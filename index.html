@@ -42,7 +42,7 @@
   </noscript>
   
   <!-- تحميل FontAwesome مرة واحدة -->
-  <script src="https://kit.fontawesome.com/8b3e0b56e3.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   
   <!-- Preload للصور المهمة -->
   <link rel="preload" href="https://i.ibb.co/G42RrRnH/Logo.png" as="image" />
@@ -741,7 +741,7 @@
       transition: all 0.4s ease;
       position: relative;
       overflow: hidden;
-      border-left: 5px solid var(--accent);
+      border-left: 5px solid var(--accept);
     }
 
     .benefit-card:hover {
@@ -1522,7 +1522,7 @@
     }
     
     .btn-accent {
-      background: var(--accept);
+      background: var(--accent);
       box-shadow: 0 4px 8px rgba(255, 152, 0, 0.3);
     }
     
@@ -2002,8 +2002,8 @@
   <header class="header">
     <div class="header-container">
       <a href="#top" class="logo-link">
-  <img src="https://i.ibb.co/G42RrRnH/Logo.png" alt="Mashhor Logo" class="logo" width="120" height="50" loading="lazy" />
-</a>
+        <img src="https://i.ibb.co/G42RrRnH/Logo.png" alt="Mashhor Logo" class="logo" width="120" height="50" loading="lazy" />
+      </a>
 
       <button class="hamburger" aria-label="Menu">
         <span></span>
@@ -2421,7 +2421,7 @@
           <h3 data-en="Retail Chains" data-ar="سلاسل التجزئة">Retail Chains</h3>
           <ul style="list-style-type: none; padding-left: 0;">
             <li data-en="Supermarkets" data-ar="السوبرماركت">Supermarkets</li>
-            <li data-en="Hypermarkets" data-ar="هايبرمارкет">Hypermarkets</li>
+            <li data-en="Hypermarkets" data-ar="هايبرماركت">Hypermarkets</li>
             <li data-en="Specialty Stores" data-ar="متاجر متخصصة">Specialty Stores</li>
           </ul>
         </div>
@@ -2837,7 +2837,7 @@
         }
       });
 
- const observer = new IntersectionObserver((entries) => {
+      const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             animateCounters();
