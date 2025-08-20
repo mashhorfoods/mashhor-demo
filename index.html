@@ -1,20 +1,46 @@
 <!DOCTYPE html>
 <html lang="en" dir="auto">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <title>Mashhor Foodstuff - Premium Rice Supplier in Oman</title>
-  <meta name="description" content="Mashhor Foodstuff Trading LLC: Oman's trusted supplier of premium Basmati and Non-Basmati rice. Wholesale and retail." />
-  <meta name="keywords" content="premium rice Oman, Basmati rice supplier, Non-Basmati rice, wholesale rice Oman, Mashhor Foodstuff" />
-  <meta name="author" content="Mashhor Foodstuff Trading LLC" />
+  <meta name="description" content="Mashhor Foodstuff Trading LLC: Oman's trusted supplier of premium Basmati and Non-Basmati rice. Wholesale and retail.">
+  <meta name="keywords" content="premium rice Oman, Basmati rice supplier, Non-Basmati rice, wholesale rice Oman, Mashhor Foodstuff">
+  <meta name="author" content="Mashhor Foodstuff Trading LLC">
+  
+  <!-- وسوم SEO محسنة -->
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="googlebot" content="index, follow">
+  <meta name="geo.region" content="OM">
+  <meta name="geo.placename" content="Muscat">
+  <meta name="geo.position" content="23.5880;58.3829">
+  <meta name="ICBM" content="23.5880, 58.3829">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@mashhorfoodoman">
+  <meta name="twitter:creator" content="@mashhorfoodoman">
   
   <!-- Open Graph / Social Media Meta Tags -->
-  <meta property="og:title" content="Mashhor Foodstuff - Premium Rice Supplier in Oman" />
-  <meta property="og:description" content="Oman's trusted supplier of premium Basmati and Non-Basmati rice. Wholesale and retail." />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://mashhorfoodstuff.com" />
-  <meta property="og:image" content="https://i.ibb.co/G42RrRnH/Logo.png" />
-  
+  <meta property="og:title" content="Mashhor Foodstuff - Premium Rice Supplier in Oman">
+  <meta property="og:description" content="Oman's trusted supplier of premium Basmati and Non-Basmati rice. Wholesale and retail. Quality guaranteed with international certifications.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://mashhorfoods.github.io/mashhor-demo/">
+  <meta property="og:image" content="https://i.ibb.co/G42RrRnH/Logo.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Mashhor Foodstuff Logo">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="ar_OM">
+  <meta property="og:site_name" content="Mashhor Foodstuff">
+  <meta property="og:updated_time" content="2025-01-21T00:00:00+04:00">
+  <meta property="og:see_also" content="https://www.facebook.com/mashhorfoodoman/">
+  <meta property="og:see_also" content="https://www.instagram.com/mashhorfoodoman">
+
+  <!-- وسوم إضافية لتحسين SEO -->
+  <link rel="canonical" href="https://mashhorfoods.github.io/mashhor-demo/">
+  <meta name="theme-color" content="#2e7d32">
+  <link rel="icon" href="https://i.ibb.co/G42RrRnH/Logo.png" type="image/png">
+  <link rel="apple-touch-icon" href="https://i.ibb.co/G42RrRnH/Logo.png">
+
   <script>
     // Set initial language before page loads to prevent FOUC (Flash of Unstyled Content)
     window.initialLang = localStorage.getItem('language') || 
@@ -36,16 +62,16 @@
   </script>
 
   <!-- تحسين طلبات الخطوط -->
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
   </noscript>
   
   <!-- تحميل FontAwesome مرة واحدة -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <!-- Preload للصور المهمة -->
-  <link rel="preload" href="https://i.ibb.co/G42RrRnH/Logo.png" as="image" />
+  <link rel="preload" href="https://i.ibb.co/G42RrRnH/Logo.png" as="image">
   
   <style>
     /* Prevent language mixing during load */
@@ -61,6 +87,19 @@
     /* Smooth transition for language switch */
     [data-en], [data-ar] {
       transition: visibility 0.3s ease;
+    }
+
+    /* حل مشكلة الأرقام في اللغة العربية */
+    .rtl-numbers {
+      unicode-bidi: isolate;
+      direction: ltr;
+      display: inline-block;
+    }
+    
+    /* تأكد من أن الأرقام في عناصر الاتصال تظهر بشكل صحيح */
+    .method-link .rtl-numbers,
+    .footer-contact-info .rtl-numbers {
+      unicode-bidi: plaintext;
     }
 
     :root {
@@ -529,13 +568,26 @@
       margin-bottom: 20px;
     }
     
-    .certification-logo img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-      filter: grayscale(25%);
-      transition: all 0.3s ease;
-    }
+    .certification-logo {
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  padding: 5px;
+}
+
+.certification-logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: grayscale(25%);
+  transition: all 0.3s ease;
+}
     
     .certification-card:hover .certification-logo img {
       filter: grayscale(0%);
@@ -638,14 +690,28 @@
       position: relative;
     }
     
-    .slide img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
+    .slider-container {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: transform 0.5s ease;
+}
+
+.slide:hover img {
+  transform: scale(1.03);
+}
     
     .slider-btn {
       position: absolute;
@@ -887,13 +953,29 @@
     }
     
     .product-card img {
-      width: 100%;
-      height: 200px;
-      object-fit: contain;
-      margin-bottom: 15px;
-      background: var(--secondary);
-    }
+  width: 100%;
+  height: 220px;
+  object-fit: contain;
+  margin-bottom: 15px;
+  background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+  padding: 15px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.product-card:hover img {
+  transform: scale(1.05);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
     
+    .product-card img.zoomed {
+  transform: scale(1.8);
+  z-index: 100;
+  position: relative;
+  box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+  transition: transform 0.3s ease;
+}
+
     .product-card h3 {
       font-size: 1rem;
       color: var(--primary);
@@ -1991,6 +2073,35 @@
       }
     }
   </style>
+  
+   <!-- Schema.org markup for Google -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Mashhor Foodstuff Trading LLC",
+    "url": "https://mashhorfoods.github.io/mashhor-demo/",
+    "logo": "https://i.ibb.co/G42RrRnH/Logo.png",
+    "description": "Oman's trusted supplier of premium Basmati and Non-Basmati rice. Wholesale and retail.",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Building No. 162/1, Way No. 4902, Block No. 349",
+      "addressLocality": "Rusayl Industrial Area",
+      "addressCountry": "OM"
+    },
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+968-95224124",
+      "contactType": "Customer service",
+      "areaServed": "OM",
+      "availableLanguage": ["en", "ar"]
+    },
+    "sameAs": [
+      "https://www.facebook.com/mashhorfoodoman/",
+      "https://www.instagram.com/mashhorfoodoman"
+    ]
+  }
+  </script>
 </head>
 <body id="top">
   <a href="#main-content" class="skip-link" data-en="Skip to content" data-ar="انتقل إلى المحتوى">Skip to content</a>
@@ -2025,7 +2136,7 @@
     </nav>
   </header>
 
-  <a href="https://wa.me/96895224124?text=مرحبًا، أنا مهتم بمنتجاتكم" target="_blank" class="quick-order" data-en="Quick Order" data-ar="طلب سريع">
+  <a href="https://wa.me/96895224124?text=مرحباً، أنا مهتم بمنتجاتكم." target="_blank" class="quick-order" data-en="Quick Order" data-ar="طلب سريع">
     <i class="fas fa-bolt"></i>
     <span class="quick-order-text">Quick Order</span>
   </a>
@@ -2043,14 +2154,14 @@
 
     <section id="certifications" class="certifications-section load-animate">
       <div class="section-header">
-        <h2 data-en="Internationally Recognized Certifications" data-ar="شهادات معتمدة عالميًا">Internationally Recognized Certifications</h2>
+        <h2 data-en="Internationally Recognized Certifications" data-ar="شهادات معتمدة عالمياً">Internationally Recognized Certifications</h2>
         <p class="section-subtitle" data-en="Our commitment to quality is verified by independent international organizations" data-ar="التزامنا بالجودة مثبت من قبل منظمات دولية مستقلة">Our commitment to quality is verified by independent international organizations</p>
       </div>
 
       <div class="certifications-grid">
         <div class="certification-card slide-up">
           <div class="certification-logo">
-            <img src="https://i.ibb.co/jPrsz61K/iso-22000.png" alt="ISO 22000 Certification" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/jPrsz61K/iso-22000.png" width="120" height="120" />
+            <img src="https://i.ibb.co/0ywjyLK6/iso22000.webp" alt="ISO 22000 Certification" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/0ywjyLK6/iso22000.webp" width="120" height="120" />
           </div>
           <div class="certification-details">
             <h3 data-en="ISO 22000:2018" data-ar="الأيزو 22000:2018">ISO 22000:2018</h3>
@@ -2060,7 +2171,7 @@
         
         <div class="certification-card slide-up">
           <div class="certification-logo">
-            <img src="https://i.ibb.co/k2zs9WqR/iso-90012015-logo-png-seeklogo-388364.png" alt="ISO 9001 Certification" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/k2zs9WqR/iso-90012015-logo-png-seeklogo-388364.png" width="120" height="120" />
+            <img src="https://i.ibb.co/cKYgdpCB/iso2015.webp" alt="ISO 9001 Certification" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/cKYgdpCB/iso2015.webp" width="120" height="120" />
           </div>
           <div class="certification-details">
             <h3 data-en="ISO 9001:2015" data-ar="الأيزو 9001:2015">ISO 9001:2015</h3>
@@ -2070,7 +2181,7 @@
         
         <div class="certification-card slide-up">
           <div class="certification-logo">
-            <img src="https://i.ibb.co/B2tJWKJ9/hpc.jpg" alt="HACCP Certification" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/B2tJWKJ9/hpc.jpg" width="120" height="120" />
+            <img src="https://i.ibb.co/p6fsX5XN/haccp.webp" alt="HACCP Certification" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/p6fsX5XN/haccp.webp" width="120" height="120" />
           </div>
           <div class="certification-details">
             <h3>HACCP</h3>
@@ -2080,7 +2191,7 @@
         
         <div class="certification-card slide-up">
           <div class="certification-logo">
-            <img src="https://i.ibb.co/twTsc8fy/png-transparent-gmp-logo-good-manufacturing-practice-logo-certification-good-manufacturing-practice.png" alt="GMP Certification" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/twTsc8fy/png-transparent-gmp-logo-good-manufacturing-practice-logo-certification-good-manufacturing-practice.png" width="120" height="120" />
+            <img src="https://i.ibb.co/yckTC2g8/gmp.webp" alt="GMP Certification" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/yckTC2g8/gmp.webp" width="120" height="120" />
           </div>
           <div class="certification-details">
             <h3>GMP</h3>
@@ -2101,19 +2212,27 @@
       </div>
       <div class="trust-badge">
         <i class="fas fa-star"></i>
-        <span class="trust-text" data-en="Rated 4.9/5" data-ar="تقييم 4.9/5">Rated 4.9/5</span>
+        <span class="trust-text" data-en="Rated 4.4/5" data-ar="تقييم 4.4/5">Rated 4.4/5</span>
       </div>
     </div>
 
     <section id="products" class="load-animate">
       <h2 data-en="Our Products" data-ar="منتجاتنا">Our Products</h2>
-      <p data-en='"A Grain for every table"' data-ar='"حبة لكل مائدة"'>"A Grain for every table"</p>
+      <p data-en='A Grain for every table' data-ar='حبة لكل مائدة'>A Grain for every table</p>
 
       <div class="products-container">
         <div class="product-card slide-up" data-category="basmati bulk">
           <button class="favorite-btn" aria-label="Add to favorites"><i class="far fa-heart"></i></button>
-          <h3 data-en="MASHHOR INDIAN XXXL 1121 Basmati Rice (35kg)" data-ar="أرز مشهور بسمتي XXXL 1121 هندي (35 كجم)">MASHHOR INDIAN XXXL 1121 Basmati Rice (35kg)</h3>
-          <img src="https://i.ibb.co/4LMQ7wf/mashhor-rice.webp" alt="MASHHOR RICE 35kg" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/4LMQ7wf/mashhor-rice.webp" width="300" height="200" />
+          <h3 data-en="MASHHOR INDIAN XXXL 1121 Basmati Rice (35kg)" data-ar="أرز مشهور بسمتي اكس اكس اكس ال 1121 هندي (35 كجم)">MASHHOR INDIAN XXXL 1121 Basmati Rice (35kg)</h3>
+    <img src="https://i.ibb.co/4LMQ7wf/mashhor-rice.webp" 
+     alt="MASHHOR RICE 35kg" 
+     loading="lazy" 
+     class="lazy-load enhanced-image" 
+     data-src="https://i.ibb.co/4LMQ7wf/mashhor-rice.webp" 
+     width="300" 
+     height="200" 
+     onerror="this.src='https://via.placeholder.com/300x200/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
+     
           <ul>
             <li data-en="Premium Long Grain Basmati Rice." data-ar="أرز بسمتي طويل الحبة ممتاز.">Premium Long Grain Basmati Rice.</li>
             <li data-en="Suitable for diabetics." data-ar="مناسب لمرضى السكري.">Suitable for diabetics.</li>
@@ -2127,13 +2246,13 @@
               <button class="quantity-btn plus">+</button>
             </div>
             <button class="order-btn quick-view-btn" data-product="1" data-en="Quick View" data-ar="عرض سريع">Quick View</button>
-            <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MASHHOR%20INDIAN%20XXXL%201121%20Basmati%20Rice%20(35kg)." target="_blank" class="order-btn" data-en="Order Online" data-ar="اطلب أونلاين">Order Online</a>
+            <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MASHHOR%20INDIAN%20XXXL%201121%20Basmati%20Rice%20(35kg)." target="_blank" class="order-btn" data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">Order via WhatsApp</a>
           </div>
         </div>
 
         <div class="product-card slide-up" data-category="basmati retail">
           <button class="favorite-btn" aria-label="Add to favorites"><i class="far fa-heart"></i></button>
-          <h3 data-en="MASHHOR INDIAN XXXL 1121 Basmati Rice (5kg)" data-ar="أرز مشهور بسمتي XXXL 1121 هندي (5 كجم)">MASHHOR INDIAN XXXL 1121 Basmati Rice (5kg)</h3>
+          <h3 data-en="MASHHOR INDIAN XXXL 1121 Basmati Rice (5kg)" data-ar="أرز مشهور بسمتي اكس اكس اكس ال 1121 هندي (5 كجم)">MASHHOR INDIAN XXXL 1121 Basmati Rice (5kg)</h3>
           <img src="https://i.ibb.co/rGY7PV4G/image.png" alt="MASHHOR RICE 5kg" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/rGY7PV4G/image.png" width="300" height="200" />
           <ul>
             <li data-en="Aged long-grain rice, Aromatic, fluffy texture." data-ar="أرز طويل الحبة معتق، عطري، ذو قوام رقيق.">Aged long-grain rice, Aromatic, fluffy texture.</li>
@@ -2146,13 +2265,13 @@
               <button class="quantity-btn plus">+</button>
             </div>
             <button class="order-btn quick-view-btn" data-product="2" data-en="Quick View" data-ar="عرض سريع">Quick View</button>
-            <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MASHHOR%20INDIAN%20XXXL%201121%20Basmati%20Rice%20(5kg)." target="_blank" class="order-btn" data-en="Order Online" data-ar="اطلب أونلاين">Order Online</a>
+            <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MASHHOR%20INDIAN%20XXXL%201121%20Basmati%20Rice%20(5kg)." target="_blank" class="order-btn" data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">Order via WhatsApp</a>
           </div>
         </div>
 
         <div class="product-card slide-up" data-category="non-basmati bulk">
           <button class="favorite-btn" aria-label="Add to favorites"><i class="far fa-heart"></i></button>
-          <h3 data-en="MAHINAZ CLASSIC XXL Biryani Rice (35kg)" data-ar="أرز مهيناز كلاسيك XXL للبرياني (35 كجم)">MAHINAZ CLASSIC XXL Biryani Rice (35kg)</h3>
+          <h3 data-en="MAHINAZ CLASSIC XXL Biryani Rice (35kg)" data-ar="أرز مهيناز كلاسيك اكس اكس ال للبرياني (35 كجم)">MAHINAZ CLASSIC XXL Biryani Rice (35kg)</h3>
           <img src="https://i.ibb.co/8DHDKrZW/mhz35kg.webp" alt="MAHINAZ Biryani Rice" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/8DHDKrZW/mhz35kg.webp" width="300" height="200" />
           <ul>
             <li data-en="Aromatic XXL grains, perfect for traditional biryani dishes." data-ar="حبوب XXL عطرية، مثالية لأطباق البرياني التقليدية.">Aromatic XXL grains, perfect for traditional biryani dishes.</li>
@@ -2165,13 +2284,13 @@
               <button class="quantity-btn plus">+</button>
             </div>
             <button class="order-btn quick-view-btn" data-product="3" data-en="Quick View" data-ar="عرض سريع">Quick View</button>
-            <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MAHINAZ%20CLASSIC%20XXL%20Biryani%20Rice%20(35kg)." target="_blank" class="order-btn" data-en="Order Online" data-ar="اطلب أونلاين">Order Online</a>
+            <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MAHINAZ%20CLASSIC%20XXL%20Biryani%20Rice%20(35kg)." target="_blank" class="order-btn" data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">Order via WhatsApp</a>
           </div>
         </div>
 
         <div class="product-card slide-up" data-category="non-basmati bulk">
           <button class="favorite-btn" aria-label="Add to favorites"><i class="far fa-heart"></i></button>
-          <h3 data-en="INDIAN PRIDE 1121 XXXL Golden Sella Basmati Rice (20kg)" data-ar="أرز إنديان برايد 1121 XXXL سيلا ذهبي بسمتي (20 كجم)">INDIAN PRIDE 1121 XXXL Golden Sella Basmati Rice (20kg)</h3>
+          <h3 data-en="INDIAN PRIDE 1121 XXXL Golden Sella Basmati Rice (20kg)" data-ar="أرز إنديان برايد اكس اكس اكس ال 1121 سيلا ذهبي بسمتي (20 كجم)">INDIAN PRIDE 1121 XXXL Golden Sella Basmati Rice (20kg)</h3>
           <img src="https://i.ibb.co/JwJNXCwm/1-1.png" alt="INDIAN PRIDE Rice" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/JwJNXCwm/1-1.png" width="300" height="200" />
           <ul>
             <li data-en="Parboiled golden grains, naturally aromatic." data-ar="حبوب ذهبية مسلوقة جزئيًا، عطرية طبيعيًا.">Parboiled golden grains, naturally aromatic.</li>
@@ -2184,7 +2303,7 @@
               <button class="quantity-btn plus">+</button>
             </div>
             <button class="order-btn quick-view-btn" data-product="4" data-en="Quick View" data-ar="عرض سريع">Quick View</button>
-            <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20INDIAN%20PRIDE%201121%20XXXL%20Golden%20Sella%20Basmati%20Rice%20(20kg)." target="_blank" class="order-btn" data-en="Order Online" data-ar="اطلب أونلاين">Order Online</a>
+            <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20INDIAN%20PRIDE%201121%20XXXL%20Golden%20Sella%20Basmati%20Rice%20(20kg)." target="_blank" class="order-btn" data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">Order via WhatsApp</a>
           </div>
         </div>
       </div>
@@ -2314,30 +2433,29 @@
     </section>
 
     <section class="banner-slider load-animate">
-      <div class="slider-container">
-        <div class="slider">
-          <div class="slide">
-            <img src="https://i.ibb.co/Kcbf6t1Z/IMG-20250819-152618.webp" alt="Premium Rice Selection" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/8DHDKrZW/mhz35kg.webp" width="1200" height="600" />
-          </div>
-          <div class="slide">
-            <img src="https://i.ibb.co/4LMQ7wf/mashhor-rice.webp" alt="Rice Packaging" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/4LMQ7wf/mashhor-rice.webp" width="1200" height="600" />
-          </div>
-          <div class="slide">
-            <img src="https://i.ibb.co/TMntxccG/msh5.webp" alt="Rice Grains Close-up" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/TMntxccG/msh5.webp" width="1200" height="600" />
-          </div>
-          <div class="slide">
-            <img src="https://i.ibb.co/BHZsn4Q8/pride.webp" alt="Indian Pride Rice" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/BHZsn4Q8/pride.webp" width="1200" height="600" />
-          </div>
-        </div>
-        <button class="slider-btn prev-btn" aria-label="Previous slide">❮</button>
-        <button class="slider-btn next-btn" aria-label="Next slide">❯</button>
-        <div class="slider-dots"></div>
+  <div class="slider-container">
+    <div class="slider">
+      <div class="slide">
+        <img src="https://i.ibb.co/Kcbf6t1Z/IMG-20250819-152618.webp" alt="Premium Rice Selection" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/Kcbf6t1Z/IMG-20250819-152618.webp" width="1200" height="600" />
       </div>
-      <div class="slider-promo-text">
-        <p data-en="From farm to your table - Premium quality rice for every occasion" data-ar="من المزرعة إلى مائدتك - أرز عالي الجودة لكل مناسبة">From farm to your table - Premium quality rice for every occasion</p>
-
+      <div class="slide">
+        <img src="https://i.ibb.co/3mnkdbpd/IMG-20250819-152313.webp" alt="High-Quality Rice Grains" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/3mnkdbpd/IMG-20250819-152313.webp" width="1200" height="600" />
       </div>
-    </section>
+      <div class="slide">
+        <img src="https://i.ibb.co/7Jfr3C94/image.webp" alt="Mashhor Rice Packaging" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/7Jfr3C94/image.webp" width="1200" height="600" />
+      </div>
+      <div class="slide">
+        <img src="https://i.ibb.co/Q3M9cXBD/delicious-popular-dishes-traditional-oriental-thumbnail-276127.webp" alt="Delicious Rice Dishes" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/Q3M9cXBD/delicious-popular-dishes-traditional-oriental-thumbnail-276127.webp" width="1200" height="600" />
+      </div>
+    </div>
+    <button class="slider-btn prev-btn" aria-label="Previous slide">❮</button>
+    <button class="slider-btn next-btn" aria-label="Next slide">❯</button>
+    <div class="slider-dots"></div>
+  </div>
+  <div class="slider-promo-text">
+    <p data-en="Premium Quality Rice - Perfect for Every Occasion" data-ar="أرز عالي الجودة - مثالي لكل مناسبة">Premium Quality Rice - Perfect for Every Occasion</p>
+  </div>
+</section>
 
     <section id="why-us" class="enhanced-section load-animate">
       <div class="section-header">
@@ -2410,7 +2528,7 @@
     <section id="who-we-serve" class="enhanced-section load-animate">
       <div class="section-header">
         <h2 data-en="Our Valued Partners" data-ar="شركاؤنا الكرام">Our Valued Partners</h2>
-        <p class="section-subtitle" style="white-space: normal;" data-en='"Serving Oman\'s Food Industry with Premium Rice Solutions"' data-ar='"نخدم صناعة الأغذية في عمان بحلول الأرز الممتازة"'>"Serving Oman's Food Industry with Premium Rice Solutions"</p>
+        <p class="section-subtitle" style="white-space: normal;" data-en=' Serving Omans Food Industry with Premium Rice Solutions' data-ar='نخدم صناعة الأغذية في عمان بحلول الأرز الممتازة'> Serving Omans Food Industry with Premium Rice Solutions</p>
       </div>
 
       <div class="client-categories">
@@ -2455,7 +2573,7 @@
     <section id="clients-say" class="enhanced-section load-animate" style="background-color: #f9f9f9;">
       <div class="section-header">
         <h2 data-en="What Our Clients Say" data-ar="ما يقوله عملاؤنا">What Our Clients Say</h2>
-        <p class="section-subtitle" data-en='"Trusted by businesses across Oman"' data-ar='"موثوق به من قبل الشركات في جميع أنحاء عمان"'>"Trusted by businesses across Oman"</p>
+        <p class="section-subtitle" data-en='Trusted by businesses across Oman ' data-ar='موثوق به من قبل الشركات في جميع أنحاء عمان'>Trusted by businesses across Oman</p>
       </div>
 
       <div class="testimonials-container">
@@ -2490,7 +2608,7 @@
             <i class="fas fa-star-half-alt"></i>
           </div>
           <div class="testimonial-content">
-            <p data-en='"We switched to Mashhor rice last year and never looked back. Their customer service is as excellent as their products."' data-ar='"انتقلنا إلى أرز مشهور العام الماضي ولم ننظر إلى الوراء. خدمة العملاء لديهم ممتازة مثل منتجاتهم."'>"We switched to Mashhor rice last year and never looked back. Their customer service is as excellent as their products."</p>
+            <p data-en='"We switched to Mashhor rice last year and never looked back. Their customer service is as excellent as their products."' data-ar='"غيرنا إلى أرز مشهور العام الماضي ولم ننظر إلى الوراء. خدمة العملاء لديهم ممتازة مثل منتجاتهم."'>"We switched to Mashhor rice last year and never looked back. Their customer service is as excellent as their products."</p>
           </div>
           <div class="testimonial-author">
             <div class="author-avatar">
@@ -2527,7 +2645,7 @@
       </div>
 
       <div class="section-subtitle" style="margin-top: 40px; font-style: italic;">
-        <p data-en='"Join hundreds of satisfied clients who trust Mashhor for their premium rice needs"' data-ar='"انضم إلى المئات من العملاء الراضين الذين يثقون بمشهور لتلبية احتياجاتهم من الأرز الممتاز"'>"Join hundreds of satisfied clients who trust Mashhor for their premium rice needs"</p>
+        <p data-en='"Join hundreds of satisfied clients who trust Mashhor for their premium rice needs"' data-ar='انضم إلى المئات من العملاء الراضين الذين يثقون بمشهور لتلبية احتياجاتهم من الأرز الممتاز'>"Join hundreds of satisfied clients who trust Mashhor for their premium rice needs"</p>
       </div>
     </section>
 
@@ -2537,7 +2655,7 @@
       <div class="contact-content">
         <div class="contact-header">
           <h2 data-en="Get In Touch" data-ar="تواصل معنا">Get In Touch</h2>
-          <p class="section-subtitle" data-en='"We\'re here to serve you"' data-ar="نحن هنا لخدمتك">"We are here to serve you"</p>
+          <p class="section-subtitle" data-en='We are here to serve you' data-ar="نحن هنا لخدمتك">We are here to serve you</p>
         </div>
         
         <div class="contact-grid">
@@ -2560,7 +2678,7 @@
               <div class="method-info">
                 <h3 data-en="Call Us" data-ar="اتصل بنا">Call Us</h3>
                 <a href="tel:+96822716859" class="method-link">+968 22716859</a>
-                <p class="method-description" data-en="Sat-Thu: 8AM - 5PM" data-ar="السبت-الخميس: 8 صباحًا - 5 مساءً">Sat-Thu: 8AM - 5PM</p>
+                <p class="method-description" data-en="Sat-Thu: 8AM - 5PM" data-ar="السبت-الخميس: 8 صباحاً - 5 مساءً">Sat-Thu: 8AM - 5PM</p>
               </div>
             </div>
             
@@ -2634,8 +2752,8 @@
         <img src="https://i.ibb.co/G42RrRnH/Logo.png" alt="Mashhor Logo" loading="lazy" width="200" height="80" />
         <div class="social-links">
           <a href="https://wa.me/96895224124" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-          <a href="https://www.facebook.com/" target="_blank" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
-          <a href="https://www.instagram.com/" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="https://www.facebook.com/mashhorfoodoman/" target="_blank" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+          <a href="https://www.instagram.com/mashhorfoodoman" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
           <a href="mailto:mashhorfoods@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
         </div>
       </div>
@@ -2985,6 +3103,7 @@
         });
       });
       
+      
       const modal = document.getElementById('quickViewModal');
       const closeModal = document.querySelector('.close-modal');
       const quickViewBtns = document.querySelectorAll('.quick-view-btn');
@@ -2993,7 +3112,7 @@
         1: {
           title: {
             en: "MASHHOR INDIAN XXXL 1121 Basmati Rice (35kg)",
-            ar: "أرز مشهور بسمتي XXXL 1121 هندي (35 كجم)"
+            ar: "أرز مشهور بسمتي اكس اكس اكس ال 1121 هندي (35 كجم)"
           },
           description: {
             en: "Premium Long Grain Basmati Rice. Direct from Indian farms with rigorous quality checks. Suitable for diabetics, cholesterol free, and aged for perfect texture.",
@@ -3002,13 +3121,13 @@
           image: "https://i.ibb.co/4LMQ7wf/mashhor-rice.webp",
           link: {
             en: "https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MASHHOR%20INDIAN%20XXXL%201121%20Basmati%20Rice%20(35kg).",
-            ar: "https://wa.me/96895224124?text=مرحبًا، أنا مهتم بمنتج أرز مشهور بسمتي XXXL 1121 هندي (35 كجم)"
+            ar: "https://wa.me/96895224124?text=مرحباً، أنا مهتم بمنتج أرز مشهور بسمتي اكس اكس اكس ال 1121 هندي (35 كجم)"
           }
         },
         2: {
           title: {
             en: "MASHHOR INDIAN XXXL 1121 Basmati Rice (5kg)",
-            ar: "أرز مشهور بسمتي XXXL 1121 هندي (5 كجم)"
+            ar: "أرز مشهور بسمتي اكس اكس اكس ال 1121 هندي (5 كجم)"
           },
           description: {
             en: "Aged long-grain rice with aromatic flavor and fluffy texture. Ideal for daily cooking and special occasions. Perfect for traditional Arabic and Indian dishes.",
@@ -3017,13 +3136,13 @@
           image: "https://i.ibb.co/rGY7PV4G/image.png",
           link: {
             en: "https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MASHHOR%20INDIAN%20XXXL%201121%20Basmati%20Rice%20(5kg).",
-            ar: "https://wa.me/96895224124?text=مرحبًا، أنا مهتم بمنتج أرز مشهور بسمتي XXXL 1121 هندي (5 كجم)"
+            ar: "https://wa.me/96895224124?text=مرحباً، أنا مهتم بمنتج أرز مشهور بسمتي اكس اكس اكس ال 1121 هندي (5 كجم)"
           }
         },
         3: {
           title: {
             en: "MAHINAZ CLASSIC XXL Biryani Rice (35kg)",
-            ar: "أرز مهيناز كلاسيك XXL للبرياني (35 كجم)"
+            ar: "أرز مهيناز كلاسيك اكس اكس ال للبرياني (35 كجم)"
           },
           description: {
             en: "Aromatic XXL grains perfect for traditional biryani dishes. Premium Indian rice with rich flavor and perfect texture that stays separate when cooked.",
@@ -3032,13 +3151,13 @@
           image: "https://i.ibb.co/8DHDKrZW/mhz35kg.webp",
           link: {
             en: "https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MAHINAZ%20CLASSIC%20XXL%20Biryani%20Rice%20(35kg).",
-            ar: "https://wa.me/96895224124?text=مرحبًا، أنا مهتم بمنتج أرز مهيناز كلاسيك XXL للبرياني (35 كجم)"
+            ar: "https://wa.me/96895224124?text=مرحباً، أنا مهتم بمنتج أرز مهيناز كلاسيك اكس اكس ال للبرياني (35 كجم)"
           }
         },
         4: {
           title: {
             en: "INDIAN PRIDE 1121 XXXL Golden Sella Basmati Rice (20kg)",
-            ar: "أرز إنديان برايد 1121 XXXL سيلا ذهبي بسمتي (20 كجم)"
+            ar: "أرز إنديان برايد اكس اكس اكس ال 1121 سيلا ذهبي بسمتي (20 كجم)"
           },
           description: {
             en: "Parboiled golden grains that are naturally aromatic. Perfect texture for biryani, mandi, and traditional rice dishes. Retains nutrients through special processing.",
@@ -3047,7 +3166,7 @@
           image: "https://i.ibb.co/JwJNXCwm/1-1.png",
           link: {
             en: "https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20INDIAN%20PRIDE%201121%20XXXL%20Golden%20Sella%20Basmati%20Rice%20(20kg).",
-            ar: "https://wa.me/96895224124?text=مرحبًا، أنا مهتم بمنتج أرز إنديان برايد 1121 XXXL سيلا ذهبي بسمتي (20 كجم)"
+            ar: "https://wa.me/96895224124?text=مرحباً، أنا مهتم بمنتج أرز إنديان برايد اكس اكس اكس ال 1121 سيلا ذهبي بسمتي (20 كجم)"
           }
         }
       };
@@ -3213,6 +3332,72 @@
       
       initSlider();
     });
+    
+    // تحسين تحميل الصور
+document.addEventListener('DOMContentLoaded', function() {
+  // إضافة تأثير تحميل للصور
+  const images = document.querySelectorAll('img');
+  
+  images.forEach(img => {
+    // إضافة CSS للصور أثناء التحميل
+    if (!img.complete) {
+      img.style.opacity = '0';
+      img.style.transition = 'opacity 0.5s ease';
+    }
+    
+    img.addEventListener('load', function() {
+      this.style.opacity = '1';
+      this.classList.add('loaded');
+    });
+    
+    // معالجة أخطاء تحميل الصور
+    img.addEventListener('error', function() {
+      console.error('Failed to load image:', this.src);
+      if (!this.getAttribute('data-error-handled')) {
+        this.src = 'https://via.placeholder.com/300x200/f8f8f8/666666?text=Image+Not+Found';
+        this.alt = 'Image failed to load';
+        this.setAttribute('data-error-handled', 'true');
+      }
+    });
+  });
+  
+  // معالجة خاصة لصور المنتجات - التكبير عند النقر
+  const productImages = document.querySelectorAll('.product-card img');
+  productImages.forEach(img => {
+    img.addEventListener('click', function() {
+      this.classList.toggle('zoomed');
+    });
+  });
+  
+  // إغلاق الصورة المكبرة عند النقر خارجها
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.product-card img')) {
+      document.querySelectorAll('.product-card img.zoomed').forEach(img => {
+        img.classList.remove('zoomed');
+      });
+    }
+  });
+});
+
+// إضافة تأثير تحميل للصور عند التمرير
+if ('IntersectionObserver' in window) {
+  const lazyImageObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const lazyImage = entry.target;
+        if (lazyImage.dataset.src) {
+          lazyImage.src = lazyImage.dataset.src;
+        }
+        lazyImage.classList.add('loaded');
+        lazyImageObserver.unobserve(lazyImage);
+      }
+    });
+  });
+
+  document.querySelectorAll('.lazy-load').forEach(lazyImage => {
+    lazyImageObserver.observe(lazyImage);
+  });
+}
   </script>
 </body>
 </html>
