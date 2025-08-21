@@ -74,6 +74,186 @@
   <link rel="preload" href="https://i.ibb.co/G42RrRnH/Logo.png" as="image">
   
   <style>
+      /* تحسينات عامة للتخطيط */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.section-title {
+  font-size: 2.2rem;
+  color: var(--primary);
+  margin-bottom: 15px;
+  font-weight: 700;
+}
+
+.section-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-light);
+  font-style: italic;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* تحسينات قسم المنتجات */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  padding: 20px 0;
+}
+
+.product-card {
+  background: white;
+  border-radius: 12px;
+  padding: 25px 20px;
+  box-shadow: var(--shadow);
+  transition: all 0.3s ease;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.product-card:hover {
+  transform: translateY(-10px);
+  box-shadow: var(--shadow-hover);
+}
+
+.product-features {
+  text-align: left;
+  margin-bottom: 20px;
+  flex-grow: 1;
+}
+
+.product-features li {
+  margin-bottom: 8px;
+  position: relative;
+  padding-left: 20px;
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+.product-features li:before {
+  content: "•";
+  color: var(--accent);
+  position: absolute;
+  left: 0;
+  font-size: 1.2rem;
+}
+
+/* تحسينات قسم القصة */
+.about-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 50px;
+  align-items: center;
+  margin-bottom: 50px;
+}
+
+.about-text {
+  padding-right: 20px;
+}
+
+.about-text p {
+  margin-bottom: 20px;
+  line-height: 1.7;
+  font-size: 1.05rem;
+}
+
+.about-text strong {
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+
+.mission-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px;
+}
+
+.mission-card {
+  background: var(--gray);
+  padding: 25px 20px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+
+.mission-card h3 {
+  font-size: 1.2rem;
+  color: var(--primary-dark);
+  margin-bottom: 15px;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.mission-card h3:after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 2px;
+  background: var(--accent);
+}
+
+.mission-card p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.about-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+/* تحسينات للشاشات المتوسطة */
+@media (max-width: 992px) {
+  .about-content {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  
+  .about-text {
+    padding-right: 0;
+    order: 2;
+  }
+}
+
+/* تحسينات للشاشات الصغيرة */
+@media (max-width: 768px) {
+  .section-title {
+    font-size: 1.8rem;
+  }
+  
+  .products-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .mission-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .about-actions {
+    flex-direction: column;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+}
     /* Prevent language mixing during load */
     [data-en], [data-ar] {
       visibility: hidden;
@@ -1011,13 +1191,8 @@
     }
     
     .product-card ul li::before {
-      content: "•";
-      position: absolute;
-      left: 0;
-      color: var(--accent);
-      font-size: 1rem;
-      line-height: 1;
-    }
+  content: none;
+}
     
     body[dir="rtl"] .product-card ul li::before {
       left: auto;
@@ -1789,7 +1964,7 @@
     }
     
     .footer-contact-info i {
-      color: var(--accent);
+      color: var(--accept);
       margin-top: 3px;
     }
     
@@ -2072,6 +2247,67 @@
         height: 450px;
       }
     }
+    
+    /* تحسينات للغة العربية */
+body.rtl {
+  text-align: right;
+}
+
+body.rtl .product-card ul,
+body.rtl .modal-info,
+body.rtl .nutrition-table th, 
+body.rtl .nutrition-table td {
+  text-align: right;
+}
+
+body.rtl .form-group label {
+  right: 15px;
+  left: auto;
+}
+
+body.rtl .form-group input:focus + label,
+body.rtl .form-group input:not(:placeholder-shown) + label,
+body.rtl .form-group textarea:focus + label,
+body.rtl .form-group textarea:not(:placeholder-shown) + label {
+  right: 10px;
+  left: auto;
+}
+
+body.rtl .quantity-selector {
+  flex-direction: row-reverse;
+}
+
+body.rtl .favorite-btn {
+  right: auto;
+  left: 15px;
+}
+
+body.rtl .testimonial-content::after {
+  right: 0;
+  left: auto;
+}
+
+body.rtl .method-link .rtl-numbers,
+body.rtl .footer-contact-info .rtl-numbers {
+  unicode-bidi: plaintext;
+  direction: ltr;
+  display: inline-block;
+}
+
+body.rtl .category-card ul li {
+  text-align: right;
+  padding-right: 20px;
+  padding-left: 0;
+}
+
+body.rtl .category-card ul li::before {
+  right: 0;
+  left: auto;
+}
+
+body.rtl .product-actions {
+  text-align: right;
+}
   </style>
   
    <!-- Schema.org markup for Google -->
@@ -2368,69 +2604,69 @@
     </div>
 
     <section id="about" class="premium-about-section load-animate">
-      <div class="section-header">
-        <h2 data-en="The Mashhor Story" data-ar="قصة مشهور">The Mashhor Story</h2>
-        <p class="section-subtitle" data-en="Cultivating excellence in every grain" data-ar="نزرع التميز في كل حبة">Cultivating excellence in every grain</p>
-      </div>
+  <div class="section-header">
+    <h2 data-en="The Mashhor Story" data-ar="قصة مشهور">The Mashhor Story</h2>
+    <p class="section-subtitle" data-en="Cultivating excellence in every grain" data-ar="نزرع التميز في كل حبة">Cultivating excellence in every grain</p>
+  </div>
 
-      <div class="about-container">
-        <div class="about-content">
-          <div class="about-text">
-            <div class="centered-header">
-              <h3 data-en="Premium Rice Specialists" data-ar="متخصصون في الأرز الممتاز">Premium Rice Specialists</h3>
-            </div>
-            
-            <div class="about-paragraph">
-              <p data-en="<strong>Mashhor Foodstuff Trading LLC</strong> is Oman's trusted source for premium Basmati and Non-Basmati rice, serving both wholesale and retail customers with exceptional quality products." 
-                 data-ar="<strong>شركة مشهور للأغذية</strong> هي المصدر الموثوق للأرز البسمتي وغير البسمتي الممتاز في عمان، حيث تخدم كل من العملاء بالجملة والتجزئة بمنتجات عالية الجودة.">
-                <strong>Mashhor Foodstuff Trading LLC</strong> is Oman's trusted source for premium Basmati and Non-Basmati rice, serving both wholesale and retail customers with exceptional quality products.
-              </p>
-            </div>
-            
-            <div class="about-paragraph">
-              <p data-en="We meticulously source our rice from <strong>Mahavir Rice Mills</strong>, an ISO-certified producer with decades of rice cultivation expertise, ensuring authentic flavor and perfect grain quality." 
-                 data-ar="نحن نختار أرزنا بعناية من <strong>مطاحن مهافير للأرز</strong>، منتج معتمد حسب المواصفة ISO مع عقود من الخبرة في زراعة الأرز، مما يضمن نكهة أصيلة وجودة حبة مثالية.">
-                We meticulously source our rice from <strong>Mahavir Rice Mills</strong>, an ISO-certified producer with decades of rice cultivation expertise, ensuring authentic flavor and perfect grain quality.
-              </p>
-            </div>
-            
-            <div class="about-cta">
-              <a href="https://docs.google.com/presentation/d/10_T6i2drSTwNAXouCuW5IITRQGPRRK2C/edit?usp=drivesdk" target="_blank" class="btn btn-outline" data-en="Download Full Profile" data-ar="تحميل الملف التعريفي الكامل">
-                <i class="fas fa-file-pdf"></i>
-                <span>Download Full Profile</span>
-              </a>
-              <a href="#contact-us" class="btn btn-accent" data-en="Get In Touch" data-ar="تواصل معنا">
-                <i class="fas fa-phone-alt"></i>
-                <span>Get In Touch</span>
-              </a>
-            </div>
-          </div>
+  <div class="about-container">
+    <div class="about-content">
+      <div class="about-text">
+        <div class="centered-header">
+          <h3 data-en="Premium Rice Specialists" data-ar="متخصصون في الأرز الممتاز">Premium Rice Specialists</h3>
         </div>
         
-        <div class="mission-cards">
-          <div class="mission-card">
-            <h3 data-en="Our Mission" data-ar="مهمتنا">Our Mission</h3>
-            <p data-en="To deliver the finest quality rice with uncompromising standards, ensuring every grain meets our promise of excellence." data-ar="تقديم أجود أنواع الأرز بمعايير لا هوادة فيها، مع ضمان أن كل حبة تفي بوعدنا بالتميز.">
-              To deliver the finest quality rice with uncompromising standards, ensuring every grain meets our promise of excellence.
-            </p>
-          </div>
-          
-          <div class="mission-card">
-            <h3 data-en="Our Vision" data-ar="رؤيتنا">Our Vision</h3>
-            <p data-en="To redefine Oman's rice market through superior products, innovative solutions, and unmatched customer experiences." data-ar="إعادة تعريف سوق الأرز العماني من خلال منتجات فائقة وحلول مبتكرة وتجارب عملاء لا مثيل لها.">
-              To redefine Oman's rice market through superior products, innovative solutions, and unmatched customer experiences.
-            </p>
-          </div>
-          
-          <div class="mission-card">
-            <h3 data-en="Our Promise" data-ar="وعدنا">Our Promise</h3>
-            <p data-en="Consistent quality, reliable delivery, and personalized service - every time, without exception." data-ar="جودة ثابتة، توصيل موثوق، وخدمة شخصية - في كل مرة، دون استثناء.">
-              Consistent quality, reliable delivery, and personalized service - every time, without exception.
-            </p>
-          </div>
+        <div class="about-paragraph">
+          <p data-en="<strong>Mashhor Foodstuff Trading LLC</strong> is Oman's trusted source for premium Basmati and Non-Basmati rice, serving both wholesale and retail customers with exceptional quality products." 
+             data-ar="<strong>شركة مشهور للأغذية</strong> هي المصدر الموثوق للأرز البسمتي وغير البسمتي الممتاز في عمان، حيث تخدم كل من العملاء بالجملة والتجزئة بمنتجات عالية الجودة.">
+            <strong>Mashhor Foodstuff Trading LLC</strong> is Oman's trusted source for premium Basmati and Non-Basmati rice, serving both wholesale and retail customers with exceptional quality products.
+          </p>
+        </div>
+        
+        <div class="about-paragraph">
+          <p data-en="We meticulously source our rice from <strong>Mahavir Rice Mills</strong>, an ISO-certified producer with decades of rice cultivation expertise, ensuring authentic flavor and perfect grain quality." 
+             data-ar="نحن نختار أرزنا بعناية من <strong>مطاحن مهافير للأرز</strong>، منتج معتمد حسب المواصفة ISO مع عقود من الخبرة في زراعة الأرز، مما يضمن نكهة أصيلة وجودة حبة مثالية.">
+            We meticulously source our rice from <strong>Mahavir Rice Mills</strong>, an ISO-certified producer with decades of rice cultivation expertise, ensuring authentic flavor and perfect grain quality.
+          </p>
+        </div>
+        
+        <div class="about-cta">
+          <a href="https://docs.google.com/presentation/d/10_T6i2drSTwNAXouCuW5IITRQGPRRK2C/edit?usp=drivesdk" target="_blank" class="btn btn-outline" data-en="Download Full Profile" data-ar="تحميل الملف التعريفي الكامل">
+            <i class="fas fa-file-pdf"></i>
+            <span>Download Full Profile</span>
+          </a>
+          <a href="#contact-us" class="btn btn-accent" data-en="Get In Touch" data-ar="تواصل معنا">
+            <i class="fas fa-phone-alt"></i>
+            <span>Get In Touch</span>
+          </a>
         </div>
       </div>
-    </section>
+    </div>
+    
+    <div class="mission-cards">
+      <div class="mission-card">
+        <h3 data-en="Our Mission" data-ar="مهمتنا">Our Mission</h3>
+        <p data-en="To deliver the finest quality rice with uncompromising standards, ensuring every grain meets our promise of excellence." data-ar="تقديم أجود أنواع الأرز بمعايير لا هوادة فيها، مع ضمان أن كل حبة تفي بوعدنا بالتميز.">
+          To deliver the finest quality rice with uncompromising standards, ensuring every grain meets our promise of excellence.
+        </p>
+      </div>
+      
+      <div class="mission-card">
+        <h3 data-en="Our Vision" data-ar="رؤيتنا">Our Vision</h3>
+        <p data-en="To redefine Oman's rice market through superior products, innovative solutions, and unmatched customer experiences." data-ar="إعادة تعريف سوق الأرز العماني من خلال منتجات فائقة وحلول مبتكرة وتجارب عملاء لا مثيل لها.">
+          To redefine Oman's rice market through superior products, innovative solutions, and unmatched customer experiences.
+        </p>
+      </div>
+      
+      <div class="mission-card">
+        <h3 data-en="Our Promise" data-ar="وعدنا">Our Promise</h3>
+        <p data-en="Consistent quality, reliable delivery, and personalized service - every time, without exception." data-ar="جودة ثابتة، توصيل موثوق، وخدمة شخصية - في كل مرة، دون استثناء.">
+          Consistent quality, reliable delivery, and personalized service - every time, without exception.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
 
     <section class="banner-slider load-animate">
   <div class="slider-container">
@@ -2501,7 +2737,7 @@
           <div class="benefit-icon">
             <i class="fas fa-handshake"></i>
           </div>
-          <h3 data-en="Trusted Partnerships" data-ar="شراقات موثوقة">Trusted Partnerships</h3>
+          <h3 data-en="Trusted Partnerships" data-ar="شراكات موثوقة">Trusted Partnerships</h3>
           <p data-en="Serving hotels, supermarkets and wholesalers with consistent quality." data-ar="نخدم الفنادق والسوبرماركت وتجار الجملة بجودة ثابتة.">Serving hotels, supermarkets and wholesalers with consistent quality.</p>
           <div class="benefit-arrow">
             <i class="fas fa-chevron-right"></i>
@@ -2804,38 +3040,64 @@
 
     // تحسين وظيفة تغيير اللغة
     function setLanguage(lang) {
-      currentLang = lang;
-      localStorage.setItem('language', lang);
-      
-      // تطبيق الإتجاه واللغة فوراً
-      document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-      document.documentElement.lang = lang;
-      
-      // تحديث نص زر تبديل اللغة
-      const langToggle = document.getElementById('languageToggle');
-      if (langToggle) {
-        langToggle.querySelector('.lang-text').textContent = lang === 'ar' ? 'English' : 'عربي';
-      }
-      
-      // تحديث جميع العناصر القابلة للترجمة
-      document.querySelectorAll('[data-en], [data-ar]').forEach(element => {
-        const text = element.getAttribute(`data-${lang}`);
-        if (text) {
-          if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
-            element.placeholder = text;
-          } else {
-            const hasHTML = /<[a-z][\s\S]*>/i.test(text);
-            element.innerHTML = hasHTML ? text : document.createTextNode(text).textContent;
-          }
-        }
-      });
-
-      // تحديث زر الطلب في المودال إذا كان موجوداً
-      const modalOrderBtn = document.getElementById('modalOrderBtn');
-      if (modalOrderBtn) {
-        modalOrderBtn.textContent = lang === 'ar' ? 'اطلب الآن' : 'Order Now';
+  currentLang = lang;
+  localStorage.setItem('language', lang);
+  
+  // تطبيق الإتجاه واللغة فوراً
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.documentElement.lang = lang;
+  
+  // إضافة CSS إضافي للدعم الكامل للعربية
+  if (lang === 'ar') {
+    document.body.classList.add('rtl');
+    document.body.classList.remove('ltr');
+  } else {
+    document.body.classList.add('ltr');
+    document.body.classList.remove('rtl');
+  }
+  
+  // تحديث نص زر تبديل اللغة
+  const langToggle = document.getElementById('languageToggle');
+  if (langToggle) {
+    langToggle.querySelector('.lang-text').textContent = lang === 'ar' ? 'English' : 'عربي';
+  }
+  
+  // تحديث جميع العناصر القابلة للترجمة
+  document.querySelectorAll('[data-en], [data-ar]').forEach(element => {
+    const text = element.getAttribute(`data-${lang}`);
+    if (text) {
+      if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+        element.placeholder = text;
+      } else {
+        const hasHTML = /<[a-z][\s\S]*>/i.test(text);
+        element.innerHTML = hasHTML ? text : document.createTextNode(text).textContent;
       }
     }
+  });
+
+  // تحديث زر الطلب في المودال إذا كان موجوداً
+  const modalOrderBtn = document.getElementById('modalOrderBtn');
+  if (modalOrderBtn) {
+    modalOrderBtn.textContent = lang === 'ar' ? 'اطلب الآن' : 'Order Now';
+  }
+  
+  // إعادة تنظيم الجداول والعناصر للغة العربية
+  if (lang === 'ar') {
+    document.querySelectorAll('.nutrition-table th, .nutrition-table td').forEach(cell => {
+      cell.style.textAlign = 'right';
+    });
+    document.querySelectorAll('.modal-info').forEach(info => {
+      info.style.textAlign = 'right';
+    });
+  } else {
+    document.querySelectorAll('.nutrition-table th, .nutrition-table td').forEach(cell => {
+      cell.style.textAlign = 'left';
+    });
+    document.querySelectorAll('.modal-info').forEach(info => {
+      info.style.textAlign = 'left';
+    });
+  }
+}
 
     // دالة لإنشاء رابط واتساب بشكل صحيح
     function generateWhatsAppLink(productName, quantity) {
@@ -3180,28 +3442,36 @@
       }
 
       quickViewBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-          const productId = this.getAttribute('data-product');
-          const product = productsData[productId];
+  btn.addEventListener('click', function() {
+    const productId = this.getAttribute('data-product');
+    const product = productsData[productId];
 
-          currentProductTitle = product.title[currentLang];
+    currentProductTitle = product.title[currentLang];
 
-          document.getElementById('modalProductTitle').textContent = currentProductTitle;
-          document.getElementById('modalProductDescription').textContent = product.description[currentLang];
-          document.getElementById('modalProductImage').src = product.image;
-          document.getElementById('modalProductImage').alt = currentProductTitle;
+    document.getElementById('modalProductTitle').textContent = currentProductTitle;
+    document.getElementById('modalProductDescription').textContent = product.description[currentLang];
+    
+    // إصلاح: تأكد من تعيين src بشكل صحيح
+    const modalImage = document.getElementById('modalProductImage');
+    modalImage.src = product.image;
+    modalImage.alt = currentProductTitle;
 
-          // إعادة ضبط كمية المودال إلى 1 عند الفتح
-          const qtyInput = document.querySelector('#quickViewModal .quantity-input');
-          qtyInput.value = 1;
-          updateModalOrderLink();
+    // إصلاح: إعادة ضبط الصورة إذا فشلت
+    modalImage.onerror = function() {
+      this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOGY4Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4=';
+    };
 
-          document.getElementById('modalOrderBtn').textContent = currentLang === 'ar' ? 'اطلب الآن' : 'Order Now';
+    // إعادة ضبط الكمية
+    const qtyInput = document.querySelector('#quickViewModal .quantity-input');
+    qtyInput.value = 1;
+    updateModalOrderLink();
 
-          modal.style.display = 'block';
-          document.body.style.overflow = 'hidden';
-        });
-      });
+    document.getElementById('modalOrderBtn').textContent = currentLang === 'ar' ? 'اطلب الآن' : 'Order Now';
+
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+  });
+});
 
       // أي تغيير للكمية داخل المودال يحدّث رابط الواتساب فورًا
       document.querySelector('#quickViewModal').addEventListener('click', function(e) {
