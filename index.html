@@ -1106,26 +1106,26 @@
     }
 
     .products-container {
-      display: grid;
-      grid-template-columns: repeat(1, 1fr);
-      gap: 25px;
-      padding: 0 15px;
-      max-width: 1400px;
-      margin: 0 auto;
-    }
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+  padding: 0 15px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
     
     .product-card {
-      text-align: center;
-      padding: 20px 15px;
-      border-radius: 10px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-      background: var(--white);
-      transition: all 0.3s ease;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      position: relative;
-    }
+  text-align: center;
+  padding: 20px 15px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  background: var(--white);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  position: relative;
+}
     
     .product-card:hover {
       transform: translateY(-10px);
@@ -1689,10 +1689,6 @@
       overflow: hidden;
     }
     
-    .premium-about-section::before {
-      content: none;
-    }
-    
     .about-container {
       max-width: 1200px;
       margin: 0 auto;
@@ -1720,10 +1716,6 @@
       background: white;
       border-radius: 12px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-    }
-    
-    .flourish-decoration {
-      display: none;
     }
     
     .centered-header {
@@ -2210,16 +2202,6 @@
         grid-template-columns: repeat(4, 1fr);
       }
       
-      .product-card:nth-child(3),
-      .product-card:nth-child(4) {
-        grid-column: span 2;
-      }
-      
-      .product-card:nth-child(3) img,
-      .product-card:nth-child(4) img {
-        height: 350px;
-      }
-      
       .contact-section {
         padding: 100px 0;
       }
@@ -2230,24 +2212,46 @@
     }
     
     @media (min-width: 1200px) {
-      .hero h1 {
-        font-size: 3rem;
-      }
-      
-      section h2 {
-        font-size: 2.5rem;
-      }
-      
-      .product-card:nth-child(3) img,
-      .product-card:nth-child(4) img {
-        height: 400px;
-      }
-      
-      .slider-container {
-        height: 450px;
-      }
-    }
-    
+  .hero h1 {
+    font-size: 3rem;
+  }
+  
+  section h2 {
+    font-size: 2.5rem;
+  }
+  
+  .products-container {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .product-card img {
+    height: 220px;
+  }
+  
+  .slider-container {
+    height: 450px;
+  }
+}
+
+/* أضف هذه الاستعلامات الجديدة هنا */
+@media (min-width: 576px) {
+  .products-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .products-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 992px) {
+  .products-container {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
     /* تحسينات للغة العربية */
 body.rtl {
   text-align: right;
@@ -2307,6 +2311,285 @@ body.rtl .category-card ul li::before {
 
 body.rtl .product-actions {
   text-align: right;
+}
+
+/* إصلاح تخطيط شبكة المنتجات */
+.products-container {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+  gap: 25px !important;
+  padding: 0 15px !important;
+  max-width: 1400px !important;
+  margin: 0 auto !important;
+}
+
+.product-card {
+  grid-column: span 1 !important; /* إجبار جميع البطاقات على أن تأخذ عموداً واحداً فقط */
+}
+
+.product-card img {
+  height: 220px !important; /* توحيد ارتفاع الصور */
+}
+
+/* إصلاح الوسائط المتعددة */
+@media (min-width: 576px) {
+  .products-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .products-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 992px) {
+  .products-container {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ===== The Mashhor Story Section Improvements ===== */
+.premium-about-section {
+  padding: 80px 15px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  position: relative;
+}
+
+.about-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.about-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+  margin-bottom: 60px;
+}
+
+.about-text {
+  padding: 30px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.centered-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.centered-header h3 {
+  display: inline-block;
+  position: relative;
+  padding-bottom: 15px;
+  font-size: 1.8rem;
+  color: var(--primary-dark);
+  font-weight: 700;
+}
+
+.centered-header h3::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background: var(--accent);
+}
+
+.about-paragraph {
+  margin-bottom: 25px;
+  line-height: 1.7;
+  text-align: center;
+  color: var(--text);
+  font-size: 1.05rem;
+}
+
+.about-paragraph strong {
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+
+.about-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 40px;
+  justify-content: center;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+}
+
+.btn-outline:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-accent {
+  background: var(--accent);
+  box-shadow: 0 4px 8px rgba(255, 152, 0, 0.3);
+}
+
+.btn-accent:hover {
+  background: var(--accent-dark);
+  box-shadow: 0 6px 12px rgba(255, 152, 0, 0.4);
+}
+
+.about-image {
+  position: relative;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+  transition: transform 0.5s ease;
+}
+
+.about-image:hover img {
+  transform: scale(1.03);
+}
+
+.mission-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  margin-top: 50px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.mission-card {
+  background: white;
+  padding: 25px 20px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  border-left: 4px solid var(--accent);
+}
+
+.mission-card h3 {
+  font-size: 1.2rem;
+  color: var(--primary-dark);
+  margin-bottom: 15px;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.mission-card h3::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 2px;
+  background: var(--accent);
+}
+
+.mission-card p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+/* وسائط متعددة للاستجابة */
+@media (min-width: 768px) {
+  .about-content {
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+  }
+  
+  .about-paragraph {
+    text-align: left;
+  }
+  
+  .centered-header {
+    text-align: left;
+  }
+  
+  .centered-header h3::after {
+    left: 0;
+    transform: none;
+  }
+  
+  .mission-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .about-cta {
+    flex-direction: column;
+  }
+  
+  .about-text {
+    padding: 20px;
+  }
+  
+  .centered-header h3 {
+    font-size: 1.5rem;
+  }
+  
+  .about-paragraph {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .premium-about-section {
+    padding: 60px 15px;
+  }
+  
+  .about-text {
+    padding: 15px;
+  }
+  
+  .centered-header h3 {
+    font-size: 1.3rem;
+  }
+  
+  .mission-card {
+    padding: 20px 15px;
+  }
+}
+
+/* حل مشكلة انعكاس الأرقام في اللغة العربية */
+.contact-number {
+  unicode-bidi: plaintext;
+  direction: ltr;
+  display: inline-block;
+  font-family: 'Tajawal', 'Segoe UI', Arial, sans-serif;
+}
+
+body[dir="rtl"] .contact-number,
+body[dir="rtl"] .rtl-numbers {
+  unicode-bidi: plaintext;
+  direction: ltr;
+  display: inline-block;
+}
+
+/* تحسين ظهور الأرقام في عناصر الاتصال */
+.method-link .contact-number,
+.footer-contact-info .contact-number {
+  unicode-bidi: plaintext;
+  direction: ltr;
 }
   </style>
   
@@ -2641,6 +2924,10 @@ body.rtl .product-actions {
           </a>
         </div>
       </div>
+      
+      <div class="about-image">
+        <img src="https://i.ibb.co/G42RrRnH/Logo.png" alt="Mashhor Premium Rice" loading="lazy" width="400" height="300" />
+      </div>
     </div>
     
     <div class="mission-cards">
@@ -2902,7 +3189,7 @@ body.rtl .product-actions {
               </div>
               <div class="method-info">
                 <h3 data-en="WhatsApp" data-ar="واتساب">WhatsApp</h3>
-                <a href="https://wa.me/96895224124" target="_blank" class="method-link">+968 95224124</a>
+                <a href="https://wa.me/96895224124" target="_blank" class="method-link contact-number">+968 95224124</a>
                 <p class="method-description" data-en="Fast response within minutes" data-ar="رد سريع خلال دقائق">Fast response within minutes</p>
               </div>
             </div>
@@ -2913,7 +3200,7 @@ body.rtl .product-actions {
               </div>
               <div class="method-info">
                 <h3 data-en="Call Us" data-ar="اتصل بنا">Call Us</h3>
-                <a href="tel:+96822716859" class="method-link">+968 22716859</a>
+                <a href="tel:+96822716859" class="method-link contact-number">+968 22716859</a>
                 <p class="method-description" data-en="Sat-Thu: 8AM - 5PM" data-ar="السبت-الخميس: 8 صباحاً - 5 مساءً">Sat-Thu: 8AM - 5PM</p>
               </div>
             </div>
@@ -3016,9 +3303,9 @@ body.rtl .product-actions {
             </span>
           </li>
           <li>
-            <i class="fas fa-phone-alt"></i>
-            <a href="tel:+96822716859">+968 22716859</a>
-          </li>
+  <i class="fas fa-phone-alt"></i>
+  <a href="tel:+96822716859" class="contact-number">+968 22716859</a>
+</li>
           <li>
             <i class="fas fa-envelope"></i>
             <a href="mailto:mashhorfoods@gmail.com">mashhorfoods@gmail.com</a>
@@ -3099,13 +3386,20 @@ body.rtl .product-actions {
   }
 }
 
+// تحديث اتجاه الأرقام عند تغيير اللغة
+document.querySelectorAll('.contact-number').forEach(element => {
+  element.style.unicodeBidi = 'plaintext';
+  element.style.direction = 'ltr';
+});
+
+
     // دالة لإنشاء رابط واتساب بشكل صحيح
     function generateWhatsAppLink(productName, quantity) {
-      const message = currentLang === 'ar' ? 
-        `أنا مهتم بـ ${encodeURIComponent(productName)} - الكمية: ${quantity}` : 
-        `I'm interested in ${encodeURIComponent(productName)} - Quantity: ${quantity}`;
-      return `https://wa.me/96895224124?text=${message}`;
-    }
+  const message = currentLang === 'ar' ? 
+    `أنا مهتم بـ ${encodeURIComponent(productName)} - الكمية: ${quantity}` : 
+    `I'm interested in ${encodeURIComponent(productName)} - Quantity: ${quantity}`;
+  return `https://wa.me/96895224124?text=${message}`;
+}
 
     // تهيئة الصفحة عند تحميل DOM
     document.addEventListener('DOMContentLoaded', function() {
@@ -3451,12 +3745,10 @@ body.rtl .product-actions {
     document.getElementById('modalProductTitle').textContent = currentProductTitle;
     document.getElementById('modalProductDescription').textContent = product.description[currentLang];
     
-    // إصلاح: تأكد من تعيين src بشكل صحيح
     const modalImage = document.getElementById('modalProductImage');
     modalImage.src = product.image;
     modalImage.alt = currentProductTitle;
 
-    // إصلاح: إعادة ضبط الصورة إذا فشلت
     modalImage.onerror = function() {
       this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOGY4Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4=';
     };
@@ -3464,9 +3756,28 @@ body.rtl .product-actions {
     // إعادة ضبط الكمية
     const qtyInput = document.querySelector('#quickViewModal .quantity-input');
     qtyInput.value = 1;
+    
+    // تأكد من أن زر الطلب في المودال يعمل
+document.getElementById('modalOrderBtn').addEventListener('click', function(e) {
+  e.preventDefault();
+  const qtyInput = document.querySelector('#quickViewModal .quantity-input');
+  const quantity = parseInt(qtyInput.value) || 1;
+  const whatsappLink = generateWhatsAppLink(currentProductTitle, quantity);
+  window.open(whatsappLink, '_blank');
+});
+    
+    // تحديث رابط الطلب فوراً
     updateModalOrderLink();
 
-    document.getElementById('modalOrderBtn').textContent = currentLang === 'ar' ? 'اطلب الآن' : 'Order Now';
+    // تعيين النص والرابط بشكل صحيح
+    const modalOrderBtn = document.getElementById('modalOrderBtn');
+    modalOrderBtn.textContent = currentLang === 'ar' ? 'اطلب الآن' : 'Order Now';
+    
+    // تعيين الرابط مباشرة لمنع أي مشاكل
+    const quantity = parseInt(qtyInput.value) || 1;
+    const whatsappLink = generateWhatsAppLink(currentProductTitle, quantity);
+    modalOrderBtn.setAttribute('href', whatsappLink);
+    modalOrderBtn.setAttribute('target', '_blank');
 
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
