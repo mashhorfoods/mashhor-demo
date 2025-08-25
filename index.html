@@ -2233,7 +2233,6 @@
   }
 }
 
-/* أضف هذه الاستعلامات الجديدة هنا */
 @media (min-width: 576px) {
   .products-container {
     grid-template-columns: repeat(2, 1fr);
@@ -2250,6 +2249,7 @@
   .products-container {
     grid-template-columns: repeat(4, 1fr);
   }
+}
 }
 
     /* تحسينات للغة العربية */
@@ -2329,25 +2329,6 @@ body.rtl .product-actions {
 
 .product-card img {
   height: 220px !important; /* توحيد ارتفاع الصور */
-}
-
-/* إصلاح الوسائط المتعددة */
-@media (min-width: 576px) {
-  .products-container {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 768px) {
-  .products-container {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (min-width: 992px) {
-  .products-container {
-    grid-template-columns: repeat(4, 1fr);
-  }
 }
 
 /* ===== The Mashhor Story Section Improvements ===== */
@@ -2571,7 +2552,8 @@ body.rtl .product-actions {
 }
 
 /* حل مشكلة انعكاس الأرقام في اللغة العربية */
-.contact-number {
+.contact-number,
+.rtl-numbers {
   unicode-bidi: plaintext;
   direction: ltr;
   display: inline-block;
@@ -2743,11 +2725,11 @@ body[dir="rtl"] .rtl-numbers {
         <div class="product-card slide-up" data-category="basmati bulk">
           <button class="favorite-btn" aria-label="Add to favorites"><i class="far fa-heart"></i></button>
           <h3 data-en="MASHHOR INDIAN XXXL 1121 Basmati Rice (35kg)" data-ar="أرز مشهور بسمتي اكس اكس اكس ال 1121 هندي (35 كجم)">MASHHOR INDIAN XXXL 1121 Basmati Rice (35kg)</h3>
-    <img src="https://i.ibb.co/4LMQ7wf/mashhor-rice.webp" 
+    <img src="https://i.ibb.co/TMntxccG/msh5.webp" 
      alt="MASHHOR RICE 35kg" 
      loading="lazy" 
      class="lazy-load enhanced-image" 
-     data-src="https://i.ibb.co/4LMQ7wf/mashhor-rice.webp" 
+     data-src="https://i.ibb.co/TMntxccG/msh5.webp" 
      width="300" 
      height="200" 
      onerror="this.src='https://via.placeholder.com/300x200/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
@@ -2791,7 +2773,7 @@ body[dir="rtl"] .rtl-numbers {
         <div class="product-card slide-up" data-category="non-basmati bulk">
           <button class="favorite-btn" aria-label="Add to favorites"><i class="far fa-heart"></i></button>
           <h3 data-en="MAHINAZ CLASSIC XXL Biryani Rice (35kg)" data-ar="أرز مهيناز كلاسيك اكس اكس ال للبرياني (35 كجم)">MAHINAZ CLASSIC XXL Biryani Rice (35kg)</h3>
-          <img src="https://i.ibb.co/8DHDKrZW/mhz35kg.webp" alt="MAHINAZ Biryani Rice" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/8DHDKrZW/mhz35kg.webp" width="300" height="200" />
+          <img src="https://i.ibb.co/WN9KvcQ2/mhz35kg-copy.webp" alt="MAHINAZ Biryani Rice" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/WN9KvcQ2/mhz35kg-copy.webp" width="300" height="200" />
           <ul>
             <li data-en="Aromatic XXL grains, perfect for traditional biryani dishes." data-ar="حبوب XXL عطرية، مثالية لأطباق البرياني التقليدية.">Aromatic XXL grains, perfect for traditional biryani dishes.</li>
             <li data-en="Premium Indian rice for rich flavor and texture." data-ar="أرز هندي ممتاز لنكهة غنية وقوام مميز.">Premium Indian rice for rich flavor and texture.</li>
@@ -2810,7 +2792,7 @@ body[dir="rtl"] .rtl-numbers {
         <div class="product-card slide-up" data-category="non-basmati bulk">
           <button class="favorite-btn" aria-label="Add to favorites"><i class="far fa-heart"></i></button>
           <h3 data-en="INDIAN PRIDE 1121 XXXL Golden Sella Basmati Rice (20kg)" data-ar="أرز إنديان برايد اكس اكس اكس ال 1121 سيلا ذهبي بسمتي (20 كجم)">INDIAN PRIDE 1121 XXXL Golden Sella Basmati Rice (20kg)</h3>
-          <img src="https://i.ibb.co/JwJNXCwm/1-1.png" alt="INDIAN PRIDE Rice" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/JwJNXCwm/1-1.png" width="300" height="200" />
+          <img src="https://i.ibb.co/BHZsn4Q8/pride.webp" alt="INDIAN PRIDE Rice" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/BHZsn4Q8/pride.webp" width="300" height="200" />
           <ul>
             <li data-en="Parboiled golden grains, naturally aromatic." data-ar="حبوب ذهبية مسلوقة جزئيًا، عطرية طبيعيًا.">Parboiled golden grains, naturally aromatic.</li>
             <li data-en="Perfect texture for biryani, mandi, and traditional rice dishes." data-ar="قوام مثالي للبرياني والمندي وأطباق الأرز التقليدية.">Perfect texture for biryani, mandi, and traditional rice dishes.</li>
@@ -3324,82 +3306,66 @@ body[dir="rtl"] .rtl-numbers {
   <script>
     // حفظ اللغة الحالية في متغير عام
     let currentLang = window.initialLang;
+    
+      // دالة لإنشاء رابط واتساب بشكل صحيح
+    function generateWhatsAppLink(productName, quantity) {
+      const message = currentLang === 'ar' ? 
+        `أنا مهتم بـ ${encodeURIComponent(productName)} - الكمية: ${quantity}` : 
+        `I'm interested in ${encodeURIComponent(productName)} - Quantity: ${quantity}`;
+      return `https://wa.me/96895224124?text=${message}`;
+    }
 
     // تحسين وظيفة تغيير اللغة
     function setLanguage(lang) {
-  currentLang = lang;
-  localStorage.setItem('language', lang);
-  
-  // تطبيق الإتجاه واللغة فوراً
-  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-  document.documentElement.lang = lang;
-  
-  // إضافة CSS إضافي للدعم الكامل للعربية
-  if (lang === 'ar') {
-    document.body.classList.add('rtl');
-    document.body.classList.remove('ltr');
-  } else {
-    document.body.classList.add('ltr');
-    document.body.classList.remove('rtl');
-  }
-  
+ 
   // تحديث نص زر تبديل اللغة
   const langToggle = document.getElementById('languageToggle');
   if (langToggle) {
     langToggle.querySelector('.lang-text').textContent = lang === 'ar' ? 'English' : 'عربي';
   }
   
-  // تحديث جميع العناصر القابلة للترجمة
-  document.querySelectorAll('[data-en], [data-ar]').forEach(element => {
-    const text = element.getAttribute(`data-${lang}`);
-    if (text) {
-      if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
-        element.placeholder = text;
-      } else {
-        const hasHTML = /<[a-z][\s\S]*>/i.test(text);
-        element.innerHTML = hasHTML ? text : document.createTextNode(text).textContent;
+     // تحديث جميع العناصر القابلة للترجمة
+      document.querySelectorAll('[data-en], [data-ar]').forEach(element => {
+        const text = element.getAttribute(`data-${lang}`);
+        if (text) {
+          if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+            element.placeholder = text;
+          } else {
+            const hasHTML = /<[a-z][\s\S]*>/i.test(text);
+            element.innerHTML = hasHTML ? text : document.createTextNode(text).textContent;
+          }
+        }
+      });
+
+     // تحديث زر الطلب في المودال إذا كان موجوداً
+      const modalOrderBtn = document.getElementById('modalOrderBtn');
+      if (modalOrderBtn) {
+        modalOrderBtn.textContent = lang === 'ar' ? 'اطلب الآن' : 'Order Now';
       }
-    }
-  });
-
-  // تحديث زر الطلب في المودال إذا كان موجوداً
-  const modalOrderBtn = document.getElementById('modalOrderBtn');
-  if (modalOrderBtn) {
-    modalOrderBtn.textContent = lang === 'ar' ? 'اطلب الآن' : 'Order Now';
-  }
   
-  // إعادة تنظيم الجداول والعناصر للغة العربية
-  if (lang === 'ar') {
-    document.querySelectorAll('.nutrition-table th, .nutrition-table td').forEach(cell => {
-      cell.style.textAlign = 'right';
-    });
-    document.querySelectorAll('.modal-info').forEach(info => {
-      info.style.textAlign = 'right';
-    });
-  } else {
-    document.querySelectorAll('.nutrition-table th, .nutrition-table td').forEach(cell => {
-      cell.style.textAlign = 'left';
-    });
-    document.querySelectorAll('.modal-info').forEach(info => {
-      info.style.textAlign = 'left';
-    });
-  }
-}
+      // إعادة تنظيم الجداول والعناصر للغة العربية
+      if (lang === 'ar') {
+        document.querySelectorAll('.nutrition-table th, .nutrition-table td').forEach(cell => {
+          cell.style.textAlign = 'right';
+        });
+        document.querySelectorAll('.modal-info').forEach(info => {
+          info.style.textAlign = 'right';
+        });
+      } else {
+        document.querySelectorAll('.nutrition-table th, .nutrition-table td').forEach(cell => {
+          cell.style.textAlign = 'left';
+        });
+        document.querySelectorAll('.modal-info').forEach(info => {
+          info.style.textAlign = 'left';
+        });
+      }
 
-// تحديث اتجاه الأرقام عند تغيير اللغة
-document.querySelectorAll('.contact-number').forEach(element => {
-  element.style.unicodeBidi = 'plaintext';
-  element.style.direction = 'ltr';
-});
-
-
-    // دالة لإنشاء رابط واتساب بشكل صحيح
-    function generateWhatsAppLink(productName, quantity) {
-  const message = currentLang === 'ar' ? 
-    `أنا مهتم بـ ${encodeURIComponent(productName)} - الكمية: ${quantity}` : 
-    `I'm interested in ${encodeURIComponent(productName)} - Quantity: ${quantity}`;
-  return `https://wa.me/96895224124?text=${message}`;
-}
+       // تحديث المتغير العام للغة الحالية
+      currentLang = lang;
+      localStorage.setItem('language', lang);
+      document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+      document.documentElement.lang = lang;
+    }
 
     // تهيئة الصفحة عند تحميل DOM
     document.addEventListener('DOMContentLoaded', function() {
@@ -3623,7 +3589,7 @@ document.querySelectorAll('.contact-number').forEach(element => {
         });
       });
       
-      // تفويض أحداث يضمن عمل الأزرار أينما وُجدت (في البطاقات وفي المودال)
+    // تفويض أحداث يضمن عمل الأزرار أينما وُجدت (في البطاقات وفي المودال)
       document.addEventListener('click', function (e) {
         const btn = e.target.closest('.quantity-btn');
         if (!btn) return;
@@ -3674,7 +3640,7 @@ document.querySelectorAll('.contact-number').forEach(element => {
             en: "Premium Long Grain Basmati Rice. Direct from Indian farms with rigorous quality checks. Suitable for diabetics, cholesterol free, and aged for perfect texture.",
             ar: "أرز بسمتي طويل الحبة ممتاز. مباشرة من المزارع الهندية مع فحوصات جودة صارمة. مناسب لمرضى السكري، خالي من الكوليسترول، ومعتق لتحقيق القوام المثالي."
           },
-          image: "https://i.ibb.co/4LMQ7wf/mashhor-rice.webp",
+          image: "https://i.ibb.co/TMntxccG/msh5.webp",
           link: {
             en: "https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MASHHOR%20INDIAN%20XXXL%201121%20Basmati%20Rice%20(35kg).",
             ar: "https://wa.me/96895224124?text=مرحباً، أنا مهتم بمنتج أرز مشهور بسمتي اكس اكس اكس ال 1121 هندي (35 كجم)"
@@ -3704,7 +3670,7 @@ document.querySelectorAll('.contact-number').forEach(element => {
             en: "Aromatic XXL grains perfect for traditional biryani dishes. Premium Indian rice with rich flavor and perfect texture that stays separate when cooked.",
             ar: "حبوب XXL عطرية مثالية لأطباق البرياني التقليدية. أرز هندي ممتاز بنكهة غنية وقوام مثالي يبقى منفصلاً عند الطهي."
           },
-          image: "https://i.ibb.co/8DHDKrZW/mhz35kg.webp",
+          image: "https://i.ibb.co/WN9KvcQ2/mhz35kg-copy.webp",
           link: {
             en: "https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MAHINAZ%20CLASSIC%20XXL%20Biryani%20Rice%20(35kg).",
             ar: "https://wa.me/96895224124?text=مرحباً، أنا مهتم بمنتج أرز مهيناز كلاسيك اكس اكس ال للبرياني (35 كجم)"
@@ -3719,7 +3685,7 @@ document.querySelectorAll('.contact-number').forEach(element => {
             en: "Parboiled golden grains that are naturally aromatic. Perfect texture for biryani, mandi, and traditional rice dishes. Retains nutrients through special processing.",
             ar: "حبوب ذهبية مسلوقة جزئيًا ذات نكهة عطرية طبيعية. قوام مثالي للبرياني والمندي وأطباق الأرز التقليدية. يحتفظ بالمغذيات من خلال معالجة خاصة."
           },
-          image: "https://i.ibb.co/JwJNXCwm/1-1.png",
+          image: "https://i.ibb.co/BHZsn4Q8/pride.webp",
           link: {
             en: "https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20INDIAN%20PRIDE%201121%20XXXL%20Golden%20Sella%20Basmati%20Rice%20(20kg).",
             ar: "https://wa.me/96895224124?text=مرحباً، أنا مهتم بمنتج أرز إنديان برايد اكس اكس اكس ال 1121 سيلا ذهبي بسمتي (20 كجم)"
@@ -3730,59 +3696,60 @@ document.querySelectorAll('.contact-number').forEach(element => {
       let currentProductTitle = '';
 
       function updateModalOrderLink() {
-        const qty = parseInt(document.querySelector('#quickViewModal .quantity-input').value) || 1;
+        const qtyInput = document.querySelector('#quickViewModal .quantity-input');
+        const qty = parseInt(qtyInput.value) || 1;
         const href = generateWhatsAppLink(currentProductTitle, qty);
         document.getElementById('modalOrderBtn').setAttribute('href', href);
       }
 
       quickViewBtns.forEach(btn => {
-  btn.addEventListener('click', function() {
-    const productId = this.getAttribute('data-product');
-    const product = productsData[productId];
+        btn.addEventListener('click', function() {
+          const productId = this.getAttribute('data-product');
+          const product = productsData[productId];
 
-    currentProductTitle = product.title[currentLang];
+          currentProductTitle = product.title[currentLang];
 
-    document.getElementById('modalProductTitle').textContent = currentProductTitle;
-    document.getElementById('modalProductDescription').textContent = product.description[currentLang];
-    
-    const modalImage = document.getElementById('modalProductImage');
-    modalImage.src = product.image;
-    modalImage.alt = currentProductTitle;
+          document.getElementById('modalProductTitle').textContent = currentProductTitle;
+          document.getElementById('modalProductDescription').textContent = product.description[currentLang];
+          
+          const modalImage = document.getElementById('modalProductImage');
+          modalImage.src = product.image;
+          modalImage.alt = currentProductTitle;
 
-    modalImage.onerror = function() {
-      this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOGY4Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4=';
-    };
+          modalImage.onerror = function() {
+            this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOGY4Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4=';
+          };
 
-    // إعادة ضبط الكمية
-    const qtyInput = document.querySelector('#quickViewModal .quantity-input');
-    qtyInput.value = 1;
-    
-    // تأكد من أن زر الطلب في المودال يعمل
-document.getElementById('modalOrderBtn').addEventListener('click', function(e) {
-  e.preventDefault();
-  const qtyInput = document.querySelector('#quickViewModal .quantity-input');
-  const quantity = parseInt(qtyInput.value) || 1;
-  const whatsappLink = generateWhatsAppLink(currentProductTitle, quantity);
-  window.open(whatsappLink, '_blank');
-});
-    
-    // تحديث رابط الطلب فوراً
-    updateModalOrderLink();
+           // إعادة ضبط الكمية
+          const qtyInput = document.querySelector('#quickViewModal .quantity-input');
+          qtyInput.value = 1;
+          
+          // تأكد من أن زر الطلب في المودال يعمل
+          document.getElementById('modalOrderBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            const qtyInput = document.querySelector('#quickViewModal .quantity-input');
+            const quantity = parseInt(qtyInput.value) || 1;
+            const whatsappLink = generateWhatsAppLink(currentProductTitle, quantity);
+            window.open(whatsappLink, '_blank');
+          });
+          
+          // تحديث رابط الطلب فوراً
+          updateModalOrderLink();
 
-    // تعيين النص والرابط بشكل صحيح
-    const modalOrderBtn = document.getElementById('modalOrderBtn');
-    modalOrderBtn.textContent = currentLang === 'ar' ? 'اطلب الآن' : 'Order Now';
-    
-    // تعيين الرابط مباشرة لمنع أي مشاكل
-    const quantity = parseInt(qtyInput.value) || 1;
-    const whatsappLink = generateWhatsAppLink(currentProductTitle, quantity);
-    modalOrderBtn.setAttribute('href', whatsappLink);
-    modalOrderBtn.setAttribute('target', '_blank');
+          // تعيين النص والرابط بشكل صحيح
+          const modalOrderBtn = document.getElementById('modalOrderBtn');
+          modalOrderBtn.textContent = currentLang === 'ar' ? 'اطلب الآن' : 'Order Now';
+          
+          // تعيين الرابط مباشرة لمنع أي مشاكل
+          const quantity = parseInt(qtyInput.value) || 1;
+          const whatsappLink = generateWhatsAppLink(currentProductTitle, quantity);
+          modalOrderBtn.setAttribute('href', whatsappLink);
+          modalOrderBtn.setAttribute('target', '_blank');
 
-    modal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-  });
-});
+          modal.style.display = 'block';
+          document.body.style.overflow = 'hidden';
+        });
+      });
 
       // أي تغيير للكمية داخل المودال يحدّث رابط الواتساب فورًا
       document.querySelector('#quickViewModal').addEventListener('click', function(e) {
@@ -3913,72 +3880,6 @@ document.getElementById('modalOrderBtn').addEventListener('click', function(e) {
       
       initSlider();
     });
-    
-    // تحسين تحميل الصور
-document.addEventListener('DOMContentLoaded', function() {
-  // إضافة تأثير تحميل للصور
-  const images = document.querySelectorAll('img');
-  
-  images.forEach(img => {
-    // إضافة CSS للصور أثناء التحميل
-    if (!img.complete) {
-      img.style.opacity = '0';
-      img.style.transition = 'opacity 0.5s ease';
-    }
-    
-    img.addEventListener('load', function() {
-      this.style.opacity = '1';
-      this.classList.add('loaded');
-    });
-    
-    // معالجة أخطاء تحميل الصور
-    img.addEventListener('error', function() {
-      console.error('Failed to load image:', this.src);
-      if (!this.getAttribute('data-error-handled')) {
-        this.src = 'https://via.placeholder.com/300x200/f8f8f8/666666?text=Image+Not+Found';
-        this.alt = 'Image failed to load';
-        this.setAttribute('data-error-handled', 'true');
-      }
-    });
-  });
-  
-  // معالجة خاصة لصور المنتجات - التكبير عند النقر
-  const productImages = document.querySelectorAll('.product-card img');
-  productImages.forEach(img => {
-    img.addEventListener('click', function() {
-      this.classList.toggle('zoomed');
-    });
-  });
-  
-  // إغلاق الصورة المكبرة عند النقر خارجها
-  document.addEventListener('click', function(e) {
-    if (!e.target.closest('.product-card img')) {
-      document.querySelectorAll('.product-card img.zoomed').forEach(img => {
-        img.classList.remove('zoomed');
-      });
-    }
-  });
-});
-
-// إضافة تأثير تحميل للصور عند التمرير
-if ('IntersectionObserver' in window) {
-  const lazyImageObserver = new IntersectionObserver((entries, observer) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const lazyImage = entry.target;
-        if (lazyImage.dataset.src) {
-          lazyImage.src = lazyImage.dataset.src;
-        }
-        lazyImage.classList.add('loaded');
-        lazyImageObserver.unobserve(lazyImage);
-      }
-    });
-  });
-
-  document.querySelectorAll('.lazy-load').forEach(lazyImage => {
-    lazyImageObserver.observe(lazyImage);
-  });
-}
   </script>
 </body>
 </html>
