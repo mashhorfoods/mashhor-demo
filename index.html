@@ -76,11 +76,8 @@
     document.head.appendChild(antiFoucCSS);
   </script>
   
-  <!-- Font Loading Optimization -->
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
-  </noscript>
+  <!-- Font Loading -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
   
   <!-- FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -105,6 +102,8 @@
       --border: rgba(0,0,0,0.1);
       --shadow: 0 4px 15px rgba(0,0,0,0.1);
       --shadow-hover: 0 8px 25px rgba(0,0,0,0.15);
+      --shadow-glow: 0 0 15px rgba(46, 125, 50, 0.3);
+      --shadow-glow-hover: 0 0 25px rgba(46, 125, 50, 0.5);
       --animation-speed: 0.3s;
       --cart-height: 70vh;
     }
@@ -227,6 +226,12 @@
       to {
         transform: translateY(100%);
       }
+    }
+    
+    @keyframes glow {
+      0% { box-shadow: 0 0 5px rgba(46, 125, 50, 0.2); }
+      50% { box-shadow: 0 0 20px rgba(46, 125, 50, 0.6); }
+      100% { box-shadow: 0 0 5px rgba(46, 125, 50, 0.2); }
     }
     
     .load-animate {
@@ -404,42 +409,59 @@
       background: rgba(46, 125, 50, 0.2);
     }
     
-    /* ============= CART ICON ============= */
-    .cart-icon {
-      position: relative;
+    /* ============= FLOATING CART BUTTON ============= */
+    .floating-cart {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
-      margin-left: 20px;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4);
+      transition: all 0.3s ease;
     }
     
-    body[dir="rtl"] .cart-icon {
-      margin-left: 0;
-      margin-right: 20px;
+    body[dir="rtl"] .floating-cart {
+      right: auto;
+      left: 20px;
     }
     
-    .cart-icon i {
-      font-size: 1.5rem;
-      color: var(--primary);
+    .floating-cart:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 16px rgba(46, 125, 50, 0.6);
+      animation: glow 1.5s infinite;
+    }
+    
+    .floating-cart i {
+      font-size: 1.8rem;
+      color: var(--white);
     }
     
     .cart-count {
       position: absolute;
-      top: -8px;
-      right: -8px;
+      top: -5px;
+      right: -5px;
       background: var(--accent);
       color: white;
       border-radius: 50%;
-      width: 20px;
-      height: 20px;
+      width: 24px;
+      height: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       font-weight: 600;
     }
     
     body[dir="rtl"] .cart-count {
       right: auto;
-      left: -8px;
+      left: -5px;
     }
     
     /* ============= SHOPPING CART ============= */
@@ -464,11 +486,6 @@
     }
     
     body[dir="rtl"] .cart-sidebar {
-      left: 0;
-      right: 0;
-    }
-    
-    body[dir="rtl"] .cart-sidebar.active {
       left: 0;
       right: 0;
     }
@@ -832,18 +849,21 @@
       text-align: center;
       padding: 20px 15px;
       border-radius: 10px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      box-shadow: var(--shadow);
       background: var(--white);
       transition: all 0.3s ease;
       display: flex;
       flex-direction: column;
       height: auto;
       position: relative;
+      border: 1px solid rgba(46, 125, 50, 0.1);
     }
     
     .product-card:hover {
       transform: translateY(-10px);
-      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+      box-shadow: var(--shadow-hover);
+      border-color: rgba(46, 125, 50, 0.3);
+      animation: glow 1.5s infinite;
     }
     
     .product-card img {
@@ -855,11 +875,12 @@
       padding: 15px;
       border-radius: 8px;
       transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
     
     .product-card:hover img {
       transform: scale(1.05);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
     }
     
     .product-card img.zoomed {
@@ -906,11 +927,6 @@
     
     .product-card ul li::before {
       content: none;
-    }
-    
-    body[dir="rtl"] .product-card ul li::before {
-      left: auto;
-      right: 0;
     }
     
     .product-actions {
@@ -1072,250 +1088,6 @@
       box-shadow: 0 6px 12px rgba(255, 152, 0, 0.4);
     }
     
-    /* ============= CERTIFICATIONS SECTION ============= */
-    .certifications-section {
-      background-color: white;
-      padding: 80px 15px;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .certifications-section::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: url('https://i.ibb.co/G42RrRnH/Logo.png') center/contain no-repeat;
-      opacity: 0.03;
-      z-index: 0;
-    }
-    
-    .certifications-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 25px;
-      max-width: 1100px;
-      margin: 40px auto 0;
-      position: relative;
-      z-index: 1;
-    }
-    
-    .certification-card {
-      background: white;
-      border-radius: 10px;
-      padding: 25px 20px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-      transition: all 0.3s ease;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      border: 1px solid rgba(46, 125, 50, 0.1);
-    }
-    
-    .certification-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 30px rgba(46, 125, 50, 0.1);
-      border-color: rgba(46, 125, 50, 0.3);
-    }
-    
-    .certification-logo {
-      width: 120px;
-      height: 120px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 20px;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-      padding: 5px;
-    }
-    
-    .certification-logo img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-      filter: grayscale(25%);
-      transition: all 0.3s ease;
-    }
-    
-    .certification-card:hover .certification-logo img {
-      filter: grayscale(0%);
-    }
-    
-    .certification-details h3 {
-      color: var(--primary);
-      font-size: 1.2rem;
-      margin-bottom: 8px;
-    }
-    
-    .certification-details p {
-      color: var(--text-light);
-      font-size: 0.9rem;
-      line-height: 1.5;
-    }
-    
-    /* ============= GENERAL SECTION STYLES ============= */
-    section {
-      padding: 60px 15px;
-      text-align: center;
-      position: relative;
-      max-width: 100%;
-      overflow-x: hidden;
-      margin-bottom: 40px;
-    }
-    
-    section h2 {
-      font-size: 1.8rem;
-      color: var(--primary);
-      margin-bottom: 20px;
-      font-weight: 700;
-      position: relative;
-      display: inline-block;
-      padding: 0 15px;
-    }
-    
-    section h2::after {
-      content: "";
-      position: absolute;
-      bottom: -8px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60px;
-      height: 3px;
-      background: var(--accent);
-      border-radius: 3px;
-    }
-    
-    section p {
-      font-size: 1rem;
-      color: #444;
-      max-width: 100%;
-      margin: 0 auto 20px;
-      line-height: 1.6;
-      padding: 0 15px;
-    }
-    
-    /* ============= BANNER SLIDER ============= */
-    .banner-slider {
-      position: relative;
-      max-width: 1200px;
-      margin: 40px auto;
-      overflow: hidden;
-      border-radius: 8px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    
-    .slider-container {
-      position: relative;
-      width: 100%;
-      height: 400px;
-      overflow: hidden;
-      border-radius: 12px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-    }
-    
-    .slider {
-      display: flex;
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      transition: transform 0.5s ease;
-    }
-    
-    .slide {
-      min-width: 100%;
-      height: 100%;
-      flex-shrink: 0;
-      position: relative;
-    }
-    
-    .slide img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      position: absolute;
-      top: 0;
-      left: 0;
-      transition: transform 0.5s ease;
-    }
-    
-    .slide:hover img {
-      transform: scale(1.03);
-    }
-    
-    .slider-btn {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 40px;
-      height: 40px;
-      background: rgba(255,255,255,0.7);
-      border: none;
-      border-radius: 50%;
-      font-size: 18px;
-      cursor: pointer;
-      z-index: 10;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .slider-btn:hover {
-      background: var(--white);
-      transform: translateY(-50%) scale(1.1);
-    }
-    
-    .prev-btn {
-      left: 15px;
-    }
-    
-    .next-btn {
-      right: 15px;
-    }
-    
-    .slider-dots {
-      position: absolute;
-      bottom: 15px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 8px;
-      z-index: 10;
-    }
-    
-    .slider-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.5);
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .slider-dot.active {
-      background: var(--white);
-      transform: scale(1.2);
-    }
-    
-    .slider-promo-text {
-      text-align: center;
-      margin-top: 20px;
-      font-style: italic;
-      font-size: 1.1rem;
-      color: var(--primary);
-      font-weight: 500;
-      max-width: 800px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    
     /* ============= ENHANCED SECTION ============= */
     .enhanced-section {
       padding: 60px 15px;
@@ -1350,6 +1122,7 @@
     .benefit-card:hover {
       transform: translateY(-10px);
       box-shadow: 0 15px 30px rgba(46, 125, 50, 0.15);
+      animation: glow 1.5s infinite;
     }
     
     .benefit-icon {
@@ -1432,6 +1205,7 @@
     .category-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      animation: glow 1.5s infinite;
     }
     
     .category-icon {
@@ -1595,6 +1369,7 @@
       transform: translateY(-10px);
       box-shadow: 0 15px 40px rgba(46, 125, 50, 0.15);
       border-color: var(--primary);
+      animation: glow 1.5s infinite;
     }
     
     .testimonial-rating {
@@ -1788,6 +1563,11 @@
       background: white;
     }
     
+    body[dir="rtl"] .form-group input,
+    body[dir="rtl"] .form-group textarea {
+      font-family: 'Tajawal', sans-serif;
+    }
+    
     .form-group textarea {
       min-height: 120px;
       resize: vertical;
@@ -1804,6 +1584,11 @@
       padding: 0 5px;
     }
     
+    body[dir="rtl"] .form-group label {
+      right: 15px;
+      left: auto;
+    }
+    
     .form-group input:focus + label,
     .form-group input:not(:placeholder-shown) + label,
     .form-group textarea:focus + label,
@@ -1812,6 +1597,14 @@
       left: 10px;
       font-size: 0.8rem;
       color: var(--primary);
+    }
+    
+    body[dir="rtl"] .form-group input:focus + label,
+    body[dir="rtl"] .form-group input:not(:placeholder-shown) + label,
+    body[dir="rtl"] .form-group textarea:focus + label,
+    body[dir="rtl"] .form-group textarea:not(:placeholder-shown) + label {
+      right: 10px;
+      left: auto;
     }
     
     .form-group input:focus,
@@ -2006,6 +1799,10 @@
       border-left: 4px solid var(--accent);
     }
     
+    .mission-card:hover {
+      animation: glow 1.5s infinite;
+    }
+    
     .mission-card h3 {
       font-size: 1.2rem;
       color: var(--primary-dark);
@@ -2029,6 +1826,251 @@
       font-size: 0.95rem;
       line-height: 1.6;
       color: var(--text);
+    }
+    
+    /* ============= CERTIFICATIONS SECTION ============= */
+    .certifications-section {
+      background-color: white;
+      padding: 80px 15px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .certifications-section::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('https://i.ibb.co/G42RrRnH/Logo.png') center/contain no-repeat;
+      opacity: 0.03;
+      z-index: 0;
+    }
+    
+    .certifications-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      max-width: 1100px;
+      margin: 40px auto 0;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .certification-card {
+      background: white;
+      border-radius: 10px;
+      padding: 25px 20px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      border: 1px solid rgba(46, 125, 50, 0.1);
+    }
+    
+    .certification-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(46, 125, 50, 0.1);
+      border-color: rgba(46, 125, 50, 0.3);
+      animation: glow 1.5s infinite;
+    }
+    
+    .certification-logo {
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+      padding: 5px;
+    }
+    
+    .certification-logo img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      filter: grayscale(25%);
+      transition: all 0.3s ease;
+    }
+    
+    .certification-card:hover .certification-logo img {
+      filter: grayscale(0%);
+    }
+    
+    .certification-details h3 {
+      color: var(--primary);
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+    }
+    
+    .certification-details p {
+      color: var(--text-light);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    
+    /* ============= BANNER SLIDER ============= */
+    .banner-slider {
+      position: relative;
+      max-width: 1200px;
+      margin: 40px auto;
+      overflow: hidden;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .slider-container {
+      position: relative;
+      width: 100%;
+      height: 400px;
+      overflow: hidden;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    
+    .slider {
+      display: flex;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.5s ease;
+    }
+    
+    .slide {
+      min-width: 100%;
+      height: 100%;
+      flex-shrink: 0;
+      position: relative;
+    }
+    
+    .slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transition: transform 0.5s ease;
+    }
+    
+    .slide:hover img {
+      transform: scale(1.03);
+    }
+    
+    .slider-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      background: rgba(255,255,255,0.7);
+      border: none;
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .slider-btn:hover {
+      background: var(--white);
+      transform: translateY(-50%) scale(1.1);
+    }
+    
+    .prev-btn {
+      left: 15px;
+    }
+    
+    .next-btn {
+      right: 15px;
+    }
+    
+    .slider-dots {
+      position: absolute;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      z-index: 10;
+    }
+    
+    .slider-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .slider-dot.active {
+      background: var(--white);
+      transform: scale(1.2);
+    }
+    
+    .slider-promo-text {
+      text-align: center;
+      margin-top: 20px;
+      font-style: italic;
+      font-size: 1.1rem;
+      color: var(--primary);
+      font-weight: 500;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    /* ============= GENERAL SECTION STYLES ============= */
+    section {
+      padding: 60px 15px;
+      text-align: center;
+      position: relative;
+      max-width: 100%;
+      overflow-x: hidden;
+      margin-bottom: 40px;
+    }
+    
+    section h2 {
+      font-size: 1.8rem;
+      color: var(--primary);
+      margin-bottom: 20px;
+      font-weight: 700;
+      position: relative;
+      display: inline-block;
+      padding: 0 15px;
+    }
+    
+    section h2::after {
+      content: "";
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 3px;
+    }
+    
+    section p {
+      font-size: 1rem;
+      color: #444;
+      max-width: 100%;
+      margin: 0 auto 20px;
+      line-height: 1.6;
+      padding: 0 15px;
     }
     
     /* ============= FOOTER ============= */
@@ -2277,24 +2319,6 @@
       text-align: right;
     }
     
-    /* إصلاح تخطيط شبكة المنتجات */
-    .products-container {
-      display: grid !important;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
-      gap: 25px !important;
-      padding: 0 15px !important;
-      max-width: 1400px !important;
-      margin: 0 auto !important;
-    }
-    
-    .product-card {
-      grid-column: span 1 !important; /* إجبار جميع البطاقات على أن تأخذ عموداً واحداً فقط */
-    }
-    
-    .product-card img {
-      height: 220px !important; /* توحيد ارتفاع الصور */
-    }
-    
     /* حل مشكلة انعكاس الأرقام في اللغة العربية */
     .contact-number,
     .rtl-numbers {
@@ -2379,6 +2403,29 @@
       
       .method-icon {
         margin-bottom: 15px;
+      }
+      
+      /* Floating Cart Responsive */
+      .floating-cart {
+        width: 50px;
+        height: 50px;
+        bottom: 15px;
+        right: 15px;
+      }
+      
+      body[dir="rtl"] .floating-cart {
+        right: auto;
+        left: 15px;
+      }
+      
+      .floating-cart i {
+        font-size: 1.5rem;
+      }
+      
+      .cart-count {
+        width: 20px;
+        height: 20px;
+        font-size: 0.7rem;
       }
       
       /* Cart Sidebar Responsive */
@@ -2518,14 +2565,6 @@
         font-size: 2.5rem;
       }
       
-      .products-container {
-        grid-template-columns: repeat(4, 1fr);
-      }
-      
-      .product-card img {
-        height: 220px;
-      }
-      
       .slider-container {
         height: 450px;
       }
@@ -2638,159 +2677,6 @@
       margin: 0 auto;
     }
     
-    /* Products Section Improvements */
-    .products-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 30px;
-      padding: 20px 0;
-    }
-    
-    .product-card {
-      background: white;
-      border-radius: 12px;
-      padding: 25px 20px;
-      box-shadow: var(--shadow);
-      transition: all 0.3s ease;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
-    
-    .product-card:hover {
-      transform: translateY(-10px);
-      box-shadow: var(--shadow-hover);
-    }
-    
-    .product-features {
-      text-align: left;
-      margin-bottom: 20px;
-      flex-grow: 1;
-    }
-    
-    .product-features li {
-      margin-bottom: 8px;
-      position: relative;
-      padding-left: 20px;
-      color: var(--text-light);
-      font-size: 0.9rem;
-    }
-    
-    .product-features li:before {
-      content: "•";
-      color: var(--accent);
-      position: absolute;
-      left: 0;
-      font-size: 1.2rem;
-    }
-    
-    /* About Section Improvements */
-    .about-content {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 50px;
-      align-items: center;
-      margin-bottom: 50px;
-    }
-    
-    .about-text {
-      padding-right: 20px;
-    }
-    
-    .about-text p {
-      margin-bottom: 20px;
-      line-height: 1.7;
-      font-size: 1.05rem;
-    }
-    
-    .about-text strong {
-      color: var(--primary-dark);
-      font-weight: 600;
-    }
-    
-    .mission-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 25px;
-    }
-    
-    .mission-card {
-      background: var(--gray);
-      padding: 25px 20px;
-      border-radius: 10px;
-      text-align: center;
-      box-shadow: var(--shadow);
-    }
-    
-    .mission-card h3 {
-      font-size: 1.2rem;
-      color: var(--primary-dark);
-      margin-bottom: 15px;
-      position: relative;
-      padding-bottom: 10px;
-    }
-    
-    .mission-card h3:after {
-      content: "";
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 40px;
-      height: 2px;
-      background: var(--accent);
-    }
-    
-    .mission-card p {
-      font-size: 0.95rem;
-      line-height: 1.6;
-      color: var(--text);
-    }
-    
-    .about-actions {
-      display: flex;
-      gap: 15px;
-      margin-top: 30px;
-      flex-wrap: wrap;
-    }
-    
-    /* Responsive Styles */
-    @media (max-width: 992px) {
-      .about-content {
-        grid-template-columns: 1fr;
-        gap: 40px;
-      }
-      
-      .about-text {
-        padding-right: 0;
-        order: 2;
-      }
-    }
-    
-    @media (max-width: 768px) {
-      .section-title {
-        font-size: 1.8rem;
-      }
-      
-      .products-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
-      }
-      
-      .mission-cards {
-        grid-template-columns: 1fr;
-      }
-      
-      .about-actions {
-        flex-direction: column;
-      }
-      
-      .btn {
-        width: 100%;
-      }
-    }
-    
     /* Error messages */
     .form-group.error input,
     .form-group.error textarea {
@@ -2855,10 +2741,6 @@
       </a>
       
       <div class="header-right">
-        <div class="cart-icon" id="cartIcon">
-          <i class="fas fa-shopping-cart"></i>
-          <span class="cart-count" id="cartCount">0</span>
-        </div>
         <button class="hamburger" aria-label="Menu">
           <span></span>
           <span></span>
@@ -2872,14 +2754,20 @@
       <a href="#about" class="nav-link" data-en="About" data-ar="من نحن">About</a>
       <a href="#products" class="nav-link" data-en="Products" data-ar="منتجاتنا">Products</a>
       <a href="#why-us" class="nav-link" data-en="Why Us" data-ar="لماذا نحن">Why Us</a>
-      <a href="#certifications" class="nav-link" data-en="Certifications" data-ar="الشهادات">Certifications</a>
       <a href="#clients-say" class="nav-link" data-en="Testimonials" data-ar="آراء العملاء">Testimonials</a>
+      <a href="#certifications" class="nav-link" data-en="Certifications" data-ar="الشهادات">Certifications</a>
       <a href="#contact-us" class="nav-link" data-en="Contact" data-ar="اتصل بنا">Contact</a>
       <button class="language-toggle" id="languageToggle" aria-label="Toggle language">
         <i class="fas fa-language"></i> <span class="lang-text">عربي</span>
       </button>
     </nav>
   </header>
+  
+  <!-- ============= FLOATING CART BUTTON ============= -->
+  <div class="floating-cart" id="cartIcon">
+    <i class="fas fa-shopping-cart"></i>
+    <span class="cart-count" id="cartCount">0</span>
+  </div>
   
   <!-- ============= SHOPPING CART ============= -->
   <div class="cart-sidebar" id="cartSidebar">
@@ -2888,7 +2776,7 @@
       <button class="close-cart" id="closeCart">&times;</button>
     </div>
     <div class="cart-items" id="cartItems">
-      <div class="cart-empty" id="cartEmpty">
+      <div class="cart-empty">
         <i class="fas fa-shopping-cart"></i>
         <p data-en="Your cart is empty" data-ar="سلة التسوق فارغة">Your cart is empty</p>
       </div>
@@ -3107,209 +2995,6 @@
       </div>
     </div>
     
-    <!-- ============= CERTIFICATIONS SECTION ============= -->
-    <section id="certifications" class="certifications-section load-animate">
-      <div class="section-header">
-        <h2 data-en="Internationally Recognized Certifications" data-ar="شهادات معتمدة عالمياً">Internationally Recognized Certifications</h2>
-        <p class="section-subtitle" data-en="Our commitment to quality is verified by independent international organizations" data-ar="التزامنا بالجودة مثبت من قبل منظمات دولية مستقلة">Our commitment to quality is verified by independent international organizations</p>
-      </div>
-      <div class="certifications-grid">
-        <div class="certification-card slide-up">
-          <div class="certification-logo">
-            <img src="https://i.ibb.co/0ywjyLK6/iso22000.webp" alt="ISO 22000 Certification" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/0ywjyLK6/iso22000.webp" width="120" height="120" onerror="this.src='https://via.placeholder.com/120x120?text=ISO+22000'; this.alt='ISO 22000 Certification'" />
-          </div>
-          <div class="certification-details">
-            <h3 data-en="ISO 22000:2018" data-ar="الأيزو 22000:2018">ISO 22000:2018</h3>
-            <p data-en="Food Safety Management System" data-ar="نظام إدارة سلامة الغذاء">Food Safety Management System</p>
-          </div>
-        </div>
-        
-        <div class="certification-card slide-up">
-          <div class="certification-logo">
-            <img src="https://i.ibb.co/cKYgdpCB/iso2015.webp" alt="ISO 9001 Certification" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/cKYgdpCB/iso2015.webp" width="120" height="120" onerror="this.src='https://via.placeholder.com/120x120?text=ISO+9001'; this.alt='ISO 9001 Certification'" />
-          </div>
-          <div class="certification-details">
-            <h3 data-en="ISO 9001:2015" data-ar="الأيزو 9001:2015">ISO 9001:2015</h3>
-            <p data-en="Quality Management System" data-ar="نظام إدارة الجودة">Quality Management System</p>
-          </div>
-        </div>
-        
-        <div class="certification-card slide-up">
-          <div class="certification-logo">
-            <img src="https://i.ibb.co/p6fsX5XN/haccp.webp" alt="HACCP Certification" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/p6fsX5XN/haccp.webp" width="120" height="120" onerror="this.src='https://via.placeholder.com/120x120?text=HACCP'; this.alt='HACCP Certification'" />
-          </div>
-          <div class="certification-details">
-            <h3>HACCP</h3>
-            <p data-en="Hazard Analysis Critical Control Point" data-ar="نظام تحليل المخاطر ونقاط التحكم الحرجة">Hazard Analysis Critical Control Point</p>
-          </div>
-        </div>
-        
-        <div class="certification-card slide-up">
-          <div class="certification-logo">
-            <img src="https://i.ibb.co/yckTC2g8/gmp.webp" alt="GMP Certification" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/yckTC2g8/gmp.webp" width="120" height="120" onerror="this.src='https://via.placeholder.com/120x120?text=GMP'; this.alt='GMP Certification'" />
-          </div>
-          <div class="certification-details">
-            <h3>GMP</h3>
-            <p data-en="Good Manufacturing Practice" data-ar="ممارسات التصنيع الجيدة">Good Manufacturing Practice</p>
-          </div>
-        </div>
-      </div>
-    </section>
-    
-    <!-- ============= PRODUCT MODAL ============= -->
-    <div class="modal" id="quickViewModal">
-      <div class="modal-content">
-        <button class="close-modal" aria-label="Close modal">&times;</button>
-        <div class="modal-body">
-          <div class="modal-image">
-            <img id="modalProductImage" src="" alt="" loading="lazy" class="lazy-load" width="300" height="300" />
-          </div>
-          <div class="modal-info">
-            <h3 id="modalProductTitle"></h3>
-            <p id="modalProductDescription"></p>
-            
-            <div class="nutrition-info">
-              <h4 data-en="Nutritional Information" data-ar="المعلومات الغذائية">Nutritional Information</h4>
-              <table class="nutrition-table">
-                <thead>
-                  <tr>
-                    <th data-en="Nutrient" data-ar="المغذيات">Nutrient</th>
-                    <th data-en="Per 100g" data-ar="لكل 100 جرام">Per 100g</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td data-en="Energy" data-ar="الطاقة">Energy</td>
-                    <td>350 kcal</td>
-                  </tr>
-                  <tr>
-                    <td data-en="Carbohydrates" data-ar="الكربوهيدرات">Carbohydrates</td>
-                    <td>77g</td>
-                  </tr>
-                  <tr>
-                    <td data-en="Protein" data-ar="البروتين">Protein</td>
-                    <td>7g</td>
-                  </tr>
-                  <tr>
-                    <td data-en="Fat" data-ar="الدهون">Fat</td>
-                    <td>0.5g</td>
-                  </tr>
-                  <tr>
-                    <td data-en="Fiber" data-ar="الألياف">Fiber</td>
-                    <td>1g</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            
-            <div class="product-actions">
-              <div class="quantity-selector">
-                <button class="quantity-btn minus">-</button>
-                <input type="number" class="quantity-input" value="1" min="1" max="10" />
-                <button class="quantity-btn plus">+</button>
-              </div>
-              <a href="#" target="_blank" class="order-btn" id="modalOrderBtn" data-en="Order Now" data-ar="اطلب الآن">Order Now</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- ============= ABOUT SECTION ============= -->
-    <section id="about" class="premium-about-section load-animate">
-      <div class="section-header">
-        <h2 data-en="The Mashhor Story" data-ar="قصة مشهور">The Mashhor Story</h2>
-        <p class="section-subtitle" data-en="Cultivating excellence in every grain" data-ar="نزرع التميز في كل حبة">Cultivating excellence in every grain</p>
-      </div>
-      <div class="about-container">
-        <div class="about-content">
-          <div class="about-text">
-            <div class="centered-header">
-              <h3 data-en="Premium Rice Specialists" data-ar="متخصصون في الأرز الممتاز">Premium Rice Specialists</h3>
-            </div>
-            
-            <div class="about-paragraph">
-              <p data-en="<strong>Mashhor Foodstuff Trading LLC</strong> is Oman's trusted source for premium Basmati and Non-Basmati rice, serving both wholesale and retail customers with exceptional quality products." 
-                 data-ar="<strong>شركة مشهور للأغذية</strong> هي المصدر الموثوق للأرز البسمتي وغير البسمتي الممتاز في عمان، حيث تخدم كل من العملاء بالجملة والتجزئة بمنتجات عالية الجودة.">
-                <strong>Mashhor Foodstuff Trading LLC</strong> is Oman's trusted source for premium Basmati and Non-Basmati rice, serving both wholesale and retail customers with exceptional quality products.
-              </p>
-            </div>
-            
-            <div class="about-paragraph">
-              <p data-en="We meticulously source our rice from <strong>Mahavir Rice Mills</strong>, an ISO-certified producer with decades of rice cultivation expertise, ensuring authentic flavor and perfect grain quality." 
-                 data-ar="نحن نختار أرزنا بعناية من <strong>مطاحن مهافير للأرز</strong>، منتج معتمد حسب المواصفة ISO مع عقود من الخبرة في زراعة الأرز، مما يضمن نكهة أصيلة وجودة حبة مثالية.">
-                We meticulously source our rice from <strong>Mahavir Rice Mills</strong>, an ISO-certified producer with decades of rice cultivation expertise, ensuring authentic flavor and perfect grain quality.
-              </p>
-            </div>
-            
-            <div class="about-cta">
-              <a href="https://docs.google.com/presentation/d/10_T6i2drSTwNAXouCuW5IITRQGPRRK2C/edit?usp=drivesdk" target="_blank" class="btn btn-outline" data-en="Download Full Profile" data-ar="تحميل الملف التعريفي الكامل">
-                <i class="fas fa-file-pdf"></i>
-                <span>Download Full Profile</span>
-              </a>
-              <a href="#contact-us" class="btn btn-accent" data-en="Get In Touch" data-ar="تواصل معنا">
-                <i class="fas fa-phone-alt"></i>
-                <span>Get In Touch</span>
-              </a>
-            </div>
-          </div>
-          
-          <div class="about-image">
-            <img src="https://i.ibb.co/G42RrRnH/Logo.png" alt="Mashhor Premium Rice" loading="lazy" width="400" height="300" />
-          </div>
-        </div>
-        
-        <div class="mission-cards">
-          <div class="mission-card">
-            <h3 data-en="Our Mission" data-ar="مهمتنا">Our Mission</h3>
-            <p data-en="To deliver the finest quality rice with uncompromising standards, ensuring every grain meets our promise of excellence." data-ar="تقديم أجود أنواع الأرز بمعايير لا هوادة فيها، مع ضمان أن كل حبة تفي بوعدنا بالتميز.">
-              To deliver the finest quality rice with uncompromising standards, ensuring every grain meets our promise of excellence.
-            </p>
-          </div>
-          
-          <div class="mission-card">
-            <h3 data-en="Our Vision" data-ar="رؤيتنا">Our Vision</h3>
-            <p data-en="To redefine Oman's rice market through superior products, innovative solutions, and unmatched customer experiences." data-ar="إعادة تعريف سوق الأرز العماني من خلال منتجات فائقة وحلول مبتكرة وتجارب عملاء لا مثيل لها.">
-              To redefine Oman's rice market through superior products, innovative solutions, and unmatched customer experiences.
-            </p>
-          </div>
-          
-          <div class="mission-card">
-            <h3 data-en="Our Promise" data-ar="وعدنا">Our Promise</h3>
-            <p data-en="Consistent quality, reliable delivery, and personalized service - every time, without exception." data-ar="جودة ثابتة، توصيل موثوق، وخدمة شخصية - في كل مرة، دون استثناء.">
-              Consistent quality, reliable delivery, and personalized service - every time, without exception.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-    
-    <!-- ============= BANNER SLIDER ============= -->
-    <section class="banner-slider load-animate">
-      <div class="slider-container">
-        <div class="slider">
-          <div class="slide">
-            <img src="https://i.ibb.co/Kcbf6t1Z/IMG-20250819-152618.webp" alt="Premium Rice Selection" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/Kcbf6t1Z/IMG-20250819-152618.webp" width="1200" height="600" onerror="this.src='https://via.placeholder.com/1200x600/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
-          </div>
-          <div class="slide">
-            <img src="https://i.ibb.co/3mnkdbpd/IMG-20250819-152313.webp" alt="High-Quality Rice Grains" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/3mnkdbpd/IMG-20250819-152313.webp" width="1200" height="600" onerror="this.src='https://via.placeholder.com/1200x600/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
-          </div>
-          <div class="slide">
-            <img src="https://i.ibb.co/7Jfr3C94/image.webp" alt="Mashhor Rice Packaging" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/7Jfr3C94/image.webp" width="1200" height="600" onerror="this.src='https://via.placeholder.com/1200x600/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
-          </div>
-          <div class="slide">
-            <img src="https://i.ibb.co/Q3M9cXBD/delicious-popular-dishes-traditional-oriental-thumbnail-276127.webp" alt="Delicious Rice Dishes" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/Q3M9cXBD/delicious-popular-dishes-traditional-oriental-thumbnail-276127.webp" width="1200" height="600" onerror="this.src='https://via.placeholder.com/1200x600/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
-          </div>
-        </div>
-        <button class="slider-btn prev-btn" aria-label="Previous slide">❮</button>
-        <button class="slider-btn next-btn" aria-label="Next slide">❯</button>
-        <div class="slider-dots"></div>
-      </div>
-      <div class="slider-promo-text">
-        <p data-en="Premium Quality Rice - Perfect for Every Occasion" data-ar="أرز عالي الجودة - مثالي لكل مناسبة">Premium Quality Rice - Perfect for Every Occasion</p>
-      </div>
-    </section>
-    
     <!-- ============= WHY US SECTION ============= -->
     <section id="why-us" class="enhanced-section load-animate">
       <div class="section-header">
@@ -3377,53 +3062,8 @@
       </div>
     </section>
     
-    <!-- ============= WHO WE SERVE SECTION ============= -->
-    <section id="who-we-serve" class="enhanced-section load-animate">
-      <div class="section-header">
-        <h2 data-en="Our Valued Partners" data-ar="شركاؤنا الكرام">Our Valued Partners</h2>
-        <p class="section-subtitle" style="white-space: normal;" data-en=' Serving Omans Food Industry with Premium Rice Solutions' data-ar='نخدم صناعة الأغذية في عمان بحلول الأرز الممتازة'> Serving Omans Food Industry with Premium Rice Solutions</p>
-      </div>
-      <div class="client-categories">
-        <div class="category-card slide-up">
-          <div class="category-icon">
-            <i class="fas fa-store"></i>
-          </div>
-          <h3 data-en="Retail Chains" data-ar="سلاسل التجزئة">Retail Chains</h3>
-          <ul style="list-style-type: none; padding-left: 0;">
-            <li data-en="Supermarkets" data-ar="السوبرماركت">Supermarkets</li>
-            <li data-en="Hypermarkets" data-ar="هايبرماركت">Hypermarkets</li>
-            <li data-en="Specialty Stores" data-ar="متاجر متخصصة">Specialty Stores</li>
-          </ul>
-        </div>
-        
-        <div class="category-card slide-up">
-          <div class="category-icon">
-            <i class="fas fa-utensils"></i>
-          </div>
-          <h3 data-en="Food Service" data-ar="خدمات الطعام">Food Service</h3>
-          <ul style="list-style-type: none; padding-left: 0;">
-            <li data-en="Hotels & Resorts" data-ar="الفنادق والمنتجعات">Hotels & Resorts</li>
-            <li data-en="Restaurants" data-ar="المطاعم">Restaurants</li>
-            <li data-en="Catering Services" data-ar="خدمات التموين">Catering Services</li>
-          </ul>
-        </div>
-        
-        <div class="category-card slide-up">
-          <div class="category-icon">
-            <i class="fas fa-boxes"></i>
-          </div>
-          <h3 data-en="Wholesale" data-ar="الجملة">Wholesale</h3>
-          <ul style="list-style-type: none; padding-left: 0;">
-            <li data-en="Distributors" data-ar="الموزعون">Distributors</li>
-            <li data-en="Bulk Buyers" data-ar="المشترون بالجملة">Bulk Buyers</li>
-            <li data-en="Food Processors" data-ar="معالجات الأغذية">Food Processors</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-    
     <!-- ============= TESTIMONIALS SECTION ============= -->
-    <section id="clients-say" class="enhanced-section load-animate" style="background-color: #f9f9f9;">
+    <section id="clients-say" class="enhanced-section load-animate">
       <div class="section-header">
         <h2 data-en="What Our Clients Say" data-ar="ما يقوله عملاؤنا">What Our Clients Say</h2>
         <p class="section-subtitle" data-en='Trusted by businesses across Oman ' data-ar='موثوق به من قبل الشركات في جميع أنحاء عمان'>Trusted by businesses across Oman</p>
@@ -3498,6 +3138,254 @@
       </div>
     </section>
     
+    <!-- ============= CERTIFICATIONS SECTION ============= -->
+    <section id="certifications" class="certifications-section load-animate">
+      <div class="section-header">
+        <h2 data-en="Internationally Recognized Certifications" data-ar="شهادات معتمدة عالمياً">Internationally Recognized Certifications</h2>
+        <p class="section-subtitle" data-en="Our commitment to quality is verified by independent international organizations" data-ar="التزامنا بالجودة مثبت من قبل منظمات دولية مستقلة">Our commitment to quality is verified by independent international organizations</p>
+      </div>
+      <div class="certifications-grid">
+        <div class="certification-card slide-up">
+          <div class="certification-logo">
+            <img src="https://i.ibb.co/0ywjyLK6/iso22000.webp" alt="ISO 22000 Certification" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/0ywjyLK6/iso22000.webp" width="120" height="120" onerror="this.src='https://via.placeholder.com/120x120?text=ISO+22000'; this.alt='ISO 22000 Certification'" />
+          </div>
+          <div class="certification-details">
+            <h3 data-en="ISO 22000:2018" data-ar="الأيزو 22000:2018">ISO 22000:2018</h3>
+            <p data-en="Food Safety Management System" data-ar="نظام إدارة سلامة الغذاء">Food Safety Management System</p>
+          </div>
+        </div>
+        
+        <div class="certification-card slide-up">
+          <div class="certification-logo">
+            <img src="https://i.ibb.co/cKYgdpCB/iso2015.webp" alt="ISO 9001 Certification" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/cKYgdpCB/iso2015.webp" width="120" height="120" onerror="this.src='https://via.placeholder.com/120x120?text=ISO+9001'; this.alt='ISO 9001 Certification'" />
+          </div>
+          <div class="certification-details">
+            <h3 data-en="ISO 9001:2015" data-ar="الأيزو 9001:2015">ISO 9001:2015</h3>
+            <p data-en="Quality Management System" data-ar="نظام إدارة الجودة">Quality Management System</p>
+          </div>
+        </div>
+        
+        <div class="certification-card slide-up">
+          <div class="certification-logo">
+            <img src="https://i.ibb.co/p6fsX5XN/haccp.webp" alt="HACCP Certification" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/p6fsX5XN/haccp.webp" width="120" height="120" onerror="this.src='https://via.placeholder.com/120x120?text=HACCP'; this.alt='HACCP Certification'" />
+          </div>
+          <div class="certification-details">
+            <h3>HACCP</h3>
+            <p data-en="Hazard Analysis Critical Control Point" data-ar="نظام تحليل المخاطر ونقاط التحكم الحرجة">Hazard Analysis Critical Control Point</p>
+          </div>
+        </div>
+        
+        <div class="certification-card slide-up">
+          <div class="certification-logo">
+            <img src="https://i.ibb.co/yckTC2g8/gmp.webp" alt="GMP Certification" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/yckTC2g8/gmp.webp" width="120" height="120" onerror="this.src='https://via.placeholder.com/120x120?text=GMP'; this.alt='GMP Certification'" />
+          </div>
+          <div class="certification-details">
+            <h3>GMP</h3>
+            <p data-en="Good Manufacturing Practice" data-ar="ممارسات التصنيع الجيدة">Good Manufacturing Practice</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- ============= WHO WE SERVE SECTION ============= -->
+    <section id="who-we-serve" class="enhanced-section load-animate">
+      <div class="section-header">
+        <h2 data-en="Our Valued Partners" data-ar="شركاؤنا الكرام">Our Valued Partners</h2>
+        <p class="section-subtitle" style="white-space: normal;" data-en=' Serving Omans Food Industry with Premium Rice Solutions' data-ar='نخدم صناعة الأغذية في عمان بحلول الأرز الممتازة'> Serving Omans Food Industry with Premium Rice Solutions</p>
+      </div>
+      <div class="client-categories">
+        <div class="category-card slide-up">
+          <div class="category-icon">
+            <i class="fas fa-store"></i>
+          </div>
+          <h3 data-en="Retail Chains" data-ar="سلاسل التجزئة">Retail Chains</h3>
+          <ul style="list-style-type: none; padding-left: 0;">
+            <li data-en="Supermarkets" data-ar="السوبرماركت">Supermarkets</li>
+            <li data-en="Hypermarkets" data-ar="هايبرماركت">Hypermarkets</li>
+            <li data-en="Specialty Stores" data-ar="متاجر متخصصة">Specialty Stores</li>
+          </ul>
+        </div>
+        
+        <div class="category-card slide-up">
+          <div class="category-icon">
+            <i class="fas fa-utensils"></i>
+          </div>
+          <h3 data-en="Food Service" data-ar="خدمات الطعام">Food Service</h3>
+          <ul style="list-style-type: none; padding-left: 0;">
+            <li data-en="Hotels & Resorts" data-ar="الفنادق والمنتجعات">Hotels & Resorts</li>
+            <li data-en="Restaurants" data-ar="المطاعم">Restaurants</li>
+            <li data-en="Catering Services" data-ar="خدمات التموين">Catering Services</li>
+          </ul>
+        </div>
+        
+        <div class="category-card slide-up">
+          <div class="category-icon">
+            <i class="fas fa-boxes"></i>
+          </div>
+          <h3 data-en="Wholesale" data-ar="الجملة">Wholesale</h3>
+          <ul style="list-style-type: none; padding-left: 0;">
+            <li data-en="Distributors" data-ar="الموزعون">Distributors</li>
+            <li data-en="Bulk Buyers" data-ar="المشترون بالجملة">Bulk Buyers</li>
+            <li data-en="Food Processors" data-ar="معالجات الأغذية">Food Processors</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    
+    <!-- ============= BANNER SLIDER ============= -->
+    <section class="banner-slider load-animate">
+      <div class="slider-container">
+        <div class="slider">
+          <div class="slide">
+            <img src="https://i.ibb.co/Kcbf6t1Z/IMG-20250819-152618.webp" alt="Premium Rice Selection" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/Kcbf6t1Z/IMG-20250819-152618.webp" width="1200" height="600" onerror="this.src='https://via.placeholder.com/1200x600/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
+          </div>
+          <div class="slide">
+            <img src="https://i.ibb.co/3mnkdbpd/IMG-20250819-152313.webp" alt="High-Quality Rice Grains" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/3mnkdbpd/IMG-20250819-152313.webp" width="1200" height="600" onerror="this.src='https://via.placeholder.com/1200x600/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
+          </div>
+          <div class="slide">
+            <img src="https://i.ibb.co/7Jfr3C94/image.webp" alt="Mashhor Rice Packaging" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/7Jfr3C94/image.webp" width="1200" height="600" onerror="this.src='https://via.placeholder.com/1200x600/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
+          </div>
+          <div class="slide">
+            <img src="https://i.ibb.co/Q3M9cXBD/delicious-popular-dishes-traditional-oriental-thumbnail-276127.webp" alt="Delicious Rice Dishes" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/Q3M9cXBD/delicious-popular-dishes-traditional-oriental-thumbnail-276127.webp" width="1200" height="600" onerror="this.src='https://via.placeholder.com/1200x600/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
+          </div>
+        </div>
+        <button class="slider-btn prev-btn" aria-label="Previous slide">❮</button>
+        <button class="slider-btn next-btn" aria-label="Next slide">❯</button>
+        <div class="slider-dots"></div>
+      </div>
+      <div class="slider-promo-text">
+        <p data-en="Premium Quality Rice - Perfect for Every Occasion" data-ar="أرز عالي الجودة - مثالي لكل مناسبة">Premium Quality Rice - Perfect for Every Occasion</p>
+      </div>
+    </section>
+    
+    <!-- ============= ABOUT SECTION ============= -->
+    <section id="about" class="premium-about-section load-animate">
+      <div class="section-header">
+        <h2 data-en="The Mashhor Story" data-ar="قصة مشهور">The Mashhor Story</h2>
+        <p class="section-subtitle" data-en="Cultivating excellence in every grain" data-ar="نزرع التميز في كل حبة">Cultivating excellence in every grain</p>
+      </div>
+      <div class="about-container">
+        <div class="about-content">
+          <div class="about-text">
+            <div class="centered-header">
+              <h3 data-en="Premium Rice Specialists" data-ar="متخصصون في الأرز الممتاز">Premium Rice Specialists</h3>
+            </div>
+            
+            <div class="about-paragraph">
+              <p data-en="<strong>Mashhor Foodstuff Trading LLC</strong> is Oman's trusted source for premium Basmati and Non-Basmati rice, serving both wholesale and retail customers with exceptional quality products." 
+                 data-ar="<strong>شركة مشهور للأغذية</strong> هي المصدر الموثوق للأرز البسمتي وغير البسمتي الممتاز في عمان، حيث تخدم كل من العملاء بالجملة والتجزئة بمنتجات عالية الجودة.">
+                <strong>Mashhor Foodstuff Trading LLC</strong> is Oman's trusted source for premium Basmati and Non-Basmati rice, serving both wholesale and retail customers with exceptional quality products.
+              </p>
+            </div>
+            
+            <div class="about-paragraph">
+              <p data-en="We meticulously source our rice from <strong>Mahavir Rice Mills</strong>, an ISO-certified producer with decades of rice cultivation expertise, ensuring authentic flavor and perfect grain quality." 
+                 data-ar="نحن نختار أرزنا بعناية من <strong>مطاحن مهافير للأرز</strong>، منتج معتمد حسب المواصفة ISO مع عقود من الخبرة في زراعة الأرز، مما يضمن نكهة أصالة وجودة حبة مثالية.">
+                We meticulously source our rice from <strong>Mahavir Rice Mills</strong>, an ISO-certified producer with decades of rice cultivation expertise, ensuring authentic flavor and perfect grain quality.
+              </p>
+            </div>
+            
+            <div class="about-cta">
+              <a href="https://docs.google.com/presentation/d/10_T6i2drSTwNAXouCuW5IITRQGPRRK2C/edit?usp=drivesdk" target="_blank" class="btn btn-outline" data-en="Download Full Profile" data-ar="تحميل الملف التعريفي الكامل">
+                <i class="fas fa-file-pdf"></i>
+                <span>Download Full Profile</span>
+              </a>
+              <a href="#contact-us" class="btn btn-accent" data-en="Get In Touch" data-ar="تواصل معنا">
+                <i class="fas fa-phone-alt"></i>
+                <span>Get In Touch</span>
+              </a>
+            </div>
+          </div>
+          
+          <div class="about-image">
+            <img src="https://i.ibb.co/G42RrRnH/Logo.png" alt="Mashhor Premium Rice" loading="lazy" width="400" height="300" />
+          </div>
+        </div>
+        
+        <div class="mission-cards">
+          <div class="mission-card">
+            <h3 data-en="Our Mission" data-ar="مهمتنا">Our Mission</h3>
+            <p data-en="To deliver the finest quality rice with uncompromising standards, ensuring every grain meets our promise of excellence." data-ar="تقديم أجود أنواع الأرز بمعايير لا هوادة فيها، مع ضمان أن كل حبة تفي بوعدنا بالتميز.">
+              To deliver the finest quality rice with uncompromising standards, ensuring every grain meets our promise of excellence.
+            </p>
+          </div>
+          
+          <div class="mission-card">
+            <h3 data-en="Our Vision" data-ar="رؤيتنا">Our Vision</h3>
+            <p data-en="To redefine Oman's rice market through superior products, innovative solutions, and unmatched customer experiences." data-ar="إعادة تعريف سوق الأرز العماني من خلال منتجات فائقة وحلول مبتكرة وتجارب عملاء لا مثيل لها.">
+              To redefine Oman's rice market through superior products, innovative solutions, and unmatched customer experiences.
+            </p>
+          </div>
+          
+          <div class="mission-card">
+            <h3 data-en="Our Promise" data-ar="وعدنا">Our Promise</h3>
+            <p data-en="Consistent quality, reliable delivery, and personalized service - every time, without exception." data-ar="جودة ثابتة، توصيل موثوق، وخدمة شخصية - في كل مرة، دون استثناء.">
+              Consistent quality, reliable delivery, and personalized service - every time, without exception.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- ============= PRODUCT MODAL ============= -->
+    <div class="modal" id="quickViewModal">
+      <div class="modal-content">
+        <button class="close-modal" aria-label="Close modal">&times;</button>
+        <div class="modal-body">
+          <div class="modal-image">
+            <img id="modalProductImage" src="" alt="" loading="lazy" class="lazy-load" width="300" height="300" />
+          </div>
+          <div class="modal-info">
+            <h3 id="modalProductTitle"></h3>
+            <p id="modalProductDescription"></p>
+            
+            <div class="nutrition-info">
+              <h4 data-en="Nutritional Information" data-ar="المعلومات الغذائية">Nutritional Information</h4>
+              <table class="nutrition-table">
+                <thead>
+                  <tr>
+                    <th data-en="Nutrient" data-ar="المغذيات">Nutrient</th>
+                    <th data-en="Per 100g" data-ar="لكل 100 جرام">Per 100g</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td data-en="Energy" data-ar="الطاقة">Energy</td>
+                    <td>350 kcal</td>
+                  </tr>
+                  <tr>
+                    <td data-en="Carbohydrates" data-ar="الكربوهيدرات">Carbohydrates</td>
+                    <td>77g</td>
+                  </tr>
+                  <tr>
+                    <td data-en="Protein" data-ar="البروتين">Protein</td>
+                    <td>7g</td>
+                  </tr>
+                  <tr>
+                    <td data-en="Fat" data-ar="الدهون">Fat</td>
+                    <td>0.5g</td>
+                  </tr>
+                  <tr>
+                    <td data-en="Fiber" data-ar="الألياف">Fiber</td>
+                    <td>1g</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="product-actions">
+              <div class="quantity-selector">
+                <button class="quantity-btn minus">-</button>
+                <input type="number" class="quantity-input" value="1" min="1" max="10" />
+                <button class="quantity-btn plus">+</button>
+              </div>
+              <a href="#" target="_blank" class="order-btn" id="modalOrderBtn" data-en="Order Now" data-ar="اطلب الآن">Order Now</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <!-- ============= CONTACT SECTION ============= -->
     <section id="contact-us" class="contact-section load-animate">
       <div class="contact-overlay"></div>
@@ -3516,7 +3404,7 @@
               </div>
               <div class="method-info">
                 <h3 data-en="WhatsApp" data-ar="واتساب">WhatsApp</h3>
-                <a href="https://wa.me/96895224124" target="_blank" class="method-link contact-number">+968 95224124</a>
+                <a href="https://wa.me/96895224124" target="_blank" class="method-link contact-number rtl-numbers">+968 95224124</a>
                 <p class="method-description" data-en="Fast response within minutes" data-ar="رد سريع خلال دقائق">Fast response within minutes</p>
               </div>
             </div>
@@ -3527,7 +3415,7 @@
               </div>
               <div class="method-info">
                 <h3 data-en="Call Us" data-ar="اتصل بنا">Call Us</h3>
-                <a href="tel:+96822716859" class="method-link contact-number">+968 22716859</a>
+                <a href="tel:+96822716859" class="method-link contact-number rtl-numbers">+968 22716859</a>
                 <p class="method-description" data-en="Sat-Thu: 8AM - 5PM" data-ar="السبت-الخميس: 8 صباحاً - 5 مساءً">Sat-Thu: 8AM - 5PM</p>
               </div>
             </div>
@@ -3630,7 +3518,7 @@
           </li>
           <li>
             <i class="fas fa-phone-alt"></i>
-            <a href="tel:+96822716859" class="contact-number">+968 22716859</a>
+            <a href="tel:+96822716859" class="contact-number rtl-numbers">+968 22716859</a>
           </li>
           <li>
             <i class="fas fa-envelope"></i>
@@ -3650,11 +3538,11 @@
   <!-- ============= JAVASCRIPT ============= -->
   <script>
     // ============= GLOBAL VARIABLES =============
-    let currentLang = window.initialLang;
-    
+    let currentLang = window.initialLang || 'en';
+
     // Shopping Cart
     let cart = [];
-    
+
     // Product Data
     const productsData = {
       1: {
@@ -3748,23 +3636,26 @@
         }
       }
     };
-    
+
     // ============= UTILITY FUNCTIONS =============
     // Generate WhatsApp link with proper parameters
     function generateWhatsAppLink(productName, quantity) {
-      const message = currentLang === 'ar' ? 
+      const lang = currentLang || 'en';
+      const message = lang === 'ar' ? 
         `أنا مهتم بـ ${productName} - الكمية: ${quantity}` : 
         `I'm interested in ${productName} - Quantity: ${quantity}`;
       return `https://wa.me/96895224124?text=${encodeURIComponent(message)}`;
     }
-    
+
     // Validate email format
     function isValidEmail(email) {
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
-    
+
     // Smooth scroll function with fallback for older browsers
     function smoothScroll(target) {
+      if (!target) return;
+      
       if ('scrollBehavior' in document.documentElement.style) {
         window.scrollTo({
           top: target.offsetTop - 80,
@@ -3775,13 +3666,16 @@
         window.scrollTo(0, target.offsetTop - 80);
       }
     }
-    
+
     // ============= LANGUAGE HANDLING =============
     function setLanguage(lang) {
+      if (!lang) lang = 'en';
+      
       // Update language toggle button text
       const langToggle = document.getElementById('languageToggle');
       if (langToggle) {
-        langToggle.querySelector('.lang-text').textContent = lang === 'ar' ? 'English' : 'عربي';
+        const langText = langToggle.querySelector('.lang-text');
+        if (langText) langText.textContent = lang === 'ar' ? 'English' : 'عربي';
       }
       
       // Update all translatable elements
@@ -3791,8 +3685,13 @@
           if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
             element.placeholder = text;
           } else {
+            // Check if text contains HTML
             const hasHTML = /<[a-z][\s\S]*>/i.test(text);
-            element.innerHTML = hasHTML ? text : document.createTextNode(text).textContent;
+            if (hasHTML) {
+              element.innerHTML = text;
+            } else {
+              element.textContent = text;
+            }
           }
         }
       });
@@ -3832,10 +3731,12 @@
       document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
       document.documentElement.lang = lang;
     }
-    
+
     // ============= SHOPPING CART FUNCTIONS =============
     // Add item to cart
     function addToCart(productId, quantity) {
+      if (!productId || !quantity) return;
+      
       const product = productsData[productId];
       if (!product) return;
       
@@ -3861,15 +3762,19 @@
       // Show notification
       showNotification(currentLang === 'ar' ? 'تمت الإضافة إلى سلة التسوق' : 'Added to cart');
     }
-    
+
     // Remove item from cart
     function removeFromCart(productId) {
+      if (!productId) return;
+      
       cart = cart.filter(item => item.id !== productId);
       updateCartUI();
     }
-    
+
     // Update item quantity in cart
     function updateCartItemQuantity(productId, quantity) {
+      if (!productId || quantity === undefined) return;
+      
       const item = cart.find(item => item.id === productId);
       if (item) {
         if (quantity <= 0) {
@@ -3880,67 +3785,67 @@
         }
       }
     }
-    
+
     // Update cart UI
     function updateCartUI() {
       const cartCount = document.getElementById('cartCount');
       const cartItems = document.getElementById('cartItems');
-      const cartEmpty = document.getElementById('cartEmpty');
       const cartFooter = document.getElementById('cartFooter');
       const cartTotalItems = document.getElementById('cartTotalItems');
       
-      // التحقق من وجود العناصر قبل الوصول إليها
-      if (!cartCount || !cartItems || !cartEmpty || !cartFooter || !cartTotalItems) {
-        console.error('One or more cart elements not found');
-        return;
-      }
-      
       // Update cart count
       const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
-      cartCount.textContent = totalItems;
+      if (cartCount) cartCount.textContent = totalItems;
       
       // Update cart items display
       if (cart.length === 0) {
-        cartEmpty.style.display = 'block';
-        cartFooter.style.display = 'none';
-        cartItems.innerHTML = '<div class="cart-empty" id="cartEmpty"><i class="fas fa-shopping-cart"></i><p data-en="Your cart is empty" data-ar="سلة التسوق فارغة">Your cart is empty</p></div>';
-      } else {
-        cartEmpty.style.display = 'none';
-        cartFooter.style.display = 'block';
-        
-        // Clear cart items
-        cartItems.innerHTML = '';
-        
-        // Add each item to cart
-        cart.forEach(item => {
-          const cartItem = document.createElement('div');
-          cartItem.className = 'cart-item';
-          cartItem.innerHTML = `
-            <img src="${item.image}" alt="${item.title}" class="cart-item-image">
-            <div class="cart-item-details">
-              <div class="cart-item-title">${item.title}</div>
-              <div class="cart-item-quantity">
-                <button class="quantity-btn minus" onclick="updateCartItemQuantity(${item.id}, ${item.quantity - 1})">-</button>
-                <input type="number" value="${item.quantity}" min="1" onchange="updateCartItemQuantity(${item.id}, parseInt(this.value))">
-                <button class="quantity-btn plus" onclick="updateCartItemQuantity(${item.id}, ${item.quantity + 1})">+</button>
-              </div>
-              <button class="cart-item-remove" onclick="removeFromCart(${item.id})">${currentLang === 'ar' ? 'إزالة' : 'Remove'}</button>
+        if (cartItems) {
+          cartItems.innerHTML = `
+            <div class="cart-empty">
+              <i class="fas fa-shopping-cart"></i>
+              <p data-en="Your cart is empty" data-ar="سلة التسوق فارغة">Your cart is empty</p>
             </div>
           `;
-          cartItems.appendChild(cartItem);
-        });
+        }
+        if (cartFooter) cartFooter.style.display = 'none';
+      } else {
+        if (cartItems) {
+          // Clear cart items
+          cartItems.innerHTML = '';
+          
+          // Add each item to cart
+          cart.forEach(item => {
+            const cartItem = document.createElement('div');
+            cartItem.className = 'cart-item';
+            cartItem.innerHTML = `
+              <img src="${item.image}" alt="${item.title}" class="cart-item-image">
+              <div class="cart-item-details">
+                <div class="cart-item-title">${item.title}</div>
+                <div class="cart-item-quantity">
+                  <button class="quantity-btn minus" onclick="updateCartItemQuantity(${item.id}, ${item.quantity - 1})">-</button>
+                  <input type="number" value="${item.quantity}" min="1" onchange="updateCartItemQuantity(${item.id}, parseInt(this.value))">
+                  <button class="quantity-btn plus" onclick="updateCartItemQuantity(${item.id}, ${item.quantity + 1})">+</button>
+                </div>
+                <button class="cart-item-remove" onclick="removeFromCart(${item.id})">${currentLang === 'ar' ? 'إزالة' : 'Remove'}</button>
+              </div>
+            `;
+            cartItems.appendChild(cartItem);
+          });
+        }
+        
+        if (cartFooter) cartFooter.style.display = 'block';
         
         // Update total items
-        cartTotalItems.textContent = totalItems;
+        if (cartTotalItems) cartTotalItems.textContent = totalItems;
       }
     }
-    
+
     // Show notification
     function showNotification(message) {
-      // التحقق من وجود الإشعار بالفعل
+      // Remove existing notification if any
       const existingNotification = document.querySelector('.notification');
       if (existingNotification) {
-        document.body.removeChild(existingNotification);
+        existingNotification.remove();
       }
       
       const notification = document.createElement('div');
@@ -3966,18 +3871,19 @@
       setTimeout(() => {
         notification.style.animation = 'fadeOut 0.3s ease';
         setTimeout(() => {
-          if (document.body.contains(notification)) {
-            document.body.removeChild(notification);
+          if (notification.parentNode) {
+            notification.remove();
           }
         }, 300);
       }, 3000);
     }
-    
+
     // Generate cart checkout message
     function generateCartCheckoutMessage() {
       if (cart.length === 0) return '';
       
-      let message = currentLang === 'ar' ? 
+      const lang = currentLang || 'en';
+      let message = lang === 'ar' ? 
         'مرحباً، أرغب في طلب المنتجات التالية:%0A%0A' : 
         'Hello, I would like to order the following products:%0A%0A';
       
@@ -3986,79 +3892,88 @@
       });
       
       message += '%0A%0A';
-      message += currentLang === 'ar' ? 
+      message += lang === 'ar' ? 
         'يرجى تأكيد الطلب وتوفير تفاصيل الدفع والشحن.' : 
         'Please confirm the order and provide payment and shipping details.';
       
       return message;
     }
-    
+
     // ============= DOCUMENT READY =============
     document.addEventListener('DOMContentLoaded', function() {
       // Set initial language
       setLanguage(currentLang);
       
       // Set current year in footer
-      document.getElementById('currentYear').textContent = new Date().getFullYear();
+      const currentYearElement = document.getElementById('currentYear');
+      if (currentYearElement) currentYearElement.textContent = new Date().getFullYear();
       
       // Initialize cart UI
       updateCartUI();
       
       // ============= SCROLL EVENTS =============
       // Progress bar
-      window.onscroll = function() {
+      window.addEventListener('scroll', function() {
         const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
         const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
         const scrolled = (winScroll / height) * 100;
-        document.getElementById('progressBar').style.width = scrolled + '%';
-      };
+        const progressBar = document.getElementById('progressBar');
+        if (progressBar) progressBar.style.width = scrolled + '%';
+      });
       
       // Header scroll effect
       window.addEventListener('scroll', function() {
         const header = document.querySelector('.header');
-        if (window.scrollY > 50) {
-          header.classList.add('scrolled');
-        } else {
-          header.classList.remove('scrolled');
+        if (header) {
+          if (window.scrollY > 50) {
+            header.classList.add('scrolled');
+          } else {
+            header.classList.remove('scrolled');
+          }
         }
       });
       
       // ============= MOBILE MENU =============
       const hamburger = document.querySelector('.hamburger');
       const navMenu = document.querySelector('.nav-menu');
-      const body = document.querySelector('body');
       
-      hamburger.addEventListener('click', function(e) {
-        e.stopPropagation();
-        this.classList.toggle('active');
-        navMenu.classList.toggle('active');
-        
-        if (navMenu.classList.contains('active')) {
-          this.style.opacity = '0';
-          this.style.pointerEvents = 'none';
-        } else {
-          this.style.opacity = '1';
-          this.style.pointerEvents = 'auto';
-        }
-      });
-      
-      body.addEventListener('click', function(e) {
-        if (navMenu.classList.contains('active') && !e.target.closest('.nav-menu')) {
-          hamburger.classList.remove('active');
-          navMenu.classList.remove('active');
-          hamburger.style.opacity = '1';
-          hamburger.style.pointerEvents = 'auto';
-        }
-      });
-      
-      document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', () => {
-          hamburger.classList.remove('active');
-          navMenu.classList.remove('active');
-          hamburger.style.opacity = '1';
-          hamburger.style.pointerEvents = 'auto';
+      if (hamburger && navMenu) {
+        hamburger.addEventListener('click', function(e) {
+          e.stopPropagation();
+          this.classList.toggle('active');
+          navMenu.classList.toggle('active');
+          
+          if (navMenu.classList.contains('active')) {
+            this.style.opacity = '0';
+            this.style.pointerEvents = 'none';
+          } else {
+            this.style.opacity = '1';
+            this.style.pointerEvents = 'auto';
+          }
         });
-      });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', function(e) {
+          if (navMenu.classList.contains('active') && 
+              !e.target.closest('.nav-menu') && 
+              !e.target.closest('.hamburger')) {
+            hamburger.classList.remove('active');
+            navMenu.classList.remove('active');
+            hamburger.style.opacity = '1';
+            hamburger.style.pointerEvents = 'auto';
+          }
+        });
+        
+        // Close menu when clicking on a link
+        document.querySelectorAll('.nav-link').forEach(link => {
+          link.addEventListener('click', () => {
+            hamburger.classList.remove('active');
+            navMenu.classList.remove('active');
+            hamburger.style.opacity = '1';
+            hamburger.style.pointerEvents = 'auto';
+          });
+        });
+      }
       
       // ============= LANGUAGE TOGGLE =============
       const langToggle = document.getElementById('languageToggle');
@@ -4074,40 +3989,48 @@
       const cartSidebar = document.getElementById('cartSidebar');
       const closeCart = document.getElementById('closeCart');
       
-      cartIcon.addEventListener('click', function() {
-        cartSidebar.classList.toggle('active');
-      });
+      if (cartIcon && cartSidebar) {
+        cartIcon.addEventListener('click', function() {
+          cartSidebar.classList.toggle('active');
+        });
+      }
       
-      closeCart.addEventListener('click', function() {
-        cartSidebar.classList.remove('active');
-      });
+      if (closeCart && cartSidebar) {
+        closeCart.addEventListener('click', function() {
+          cartSidebar.classList.remove('active');
+        });
+      }
       
       // Close cart when clicking outside
       document.addEventListener('click', function(e) {
-        if (cartSidebar.classList.contains('active') && 
+        if (cartSidebar && cartSidebar.classList.contains('active') && 
             !e.target.closest('.cart-sidebar') && 
-            !e.target.closest('.cart-icon')) {
+            !e.target.closest('.floating-cart')) {
           cartSidebar.classList.remove('active');
         }
       });
       
       // ============= CART CHECKOUT =============
       const cartCheckout = document.getElementById('cartCheckout');
-      cartCheckout.addEventListener('click', function() {
-        const message = generateCartCheckoutMessage();
-        const whatsappLink = `https://wa.me/96895224124?text=${encodeURIComponent(message)}`;
-        window.open(whatsappLink, '_blank');
-      });
+      if (cartCheckout) {
+        cartCheckout.addEventListener('click', function() {
+          const message = generateCartCheckoutMessage();
+          const whatsappLink = `https://wa.me/96895224124?text=${encodeURIComponent(message)}`;
+          window.open(whatsappLink, '_blank');
+        });
+      }
       
       // ============= LAZY LOADING =============
-      const lazyImages = [].slice.call(document.querySelectorAll('.lazy-load'));
+      const lazyImages = document.querySelectorAll('.lazy-load');
       
       if ('IntersectionObserver' in window) {
         const lazyImageObserver = new IntersectionObserver((entries) => {
           entries.forEach(entry => {
             if (entry.isIntersecting) {
               const lazyImage = entry.target;
-              lazyImage.src = lazyImage.dataset.src;
+              if (lazyImage.dataset.src) {
+                lazyImage.src = lazyImage.dataset.src;
+              }
               lazyImage.classList.add('loaded');
               lazyImageObserver.unobserve(lazyImage);
             }
@@ -4123,23 +4046,29 @@
       } else {
         // Fallback for browsers that don't support IntersectionObserver
         lazyImages.forEach(img => {
-          img.src = img.dataset.src || img.src;
+          if (img.dataset.src) {
+            img.src = img.dataset.src;
+          }
           img.classList.add('loaded');
         });
       }
       
       // ============= COUNTER ANIMATION =============
-      const observer = new IntersectionObserver((entries) => {
+      const observerOptions = {
+        threshold: 0.5
+      };
+      
+      const counterObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             animateCounters();
-            observer.unobserve(entry.target);
+            counterObserver.unobserve(entry.target);
           }
         });
-      }, { threshold: 0.5 });
+      }, observerOptions);
       
       document.querySelectorAll('.stat-item').forEach(item => {
-        observer.observe(item);
+        counterObserver.observe(item);
       });
       
       function animateCounters() {
@@ -4170,61 +4099,64 @@
       const messageForm = document.getElementById('messageForm');
       const formSuccess = document.querySelector('.form-success');
       
-      messageForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Reset form errors
-        document.querySelectorAll('.form-group').forEach(group => {
-          group.classList.remove('error');
+      if (messageForm) {
+        messageForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          // Reset form errors
+          document.querySelectorAll('.form-group').forEach(group => {
+            group.classList.remove('error');
+          });
+          
+          if (formSuccess) formSuccess.style.display = 'none';
+          
+          // Validate form
+          let isValid = true;
+          const name = document.getElementById('name').value.trim();
+          const phone = document.getElementById('phone').value.trim();
+          const message = document.getElementById('message').value.trim();
+          const email = document.getElementById('email').value.trim();
+          
+          if (!name) { 
+            document.getElementById('name').parentElement.classList.add('error'); 
+            isValid = false; 
+          }
+          
+          if (!phone) { 
+            document.getElementById('phone').parentElement.classList.add('error'); 
+            isValid = false; 
+          }
+          
+          if (!message) { 
+            document.getElementById('message').parentElement.classList.add('error'); 
+            isValid = false; 
+          }
+          
+          // Email validation (optional)
+          if (email && !isValidEmail(email)) {
+            document.getElementById('email').parentElement.classList.add('error');
+            isValid = false;
+          }
+          
+          if (!isValid) return;
+          
+          // Create WhatsApp message based on current language
+          const lang = currentLang || 'en';
+          const whatsappMessage =
+            lang === 'ar'
+              ? `رسالة جديدة من موقع ماشهور:%0A%0A*الاسم:* ${encodeURIComponent(name)}%0A*الهاتف:* ${encodeURIComponent(phone)}%0A%0A*الرسالة:*%0A${encodeURIComponent(message)}`
+              : `New message from Mashhor website:%0A%0A*Name:* ${encodeURIComponent(name)}%0A*Phone:* ${encodeURIComponent(phone)}%0A%0A*Message:*%0A${encodeURIComponent(message)}`;
+          
+          // Show success message
+          if (formSuccess) formSuccess.style.display = 'block';
+          this.reset();
+          
+          // Open WhatsApp after a short delay
+          setTimeout(() => {
+            window.open(`https://wa.me/96895224124?text=${whatsappMessage}`, '_blank');
+          }, 1000);
         });
-        
-        formSuccess.style.display = 'none';
-        
-        // Validate form
-        let isValid = true;
-        const name = document.getElementById('name').value.trim();
-        const phone = document.getElementById('phone').value.trim();
-        const message = document.getElementById('message').value.trim();
-        const email = document.getElementById('email').value.trim();
-        
-        if (!name) { 
-          document.getElementById('name').parentElement.classList.add('error'); 
-          isValid = false; 
-        }
-        
-        if (!phone) { 
-          document.getElementById('phone').parentElement.classList.add('error'); 
-          isValid = false; 
-        }
-        
-        if (!message) { 
-          document.getElementById('message').parentElement.classList.add('error'); 
-          isValid = false; 
-        }
-        
-        // Email validation (optional)
-        if (email && !isValidEmail(email)) {
-          document.getElementById('email').parentElement.classList.add('error');
-          isValid = false;
-        }
-        
-        if (!isValid) return;
-        
-        // Create WhatsApp message based on current language
-        const whatsappMessage =
-          currentLang === 'ar'
-            ? `رسالة جديدة من موقع ماشهور:%0A%0A*الاسم:* ${encodeURIComponent(name)}%0A*الهاتف:* ${encodeURIComponent(phone)}%0A%0A*الرسالة:*%0A${encodeURIComponent(message)}`
-            : `New message from Mashhor website:%0A%0A*Name:* ${encodeURIComponent(name)}%0A*Phone:* ${encodeURIComponent(phone)}%0A%0A*Message:*%0A${encodeURIComponent(message)}`;
-        
-        // Show success message
-        formSuccess.style.display = 'block';
-        this.reset();
-        
-        // Open WhatsApp after a short delay
-        setTimeout(() => {
-          window.open(`https://wa.me/96895224124?text=${whatsappMessage}`, '_blank');
-        }, 1000);
-      });
+      }
       
       // ============= SMOOTH SCROLLING =============
       document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -4232,6 +4164,8 @@
           e.preventDefault();
           
           const targetId = this.getAttribute('href');
+          if (targetId === '#') return;
+          
           const target = document.querySelector(targetId);
           
           if (target) {
@@ -4295,6 +4229,8 @@
         if (!btn) return;
         
         const input = btn.parentElement.querySelector('.quantity-input');
+        if (!input) return;
+        
         let value = parseInt(input.value) || 1;
         const min = parseInt(input.min) || 1;
         const max = parseInt(input.max) || 10;
@@ -4344,6 +4280,8 @@
       // Update modal order link when quantity changes
       function updateModalOrderLink() {
         const qtyInput = document.querySelector('#quickViewModal .quantity-input');
+        if (!qtyInput) return;
+        
         const qty = parseInt(qtyInput.value) || 1;
         const href = generateWhatsAppLink(currentProductTitle, qty);
         
@@ -4352,17 +4290,6 @@
           modalOrderBtn.setAttribute('href', href);
         }
       }
-      
-      // Modal order button click handler
-      document.addEventListener('click', function(e) {
-        if (e.target && e.target.id === 'modalOrderBtn') {
-          e.preventDefault();
-          const href = e.target.getAttribute('href');
-          if (href && href.startsWith('https://wa.me/')) {
-            window.open(href, '_blank');
-          }
-        }
-      });
       
       // Quick view button click handlers
       quickViewBtns.forEach(btn => {
@@ -4375,25 +4302,32 @@
           currentProductTitle = product.title[currentLang];
           
           // Update modal content
-          document.getElementById('modalProductTitle').textContent = currentProductTitle;
-          document.getElementById('modalProductDescription').textContent = product.description[currentLang];
-          
+          const modalProductTitle = document.getElementById('modalProductTitle');
+          const modalProductDescription = document.getElementById('modalProductDescription');
           const modalImage = document.getElementById('modalProductImage');
-          modalImage.src = product.image;
-          modalImage.alt = currentProductTitle;
           
-          // Handle image error
-          modalImage.onerror = function() {
-            this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOGY4Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4=';
-          };
+          if (modalProductTitle) modalProductTitle.textContent = currentProductTitle;
+          if (modalProductDescription) modalProductDescription.textContent = product.description[currentLang];
+          
+          if (modalImage) {
+            modalImage.src = product.image;
+            modalImage.alt = currentProductTitle;
+            
+            // Handle image error
+            modalImage.onerror = function() {
+              this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOGY4Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4=';
+            };
+          }
           
           // Reset quantity
           const qtyInput = document.querySelector('#quickViewModal .quantity-input');
-          qtyInput.value = 1;
+          if (qtyInput) qtyInput.value = 1;
           
           // Set modal order button text
           const modalOrderBtn = document.getElementById('modalOrderBtn');
-          modalOrderBtn.textContent = currentLang === 'ar' ? 'اطلب الآن' : 'Order Now';
+          if (modalOrderBtn) {
+            modalOrderBtn.textContent = currentLang === 'ar' ? 'اطلب الآن' : 'Order Now';
+          }
           
           // Set WhatsApp link
           const quantity = parseInt(qtyInput.value) || 1;
@@ -4402,25 +4336,29 @@
           modalOrderBtn.setAttribute('target', '_blank');
           
           // Show modal
-          modal.style.display = 'block';
-          document.body.style.overflow = 'hidden';
+          if (modal) {
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+          }
         });
       });
       
       // Update WhatsApp link when quantity changes in modal
-      document.querySelector('#quickViewModal').addEventListener('click', function(e) {
+      document.querySelector('#quickViewModal')?.addEventListener('click', function(e) {
         if (e.target.closest('.quantity-btn')) updateModalOrderLink();
       });
       
-      document.querySelector('#quickViewModal').addEventListener('input', function(e) {
+      document.querySelector('#quickViewModal')?.addEventListener('input', function(e) {
         if (e.target.classList.contains('quantity-input')) updateModalOrderLink();
       });
       
       // Modal close events
-      closeModal.addEventListener('click', function() {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-      });
+      if (closeModal && modal) {
+        closeModal.addEventListener('click', function() {
+          modal.style.display = 'none';
+          document.body.style.overflow = 'auto';
+        });
+      }
       
       window.addEventListener('click', function(e) {
         if (e.target === modal) {
@@ -4430,7 +4368,7 @@
       });
       
       document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && modal.style.display === 'block') {
+        if (e.key === 'Escape' && modal && modal.style.display === 'block') {
           modal.style.display = 'none';
           document.body.style.overflow = 'auto';
         }
@@ -4461,6 +4399,8 @@
       
       // Create slider dots
       function createDots() {
+        if (!dotsContainer) return;
+        
         dotsContainer.innerHTML = '';
         slides.forEach((_, index) => {
           const dot = document.createElement('span');
@@ -4473,7 +4413,7 @@
       
       // Go to specific slide
       function goToSlide(slideIndex) {
-        if (isTransitioning) return;
+        if (isTransitioning || !slider) return;
         
         isTransitioning = true;
         currentSlide = (slideIndex + slideCount) % slideCount;
@@ -4516,61 +4456,77 @@
       
       // Initialize slider
       function initSlider() {
+        if (!slider || slides.length === 0) return;
+        
         createDots();
         resetInterval();
         
         // Button events
-        nextBtn.addEventListener('click', nextSlide);
-        prevBtn.addEventListener('click', prevSlide);
+        if (nextBtn) nextBtn.addEventListener('click', nextSlide);
+        if (prevBtn) prevBtn.addEventListener('click', prevSlide);
         
         // Pause on hover
         const sliderContainer = document.querySelector('.slider-container');
-        sliderContainer.addEventListener('mouseenter', () => {
-          clearInterval(slideInterval);
-        });
-        
-        sliderContainer.addEventListener('mouseleave', resetInterval);
-        
-        // Touch events
-        let touchStartX = 0;
-        let touchEndX = 0;
-        
-        sliderContainer.addEventListener('touchstart', (e) => {
-          touchStartX = e.changedTouches[0].screenX;
-          clearInterval(slideInterval);
-        }, {passive: true});
-        
-        sliderContainer.addEventListener('touchend', (e) => {
-          touchEndX = e.changedTouches[0].screenX;
-          handleSwipe();
-          resetInterval();
-        }, {passive: true});
-        
-        function handleSwipe() {
-          const threshold = 50;
-          if (touchEndX < touchStartX - threshold) {
-            nextSlide();
-          } else if (touchEndX > touchStartX + threshold) {
-            prevSlide();
+        if (sliderContainer) {
+          sliderContainer.addEventListener('mouseenter', () => {
+            clearInterval(slideInterval);
+          });
+          
+          sliderContainer.addEventListener('mouseleave', resetInterval);
+          
+          // Touch events
+          let touchStartX = 0;
+          let touchEndX = 0;
+          
+          sliderContainer.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            clearInterval(slideInterval);
+          }, {passive: true});
+          
+          sliderContainer.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+            resetInterval();
+          }, {passive: true});
+          
+          function handleSwipe() {
+            const threshold = 50;
+            if (touchEndX < touchStartX - threshold) {
+              nextSlide();
+            } else if (touchEndX > touchStartX + threshold) {
+              prevSlide();
+            }
           }
         }
       }
       
       initSlider();
-    });
-    
-    // ============= IMAGE ERROR HANDLING =============
-    document.addEventListener('DOMContentLoaded', function() {
+      
+      // ============= IMAGE ERROR HANDLING =============
       document.querySelectorAll('img').forEach(img => {
+        // Check if image has already failed
+        if (img.complete && img.naturalHeight === 0) {
+          handleImageError(img);
+          return;
+        }
+        
         img.addEventListener('error', function() {
-          if (!this.dataset.errorHandled) {
-            this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOGY4Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4=';
-            this.alt = 'Image failed to load';
-            this.dataset.errorHandled = 'true';
-          }
+          handleImageError(this);
         });
       });
+      
+      function handleImageError(img) {
+        if (!img.dataset.errorHandled) {
+          img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOGY4Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4=';
+          img.alt = 'Image failed to load';
+          img.dataset.errorHandled = 'true';
+        }
+      }
     });
+
+    // Make cart functions globally available for inline onclick handlers
+    window.updateCartItemQuantity = updateCartItemQuantity;
+    window.removeFromCart = removeFromCart;
   </script>
 </body>
 </html>
