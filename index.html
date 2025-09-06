@@ -379,38 +379,6 @@
       background: rgba(46, 125, 50, 0.2);
     }
     
-    /* ============= QUICK ORDER BUTTON ============= */
-    .quick-order {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      z-index: 998;
-      background: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 50px;
-      padding: 15px 25px;
-      font-weight: 600;
-      font-size: 1rem;
-      box-shadow: 0 4px 15px rgba(46, 125, 50, 0.4);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.3s ease;
-      text-decoration: none;
-    }
-    
-    body[dir="rtl"] .quick-order {
-      left: auto;
-      right: 20px;
-    }
-    
-    .quick-order:hover {
-      background: var(--primary-dark);
-      transform: translateY(-3px);
-      box-shadow: 0 6px 20px rgba(46, 125, 50, 0.5);
-    }
-    
     /* ============= TRUST BADGES ============= */
     .trust-badges {
       display: flex;
@@ -507,6 +475,284 @@
     .btn-order:hover {
       background-color: var(--accent-dark);
       box-shadow: 0 6px 12px rgba(255, 152, 0, 0.4);
+    }
+    
+    /* ============= PRODUCTS SECTION ============= */
+    .products-section {
+      padding: 60px 15px;
+      text-align: center;
+      position: relative;
+      max-width: 100%;
+      overflow-x: hidden;
+      margin-bottom: 40px;
+      background-color: white;
+    }
+    
+    .products-section h2 {
+      font-size: 1.8rem;
+      color: var(--primary);
+      margin-bottom: 20px;
+      font-weight: 700;
+      position: relative;
+      display: inline-block;
+      padding: 0 15px;
+    }
+    
+    .products-section h2::after {
+      content: "";
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 3px;
+    }
+    
+    .products-section p {
+      font-size: 1rem;
+      color: #444;
+      max-width: 100%;
+      margin: 0 auto 20px;
+      line-height: 1.6;
+      padding: 0 15px;
+    }
+    
+    .section-subtitle {
+      display: block !important;
+      opacity: 1 !important;
+      font-style: italic;
+      color: #666;
+      font-size: 1rem;
+      max-width: 700px;
+      margin: 0.8rem auto 0;
+      white-space: normal;
+    }
+    
+    /* Product Categories Tabs */
+    .product-categories {
+      display: flex;
+      justify-content: center;
+      margin: 30px 0;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    
+    .category-tab {
+      padding: 12px 24px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-light);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .category-tab:hover {
+      color: var(--primary);
+    }
+    
+    .category-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--accent);
+    }
+    
+    .category-tab.active::after {
+      content: "";
+      position: absolute;
+      bottom: -3px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--accent);
+    }
+    
+    /* Products Container */
+    .products-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      padding: 0 15px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .product-card {
+      text-align: center;
+      padding: 20px 15px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      background: var(--white);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      height: auto;
+      position: relative;
+    }
+    
+    .product-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+    
+    .product-card img {
+      width: 100%;
+      height: 220px;
+      object-fit: contain;
+      margin-bottom: 15px;
+      background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+      padding: 15px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+    
+    .product-card:hover img {
+      transform: scale(1.05);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+    
+    .product-card img.zoomed {
+      transform: scale(1.8);
+      z-index: 100;
+      position: relative;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+      transition: transform 0.3s ease;
+    }
+    
+    .product-card h3 {
+      font-size: 1rem;
+      color: var(--primary);
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    
+    .product-card ul {
+      text-align: left;
+      padding-left: 15px;
+      font-size: 0.9rem;
+      color: #555;
+      font-style: italic;
+      margin-bottom: 15px;
+      list-style-type: none;
+    }
+    
+    body[dir="rtl"] .product-card ul {
+      text-align: right;
+      padding-left: 0;
+      padding-right: 15px;
+    }
+    
+    .product-card ul li {
+      margin-bottom: 8px;
+      position: relative;
+      padding-left: 20px;
+    }
+    
+    body[dir="rtl"] .product-card ul li {
+      padding-left: 0;
+      padding-right: 20px;
+    }
+    
+    .product-card ul li::before {
+      content: none;
+    }
+    
+    body[dir="rtl"] .product-card ul li::before {
+      left: auto;
+      right: 0;
+    }
+    
+    .product-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: auto;
+    }
+    
+    body[dir="rtl"] .product-actions {
+      text-align: right;
+    }
+    
+    .quantity-selector {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    body[dir="rtl"] .quantity-selector {
+      flex-direction: row-reverse;
+    }
+    
+    .quantity-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .quantity-btn:hover {
+      background: var(--primary-dark);
+    }
+    
+    .quantity-input {
+      width: 50px;
+      text-align: center;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 5px;
+    }
+    
+    .order-btn {
+      display: inline-block;
+      padding: 12px;
+      background-color: var(--primary);
+      color: var(--white);
+      font-size: 0.9rem;
+      border-radius: 50px;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(46, 125, 50, 0.3);
+      text-decoration: none;
+      width: 100%;
+      text-align: center;
+    }
+    
+    .order-btn:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(46, 125, 50, 0.4);
+    }
+    
+    .favorite-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: none;
+      border: none;
+      color: #ccc;
+      font-size: 1.3rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 1;
+    }
+    
+    .favorite-btn.active {
+      color: var(--accent);
     }
     
     /* ============= CERTIFICATIONS SECTION ============= */
@@ -634,17 +880,6 @@
       margin: 0 auto 20px;
       line-height: 1.6;
       padding: 0 15px;
-    }
-    
-    .section-subtitle {
-      display: block !important;
-      opacity: 1 !important;
-      font-style: italic;
-      color: #666;
-      font-size: 1rem;
-      max-width: 700px;
-      margin: 0.8rem auto 0;
-      white-space: normal;
     }
     
     /* ============= BANNER SLIDER ============= */
@@ -908,190 +1143,6 @@
     
     body[dir="rtl"] .category-card ul li {
       text-align: right;
-    }
-    
-    /* ============= PRODUCTS SECTION ============= */
-    .products-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 25px;
-      padding: 0 15px;
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-    
-    .product-card {
-      text-align: center;
-      padding: 20px 15px;
-      border-radius: 10px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-      background: var(--white);
-      transition: all 0.3s ease;
-      display: flex;
-      flex-direction: column;
-      height: auto;
-      position: relative;
-    }
-    
-    .product-card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-    }
-    
-    .product-card img {
-      width: 100%;
-      height: 220px;
-      object-fit: contain;
-      margin-bottom: 15px;
-      background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
-      padding: 15px;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-    }
-    
-    .product-card:hover img {
-      transform: scale(1.05);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-    }
-    
-    .product-card img.zoomed {
-      transform: scale(1.8);
-      z-index: 100;
-      position: relative;
-      box-shadow: 0 12px 24px rgba(0,0,0,0.2);
-      transition: transform 0.3s ease;
-    }
-    
-    .product-card h3 {
-      font-size: 1rem;
-      color: var(--primary);
-      margin-bottom: 12px;
-      font-weight: 600;
-    }
-    
-    .product-card ul {
-      text-align: left;
-      padding-left: 15px;
-      font-size: 0.9rem;
-      color: #555;
-      font-style: italic;
-      margin-bottom: 15px;
-      list-style-type: none;
-    }
-    
-    body[dir="rtl"] .product-card ul {
-      text-align: right;
-      padding-left: 0;
-      padding-right: 15px;
-    }
-    
-    .product-card ul li {
-      margin-bottom: 8px;
-      position: relative;
-      padding-left: 20px;
-    }
-    
-    body[dir="rtl"] .product-card ul li {
-      padding-left: 0;
-      padding-right: 20px;
-    }
-    
-    .product-card ul li::before {
-      content: none;
-    }
-    
-    body[dir="rtl"] .product-card ul li::before {
-      left: auto;
-      right: 0;
-    }
-    
-    .product-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: auto;
-    }
-    
-    body[dir="rtl"] .product-actions {
-      text-align: right;
-    }
-    
-    .quantity-selector {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-    
-    body[dir="rtl"] .quantity-selector {
-      flex-direction: row-reverse;
-    }
-    
-    .quantity-btn {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      background: var(--primary);
-      color: white;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .quantity-btn:hover {
-      background: var(--primary-dark);
-    }
-    
-    .quantity-input {
-      width: 50px;
-      text-align: center;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      padding: 5px;
-    }
-    
-    .order-btn {
-      display: inline-block;
-      padding: 12px;
-      background-color: var(--primary);
-      color: var(--white);
-      font-size: 0.9rem;
-      border-radius: 50px;
-      transition: all 0.3s ease;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 4px 8px rgba(46, 125, 50, 0.3);
-      text-decoration: none;
-      width: 100%;
-      text-align: center;
-    }
-    
-    .order-btn:hover {
-      background-color: var(--primary-dark);
-      transform: translateY(-3px);
-      box-shadow: 0 6px 12px rgba(46, 125, 50, 0.4);
-    }
-    
-    .favorite-btn {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      background: none;
-      border: none;
-      color: #ccc;
-      font-size: 1.3rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      z-index: 1;
-    }
-    
-    .favorite-btn.active {
-      color: var(--accent);
     }
     
     /* ============= MODAL ============= */
@@ -1815,38 +1866,6 @@
       opacity: 0.8;
     }
     
-    /* ============= BACK TO TOP BUTTON ============= */
-    #backToTop {
-      display: none;
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 997;
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: var(--primary);
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-size: 1.2rem;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      align-items: center;
-      justify-content: center;
-    }
-    
-    body[dir="rtl"] #backToTop {
-      right: auto;
-      left: 20px;
-    }
-    
-    #backToTop:hover {
-      background: var(--primary-dark);
-      transform: translateY(-5px);
-      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
-    }
-    
     /* ============= LAZY LOADING ============= */
     .lazy-load {
       opacity: 0;
@@ -2008,11 +2027,6 @@
         padding: 12px 25px;
         font-size: 1rem;
         min-width: 160px;
-      }
-      
-      .quick-order {
-        padding: 12px 20px;
-        font-size: 0.9rem;
       }
       
       .mission-cards {
@@ -2523,12 +2537,6 @@
     </nav>
   </header>
   
-  <!-- ============= QUICK ORDER BUTTON ============= -->
-  <a href="https://wa.me/96895224124?text=مرحباً، أنا مهتم بمنتجاتكم." target="_blank" class="quick-order" data-en="Quick Order" data-ar="طلب سريع">
-    <i class="fas fa-bolt"></i>
-    <span class="quick-order-text">Quick Order</span>
-  </a>
-  
   <!-- ============= MAIN CONTENT ============= -->
   <main id="main-content">
     <!-- ============= HERO SECTION ============= -->
@@ -2541,6 +2549,183 @@
         </div>
       </div>
     </section>
+    
+    <!-- ============= PRODUCTS SECTION ============= -->
+    <section id="products" class="products-section load-animate">
+      <h2 data-en="Our Products" data-ar="منتجاتنا">Our Products</h2>
+      <p data-en='A Grain for every table' data-ar='حبة لكل مائدة'>A Grain for every table</p>
+      
+      <!-- Product Categories Tabs -->
+      <div class="product-categories">
+        <button class="category-tab active" data-category="all" data-en="All Products" data-ar="جميع المنتجات">All Products</button>
+        <button class="category-tab" data-category="basmati" data-en="Basmati Rice" data-ar="أرز بسمتي">Basmati Rice</button>
+        <button class="category-tab" data-category="non-basmati" data-en="Non-Basmati Rice" data-ar="أرز غير بسمتي">Non-Basmati Rice</button>
+      </div>
+      
+      <div class="products-container">
+        <!-- Product 1 - Basmati -->
+        <div class="product-card slide-up" data-category="basmati">
+          <button class="favorite-btn" aria-label="Add to favorites"><i class="far fa-heart"></i></button>
+          <h3 data-en="MASHHOR INDIAN XXXL 1121 Basmati Rice (35kg)" data-ar="أرز مشهور بسمتي اكس اكس اكس ال 1121 هندي (35 كجم)">MASHHOR INDIAN XXXL 1121 Basmati Rice (35kg)</h3>
+          <img src="https://i.ibb.co/4LMQ7wf/mashhor-rice.webp" 
+               alt="MASHHOR RICE 35kg" 
+               loading="lazy" 
+               class="lazy-load enhanced-image" 
+               data-src="https://i.ibb.co/4LMQ7wf/mashhor-rice.webp" 
+               width="300" 
+               height="200" 
+               onerror="this.src='https://via.placeholder.com/300x200/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
+          
+          <ul>
+            <li data-en="Premium Long Grain Basmati Rice." data-ar="أرز بسمتي طويل الحبة ممتاز.">Premium Long Grain Basmati Rice.</li>
+            <li data-en="Suitable for diabetics." data-ar="مناسب لمرضى السكري.">Suitable for diabetics.</li>
+            <li data-en="Cholesterol free." data-ar="خالي من الكوليسترول.">Cholesterol free.</li>
+            <li data-en="Aged rice." data-ar="أرز معتق.">Aged rice.</li>
+          </ul>
+          <div class="product-actions">
+            <div class="quantity-selector">
+              <button class="quantity-btn minus">-</button>
+              <input type="number" class="quantity-input" value="1" min="1" max="10" />
+              <button class="quantity-btn plus">+</button>
+            </div>
+            <button class="order-btn quick-view-btn" data-product="1" data-en="Quick View" data-ar="عرض سريع">Quick View</button>
+            <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MASHHOR%20INDIAN%20XXXL%201121%20Basmati%20Rice%20(35kg)." target="_blank" class="order-btn" data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">Order via WhatsApp</a>
+          </div>
+        </div>
+        
+        <!-- Product 2 - Basmati -->
+        <div class="product-card slide-up" data-category="basmati">
+          <button class="favorite-btn" aria-label="Add to favorites"><i class="far fa-heart"></i></button>
+          <h3 data-en="MASHHOR INDIAN XXXL 1121 Basmati Rice (5kg)" data-ar="أرز مشهور بسمتي اكس اكس اكس ال 1121 هندي (5 كجم)">MASHHOR INDIAN XXXL 1121 Basmati Rice (5kg)</h3>
+          <img src="https://i.ibb.co/TMntxccG/msh5.webp" alt="MASHHOR RICE 5kg" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/TMntxccG/msh5.webp" width="300" height="200" onerror="this.src='https://via.placeholder.com/300x200/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
+          <ul>
+            <li data-en="Aged long-grain rice, Aromatic, fluffy texture." data-ar="أرز طويل الحبة معتق، عطري، ذو قوام رقيق.">Aged long-grain rice, Aromatic, fluffy texture.</li>
+            <li data-en="Ideal for daily cooking & special occasions." data-ar="مثالي للطهي اليومي والمناسبات الخاصة.">Ideal for daily cooking & special occasions.</li>
+          </ul>
+          <div class="product-actions">
+            <div class="quantity-selector">
+              <button class="quantity-btn minus">-</button>
+              <input type="number" class="quantity-input" value="1" min="1" max="10" />
+              <button class="quantity-btn plus">+</button>
+            </div>
+            <button class="order-btn quick-view-btn" data-product="2" data-en="Quick View" data-ar="عرض سريع">Quick View</button>
+            <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MASHHOR%20INDIAN%20XXXL%201121%20Basmati%20Rice%20(5kg)." target="_blank" class="order-btn" data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">Order via WhatsApp</a>
+          </div>
+        </div>
+        
+        <!-- Product 3 - Non-Basmati -->
+        <div class="product-card slide-up" data-category="non-basmati">
+          <button class="favorite-btn" aria-label="Add to favorites"><i class="far fa-heart"></i></button>
+          <h3 data-en="MAHINAZ CLASSIC XXL Biryani Rice (35kg)" data-ar="أرز مهيناز كلاسيك اكس اكس ال للبرياني (35 كجم)">MAHINAZ CLASSIC XXL Biryani Rice (35kg)</h3>
+          <img src="https://i.ibb.co/WN9KvcQ2/mhz35kg-copy.webp" alt="MAHINAZ Biryani Rice" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/WN9KvcQ2/mhz35kg-copy.webp" width="300" height="200" onerror="this.src='https://via.placeholder.com/300x200/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
+          <ul>
+            <li data-en="Aromatic XXL grains, perfect for traditional biryani dishes." data-ar="حبوب XXL عطرية، مثالية لأطباق البرياني التقليدية.">Aromatic XXL grains, perfect for traditional biryani dishes.</li>
+            <li data-en="Premium Indian rice for rich flavor and texture." data-ar="أرز هندي ممتاز لنكهة غنية وقوام مميز.">Premium Indian rice for rich flavor and texture.</li>
+          </ul>
+          <div class="product-actions">
+            <div class="quantity-selector">
+              <button class="quantity-btn minus">-</button>
+              <input type="number" class="quantity-input" value="1" min="1" max="10" />
+              <button class="quantity-btn plus">+</button>
+            </div>
+            <button class="order-btn quick-view-btn" data-product="3" data-en="Quick View" data-ar="عرض سريع">Quick View</button>
+            <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MAHINAZ%20CLASSIC%20XXL%20Biryani%20Rice%20(35kg)." target="_blank" class="order-btn" data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">Order via WhatsApp</a>
+          </div>
+        </div>
+        
+        <!-- Product 4 - Non-Basmati -->
+        <div class="product-card slide-up" data-category="non-basmati">
+          <button class="favorite-btn" aria-label="Add to favorites"><i class="far fa-heart"></i></button>
+          <h3 data-en="INDIAN PRIDE 1121 XXXL Golden Sella Basmati Rice (20kg)" data-ar="أرز إنديان برايد اكس اكس اكس ال 1121 سيلا ذهبي بسمتي (20 كجم)">INDIAN PRIDE 1121 XXXL Golden Sella Basmati Rice (20kg)</h3>
+          <img src="https://i.ibb.co/BHZsn4Q8/pride.webp" alt="INDIAN PRIDE Rice" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/BHZsn4Q8/pride.webp" width="300" height="200" onerror="this.src='https://via.placeholder.com/300x200/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
+          <ul>
+            <li data-en="Parboiled golden grains, naturally aromatic." data-ar="حبوب ذهبية مسلوقة جزئيًا، عطرية طبيعيًا.">Parboiled golden grains, naturally aromatic.</li>
+            <li data-en="Perfect texture for biryani, mandi, and traditional rice dishes." data-ar="قوام مثالي للبرياني والمندي وأطباق الأرز التقليدية.">Perfect texture for biryani, mandi, and traditional rice dishes.</li>
+          </ul>
+          <div class="product-actions">
+            <div class="quantity-selector">
+              <button class="quantity-btn minus">-</button>
+              <input type="number" class="quantity-input" value="1" min="1" max="10" />
+              <button class="quantity-btn plus">+</button>
+            </div>
+            <button class="order-btn quick-view-btn" data-product="5" data-en="Quick View" data-ar="عرض سريع">Quick View</button>
+            <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20INDIAN%20PRIDE%201121%20XXXL%20Golden%20Sella%20Basmati%20Rice%20(20kg)." target="_blank" class="order-btn" data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">Order via WhatsApp</a>
+          </div>
+        </div>
+        
+        <!-- Product 5 - Non-Basmati -->
+        <div class="product-card slide-up" data-category="non-basmati">
+          <button class="favorite-btn" aria-label="Add to favorites"><i class="far fa-heart"></i></button>
+          <h3 data-en="Palakkadan Mata Rice (18kg)" data-ar="أرز بالاكادان ماتا (18 كجم)">Palakkadan Mata Rice (18kg)</h3>
+          <img src="https://i.ibb.co/23KJsQGc/IMG-20250904-213156.jpg" 
+               alt="Palakkadan Mata Rice" 
+               loading="lazy" 
+               class="lazy-load" 
+               data-src="https://i.ibb.co/23KJsQGc/IMG-20250904-213156.jpg" 
+               width="300" 
+               height="200"
+               onerror="this.src='https://via.placeholder.com/300x200/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
+          <ul>
+            <li data-en="Traditional Kerala rice known for its unique taste and texture." data-ar="أرز كيرالا التقليدي المعروف بمذاقه الفريد وقوامه المميز.">Traditional Kerala rice known for its unique taste and texture.</li>
+            <li data-en="Rich in fiber and nutrients, ideal for healthy meals." data-ar="غني بالألياف والعناصر الغذائية، مثالي للوجبات الصحية.">Rich in fiber and nutrients, ideal for healthy meals.</li>
+            <li data-en="Perfect for traditional South Indian dishes like Kanji and Pongal." data-ar="مثالي للأطباق الجنوب الهندية التقليدية مثل كانجي وبونغال.">Perfect for traditional South Indian dishes like Kanji and Pongal.</li>
+          </ul>
+          <div class="product-actions">
+            <div class="quantity-selector">
+              <button class="quantity-btn minus">-</button>
+              <input type="number" class="quantity-input" value="1" min="1" max="10" />
+              <button class="quantity-btn plus">+</button>
+            </div>
+            <button class="order-btn quick-view-btn" data-product="5" data-en="Quick View" data-ar="عرض سريع">Quick View</button>
+            <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20Palakkadan%20Mata%20Rice%20(18kg)." target="_blank" class="order-btn" data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">Order via WhatsApp</a>
+          </div>
+        </div>
+        
+        <!-- Product 6 - Non-Basmati -->
+        <div class="product-card slide-up" data-category="non-basmati">
+          <button class="favorite-btn" aria-label="Add to favorites"><i class="far fa-heart"></i></button>
+          <h3 data-en="Mashhor Sona Masoori Rice (18kg)" data-ar="أرز مشهور سونا ماسوري (18 كجم)">Mashhor Sona Masoori Rice (18kg)</h3>
+          <img src="https://i.ibb.co/3YQw8wbz/IMG-20250904-213127.jpg" 
+               alt="Mashhor Sona Masoori Rice" 
+               loading="lazy" 
+               class="lazy-load" 
+               data-src="https://i.ibb.co/3YQw8wbz/IMG-20250904-213127.jpg" 
+               width="300" 
+               height="200"
+               onerror="this.src='https://via.placeholder.com/300x200/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
+          <ul>
+            <li data-en="Premium Sona Masoori rice from South India." data-ar="أرز سونا ماسوري ممتاز من جنوب الهند.">Premium Sona Masoori rice from South India.</li>
+            <li data-en="Light texture and perfect for daily cooking." data-ar="قوام خفيف ومثالي للطهي اليومي.">Light texture and perfect for daily cooking.</li>
+            <li data-en="Ideal for traditional South Indian dishes." data-ar="مثالي للأطباق الجنوب الهندية التقليدية.">Ideal for traditional South Indian dishes.</li>
+          </ul>
+          <div class="product-actions">
+            <div class="quantity-selector">
+              <button class="quantity-btn minus">-</button>
+              <input type="number" class="quantity-input" value="1" min="1" max="10" />
+              <button class="quantity-btn plus">+</button>
+            </div>
+            <button class="order-btn quick-view-btn" data-product="6" data-en="Quick View" data-ar="عرض سريع">Quick View</button>
+            <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20Mashhor%20Sona%20Masoori%20Rice%20(18kg)." target="_blank" class="order-btn" data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">Order via WhatsApp</a>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- ============= TRUST BADGES ============= -->
+    <div class="trust-badges load-animate">
+      <div class="trust-badge">
+        <i class="fas fa-check-circle"></i>
+        <span class="trust-text" data-en="Quality Guaranteed" data-ar="جودة مضمونة">Quality Guaranteed</span>
+      </div>
+      <div class="trust-badge">
+        <i class="fas fa-truck"></i>
+        <span class="trust-text" data-en="Fast Delivery" data-ar="توصيل سريع">Fast Delivery</span>
+      </div>
+      <div class="trust-badge">
+        <i class="fas fa-star"></i>
+        <span class="trust-text" data-en="Rated 4.4/5" data-ar="تقييم 4.4/5">Rated 4.4/5</span>
+      </div>
+    </div>
     
     <!-- ============= CERTIFICATIONS SECTION ============= -->
     <section id="certifications" class="certifications-section load-animate">
@@ -2586,175 +2771,6 @@
           <div class="certification-details">
             <h3>GMP</h3>
             <p data-en="Good Manufacturing Practice" data-ar="ممارسات التصنيع الجيدة">Good Manufacturing Practice</p>
-          </div>
-        </div>
-      </div>
-    </section>
-    
-    <!-- ============= TRUST BADGES ============= -->
-    <div class="trust-badges load-animate">
-      <div class="trust-badge">
-        <i class="fas fa-check-circle"></i>
-        <span class="trust-text" data-en="Quality Guaranteed" data-ar="جودة مضمونة">Quality Guaranteed</span>
-      </div>
-      <div class="trust-badge">
-        <i class="fas fa-truck"></i>
-        <span class="trust-text" data-en="Fast Delivery" data-ar="توصيل سريع">Fast Delivery</span>
-      </div>
-      <div class="trust-badge">
-        <i class="fas fa-star"></i>
-        <span class="trust-text" data-en="Rated 4.4/5" data-ar="تقييم 4.4/5">Rated 4.4/5</span>
-      </div>
-    </div>
-    
-    <!-- ============= PRODUCTS SECTION ============= -->
-    <section id="products" class="load-animate">
-      <h2 data-en="Our Products" data-ar="منتجاتنا">Our Products</h2>
-      <p data-en='A Grain for every table' data-ar='حبة لكل مائدة'>A Grain for every table</p>
-      <div class="products-container">
-        <!-- Product 1 -->
-        <div class="product-card slide-up" data-category="basmati bulk">
-          <button class="favorite-btn" aria-label="Add to favorites"><i class="far fa-heart"></i></button>
-          <h3 data-en="MASHHOR INDIAN XXXL 1121 Basmati Rice (35kg)" data-ar="أرز مشهور بسمتي اكس اكس اكس ال 1121 هندي (35 كجم)">MASHHOR INDIAN XXXL 1121 Basmati Rice (35kg)</h3>
-          <img src="https://i.ibb.co/4LMQ7wf/mashhor-rice.webp" 
-               alt="MASHHOR RICE 35kg" 
-               loading="lazy" 
-               class="lazy-load enhanced-image" 
-               data-src="https://i.ibb.co/4LMQ7wf/mashhor-rice.webp" 
-               width="300" 
-               height="200" 
-               onerror="this.src='https://via.placeholder.com/300x200/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
-          
-          <ul>
-            <li data-en="Premium Long Grain Basmati Rice." data-ar="أرز بسمتي طويل الحبة ممتاز.">Premium Long Grain Basmati Rice.</li>
-            <li data-en="Suitable for diabetics." data-ar="مناسب لمرضى السكري.">Suitable for diabetics.</li>
-            <li data-en="Cholesterol free." data-ar="خالي من الكوليسترول.">Cholesterol free.</li>
-            <li data-en="Aged rice." data-ar="أرز معتق.">Aged rice.</li>
-          </ul>
-          <div class="product-actions">
-            <div class="quantity-selector">
-              <button class="quantity-btn minus">-</button>
-              <input type="number" class="quantity-input" value="1" min="1" max="10" />
-              <button class="quantity-btn plus">+</button>
-            </div>
-            <button class="order-btn quick-view-btn" data-product="1" data-en="Quick View" data-ar="عرض سريع">Quick View</button>
-            <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MASHHOR%20INDIAN%20XXXL%201121%20Basmati%20Rice%20(35kg)." target="_blank" class="order-btn" data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">Order via WhatsApp</a>
-          </div>
-        </div>
-        
-        <!-- Product 2 -->
-        <div class="product-card slide-up" data-category="basmati retail">
-          <button class="favorite-btn" aria-label="Add to favorites"><i class="far fa-heart"></i></button>
-          <h3 data-en="MASHHOR INDIAN XXXL 1121 Basmati Rice (5kg)" data-ar="أرز مشهور بسمتي اكس اكس اكس ال 1121 هندي (5 كجم)">MASHHOR INDIAN XXXL 1121 Basmati Rice (5kg)</h3>
-          <img src="https://i.ibb.co/TMntxccG/msh5.webp" alt="MASHHOR RICE 5kg" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/TMntxccG/msh5.webp" width="300" height="200" onerror="this.src='https://via.placeholder.com/300x200/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
-          <ul>
-            <li data-en="Aged long-grain rice, Aromatic, fluffy texture." data-ar="أرز طويل الحبة معتق، عطري، ذو قوام رقيق.">Aged long-grain rice, Aromatic, fluffy texture.</li>
-            <li data-en="Ideal for daily cooking & special occasions." data-ar="مثالي للطهي اليومي والمناسبات الخاصة.">Ideal for daily cooking & special occasions.</li>
-          </ul>
-          <div class="product-actions">
-            <div class="quantity-selector">
-              <button class="quantity-btn minus">-</button>
-              <input type="number" class="quantity-input" value="1" min="1" max="10" />
-              <button class="quantity-btn plus">+</button>
-            </div>
-            <button class="order-btn quick-view-btn" data-product="2" data-en="Quick View" data-ar="عرض سريع">Quick View</button>
-            <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MASHHOR%20INDIAN%20XXXL%201121%20Basmati%20Rice%20(5kg)." target="_blank" class="order-btn" data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">Order via WhatsApp</a>
-          </div>
-        </div>
-        
-        <!-- Product 3 -->
-        <div class="product-card slide-up" data-category="non-basmati bulk">
-          <button class="favorite-btn" aria-label="Add to favorites"><i class="far fa-heart"></i></button>
-          <h3 data-en="MAHINAZ CLASSIC XXL Biryani Rice (35kg)" data-ar="أرز مهيناز كلاسيك اكس اكس ال للبرياني (35 كجم)">MAHINAZ CLASSIC XXL Biryani Rice (35kg)</h3>
-          <img src="https://i.ibb.co/WN9KvcQ2/mhz35kg-copy.webp" alt="MAHINAZ Biryani Rice" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/WN9KvcQ2/mhz35kg-copy.webp" width="300" height="200" onerror="this.src='https://via.placeholder.com/300x200/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
-          <ul>
-            <li data-en="Aromatic XXL grains, perfect for traditional biryani dishes." data-ar="حبوب XXL عطرية، مثالية لأطباق البرياني التقليدية.">Aromatic XXL grains, perfect for traditional biryani dishes.</li>
-            <li data-en="Premium Indian rice for rich flavor and texture." data-ar="أرز هندي ممتاز لنكهة غنية وقوام مميز.">Premium Indian rice for rich flavor and texture.</li>
-          </ul>
-          <div class="product-actions">
-            <div class="quantity-selector">
-              <button class="quantity-btn minus">-</button>
-              <input type="number" class="quantity-input" value="1" min="1" max="10" />
-              <button class="quantity-btn plus">+</button>
-            </div>
-            <button class="order-btn quick-view-btn" data-product="3" data-en="Quick View" data-ar="عرض سريع">Quick View</button>
-            <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MAHINAZ%20CLASSIC%20XXL%20Biryani%20Rice%20(35kg)." target="_blank" class="order-btn" data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">Order via WhatsApp</a>
-          </div>
-        </div>
-        
-        <!-- Product 4 -->
-        <div class="product-card slide-up" data-category="non-basmati bulk">
-          <button class="favorite-btn" aria-label="Add to favorites"><i class="far fa-heart"></i></button>
-          <h3 data-en="INDIAN PRIDE 1121 XXXL Golden Sella Basmati Rice (20kg)" data-ar="أرز إنديان برايد اكس اكس اكس ال 1121 سيلا ذهبي بسمتي (20 كجم)">INDIAN PRIDE 1121 XXXL Golden Sella Basmati Rice (20kg)</h3>
-          <img src="https://i.ibb.co/BHZsn4Q8/pride.webp" alt="INDIAN PRIDE Rice" loading="lazy" class="lazy-load" data-src="https://i.ibb.co/BHZsn4Q8/pride.webp" width="300" height="200" onerror="this.src='https://via.placeholder.com/300x200/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
-          <ul>
-            <li data-en="Parboiled golden grains, naturally aromatic." data-ar="حبوب ذهبية مسلوقة جزئيًا، عطرية طبيعيًا.">Parboiled golden grains, naturally aromatic.</li>
-            <li data-en="Perfect texture for biryani, mandi, and traditional rice dishes." data-ar="قوام مثالي للبرياني والمندي وأطباق الأرز التقليدية.">Perfect texture for biryani, mandi, and traditional rice dishes.</li>
-          </ul>
-          <div class="product-actions">
-            <div class="quantity-selector">
-              <button class="quantity-btn minus">-</button>
-              <input type="number" class="quantity-input" value="1" min="1" max="10" />
-              <button class="quantity-btn plus">+</button>
-            </div>
-            <button class="order-btn quick-view-btn" data-product="5" data-en="Quick View" data-ar="عرض سريع">Quick View</button>
-            <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20INDIAN%20PRIDE%201121%20XXXL%20Golden%20Sella%20Basmati%20Rice%20(20kg)." target="_blank" class="order-btn" data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">Order via WhatsApp</a>
-          </div>
-        </div>
-        
-        <!-- Product 5 -->
-        <div class="product-card slide-up" data-category="non-basmati bulk">
-          <button class="favorite-btn" aria-label="Add to favorites"><i class="far fa-heart"></i></button>
-          <h3 data-en="Palakkadan Mata Rice (18kg)" data-ar="أرز بالاكادان ماتا (18 كجم)">Palakkadan Mata Rice (18kg)</h3>
-          <img src="https://i.ibb.co/23KJsQGc/IMG-20250904-213156.jpg" 
-               alt="Palakkadan Mata Rice" 
-               loading="lazy" 
-               class="lazy-load" 
-               data-src="https://i.ibb.co/23KJsQGc/IMG-20250904-213156.jpg" 
-               width="300" 
-               height="200"
-               onerror="this.src='https://via.placeholder.com/300x200/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
-          <ul>
-            <li data-en="Traditional Kerala rice known for its unique taste and texture." data-ar="أرز كيرالا التقليدي المعروف بمذاقه الفريد وقوامه المميز.">Traditional Kerala rice known for its unique taste and texture.</li>
-            <li data-en="Rich in fiber and nutrients, ideal for healthy meals." data-ar="غني بالألياف والعناصر الغذائية، مثالي للوجبات الصحية.">Rich in fiber and nutrients, ideal for healthy meals.</li>
-            <li data-en="Perfect for traditional South Indian dishes like Kanji and Pongal." data-ar="مثالي للأطباق الجنوب الهندية التقليدية مثل كانجي وبونغال.">Perfect for traditional South Indian dishes like Kanji and Pongal.</li>
-          </ul>
-          <div class="product-actions">
-            <div class="quantity-selector">
-              <button class="quantity-btn minus">-</button>
-              <input type="number" class="quantity-input" value="1" min="1" max="10" />
-              <button class="quantity-btn plus">+</button>
-            </div>
-            <button class="order-btn quick-view-btn" data-product="5" data-en="Quick View" data-ar="عرض سريع">Quick View</button>
-            <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20Palakkadan%20Mata%20Rice%20(18kg)." target="_blank" class="order-btn" data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">Order via WhatsApp</a>
-          </div>
-        </div>
-        
-        <!-- Product 6 -->
-        <div class="product-card slide-up" data-category="non-basmati bulk">
-          <button class="favorite-btn" aria-label="Add to favorites"><i class="far fa-heart"></i></button>
-          <h3 data-en="Mashhor Sona Masoori Rice (18kg)" data-ar="أرز مشهور سونا ماسوري (18 كجم)">Mashhor Sona Masoori Rice (18kg)</h3>
-          <img src="https://i.ibb.co/3YQw8wbz/IMG-20250904-213127.jpg" 
-               alt="Mashhor Sona Masoori Rice" 
-               loading="lazy" 
-               class="lazy-load" 
-               data-src="https://i.ibb.co/3YQw8wbz/IMG-20250904-213127.jpg" 
-               width="300" 
-               height="200"
-               onerror="this.src='https://via.placeholder.com/300x200/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
-          <ul>
-            <li data-en="Premium Sona Masoori rice from South India." data-ar="أرز سونا ماسوري ممتاز من جنوب الهند.">Premium Sona Masoori rice from South India.</li>
-            <li data-en="Light texture and perfect for daily cooking." data-ar="قوام خفيف ومثالي للطهي اليومي.">Light texture and perfect for daily cooking.</li>
-            <li data-en="Ideal for traditional South Indian dishes." data-ar="مثالي للأطباق الجنوب الهندية التقليدية.">Ideal for traditional South Indian dishes.</li>
-          </ul>
-          <div class="product-actions">
-            <div class="quantity-selector">
-              <button class="quantity-btn minus">-</button>
-              <input type="number" class="quantity-input" value="1" min="1" max="10" />
-              <button class="quantity-btn plus">+</button>
-            </div>
-            <button class="order-btn quick-view-btn" data-product="6" data-en="Quick View" data-ar="عرض سريع">Quick View</button>
-            <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20Mashhor%20Sona%20Masoori%20Rice%20(18kg)." target="_blank" class="order-btn" data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">Order via WhatsApp</a>
           </div>
         </div>
       </div>
@@ -3198,9 +3214,6 @@
     </section>
   </main>
   
-  <!-- ============= BACK TO TOP BUTTON ============= -->
-  <button id="backToTop" title="Go to top">↑</button>
-  
   <!-- ============= FOOTER ============= -->
   <footer class="load-animate">
     <div class="footer-container">
@@ -3352,14 +3365,6 @@
         const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
         const scrolled = (winScroll / height) * 100;
         document.getElementById('progressBar').style.width = scrolled + '%';
-        
-        // Back to top button visibility
-        const backToTop = document.getElementById('backToTop');
-        if (winScroll > 300) {
-          backToTop.style.display = "flex";
-        } else {
-          backToTop.style.display = "none";
-        }
       };
       
       // Header scroll effect
@@ -3446,15 +3451,6 @@
           img.classList.add('loaded');
         });
       }
-      
-      // ============= BACK TO TOP BUTTON =============
-      const backToTop = document.getElementById('backToTop');
-      backToTop.addEventListener('click', function() {
-        window.scrollTo({
-          top: 0,
-          behavior: 'smooth'
-        });
-      });
       
       // ============= COUNTER ANIMATION =============
       const observer = new IntersectionObserver((entries) => {
@@ -3571,6 +3567,34 @@
               location.hash = targetId;
             }
           }
+        });
+      });
+      
+      // ============= PRODUCT CATEGORIES =============
+      const categoryTabs = document.querySelectorAll('.category-tab');
+      const productCards = document.querySelectorAll('.product-card');
+      
+      // Filter products by category
+      function filterProducts(category) {
+        productCards.forEach(card => {
+          if (category === 'all' || card.getAttribute('data-category') === category) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      }
+      
+      // Category tab click handlers
+      categoryTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+          // Update active tab
+          categoryTabs.forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+          
+          // Filter products
+          const category = this.getAttribute('data-category');
+          filterProducts(category);
         });
       });
       
