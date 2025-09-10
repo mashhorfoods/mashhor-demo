@@ -4004,155 +4004,438 @@ body[dir="rtl"] .hero-image-card {
     
     /* ============= FOOTER ============= */
     footer {
-      background-color: var(--primary-dark);
-      padding: 60px 20px 30px;
-      color: white;
-      font-size: 0.9rem;
-      position: relative;
-    }
-    
-    footer::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 5px;
-      background: var(--accent);
-    }
-    
-    .footer-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 40px;
-    }
-    
-    @media (min-width: 768px) {
-      .footer-container {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-    
-    .footer-logo {
-      text-align: center;
-    }
-    
-    @media (min-width: 768px) {
-      .footer-logo {
-        text-align: left;
-      }
-      body[dir="rtl"] .footer-logo {
-        text-align: right;
-      }
-    }
-    
-    .footer-logo img {
-      height: 80px;
-      width: auto;
-      margin-bottom: 20px;
-      filter: brightness(0) invert(1);
-    }
-    
-    .footer-about p {
-      margin-bottom: 20px;
-      line-height: 1.6;
-    }
-    
-    .footer-links-section h3 {
-      color: white;
-      margin-bottom: 20px;
-      font-size: 1.2rem;
-      position: relative;
-      padding-bottom: 10px;
-    }
-    
-    .footer-links-section h3::after {
-      content: "";
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 40px;
-      height: 2px;
-      background: var(--accent);
-    }
-    
-    .footer-links {
-      list-style: none;
-    }
-    
-    .footer-links li {
-      margin-bottom: 10px;
-    }
-    
-    .footer-links a {
-      color: rgba(255,255,255,0.8);
-      text-decoration: none;
-      transition: all 0.3s ease;
-      display: inline-block;
-      padding: 5px 0;
-    }
-    
-    .footer-links a:hover {
-      color: white;
-      transform: translateX(5px);
-    }
-    
-    body[dir="rtl"] .footer-links a:hover {
-      transform: translateX(-5px);
-    }
-    
-    .footer-contact-info {
-      list-style: none;
-    }
-    
-    .footer-contact-info li {
-      margin-bottom: 15px;
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-    }
-    
-    .footer-contact-info i {
-      color: var(--accent);
-      margin-top: 3px;
-    }
-    
-    .footer-contact-info a {
-      color: white;
-      text-decoration: none;
-    }
-    
-    .footer-bottom {
-      margin-top: 40px;
-      padding-top: 20px;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      text-align: center;
-    }
-    
-    .social-links {
-      margin: 20px 0;
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-    }
-    
-    .social-links a {
-      color: white;
-      font-size: 1.2rem;
-      transition: all 0.3s ease;
-    }
-    
-    .social-links a:hover {
-      color: var(--accent);
-      transform: translateY(-3px);
-    }
-    
-    .copyright {
-      font-size: 0.85rem;
-      opacity: 0.8;
-    }
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+}
+
+body[dir="rtl"] footer {
+  font-family: 'Tajawal', sans-serif;
+}
+
+/* Footer decorative elements */
+footer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--primary));
+}
+
+footer::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Footer pattern overlay */
+.footer-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-4v4h-4v4h4v4h4v-4h4v-4h-4zm0-30V0h-4v4h-4v4h4v4h4V8h4V4h-4zM6 34v-4H2v4H0v4h2v4h4v-4h4v-4H6zM6 4V0H2v4H0v4h2v4h4V8h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  opacity: 0.5;
+  z-index: 0;
+}
+
+/* Main footer container */
+.footer-container {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 70px 20px 40px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 50px;
+}
+
+@media (min-width: 768px) {
+  .footer-container {
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 40px;
+  }
+}
+
+/* Footer logo section */
+.footer-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+@media (min-width: 768px) {
+  .footer-logo {
+    align-items: flex-start;
+    text-align: left;
+  }
+  
+  body[dir="rtl"] .footer-logo {
+    align-items: flex-end;
+    text-align: right;
+  }
+}
+
+.footer-logo img {
+  height: 70px;
+  width: auto;
+  margin-bottom: 20px;
+  filter: brightness(0) invert(1);
+  transition: transform 0.3s ease;
+}
+
+.footer-logo img:hover {
+  transform: scale(1.05);
+}
+
+.footer-about p {
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.7;
+  margin-bottom: 25px;
+  font-size: 0.95rem;
+}
+
+/* Social links */
+.social-links {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+@media (min-width: 768px) {
+  .social-links {
+    justify-content: flex-start;
+  }
+  
+  body[dir="rtl"] .social-links {
+    justify-content: flex-end;
+  }
+}
+
+.social-links a {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.social-links a::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--primary);
+  transform: scale(0);
+  transition: transform 0.3s ease;
+  z-index: -1;
+}
+
+.social-links a:hover {
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(46, 125, 50, 0.3);
+}
+
+.social-links a:hover::before {
+  transform: scale(1);
+}
+
+.social-links a:nth-child(1):hover::before {
+  background: #25D366; /* WhatsApp green */
+}
+
+.social-links a:nth-child(2):hover::before {
+  background: #1877F2; /* Facebook blue */
+}
+
+.social-links a:nth-child(3):hover::before {
+  background: #E1306C; /* Instagram pink */
+}
+
+.social-links a:nth-child(4):hover::before {
+  background: #EA4335; /* Email red */
+}
+
+/* Footer sections */
+.footer-links-section {
+  margin-bottom: 30px;
+}
+
+@media (min-width: 768px) {
+  .footer-links-section {
+    margin-bottom: 0;
+  }
+}
+
+.footer-links-section h3 {
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  position: relative;
+  padding-bottom: 12px;
+  display: inline-block;
+}
+
+.footer-links-section h3::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background: var(--accent);
+}
+
+body[dir="rtl"] .footer-links-section h3::after {
+  left: auto;
+  right: 0;
+}
+
+/* Footer links */
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links li {
+  margin-bottom: 12px;
+}
+
+.footer-links a {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.footer-links a::before {
+  content: "›";
+  margin-right: 8px;
+  font-size: 1.1rem;
+  color: var(--accent);
+  transition: transform 0.3s ease;
+}
+
+body[dir="rtl"] .footer-links a::before {
+  content: "‹";
+  margin-right: 0;
+  margin-left: 8px;
+}
+
+.footer-links a:hover {
+  color: white;
+  transform: translateX(5px);
+}
+
+body[dir="rtl"] .footer-links a:hover {
+  transform: translateX(-5px);
+}
+
+.footer-links a:hover::before {
+  transform: translateX(3px);
+}
+
+body[dir="rtl"] .footer-links a:hover::before {
+  transform: translateX(-3px);
+}
+
+/* Footer contact info */
+.footer-contact-info {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-contact-info li {
+  margin-bottom: 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+body[dir="rtl"] .footer-contact-info li {
+  flex-direction: row-reverse;
+}
+
+.footer-contact-info i {
+  color: var(--accent);
+  font-size: 1.1rem;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.footer-contact-info a {
+  color: white;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.3s ease;
+}
+
+.footer-contact-info a:hover {
+  color: var(--accent);
+}
+
+.footer-contact-info span {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* Footer bottom */
+.footer-bottom {
+  position: relative;
+  z-index: 1;
+  margin-top: 50px;
+  padding-top: 25px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.copyright {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.copyright span {
+  display: inline-block;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .footer-container {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding: 50px 15px 30px;
+  }
+  
+  .footer-logo {
+    margin-bottom: 20px;
+  }
+  
+  .footer-links-section {
+    margin-bottom: 25px;
+  }
+  
+  .footer-links-section h3 {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+  }
+  
+  .footer-links a {
+    font-size: 0.9rem;
+  }
+  
+  .footer-contact-info li {
+    margin-bottom: 15px;
+  }
+  
+  .footer-contact-info i {
+    font-size: 1rem;
+  }
+  
+  .footer-contact-info a,
+  .footer-contact-info span {
+    font-size: 0.9rem;
+  }
+  
+  .footer-bottom {
+    margin-top: 30px;
+    padding-top: 20px;
+  }
+  
+  .copyright {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-container {
+    padding: 40px 15px 25px;
+  }
+  
+  .footer-logo img {
+    height: 60px;
+  }
+  
+  .footer-about p {
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+  }
+  
+  .social-links {
+    gap: 12px;
+  }
+  
+  .social-links a {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+  
+  .footer-links-section h3 {
+    font-size: 1rem;
+  }
+  
+  .footer-links a {
+    font-size: 0.85rem;
+  }
+  
+  .footer-contact-info li {
+    gap: 10px;
+  }
+  
+  .footer-contact-info i {
+    font-size: 0.9rem;
+  }
+  
+  .footer-contact-info a,
+  .footer-contact-info span {
+    font-size: 0.85rem;
+  }
+  
+  .footer-bottom {
+    margin-top: 25px;
+    padding-top: 15px;
+  }
+  
+  .copyright {
+    font-size: 0.75rem;
+  }
+}
     
     /* ============= LAZY LOADING ============= */
     .lazy-load {
@@ -5911,55 +6194,63 @@ body[dir="rtl"] .hero-image-card {
   
   <!-- ============= FOOTER ============= -->
   <footer class="load-animate">
-    <div class="footer-container">
-      <div class="footer-logo">
-        <img src="https://i.ibb.co/B5M4WdDR/logo-1.webp" alt="Mashhor Logo" loading="lazy" width="200" height="80" />
-        <div class="social-links">
-          <a href="https://wa.me/96895224124" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-          <a href="https://www.facebook.com/mashhorfoodoman/" target="_blank" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
-          <a href="https://www.instagram.com/mashhorfoodoman" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-          <a href="mailto:mashhorfoods@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
-        </div>
+  <div class="footer-pattern"></div>
+  
+  <div class="footer-container">
+    <div class="footer-logo">
+      <img src="https://i.ibb.co/B5M4WdDR/logo-1.webp" alt="Mashhor Logo" loading="lazy" width="200" height="80" />
+      <div class="footer-about">
+        <p data-en="Mashhor Foodstuff Trading LLC is Oman's trusted source for premium Basmati and Non-Basmati rice, serving both wholesale and retail customers with exceptional quality products." 
+           data-ar="شركة مشهور للأغذية هي المصدر الموثوق للأرز البسمتي وغير البسمتي الممتاز في عمان، حيث تخدم كل من العملاء بالجملة والتجزئة بمنتجات عالية الجودة.">
+          Mashhor Foodstuff Trading LLC is Oman's trusted source for premium Basmati and Non-Basmati rice, serving both wholesale and retail customers with exceptional quality products.
+        </p>
       </div>
-      
-      <div class="footer-links-section">
-        <h3 data-en="Quick Links" data-ar="روابط سريعة">Quick Links</h3>
-        <ul class="footer-links">
-          <li><a href="#about" data-en="About Us" data-ar="من نحن">About Us</a></li>
-          <li><a href="#products" data-en="Our Products" data-ar="منتجاتنا">Our Products</a></li>
-          <li><a href="#certifications" data-en="Certifications" data-ar="الشهادات">Certifications</a></li>
-          <li><a href="#contact-us" data-en="Contact Us" data-ar="اتصل بنا">Contact Us</a></li>
-        </ul>
-      </div>
-      
-      <div class="footer-links-section">
-        <h3 data-en="Contact Info" data-ar="معلومات الاتصال">Contact Info</h3>
-        <ul class="footer-contact-info">
-          <li>
-            <i class="fas fa-map-marker-alt"></i>
-            <span data-en="Building No. 162/1, Way No. 4902, Block No. 349, Rusayl Industrial Area, Sultanate of Oman" 
-                  data-ar="مبنى رقم 162/1، طريق رقم 4902، قطعة رقم 349، المنطقة الصناعية بروي، سلطنة عمان">
-              Building No. 162/1, Way No. 4902, Block No. 349, Rusayl Industrial Area, Sultanate of Oman
-            </span>
-          </li>
-          <li>
-            <i class="fas fa-phone-alt"></i>
-            <a href="tel:+96822716859" class="contact-number rtl-numbers">+968 22716859</a>
-          </li>
-          <li>
-            <i class="fas fa-envelope"></i>
-            <a href="mailto:mashhorfoods@gmail.com">mashhorfoods@gmail.com</a>
-          </li>
-        </ul>
+      <div class="social-links">
+        <a href="https://wa.me/96895224124" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        <a href="https://www.facebook.com/mashhorfoodoman/" target="_blank" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+        <a href="https://www.instagram.com/mashhorfoodoman" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="mailto:mashhorfoods@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
       </div>
     </div>
     
-    <div class="footer-bottom">
-      <div class="copyright">
-        &copy; <span id="currentYear"></span> <span data-en="Mashhor Foodstuff Trading LLC. All Rights Reserved." data-ar="شركة مشهور للأغذية. جميع الحقوق محفوظة.">Mashhor Foodstuff Trading LLC. All Rights Reserved.</span>
-      </div>
+    <div class="footer-links-section">
+      <h3 data-en="Quick Links" data-ar="روابط سريعة">Quick Links</h3>
+      <ul class="footer-links">
+        <li><a href="#about" data-en="About Us" data-ar="من نحن">About Us</a></li>
+        <li><a href="#products" data-en="Our Products" data-ar="منتجاتنا">Our Products</a></li>
+        <li><a href="#certifications" data-en="Certifications" data-ar="الشهادات">Certifications</a></li>
+        <li><a href="#contact-us" data-en="Contact Us" data-ar="اتصل بنا">Contact Us</a></li>
+      </ul>
     </div>
-  </footer>
+    
+    <div class="footer-links-section">
+      <h3 data-en="Contact Info" data-ar="معلومات الاتصال">Contact Info</h3>
+      <ul class="footer-contact-info">
+        <li>
+          <i class="fas fa-map-marker-alt"></i>
+          <span data-en="Building No. 162/1, Way No. 4902, Block No. 349, Rusayl Industrial Area, Sultanate of Oman" 
+                data-ar="مبنى رقم 162/1، طريق رقم 4902، قطعة رقم 349، المنطقة الصناعية بروي، سلطنة عمان">
+            Building No. 162/1, Way No. 4902, Block No. 349, Rusayl Industrial Area, Sultanate of Oman
+          </span>
+        </li>
+        <li>
+          <i class="fas fa-phone-alt"></i>
+          <a href="tel:+96822716859" class="contact-number rtl-numbers">+968 22716859</a>
+        </li>
+        <li>
+          <i class="fas fa-envelope"></i>
+          <a href="mailto:mashhorfoods@gmail.com">mashhorfoods@gmail.com</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  
+  <div class="footer-bottom">
+    <div class="copyright">
+      <span>&copy; <span id="currentYear"></span> <span data-en="Mashhor Foodstuff Trading LLC. All Rights Reserved." data-ar="شركة مشهور للأغذية. جميع الحقوق محفوظة.">Mashhor Foodstuff Trading LLC. All Rights Reserved.</span></span>
+    </div>
+  </div>
+</footer>
   
   <!-- ============= JAVASCRIPT ============= -->
   <script>
