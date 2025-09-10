@@ -337,147 +337,584 @@
     }
     
     /* ============= HEADER ============= */
-    .header {
-      position: fixed;
-      top: 0;
-      width: 100%;
-      background: var(--white);
-      border-bottom: 1px solid rgba(0,0,0,0.1);
-      z-index: 1000;
-      padding: 15px 20px;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .header-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-    }
-    
-    .header.scrolled {
-      padding: 10px 20px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-    }
-    
-    .logo {
-      height: 60px;
-      width: auto;
-      max-width: 200px;
-      object-fit: contain;
-      transition: all 0.3s ease;
-    }
-    
-    .header.scrolled .logo {
-      height: 50px;
-    }
-    
-    .hamburger {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      width: 30px;
-      height: 21px;
-      cursor: pointer;
-      z-index: 1001;
-      transition: opacity 0.3s ease;
-      background: transparent;
-      border: none;
-    }
-    
-    .hamburger span {
-      display: block;
-      height: 3px;
-      width: 100%;
-      background: var(--primary);
-      border-radius: 3px;
-      transition: all 0.3s ease;
-    }
-    
-    .hamburger.active span:nth-child(1) {
-      transform: translateY(9px) rotate(45deg);
-    }
-    
-    .hamburger.active span:nth-child(2) {
-      opacity: 0;
-    }
-    
-    .hamburger.active span:nth-child(3) {
-      transform: translateY(-9px) rotate(-45deg);
-    }
-    
-    /* ============= NAVIGATION ============= */
-    .nav-menu {
-      position: fixed;
-      top: 0;
-      right: -100%;
-      width: 80%;
-      max-width: 300px;
-      height: 100vh;
-      background: var(--white);
-      padding: 80px 20px 20px;
-      transition: all 0.3s ease;
-      z-index: 999;
-      box-shadow: -5px 0 15px rgba(0,0,0,0.1);
-    }
-    
-    body[dir="rtl"] .nav-menu {
-      right: auto;
-      left: -100%;
-    }
-    
-    .nav-menu.active {
-      right: 0;
-    }
-    
-    body[dir="rtl"] .nav-menu.active {
-      left: 0;
-      right: auto;
-    }
-    
-    .nav-menu a {
-      display: block;
-      color: var(--text);
-      padding: 12px 0;
-      font-size: 18px;
-      text-decoration: none;
-      border-bottom: 1px solid var(--border);
-      transition: all 0.3s ease;
-      font-weight: 500;
-    }
-    
-    .nav-menu a:hover {
-      background: rgba(46, 125, 50, 0.05);
-      padding-left: 15px;
-      color: var(--primary);
-    }
-    
-    body[dir="rtl"] .nav-menu a:hover {
-      padding-left: 0;
-      padding-right: 15px;
-    }
-    
-    .language-toggle {
-      background: rgba(46, 125, 50, 0.1);
-      color: var(--primary);
-      border: none;
-      padding: 8px 15px;
-      border-radius: 20px;
-      cursor: pointer;
-      margin-top: 20px;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      transition: all 0.3s ease;
-    }
-    
-    .language-toggle:hover {
-      background: rgba(46, 125, 50, 0.2);
-    }
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 1000;
+  padding: 0;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05);
+  transition: all 0.4s cubic-bezier(0.16, 0.8, 0.36, 1);
+}
+
+.header.scrolled {
+  padding: 0;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 15px 20px;
+  position: relative;
+}
+
+/* Logo Styles */
+.logo-link {
+  display: flex;
+  align-items: center;
+  z-index: 1002;
+  transition: transform 0.3s ease;
+}
+
+.logo-link:hover {
+  transform: scale(1.05);
+}
+
+.logo {
+  height: 60px;
+  width: auto;
+  max-width: 200px;
+  object-fit: contain;
+  transition: all 0.3s ease;
+}
+
+.header.scrolled .logo {
+  height: 50px;
+}
+
+/* Navigation Styles */
+.nav-container {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.nav-menu {
+  display: flex;
+  gap: 5px;
+  background: rgba(46, 125, 50, 0.05);
+  padding: 5px;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+}
+
+.nav-menu a {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  border-radius: 50px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.nav-menu a::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 50px;
+}
+
+.nav-menu a:hover {
+  color: white;
+  transform: translateY(-2px);
+}
+
+.nav-menu a:hover::before {
+  opacity: 1;
+}
+
+.nav-menu a.active {
+  color: white;
+  background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+}
+
+/* Header Actions */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Search Button */
+.search-btn {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: rgba(46, 125, 50, 0.1);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--primary);
+}
+
+.search-btn:hover {
+  background: var(--primary);
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(46, 125, 50, 0.3);
+}
+
+/* Language Toggle */
+.language-toggle {
+  background: rgba(46, 125, 50, 0.1);
+  color: var(--primary);
+  border: none;
+  padding: 10px 15px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.language-toggle:hover {
+  background: var(--primary);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.language-toggle i {
+  font-size: 1rem;
+}
+
+/* Hamburger Menu */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 21px;
+  cursor: pointer;
+  z-index: 1001;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.hamburger span {
+  display: block;
+  height: 3px;
+  width: 100%;
+  background: var(--primary);
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+.hamburger.active span:nth-child(1) {
+  transform: translateY(9px) rotate(45deg);
+}
+
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+  transform: translateY(-9px) rotate(-45deg);
+}
+
+/* Mobile Navigation */
+.mobile-nav {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 320px;
+  height: 100vh;
+  background: white;
+  box-shadow: -5px 0 25px rgba(0, 0, 0, 0.1);
+  z-index: 1001;
+  transition: right 0.4s cubic-bezier(0.16, 0.8, 0.36, 1);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.mobile-nav.active {
+  right: 0;
+}
+
+.mobile-nav-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.mobile-nav-logo {
+  height: 40px;
+}
+
+.mobile-nav-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.05);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mobile-nav-close:hover {
+  background: rgba(46, 125, 50, 0.1);
+  color: var(--primary);
+}
+
+.mobile-nav-menu {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+}
+
+.mobile-nav-menu a {
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.mobile-nav-menu a:hover {
+  background: rgba(46, 125, 50, 0.05);
+  color: var(--primary);
+  padding-left: 25px;
+}
+
+.mobile-nav-menu a.active {
+  color: var(--primary);
+  background: rgba(46, 125, 50, 0.05);
+  font-weight: 600;
+}
+
+.mobile-nav-menu a i {
+  margin-right: 12px;
+  font-size: 1.1rem;
+  width: 20px;
+  text-align: center;
+}
+
+.mobile-nav-actions {
+  margin-top: auto;
+  padding: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.mobile-search {
+  position: relative;
+}
+
+.mobile-search input {
+  width: 100%;
+  padding: 12px 45px 12px 15px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 30px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.mobile-search input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+}
+
+.mobile-search button {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.mobile-language-toggle {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.mobile-language-toggle:hover {
+  background: var(--primary-dark);
+}
+
+/* Search Overlay */
+.search-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 1003;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 100px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.search-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.search-container {
+  width: 100%;
+  max-width: 700px;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  transform: translateY(30px);
+  transition: transform 0.3s ease;
+}
+
+.search-overlay.active .search-container {
+  transform: translateY(0);
+}
+
+.search-form {
+  display: flex;
+  align-items: center;
+}
+
+.search-form input {
+  flex: 1;
+  padding: 20px;
+  border: none;
+  font-size: 1.1rem;
+  outline: none;
+}
+
+.search-form button {
+  width: 60px;
+  height: 60px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.search-form button:hover {
+  background: var(--primary-dark);
+}
+
+.search-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+}
+
+.search-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+/* Overlay for mobile menu */
+.menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.menu-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* RTL Support */
+body[dir="rtl"] .mobile-nav {
+  right: auto;
+  left: -100%;
+  box-shadow: 5px 0 25px rgba(0, 0, 0, 0.1);
+}
+
+body[dir="rtl"] .mobile-nav.active {
+  left: 0;
+  right: auto;
+}
+
+body[dir="rtl"] .mobile-nav-menu a {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+body[dir="rtl"] .mobile-nav-menu a:hover {
+  padding-left: 20px;
+  padding-right: 25px;
+}
+
+body[dir="rtl"] .mobile-nav-menu a i {
+  margin-right: 0;
+  margin-left: 12px;
+}
+
+body[dir="rtl"] .mobile-search input {
+  padding: 12px 15px 12px 45px;
+}
+
+body[dir="rtl"] .mobile-search button {
+  right: auto;
+  left: 5px;
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .header-container {
+    padding: 15px;
+  }
+  
+  .nav-container {
+    gap: 20px;
+  }
+  
+  .nav-menu {
+    gap: 3px;
+  }
+  
+  .nav-menu a {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-container {
+    padding: 12px 15px;
+  }
+  
+  .logo {
+    height: 50px;
+  }
+  
+  .header.scrolled .logo {
+    height: 40px;
+  }
+  
+  .nav-container {
+    display: none;
+  }
+  
+  .header-actions {
+    gap: 10px;
+  }
+  
+  .hamburger {
+    display: flex;
+  }
+  
+  .search-btn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .language-toggle {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-container {
+    padding: 10px 15px;
+  }
+  
+  .logo {
+    height: 45px;
+  }
+  
+  .header.scrolled .logo {
+    height: 35px;
+  }
+  
+  .mobile-nav {
+    width: 280px;
+  }
+  
+  .search-form input {
+    padding: 15px;
+    font-size: 1rem;
+  }
+  
+  .search-form button {
+    width: 50px;
+    height: 50px;
+  }
+}
     
     /* ============= SHOPPING CART STYLES ============= */
     .cart-overlay {
@@ -5196,34 +5633,105 @@ body[dir="rtl"] .footer-contact-info li {
     <div class="progress-bar" id="progressBar"></div>
   </div>
   
-  <!-- ============= HEADER ============= -->
-  <header class="header">
-    <div class="header-container">
-      <a href="#top" class="logo-link">
-        <img src="https://i.ibb.co/B5M4WdDR/logo-1.webp" alt="Mashhor Logo" class="logo" width="120" height="50" loading="lazy" />
-      </a>
+<!-- ============= HEADER ============= -->
+<header class="header">
+  <div class="header-container">
+    <a href="#top" class="logo-link">
+      <img src="https://i.ibb.co/B5M4WdDR/logo-1.webp" alt="Mashhor Logo" class="logo" width="120" height="50" loading="lazy" />
+    </a>
+    
+    <div class="nav-container">
+      <nav class="nav-menu">
+        <a href="#about" class="nav-link" data-en="About" data-ar="من نحن">About</a>
+        <a href="#products" class="nav-link" data-en="Products" data-ar="منتجاتنا">Products</a>
+        <a href="#why-us" class="nav-link" data-en="Why Us" data-ar="لماذا نحن">Why Us</a>
+        <a href="#certifications" class="nav-link" data-en="Certifications" data-ar="الشهادات">Certifications</a>
+        <a href="#contact-us" class="nav-link" data-en="Contact" data-ar="اتصل بنا">Contact</a>
+      </nav>
       
-      <div class="header-right">
-        <button class="hamburger" aria-label="Menu">
-          <span></span>
-          <span></span>
-          <span></span>
+      <div class="header-actions">
+        <button class="search-btn" aria-label="Search">
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="language-toggle" id="languageToggle" aria-label="Toggle language">
+          <i class="fas fa-language"></i> <span class="lang-text">عربي</span>
         </button>
       </div>
     </div>
     
-    <!-- ============= NAVIGATION MENU ============= -->
-    <nav class="nav-menu">
-      <a href="#about" class="nav-link" data-en="About" data-ar="من نحن">About</a>
-      <a href="#products" class="nav-link" data-en="Products" data-ar="منتجاتنا">Products</a>
-      <a href="#why-us" class="nav-link" data-en="Why Us" data-ar="لماذا نحن">Why Us</a>
-      <a href="#certifications" class="nav-link" data-en="Certifications" data-ar="الشهادات">Certifications</a>
-      <a href="#contact-us" class="nav-link" data-en="Contact" data-ar="اتصل بنا">Contact</a>
-      <button class="language-toggle" id="languageToggle" aria-label="Toggle language">
-        <i class="fas fa-language"></i> <span class="lang-text">عربي</span>
+    <button class="hamburger" aria-label="Menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+</header>
+
+<!-- ============= MOBILE NAVIGATION ============= -->
+<div class="mobile-nav" id="mobileNav">
+  <div class="mobile-nav-header">
+    <img src="https://i.ibb.co/B5M4WdDR/logo-1.webp" alt="Mashhor Logo" class="mobile-nav-logo" loading="lazy" />
+    <button class="mobile-nav-close" aria-label="Close menu">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+  
+  <div class="mobile-nav-menu">
+    <a href="#about" class="nav-link" data-en="About" data-ar="من نحن">
+      <i class="fas fa-info-circle"></i>
+      <span data-en="About" data-ar="من نحن">About</span>
+    </a>
+    <a href="#products" class="nav-link" data-en="Products" data-ar="منتجاتنا">
+      <i class="fas fa-box"></i>
+      <span data-en="Products" data-ar="منتجاتنا">Products</span>
+    </a>
+    <a href="#why-us" class="nav-link" data-en="Why Us" data-ar="لماذا نحن">
+      <i class="fas fa-star"></i>
+      <span data-en="Why Us" data-ar="لماذا نحن">Why Us</span>
+    </a>
+    <a href="#certifications" class="nav-link" data-en="Certifications" data-ar="الشهادات">
+      <i class="fas fa-certificate"></i>
+      <span data-en="Certifications" data-ar="الشهادات">Certifications</span>
+    </a>
+    <a href="#contact-us" class="nav-link" data-en="Contact" data-ar="اتصل بنا">
+      <i class="fas fa-envelope"></i>
+      <span data-en="Contact" data-ar="اتصل بنا">Contact</span>
+    </a>
+  </div>
+  
+  <div class="mobile-nav-actions">
+    <div class="mobile-search">
+      <input type="text" placeholder="Search..." data-en="Search..." data-ar="بحث..." />
+      <button aria-label="Search">
+        <i class="fas fa-search"></i>
       </button>
-    </nav>
-  </header>
+    </div>
+    
+    <button class="mobile-language-toggle" id="mobileLanguageToggle" aria-label="Toggle language">
+      <i class="fas fa-language"></i>
+      <span class="lang-text">عربي</span>
+    </button>
+  </div>
+</div>
+
+<div class="menu-overlay" id="menuOverlay"></div>
+
+<!-- ============= SEARCH OVERLAY ============= -->
+<div class="search-overlay" id="searchOverlay">
+  <button class="search-close" aria-label="Close search">
+    <i class="fas fa-times"></i>
+  </button>
+  
+  <div class="search-container">
+    <form class="search-form">
+      <input type="text" placeholder="Search for products..." data-en="Search for products..." data-ar="البحث عن منتجات..." />
+      <button type="submit" aria-label="Submit search">
+        <i class="fas fa-search"></i>
+      </button>
+    </form>
+  </div>
+</div>
   
   <!-- ============= SHOPPING CART ============= -->
   <div class="cart-overlay" id="cartOverlay"></div>
@@ -6695,6 +7203,9 @@ body[dir="rtl"] .footer-contact-info li {
       // Initialize cart UI
       updateCartUI();
       
+      // Initialize active nav link on page load
+updateActiveNavLink();
+      
       // ============= SCROLL EVENTS =============
       // Progress bar
       window.addEventListener('scroll', function() {
@@ -6718,55 +7229,135 @@ body[dir="rtl"] .footer-contact-info li {
       });
       
       // ============= MOBILE MENU =============
-      const hamburger = document.querySelector('.hamburger');
-      const navMenu = document.querySelector('.nav-menu');
+const hamburger = document.querySelector('.hamburger');
+const mobileNav = document.getElementById('mobileNav');
+const menuOverlay = document.getElementById('menuOverlay');
+const mobileNavClose = document.querySelector('.mobile-nav-close');
+const mobileLanguageToggle = document.getElementById('mobileLanguageToggle');
+
+if (hamburger && mobileNav && menuOverlay) {
+  hamburger.addEventListener('click', function() {
+    this.classList.toggle('active');
+    mobileNav.classList.toggle('active');
+    menuOverlay.classList.toggle('active');
+    
+    if (mobileNav.classList.contains('active')) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+  });
+  
+  menuOverlay.addEventListener('click', function() {
+    hamburger.classList.remove('active');
+    mobileNav.classList.remove('active');
+    menuOverlay.classList.remove('active');
+    document.body.style.overflow = 'auto';
+  });
+  
+  if (mobileNavClose) {
+    mobileNavClose.addEventListener('click', function() {
+      hamburger.classList.remove('active');
+      mobileNav.classList.remove('active');
+      menuOverlay.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    });
+  }
+}
+
+// Mobile language toggle
+if (mobileLanguageToggle) {
+  mobileLanguageToggle.addEventListener('click', function() {
+    const newLang = currentLang === 'ar' ? 'en' : 'ar';
+    setLanguage(newLang);
+  });
+}
+
+// ============= SEARCH OVERLAY =============
+const searchBtn = document.querySelector('.search-btn');
+const searchOverlay = document.getElementById('searchOverlay');
+const searchClose = document.querySelector('.search-close');
+const searchForm = document.querySelector('.search-form');
+
+if (searchBtn && searchOverlay) {
+  searchBtn.addEventListener('click', function() {
+    searchOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    // Focus on search input
+    setTimeout(() => {
+      const searchInput = searchOverlay.querySelector('input');
+      if (searchInput) searchInput.focus();
+    }, 300);
+  });
+  
+  if (searchClose) {
+    searchClose.addEventListener('click', function() {
+      searchOverlay.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    });
+  }
+  
+  // Close search overlay when clicking outside the search container
+  searchOverlay.addEventListener('click', function(e) {
+    if (e.target === searchOverlay) {
+      searchOverlay.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    }
+  });
+  
+  // Handle search form submission
+  if (searchForm) {
+    searchForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const searchInput = this.querySelector('input');
+      const searchTerm = searchInput.value.trim();
       
-      if (hamburger && navMenu) {
-        hamburger.addEventListener('click', function(e) {
-          e.stopPropagation();
-          this.classList.toggle('active');
-          navMenu.classList.toggle('active');
-          
-          if (navMenu.classList.contains('active')) {
-            this.style.opacity = '0';
-            this.style.pointerEvents = 'none';
-          } else {
-            this.style.opacity = '1';
-            this.style.pointerEvents = 'auto';
-          }
-        });
-        
-        // Close menu when clicking outside
-        document.addEventListener('click', function(e) {
-          if (navMenu.classList.contains('active') && 
-              !e.target.closest('.nav-menu') && 
-              !e.target.closest('.hamburger')) {
-            hamburger.classList.remove('active');
-            navMenu.classList.remove('active');
-            hamburger.style.opacity = '1';
-            hamburger.style.pointerEvents = 'auto';
-          }
-        });
-        
-        // Close menu when clicking on a link
-        document.querySelectorAll('.nav-link').forEach(link => {
-          link.addEventListener('click', () => {
-            hamburger.classList.remove('active');
-            navMenu.classList.remove('active');
-            hamburger.style.opacity = '1';
-            hamburger.style.pointerEvents = 'auto';
-          });
-        });
+      if (searchTerm) {
+        // In a real implementation, this would perform a search
+        alert(currentLang === 'ar' ? `البحث عن: ${searchTerm}` : `Searching for: ${searchTerm}`);
+        searchOverlay.classList.remove('active');
+        document.body.style.overflow = 'auto';
+        searchInput.value = '';
       }
-      
-      // ============= LANGUAGE TOGGLE =============
-      const langToggle = document.getElementById('languageToggle');
-      if (langToggle) {
-        langToggle.addEventListener('click', function() {
-          const newLang = currentLang === 'ar' ? 'en' : 'ar';
-          setLanguage(newLang);
-        });
-      }
+    });
+  }
+}
+
+// ============= ACTIVE NAV LINK =============
+// Update active nav link based on scroll position
+function updateActiveNavLink() {
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-link');
+  
+  let current = '';
+  
+  sections.forEach(section => {
+    const sectionTop = section.offsetTop;
+    const sectionHeight = section.clientHeight;
+    if (scrollY >= (sectionTop - 150)) {
+      current = section.getAttribute('id');
+    }
+  });
+  
+  navLinks.forEach(link => {
+    link.classList.remove('active');
+    if (link.getAttribute('href') === `#${current}`) {
+      link.classList.add('active');
+    }
+  });
+}
+
+window.addEventListener('scroll', updateActiveNavLink);
+
+// ============= LANGUAGE TOGGLE =============
+const langToggle = document.getElementById('languageToggle');
+if (langToggle) {
+  langToggle.addEventListener('click', function() {
+    const newLang = currentLang === 'ar' ? 'en' : 'ar';
+    setLanguage(newLang);
+  });
+}
       
       // ============= CART TOGGLE =============
       const cartIcon = document.getElementById('cartIcon');
