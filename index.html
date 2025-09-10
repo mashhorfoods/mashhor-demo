@@ -1,5 +1,3 @@
-remove the counter from why us section
-
 <!DOCTYPE html>
 <html lang="en" dir="auto">
 <head>
@@ -293,17 +291,6 @@ remove the counter from why us section
     @keyframes quoteFloat {
       0%, 100% { transform: translateY(0) rotate(0); }
       50% { transform: translateY(-10px) rotate(5deg); }
-    }
-    
-    @keyframes pulse {
-      0% {
-        transform: scale(0);
-        opacity: 0.7;
-      }
-      100% {
-        transform: scale(1.5);
-        opacity: 0;
-      }
     }
     
     @keyframes slideInRight {
@@ -3003,76 +2990,6 @@ body[dir="rtl"] .hero-image-card {
       opacity: 1;
     }
     
-    .partners-stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 30px;
-      margin: 60px 0;
-      position: relative;
-    }
-    
-    .partners-stats::before {
-      content: "";
-      position: absolute;
-      top: -40px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100px;
-      height: 3px;
-      background: linear-gradient(90deg, transparent, var(--primary), transparent);
-      border-radius: 3px;
-    }
-    
-    .stat-item {
-      background: white;
-      border-radius: 16px;
-      padding: 30px 20px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-      text-align: center;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .stat-item::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 5px;
-      background: linear-gradient(90deg, var(--primary), var(--accent));
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform 0.4s ease;
-    }
-    
-    .stat-item:hover::before {
-      transform: scaleX(1);
-    }
-    
-    .stat-item:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 15px 35px rgba(46, 125, 50, 0.15);
-    }
-    
-    .stat-number {
-      font-size: 3rem;
-      font-weight: 800;
-      color: var(--primary);
-      margin-bottom: 10px;
-      position: relative;
-      display: inline-block;
-    }
-    
-    .stat-label {
-      font-size: 1rem;
-      color: var(--text-light);
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    
     .partners-cta {
       text-align: center;
       margin-top: 40px;
@@ -3190,15 +3107,6 @@ body[dir="rtl"] .hero-image-card {
         font-size: 1.2rem;
       }
       
-      .partners-stats {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-      }
-      
-      .stat-number {
-        font-size: 2.2rem;
-      }
-      
       .cta-button {
         padding: 15px 30px;
         font-size: 1rem;
@@ -3214,13 +3122,9 @@ body[dir="rtl"] .hero-image-card {
         font-size: 1rem;
       }
       
-      .partners-stats {
-        grid-template-columns: 1fr;
-        gap: 15px;
-      }
-      
-      .stat-number {
-        font-size: 2rem;
+      .cta-button {
+        padding: 15px 30px;
+        font-size: 1rem;
       }
     }
     
@@ -3385,6 +3289,450 @@ body[dir="rtl"] .hero-image-card {
     
     body[dir="rtl"] .category-card ul li {
       text-align: right;
+    }
+    
+    /* ============= NEW GET IN TOUCH SECTION STYLES ============= */
+    .contact-section {
+      position: relative;
+      padding: 100px 0;
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      overflow: hidden;
+    }
+    
+    .contact-section::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(46, 125, 50, 0.03) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(46, 125, 50, 0.03) 0%, transparent 20%);
+      z-index: 0;
+    }
+    
+    .contact-content {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    .contact-header {
+      text-align: center;
+      margin-bottom: 70px;
+    }
+    
+    .contact-header h2 {
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin-bottom: 20px;
+      position: relative;
+      display: inline-block;
+    }
+    
+    .contact-header h2::after {
+      content: "";
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--primary));
+      border-radius: 2px;
+    }
+    
+    .section-subtitle {
+      font-size: 1.3rem;
+      color: var(--text-light);
+      max-width: 700px;
+      margin: 30px auto 0;
+      font-weight: 400;
+      line-height: 1.6;
+    }
+    
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 50px;
+      align-items: start;
+    }
+    
+    .contact-details {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .contact-details::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--primary), var(--accent));
+    }
+    
+    .contact-method {
+      display: flex;
+      margin-bottom: 30px;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+    
+    .contact-method:hover {
+      transform: translateX(10px);
+    }
+    
+    body[dir="rtl"] .contact-method:hover {
+      transform: translateX(-10px);
+    }
+    
+    .method-icon {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, rgba(46, 125, 50, 0.1) 0%, rgba(46, 125, 50, 0.2) 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 20px;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+    
+    body[dir="rtl"] .method-icon {
+      margin-right: 0;
+      margin-left: 20px;
+    }
+    
+    .contact-method:hover .method-icon {
+      background: linear-gradient(135deg, rgba(46, 125, 50, 0.2) 0%, rgba(46, 125, 50, 0.3) 100%);
+      transform: scale(1.1);
+    }
+    
+    .method-icon i {
+      font-size: 1.5rem;
+      color: var(--primary);
+      transition: all 0.3s ease;
+    }
+    
+    .contact-method:hover .method-icon i {
+      color: var(--primary-dark);
+    }
+    
+    .method-info h3 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin-bottom: 8px;
+    }
+    
+    .method-link {
+      display: inline-block;
+      color: var(--primary);
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 8px;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .method-link::after {
+      content: "";
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--accent);
+      transition: width 0.3s ease;
+    }
+    
+    .method-link:hover::after {
+      width: 100%;
+    }
+    
+    .method-description {
+      color: var(--text-light);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    
+    .contact-form {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .contact-form::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 5px;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--accent), var(--primary));
+    }
+    
+    body[dir="rtl"] .contact-form::before {
+      right: auto;
+      left: 0;
+    }
+    
+    .contact-form h3 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin-bottom: 25px;
+      position: relative;
+      display: inline-block;
+    }
+    
+    .contact-form h3::after {
+      content: "";
+      position: absolute;
+      bottom: -8px;
+      left: 0;
+      width: 40px;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+    
+    body[dir="rtl"] .contact-form h3::after {
+      left: auto;
+      right: 0;
+    }
+    
+    .form-group {
+      position: relative;
+      margin-bottom: 25px;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 15px;
+      border: 2px solid rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      font-size: 1rem;
+      background: #f9f9f9;
+      transition: all 0.3s ease;
+    }
+    
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: var(--primary);
+      background: white;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+    }
+    
+    .form-group label {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      color: #777;
+      font-size: 1rem;
+      pointer-events: none;
+      transition: all 0.3s ease;
+      background: transparent;
+      padding: 0 5px;
+    }
+    
+    body[dir="rtl"] .form-group label {
+      left: auto;
+      right: 15px;
+    }
+    
+    .form-group input:focus + label,
+    .form-group input:not(:placeholder-shown) + label,
+    .form-group textarea:focus + label,
+    .form-group textarea:not(:placeholder-shown) + label {
+      top: -10px;
+      left: 10px;
+      font-size: 0.8rem;
+      color: var(--primary);
+      background: white;
+    }
+    
+    body[dir="rtl"] .form-group input:focus + label,
+    body[dir="rtl"] .form-group input:not(:placeholder-shown) + label,
+    body[dir="rtl"] .form-group textarea:focus + label,
+    body[dir="rtl"] .form-group textarea:not(:placeholder-shown) + label {
+      left: auto;
+      right: 10px;
+    }
+    
+    .form-group textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+    
+    .submit-btn {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 15px 30px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 5px 15px rgba(46, 125, 50, 0.3);
+    }
+    
+    .submit-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(46, 125, 50, 0.4);
+    }
+    
+    .submit-btn i {
+      font-size: 1.2rem;
+    }
+    
+    .form-success {
+      display: none;
+      text-align: center;
+      padding: 20px;
+      background: rgba(46, 125, 50, 0.1);
+      border-radius: 10px;
+      margin-top: 20px;
+      color: var(--primary-dark);
+    }
+    
+    .form-success i {
+      font-size: 2.5rem;
+      color: var(--primary);
+      margin-bottom: 15px;
+    }
+    
+    .form-success p {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    
+    /* Contact Section Responsive Design */
+    @media (max-width: 992px) {
+      .contact-header h2 {
+        font-size: 2.5rem;
+      }
+      
+      .section-subtitle {
+        font-size: 1.2rem;
+      }
+      
+      .contact-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+      
+      .contact-details,
+      .contact-form {
+        padding: 30px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .contact-section {
+        padding: 80px 0;
+      }
+      
+      .contact-header {
+        margin-bottom: 50px;
+      }
+      
+      .contact-header h2 {
+        font-size: 2.2rem;
+      }
+      
+      .section-subtitle {
+        font-size: 1.1rem;
+      }
+      
+      .contact-details,
+      .contact-form {
+        padding: 25px 20px;
+      }
+      
+      .method-icon {
+        width: 50px;
+        height: 50px;
+      }
+      
+      .method-icon i {
+        font-size: 1.3rem;
+      }
+      
+      .method-info h3 {
+        font-size: 1.2rem;
+      }
+      
+      .contact-form h3 {
+        font-size: 1.6rem;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .contact-section {
+        padding: 60px 0;
+      }
+      
+      .contact-header h2 {
+        font-size: 2rem;
+      }
+      
+      .section-subtitle {
+        font-size: 1rem;
+      }
+      
+      .contact-details,
+      .contact-form {
+        padding: 20px 15px;
+      }
+      
+      .method-icon {
+        width: 45px;
+        height: 45px;
+        margin-right: 15px;
+      }
+      
+      body[dir="rtl"] .method-icon {
+        margin-right: 0;
+        margin-left: 15px;
+      }
+      
+      .method-icon i {
+        font-size: 1.2rem;
+      }
+      
+      .method-info h3 {
+        font-size: 1.1rem;
+      }
+      
+      .contact-form h3 {
+        font-size: 1.4rem;
+      }
+      
+      .submit-btn {
+        width: 100%;
+      }
     }
     
     /* ============= MODAL ============= */
@@ -5302,21 +5650,6 @@ body[dir="rtl"] .hero-image-card {
           </div>
         </div>
         
-        <div class="partners-stats">
-          <div class="stat-item">
-            <div class="stat-number" data-count="250">0</div>
-            <div class="stat-label" data-en="Tons Supplied Monthly" data-ar="طن يتم توريده شهرياً">Tons Supplied Monthly</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-number" data-count="100">0</div>
-            <div class="stat-label" data-en="Partner Businesses" data-ar="شركات شريكة">Partner Businesses</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-number" data-count="99">0</div>
-            <div class="stat-label" data-en="% Satisfaction Rate" data-ar="نسبة الرضا">% Satisfaction Rate</div>
-          </div>
-        </div>
-        
         <div class="partners-cta">
           <a href="#contact-us" class="cta-button" data-en="Become Our Partner" data-ar="كن شريكنا">
             <span data-en="Become Our Partner" data-ar="كن شريكنا">Become Our Partner</span>
@@ -5563,7 +5896,7 @@ body[dir="rtl"] .hero-image-card {
                 <div class="error-message" data-en="Please enter your message" data-ar="الرجاء إدخال رسالتك">Please enter your message</div>
               </div>
               <button type="submit" class="submit-btn">
-                <i class="fab fa-whatsapp"></i> <span data-en="Send Message" data-ar="إرسال الرسالة">Send Message</span>
+                <i class="fas fa-envelope"></i> <span data-en="Send Message" data-ar="إرسال الرسالة">Send Message</span>
               </button>
             </form>
             <div class="form-success">
@@ -6227,48 +6560,6 @@ body[dir="rtl"] .hero-image-card {
         });
       }
       
-      // ============= COUNTER ANIMATION =============
-      const observerOptions = {
-        threshold: 0.5
-      };
-      
-      const counterObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            animateCounters();
-            counterObserver.unobserve(entry.target);
-          }
-        });
-      }, observerOptions);
-      
-      document.querySelectorAll('.stat-item').forEach(item => {
-        counterObserver.observe(item);
-      });
-      
-      function animateCounters() {
-        const counters = document.querySelectorAll('.stat-number');
-        
-        counters.forEach(counter => {
-          const target = +counter.getAttribute('data-count');
-          const duration = 2000;
-          const startTime = Date.now();
-          
-          const updateCounter = () => {
-            const elapsed = Date.now() - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            const value = Math.floor(progress * target);
-            
-            counter.textContent = value === target ? `${target}+` : value;
-            
-            if (progress < 1) {
-              requestAnimationFrame(updateCounter);
-            }
-          };
-          
-          updateCounter();
-        });
-      }
-      
       // ============= CONTACT FORM =============
       const messageForm = document.getElementById('messageForm');
       const formSuccess = document.querySelector('.form-success');
@@ -6314,20 +6605,37 @@ body[dir="rtl"] .hero-image-card {
           
           if (!isValid) return;
           
-          // Create WhatsApp message based on current language
+          // Create email content
           const lang = currentLang || 'en';
-          const whatsappMessage =
-            lang === 'ar'
-              ? `رسالة جديدة من موقع ماشهور:%0A%0A*الاسم:* ${encodeURIComponent(name)}%0A*الهاتف:* ${encodeURIComponent(phone)}%0A%0A*الرسالة:*%0A${encodeURIComponent(message)}`
-              : `New message from Mashhor website:%0A%0A*Name:* ${encodeURIComponent(name)}%0A*Phone:* ${encodeURIComponent(phone)}%0A%0A*Message:*%0A${encodeURIComponent(message)}`;
+          const emailSubject = lang === 'ar' 
+            ? 'رسالة جديدة من موقع مشهور للأغذية' 
+            : 'New Message from Mashhor Foodstuff Website';
+            
+          const emailBody = lang === 'ar'
+            ? `الاسم: ${name}%0A` +
+              `البريد الإلكتروني: ${email || 'غير متوفر'}%0A` +
+              `رقم الهاتف: ${phone}%0A%0A` +
+              `الرسالة:%0A${message}`
+            : `Name: ${name}%0A` +
+              `Email: ${email || 'Not provided'}%0A` +
+              `Phone: ${phone}%0A%0A` +
+              `Message:%0A${message}`;
+          
+          // Create mailto link
+          const mailtoLink = `mailto:mashhorfoods@gmail.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
           
           // Show success message
-          if (formSuccess) formSuccess.style.display = 'block';
+          if (formSuccess) {
+            formSuccess.style.display = 'block';
+            formSuccess.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+          
+          // Reset form
           this.reset();
           
-          // Open WhatsApp after a short delay
+          // Open email client after a short delay
           setTimeout(() => {
-            window.open(`https://wa.me/96895224124?text=${whatsappMessage}`, '_blank');
+            window.location.href = mailtoLink;
           }, 1000);
         });
       }
