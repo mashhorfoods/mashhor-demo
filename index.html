@@ -1,6 +1,5 @@
-
 <!DOCTYPE html>
-<html lang="en" dir="auto">
+<html lang="en" dir="ltr">
 <head>
   <!-- ============= META INFORMATION ============= -->
   <meta charset="UTF-8">
@@ -52,7 +51,6 @@
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Mashhor Foodstuff Logo">
   <meta property="og:locale" content="en_US">
-  <meta property="og:locale:alternate" content="ar_OM">
   <meta property="og:site_name" content="Mashhor Foodstuff">
   <meta property="og:updated_time" content="2025-01-21T00:00:00+04:00">
   <meta property="og:see_also" content="https://www.facebook.com/mashhorfoodoman/">
@@ -64,29 +62,8 @@
   <link rel="icon" href="https://i.ibb.co/B5M4WdDR/logo-1.webp" type="image/png">
   <link rel="apple-touch-icon" href="https://i.ibb.co/B5M4WdDR/logo-1.webp">
   
-  <!-- Language & Anti-FOUC Scripts -->
-  <script>
-    // Set initial language before page loads to prevent FOUC (Flash of Unstyled Content)
-    window.initialLang = localStorage.getItem('language') || 
-                       (navigator.language.startsWith('ar') ? 'ar' : 'en');
-    
-    // Apply language settings immediately
-    document.documentElement.dir = window.initialLang === 'ar' ? 'rtl' : 'ltr';
-    document.documentElement.lang = window.initialLang;
-    
-    // Add anti-FOUC CSS before main CSS loads
-    const antiFoucCSS = document.createElement('style');
-    antiFoucCSS.textContent = `
-      [data-en], [data-ar] { visibility: hidden; }
-      [lang="en"] [data-en],
-      [lang="ar"] [data-ar] { visibility: visible; }
-      [data-en], [data-ar] { transition: visibility 0.3s ease; }
-    `;
-    document.head.appendChild(antiFoucCSS);
-  </script>
-  
   <!-- Font Loading -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -136,29 +113,11 @@ body {
   scroll-behavior: smooth;
 }
 
-body[dir="rtl"] {
-  font-family: 'Tajawal', sans-serif;
-  font-weight: 400;
-  font-size: 17px;
-  line-height: 1.7;
-}
-
 h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   color: var(--primary);
   line-height: 1.3;
   margin-bottom: 1.2rem;
-}
-
-body[dir="rtl"] h1, 
-body[dir="rtl"] h2, 
-body[dir="rtl"] h3, 
-body[dir="rtl"] h4, 
-body[dir="rtl"] h5, 
-body[dir="rtl"] h6 {
-  font-weight: 600;
-  letter-spacing: 0;
-  line-height: 1.4;
 }
 
 input, textarea, select, button {
@@ -238,31 +197,6 @@ textarea:focus {
 .header.scrolled {
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
-}
-
-/* Optimize for dark mode */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --primary: #4caf50;
-    --primary-dark: #388e3c;
-    --primary-light: #81c784;
-    --secondary: #1e1e1e;
-    --text: #e0e0e0;
-    --text-light: #bdbdbd;
-    --white: #121212;
-    --gray: #2a2a2a;
-    --border: rgba(255, 255, 255, 0.1);
-  }
-  
-  body {
-    background-color: var(--white);
-    color: var(--text);
-  }
-  
-  .product-card, .feature-card, .certification-card {
-    background: var(--secondary);
-    color: var(--text);
-  }
 }
 
 /* Add reduced motion preferences for accessibility */
@@ -750,32 +684,6 @@ textarea:focus {
   box-shadow: 0 5px 15px rgba(46, 125, 50, 0.3);
 }
 
-/* Language Toggle */
-.language-toggle {
-  background: rgba(46, 125, 50, 0.1);
-  color: var(--primary);
-  border: none;
-  padding: 10px 15px;
-  border-radius: 30px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.3s ease;
-}
-
-.language-toggle:hover {
-  background: var(--primary);
-  color: white;
-  transform: translateY(-2px);
-}
-
-.language-toggle i {
-  font-size: 1rem;
-}
-
 /* Hamburger Menu */
 .hamburger {
   display: none;
@@ -941,23 +849,23 @@ textarea:focus {
   cursor: pointer;
 }
 
-.mobile-language-toggle {
-  background: var(--primary);
-  color: white;
-  border: none;
-  padding: 12px;
-  border-radius: 30px;
-  cursor: pointer;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+/* Overlay for mobile menu */
+.menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
   transition: all 0.3s ease;
 }
 
-.mobile-language-toggle:hover {
-  background: var(--primary-dark);
+.menu-overlay.active {
+  opacity: 1;
+  visibility: visible;
 }
 
 /* Search Overlay */
@@ -1049,61 +957,6 @@ textarea:focus {
   transform: rotate(90deg);
 }
 
-/* Overlay for mobile menu */
-.menu-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s ease;
-}
-
-.menu-overlay.active {
-  opacity: 1;
-  visibility: visible;
-}
-
-/* RTL Support */
-body[dir="rtl"] .mobile-nav {
-  right: auto;
-  left: -100%;
-  box-shadow: 5px 0 25px rgba(0, 0, 0, 0.1);
-}
-
-body[dir="rtl"] .mobile-nav.active {
-  left: 0;
-  right: auto;
-}
-
-body[dir="rtl"] .mobile-nav-menu a {
-  padding-left: 20px;
-  padding-right: 20px;
-}
-
-body[dir="rtl"] .mobile-nav-menu a:hover {
-  padding-left: 20px;
-  padding-right: 25px;
-}
-
-body[dir="rtl"] .mobile-nav-menu a i {
-  margin-right: 0;
-  margin-left: 12px;
-}
-
-body[dir="rtl"] .mobile-search input {
-  padding: 12px 15px 12px 45px;
-}
-
-body[dir="rtl"] .mobile-search button {
-  right: auto;
-  left: 5px;
-}
-
 /* Responsive Styles */
 @media (max-width: 1024px) {
   .header-container {
@@ -1152,10 +1005,6 @@ body[dir="rtl"] .mobile-search button {
   .search-btn {
     width: 40px;
     height: 40px;
-  }
-  
-  .language-toggle {
-    display: none;
   }
 }
 
@@ -1221,19 +1070,8 @@ body[dir="rtl"] .mobile-search button {
   overflow: hidden;
 }
 
-body[dir="rtl"] .cart-drawer {
-  right: auto;
-  left: -400px;
-  box-shadow: 5px 0 25px rgba(0, 0, 0, 0.1);
-}
-
 .cart-drawer.active {
   right: 0;
-}
-
-body[dir="rtl"] .cart-drawer.active {
-  right: auto;
-  left: 0;
 }
 
 .cart-header {
@@ -1536,11 +1374,6 @@ body[dir="rtl"] .cart-drawer.active {
   transition: all 0.3s ease;
 }
 
-body[dir="rtl"] .floating-cart {
-  right: auto;
-  left: 25px;
-}
-
 .floating-cart:hover {
   transform: scale(1.1);
   box-shadow: 0 8px 25px rgba(46, 125, 50, 0.6);
@@ -1568,11 +1401,6 @@ body[dir="rtl"] .floating-cart {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-body[dir="rtl"] .cart-count {
-  right: auto;
-  left: -5px;
-}
-
 .cart-pulse {
   position: absolute;
   top: 0;
@@ -1596,18 +1424,8 @@ body[dir="rtl"] .cart-count {
     right: -100%;
   }
   
-  body[dir="rtl"] .cart-drawer {
-    right: auto;
-    left: -100%;
-  }
-  
   .cart-drawer.active {
     right: 0;
-  }
-  
-  body[dir="rtl"] .cart-drawer.active {
-    right: auto;
-    left: 0;
   }
   
   .cart-item {
@@ -1634,11 +1452,6 @@ body[dir="rtl"] .cart-count {
     height: 55px;
     bottom: 20px;
     right: 20px;
-  }
-  
-  body[dir="rtl"] .floating-cart {
-    right: auto;
-    left: 20px;
   }
   
   .floating-cart i {
@@ -1682,11 +1495,6 @@ body[dir="rtl"] .cart-count {
     height: 50px;
     bottom: 15px;
     right: 15px;
-  }
-  
-  body[dir="rtl"] .floating-cart {
-    right: auto;
-    left: 15px;
   }
   
   .floating-cart i {
@@ -2027,34 +1835,6 @@ body[dir="rtl"] .cart-count {
   }
 }
 
-/* RTL Support for Hero Section */
-body[dir="rtl"] .hero-text {
-  text-align: right;
-  padding-right: 0;
-  padding-left: 40px;
-}
-
-body[dir="rtl"] .hero-buttons {
-  justify-content: flex-start;
-}
-
-body[dir="rtl"] .btn i {
-  transform: rotate(180deg);
-}
-
-body[dir="rtl"] .btn:hover i {
-  transform: rotate(180deg) translateX(5px);
-}
-
-body[dir="rtl"] .hero-image {
-  transform: translateX(-50px);
-}
-
-body[dir="rtl"] .hero-image-card {
-  right: auto;
-  left: -30px;
-}
-
 /* Hero Section Responsive */
 @media (max-width: 992px) {
   .hero-content {
@@ -2178,38 +1958,6 @@ body[dir="rtl"] .hero-image-card {
   
   .hero-card-text p {
     font-size: 0.8rem;
-  }
-}
-
-/* RTL Responsive Adjustments */
-@media (max-width: 992px) {
-  body[dir="rtl"] .hero-text {
-    text-align: center;
-    padding-left: 0;
-  }
-  
-  body[dir="rtl"] .hero-buttons {
-    justify-content: center;
-  }
-  
-  body[dir="rtl"] .hero-image {
-    transform: translateY(30px);
-  }
-  
-  body[dir="rtl"] .hero-image-card {
-    left: -20px;
-  }
-}
-
-@media (max-width: 768px) {
-  body[dir="rtl"] .hero-image-card {
-    left: -15px;
-  }
-}
-
-@media (max-width: 480px) {
-  body[dir="rtl"] .hero-image-card {
-    left: -10px;
   }
 }
 
@@ -2647,24 +2395,6 @@ body[dir="rtl"] .hero-image-card {
   }
 }
 
-/* RTL Support */
-body[dir="rtl"] .about-text h3::after {
-  left: auto;
-  right: 0;
-}
-
-body[dir="rtl"] .about-cta {
-  flex-direction: row-reverse;
-}
-
-@media (max-width: 992px) {
-  body[dir="rtl"] .about-text h3::after {
-    right: 50%;
-    left: auto;
-    transform: translateX(50%);
-  }
-}
-
 /* ============= NEW PRODUCT SECTION STYLES ============= */
 .products-section {
   padding: 80px 15px;
@@ -2680,7 +2410,7 @@ body[dir="rtl"] .about-cta {
   left: 0;
   width: 100%;
   height: 100%;
-  background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmNWY1ZjUiIGZpbGwtb3BhY2l0eT0iMC4zIj48cGF0aCBkPSJNMzYgMzR2LTRoLTR2NGgtNHY0aDR2NGg0di00aDR2LTRoLTR6Ii8+PC9nPjwvZz48L3N2Zz4=');
+  background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmNWY1ZjUiIGZpbGwtb3BhY2l0eT0iMC4zIj48cGF0aCBkPSJNMzYgMzR2LTRoLTR2NGgtNHY0aDR2NGg0di04eiIvPjwvZz48L2c+PC9zdmc+');
   opacity: 0.05;
   z-index: 0;
 }
@@ -2954,16 +2684,6 @@ body[dir="rtl"] .about-cta {
   font-weight: bold;
 }
 
-body[dir="rtl"] .product-features li {
-  padding-left: 0;
-  padding-right: 25px;
-}
-
-body[dir="rtl"] .product-features li::before {
-  left: auto;
-  right: 0;
-}
-
 .product-actions {
   display: flex;
   flex-direction: column;
@@ -2976,10 +2696,6 @@ body[dir="rtl"] .product-features li::before {
   justify-content: center;
   gap: 10px;
   margin-bottom: 5px;
-}
-
-body[dir="rtl"] .quantity-selector {
-  flex-direction: row-reverse;
 }
 
 .quantity-btn {
@@ -3518,38 +3234,6 @@ body[dir="rtl"] .quantity-selector {
   }
 }
 
-/* RTL Support */
-body[dir="rtl"] .feature-title::after {
-  left: auto;
-  right: 0;
-}
-
-body[dir="rtl"] .feature-link i {
-  margin-left: 0;
-  margin-right: 8px;
-}
-
-body[dir="rtl"] .feature-link:hover i {
-  transform: translateX(-5px);
-}
-
-body[dir="rtl"] .why-us-testimonial-author {
-  justify-content: flex-start;
-}
-
-body[dir="rtl"] .why-us-testimonial-author-info {
-  text-align: left;
-}
-
-body[dir="rtl"] .why-us-cta-btn i {
-  margin-left: 0;
-  margin-right: 10px;
-}
-
-body[dir="rtl"] .why-us-cta-btn:hover i {
-  transform: translateX(-5px);
-}
-
 /* ============= CERTIFICATIONS SECTION ============= */
 .certifications-section {
   padding: 100px 20px;
@@ -3927,21 +3611,6 @@ body[dir="rtl"] .why-us-cta-btn:hover i {
   }
 }
 
-/* RTL Support */
-body[dir="rtl"] .certification-details h3::after {
-  left: auto;
-  right: 0;
-}
-
-body[dir="rtl"] .certifications-cta-btn i {
-  margin-left: 0;
-  margin-right: 10px;
-}
-
-body[dir="rtl"] .certifications-cta-btn:hover i {
-  transform: translateX(-5px);
-}
-
 /* ============= NEW PARTNERS SECTION STYLES ============= */
 .partners-section {
   padding: 100px 20px;
@@ -4136,10 +3805,6 @@ body[dir="rtl"] .certifications-cta-btn:hover i {
   transform: translateX(5px);
 }
 
-body[dir="rtl"] .feature-item:hover {
-  transform: translateX(-5px);
-}
-
 .feature-item i {
   color: var(--accent);
   font-size: 1rem;
@@ -4321,21 +3986,6 @@ body[dir="rtl"] .feature-item:hover {
   }
 }
 
-/* RTL Support */
-body[dir="rtl"] .partner-title::after {
-  left: auto;
-  right: 0;
-}
-
-body[dir="rtl"] .cta-button i {
-  margin-left: 0;
-  margin-right: 10px;
-}
-
-body[dir="rtl"] .cta-button:hover i {
-  transform: translateX(-5px);
-}
-
 /* ============= ENHANCED SECTION ============= */
 .enhanced-section {
   padding: 60px 15px;
@@ -4480,10 +4130,6 @@ body[dir="rtl"] .cta-button:hover i {
   font-size: 0.9rem;
 }
 
-body[dir="rtl"] .category-card ul li {
-  text-align: right;
-}
-
 /* ============= NEW GET IN TOUCH SECTION STYLES ============= */
 .contact-section {
   position: relative;
@@ -4585,10 +4231,6 @@ body[dir="rtl"] .category-card ul li {
   transform: translateX(10px);
 }
 
-body[dir="rtl"] .contact-method:hover {
-  transform: translateX(-10px);
-}
-
 .method-icon {
   width: 60px;
   height: 60px;
@@ -4600,11 +4242,6 @@ body[dir="rtl"] .contact-method:hover {
   margin-right: 20px;
   flex-shrink: 0;
   transition: all 0.3s ease;
-}
-
-body[dir="rtl"] .method-icon {
-  margin-right: 0;
-  margin-left: 20px;
 }
 
 .contact-method:hover .method-icon {
@@ -4679,11 +4316,6 @@ body[dir="rtl"] .method-icon {
   background: linear-gradient(to bottom, var(--accent), var(--primary));
 }
 
-body[dir="rtl"] .contact-form::before {
-  right: auto;
-  left: 0;
-}
-
 .contact-form h3 {
   font-size: 1.8rem;
   font-weight: 700;
@@ -4702,11 +4334,6 @@ body[dir="rtl"] .contact-form::before {
   height: 3px;
   background: var(--accent);
   border-radius: 2px;
-}
-
-body[dir="rtl"] .contact-form h3::after {
-  left: auto;
-  right: 0;
 }
 
 .form-group {
@@ -4745,11 +4372,6 @@ body[dir="rtl"] .contact-form h3::after {
   padding: 0 5px;
 }
 
-body[dir="rtl"] .form-group label {
-  left: auto;
-  right: 15px;
-}
-
 .form-group input:focus + label,
 .form-group input:not(:placeholder-shown) + label,
 .form-group textarea:focus + label,
@@ -4759,14 +4381,6 @@ body[dir="rtl"] .form-group label {
   font-size: 0.8rem;
   color: var(--primary);
   background: white;
-}
-
-body[dir="rtl"] .form-group input:focus + label,
-body[dir="rtl"] .form-group input:not(:placeholder-shown) + label,
-body[dir="rtl"] .form-group textarea:focus + label,
-body[dir="rtl"] .form-group textarea:not(:placeholder-shown) + label {
-  right: 10px;
-  left: auto;
 }
 
 .form-group textarea {
@@ -4906,11 +4520,6 @@ body[dir="rtl"] .form-group textarea:not(:placeholder-shown) + label {
     margin-right: 15px;
   }
   
-  body[dir="rtl"] .method-icon {
-    margin-right: 0;
-    margin-left: 15px;
-  }
-  
   .method-icon i {
     font-size: 1.2rem;
   }
@@ -4986,10 +4595,6 @@ body[dir="rtl"] .form-group textarea:not(:placeholder-shown) + label {
   text-align: left;
 }
 
-body[dir="rtl"] .modal-info {
-  text-align: right;
-}
-
 .modal-info h3 {
   font-size: 1.3rem;
   margin-bottom: 12px;
@@ -5025,11 +4630,6 @@ body[dir="rtl"] .modal-info {
   padding: 6px;
   text-align: left;
   border-bottom: 1px solid #eee;
-}
-
-body[dir="rtl"] .nutrition-table th,
-body[dir="rtl"] .nutrition-table td {
-  text-align: right;
 }
 
 .nutrition-table th {
@@ -5206,10 +4806,6 @@ footer {
   margin: 0;
 }
 
-body[dir="rtl"] footer {
-  font-family: 'Tajawal', sans-serif;
-}
-
 /* Footer decorative elements */
 footer::before {
   content: "";
@@ -5238,7 +4834,7 @@ footer::after {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-4v4h-4v4h4v4h4v-4h4v-4h-4zM6 34v-4H2v4H0v4h2v4h4v-4h4v-4H6zM6 4V0H2v4H0v4h2v4h4V8h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-4v4h-4v4h4v4h4v-4h4v-4h-4z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   opacity: 0.5;
   z-index: 0;
 }
@@ -5276,11 +4872,6 @@ footer::after {
     align-items: flex-start;
     text-align: left;
   }
-  
-  body[dir="rtl"] .footer-logo {
-    align-items: flex-end;
-    text-align: right;
-  }
 }
 
 .footer-logo img {
@@ -5313,10 +4904,6 @@ footer::after {
 @media (min-width: 768px) {
   .social-links {
     justify-content: flex-start;
-  }
-  
-  body[dir="rtl"] .social-links {
-    justify-content: flex-end;
   }
 }
 
@@ -5405,11 +4992,6 @@ footer::after {
   background: var(--accent);
 }
 
-body[dir="rtl"] .footer-links-section h3::after {
-  left: auto;
-  right: 0;
-}
-
 /* Footer links */
 .footer-links {
   list-style: none;
@@ -5439,27 +5021,13 @@ body[dir="rtl"] .footer-links-section h3::after {
   transition: transform 0.3s ease;
 }
 
-body[dir="rtl"] .footer-links a::before {
-  content: "‹";
-  margin-right: 0;
-  margin-left: 8px;
-}
-
 .footer-links a:hover {
   color: white;
   transform: translateX(5px);
 }
 
-body[dir="rtl"] .footer-links a:hover {
-  transform: translateX(-5px);
-}
-
 .footer-links a:hover::before {
   transform: translateX(3px);
-}
-
-body[dir="rtl"] .footer-links a:hover::before {
-  transform: translateX(-3px);
 }
 
 /* Footer contact info */
@@ -5474,10 +5042,6 @@ body[dir="rtl"] .footer-links a:hover::before {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-}
-
-body[dir="rtl"] .footer-contact-info li {
-  flex-direction: row-reverse;
 }
 
 .footer-contact-info i {
@@ -5639,108 +5203,6 @@ body[dir="rtl"] .footer-contact-info li {
   opacity: 1;
 }
 
-/* ============= RTL SUPPORT ============= */
-/* Prevent language mixing during load */
-[data-en], [data-ar] {
-  visibility: hidden;
-}
-[lang="en"] [data-en],
-[lang="ar"] [data-ar] {
-  visibility: visible;
-}
-/* Smooth transition for language switch */
-[data-en], [data-ar] {
-  transition: visibility 0.3s ease;
-}
-
-/* حل مشكلة الأرقام في اللغة العربية */
-.rtl-numbers {
-  unicode-bidi: plaintext;
-  direction: ltr;
-  display: inline-block;
-  font-family: 'Tajawal', 'Segoe UI', Arial, sans-serif;
-}
-
-/* تأكد من أن الأرقام في عناصر الاتصال تظهر بشكل صحيح */
-.method-link .rtl-numbers,
-.footer-contact-info .rtl-numbers {
-  unicode-bidi: plaintext;
-  direction: ltr;
-  display: inline-block;
-}
-
-/* تحسينات للغة العربية */
-body[dir="rtl"] {
-  text-align: right;
-}
-
-body[dir="rtl"] .product-card ul,
-body[dir="rtl"] .modal-info,
-body[dir="rtl"] .nutrition-table th, 
-body[dir="rtl"] .nutrition-table td {
-  text-align: right;
-}
-
-body[dir="rtl"] .form-group label {
-  right: 15px;
-  left: auto;
-}
-
-body[dir="rtl"] .form-group input:focus + label,
-body[dir="rtl"] .form-group input:not(:placeholder-shown) + label,
-body[dir="rtl"] .form-group textarea:focus + label,
-body[dir="rtl"] .form-group textarea:not(:placeholder-shown) + label {
-  right: 10px;
-  left: auto;
-}
-
-body[dir="rtl"] .quantity-selector {
-  flex-direction: row-reverse;
-}
-
-body[dir="rtl"] .favorite-btn {
-  right: auto;
-  left: 15px;
-}
-
-body[dir="rtl"] .category-card ul li {
-  text-align: right;
-  padding-right: 20px;
-  padding-left: 0;
-}
-
-body[dir="rtl"] .category-card ul li::before {
-  right: 0;
-  left: auto;
-}
-
-body[dir="rtl"] .product-actions {
-  text-align: right;
-}
-
-/* حل مشكلة انعكاس الأرقام في اللغة العربية */
-.contact-number,
-.rtl-numbers {
-  unicode-bidi: plaintext;
-  direction: ltr;
-  display: inline-block;
-  font-family: 'Tajawal', 'Segoe UI', Arial, sans-serif;
-}
-
-body[dir="rtl"] .contact-number,
-body[dir="rtl"] .rtl-numbers {
-  unicode-bidi: plaintext;
-  direction: ltr;
-  display: inline-block;
-}
-
-/* تحسين ظهور الأرقام في عناصر الاتصال */
-.method-link .contact-number,
-.footer-contact-info .contact-number {
-  unicode-bidi: plaintext;
-  direction: ltr;
-}
-
 /* ============= RESPONSIVE STYLES ============= */
 @media (max-width: 480px) {
   .hero {
@@ -5792,11 +5254,6 @@ body[dir="rtl"] .rtl-numbers {
     right: 15px;
   }
   
-  body[dir="rtl"] .floating-cart {
-    right: auto;
-    left: 15px;
-  }
-  
   .floating-cart i {
     font-size: 1.5rem;
   }
@@ -5813,18 +5270,8 @@ body[dir="rtl"] .rtl-numbers {
     right: -100%;
   }
   
-  body[dir="rtl"] .cart-drawer {
-    right: auto;
-    left: -100%;
-  }
-  
   .cart-drawer.active {
     right: 0;
-  }
-  
-  body[dir="rtl"] .cart-drawer.active {
-    right: auto;
-    left: 0;
   }
   
   .cart-item {
@@ -5835,11 +5282,6 @@ body[dir="rtl"] .rtl-numbers {
   
   .cart-item-image {
     margin-right: 0;
-    margin-bottom: 15px;
-  }
-  
-  body[dir="rtl"] .cart-item-image {
-    margin-left: 0;
     margin-bottom: 15px;
   }
   
@@ -6042,192 +5484,6 @@ body[dir="rtl"] .rtl-numbers {
   }
 }
 
-/* Hero Section Responsive */
-@media (max-width: 992px) {
-  .hero-content {
-    flex-direction: column;
-    text-align: center;
-    max-width: 800px;
-  }
-  
-  .hero-text {
-    max-width: 100%;
-    padding-right: 0;
-    margin-bottom: 50px;
-    text-align: center;
-  }
-  
-  .hero-title {
-    font-size: 3rem;
-  }
-  
-  .hero-buttons {
-    justify-content: center;
-  }
-  
-  .hero-features {
-    justify-content: center;
-  }
-  
-  .hero-image {
-    max-width: 400px;
-    transform: translateY(30px);
-    animation: fadeInUp 1s ease forwards 0.6s;
-  }
-  
-  .hero-image-card {
-    bottom: -20px;
-    right: -20px;
-  }
-}
-
-@media (max-width: 768px) {
-  .hero-title {
-    font-size: 2.5rem;
-  }
-  
-  .hero-subtitle {
-    font-size: 1.1rem;
-  }
-  
-  .hero-buttons {
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 300px;
-    margin: 0 auto 40px;
-  }
-  
-  .btn {
-    width: 100%;
-  }
-  
-  .hero-features {
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  .hero-image {
-    max-width: 300px;
-  }
-  
-  .hero-image-card {
-    bottom: -15px;
-    right: -15px;
-    padding: 15px;
-    min-width: 150px;
-  }
-  
-  .hero-card-icon {
-    width: 40px;
-    height: 40px;
-  }
-}
-
-@media (max-width: 480px) {
-  .hero-title {
-    font-size: 2rem;
-  }
-  
-  .hero-subtitle {
-    font-size: 1rem;
-  }
-  
-  .hero-badge {
-    font-size: 0.8rem;
-    padding: 6px 12px;
-  }
-  
-  .btn {
-    padding: 14px 24px;
-    font-size: 0.9rem;
-  }
-  
-  .hero-image {
-    max-width: 250px;
-  }
-  
-  .hero-image-card {
-    bottom: -10px;
-    right: -10px;
-    padding: 12px;
-    min-width: 130px;
-  }
-  
-  .hero-card-icon {
-    width: 35px;
-    height: 35px;
-    font-size: 1rem;
-  }
-  
-  .hero-card-text h4 {
-    font-size: 0.9rem;
-  }
-  
-  .hero-card-text p {
-    font-size: 0.8rem;
-  }
-}
-
-/* RTL Support */
-body[dir="rtl"] .hero-text {
-  text-align: right;
-  padding-right: 0;
-  padding-left: 40px;
-}
-
-body[dir="rtl"] .hero-buttons {
-  justify-content: flex-start;
-}
-
-body[dir="rtl"] .btn i {
-  transform: rotate(180deg);
-}
-
-body[dir="rtl"] .btn:hover i {
-  transform: rotate(180deg) translateX(5px);
-}
-
-body[dir="rtl"] .hero-image {
-  transform: translateX(-50px);
-}
-
-body[dir="rtl"] .hero-image-card {
-  right: auto;
-  left: -30px;
-}
-
-@media (max-width: 992px) {
-  body[dir="rtl"] .hero-text {
-    text-align: center;
-    padding-left: 0;
-  }
-  
-  body[dir="rtl"] .hero-buttons {
-    justify-content: center;
-  }
-  
-  body[dir="rtl"] .hero-image {
-    transform: translateY(30px);
-  }
-  
-  body[dir="rtl"] .hero-image-card {
-    left: -20px;
-  }
-}
-
-@media (max-width: 768px) {
-  body[dir="rtl"] .hero-image-card {
-    left: -15px;
-  }
-}
-
-@media (max-width: 480px) {
-  body[dir="rtl"] .hero-image-card {
-    left: -10px;
-  }
-}
-
 /* ============= UTILITY STYLES ============= */
 .container {
   max-width: 1200px;
@@ -6293,7 +5549,7 @@ body[dir="rtl"] .hero-image-card {
       "telephone": "+968-95224124",
       "contactType": "Customer service",
       "areaServed": "OM",
-      "availableLanguage": ["en", "ar"]
+      "availableLanguage": "en"
     },
     "sameAs": [
       "https://www.facebook.com/mashhorfoodoman/",
@@ -6304,7 +5560,7 @@ body[dir="rtl"] .hero-image-card {
 </head>
 <body id="top">
   <!-- ============= SKIP TO CONTENT LINK ============= -->
-  <a href="#main-content" class="skip-link" data-en="Skip to content" data-ar="انتقل إلى المحتوى">Skip to content</a>
+  <a href="#main-content" class="skip-link">Skip to content</a>
   
   <!-- ============= PROGRESS BAR ============= -->
   <div class="progress-container">
@@ -6320,20 +5576,16 @@ body[dir="rtl"] .hero-image-card {
     
     <div class="nav-container">
       <nav class="nav-menu">
-        <a href="#about" class="nav-link" data-en="About us" data-ar="من نحن">About</a>
-        <a href="#products" class="nav-link" data-en="Products" data-ar="منتجاتنا">Products</a>
-        <a href="#why-us" class="nav-link" data-en="Why Us" data-ar="لماذا نحن">Why Us</a>
-        <a href="#certifications" class="nav-link" data-en="Certifications" data-ar="الشهادات">Certifications</a>
-        <a href="#contact-us" class="nav-link" data-en="Contact" data-ar="اتصل بنا">Contact</a>
+        <a href="#about" class="nav-link">About</a>
+        <a href="#products" class="nav-link">Products</a>
+        <a href="#why-us" class="nav-link">Why Us</a>
+        <a href="#certifications" class="nav-link">Certifications</a>
+        <a href="#contact-us" class="nav-link">Contact</a>
       </nav>
       
       <div class="header-actions">
         <button class="search-btn" aria-label="Search">
           <i class="fas fa-search"></i>
-        </button>
-        
-        <button class="language-toggle" id="languageToggle" aria-label="Toggle language">
-          <i class="fas fa-language"></i> <span class="lang-text">عربي</span>
         </button>
       </div>
     </div>
@@ -6356,40 +5608,35 @@ body[dir="rtl"] .hero-image-card {
   </div>
   
   <div class="mobile-nav-menu">
-    <a href="#about us" class="nav-link" data-en="About" data-ar="من نحن">
+    <a href="#about" class="nav-link">
       <i class="fas fa-info-circle"></i>
-      <span data-en="About" data-ar="من نحن">About</span>
+      <span>About</span>
     </a>
-    <a href="#products" class="nav-link" data-en="Products" data-ar="منتجاتنا">
+    <a href="#products" class="nav-link">
       <i class="fas fa-box"></i>
-      <span data-en="Products" data-ar="منتجاتنا">Products</span>
+      <span>Products</span>
     </a>
-    <a href="#why-us" class="nav-link" data-en="Why Us" data-ar="لماذا نحن">
+    <a href="#why-us" class="nav-link">
       <i class="fas fa-star"></i>
-      <span data-en="Why Us" data-ar="لماذا نحن">Why Us</span>
+      <span>Why Us</span>
     </a>
-    <a href="#certifications" class="nav-link" data-en="Certifications" data-ar="الشهادات">
+    <a href="#certifications" class="nav-link">
       <i class="fas fa-certificate"></i>
-      <span data-en="Certifications" data-ar="الشهادات">Certifications</span>
+      <span>Certifications</span>
     </a>
-    <a href="#contact-us" class="nav-link" data-en="Contact" data-ar="اتصل بنا">
+    <a href="#contact-us" class="nav-link">
       <i class="fas fa-envelope"></i>
-      <span data-en="Contact" data-ar="اتصل بنا">Contact</span>
+      <span>Contact</span>
     </a>
   </div>
   
   <div class="mobile-nav-actions">
     <div class="mobile-search">
-      <input type="text" placeholder="Search..." data-en="Search..." data-ar="بحث..." />
+      <input type="text" placeholder="Search..." />
       <button aria-label="Search">
         <i class="fas fa-search"></i>
       </button>
     </div>
-    
-    <button class="mobile-language-toggle" id="mobileLanguageToggle" aria-label="Toggle language">
-      <i class="fas fa-language"></i>
-      <span class="lang-text">عربي</span>
-    </button>
   </div>
 </div>
 
@@ -6403,7 +5650,7 @@ body[dir="rtl"] .hero-image-card {
   
   <div class="search-container">
     <form class="search-form">
-      <input type="text" placeholder="Search for products..." data-en="Search for products..." data-ar="البحث عن منتجات..." />
+      <input type="text" placeholder="Search for products..." />
       <button type="submit" aria-label="Submit search">
         <i class="fas fa-search"></i>
       </button>
@@ -6415,7 +5662,7 @@ body[dir="rtl"] .hero-image-card {
   <div class="cart-overlay" id="cartOverlay"></div>
   <div class="cart-drawer" id="cartDrawer">
     <div class="cart-header">
-      <h3 data-en="Your Shopping Cart" data-ar="سلة التسوق الخاصة بك">Your Shopping Cart</h3>
+      <h3>Your Shopping Cart</h3>
       <button class="close-cart" id="closeCart">
         <i class="fas fa-times"></i>
       </button>
@@ -6427,10 +5674,10 @@ body[dir="rtl"] .hero-image-card {
           <div class="empty-cart-icon">
             <i class="fas fa-shopping-basket"></i>
           </div>
-          <h4 data-en="Your cart is empty" data-ar="سلة التسوق فارغة">Your cart is empty</h4>
-          <p data-en="Add some delicious rice to your cart" data-ar="أضف بعض الأرز اللذيذ إلى سلة التسوق">Add some delicious rice to your cart</p>
+          <h4>Your cart is empty</h4>
+          <p>Add some delicious rice to your cart</p>
           <button class="continue-shopping-btn" id="continueShopping">
-            <span data-en="Continue Shopping" data-ar="مواصلة التسوق">Continue Shopping</span>
+            <span>Continue Shopping</span>
           </button>
         </div>
       </div>
@@ -6439,11 +5686,11 @@ body[dir="rtl"] .hero-image-card {
     <div class="cart-footer" id="cartFooter" style="display: none;">
       <div class="cart-summary">
         <div class="summary-row">
-          <span data-en="Total Items:" data-ar="إجمالي العناصر:">Total Items:</span>
+          <span>Total Items:</span>
           <span class="summary-value" id="cartTotalItems">0</span>
         </div>
         <div class="summary-row total-row">
-          <span data-en="Estimated Total:" data-ar="الإجمالي التقريبي:">Estimated Total:</span>
+          <span>Estimated Total:</span>
           <span class="summary-value" id="cartEstimatedTotal">OMR 0.00</span>
         </div>
       </div>
@@ -6451,11 +5698,11 @@ body[dir="rtl"] .hero-image-card {
       <div class="cart-actions">
         <button class="cart-clear-btn" id="clearCart">
           <i class="fas fa-trash-alt"></i>
-          <span data-en="Clear Cart" data-ar="تفريغ السلة">Clear Cart</span>
+          <span>Clear Cart</span>
         </button>
         <button class="cart-checkout-btn" id="cartCheckout">
           <i class="fab fa-whatsapp"></i>
-          <span data-en="Checkout via WhatsApp" data-ar="إتمام الشراء عبر واتساب">Checkout via WhatsApp</span>
+          <span>Checkout via WhatsApp</span>
         </button>
       </div>
     </div>
@@ -6480,40 +5727,40 @@ body[dir="rtl"] .hero-image-card {
       <div class="hero-content">
         <div class="hero-text">
           <div class="hero-badge">
-            <span data-en="Premium Quality" data-ar="جودة ممتازة">Premium Quality</span>
+            <span>Premium Quality</span>
           </div>
           
           <h1 class="hero-title">
-            <span class="line" data-en="Premium Rice Supplier" data-ar="مورد الأرز الممتاز">Premium Rice Supplier</span>
-            <span class="line" data-en="in Oman" data-ar="في عمان">in Oman</span>
+            <span class="line">Premium Rice Supplier</span>
+            <span class="line">in Oman</span>
           </h1>
           
-          <p class="hero-subtitle" data-en="Source of high-quality Basmati and Non-Basmati rice for every table" data-ar="مصدر الأرز البسمتي وغير البسمتي عالي الجودة لكل مائدة">
+          <p class="hero-subtitle">
             Source of high-quality Basmati and Non-Basmati rice for every table
           </p>
           
           <div class="hero-buttons">
-            <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20your%20products." target="_blank" class="btn btn-primary" data-en="Order Now" data-ar="اطلب الآن">
-              <span data-en="Order Now" data-ar="اطلب الآن">Order Now</span>
+            <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20your%20products." target="_blank" class="btn btn-primary">
+              <span>Order Now</span>
               <i class="fas fa-arrow-right"></i>
             </a>
-            <a href="#products" class="btn btn-outline" data-en="View Products" data-ar="عرض المنتجات">
-              <span data-en="View Products" data-ar="عرض المنتجات">View Products</span>
+            <a href="#products" class="btn btn-outline">
+              <span>View Products</span>
             </a>
           </div>
           
           <div class="hero-features">
             <div class="hero-feature">
               <i class="fas fa-certificate"></i>
-              <span data-en="Certified Quality" data-ar="جودة معتمدة">Certified Quality</span>
+              <span>Certified Quality</span>
             </div>
             <div class="hero-feature">
               <i class="fas fa-truck-fast"></i>
-              <span data-en="Fast Delivery" data-ar="توصيل سريع">Fast Delivery</span>
+              <span>Fast Delivery</span>
             </div>
             <div class="hero-feature">
               <i class="fas fa-leaf"></i>
-              <span data-en="100% Natural" data-ar="100% طبيعي">100% Natural</span>
+              <span>100% Natural</span>
             </div>
           </div>
         </div>
@@ -6527,8 +5774,8 @@ body[dir="rtl"] .hero-image-card {
                   <i class="fas fa-award"></i>
                 </div>
                 <div class="hero-card-text">
-                  <h4 data-en="Premium Quality" data-ar="جودة ممتازة">Premium Quality</h4>
-                  <p data-en="ISO Certified" data-ar="معتمد حسب الأيزو">ISO Certified</p>
+                  <h4>Premium Quality</h4>
+                  <p>ISO Certified</p>
                 </div>
               </div>
             </div>
@@ -6538,7 +5785,7 @@ body[dir="rtl"] .hero-image-card {
       
       <div class="hero-scroll-indicator">
         <div class="scroll-dot"></div>
-        <span data-en="Scroll Down" data-ar="للأسفل">Scroll Down</span>
+        <span>Scroll Down</span>
       </div>
     </section>
     
@@ -6546,21 +5793,21 @@ body[dir="rtl"] .hero-image-card {
     <section id="products" class="products-section load-animate">
       <div class="products-container">
         <div class="section-header">
-          <h2 class="section-title" data-en="Our Premium Products" data-ar="منتجاتنا المميزة">Our Premium Products</h2>
-          <p class="section-subtitle" data-en="A Grain for every table" data-ar="حبة لكل مائدة">A Grain for every table</p>
+          <h2 class="section-title">Our Premium Products</h2>
+          <p class="section-subtitle">A Grain for every table</p>
         </div>
         
         <!-- Product Categories Tabs -->
         <div class="product-categories">
-          <button class="category-tab active" data-category="all" data-en="All Products" data-ar="جميع المنتجات">All Products</button>
-          <button class="category-tab" data-category="basmati" data-en="Basmati Rice" data-ar="أرز بسمتي">Basmati Rice</button>
-          <button class="category-tab" data-category="non-basmati" data-en="Non-Basmati Rice" data-ar="أرز غير بسمتي">Non-Basmati Rice</button>
+          <button class="category-tab active" data-category="all">All Products</button>
+          <button class="category-tab" data-category="basmati">Basmati Rice</button>
+          <button class="category-tab" data-category="non-basmati">Non-Basmati Rice</button>
         </div>
         
         <div class="products-grid">
           <!-- Product 1 - Basmati -->
           <div class="product-card" data-category="basmati">
-            <div class="product-badge" data-en="Premium" data-ar="مميز">Premium</div>
+            <div class="product-badge">Premium</div>
             <button class="favorite-btn" aria-label="Add to favorites"><i class="far fa-heart"></i></button>
             <div class="product-image-container">
               <img src="https://i.ibb.co/zVmRP872/Untitled-1-copy.webp" 
@@ -6572,13 +5819,13 @@ body[dir="rtl"] .hero-image-card {
                    onerror="this.src='https://via.placeholder.com/300x200/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
             </div>
             <div class="product-info">
-              <h3 class="product-title" data-en="MASHHOR INDIAN XXXL 1121 Basmati Rice (35kg)" data-ar="أرز مشهور بسمتي اكس اكس اكس ال 1121 هندي (35 كجم)">MASHHOR INDIAN XXXL 1121 Basmati Rice (35kg)</h3>
+              <h3 class="product-title">MASHHOR INDIAN XXXL 1121 Basmati Rice (35kg)</h3>
               <div class="product-features">
                 <ul>
-                  <li data-en="Premium Long Grain Basmati Rice" data-ar="أرز بسمتي طويل الحبة ممتاز">Premium Long Grain Basmati Rice</li>
-                  <li data-en="Suitable for diabetics" data-ar="مناسب لمرضى السكري">Suitable for diabetics</li>
-                  <li data-en="Cholesterol free" data-ar="خالي من الكوليسترول">Cholesterol free</li>
-                  <li data-en="Aged rice" data-ar="أرز معتق">Aged rice</li>
+                  <li>Premium Long Grain Basmati Rice</li>
+                  <li>Suitable for diabetics</li>
+                  <li>Cholesterol free</li>
+                  <li>Aged rice</li>
                 </ul>
               </div>
               <div class="product-actions">
@@ -6588,17 +5835,17 @@ body[dir="rtl"] .hero-image-card {
                   <button class="quantity-btn plus">+</button>
                 </div>
                 <div class="product-buttons">
-                  <button class="add-to-cart-btn" data-product-id="1" data-en="Add to Cart" data-ar="أضف إلى السلة">
+                  <button class="add-to-cart-btn" data-product-id="1">
                     <i class="fas fa-shopping-cart"></i>
-                    <span data-en="Add to Cart" data-ar="أضف إلى السلة">Add to Cart</span>
+                    <span>Add to Cart</span>
                   </button>
-                  <button class="quick-view-btn" data-product="1" data-en="Quick View" data-ar="عرض سريع">
+                  <button class="quick-view-btn" data-product="1">
                     <i class="fas fa-eye"></i>
                   </button>
                 </div>
-                <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MASHHOR%20INDIAN%20XXXL%201121%20Basmati%20Rice%20(35kg)." target="_blank" class="whatsapp-order-btn" data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">
+                <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MASHHOR%20INDIAN%20XXXL%201121%20Basmati%20Rice%20(35kg)." target="_blank" class="whatsapp-order-btn">
                   <i class="fab fa-whatsapp"></i>
-                  <span data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">Order via WhatsApp</span>
+                  <span>Order via WhatsApp</span>
                 </a>
               </div>
             </div>
@@ -6606,17 +5853,17 @@ body[dir="rtl"] .hero-image-card {
           
           <!-- Product 2 - Basmati -->
           <div class="product-card" data-category="basmati">
-            <div class="product-badge" data-en="Popular" data-ar="شائع">Popular</div>
+            <div class="product-badge">Popular</div>
             <button class="favorite-btn" aria-label="Add to favorites"><i class="far fa-heart"></i></button>
             <div class="product-image-container">
               <img src="https://i.ibb.co/TMntxccG/https://i.ibb.co/4nrGdyFC/mashhor.webp5.webp" alt="MASHHOR RICE 5kg" loading="lazy" class="product-image" width="300" height="200" onerror="this.src='https://via.placeholder.com/300x200/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
             </div>
             <div class="product-info">
-              <h3 class="product-title" data-en="MASHHOR INDIAN XXXL 1121 Basmati Rice (5kg)" data-ar="أرز مشهور بسمتي اكس اكس اكس ال 1121 هندي (5 كجم)">MASHHOR INDIAN XXXL 1121 Basmati Rice (5kg)</h3>
+              <h3 class="product-title">MASHHOR INDIAN XXXL 1121 Basmati Rice (5kg)</h3>
               <div class="product-features">
                 <ul>
-                  <li data-en="Aged long-grain rice, Aromatic, fluffy texture" data-ar="أرز طويل الحبة معتق، عطري، ذو قوام رقيق">Aged long-grain rice, Aromatic, fluffy texture</li>
-                  <li data-en="Ideal for daily cooking & special occasions" data-ar="مثالي للطهي اليومي والمناسبات الخاصة">Ideal for daily cooking & special occasions</li>
+                  <li>Aged long-grain rice, Aromatic, fluffy texture</li>
+                  <li>Ideal for daily cooking & special occasions</li>
                 </ul>
               </div>
               <div class="product-actions">
@@ -6626,17 +5873,17 @@ body[dir="rtl"] .hero-image-card {
                   <button class="quantity-btn plus">+</button>
                 </div>
                 <div class="product-buttons">
-                  <button class="add-to-cart-btn" data-product-id="2" data-en="Add to Cart" data-ar="أضف إلى السلة">
+                  <button class="add-to-cart-btn" data-product-id="2">
                     <i class="fas fa-shopping-cart"></i>
-                    <span data-en="Add to Cart" data-ar="أضف إلى السلة">Add to Cart</span>
+                    <span>Add to Cart</span>
                   </button>
-                  <button class="quick-view-btn" data-product="2" data-en="Quick View" data-ar="عرض سريع">
+                  <button class="quick-view-btn" data-product="2">
                     <i class="fas fa-eye"></i>
                   </button>
                 </div>
-                <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MASHHOR%20INDIAN%20XXXL%201121%20Basmati%20Rice%20(5kg)." target="_blank" class="whatsapp-order-btn" data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">
+                <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MASHHOR%20INDIAN%20XXXL%201121%20Basmati%20Rice%20(5kg)." target="_blank" class="whatsapp-order-btn">
                   <i class="fab fa-whatsapp"></i>
-                  <span data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">Order via WhatsApp</span>
+                  <span>Order via WhatsApp</span>
                 </a>
               </div>
             </div>
@@ -6644,17 +5891,17 @@ body[dir="rtl"] .hero-image-card {
           
           <!-- Product 3 - Non-Basmati -->
           <div class="product-card" data-category="non-basmati">
-            <div class="product-badge" data-en="Specialty" data-ar="متخصص">Specialty</div>
+            <div class="product-badge">Specialty</div>
             <button class="favorite-btn" aria-label="Add to favorites"><i class="far fa-heart"></i></button>
             <div class="product-image-container">
               <img src="https://i.ibb.co/845wmDPy/mahinaz35kg.webp" alt="MAHINAZ Biryani Rice" loading="lazy" class="product-image" width="300" height="200" onerror="this.src='https://via.placeholder.com/300x200/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
             </div>
             <div class="product-info">
-              <h3 class="product-title" data-en="MAHINAZ CLASSIC XXL Biryani Rice (35kg)" data-ar="أرز مهيناز كلاسيك اكس اكس ال للبرياني (35 كجم)">MAHINAZ CLASSIC XXL Biryani Rice (35kg)</h3>
+              <h3 class="product-title">MAHINAZ CLASSIC XXL Biryani Rice (35kg)</h3>
               <div class="product-features">
                 <ul>
-                  <li data-en="Aromatic XXL grains, perfect for traditional biryani dishes" data-ar="حبوب XXL عطرية، مثالية لأطباق البرياني التقليدية">Aromatic XXL grains, perfect for traditional biryani dishes</li>
-                  <li data-en="Premium Indian rice for rich flavor and texture" data-ar="أرز هندي ممتاز لنكهة غنية وقوام مميز">Premium Indian rice for rich flavor and texture</li>
+                  <li>Aromatic XXL grains, perfect for traditional biryani dishes</li>
+                  <li>Premium Indian rice for rich flavor and texture</li>
                 </ul>
               </div>
               <div class="product-actions">
@@ -6664,17 +5911,17 @@ body[dir="rtl"] .hero-image-card {
                   <button class="quantity-btn plus">+</button>
                 </div>
                 <div class="product-buttons">
-                  <button class="add-to-cart-btn" data-product-id="3" data-en="Add to Cart" data-ar="أضف إلى السلة">
+                  <button class="add-to-cart-btn" data-product-id="3">
                     <i class="fas fa-shopping-cart"></i>
-                    <span data-en="Add to Cart" data-ar="أضف إلى السلة">Add to Cart</span>
+                    <span>Add to Cart</span>
                   </button>
-                  <button class="quick-view-btn" data-product="3" data-en="Quick View" data-ar="عرض سريع">
+                  <button class="quick-view-btn" data-product="3">
                     <i class="fas fa-eye"></i>
                   </button>
                 </div>
-                <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MAHINAZ%20CLASSIC%20XXL%20Biryani%20Rice%20(35kg)." target="_blank" class="whatsapp-order-btn" data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">
+                <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MAHINAZ%20CLASSIC%20XXL%20Biryani%20Rice%20(35kg)." target="_blank" class="whatsapp-order-btn">
                   <i class="fab fa-whatsapp"></i>
-                  <span data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">Order via WhatsApp</span>
+                  <span>Order via WhatsApp</span>
                 </a>
               </div>
             </div>
@@ -6682,17 +5929,17 @@ body[dir="rtl"] .hero-image-card {
           
           <!-- Product 4 - Non-Basmati -->
           <div class="product-card" data-category="non-basmati">
-            <div class="product-badge" data-en="Golden" data-ar="ذهبي">Golden</div>
+            <div class="product-badge">Golden</div>
             <button class="favorite-btn" aria-label="Add to favorites"><i class="far fa-heart"></i></button>
             <div class="product-image-container">
               <img src="https://i.ibb.co/twKYqkMm/india-pride.webp" alt="INDIAN PRIDE Rice" loading="lazy" class="product-image" width="300" height="200" onerror="this.src='https://via.placeholder.com/300x200/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
             </div>
             <div class="product-info">
-              <h3 class="product-title" data-en="INDIAN PRIDE 1121 XXXL Golden Sella Basmati Rice (20kg)" data-ar="أرز إنديان برايد اكس اكس اكس ال 1121 سيلا ذهبي بسمتي (20 كجم)">INDIAN PRIDE 1121 XXXL Golden Sella Basmati Rice (20kg)</h3>
+              <h3 class="product-title">INDIAN PRIDE 1121 XXXL Golden Sella Basmati Rice (20kg)</h3>
               <div class="product-features">
                 <ul>
-                  <li data-en="Parboiled golden grains, naturally aromatic" data-ar="حبوب ذهبية مسلوقة جزئيًا، عطرية طبيعيًا">Parboiled golden grains, naturally aromatic</li>
-                  <li data-en="Perfect texture for biryani, mandi, and traditional rice dishes" data-ar="قوام مثالي للبرياني والمندي وأطباق الأرز التقليدية">Perfect texture for biryani, mandi, and traditional rice dishes</li>
+                  <li>Parboiled golden grains, naturally aromatic</li>
+                  <li>Perfect texture for biryani, mandi, and traditional rice dishes</li>
                 </ul>
               </div>
               <div class="product-actions">
@@ -6702,17 +5949,17 @@ body[dir="rtl"] .hero-image-card {
                   <button class="quantity-btn plus">+</button>
                 </div>
                 <div class="product-buttons">
-                  <button class="add-to-cart-btn" data-product-id="4" data-en="Add to Cart" data-ar="أضف إلى السلة">
+                  <button class="add-to-cart-btn" data-product-id="4">
                     <i class="fas fa-shopping-cart"></i>
-                    <span data-en="Add to Cart" data-ar="أضف إلى السلة">Add to Cart</span>
+                    <span>Add to Cart</span>
                   </button>
-                  <button class="quick-view-btn" data-product="4" data-en="Quick View" data-ar="عرض سريع">
+                  <button class="quick-view-btn" data-product="4">
                     <i class="fas fa-eye"></i>
                   </button>
                 </div>
-                <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20INDIAN%20PRIDE%201121%20XXXL%20Golden%20Sella%20Basmati%20Rice%20(20kg)." target="_blank" class="whatsapp-order-btn" data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">
+                <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20INDIAN%20PRIDE%201121%20XXXL%20Golden%20Sella%20Basmati%20Rice%20(20kg)." target="_blank" class="whatsapp-order-btn">
                   <i class="fab fa-whatsapp"></i>
-                  <span data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">Order via WhatsApp</span>
+                  <span>Order via WhatsApp</span>
                 </a>
               </div>
             </div>
@@ -6720,7 +5967,7 @@ body[dir="rtl"] .hero-image-card {
           
           <!-- Product 5 - Non-Basmati -->
           <div class="product-card" data-category="non-basmati">
-            <div class="product-badge" data-en="Traditional" data-ar="تقليدي">Traditional</div>
+            <div class="product-badge">Traditional</div>
             <button class="favorite-btn" aria-label="Add to favorites"><i class="far fa-heart"></i></button>
             <div class="product-image-container">
               <img src="https://i.ibb.co/23KJsQGc/IMG-20250904-213156.jpg" 
@@ -6732,12 +5979,12 @@ body[dir="rtl"] .hero-image-card {
                    onerror="this.src='https://via.placeholder.com/300x200/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
             </div>
             <div class="product-info">
-              <h3 class="product-title" data-en="Palakkadan Mata Rice (18kg)" data-ar="أرز بالاكادان ماتا (18 كجم)">Palakkadan Mata Rice (18kg)</h3>
+              <h3 class="product-title">Palakkadan Mata Rice (18kg)</h3>
               <div class="product-features">
                 <ul>
-                  <li data-en="Traditional Kerala rice known for its unique taste and texture" data-ar="أرز كيرالا التقليدي المعروف بمذاقه الفريد وقوامه المميز">Traditional Kerala rice known for its unique taste and texture</li>
-                  <li data-en="Rich in fiber and nutrients, ideal for healthy meals" data-ar="غني بالألياف والعناصر الغذائية، مثالي للوجبات الصحية">Rich in fiber and nutrients, ideal for healthy meals</li>
-                  <li data-en="Perfect for traditional South Indian dishes like Kanji and Pongal" data-ar="مثالي للأطباق الجنوب الهندية التقليدية مثل كانجي وبونغال">Perfect for traditional South Indian dishes like Kanji and Pongal</li>
+                  <li>Traditional Kerala rice known for its unique taste and texture</li>
+                  <li>Rich in fiber and nutrients, ideal for healthy meals</li>
+                  <li>Perfect for traditional South Indian dishes like Kanji and Pongal</li>
                 </ul>
               </div>
               <div class="product-actions">
@@ -6747,17 +5994,17 @@ body[dir="rtl"] .hero-image-card {
                   <button class="quantity-btn plus">+</button>
                 </div>
                 <div class="product-buttons">
-                  <button class="add-to-cart-btn" data-product-id="5" data-en="Add to Cart" data-ar="أضف إلى السلة">
+                  <button class="add-to-cart-btn" data-product-id="5">
                     <i class="fas fa-shopping-cart"></i>
-                    <span data-en="Add to Cart" data-ar="أضف إلى السلة">Add to Cart</span>
+                    <span>Add to Cart</span>
                   </button>
-                  <button class="quick-view-btn" data-product="5" data-en="Quick View" data-ar="عرض سريع">
+                  <button class="quick-view-btn" data-product="5">
                     <i class="fas fa-eye"></i>
                   </button>
                 </div>
-                <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20Palakkadan%20Mata%20Rice%20(18kg)." target="_blank" class="whatsapp-order-btn" data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">
+                <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20Palakkadan%20Mata%20Rice%20(18kg)." target="_blank" class="whatsapp-order-btn">
                   <i class="fab fa-whatsapp"></i>
-                  <span data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">Order via WhatsApp</span>
+                  <span>Order via WhatsApp</span>
                 </a>
               </div>
             </div>
@@ -6765,7 +6012,7 @@ body[dir="rtl"] .hero-image-card {
           
           <!-- Product 6 - Non-Basmati -->
           <div class="product-card" data-category="non-basmati">
-            <div class="product-badge" data-en="Light" data-ar="خفيف">Light</div>
+            <div class="product-badge">Light</div>
             <button class="favorite-btn" aria-label="Add to favorites"><i class="far fa-heart"></i></button>
             <div class="product-image-container">
               <img src="https://i.ibb.co/3YQw8wbz/IMG-20250904-213127.jpg" 
@@ -6777,12 +6024,12 @@ body[dir="rtl"] .hero-image-card {
                    onerror="this.src='https://via.placeholder.com/300x200/f8f8f8/666666?text=Image+Not+Found'; this.alt='Image failed to load'" />
             </div>
             <div class="product-info">
-              <h3 class="product-title" data-en="Mashhor Sona Masoori Rice (18kg)" data-ar="أرز مشهور سونا ماسوري (18 كجم)">Mashhor Sona Masoori Rice (18kg)</h3>
+              <h3 class="product-title">Mashhor Sona Masoori Rice (18kg)</h3>
               <div class="product-features">
                 <ul>
-                  <li data-en="Premium Sona Masoori rice from South India" data-ar="أرز سونا ماسوري ممتاز من جنوب الهند">Premium Sona Masoori rice from South India</li>
-                  <li data-en="Light texture and perfect for daily cooking" data-ar="قوام خفيف ومثالي للطهي اليومي">Light texture and perfect for daily cooking</li>
-                  <li data-en="Ideal for traditional South Indian dishes" data-ar="مثالي للأطباق الجنوب الهندية التقليدية">Ideal for traditional South Indian dishes</li>
+                  <li>Premium Sona Masoori rice from South India</li>
+                  <li>Light texture and perfect for daily cooking</li>
+                  <li>Ideal for traditional South Indian dishes</li>
                 </ul>
               </div>
               <div class="product-actions">
@@ -6792,17 +6039,17 @@ body[dir="rtl"] .hero-image-card {
                   <button class="quantity-btn plus">+</button>
                 </div>
                 <div class="product-buttons">
-                  <button class="add-to-cart-btn" data-product-id="6" data-en="Add to Cart" data-ar="أضف إلى السلة">
+                  <button class="add-to-cart-btn" data-product-id="6">
                     <i class="fas fa-shopping-cart"></i>
-                    <span data-en="Add to Cart" data-ar="أضف إلى السلة">Add to Cart</span>
+                    <span>Add to Cart</span>
                   </button>
-                  <button class="quick-view-btn" data-product="6" data-en="Quick View" data-ar="عرض سريع">
+                  <button class="quick-view-btn" data-product="6">
                     <i class="fas fa-eye"></i>
                   </button>
                 </div>
-                <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20Mashhor%20Sona%20Masoori%20Rice%20(18kg)." target="_blank" class="whatsapp-order-btn" data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">
+                <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20Mashhor%20Sona%20Masoori%20Rice%20(18kg)." target="_blank" class="whatsapp-order-btn">
                   <i class="fab fa-whatsapp"></i>
-                  <span data-en="Order via WhatsApp" data-ar="اطلب عبر واتساب">Order via WhatsApp</span>
+                  <span>Order via WhatsApp</span>
                 </a>
               </div>
             </div>
@@ -6814,9 +6061,9 @@ body[dir="rtl"] .hero-image-card {
     <!-- ============= BULK ORDER BANNER ============= -->
     <section class="bulk-order-banner load-animate">
       <div class="bulk-order-content">
-        <h2 data-en="Bulk Orders Available" data-ar="طلبات الجملة متاحة">Bulk Orders Available</h2>
-        <p data-en="Looking for large quantities? We offer special pricing for bulk orders. Contact us today for a customized quote." data-ar="تبحث عن كميات كبيرة؟ نحن نقدم أسعاراً خاصة لطلبات الجملة. اتصل بنا اليوم للحصول على عرض مخصص.">Looking for large quantities? We offer special pricing for bulk orders. Contact us today for a customized quote.</p>
-        <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20placing%20a%20bulk%20order.%20Please%20provide%20me%20with%20pricing%20information." target="_blank" class="bulk-order-cta" data-en="Inquire About Bulk Pricing" data-ar="استفسار عن أسعار الجملة">Inquire About Bulk Pricing</a>
+        <h2>Bulk Orders Available</h2>
+        <p>Looking for large quantities? We offer special pricing for bulk orders. Contact us today for a customized quote.</p>
+        <a href="https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20placing%20a%20bulk%20order.%20Please%20provide%20me%20with%20pricing%20information." target="_blank" class="bulk-order-cta">Inquire About Bulk Pricing</a>
       </div>
     </section>
     
@@ -6824,23 +6071,23 @@ body[dir="rtl"] .hero-image-card {
     <div class="trust-badges load-animate">
       <div class="trust-badge">
         <i class="fas fa-check-circle"></i>
-        <span class="trust-text" data-en="Quality Guaranteed" data-ar="جودة مضمونة">Quality Guaranteed</span>
+        <span class="trust-text">Quality Guaranteed</span>
       </div>
       <div class="trust-badge">
         <i class="fas fa-truck"></i>
-        <span class="trust-text" data-en="Fast Delivery" data-ar="توصيل سريع">Fast Delivery</span>
+        <span class="trust-text">Fast Delivery</span>
       </div>
       <div class="trust-badge">
         <i class="fas fa-star"></i>
-        <span class="trust-text" data-en="Rated 4.4/5" data-ar="تقييم 4.4/5">Rated 4.4/5</span>
+        <span class="trust-text">Rated 4.4/5</span>
       </div>
     </div>
     
     <!-- ============= WHY US SECTION ============= -->
     <section id="why-us" class="load-animate">
       <div class="section-header">
-        <h2 class="section-title" data-en="Why Choose Mashhor?" data-ar="لماذا تختار مشهور؟">Why Choose Mashhor?</h2>
-        <p class="section-subtitle" data-en="Excellence in Every Grain – Trusted Across Oman" data-ar="التميز في كل حبة – موثوق به في جميع أنحاء عمان">Excellence in Every Grain – Trusted Across Oman</p>
+        <h2 class="section-title">Why Choose Mashhor?</h2>
+        <p class="section-subtitle">Excellence in Every Grain – Trusted Across Oman</p>
       </div>
       
       <div class="why-us-container">
@@ -6849,10 +6096,10 @@ body[dir="rtl"] .hero-image-card {
             <div class="feature-icon">
               <i class="fas fa-certificate"></i>
             </div>
-            <h3 class="feature-title" data-en="Certified Quality" data-ar="جودة معتمدة">Certified Quality</h3>
-            <p class="feature-description" data-en="Direct sourcing from ISO-certified Indian mills with rigorous quality checks at every stage." data-ar="توريد مباشر من مصانع هندية معتمدة حسب المواصفة ISO مع فحوصات جودة صارمة في كل مرحلة.">Direct sourcing from ISO-certified Indian mills with rigorous quality checks at every stage.</p>
-            <a href="#certifications" class="feature-link" data-en="Learn More" data-ar="اعرف المزيد">
-              <span data-en="Learn More" data-ar="اعرف المزيد">Learn More</span>
+            <h3 class="feature-title">Certified Quality</h3>
+            <p class="feature-description">Direct sourcing from ISO-certified Indian mills with rigorous quality checks at every stage.</p>
+            <a href="#certifications" class="feature-link">
+              <span>Learn More</span>
               <i class="fas fa-arrow-right"></i>
             </a>
           </div>
@@ -6861,10 +6108,10 @@ body[dir="rtl"] .hero-image-card {
             <div class="feature-icon">
               <i class="fas fa-truck-fast"></i>
             </div>
-            <h3 class="feature-title" data-en="Fast Delivery" data-ar="توصيل سريع">Fast Delivery</h3>
-            <p class="feature-description" data-en="Oman-wide delivery within 24-48 hours for bulk orders with real-time tracking." data-ar="توصيل في جميع أنحاء عمان خلال 24-48 ساعة للطلبات الكبيرة مع تتبع في الوقت الحقيقي.">Oman-wide delivery within 24-48 hours for bulk orders with real-time tracking.</p>
-            <a href="#contact-us" class="feature-link" data-en="Contact Us" data-ar="اتصل بنا">
-              <span data-en="Contact Us" data-ar="اتصل بنا">Contact Us</span>
+            <h3 class="feature-title">Fast Delivery</h3>
+            <p class="feature-description">Oman-wide delivery within 24-48 hours for bulk orders with real-time tracking.</p>
+            <a href="#contact-us" class="feature-link">
+              <span>Contact Us</span>
               <i class="fas fa-arrow-right"></i>
             </a>
           </div>
@@ -6873,10 +6120,10 @@ body[dir="rtl"] .hero-image-card {
             <div class="feature-icon">
               <i class="fas fa-star"></i>
             </div>
-            <h3 class="feature-title" data-en="Premium Selection" data-ar="اختيار ممتاز">Premium Selection</h3>
-            <p class="feature-description" data-en="1121 Basmati, Golden Sella, and specialty rice varieties for every culinary need." data-ar="أرز بسمتي 1121، سيلا ذهبي، وأصناف أرز خاصة لكل احتياجات الطهي.">1121 Basmati, Golden Sella, and specialty rice varieties for every culinary need.</p>
-            <a href="#products" class="feature-link" data-en="View Products" data-ar="عرض المنتجات">
-              <span data-en="View Products" data-ar="عرض المنتجات">View Products</span>
+            <h3 class="feature-title">Premium Selection</h3>
+            <p class="feature-description">1121 Basmati, Golden Sella, and specialty rice varieties for every culinary need.</p>
+            <a href="#products" class="feature-link">
+              <span>View Products</span>
               <i class="fas fa-arrow-right"></i>
             </a>
           </div>
@@ -6885,28 +6132,28 @@ body[dir="rtl"] .hero-image-card {
             <div class="feature-icon">
               <i class="fas fa-handshake"></i>
             </div>
-            <h3 class="feature-title" data-en="Trusted Partnerships" data-ar="شراكات موثوقة">Trusted Partnerships</h3>
-            <p class="feature-description" data-en="Serving hotels, supermarkets and wholesalers with consistent quality." data-ar="نخدم الفنادق والسوبرماركت وتجار الجملة بجودة ثابتة.">Serving hotels, supermarkets and wholesalers with consistent quality.</p>
-            <a href="#who-we-serve" class="feature-link" data-en="Our Partners" data-ar="شركاؤنا">
-              <span data-en="Our Partners" data-ar="شركاؤنا">Our Partners</span>
+            <h3 class="feature-title">Trusted Partnerships</h3>
+            <p class="feature-description">Serving hotels, supermarkets and wholesalers with consistent quality.</p>
+            <a href="#who-we-serve" class="feature-link">
+              <span>Our Partners</span>
               <i class="fas fa-arrow-right"></i>
             </a>
           </div>
         </div>
         
         <div class="why-us-testimonial slide-up">
-          <p class="why-us-testimonial-content" data-en='"Mashhor Foodstuff has been our trusted rice supplier for over five years. Their commitment to quality and timely delivery has helped us maintain our reputation for excellence."' data-ar='"شركة مشهور للأغذية كانت مورد الأرز الموثوق لدينا لأكثر من خمس سنوات. التزامهم بالجودة والتسليم في الوقت المحدد ساعدنا على الحفاظ على سمعتنا للتميز."'>"Mashhor Foodstuff has been our trusted rice supplier for over five years. Their commitment to quality and timely delivery has helped us maintain our reputation for excellence."</p>
+          <p class="why-us-testimonial-content">"Mashhor Foodstuff has been our trusted rice supplier for over five years. Their commitment to quality and timely delivery has helped us maintain our reputation for excellence."</p>
           <div class="why-us-testimonial-author">
             <div class="why-us-testimonial-author-info">
-              <div class="why-us-testimonial-author-name" data-en="Executive Chef" data-ar="رئيس الطهاة">Executive Chef</div>
-              <div class="why-us-testimonial-author-title" data-en="5-Star Hotel, Muscat" data-ar="فندق 5 نجوم، مسقط">5-Star Hotel, Muscat</div>
+              <div class="why-us-testimonial-author-name">Executive Chef</div>
+              <div class="why-us-testimonial-author-title">5-Star Hotel, Muscat</div>
             </div>
           </div>
         </div>
         
         <div class="why-us-cta">
-          <a href="#contact-us" class="why-us-cta-btn" data-en="Experience the Mashhor Difference" data-ar="اختبر فرق مشهور">
-            <span data-en="Experience the Mashhor Difference" data-ar="اختبر فرق مشهور">Experience the Mashhor Difference</span>
+          <a href="#contact-us" class="why-us-cta-btn">
+            <span>Experience Mashhor Difference</span>
             <i class="fas fa-arrow-right"></i>
           </a>
         </div>
@@ -6917,8 +6164,8 @@ body[dir="rtl"] .hero-image-card {
     <section id="certifications" class="certifications-section load-animate">
       <div class="certifications-container">
         <div class="certifications-header">
-          <h2 class="certifications-title" data-en="Internationally Recognized Certifications" data-ar="شهادات معتمدة عالمياً">Internationally Recognized Certifications</h2>
-          <p class="certifications-subtitle" data-en="Our commitment to quality is verified by independent international organizations" data-ar="التزامنا بالجودة مثبت من قبل منظمات دولية مستقلة">Our commitment to quality is verified by independent international organizations</p>
+          <h2 class="certifications-title">Internationally Recognized Certifications</h2>
+          <p class="certifications-subtitle">Our commitment to quality is verified by independent international organizations</p>
         </div>
         
         <div class="certifications-grid">
@@ -6930,16 +6177,16 @@ body[dir="rtl"] .hero-image-card {
               <img src="https://i.ibb.co/0ywjyLK6/iso22000.webp" alt="ISO 22000 Certification" loading="lazy" width="120" height="120" onerror="this.src='https://via.placeholder.com/120x120?text=ISO+22000'; this.alt='ISO 22000 Certification'" />
             </div>
             <div class="certification-details">
-              <h3 data-en="ISO 22000:2018" data-ar="الأيزو 22000:2018">ISO 22000:2018</h3>
-              <p data-en="Food Safety Management System" data-ar="نظام إدارة سلامة الغذاء">Food Safety Management System</p>
+              <h3>ISO 22000:2018</h3>
+              <p>Food Safety Management System</p>
               <div class="certification-features">
                 <div class="certification-feature">
                   <i class="fas fa-shield-alt"></i>
-                  <span data-en="Safety" data-ar="السلامة">Safety</span>
+                  <span>Safety</span>
                 </div>
                 <div class="certification-feature">
                   <i class="fas fa-globe"></i>
-                  <span data-en="Global" data-ar="عالمي">Global</span>
+                  <span>Global</span>
                 </div>
               </div>
             </div>
@@ -6953,16 +6200,16 @@ body[dir="rtl"] .hero-image-card {
               <img src="https://i.ibb.co/cKYgdpCB/iso2015.webp" alt="ISO 9001 Certification" loading="lazy" width="120" height="120" onerror="this.src='https://via.placeholder.com/120x120?text=ISO+9001'; this.alt='ISO 9001 Certification'" />
             </div>
             <div class="certification-details">
-              <h3 data-en="ISO 9001:2015" data-ar="الأيزو 9001:2015">ISO 9001:2015</h3>
-              <p data-en="Quality Management System" data-ar="نظام إدارة الجودة">Quality Management System</p>
+              <h3>ISO 9001:2015</h3>
+              <p>Quality Management System</p>
               <div class="certification-features">
                 <div class="certification-feature">
                   <i class="fas fa-award"></i>
-                  <span data-en="Quality" data-ar="الجودة">Quality</span>
+                  <span>Quality</span>
                 </div>
                 <div class="certification-feature">
                   <i class="fas fa-certificate"></i>
-                  <span data-en="Standard" data-ar="معيار">Standard</span>
+                  <span>Standard</span>
                 </div>
               </div>
             </div>
@@ -6977,15 +6224,15 @@ body[dir="rtl"] .hero-image-card {
             </div>
             <div class="certification-details">
               <h3>HACCP</h3>
-              <p data-en="Hazard Analysis Critical Control Point" data-ar="نظام تحليل المخاطر ونقاط التحكم الحرجة">Hazard Analysis Critical Control Point</p>
+              <p>Hazard Analysis Critical Control Point</p>
               <div class="certification-features">
                 <div class="certification-feature">
                   <i class="fas fa-microscope"></i>
-                  <span data-en="Analysis" data-ar="التحليل">Analysis</span>
+                  <span>Analysis</span>
                 </div>
                 <div class="certification-feature">
                   <i class="fas fa-clipboard-check"></i>
-                  <span data-en="Control" data-ar="التحكم">Control</span>
+                  <span>Control</span>
                 </div>
               </div>
             </div>
@@ -7000,15 +6247,15 @@ body[dir="rtl"] .hero-image-card {
             </div>
             <div class="certification-details">
               <h3>GMP</h3>
-              <p data-en="Good Manufacturing Practice" data-ar="ممارسات التصنيع الجيدة">Good Manufacturing Practice</p>
+              <p>Good Manufacturing Practice</p>
               <div class="certification-features">
                 <div class="certification-feature">
                   <i class="fas fa-industry"></i>
-                  <span data-en="Manufacturing" data-ar="التصنيع">Manufacturing</span>
+                  <span>Manufacturing</span>
                 </div>
                 <div class="certification-feature">
                   <i class="fas fa-hand-holding-heart"></i>
-                  <span data-en="Practice" data-ar="الممارسة">Practice</span>
+                  <span>Practice</span>
                 </div>
               </div>
             </div>
@@ -7016,8 +6263,8 @@ body[dir="rtl"] .hero-image-card {
         </div>
         
         <div class="certifications-cta">
-          <a href="#contact-us" class="certifications-cta-btn" data-en="Learn More About Our Quality Standards" data-ar="اعرف المزيد عن معايير جودتنا">
-            <span data-en="Learn More About Our Quality Standards" data-ar="اعرف المزيد عن معايير جودتنا">Learn More About Our Quality Standards</span>
+          <a href="#contact-us" class="certifications-cta-btn">
+            <span>Learn More About Our Quality Standards</span>
             <i class="fas fa-arrow-right"></i>
           </a>
         </div>
@@ -7028,12 +6275,12 @@ body[dir="rtl"] .hero-image-card {
     <section id="who-we-serve" class="partners-section load-animate">
       <div class="partners-container">
         <div class="section-header">
-          <h2 class="section-title" data-en="Our Valued Partners" data-ar="شركاؤنا الكرام">Our Valued Partners</h2>
-          <p class="section-subtitle" data-en="Serving Oman's Food Industry with Premium Rice Solutions" data-ar="نخدم صناعة الأغذية في عمان بحلول الأرز الممتازة">Serving Oman's Food Industry with Premium Rice Solutions</p>
+          <h2 class="section-title">Our Valued Partners</h2>
+          <p class="section-subtitle">Serving Oman's Food Industry with Premium Rice Solutions</p>
         </div>
         
         <div class="partners-intro">
-          <p class="intro-text" data-en="We proudly collaborate with diverse businesses across Oman's food industry, delivering exceptional rice products tailored to each sector's unique needs." data-ar="نتعاون بفخر مع متنوع الشركات في قطاع الأغذية في عمان، حيث نقدم منتجات أرز استثنائية مصممة لتلبية الاحتياجات الفريدة لكل قطاع.">We proudly collaborate with diverse businesses across Oman's food industry, delivering exceptional rice products tailored to each sector's unique needs.</p>
+          <p class="intro-text">We proudly collaborate with diverse businesses across Oman's food industry, delivering exceptional rice products tailored to each sector's unique needs.</p>
         </div>
         
         <div class="partners-grid">
@@ -7042,20 +6289,20 @@ body[dir="rtl"] .hero-image-card {
               <i class="fas fa-store"></i>
             </div>
             <div class="partner-content">
-              <h3 class="partner-title" data-en="Retail Chains" data-ar="سلاسل التجزئة">Retail Chains</h3>
-              <p class="partner-description" data-en="Supplying premium rice varieties to supermarkets, hypermarkets, and specialty stores across Oman." data-ar="توفير أصناف الأرز الممتاز للسوبرماركت والهايبرماركت والمتاجر المتخصصة في جميع أنحاء عمان.">Supplying premium rice varieties to supermarkets, hypermarkets, and specialty stores across Oman.</p>
+              <h3 class="partner-title">Retail Chains</h3>
+              <p class="partner-description">Supplying premium rice varieties to supermarkets, hypermarkets, and specialty stores across Oman.</p>
               <div class="partner-features">
                 <div class="feature-item">
                   <i class="fas fa-check-circle"></i>
-                  <span data-en="Supermarkets" data-ar="السوبرماركت">Supermarkets</span>
+                  <span>Supermarkets</span>
                 </div>
                 <div class="feature-item">
                   <i class="fas fa-check-circle"></i>
-                  <span data-en="Hypermarkets" data-ar="هايبرماركت">Hypermarkets</span>
+                  <span>Hypermarkets</span>
                 </div>
                 <div class="feature-item">
                   <i class="fas fa-check-circle"></i>
-                  <span data-en="Specialty Stores" data-ar="متاجر متخصصة">Specialty Stores</span>
+                  <span>Specialty Stores</span>
                 </div>
               </div>
             </div>
@@ -7069,20 +6316,20 @@ body[dir="rtl"] .hero-image-card {
               <i class="fas fa-utensils"></i>
             </div>
             <div class="partner-content">
-              <h3 class="partner-title" data-en="Food Service" data-ar="خدمات الطعام">Food Service</h3>
-              <p class="partner-description" data-en="Providing high-quality rice for hotels, resorts, restaurants, and catering services throughout Oman." data-ar="توفير أرز عالي الجودة للفنادق والمنتجعات والمطاعم وخدمات التموين في جميع أنحاء عمان.">Providing high-quality rice for hotels, resorts, restaurants, and catering services throughout Oman.</p>
+              <h3 class="partner-title">Food Service</h3>
+              <p class="partner-description">Providing high-quality rice for hotels, resorts, restaurants, and catering services throughout Oman.</p>
               <div class="partner-features">
                 <div class="feature-item">
                   <i class="fas fa-check-circle"></i>
-                  <span data-en="Hotels & Resorts" data-ar="الفنادق والمنتجعات">Hotels & Resorts</span>
+                  <span>Hotels & Resorts</span>
                 </div>
                 <div class="feature-item">
                   <i class="fas fa-check-circle"></i>
-                  <span data-en="Restaurants" data-ar="المطاعم">Restaurants</span>
+                  <span>Restaurants</span>
                 </div>
                 <div class="feature-item">
                   <i class="fas fa-check-circle"></i>
-                  <span data-en="Catering Services" data-ar="خدمات التموين">Catering Services</span>
+                  <span>Catering Services</span>
                 </div>
               </div>
             </div>
@@ -7096,20 +6343,20 @@ body[dir="rtl"] .hero-image-card {
               <i class="fas fa-boxes"></i>
             </div>
             <div class="partner-content">
-              <h3 class="partner-title" data-en="Wholesale" data-ar="الجملة">Wholesale</h3>
-              <p class="partner-description" data-en="Supporting distributors, bulk buyers, and food processors with consistent quality and reliable supply." data-ar="دعم الموزعين والمشترين بالجملة ومعالجات الأغذية بجودة ثابتة وإمدادات موثوقة.">Supporting distributors, bulk buyers, and food processors with consistent quality and reliable supply.</p>
+              <h3 class="partner-title">Wholesale</h3>
+              <p class="partner-description">Supporting distributors, bulk buyers, and food processors with consistent quality and reliable supply.</p>
               <div class="partner-features">
                 <div class="feature-item">
                   <i class="fas fa-check-circle"></i>
-                  <span data-en="Distributors" data-ar="الموزعون">Distributors</span>
+                  <span>Distributors</span>
                 </div>
                 <div class="feature-item">
                   <i class="fas fa-check-circle"></i>
-                  <span data-en="Bulk Buyers" data-ar="المشترون بالجملة">Bulk Buyers</span>
+                  <span>Bulk Buyers</span>
                 </div>
                 <div class="feature-item">
                   <i class="fas fa-check-circle"></i>
-                  <span data-en="Food Processors" data-ar="معالجات الأغذية">Food Processors</span>
+                  <span>Food Processors</span>
                 </div>
               </div>
             </div>
@@ -7120,8 +6367,8 @@ body[dir="rtl"] .hero-image-card {
         </div>
         
         <div class="partners-cta">
-          <a href="#contact-us" class="cta-button" data-en="Become Our Partner" data-ar="كن شريكنا">
-            <span data-en="Become Our Partner" data-ar="كن شريكنا">Become Our Partner</span>
+          <a href="#contact-us" class="cta-button">
+            <span>Become Our Partner</span>
             <i class="fas fa-arrow-right"></i>
           </a>
         </div>
@@ -7150,7 +6397,7 @@ body[dir="rtl"] .hero-image-card {
         <div class="slider-dots"></div>
       </div>
       <div class="slider-promo-text">
-        <p data-en="Premium Quality Rice - Perfect for Every Occasion" data-ar="أرز عالي الجودة - مثالي لكل مناسبة">Premium Quality Rice - Perfect for Every Occasion</p>
+        <p>Premium Quality Rice - Perfect for Every Occasion</p>
       </div>
     </section>
     
@@ -7158,8 +6405,8 @@ body[dir="rtl"] .hero-image-card {
 <section id="about" class="about-section load-animate">
   <div class="about-container">
     <div class="about-header">
-      <h2 class="about-title" data-en="The Mashhor Story" data-ar="قصة مشهور">The Mashhor Story</h2>
-      <p class="about-subtitle" data-en="Cultivating excellence in every grain" data-ar="نزرع التميز في كل حبة">Cultivating excellence in every grain</p>
+      <h2 class="about-title">The Mashhor Story</h2>
+      <p class="about-subtitle">Cultivating excellence in every grain</p>
     </div>
     
     <div class="about-content">
@@ -7168,30 +6415,28 @@ body[dir="rtl"] .hero-image-card {
       </div>
       
       <div class="about-text">
-        <h3 data-en="Premium Rice Specialists" data-ar="متخصصون في الأرز الممتاز">Premium Rice Specialists</h3>
+        <h3>Premium Rice Specialists</h3>
         
         <div class="about-paragraph">
-          <p data-en="<strong>Mashhor Foodstuff Trading LLC</strong> is Oman's trusted source for premium Basmati and Non-Basmati rice, serving both wholesale and retail customers with exceptional quality products." 
-             data-ar="<strong>شركة مشهور للأغذية</strong> هي المصدر الموثوق للأرز البسمتي وغير البسمتي الممتاز في عمان، حيث تخدم كل من العملاء بالجملة والتجزئة بمنتجات عالية الجودة.">
+          <p>
             <strong>Mashhor Foodstuff Trading LLC</strong> is Oman's trusted source for premium Basmati and Non-Basmati rice, serving both wholesale and retail customers with exceptional quality products.
           </p>
         </div>
         
         <div class="about-paragraph">
-          <p data-en="We meticulously source our rice from <strong>Mahavir Rice Mills</strong>, an ISO-certified producer with decades of rice cultivation expertise, ensuring authentic flavor and perfect grain quality." 
-             data-ar="نحن نختار أرزنا بعناية من <strong>مطاحن مهافير للأرز</strong>، منتج معتمد حسب المواصفة ISO مع عقود من الخبرة في زراعة الأرز، مما يضمن نكهة أصالة وجودة حبة مثالية.">
+          <p>
             We meticulously source our rice from <strong>Mahavir Rice Mills</strong>, an ISO-certified producer with decades of rice cultivation expertise, ensuring authentic flavor and perfect grain quality.
           </p>
         </div>
         
         <div class="about-cta">
-          <a href="https://docs.google.com/presentation/d/10_T6i2drSTwNAXouCuW5IITRQGPRRK2C/edit?usp=drivesdk" target="_blank" class="btn btn-outline" data-en="Download Full Profile" data-ar="تحميل الملف التعريفي الكامل">
+          <a href="https://docs.google.com/presentation/d/10_T6i2drSTwNAXouCuW5IITRQGPRRK2C/edit?usp=drivesdk" target="_blank" class="btn btn-outline">
             <i class="fas fa-file-pdf"></i>
-            <span data-en="Download Full Profile" data-ar="تحميل الملف التعريفي الكامل">Download Full Profile</span>
+            <span>Download Full Profile</span>
           </a>
-          <a href="#contact-us" class="btn btn-primary" data-en="Get In Touch" data-ar="تواصل معنا">
+          <a href="#contact-us" class="btn btn-primary">
             <i class="fas fa-phone-alt"></i>
-            <span data-en="Get In Touch" data-ar="تواصل معنا">Get In Touch</span>
+            <span>Get In Touch</span>
           </a>
         </div>
       </div>
@@ -7203,7 +6448,7 @@ body[dir="rtl"] .hero-image-card {
           <i class="fas fa-weight-hanging"></i>
         </div>
         <div class="stat-number">250+</div>
-        <div class="stat-label" data-en="Tons Annual Supply" data-ar="طن إمداد سنوي">Tons Annual Supply</div>
+        <div class="stat-label">Tons Annual Supply</div>
       </div>
       
       <div class="stat-card">
@@ -7211,7 +6456,7 @@ body[dir="rtl"] .hero-image-card {
           <i class="fas fa-users"></i>
         </div>
         <div class="stat-number">100+</div>
-        <div class="stat-label" data-en="Happy Clients" data-ar="عملاء سعداء">Happy Clients</div>
+        <div class="stat-label">Happy Clients</div>
       </div>
       
       <div class="stat-card">
@@ -7219,22 +6464,21 @@ body[dir="rtl"] .hero-image-card {
           <i class="fas fa-chart-line"></i>
         </div>
         <div class="stat-number">98+</div>
-        <div class="stat-label" data-en="% Satisfaction Rate" data-ar="% معدل رضا">% Satisfaction Rate</div>
+        <div class="stat-label">% Satisfaction Rate</div>
       </div>
     </div>
     
     <div class="about-values">
-      <h3 class="values-title" data-en="Our Core Values" data-ar="قيمنا الأساسية">Our Core Values</h3>
+      <h3 class="values-title">Our Core Values</h3>
       
       <div class="values-grid">
         <div class="value-card">
           <div class="value-icon">
             <i class="fas fa-certificate"></i>
           </div>
-          <h4 class="value-title" data-en="Quality" data-ar="الجودة">Quality</h4>
-          <p class="value-description" data-en="We never compromise on quality, ensuring every grain meets the highest standards." 
-             data-ar="نحن لا نتسامح أبدًا في مسألة الجودة، ونتأكد من أن كل حبة تلبي أعلى المعايير.">
-            We never compromise on quality, ensuring every grain meets the highest standards.
+          <h4 class="value-title">Quality</h4>
+          <p class="value-description">
+            We never compromise on quality, ensuring every grain meets highest standards.
           </p>
         </div>
         
@@ -7242,9 +6486,8 @@ body[dir="rtl"] .hero-image-card {
           <div class="value-icon">
             <i class="fas fa-handshake"></i>
           </div>
-          <h4 class="value-title" data-en="Integrity" data-ar="النزاهة">Integrity</h4>
-          <p class="value-description" data-en="We conduct our business with honesty, transparency, and ethical practices." 
-             data-ar="نمارس أعمالنا بصدق وشفافية وممارسات أخلاقية.">
+          <h4 class="value-title">Integrity</h4>
+          <p class="value-description">
             We conduct our business with honesty, transparency, and ethical practices.
           </p>
         </div>
@@ -7253,10 +6496,9 @@ body[dir="rtl"] .hero-image-card {
           <div class="value-icon">
             <i class="fas fa-users"></i>
           </div>
-          <h4 class="value-title" data-en="Customer Focus" data-ar="التركيز على العميل">Customer Focus</h4>
-          <p class="value-description" data-en="Our customers are at the heart of everything we do, and we strive to exceed their expectations." 
-             data-ar="عملاؤنا في قلب كل ما نقوم به، ونسعى لتجاوز توقعاتهم.">
-            Our customers are at the heart of everything we do, and we strive to exceed their expectations.
+          <h4 class="value-title">Customer Focus</h4>
+          <p class="value-description">
+            Our customers are at heart of everything we do, and we strive to exceed their expectations.
           </p>
         </div>
       </div>
@@ -7277,33 +6519,33 @@ body[dir="rtl"] .hero-image-card {
             <p id="modalProductDescription"></p>
             
             <div class="nutrition-info">
-              <h4 data-en="Nutritional Information" data-ar="المعلومات الغذائية">Nutritional Information</h4>
+              <h4>Nutritional Information</h4>
               <table class="nutrition-table">
                 <thead>
                   <tr>
-                    <th data-en="Nutrient" data-ar="المغذيات">Nutrient</th>
-                    <th data-en="Per 100g" data-ar="لكل 100 جرام">Per 100g</th>
+                    <th>Nutrient</th>
+                    <th>Per 100g</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td data-en="Energy" data-ar="الطاقة">Energy</td>
+                    <td>Energy</td>
                     <td>350 kcal</td>
                   </tr>
                   <tr>
-                    <td data-en="Carbohydrates" data-ar="الكربوهيدرات">Carbohydrates</td>
+                    <td>Carbohydrates</td>
                     <td>77g</td>
                   </tr>
                   <tr>
-                    <td data-en="Protein" data-ar="البروتين">Protein</td>
+                    <td>Protein</td>
                     <td>7g</td>
                   </tr>
                   <tr>
-                    <td data-en="Fat" data-ar="الدهون">Fat</td>
+                    <td>Fat</td>
                     <td>0.5g</td>
                   </tr>
                   <tr>
-                    <td data-en="Fiber" data-ar="الألياف">Fiber</td>
+                    <td>Fiber</td>
                     <td>1g</td>
                   </tr>
                 </tbody>
@@ -7316,7 +6558,7 @@ body[dir="rtl"] .hero-image-card {
                 <input type="number" class="quantity-input" value="1" min="1" max="10" />
                 <button class="quantity-btn plus">+</button>
               </div>
-              <a href="#" target="_blank" class="order-btn" id="modalOrderBtn" data-en="Order Now" data-ar="اطلب الآن">Order Now</a>
+              <a href="#" target="_blank" class="order-btn" id="modalOrderBtn">Order Now</a>
             </div>
           </div>
         </div>
@@ -7329,8 +6571,8 @@ body[dir="rtl"] .hero-image-card {
       
       <div class="contact-content">
         <div class="contact-header">
-          <h2 data-en="Get In Touch" data-ar="تواصل معنا">Get In Touch</h2>
-          <p class="section-subtitle" data-en='We are here to serve you' data-ar="نحن هنا لخدمتك">We are here to serve you</p>
+          <h2>Get In Touch</h2>
+          <p class="section-subtitle">We are here to serve you</p>
         </div>
         
         <div class="contact-grid">
@@ -7340,9 +6582,9 @@ body[dir="rtl"] .hero-image-card {
                 <i class="fab fa-whatsapp"></i>
               </div>
               <div class="method-info">
-                <h3 data-en="WhatsApp" data-ar="واتساب">WhatsApp</h3>
-                <a href="https://wa.me/96895224124" target="_blank" class="method-link contact-number rtl-numbers">+968 95224124</a>
-                <p class="method-description" data-en="Fast response within minutes" data-ar="رد سريع خلال دقائق">Fast response within minutes</p>
+                <h3>WhatsApp</h3>
+                <a href="https://wa.me/96895224124" target="_blank" class="method-link contact-number">+968 95224124</a>
+                <p class="method-description">Fast response within minutes</p>
               </div>
             </div>
             
@@ -7351,9 +6593,9 @@ body[dir="rtl"] .hero-image-card {
                 <i class="fas fa-phone-alt"></i>
               </div>
               <div class="method-info">
-                <h3 data-en="Call Us" data-ar="اتصل بنا">Call Us</h3>
-                <a href="tel:+96822716859" class="method-link contact-number rtl-numbers">+968 22716859</a>
-                <p class="method-description" data-en="Sat-Thu: 8AM - 5PM" data-ar="السبت-الخميس: 8 صباحاً - 5 مساءً">Sat-Thu: 8AM - 5PM</p>
+                <h3>Call Us</h3>
+                <a href="tel:+96822716859" class="method-link contact-number">+968 22716859</a>
+                <p class="method-description">Sat-Thu: 8AM - 5PM</p>
               </div>
             </div>
             
@@ -7362,9 +6604,9 @@ body[dir="rtl"] .hero-image-card {
                 <i class="fas fa-envelope"></i>
               </div>
               <div class="method-info">
-                <h3 data-en="Email Us" data-ar="راسلنا">Email Us</h3>
+                <h3>Email Us</h3>
                 <a href="mailto:mashhorfoods@gmail.com" class="method-link">mashhorfoods@gmail.com</a>
-                <p class="method-description" data-en="Response within 24 hours" data-ar="رد خلال 24 ساعة">Response within 24 hours</p>
+                <p class="method-description">Response within 24 hours</p>
               </div>
             </div>
             
@@ -7373,45 +6615,44 @@ body[dir="rtl"] .hero-image-card {
                 <i class="fas fa-map-marker-alt"></i>
               </div>
               <div class="method-info">
-                <h3 data-en="Our Location" data-ar="موقعنا">Our Location</h3>
-                <address data-en="Building No. 162/1, Way No. 4902, Block No. 349<br>Rusayl Industrial Area, Sultanate of Oman" 
-                        data-ar="مبنى رقم 162/1، طريق رقم 4902، قطعة رقم 349<br>المنطقة الصناعية بروي، سلطنة عمان">
-                  Building No. 162/1, Way No. 4902, Block No. 349, Rusayl Industrial Area, Sultanate of Oman
+                <h3>Our Location</h3>
+                <address>
+                  Building No. 162/1, Way No. 4902, Block No. 349<br>Rusayl Industrial Area, Sultanate of Oman
                 </address>
               </div>
             </div>
           </div>
           
           <div class="contact-form slide-up">
-            <h3 data-en="Send a Message" data-ar="إرسال رسالة">Send a Message</h3>
+            <h3>Send a Message</h3>
             <form id="messageForm">
               <div class="form-group">
                 <input type="text" id="name" placeholder=" " required />
-                <label for="name" data-en="Your Name" data-ar="اسمك">Your Name</label>
-                <div class="error-message" data-en="Please enter your name" data-ar="الرجاء إدخال اسمك">Please enter your name</div>
+                <label for="name">Your Name</label>
+                <div class="error-message">Please enter your name</div>
               </div>
               <div class="form-group">
                 <input type="email" id="email" placeholder=" " />
-                <label for="email" data-en="Your Email" data-ar="بريدك الإلكتروني">Your Email</label>
-                <div class="error-message" data-en="Please enter a valid email" data-ar="الرجاء إدخال بريد إلكتروني صحيح">Please enter a valid email</div>
+                <label for="email">Your Email</label>
+                <div class="error-message">Please enter a valid email</div>
               </div>
               <div class="form-group">
                 <input type="tel" id="phone" placeholder=" " required />
-                <label for="phone" data-en="Phone Number" data-ar="رقم الهاتف">Phone Number</label>
-                <div class="error-message" data-en="Please enter your phone number" data-ar="الرجاء إدخال رقم هاتفك">Please enter your phone number</div>
+                <label for="phone">Phone Number</label>
+                <div class="error-message">Please enter your phone number</div>
               </div>
               <div class="form-group">
                 <textarea id="message" rows="4" placeholder=" " required></textarea>
-                <label for="message" data-en="Your Message" data-ar="رسالتك">Your Message</label>
-                <div class="error-message" data-en="Please enter your message" data-ar="الرجاء إدخال رسالتك">Please enter your message</div>
+                <label for="message">Your Message</label>
+                <div class="error-message">Please enter your message</div>
               </div>
               <button type="submit" class="submit-btn">
-                <i class="fas fa-envelope"></i> <span data-en="Send Message" data-ar="إرسال الرسالة">Send Message</span>
+                <i class="fas fa-envelope"></i> <span>Send Message</span>
               </button>
             </form>
             <div class="form-success">
               <i class="fas fa-check-circle"></i>
-              <p data-en="Thank you! Your message has been sent." data-ar="شكرًا لك! تم إرسال رسالتك.">Thank you! Your message has been sent.</p>
+              <p>Thank you! Your message has been sent.</p>
             </div>
           </div>
         </div>
@@ -7427,8 +6668,7 @@ body[dir="rtl"] .hero-image-card {
     <div class="footer-logo">
       <img src="https://i.ibb.co/B5M4WdDR/logo-1.webp" alt="Mashhor Logo" loading="lazy" width="200" height="80" />
       <div class="footer-about">
-        <p data-en="Mashhor Foodstuff Trading LLC is Oman's trusted source for premium Basmati and Non-Basmati rice, serving both wholesale and retail customers with exceptional quality products." 
-           data-ar="شركة مشهور للأغذية هي المصدر الموثوق للأرز البسمتي وغير البسمتي الممتاز في عمان، حيث تخدم كل من العملاء بالجملة والتجزئة بمنتجات عالية الجودة.">
+        <p>
           Mashhor Foodstuff Trading LLC is Oman's trusted source for premium Basmati and Non-Basmati rice, serving both wholesale and retail customers with exceptional quality products.
         </p>
       </div>
@@ -7441,28 +6681,27 @@ body[dir="rtl"] .hero-image-card {
     </div>
     
     <div class="footer-links-section">
-      <h3 data-en="Quick Links" data-ar="روابط سريعة">Quick Links</h3>
+      <h3>Quick Links</h3>
       <ul class="footer-links">
-        <li><a href="#about" data-en="About Us" data-ar="من نحن">About Us</a></li>
-        <li><a href="#products" data-en="Our Products" data-ar="منتجاتنا">Our Products</a></li>
-        <li><a href="#certifications" data-en="Certifications" data-ar="الشهادات">Certifications</a></li>
-        <li><a href="#contact-us" data-en="Contact Us" data-ar="اتصل بنا">Contact Us</a></li>
+        <li><a href="#about">About Us</a></li>
+        <li><a href="#products">Our Products</a></li>
+        <li><a href="#certifications">Certifications</a></li>
+        <li><a href="#contact-us">Contact Us</a></li>
       </ul>
     </div>
     
     <div class="footer-links-section">
-      <h3 data-en="Contact Info" data-ar="معلومات الاتصال">Contact Info</h3>
+      <h3>Contact Info</h3>
       <ul class="footer-contact-info">
         <li>
           <i class="fas fa-map-marker-alt"></i>
-          <span data-en="Building No. 162/1, Way No. 4902, Block No. 349, Rusayl Industrial Area, Sultanate of Oman" 
-                data-ar="مبنى رقم 162/1، طريق رقم 4902، قطعة رقم 349، المنطقة الصناعية بروي، سلطنة عمان">
+          <span>
             Building No. 162/1, Way No. 4902, Block No. 349, Rusayl Industrial Area, Sultanate of Oman
           </span>
         </li>
         <li>
           <i class="fas fa-phone-alt"></i>
-          <a href="tel:+96822716859" class="contact-number rtl-numbers">+968 22716859</a>
+          <a href="tel:+96822716859" class="contact-number">+968 22716859</a>
         </li>
         <li>
           <i class="fas fa-envelope"></i>
@@ -7474,7 +6713,7 @@ body[dir="rtl"] .hero-image-card {
   
   <div class="footer-bottom">
     <div class="copyright">
-      <span>&copy; <span id="currentYear"></span> <span data-en="Mashhor Foodstuff Trading LLC. All Rights Reserved." data-ar="شركة مشهور للأغذية. جميع الحقوق محفوظة.">Mashhor Foodstuff Trading LLC. All Rights Reserved.</span></span>
+      <span>&copy; <span id="currentYear"></span> Mashhor Foodstuff Trading LLC. All Rights Reserved.</span>
     </div>
   </div>
 </footer>
@@ -7482,7 +6721,6 @@ body[dir="rtl"] .hero-image-card {
   <!-- ============= JAVASCRIPT ============= -->
   <script>
    // ============= GLOBAL VARIABLES =============
-let currentLang = window.initialLang || 'en';
 let cart = [];
 let isTransitioning = false;
 let scrollTimeout = null;
@@ -7510,8 +6748,6 @@ const elements = {
   searchBtn: document.querySelector('.search-btn'),
   searchOverlay: document.getElementById('searchOverlay'),
   searchClose: document.querySelector('.search-close'),
-  langToggle: document.getElementById('languageToggle'),
-  mobileLangToggle: document.getElementById('mobileLanguageToggle'),
   modal: document.getElementById('quickViewModal'),
   closeModal: document.querySelector('.close-modal'),
   slider: document.querySelector('.slider'),
@@ -7523,103 +6759,49 @@ const elements = {
   formSuccess: document.querySelector('.form-success')
 };
 
-// Product Data
+// Product Data (Simplified for English only)
 const productsData = {
   1: {
-    title: {
-      en: "MASHHOR INDIAN XXXL 1121 Basmati Rice (35kg)",
-      ar: "أرز مشهور بسمتي اكس اكس اكس ال 1121 هندي (35 كجم)"
-    },
-    description: {
-      en: "Premium Long Grain Basmati Rice. Direct from Indian farms with rigorous quality checks. Suitable for diabetics, cholesterol free, and aged for perfect texture.",
-      ar: "أرز بسمتي طويل الحبة ممتاز. مباشرة من المزارع الهندية مع فحوصات جودة صارمة. مناسب لمرضى السكري، خالي من الكوليسترول، ومعتق لتحقيق القوام المثالي."
-    },
+    title: "MASHHOR INDIAN XXXL 1121 Basmati Rice (35kg)",
+    description: "Premium Long Grain Basmati Rice. Direct from Indian farms with rigorous quality checks. Suitable for diabetics, cholesterol free, and aged for perfect texture.",
     image: "https://i.ibb.co/zVmRP872/Untitled-1-copy.webp",
     price: 25.50,
-    link: {
-      en: "https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MASHHOR%20INDIAN%20XXXL%201121%20Basmati%20Rice%20(35kg).",
-      ar: "https://wa.me/96895224124?text=مرحباً، أنا مهتم بمنتج أرز مشهور بسمتي اكس اكس اكس ال 1121 هندي (35 كجم)"
-    }
+    link: "https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MASHHOR%20INDIAN%20XXXL%201121%20Basmati%20Rice%20(35kg)."
   },
   2: {
-    title: {
-      en: "MASHHOR INDIAN XXXL 1121 Basmati Rice (5kg)",
-      ar: "أرز مشهور بسمتي اكس اكس اكس ال 1121 هندي (5 كجم)"
-    },
-    description: {
-      en: "Aged long-grain rice with aromatic flavor and fluffy texture. Ideal for daily cooking and special occasions. Perfect for traditional Arabic and Indian dishes.",
-      ar: "أرز طويل الحبة معتق بنكهة عطرية وقوام رقيق. مثالي للطهي اليومي والمناسبات الخاصة. مثالي للأطباق العربية والهندية التقليدية."
-    },
+    title: "MASHHOR INDIAN XXXL 1121 Basmati Rice (5kg)",
+    description: "Aged long-grain rice with aromatic flavor and fluffy texture. Ideal for daily cooking and special occasions. Perfect for traditional Arabic and Indian dishes.",
     image: "https://i.ibb.co/TMntxccG/https://i.ibb.co/4nrGdyFC/mashhor.webp5.webp",
     price: 4.50,
-    link: {
-      en: "https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MASHHOR%20INDIAN%20XXXL%201121%20Basmati%20Rice%20(5kg).",
-      ar: "https://wa.me/96895224124?text=مرحباً، أنا مهتم بمنتج أرز مشهور بسمتي اكس اكس اكس ال 1121 هندي (5 كجم)"
-    }
+    link: "https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MASHHOR%20INDIAN%20XXXL%201121%20Basmati%20Rice%20(5kg)."
   },
   3: {
-    title: {
-      en: "MAHINAZ CLASSIC XXL Biryani Rice (35kg)",
-      ar: "أرز مهيناز كلاسيك اكس اكس ال للبرياني (35 كجم)"
-    },
-    description: {
-      en: "Aromatic XXL grains perfect for traditional biryani dishes. Premium Indian rice with rich flavor and perfect texture that stays separate when cooked.",
-      ar: "حبوب XXL عطرية مثالية لأطباق البرياني التقليدية. أرز هندي ممتاز بنكهة غنية وقوام مثالي يبقى منفصلاً عند الطهي."
-    },
+    title: "MAHINAZ CLASSIC XXL Biryani Rice (35kg)",
+    description: "Aromatic XXL grains perfect for traditional biryani dishes. Premium Indian rice with rich flavor and perfect texture that stays separate when cooked.",
     image: "https://i.ibb.co/845wmDPy/mahinaz35kg.webp",
     price: 22.00,
-    link: {
-      en: "https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MAHINAZ%20CLASSIC%20XXL%20Biryani%20Rice%20(35kg).",
-      ar: "https://wa.me/96895224124?text=مرحباً، أنا مهتم بمنتج أرز مهيناز كلاسيك اكس اكس ال للبرياني (35 كجم)"
-    }
+    link: "https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20MAHINAZ%20CLASSIC%20XXL%20Biryani%20Rice%20(35kg)."
   },
   4: {
-    title: {
-      en: "INDIAN PRIDE 1121 XXXL Golden Sella Basmati Rice (20kg)",
-      ar: "أرز إنديان برايد اكس اكس اكس ال 1121 سيلا ذهبي بسمتي (20 كجم)"
-    },
-    description: {
-      en: "Parboiled golden grains that are naturally aromatic. Perfect texture for biryani, mandi, and traditional rice dishes. Retains nutrients through special processing.",
-      ar: "حبوب ذهبية مسلوقة جزئيًا ذات نكهة عطرية طبيعية. قوام مثالي للبرياني والمندي وأطباق الأرز التقليدية. يحتفظ بالمغذيات من خلال معالجة خاصة."
-    },
+    title: "INDIAN PRIDE 1121 XXXL Golden Sella Basmati Rice (20kg)",
+    description: "Parboiled golden grains that are naturally aromatic. Perfect texture for biryani, mandi, and traditional rice dishes. Retains nutrients through special processing.",
     image: "https://i.ibb.co/twKYqkMm/india-pride.webp",
     price: 15.00,
-    link: {
-      en: "https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20INDIAN%20PRIDE%201121%20XXXL%20Golden%20Sella%20Basmati%20Rice%20(20kg).",
-      ar: "https://wa.me/96895224124?text=مرحباً، أنا مهتم بمنتج أرز إنديان برايد اكس اكس اكس ال 1121 سيلا ذهبي بسمتي (20 كجم)"
-    }
+    link: "https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20INDIAN%20PRIDE%201121%20XXXL%20Golden%20Sella%20Basmati%20Rice%20(20kg)."
   }, 
   5: {
-    title: {
-      en: "Palakkadan Mata Rice (18kg)",
-      ar: "أرز بالاكادان ماتا (18 كجم)"
-    },
-    description: {
-      en: "Traditional Kerala rice known for its unique taste and texture. Rich in fiber and nutrients, making it ideal for healthy meals. Perfect for traditional South Indian dishes like Kanji and Pongal.",
-      ar: "أرز كيرالا التقليدي المعروف بمذاقه الفريد وقوامه المميز. غني بالألياف والعناصر الغذائية، مما يجعله مثاليًا للوجبات الصحية. مثالي للأطباق الجنوب الهندية التقليدية مثل كانجي وبونغال."
-    },
+    title: "Palakkadan Mata Rice (18kg)",
+    description: "Traditional Kerala rice known for its unique taste and texture. Rich in fiber and nutrients, making it ideal for healthy meals. Perfect for traditional South Indian dishes like Kanji and Pongal.",
     image: "https://i.ibb.co/23KJsQGc/IMG-20250904-213156.jpg",
     price: 12.00,
-    link: {
-      en: "https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20Palakkadan%20Mata%20Rice%20(18kg).",
-      ar: "https://wa.me/96895224124?text=مرحباً، أنا مهتم بمنتج أرز بالاكادان ماتا (18 كجم)"
-    }
+    link: "https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20Palakkadan%20Mata%20Rice%20(18kg)."
   },
   6: {
-    title: {
-      en: "Mashhor Sona Masoori Rice (18kg)",
-      ar: "أرز مشهور سونا ماسوري (18 كجم)"
-    },
-    description: {
-      en: "Premium quality Sona Masoori rice sourced from South India. Known for its light, fluffy texture and excellent cooking results. Perfect for daily meals and traditional South Indian dishes like idli, dosa, and pongal.",
-      ar: "أرز سونا ماسوري عالي الجودة من جنوب الهند. معروف بقوامه الخفيف والرقيق ونتائج الطهي الممتازة. مثالي للوجبات اليومية والأطباق الجنوب الهندية التقليدية مثل الإدلي والدوسا والبونغال."
-    },
+    title: "Mashhor Sona Masoori Rice (18kg)",
+    description: "Premium quality Sona Masoori rice sourced from South India. Known for its light, fluffy texture and excellent cooking results. Perfect for daily meals and traditional South Indian dishes like idli, dosa, and pongal.",
     image: "https://i.ibb.co/3YQw8wbz/IMG-20250904-213127.jpg",
     price: 10.50,
-    link: {
-      en: "https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20Mashhor%20Sona%20Masoori%20Rice%20(18kg).",
-      ar: "https://wa.me/96895224124?text=مرحباً، أنا مهتم بمنتج أرز مشهور سونا ماسوري (18 كجم)"
-    }
+    link: "https://wa.me/96895224124?text=Hello%2C%20I'm%20interested%20in%20Mashhor%20Sona%20Masoori%20Rice%20(18kg)."
   }
 };
 
@@ -7627,15 +6809,12 @@ const productsData = {
 
 /**
  * Generate WhatsApp link with proper parameters
- * @param {string} productName - The name of the product
- * @param {number} quantity - The quantity of the product
+ * @param {string} productName - The name of product
+ * @param {number} quantity - The quantity of product
  * @returns {string} The formatted WhatsApp link
  */
 function generateWhatsAppLink(productName, quantity) {
-  const lang = currentLang || 'en';
-  const message = lang === 'ar' ? 
-    `أنا مهتم بـ ${productName} - الكمية: ${quantity}` : 
-    `I'm interested in ${productName} - Quantity: ${quantity}`;
+  const message = `I'm interested in ${productName} - Quantity: ${quantity}`;
   return `https://wa.me/96895224124?text=${encodeURIComponent(message)}`;
 }
 
@@ -7664,12 +6843,12 @@ function debounce(func, wait) {
 /**
  * Smooth scroll function with fallback for older browsers
  * @param {HTMLElement|string} target - The target element or selector
- * @param {number} [offset=80] - The offset from the top
+ * @param {number} [offset=80] - The offset from top
  */
 function smoothScroll(target, offset = 80) {
   if (!target) return;
   
-  // If target is a string, get the element
+  // If target is a string, get element
   if (typeof target === 'string') {
     target = document.querySelector(target);
   }
@@ -7743,81 +6922,11 @@ function handleImageError(img) {
   }
 }
 
-// ============= LANGUAGE HANDLING =============
-
-/**
- * Set the language of the page
- * @param {string} lang - The language to set ('en' or 'ar')
- */
-function setLanguage(lang) {
-  if (!lang) lang = 'en';
-  
-  // Update language toggle button text
-  const langToggle = elements.langToggle;
-  if (langToggle) {
-    const langText = langToggle.querySelector('.lang-text');
-    if (langText) langText.textContent = lang === 'ar' ? 'English' : 'عربي';
-  }
-  
-  // Update all translatable elements
-  document.querySelectorAll('[data-en], [data-ar]').forEach(element => {
-    const text = element.getAttribute(`data-${lang}`);
-    if (text) {
-      if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
-        element.placeholder = text;
-      } else {
-        // Check if text contains HTML
-        const hasHTML = /<[a-z][\s\S]*>/i.test(text);
-        if (hasHTML) {
-          element.innerHTML = text;
-        } else {
-          element.textContent = text;
-        }
-      }
-    }
-  });
-  
-  // Update modal order button text if it exists
-  const modalOrderBtn = document.getElementById('modalOrderBtn');
-  if (modalOrderBtn) {
-    modalOrderBtn.textContent = lang === 'ar' ? 'اطلب الآن' : 'Order Now';
-  }
-  
-  // Update cart checkout button text
-  const cartCheckout = document.getElementById('cartCheckout');
-  if (cartCheckout) {
-    cartCheckout.textContent = lang === 'ar' ? 'إتمام الشراء عبر واتساب' : 'Checkout via WhatsApp';
-  }
-  
-  // Reorganize tables and elements for Arabic
-  if (lang === 'ar') {
-    document.querySelectorAll('.nutrition-table th, .nutrition-table td').forEach(cell => {
-      cell.style.textAlign = 'right';
-    });
-    document.querySelectorAll('.modal-info').forEach(info => {
-      info.style.textAlign = 'right';
-    });
-  } else {
-    document.querySelectorAll('.nutrition-table th, .nutrition-table td').forEach(cell => {
-      cell.style.textAlign = 'left';
-    });
-    document.querySelectorAll('.modal-info').forEach(info => {
-      info.style.textAlign = 'left';
-    });
-  }
-  
-  // Update global language variable
-  currentLang = lang;
-  localStorage.setItem('language', lang);
-  elements.html.dir = lang === 'ar' ? 'rtl' : 'ltr';
-  elements.html.lang = lang;
-}
-
 // ============= SHOPPING CART FUNCTIONS =============
 
 /**
  * Add item to cart
- * @param {number|string} productId - The ID of the product
+ * @param {number|string} productId - The ID of product
  * @param {number} quantity - The quantity to add
  */
 function addToCart(productId, quantity) {
@@ -7836,7 +6945,7 @@ function addToCart(productId, quantity) {
     // Add new item to cart
     cart.push({
       id: productId,
-      title: product.title[currentLang],
+      title: product.title,
       image: product.image,
       price: product.price || 0,
       quantity: quantity
@@ -7855,12 +6964,12 @@ function addToCart(productId, quantity) {
   }
   
   // Show notification
-  showNotification(currentLang === 'ar' ? 'تمت الإضافة إلى سلة التسوق' : 'Added to cart');
+  showNotification('Added to cart');
 }
 
 /**
  * Remove item from cart
- * @param {number|string} productId - The ID of the product to remove
+ * @param {number|string} productId - The ID of product to remove
  */
 function removeFromCart(productId) {
   if (!productId) return;
@@ -7871,7 +6980,7 @@ function removeFromCart(productId) {
 
 /**
  * Update item quantity in cart
- * @param {number|string} productId - The ID of the product
+ * @param {number|string} productId - The ID of product
  * @param {number} quantity - The new quantity
  */
 function updateCartItemQuantity(productId, quantity) {
@@ -7894,7 +7003,7 @@ function updateCartItemQuantity(productId, quantity) {
 function clearCart() {
   cart = [];
   updateCartUI();
-  showNotification(currentLang === 'ar' ? 'تم تفريغ سلة التسوق' : 'Cart cleared');
+  showNotification('Cart cleared');
 }
 
 /**
@@ -7919,10 +7028,10 @@ function updateCartUI() {
           <div class="empty-cart-icon">
             <i class="fas fa-shopping-basket"></i>
           </div>
-          <h4 data-en="Your cart is empty" data-ar="سلة التسوق فارغة">Your cart is empty</h4>
-          <p data-en="Add some delicious rice to your cart" data-ar="أضف بعض الأرز اللذيذ إلى سلة التسوق">Add some delicious rice to your cart</p>
+          <h4>Your cart is empty</h4>
+          <p>Add some delicious rice to your cart</p>
           <button class="continue-shopping-btn" id="continueShopping">
-            <span data-en="Continue Shopping" data-ar="مواصلة التسوق">Continue Shopping</span>
+            <span>Continue Shopping</span>
           </button>
         </div>
       `;
@@ -7959,7 +7068,7 @@ function updateCartUI() {
             </div>
             <button class="cart-item-remove" data-product-id="${item.id}">
               <i class="fas fa-trash-alt"></i>
-              <span>${currentLang === 'ar' ? 'إزالة' : 'Remove'}</span>
+              <span>Remove</span>
             </button>
           </div>
         `;
@@ -8016,19 +7125,14 @@ function updateCartUI() {
 function generateCartCheckoutMessage() {
   if (cart.length === 0) return '';
   
-  const lang = currentLang || 'en';
-  let message = lang === 'ar' ? 
-    'مرحباً، أرغب في طلب المنتجات التالية:%0A%0A' : 
-    'Hello, I would like to order the following products:%0A%0A';
+  let message = 'Hello, I would like to order following products:%0A%0A';
   
   cart.forEach(item => {
-    message += `${item.title} - الكمية: ${item.quantity}%0A`;
+    message += `${item.title} - Quantity: ${item.quantity}%0A`;
   });
   
   message += '%0A%0A';
-  message += lang === 'ar' ? 
-    'يرجى تأكيد الطلب وتوفير تفاصيل الدفع والشحن.' : 
-    'Please confirm the order and provide payment and shipping details.';
+  message += 'Please confirm order and provide payment and shipping details.';
   
   return message;
 }
@@ -8163,7 +7267,7 @@ function handleSearchSubmit(e) {
   
   if (searchTerm) {
     // In a real implementation, this would perform a search
-    alert(currentLang === 'ar' ? `البحث عن: ${searchTerm}` : `Searching for: ${searchTerm}`);
+    alert(`Searching for: ${searchTerm}`);
     closeSearchOverlay();
     searchInput.value = '';
   }
@@ -8191,7 +7295,6 @@ function filterProducts(category) {
 }
 
 // ============= IMAGE SLIDER =============
-
 let currentSlide = 0;
 const slideCount = elements.slides ? elements.slides.length : 0;
 let slideInterval;
@@ -8214,7 +7317,7 @@ function createDots() {
 
 /**
  * Go to specific slide
- * @param {number} slideIndex - The index of the slide to go to
+ * @param {number} slideIndex - The index of slide to go to
  */
 function goToSlide(slideIndex) {
   if (isTransitioning || !elements.slider) return;
@@ -8222,9 +7325,7 @@ function goToSlide(slideIndex) {
   isTransitioning = true;
   currentSlide = (slideIndex + slideCount) % slideCount;
   
-  const transformValue = elements.html.dir === 'rtl' ? 
-    `translateX(${currentSlide * 100}%)` : 
-    `translateX(-${currentSlide * 100}%)`;
+  const transformValue = `translateX(-${currentSlide * 100}%)`;
   
   elements.slider.style.transform = transformValue;
   updateDots();
@@ -8315,7 +7416,6 @@ function initSlider() {
 }
 
 // ============= PRODUCT QUICK VIEW =============
-
 let currentProductTitle = '';
 
 /**
@@ -8336,14 +7436,14 @@ function updateModalOrderLink() {
 
 /**
  * Open product quick view modal
- * @param {number|string} productId - The ID of the product
+ * @param {number|string} productId - The ID of product
  */
 function openQuickViewModal(productId) {
   const product = productsData[productId];
   
   if (!product) return;
   
-  currentProductTitle = product.title[currentLang];
+  currentProductTitle = product.title;
   
   // Update modal content
   const modalProductTitle = document.getElementById('modalProductTitle');
@@ -8351,7 +7451,7 @@ function openQuickViewModal(productId) {
   const modalImage = document.getElementById('modalProductImage');
   
   if (modalProductTitle) modalProductTitle.textContent = currentProductTitle;
-  if (modalProductDescription) modalProductDescription.textContent = product.description[currentLang];
+  if (modalProductDescription) modalProductDescription.textContent = product.description;
   
   if (modalImage) {
     modalImage.src = product.image;
@@ -8370,7 +7470,7 @@ function openQuickViewModal(productId) {
   // Set modal order button text
   const modalOrderBtn = document.getElementById('modalOrderBtn');
   if (modalOrderBtn) {
-    modalOrderBtn.textContent = currentLang === 'ar' ? 'اطلب الآن' : 'Order Now';
+    modalOrderBtn.textContent = "Order Now";
   }
   
   // Set WhatsApp link
@@ -8454,22 +7554,14 @@ function handleContactFormSubmit(e) {
   if (!validateContactForm(form)) return;
   
   // Create email content
-  const lang = currentLang || 'en';
   const name = document.getElementById('name').value.trim();
   const phone = document.getElementById('phone').value.trim();
   const message = document.getElementById('message').value.trim();
   const email = document.getElementById('email').value.trim();
   
-  const emailSubject = lang === 'ar' 
-    ? 'رسالة جديدة من موقع مشهور للأغذية' 
-    : 'New Message from Mashhor Foodstuff Website';
+  const emailSubject = 'New Message from Mashhor Foodstuff Website';
     
-  const emailBody = lang === 'ar'
-    ? `الاسم: ${name}%0A` +
-      `البريد الإلكتروني: ${email || 'غير متوفر'}%0A` +
-      `رقم الهاتف: ${phone}%0A%0A` +
-      `الرسالة:%0A${message}`
-    : `Name: ${name}%0A` +
+  const emailBody = `Name: ${name}%0A` +
       `Email: ${email || 'Not provided'}%0A` +
       `Phone: ${phone}%0A%0A` +
       `Message:%0A${message}`;
@@ -8553,14 +7645,6 @@ function initEventListeners() {
     elements.mobileNavClose.addEventListener('click', closeMobileMenu);
   }
   
-  // Mobile language toggle
-  if (elements.mobileLangToggle) {
-    elements.mobileLangToggle.addEventListener('click', function() {
-      const newLang = currentLang === 'ar' ? 'en' : 'ar';
-      setLanguage(newLang);
-    });
-  }
-  
   // Search overlay events
   if (elements.searchBtn) {
     elements.searchBtn.addEventListener('click', openSearchOverlay);
@@ -8582,14 +7666,6 @@ function initEventListeners() {
   const searchForm = document.querySelector('.search-form');
   if (searchForm) {
     searchForm.addEventListener('submit', handleSearchSubmit);
-  }
-  
-  // Language toggle
-  if (elements.langToggle) {
-    elements.langToggle.addEventListener('click', function() {
-      const newLang = currentLang === 'ar' ? 'en' : 'ar';
-      setLanguage(newLang);
-    });
   }
   
   // Cart events
@@ -8621,7 +7697,7 @@ function initEventListeners() {
   const clearCartBtn = document.getElementById('clearCart');
   if (clearCartBtn) {
     clearCartBtn.addEventListener('click', function() {
-      if (confirm(currentLang === 'ar' ? 'هل أنت متأكد من أنك تريد تفريغ سلة التسوق؟' : 'Are you sure you want to clear your cart?')) {
+      if (confirm('Are you sure you want to clear your cart?')) {
         clearCart();
       }
     });
@@ -8830,12 +7906,9 @@ function initEventListeners() {
 // ============= INITIALIZATION =============
 
 /**
- * Initialize the application
+ * Initialize application
  */
 function initApp() {
-  // Set initial language
-  setLanguage(currentLang);
-  
   // Set current year in footer
   const currentYearElement = document.getElementById('currentYear');
   if (currentYearElement) currentYearElement.textContent = new Date().getFullYear();
