@@ -5576,6 +5576,7 @@ footer::after {
     
     <div class="nav-container">
       <nav class="nav-menu">
+        <!-- Desktop Links -->
         <a href="#about" class="nav-link">About</a>
         <a href="#products" class="nav-link">Products</a>
         <a href="#why-us" class="nav-link">Why Us</a>
@@ -5608,6 +5609,7 @@ footer::after {
   </div>
   
   <div class="mobile-nav-menu">
+    <!-- Mobile Links (Identical IDs/Targets) -->
     <a href="#about" class="nav-link">
       <i class="fas fa-info-circle"></i>
       <span>About</span>
@@ -6843,9 +6845,9 @@ function debounce(func, wait) {
 /**
  * Smooth scroll function with fallback for older browsers
  * @param {HTMLElement|string} target - The target element or selector
- * @param {number} [offset=80] - The offset from top
+ * @param {number} [offset=100] - The offset from top (Increased for better clearance)
  */
-function smoothScroll(target, offset = 80) {
+function smoothScroll(target, offset = 100) {
   if (!target) return;
   
   // If target is a string, get element
@@ -7716,16 +7718,33 @@ function initEventListeners() {
   // Smooth scrolling for anchor links
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function(e) {
-      e.preventDefault();
-      
       const targetId = this.getAttribute('href');
-      if (targetId === '#') return;
       
+      // Check if target is "#", "#top", or an actual ID
+      if (targetId === '#' || targetId === '#top') {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // FIX: Close mobile menu if this link was inside it
+        if (this.closest('.mobile-nav-menu')) {
+          closeMobileMenu();
+        }
+        return;
+      }
+
       const target = document.querySelector(targetId);
       
       if (target) {
-        smoothScroll(target);
+        e.preventDefault(); // Only prevent default if target exists
         
+        // FIX: Close mobile menu if this link is inside it
+        if (this.closest('.mobile-nav-menu')) {
+          closeMobileMenu();
+        }
+        
+        smoothScroll(target, 100); // Use offset
+        
+        // Update URL hash without jumping
         if (history.pushState) {
           history.pushState(null, null, targetId);
         } else {
