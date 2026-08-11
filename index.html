@@ -414,6 +414,42 @@
   .shell-debug [data-region]{outline:var(--bw-thin) dashed var(--border-strong);outline-offset:var(--sp-4);min-height:var(--sp-32)}
 
   /* ==========================================================================
+     HERO  (Prompt 03) — 100vh · angular Quantum FRAME · centered bilingual copy
+     ========================================================================== */
+  .hero{position:relative;display:flex;align-items:center;justify-content:center;min-height:100vh;min-height:100dvh;overflow:clip;background:var(--ql-black)}
+  .hero__inner{position:relative;z-index:1;width:100%;display:flex;flex-direction:column;align-items:center;text-align:center;padding-block:calc(var(--header-h) + var(--sp-48)) var(--sp-64)}
+
+  /* FRAME background — two offset angular shards (Blue + Lime) @15%, top-left → center */
+  .hero__frame{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:clip}
+  .hero__frame::before{content:"";position:absolute;inset-block-start:-8%;inset-inline-start:-5%;inline-size:min(64vw,860px);block-size:min(82vh,760px);background:var(--ql-blue);opacity:.15;clip-path:polygon(0 0,76% 0,100% 46%,38% 100%,0 74%)}
+  .hero__frame::after{content:"";position:absolute;inset-block-start:6%;inset-inline-start:9%;inline-size:min(44vw,560px);block-size:min(50vh,470px);background:var(--ql-lime);opacity:.15;clip-path:polygon(6% 26%,64% 0,100% 62%,30% 100%)}
+  /* thin angular focus bracket (the "Frame" corner) */
+  .hero__frame-line{position:absolute;inset-block-start:15%;inset-inline-start:6%;inline-size:min(28vw,320px);block-size:min(28vw,320px);max-block-size:340px;border-block-start:var(--bw-thick) solid rgba(36,71,255,.5);border-inline-start:var(--bw-thick) solid rgba(36,71,255,.5)}
+
+  /* ARC background — mobile only (nested semicircles behind headline) */
+  .hero__arc{display:none}
+
+  .hero__eyebrow{display:inline-flex;align-items:center;gap:var(--sp-12);margin-block-end:var(--sp-16);color:var(--ql-lime);font-family:var(--font-en);font-size:var(--fs-eyebrow);font-weight:var(--fw-semibold);letter-spacing:var(--ls-widest);text-transform:uppercase}
+  .hero__eyebrow::before,.hero__eyebrow::after{content:"";inline-size:28px;block-size:var(--bw-thick);background:currentColor}
+
+  /* Headline — IBM Plex Sans Arabic Bold, 36px → 64px, Paper */
+  .hero__title{max-inline-size:18ch;margin-inline:auto;color:var(--ql-paper);font-weight:var(--fw-bold);font-size:clamp(2.25rem,1.40rem + 3.6vw,4rem);line-height:1.12}
+  /* Supporting text — Regular, 16px → 20px, Cool Gray */
+  .hero__lead{margin-block-start:var(--sp-24);max-inline-size:54ch;margin-inline:auto;color:var(--ql-gray);font-weight:var(--fw-regular);font-size:clamp(1rem,0.90rem + 0.4vw,1.25rem);line-height:1.75}
+
+  /* Three pillars — LINK connectors (line + dot), Blue */
+  .hero__pillars{display:flex;align-items:center;justify-content:center;gap:var(--sp-16);margin-block-start:var(--sp-48);flex-wrap:wrap}
+  .hero__pillar{font-family:var(--font-en);font-weight:var(--fw-black);font-size:clamp(0.9rem,0.85rem + 0.2vw,1.05rem);letter-spacing:0.16em;text-transform:uppercase;color:var(--ql-blue)}
+  .hero__sep{position:relative;inline-size:48px;block-size:var(--bw-thick);background:rgba(36,71,255,.45);border-radius:2px;flex:0 0 auto}
+  .hero__sep::before{content:"";position:absolute;inset-block-start:50%;inset-inline-start:50%;transform:translate(-50%,-50%);inline-size:7px;block-size:7px;border-radius:var(--radius-round);background:var(--ql-blue)}
+
+  /* Scroll indicator — Lime, bobbing arrow (removed on mobile) */
+  .hero__scroll{position:absolute;inset-block-end:var(--sp-32);inset-inline:0;margin-inline:auto;inline-size:var(--tap-min);block-size:var(--tap-min);display:flex;align-items:center;justify-content:center;color:var(--ql-lime);z-index:1}
+  .hero__scroll svg{inline-size:22px;block-size:22px;animation:hero-bob 1.8s var(--ease-in-out) infinite}
+  @keyframes hero-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+  @media (prefers-reduced-motion:reduce){.hero__scroll svg{animation:none}}
+
+  /* ==========================================================================
      RESPONSIVE  (Desktop-first · anchors: 1440 / 768 / 375)
      ========================================================================== */
   @media (max-width:1200px){
@@ -428,6 +464,18 @@
     .site-footer__brand{grid-column:1 / -1}
     .site-footer__col{grid-column:span 4}
     .site-footer__newsletter{grid-column:1 / -1}
+
+    /* HERO mobile: FRAME → ARC, stacked pillars, smaller eyebrow, no scroll cue */
+    .hero__frame,.hero__frame-line{display:none}
+    .hero__arc{display:block;position:absolute;inset-block-start:calc(var(--header-h) + 6%);inset-inline:0;margin-inline:auto;inline-size:min(86vw,360px);aspect-ratio:2 / 1;z-index:0;pointer-events:none}
+    .hero__arc::before,.hero__arc::after{content:"";position:absolute;inset-block-end:0;inset-inline:0;margin-inline:auto;border:3px solid;border-block-end:0;border-start-start-radius:var(--radius-pill);border-start-end-radius:var(--radius-pill)}
+    .hero__arc::before{inline-size:100%;block-size:100%;border-color:rgba(36,71,255,.35)}
+    .hero__arc::after{inline-size:64%;block-size:64%;border-color:rgba(199,243,107,.42)}
+    .hero__eyebrow{font-size:0.7rem;letter-spacing:0.18em}
+    .hero__eyebrow::before,.hero__eyebrow::after{inline-size:18px}
+    .hero__pillars{flex-direction:column;gap:var(--sp-12)}
+    .hero__sep{inline-size:40px}
+    .hero__scroll{display:none}
   }
   @media (max-width:375px){
     :root{--anchor-offset:76px;--grid-cols:4}
@@ -497,9 +545,35 @@
       <a class="btn btn--start btn--block mobile-nav__cta" href="#contact" lang="ar">لنبدأ</a>
     </div>
 
-    <!-- ================= MAIN (sections arrive in later steps) ================= -->
+    <!-- ================= MAIN ================= -->
     <main class="site-main" id="main">
-      <!-- Foundation established. Hero + content sections begin in the next prompt. -->
+
+      <!-- ===== HERO (Prompt 03) ===== -->
+      <section class="hero" id="home" data-section aria-labelledby="hero-title">
+        <!-- FRAME background (desktop): angular Blue + Lime shards, top-left → center -->
+        <div class="hero__frame" aria-hidden="true"><span class="hero__frame-line"></span></div>
+        <!-- ARC background (mobile only) -->
+        <div class="hero__arc" aria-hidden="true"></div>
+
+        <div class="hero__inner container container--wide">
+          <p class="hero__eyebrow">CREATIVE SERVICES PROPOSAL</p>
+          <h1 class="hero__title" id="hero-title" lang="ar" dir="rtl">عرض خدمات إبداعية متكامل</h1>
+          <p class="hero__lead" lang="ar" dir="rtl">حلول تصميم واتصال بصري تساعد على بناء حضور احترافي، واضح، ومتناسق للعلامات التجارية والمشاريع.</p>
+
+          <div class="hero__pillars" role="list" aria-label="Package levels">
+            <span class="hero__pillar" role="listitem">BASIC</span>
+            <span class="hero__sep" aria-hidden="true"></span>
+            <span class="hero__pillar" role="listitem">MEDIUM</span>
+            <span class="hero__sep" aria-hidden="true"></span>
+            <span class="hero__pillar" role="listitem">PREMIUM</span>
+          </div>
+        </div>
+
+        <a class="hero__scroll" href="#services" aria-label="Scroll to content">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v15M6 13l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </section>
+
     </main>
 
     <!-- ================= GLOBAL FOOTER (structure placeholder) ================= -->
