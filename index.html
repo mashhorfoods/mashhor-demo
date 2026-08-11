@@ -551,6 +551,36 @@
   .addons__footer{margin-block-start:var(--sp-32);text-align:center;color:var(--ql-black);font-weight:var(--fw-semibold)}
 
   /* ==========================================================================
+     PROCESS (Prompt 07) — Black bg · 6 steps (2×3) · LINK connectors
+     ========================================================================== */
+  .process{background:var(--ql-black)}
+  .process__title{color:var(--ql-paper);font-weight:var(--fw-bold);font-size:clamp(1.75rem,1.4rem + 1.8vw,2.5rem);text-align:start}
+  .process-flow{display:flex;flex-direction:column;gap:var(--sp-64);margin-block-start:var(--sp-48);list-style:none;padding:0}
+  .process-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-24);position:relative}
+  .process-row::before{content:"";position:absolute;inset-block-start:32px;inset-inline:16.6%;block-size:var(--link-width);background:var(--ql-blue);z-index:0}  /* horizontal LINK */
+  .pstep{display:flex;flex-direction:column;align-items:center;text-align:center}
+  .pstep__node{position:relative;z-index:1;flex:0 0 auto;inline-size:64px;block-size:64px;border-radius:var(--radius-round);background:var(--ql-blue);display:grid;place-items:center}
+  .pstep__num{font-family:var(--font-en);font-weight:var(--fw-black);color:var(--ql-lime);font-size:1.25rem}
+  .pstep__body{display:flex;flex-direction:column;align-items:center}
+  .pstep__name{margin-block-start:var(--sp-16);color:var(--ql-paper);font-weight:var(--fw-bold);font-size:1.15rem}
+  .pstep__link{inline-size:var(--link-width);block-size:24px;background:var(--ql-blue);margin-block:var(--sp-12)}  /* vertical LINK */
+  .pstep__desc{color:var(--ql-gray);font-size:0.9rem;line-height:1.6;max-inline-size:26ch}
+
+  /* ==========================================================================
+     POLICIES (Prompt 07) — Paper bg · 3 columns (Reviews / Payment / Terms)
+     ========================================================================== */
+  .policies{background:var(--surface-paper);color:var(--text-on-paper)}
+  .policies__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-24)}
+  .policy{padding:var(--sp-32);border:1.5px solid var(--border-on-paper);border-radius:var(--arc-md);border-start-start-radius:var(--arc-lg)}
+  .policy__title{color:var(--ql-blue);font-weight:var(--fw-bold);font-size:1.3rem;margin-block-end:var(--sp-20)}
+  .policy__list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:var(--sp-12)}
+  .policy__list li{color:var(--ql-black);font-size:0.98rem;line-height:1.6}
+  .policy__list strong{color:var(--ql-blue);font-weight:var(--fw-bold)}
+  .policy__list--bullets li{position:relative;padding-inline-start:var(--sp-20)}
+  .policy__list--bullets li::before{content:"";position:absolute;inset-inline-start:0;inset-block-start:0.5em;inline-size:7px;block-size:7px;border-radius:var(--radius-round);background:var(--ql-blue)}
+  .policy__note{margin-block-start:var(--sp-16);color:var(--ql-gray);font-size:0.85rem;line-height:1.6}
+
+  /* ==========================================================================
      RESPONSIVE  (Desktop-first · anchors: 1440 / 768 / 375)
      ========================================================================== */
   @media (max-width:1200px){
@@ -605,6 +635,22 @@
 
     /* ADDITIONAL SERVICES mobile: 2-column grid */
     .addons__grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+
+    /* PROCESS mobile: vertical timeline */
+    .process-flow{gap:0}
+    .process-row{display:contents}
+    .process-row::before{display:none}
+    .pstep{flex-direction:row;align-items:flex-start;text-align:start;gap:var(--sp-16);padding-block:12px;position:relative}
+    .pstep__node{margin-block-start:0}
+    .pstep__body{align-items:flex-start}
+    .pstep__name{margin-block-start:0}
+    .pstep__link{display:none}
+    .pstep__desc{max-inline-size:none;margin-block-start:var(--sp-4)}
+    .pstep::before{content:"";position:absolute;inset-inline-start:31px;inset-block-start:44px;block-size:100%;inline-size:var(--link-width);background:var(--ql-blue);z-index:0}  /* timeline LINK */
+    .pstep:last-child::before{display:none}
+
+    /* POLICIES mobile: single column */
+    .policies__grid{grid-template-columns:1fr}
   }
   @media (max-width:375px){
     :root{--anchor-offset:76px;--grid-cols:4}
@@ -971,6 +1017,107 @@
             <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>تجهيز الملفات للطباعة والنشر</div>
           </div>
           <p class="addons__footer">يتم تحديد السعر حسب نوع الخدمة وحجم العمل قبل التنفيذ.</p>
+        </div>
+      </section>
+
+      <!-- ===== PROCESS (Prompt 07) ===== -->
+      <section class="section process" id="process" data-section aria-labelledby="process-title">
+        <div class="container container--wide" lang="ar" dir="rtl">
+          <h2 class="process__title" id="process-title" data-reveal>التصميم ليس مجرد شكل</h2>
+
+          <div class="process-flow" role="list">
+            <div class="process-row">
+              <div class="pstep" role="listitem" data-reveal>
+                <div class="pstep__node"><span class="pstep__num">01</span></div>
+                <div class="pstep__body">
+                  <h3 class="pstep__name">الفهم</h3>
+                  <span class="pstep__link" aria-hidden="true"></span>
+                  <p class="pstep__desc">جمع المعلومات وتحديد الاحتياج.</p>
+                </div>
+              </div>
+              <div class="pstep" role="listitem" data-reveal>
+                <div class="pstep__node"><span class="pstep__num">02</span></div>
+                <div class="pstep__body">
+                  <h3 class="pstep__name">التخطيط</h3>
+                  <span class="pstep__link" aria-hidden="true"></span>
+                  <p class="pstep__desc">تحديد المخرجات والأولويات والجدول الزمني.</p>
+                </div>
+              </div>
+              <div class="pstep" role="listitem" data-reveal>
+                <div class="pstep__node"><span class="pstep__num">03</span></div>
+                <div class="pstep__body">
+                  <h3 class="pstep__name">التطوير</h3>
+                  <span class="pstep__link" aria-hidden="true"></span>
+                  <p class="pstep__desc">بناء الاتجاه والحلول البصرية.</p>
+                </div>
+              </div>
+            </div>
+            <div class="process-row">
+              <div class="pstep" role="listitem" data-reveal>
+                <div class="pstep__node"><span class="pstep__num">04</span></div>
+                <div class="pstep__body">
+                  <h3 class="pstep__name">التنفيذ</h3>
+                  <span class="pstep__link" aria-hidden="true"></span>
+                  <p class="pstep__desc">إنتاج المخرجات المتفق عليها.</p>
+                </div>
+              </div>
+              <div class="pstep" role="listitem" data-reveal>
+                <div class="pstep__node"><span class="pstep__num">05</span></div>
+                <div class="pstep__body">
+                  <h3 class="pstep__name">المراجعة</h3>
+                  <span class="pstep__link" aria-hidden="true"></span>
+                  <p class="pstep__desc">تنفيذ جولات المراجعة وفق الباقة.</p>
+                </div>
+              </div>
+              <div class="pstep" role="listitem" data-reveal>
+                <div class="pstep__node"><span class="pstep__num">06</span></div>
+                <div class="pstep__body">
+                  <h3 class="pstep__name">التسليم</h3>
+                  <span class="pstep__link" aria-hidden="true"></span>
+                  <p class="pstep__desc">تجهيز وتسليم الملفات النهائية.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== POLICIES (Prompt 07) ===== -->
+      <section class="section policies" id="policies" aria-label="المراجعات والدفع والشروط">
+        <div class="container container--wide" lang="ar" dir="rtl">
+          <div class="policies__grid">
+
+            <div class="policy" data-reveal>
+              <h3 class="policy__title">المراجعات</h3>
+              <ul class="policy__list">
+                <li><strong>BASIC</strong> — جولتان</li>
+                <li><strong>MEDIUM</strong> — 3 جولات</li>
+                <li><strong>PREMIUM</strong> — 4 جولات</li>
+              </ul>
+              <p class="policy__note">تُحتسب الجولة بعد استلام الملاحظات المجمعة.</p>
+              <p class="policy__note">إضافة مخرجات أو تغيير نطاق المشروع لا يُعتبر مراجعة، ويتم تقييمه وتسعيره بشكل منفصل.</p>
+            </div>
+
+            <div class="policy" data-reveal>
+              <h3 class="policy__title">الدفع</h3>
+              <ul class="policy__list">
+                <li><strong>50%</strong> عند اعتماد المشروع وبدء العمل.</li>
+                <li><strong>50%</strong> عند الانتهاء وقبل التسليم النهائي.</li>
+              </ul>
+            </div>
+
+            <div class="policy" data-reveal>
+              <h3 class="policy__title">شروط أساسية</h3>
+              <ul class="policy__list policy__list--bullets">
+                <li>تبدأ مدة التنفيذ بعد استلام المحتوى والمواد المطلوبة ودفعة بدء المشروع.</li>
+                <li>أي طلبات خارج نطاق الباقة يتم تسعيرها بشكل منفصل.</li>
+                <li>تأخر إرسال المحتوى أو الملاحظات قد يؤدي إلى تعديل الجدول الزمني.</li>
+                <li>الملفات المصدرية لا تُسلّم تلقائيًا إلا إذا تم الاتفاق عليها.</li>
+                <li>يتم تسليم الملفات النهائية بعد استكمال الدفعات المستحقة.</li>
+              </ul>
+            </div>
+
+          </div>
         </div>
       </section>
 
