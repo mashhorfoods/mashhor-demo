@@ -468,6 +468,54 @@
   .service-card__desc{position:relative;z-index:1;margin-block-start:var(--sp-16);color:var(--ql-black);font-weight:var(--fw-regular);max-inline-size:42ch}
 
   /* ==========================================================================
+     PACKAGES  (Prompt 05) — intro cards + interactive tab selector · Black bg
+     ========================================================================== */
+  .packages{background:var(--ql-black)}
+  .packages__head{max-inline-size:60ch;text-align:start}
+  .packages__title{color:var(--ql-paper);font-weight:var(--fw-bold);font-size:clamp(1.9rem,1.4rem + 2vw,2.5rem);line-height:1.15}
+  .packages__subtitle{margin-block-start:var(--sp-8);color:var(--ql-gray);font-weight:var(--fw-regular);font-size:clamp(1.05rem,1rem + 0.3vw,1.125rem)}
+
+  /* Part A — intro cards (Paper cards, thin blue FRAME) */
+  .pkg-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-24);margin-block-start:var(--sp-48);align-items:start}
+  .pkg-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:var(--sp-8);padding:var(--sp-40) var(--sp-24) var(--sp-32);background:var(--surface-paper);color:var(--text-on-paper);border:1.5px solid var(--ql-blue);border-radius:var(--radius-lg);text-align:center;overflow:hidden;transition:var(--shift-transition)}
+  .pkg-card:hover{transform:translateY(-6px);box-shadow:0 20px 46px rgba(0,0,0,.42)}
+  .pkg-card--featured{margin-block-start:-12px}                 /* MEDIUM taller by 12px — SHIFT */
+  .pkg-card__bar{position:absolute;inset-block-start:0;inset-inline:0;block-size:6px;background:var(--ql-lime)}
+  .pkg-card__name{display:inline-flex;align-items:center;gap:var(--sp-8);font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:0.12em;color:var(--ql-black);font-size:1.05rem}
+  .pkg-card__price{margin-block-start:var(--sp-8);font-family:var(--font-en);font-weight:var(--fw-black);font-size:clamp(2rem,1.6rem + 1.4vw,2.6rem);color:var(--ql-blue);line-height:1}
+  .pkg-card__dur{font-family:var(--font-en);font-weight:var(--fw-semibold);letter-spacing:0.14em;color:var(--ql-gray);font-size:0.82rem}
+  .pkg-card__badge{margin-block-start:var(--sp-4);padding:5px 14px;background:rgba(36,71,255,.12);color:var(--ql-blue);border-radius:var(--radius-pill);font-size:0.82rem;font-weight:var(--fw-semibold)}
+  .pkg-card__cta{margin-block-start:var(--sp-16);min-inline-size:150px}
+  .pkg-card__cta--lime{background:var(--ql-lime);color:var(--ql-black);border-color:var(--ql-lime)}   /* PREMIUM CTA */
+  .pkg-card__cta--lime:hover{background:var(--ql-lime-deep);border-color:var(--ql-lime-deep)}
+
+  /* Part B — tab selector */
+  .pkg-selector{margin-block-start:var(--sp-64)}
+  .pkg-tabs{display:inline-flex;gap:var(--sp-8);padding:var(--sp-4);border-radius:var(--radius-pill);background:rgba(244,241,234,.05)}
+  .pkg-tab{padding:var(--sp-12) var(--sp-32);border-radius:var(--radius-pill);font-family:var(--font-en);font-weight:var(--fw-bold);letter-spacing:0.08em;color:var(--ql-blue);background:transparent;border:1.5px solid transparent;cursor:pointer;transition:var(--shift-transition)}
+  .pkg-tab:hover{border-color:var(--ql-blue)}
+  .pkg-tab.is-active{background:var(--ql-blue);color:var(--ql-paper);border-color:var(--ql-blue)}   /* active tab */
+  .pkg-tab:focus-visible{outline:none;box-shadow:var(--shadow-focus)}
+  .pkg-panels{margin-block-start:var(--sp-32)}
+  .pkg-panel{display:grid;grid-template-columns:4fr 6fr;gap:var(--sp-48);padding:var(--sp-40);border:1.5px solid var(--border-strong);border-radius:var(--radius-lg)}
+  .pkg-panel[hidden]{display:none}
+  .pkg-panel__title{color:var(--ql-paper);font-weight:var(--fw-bold);font-size:clamp(1.5rem,1.2rem + 1.4vw,2rem);line-height:1.2}
+  .pkg-panel__desc{margin-block-start:var(--sp-16);color:var(--ql-gray);font-size:1rem;line-height:1.7}
+  .pkg-panel__price{margin-block-start:var(--sp-24);color:var(--ql-blue);font-family:var(--font-en);font-weight:var(--fw-bold);font-size:1.2rem}
+  .pkg-deliverables{display:flex;flex-direction:column;gap:var(--sp-24)}
+  .pkg-group + .pkg-group{border-block-start:var(--link-width) solid var(--border);padding-block-start:var(--sp-24)}  /* LINK divider */
+  .pkg-group__head{color:var(--ql-lime);font-weight:var(--fw-bold);font-size:0.95rem;margin-block-end:var(--sp-12)}
+  .pkg-group__sub{color:var(--ql-paper);font-size:0.9rem;opacity:.82;margin-block-end:var(--sp-8)}
+  .pkg-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:var(--sp-8)}
+  .pkg-list li{position:relative;padding-inline-start:var(--sp-20);color:var(--ql-paper);font-size:0.95rem;line-height:1.6}
+  .pkg-list li::before{content:"";position:absolute;inset-inline-start:0;inset-block-start:0.55em;inline-size:6px;block-size:6px;border-radius:var(--radius-round);background:var(--ql-blue)}
+  .pkg-note{margin-block-start:var(--sp-12);color:var(--ql-gray);font-size:0.85rem}
+  /* PREMIUM excludes ("لا يشمل") — light box */
+  .pkg-excludes{margin-block-start:var(--sp-24);padding:var(--sp-20) var(--sp-24);background:var(--surface-paper);color:var(--text-on-paper);border-radius:var(--radius-md)}
+  .pkg-excludes__head{color:var(--ql-black);font-weight:var(--fw-bold);margin-block-end:var(--sp-8)}
+  .pkg-excludes__list{color:var(--text-on-paper-muted);font-size:0.92rem;line-height:1.7}
+
+  /* ==========================================================================
      RESPONSIVE  (Desktop-first · anchors: 1440 / 768 / 375)
      ========================================================================== */
   @media (max-width:1200px){
@@ -501,6 +549,13 @@
     .service-card:hover{transform:none;box-shadow:none}
     .service-card__head{display:flex;align-items:baseline;gap:var(--sp-12);flex-wrap:wrap}
     .service-card__num{position:static;font-size:1.5rem;line-height:1.2}
+
+    /* PACKAGES mobile: cards stack, tabs become vertical buttons, panel one column */
+    .pkg-cards{grid-template-columns:1fr;gap:var(--sp-20);max-inline-size:440px;margin-inline:auto}
+    .pkg-card--featured{margin-block-start:0}
+    .pkg-tabs{display:flex;flex-direction:column;inline-size:100%;border-radius:var(--radius-md);gap:var(--sp-8)}
+    .pkg-tab{inline-size:100%;text-align:center}
+    .pkg-panel{grid-template-columns:1fr;gap:var(--sp-32);padding:var(--sp-24)}
   }
   @media (max-width:375px){
     :root{--anchor-offset:76px;--grid-cols:4}
@@ -645,6 +700,169 @@
         </div>
       </section>
 
+      <!-- ===== PACKAGES (Prompt 05) ===== -->
+      <section class="section packages" id="packages" data-section aria-labelledby="packages-title">
+        <div class="container container--wide">
+
+          <!-- Part A · Intro -->
+          <div class="packages__head" lang="ar" dir="rtl" data-reveal>
+            <h2 class="packages__title" id="packages-title">اختر مستوى الحل</h2>
+            <p class="packages__subtitle">ثلاث باقات مصممة لتناسب مراحل واحتياجات مختلفة.</p>
+          </div>
+
+          <div class="pkg-cards" data-reveal>
+            <!-- BASIC -->
+            <article class="pkg-card">
+              <div class="pkg-card__name">BASIC</div>
+              <div class="pkg-card__price">$299</div>
+              <div class="pkg-card__dur">7 DAYS</div>
+              <a class="btn btn--start pkg-card__cta" href="#contact" lang="ar">لنبدأ</a>
+            </article>
+
+            <!-- MEDIUM (featured) -->
+            <article class="pkg-card pkg-card--featured">
+              <span class="pkg-card__bar" aria-hidden="true"></span>
+              <div class="pkg-card__name"><span aria-hidden="true">⭐</span> MEDIUM</div>
+              <div class="pkg-card__price">$649</div>
+              <div class="pkg-card__dur">10 DAYS</div>
+              <span class="pkg-card__badge" lang="ar" dir="rtl">الخيار الأفضل قيمة</span>
+              <a class="btn btn--start pkg-card__cta" href="#contact" lang="ar">لنبدأ</a>
+            </article>
+
+            <!-- PREMIUM -->
+            <article class="pkg-card">
+              <div class="pkg-card__name">PREMIUM</div>
+              <div class="pkg-card__price">$1,299</div>
+              <div class="pkg-card__dur">20 DAYS</div>
+              <a class="btn pkg-card__cta pkg-card__cta--lime" href="#contact" lang="ar">لنبدأ</a>
+            </article>
+          </div>
+
+          <!-- Part B · Interactive detail selector -->
+          <div class="pkg-selector" data-pkg-selector data-reveal>
+            <div class="pkg-tabs" role="tablist" aria-label="Package levels">
+              <button class="pkg-tab is-active" type="button" role="tab" id="tab-basic" aria-selected="true" aria-controls="panel-basic" data-pkg-tab="basic">BASIC</button>
+              <button class="pkg-tab" type="button" role="tab" id="tab-medium" aria-selected="false" aria-controls="panel-medium" data-pkg-tab="medium" tabindex="-1">MEDIUM</button>
+              <button class="pkg-tab" type="button" role="tab" id="tab-premium" aria-selected="false" aria-controls="panel-premium" data-pkg-tab="premium" tabindex="-1">PREMIUM</button>
+            </div>
+
+            <div class="pkg-panels">
+
+              <!-- BASIC panel -->
+              <div class="pkg-panel is-active" role="tabpanel" id="panel-basic" aria-labelledby="tab-basic" data-pkg-panel="basic" lang="ar" dir="rtl">
+                <div class="pkg-panel__aside">
+                  <h3 class="pkg-panel__title">حضور بصري أساسي</h3>
+                  <p class="pkg-panel__desc">للمشاريع التي تحتاج إلى مجموعة أساسية من المواد البصرية لبناء حضور رقمي احترافي ومنظم.</p>
+                  <p class="pkg-panel__price">$299 · 7 أيام عمل</p>
+                </div>
+                <div class="pkg-deliverables">
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">محتوى رقمي</h4>
+                    <ul class="pkg-list"><li>6 منشورات Social Media</li><li>4 Stories</li><li>1 إعلان رقمي</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">مواد تعريفية</h4>
+                    <ul class="pkg-list"><li>1 غلاف حساب</li><li>1 بطاقة أعمال</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">التجهيز</h4>
+                    <ul class="pkg-list"><li>تجهيز الملفات للاستخدام الرقمي</li><li>تصدير وتسليم الملفات النهائية</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">المراجعات</h4>
+                    <ul class="pkg-list"><li>جولتان</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">الملفات</h4>
+                    <ul class="pkg-list"><li>JPG · PNG · PDF</li></ul>
+                    <p class="pkg-note">الملفات المصدرية غير مشمولة ويمكن توفيرها كخدمة إضافية.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- MEDIUM panel -->
+              <div class="pkg-panel" role="tabpanel" id="panel-medium" aria-labelledby="tab-medium" data-pkg-panel="medium" lang="ar" dir="rtl" hidden>
+                <div class="pkg-panel__aside">
+                  <h3 class="pkg-panel__title">حضور بصري متكامل</h3>
+                  <p class="pkg-panel__desc">للمشاريع التي تحتاج إلى محتوى متنوع ومنظومة بصرية موحدة تساعد على الحفاظ على الاتساق في مختلف المواد.</p>
+                  <p class="pkg-panel__price">$649 · 10 أيام عمل</p>
+                </div>
+                <div class="pkg-deliverables">
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">محتوى رقمي</h4>
+                    <ul class="pkg-list"><li>10 منشورات Social Media</li><li>6 Stories</li><li>2 إعلانات رقمية</li><li>2 أغلفة حسابات</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">مواد تسويقية</h4>
+                    <ul class="pkg-list"><li>1 بروفايل أو بروشور مختصر</li><li>1 بطاقة أعمال</li><li>2 فلاير أو بوستر</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">النظام البصري للمحتوى</h4>
+                    <ul class="pkg-list"><li>أسلوب تصميم موحد</li><li>Typography Direction</li><li>أسلوب استخدام الصور</li><li>أسلوب الأيقونات والعناصر الرسومية</li><li>نظام Layout للمحتوى</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">المراجعات</h4>
+                    <ul class="pkg-list"><li>3 جولات</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">الملفات</h4>
+                    <ul class="pkg-list"><li>JPG · PNG · PDF</li></ul>
+                    <p class="pkg-note">الملفات المصدرية غير مشمولة ويمكن توفيرها كخدمة إضافية.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- PREMIUM panel -->
+              <div class="pkg-panel" role="tabpanel" id="panel-premium" aria-labelledby="tab-premium" data-pkg-panel="premium" lang="ar" dir="rtl" hidden>
+                <div class="pkg-panel__aside">
+                  <h3 class="pkg-panel__title">الحضور التجاري والرقمي المتكامل</h3>
+                  <p class="pkg-panel__desc">للمشاريع والعلامات التجارية التي تحتاج إلى منظومة بصرية متكاملة تمتد من المحتوى والحملات إلى تصميم الموقع الإلكتروني.</p>
+                  <p class="pkg-panel__price">$1,299 · 20 يوم عمل</p>
+                </div>
+                <div class="pkg-deliverables">
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">محتوى رقمي</h4>
+                    <ul class="pkg-list"><li>15 منشور Social Media</li><li>10 Stories</li><li>3 إعلانات رقمية</li><li>3 أغلفة حسابات</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">مواد تسويقية</h4>
+                    <ul class="pkg-list"><li>1 بروفايل أو بروشور</li><li>3 فلاير أو بوستر</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">النظام البصري</h4>
+                    <ul class="pkg-list"><li>Typography Direction</li><li>نظام الألوان والاستخدامات</li><li>أسلوب الصور</li><li>أسلوب الأيقونات والعناصر الرسومية</li><li>نظام Layout</li><li>قواعد تطبيق الهوية على المحتوى</li><li>3 قوالب تصميم قابلة لإعادة الاستخدام</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">الحملة البصرية</h4>
+                    <p class="pkg-group__sub">حملة بصرية واحدة، تشمل:</p>
+                    <ul class="pkg-list"><li>Concept بصري واحد</li><li>Key Visual واحد</li><li>تطبيق على 3 مخرجات كحد أقصى</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">تصميم الموقع الإلكتروني</h4>
+                    <p class="pkg-group__sub">Website UI/UX Design — حتى 5 صفحات، يشمل:</p>
+                    <ul class="pkg-list"><li>Desktop UI</li><li>Mobile UI</li><li>الهيكلة الأساسية لتجربة المستخدم</li><li>تصميم واجهات الصفحات</li><li>نظام مكونات بصري أساسي</li><li>تجهيز التصميم للتطوير</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">المراجعات</h4>
+                    <ul class="pkg-list"><li>4 جولات</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">الملفات</h4>
+                    <ul class="pkg-list"><li>JPG · PNG · PDF + ملفات تصميم الموقع</li></ul>
+                  </div>
+                  <div class="pkg-excludes">
+                    <p class="pkg-excludes__head">لا يشمل</p>
+                    <p class="pkg-excludes__list">البرمجة، الاستضافة، الدومين، كتابة المحتوى، SEO.</p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
     </main>
 
     <!-- ================= GLOBAL FOOTER (structure placeholder) ================= -->
@@ -760,7 +978,38 @@
       sections.forEach(function(s){ observer.observe(s); });
     }
 
-    function init(){ initHeaderScrollState(); initMobileNav(); initReveal(); initScrollSpy(); }
+    /* 5 · PACKAGE TAB SELECTOR — switch BASIC / MEDIUM / PREMIUM detail */
+    function initPkgTabs() {
+      var root = doc.querySelector("[data-pkg-selector]");
+      if(!root) return;
+      var tabs = Array.prototype.slice.call(root.querySelectorAll("[data-pkg-tab]"));
+      var panels = Array.prototype.slice.call(root.querySelectorAll("[data-pkg-panel]"));
+      function activate(key, focusTab){
+        tabs.forEach(function(t){
+          var on = t.getAttribute("data-pkg-tab") === key;
+          t.classList.toggle("is-active", on);
+          t.setAttribute("aria-selected", on ? "true" : "false");
+          t.tabIndex = on ? 0 : -1;
+          if(on && focusTab) t.focus();
+        });
+        panels.forEach(function(p){
+          var on = p.getAttribute("data-pkg-panel") === key;
+          p.hidden = !on;
+          p.classList.toggle("is-active", on);
+        });
+      }
+      tabs.forEach(function(t){
+        t.addEventListener("click", function(){ activate(t.getAttribute("data-pkg-tab")); });
+        t.addEventListener("keydown", function(e){
+          var idx = tabs.indexOf(t), next = null;
+          if(e.key === "ArrowRight" || e.key === "ArrowDown") next = tabs[(idx + 1) % tabs.length];
+          else if(e.key === "ArrowLeft" || e.key === "ArrowUp") next = tabs[(idx - 1 + tabs.length) % tabs.length];
+          if(next){ e.preventDefault(); activate(next.getAttribute("data-pkg-tab"), true); }
+        });
+      });
+    }
+
+    function init(){ initHeaderScrollState(); initMobileNav(); initReveal(); initScrollSpy(); initPkgTabs(); }
     if(doc.readyState === "loading"){ doc.addEventListener("DOMContentLoaded", init); } else { init(); }
   })();
   </script>
