@@ -516,6 +516,41 @@
   .pkg-excludes__list{color:var(--text-on-paper-muted);font-size:0.92rem;line-height:1.7}
 
   /* ==========================================================================
+     COMPARISON TABLE (Prompt 06) — Black bg · framed columns · numbers Lime
+     ========================================================================== */
+  .compare{background:var(--ql-black)}
+  .compare__title{color:var(--ql-paper);font-weight:var(--fw-bold);font-size:clamp(1.6rem,1.3rem + 1.4vw,2rem);text-align:start}
+  .compare__wrap{margin-block-start:var(--sp-32)}
+  .cmp{inline-size:100%;border-collapse:separate;border-spacing:16px 0}
+  .cmp th,.cmp td{padding:14px 18px;text-align:center;font-size:0.95rem}
+  /* Column headers = top of each FRAME */
+  .cmp thead th{color:var(--ql-paper);font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:0.08em;padding-block:20px;border:1.5px solid var(--ql-blue);border-block-end:0;border-start-start-radius:var(--radius-md);border-start-end-radius:var(--radius-md)}
+  .cmp thead th:first-child{border:0}
+  .cmp tbody th{color:var(--ql-paper);font-weight:var(--fw-semibold);text-align:start;white-space:nowrap}
+  /* Framed columns (blue side borders; closed at the last row) */
+  .cmp tbody td{border-inline:1.5px solid var(--ql-blue);color:var(--ql-paper)}
+  .cmp tbody tr:last-child td{border-block-end:1.5px solid var(--ql-blue);border-end-start-radius:var(--radius-md);border-end-end-radius:var(--radius-md)}
+  .cmp .v-num{color:var(--ql-lime);font-weight:var(--fw-bold)}       /* prominent numbers */
+  .cmp .v-check{color:var(--ql-blue);font-weight:var(--fw-bold)}     /* included ✓ */
+  .cmp .v-dash{color:var(--ql-gray)}                                 /* — Cool Gray */
+  .cmp .v-text{color:var(--ql-paper)}
+  .cmp .v-price{color:var(--ql-lime);font-weight:var(--fw-black)}
+  .cmp__star{color:var(--ql-lime)}
+
+  /* ==========================================================================
+     ADDITIONAL SERVICES (Prompt 06) — Paper bg · 4-col grid (2 on mobile)
+     ========================================================================== */
+  .addons{background:var(--surface-paper);color:var(--text-on-paper)}
+  .addons__title{color:var(--ql-black);font-weight:var(--fw-bold);font-size:clamp(1.6rem,1.3rem + 1.4vw,2rem);text-align:start}
+  .addons__intro{margin-block-start:var(--sp-8);color:var(--ql-gray);max-inline-size:60ch}
+  .addons__grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--sp-16);margin-block-start:var(--sp-40)}
+  .addon{display:flex;align-items:center;gap:var(--sp-12);padding:var(--sp-20);background:transparent;border:1.5px solid var(--border-on-paper);border-radius:var(--radius-md);color:var(--ql-black);font-weight:var(--fw-medium);font-size:0.95rem;line-height:1.4;transition:var(--shift-transition)}
+  .addon:hover{border-color:var(--ql-blue);transform:translateY(-3px)}
+  .addon__mark{flex:0 0 auto;inline-size:24px;block-size:24px;display:grid;place-items:center;color:var(--ql-blue)}
+  .addon__mark svg{inline-size:16px;block-size:16px}
+  .addons__footer{margin-block-start:var(--sp-32);text-align:center;color:var(--ql-black);font-weight:var(--fw-semibold)}
+
+  /* ==========================================================================
      RESPONSIVE  (Desktop-first · anchors: 1440 / 768 / 375)
      ========================================================================== */
   @media (max-width:1200px){
@@ -556,6 +591,20 @@
     .pkg-tabs{display:flex;flex-direction:column;inline-size:100%;border-radius:var(--radius-md);gap:var(--sp-8)}
     .pkg-tab{inline-size:100%;text-align:center}
     .pkg-panel{grid-template-columns:1fr;gap:var(--sp-32);padding:var(--sp-24)}
+
+    /* COMPARISON mobile: NO horizontal scroll — each feature becomes a stacked card
+       showing all three values inline (e.g. "منشورات: 6 | 10 | 15"). */
+    .cmp{border-spacing:0}
+    .cmp thead{display:none}
+    .cmp tbody{display:flex;flex-direction:column;gap:var(--sp-16)}
+    .cmp tbody tr{display:flex;flex-wrap:wrap;align-items:stretch;gap:var(--sp-8);padding:var(--sp-16) var(--sp-20);border:1.5px solid var(--ql-blue);border-radius:var(--radius-md)}
+    .cmp tbody tr th{flex:1 0 100%;text-align:start;color:var(--ql-paper);font-weight:var(--fw-bold);padding:0 0 var(--sp-8);border:0;white-space:normal}
+    .cmp tbody tr td{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:0;border:0}
+    .cmp tbody tr td::before{content:attr(data-pkg);font-family:var(--font-en);font-size:0.66rem;letter-spacing:0.1em;color:var(--ql-gray)}
+    .cmp tbody tr:last-child td{border:0}
+
+    /* ADDITIONAL SERVICES mobile: 2-column grid */
+    .addons__grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   }
   @media (max-width:375px){
     :root{--anchor-offset:76px;--grid-cols:4}
@@ -860,6 +909,68 @@
             </div>
           </div>
 
+        </div>
+      </section>
+
+      <!-- ===== COMPARISON TABLE (Prompt 06) ===== -->
+      <section class="section compare" id="comparison" aria-labelledby="compare-title">
+        <div class="container container--wide" lang="ar" dir="rtl">
+          <h2 class="compare__title" id="compare-title">مقارنة الباقات</h2>
+          <div class="compare__wrap" data-reveal>
+            <table class="cmp">
+              <caption class="u-visually-hidden">مقارنة باقات BASIC وMEDIUM وPREMIUM</caption>
+              <thead>
+                <tr>
+                  <th scope="col"></th>
+                  <th scope="col">BASIC</th>
+                  <th scope="col"><span class="cmp__star" aria-hidden="true">⭐</span> MEDIUM</th>
+                  <th scope="col">PREMIUM</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row">منشورات</th><td class="v-num" data-pkg="BASIC">6</td><td class="v-num" data-pkg="MEDIUM">10</td><td class="v-num" data-pkg="PREMIUM">15</td></tr>
+                <tr><th scope="row">Stories</th><td class="v-num" data-pkg="BASIC">4</td><td class="v-num" data-pkg="MEDIUM">6</td><td class="v-num" data-pkg="PREMIUM">10</td></tr>
+                <tr><th scope="row">إعلانات رقمية</th><td class="v-num" data-pkg="BASIC">1</td><td class="v-num" data-pkg="MEDIUM">2</td><td class="v-num" data-pkg="PREMIUM">3</td></tr>
+                <tr><th scope="row">أغلفة حسابات</th><td class="v-num" data-pkg="BASIC">1</td><td class="v-num" data-pkg="MEDIUM">2</td><td class="v-num" data-pkg="PREMIUM">3</td></tr>
+                <tr><th scope="row">بروفايل / بروشور</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-num" data-pkg="MEDIUM">1</td><td class="v-num" data-pkg="PREMIUM">1</td></tr>
+                <tr><th scope="row">بطاقة أعمال</th><td class="v-num" data-pkg="BASIC">1</td><td class="v-num" data-pkg="MEDIUM">1</td><td class="v-dash" data-pkg="PREMIUM">—</td></tr>
+                <tr><th scope="row">فلاير / بوستر</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-num" data-pkg="MEDIUM">2</td><td class="v-num" data-pkg="PREMIUM">3</td></tr>
+                <tr><th scope="row">نظام بصري للمحتوى</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-check" data-pkg="MEDIUM">✓</td><td class="v-check" data-pkg="PREMIUM">✓</td></tr>
+                <tr><th scope="row">قوالب قابلة لإعادة الاستخدام</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-dash" data-pkg="MEDIUM">—</td><td class="v-num" data-pkg="PREMIUM">3</td></tr>
+                <tr><th scope="row">حملة بصرية</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-dash" data-pkg="MEDIUM">—</td><td class="v-check" data-pkg="PREMIUM">✓</td></tr>
+                <tr><th scope="row">Website UI/UX</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-dash" data-pkg="MEDIUM">—</td><td class="v-text" data-pkg="PREMIUM">حتى 5 صفحات</td></tr>
+                <tr><th scope="row">المراجعات</th><td class="v-num" data-pkg="BASIC">2</td><td class="v-num" data-pkg="MEDIUM">3</td><td class="v-num" data-pkg="PREMIUM">4</td></tr>
+                <tr><th scope="row">مدة التنفيذ</th><td class="v-text" data-pkg="BASIC">7 أيام</td><td class="v-text" data-pkg="MEDIUM">10 أيام</td><td class="v-text" data-pkg="PREMIUM">20 يوم</td></tr>
+                <tr><th scope="row">السعر</th><td class="v-price" data-pkg="BASIC">$299</td><td class="v-price" data-pkg="MEDIUM">$649</td><td class="v-price" data-pkg="PREMIUM">$1,299</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== ADDITIONAL SERVICES (Prompt 06) ===== -->
+      <section class="section addons" id="addons" aria-labelledby="addons-title">
+        <div class="container container--wide" lang="ar" dir="rtl">
+          <div class="addons__head" data-reveal>
+            <h2 class="addons__title" id="addons-title">الخدمات الإضافية</h2>
+            <p class="addons__intro">يمكن إضافة خدمات خارج نطاق الباقات حسب احتياجات المشروع.</p>
+          </div>
+          <div class="addons__grid" data-reveal>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>منشورات وStories إضافية</div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>إعلانات رقمية إضافية</div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>بروفايلات وبروشورات</div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>كتالوجات</div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>عروض تقديمية</div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>مواد مطبوعة</div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>حملات بصرية إضافية</div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>تطبيقات إضافية للحملات</div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>صفحات إضافية للموقع</div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>قوالب إضافية</div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>تصميم واجهات إضافية</div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>برمجة وتطوير المواقع</div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>تجهيز الملفات للطباعة والنشر</div>
+          </div>
+          <p class="addons__footer">يتم تحديد السعر حسب نوع الخدمة وحجم العمل قبل التنفيذ.</p>
         </div>
       </section>
 
