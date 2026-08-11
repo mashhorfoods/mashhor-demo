@@ -450,6 +450,24 @@
   @media (prefers-reduced-motion:reduce){.hero__scroll svg{animation:none}}
 
   /* ==========================================================================
+     SERVICES  (Prompt 04) — "حلولنا" · Paper bg · 2×2 FRAME modules
+     ========================================================================== */
+  .services{background:var(--surface-paper);color:var(--text-on-paper)}
+  .services__head{max-inline-size:62ch;text-align:start}
+  .services__title{color:var(--ql-black);font-weight:var(--fw-bold);font-size:clamp(2rem,1.4rem + 2.6vw,3rem);line-height:1.1}
+  .services__intro{margin-block-start:var(--sp-16);color:var(--ql-gray);font-weight:var(--fw-regular);font-size:clamp(1.05rem,1rem + 0.3vw,1.125rem);line-height:1.75}
+
+  .services__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-32);margin-block-start:var(--sp-48)}
+  /* Module = thin FRAME (border) in Blue */
+  .service-card{position:relative;overflow:hidden;min-block-size:200px;padding:var(--sp-40);border:1.5px solid var(--ql-blue);border-radius:var(--radius-md);background:transparent;transition:var(--shift-transition)}
+  .service-card:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(36,71,255,.12)}
+  /* Large number watermark (Lime) — top-left corner of each module */
+  .service-card__num{position:absolute;inset-block-start:2px;left:20px;z-index:0;font-family:var(--font-en);font-weight:var(--fw-black);font-size:clamp(4.5rem,7vw,6.75rem);line-height:1;color:var(--ql-lime);pointer-events:none;-webkit-user-select:none;user-select:none}
+  .service-card__head{position:relative;z-index:1}
+  .service-card__title{color:var(--ql-blue);font-weight:var(--fw-bold);font-size:clamp(1.3rem,1.1rem + 0.8vw,1.6rem);line-height:1.2}
+  .service-card__desc{position:relative;z-index:1;margin-block-start:var(--sp-16);color:var(--ql-black);font-weight:var(--fw-regular);max-inline-size:42ch}
+
+  /* ==========================================================================
      RESPONSIVE  (Desktop-first · anchors: 1440 / 768 / 375)
      ========================================================================== */
   @media (max-width:1200px){
@@ -476,6 +494,13 @@
     .hero__pillars{flex-direction:column;gap:var(--sp-12)}
     .hero__sep{inline-size:40px}
     .hero__scroll{display:none}
+
+    /* SERVICES mobile: 4×1 column · FRAME → thick 4px left bar · small inline number */
+    .services__grid{grid-template-columns:1fr;gap:var(--sp-24)}
+    .service-card{overflow:visible;min-block-size:0;padding:var(--sp-24);border:0;border-left:4px solid var(--ql-blue);border-radius:0}
+    .service-card:hover{transform:none;box-shadow:none}
+    .service-card__head{display:flex;align-items:baseline;gap:var(--sp-12);flex-wrap:wrap}
+    .service-card__num{position:static;font-size:1.5rem;line-height:1.2}
   }
   @media (max-width:375px){
     :root{--anchor-offset:76px;--grid-cols:4}
@@ -572,6 +597,52 @@
         <a class="hero__scroll" href="#services" aria-label="Scroll to content">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v15M6 13l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
+      </section>
+
+      <!-- ===== SERVICES (Prompt 04) ===== -->
+      <section class="section services" id="services" data-section aria-labelledby="services-title">
+        <div class="container container--wide">
+
+          <div class="services__head" lang="ar" dir="rtl" data-reveal>
+            <h2 class="services__title" id="services-title">حلولنا</h2>
+            <p class="services__intro">نحوّل الأفكار والاحتياجات إلى حلول بصرية واضحة، عملية، ومتناسقة تساعد المشروع على الظهور باحترافية والتواصل بوضوح مع جمهوره.</p>
+          </div>
+
+          <div class="services__grid">
+            <article class="service-card" lang="ar" dir="rtl" data-reveal>
+              <div class="service-card__head">
+                <span class="service-card__num" aria-hidden="true">01</span>
+                <h3 class="service-card__title">التصميم الجرافيكي</h3>
+              </div>
+              <p class="service-card__desc">المحتوى الرقمي، المواد التسويقية، والمطبوعات.</p>
+            </article>
+
+            <article class="service-card" lang="ar" dir="rtl" data-reveal>
+              <div class="service-card__head">
+                <span class="service-card__num" aria-hidden="true">02</span>
+                <h3 class="service-card__title">الأنظمة البصرية</h3>
+              </div>
+              <p class="service-card__desc">تطوير أساليب وقوالب تساعد على الحفاظ على الاتساق البصري.</p>
+            </article>
+
+            <article class="service-card" lang="ar" dir="rtl" data-reveal>
+              <div class="service-card__head">
+                <span class="service-card__num" aria-hidden="true">03</span>
+                <h3 class="service-card__title">الحملات الإبداعية</h3>
+              </div>
+              <p class="service-card__desc">تطوير المفاهيم والاتجاهات البصرية للحملات.</p>
+            </article>
+
+            <article class="service-card" lang="ar" dir="rtl" data-reveal>
+              <div class="service-card__head">
+                <span class="service-card__num" aria-hidden="true">04</span>
+                <h3 class="service-card__title">التجارب الرقمية</h3>
+              </div>
+              <p class="service-card__desc">تصميم واجهات وتجارب المواقع الإلكترونية.</p>
+            </article>
+          </div>
+
+        </div>
       </section>
 
     </main>
