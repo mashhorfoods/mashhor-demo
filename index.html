@@ -457,8 +457,8 @@
   /* Module = thin FRAME (border) in Blue */
   .service-card{position:relative;overflow:hidden;min-block-size:200px;padding:var(--sp-40);border:1.5px solid var(--ql-blue);border-radius:var(--radius-md);background:transparent;transition:var(--shift-transition)}
   .service-card:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(36,71,255,.12)}
-  /* Large number watermark (Lime) — top-left corner of each module */
-  .service-card__num{position:absolute;inset-block-start:2px;left:20px;z-index:0;font-family:var(--font-en);font-weight:var(--fw-black);font-size:clamp(4.5rem,7vw,6.75rem);line-height:1;color:var(--ql-lime);pointer-events:none;-webkit-user-select:none;user-select:none}
+  /* Bold number (Blue) — top-left corner, sized to clear the description text */
+  .service-card__num{position:absolute;inset-block-start:8px;left:24px;z-index:0;font-family:var(--font-en);font-weight:var(--fw-black);font-size:clamp(2.5rem,3.2vw,3.25rem);line-height:1;color:var(--ql-blue);pointer-events:none;-webkit-user-select:none;user-select:none}
   .service-card__head{position:relative;z-index:1}
   .service-card__title{color:var(--ql-blue);font-weight:var(--fw-bold);font-size:clamp(1.3rem,1.1rem + 0.8vw,1.6rem);line-height:1.2}
   .service-card__desc{position:relative;z-index:1;margin-block-start:var(--sp-16);color:var(--ql-black);font-weight:var(--fw-regular);max-inline-size:42ch}
