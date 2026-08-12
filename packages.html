@@ -5,16 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#111111">
 
-  <title>Quantum Link — Creative Design &amp; Communication Agency</title>
+  <title>Packages — Quantum Link</title>
   <meta name="description" content="Quantum Link is a creative, design and communication agency. We connect ideas with design and communication to create real impact — branding, visual systems, campaigns, and digital experiences.">
-  <link rel="canonical" href="https://quantumlink.agency/">
+  <link rel="canonical" href="https://quantumlink.agency/packages.html">
 
   <!-- Open Graph / social -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Quantum Link">
   <meta property="og:title" content="Quantum Link — Creative Design &amp; Communication Agency">
   <meta property="og:description" content="Connecting ideas to impact. A creative agency for branding, visual systems, campaigns, and digital experiences.">
-  <meta property="og:url" content="https://quantumlink.agency/">
+  <meta property="og:url" content="https://quantumlink.agency/packages.html">
   <meta property="og:locale" content="en">
   <meta property="og:locale:alternate" content="ar">
   <meta name="twitter:card" content="summary_large_image">
@@ -968,12 +968,9 @@
   }
   @media (max-width:768px){
     .approach__steps{grid-template-columns:1fr;gap:0}
-    .approach__steps::before{inset-block:26px auto;inset-inline-start:26px;inset-inline-end:auto;inline-size:var(--link-width);block-size:calc(100% - 52px)}
-    .astep{display:grid;grid-template-columns:auto 1fr;column-gap:var(--sp-20);align-items:start;text-align:start;padding-block:var(--sp-20)}
-    .astep__node{grid-column:1;grid-row:1 / span 3;align-self:start}
-    .astep__label{grid-column:2;grid-row:1}
-    .astep__title{grid-column:2;grid-row:2;line-height:1.1}
-    .astep__desc{grid-column:2;grid-row:3;max-inline-size:none}
+    .approach__steps::before{inset-block:36px;inset-inline-start:26px;inset-inline-end:auto;inline-size:var(--link-width);block-size:auto}
+    .astep{flex-direction:row;align-items:flex-start;text-align:start;gap:var(--sp-16);padding-block:var(--sp-16)}
+    .astep__desc{max-inline-size:none}
     .field-grid{grid-template-columns:1fr}
     .start__aside{display:none}
     .cap{grid-template-columns:auto 1fr;gap:var(--sp-16)}
@@ -987,486 +984,418 @@
   }
   </style>
 </head>
-
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
   <span id="top"></span>
 
   <div class="site-shell">
 
-    <!-- ================= GLOBAL HEADER ================= -->
     <header class="site-header" data-header>
       <div class="site-header__inner container container--wide">
-
-        <a class="site-header__logo" href="#top" aria-label="Quantum Link — Home">
-          <!-- Brand logo: Quantum mark (Arc + Frame/Shift arrow) + wordmark -->
+        <a class="site-header__logo" href="index.html" aria-label="Quantum Link — Home">
           <span class="ql-logo" aria-hidden="true">
-            <svg class="ql-logo__mark" viewBox="0 0 120 120" role="img" aria-label="Quantum Link">
-              <circle cx="55" cy="55" r="35" fill="none" stroke="currentColor" stroke-width="16"/>
-              <path d="M59 57 L104 102 L58 88 L72 74 Z" fill="currentColor"/>
-            </svg>
+            <svg class="ql-logo__mark" viewBox="0 0 120 120" role="img" aria-label="Quantum Link"><circle cx="55" cy="55" r="35" fill="none" stroke="currentColor" stroke-width="16"/><path d="M59 57 L104 102 L58 88 L72 74 Z" fill="currentColor"/></svg>
             <span class="ql-logo__word"><b>Quantum</b><b>Link</b></span>
           </span>
         </a>
-
         <nav class="site-nav" aria-label="Primary">
           <ul class="site-nav__list">
-            <li><a class="site-nav__link" href="#work" data-nav-link>Work</a></li>
-            <li><a class="site-nav__link" href="#services" data-nav-link>Services</a></li>
-            <li><a class="site-nav__link" href="#approach" data-nav-link>Approach</a></li>
-            <li><a class="site-nav__link" href="#about" data-nav-link>About</a></li>
-            <li><a class="site-nav__link" href="#contact" data-nav-link>Contact</a></li>
+            <li><a class="site-nav__link" href="index.html#work">Work</a></li>
+            <li><a class="site-nav__link" href="index.html#services">Services</a></li>
+            <li><a class="site-nav__link" href="index.html#approach">Approach</a></li>
+            <li><a class="site-nav__link" href="index.html#about">About</a></li>
+            <li><a class="site-nav__link is-active" href="#top" aria-current="page">Packages</a></li>
           </ul>
         </nav>
-
         <div class="site-header__actions">
-          <a class="btn btn--primary" href="#contact">Start a Project <span class="btn__icon" aria-hidden="true">↗</span></a>
-          <button type="button" class="site-header__menu-trigger" data-menu-trigger
-                  aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav">
-            <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
-          </button>
+          <a class="btn btn--primary" href="index.html#contact">Start a Project <span class="btn__icon" aria-hidden="true">↗</span></a>
+          <button type="button" class="site-header__menu-trigger" data-menu-trigger aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav"><span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>
         </div>
-
       </div>
     </header>
 
-    <!-- ================= MOBILE DRAWER ================= -->
     <div class="mobile-nav" id="mobile-nav" data-mobile-nav data-state="closed" aria-label="Mobile menu" hidden>
       <ul class="mobile-nav__list">
-        <li><a class="mobile-nav__link" href="#work" data-nav-link>Work</a></li>
-        <li><a class="mobile-nav__link" href="#services" data-nav-link>Services</a></li>
-        <li><a class="mobile-nav__link" href="#approach" data-nav-link>Approach</a></li>
-        <li><a class="mobile-nav__link" href="#about" data-nav-link>About</a></li>
-        <li><a class="mobile-nav__link" href="#contact" data-nav-link>Contact</a></li>
-        <li><a class="mobile-nav__link" href="packages.html">Packages</a></li>
+        <li><a class="mobile-nav__link" href="index.html#work">Work</a></li>
+        <li><a class="mobile-nav__link" href="index.html#services">Services</a></li>
+        <li><a class="mobile-nav__link" href="index.html#approach">Approach</a></li>
+        <li><a class="mobile-nav__link" href="index.html#about">About</a></li>
+        <li><a class="mobile-nav__link is-active" href="#top">Packages</a></li>
       </ul>
-      <a class="btn btn--primary btn--block mobile-nav__cta" href="#contact">Start a Project <span class="btn__icon" aria-hidden="true">↗</span></a>
+      <a class="btn btn--primary btn--block mobile-nav__cta" href="index.html#contact">Start a Project <span class="btn__icon" aria-hidden="true">↗</span></a>
     </div>
-
-    <!-- ================= MAIN ================= -->
     <main class="site-main" id="main">
 
-      <!-- ===== 01 · HERO ===== -->
-      <section class="hero" id="home" data-section aria-labelledby="hero-title">
-        <div class="hero__grid container container--wide">
-          <div class="hero__content">
-            <p class="hero__eyebrow">CREATIVE · DESIGN · COMMUNICATION</p>
-            <h1 class="hero__title" id="hero-title">Connecting ideas<br>to <span class="hero__accent">impact.</span></h1>
-            <p class="hero__lead">We are a creative agency that transforms ideas into meaningful brands, engaging experiences, and powerful communication.</p>
-            <div class="hero__cta-row">
-              <a class="btn btn--primary" href="#contact">Start a Project <span class="btn__icon" aria-hidden="true">↗</span></a>
-              <a class="link-cta" href="#work">Explore our work <span class="link-cta__line" aria-hidden="true"></span></a>
-            </div>
-          </div>
-          <div class="hero__visual" aria-hidden="true">
-            <svg class="hero__sig" viewBox="0 0 240 240" fill="none" preserveAspectRatio="xMidYMid meet">
-              <path d="M48 224 L48 116 A68 68 0 0 1 116 48 L224 48"/>
-            </svg>
-            <span class="hero__shift"></span>
-            <span class="hero__ring"></span>
-            <span class="hero__dot"></span>
-          </div>
+      <section class="section section--paper section--below-header" dir="rtl">
+        <div class="container container--wide">
+          <p class="sec-eyebrow">ENGAGEMENT</p>
+          <h1 class="sec-title">الباقات والخدمات</h1>
+          <p class="sec-lead u-rtl">تفاصيل الباقات والمخرجات والمقارنة والخدمات الإضافية وآلية العمل والشروط.</p>
+          <p style="margin-block-start:var(--sp-24)"><a class="link-cta" style="color:var(--ql-black)" href="index.html"><span class="link-cta__line" aria-hidden="true"></span> Back to home</a></p>
         </div>
-        <a class="hero__scroll" href="#position" aria-label="Scroll to content">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v15M6 13l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
       </section>
 
-      <!-- ===== 02 · POSITIONING ===== -->
-      <section class="section position" id="position" data-section aria-labelledby="position-title">
+<!-- ===== PACKAGES (Prompt 05) ===== -->
+      <section class="section packages" id="packages" data-section aria-labelledby="packages-title">
+        <div class="sig-accent sig-accent--bl" aria-hidden="true"><svg viewBox="0 0 240 240" fill="none"><path d="M48 224 L48 116 A68 68 0 0 1 116 48 L224 48"/></svg></div>
+        <div class="container container--wide" lang="ar" dir="rtl">
+
+          <!-- Part A · Intro -->
+          <div class="packages__head" lang="ar" dir="rtl" data-reveal>
+            <h2 class="packages__title" id="packages-title">اختر مستوى الحل</h2>
+            <p class="packages__subtitle">ثلاث باقات مصممة لتناسب مراحل واحتياجات مختلفة.</p>
+          </div>
+
+          <div class="pkg-cards" data-stagger>
+            <!-- BASIC -->
+            <article class="pkg-card">
+              <div class="pkg-card__name">BASIC</div>
+              <div class="pkg-card__price">$299</div>
+              <div class="pkg-card__dur">7 DAYS</div>
+              <a class="btn btn--start pkg-card__cta" href="#contact" lang="ar">لنبدأ</a>
+            </article>
+
+            <!-- MEDIUM (featured) -->
+            <article class="pkg-card pkg-card--featured">
+              <span class="pkg-card__bar" aria-hidden="true"></span>
+              <div class="pkg-card__name"><span aria-hidden="true">⭐</span> MEDIUM</div>
+              <div class="pkg-card__price">$649</div>
+              <div class="pkg-card__dur">10 DAYS</div>
+              <span class="pkg-card__badge" lang="ar" dir="rtl">الخيار الأفضل قيمة</span>
+              <a class="btn btn--start pkg-card__cta" href="#contact" lang="ar">لنبدأ</a>
+            </article>
+
+            <!-- PREMIUM -->
+            <article class="pkg-card">
+              <div class="pkg-card__name">PREMIUM</div>
+              <div class="pkg-card__price">$1,299</div>
+              <div class="pkg-card__dur">20 DAYS</div>
+              <a class="btn pkg-card__cta pkg-card__cta--lime" href="#contact" lang="ar">لنبدأ</a>
+            </article>
+          </div>
+
+          <!-- Part B · Interactive detail selector -->
+          <div class="pkg-selector" data-pkg-selector data-reveal>
+            <div class="pkg-tabs" role="tablist" aria-label="Package levels">
+              <button class="pkg-tab is-active" type="button" role="tab" id="tab-basic" aria-selected="true" aria-controls="panel-basic" data-pkg-tab="basic">BASIC</button>
+              <button class="pkg-tab" type="button" role="tab" id="tab-medium" aria-selected="false" aria-controls="panel-medium" data-pkg-tab="medium" tabindex="-1">MEDIUM</button>
+              <button class="pkg-tab" type="button" role="tab" id="tab-premium" aria-selected="false" aria-controls="panel-premium" data-pkg-tab="premium" tabindex="-1">PREMIUM</button>
+            </div>
+
+            <div class="pkg-panels">
+
+              <!-- BASIC panel -->
+              <div class="pkg-panel is-active" role="tabpanel" id="panel-basic" aria-labelledby="tab-basic" data-pkg-panel="basic" lang="ar" dir="rtl">
+                <div class="pkg-panel__aside">
+                  <h3 class="pkg-panel__title">حضور بصري أساسي</h3>
+                  <p class="pkg-panel__desc">للمشاريع التي تحتاج إلى مجموعة أساسية من المواد البصرية لبناء حضور رقمي احترافي ومنظم.</p>
+                  <p class="pkg-panel__price">$299 · 7 أيام عمل</p>
+                </div>
+                <div class="pkg-deliverables">
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">محتوى رقمي</h4>
+                    <ul class="pkg-list"><li>6 منشورات Social Media</li><li>4 Stories</li><li>1 إعلان رقمي</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">مواد تعريفية</h4>
+                    <ul class="pkg-list"><li>1 غلاف حساب</li><li>1 بطاقة أعمال</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">التجهيز</h4>
+                    <ul class="pkg-list"><li>تجهيز الملفات للاستخدام الرقمي</li><li>تصدير وتسليم الملفات النهائية</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">المراجعات</h4>
+                    <ul class="pkg-list"><li>جولتان</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">الملفات</h4>
+                    <ul class="pkg-list"><li>JPG · PNG · PDF</li></ul>
+                    <p class="pkg-note">الملفات المصدرية غير مشمولة ويمكن توفيرها كخدمة إضافية.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- MEDIUM panel -->
+              <div class="pkg-panel" role="tabpanel" id="panel-medium" aria-labelledby="tab-medium" data-pkg-panel="medium" lang="ar" dir="rtl" hidden>
+                <div class="pkg-panel__aside">
+                  <h3 class="pkg-panel__title">حضور بصري متكامل</h3>
+                  <p class="pkg-panel__desc">للمشاريع التي تحتاج إلى محتوى متنوع ومنظومة بصرية موحدة تساعد على الحفاظ على الاتساق في مختلف المواد.</p>
+                  <p class="pkg-panel__price">$649 · 10 أيام عمل</p>
+                </div>
+                <div class="pkg-deliverables">
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">محتوى رقمي</h4>
+                    <ul class="pkg-list"><li>10 منشورات Social Media</li><li>6 Stories</li><li>2 إعلانات رقمية</li><li>2 أغلفة حسابات</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">مواد تسويقية</h4>
+                    <ul class="pkg-list"><li>1 بروفايل أو بروشور مختصر</li><li>1 بطاقة أعمال</li><li>2 فلاير أو بوستر</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">النظام البصري للمحتوى</h4>
+                    <ul class="pkg-list"><li>أسلوب تصميم موحد</li><li>Typography Direction</li><li>أسلوب استخدام الصور</li><li>أسلوب الأيقونات والعناصر الرسومية</li><li>نظام Layout للمحتوى</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">المراجعات</h4>
+                    <ul class="pkg-list"><li>3 جولات</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">الملفات</h4>
+                    <ul class="pkg-list"><li>JPG · PNG · PDF</li></ul>
+                    <p class="pkg-note">الملفات المصدرية غير مشمولة ويمكن توفيرها كخدمة إضافية.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- PREMIUM panel -->
+              <div class="pkg-panel" role="tabpanel" id="panel-premium" aria-labelledby="tab-premium" data-pkg-panel="premium" lang="ar" dir="rtl" hidden>
+                <div class="pkg-panel__aside">
+                  <h3 class="pkg-panel__title">الحضور التجاري والرقمي المتكامل</h3>
+                  <p class="pkg-panel__desc">للمشاريع والعلامات التجارية التي تحتاج إلى منظومة بصرية متكاملة تمتد من المحتوى والحملات إلى تصميم الموقع الإلكتروني.</p>
+                  <p class="pkg-panel__price">$1,299 · 20 يوم عمل</p>
+                </div>
+                <div class="pkg-deliverables">
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">محتوى رقمي</h4>
+                    <ul class="pkg-list"><li>15 منشور Social Media</li><li>10 Stories</li><li>3 إعلانات رقمية</li><li>3 أغلفة حسابات</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">مواد تسويقية</h4>
+                    <ul class="pkg-list"><li>1 بروفايل أو بروشور</li><li>3 فلاير أو بوستر</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">النظام البصري</h4>
+                    <ul class="pkg-list"><li>Typography Direction</li><li>نظام الألوان والاستخدامات</li><li>أسلوب الصور</li><li>أسلوب الأيقونات والعناصر الرسومية</li><li>نظام Layout</li><li>قواعد تطبيق الهوية على المحتوى</li><li>3 قوالب تصميم قابلة لإعادة الاستخدام</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">الحملة البصرية</h4>
+                    <p class="pkg-group__sub">حملة بصرية واحدة، تشمل:</p>
+                    <ul class="pkg-list"><li>Concept بصري واحد</li><li>Key Visual واحد</li><li>تطبيق على 3 مخرجات كحد أقصى</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">تصميم الموقع الإلكتروني</h4>
+                    <p class="pkg-group__sub">Website UI/UX Design — حتى 5 صفحات، يشمل:</p>
+                    <ul class="pkg-list"><li>Desktop UI</li><li>Mobile UI</li><li>الهيكلة الأساسية لتجربة المستخدم</li><li>تصميم واجهات الصفحات</li><li>نظام مكونات بصري أساسي</li><li>تجهيز التصميم للتطوير</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">المراجعات</h4>
+                    <ul class="pkg-list"><li>4 جولات</li></ul>
+                  </div>
+                  <div class="pkg-group">
+                    <h4 class="pkg-group__head">الملفات</h4>
+                    <ul class="pkg-list"><li>JPG · PNG · PDF + ملفات تصميم الموقع</li></ul>
+                  </div>
+                  <div class="pkg-excludes">
+                    <p class="pkg-excludes__head">لا يشمل</p>
+                    <p class="pkg-excludes__list">البرمجة، الاستضافة، الدومين، كتابة المحتوى، SEO.</p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ===== COMPARISON TABLE (Prompt 06) ===== -->
+      <section class="section compare" id="comparison" aria-labelledby="compare-title">
         <div class="sig-accent sig-accent--tr" aria-hidden="true"><svg viewBox="0 0 240 240" fill="none"><path d="M48 224 L48 116 A68 68 0 0 1 116 48 L224 48"/></svg></div>
-        <div class="container container--wide">
-          <div class="position__grid">
-            <div class="sec-head" data-reveal>
-              <p class="sec-eyebrow">WHO WE ARE</p>
-              <h2 class="sec-title" id="position-title">One idea, well&nbsp;connected, becomes <span class="hero__accent">impact.</span></h2>
-              <p class="sec-lead u-rtl" lang="ar">نربط بين ما يبقى عادةً منفصلاً — الفكرة والتصميم، الرسالة والجمهور، العلامة والتجربة — لنصنع تواصلاً له معنى وأثر.</p>
-            </div>
-            <div class="relations" data-stagger>
-              <div class="relation"><span class="relation__a">IDEA</span><span class="relation__link" aria-hidden="true"></span><span class="relation__b">DESIGN</span></div>
-              <div class="relation"><span class="relation__a">MESSAGE</span><span class="relation__link" aria-hidden="true"></span><span class="relation__b">AUDIENCE</span></div>
-              <div class="relation"><span class="relation__a">BRAND</span><span class="relation__link" aria-hidden="true"></span><span class="relation__b">EXPERIENCE</span></div>
-              <div class="relation"><span class="relation__a">CREATIVE</span><span class="relation__link" aria-hidden="true"></span><span class="relation__b">IMPACT</span></div>
-            </div>
+        <div class="container container--wide" lang="ar" dir="rtl">
+          <h2 class="compare__title" id="compare-title">مقارنة الباقات</h2>
+          <div class="compare__wrap" data-reveal>
+            <table class="cmp">
+              <caption class="u-visually-hidden">مقارنة باقات BASIC وMEDIUM وPREMIUM</caption>
+              <thead>
+                <tr>
+                  <th scope="col"></th>
+                  <th scope="col">BASIC</th>
+                  <th scope="col"><span class="cmp__star" aria-hidden="true">⭐</span> MEDIUM</th>
+                  <th scope="col">PREMIUM</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row">منشورات</th><td class="v-num" data-pkg="BASIC">6</td><td class="v-num" data-pkg="MEDIUM">10</td><td class="v-num" data-pkg="PREMIUM">15</td></tr>
+                <tr><th scope="row">Stories</th><td class="v-num" data-pkg="BASIC">4</td><td class="v-num" data-pkg="MEDIUM">6</td><td class="v-num" data-pkg="PREMIUM">10</td></tr>
+                <tr><th scope="row">إعلانات رقمية</th><td class="v-num" data-pkg="BASIC">1</td><td class="v-num" data-pkg="MEDIUM">2</td><td class="v-num" data-pkg="PREMIUM">3</td></tr>
+                <tr><th scope="row">أغلفة حسابات</th><td class="v-num" data-pkg="BASIC">1</td><td class="v-num" data-pkg="MEDIUM">2</td><td class="v-num" data-pkg="PREMIUM">3</td></tr>
+                <tr><th scope="row">بروفايل / بروشور</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-num" data-pkg="MEDIUM">1</td><td class="v-num" data-pkg="PREMIUM">1</td></tr>
+                <tr><th scope="row">بطاقة أعمال</th><td class="v-num" data-pkg="BASIC">1</td><td class="v-num" data-pkg="MEDIUM">1</td><td class="v-dash" data-pkg="PREMIUM">—</td></tr>
+                <tr><th scope="row">فلاير / بوستر</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-num" data-pkg="MEDIUM">2</td><td class="v-num" data-pkg="PREMIUM">3</td></tr>
+                <tr><th scope="row">نظام بصري للمحتوى</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-check" data-pkg="MEDIUM">✓</td><td class="v-check" data-pkg="PREMIUM">✓</td></tr>
+                <tr><th scope="row">قوالب قابلة لإعادة الاستخدام</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-dash" data-pkg="MEDIUM">—</td><td class="v-num" data-pkg="PREMIUM">3</td></tr>
+                <tr><th scope="row">حملة بصرية</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-dash" data-pkg="MEDIUM">—</td><td class="v-check" data-pkg="PREMIUM">✓</td></tr>
+                <tr><th scope="row">Website UI/UX</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-dash" data-pkg="MEDIUM">—</td><td class="v-text" data-pkg="PREMIUM">حتى 5 صفحات</td></tr>
+                <tr><th scope="row">المراجعات</th><td class="v-num" data-pkg="BASIC">2</td><td class="v-num" data-pkg="MEDIUM">3</td><td class="v-num" data-pkg="PREMIUM">4</td></tr>
+                <tr><th scope="row">مدة التنفيذ</th><td class="v-text" data-pkg="BASIC">7 أيام</td><td class="v-text" data-pkg="MEDIUM">10 أيام</td><td class="v-text" data-pkg="PREMIUM">20 يوم</td></tr>
+                <tr><th scope="row">السعر</th><td class="v-price" data-pkg="BASIC">$299</td><td class="v-price" data-pkg="MEDIUM">$649</td><td class="v-price" data-pkg="PREMIUM">$1,299</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </section>
 
-      <!-- ===== 03 · SERVICES / CAPABILITIES ===== -->
-      <section class="section section--paper caps" id="services" data-section dir="rtl" aria-labelledby="services-title">
-        <div class="container container--wide">
-          <div class="sec-head" data-reveal>
-            <p class="sec-eyebrow">WHAT WE CREATE</p>
-            <h2 class="sec-title" id="services-title">Capabilities</h2>
-            <p class="sec-lead u-rtl" lang="ar">نحوّل الأفكار والاحتياجات إلى حلول بصرية واضحة، عملية، ومتناسقة تساعد المشروع على الظهور باحترافية والتواصل بوضوح مع جمهوره.</p>
+      <!-- ===== ADDITIONAL SERVICES (Prompt 06) ===== -->
+      <section class="section addons" id="addons" aria-labelledby="addons-title">
+        <div class="container container--wide" lang="ar" dir="rtl">
+          <div class="addons__head" data-reveal>
+            <h2 class="addons__title" id="addons-title">الخدمات الإضافية</h2>
+            <p class="addons__intro">يمكن إضافة خدمات خارج نطاق الباقات حسب احتياجات المشروع.</p>
           </div>
-          <div class="caps__list" data-stagger>
-            <article class="cap">
-              <span class="cap__num">01</span>
-              <div class="cap__body">
-                <p class="cap__label">Graphic Design</p>
-                <h3 class="cap__title u-rtl" lang="ar">التصميم الجرافيكي</h3>
-                <p class="cap__desc u-rtl" lang="ar">المحتوى الرقمي، المواد التسويقية، والمطبوعات.</p>
-              </div>
-              <span class="cap__form" aria-hidden="true"><svg viewBox="0 0 100 100"><path d="M24 40 L24 24 L40 24 M60 24 L76 24 L76 40 M76 60 L76 76 L60 76 M40 76 L24 76 L24 60" fill="none" stroke="currentColor" stroke-width="9"/></svg></span>
-            </article>
-            <article class="cap">
-              <span class="cap__num">02</span>
-              <div class="cap__body">
-                <p class="cap__label">Visual Systems</p>
-                <h3 class="cap__title u-rtl" lang="ar">الأنظمة البصرية</h3>
-                <p class="cap__desc u-rtl" lang="ar">تطوير أساليب وقوالب تساعد على الحفاظ على الاتساق البصري.</p>
-              </div>
-              <span class="cap__form" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="40" cy="50" r="24" fill="none" stroke="currentColor" stroke-width="9"/><circle cx="62" cy="50" r="24" fill="none" stroke="currentColor" stroke-width="9"/></svg></span>
-            </article>
-            <article class="cap">
-              <span class="cap__num">03</span>
-              <div class="cap__body">
-                <p class="cap__label">Creative Campaigns</p>
-                <h3 class="cap__title u-rtl" lang="ar">الحملات الإبداعية</h3>
-                <p class="cap__desc u-rtl" lang="ar">تطوير المفاهيم والاتجاهات البصرية للحملات.</p>
-              </div>
-              <span class="cap__form" aria-hidden="true"><svg viewBox="0 0 100 100"><rect x="16" y="16" width="44" height="44" fill="currentColor" opacity=".35"/><rect x="40" y="40" width="44" height="44" fill="currentColor"/></svg></span>
-            </article>
-            <article class="cap">
-              <span class="cap__num">04</span>
-              <div class="cap__body">
-                <p class="cap__label">Digital Experiences</p>
-                <h3 class="cap__title u-rtl" lang="ar">التجارب الرقمية</h3>
-                <p class="cap__desc u-rtl" lang="ar">تصميم واجهات وتجارب المواقع الإلكترونية.</p>
-              </div>
-              <span class="cap__form" aria-hidden="true"><svg viewBox="0 0 100 100"><path d="M12 82 A40 40 0 0 1 92 82" fill="none" stroke="currentColor" stroke-width="12" stroke-linecap="round"/></svg></span>
-            </article>
+          <div class="addons__grid" data-stagger>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>منشورات وStories إضافية</div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>إعلانات رقمية إضافية</div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>بروفايلات وبروشورات</div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>كتالوجات</div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>عروض تقديمية</div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>مواد مطبوعة</div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>حملات بصرية إضافية</div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>تطبيقات إضافية للحملات</div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>صفحات إضافية للموقع</div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>قوالب إضافية</div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>تصميم واجهات إضافية</div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>برمجة وتطوير المواقع</div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>تجهيز الملفات للطباعة والنشر</div>
           </div>
+          <p class="addons__footer">يتم تحديد السعر حسب نوع الخدمة وحجم العمل قبل التنفيذ.</p>
         </div>
       </section>
 
-      <!-- ===== 04 · SELECTED WORK ===== -->
-      <section class="section work" id="work" data-section aria-labelledby="work-title">
-        <div class="container container--wide">
-          <div class="sec-head" data-reveal>
-            <p class="sec-eyebrow">SELECTED WORK</p>
-            <h2 class="sec-title" id="work-title">Ideas, made&nbsp;visible.</h2>
-            <p class="sec-lead">A selection of branding, campaign, and digital projects — where strategy meets craft.</p>
-          </div>
-          <div class="work__grid" data-stagger>
-
-            <a class="work-item work-item--wide" href="#contact">
-              <span class="work-item__visual">
-                <span class="work-item__scrim" aria-hidden="true"></span>
-                <svg viewBox="0 0 240 160" fill="none" aria-hidden="true"><path d="M40 148 L40 92 A44 44 0 0 1 84 48 L196 48" stroke="#F4F1EA" stroke-width="26"/><rect x="150" y="96" width="70" height="34" transform="rotate(-8 150 96)" fill="#2447FF"/><circle cx="196" cy="44" r="20" fill="none" stroke="#C7F36B" stroke-width="4"/></svg>
-              </span>
-              <span class="work-item__badge">Visual Identity</span>
-              <span class="work-item__meta">
-                <span>
-                  <span class="work-item__title">Meridian — Brand Identity</span>
-                  <span class="work-item__desc" style="display:block">A complete visual identity and application system for a boutique property developer.</span>
-                </span>
-                <span class="work-item__arrow" aria-hidden="true">↗</span>
-              </span>
-            </a>
-
-            <a class="work-item" href="#contact">
-              <span class="work-item__visual">
-                <span class="work-item__scrim" aria-hidden="true"></span>
-                <svg viewBox="0 0 200 130" fill="none" aria-hidden="true"><rect x="30" y="26" width="70" height="78" fill="#C7F36B" opacity=".9"/><rect x="70" y="46" width="70" height="78" fill="#2447FF"/></svg>
-              </span>
-              <span class="work-item__badge">Packaging</span>
-              <span class="work-item__meta">
-                <span>
-                  <span class="work-item__title">Kanz — Packaging System</span>
-                  <span class="work-item__desc" style="display:block">A retail packaging language scaled across a full product line.</span>
-                </span>
-                <span class="work-item__arrow" aria-hidden="true">↗</span>
-              </span>
-            </a>
-
-            <a class="work-item" href="#contact">
-              <span class="work-item__visual">
-                <span class="work-item__scrim" aria-hidden="true"></span>
-                <svg viewBox="0 0 200 130" fill="none" aria-hidden="true"><path d="M20 100 A50 50 0 0 1 120 100" stroke="#F4F1EA" stroke-width="16"/><rect x="120" y="40" width="60" height="30" transform="rotate(-10 120 40)" fill="#2447FF"/><circle cx="150" cy="95" r="10" fill="#C7F36B"/></svg>
-              </span>
-              <span class="work-item__badge">Campaign</span>
-              <span class="work-item__meta">
-                <span>
-                  <span class="work-item__title">Aswaq — Seasonal Campaign</span>
-                  <span class="work-item__desc" style="display:block">Concept, key visual, and creative direction for a seasonal campaign.</span>
-                </span>
-                <span class="work-item__arrow" aria-hidden="true">↗</span>
-              </span>
-            </a>
-
-            <a class="work-item" href="#contact">
-              <span class="work-item__visual">
-                <span class="work-item__scrim" aria-hidden="true"></span>
-                <svg viewBox="0 0 200 130" fill="none" aria-hidden="true"><path d="M40 34 L40 22 L52 22 M148 22 L160 22 L160 34 M160 96 L160 108 L148 108 M52 108 L40 108 L40 96" stroke="#F4F1EA" stroke-width="8"/><rect x="70" y="46" width="60" height="38" fill="#2447FF"/><circle cx="130" cy="46" r="8" fill="#C7F36B"/></svg>
-              </span>
-              <span class="work-item__badge">Digital</span>
-              <span class="work-item__meta">
-                <span>
-                  <span class="work-item__title">Nawah — Digital Experience</span>
-                  <span class="work-item__desc" style="display:block">Website UI/UX and a component-based digital experience.</span>
-                </span>
-                <span class="work-item__arrow" aria-hidden="true">↗</span>
-              </span>
-            </a>
-
-            <a class="work-item" href="#contact">
-              <span class="work-item__visual">
-                <span class="work-item__scrim" aria-hidden="true"></span>
-                <svg viewBox="0 0 200 130" fill="none" aria-hidden="true"><circle cx="80" cy="65" r="34" fill="none" stroke="#F4F1EA" stroke-width="12"/><circle cx="120" cy="65" r="34" fill="none" stroke="#C7F36B" stroke-width="12"/><rect x="150" y="90" width="34" height="18" transform="rotate(-8 150 90)" fill="#2447FF"/></svg>
-              </span>
-              <span class="work-item__badge">Social Content</span>
-              <span class="work-item__meta">
-                <span>
-                  <span class="work-item__title">Sila — Content System</span>
-                  <span class="work-item__desc" style="display:block">A social content system and reusable templates for consistent presence.</span>
-                </span>
-                <span class="work-item__arrow" aria-hidden="true">↗</span>
-              </span>
-            </a>
-
-          </div>
-        </div>
-      </section>
-
-      <!-- ===== 05 · APPROACH ===== -->
-      <section class="section section--paper approach" id="approach" data-section dir="rtl" aria-labelledby="approach-title">
-        <div class="container container--wide">
-          <div class="sec-head" data-reveal>
-            <p class="sec-eyebrow">HOW WE WORK</p>
-            <h2 class="sec-title" id="approach-title">Understand. Connect. Create.</h2>
-            <p class="sec-lead u-rtl" lang="ar">منهجية واضحة تربط الفهم بالفكرة، والفكرة بالتنفيذ، حتى التسليم.</p>
-          </div>
-          <div class="approach__steps" data-stagger>
-            <div class="astep">
-              <span class="astep__node">01</span>
-              <span class="astep__label">Understand</span>
-              <h3 class="astep__title u-rtl" lang="ar">نفهم</h3>
-              <p class="astep__desc u-rtl" lang="ar">جمع المعلومات وتحديد الاحتياج.</p>
-            </div>
-            <div class="astep">
-              <span class="astep__node">02</span>
-              <span class="astep__label">Connect</span>
-              <h3 class="astep__title u-rtl" lang="ar">نربط</h3>
-              <p class="astep__desc u-rtl" lang="ar">ربط الأهداف بالجمهور وبناء الاتجاه.</p>
-            </div>
-            <div class="astep">
-              <span class="astep__node">03</span>
-              <span class="astep__label">Create</span>
-              <h3 class="astep__title u-rtl" lang="ar">نبتكر</h3>
-              <p class="astep__desc u-rtl" lang="ar">إنتاج الحلول والمخرجات البصرية.</p>
-            </div>
-            <div class="astep">
-              <span class="astep__node">04</span>
-              <span class="astep__label">Refine</span>
-              <h3 class="astep__title u-rtl" lang="ar">نصقل</h3>
-              <p class="astep__desc u-rtl" lang="ar">مراجعة وتحسين وفق الملاحظات.</p>
-            </div>
-            <div class="astep">
-              <span class="astep__node">05</span>
-              <span class="astep__label">Deliver</span>
-              <h3 class="astep__title u-rtl" lang="ar">نسلّم</h3>
-              <p class="astep__desc u-rtl" lang="ar">تجهيز وتسليم الملفات النهائية.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ===== 06 · THE QUANTUM LINK DIFFERENCE ===== -->
-      <section class="section diff" id="difference" aria-labelledby="diff-title">
+      <!-- ===== PROCESS (Prompt 07) ===== -->
+      <section class="section process" id="process" data-section aria-labelledby="process-title">
         <div class="sig-accent sig-accent--bl" aria-hidden="true"><svg viewBox="0 0 240 240" fill="none"><path d="M48 224 L48 116 A68 68 0 0 1 116 48 L224 48"/></svg></div>
-        <div class="container container--wide">
-          <div class="sec-head" data-reveal>
-            <p class="sec-eyebrow">WHY QUANTUM LINK</p>
-            <p class="diff__statement" id="diff-title">We design <b>ideas</b> before decoration — with purpose, consistency, and intent.</p>
-          </div>
-          <div class="principles" data-stagger>
-            <div class="principle"><span class="principle__no">01</span><p class="principle__en">Ideas before decoration</p><p class="principle__ar u-rtl" lang="ar">الفكرة قبل الزخرفة</p></div>
-            <div class="principle"><span class="principle__no">02</span><p class="principle__en">Design with purpose</p><p class="principle__ar u-rtl" lang="ar">تصميم بهدف واضح</p></div>
-            <div class="principle"><span class="principle__no">03</span><p class="principle__en">Strategic thinking</p><p class="principle__ar u-rtl" lang="ar">تفكير استراتيجي</p></div>
-            <div class="principle"><span class="principle__no">04</span><p class="principle__en">Visual consistency</p><p class="principle__ar u-rtl" lang="ar">اتساق بصري</p></div>
-            <div class="principle"><span class="principle__no">05</span><p class="principle__en">Message meets audience</p><p class="principle__ar u-rtl" lang="ar">صلة بين الرسالة والجمهور</p></div>
-            <div class="principle"><span class="principle__no">06</span><p class="principle__en">Design that scales</p><p class="principle__ar u-rtl" lang="ar">تصميم يتّسع عبر المنصّات</p></div>
-          </div>
-        </div>
-      </section>
+        <div class="container container--wide" lang="ar" dir="rtl">
+          <h2 class="process__title" id="process-title" data-reveal>التصميم ليس مجرد شكل</h2>
 
-      <!-- ===== 07 · ENGAGEMENT (packages overview → dedicated page) ===== -->
-      <section class="section section--paper engage" id="packages" data-section aria-labelledby="engage-title">
-        <div class="container container--wide">
-          <div class="engage__head" data-reveal>
-            <div class="sec-head">
-              <p class="sec-eyebrow">HOW TO WORK WITH US</p>
-              <h2 class="sec-title" id="engage-title">Ways to engage</h2>
-            </div>
-            <a class="link-cta" href="packages.html">View all packages <span class="link-cta__line" aria-hidden="true"></span></a>
-          </div>
-          <div class="tiers" data-stagger>
-            <article class="tier">
-              <span class="tier__name">BASIC</span>
-              <p class="tier__tag u-rtl" lang="ar">حضور بصري أساسي</p>
-              <p class="tier__price">$299 <small>· 7 DAYS</small></p>
-              <p class="tier__note u-rtl" lang="ar">مجموعة أساسية من المواد البصرية لبناء حضور رقمي احترافي.</p>
-              <a class="link-cta" href="packages.html#basic">Details <span class="link-cta__line" aria-hidden="true"></span></a>
-            </article>
-            <article class="tier tier--featured">
-              <span class="tier__name">MEDIUM</span>
-              <p class="tier__tag u-rtl" lang="ar">حضور بصري متكامل</p>
-              <p class="tier__price">$649 <small>· 10 DAYS</small></p>
-              <p class="tier__note u-rtl" lang="ar">محتوى متنوع مع نظام بصري موحد للحفاظ على الاتساق.</p>
-              <a class="link-cta" href="packages.html#medium">Details <span class="link-cta__line" aria-hidden="true"></span></a>
-            </article>
-            <article class="tier">
-              <span class="tier__name">PREMIUM</span>
-              <p class="tier__tag u-rtl" lang="ar">الحضور التجاري والرقمي المتكامل</p>
-              <p class="tier__price">$1,299 <small>· 20 DAYS</small></p>
-              <p class="tier__note u-rtl" lang="ar">منظومة بصرية متكاملة تمتد من المحتوى والحملات إلى الموقع.</p>
-              <a class="link-cta" href="packages.html#premium">Details <span class="link-cta__line" aria-hidden="true"></span></a>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <!-- ===== 08 · ABOUT ===== -->
-      <section class="section about" id="about" data-section aria-labelledby="about-title">
-        <div class="container container--wide">
-          <div class="about__grid">
-            <div class="about__body" data-reveal>
-              <p class="sec-eyebrow">ABOUT</p>
-              <h2 class="sec-title" id="about-title">A studio built on connection.</h2>
-              <p>Quantum Link is a creative, design and communication agency. We believe <b>one idea, well connected, becomes something new</b> — so we join strategy with craft to help brands look, sound, and feel coherent.</p>
-              <p>We think before we decorate. Every mark, system, and message is made to carry meaning across every platform it lives on.</p>
-              <div class="about__stats">
-                <div class="about-stat"><p class="about-stat__n">01</p><p class="about-stat__l">One connected idea per project</p></div>
-                <div class="about-stat"><p class="about-stat__n">04</p><p class="about-stat__l">Core creative capabilities</p></div>
+          <div class="process-flow" role="list">
+            <div class="process-row">
+              <div class="pstep" role="listitem" data-reveal>
+                <div class="pstep__node"><span class="pstep__num">01</span></div>
+                <div class="pstep__body">
+                  <h3 class="pstep__name">الفهم</h3>
+                  <span class="pstep__link" aria-hidden="true"></span>
+                  <p class="pstep__desc">جمع المعلومات وتحديد الاحتياج.</p>
+                </div>
+              </div>
+              <div class="pstep" role="listitem" data-reveal>
+                <div class="pstep__node"><span class="pstep__num">02</span></div>
+                <div class="pstep__body">
+                  <h3 class="pstep__name">التخطيط</h3>
+                  <span class="pstep__link" aria-hidden="true"></span>
+                  <p class="pstep__desc">تحديد المخرجات والأولويات والجدول الزمني.</p>
+                </div>
+              </div>
+              <div class="pstep" role="listitem" data-reveal>
+                <div class="pstep__node"><span class="pstep__num">03</span></div>
+                <div class="pstep__body">
+                  <h3 class="pstep__name">التطوير</h3>
+                  <span class="pstep__link" aria-hidden="true"></span>
+                  <p class="pstep__desc">بناء الاتجاه والحلول البصرية.</p>
+                </div>
               </div>
             </div>
-            <div class="about__visual" aria-hidden="true">
-              <svg viewBox="0 0 240 240" fill="none"><path d="M56 208 L56 120 A56 56 0 0 1 112 64 L200 64" stroke="currentColor" stroke-width="30"/><rect x="150" y="150" width="56" height="28" transform="rotate(-8 150 150)" fill="#2447FF"/><circle cx="196" cy="60" r="18" fill="none" stroke="#C7F36B" stroke-width="4"/></svg>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ===== 09 · START A PROJECT ===== -->
-      <section class="section contact start" id="contact" data-section aria-labelledby="contact-title">
-        <div class="sig-accent sig-accent--bl" aria-hidden="true"><svg viewBox="0 0 240 240" fill="none"><path d="M48 224 L48 116 A68 68 0 0 1 116 48 L224 48"/></svg></div>
-        <div class="container container--wide">
-          <div class="start__grid">
-            <div>
-              <p class="sec-eyebrow">GET IN TOUCH</p>
-              <h2 class="sec-title" id="contact-title">Start a project</h2>
-              <p class="sec-lead u-rtl" lang="ar">أخبرنا عن مشروعك، ولنبدأ محادثة إبداعية.</p>
-              <form class="start-form" data-contact-form novalidate>
-                <div class="field-grid">
-                  <div class="field"><label for="cf-name">Name · الاسم</label><input id="cf-name" name="name" type="text" placeholder="Full name" required></div>
-                  <div class="field"><label for="cf-email">Email · البريد</label><input id="cf-email" name="email" type="email" placeholder="you@company.com" required></div>
-                  <div class="field"><label for="cf-company">Company · الجهة</label><input id="cf-company" name="company" type="text" placeholder="Organization"></div>
-                  <div class="field"><label for="cf-type">Project type · نوع المشروع</label>
-                    <select id="cf-type" name="type" required>
-                      <option value="" disabled selected>Select a type</option>
-                      <option>Branding</option><option>Visual Identity</option><option>Creative Campaign</option>
-                      <option>Packaging</option><option>Digital / Website</option><option>Content / Social</option><option>Other</option>
-                    </select>
-                  </div>
-                  <div class="field field--full"><label for="cf-desc">Project description · وصف المشروع</label><textarea id="cf-desc" name="description" placeholder="Tell us about the idea, the audience, and the outcome you're after…" required></textarea></div>
-                  <div class="field"><label for="cf-budget">Budget <span class="field__opt">(optional)</span></label>
-                    <select id="cf-budget" name="budget">
-                      <option value="" disabled selected>Select a range</option>
-                      <option>Under $500</option><option>$500 – $1,500</option><option>$1,500 – $5,000</option><option>$5,000+</option>
-                    </select>
-                  </div>
-                  <div class="field"><label for="cf-timeline">Timeline <span class="field__opt">(optional)</span></label>
-                    <select id="cf-timeline" name="timeline">
-                      <option value="" disabled selected>Select a timeline</option>
-                      <option>As soon as possible</option><option>1–2 weeks</option><option>Within a month</option><option>Flexible</option>
-                    </select>
-                  </div>
+            <div class="process-row">
+              <div class="pstep" role="listitem" data-reveal>
+                <div class="pstep__node"><span class="pstep__num">04</span></div>
+                <div class="pstep__body">
+                  <h3 class="pstep__name">التنفيذ</h3>
+                  <span class="pstep__link" aria-hidden="true"></span>
+                  <p class="pstep__desc">إنتاج المخرجات المتفق عليها.</p>
                 </div>
-                <div class="start__submit">
-                  <button type="submit" class="btn contact-submit">Start the conversation</button>
-                  <span class="link-cta" style="pointer-events:none"><span class="link-cta__line" aria-hidden="true"></span> We reply within 1–2 days</span>
+              </div>
+              <div class="pstep" role="listitem" data-reveal>
+                <div class="pstep__node"><span class="pstep__num">05</span></div>
+                <div class="pstep__body">
+                  <h3 class="pstep__name">المراجعة</h3>
+                  <span class="pstep__link" aria-hidden="true"></span>
+                  <p class="pstep__desc">تنفيذ جولات المراجعة وفق الباقة.</p>
                 </div>
-                <p class="form-success" data-form-success hidden lang="ar" dir="rtl">شكرًا لثقتكم — سنعود إليك قريبًا.</p>
-              </form>
-            </div>
-            <div class="start__aside" aria-hidden="true">
-              <div class="contact__frame">
-                <span class="contact__frame-line"></span>
-                <span class="ql-logo contact__logo">
-                  <svg class="ql-logo__mark" viewBox="0 0 120 120" aria-hidden="true"><circle cx="55" cy="55" r="35" fill="none" stroke="currentColor" stroke-width="16"/><path d="M59 57 L104 102 L58 88 L72 74 Z" fill="currentColor"/></svg>
-                  <span class="ql-logo__word"><b>Quantum</b><b>Link</b></span>
-                </span>
-                <p class="contact__frame-text" lang="ar" dir="rtl">جاهزون لتحويل الأفكار إلى حلول بصرية واضحة واحترافية</p>
+              </div>
+              <div class="pstep" role="listitem" data-reveal>
+                <div class="pstep__node"><span class="pstep__num">06</span></div>
+                <div class="pstep__body">
+                  <h3 class="pstep__name">التسليم</h3>
+                  <span class="pstep__link" aria-hidden="true"></span>
+                  <p class="pstep__desc">تجهيز وتسليم الملفات النهائية.</p>
+                </div>
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <!-- ===== POLICIES (Prompt 07) ===== -->
+      <section class="section policies" id="policies" aria-label="المراجعات والدفع والشروط">
+        <div class="container container--wide" lang="ar" dir="rtl">
+          <div class="policies__grid" data-stagger>
+
+            <div class="policy">
+              <h3 class="policy__title">المراجعات</h3>
+              <ul class="policy__list">
+                <li><strong>BASIC</strong> — جولتان</li>
+                <li><strong>MEDIUM</strong> — 3 جولات</li>
+                <li><strong>PREMIUM</strong> — 4 جولات</li>
+              </ul>
+              <p class="policy__note">تُحتسب الجولة بعد استلام الملاحظات المجمعة.</p>
+            </div>
+
+            <div class="policy">
+              <h3 class="policy__title">الدفع</h3>
+              <ul class="policy__list">
+                <li><strong>50%</strong> عند اعتماد المشروع وبدء العمل.</li>
+                <li><strong>50%</strong> عند الانتهاء وقبل التسليم النهائي.</li>
+              </ul>
+            </div>
+
+            <div class="policy">
+              <h3 class="policy__title">شروط أساسية</h3>
+              <ul class="policy__list policy__list--bullets">
+                <li>تبدأ مدة التنفيذ بعد استلام المحتوى والمواد المطلوبة ودفعة بدء المشروع.</li>
+                <li>أي طلبات خارج نطاق الباقة يتم تسعيرها بشكل منفصل.</li>
+                <li>تأخر إرسال المحتوى أو الملاحظات قد يؤدي إلى تعديل الجدول الزمني.</li>
+                <li>الملفات المصدرية لا تُسلّم تلقائيًا إلا إذا تم الاتفاق عليها.</li>
+                <li>يتم تسليم الملفات النهائية بعد استكمال الدفعات المستحقة.</li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <section class="section contact" style="text-align:center">
+        <div class="container container--narrow">
+          <p class="sec-eyebrow" style="justify-content:center">READY?</p>
+          <h2 class="sec-title" style="text-align:center">Start a project</h2>
+          <p class="sec-lead" style="margin-inline:auto;text-align:center">Tell us about your project and let’s begin a creative conversation.</p>
+          <p style="margin-block-start:var(--sp-32)"><a class="btn btn--primary" href="index.html#contact">Start a Project <span class="btn__icon" aria-hidden="true">↗</span></a></p>
         </div>
       </section>
 
     </main>
 
-    <!-- ================= GLOBAL FOOTER ================= -->
     <footer class="site-footer" role="contentinfo">
       <div class="sig-accent sig-accent--tr" aria-hidden="true"><svg viewBox="0 0 240 240" fill="none"><path d="M48 224 L48 116 A68 68 0 0 1 116 48 L224 48"/></svg></div>
       <div class="site-footer__top">
         <div class="container container--wide">
           <div class="site-footer__cols">
             <div class="site-footer__brand">
-              <a class="site-footer__logo" href="#top" aria-label="Quantum Link — Home">
-                <span class="ql-logo" aria-hidden="true">
-                  <svg class="ql-logo__mark" viewBox="0 0 120 120" aria-hidden="true"><circle cx="55" cy="55" r="35" fill="none" stroke="currentColor" stroke-width="16"/><path d="M59 57 L104 102 L58 88 L72 74 Z" fill="currentColor"/></svg>
-                  <span class="ql-logo__word"><b>Quantum</b><b>Link</b></span>
-                </span>
-              </a>
+              <a class="site-footer__logo" href="index.html" aria-label="Quantum Link — Home"><span class="ql-logo" aria-hidden="true"><svg class="ql-logo__mark" viewBox="0 0 120 120" aria-hidden="true"><circle cx="55" cy="55" r="35" fill="none" stroke="currentColor" stroke-width="16"/><path d="M59 57 L104 102 L58 88 L72 74 Z" fill="currentColor"/></svg><span class="ql-logo__word"><b>Quantum</b><b>Link</b></span></span></a>
               <p class="site-footer__brand-tag">Connecting ideas to impact — a creative, design and communication agency.</p>
               <a class="site-footer__brand-mail" href="mailto:hello@quantumlink.agency">hello@quantumlink.agency</a>
             </div>
-            <nav class="footcol" aria-label="Explore">
-              <p class="footcol__h">Explore</p>
-              <ul class="footcol__list">
-                <li><a href="#work">Work</a></li>
-                <li><a href="#services">Services</a></li>
-                <li><a href="#approach">Approach</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#contact">Contact</a></li>
-              </ul>
-            </nav>
-            <nav class="footcol" aria-label="Services">
-              <p class="footcol__h">Services</p>
-              <ul class="footcol__list">
-                <li><a href="#services">Graphic Design</a></li>
-                <li><a href="#services">Visual Systems</a></li>
-                <li><a href="#services">Creative Campaigns</a></li>
-                <li><a href="#services">Digital Experiences</a></li>
-                <li><a href="packages.html">Packages</a></li>
-              </ul>
-            </nav>
-            <div class="footcol">
-              <p class="footcol__h">Connect</p>
-              <div class="site-footer__social">
-                <a class="social-dot" href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
-                <a class="social-dot" href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5A2.5 2.5 0 1 1 5 8.5 2.5 2.5 0 0 1 4.98 3.5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.95 1.83-1.95 3.75-1.95C20.4 8.75 22 11 22 14.5V21h-4v-5.7c0-1.36-.02-3.1-1.9-3.1s-2.2 1.47-2.2 3v5.8H9z"/></svg></a>
-                <a class="social-dot" href="#" aria-label="Behance"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.4 8.6c1 0 1.6.6 1.6 1.4 0 .9-.6 1.4-1.7 1.4H5.6V8.6h2.8zm.2 4.3c1.1 0 1.8.5 1.8 1.5s-.7 1.5-1.9 1.5H5.6v-3h3zM3 6.8v10.4h5.7c2.6 0 4.1-1.2 4.1-3.3 0-1.4-.8-2.4-2.1-2.7 1-.4 1.6-1.3 1.6-2.4 0-1.8-1.4-3-3.8-3H3zm11.3 6.6c.1-1.1.8-1.7 1.8-1.7s1.6.6 1.7 1.7h-3.5zm5.5 1.3v-.5c0-2.4-1.4-4-3.7-4s-3.8 1.6-3.8 4 1.5 3.9 3.9 3.9c1.9 0 3.2-1 3.5-2.4h-2c-.2.5-.7.8-1.4.8-1 0-1.7-.6-1.9-1.8h5.4zM15 7.4h4.4v1H15z"/></svg></a>
-                <a class="social-dot" href="#" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 3h3l-6.6 7.5L21.8 21h-6l-4.3-5.6L6.5 21H3.4l7.1-8.1L2.3 3h6.1l3.9 5.1L17.5 3z"/></svg></a>
-              </div>
-              <a class="site-footer__start" href="#contact" lang="ar" dir="rtl" style="margin-block-start:var(--sp-24);display:inline-block">لنبدأ.</a>
-            </div>
+            <nav class="footcol" aria-label="Explore"><p class="footcol__h">Explore</p><ul class="footcol__list"><li><a href="index.html#work">Work</a></li><li><a href="index.html#services">Services</a></li><li><a href="index.html#approach">Approach</a></li><li><a href="index.html#about">About</a></li><li><a href="index.html#contact">Contact</a></li></ul></nav>
+            <nav class="footcol" aria-label="Services"><p class="footcol__h">Services</p><ul class="footcol__list"><li><a href="index.html#services">Graphic Design</a></li><li><a href="index.html#services">Visual Systems</a></li><li><a href="index.html#services">Creative Campaigns</a></li><li><a href="index.html#services">Digital Experiences</a></li><li><a href="packages.html">Packages</a></li></ul></nav>
+            <div class="footcol"><p class="footcol__h">Connect</p><div class="site-footer__social"><a class="social-dot" href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a><a class="social-dot" href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5A2.5 2.5 0 1 1 5 8.5 2.5 2.5 0 0 1 4.98 3.5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.95 1.83-1.95 3.75-1.95C20.4 8.75 22 11 22 14.5V21h-4v-5.7c0-1.36-.02-3.1-1.9-3.1s-2.2 1.47-2.2 3v5.8H9z"/></svg></a><a class="social-dot" href="#" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 3h3l-6.6 7.5L21.8 21h-6l-4.3-5.6L6.5 21H3.4l7.1-8.1L2.3 3h6.1l3.9 5.1L17.5 3z"/></svg></a></div></div>
           </div>
         </div>
       </div>
-      <div class="site-footer__bottom">
-        <div class="container container--wide site-footer__bottom-inner">
-          <span>© 2025 Quantum Link. All rights reserved.</span>
-          <span>Connecting ideas to impact.</span>
-        </div>
-      </div>
+      <div class="site-footer__bottom"><div class="container container--wide site-footer__bottom-inner"><span>© 2025 Quantum Link. All rights reserved.</span><span>Connecting ideas to impact.</span></div></div>
     </footer>
 
   </div><!-- /.site-shell -->
 
-  <script>
+<script>
   /* ==========================================================================
      QUANTUM LINK — SHELL BEHAVIOR (header · drawer · SHIFT reveal · scroll-spy)
      ========================================================================== */
