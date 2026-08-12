@@ -677,6 +677,37 @@
   .site-footer__inner::before{content:"";inline-size:48px;block-size:4px;background:var(--ql-lime);border-radius:2px;margin-block-end:var(--sp-24)}
 
   /* ==========================================================================
+     MICRO-DETAILS — consistent focus rings, tactile press, hover refinements
+     ========================================================================== */
+  /* Unified keyboard focus-visible ring across interactive elements */
+  a:focus-visible,button:focus-visible,.btn:focus-visible,.site-nav__link:focus-visible,
+  .mobile-nav__link:focus-visible,.pkg-tab:focus-visible,.hero__scroll:focus-visible,
+  .site-header__logo:focus-visible,.site-footer__logo:focus-visible,.site-footer__start:focus-visible{
+    outline:var(--bw-thick) solid var(--accent-hover);outline-offset:3px;box-shadow:none;border-radius:var(--radius-sm)}
+  .contact input:focus-visible,.contact select:focus-visible{outline:var(--bw-thick) solid var(--accent-2);outline-offset:2px}
+
+  /* Tactile press (active) states */
+  .btn:active{transform:translateY(1px) scale(.985)}
+  .pkg-tab:active{transform:scale(.98)}
+  .site-nav__link:active,.mobile-nav__link:active{transform:translateY(1px)}
+  .site-header__logo:active .ql-logo,.site-footer__logo:active .ql-logo{transform:scale(.97)}
+
+  /* Footer "لنبدأ." — animated underline on hover/focus */
+  .site-footer__start{position:relative}
+  .site-footer__start::after{content:"";position:absolute;inset-block-end:-2px;inset-inline:0;block-size:2px;background:currentColor;transform:scaleX(0);transform-origin:right;transition:transform var(--dur-normal) var(--ease-shift)}
+  .site-footer__start:hover::after,.site-footer__start:focus-visible::after{transform:scaleX(1)}
+
+  /* Hero scroll cue — hover nudge (keeps horizontal centering) */
+  .hero__scroll{transition:color var(--dur-fast) var(--ease-standard),transform var(--dur-normal) var(--ease-shift)}
+  .hero__scroll:hover{color:var(--accent-2-hover);transform:translateX(-50%) translateY(3px)}
+
+  @media (prefers-reduced-motion:reduce){
+    .btn:active,.pkg-tab:active,.site-nav__link:active,.mobile-nav__link:active,
+    .site-header__logo:active .ql-logo,.site-footer__logo:active .ql-logo{transform:none}
+    .hero__scroll:hover{transform:translateX(-50%)}
+  }
+
+  /* ==========================================================================
      RESPONSIVE  (Desktop-first · anchors: 1440 / 768 / 375)
      ========================================================================== */
   @media (max-width:1200px){
