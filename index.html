@@ -943,15 +943,32 @@
   .work__next{margin-block-start:clamp(3.5rem,7vw,6rem);padding-block-start:clamp(1.75rem,3.5vw,2.75rem);border-block-start:var(--bw-hairline) solid var(--border);display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-20) var(--sp-32);flex-wrap:wrap}
   .work__next-line{margin:0;font-family:var(--font-en);font-weight:var(--fw-bold);letter-spacing:-.01em;font-size:clamp(1.2rem,1rem + .9vw,1.8rem);color:var(--ql-paper);max-inline-size:24ch}
 
-  /* 05 · APPROACH — 5-step brand flow */
+  /* 05 · APPROACH — a thinking-led creative journey (one evolving system, not a timeline) */
   .approach{background:var(--surface-paper);color:var(--text-on-paper)}
-  .approach__steps{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--sp-16);margin-block-start:var(--sp-56);position:relative}
-  .approach__steps::before{content:"";position:absolute;inset-block-start:26px;inset-inline:10%;block-size:var(--link-width);background:var(--ql-blue);opacity:.35}
-  .astep{position:relative;text-align:center;display:flex;flex-direction:column;align-items:center;gap:var(--sp-12)}
-  .astep__node{position:relative;z-index:1;inline-size:52px;block-size:52px;border-radius:var(--radius-round);background:var(--ql-blue);color:var(--ql-paper);display:grid;place-items:center;font-family:var(--font-en);font-weight:var(--fw-black);font-size:0.95rem}
-  .astep__label{font-family:var(--font-en);font-weight:var(--fw-bold);letter-spacing:var(--ls-wide);text-transform:uppercase;font-size:0.82rem;color:var(--ql-gray)}
-  .astep__title{font-weight:var(--fw-bold);font-size:1.35rem;color:var(--ql-black)}
-  .astep__desc{color:var(--text-on-paper-muted);font-size:0.95rem;line-height:1.6;max-inline-size:22ch}
+  .approach__intro{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,4fr);column-gap:clamp(2rem,5vw,5.5rem);row-gap:clamp(1rem,2.5vw,1.75rem);align-items:end}
+  .approach__label{margin:0;font-family:var(--font-en);font-weight:var(--fw-bold);font-size:var(--fs-eyebrow);letter-spacing:var(--ls-widest);text-transform:uppercase;color:var(--ql-blue)}
+  .approach__statement{margin-block-start:var(--sp-16);font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:-.02em;line-height:1.05;font-size:clamp(1.9rem,1.2rem + 2.4vw,3.2rem);color:var(--ql-black);text-wrap:balance}
+  .approach__statement .hero__accent{color:var(--ql-blue)}
+  .approach__lead{margin:0;align-self:end;color:var(--ql-gray);font-size:clamp(1rem,.95rem + .25vw,1.15rem);line-height:1.7;max-inline-size:36ch}
+
+  .journey{margin-block-start:clamp(2.5rem,6vw,5rem);border-block-start:var(--bw-hairline) solid var(--border-on-paper)}
+  .astage{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"num name glyph" "num desc glyph";align-items:center;column-gap:clamp(1.25rem,3vw,3.25rem);row-gap:var(--sp-4);padding-block:clamp(1.5rem,3vw,2.5rem);padding-inline-start:clamp(.75rem,1.5vw,1.25rem);border-block-end:var(--bw-hairline) solid var(--border-on-paper);transition:background-color var(--dur-normal) var(--ease-shift)}
+  .astage::before{content:"";position:absolute;inset-inline-start:0;inset-block:0;inline-size:2px;background:var(--ql-blue);transform:scaleY(0);transform-origin:top;transition:transform var(--dur-normal) var(--ease-shift)}
+  .astage.is-active::before{transform:scaleY(1)}
+  .astage.is-active{background:rgba(36,71,255,.03)}
+  .astage__num{grid-area:num;align-self:center;font-family:var(--font-en);font-weight:var(--fw-black);font-size:clamp(1rem,.85rem + .55vw,1.35rem);letter-spacing:0;color:var(--text-on-paper-subtle);min-inline-size:2.5ch;transition:color var(--dur-normal) var(--ease-shift)}
+  .astage.is-active .astage__num{color:var(--ql-blue)}
+  .astage__name{grid-area:name;margin:0;font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:-.02em;line-height:1.05;font-size:clamp(1.55rem,1.15rem + 1.8vw,2.75rem);color:var(--ql-black)}
+  .astage__desc{grid-area:desc;margin:0;color:var(--ql-gray);font-size:clamp(.95rem,.92rem + .15vw,1.05rem);line-height:1.55;max-inline-size:44ch}
+  .astage__glyph{grid-area:glyph;align-self:center;inline-size:clamp(64px,9vw,120px);block-size:clamp(64px,9vw,120px);color:var(--ql-blue);transition:opacity var(--dur-normal) var(--ease-shift),transform var(--dur-slow) var(--ease-shift)}
+  .astage__glyph svg{inline-size:100%;block-size:100%;overflow:visible}
+  /* the composition grows more resolved down the journey (open field -> resolved mark) */
+  .astage:nth-child(1) .astage__glyph{opacity:.5}
+  .astage:nth-child(2) .astage__glyph{opacity:.62}
+  .astage:nth-child(3) .astage__glyph{opacity:.74}
+  .astage:nth-child(4) .astage__glyph{opacity:.87}
+  .astage:nth-child(5) .astage__glyph{opacity:1}
+  .astage.is-active .astage__glyph{opacity:1;transform:scale(1.05)}
 
   /* 06 · DIFFERENCE — brand statement + principles */
   .diff{background:var(--ql-black)}
@@ -1037,13 +1054,12 @@
     .about__visual{aspect-ratio:16 / 10}
   }
   @media (max-width:768px){
-    .approach__steps{grid-template-columns:1fr;gap:0}
-    .approach__steps::before{inset-block:26px auto;inset-inline-start:26px;inset-inline-end:auto;inline-size:var(--link-width);block-size:calc(100% - 52px)}
-    .astep{display:grid;grid-template-columns:auto 1fr;column-gap:var(--sp-20);align-items:start;text-align:start;padding-block:var(--sp-20)}
-    .astep__node{grid-column:1;grid-row:1 / span 3;align-self:start}
-    .astep__label{grid-column:2;grid-row:1}
-    .astep__title{grid-column:2;grid-row:2;line-height:1.1}
-    .astep__desc{grid-column:2;grid-row:3;max-inline-size:none}
+    .approach__intro{grid-template-columns:1fr}
+    .approach__lead{align-self:start}
+    /* mobile journey: number → title → description → evolving visual, per stage */
+    .astage{grid-template-columns:auto minmax(0,1fr);grid-template-areas:"num name" ".   desc" ".   glyph";column-gap:var(--sp-16);row-gap:var(--sp-12);align-items:baseline;padding-block:clamp(1.75rem,6vw,2.4rem)}
+    .astage__num{align-self:baseline}
+    .astage__glyph{justify-self:start;margin-block-start:var(--sp-12);inline-size:clamp(76px,26vw,104px);block-size:clamp(76px,26vw,104px)}
     .field-grid{grid-template-columns:1fr}
     .start__aside{display:none}
   }
@@ -1088,7 +1104,8 @@
   /* Arabic has no letter-spacing / caps — reset on translated UI so glyphs join */
   html[data-lang="ar"] .btn,html[data-lang="ar"] .site-nav__link,html[data-lang="ar"] .mobile-nav__link,
   html[data-lang="ar"] .sec-eyebrow,html[data-lang="ar"] .hero__eyebrow,html[data-lang="ar"] .footcol__h,
-  html[data-lang="ar"] .link-cta,html[data-lang="ar"] .wp__cat,html[data-lang="ar"] .wp__view,html[data-lang="ar"] .wp__title,html[data-lang="ar"] .astep__label,
+  html[data-lang="ar"] .link-cta,html[data-lang="ar"] .wp__cat,html[data-lang="ar"] .wp__view,html[data-lang="ar"] .wp__title,
+  html[data-lang="ar"] .approach__label,html[data-lang="ar"] .approach__statement,html[data-lang="ar"] .astage__name,
   html[data-lang="ar"] .position__label,html[data-lang="ar"] .position__statement,
   html[data-lang="ar"] .rel__word,html[data-lang="ar"] .pos-climax__word,
   html[data-lang="ar"] .caps__label,html[data-lang="ar"] .caps__statement,html[data-lang="ar"] .capx__title,html[data-lang="ar"] .caps__cue,
@@ -1315,17 +1332,45 @@
       <!-- 05 · APPROACH -->
       <section class="section section--paper approach" id="approach" data-section aria-labelledby="approach-title">
         <div class="container container--wide">
-          <div class="sec-head" data-reveal>
-            <p class="sec-eyebrow" data-ar="كيف نعمل">HOW WE WORK</p>
-            <h2 class="sec-title" id="approach-title" data-ar="نفهم. نربط. نبتكر.">Understand. Connect. Create.</h2>
-            <p class="sec-lead" data-ar="منهجية واضحة تربط الفهم بالفكرة، والفكرة بالتنفيذ، حتى التسليم.">A clear method that connects understanding to idea, and idea to execution — through to delivery.</p>
+          <div class="approach__intro">
+            <div>
+              <p class="approach__label" data-reveal data-ar="كيف نعمل">HOW WE WORK</p>
+              <h2 class="approach__statement" id="approach-title" data-reveal data-ar='نبدأ بالفهم، ثم نبني <span class="hero__accent">ما يهم.</span>'>We start with understanding, then build <span class="hero__accent">what matters.</span></h2>
+            </div>
+            <p class="approach__lead" data-reveal data-ar="منهجية تقودها الفكرة — تصقل المخرج الإبداعي بدل أن تضيف خطوات.">A thinking-led method — it sharpens the creative outcome rather than adding steps.</p>
           </div>
-          <div class="approach__steps" data-stagger>
-            <div class="astep"><span class="astep__node">01</span><h3 class="astep__title" data-ar="نفهم">Understand</h3><p class="astep__desc" data-ar="جمع المعلومات وتحديد الاحتياج.">Gathering information and defining the need.</p></div>
-            <div class="astep"><span class="astep__node">02</span><h3 class="astep__title" data-ar="نربط">Connect</h3><p class="astep__desc" data-ar="ربط الأهداف بالجمهور وبناء الاتجاه.">Linking goals to the audience and shaping the direction.</p></div>
-            <div class="astep"><span class="astep__node">03</span><h3 class="astep__title" data-ar="نبتكر">Create</h3><p class="astep__desc" data-ar="إنتاج الحلول والمخرجات البصرية.">Producing the solutions and visual outcomes.</p></div>
-            <div class="astep"><span class="astep__node">04</span><h3 class="astep__title" data-ar="نصقل">Refine</h3><p class="astep__desc" data-ar="مراجعة وتحسين وفق الملاحظات.">Reviewing and refining against feedback.</p></div>
-            <div class="astep"><span class="astep__node">05</span><h3 class="astep__title" data-ar="نسلّم">Deliver</h3><p class="astep__desc" data-ar="تجهيز وتسليم الملفات النهائية.">Preparing and handing over the final files.</p></div>
+
+          <div class="journey" data-stagger>
+            <article class="astage">
+              <span class="astage__num">01</span>
+              <h3 class="astage__name" data-ar="نفهم">Understand</h3>
+              <p class="astage__desc" data-ar="السياق قبل الإبداع.">Context before creation.</p>
+              <span class="astage__glyph" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><g stroke="currentColor" stroke-width="4"><circle cx="24" cy="30" r="7"/><circle cx="94" cy="24" r="7"/><circle cx="58" cy="60" r="7"/><circle cx="30" cy="94" r="7"/><circle cx="98" cy="90" r="7"/></g></svg></span>
+            </article>
+            <article class="astage">
+              <span class="astage__num">02</span>
+              <h3 class="astage__name" data-ar="نربط">Connect</h3>
+              <p class="astage__desc" data-ar="الأفكار والاستراتيجية والتواصل.">Ideas, strategy, and communication.</p>
+              <span class="astage__glyph" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><path d="M28 32 L58 60 L94 26 M58 60 L32 92 M58 60 L96 90" stroke="currentColor" stroke-width="3"/><g fill="currentColor"><circle cx="28" cy="32" r="6"/><circle cx="94" cy="26" r="6"/><circle cx="58" cy="60" r="7"/><circle cx="32" cy="92" r="6"/><circle cx="96" cy="90" r="6"/></g></svg></span>
+            </article>
+            <article class="astage">
+              <span class="astage__num">03</span>
+              <h3 class="astage__name" data-ar="نبتكر">Create</h3>
+              <p class="astage__desc" data-ar="التصميم يصبح ملموسًا.">Design becomes tangible.</p>
+              <span class="astage__glyph" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><path d="M22 98 A54 54 0 0 1 98 40" stroke="currentColor" stroke-width="6" stroke-linecap="round"/><rect x="58" y="58" width="42" height="32" transform="rotate(-8 58 58)" fill="currentColor"/></svg></span>
+            </article>
+            <article class="astage">
+              <span class="astage__num">04</span>
+              <h3 class="astage__name" data-ar="نصقل">Refine</h3>
+              <p class="astage__desc" data-ar="أوضح وأدق وأكثر فاعلية.">Make it sharper. Make it work.</p>
+              <span class="astage__glyph" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><path d="M28 96 L28 54 A26 26 0 0 1 54 28 L96 28" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><rect x="56" y="58" width="36" height="28" fill="none" stroke="currentColor" stroke-width="5"/></svg></span>
+            </article>
+            <article class="astage">
+              <span class="astage__num">05</span>
+              <h3 class="astage__name" data-ar="نسلّم">Deliver</h3>
+              <p class="astage__desc" data-ar="جاهز للعالم الواقعي.">Ready for the real world.</p>
+              <span class="astage__glyph" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><path d="M28 96 L28 54 A26 26 0 0 1 54 28 L96 28" stroke="currentColor" stroke-width="8" stroke-linecap="round"/><rect x="56" y="58" width="36" height="28" fill="currentColor"/><circle cx="96" cy="28" r="7" fill="var(--ql-lime)"/></svg></span>
+            </article>
           </div>
         </div>
       </section>
@@ -1847,13 +1892,14 @@
 
     /* 3b · CAPABILITIES — highlight the entry nearest the viewport centre */
     function initCaps() {
-      var caps = doc.querySelectorAll(".capx");
-      if(!caps.length) return;
+      /* highlights the capability / approach entry nearest the viewport centre */
+      var items = doc.querySelectorAll(".capx,.astage");
+      if(!items.length) return;
       if(prefersReducedMotion || !("IntersectionObserver" in window)){ return; }
       var obs = new IntersectionObserver(function(entries){
         entries.forEach(function(entry){ entry.target.classList.toggle("is-active", entry.isIntersecting); });
       }, { rootMargin:"-45% 0px -45% 0px", threshold:0 });
-      caps.forEach(function(c){ obs.observe(c); });
+      items.forEach(function(c){ obs.observe(c); });
     }
 
     /* 4 · SCROLL-SPY — drives .is-active on nav links */
