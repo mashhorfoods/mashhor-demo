@@ -742,11 +742,21 @@
   @media (max-width:1200px){
     .site-nav__link{padding-inline:var(--sp-12)}
   }
+  /* Header collapses to the drawer below 1080 — the full nav + CTA needs the room */
+  @media (max-width:1080px){
+    .site-nav,.site-header__actions .btn{display:none}
+    .site-header__menu-trigger{display:inline-flex}
+  }
+  /* Tighten the desktop header in the 1081–1240 band so the CTA never clips */
+  @media (min-width:1081px) and (max-width:1240px){
+    .site-header__inner{gap:var(--sp-16)}
+    .site-nav__link{padding-inline:var(--sp-8)}
+    .site-header__actions{gap:var(--sp-12)}
+    .site-header__actions .btn{padding-inline:var(--sp-16)}
+  }
   @media (max-width:768px){
     :root{--anchor-offset:84px;--grid-cols:8}
     .col-9,.col-10,.col-11,.col-12{grid-column:1 / -1}
-    .site-nav,.site-header__actions .btn{display:none}
-    .site-header__menu-trigger{display:inline-flex}
 
     /* HERO mobile: stack (content over visual), smaller signature */
     .hero__grid{grid-template-columns:1fr;gap:var(--sp-40)}
