@@ -570,15 +570,56 @@
      POLICIES (Prompt 07) — Paper bg · 3 columns (Reviews / Payment / Terms)
      ========================================================================== */
   .policies{background:var(--surface-paper);color:var(--text-on-paper)}
-  .policies__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-24)}
-  .policy{padding:var(--sp-32);border:1.5px solid var(--border-on-paper);border-radius:var(--arc-md);border-start-start-radius:var(--arc-lg)}
-  .policy__title{color:var(--ql-blue);font-weight:var(--fw-bold);font-size:1.3rem;margin-block-end:var(--sp-20)}
+  .policies__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-40)}
+  .policy{padding-inline:var(--sp-20)}
+  .policy + .policy{border-inline-start:var(--bw-hairline) solid rgba(107,107,118,.35)}  /* Cool Gray column divider */
+  .policy__title{color:var(--ql-blue);font-weight:var(--fw-bold);font-size:1.3rem;padding-block-end:var(--sp-16);margin-block-end:var(--sp-20);border-block-end:var(--bw-hairline) solid rgba(107,107,118,.30)}
   .policy__list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:var(--sp-12)}
   .policy__list li{color:var(--ql-black);font-size:0.98rem;line-height:1.6}
   .policy__list strong{color:var(--ql-blue);font-weight:var(--fw-bold)}
   .policy__list--bullets li{position:relative;padding-inline-start:var(--sp-20)}
   .policy__list--bullets li::before{content:"";position:absolute;inset-inline-start:0;inset-block-start:0.5em;inline-size:7px;block-size:7px;border-radius:var(--radius-round);background:var(--ql-blue)}
   .policy__note{margin-block-start:var(--sp-16);color:var(--ql-gray);font-size:0.85rem;line-height:1.6}
+
+  /* ==========================================================================
+     CONTACT (Prompt 08) — Black bg · split (form left / visual right) · 2-step
+     ========================================================================== */
+  .contact{background:var(--ql-black)}
+  .contact__grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-64);align-items:stretch}
+  .contact__title{color:var(--ql-paper);font-weight:var(--fw-bold);font-size:clamp(2rem,1.5rem + 2vw,3rem);margin-block-end:var(--sp-32);text-align:start}
+  .form-step__heading{color:var(--ql-paper);font-weight:var(--fw-bold);font-size:1.1rem;padding-block-start:var(--sp-8);border-block-start:var(--link-width) solid var(--ql-blue)}  /* التواصل — LINK divider */
+
+  /* Progress indicator */
+  .form-progress{margin-block-end:var(--sp-32)}
+  .form-progress__bar{position:relative;block-size:6px;background:var(--bg-raised);border-radius:var(--radius-pill);overflow:hidden}
+  .form-progress__fill{position:absolute;inset-block:0;inset-inline-start:0;inline-size:50%;background:var(--ql-blue);border-radius:var(--radius-pill);transition:inline-size var(--dur-normal) var(--ease-shift)}
+  .form-progress__label{margin-block-start:var(--sp-8);color:var(--ql-gray);font-size:0.85rem}
+
+  /* Steps + fields */
+  .form-step{border:0;margin:0;padding:0;min-inline-size:0;display:flex;flex-direction:column;gap:var(--sp-20)}
+  .form-step[hidden]{display:none}
+  .field{display:flex;flex-direction:column;gap:var(--sp-8)}
+  .field label{color:var(--ql-paper);font-weight:var(--fw-medium);font-size:0.95rem}
+  /* Fields: transparent bg, bottom-border only (Cool Gray), Lime focus */
+  .contact input,.contact select{inline-size:100%;background:transparent;color:var(--ql-paper);border:0;border-block-end:1.5px solid var(--ql-gray);border-radius:0;padding:12px 4px;min-block-size:48px;transition:border-color var(--dur-fast) var(--ease-standard)}
+  .contact input::placeholder{color:var(--text-subtle)}
+  .contact input[type="date"]{color-scheme:dark}
+  .contact input:focus,.contact select:focus{outline:none;border-block-end-color:var(--ql-lime);border-block-end-width:2px}
+  .contact select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B6B76' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left center;background-size:16px}
+  .contact select:invalid{color:var(--text-subtle)}
+  .form-actions{margin-block-start:var(--sp-12);display:flex}
+  .form-actions--split{justify-content:space-between;gap:var(--sp-16)}
+  .contact .btn{font-family:var(--font-ar);text-transform:none;letter-spacing:0}
+  .contact-submit{background:var(--ql-lime);color:var(--ql-black);border-color:var(--ql-lime);font-weight:var(--fw-bold)}
+  .contact-submit:hover{background:var(--ql-lime-deep);border-color:var(--ql-lime-deep);transform:translateY(-2px)}
+  .form-success{color:var(--ql-lime);font-size:1.3rem;font-weight:var(--fw-bold);text-align:center;padding-block:var(--sp-48)}
+
+  /* Right visual: Quantum FRAME with logo overlay */
+  .contact__visual{display:flex}
+  .contact__frame{position:relative;flex:1;min-block-size:440px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sp-24);padding:var(--sp-56);overflow:hidden;clip-path:var(--frame-clip-br);background:radial-gradient(circle at 28% 18%,rgba(36,71,255,.30),transparent 58%),radial-gradient(circle at 82% 88%,rgba(199,243,107,.16),transparent 55%),var(--bg-elevated)}
+  .contact__frame-line{position:absolute;inset-block-start:32px;inset-inline-start:32px;inline-size:110px;block-size:110px;border-block-start:var(--bw-thick) solid rgba(199,243,107,.55);border-inline-start:var(--bw-thick) solid rgba(199,243,107,.55)}
+  .contact__logo{--logo-mark:84px;--logo-word:1.9rem;color:var(--ql-paper);--mark-color:var(--ql-blue);gap:var(--sp-16);opacity:.5;position:relative;z-index:1}  /* semi-transparent watermark */
+  .contact__frame-text{position:relative;z-index:1;max-inline-size:24ch;text-align:center;color:var(--ql-paper);font-weight:var(--fw-semibold);font-size:1.25rem;line-height:1.6}
 
   /* ==========================================================================
      RESPONSIVE  (Desktop-first · anchors: 1440 / 768 / 375)
@@ -649,8 +690,14 @@
     .pstep::before{content:"";position:absolute;inset-inline-start:31px;inset-block-start:44px;block-size:100%;inline-size:var(--link-width);background:var(--ql-blue);z-index:0}  /* timeline LINK */
     .pstep:last-child::before{display:none}
 
-    /* POLICIES mobile: single column */
-    .policies__grid{grid-template-columns:1fr}
+    /* POLICIES mobile: single column, drop side dividers */
+    .policies__grid{grid-template-columns:1fr;gap:var(--sp-32)}
+    .policy{padding-inline:0}
+    .policy + .policy{border-inline-start:0}
+
+    /* CONTACT mobile: hide visual, form full width */
+    .contact__grid{grid-template-columns:1fr}
+    .contact__visual{display:none}
   }
   @media (max-width:375px){
     :root{--anchor-offset:76px;--grid-cols:4}
@@ -1095,7 +1142,6 @@
                 <li><strong>PREMIUM</strong> — 4 جولات</li>
               </ul>
               <p class="policy__note">تُحتسب الجولة بعد استلام الملاحظات المجمعة.</p>
-              <p class="policy__note">إضافة مخرجات أو تغيير نطاق المشروع لا يُعتبر مراجعة، ويتم تقييمه وتسعيره بشكل منفصل.</p>
             </div>
 
             <div class="policy" data-reveal>
@@ -1115,6 +1161,82 @@
                 <li>الملفات المصدرية لا تُسلّم تلقائيًا إلا إذا تم الاتفاق عليها.</li>
                 <li>يتم تسليم الملفات النهائية بعد استكمال الدفعات المستحقة.</li>
               </ul>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== CONTACT / LET'S START (Prompt 08) ===== -->
+      <section class="section contact" id="contact" data-section aria-labelledby="contact-title">
+        <div class="container container--wide">
+          <div class="contact__grid">
+
+            <!-- Left: two-step form -->
+            <div class="contact__form-col" lang="ar" dir="rtl">
+              <h2 class="contact__title" id="contact-title">لنبدأ.</h2>
+              <form class="contact-form" data-contact-form novalidate>
+                <div class="form-progress">
+                  <div class="form-progress__bar"><span class="form-progress__fill" data-progress-fill></span></div>
+                  <p class="form-progress__label" data-progress-label>الخطوة 1 من 2</p>
+                </div>
+
+                <!-- Step 1: project -->
+                <fieldset class="form-step is-active" data-step="1">
+                  <div class="field">
+                    <label for="cf-package">الباقة المختارة</label>
+                    <select id="cf-package" name="package" required>
+                      <option value="" disabled selected>اختر الباقة</option>
+                      <option value="BASIC">BASIC</option>
+                      <option value="MEDIUM">MEDIUM</option>
+                      <option value="PREMIUM">PREMIUM</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="cf-price">السعر</label>
+                    <input id="cf-price" name="price" type="number" inputmode="numeric" min="0" placeholder="المبلغ" required>
+                  </div>
+                  <div class="field">
+                    <label for="cf-date">تاريخ البدء</label>
+                    <input id="cf-date" name="start_date" type="date" required>
+                  </div>
+                  <div class="form-actions">
+                    <button type="button" class="btn btn--start" data-next>التالي</button>
+                  </div>
+                </fieldset>
+
+                <!-- Step 2: contact -->
+                <fieldset class="form-step" data-step="2" hidden>
+                  <h3 class="form-step__heading">التواصل</h3>
+                  <div class="field"><label for="cf-name">الاسم</label><input id="cf-name" name="name" type="text" placeholder="الاسم" required></div>
+                  <div class="field"><label for="cf-phone">الهاتف</label><input id="cf-phone" name="phone" type="tel" placeholder="رقم الهاتف" required></div>
+                  <div class="field"><label for="cf-email">البريد الإلكتروني</label><input id="cf-email" name="email" type="email" placeholder="البريد الإلكتروني" required></div>
+                  <div class="field"><label for="cf-whatsapp">واتساب</label><input id="cf-whatsapp" name="whatsapp" type="tel" placeholder="رقم واتساب"></div>
+                  <div class="field"><label for="cf-website">الموقع الإلكتروني</label><input id="cf-website" name="website" type="url" placeholder="الموقع"></div>
+                  <div class="field"><label for="cf-social">حسابات التواصل الاجتماعي</label><input id="cf-social" name="social" type="text" placeholder="الحسابات"></div>
+                  <div class="form-actions form-actions--split">
+                    <button type="button" class="btn btn--ghost" data-back>السابق</button>
+                    <button type="submit" class="btn contact-submit">إرسال الطلب</button>
+                  </div>
+                </fieldset>
+
+                <p class="form-success" data-form-success hidden>شكرًا لثقتكم.</p>
+              </form>
+            </div>
+
+            <!-- Right: Quantum Frame + logo overlay -->
+            <div class="contact__visual" aria-hidden="true">
+              <div class="contact__frame">
+                <span class="contact__frame-line"></span>
+                <span class="ql-logo contact__logo">
+                  <svg class="ql-logo__mark" viewBox="0 0 120 120" aria-hidden="true">
+                    <circle cx="55" cy="55" r="35" fill="none" stroke="currentColor" stroke-width="16"/>
+                    <path d="M59 57 L104 102 L58 88 L72 74 Z" fill="currentColor"/>
+                  </svg>
+                  <span class="ql-logo__word"><b>Quantum</b><b>Link</b></span>
+                </span>
+                <p class="contact__frame-text" lang="ar" dir="rtl">جاهزون لتحويل الأفكار إلى حلول بصرية واضحة واحترافية</p>
+              </div>
             </div>
 
           </div>
@@ -1267,7 +1389,44 @@
       });
     }
 
-    function init(){ initHeaderScrollState(); initMobileNav(); initReveal(); initScrollSpy(); initPkgTabs(); }
+    /* 6 · CONTACT FORM — two-step with progress indicator */
+    function initContactForm() {
+      var form = doc.querySelector("[data-contact-form]");
+      if(!form) return;
+      var steps = Array.prototype.slice.call(form.querySelectorAll("[data-step]"));
+      var fill = form.querySelector("[data-progress-fill]");
+      var label = form.querySelector("[data-progress-label]");
+      var success = form.querySelector("[data-form-success]");
+      var progress = form.querySelector(".form-progress");
+      var total = steps.length;
+      function show(n){
+        steps.forEach(function(s){ var on = parseInt(s.getAttribute("data-step"),10) === n; s.hidden = !on; s.classList.toggle("is-active", on); });
+        if(fill) fill.style.inlineSize = (n / total * 100) + "%";
+        if(label) label.textContent = "الخطوة " + n + " من " + total;
+        var first = steps[n-1] && steps[n-1].querySelector("input,select");
+        if(first) first.focus();
+      }
+      function validStep(n){
+        var s = form.querySelector('[data-step="' + n + '"]');
+        var inputs = s.querySelectorAll("input,select");
+        for(var i=0;i<inputs.length;i++){ if(!inputs[i].checkValidity()){ inputs[i].reportValidity(); return false; } }
+        return true;
+      }
+      var next = form.querySelector("[data-next]");
+      if(next) next.addEventListener("click", function(){ if(validStep(1)) show(2); });
+      var back = form.querySelector("[data-back]");
+      if(back) back.addEventListener("click", function(){ show(1); });
+      form.addEventListener("submit", function(e){
+        e.preventDefault();
+        if(!validStep(2)) return;
+        steps.forEach(function(s){ s.hidden = true; });
+        if(progress) progress.hidden = true;
+        if(success) success.hidden = false;
+      });
+      show(1);
+    }
+
+    function init(){ initHeaderScrollState(); initMobileNav(); initReveal(); initScrollSpy(); initPkgTabs(); initContactForm(); }
     if(doc.readyState === "loading"){ doc.addEventListener("DOMContentLoaded", init); } else { init(); }
   })();
   </script>
