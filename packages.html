@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en" dir="ltr" data-lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -982,6 +982,23 @@
     .about__stats{grid-template-columns:1fr 1fr}
     .relation__a,.relation__b{font-size:clamp(1.25rem,4.5vw,1.6rem)}
   }
+  /* ==========================================================================
+     LANGUAGE TOGGLE (EN ⇄ AR)
+     ========================================================================== */
+  .lang-toggle{display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:var(--radius-pill);border:var(--bw-thin) solid var(--border-strong);background:transparent;cursor:pointer;flex:0 0 auto}
+  .lang-toggle__opt{min-inline-size:30px;padding:5px 9px;border-radius:var(--radius-pill);font-family:var(--font-en);font-weight:var(--fw-bold);font-size:0.78rem;letter-spacing:0.04em;color:var(--text-muted);line-height:1;transition:var(--shift-transition)}
+  .lang-toggle__opt[data-lang-opt="ar"]{font-family:var(--font-ar);font-size:0.95rem;font-weight:var(--fw-bold)}
+  .lang-toggle__opt.is-active{background:var(--accent);color:var(--ql-paper)}
+  .lang-toggle:hover{border-color:var(--text)}
+  .lang-toggle:focus-visible{outline:var(--bw-thick) solid var(--accent-hover);outline-offset:3px}
+  .section--paper .lang-toggle{border-color:var(--border-on-paper-strong)}
+  .section--paper .lang-toggle__opt{color:var(--text-on-paper-subtle)}
+  html[data-lang="ar"] .keep-en{font-family:var(--font-en) !important}
+  html[data-lang="ar"] body{font-size:1.075rem}
+  html[data-lang="ar"] .btn,html[data-lang="ar"] .site-nav__link,html[data-lang="ar"] .mobile-nav__link,
+  html[data-lang="ar"] .sec-eyebrow,html[data-lang="ar"] .footcol__h,html[data-lang="ar"] .link-cta,
+  html[data-lang="ar"] .pkg-tab,html[data-lang="ar"] .pkg-group__head,html[data-lang="ar"] .policy__title,
+  html[data-lang="ar"] .pstep__name,html[data-lang="ar"] .addons__title,html[data-lang="ar"] .compare__title{letter-spacing:0;text-transform:none}
   </style>
 </head>
 <body>
@@ -1000,15 +1017,19 @@
         </a>
         <nav class="site-nav" aria-label="Primary">
           <ul class="site-nav__list">
-            <li><a class="site-nav__link" href="index.html#work">Work</a></li>
-            <li><a class="site-nav__link" href="index.html#services">Services</a></li>
-            <li><a class="site-nav__link" href="index.html#approach">Approach</a></li>
-            <li><a class="site-nav__link" href="index.html#about">About</a></li>
-            <li><a class="site-nav__link is-active" href="#top" aria-current="page">Packages</a></li>
+            <li><a class="site-nav__link" href="index.html#work" data-ar="الأعمال">Work</a></li>
+            <li><a class="site-nav__link" href="index.html#services" data-ar="الخدمات">Services</a></li>
+            <li><a class="site-nav__link" href="index.html#approach" data-ar="المنهجية">Approach</a></li>
+            <li><a class="site-nav__link" href="index.html#about" data-ar="عن الوكالة">About</a></li>
+            <li><a class="site-nav__link is-active" href="#top" aria-current="page" data-ar="الباقات">Packages</a></li>
           </ul>
         </nav>
         <div class="site-header__actions">
-          <a class="btn btn--primary" href="index.html#contact">Start a Project <span class="btn__icon" aria-hidden="true">↗</span></a>
+          <button type="button" class="lang-toggle" data-lang-toggle aria-label="Switch language / تبديل اللغة">
+            <span class="lang-toggle__opt" data-lang-opt="en">EN</span>
+            <span class="lang-toggle__opt" data-lang-opt="ar">ع</span>
+          </button>
+          <a class="btn btn--primary" href="index.html#contact" data-ar='ابدأ مشروعًا'>Start a Project <span class="btn__icon" aria-hidden="true">↗</span></a>
           <button type="button" class="site-header__menu-trigger" data-menu-trigger aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav"><span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>
         </div>
       </div>
@@ -1016,179 +1037,179 @@
 
     <div class="mobile-nav" id="mobile-nav" data-mobile-nav data-state="closed" aria-label="Mobile menu" hidden>
       <ul class="mobile-nav__list">
-        <li><a class="mobile-nav__link" href="index.html#work">Work</a></li>
-        <li><a class="mobile-nav__link" href="index.html#services">Services</a></li>
-        <li><a class="mobile-nav__link" href="index.html#approach">Approach</a></li>
-        <li><a class="mobile-nav__link" href="index.html#about">About</a></li>
-        <li><a class="mobile-nav__link is-active" href="#top">Packages</a></li>
+        <li><a class="mobile-nav__link" href="index.html#work" data-ar="الأعمال">Work</a></li>
+        <li><a class="mobile-nav__link" href="index.html#services" data-ar="الخدمات">Services</a></li>
+        <li><a class="mobile-nav__link" href="index.html#approach" data-ar="المنهجية">Approach</a></li>
+        <li><a class="mobile-nav__link" href="index.html#about" data-ar="عن الوكالة">About</a></li>
+        <li><a class="mobile-nav__link is-active" href="#top" data-ar="الباقات">Packages</a></li>
       </ul>
-      <a class="btn btn--primary btn--block mobile-nav__cta" href="index.html#contact">Start a Project <span class="btn__icon" aria-hidden="true">↗</span></a>
+      <a class="btn btn--primary btn--block mobile-nav__cta" href="index.html#contact" data-ar='ابدأ مشروعًا'>Start a Project <span class="btn__icon" aria-hidden="true">↗</span></a>
     </div>
     <main class="site-main" id="main">
 
-      <section class="section section--paper section--below-header" dir="rtl">
+      <section class="section section--paper section--below-header">
         <div class="container container--wide">
-          <p class="sec-eyebrow">ENGAGEMENT</p>
-          <h1 class="sec-title">الباقات والخدمات</h1>
-          <p class="sec-lead u-rtl">تفاصيل الباقات والمخرجات والمقارنة والخدمات الإضافية وآلية العمل والشروط.</p>
-          <p style="margin-block-start:var(--sp-24)"><a class="link-cta" style="color:var(--ql-black)" href="index.html"><span class="link-cta__line" aria-hidden="true"></span> Back to home</a></p>
+          <p class="sec-eyebrow" data-ar="الباقات">ENGAGEMENT</p>
+          <h1 class="sec-title" data-ar="الباقات والخدمات">Packages &amp; Services</h1>
+          <p class="sec-lead" data-ar="تفاصيل الباقات والمخرجات والمقارنة والخدمات الإضافية وآلية العمل والشروط.">Full breakdown of packages, deliverables, comparison, add-on services, workflow and terms.</p>
+          <p style="margin-block-start:var(--sp-24)"><a class="link-cta" style="color:var(--ql-black)" href="index.html"><span class="link-cta__line" aria-hidden="true"></span> <span data-ar="العودة للرئيسية">Back to home</span></a></p>
         </div>
       </section>
 
-<!-- ===== PACKAGES (Prompt 05) ===== -->
+<!-- ===== PACKAGES ===== -->
       <section class="section packages" id="packages" data-section aria-labelledby="packages-title">
         <div class="sig-accent sig-accent--bl" aria-hidden="true"><svg viewBox="0 0 240 240" fill="none"><path d="M48 224 L48 116 A68 68 0 0 1 116 48 L224 48"/></svg></div>
-        <div class="container container--wide" lang="ar" dir="rtl">
+        <div class="container container--wide">
 
           <!-- Part A · Intro -->
-          <div class="packages__head" lang="ar" dir="rtl" data-reveal>
-            <h2 class="packages__title" id="packages-title">اختر مستوى الحل</h2>
-            <p class="packages__subtitle">ثلاث باقات مصممة لتناسب مراحل واحتياجات مختلفة.</p>
+          <div class="packages__head" data-reveal>
+            <h2 class="packages__title" id="packages-title" data-ar="اختر مستوى الحل">Choose your level</h2>
+            <p class="packages__subtitle" data-ar="ثلاث باقات مصممة لتناسب مراحل واحتياجات مختلفة.">Three packages shaped for different stages and needs.</p>
           </div>
 
           <div class="pkg-cards" data-stagger>
             <!-- BASIC -->
             <article class="pkg-card">
-              <div class="pkg-card__name">BASIC</div>
-              <div class="pkg-card__price">$299</div>
-              <div class="pkg-card__dur">7 DAYS</div>
-              <a class="btn btn--start pkg-card__cta" href="#contact" lang="ar">لنبدأ</a>
+              <div class="pkg-card__name keep-en">BASIC</div>
+              <div class="pkg-card__price keep-en">$299</div>
+              <div class="pkg-card__dur keep-en" data-ar="7 أيام">7 DAYS</div>
+              <a class="btn btn--start pkg-card__cta" href="index.html#contact" data-ar="لنبدأ">Let’s start</a>
             </article>
 
             <!-- MEDIUM (featured) -->
             <article class="pkg-card pkg-card--featured">
               <span class="pkg-card__bar" aria-hidden="true"></span>
-              <div class="pkg-card__name"><span aria-hidden="true">⭐</span> MEDIUM</div>
-              <div class="pkg-card__price">$649</div>
-              <div class="pkg-card__dur">10 DAYS</div>
-              <span class="pkg-card__badge" lang="ar" dir="rtl">الخيار الأفضل قيمة</span>
-              <a class="btn btn--start pkg-card__cta" href="#contact" lang="ar">لنبدأ</a>
+              <div class="pkg-card__name keep-en"><span aria-hidden="true">⭐</span> MEDIUM</div>
+              <div class="pkg-card__price keep-en">$649</div>
+              <div class="pkg-card__dur keep-en" data-ar="10 أيام">10 DAYS</div>
+              <span class="pkg-card__badge" data-ar="الخيار الأفضل قيمة">Best value</span>
+              <a class="btn btn--start pkg-card__cta" href="index.html#contact" data-ar="لنبدأ">Let’s start</a>
             </article>
 
             <!-- PREMIUM -->
             <article class="pkg-card">
-              <div class="pkg-card__name">PREMIUM</div>
-              <div class="pkg-card__price">$1,299</div>
-              <div class="pkg-card__dur">20 DAYS</div>
-              <a class="btn pkg-card__cta pkg-card__cta--lime" href="#contact" lang="ar">لنبدأ</a>
+              <div class="pkg-card__name keep-en">PREMIUM</div>
+              <div class="pkg-card__price keep-en">$1,299</div>
+              <div class="pkg-card__dur keep-en" data-ar="20 يوم">20 DAYS</div>
+              <a class="btn pkg-card__cta pkg-card__cta--lime" href="index.html#contact" data-ar="لنبدأ">Let’s start</a>
             </article>
           </div>
 
           <!-- Part B · Interactive detail selector -->
           <div class="pkg-selector" data-pkg-selector data-reveal>
             <div class="pkg-tabs" role="tablist" aria-label="Package levels">
-              <button class="pkg-tab is-active" type="button" role="tab" id="tab-basic" aria-selected="true" aria-controls="panel-basic" data-pkg-tab="basic">BASIC</button>
-              <button class="pkg-tab" type="button" role="tab" id="tab-medium" aria-selected="false" aria-controls="panel-medium" data-pkg-tab="medium" tabindex="-1">MEDIUM</button>
-              <button class="pkg-tab" type="button" role="tab" id="tab-premium" aria-selected="false" aria-controls="panel-premium" data-pkg-tab="premium" tabindex="-1">PREMIUM</button>
+              <button class="pkg-tab is-active keep-en" type="button" role="tab" id="tab-basic" aria-selected="true" aria-controls="panel-basic" data-pkg-tab="basic">BASIC</button>
+              <button class="pkg-tab keep-en" type="button" role="tab" id="tab-medium" aria-selected="false" aria-controls="panel-medium" data-pkg-tab="medium" tabindex="-1">MEDIUM</button>
+              <button class="pkg-tab keep-en" type="button" role="tab" id="tab-premium" aria-selected="false" aria-controls="panel-premium" data-pkg-tab="premium" tabindex="-1">PREMIUM</button>
             </div>
 
             <div class="pkg-panels">
 
               <!-- BASIC panel -->
-              <div class="pkg-panel is-active" role="tabpanel" id="panel-basic" aria-labelledby="tab-basic" data-pkg-panel="basic" lang="ar" dir="rtl">
+              <div class="pkg-panel is-active" role="tabpanel" id="panel-basic" aria-labelledby="tab-basic" data-pkg-panel="basic">
                 <div class="pkg-panel__aside">
-                  <h3 class="pkg-panel__title">حضور بصري أساسي</h3>
-                  <p class="pkg-panel__desc">للمشاريع التي تحتاج إلى مجموعة أساسية من المواد البصرية لبناء حضور رقمي احترافي ومنظم.</p>
-                  <p class="pkg-panel__price">$299 · 7 أيام عمل</p>
+                  <h3 class="pkg-panel__title" data-ar="حضور بصري أساسي">Essential visual presence</h3>
+                  <p class="pkg-panel__desc" data-ar="للمشاريع التي تحتاج إلى مجموعة أساسية من المواد البصرية لبناء حضور رقمي احترافي ومنظم.">For projects that need a core set of visual materials to build a professional, organized digital presence.</p>
+                  <p class="pkg-panel__price" data-ar="$299 · 7 أيام عمل">$299 · 7 working days</p>
                 </div>
                 <div class="pkg-deliverables">
                   <div class="pkg-group">
-                    <h4 class="pkg-group__head">محتوى رقمي</h4>
-                    <ul class="pkg-list"><li>6 منشورات Social Media</li><li>4 Stories</li><li>1 إعلان رقمي</li></ul>
+                    <h4 class="pkg-group__head" data-ar="محتوى رقمي">Digital content</h4>
+                    <ul class="pkg-list"><li data-ar="6 منشورات Social Media">6 social media posts</li><li data-ar="4 Stories">4 stories</li><li data-ar="1 إعلان رقمي">1 digital ad</li></ul>
                   </div>
                   <div class="pkg-group">
-                    <h4 class="pkg-group__head">مواد تعريفية</h4>
-                    <ul class="pkg-list"><li>1 غلاف حساب</li><li>1 بطاقة أعمال</li></ul>
+                    <h4 class="pkg-group__head" data-ar="مواد تعريفية">Brand materials</h4>
+                    <ul class="pkg-list"><li data-ar="1 غلاف حساب">1 account cover</li><li data-ar="1 بطاقة أعمال">1 business card</li></ul>
                   </div>
                   <div class="pkg-group">
-                    <h4 class="pkg-group__head">التجهيز</h4>
-                    <ul class="pkg-list"><li>تجهيز الملفات للاستخدام الرقمي</li><li>تصدير وتسليم الملفات النهائية</li></ul>
+                    <h4 class="pkg-group__head" data-ar="التجهيز">Preparation</h4>
+                    <ul class="pkg-list"><li data-ar="تجهيز الملفات للاستخدام الرقمي">Files prepared for digital use</li><li data-ar="تصدير وتسليم الملفات النهائية">Export and delivery of final files</li></ul>
                   </div>
                   <div class="pkg-group">
-                    <h4 class="pkg-group__head">المراجعات</h4>
-                    <ul class="pkg-list"><li>جولتان</li></ul>
+                    <h4 class="pkg-group__head" data-ar="المراجعات">Revisions</h4>
+                    <ul class="pkg-list"><li data-ar="جولتان">2 rounds</li></ul>
                   </div>
                   <div class="pkg-group">
-                    <h4 class="pkg-group__head">الملفات</h4>
-                    <ul class="pkg-list"><li>JPG · PNG · PDF</li></ul>
-                    <p class="pkg-note">الملفات المصدرية غير مشمولة ويمكن توفيرها كخدمة إضافية.</p>
+                    <h4 class="pkg-group__head" data-ar="الملفات">Files</h4>
+                    <ul class="pkg-list"><li class="keep-en">JPG · PNG · PDF</li></ul>
+                    <p class="pkg-note" data-ar="الملفات المصدرية غير مشمولة ويمكن توفيرها كخدمة إضافية.">Source files are not included and can be provided as an add-on.</p>
                   </div>
                 </div>
               </div>
 
               <!-- MEDIUM panel -->
-              <div class="pkg-panel" role="tabpanel" id="panel-medium" aria-labelledby="tab-medium" data-pkg-panel="medium" lang="ar" dir="rtl" hidden>
+              <div class="pkg-panel" role="tabpanel" id="panel-medium" aria-labelledby="tab-medium" data-pkg-panel="medium" hidden>
                 <div class="pkg-panel__aside">
-                  <h3 class="pkg-panel__title">حضور بصري متكامل</h3>
-                  <p class="pkg-panel__desc">للمشاريع التي تحتاج إلى محتوى متنوع ومنظومة بصرية موحدة تساعد على الحفاظ على الاتساق في مختلف المواد.</p>
-                  <p class="pkg-panel__price">$649 · 10 أيام عمل</p>
+                  <h3 class="pkg-panel__title" data-ar="حضور بصري متكامل">Integrated visual presence</h3>
+                  <p class="pkg-panel__desc" data-ar="للمشاريع التي تحتاج إلى محتوى متنوع ومنظومة بصرية موحدة تساعد على الحفاظ على الاتساق في مختلف المواد.">For projects that need varied content and a unified visual system that keeps materials consistent.</p>
+                  <p class="pkg-panel__price" data-ar="$649 · 10 أيام عمل">$649 · 10 working days</p>
                 </div>
                 <div class="pkg-deliverables">
                   <div class="pkg-group">
-                    <h4 class="pkg-group__head">محتوى رقمي</h4>
-                    <ul class="pkg-list"><li>10 منشورات Social Media</li><li>6 Stories</li><li>2 إعلانات رقمية</li><li>2 أغلفة حسابات</li></ul>
+                    <h4 class="pkg-group__head" data-ar="محتوى رقمي">Digital content</h4>
+                    <ul class="pkg-list"><li data-ar="10 منشورات Social Media">10 social media posts</li><li data-ar="6 Stories">6 stories</li><li data-ar="2 إعلانات رقمية">2 digital ads</li><li data-ar="2 أغلفة حسابات">2 account covers</li></ul>
                   </div>
                   <div class="pkg-group">
-                    <h4 class="pkg-group__head">مواد تسويقية</h4>
-                    <ul class="pkg-list"><li>1 بروفايل أو بروشور مختصر</li><li>1 بطاقة أعمال</li><li>2 فلاير أو بوستر</li></ul>
+                    <h4 class="pkg-group__head" data-ar="مواد تسويقية">Marketing materials</h4>
+                    <ul class="pkg-list"><li data-ar="1 بروفايل أو بروشور مختصر">1 short profile or brochure</li><li data-ar="1 بطاقة أعمال">1 business card</li><li data-ar="2 فلاير أو بوستر">2 flyers or posters</li></ul>
                   </div>
                   <div class="pkg-group">
-                    <h4 class="pkg-group__head">النظام البصري للمحتوى</h4>
-                    <ul class="pkg-list"><li>أسلوب تصميم موحد</li><li>Typography Direction</li><li>أسلوب استخدام الصور</li><li>أسلوب الأيقونات والعناصر الرسومية</li><li>نظام Layout للمحتوى</li></ul>
+                    <h4 class="pkg-group__head" data-ar="النظام البصري للمحتوى">Content visual system</h4>
+                    <ul class="pkg-list"><li data-ar="أسلوب تصميم موحد">Unified design style</li><li class="keep-en">Typography Direction</li><li data-ar="أسلوب استخدام الصور">Image usage style</li><li data-ar="أسلوب الأيقونات والعناصر الرسومية">Icon and graphic-element style</li><li data-ar="نظام Layout للمحتوى">Content layout system</li></ul>
                   </div>
                   <div class="pkg-group">
-                    <h4 class="pkg-group__head">المراجعات</h4>
-                    <ul class="pkg-list"><li>3 جولات</li></ul>
+                    <h4 class="pkg-group__head" data-ar="المراجعات">Revisions</h4>
+                    <ul class="pkg-list"><li data-ar="3 جولات">3 rounds</li></ul>
                   </div>
                   <div class="pkg-group">
-                    <h4 class="pkg-group__head">الملفات</h4>
-                    <ul class="pkg-list"><li>JPG · PNG · PDF</li></ul>
-                    <p class="pkg-note">الملفات المصدرية غير مشمولة ويمكن توفيرها كخدمة إضافية.</p>
+                    <h4 class="pkg-group__head" data-ar="الملفات">Files</h4>
+                    <ul class="pkg-list"><li class="keep-en">JPG · PNG · PDF</li></ul>
+                    <p class="pkg-note" data-ar="الملفات المصدرية غير مشمولة ويمكن توفيرها كخدمة إضافية.">Source files are not included and can be provided as an add-on.</p>
                   </div>
                 </div>
               </div>
 
               <!-- PREMIUM panel -->
-              <div class="pkg-panel" role="tabpanel" id="panel-premium" aria-labelledby="tab-premium" data-pkg-panel="premium" lang="ar" dir="rtl" hidden>
+              <div class="pkg-panel" role="tabpanel" id="panel-premium" aria-labelledby="tab-premium" data-pkg-panel="premium" hidden>
                 <div class="pkg-panel__aside">
-                  <h3 class="pkg-panel__title">الحضور التجاري والرقمي المتكامل</h3>
-                  <p class="pkg-panel__desc">للمشاريع والعلامات التجارية التي تحتاج إلى منظومة بصرية متكاملة تمتد من المحتوى والحملات إلى تصميم الموقع الإلكتروني.</p>
-                  <p class="pkg-panel__price">$1,299 · 20 يوم عمل</p>
+                  <h3 class="pkg-panel__title" data-ar="الحضور التجاري والرقمي المتكامل">Complete commercial &amp; digital presence</h3>
+                  <p class="pkg-panel__desc" data-ar="للمشاريع والعلامات التجارية التي تحتاج إلى منظومة بصرية متكاملة تمتد من المحتوى والحملات إلى تصميم الموقع الإلكتروني.">For projects and brands that need a complete visual system spanning content, campaigns and website design.</p>
+                  <p class="pkg-panel__price" data-ar="$1,299 · 20 يوم عمل">$1,299 · 20 working days</p>
                 </div>
                 <div class="pkg-deliverables">
                   <div class="pkg-group">
-                    <h4 class="pkg-group__head">محتوى رقمي</h4>
-                    <ul class="pkg-list"><li>15 منشور Social Media</li><li>10 Stories</li><li>3 إعلانات رقمية</li><li>3 أغلفة حسابات</li></ul>
+                    <h4 class="pkg-group__head" data-ar="محتوى رقمي">Digital content</h4>
+                    <ul class="pkg-list"><li data-ar="15 منشور Social Media">15 social media posts</li><li data-ar="10 Stories">10 stories</li><li data-ar="3 إعلانات رقمية">3 digital ads</li><li data-ar="3 أغلفة حسابات">3 account covers</li></ul>
                   </div>
                   <div class="pkg-group">
-                    <h4 class="pkg-group__head">مواد تسويقية</h4>
-                    <ul class="pkg-list"><li>1 بروفايل أو بروشور</li><li>3 فلاير أو بوستر</li></ul>
+                    <h4 class="pkg-group__head" data-ar="مواد تسويقية">Marketing materials</h4>
+                    <ul class="pkg-list"><li data-ar="1 بروفايل أو بروشور">1 profile or brochure</li><li data-ar="3 فلاير أو بوستر">3 flyers or posters</li></ul>
                   </div>
                   <div class="pkg-group">
-                    <h4 class="pkg-group__head">النظام البصري</h4>
-                    <ul class="pkg-list"><li>Typography Direction</li><li>نظام الألوان والاستخدامات</li><li>أسلوب الصور</li><li>أسلوب الأيقونات والعناصر الرسومية</li><li>نظام Layout</li><li>قواعد تطبيق الهوية على المحتوى</li><li>3 قوالب تصميم قابلة لإعادة الاستخدام</li></ul>
+                    <h4 class="pkg-group__head" data-ar="النظام البصري">Visual system</h4>
+                    <ul class="pkg-list"><li class="keep-en">Typography Direction</li><li data-ar="نظام الألوان والاستخدامات">Color system and usage</li><li data-ar="أسلوب الصور">Image style</li><li data-ar="أسلوب الأيقونات والعناصر الرسومية">Icon and graphic-element style</li><li data-ar="نظام Layout">Layout system</li><li data-ar="قواعد تطبيق الهوية على المحتوى">Identity application rules for content</li><li data-ar="3 قوالب تصميم قابلة لإعادة الاستخدام">3 reusable design templates</li></ul>
                   </div>
                   <div class="pkg-group">
-                    <h4 class="pkg-group__head">الحملة البصرية</h4>
-                    <p class="pkg-group__sub">حملة بصرية واحدة، تشمل:</p>
-                    <ul class="pkg-list"><li>Concept بصري واحد</li><li>Key Visual واحد</li><li>تطبيق على 3 مخرجات كحد أقصى</li></ul>
+                    <h4 class="pkg-group__head" data-ar="الحملة البصرية">Visual campaign</h4>
+                    <p class="pkg-group__sub" data-ar="حملة بصرية واحدة، تشمل:">One visual campaign, including:</p>
+                    <ul class="pkg-list"><li data-ar="Concept بصري واحد">One visual concept</li><li data-ar="Key Visual واحد">One key visual</li><li data-ar="تطبيق على 3 مخرجات كحد أقصى">Applied to up to 3 deliverables</li></ul>
                   </div>
                   <div class="pkg-group">
-                    <h4 class="pkg-group__head">تصميم الموقع الإلكتروني</h4>
-                    <p class="pkg-group__sub">Website UI/UX Design — حتى 5 صفحات، يشمل:</p>
-                    <ul class="pkg-list"><li>Desktop UI</li><li>Mobile UI</li><li>الهيكلة الأساسية لتجربة المستخدم</li><li>تصميم واجهات الصفحات</li><li>نظام مكونات بصري أساسي</li><li>تجهيز التصميم للتطوير</li></ul>
+                    <h4 class="pkg-group__head" data-ar="تصميم الموقع الإلكتروني">Website design</h4>
+                    <p class="pkg-group__sub" data-ar="Website UI/UX Design — حتى 5 صفحات، يشمل:">Website UI/UX design — up to 5 pages, including:</p>
+                    <ul class="pkg-list"><li class="keep-en">Desktop UI</li><li class="keep-en">Mobile UI</li><li data-ar="الهيكلة الأساسية لتجربة المستخدم">Core UX structure</li><li data-ar="تصميم واجهات الصفحات">Page interface design</li><li data-ar="نظام مكونات بصري أساسي">Basic visual component system</li><li data-ar="تجهيز التصميم للتطوير">Design prepared for development</li></ul>
                   </div>
                   <div class="pkg-group">
-                    <h4 class="pkg-group__head">المراجعات</h4>
-                    <ul class="pkg-list"><li>4 جولات</li></ul>
+                    <h4 class="pkg-group__head" data-ar="المراجعات">Revisions</h4>
+                    <ul class="pkg-list"><li data-ar="4 جولات">4 rounds</li></ul>
                   </div>
                   <div class="pkg-group">
-                    <h4 class="pkg-group__head">الملفات</h4>
-                    <ul class="pkg-list"><li>JPG · PNG · PDF + ملفات تصميم الموقع</li></ul>
+                    <h4 class="pkg-group__head" data-ar="الملفات">Files</h4>
+                    <ul class="pkg-list"><li data-ar="JPG · PNG · PDF + ملفات تصميم الموقع">JPG · PNG · PDF + website design files</li></ul>
                   </div>
                   <div class="pkg-excludes">
-                    <p class="pkg-excludes__head">لا يشمل</p>
-                    <p class="pkg-excludes__list">البرمجة، الاستضافة، الدومين، كتابة المحتوى، SEO.</p>
+                    <p class="pkg-excludes__head" data-ar="لا يشمل">Not included</p>
+                    <p class="pkg-excludes__list" data-ar="البرمجة، الاستضافة، الدومين، كتابة المحتوى، SEO.">Development, hosting, domain, copywriting, SEO.</p>
                   </div>
                 </div>
               </div>
@@ -1199,99 +1220,99 @@
         </div>
       </section>
 
-      <!-- ===== COMPARISON TABLE (Prompt 06) ===== -->
+      <!-- ===== COMPARISON TABLE ===== -->
       <section class="section compare" id="comparison" aria-labelledby="compare-title">
         <div class="sig-accent sig-accent--tr" aria-hidden="true"><svg viewBox="0 0 240 240" fill="none"><path d="M48 224 L48 116 A68 68 0 0 1 116 48 L224 48"/></svg></div>
-        <div class="container container--wide" lang="ar" dir="rtl">
-          <h2 class="compare__title" id="compare-title">مقارنة الباقات</h2>
+        <div class="container container--wide">
+          <h2 class="compare__title" id="compare-title" data-ar="مقارنة الباقات">Compare packages</h2>
           <div class="compare__wrap" data-reveal>
             <table class="cmp">
-              <caption class="u-visually-hidden">مقارنة باقات BASIC وMEDIUM وPREMIUM</caption>
+              <caption class="u-visually-hidden" data-ar="مقارنة باقات BASIC وMEDIUM وPREMIUM">Comparison of BASIC, MEDIUM and PREMIUM packages</caption>
               <thead>
                 <tr>
                   <th scope="col"></th>
-                  <th scope="col">BASIC</th>
-                  <th scope="col"><span class="cmp__star" aria-hidden="true">⭐</span> MEDIUM</th>
-                  <th scope="col">PREMIUM</th>
+                  <th scope="col" class="keep-en">BASIC</th>
+                  <th scope="col" class="keep-en"><span class="cmp__star" aria-hidden="true">⭐</span> MEDIUM</th>
+                  <th scope="col" class="keep-en">PREMIUM</th>
                 </tr>
               </thead>
               <tbody>
-                <tr><th scope="row">منشورات</th><td class="v-num" data-pkg="BASIC">6</td><td class="v-num" data-pkg="MEDIUM">10</td><td class="v-num" data-pkg="PREMIUM">15</td></tr>
-                <tr><th scope="row">Stories</th><td class="v-num" data-pkg="BASIC">4</td><td class="v-num" data-pkg="MEDIUM">6</td><td class="v-num" data-pkg="PREMIUM">10</td></tr>
-                <tr><th scope="row">إعلانات رقمية</th><td class="v-num" data-pkg="BASIC">1</td><td class="v-num" data-pkg="MEDIUM">2</td><td class="v-num" data-pkg="PREMIUM">3</td></tr>
-                <tr><th scope="row">أغلفة حسابات</th><td class="v-num" data-pkg="BASIC">1</td><td class="v-num" data-pkg="MEDIUM">2</td><td class="v-num" data-pkg="PREMIUM">3</td></tr>
-                <tr><th scope="row">بروفايل / بروشور</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-num" data-pkg="MEDIUM">1</td><td class="v-num" data-pkg="PREMIUM">1</td></tr>
-                <tr><th scope="row">بطاقة أعمال</th><td class="v-num" data-pkg="BASIC">1</td><td class="v-num" data-pkg="MEDIUM">1</td><td class="v-dash" data-pkg="PREMIUM">—</td></tr>
-                <tr><th scope="row">فلاير / بوستر</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-num" data-pkg="MEDIUM">2</td><td class="v-num" data-pkg="PREMIUM">3</td></tr>
-                <tr><th scope="row">نظام بصري للمحتوى</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-check" data-pkg="MEDIUM">✓</td><td class="v-check" data-pkg="PREMIUM">✓</td></tr>
-                <tr><th scope="row">قوالب قابلة لإعادة الاستخدام</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-dash" data-pkg="MEDIUM">—</td><td class="v-num" data-pkg="PREMIUM">3</td></tr>
-                <tr><th scope="row">حملة بصرية</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-dash" data-pkg="MEDIUM">—</td><td class="v-check" data-pkg="PREMIUM">✓</td></tr>
-                <tr><th scope="row">Website UI/UX</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-dash" data-pkg="MEDIUM">—</td><td class="v-text" data-pkg="PREMIUM">حتى 5 صفحات</td></tr>
-                <tr><th scope="row">المراجعات</th><td class="v-num" data-pkg="BASIC">2</td><td class="v-num" data-pkg="MEDIUM">3</td><td class="v-num" data-pkg="PREMIUM">4</td></tr>
-                <tr><th scope="row">مدة التنفيذ</th><td class="v-text" data-pkg="BASIC">7 أيام</td><td class="v-text" data-pkg="MEDIUM">10 أيام</td><td class="v-text" data-pkg="PREMIUM">20 يوم</td></tr>
-                <tr><th scope="row">السعر</th><td class="v-price" data-pkg="BASIC">$299</td><td class="v-price" data-pkg="MEDIUM">$649</td><td class="v-price" data-pkg="PREMIUM">$1,299</td></tr>
+                <tr><th scope="row" data-ar="منشورات">Posts</th><td class="v-num" data-pkg="BASIC">6</td><td class="v-num" data-pkg="MEDIUM">10</td><td class="v-num" data-pkg="PREMIUM">15</td></tr>
+                <tr><th scope="row" data-ar="Stories">Stories</th><td class="v-num" data-pkg="BASIC">4</td><td class="v-num" data-pkg="MEDIUM">6</td><td class="v-num" data-pkg="PREMIUM">10</td></tr>
+                <tr><th scope="row" data-ar="إعلانات رقمية">Digital ads</th><td class="v-num" data-pkg="BASIC">1</td><td class="v-num" data-pkg="MEDIUM">2</td><td class="v-num" data-pkg="PREMIUM">3</td></tr>
+                <tr><th scope="row" data-ar="أغلفة حسابات">Account covers</th><td class="v-num" data-pkg="BASIC">1</td><td class="v-num" data-pkg="MEDIUM">2</td><td class="v-num" data-pkg="PREMIUM">3</td></tr>
+                <tr><th scope="row" data-ar="بروفايل / بروشور">Profile / brochure</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-num" data-pkg="MEDIUM">1</td><td class="v-num" data-pkg="PREMIUM">1</td></tr>
+                <tr><th scope="row" data-ar="بطاقة أعمال">Business card</th><td class="v-num" data-pkg="BASIC">1</td><td class="v-num" data-pkg="MEDIUM">1</td><td class="v-dash" data-pkg="PREMIUM">—</td></tr>
+                <tr><th scope="row" data-ar="فلاير / بوستر">Flyer / poster</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-num" data-pkg="MEDIUM">2</td><td class="v-num" data-pkg="PREMIUM">3</td></tr>
+                <tr><th scope="row" data-ar="نظام بصري للمحتوى">Content visual system</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-check" data-pkg="MEDIUM">✓</td><td class="v-check" data-pkg="PREMIUM">✓</td></tr>
+                <tr><th scope="row" data-ar="قوالب قابلة لإعادة الاستخدام">Reusable templates</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-dash" data-pkg="MEDIUM">—</td><td class="v-num" data-pkg="PREMIUM">3</td></tr>
+                <tr><th scope="row" data-ar="حملة بصرية">Visual campaign</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-dash" data-pkg="MEDIUM">—</td><td class="v-check" data-pkg="PREMIUM">✓</td></tr>
+                <tr><th scope="row" class="keep-en">Website UI/UX</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-dash" data-pkg="MEDIUM">—</td><td class="v-text" data-pkg="PREMIUM" data-ar="حتى 5 صفحات">Up to 5 pages</td></tr>
+                <tr><th scope="row" data-ar="المراجعات">Revisions</th><td class="v-num" data-pkg="BASIC">2</td><td class="v-num" data-pkg="MEDIUM">3</td><td class="v-num" data-pkg="PREMIUM">4</td></tr>
+                <tr><th scope="row" data-ar="مدة التنفيذ">Timeline</th><td class="v-text" data-pkg="BASIC" data-ar="7 أيام">7 days</td><td class="v-text" data-pkg="MEDIUM" data-ar="10 أيام">10 days</td><td class="v-text" data-pkg="PREMIUM" data-ar="20 يوم">20 days</td></tr>
+                <tr><th scope="row" data-ar="السعر">Price</th><td class="v-price keep-en" data-pkg="BASIC">$299</td><td class="v-price keep-en" data-pkg="MEDIUM">$649</td><td class="v-price keep-en" data-pkg="PREMIUM">$1,299</td></tr>
               </tbody>
             </table>
           </div>
         </div>
       </section>
 
-      <!-- ===== ADDITIONAL SERVICES (Prompt 06) ===== -->
+      <!-- ===== ADDITIONAL SERVICES ===== -->
       <section class="section addons" id="addons" aria-labelledby="addons-title">
-        <div class="container container--wide" lang="ar" dir="rtl">
+        <div class="container container--wide">
           <div class="addons__head" data-reveal>
-            <h2 class="addons__title" id="addons-title">الخدمات الإضافية</h2>
-            <p class="addons__intro">يمكن إضافة خدمات خارج نطاق الباقات حسب احتياجات المشروع.</p>
+            <h2 class="addons__title" id="addons-title" data-ar="الخدمات الإضافية">Add-on services</h2>
+            <p class="addons__intro" data-ar="يمكن إضافة خدمات خارج نطاق الباقات حسب احتياجات المشروع.">Services beyond the packages can be added based on project needs.</p>
           </div>
           <div class="addons__grid" data-stagger>
-            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>منشورات وStories إضافية</div>
-            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>إعلانات رقمية إضافية</div>
-            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>بروفايلات وبروشورات</div>
-            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>كتالوجات</div>
-            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>عروض تقديمية</div>
-            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>مواد مطبوعة</div>
-            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>حملات بصرية إضافية</div>
-            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>تطبيقات إضافية للحملات</div>
-            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>صفحات إضافية للموقع</div>
-            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>قوالب إضافية</div>
-            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>تصميم واجهات إضافية</div>
-            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>برمجة وتطوير المواقع</div>
-            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>تجهيز الملفات للطباعة والنشر</div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><span data-ar="منشورات وStories إضافية">Extra posts and stories</span></div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><span data-ar="إعلانات رقمية إضافية">Extra digital ads</span></div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><span data-ar="بروفايلات وبروشورات">Profiles and brochures</span></div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><span data-ar="كتالوجات">Catalogs</span></div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><span data-ar="عروض تقديمية">Presentations</span></div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><span data-ar="مواد مطبوعة">Print materials</span></div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><span data-ar="حملات بصرية إضافية">Extra visual campaigns</span></div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><span data-ar="تطبيقات إضافية للحملات">Extra campaign applications</span></div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><span data-ar="صفحات إضافية للموقع">Extra website pages</span></div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><span data-ar="قوالب إضافية">Extra templates</span></div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><span data-ar="تصميم واجهات إضافية">Extra interface design</span></div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><span data-ar="برمجة وتطوير المواقع">Web development</span></div>
+            <div class="addon"><span class="addon__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><span data-ar="تجهيز الملفات للطباعة والنشر">Print and publishing file prep</span></div>
           </div>
-          <p class="addons__footer">يتم تحديد السعر حسب نوع الخدمة وحجم العمل قبل التنفيذ.</p>
+          <p class="addons__footer" data-ar="يتم تحديد السعر حسب نوع الخدمة وحجم العمل قبل التنفيذ.">Pricing is set by service type and scope before work begins.</p>
         </div>
       </section>
 
-      <!-- ===== PROCESS (Prompt 07) ===== -->
+      <!-- ===== PROCESS ===== -->
       <section class="section process" id="process" data-section aria-labelledby="process-title">
         <div class="sig-accent sig-accent--bl" aria-hidden="true"><svg viewBox="0 0 240 240" fill="none"><path d="M48 224 L48 116 A68 68 0 0 1 116 48 L224 48"/></svg></div>
-        <div class="container container--wide" lang="ar" dir="rtl">
-          <h2 class="process__title" id="process-title" data-reveal>التصميم ليس مجرد شكل</h2>
+        <div class="container container--wide">
+          <h2 class="process__title" id="process-title" data-reveal data-ar="التصميم ليس مجرد شكل">Design is more than looks</h2>
 
           <div class="process-flow" role="list">
             <div class="process-row">
               <div class="pstep" role="listitem" data-reveal>
                 <div class="pstep__node"><span class="pstep__num">01</span></div>
                 <div class="pstep__body">
-                  <h3 class="pstep__name">الفهم</h3>
+                  <h3 class="pstep__name" data-ar="الفهم">Understand</h3>
                   <span class="pstep__link" aria-hidden="true"></span>
-                  <p class="pstep__desc">جمع المعلومات وتحديد الاحتياج.</p>
+                  <p class="pstep__desc" data-ar="جمع المعلومات وتحديد الاحتياج.">Gather information and define the need.</p>
                 </div>
               </div>
               <div class="pstep" role="listitem" data-reveal>
                 <div class="pstep__node"><span class="pstep__num">02</span></div>
                 <div class="pstep__body">
-                  <h3 class="pstep__name">التخطيط</h3>
+                  <h3 class="pstep__name" data-ar="التخطيط">Plan</h3>
                   <span class="pstep__link" aria-hidden="true"></span>
-                  <p class="pstep__desc">تحديد المخرجات والأولويات والجدول الزمني.</p>
+                  <p class="pstep__desc" data-ar="تحديد المخرجات والأولويات والجدول الزمني.">Define deliverables, priorities and timeline.</p>
                 </div>
               </div>
               <div class="pstep" role="listitem" data-reveal>
                 <div class="pstep__node"><span class="pstep__num">03</span></div>
                 <div class="pstep__body">
-                  <h3 class="pstep__name">التطوير</h3>
+                  <h3 class="pstep__name" data-ar="التطوير">Develop</h3>
                   <span class="pstep__link" aria-hidden="true"></span>
-                  <p class="pstep__desc">بناء الاتجاه والحلول البصرية.</p>
+                  <p class="pstep__desc" data-ar="بناء الاتجاه والحلول البصرية.">Build the direction and visual solutions.</p>
                 </div>
               </div>
             </div>
@@ -1299,25 +1320,25 @@
               <div class="pstep" role="listitem" data-reveal>
                 <div class="pstep__node"><span class="pstep__num">04</span></div>
                 <div class="pstep__body">
-                  <h3 class="pstep__name">التنفيذ</h3>
+                  <h3 class="pstep__name" data-ar="التنفيذ">Produce</h3>
                   <span class="pstep__link" aria-hidden="true"></span>
-                  <p class="pstep__desc">إنتاج المخرجات المتفق عليها.</p>
+                  <p class="pstep__desc" data-ar="إنتاج المخرجات المتفق عليها.">Produce the agreed deliverables.</p>
                 </div>
               </div>
               <div class="pstep" role="listitem" data-reveal>
                 <div class="pstep__node"><span class="pstep__num">05</span></div>
                 <div class="pstep__body">
-                  <h3 class="pstep__name">المراجعة</h3>
+                  <h3 class="pstep__name" data-ar="المراجعة">Review</h3>
                   <span class="pstep__link" aria-hidden="true"></span>
-                  <p class="pstep__desc">تنفيذ جولات المراجعة وفق الباقة.</p>
+                  <p class="pstep__desc" data-ar="تنفيذ جولات المراجعة وفق الباقة.">Run revision rounds per the package.</p>
                 </div>
               </div>
               <div class="pstep" role="listitem" data-reveal>
                 <div class="pstep__node"><span class="pstep__num">06</span></div>
                 <div class="pstep__body">
-                  <h3 class="pstep__name">التسليم</h3>
+                  <h3 class="pstep__name" data-ar="التسليم">Deliver</h3>
                   <span class="pstep__link" aria-hidden="true"></span>
-                  <p class="pstep__desc">تجهيز وتسليم الملفات النهائية.</p>
+                  <p class="pstep__desc" data-ar="تجهيز وتسليم الملفات النهائية.">Prepare and hand over the final files.</p>
                 </div>
               </div>
             </div>
@@ -1325,37 +1346,37 @@
         </div>
       </section>
 
-      <!-- ===== POLICIES (Prompt 07) ===== -->
-      <section class="section policies" id="policies" aria-label="المراجعات والدفع والشروط">
-        <div class="container container--wide" lang="ar" dir="rtl">
+      <!-- ===== POLICIES ===== -->
+      <section class="section policies" id="policies" aria-label="Revisions, payment and terms">
+        <div class="container container--wide">
           <div class="policies__grid" data-stagger>
 
             <div class="policy">
-              <h3 class="policy__title">المراجعات</h3>
+              <h3 class="policy__title" data-ar="المراجعات">Revisions</h3>
               <ul class="policy__list">
-                <li><strong>BASIC</strong> — جولتان</li>
-                <li><strong>MEDIUM</strong> — 3 جولات</li>
-                <li><strong>PREMIUM</strong> — 4 جولات</li>
+                <li data-ar="&lt;strong&gt;BASIC&lt;/strong&gt; — جولتان"><strong class="keep-en">BASIC</strong> — 2 rounds</li>
+                <li data-ar="&lt;strong&gt;MEDIUM&lt;/strong&gt; — 3 جولات"><strong class="keep-en">MEDIUM</strong> — 3 rounds</li>
+                <li data-ar="&lt;strong&gt;PREMIUM&lt;/strong&gt; — 4 جولات"><strong class="keep-en">PREMIUM</strong> — 4 rounds</li>
               </ul>
-              <p class="policy__note">تُحتسب الجولة بعد استلام الملاحظات المجمعة.</p>
+              <p class="policy__note" data-ar="تُحتسب الجولة بعد استلام الملاحظات المجمعة.">A round counts once consolidated feedback is received.</p>
             </div>
 
             <div class="policy">
-              <h3 class="policy__title">الدفع</h3>
+              <h3 class="policy__title" data-ar="الدفع">Payment</h3>
               <ul class="policy__list">
-                <li><strong>50%</strong> عند اعتماد المشروع وبدء العمل.</li>
-                <li><strong>50%</strong> عند الانتهاء وقبل التسليم النهائي.</li>
+                <li data-ar="&lt;strong&gt;50%&lt;/strong&gt; عند اعتماد المشروع وبدء العمل."><strong>50%</strong> on project approval and kickoff.</li>
+                <li data-ar="&lt;strong&gt;50%&lt;/strong&gt; عند الانتهاء وقبل التسليم النهائي."><strong>50%</strong> on completion, before final delivery.</li>
               </ul>
             </div>
 
             <div class="policy">
-              <h3 class="policy__title">شروط أساسية</h3>
+              <h3 class="policy__title" data-ar="شروط أساسية">Key terms</h3>
               <ul class="policy__list policy__list--bullets">
-                <li>تبدأ مدة التنفيذ بعد استلام المحتوى والمواد المطلوبة ودفعة بدء المشروع.</li>
-                <li>أي طلبات خارج نطاق الباقة يتم تسعيرها بشكل منفصل.</li>
-                <li>تأخر إرسال المحتوى أو الملاحظات قد يؤدي إلى تعديل الجدول الزمني.</li>
-                <li>الملفات المصدرية لا تُسلّم تلقائيًا إلا إذا تم الاتفاق عليها.</li>
-                <li>يتم تسليم الملفات النهائية بعد استكمال الدفعات المستحقة.</li>
+                <li data-ar="تبدأ مدة التنفيذ بعد استلام المحتوى والمواد المطلوبة ودفعة بدء المشروع.">The timeline starts once content, required materials and the kickoff payment are received.</li>
+                <li data-ar="أي طلبات خارج نطاق الباقة يتم تسعيرها بشكل منفصل.">Any requests outside the package scope are priced separately.</li>
+                <li data-ar="تأخر إرسال المحتوى أو الملاحظات قد يؤدي إلى تعديل الجدول الزمني.">Late content or feedback may shift the timeline.</li>
+                <li data-ar="الملفات المصدرية لا تُسلّم تلقائيًا إلا إذا تم الاتفاق عليها.">Source files are not delivered automatically unless agreed.</li>
+                <li data-ar="يتم تسليم الملفات النهائية بعد استكمال الدفعات المستحقة.">Final files are delivered once due payments are complete.</li>
               </ul>
             </div>
 
@@ -1365,10 +1386,10 @@
 
       <section class="section contact" style="text-align:center">
         <div class="container container--narrow">
-          <p class="sec-eyebrow" style="justify-content:center">READY?</p>
-          <h2 class="sec-title" style="text-align:center">Start a project</h2>
-          <p class="sec-lead" style="margin-inline:auto;text-align:center">Tell us about your project and let’s begin a creative conversation.</p>
-          <p style="margin-block-start:var(--sp-32)"><a class="btn btn--primary" href="index.html#contact">Start a Project <span class="btn__icon" aria-hidden="true">↗</span></a></p>
+          <p class="sec-eyebrow" style="justify-content:center" data-ar="جاهز؟">READY?</p>
+          <h2 class="sec-title" style="text-align:center" data-ar="ابدأ مشروعًا">Start a project</h2>
+          <p class="sec-lead" style="margin-inline:auto;text-align:center" data-ar="أخبرنا عن مشروعك ولنبدأ محادثة إبداعية.">Tell us about your project and let’s begin a creative conversation.</p>
+          <p style="margin-block-start:var(--sp-32)"><a class="btn btn--primary" href="index.html#contact" data-ar='ابدأ مشروعًا'>Start a Project <span class="btn__icon" aria-hidden="true">↗</span></a></p>
         </div>
       </section>
 
@@ -1381,16 +1402,16 @@
           <div class="site-footer__cols">
             <div class="site-footer__brand">
               <a class="site-footer__logo" href="index.html" aria-label="Quantum Link — Home"><span class="ql-logo" aria-hidden="true"><svg class="ql-logo__mark" viewBox="0 0 120 120" aria-hidden="true"><circle cx="55" cy="55" r="35" fill="none" stroke="currentColor" stroke-width="16"/><path d="M59 57 L104 102 L58 88 L72 74 Z" fill="currentColor"/></svg><span class="ql-logo__word"><b>Quantum</b><b>Link</b></span></span></a>
-              <p class="site-footer__brand-tag">Connecting ideas to impact — a creative, design and communication agency.</p>
-              <a class="site-footer__brand-mail" href="mailto:hello@quantumlink.agency">hello@quantumlink.agency</a>
+              <p class="site-footer__brand-tag" data-ar="نربط الأفكار بالأثر — وكالة إبداع وتصميم وتواصل.">Connecting ideas to impact — a creative, design and communication agency.</p>
+              <a class="site-footer__brand-mail keep-en" href="mailto:hello@quantumlink.agency">hello@quantumlink.agency</a>
             </div>
-            <nav class="footcol" aria-label="Explore"><p class="footcol__h">Explore</p><ul class="footcol__list"><li><a href="index.html#work">Work</a></li><li><a href="index.html#services">Services</a></li><li><a href="index.html#approach">Approach</a></li><li><a href="index.html#about">About</a></li><li><a href="index.html#contact">Contact</a></li></ul></nav>
-            <nav class="footcol" aria-label="Services"><p class="footcol__h">Services</p><ul class="footcol__list"><li><a href="index.html#services">Graphic Design</a></li><li><a href="index.html#services">Visual Systems</a></li><li><a href="index.html#services">Creative Campaigns</a></li><li><a href="index.html#services">Digital Experiences</a></li><li><a href="packages.html">Packages</a></li></ul></nav>
-            <div class="footcol"><p class="footcol__h">Connect</p><div class="site-footer__social"><a class="social-dot" href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a><a class="social-dot" href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5A2.5 2.5 0 1 1 5 8.5 2.5 2.5 0 0 1 4.98 3.5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.95 1.83-1.95 3.75-1.95C20.4 8.75 22 11 22 14.5V21h-4v-5.7c0-1.36-.02-3.1-1.9-3.1s-2.2 1.47-2.2 3v5.8H9z"/></svg></a><a class="social-dot" href="#" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 3h3l-6.6 7.5L21.8 21h-6l-4.3-5.6L6.5 21H3.4l7.1-8.1L2.3 3h6.1l3.9 5.1L17.5 3z"/></svg></a></div></div>
+            <nav class="footcol" aria-label="Explore"><p class="footcol__h" data-ar="استكشف">Explore</p><ul class="footcol__list"><li><a href="index.html#work" data-ar="الأعمال">Work</a></li><li><a href="index.html#services" data-ar="الخدمات">Services</a></li><li><a href="index.html#approach" data-ar="المنهجية">Approach</a></li><li><a href="index.html#about" data-ar="عن الوكالة">About</a></li><li><a href="index.html#contact" data-ar="تواصل">Contact</a></li></ul></nav>
+            <nav class="footcol" aria-label="Services"><p class="footcol__h" data-ar="الخدمات">Services</p><ul class="footcol__list"><li><a href="index.html#services" data-ar="التصميم الجرافيكي">Graphic Design</a></li><li><a href="index.html#services" data-ar="الأنظمة البصرية">Visual Systems</a></li><li><a href="index.html#services" data-ar="الحملات الإبداعية">Creative Campaigns</a></li><li><a href="index.html#services" data-ar="التجارب الرقمية">Digital Experiences</a></li><li><a href="packages.html" data-ar="الباقات">Packages</a></li></ul></nav>
+            <div class="footcol"><p class="footcol__h" data-ar="تواصل">Connect</p><div class="site-footer__social"><a class="social-dot" href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a><a class="social-dot" href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5A2.5 2.5 0 1 1 5 8.5 2.5 2.5 0 0 1 4.98 3.5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.95 1.83-1.95 3.75-1.95C20.4 8.75 22 11 22 14.5V21h-4v-5.7c0-1.36-.02-3.1-1.9-3.1s-2.2 1.47-2.2 3v5.8H9z"/></svg></a><a class="social-dot" href="#" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 3h3l-6.6 7.5L21.8 21h-6l-4.3-5.6L6.5 21H3.4l7.1-8.1L2.3 3h6.1l3.9 5.1L17.5 3z"/></svg></a></div></div>
           </div>
         </div>
       </div>
-      <div class="site-footer__bottom"><div class="container container--wide site-footer__bottom-inner"><span>© 2025 Quantum Link. All rights reserved.</span><span>Connecting ideas to impact.</span></div></div>
+      <div class="site-footer__bottom"><div class="container container--wide site-footer__bottom-inner"><span class="keep-en">© 2025 Quantum Link. All rights reserved.</span><span data-ar="نربط الأفكار بالأثر.">Connecting ideas to impact.</span></div></div>
     </footer>
 
   </div><!-- /.site-shell -->
@@ -1540,7 +1561,28 @@
       });
     }
 
-    function init(){ initHeaderScrollState(); initMobileNav(); initReveal(); initScrollSpy(); initPkgTabs(); initContactForm(); }
+    function initLang() {
+      function apply(lang){
+        root.setAttribute("data-lang", lang);
+        root.setAttribute("lang", lang);
+        root.setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
+        Array.prototype.forEach.call(doc.querySelectorAll("[data-ar]"), function(el){
+          if(el.getAttribute("data-en") === null) el.setAttribute("data-en", el.innerHTML);
+          el.innerHTML = (lang === "ar") ? el.getAttribute("data-ar") : el.getAttribute("data-en");
+        });
+        Array.prototype.forEach.call(doc.querySelectorAll("[data-lang-opt]"), function(o){
+          o.classList.toggle("is-active", o.getAttribute("data-lang-opt") === lang);
+        });
+        try{ localStorage.setItem("ql-lang", lang); }catch(e){}
+      }
+      var saved = "en"; try{ saved = localStorage.getItem("ql-lang") || "en"; }catch(e){}
+      apply(saved);
+      Array.prototype.forEach.call(doc.querySelectorAll("[data-lang-toggle]"), function(btn){
+        btn.addEventListener("click", function(){ apply(root.getAttribute("data-lang") === "ar" ? "en" : "ar"); });
+      });
+    }
+
+    function init(){ initLang(); initHeaderScrollState(); initMobileNav(); initReveal(); initScrollSpy(); initPkgTabs(); initContactForm(); }
     if(doc.readyState === "loading"){ doc.addEventListener("DOMContentLoaded", init); } else { init(); }
   })();
   </script>

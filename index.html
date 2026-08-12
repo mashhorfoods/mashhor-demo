@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en" dir="ltr" data-lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -985,6 +985,28 @@
     .about__stats{grid-template-columns:1fr 1fr}
     .relation__a,.relation__b{font-size:clamp(1.25rem,4.5vw,1.6rem)}
   }
+
+  /* ==========================================================================
+     LANGUAGE TOGGLE (EN / AR) — separates languages, flips direction
+     ========================================================================== */
+  .lang-toggle{display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:var(--radius-pill);border:var(--bw-thin) solid var(--border-strong);background:transparent;cursor:pointer;flex:0 0 auto}
+  .lang-toggle__opt{min-inline-size:30px;padding:5px 9px;border-radius:var(--radius-pill);font-family:var(--font-en);font-weight:var(--fw-bold);font-size:0.78rem;letter-spacing:0.04em;color:var(--text-muted);line-height:1;transition:var(--shift-transition)}
+  .lang-toggle__opt[data-lang-opt="ar"]{font-family:var(--font-ar);font-size:0.95rem;font-weight:var(--fw-bold)}
+  .lang-toggle__opt.is-active{background:var(--accent);color:var(--ql-paper)}
+  .lang-toggle:hover{border-color:var(--text)}
+  .lang-toggle:focus-visible{outline:var(--bw-thick) solid var(--accent-hover);outline-offset:3px}
+  .section--paper .lang-toggle{border-color:var(--border-on-paper-strong)}
+  .section--paper .lang-toggle__opt{color:var(--text-on-paper-subtle)}
+  /* AR mode: keep genuinely-English tokens in Manrope even under :lang(ar) inheritance */
+  .ql-logo__word{font-family:var(--font-en)}
+  html[data-lang="ar"] .keep-en{font-family:var(--font-en) !important}
+  /* Arabic reads slightly larger for parity */
+  html[data-lang="ar"] body{font-size:1.075rem}
+  /* Arabic has no letter-spacing / caps — reset on translated UI so glyphs join */
+  html[data-lang="ar"] .btn,html[data-lang="ar"] .site-nav__link,html[data-lang="ar"] .mobile-nav__link,
+  html[data-lang="ar"] .sec-eyebrow,html[data-lang="ar"] .hero__eyebrow,html[data-lang="ar"] .footcol__h,
+  html[data-lang="ar"] .link-cta,html[data-lang="ar"] .work-item__badge,html[data-lang="ar"] .astep__label,
+  html[data-lang="ar"] .cap__label,html[data-lang="ar"] .tier__name:not(.keep-en){letter-spacing:0;text-transform:none}
   </style>
 </head>
 
@@ -997,143 +1019,126 @@
     <!-- ================= GLOBAL HEADER ================= -->
     <header class="site-header" data-header>
       <div class="site-header__inner container container--wide">
-
         <a class="site-header__logo" href="#top" aria-label="Quantum Link — Home">
-          <!-- Brand logo: Quantum mark (Arc + Frame/Shift arrow) + wordmark -->
           <span class="ql-logo" aria-hidden="true">
-            <svg class="ql-logo__mark" viewBox="0 0 120 120" role="img" aria-label="Quantum Link">
-              <circle cx="55" cy="55" r="35" fill="none" stroke="currentColor" stroke-width="16"/>
-              <path d="M59 57 L104 102 L58 88 L72 74 Z" fill="currentColor"/>
-            </svg>
+            <svg class="ql-logo__mark" viewBox="0 0 120 120" role="img" aria-label="Quantum Link"><circle cx="55" cy="55" r="35" fill="none" stroke="currentColor" stroke-width="16"/><path d="M59 57 L104 102 L58 88 L72 74 Z" fill="currentColor"/></svg>
             <span class="ql-logo__word"><b>Quantum</b><b>Link</b></span>
           </span>
         </a>
-
         <nav class="site-nav" aria-label="Primary">
           <ul class="site-nav__list">
-            <li><a class="site-nav__link" href="#work" data-nav-link>Work</a></li>
-            <li><a class="site-nav__link" href="#services" data-nav-link>Services</a></li>
-            <li><a class="site-nav__link" href="#approach" data-nav-link>Approach</a></li>
-            <li><a class="site-nav__link" href="#about" data-nav-link>About</a></li>
-            <li><a class="site-nav__link" href="#contact" data-nav-link>Contact</a></li>
+            <li><a class="site-nav__link" href="#work" data-nav-link data-ar="الأعمال">Work</a></li>
+            <li><a class="site-nav__link" href="#services" data-nav-link data-ar="الخدمات">Services</a></li>
+            <li><a class="site-nav__link" href="#approach" data-nav-link data-ar="المنهجية">Approach</a></li>
+            <li><a class="site-nav__link" href="#about" data-nav-link data-ar="عن الوكالة">About</a></li>
+            <li><a class="site-nav__link" href="#contact" data-nav-link data-ar="تواصل">Contact</a></li>
           </ul>
         </nav>
-
         <div class="site-header__actions">
-          <a class="btn btn--primary" href="#contact">Start a Project <span class="btn__icon" aria-hidden="true">↗</span></a>
-          <button type="button" class="site-header__menu-trigger" data-menu-trigger
-                  aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav">
-            <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+          <button type="button" class="lang-toggle" data-lang-toggle aria-label="Switch language / تبديل اللغة">
+            <span class="lang-toggle__opt" data-lang-opt="en">EN</span>
+            <span class="lang-toggle__opt" data-lang-opt="ar">ع</span>
           </button>
+          <a class="btn btn--primary" href="#contact" data-ar='ابدأ مشروعًا'>Start a Project <span class="btn__icon" aria-hidden="true">↗</span></a>
+          <button type="button" class="site-header__menu-trigger" data-menu-trigger aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav"><span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>
         </div>
-
       </div>
     </header>
 
     <!-- ================= MOBILE DRAWER ================= -->
     <div class="mobile-nav" id="mobile-nav" data-mobile-nav data-state="closed" aria-label="Mobile menu" hidden>
       <ul class="mobile-nav__list">
-        <li><a class="mobile-nav__link" href="#work" data-nav-link>Work</a></li>
-        <li><a class="mobile-nav__link" href="#services" data-nav-link>Services</a></li>
-        <li><a class="mobile-nav__link" href="#approach" data-nav-link>Approach</a></li>
-        <li><a class="mobile-nav__link" href="#about" data-nav-link>About</a></li>
-        <li><a class="mobile-nav__link" href="#contact" data-nav-link>Contact</a></li>
-        <li><a class="mobile-nav__link" href="packages.html">Packages</a></li>
+        <li><a class="mobile-nav__link" href="#work" data-nav-link data-ar="الأعمال">Work</a></li>
+        <li><a class="mobile-nav__link" href="#services" data-nav-link data-ar="الخدمات">Services</a></li>
+        <li><a class="mobile-nav__link" href="#approach" data-nav-link data-ar="المنهجية">Approach</a></li>
+        <li><a class="mobile-nav__link" href="#about" data-nav-link data-ar="عن الوكالة">About</a></li>
+        <li><a class="mobile-nav__link" href="#contact" data-nav-link data-ar="تواصل">Contact</a></li>
+        <li><a class="mobile-nav__link" href="packages.html" data-ar="الباقات">Packages</a></li>
       </ul>
-      <a class="btn btn--primary btn--block mobile-nav__cta" href="#contact">Start a Project <span class="btn__icon" aria-hidden="true">↗</span></a>
+      <a class="btn btn--primary btn--block mobile-nav__cta" href="#contact" data-ar='ابدأ مشروعًا'>Start a Project <span class="btn__icon" aria-hidden="true">↗</span></a>
     </div>
 
     <!-- ================= MAIN ================= -->
     <main class="site-main" id="main">
 
-      <!-- ===== 01 · HERO ===== -->
+      <!-- 01 · HERO -->
       <section class="hero" id="home" data-section aria-labelledby="hero-title">
         <div class="hero__grid container container--wide">
           <div class="hero__content">
-            <p class="hero__eyebrow">CREATIVE · DESIGN · COMMUNICATION</p>
-            <h1 class="hero__title" id="hero-title">Connecting ideas<br>to <span class="hero__accent">impact.</span></h1>
-            <p class="hero__lead">We are a creative agency that transforms ideas into meaningful brands, engaging experiences, and powerful communication.</p>
+            <p class="hero__eyebrow" data-ar="إبداع · تصميم · تواصل">CREATIVE · DESIGN · COMMUNICATION</p>
+            <h1 class="hero__title" id="hero-title" data-ar='نربط الأفكار<br>بـ<span class="hero__accent">الأثر.</span>'>Connecting ideas<br>to <span class="hero__accent">impact.</span></h1>
+            <p class="hero__lead" data-ar="وكالة إبداعية تحوّل الأفكار إلى علاماتٍ ذات معنى، وتجارب مؤثّرة، وتواصلٍ فعّال.">We are a creative agency that transforms ideas into meaningful brands, engaging experiences, and powerful communication.</p>
             <div class="hero__cta-row">
-              <a class="btn btn--primary" href="#contact">Start a Project <span class="btn__icon" aria-hidden="true">↗</span></a>
-              <a class="link-cta" href="#work">Explore our work <span class="link-cta__line" aria-hidden="true"></span></a>
+              <a class="btn btn--primary" href="#contact" data-ar='ابدأ مشروعًا'>Start a Project <span class="btn__icon" aria-hidden="true">↗</span></a>
+              <a class="link-cta" href="#work" data-ar='استكشف أعمالنا <span class="link-cta__line" aria-hidden="true"></span>'>Explore our work <span class="link-cta__line" aria-hidden="true"></span></a>
             </div>
           </div>
           <div class="hero__visual" aria-hidden="true">
-            <svg class="hero__sig" viewBox="0 0 240 240" fill="none" preserveAspectRatio="xMidYMid meet">
-              <path d="M48 224 L48 116 A68 68 0 0 1 116 48 L224 48"/>
-            </svg>
-            <span class="hero__shift"></span>
-            <span class="hero__ring"></span>
-            <span class="hero__dot"></span>
+            <svg class="hero__sig" viewBox="0 0 240 240" fill="none" preserveAspectRatio="xMidYMid meet"><path d="M48 224 L48 116 A68 68 0 0 1 116 48 L224 48"/></svg>
+            <span class="hero__shift"></span><span class="hero__ring"></span><span class="hero__dot"></span>
           </div>
         </div>
-        <a class="hero__scroll" href="#position" aria-label="Scroll to content">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v15M6 13l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
+        <a class="hero__scroll" href="#position" aria-label="Scroll to content"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v15M6 13l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
       </section>
 
-      <!-- ===== 02 · POSITIONING ===== -->
+      <!-- 02 · POSITIONING -->
       <section class="section position" id="position" data-section aria-labelledby="position-title">
         <div class="sig-accent sig-accent--tr" aria-hidden="true"><svg viewBox="0 0 240 240" fill="none"><path d="M48 224 L48 116 A68 68 0 0 1 116 48 L224 48"/></svg></div>
         <div class="container container--wide">
           <div class="position__grid">
             <div class="sec-head" data-reveal>
-              <p class="sec-eyebrow">WHO WE ARE</p>
-              <h2 class="sec-title" id="position-title">One idea, well&nbsp;connected, becomes <span class="hero__accent">impact.</span></h2>
-              <p class="sec-lead u-rtl" lang="ar">نربط بين ما يبقى عادةً منفصلاً — الفكرة والتصميم، الرسالة والجمهور، العلامة والتجربة — لنصنع تواصلاً له معنى وأثر.</p>
+              <p class="sec-eyebrow" data-ar="من نحن">WHO WE ARE</p>
+              <h2 class="sec-title" id="position-title" data-ar='فكرة واحدة، مترابطة جيدًا، تصنع <span class="hero__accent">الأثر.</span>'>One idea, well&nbsp;connected, becomes <span class="hero__accent">impact.</span></h2>
+              <p class="sec-lead" data-ar="نربط بين ما يبقى عادةً منفصلاً — الفكرة والتصميم، الرسالة والجمهور، العلامة والتجربة — لنصنع تواصلاً له معنى وأثر.">We connect what’s usually kept apart — idea and design, message and audience, brand and experience — to create communication with meaning and impact.</p>
             </div>
             <div class="relations" data-stagger>
-              <div class="relation"><span class="relation__a">IDEA</span><span class="relation__link" aria-hidden="true"></span><span class="relation__b">DESIGN</span></div>
-              <div class="relation"><span class="relation__a">MESSAGE</span><span class="relation__link" aria-hidden="true"></span><span class="relation__b">AUDIENCE</span></div>
-              <div class="relation"><span class="relation__a">BRAND</span><span class="relation__link" aria-hidden="true"></span><span class="relation__b">EXPERIENCE</span></div>
-              <div class="relation"><span class="relation__a">CREATIVE</span><span class="relation__link" aria-hidden="true"></span><span class="relation__b">IMPACT</span></div>
+              <div class="relation"><span class="relation__a" data-ar="فكرة">IDEA</span><span class="relation__link" aria-hidden="true"></span><span class="relation__b" data-ar="تصميم">DESIGN</span></div>
+              <div class="relation"><span class="relation__a" data-ar="رسالة">MESSAGE</span><span class="relation__link" aria-hidden="true"></span><span class="relation__b" data-ar="جمهور">AUDIENCE</span></div>
+              <div class="relation"><span class="relation__a" data-ar="علامة">BRAND</span><span class="relation__link" aria-hidden="true"></span><span class="relation__b" data-ar="تجربة">EXPERIENCE</span></div>
+              <div class="relation"><span class="relation__a" data-ar="إبداع">CREATIVE</span><span class="relation__link" aria-hidden="true"></span><span class="relation__b" data-ar="أثر">IMPACT</span></div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- ===== 03 · SERVICES / CAPABILITIES ===== -->
-      <section class="section section--paper caps" id="services" data-section dir="rtl" aria-labelledby="services-title">
+      <!-- 03 · SERVICES / CAPABILITIES -->
+      <section class="section section--paper caps" id="services" data-section aria-labelledby="services-title">
         <div class="container container--wide">
           <div class="sec-head" data-reveal>
-            <p class="sec-eyebrow">WHAT WE CREATE</p>
-            <h2 class="sec-title" id="services-title">Capabilities</h2>
-            <p class="sec-lead u-rtl" lang="ar">نحوّل الأفكار والاحتياجات إلى حلول بصرية واضحة، عملية، ومتناسقة تساعد المشروع على الظهور باحترافية والتواصل بوضوح مع جمهوره.</p>
+            <p class="sec-eyebrow" data-ar="ماذا نصنع">WHAT WE CREATE</p>
+            <h2 class="sec-title" id="services-title" data-ar="قدراتنا">Capabilities</h2>
+            <p class="sec-lead" data-ar="نحوّل الأفكار والاحتياجات إلى حلول بصرية واضحة، عملية، ومتناسقة تساعد المشروع على الظهور باحترافية والتواصل بوضوح مع جمهوره.">We turn ideas and needs into clear, practical, and consistent visual solutions that help a project appear professional and communicate clearly with its audience.</p>
           </div>
           <div class="caps__list" data-stagger>
             <article class="cap">
               <span class="cap__num">01</span>
               <div class="cap__body">
-                <p class="cap__label">Graphic Design</p>
-                <h3 class="cap__title u-rtl" lang="ar">التصميم الجرافيكي</h3>
-                <p class="cap__desc u-rtl" lang="ar">المحتوى الرقمي، المواد التسويقية، والمطبوعات.</p>
+                <h3 class="cap__title" data-ar="التصميم الجرافيكي">Graphic Design</h3>
+                <p class="cap__desc" data-ar="المحتوى الرقمي، المواد التسويقية، والمطبوعات.">Digital content, marketing materials, and print.</p>
               </div>
               <span class="cap__form" aria-hidden="true"><svg viewBox="0 0 100 100"><path d="M24 40 L24 24 L40 24 M60 24 L76 24 L76 40 M76 60 L76 76 L60 76 M40 76 L24 76 L24 60" fill="none" stroke="currentColor" stroke-width="9"/></svg></span>
             </article>
             <article class="cap">
               <span class="cap__num">02</span>
               <div class="cap__body">
-                <p class="cap__label">Visual Systems</p>
-                <h3 class="cap__title u-rtl" lang="ar">الأنظمة البصرية</h3>
-                <p class="cap__desc u-rtl" lang="ar">تطوير أساليب وقوالب تساعد على الحفاظ على الاتساق البصري.</p>
+                <h3 class="cap__title" data-ar="الأنظمة البصرية">Visual Systems</h3>
+                <p class="cap__desc" data-ar="تطوير أساليب وقوالب تساعد على الحفاظ على الاتساق البصري.">Methods and templates that keep everything visually consistent.</p>
               </div>
               <span class="cap__form" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="40" cy="50" r="24" fill="none" stroke="currentColor" stroke-width="9"/><circle cx="62" cy="50" r="24" fill="none" stroke="currentColor" stroke-width="9"/></svg></span>
             </article>
             <article class="cap">
               <span class="cap__num">03</span>
               <div class="cap__body">
-                <p class="cap__label">Creative Campaigns</p>
-                <h3 class="cap__title u-rtl" lang="ar">الحملات الإبداعية</h3>
-                <p class="cap__desc u-rtl" lang="ar">تطوير المفاهيم والاتجاهات البصرية للحملات.</p>
+                <h3 class="cap__title" data-ar="الحملات الإبداعية">Creative Campaigns</h3>
+                <p class="cap__desc" data-ar="تطوير المفاهيم والاتجاهات البصرية للحملات.">Concepts and visual directions for campaigns.</p>
               </div>
               <span class="cap__form" aria-hidden="true"><svg viewBox="0 0 100 100"><rect x="16" y="16" width="44" height="44" fill="currentColor" opacity=".35"/><rect x="40" y="40" width="44" height="44" fill="currentColor"/></svg></span>
             </article>
             <article class="cap">
               <span class="cap__num">04</span>
               <div class="cap__body">
-                <p class="cap__label">Digital Experiences</p>
-                <h3 class="cap__title u-rtl" lang="ar">التجارب الرقمية</h3>
-                <p class="cap__desc u-rtl" lang="ar">تصميم واجهات وتجارب المواقع الإلكترونية.</p>
+                <h3 class="cap__title" data-ar="التجارب الرقمية">Digital Experiences</h3>
+                <p class="cap__desc" data-ar="تصميم واجهات وتجارب المواقع الإلكترونية.">Interface and experience design for websites.</p>
               </div>
               <span class="cap__form" aria-hidden="true"><svg viewBox="0 0 100 100"><path d="M12 82 A40 40 0 0 1 92 82" fill="none" stroke="currentColor" stroke-width="12" stroke-linecap="round"/></svg></span>
             </article>
@@ -1141,264 +1146,183 @@
         </div>
       </section>
 
-      <!-- ===== 04 · SELECTED WORK ===== -->
+      <!-- 04 · SELECTED WORK -->
       <section class="section work" id="work" data-section aria-labelledby="work-title">
         <div class="container container--wide">
           <div class="sec-head" data-reveal>
-            <p class="sec-eyebrow">SELECTED WORK</p>
-            <h2 class="sec-title" id="work-title">Ideas, made&nbsp;visible.</h2>
-            <p class="sec-lead">A selection of branding, campaign, and digital projects — where strategy meets craft.</p>
+            <p class="sec-eyebrow" data-ar="أعمال مختارة">SELECTED WORK</p>
+            <h2 class="sec-title" id="work-title" data-ar="أفكارٌ ظاهرة للعيان.">Ideas, made&nbsp;visible.</h2>
+            <p class="sec-lead" data-ar="مجموعة من مشاريع الهوية والحملات والتجارب الرقمية — حيث تلتقي الاستراتيجية بالحِرفة.">A selection of branding, campaign, and digital projects — where strategy meets craft.</p>
           </div>
           <div class="work__grid" data-stagger>
-
             <a class="work-item work-item--wide" href="#contact">
-              <span class="work-item__visual">
-                <span class="work-item__scrim" aria-hidden="true"></span>
-                <svg viewBox="0 0 240 160" fill="none" aria-hidden="true"><path d="M40 148 L40 92 A44 44 0 0 1 84 48 L196 48" stroke="#F4F1EA" stroke-width="26"/><rect x="150" y="96" width="70" height="34" transform="rotate(-8 150 96)" fill="#2447FF"/><circle cx="196" cy="44" r="20" fill="none" stroke="#C7F36B" stroke-width="4"/></svg>
-              </span>
-              <span class="work-item__badge">Visual Identity</span>
-              <span class="work-item__meta">
-                <span>
-                  <span class="work-item__title">Meridian — Brand Identity</span>
-                  <span class="work-item__desc" style="display:block">A complete visual identity and application system for a boutique property developer.</span>
-                </span>
-                <span class="work-item__arrow" aria-hidden="true">↗</span>
-              </span>
+              <span class="work-item__visual"><span class="work-item__scrim" aria-hidden="true"></span><svg viewBox="0 0 240 160" fill="none" aria-hidden="true"><path d="M40 148 L40 92 A44 44 0 0 1 84 48 L196 48" stroke="#F4F1EA" stroke-width="26"/><rect x="150" y="96" width="70" height="34" transform="rotate(-8 150 96)" fill="#2447FF"/><circle cx="196" cy="44" r="20" fill="none" stroke="#C7F36B" stroke-width="4"/></svg></span>
+              <span class="work-item__badge" data-ar="هوية بصرية">Visual Identity</span>
+              <span class="work-item__meta"><span><span class="work-item__title" data-ar="ميريديان — هوية بصرية">Meridian — Brand Identity</span><span class="work-item__desc" style="display:block" data-ar="نظام هوية بصرية وتطبيقاته الكاملة لمطوّر عقاري متخصص.">A complete visual identity and application system for a boutique property developer.</span></span><span class="work-item__arrow" aria-hidden="true">↗</span></span>
             </a>
-
             <a class="work-item" href="#contact">
-              <span class="work-item__visual">
-                <span class="work-item__scrim" aria-hidden="true"></span>
-                <svg viewBox="0 0 200 130" fill="none" aria-hidden="true"><rect x="30" y="26" width="70" height="78" fill="#C7F36B" opacity=".9"/><rect x="70" y="46" width="70" height="78" fill="#2447FF"/></svg>
-              </span>
-              <span class="work-item__badge">Packaging</span>
-              <span class="work-item__meta">
-                <span>
-                  <span class="work-item__title">Kanz — Packaging System</span>
-                  <span class="work-item__desc" style="display:block">A retail packaging language scaled across a full product line.</span>
-                </span>
-                <span class="work-item__arrow" aria-hidden="true">↗</span>
-              </span>
+              <span class="work-item__visual"><span class="work-item__scrim" aria-hidden="true"></span><svg viewBox="0 0 200 130" fill="none" aria-hidden="true"><rect x="30" y="26" width="70" height="78" fill="#C7F36B" opacity=".9"/><rect x="70" y="46" width="70" height="78" fill="#2447FF"/></svg></span>
+              <span class="work-item__badge" data-ar="تغليف">Packaging</span>
+              <span class="work-item__meta"><span><span class="work-item__title" data-ar="كنز — نظام تغليف">Kanz — Packaging System</span><span class="work-item__desc" style="display:block" data-ar="لغة تغليف للبيع بالتجزئة تمتد عبر خط منتجات كامل.">A retail packaging language scaled across a full product line.</span></span><span class="work-item__arrow" aria-hidden="true">↗</span></span>
             </a>
-
             <a class="work-item" href="#contact">
-              <span class="work-item__visual">
-                <span class="work-item__scrim" aria-hidden="true"></span>
-                <svg viewBox="0 0 200 130" fill="none" aria-hidden="true"><path d="M20 100 A50 50 0 0 1 120 100" stroke="#F4F1EA" stroke-width="16"/><rect x="120" y="40" width="60" height="30" transform="rotate(-10 120 40)" fill="#2447FF"/><circle cx="150" cy="95" r="10" fill="#C7F36B"/></svg>
-              </span>
-              <span class="work-item__badge">Campaign</span>
-              <span class="work-item__meta">
-                <span>
-                  <span class="work-item__title">Aswaq — Seasonal Campaign</span>
-                  <span class="work-item__desc" style="display:block">Concept, key visual, and creative direction for a seasonal campaign.</span>
-                </span>
-                <span class="work-item__arrow" aria-hidden="true">↗</span>
-              </span>
+              <span class="work-item__visual"><span class="work-item__scrim" aria-hidden="true"></span><svg viewBox="0 0 200 130" fill="none" aria-hidden="true"><path d="M20 100 A50 50 0 0 1 120 100" stroke="#F4F1EA" stroke-width="16"/><rect x="120" y="40" width="60" height="30" transform="rotate(-10 120 40)" fill="#2447FF"/><circle cx="150" cy="95" r="10" fill="#C7F36B"/></svg></span>
+              <span class="work-item__badge" data-ar="حملة">Campaign</span>
+              <span class="work-item__meta"><span><span class="work-item__title" data-ar="أسواق — حملة موسمية">Aswaq — Seasonal Campaign</span><span class="work-item__desc" style="display:block" data-ar="مفهوم ومشهد رئيسي واتجاه إبداعي لحملة موسمية.">Concept, key visual, and creative direction for a seasonal campaign.</span></span><span class="work-item__arrow" aria-hidden="true">↗</span></span>
             </a>
-
             <a class="work-item" href="#contact">
-              <span class="work-item__visual">
-                <span class="work-item__scrim" aria-hidden="true"></span>
-                <svg viewBox="0 0 200 130" fill="none" aria-hidden="true"><path d="M40 34 L40 22 L52 22 M148 22 L160 22 L160 34 M160 96 L160 108 L148 108 M52 108 L40 108 L40 96" stroke="#F4F1EA" stroke-width="8"/><rect x="70" y="46" width="60" height="38" fill="#2447FF"/><circle cx="130" cy="46" r="8" fill="#C7F36B"/></svg>
-              </span>
-              <span class="work-item__badge">Digital</span>
-              <span class="work-item__meta">
-                <span>
-                  <span class="work-item__title">Nawah — Digital Experience</span>
-                  <span class="work-item__desc" style="display:block">Website UI/UX and a component-based digital experience.</span>
-                </span>
-                <span class="work-item__arrow" aria-hidden="true">↗</span>
-              </span>
+              <span class="work-item__visual"><span class="work-item__scrim" aria-hidden="true"></span><svg viewBox="0 0 200 130" fill="none" aria-hidden="true"><path d="M40 34 L40 22 L52 22 M148 22 L160 22 L160 34 M160 96 L160 108 L148 108 M52 108 L40 108 L40 96" stroke="#F4F1EA" stroke-width="8"/><rect x="70" y="46" width="60" height="38" fill="#2447FF"/><circle cx="130" cy="46" r="8" fill="#C7F36B"/></svg></span>
+              <span class="work-item__badge" data-ar="رقمي">Digital</span>
+              <span class="work-item__meta"><span><span class="work-item__title" data-ar="نواة — تجربة رقمية">Nawah — Digital Experience</span><span class="work-item__desc" style="display:block" data-ar="تصميم واجهة وتجربة موقع قائم على نظام مكوّنات.">Website UI/UX and a component-based digital experience.</span></span><span class="work-item__arrow" aria-hidden="true">↗</span></span>
             </a>
-
             <a class="work-item" href="#contact">
-              <span class="work-item__visual">
-                <span class="work-item__scrim" aria-hidden="true"></span>
-                <svg viewBox="0 0 200 130" fill="none" aria-hidden="true"><circle cx="80" cy="65" r="34" fill="none" stroke="#F4F1EA" stroke-width="12"/><circle cx="120" cy="65" r="34" fill="none" stroke="#C7F36B" stroke-width="12"/><rect x="150" y="90" width="34" height="18" transform="rotate(-8 150 90)" fill="#2447FF"/></svg>
-              </span>
-              <span class="work-item__badge">Social Content</span>
-              <span class="work-item__meta">
-                <span>
-                  <span class="work-item__title">Sila — Content System</span>
-                  <span class="work-item__desc" style="display:block">A social content system and reusable templates for consistent presence.</span>
-                </span>
-                <span class="work-item__arrow" aria-hidden="true">↗</span>
-              </span>
+              <span class="work-item__visual"><span class="work-item__scrim" aria-hidden="true"></span><svg viewBox="0 0 200 130" fill="none" aria-hidden="true"><circle cx="80" cy="65" r="34" fill="none" stroke="#F4F1EA" stroke-width="12"/><circle cx="120" cy="65" r="34" fill="none" stroke="#C7F36B" stroke-width="12"/><rect x="150" y="90" width="34" height="18" transform="rotate(-8 150 90)" fill="#2447FF"/></svg></span>
+              <span class="work-item__badge" data-ar="محتوى اجتماعي">Social Content</span>
+              <span class="work-item__meta"><span><span class="work-item__title" data-ar="صِلة — نظام محتوى">Sila — Content System</span><span class="work-item__desc" style="display:block" data-ar="نظام محتوى اجتماعي وقوالب قابلة لإعادة الاستخدام لحضور متّسق.">A social content system and reusable templates for consistent presence.</span></span><span class="work-item__arrow" aria-hidden="true">↗</span></span>
             </a>
-
           </div>
         </div>
       </section>
 
-      <!-- ===== 05 · APPROACH ===== -->
-      <section class="section section--paper approach" id="approach" data-section dir="rtl" aria-labelledby="approach-title">
+      <!-- 05 · APPROACH -->
+      <section class="section section--paper approach" id="approach" data-section aria-labelledby="approach-title">
         <div class="container container--wide">
           <div class="sec-head" data-reveal>
-            <p class="sec-eyebrow">HOW WE WORK</p>
-            <h2 class="sec-title" id="approach-title">Understand. Connect. Create.</h2>
-            <p class="sec-lead u-rtl" lang="ar">منهجية واضحة تربط الفهم بالفكرة، والفكرة بالتنفيذ، حتى التسليم.</p>
+            <p class="sec-eyebrow" data-ar="كيف نعمل">HOW WE WORK</p>
+            <h2 class="sec-title" id="approach-title" data-ar="نفهم. نربط. نبتكر.">Understand. Connect. Create.</h2>
+            <p class="sec-lead" data-ar="منهجية واضحة تربط الفهم بالفكرة، والفكرة بالتنفيذ، حتى التسليم.">A clear method that connects understanding to idea, and idea to execution — through to delivery.</p>
           </div>
           <div class="approach__steps" data-stagger>
-            <div class="astep">
-              <span class="astep__node">01</span>
-              <span class="astep__label">Understand</span>
-              <h3 class="astep__title u-rtl" lang="ar">نفهم</h3>
-              <p class="astep__desc u-rtl" lang="ar">جمع المعلومات وتحديد الاحتياج.</p>
-            </div>
-            <div class="astep">
-              <span class="astep__node">02</span>
-              <span class="astep__label">Connect</span>
-              <h3 class="astep__title u-rtl" lang="ar">نربط</h3>
-              <p class="astep__desc u-rtl" lang="ar">ربط الأهداف بالجمهور وبناء الاتجاه.</p>
-            </div>
-            <div class="astep">
-              <span class="astep__node">03</span>
-              <span class="astep__label">Create</span>
-              <h3 class="astep__title u-rtl" lang="ar">نبتكر</h3>
-              <p class="astep__desc u-rtl" lang="ar">إنتاج الحلول والمخرجات البصرية.</p>
-            </div>
-            <div class="astep">
-              <span class="astep__node">04</span>
-              <span class="astep__label">Refine</span>
-              <h3 class="astep__title u-rtl" lang="ar">نصقل</h3>
-              <p class="astep__desc u-rtl" lang="ar">مراجعة وتحسين وفق الملاحظات.</p>
-            </div>
-            <div class="astep">
-              <span class="astep__node">05</span>
-              <span class="astep__label">Deliver</span>
-              <h3 class="astep__title u-rtl" lang="ar">نسلّم</h3>
-              <p class="astep__desc u-rtl" lang="ar">تجهيز وتسليم الملفات النهائية.</p>
-            </div>
+            <div class="astep"><span class="astep__node">01</span><h3 class="astep__title" data-ar="نفهم">Understand</h3><p class="astep__desc" data-ar="جمع المعلومات وتحديد الاحتياج.">Gathering information and defining the need.</p></div>
+            <div class="astep"><span class="astep__node">02</span><h3 class="astep__title" data-ar="نربط">Connect</h3><p class="astep__desc" data-ar="ربط الأهداف بالجمهور وبناء الاتجاه.">Linking goals to the audience and shaping the direction.</p></div>
+            <div class="astep"><span class="astep__node">03</span><h3 class="astep__title" data-ar="نبتكر">Create</h3><p class="astep__desc" data-ar="إنتاج الحلول والمخرجات البصرية.">Producing the solutions and visual outcomes.</p></div>
+            <div class="astep"><span class="astep__node">04</span><h3 class="astep__title" data-ar="نصقل">Refine</h3><p class="astep__desc" data-ar="مراجعة وتحسين وفق الملاحظات.">Reviewing and refining against feedback.</p></div>
+            <div class="astep"><span class="astep__node">05</span><h3 class="astep__title" data-ar="نسلّم">Deliver</h3><p class="astep__desc" data-ar="تجهيز وتسليم الملفات النهائية.">Preparing and handing over the final files.</p></div>
           </div>
         </div>
       </section>
 
-      <!-- ===== 06 · THE QUANTUM LINK DIFFERENCE ===== -->
+      <!-- 06 · THE QUANTUM LINK DIFFERENCE -->
       <section class="section diff" id="difference" aria-labelledby="diff-title">
         <div class="sig-accent sig-accent--bl" aria-hidden="true"><svg viewBox="0 0 240 240" fill="none"><path d="M48 224 L48 116 A68 68 0 0 1 116 48 L224 48"/></svg></div>
         <div class="container container--wide">
           <div class="sec-head" data-reveal>
-            <p class="sec-eyebrow">WHY QUANTUM LINK</p>
-            <p class="diff__statement" id="diff-title">We design <b>ideas</b> before decoration — with purpose, consistency, and intent.</p>
+            <p class="sec-eyebrow" data-ar="لماذا كوانتم لينك">WHY QUANTUM LINK</p>
+            <p class="diff__statement" id="diff-title" data-ar='نصمّم <b>الأفكار</b> قبل الزخرفة — بهدفٍ واتساقٍ ونيّة.'>We design <b>ideas</b> before decoration — with purpose, consistency, and intent.</p>
           </div>
           <div class="principles" data-stagger>
-            <div class="principle"><span class="principle__no">01</span><p class="principle__en">Ideas before decoration</p><p class="principle__ar u-rtl" lang="ar">الفكرة قبل الزخرفة</p></div>
-            <div class="principle"><span class="principle__no">02</span><p class="principle__en">Design with purpose</p><p class="principle__ar u-rtl" lang="ar">تصميم بهدف واضح</p></div>
-            <div class="principle"><span class="principle__no">03</span><p class="principle__en">Strategic thinking</p><p class="principle__ar u-rtl" lang="ar">تفكير استراتيجي</p></div>
-            <div class="principle"><span class="principle__no">04</span><p class="principle__en">Visual consistency</p><p class="principle__ar u-rtl" lang="ar">اتساق بصري</p></div>
-            <div class="principle"><span class="principle__no">05</span><p class="principle__en">Message meets audience</p><p class="principle__ar u-rtl" lang="ar">صلة بين الرسالة والجمهور</p></div>
-            <div class="principle"><span class="principle__no">06</span><p class="principle__en">Design that scales</p><p class="principle__ar u-rtl" lang="ar">تصميم يتّسع عبر المنصّات</p></div>
+            <div class="principle"><span class="principle__no">01</span><p class="principle__en" data-ar="الفكرة قبل الزخرفة">Ideas before decoration</p></div>
+            <div class="principle"><span class="principle__no">02</span><p class="principle__en" data-ar="تصميم بهدف واضح">Design with purpose</p></div>
+            <div class="principle"><span class="principle__no">03</span><p class="principle__en" data-ar="تفكير استراتيجي">Strategic thinking</p></div>
+            <div class="principle"><span class="principle__no">04</span><p class="principle__en" data-ar="اتساق بصري">Visual consistency</p></div>
+            <div class="principle"><span class="principle__no">05</span><p class="principle__en" data-ar="صلة بين الرسالة والجمهور">Message meets audience</p></div>
+            <div class="principle"><span class="principle__no">06</span><p class="principle__en" data-ar="تصميم يتّسع عبر المنصّات">Design that scales</p></div>
           </div>
         </div>
       </section>
 
-      <!-- ===== 07 · ENGAGEMENT (packages overview → dedicated page) ===== -->
+      <!-- 07 · ENGAGEMENT -->
       <section class="section section--paper engage" id="packages" data-section aria-labelledby="engage-title">
         <div class="container container--wide">
           <div class="engage__head" data-reveal>
             <div class="sec-head">
-              <p class="sec-eyebrow">HOW TO WORK WITH US</p>
-              <h2 class="sec-title" id="engage-title">Ways to engage</h2>
+              <p class="sec-eyebrow" data-ar="طرق العمل معنا">HOW TO WORK WITH US</p>
+              <h2 class="sec-title" id="engage-title" data-ar="طرق التعاون">Ways to engage</h2>
             </div>
-            <a class="link-cta" href="packages.html">View all packages <span class="link-cta__line" aria-hidden="true"></span></a>
+            <a class="link-cta" href="packages.html" data-ar='كل الباقات <span class="link-cta__line" aria-hidden="true"></span>'>View all packages <span class="link-cta__line" aria-hidden="true"></span></a>
           </div>
           <div class="tiers" data-stagger>
             <article class="tier">
-              <span class="tier__name">BASIC</span>
-              <p class="tier__tag u-rtl" lang="ar">حضور بصري أساسي</p>
-              <p class="tier__price">$299 <small>· 7 DAYS</small></p>
-              <p class="tier__note u-rtl" lang="ar">مجموعة أساسية من المواد البصرية لبناء حضور رقمي احترافي.</p>
-              <a class="link-cta" href="packages.html#basic">Details <span class="link-cta__line" aria-hidden="true"></span></a>
+              <span class="tier__name keep-en">BASIC</span>
+              <p class="tier__tag" data-ar="حضور بصري أساسي">Essential visual presence</p>
+              <p class="tier__price keep-en" data-ar='$299 <small>· 7 أيام</small>'>$299 <small>· 7 DAYS</small></p>
+              <p class="tier__note" data-ar="مجموعة أساسية من المواد البصرية لبناء حضور رقمي احترافي.">A core set of visual materials to build a professional digital presence.</p>
+              <a class="link-cta" href="packages.html#basic" data-ar='التفاصيل <span class="link-cta__line" aria-hidden="true"></span>'>Details <span class="link-cta__line" aria-hidden="true"></span></a>
             </article>
             <article class="tier tier--featured">
-              <span class="tier__name">MEDIUM</span>
-              <p class="tier__tag u-rtl" lang="ar">حضور بصري متكامل</p>
-              <p class="tier__price">$649 <small>· 10 DAYS</small></p>
-              <p class="tier__note u-rtl" lang="ar">محتوى متنوع مع نظام بصري موحد للحفاظ على الاتساق.</p>
-              <a class="link-cta" href="packages.html#medium">Details <span class="link-cta__line" aria-hidden="true"></span></a>
+              <span class="tier__name keep-en">MEDIUM</span>
+              <p class="tier__tag" data-ar="حضور بصري متكامل">Complete visual presence</p>
+              <p class="tier__price keep-en" data-ar='$649 <small>· 10 أيام</small>'>$649 <small>· 10 DAYS</small></p>
+              <p class="tier__note" data-ar="محتوى متنوع مع نظام بصري موحد للحفاظ على الاتساق.">Varied content with a unified visual system for consistency.</p>
+              <a class="link-cta" href="packages.html#medium" data-ar='التفاصيل <span class="link-cta__line" aria-hidden="true"></span>'>Details <span class="link-cta__line" aria-hidden="true"></span></a>
             </article>
             <article class="tier">
-              <span class="tier__name">PREMIUM</span>
-              <p class="tier__tag u-rtl" lang="ar">الحضور التجاري والرقمي المتكامل</p>
-              <p class="tier__price">$1,299 <small>· 20 DAYS</small></p>
-              <p class="tier__note u-rtl" lang="ar">منظومة بصرية متكاملة تمتد من المحتوى والحملات إلى الموقع.</p>
-              <a class="link-cta" href="packages.html#premium">Details <span class="link-cta__line" aria-hidden="true"></span></a>
+              <span class="tier__name keep-en">PREMIUM</span>
+              <p class="tier__tag" data-ar="الحضور التجاري والرقمي المتكامل">Full commercial &amp; digital presence</p>
+              <p class="tier__price keep-en" data-ar='$1,299 <small>· 20 أيام</small>'>$1,299 <small>· 20 DAYS</small></p>
+              <p class="tier__note" data-ar="منظومة بصرية متكاملة تمتد من المحتوى والحملات إلى الموقع.">An integrated visual system spanning content, campaigns, and the website.</p>
+              <a class="link-cta" href="packages.html#premium" data-ar='التفاصيل <span class="link-cta__line" aria-hidden="true"></span>'>Details <span class="link-cta__line" aria-hidden="true"></span></a>
             </article>
           </div>
         </div>
       </section>
 
-      <!-- ===== 08 · ABOUT ===== -->
+      <!-- 08 · ABOUT -->
       <section class="section about" id="about" data-section aria-labelledby="about-title">
         <div class="container container--wide">
           <div class="about__grid">
             <div class="about__body" data-reveal>
-              <p class="sec-eyebrow">ABOUT</p>
-              <h2 class="sec-title" id="about-title">A studio built on connection.</h2>
-              <p>Quantum Link is a creative, design and communication agency. We believe <b>one idea, well connected, becomes something new</b> — so we join strategy with craft to help brands look, sound, and feel coherent.</p>
-              <p>We think before we decorate. Every mark, system, and message is made to carry meaning across every platform it lives on.</p>
+              <p class="sec-eyebrow" data-ar="عن الوكالة">ABOUT</p>
+              <h2 class="sec-title" id="about-title" data-ar="استوديو قائم على الرَّبط.">A studio built on connection.</h2>
+              <p data-ar='<b>كوانتم لينك</b> وكالة إبداع وتصميم وتواصل. نؤمن أن <b>فكرة واحدة، مترابطة جيدًا، تصبح شيئًا جديدًا</b> — لذا نجمع الاستراتيجية بالحِرفة كي تبدو العلامات متّسقة في مظهرها وصوتها وإحساسها.'>Quantum Link is a creative, design and communication agency. We believe <b>one idea, well connected, becomes something new</b> — so we join strategy with craft to help brands look, sound, and feel coherent.</p>
+              <p data-ar="نفكّر قبل أن نزخرف. كل علامة ونظام ورسالة تُصنع لتحمل معنى عبر كل منصّة تظهر عليها.">We think before we decorate. Every mark, system, and message is made to carry meaning across every platform it lives on.</p>
               <div class="about__stats">
-                <div class="about-stat"><p class="about-stat__n">01</p><p class="about-stat__l">One connected idea per project</p></div>
-                <div class="about-stat"><p class="about-stat__n">04</p><p class="about-stat__l">Core creative capabilities</p></div>
+                <div class="about-stat"><p class="about-stat__n">01</p><p class="about-stat__l" data-ar="فكرة واحدة مترابطة لكل مشروع">One connected idea per project</p></div>
+                <div class="about-stat"><p class="about-stat__n">04</p><p class="about-stat__l" data-ar="قدرات إبداعية أساسية">Core creative capabilities</p></div>
               </div>
             </div>
-            <div class="about__visual" aria-hidden="true">
-              <svg viewBox="0 0 240 240" fill="none"><path d="M56 208 L56 120 A56 56 0 0 1 112 64 L200 64" stroke="currentColor" stroke-width="30"/><rect x="150" y="150" width="56" height="28" transform="rotate(-8 150 150)" fill="#2447FF"/><circle cx="196" cy="60" r="18" fill="none" stroke="#C7F36B" stroke-width="4"/></svg>
-            </div>
+            <div class="about__visual" aria-hidden="true"><svg viewBox="0 0 240 240" fill="none"><path d="M56 208 L56 120 A56 56 0 0 1 112 64 L200 64" stroke="currentColor" stroke-width="30"/><rect x="150" y="150" width="56" height="28" transform="rotate(-8 150 150)" fill="#2447FF"/><circle cx="196" cy="60" r="18" fill="none" stroke="#C7F36B" stroke-width="4"/></svg></div>
           </div>
         </div>
       </section>
 
-      <!-- ===== 09 · START A PROJECT ===== -->
+      <!-- 09 · START A PROJECT -->
       <section class="section contact start" id="contact" data-section aria-labelledby="contact-title">
         <div class="sig-accent sig-accent--bl" aria-hidden="true"><svg viewBox="0 0 240 240" fill="none"><path d="M48 224 L48 116 A68 68 0 0 1 116 48 L224 48"/></svg></div>
         <div class="container container--wide">
           <div class="start__grid">
             <div>
-              <p class="sec-eyebrow">GET IN TOUCH</p>
-              <h2 class="sec-title" id="contact-title">Start a project</h2>
-              <p class="sec-lead u-rtl" lang="ar">أخبرنا عن مشروعك، ولنبدأ محادثة إبداعية.</p>
+              <p class="sec-eyebrow" data-ar="تواصل معنا">GET IN TOUCH</p>
+              <h2 class="sec-title" id="contact-title" data-ar="ابدأ مشروعًا">Start a project</h2>
+              <p class="sec-lead" data-ar="أخبرنا عن مشروعك، ولنبدأ محادثة إبداعية.">Tell us about your project, and let’s start a creative conversation.</p>
               <form class="start-form" data-contact-form novalidate>
                 <div class="field-grid">
-                  <div class="field"><label for="cf-name">Name · الاسم</label><input id="cf-name" name="name" type="text" placeholder="Full name" required></div>
-                  <div class="field"><label for="cf-email">Email · البريد</label><input id="cf-email" name="email" type="email" placeholder="you@company.com" required></div>
-                  <div class="field"><label for="cf-company">Company · الجهة</label><input id="cf-company" name="company" type="text" placeholder="Organization"></div>
-                  <div class="field"><label for="cf-type">Project type · نوع المشروع</label>
+                  <div class="field"><label for="cf-name" data-ar="الاسم">Name</label><input id="cf-name" name="name" type="text" placeholder="Full name" data-ar-ph="الاسم الكامل" required></div>
+                  <div class="field"><label for="cf-email" data-ar="البريد الإلكتروني">Email</label><input id="cf-email" name="email" type="email" placeholder="you@company.com" data-ar-ph="you@company.com" required></div>
+                  <div class="field"><label for="cf-company" data-ar="الجهة">Company</label><input id="cf-company" name="company" type="text" placeholder="Organization" data-ar-ph="الجهة أو الشركة"></div>
+                  <div class="field"><label for="cf-type" data-ar="نوع المشروع">Project type</label>
                     <select id="cf-type" name="type" required>
-                      <option value="" disabled selected>Select a type</option>
-                      <option>Branding</option><option>Visual Identity</option><option>Creative Campaign</option>
-                      <option>Packaging</option><option>Digital / Website</option><option>Content / Social</option><option>Other</option>
+                      <option value="" disabled selected data-ar="اختر النوع">Select a type</option>
+                      <option data-ar="الهوية">Branding</option><option data-ar="الهوية البصرية">Visual Identity</option><option data-ar="حملة إبداعية">Creative Campaign</option>
+                      <option data-ar="التغليف">Packaging</option><option data-ar="رقمي / موقع">Digital / Website</option><option data-ar="محتوى / اجتماعي">Content / Social</option><option data-ar="أخرى">Other</option>
                     </select>
                   </div>
-                  <div class="field field--full"><label for="cf-desc">Project description · وصف المشروع</label><textarea id="cf-desc" name="description" placeholder="Tell us about the idea, the audience, and the outcome you're after…" required></textarea></div>
-                  <div class="field"><label for="cf-budget">Budget <span class="field__opt">(optional)</span></label>
+                  <div class="field field--full"><label for="cf-desc" data-ar="وصف المشروع">Project description</label><textarea id="cf-desc" name="description" placeholder="Tell us about the idea, the audience, and the outcome you’re after…" data-ar-ph="أخبرنا عن الفكرة والجمهور والنتيجة التي تريدها…" required></textarea></div>
+                  <div class="field"><label for="cf-budget" data-ar='الميزانية <span class="field__opt" data-ar="(اختياري)">(optional)</span>'>Budget <span class="field__opt" data-ar="(اختياري)">(optional)</span></label>
                     <select id="cf-budget" name="budget">
-                      <option value="" disabled selected>Select a range</option>
-                      <option>Under $500</option><option>$500 – $1,500</option><option>$1,500 – $5,000</option><option>$5,000+</option>
+                      <option value="" disabled selected data-ar="اختر النطاق">Select a range</option>
+                      <option data-ar="أقل من 500$">Under $500</option><option>$500 – $1,500</option><option>$1,500 – $5,000</option><option>$5,000+</option>
                     </select>
                   </div>
-                  <div class="field"><label for="cf-timeline">Timeline <span class="field__opt">(optional)</span></label>
+                  <div class="field"><label for="cf-timeline" data-ar='المدة <span class="field__opt" data-ar="(اختياري)">(optional)</span>'>Timeline <span class="field__opt" data-ar="(اختياري)">(optional)</span></label>
                     <select id="cf-timeline" name="timeline">
-                      <option value="" disabled selected>Select a timeline</option>
-                      <option>As soon as possible</option><option>1–2 weeks</option><option>Within a month</option><option>Flexible</option>
+                      <option value="" disabled selected data-ar="اختر المدة">Select a timeline</option>
+                      <option data-ar="في أقرب وقت">As soon as possible</option><option data-ar="أسبوع إلى أسبوعين">1–2 weeks</option><option data-ar="خلال شهر">Within a month</option><option data-ar="مرن">Flexible</option>
                     </select>
                   </div>
                 </div>
                 <div class="start__submit">
-                  <button type="submit" class="btn contact-submit">Start the conversation</button>
-                  <span class="link-cta" style="pointer-events:none"><span class="link-cta__line" aria-hidden="true"></span> We reply within 1–2 days</span>
+                  <button type="submit" class="btn contact-submit" data-ar="لنبدأ المحادثة">Start the conversation</button>
+                  <span class="link-cta" style="pointer-events:none" data-ar='<span class="link-cta__line" aria-hidden="true"></span> نردّ خلال يوم إلى يومين'><span class="link-cta__line" aria-hidden="true"></span> We reply within 1–2 days</span>
                 </div>
-                <p class="form-success" data-form-success hidden lang="ar" dir="rtl">شكرًا لثقتكم — سنعود إليك قريبًا.</p>
+                <p class="form-success" data-form-success hidden data-ar="شكرًا — سنعود إليك قريبًا.">Thank you — we’ll be in touch shortly.</p>
               </form>
             </div>
             <div class="start__aside" aria-hidden="true">
               <div class="contact__frame">
                 <span class="contact__frame-line"></span>
-                <span class="ql-logo contact__logo">
-                  <svg class="ql-logo__mark" viewBox="0 0 120 120" aria-hidden="true"><circle cx="55" cy="55" r="35" fill="none" stroke="currentColor" stroke-width="16"/><path d="M59 57 L104 102 L58 88 L72 74 Z" fill="currentColor"/></svg>
-                  <span class="ql-logo__word"><b>Quantum</b><b>Link</b></span>
-                </span>
-                <p class="contact__frame-text" lang="ar" dir="rtl">جاهزون لتحويل الأفكار إلى حلول بصرية واضحة واحترافية</p>
+                <span class="ql-logo contact__logo"><svg class="ql-logo__mark" viewBox="0 0 120 120" aria-hidden="true"><circle cx="55" cy="55" r="35" fill="none" stroke="currentColor" stroke-width="16"/><path d="M59 57 L104 102 L58 88 L72 74 Z" fill="currentColor"/></svg><span class="ql-logo__word"><b>Quantum</b><b>Link</b></span></span>
+                <p class="contact__frame-text" data-ar="جاهزون لتحويل الأفكار إلى حلول بصرية واضحة واحترافية">Ready to turn ideas into clear, professional visual solutions.</p>
               </div>
             </div>
           </div>
@@ -1414,54 +1338,17 @@
         <div class="container container--wide">
           <div class="site-footer__cols">
             <div class="site-footer__brand">
-              <a class="site-footer__logo" href="#top" aria-label="Quantum Link — Home">
-                <span class="ql-logo" aria-hidden="true">
-                  <svg class="ql-logo__mark" viewBox="0 0 120 120" aria-hidden="true"><circle cx="55" cy="55" r="35" fill="none" stroke="currentColor" stroke-width="16"/><path d="M59 57 L104 102 L58 88 L72 74 Z" fill="currentColor"/></svg>
-                  <span class="ql-logo__word"><b>Quantum</b><b>Link</b></span>
-                </span>
-              </a>
-              <p class="site-footer__brand-tag">Connecting ideas to impact — a creative, design and communication agency.</p>
-              <a class="site-footer__brand-mail" href="mailto:hello@quantumlink.agency">hello@quantumlink.agency</a>
+              <a class="site-footer__logo" href="#top" aria-label="Quantum Link — Home"><span class="ql-logo" aria-hidden="true"><svg class="ql-logo__mark" viewBox="0 0 120 120" aria-hidden="true"><circle cx="55" cy="55" r="35" fill="none" stroke="currentColor" stroke-width="16"/><path d="M59 57 L104 102 L58 88 L72 74 Z" fill="currentColor"/></svg><span class="ql-logo__word"><b>Quantum</b><b>Link</b></span></span></a>
+              <p class="site-footer__brand-tag" data-ar="نربط الأفكار بالأثر — وكالة إبداع وتصميم وتواصل.">Connecting ideas to impact — a creative, design and communication agency.</p>
+              <a class="site-footer__brand-mail keep-en" href="mailto:hello@quantumlink.agency">hello@quantumlink.agency</a>
             </div>
-            <nav class="footcol" aria-label="Explore">
-              <p class="footcol__h">Explore</p>
-              <ul class="footcol__list">
-                <li><a href="#work">Work</a></li>
-                <li><a href="#services">Services</a></li>
-                <li><a href="#approach">Approach</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#contact">Contact</a></li>
-              </ul>
-            </nav>
-            <nav class="footcol" aria-label="Services">
-              <p class="footcol__h">Services</p>
-              <ul class="footcol__list">
-                <li><a href="#services">Graphic Design</a></li>
-                <li><a href="#services">Visual Systems</a></li>
-                <li><a href="#services">Creative Campaigns</a></li>
-                <li><a href="#services">Digital Experiences</a></li>
-                <li><a href="packages.html">Packages</a></li>
-              </ul>
-            </nav>
-            <div class="footcol">
-              <p class="footcol__h">Connect</p>
-              <div class="site-footer__social">
-                <a class="social-dot" href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
-                <a class="social-dot" href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5A2.5 2.5 0 1 1 5 8.5 2.5 2.5 0 0 1 4.98 3.5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.95 1.83-1.95 3.75-1.95C20.4 8.75 22 11 22 14.5V21h-4v-5.7c0-1.36-.02-3.1-1.9-3.1s-2.2 1.47-2.2 3v5.8H9z"/></svg></a>
-                <a class="social-dot" href="#" aria-label="Behance"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.4 8.6c1 0 1.6.6 1.6 1.4 0 .9-.6 1.4-1.7 1.4H5.6V8.6h2.8zm.2 4.3c1.1 0 1.8.5 1.8 1.5s-.7 1.5-1.9 1.5H5.6v-3h3zM3 6.8v10.4h5.7c2.6 0 4.1-1.2 4.1-3.3 0-1.4-.8-2.4-2.1-2.7 1-.4 1.6-1.3 1.6-2.4 0-1.8-1.4-3-3.8-3H3zm11.3 6.6c.1-1.1.8-1.7 1.8-1.7s1.6.6 1.7 1.7h-3.5zm5.5 1.3v-.5c0-2.4-1.4-4-3.7-4s-3.8 1.6-3.8 4 1.5 3.9 3.9 3.9c1.9 0 3.2-1 3.5-2.4h-2c-.2.5-.7.8-1.4.8-1 0-1.7-.6-1.9-1.8h5.4zM15 7.4h4.4v1H15z"/></svg></a>
-                <a class="social-dot" href="#" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 3h3l-6.6 7.5L21.8 21h-6l-4.3-5.6L6.5 21H3.4l7.1-8.1L2.3 3h6.1l3.9 5.1L17.5 3z"/></svg></a>
-              </div>
-              <a class="site-footer__start" href="#contact" lang="ar" dir="rtl" style="margin-block-start:var(--sp-24);display:inline-block">لنبدأ.</a>
-            </div>
+            <nav class="footcol" aria-label="Explore"><p class="footcol__h" data-ar="استكشف">Explore</p><ul class="footcol__list"><li><a href="#work" data-ar="الأعمال">Work</a></li><li><a href="#services" data-ar="الخدمات">Services</a></li><li><a href="#approach" data-ar="المنهجية">Approach</a></li><li><a href="#about" data-ar="عن الوكالة">About</a></li><li><a href="#contact" data-ar="تواصل">Contact</a></li></ul></nav>
+            <nav class="footcol" aria-label="Services"><p class="footcol__h" data-ar="الخدمات">Services</p><ul class="footcol__list"><li><a href="#services" data-ar="التصميم الجرافيكي">Graphic Design</a></li><li><a href="#services" data-ar="الأنظمة البصرية">Visual Systems</a></li><li><a href="#services" data-ar="الحملات الإبداعية">Creative Campaigns</a></li><li><a href="#services" data-ar="التجارب الرقمية">Digital Experiences</a></li><li><a href="packages.html" data-ar="الباقات">Packages</a></li></ul></nav>
+            <div class="footcol"><p class="footcol__h" data-ar="تواصل">Connect</p><div class="site-footer__social"><a class="social-dot" href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a><a class="social-dot" href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5A2.5 2.5 0 1 1 5 8.5 2.5 2.5 0 0 1 4.98 3.5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.95 1.83-1.95 3.75-1.95C20.4 8.75 22 11 22 14.5V21h-4v-5.7c0-1.36-.02-3.1-1.9-3.1s-2.2 1.47-2.2 3v5.8H9z"/></svg></a><a class="social-dot" href="#" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 3h3l-6.6 7.5L21.8 21h-6l-4.3-5.6L6.5 21H3.4l7.1-8.1L2.3 3h6.1l3.9 5.1L17.5 3z"/></svg></a></div><a class="site-footer__start" href="#contact" data-ar="لنبدأ." style="margin-block-start:var(--sp-24);display:inline-block">Let’s start.</a></div>
           </div>
         </div>
       </div>
-      <div class="site-footer__bottom">
-        <div class="container container--wide site-footer__bottom-inner">
-          <span>© 2025 Quantum Link. All rights reserved.</span>
-          <span>Connecting ideas to impact.</span>
-        </div>
-      </div>
+      <div class="site-footer__bottom"><div class="container container--wide site-footer__bottom-inner"><span class="keep-en">© 2025 Quantum Link. All rights reserved.</span><span data-ar="نربط الأفكار بالأثر.">Connecting ideas to impact.</span></div></div>
     </footer>
 
   </div><!-- /.site-shell -->
@@ -1611,7 +1498,33 @@
       });
     }
 
-    function init(){ initHeaderScrollState(); initMobileNav(); initReveal(); initScrollSpy(); initPkgTabs(); initContactForm(); }
+    /* 7 · LANGUAGE TOGGLE — EN / AR (swaps content, flips direction, persists) */
+    function initLang() {
+      function apply(lang){
+        root.setAttribute("data-lang", lang);
+        root.setAttribute("lang", lang);
+        root.setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
+        Array.prototype.forEach.call(doc.querySelectorAll("[data-ar]"), function(el){
+          if(el.getAttribute("data-en") === null) el.setAttribute("data-en", el.innerHTML);
+          el.innerHTML = (lang === "ar") ? el.getAttribute("data-ar") : el.getAttribute("data-en");
+        });
+        Array.prototype.forEach.call(doc.querySelectorAll("[data-ar-ph]"), function(el){
+          if(el.getAttribute("data-en-ph") === null) el.setAttribute("data-en-ph", el.getAttribute("placeholder") || "");
+          el.setAttribute("placeholder", (lang === "ar") ? el.getAttribute("data-ar-ph") : el.getAttribute("data-en-ph"));
+        });
+        Array.prototype.forEach.call(doc.querySelectorAll("[data-lang-opt]"), function(o){
+          o.classList.toggle("is-active", o.getAttribute("data-lang-opt") === lang);
+        });
+        try{ localStorage.setItem("ql-lang", lang); }catch(e){}
+      }
+      var saved = "en"; try{ saved = localStorage.getItem("ql-lang") || "en"; }catch(e){}
+      apply(saved);
+      Array.prototype.forEach.call(doc.querySelectorAll("[data-lang-toggle]"), function(btn){
+        btn.addEventListener("click", function(){ apply(root.getAttribute("data-lang") === "ar" ? "en" : "ar"); });
+      });
+    }
+
+    function init(){ initLang(); initHeaderScrollState(); initMobileNav(); initReveal(); initScrollSpy(); initPkgTabs(); initContactForm(); }
     if(doc.readyState === "loading"){ doc.addEventListener("DOMContentLoaded", init); } else { init(); }
   })();
   </script>
