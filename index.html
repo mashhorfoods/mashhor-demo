@@ -835,35 +835,37 @@
   .link-cta:hover{color:var(--ql-paper)} .link-cta:hover .link-cta__line{inline-size:42px}
   .section--paper .link-cta{color:var(--ql-black)}
 
-  /* 02 · POSITIONING — connection expressed as transformation, not a drawn link */
+  /* 02 · POSITIONING — one generative composition on Paper (philosophy, not services) */
   .position,.diff,.work,.about{overflow:clip}
-  .position{background:var(--ql-black)}
+  .position{background:var(--surface-paper);color:var(--text-on-paper)}
 
   /* Header: plain label + underline rule, then asymmetric statement / support */
-  .position__label{margin:0;font-family:var(--font-en);font-weight:var(--fw-bold);font-size:var(--fs-eyebrow);letter-spacing:var(--ls-widest);text-transform:uppercase;color:var(--accent-2)}
-  .position__divide{display:block;block-size:var(--bw-hairline);background:var(--border);margin-block:var(--sp-16) clamp(2rem,5vw,3.75rem)}
+  .position__label{margin:0;font-family:var(--font-en);font-weight:var(--fw-bold);font-size:var(--fs-eyebrow);letter-spacing:var(--ls-widest);text-transform:uppercase;color:var(--ql-blue)}
+  .position__divide{display:block;block-size:var(--bw-hairline);background:var(--border-on-paper-strong);margin-block:var(--sp-16) clamp(2rem,5vw,3.75rem)}
   .position__lead{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,4fr);column-gap:clamp(2rem,5vw,5.5rem);row-gap:clamp(1.25rem,3vw,2rem);align-items:end}
-  .position__statement{margin:0;font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:-.02em;line-height:1.04;font-size:clamp(2rem,1.2rem + 2.9vw,3.9rem);color:var(--ql-paper);text-wrap:balance}
+  .position__statement{margin:0;font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:-.02em;line-height:1.04;font-size:clamp(2.1rem,1.2rem + 3.1vw,4.1rem);color:var(--ql-black);text-wrap:balance}
   .position__statement .hero__accent{color:var(--ql-blue)}
-  .position__support{margin:0;align-self:end;color:var(--text-muted);font-size:clamp(1.02rem,.98rem + .3vw,1.2rem);line-height:1.7;max-inline-size:40ch}
+  .position__support{margin:0;align-self:end;color:var(--ql-gray);font-size:clamp(1.02rem,.98rem + .3vw,1.2rem);line-height:1.7;max-inline-size:40ch}
 
-  /* Relationships: hollow input transforms into solid outcome.
-     No connector is drawn — the empty channel between the pair IS the link. */
-  .rels{margin-block-start:clamp(2.5rem,6vw,5.5rem);display:flex;flex-direction:column}
-  .rel{display:grid;grid-template-columns:2.25rem minmax(0,1fr) minmax(0,1fr);align-items:baseline;column-gap:clamp(1.25rem,4.5vw,4rem);padding-block:clamp(1.15rem,2.6vw,2.1rem);border-block-start:var(--bw-hairline) solid var(--border)}
-  .rel:last-child{border-block-end:var(--bw-hairline) solid var(--border)}
-  .rel__idx{font-family:var(--font-en);font-weight:var(--fw-bold);font-size:.78rem;letter-spacing:.14em;color:var(--text-muted);align-self:center}
-  .rel__word{font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:-.02em;line-height:.95;font-size:clamp(1.6rem,1rem + 2.5vw,3.2rem);white-space:nowrap}
-  .rel__from{justify-self:end;text-align:end;color:transparent;-webkit-text-stroke:1.6px var(--ql-paper);transition:color var(--dur-normal) var(--ease-shift),-webkit-text-stroke-color var(--dur-normal) var(--ease-shift)}
+  /* Relationship field — two typographic columns meet across a central seam.
+     Connection is the transformation (hollow input -> solid outcome) + the
+     negative space between, NOT a drawn connector. One composition, not rows. */
+  .rel-field{margin-block-start:clamp(2.75rem,6vw,5.5rem)}
+  .rel{display:grid;grid-template-columns:1fr 1fr;column-gap:clamp(1.75rem,5vw,4.5rem);align-items:baseline;padding-block:clamp(.6rem,1.7vw,1.25rem)}
+  .rel__word{font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:-.02em;line-height:1;font-size:clamp(1.45rem,1rem + 2vw,2.6rem);white-space:nowrap}
+  .rel__from{justify-self:end;text-align:end;color:transparent;-webkit-text-stroke:1.4px var(--ql-black);transition:color var(--dur-normal) var(--ease-shift),-webkit-text-stroke-color var(--dur-normal) var(--ease-shift)}
   .rel__to{justify-self:start;color:var(--ql-blue)}
-  .rel:hover .rel__from{color:var(--ql-paper);-webkit-text-stroke-color:transparent}
-  @supports not ((-webkit-text-stroke:1px #000)){.rel__from{color:var(--ql-paper)}}
+  .rel:hover .rel__from{color:var(--ql-black);-webkit-text-stroke-color:transparent}
+  @supports not ((-webkit-text-stroke:1px #000)){.rel__from{color:var(--ql-black)}}
 
-  /* final relationship — the transformation resolves into IMPACT (all lime) */
-  .rel--impact .rel__word{font-size:clamp(1.75rem,1.05rem + 2.9vw,3.55rem)}
-  .rel--impact .rel__to{color:var(--ql-lime)}
-  .rel--impact .rel__from{-webkit-text-stroke-color:var(--ql-lime)}
-  .rel--impact:hover .rel__from{color:var(--ql-lime);-webkit-text-stroke-color:transparent}
+  /* Climax — CREATIVE -> IMPACT, focused by a generative open frame (FRAME + ARC).
+     Lime appears once, as a fill (black on lime) — the single visual trigger. */
+  .pos-climax{position:relative;margin-block-start:clamp(1.75rem,4vw,3.25rem);display:flex;flex-wrap:wrap;align-items:center;gap:clamp(.9rem,3vw,2.5rem);padding:clamp(1.6rem,3.4vw,2.9rem) clamp(1.3rem,3.4vw,2.9rem)}
+  .pos-frame{position:absolute;inset-block:0;inset-inline-start:0;inline-size:min(62%,500px);block-size:100%;border:var(--bw-thick) solid var(--ql-blue);border-inline-end:0;border-block-end:0;border-start-start-radius:clamp(28px,4.5vw,64px);pointer-events:none}
+  .pos-climax__word{font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:-.025em;line-height:1;font-size:clamp(2rem,1.25rem + 3.1vw,3.7rem)}
+  .pos-climax__from{color:transparent;-webkit-text-stroke:2px var(--ql-black)}
+  .pos-climax__to{display:inline-block;background:var(--ql-lime);color:var(--ql-black);padding:.06em .26em;border-radius:var(--radius-xs)}
+  @supports not ((-webkit-text-stroke:1px #000)){.pos-climax__from{color:var(--ql-black)}}
 
   /* 03 · SERVICES — editorial capability index */
   .caps{background:var(--surface-paper);color:var(--text-on-paper)}
@@ -1005,12 +1007,15 @@
   }
   /* 02 · POSITIONING — mobile: input stacks over outcome, transform reads vertically */
   @media (max-width:640px){
-    .rel{grid-template-columns:2rem minmax(0,1fr);grid-template-areas:"idx from" ".   to";column-gap:var(--sp-12);row-gap:var(--sp-4);padding-block:clamp(1.5rem,6.5vw,2.1rem)}
-    .rel__idx{grid-area:idx;align-self:center}
-    .rel__from{grid-area:from;justify-self:start;text-align:start}
-    .rel__to{grid-area:to;justify-self:start}
-    .rel__word{font-size:clamp(1.9rem,10.5vw,2.7rem)}
-    .rel--impact .rel__word{font-size:clamp(2.05rem,11.5vw,2.95rem)}
+    .position__lead{grid-template-columns:1fr}
+    .position__support{align-self:start}
+    .rel{grid-template-columns:1fr;row-gap:var(--sp-2);padding-block:clamp(.9rem,4vw,1.4rem)}
+    .rel__from{justify-self:start;text-align:start}
+    .rel__to{justify-self:start}
+    .rel__word{font-size:clamp(1.85rem,10vw,2.5rem)}
+    .pos-climax{justify-content:flex-start;gap:var(--sp-4);padding:clamp(1.5rem,6vw,2.1rem) clamp(1.1rem,4vw,1.6rem)}
+    .pos-frame{inline-size:min(80%,340px)}
+    .pos-climax__word{font-size:clamp(2.3rem,12.5vw,3.2rem)}
   }
 
   /* ==========================================================================
@@ -1034,7 +1039,7 @@
   html[data-lang="ar"] .sec-eyebrow,html[data-lang="ar"] .hero__eyebrow,html[data-lang="ar"] .footcol__h,
   html[data-lang="ar"] .link-cta,html[data-lang="ar"] .work-item__badge,html[data-lang="ar"] .astep__label,
   html[data-lang="ar"] .cap__label,html[data-lang="ar"] .position__label,html[data-lang="ar"] .position__statement,
-  html[data-lang="ar"] .rel__word,html[data-lang="ar"] .rel__idx,
+  html[data-lang="ar"] .rel__word,html[data-lang="ar"] .pos-climax__word,
   html[data-lang="ar"] .tier__name:not(.keep-en){letter-spacing:0;text-transform:none}
   </style>
 </head>
@@ -1111,7 +1116,7 @@
       </section>
 
       <!-- 02 · POSITIONING -->
-      <section class="section position" id="position" data-section aria-labelledby="position-title">
+      <section class="section section--paper position" id="position" data-section aria-labelledby="position-title">
         <div class="container container--wide">
           <p class="position__label" data-reveal data-ar="التموضع">POSITIONING</p>
           <span class="position__divide" data-reveal aria-hidden="true"></span>
@@ -1120,26 +1125,23 @@
             <p class="position__support" data-reveal data-ar="نربط الأفكار بالتصميم والتواصل لنصنع علاماتٍ وتجارب ورسائل تُحرّك الناس.">We connect ideas with design and communication to create brands, experiences, and messages that move people.</p>
           </div>
 
-          <div class="rels" data-stagger>
+          <div class="rel-field" data-stagger>
             <div class="rel">
-              <span class="rel__idx">01</span>
               <span class="rel__word rel__from" data-ar="فكرة">Idea</span>
               <span class="rel__word rel__to" data-ar="تصميم">Design</span>
             </div>
             <div class="rel">
-              <span class="rel__idx">02</span>
               <span class="rel__word rel__from" data-ar="رسالة">Message</span>
               <span class="rel__word rel__to" data-ar="جمهور">Audience</span>
             </div>
             <div class="rel">
-              <span class="rel__idx">03</span>
               <span class="rel__word rel__from" data-ar="علامة">Brand</span>
               <span class="rel__word rel__to" data-ar="تجربة">Experience</span>
             </div>
-            <div class="rel rel--impact">
-              <span class="rel__idx">04</span>
-              <span class="rel__word rel__from" data-ar="إبداع">Creative</span>
-              <span class="rel__word rel__to" data-ar="أثر">Impact</span>
+            <div class="pos-climax">
+              <span class="pos-frame" aria-hidden="true"></span>
+              <span class="pos-climax__word pos-climax__from" data-ar="إبداع">Creative</span>
+              <span class="pos-climax__word pos-climax__to" data-ar="أثر">Impact</span>
             </div>
           </div>
         </div>
