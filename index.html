@@ -835,52 +835,35 @@
   .link-cta:hover{color:var(--ql-paper)} .link-cta:hover .link-cta__line{inline-size:42px}
   .section--paper .link-cta{color:var(--ql-black)}
 
-  /* 02 · POSITIONING — connection as a visual system (editorial) */
+  /* 02 · POSITIONING — connection expressed as transformation, not a drawn link */
   .position,.diff,.work,.about{overflow:clip}
   .position{background:var(--ql-black)}
 
-  /* Editorial header — asymmetric grid: statement large, support hung low-right */
-  .position__top{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,4fr);column-gap:clamp(2rem,5vw,5.5rem);row-gap:clamp(1.5rem,3vw,2.5rem);align-items:end}
-  .position__marker{grid-column:1 / -1;display:flex;align-items:center;gap:var(--sp-16);margin:0}
-  .position__idx{font-family:var(--font-en);font-weight:var(--fw-black);font-size:clamp(1rem,.85rem + .5vw,1.3rem);letter-spacing:0;color:var(--accent-2)}
-  .position__label{font-family:var(--font-en);font-weight:var(--fw-bold);font-size:var(--fs-eyebrow);letter-spacing:var(--ls-widest);text-transform:uppercase;color:var(--text-muted)}
-  .position__rule{flex:1 1 auto;block-size:var(--bw-hairline);background:var(--border);min-inline-size:24px}
+  /* Header: plain label + underline rule, then asymmetric statement / support */
+  .position__label{margin:0;font-family:var(--font-en);font-weight:var(--fw-bold);font-size:var(--fs-eyebrow);letter-spacing:var(--ls-widest);text-transform:uppercase;color:var(--accent-2)}
+  .position__divide{display:block;block-size:var(--bw-hairline);background:var(--border);margin-block:var(--sp-16) clamp(2rem,5vw,3.75rem)}
+  .position__lead{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,4fr);column-gap:clamp(2rem,5vw,5.5rem);row-gap:clamp(1.25rem,3vw,2rem);align-items:end}
   .position__statement{margin:0;font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:-.02em;line-height:1.04;font-size:clamp(2rem,1.2rem + 2.9vw,3.9rem);color:var(--ql-paper);text-wrap:balance}
   .position__statement .hero__accent{color:var(--ql-blue)}
   .position__support{margin:0;align-self:end;color:var(--text-muted);font-size:clamp(1.02rem,.98rem + .3vw,1.2rem);line-height:1.7;max-inline-size:40ch}
 
-  /* The connected system — one spine threads four relationships */
-  .position__system{position:relative;margin-block-start:clamp(2.75rem,6vw,5.5rem);--rail:2.75rem;--node:2.5rem;--spine-x:calc(var(--rail) + var(--node) / 2)}
-  .position__spine{position:absolute;inset-block:1.4rem 1.4rem;inset-inline-start:var(--spine-x);inline-size:var(--bw-thick);transform:translateX(-50%) scaleY(0);transform-origin:top;background:linear-gradient(180deg,var(--border-strong) 0%,var(--ql-blue) 55%,var(--ql-lime) 100%);opacity:0;transition:transform var(--dur-slower) var(--ease-shift),opacity var(--dur-normal) var(--ease-shift)}
-  .position__spine::before,.position__spine::after{content:"";position:absolute;inset-inline-start:50%;inline-size:11px;block-size:11px;border-radius:var(--radius-round);transform:translateX(-50%)}
-  .position__spine::before{inset-block-start:-5px;background:var(--border-strong)}
-  .position__spine::after{inset-block-end:-5px;background:var(--ql-lime);box-shadow:0 0 0 5px rgba(199,243,107,.16)}
-  .position__system.is-inview .position__spine{opacity:1;transform:translateX(-50%) scaleY(1)}
-  html[dir="rtl"] .position__spine{transform:translateX(50%) scaleY(0)}
-  html[dir="rtl"] .position__system.is-inview .position__spine{transform:translateX(50%) scaleY(1)}
+  /* Relationships: hollow input transforms into solid outcome.
+     No connector is drawn — the empty channel between the pair IS the link. */
+  .rels{margin-block-start:clamp(2.5rem,6vw,5.5rem);display:flex;flex-direction:column}
+  .rel{display:grid;grid-template-columns:2.25rem minmax(0,1fr) minmax(0,1fr);align-items:baseline;column-gap:clamp(1.25rem,4.5vw,4rem);padding-block:clamp(1.15rem,2.6vw,2.1rem);border-block-start:var(--bw-hairline) solid var(--border)}
+  .rel:last-child{border-block-end:var(--bw-hairline) solid var(--border)}
+  .rel__idx{font-family:var(--font-en);font-weight:var(--fw-bold);font-size:.78rem;letter-spacing:.14em;color:var(--text-muted);align-self:center}
+  .rel__word{font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:-.02em;line-height:.95;font-size:clamp(1.6rem,1rem + 2.5vw,3.2rem);white-space:nowrap}
+  .rel__from{justify-self:end;text-align:end;color:transparent;-webkit-text-stroke:1.6px var(--ql-paper);transition:color var(--dur-normal) var(--ease-shift),-webkit-text-stroke-color var(--dur-normal) var(--ease-shift)}
+  .rel__to{justify-self:start;color:var(--ql-blue)}
+  .rel:hover .rel__from{color:var(--ql-paper);-webkit-text-stroke-color:transparent}
+  @supports not ((-webkit-text-stroke:1px #000)){.rel__from{color:var(--ql-paper)}}
 
-  .rels{display:flex;flex-direction:column}
-  .rel{position:relative;display:grid;grid-template-columns:var(--rail) var(--node) minmax(0,1fr);align-items:center;column-gap:clamp(.85rem,2.2vw,1.9rem);padding-block:clamp(1.05rem,2.3vw,1.85rem);border-block-end:var(--bw-hairline) solid var(--border)}
-  .rel:last-child{border-block-end:0}
-  .rel__idx{font-family:var(--font-en);font-weight:var(--fw-bold);font-size:.78rem;letter-spacing:.14em;color:var(--text-muted)}
-  .rel__node{justify-self:center;inline-size:13px;block-size:13px;border-radius:var(--radius-round);border:var(--bw-thick) solid var(--ql-blue);background:var(--ql-black);position:relative;z-index:1;transition:var(--shift-transition)}
-  .rel__pair{display:flex;align-items:center;gap:clamp(.8rem,2vw,1.75rem);min-inline-size:0}
-  .rel__from,.rel__to{font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:-.02em;line-height:1;font-size:clamp(1.5rem,1rem + 2.1vw,2.85rem);white-space:nowrap}
-  .rel__from{color:var(--ql-paper)}
-  .rel__to{color:var(--ql-blue)}
-  .rel__join{flex:1 1 auto;display:flex;align-items:center;min-inline-size:44px;color:var(--ql-blue);opacity:.85;transition:opacity var(--dur-normal) var(--ease-shift)}
-  .rel__line{flex:1 1 auto;block-size:var(--bw-thick);background:currentColor;opacity:.5;min-inline-size:16px}
-  .rel__arc{flex:0 0 auto;inline-size:46px;block-size:22px;color:currentColor}
-  html[dir="rtl"] .rel__arc{transform:scaleX(-1)}
-  .rel:hover .rel__node{background:var(--ql-blue);box-shadow:0 0 0 5px rgba(36,71,255,.16)}
-  .rel:hover .rel__join{opacity:1}
-
-  /* final relationship — the produced IMPACT is emphasized */
-  .rel--impact .rel__from,.rel--impact .rel__to{font-size:clamp(1.65rem,1.05rem + 2.5vw,3.15rem)}
+  /* final relationship — the transformation resolves into IMPACT (all lime) */
+  .rel--impact .rel__word{font-size:clamp(1.75rem,1.05rem + 2.9vw,3.55rem)}
   .rel--impact .rel__to{color:var(--ql-lime)}
-  .rel--impact .rel__join{color:var(--ql-lime);opacity:1}
-  .rel--impact .rel__node{inline-size:15px;block-size:15px;border-color:var(--ql-lime);background:var(--ql-lime);box-shadow:0 0 0 5px rgba(199,243,107,.16)}
-  .rel--impact:hover .rel__node{background:var(--ql-lime)}
+  .rel--impact .rel__from{-webkit-text-stroke-color:var(--ql-lime)}
+  .rel--impact:hover .rel__from{color:var(--ql-lime);-webkit-text-stroke-color:transparent}
 
   /* 03 · SERVICES — editorial capability index */
   .caps{background:var(--surface-paper);color:var(--text-on-paper)}
@@ -992,7 +975,7 @@
   /* ---- Restructure responsive ---- */
   @media (max-width:960px){
     .about__grid,.start__grid{grid-template-columns:1fr}
-    .position__top{grid-template-columns:1fr}
+    .position__lead{grid-template-columns:1fr}
     .position__support{align-self:start}
     .work__grid{grid-template-columns:1fr}
     .work-item--wide .work-item__visual{aspect-ratio:16 / 10}
@@ -1020,20 +1003,14 @@
     .site-footer__cols{grid-template-columns:1fr}
     .about__stats{grid-template-columns:1fr 1fr}
   }
-  /* 02 · POSITIONING — mobile: vertical connected sequence (FROM ↓ TO) */
+  /* 02 · POSITIONING — mobile: input stacks over outcome, transform reads vertically */
   @media (max-width:640px){
-    .position__system{--rail:0rem;--node:2.25rem;--spine-x:calc(var(--node) / 2)}
-    .position__spine{inset-block:1.9rem 1.9rem}
-    .rel{grid-template-columns:var(--node) minmax(0,1fr);grid-template-areas:"node idx" "node pair";column-gap:var(--sp-16);row-gap:var(--sp-4);padding-block:clamp(1.6rem,7vw,2.1rem)}
-    .rel__idx{grid-area:idx;align-self:end}
-    .rel__node{grid-area:node;align-self:start;justify-self:center;margin-block-start:.55rem}
-    .rel__pair{grid-area:pair;flex-direction:column;align-items:flex-start;gap:var(--sp-8)}
-    .rel__from,.rel__to{font-size:clamp(1.7rem,9vw,2.3rem)}
-    .rel--impact .rel__from,.rel--impact .rel__to{font-size:clamp(1.85rem,10vw,2.55rem)}
-    .rel__join{flex-direction:column;align-items:flex-start;min-inline-size:0;min-block-size:30px;margin-inline-start:.35rem}
-    .rel__line{inline-size:var(--bw-thick);block-size:auto;min-block-size:12px;flex:1 1 auto}
-    .rel__arc{transform:rotate(90deg);inline-size:34px;block-size:18px}
-    html[dir="rtl"] .rel__arc{transform:rotate(90deg) scaleX(-1)}
+    .rel{grid-template-columns:2rem minmax(0,1fr);grid-template-areas:"idx from" ".   to";column-gap:var(--sp-12);row-gap:var(--sp-4);padding-block:clamp(1.5rem,6.5vw,2.1rem)}
+    .rel__idx{grid-area:idx;align-self:center}
+    .rel__from{grid-area:from;justify-self:start;text-align:start}
+    .rel__to{grid-area:to;justify-self:start}
+    .rel__word{font-size:clamp(1.9rem,10.5vw,2.7rem)}
+    .rel--impact .rel__word{font-size:clamp(2.05rem,11.5vw,2.95rem)}
   }
 
   /* ==========================================================================
@@ -1057,7 +1034,7 @@
   html[data-lang="ar"] .sec-eyebrow,html[data-lang="ar"] .hero__eyebrow,html[data-lang="ar"] .footcol__h,
   html[data-lang="ar"] .link-cta,html[data-lang="ar"] .work-item__badge,html[data-lang="ar"] .astep__label,
   html[data-lang="ar"] .cap__label,html[data-lang="ar"] .position__label,html[data-lang="ar"] .position__statement,
-  html[data-lang="ar"] .rel__from,html[data-lang="ar"] .rel__to,html[data-lang="ar"] .rel__idx,
+  html[data-lang="ar"] .rel__word,html[data-lang="ar"] .rel__idx,
   html[data-lang="ar"] .tier__name:not(.keep-en){letter-spacing:0;text-transform:none}
   </style>
 </head>
@@ -1135,57 +1112,34 @@
 
       <!-- 02 · POSITIONING -->
       <section class="section position" id="position" data-section aria-labelledby="position-title">
-        <div class="sig-accent sig-accent--tr" aria-hidden="true"><svg viewBox="0 0 240 240" fill="none"><path d="M48 224 L48 116 A68 68 0 0 1 116 48 L224 48"/></svg></div>
         <div class="container container--wide">
-          <div class="position__top">
-            <p class="position__marker" data-reveal>
-              <span class="position__idx">02</span>
-              <span class="position__label" data-ar="التموضع">POSITIONING</span>
-              <span class="position__rule" aria-hidden="true"></span>
-            </p>
+          <p class="position__label" data-reveal data-ar="التموضع">POSITIONING</p>
+          <span class="position__divide" data-reveal aria-hidden="true"></span>
+          <div class="position__lead">
             <h2 class="position__statement" id="position-title" data-reveal data-ar='الأفكار الجيدة تصبح ذات معنى <span class="hero__accent">حين تترابط الأشياء الصحيحة.</span>'>Good ideas become meaningful <span class="hero__accent">when the right things connect.</span></h2>
             <p class="position__support" data-reveal data-ar="نربط الأفكار بالتصميم والتواصل لنصنع علاماتٍ وتجارب ورسائل تُحرّك الناس.">We connect ideas with design and communication to create brands, experiences, and messages that move people.</p>
           </div>
 
-          <div class="position__system" data-reveal>
-            <span class="position__spine" aria-hidden="true"></span>
-            <div class="rels" data-stagger>
-              <div class="rel">
-                <span class="rel__idx">01</span>
-                <span class="rel__node" aria-hidden="true"></span>
-                <span class="rel__pair">
-                  <span class="rel__from" data-ar="فكرة">Idea</span>
-                  <span class="rel__join" aria-hidden="true"><span class="rel__line"></span><svg class="rel__arc" viewBox="0 0 46 22" fill="none"><path d="M0 11 H28 A11 11 0 0 1 39 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
-                  <span class="rel__to" data-ar="تصميم">Design</span>
-                </span>
-              </div>
-              <div class="rel">
-                <span class="rel__idx">02</span>
-                <span class="rel__node" aria-hidden="true"></span>
-                <span class="rel__pair">
-                  <span class="rel__from" data-ar="رسالة">Message</span>
-                  <span class="rel__join" aria-hidden="true"><span class="rel__line"></span><svg class="rel__arc" viewBox="0 0 46 22" fill="none"><path d="M0 11 H28 A11 11 0 0 1 39 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
-                  <span class="rel__to" data-ar="جمهور">Audience</span>
-                </span>
-              </div>
-              <div class="rel">
-                <span class="rel__idx">03</span>
-                <span class="rel__node" aria-hidden="true"></span>
-                <span class="rel__pair">
-                  <span class="rel__from" data-ar="علامة">Brand</span>
-                  <span class="rel__join" aria-hidden="true"><span class="rel__line"></span><svg class="rel__arc" viewBox="0 0 46 22" fill="none"><path d="M0 11 H28 A11 11 0 0 1 39 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
-                  <span class="rel__to" data-ar="تجربة">Experience</span>
-                </span>
-              </div>
-              <div class="rel rel--impact">
-                <span class="rel__idx">04</span>
-                <span class="rel__node" aria-hidden="true"></span>
-                <span class="rel__pair">
-                  <span class="rel__from" data-ar="إبداع">Creative</span>
-                  <span class="rel__join" aria-hidden="true"><span class="rel__line"></span><svg class="rel__arc" viewBox="0 0 46 22" fill="none"><path d="M0 11 H28 A11 11 0 0 1 39 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
-                  <span class="rel__to" data-ar="أثر">Impact</span>
-                </span>
-              </div>
+          <div class="rels" data-stagger>
+            <div class="rel">
+              <span class="rel__idx">01</span>
+              <span class="rel__word rel__from" data-ar="فكرة">Idea</span>
+              <span class="rel__word rel__to" data-ar="تصميم">Design</span>
+            </div>
+            <div class="rel">
+              <span class="rel__idx">02</span>
+              <span class="rel__word rel__from" data-ar="رسالة">Message</span>
+              <span class="rel__word rel__to" data-ar="جمهور">Audience</span>
+            </div>
+            <div class="rel">
+              <span class="rel__idx">03</span>
+              <span class="rel__word rel__from" data-ar="علامة">Brand</span>
+              <span class="rel__word rel__to" data-ar="تجربة">Experience</span>
+            </div>
+            <div class="rel rel--impact">
+              <span class="rel__idx">04</span>
+              <span class="rel__word rel__from" data-ar="إبداع">Creative</span>
+              <span class="rel__word rel__to" data-ar="أثر">Impact</span>
             </div>
           </div>
         </div>
