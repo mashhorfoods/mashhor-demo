@@ -505,7 +505,7 @@
   .pkg-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-24);margin-block-start:var(--sp-48);align-items:start}
   .pkg-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:var(--sp-8);padding:var(--sp-40) var(--sp-24) var(--sp-32);background:var(--surface-paper);color:var(--text-on-paper);border:1.5px solid var(--ql-blue);border-radius:var(--radius-lg);text-align:center;overflow:hidden;transition:var(--shift-transition)}
   .pkg-card:hover{transform:translateY(-6px);box-shadow:0 20px 46px rgba(0,0,0,.42)}
-  .pkg-card--featured{margin-block-start:-12px}                 /* MEDIUM taller by 12px — SHIFT */
+  .pkg-card--featured{margin-block-start:-12px}                 /* STANDARD taller by 12px — SHIFT */
   .pkg-card__bar{position:absolute;inset-block-start:0;inset-inline:0;block-size:6px;background:var(--ql-lime)}
   .pkg-card__name{display:inline-flex;align-items:center;gap:var(--sp-8);font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:0.12em;color:var(--ql-black);font-size:1.05rem}
   .pkg-card__price{margin-block-start:var(--sp-8);font-family:var(--font-en);font-weight:var(--fw-black);font-size:clamp(2rem,1.6rem + 1.4vw,2.6rem);color:var(--ql-blue);line-height:1}
@@ -1090,7 +1090,7 @@
             <!-- MEDIUM (featured) -->
             <article class="pkg-card pkg-card--featured">
               <span class="pkg-card__bar" aria-hidden="true"></span>
-              <div class="pkg-card__name keep-en"><span aria-hidden="true">⭐</span> MEDIUM</div>
+              <div class="pkg-card__name keep-en"><span aria-hidden="true">⭐</span> STANDARD</div>
               <div class="pkg-card__price keep-en">$649</div>
               <div class="pkg-card__dur keep-en" data-ar="10 أيام">10 DAYS</div>
               <span class="pkg-card__badge" data-ar="الخيار الأفضل قيمة">Best value</span>
@@ -1110,7 +1110,7 @@
           <div class="pkg-selector" data-pkg-selector data-reveal>
             <div class="pkg-tabs" role="tablist" aria-label="Package levels">
               <button class="pkg-tab is-active keep-en" type="button" role="tab" id="tab-basic" aria-selected="true" aria-controls="panel-basic" data-pkg-tab="basic">BASIC</button>
-              <button class="pkg-tab keep-en" type="button" role="tab" id="tab-medium" aria-selected="false" aria-controls="panel-medium" data-pkg-tab="medium" tabindex="-1">MEDIUM</button>
+              <button class="pkg-tab keep-en" type="button" role="tab" id="tab-standard" aria-selected="false" aria-controls="panel-standard" data-pkg-tab="standard" tabindex="-1">STANDARD</button>
               <button class="pkg-tab keep-en" type="button" role="tab" id="tab-premium" aria-selected="false" aria-controls="panel-premium" data-pkg-tab="premium" tabindex="-1">PREMIUM</button>
             </div>
 
@@ -1149,7 +1149,7 @@
               </div>
 
               <!-- MEDIUM panel -->
-              <div class="pkg-panel" role="tabpanel" id="panel-medium" aria-labelledby="tab-medium" data-pkg-panel="medium" hidden>
+              <div class="pkg-panel" role="tabpanel" id="panel-standard" aria-labelledby="tab-standard" data-pkg-panel="standard" hidden>
                 <div class="pkg-panel__aside">
                   <h3 class="pkg-panel__title" data-ar="حضور بصري متكامل">Integrated visual presence</h3>
                   <p class="pkg-panel__desc" data-ar="للمشاريع التي تحتاج إلى محتوى متنوع ومنظومة بصرية موحدة تساعد على الحفاظ على الاتساق في مختلف المواد.">For projects that need varied content and a unified visual system that keeps materials consistent.</p>
@@ -1238,30 +1238,30 @@
           <h2 class="compare__title" id="compare-title" data-ar="مقارنة الباقات">Compare packages</h2>
           <div class="compare__wrap" data-reveal>
             <table class="cmp">
-              <caption class="u-visually-hidden" data-ar="مقارنة باقات BASIC وMEDIUM وPREMIUM">Comparison of BASIC, MEDIUM and PREMIUM packages</caption>
+              <caption class="u-visually-hidden" data-ar="مقارنة باقات BASIC وSTANDARD وPREMIUM">Comparison of BASIC, STANDARD and PREMIUM packages</caption>
               <thead>
                 <tr>
                   <th scope="col"></th>
                   <th scope="col" class="keep-en">BASIC</th>
-                  <th scope="col" class="keep-en"><span class="cmp__star" aria-hidden="true">⭐</span> MEDIUM</th>
+                  <th scope="col" class="keep-en"><span class="cmp__star" aria-hidden="true">⭐</span> STANDARD</th>
                   <th scope="col" class="keep-en">PREMIUM</th>
                 </tr>
               </thead>
               <tbody>
-                <tr><th scope="row" data-ar="منشورات">Posts</th><td class="v-num" data-pkg="BASIC">6</td><td class="v-num" data-pkg="MEDIUM">10</td><td class="v-num" data-pkg="PREMIUM">15</td></tr>
-                <tr><th scope="row" data-ar="Stories">Stories</th><td class="v-num" data-pkg="BASIC">4</td><td class="v-num" data-pkg="MEDIUM">6</td><td class="v-num" data-pkg="PREMIUM">10</td></tr>
-                <tr><th scope="row" data-ar="إعلانات رقمية">Digital ads</th><td class="v-num" data-pkg="BASIC">1</td><td class="v-num" data-pkg="MEDIUM">2</td><td class="v-num" data-pkg="PREMIUM">3</td></tr>
-                <tr><th scope="row" data-ar="أغلفة حسابات">Account covers</th><td class="v-num" data-pkg="BASIC">1</td><td class="v-num" data-pkg="MEDIUM">2</td><td class="v-num" data-pkg="PREMIUM">3</td></tr>
-                <tr><th scope="row" data-ar="بروفايل / بروشور">Profile / brochure</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-num" data-pkg="MEDIUM">1</td><td class="v-num" data-pkg="PREMIUM">1</td></tr>
-                <tr><th scope="row" data-ar="بطاقة أعمال">Business card</th><td class="v-num" data-pkg="BASIC">1</td><td class="v-num" data-pkg="MEDIUM">1</td><td class="v-dash" data-pkg="PREMIUM">—</td></tr>
-                <tr><th scope="row" data-ar="فلاير / بوستر">Flyer / poster</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-num" data-pkg="MEDIUM">2</td><td class="v-num" data-pkg="PREMIUM">3</td></tr>
-                <tr><th scope="row" data-ar="نظام بصري للمحتوى">Content visual system</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-check" data-pkg="MEDIUM">✓</td><td class="v-check" data-pkg="PREMIUM">✓</td></tr>
-                <tr><th scope="row" data-ar="قوالب قابلة لإعادة الاستخدام">Reusable templates</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-dash" data-pkg="MEDIUM">—</td><td class="v-num" data-pkg="PREMIUM">3</td></tr>
-                <tr><th scope="row" data-ar="حملة بصرية">Visual campaign</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-dash" data-pkg="MEDIUM">—</td><td class="v-check" data-pkg="PREMIUM">✓</td></tr>
-                <tr><th scope="row" class="keep-en">Website UI/UX</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-dash" data-pkg="MEDIUM">—</td><td class="v-text" data-pkg="PREMIUM" data-ar="حتى 5 صفحات">Up to 5 pages</td></tr>
-                <tr><th scope="row" data-ar="المراجعات">Revisions</th><td class="v-num" data-pkg="BASIC">2</td><td class="v-num" data-pkg="MEDIUM">3</td><td class="v-num" data-pkg="PREMIUM">4</td></tr>
-                <tr><th scope="row" data-ar="مدة التنفيذ">Timeline</th><td class="v-text" data-pkg="BASIC" data-ar="7 أيام">7 days</td><td class="v-text" data-pkg="MEDIUM" data-ar="10 أيام">10 days</td><td class="v-text" data-pkg="PREMIUM" data-ar="20 يوم">20 days</td></tr>
-                <tr><th scope="row" data-ar="السعر">Price</th><td class="v-price keep-en" data-pkg="BASIC">$299</td><td class="v-price keep-en" data-pkg="MEDIUM">$649</td><td class="v-price keep-en" data-pkg="PREMIUM">$1,299</td></tr>
+                <tr><th scope="row" data-ar="منشورات">Posts</th><td class="v-num" data-pkg="BASIC">6</td><td class="v-num" data-pkg="STANDARD">10</td><td class="v-num" data-pkg="PREMIUM">15</td></tr>
+                <tr><th scope="row" data-ar="Stories">Stories</th><td class="v-num" data-pkg="BASIC">4</td><td class="v-num" data-pkg="STANDARD">6</td><td class="v-num" data-pkg="PREMIUM">10</td></tr>
+                <tr><th scope="row" data-ar="إعلانات رقمية">Digital ads</th><td class="v-num" data-pkg="BASIC">1</td><td class="v-num" data-pkg="STANDARD">2</td><td class="v-num" data-pkg="PREMIUM">3</td></tr>
+                <tr><th scope="row" data-ar="أغلفة حسابات">Account covers</th><td class="v-num" data-pkg="BASIC">1</td><td class="v-num" data-pkg="STANDARD">2</td><td class="v-num" data-pkg="PREMIUM">3</td></tr>
+                <tr><th scope="row" data-ar="بروفايل / بروشور">Profile / brochure</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-num" data-pkg="STANDARD">1</td><td class="v-num" data-pkg="PREMIUM">1</td></tr>
+                <tr><th scope="row" data-ar="بطاقة أعمال">Business card</th><td class="v-num" data-pkg="BASIC">1</td><td class="v-num" data-pkg="STANDARD">1</td><td class="v-dash" data-pkg="PREMIUM">—</td></tr>
+                <tr><th scope="row" data-ar="فلاير / بوستر">Flyer / poster</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-num" data-pkg="STANDARD">2</td><td class="v-num" data-pkg="PREMIUM">3</td></tr>
+                <tr><th scope="row" data-ar="نظام بصري للمحتوى">Content visual system</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-check" data-pkg="STANDARD">✓</td><td class="v-check" data-pkg="PREMIUM">✓</td></tr>
+                <tr><th scope="row" data-ar="قوالب قابلة لإعادة الاستخدام">Reusable templates</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-dash" data-pkg="STANDARD">—</td><td class="v-num" data-pkg="PREMIUM">3</td></tr>
+                <tr><th scope="row" data-ar="حملة بصرية">Visual campaign</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-dash" data-pkg="STANDARD">—</td><td class="v-check" data-pkg="PREMIUM">✓</td></tr>
+                <tr><th scope="row" class="keep-en">Website UI/UX</th><td class="v-dash" data-pkg="BASIC">—</td><td class="v-dash" data-pkg="STANDARD">—</td><td class="v-text" data-pkg="PREMIUM" data-ar="حتى 5 صفحات">Up to 5 pages</td></tr>
+                <tr><th scope="row" data-ar="المراجعات">Revisions</th><td class="v-num" data-pkg="BASIC">2</td><td class="v-num" data-pkg="STANDARD">3</td><td class="v-num" data-pkg="PREMIUM">4</td></tr>
+                <tr><th scope="row" data-ar="مدة التنفيذ">Timeline</th><td class="v-text" data-pkg="BASIC" data-ar="7 أيام">7 days</td><td class="v-text" data-pkg="STANDARD" data-ar="10 أيام">10 days</td><td class="v-text" data-pkg="PREMIUM" data-ar="20 يوم">20 days</td></tr>
+                <tr><th scope="row" data-ar="السعر">Price</th><td class="v-price keep-en" data-pkg="BASIC">$299</td><td class="v-price keep-en" data-pkg="STANDARD">$649</td><td class="v-price keep-en" data-pkg="PREMIUM">$1,299</td></tr>
               </tbody>
             </table>
           </div>
@@ -1366,7 +1366,7 @@
               <h3 class="policy__title" data-ar="المراجعات">Revisions</h3>
               <ul class="policy__list">
                 <li data-ar="&lt;strong&gt;BASIC&lt;/strong&gt; — جولتان"><strong class="keep-en">BASIC</strong> — 2 rounds</li>
-                <li data-ar="&lt;strong&gt;MEDIUM&lt;/strong&gt; — 3 جولات"><strong class="keep-en">MEDIUM</strong> — 3 rounds</li>
+                <li data-ar="&lt;strong&gt;STANDARD&lt;/strong&gt; — 3 جولات"><strong class="keep-en">STANDARD</strong> — 3 rounds</li>
                 <li data-ar="&lt;strong&gt;PREMIUM&lt;/strong&gt; — 4 جولات"><strong class="keep-en">PREMIUM</strong> — 4 rounds</li>
               </ul>
               <p class="policy__note" data-ar="تُحتسب الجولة بعد استلام الملاحظات المجمعة.">A round counts once consolidated feedback is received.</p>
@@ -1518,7 +1518,7 @@
       sections.forEach(function(s){ observer.observe(s); });
     }
 
-    /* 5 · PACKAGE TAB SELECTOR — switch BASIC / MEDIUM / PREMIUM detail */
+    /* 5 · PACKAGE TAB SELECTOR — switch BASIC / STANDARD / PREMIUM detail */
     function initPkgTabs() {
       var root = doc.querySelector("[data-pkg-selector]");
       if(!root) return;
@@ -1547,9 +1547,9 @@
           if(next){ e.preventDefault(); activate(next.getAttribute("data-pkg-tab"), true); }
         });
       });
-      /* Deep-link: /packages.html#basic|#medium|#premium opens that tab */
+      /* Deep-link: /packages.html#basic|#standard|#premium opens that tab */
       var h = (window.location.hash || "").replace("#","").toLowerCase();
-      if(["basic","medium","premium"].indexOf(h) >= 0){
+      if(["basic","standard","premium"].indexOf(h) >= 0){
         activate(h);
         window.requestAnimationFrame(function(){ root.scrollIntoView({block:"start"}); });
       }
