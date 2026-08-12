@@ -497,45 +497,35 @@
   .packages__title{color:var(--ql-paper);font-weight:var(--fw-bold);font-size:clamp(1.9rem,1.4rem + 2vw,2.5rem);line-height:1.15}
   .packages__subtitle{margin-block-start:var(--sp-8);color:var(--ql-gray);font-weight:var(--fw-regular);font-size:clamp(1.05rem,1rem + 0.3vw,1.125rem)}
 
-  /* Part A — intro cards (Paper cards, thin blue FRAME) */
-  .pkg-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-24);margin-block-start:var(--sp-48);align-items:start}
-  .pkg-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:var(--sp-8);padding:var(--sp-40) var(--sp-24) var(--sp-32);background:var(--surface-paper);color:var(--text-on-paper);border:1.5px solid var(--ql-blue);border-radius:var(--radius-lg);text-align:center;overflow:hidden;transition:var(--shift-transition)}
-  .pkg-card:hover{transform:translateY(-6px);box-shadow:0 20px 46px rgba(0,0,0,.42)}
-  .pkg-card--featured{margin-block-start:-12px}                 /* STANDARD taller by 12px — SHIFT */
-  .pkg-card__bar{position:absolute;inset-block-start:0;inset-inline:0;block-size:6px;background:var(--ql-lime)}
-  .pkg-card__name{display:inline-flex;align-items:center;gap:var(--sp-8);font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:0.12em;color:var(--ql-black);font-size:1.05rem}
-  .pkg-card__price{margin-block-start:var(--sp-8);font-family:var(--font-en);font-weight:var(--fw-black);font-size:clamp(2rem,1.6rem + 1.4vw,2.6rem);color:var(--ql-blue);line-height:1}
-  .pkg-card__dur{font-family:var(--font-en);font-weight:var(--fw-semibold);letter-spacing:0.14em;color:var(--ql-gray);font-size:0.82rem}
-  .pkg-card__badge{margin-block-start:var(--sp-4);padding:5px 14px;background:rgba(36,71,255,.12);color:var(--ql-blue);border-radius:var(--radius-pill);font-size:0.82rem;font-weight:var(--fw-semibold)}
-  .pkg-card__cta{margin-block-start:var(--sp-16);min-inline-size:150px}
-  .pkg-card__cta--lime{background:var(--ql-lime);color:var(--ql-black);border-color:var(--ql-lime)}   /* PREMIUM CTA */
-  .pkg-card__cta--lime:hover{background:var(--ql-lime-deep);border-color:var(--ql-lime-deep)}
+  /* Sticky in-page sub-navigation — jump between sections */
+  .subnav{position:sticky;top:calc(var(--header-h) - 1px);z-index:calc(var(--z-sticky) - 1);background:var(--surface-paper);border-block:var(--bw-hairline) solid var(--border-on-paper)}
+  .subnav__inner{display:flex;gap:clamp(.25rem,2vw,1.75rem);list-style:none;margin:0;padding:0;overflow-x:auto;scrollbar-width:none}
+  .subnav__inner::-webkit-scrollbar{display:none}
+  .subnav__link{display:inline-flex;align-items:center;padding:var(--sp-16) var(--sp-8);font-family:var(--font-en);font-size:.78rem;font-weight:var(--fw-bold);letter-spacing:.08em;text-transform:uppercase;color:var(--ql-gray);white-space:nowrap;border-block-end:2px solid transparent;transition:color var(--dur-fast) var(--ease-standard),border-color var(--dur-fast) var(--ease-standard)}
+  .subnav__link:hover{color:var(--ql-black)}
+  .subnav__link.is-active{color:var(--ql-blue);border-block-end-color:var(--ql-blue)}
 
-  /* Part B — tab selector */
-  .pkg-selector{margin-block-start:var(--sp-64)}
-  .pkg-tabs{display:inline-flex;gap:var(--sp-8);padding:var(--sp-4);border-radius:var(--radius-pill);background:rgba(244,241,234,.05)}
-  .pkg-tab{padding:var(--sp-12) var(--sp-32);border-radius:var(--radius-pill);font-family:var(--font-en);font-weight:var(--fw-bold);letter-spacing:0.08em;color:var(--ql-blue);background:transparent;border:1.5px solid transparent;cursor:pointer;transition:var(--shift-transition)}
-  .pkg-tab:hover{border-color:var(--ql-blue)}
-  .pkg-tab.is-active{background:var(--ql-blue);color:var(--ql-paper);border-color:var(--ql-blue)}   /* active tab */
-  .pkg-tab:focus-visible{outline:none;box-shadow:var(--shadow-focus)}
-  .pkg-panels{margin-block-start:var(--sp-32)}
-  .pkg-panel{display:grid;grid-template-columns:4fr 6fr;gap:var(--sp-48);padding:var(--sp-40);border:1.5px solid var(--border-strong);border-radius:var(--radius-lg)}
-  .pkg-panel[hidden]{display:none}
-  .pkg-panel__title{color:var(--ql-paper);font-weight:var(--fw-bold);font-size:clamp(1.5rem,1.2rem + 1.4vw,2rem);line-height:1.2}
-  .pkg-panel__desc{margin-block-start:var(--sp-16);color:var(--ql-gray);font-size:1rem;line-height:1.7}
-  .pkg-panel__price{margin-block-start:var(--sp-24);color:var(--ql-blue);font-family:var(--font-en);font-weight:var(--fw-bold);font-size:1.2rem}
-  .pkg-deliverables{display:flex;flex-direction:column;gap:var(--sp-24)}
-  .pkg-group + .pkg-group{border-block-start:var(--link-width) solid var(--border);padding-block-start:var(--sp-24)}  /* LINK divider */
-  .pkg-group__head{color:var(--ql-lime);font-weight:var(--fw-bold);font-size:0.95rem;margin-block-end:var(--sp-12)}
-  .pkg-group__sub{color:var(--ql-paper);font-size:0.9rem;opacity:.82;margin-block-end:var(--sp-8)}
-  .pkg-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:var(--sp-8)}
-  .pkg-list li{position:relative;padding-inline-start:var(--sp-20);color:var(--ql-paper);font-size:0.95rem;line-height:1.6}
-  .pkg-list li::before{content:"";position:absolute;inset-inline-start:0;inset-block-start:0.55em;inline-size:6px;block-size:6px;border-radius:var(--radius-round);background:var(--ql-blue)}
-  .pkg-note{margin-block-start:var(--sp-12);color:var(--ql-gray);font-size:0.85rem}
-  /* PREMIUM excludes ("لا يشمل") — light box */
-  .pkg-excludes{margin-block-start:var(--sp-24);padding:var(--sp-20) var(--sp-24);background:var(--surface-paper);color:var(--text-on-paper);border-radius:var(--radius-md)}
-  .pkg-excludes__head{color:var(--ql-black);font-weight:var(--fw-bold);margin-block-end:var(--sp-8)}
-  .pkg-excludes__list{color:var(--text-on-paper-muted);font-size:0.92rem;line-height:1.7}
+  /* Package cards — self-contained (level · price · highlights · CTA) */
+  .pkg-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(1.25rem,2vw,1.75rem);margin-block-start:clamp(2rem,4vw,3rem);align-items:stretch}
+  .pkg-card{position:relative;display:flex;flex-direction:column;padding:clamp(1.6rem,2.6vw,2.4rem);background:var(--surface-paper);color:var(--text-on-paper);border:1.5px solid transparent;border-radius:var(--radius-lg);border-end-start-radius:var(--arc-xl);text-align:start;transition:transform var(--dur-normal) var(--ease-shift),box-shadow var(--dur-normal) var(--ease-shift),border-color var(--dur-normal) var(--ease-shift)}
+  .pkg-card:hover{transform:translateY(-5px);box-shadow:0 24px 56px rgba(0,0,0,.4)}
+  .pkg-card--featured{border-color:var(--ql-blue)}
+  .pkg-card__bar{position:absolute;inset-block-start:0;inset-inline:0;block-size:5px;background:var(--ql-lime);border-start-start-radius:var(--radius-lg);border-start-end-radius:var(--radius-lg)}
+  .pkg-card__head{display:flex;align-items:center;gap:var(--sp-12)}
+  .pkg-card__tag{font-family:var(--font-en);font-size:var(--fs-caption);font-weight:var(--fw-bold);letter-spacing:var(--ls-wide);text-transform:uppercase;color:var(--ql-blue)}
+  .pkg-card__badge{margin-inline-start:auto;padding:3px 10px;background:var(--ql-blue);color:var(--ql-paper);border-radius:var(--radius-pill);font-size:.66rem;font-weight:var(--fw-bold);letter-spacing:.04em;text-transform:uppercase}
+  .pkg-card__name{margin-block-start:var(--sp-12);font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:-.01em;font-size:clamp(1.6rem,1.3rem + 1vw,2.1rem);color:var(--ql-black);line-height:1}
+  .pkg-card__price{margin-block-start:var(--sp-16);font-family:var(--font-en);font-weight:var(--fw-black);font-size:clamp(1.9rem,1.5rem + 1.2vw,2.5rem);color:var(--ql-black);line-height:1}
+  .pkg-card__price small{display:block;margin-block-start:var(--sp-8);font-size:.72rem;font-weight:var(--fw-semibold);letter-spacing:.1em;text-transform:uppercase;color:var(--ql-gray)}
+  .pkg-card__pitch{margin-block-start:var(--sp-16);color:var(--text-on-paper-muted);font-size:.95rem;line-height:1.55}
+  .pkg-card__incl{margin-block-start:var(--sp-24);font-family:var(--font-en);font-size:.72rem;font-weight:var(--fw-bold);letter-spacing:.08em;text-transform:uppercase;color:var(--ql-gray)}
+  .pkg-card__list{list-style:none;margin:var(--sp-12) 0 0;padding:0;display:flex;flex-direction:column;gap:var(--sp-8)}
+  .pkg-card__list li{position:relative;padding-inline-start:var(--sp-24);color:var(--ql-black);font-size:.95rem;line-height:1.5}
+  .pkg-card__list li::before{content:"";position:absolute;inset-inline-start:0;inset-block-start:.45em;inline-size:8px;block-size:8px;border-radius:2px;background:var(--ql-blue)}
+  .pkg-card__foot{margin-block-start:auto;padding-block-start:var(--sp-24);display:flex;flex-direction:column;gap:var(--sp-16);align-items:flex-start}
+  .pkg-card__cta{align-self:stretch;justify-content:center}
+  .pkg-card__compare{font-family:var(--font-en);font-size:.74rem;font-weight:var(--fw-bold);letter-spacing:.06em;text-transform:uppercase;color:var(--ql-gray);transition:color var(--dur-fast) var(--ease-standard)}
+  .pkg-card__compare:hover{color:var(--ql-blue)}
 
   /* ==========================================================================
      COMPARISON TABLE (Prompt 06) — Black bg · framed columns · numbers Lime
@@ -591,17 +581,23 @@
   /* ==========================================================================
      POLICIES (Prompt 07) — Paper bg · 3 columns (Reviews / Payment / Terms)
      ========================================================================== */
-  .policies{background:var(--surface-paper);color:var(--text-on-paper)}
-  .policies__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-40)}
-  .policy{padding-inline:var(--sp-20)}
-  .policy + .policy{border-inline-start:var(--bw-hairline) solid rgba(107,107,118,.35)}  /* Cool Gray column divider */
-  .policy__title{color:var(--ql-blue);font-weight:var(--fw-bold);font-size:1.3rem;padding-block-end:var(--sp-16);margin-block-end:var(--sp-20);border-block-end:var(--bw-hairline) solid rgba(107,107,118,.30)}
-  .policy__list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:var(--sp-12)}
-  .policy__list li{color:var(--ql-black);font-size:0.98rem;line-height:1.6}
-  .policy__list strong{color:var(--ql-blue);font-weight:var(--fw-bold)}
-  .policy__list--bullets li{position:relative;padding-inline-start:var(--sp-20)}
-  .policy__list--bullets li::before{content:"";position:absolute;inset-inline-start:0;inset-block-start:0.5em;inline-size:7px;block-size:7px;border-radius:var(--radius-round);background:var(--ql-blue)}
-  .policy__note{margin-block-start:var(--sp-16);color:var(--ql-gray);font-size:0.85rem;line-height:1.6}
+  .faq{background:var(--surface-paper);color:var(--text-on-paper)}
+  .faq__grid{max-inline-size:62rem;margin-block-start:clamp(2rem,4vw,3rem)}
+  .faq__item{border-block-start:var(--bw-hairline) solid var(--border-on-paper)}
+  .faq__item:last-child{border-block-end:var(--bw-hairline) solid var(--border-on-paper)}
+  .faq__q{inline-size:100%;display:flex;align-items:center;justify-content:space-between;gap:var(--sp-24);padding-block:clamp(1.1rem,2.2vw,1.55rem);background:none;border:0;text-align:start;cursor:pointer;color:var(--ql-black);font-family:var(--font-en);font-weight:var(--fw-bold);font-size:clamp(1.05rem,1rem + .4vw,1.3rem);line-height:1.3;transition:color var(--dur-fast) var(--ease-standard)}
+  .faq__q:hover{color:var(--ql-blue)}
+  .faq__q:focus-visible{outline:var(--bw-thick) solid var(--ql-blue);outline-offset:3px;border-radius:var(--radius-xs)}
+  .faq__icon{flex:0 0 auto;inline-size:22px;block-size:22px;position:relative;color:var(--ql-blue)}
+  .faq__icon::before,.faq__icon::after{content:"";position:absolute;inset-inline-start:50%;inset-block-start:50%;background:currentColor;border-radius:2px}
+  .faq__icon::before{inline-size:14px;block-size:2px;transform:translate(-50%,-50%)}
+  .faq__icon::after{inline-size:2px;block-size:14px;transform:translate(-50%,-50%);transition:transform var(--dur-normal) var(--ease-shift)}
+  .faq__item.is-open .faq__icon::after{transform:translate(-50%,-50%) scaleY(0)}
+  .faq__a{display:grid;grid-template-rows:0fr;transition:grid-template-rows var(--dur-normal) var(--ease-shift)}
+  .faq__item.is-open .faq__a{grid-template-rows:1fr}
+  .faq__a-inner{overflow:hidden}
+  .faq__a p{margin:0;color:var(--text-on-paper-muted);font-size:1rem;line-height:1.7;padding-block-end:clamp(1.1rem,2.2vw,1.6rem);max-inline-size:64ch}
+  .faq__a strong{color:var(--ql-black);font-weight:var(--fw-bold)}
 
   /* ==========================================================================
      CONTACT (Prompt 08) — Black bg · split (form left / visual right) · 2-step
@@ -676,7 +672,7 @@
   .sig-accent--bl{inset-block-end:-5%;inset-inline-start:-4%;transform:rotate(180deg)}
   @media (max-width:768px){.sig-accent{inline-size:min(60vw,300px);opacity:.05}}
   /* clip the signature watermark so it never pushes horizontal overflow at small widths */
-  .packages,.compare,.addons,.process,.policies{overflow:clip}
+  .packages,.compare,.addons,.process{overflow:clip}
 
   /* Staggered reveal — choreographed grid entrances */
   [data-stagger] > *{opacity:0;transform:translateY(22px);transition:opacity var(--dur-slow) var(--ease-shift),transform var(--dur-slow) var(--ease-shift)}
@@ -770,12 +766,8 @@
     .service-card__head{display:flex;align-items:baseline;gap:var(--sp-12);flex-wrap:wrap}
     .service-card__num{position:static;font-size:1.5rem;line-height:1.2}
 
-    /* PACKAGES mobile: cards stack, tabs become vertical buttons, panel one column */
+    /* PACKAGES mobile: cards stack */
     .pkg-cards{grid-template-columns:1fr;gap:var(--sp-20);max-inline-size:440px;margin-inline:auto}
-    .pkg-card--featured{margin-block-start:0}
-    .pkg-tabs{display:flex;flex-direction:column;inline-size:100%;border-radius:var(--radius-md);gap:var(--sp-8)}
-    .pkg-tab{inline-size:100%;text-align:center}
-    .pkg-panel{grid-template-columns:1fr;gap:var(--sp-32);padding:var(--sp-24)}
 
     /* COMPARISON mobile: NO horizontal scroll — each feature becomes a stacked card
        showing all three values inline (e.g. "منشورات: 6 | 10 | 15"). */
@@ -803,11 +795,6 @@
     .pstep__desc{max-inline-size:none;margin-block-start:var(--sp-4)}
     .pstep::before{content:"";position:absolute;inset-inline-start:31px;inset-block-start:44px;block-size:100%;inline-size:var(--link-width);background:var(--ql-blue);z-index:0}  /* timeline LINK */
     .pstep:last-child::before{display:none}
-
-    /* POLICIES mobile: single column, drop side dividers */
-    .policies__grid{grid-template-columns:1fr;gap:var(--sp-32)}
-    .policy{padding-inline:0}
-    .policy + .policy{border-inline-start:0}
 
     /* CONTACT mobile: hide visual, form full width */
     .contact__grid{grid-template-columns:1fr}
@@ -1034,172 +1021,101 @@
 
       <section class="section section--paper section--below-header">
         <div class="container container--wide">
+          <p style="margin-block-end:var(--sp-24)"><a class="link-cta" style="color:var(--ql-black)" href="index.html"><span class="link-cta__line" aria-hidden="true"></span> <span>Back to home</span></a></p>
           <p class="sec-eyebrow">ENGAGEMENT</p>
-          <h1 class="sec-title">Packages &amp; Services</h1>
-          <p class="sec-lead">Full breakdown of packages, deliverables, comparison, add-on services, workflow and terms.</p>
-          <p style="margin-block-start:var(--sp-24)"><a class="link-cta" style="color:var(--ql-black)" href="index.html"><span class="link-cta__line" aria-hidden="true"></span> <span>Back to home</span></a></p>
+          <h1 class="sec-title">Packages</h1>
+          <p class="sec-lead">Three levels of creative engagement. Compare what’s included, add what you need, and see how we work — then start a conversation.</p>
         </div>
       </section>
+
+      <!-- Sticky in-page navigation -->
+      <nav class="subnav" data-subnav aria-label="Packages page sections">
+        <ul class="subnav__inner container container--wide">
+          <li><a class="subnav__link" href="#packages" data-subnav-link>Packages</a></li>
+          <li><a class="subnav__link" href="#comparison" data-subnav-link>Compare</a></li>
+          <li><a class="subnav__link" href="#addons" data-subnav-link>Add-ons</a></li>
+          <li><a class="subnav__link" href="#process" data-subnav-link>Process</a></li>
+          <li><a class="subnav__link" href="#faq" data-subnav-link>FAQ</a></li>
+        </ul>
+      </nav>
 
 <!-- ===== PACKAGES ===== -->
       <section class="section packages" id="packages" data-section aria-labelledby="packages-title">
         <div class="sig-accent sig-accent--bl" aria-hidden="true"><svg viewBox="0 0 240 240" fill="none"><path d="M48 224 L48 116 A68 68 0 0 1 116 48 L224 48"/></svg></div>
         <div class="container container--wide">
 
-          <!-- Part A · Intro -->
           <div class="packages__head" data-reveal>
             <h2 class="packages__title" id="packages-title">Choose your level</h2>
-            <p class="packages__subtitle">Three packages shaped for different stages and needs.</p>
+            <p class="packages__subtitle">Each level builds on the one before it. Prices are fixed for the scope shown; anything beyond it is an add-on.</p>
           </div>
 
           <div class="pkg-cards" data-stagger>
+
             <!-- BASIC -->
-            <article class="pkg-card">
-              <div class="pkg-card__name keep-en">BASIC</div>
-              <div class="pkg-card__price keep-en">$299</div>
-              <div class="pkg-card__dur keep-en">7 DAYS</div>
-              <a class="btn btn--start pkg-card__cta" href="index.html#contact">Let’s start</a>
+            <article class="pkg-card" id="basic">
+              <div class="pkg-card__head">
+                <span class="pkg-card__tag">Focused</span>
+              </div>
+              <h3 class="pkg-card__name keep-en">Basic</h3>
+              <div class="pkg-card__price keep-en">$299 <small>7-day project</small></div>
+              <p class="pkg-card__pitch">A core set of visual materials to build a professional, organized presence.</p>
+              <p class="pkg-card__incl">Includes</p>
+              <ul class="pkg-card__list">
+                <li>6 social posts, 4 stories, 1 digital ad</li>
+                <li>1 account cover, 1 business card</li>
+                <li>2 revision rounds</li>
+                <li class="keep-en">JPG · PNG · PDF delivery</li>
+              </ul>
+              <div class="pkg-card__foot">
+                <a class="btn btn--primary pkg-card__cta" href="index.html#contact">Start a project <span class="btn__icon" aria-hidden="true">↗</span></a>
+                <a class="pkg-card__compare" href="#comparison">Compare all features</a>
+              </div>
             </article>
 
-            <!-- MEDIUM (featured) -->
-            <article class="pkg-card pkg-card--featured">
+            <!-- STANDARD (recommended) -->
+            <article class="pkg-card pkg-card--featured" id="standard">
               <span class="pkg-card__bar" aria-hidden="true"></span>
-              <div class="pkg-card__name keep-en"><span aria-hidden="true">⭐</span> STANDARD</div>
-              <div class="pkg-card__price keep-en">$649</div>
-              <div class="pkg-card__dur keep-en">10 DAYS</div>
-              <span class="pkg-card__badge">Best value</span>
-              <a class="btn btn--start pkg-card__cta" href="index.html#contact">Let’s start</a>
+              <div class="pkg-card__head">
+                <span class="pkg-card__tag">Integrated</span>
+                <span class="pkg-card__badge">Most chosen</span>
+              </div>
+              <h3 class="pkg-card__name keep-en">Standard</h3>
+              <div class="pkg-card__price keep-en">$649 <small>10-day project</small></div>
+              <p class="pkg-card__pitch">A broader, unified visual system that keeps varied content consistent.</p>
+              <p class="pkg-card__incl">Everything in Basic, plus</p>
+              <ul class="pkg-card__list">
+                <li>10 posts, 6 stories, 2 ads, 2 covers</li>
+                <li>Profile / brochure &amp; 2 flyers</li>
+                <li>Content visual system</li>
+                <li>3 revision rounds</li>
+              </ul>
+              <div class="pkg-card__foot">
+                <a class="btn btn--primary pkg-card__cta" href="index.html#contact">Start a project <span class="btn__icon" aria-hidden="true">↗</span></a>
+                <a class="pkg-card__compare" href="#comparison">Compare all features</a>
+              </div>
             </article>
 
             <!-- PREMIUM -->
-            <article class="pkg-card">
-              <div class="pkg-card__name keep-en">PREMIUM</div>
-              <div class="pkg-card__price keep-en">$1,299</div>
-              <div class="pkg-card__dur keep-en">20 DAYS</div>
-              <a class="btn pkg-card__cta pkg-card__cta--lime" href="index.html#contact">Let’s start</a>
+            <article class="pkg-card" id="premium">
+              <div class="pkg-card__head">
+                <span class="pkg-card__tag">Comprehensive</span>
+              </div>
+              <h3 class="pkg-card__name keep-en">Premium</h3>
+              <div class="pkg-card__price keep-en">$1,299 <small>20-day project</small></div>
+              <p class="pkg-card__pitch">A complete system spanning content, a campaign, and website design.</p>
+              <p class="pkg-card__incl">Everything in Standard, plus</p>
+              <ul class="pkg-card__list">
+                <li>15 posts, 10 stories, 3 ads, 3 covers</li>
+                <li>Full visual system + 3 templates</li>
+                <li>A visual campaign (concept + key visual)</li>
+                <li>Website UI/UX — up to 5 pages</li>
+                <li>4 revision rounds</li>
+              </ul>
+              <div class="pkg-card__foot">
+                <a class="btn btn--primary pkg-card__cta" href="index.html#contact">Start a project <span class="btn__icon" aria-hidden="true">↗</span></a>
+                <a class="pkg-card__compare" href="#comparison">Compare all features</a>
+              </div>
             </article>
-          </div>
-
-          <!-- Part B · Interactive detail selector -->
-          <div class="pkg-selector" data-pkg-selector data-reveal>
-            <div class="pkg-tabs" role="tablist" aria-label="Package levels">
-              <button class="pkg-tab is-active keep-en" type="button" role="tab" id="tab-basic" aria-selected="true" aria-controls="panel-basic" data-pkg-tab="basic">BASIC</button>
-              <button class="pkg-tab keep-en" type="button" role="tab" id="tab-standard" aria-selected="false" aria-controls="panel-standard" data-pkg-tab="standard" tabindex="-1">STANDARD</button>
-              <button class="pkg-tab keep-en" type="button" role="tab" id="tab-premium" aria-selected="false" aria-controls="panel-premium" data-pkg-tab="premium" tabindex="-1">PREMIUM</button>
-            </div>
-
-            <div class="pkg-panels">
-
-              <!-- BASIC panel -->
-              <div class="pkg-panel is-active" role="tabpanel" id="panel-basic" aria-labelledby="tab-basic" data-pkg-panel="basic">
-                <div class="pkg-panel__aside">
-                  <h3 class="pkg-panel__title">Essential visual presence</h3>
-                  <p class="pkg-panel__desc">For projects that need a core set of visual materials to build a professional, organized digital presence.</p>
-                  <p class="pkg-panel__price">$299 · 7 working days</p>
-                </div>
-                <div class="pkg-deliverables">
-                  <div class="pkg-group">
-                    <h4 class="pkg-group__head">Digital content</h4>
-                    <ul class="pkg-list"><li>6 social media posts</li><li>4 stories</li><li>1 digital ad</li></ul>
-                  </div>
-                  <div class="pkg-group">
-                    <h4 class="pkg-group__head">Brand materials</h4>
-                    <ul class="pkg-list"><li>1 account cover</li><li>1 business card</li></ul>
-                  </div>
-                  <div class="pkg-group">
-                    <h4 class="pkg-group__head">Preparation</h4>
-                    <ul class="pkg-list"><li>Files prepared for digital use</li><li>Export and delivery of final files</li></ul>
-                  </div>
-                  <div class="pkg-group">
-                    <h4 class="pkg-group__head">Revisions</h4>
-                    <ul class="pkg-list"><li>2 rounds</li></ul>
-                  </div>
-                  <div class="pkg-group">
-                    <h4 class="pkg-group__head">Files</h4>
-                    <ul class="pkg-list"><li class="keep-en">JPG · PNG · PDF</li></ul>
-                    <p class="pkg-note">Source files are not included and can be provided as an add-on.</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- MEDIUM panel -->
-              <div class="pkg-panel" role="tabpanel" id="panel-standard" aria-labelledby="tab-standard" data-pkg-panel="standard" hidden>
-                <div class="pkg-panel__aside">
-                  <h3 class="pkg-panel__title">Integrated visual presence</h3>
-                  <p class="pkg-panel__desc">For projects that need varied content and a unified visual system that keeps materials consistent.</p>
-                  <p class="pkg-panel__price">$649 · 10 working days</p>
-                </div>
-                <div class="pkg-deliverables">
-                  <div class="pkg-group">
-                    <h4 class="pkg-group__head">Digital content</h4>
-                    <ul class="pkg-list"><li>10 social media posts</li><li>6 stories</li><li>2 digital ads</li><li>2 account covers</li></ul>
-                  </div>
-                  <div class="pkg-group">
-                    <h4 class="pkg-group__head">Marketing materials</h4>
-                    <ul class="pkg-list"><li>1 short profile or brochure</li><li>1 business card</li><li>2 flyers or posters</li></ul>
-                  </div>
-                  <div class="pkg-group">
-                    <h4 class="pkg-group__head">Content visual system</h4>
-                    <ul class="pkg-list"><li>Unified design style</li><li class="keep-en">Typography Direction</li><li>Image usage style</li><li>Icon and graphic-element style</li><li>Content layout system</li></ul>
-                  </div>
-                  <div class="pkg-group">
-                    <h4 class="pkg-group__head">Revisions</h4>
-                    <ul class="pkg-list"><li>3 rounds</li></ul>
-                  </div>
-                  <div class="pkg-group">
-                    <h4 class="pkg-group__head">Files</h4>
-                    <ul class="pkg-list"><li class="keep-en">JPG · PNG · PDF</li></ul>
-                    <p class="pkg-note">Source files are not included and can be provided as an add-on.</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- PREMIUM panel -->
-              <div class="pkg-panel" role="tabpanel" id="panel-premium" aria-labelledby="tab-premium" data-pkg-panel="premium" hidden>
-                <div class="pkg-panel__aside">
-                  <h3 class="pkg-panel__title">Complete commercial &amp; digital presence</h3>
-                  <p class="pkg-panel__desc">For projects and brands that need a complete visual system spanning content, campaigns and website design.</p>
-                  <p class="pkg-panel__price">$1,299 · 20 working days</p>
-                </div>
-                <div class="pkg-deliverables">
-                  <div class="pkg-group">
-                    <h4 class="pkg-group__head">Digital content</h4>
-                    <ul class="pkg-list"><li>15 social media posts</li><li>10 stories</li><li>3 digital ads</li><li>3 account covers</li></ul>
-                  </div>
-                  <div class="pkg-group">
-                    <h4 class="pkg-group__head">Marketing materials</h4>
-                    <ul class="pkg-list"><li>1 profile or brochure</li><li>3 flyers or posters</li></ul>
-                  </div>
-                  <div class="pkg-group">
-                    <h4 class="pkg-group__head">Visual system</h4>
-                    <ul class="pkg-list"><li class="keep-en">Typography Direction</li><li>Color system and usage</li><li>Image style</li><li>Icon and graphic-element style</li><li>Layout system</li><li>Identity application rules for content</li><li>3 reusable design templates</li></ul>
-                  </div>
-                  <div class="pkg-group">
-                    <h4 class="pkg-group__head">Visual campaign</h4>
-                    <p class="pkg-group__sub">One visual campaign, including:</p>
-                    <ul class="pkg-list"><li>One visual concept</li><li>One key visual</li><li>Applied to up to 3 deliverables</li></ul>
-                  </div>
-                  <div class="pkg-group">
-                    <h4 class="pkg-group__head">Website design</h4>
-                    <p class="pkg-group__sub">Website UI/UX design — up to 5 pages, including:</p>
-                    <ul class="pkg-list"><li class="keep-en">Desktop UI</li><li class="keep-en">Mobile UI</li><li>Core UX structure</li><li>Page interface design</li><li>Basic visual component system</li><li>Design prepared for development</li></ul>
-                  </div>
-                  <div class="pkg-group">
-                    <h4 class="pkg-group__head">Revisions</h4>
-                    <ul class="pkg-list"><li>4 rounds</li></ul>
-                  </div>
-                  <div class="pkg-group">
-                    <h4 class="pkg-group__head">Files</h4>
-                    <ul class="pkg-list"><li>JPG · PNG · PDF + website design files</li></ul>
-                  </div>
-                  <div class="pkg-excludes">
-                    <p class="pkg-excludes__head">Not included</p>
-                    <p class="pkg-excludes__list">Development, hosting, domain, copywriting, SEO.</p>
-                  </div>
-                </div>
-              </div>
-
-            </div>
           </div>
 
         </div>
@@ -1331,38 +1247,35 @@
         </div>
       </section>
 
-      <!-- ===== POLICIES ===== -->
-      <section class="section policies" id="policies" aria-label="Revisions, payment and terms">
+      <!-- ===== FAQ ===== -->
+      <section class="section faq" id="faq" aria-labelledby="faq-title">
         <div class="container container--wide">
-          <div class="policies__grid" data-stagger>
+          <h2 class="addons__title" id="faq-title" data-reveal>Good to know</h2>
+          <div class="faq__grid" data-reveal>
 
-            <div class="policy">
-              <h3 class="policy__title">Revisions</h3>
-              <ul class="policy__list">
-                <li><strong class="keep-en">BASIC</strong> — 2 rounds</li>
-                <li><strong class="keep-en">STANDARD</strong> — 3 rounds</li>
-                <li><strong class="keep-en">PREMIUM</strong> — 4 rounds</li>
-              </ul>
-              <p class="policy__note">A round counts once consolidated feedback is received.</p>
+            <div class="faq__item">
+              <button class="faq__q" type="button" aria-expanded="false" data-faq>How many revision rounds are included?<span class="faq__icon" aria-hidden="true"></span></button>
+              <div class="faq__a"><div class="faq__a-inner"><p>Basic includes <strong>2 rounds</strong>, Standard <strong>3 rounds</strong>, and Premium <strong>4 rounds</strong>. A round is counted once you send consolidated feedback, so it’s worth gathering notes before each pass.</p></div></div>
             </div>
 
-            <div class="policy">
-              <h3 class="policy__title">Payment</h3>
-              <ul class="policy__list">
-                <li><strong>50%</strong> on project approval and kickoff.</li>
-                <li><strong>50%</strong> on completion, before final delivery.</li>
-              </ul>
+            <div class="faq__item">
+              <button class="faq__q" type="button" aria-expanded="false" data-faq>How does payment work?<span class="faq__icon" aria-hidden="true"></span></button>
+              <div class="faq__a"><div class="faq__a-inner"><p><strong>50%</strong> on project approval and kickoff, and <strong>50%</strong> on completion, before final delivery. Prices are fixed for the scope shown in each package.</p></div></div>
             </div>
 
-            <div class="policy">
-              <h3 class="policy__title">Key terms</h3>
-              <ul class="policy__list policy__list--bullets">
-                <li>The timeline starts once content, required materials and the kickoff payment are received.</li>
-                <li>Any requests outside the package scope are priced separately.</li>
-                <li>Late content or feedback may shift the timeline.</li>
-                <li>Source files are not delivered automatically unless agreed.</li>
-                <li>Final files are delivered once due payments are complete.</li>
-              </ul>
+            <div class="faq__item">
+              <button class="faq__q" type="button" aria-expanded="false" data-faq>When does the timeline start?<span class="faq__icon" aria-hidden="true"></span></button>
+              <div class="faq__a"><div class="faq__a-inner"><p>The project timeline starts once we have your content, the required materials, and the kickoff payment. Late content or feedback during the project may shift the delivery date.</p></div></div>
+            </div>
+
+            <div class="faq__item">
+              <button class="faq__q" type="button" aria-expanded="false" data-faq>Do I receive the source files?<span class="faq__icon" aria-hidden="true"></span></button>
+              <div class="faq__a"><div class="faq__a-inner"><p>Final files are delivered as JPG, PNG and PDF (Premium also includes website design files). Editable source files aren’t delivered automatically, but can be added as an add-on if you need them.</p></div></div>
+            </div>
+
+            <div class="faq__item">
+              <button class="faq__q" type="button" aria-expanded="false" data-faq>What sits outside a package?<span class="faq__icon" aria-hidden="true"></span></button>
+              <div class="faq__a"><div class="faq__a-inner"><p>Development, hosting, domains, copywriting and SEO sit outside the packages. Anything beyond the agreed scope is quoted separately as an add-on, and final files are handed over once due payments are complete.</p></div></div>
             </div>
 
           </div>
@@ -1493,40 +1406,34 @@
     }
 
     /* 5 · PACKAGE TAB SELECTOR — switch BASIC / STANDARD / PREMIUM detail */
-    function initPkgTabs() {
-      var root = doc.querySelector("[data-pkg-selector]");
-      if(!root) return;
-      var tabs = Array.prototype.slice.call(root.querySelectorAll("[data-pkg-tab]"));
-      var panels = Array.prototype.slice.call(root.querySelectorAll("[data-pkg-panel]"));
-      function activate(key, focusTab){
-        tabs.forEach(function(t){
-          var on = t.getAttribute("data-pkg-tab") === key;
-          t.classList.toggle("is-active", on);
-          t.setAttribute("aria-selected", on ? "true" : "false");
-          t.tabIndex = on ? 0 : -1;
-          if(on && focusTab) t.focus();
-        });
-        panels.forEach(function(p){
-          var on = p.getAttribute("data-pkg-panel") === key;
-          p.hidden = !on;
-          p.classList.toggle("is-active", on);
-        });
-      }
-      tabs.forEach(function(t){
-        t.addEventListener("click", function(){ activate(t.getAttribute("data-pkg-tab")); });
-        t.addEventListener("keydown", function(e){
-          var idx = tabs.indexOf(t), next = null;
-          if(e.key === "ArrowRight" || e.key === "ArrowDown") next = tabs[(idx + 1) % tabs.length];
-          else if(e.key === "ArrowLeft" || e.key === "ArrowUp") next = tabs[(idx - 1 + tabs.length) % tabs.length];
-          if(next){ e.preventDefault(); activate(next.getAttribute("data-pkg-tab"), true); }
+    /* 5 · IN-PAGE SUB-NAV — highlight the section currently in view */
+    function initSubnav() {
+      var links = Array.prototype.slice.call(doc.querySelectorAll("[data-subnav-link]"));
+      if(!links.length || !("IntersectionObserver" in window)) return;
+      var byId = {};
+      var sections = [];
+      links.forEach(function(a){
+        var id = (a.getAttribute("href") || "").replace("#","");
+        var sec = id && doc.getElementById(id);
+        if(sec){ byId[id] = a; sections.push(sec); }
+      });
+      function setActive(id){ links.forEach(function(a){ a.classList.toggle("is-active", byId[id] === a); }); }
+      var obs = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){ if(e.isIntersecting) setActive(e.target.id); });
+      }, { rootMargin: "-45% 0px -50% 0px", threshold: 0 });
+      sections.forEach(function(s){ obs.observe(s); });
+    }
+
+    /* 6 · FAQ — single-open accordion */
+    function initFaq() {
+      var qs = Array.prototype.slice.call(doc.querySelectorAll("[data-faq]"));
+      qs.forEach(function(btn){
+        btn.addEventListener("click", function(){
+          var item = btn.closest(".faq__item");
+          var open = item.classList.toggle("is-open");
+          btn.setAttribute("aria-expanded", open ? "true" : "false");
         });
       });
-      /* Deep-link: /packages.html#basic|#standard|#premium opens that tab */
-      var h = (window.location.hash || "").replace("#","").toLowerCase();
-      if(["basic","standard","premium"].indexOf(h) >= 0){
-        activate(h);
-        window.requestAnimationFrame(function(){ root.scrollIntoView({block:"start"}); });
-      }
     }
 
     /* 6 · START-A-PROJECT FORM — single conversational form */
@@ -1546,7 +1453,7 @@
       });
     }
 
-    function init(){ initHeaderScrollState(); initMobileNav(); initReveal(); initScrollSpy(); initPkgTabs(); initContactForm(); }
+    function init(){ initHeaderScrollState(); initMobileNav(); initReveal(); initScrollSpy(); initSubnav(); initFaq(); initContactForm(); }
     if(doc.readyState === "loading"){ doc.addEventListener("DOMContentLoaded", init); } else { init(); }
   })();
   </script>
