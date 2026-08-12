@@ -619,6 +619,38 @@
   .contact__frame-text{position:relative;z-index:1;max-inline-size:24ch;text-align:center;color:var(--ql-paper);font-weight:var(--fw-semibold);font-size:1.25rem;line-height:1.6}
 
   /* ==========================================================================
+     ELEVATION — world-class polish cascaded across every section
+     ========================================================================== */
+  /* Unified section titles: display scale + brand kicker bar */
+  .services__title,.packages__title,.compare__title,.addons__title,.process__title,.contact__title{
+    font-weight:var(--fw-black);letter-spacing:-0.02em;line-height:1.05;
+    font-size:clamp(2.25rem,1.5rem + 2.8vw,3.5rem)}
+  .services__title::before,.packages__title::before,.compare__title::before,.addons__title::before,.process__title::before,.contact__title::before{
+    content:"";display:block;inline-size:52px;block-size:4px;border-radius:2px;margin-block-end:var(--sp-20)}
+  .packages__title::before,.compare__title::before,.process__title::before,.contact__title::before{background:var(--ql-lime)}   /* dark sections */
+  .services__title::before,.addons__title::before{background:var(--ql-blue)}                                                     /* paper sections */
+
+  /* Keep section content above decorative accents */
+  .section > .container{position:relative;z-index:1}
+
+  /* Cards / tiles — ARC signature corner + refined SHIFT hover */
+  .pkg-card{border-end-start-radius:var(--arc-lg);direction:ltr}  /* English content — keep "20 DAYS" order */
+  .pkg-card--featured{box-shadow:0 24px 60px rgba(0,0,0,.5)}
+  .addon{border-end-start-radius:var(--arc-md)}
+  .addon:hover{border-color:var(--ql-blue);transform:translateY(-3px);box-shadow:0 12px 28px rgba(36,71,255,.12)}
+  .service-card{border-end-start-radius:var(--arc-lg)}
+  .service-card:hover{border-color:var(--ql-blue);transform:translateY(-4px);box-shadow:0 20px 44px rgba(36,71,255,.16)}
+
+  /* Signature Frame watermark — subtle brand motif in dark sections */
+  .packages,.compare,.process{overflow:clip}
+  .sig-accent{position:absolute;z-index:0;pointer-events:none;inline-size:min(40vw,440px);aspect-ratio:1;opacity:.06}
+  .sig-accent svg{inline-size:100%;block-size:100%;color:var(--ql-paper);overflow:visible}
+  .sig-accent svg path{fill:none;stroke:currentColor;stroke-width:34}
+  .sig-accent--tr{inset-block-start:-5%;inset-inline-end:-4%}
+  .sig-accent--bl{inset-block-end:-5%;inset-inline-start:-4%;transform:rotate(180deg)}
+  @media (max-width:768px){.sig-accent{inline-size:min(60vw,300px);opacity:.05}}
+
+  /* ==========================================================================
      RESPONSIVE  (Desktop-first · anchors: 1440 / 768 / 375)
      ========================================================================== */
   @media (max-width:1200px){
@@ -797,7 +829,7 @@
 
       <!-- ===== SERVICES (Prompt 04) ===== -->
       <section class="section services" id="services" data-section aria-labelledby="services-title">
-        <div class="container container--wide">
+        <div class="container container--wide" lang="ar" dir="rtl">
 
           <div class="services__head" lang="ar" dir="rtl" data-reveal>
             <h2 class="services__title" id="services-title">حلولنا</h2>
@@ -843,7 +875,8 @@
 
       <!-- ===== PACKAGES (Prompt 05) ===== -->
       <section class="section packages" id="packages" data-section aria-labelledby="packages-title">
-        <div class="container container--wide">
+        <div class="sig-accent sig-accent--bl" aria-hidden="true"><svg viewBox="0 0 240 240" fill="none"><path d="M48 224 L48 116 A68 68 0 0 1 116 48 L224 48"/></svg></div>
+        <div class="container container--wide" lang="ar" dir="rtl">
 
           <!-- Part A · Intro -->
           <div class="packages__head" lang="ar" dir="rtl" data-reveal>
@@ -1006,6 +1039,7 @@
 
       <!-- ===== COMPARISON TABLE (Prompt 06) ===== -->
       <section class="section compare" id="comparison" aria-labelledby="compare-title">
+        <div class="sig-accent sig-accent--tr" aria-hidden="true"><svg viewBox="0 0 240 240" fill="none"><path d="M48 224 L48 116 A68 68 0 0 1 116 48 L224 48"/></svg></div>
         <div class="container container--wide" lang="ar" dir="rtl">
           <h2 class="compare__title" id="compare-title">مقارنة الباقات</h2>
           <div class="compare__wrap" data-reveal>
@@ -1068,6 +1102,7 @@
 
       <!-- ===== PROCESS (Prompt 07) ===== -->
       <section class="section process" id="process" data-section aria-labelledby="process-title">
+        <div class="sig-accent sig-accent--bl" aria-hidden="true"><svg viewBox="0 0 240 240" fill="none"><path d="M48 224 L48 116 A68 68 0 0 1 116 48 L224 48"/></svg></div>
         <div class="container container--wide" lang="ar" dir="rtl">
           <h2 class="process__title" id="process-title" data-reveal>التصميم ليس مجرد شكل</h2>
 
