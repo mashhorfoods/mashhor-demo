@@ -867,19 +867,37 @@
   .pos-climax__to{display:inline-block;background:var(--ql-lime);color:var(--ql-black);padding:.06em .26em;border-radius:var(--radius-xs)}
   @supports not ((-webkit-text-stroke:1px #000)){.pos-climax__from{color:var(--ql-black)}}
 
-  /* 03 · SERVICES — editorial capability index */
-  .caps{background:var(--surface-paper);color:var(--text-on-paper)}
-  .caps__list{margin-block-start:var(--sp-48);border-block-start:var(--bw-hairline) solid var(--border-on-paper)}
-  .cap{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:clamp(1rem,3vw,3rem);padding-block:clamp(1.5rem,3vw,2.5rem);border-block-end:var(--bw-hairline) solid var(--border-on-paper);transition:background-color var(--dur-normal) var(--ease-shift)}
-  .cap:hover{background:rgba(36,71,255,.04)}
-  .cap__num{font-family:var(--font-en);font-weight:var(--fw-black);font-size:clamp(1.25rem,1rem + 1vw,1.75rem);color:var(--ql-blue);min-inline-size:2.5ch}
-  .cap__body{min-inline-size:0}
-  .cap__label{font-family:var(--font-en);font-size:var(--fs-caption);font-weight:var(--fw-bold);letter-spacing:var(--ls-wider);text-transform:uppercase;color:var(--ql-gray)}
-  .cap__title{margin-block-start:var(--sp-4);font-weight:var(--fw-bold);font-size:clamp(1.5rem,1.15rem + 1.4vw,2.25rem);color:var(--ql-black);line-height:1.1}
-  .cap__desc{margin-block-start:var(--sp-8);color:var(--text-on-paper-muted);max-inline-size:52ch}
-  .cap__form{inline-size:clamp(56px,7vw,84px);block-size:clamp(56px,7vw,84px);flex:0 0 auto;color:var(--ql-blue);transition:transform var(--dur-slow) var(--ease-shift)}
-  .cap:hover .cap__form{transform:rotate(-8deg) scale(1.06)}
-  .cap__form svg{inline-size:100%;block-size:100%;overflow:visible}
+  /* 03 · CAPABILITIES — editorial capability index (dark; one system, four expressions) */
+  .caps{background:var(--ql-black);color:var(--ql-paper);overflow:clip}
+  .caps__grid{display:grid;grid-template-columns:minmax(0,4.6fr) minmax(0,7fr);column-gap:clamp(2rem,6vw,6rem);align-items:start}
+
+  .caps__label{margin:0;font-family:var(--font-en);font-weight:var(--fw-bold);font-size:var(--fs-eyebrow);letter-spacing:var(--ls-widest);text-transform:uppercase;color:var(--accent-2)}
+  .caps__divide{display:block;block-size:var(--bw-hairline);background:var(--border-strong);margin-block:var(--sp-16) clamp(1.5rem,3vw,2.5rem)}
+  .caps__statement{margin:0;font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:-.02em;line-height:1.05;font-size:clamp(1.9rem,1.2rem + 2.4vw,3.1rem);color:var(--ql-paper);text-wrap:balance}
+  .caps__statement .hero__accent{color:var(--ql-blue)}
+  .caps__support{margin-block-start:var(--sp-20);color:var(--text-muted);font-size:clamp(1rem,.95rem + .25vw,1.15rem);line-height:1.7;max-inline-size:34ch}
+  .caps__cue{display:inline-flex;align-items:center;gap:var(--sp-12);margin-block-start:clamp(1.75rem,3.5vw,2.75rem);font-family:var(--font-en);font-weight:var(--fw-bold);font-size:.82rem;letter-spacing:var(--ls-wide);text-transform:uppercase;color:var(--ql-paper);transition:var(--shift-transition)}
+  .caps__cue svg{inline-size:30px;block-size:30px;color:var(--accent-2);transition:transform var(--dur-normal) var(--ease-shift)}
+  .caps__cue:hover{color:var(--accent-2)}
+  .caps__cue:hover svg{transform:translate(3px,3px)}
+
+  .caps__list{display:flex;flex-direction:column;border-block-start:var(--bw-hairline) solid var(--border)}
+  .capx{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;column-gap:clamp(1rem,2.5vw,2.25rem);padding-block:clamp(1.4rem,3vw,2.35rem);padding-inline-start:clamp(.75rem,1.5vw,1.25rem);border-block-end:var(--bw-hairline) solid var(--border);transition:background-color var(--dur-normal) var(--ease-shift)}
+  .capx::before{content:"";position:absolute;inset-inline-start:0;inset-block:0;inline-size:2px;background:var(--ql-blue);transform:scaleY(0);transform-origin:top;transition:transform var(--dur-normal) var(--ease-shift)}
+  .capx.is-active::before,.capx:hover::before{transform:scaleY(1)}
+  .capx.is-active,.capx:hover{background:rgba(244,241,234,.03)}
+  .capx__num{font-family:var(--font-en);font-weight:var(--fw-black);font-size:clamp(1rem,.85rem + .5vw,1.35rem);color:var(--ql-blue);min-inline-size:2.5ch;transition:color var(--dur-normal) var(--ease-shift)}
+  .capx.is-active .capx__num,.capx:hover .capx__num{color:var(--accent-2)}
+  .capx__body{min-inline-size:0}
+  .capx__title{margin:0;font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:-.02em;line-height:1.05;font-size:clamp(1.5rem,1.1rem + 1.7vw,2.6rem);color:var(--ql-paper)}
+  .capx__desc{margin-block-start:var(--sp-8);color:var(--text-muted);font-size:clamp(.95rem,.92rem + .15vw,1.05rem);line-height:1.55;max-inline-size:40ch}
+  .capx__form{inline-size:clamp(72px,9vw,128px);block-size:clamp(72px,9vw,128px);flex:0 0 auto;color:var(--ql-blue);opacity:.5;transition:opacity var(--dur-normal) var(--ease-shift),transform var(--dur-slow) var(--ease-shift)}
+  .capx__form svg{inline-size:100%;block-size:100%;overflow:visible}
+  .capx.is-active .capx__form,.capx:hover .capx__form{opacity:1;transform:scale(1.05)}
+  .capx--layer.is-active .capx__form,.capx--layer:hover .capx__form{transform:translate(4px,-4px)}
+  .capx--expand.is-active .capx__form,.capx--expand:hover .capx__form{transform:scale(1.12)}
+  .cf-hot{opacity:0;transition:opacity var(--dur-normal) var(--ease-shift)}
+  .capx.is-active .cf-hot,.capx:hover .cf-hot{opacity:1}
 
   /* 04 · SELECTED WORK — dominant editorial previews */
   .work{background:var(--ql-black)}
@@ -979,6 +997,8 @@
     .about__grid,.start__grid{grid-template-columns:1fr}
     .position__lead{grid-template-columns:1fr}
     .position__support{align-self:start}
+    .caps__grid{grid-template-columns:1fr;row-gap:clamp(2rem,6vw,3.25rem)}
+    .caps__support{max-inline-size:52ch}
     .work__grid{grid-template-columns:1fr}
     .work-item--wide .work-item__visual{aspect-ratio:16 / 10}
     .principles{grid-template-columns:1fr 1fr}
@@ -997,13 +1017,15 @@
     .astep__desc{grid-column:2;grid-row:3;max-inline-size:none}
     .field-grid{grid-template-columns:1fr}
     .start__aside{display:none}
-    .cap{grid-template-columns:auto 1fr;gap:var(--sp-16)}
-    .cap__form{display:none}
   }
   @media (max-width:560px){
     .principles{grid-template-columns:1fr}
     .site-footer__cols{grid-template-columns:1fr}
     .about__stats{grid-template-columns:1fr 1fr}
+    .capx{grid-template-columns:auto 1fr;grid-template-areas:"num form" "body body";row-gap:var(--sp-16);column-gap:var(--sp-16)}
+    .capx__num{grid-area:num;align-self:center}
+    .capx__form{grid-area:form;justify-self:end;inline-size:clamp(60px,19vw,84px);block-size:clamp(60px,19vw,84px)}
+    .capx__body{grid-area:body}
   }
   /* 02 · POSITIONING — mobile: input stacks over outcome, transform reads vertically */
   @media (max-width:640px){
@@ -1038,8 +1060,9 @@
   html[data-lang="ar"] .btn,html[data-lang="ar"] .site-nav__link,html[data-lang="ar"] .mobile-nav__link,
   html[data-lang="ar"] .sec-eyebrow,html[data-lang="ar"] .hero__eyebrow,html[data-lang="ar"] .footcol__h,
   html[data-lang="ar"] .link-cta,html[data-lang="ar"] .work-item__badge,html[data-lang="ar"] .astep__label,
-  html[data-lang="ar"] .cap__label,html[data-lang="ar"] .position__label,html[data-lang="ar"] .position__statement,
+  html[data-lang="ar"] .position__label,html[data-lang="ar"] .position__statement,
   html[data-lang="ar"] .rel__word,html[data-lang="ar"] .pos-climax__word,
+  html[data-lang="ar"] .caps__label,html[data-lang="ar"] .caps__statement,html[data-lang="ar"] .capx__title,html[data-lang="ar"] .caps__cue,
   html[data-lang="ar"] .tier__name:not(.keep-en){letter-spacing:0;text-transform:none}
   </style>
 </head>
@@ -1148,46 +1171,51 @@
       </section>
 
       <!-- 03 · SERVICES / CAPABILITIES -->
-      <section class="section section--paper caps" id="services" data-section aria-labelledby="services-title">
+      <section class="section caps" id="services" data-section aria-labelledby="services-title">
         <div class="container container--wide">
-          <div class="sec-head" data-reveal>
-            <p class="sec-eyebrow" data-ar="ماذا نصنع">WHAT WE CREATE</p>
-            <h2 class="sec-title" id="services-title" data-ar="قدراتنا">Capabilities</h2>
-            <p class="sec-lead" data-ar="نحوّل الأفكار والاحتياجات إلى حلول بصرية واضحة، عملية، ومتناسقة تساعد المشروع على الظهور باحترافية والتواصل بوضوح مع جمهوره.">We turn ideas and needs into clear, practical, and consistent visual solutions that help a project appear professional and communicate clearly with its audience.</p>
-          </div>
-          <div class="caps__list" data-stagger>
-            <article class="cap">
-              <span class="cap__num">01</span>
-              <div class="cap__body">
-                <h3 class="cap__title" data-ar="التصميم الجرافيكي">Graphic Design</h3>
-                <p class="cap__desc" data-ar="المحتوى الرقمي، المواد التسويقية، والمطبوعات.">Digital content, marketing materials, and print.</p>
-              </div>
-              <span class="cap__form" aria-hidden="true"><svg viewBox="0 0 100 100"><path d="M24 40 L24 24 L40 24 M60 24 L76 24 L76 40 M76 60 L76 76 L60 76 M40 76 L24 76 L24 60" fill="none" stroke="currentColor" stroke-width="9"/></svg></span>
-            </article>
-            <article class="cap">
-              <span class="cap__num">02</span>
-              <div class="cap__body">
-                <h3 class="cap__title" data-ar="الأنظمة البصرية">Visual Systems</h3>
-                <p class="cap__desc" data-ar="تطوير أساليب وقوالب تساعد على الحفاظ على الاتساق البصري.">Methods and templates that keep everything visually consistent.</p>
-              </div>
-              <span class="cap__form" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="40" cy="50" r="24" fill="none" stroke="currentColor" stroke-width="9"/><circle cx="62" cy="50" r="24" fill="none" stroke="currentColor" stroke-width="9"/></svg></span>
-            </article>
-            <article class="cap">
-              <span class="cap__num">03</span>
-              <div class="cap__body">
-                <h3 class="cap__title" data-ar="الحملات الإبداعية">Creative Campaigns</h3>
-                <p class="cap__desc" data-ar="تطوير المفاهيم والاتجاهات البصرية للحملات.">Concepts and visual directions for campaigns.</p>
-              </div>
-              <span class="cap__form" aria-hidden="true"><svg viewBox="0 0 100 100"><rect x="16" y="16" width="44" height="44" fill="currentColor" opacity=".35"/><rect x="40" y="40" width="44" height="44" fill="currentColor"/></svg></span>
-            </article>
-            <article class="cap">
-              <span class="cap__num">04</span>
-              <div class="cap__body">
-                <h3 class="cap__title" data-ar="التجارب الرقمية">Digital Experiences</h3>
-                <p class="cap__desc" data-ar="تصميم واجهات وتجارب المواقع الإلكترونية.">Interface and experience design for websites.</p>
-              </div>
-              <span class="cap__form" aria-hidden="true"><svg viewBox="0 0 100 100"><path d="M12 82 A40 40 0 0 1 92 82" fill="none" stroke="currentColor" stroke-width="12" stroke-linecap="round"/></svg></span>
-            </article>
+          <div class="caps__grid">
+            <div class="caps__aside">
+              <p class="caps__label" data-reveal data-ar="قدراتنا">CAPABILITIES</p>
+              <span class="caps__divide" data-reveal aria-hidden="true"></span>
+              <h2 class="caps__statement" id="services-title" data-reveal data-ar='من الفكرة الأولى إلى <span class="hero__accent">التجربة الأخيرة.</span>'>From the first idea to the <span class="hero__accent">final experience.</span></h2>
+              <p class="caps__support" data-reveal data-ar="نحوّل الأفكار إلى أنظمة بصرية وحملات وتجارب.">We turn ideas into visual systems, campaigns, and experiences.</p>
+              <a class="caps__cue" href="#work" data-reveal data-ar="استكشف أعمالنا">Explore our work <svg viewBox="0 0 30 30" fill="none" aria-hidden="true"><path d="M9 9 L21 9 L21 21 M21 9 L8 22" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            </div>
+
+            <div class="caps__list" data-stagger>
+              <article class="capx capx--frame">
+                <span class="capx__num">01</span>
+                <div class="capx__body">
+                  <h3 class="capx__title" data-ar="التصميم الجرافيكي">Graphic Design</h3>
+                  <p class="capx__desc" data-ar="تواصل بصري عبر الرقمي والمطبوع.">Visual communication across digital and print.</p>
+                </div>
+                <span class="capx__form" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><path d="M22 46 L22 22 L46 22" stroke="currentColor" stroke-width="8" stroke-linecap="round"/><path d="M98 46 L98 22 L74 22" stroke="currentColor" stroke-width="8" stroke-linecap="round"/><rect x="34" y="66" width="52" height="9" rx="2.5" fill="currentColor"/><rect x="34" y="83" width="34" height="9" rx="2.5" fill="currentColor"/><circle class="cf-hot" cx="95" cy="94" r="7" fill="var(--ql-lime)"/></svg></span>
+              </article>
+              <article class="capx capx--system">
+                <span class="capx__num">02</span>
+                <div class="capx__body">
+                  <h3 class="capx__title" data-ar="الأنظمة البصرية">Visual Systems</h3>
+                  <p class="capx__desc" data-ar="أنظمة هوية ولغات بصرية قابلة للتوسّع.">Identity systems and scalable visual languages.</p>
+                </div>
+                <span class="capx__form" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><g stroke="currentColor" stroke-width="7"><circle cx="30" cy="34" r="13"/><circle cx="60" cy="34" r="13"/><circle cx="90" cy="34" r="13"/><circle cx="30" cy="76" r="13"/><circle cx="60" cy="76" r="13"/><circle cx="90" cy="76" r="13"/></g><circle class="cf-hot" cx="90" cy="76" r="13" fill="var(--ql-lime)"/></svg></span>
+              </article>
+              <article class="capx capx--expand">
+                <span class="capx__num">03</span>
+                <div class="capx__body">
+                  <h3 class="capx__title" data-ar="الحملات الإبداعية">Creative Campaigns</h3>
+                  <p class="capx__desc" data-ar="أفكار تتحوّل إلى حملات لا تُنسى.">Ideas that become recognizable campaigns.</p>
+                </div>
+                <span class="capx__form" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><g stroke="currentColor" stroke-width="7" stroke-linecap="round"><path d="M30 92 A22 22 0 0 1 52 70"/><path d="M30 92 A44 44 0 0 1 74 48"/><path d="M30 92 A66 66 0 0 1 96 26"/></g><circle class="cf-hot" cx="30" cy="92" r="8" fill="var(--ql-lime)"/></svg></span>
+              </article>
+              <article class="capx capx--layer">
+                <span class="capx__num">04</span>
+                <div class="capx__body">
+                  <h3 class="capx__title" data-ar="التجارب الرقمية">Digital Experiences</h3>
+                  <p class="capx__desc" data-ar="مواقع وتجارب رقمية مبنيّة حول العلامة.">Websites and digital experiences built around the brand.</p>
+                </div>
+                <span class="capx__form" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><rect x="22" y="32" width="58" height="46" rx="8" stroke="currentColor" stroke-width="7"/><rect x="44" y="52" width="58" height="46" rx="8" fill="var(--ql-black)" stroke="currentColor" stroke-width="7"/><rect class="cf-hot" x="44" y="52" width="58" height="9" rx="4.5" fill="var(--ql-lime)"/></svg></span>
+              </article>
+            </div>
           </div>
         </div>
       </section>
@@ -1471,6 +1499,17 @@
       targets.forEach(function(el){ observer.observe(el); });
     }
 
+    /* 3b · CAPABILITIES — highlight the entry nearest the viewport centre */
+    function initCaps() {
+      var caps = doc.querySelectorAll(".capx");
+      if(!caps.length) return;
+      if(prefersReducedMotion || !("IntersectionObserver" in window)){ return; }
+      var obs = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){ entry.target.classList.toggle("is-active", entry.isIntersecting); });
+      }, { rootMargin:"-45% 0px -45% 0px", threshold:0 });
+      caps.forEach(function(c){ obs.observe(c); });
+    }
+
     /* 4 · SCROLL-SPY — drives .is-active on nav links */
     function initScrollSpy() {
       var sections = doc.querySelectorAll("[data-section][id]");
@@ -1570,7 +1609,7 @@
       });
     }
 
-    function init(){ initLang(); initHeaderScrollState(); initMobileNav(); initReveal(); initScrollSpy(); initPkgTabs(); initContactForm(); }
+    function init(){ initLang(); initHeaderScrollState(); initMobileNav(); initReveal(); initCaps(); initScrollSpy(); initPkgTabs(); initContactForm(); }
     if(doc.readyState === "loading"){ doc.addEventListener("DOMContentLoaded", init); } else { init(); }
   })();
   </script>
