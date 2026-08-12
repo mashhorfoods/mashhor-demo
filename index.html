@@ -399,19 +399,15 @@
 
   .site-main{flex:1 0 auto;display:flex;flex-direction:column}
 
-  /* Footer skeleton (structure only; content in a later step) */
-  .site-footer{flex:0 0 auto;background-color:var(--bg-elevated);color:var(--text);border-block-start:var(--bw-hairline) solid var(--border)}
-  .site-footer__top{padding-block:var(--sp-96) var(--sp-64)}
-  .site-footer__grid{display:grid;grid-template-columns:repeat(var(--grid-cols),minmax(0,1fr));gap:var(--sp-40) var(--sp-32)}
-  .site-footer__brand{grid-column:span 4}
-  .site-footer__col{grid-column:span 2}
-  .site-footer__newsletter{grid-column:span 4}
-  .site-footer__bottom{padding-block:var(--sp-32);border-block-start:var(--bw-hairline) solid var(--border)}
-  .site-footer__bottom-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--sp-16)}
-  [data-region]{min-height:var(--sp-8)}
-
-  /* Shell debug outline (toggle with .shell-debug on <body>) */
-  .shell-debug [data-region]{outline:var(--bw-thin) dashed var(--border-strong);outline-offset:var(--sp-4);min-height:var(--sp-32)}
+  /* Footer (Prompt 09) — minimalist, centered, Black bg (~180px) */
+  .site-footer{flex:0 0 auto;background-color:var(--ql-black);color:var(--text);border-block-start:var(--bw-hairline) solid var(--border)}
+  .site-footer__inner{display:flex;flex-direction:column;align-items:center;text-align:center;padding-block:var(--sp-40)}
+  .site-footer__logo{display:inline-flex;--logo-mark:42px;--logo-word:1.3rem;border-radius:var(--radius-sm)}
+  .site-footer__logo .ql-logo{color:var(--ql-paper);--mark-color:var(--ql-blue)}
+  .site-footer__thanks{margin-block-start:var(--sp-16);color:var(--ql-paper);font-weight:var(--fw-medium);font-size:1rem}
+  .site-footer__start{margin-block-start:var(--sp-4);color:var(--ql-lime);font-family:var(--font-ar);font-weight:var(--fw-bold);font-size:clamp(1.25rem,1.1rem + 0.6vw,1.5rem);line-height:1.2;transition:var(--transition-colors)}
+  .site-footer__start:hover{color:var(--ql-lime-deep)}
+  .site-footer__start:focus-visible{outline:var(--bw-thick) solid var(--ql-lime);outline-offset:4px;border-radius:var(--radius-xs)}
 
   /* ==========================================================================
      HERO  (Prompt 03) — 100vh · angular Quantum FRAME · centered bilingual copy
@@ -632,10 +628,6 @@
     .col-9,.col-10,.col-11,.col-12{grid-column:1 / -1}
     .site-nav,.site-header__actions .btn{display:none}
     .site-header__menu-trigger{display:inline-flex}
-    .site-footer__grid{grid-template-columns:repeat(8,minmax(0,1fr))}
-    .site-footer__brand{grid-column:1 / -1}
-    .site-footer__col{grid-column:span 4}
-    .site-footer__newsletter{grid-column:1 / -1}
 
     /* HERO mobile: FRAME → ARC, stacked pillars, smaller eyebrow, no scroll cue */
     .hero__frame,.hero__frame-line{display:none}
@@ -702,8 +694,6 @@
   @media (max-width:375px){
     :root{--anchor-offset:76px;--grid-cols:4}
     .col-5,.col-6,.col-7,.col-8{grid-column:1 / -1}
-    .site-footer__col{grid-column:1 / -1}
-    .site-footer__bottom-inner{justify-content:flex-start}
   }
   @media (prefers-reduced-motion:reduce){
     .btn--primary:hover,.btn--outline:hover,.btn--ghost:hover,.ql-shift:hover{transform:none}
@@ -1245,23 +1235,20 @@
 
     </main>
 
-    <!-- ================= GLOBAL FOOTER (structure placeholder) ================= -->
+    <!-- ================= GLOBAL FOOTER (Prompt 09) ================= -->
     <footer class="site-footer" role="contentinfo">
-      <div class="site-footer__top">
-        <div class="container container--wide">
-          <div class="site-footer__grid">
-            <div class="site-footer__brand" data-region="brand"></div>
-            <nav class="site-footer__col" aria-label="Sitemap" data-region="quick-links"></nav>
-            <nav class="site-footer__col" aria-label="Services" data-region="services"></nav>
-            <div class="site-footer__newsletter" data-region="newsletter"></div>
-          </div>
-        </div>
-      </div>
-      <div class="site-footer__bottom">
-        <div class="container container--wide site-footer__bottom-inner">
-          <div data-region="copyright"></div>
-          <div data-region="legal"></div>
-        </div>
+      <div class="container site-footer__inner">
+        <a class="site-footer__logo" href="#top" aria-label="Quantum Link">
+          <span class="ql-logo" aria-hidden="true">
+            <svg class="ql-logo__mark" viewBox="0 0 120 120" aria-hidden="true">
+              <circle cx="55" cy="55" r="35" fill="none" stroke="currentColor" stroke-width="16"/>
+              <path d="M59 57 L104 102 L58 88 L72 74 Z" fill="currentColor"/>
+            </svg>
+            <span class="ql-logo__word"><b>Quantum</b><b>Link</b></span>
+          </span>
+        </a>
+        <p class="site-footer__thanks" lang="ar" dir="rtl">شكرًا لثقتكم.</p>
+        <a class="site-footer__start" href="#contact" lang="ar" dir="rtl">لنبدأ.</a>
       </div>
     </footer>
 
