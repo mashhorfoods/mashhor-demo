@@ -47,6 +47,7 @@
       [data-reveal],
       .hero__content > *, .about__content > *, .why__header > *, .services__header > *,
       .why__grid .feature-card, .about__stats .about__stat, .services__trust .trust-card,
+      .about__features .about__feature,
       .hero__chip, .hero__scroll {
         opacity: 1 !important;
         transform: none !important;
@@ -1822,28 +1823,43 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 
 
 /* --------------------------------------------------------------------------
-   1 · LAYOUT  (controlled asymmetric editorial · content right, dominant
-   visual left · RTL). Ratio ≈ 5/7 so the photograph reads as a major
-   editorial object with the text column deliberately positioned beside it.
+   0 · SCOPED THEME  (navy + gold — intentionally scoped to About only)
+   The site-wide accent stays blue; these tokens repaint the accent to gold
+   for this section alone. Nothing here leaks outside `.about`.
    -------------------------------------------------------------------------- */
-.about { position: relative; overflow: clip; }
+.about {
+  position: relative;
+  overflow: clip;
+  --about-gold:      #C69A3C;                    /* decorative gold: icons, lines, flight path */
+  --about-gold-ink:  #8A6A16;                    /* AA-contrast gold for small label text       */
+  --about-gold-soft: rgba(198, 154, 60, 0.14);   /* soft gold wash                              */
+  --about-gold-line: rgba(198, 154, 60, 0.42);   /* hairline dividers / arcs                    */
+  --about-navy:      var(--brand-navy);           /* headline / feature titles                   */
+}
+
+
+/* --------------------------------------------------------------------------
+   1 · LAYOUT  (editorial navy+gold · content right, framed image left · RTL)
+   Balanced asymmetry (~1 : 1.06) so the photograph reads as a major object
+   while the text column keeps room for a headline + feature row + CTA.
+   -------------------------------------------------------------------------- */
 .about__inner {
   position: relative;
   z-index: var(--z-raised);
   display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);  /* content | dominant visual */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.06fr);  /* content | image */
   grid-template-areas:
-    "content    visual"
-    "highlights visual"
-    "cta        visual";
+    "content  visual"
+    "features visual"
+    "cta      visual";
   align-items: start;
-  column-gap: clamp(var(--space-48), 6vw, var(--space-140));
+  column-gap: clamp(var(--space-48), 6vw, var(--space-96));
   row-gap: clamp(var(--space-32), 3.5vw, var(--space-48));
 }
 
 
 /* --------------------------------------------------------------------------
-   2 · CONTENT  (label · heading · story) — quiet, editorial fade-up
+   2 · CONTENT  (gold eyebrow · navy headline · story) — quiet fade-up
    -------------------------------------------------------------------------- */
 .about__content { grid-area: content; max-width: 34rem; }
 .about__content[data-reveal] { opacity: 1; transform: none; transition: none; }
@@ -1859,28 +1875,28 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 .about__content.is-inview > *:nth-child(2) { transition-delay: 0.16s; }
 .about__content.is-inview > *:nth-child(3) { transition-delay: 0.27s; }
 
+/* Editorial gold eyebrow — text leads (right), a fine gold rule trails (left). */
 .about__eyebrow {
   display: inline-flex;
   align-items: center;
   gap: var(--space-12);
   margin-block-end: var(--space-20);
-  color: var(--color-primary);
+  color: var(--about-gold-ink);
   font-size: var(--font-size-small);
   font-weight: var(--font-weight-semibold);
 }
-.about__eyebrow::before {
+.about__eyebrow::after {
   content: "";
-  inline-size: var(--space-24);
+  inline-size: var(--space-40);
   block-size: var(--border-width-thick);
   border-radius: var(--radius-pill);
-  background-color: var(--color-accent);
+  background-color: var(--about-gold);
 }
-/* Headline becomes the strongest type in the section — larger, tightly set,
-   width-controlled so Arabic wraps gracefully. */
+/* Headline — the section's strongest type, navy, width-controlled for Arabic. */
 .about__title {
   font-size: var(--font-size-h1);
   line-height: var(--leading-tight);
-  color: var(--text-primary);
+  color: var(--about-navy);
   max-width: 28rem;
   text-wrap: balance;
   margin-block-end: var(--space-24);
@@ -1894,84 +1910,84 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 
 
 /* --------------------------------------------------------------------------
-   3 · KEY HIGHLIGHTS  (refined vertical list — not cards) · sequential reveal
-   A hairline editorial rule separates the story from the highlights.
+   3 · FEATURE STRIP  (icon columns + gold dividers) · sequential reveal
+   The existing highlight labels, recomposed as an editorial feature row.
    -------------------------------------------------------------------------- */
-.about__highlights {
-  grid-area: highlights;
+.about__features {
+  grid-area: features;
   list-style: none;
   margin: 0;
   padding: 0;
   padding-block-start: clamp(var(--space-24), 3vw, var(--space-40));
-  border-block-start: var(--border-divider);
+  border-block-start: var(--border-width-thin) solid var(--about-gold-line);
   display: grid;
-  gap: var(--space-4);
-  max-width: 34rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-8);
+  max-width: 44rem;
 }
-.about__highlights[data-reveal] { opacity: 1; transform: none; transition: none; }
+.about__features[data-reveal] { opacity: 1; transform: none; transition: none; }
 
-.about__hl {
-  position: relative;
+.about__feature {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: var(--space-16);
-  margin: 0;
-  padding: var(--space-12) var(--space-8);
-  border-radius: var(--radius-sm);
-  color: var(--text-secondary);
-  font-weight: var(--font-weight-medium);
+  text-align: center;
+  gap: var(--space-12);
+  padding-inline: var(--space-12);
   opacity: 0;
-  transform: translateY(12px);
+  transform: translateY(14px);
   transition:
       opacity var(--duration-slow) var(--ease-entrance),
-      transform var(--duration-slow) var(--ease-entrance),
-      color var(--duration-normal) var(--ease-smooth),
-      background-color var(--duration-normal) var(--ease-smooth);
+      transform var(--duration-slow) var(--ease-entrance);
 }
-.about__highlights.is-inview .about__hl { opacity: 1; transform: none; }
-.about__highlights.is-inview .about__hl:nth-child(1) { transition-delay: 0.10s; }
-.about__highlights.is-inview .about__hl:nth-child(2) { transition-delay: 0.18s; }
-.about__highlights.is-inview .about__hl:nth-child(3) { transition-delay: 0.26s; }
-.about__highlights.is-inview .about__hl:nth-child(4) { transition-delay: 0.34s; }
-
-/* Thin horizontal indicator (grows on hover/focus) */
-.about__hl::after {
-  content: "";
-  position: absolute;
-  inset-block-end: 0;
-  inset-inline-start: var(--space-8);
-  inline-size: 0;
-  block-size: var(--border-width-thick);
-  border-radius: var(--radius-pill);
-  background-color: var(--color-accent);
-  transition: inline-size var(--duration-normal) var(--ease-smooth);
+.about__features.is-inview .about__feature { opacity: 1; transform: none; }
+.about__features.is-inview .about__feature:nth-child(1) { transition-delay: 0.10s; }
+.about__features.is-inview .about__feature:nth-child(2) { transition-delay: 0.18s; }
+.about__features.is-inview .about__feature:nth-child(3) { transition-delay: 0.26s; }
+.about__features.is-inview .about__feature:nth-child(4) { transition-delay: 0.34s; }
+/* Thin gold divider between columns (start edge faces the previous item). */
+.about__feature:not(:first-child) {
+  border-inline-start: var(--border-width-thin) solid var(--about-gold-line);
 }
-.about__hl:hover,
-.about__hl:focus-within { color: var(--text-primary); background-color: var(--surface-primary); }
-.about__hl:hover::after,
-.about__hl:focus-within::after { inline-size: calc(var(--space-40) + var(--space-4)); }
-
-/* Icon gets a stronger brand-blue accent on hover */
-.about__hl .about__check {
-  transition:
-      background-color var(--duration-normal) var(--ease-smooth),
-      color var(--duration-normal) var(--ease-smooth);
+.about__feature-icon {
+  display: inline-grid;
+  place-items: center;
+  color: var(--about-gold);
+  inline-size: 40px;
+  block-size: 40px;
 }
-.about__hl:hover .about__check,
-.about__hl:focus-within .about__check {
-  background-color: var(--color-primary);
-  color: var(--text-on-primary);
+.about__feature-icon svg { inline-size: 34px; block-size: 34px; }
+.about__feature-text {
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--leading-snug);
+  color: var(--about-navy);
+  text-wrap: balance;
 }
 
 
 /* --------------------------------------------------------------------------
-   4 · PROFILE DOWNLOAD CTA
+   4 · PROFILE DOWNLOAD CTA  (gold-accented — navy ink for AA contrast)
    -------------------------------------------------------------------------- */
 .about__cta { grid-area: cta; }
 .about__cta[data-reveal] { transition-delay: 0.12s; }
+.about .btn--outline.about__profile {
+  color: var(--about-navy);
+  box-shadow: inset 0 0 0 var(--border-width-thick) var(--about-gold);
+}
+.about .btn--outline.about__profile:hover {
+  color: var(--about-navy);
+  background-color: var(--about-gold-soft);
+  box-shadow: inset 0 0 0 var(--border-width-thick) var(--about-gold);
+}
+.about .btn--outline.about__profile:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--about-gold-soft), inset 0 0 0 var(--border-width-thick) var(--about-gold);
+}
 .about__profile-icon {
   inline-size: 18px;
   block-size: 18px;
+  color: var(--about-gold);
   transition: transform var(--duration-normal) var(--ease-smooth);
 }
 .about__profile:hover .about__profile-icon,
@@ -1979,9 +1995,9 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 
 
 /* --------------------------------------------------------------------------
-   5 · INTERACTIVE VISUAL  (dominant image + geometry + floating badge)
-   Pointer parallax vars (--mx/--my) and highlight nudge (--hl) are set by
-   scripts/about.js; all decorative layers stay secondary to the photo.
+   5 · FRAMED VISUAL  (dominant image + gold flight-path + dashed arc + badge)
+   Pointer parallax vars (--mx/--my) are set by scripts/about.js; every
+   decorative layer stays quiet and secondary to the photograph.
    -------------------------------------------------------------------------- */
 .about__visual {
   grid-area: visual;
@@ -1989,8 +2005,6 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   align-self: center;
   --mx: 0; --my: 0; --hl: 0px;
 }
-/* Image follows the text in the reading sequence (label → headline → story
-   → image); the scale is nearly invisible — quality, not a noticed animation. */
 .about__visual[data-reveal] {
   opacity: 0;
   transform: scale(0.98);
@@ -2006,7 +2020,7 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   margin: 0;
   border-radius: var(--radius-2xl);
   overflow: hidden;
-  box-shadow: var(--shadow-floating);   /* larger, more premium editorial depth */
+  box-shadow: var(--shadow-floating);
   aspect-ratio: 4 / 5;
   background-color: var(--surface-section);
   transform: translate3d(calc(var(--mx) * 8px + var(--hl)), calc(var(--my) * 8px), 0);
@@ -2023,42 +2037,63 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 .about__visual.is-inview .about__media img { transform: scale(1); }
 .about__visual:hover .about__media img { transform: scale(1.03); }
 
-/* Decorative geometry — subtle, secondary; parallax at a larger speed */
-.about__decor {
+/* Gold flight path + airplane — top, arcing out toward the content side */
+.about__flight {
   position: absolute;
-  z-index: var(--z-base);
-  inset-block-start: -6%;
-  inset-inline-end: -8%;
-  inline-size: min(42vw, 460px);
-  color: var(--color-accent-soft);
-  opacity: 0.55;                        /* kept quiet so the photo dominates   */
+  z-index: var(--z-overlay);
+  inset-block-start: -9%;
+  inset-inline-start: -7%;              /* inline-start = right in RTL → toward content */
+  inline-size: min(30vw, 250px);
+  color: var(--about-gold);
   pointer-events: none;
-  transform: translate3d(calc(var(--mx) * 15px), calc(var(--my) * 15px), 0);
+  transform: translate3d(calc(var(--mx) * 12px), calc(var(--my) * 12px), 0);
   transition: transform 550ms var(--ease-smooth);
 }
-.about__decor .about__path { stroke-dasharray: 4 8; animation: about-dash 22s linear infinite; }
+/* Force stroke-only (global reset sets svg fill:currentColor, which would
+   otherwise flood these open shapes with gold). */
+.about__flight .about__path { fill: none; }
+.about__flight .about__path {
+  stroke-dasharray: 2 7;
+  animation: about-dash 26s linear infinite;
+}
+.about__plane { fill: currentColor; }
 @keyframes about-dash { to { stroke-dashoffset: -240; } }
 
-/* Floating editorial badge (light glass — kept secondary) */
+/* Gold dashed arc — bottom, wrapping the outer corner behind the photo */
+.about__arc {
+  position: absolute;
+  z-index: var(--z-base);
+  inset-block-end: -12%;
+  inset-inline-end: -12%;               /* inline-end = left in RTL → outer edge */
+  inline-size: min(42vw, 340px);
+  color: var(--about-gold);
+  opacity: 0.75;
+  pointer-events: none;
+  transform: translate3d(calc(var(--mx) * -14px), calc(var(--my) * -14px), 0);
+  transition: transform 600ms var(--ease-smooth);
+}
+.about__arc circle { fill: none; stroke-dasharray: 2 9; }
+
+/* Floating trust badge — subtle gold glass, bottom toward the content side */
 .about__badge {
   position: absolute;
   z-index: var(--z-overlay);
-  inset-block-start: var(--space-24);
+  inset-block-end: var(--space-24);
   inset-inline-start: calc(var(--space-20) * -1);
   display: inline-flex;
   align-items: center;
   gap: var(--space-12);
   padding: var(--space-12) var(--space-20);
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.82);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  border: var(--border-width-thin) solid rgba(255, 255, 255, 0.8);
+  border: var(--border-width-thin) solid var(--about-gold-line);
   border-radius: var(--radius-pill);
   box-shadow: var(--shadow-floating);
   opacity: 0;
   transform: translate3d(calc(var(--mx) * -10px), calc(var(--my) * -10px), 0);
   transition:
-      opacity var(--duration-slow) var(--ease-entrance) 0.35s,
+      opacity var(--duration-slow) var(--ease-entrance) 0.4s,
       transform 550ms var(--ease-smooth);
 }
 .about__visual.is-inview .about__badge { opacity: 1; }
@@ -2067,61 +2102,64 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   place-items: center;
   inline-size: var(--space-32);
   block-size: var(--space-32);
-  color: var(--color-primary);
-  background-color: var(--color-primary-subtle);
+  color: var(--about-gold);
+  background-color: var(--about-gold-soft);
   border-radius: var(--radius-round);
 }
 .about__badge-icon svg { inline-size: 18px; block-size: 18px; }
-.about__badge-text { font-size: var(--font-size-small); font-weight: var(--font-weight-semibold); color: var(--text-primary); }
+.about__badge-text { font-size: var(--font-size-small); font-weight: var(--font-weight-semibold); color: var(--about-navy); }
 
 
 /* --------------------------------------------------------------------------
    6 · RESPONSIVE
    -------------------------------------------------------------------------- */
-/* Large desktop — let the photograph become dominant with a gentle editorial
-   bleed toward the outer edge (safely clipped by .about { overflow: clip }). */
+/* Large desktop — a gentle editorial bleed toward the outer edge (clipped). */
 @media (min-width: 1440px) {
   .about__visual { margin-inline-end: clamp(0px, 2vw, var(--space-40)); }
   .about__media { box-shadow: var(--shadow-hover); }
 }
 
-/* Laptop two-column range — the content track is narrow here, so step the
-   headline to the h2 token for a comfortable two-line Arabic wrap (the grand
-   h1 returns on large desktop and on the full-width stacked layout below). */
+/* Laptop two-column range — step the headline to h2 for a clean Arabic wrap. */
 @media (min-width: 901px) and (max-width: 1200px) {
   .about__title { font-size: var(--font-size-h2); max-width: 24rem; }
 }
 
-/* Tablet & below — single controlled column. Reading order:
-   label · headline · story · IMAGE · highlights · download CTA */
+/* Tablet & below — single column. Reading order:
+   label · headline · story · IMAGE · feature row · download CTA */
 @media (max-width: 900px) {
   .about__inner {
     grid-template-columns: 1fr;
     grid-template-areas:
       "content"
       "visual"
-      "highlights"
+      "features"
       "cta";
-    row-gap: clamp(var(--space-32), 5vw, var(--space-48));
+    row-gap: clamp(var(--space-40), 6vw, var(--space-64));
     column-gap: 0;
   }
-  .about__content { max-width: none; align-self: start; }
+  .about__content { max-width: none; }
   .about__title { max-width: 26rem; }
-  .about__story,
-  .about__highlights { max-width: 42rem; }
+  .about__story { max-width: 42rem; }
+  .about__features { max-width: none; }
   .about__visual { margin-inline: 0; }
   .about__media { aspect-ratio: 16 / 11; }
-  .about__decor { inline-size: min(52vw, 300px); }
-  /* The rule reads as a divider between story and list on desktop; in the
-     stacked order it would sit under the image, so rely on spacing instead. */
-  .about__highlights { border-block-start: 0; padding-block-start: 0; }
+  .about__flight { inline-size: min(26vw, 180px); }
+  .about__arc { inline-size: min(40vw, 260px); }
 }
 
-/* Mobile — a deliberate, taller portrait crop keeps the subject present and
-   the image feeling intentional rather than a shrunken desktop card. */
+/* Small tablet — two feature columns; keep dividers only within each pair */
+@media (max-width: 720px) {
+  .about__features { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: var(--space-32); }
+  .about__feature:not(:first-child) { border-inline-start: 0; }
+  .about__feature:nth-child(2n) { border-inline-start: var(--border-width-thin) solid var(--about-gold-line); }
+  .about__feature:nth-child(n+3) { border-block-start: var(--border-width-thin) solid var(--about-gold-line); padding-block-start: var(--space-32); }
+}
+
+/* Mobile — a deliberate, taller portrait crop; keep the frame subtle */
 @media (max-width: 600px) {
   .about__media { aspect-ratio: 4 / 5; }
-  .about__decor { inline-size: min(56vw, 240px); inset-inline-end: -10%; }
+  .about__arc { inline-size: min(52vw, 220px); inset-inline-end: -14%; }
+  .about__flight { inline-size: min(34vw, 150px); }
 }
 @media (max-width: 480px) {
   .about__profile { width: 100%; }
@@ -2129,18 +2167,19 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 
 
 /* --------------------------------------------------------------------------
-   7 · REDUCED MOTION — opacity only; no parallax / scale
+   7 · REDUCED MOTION — opacity only; no parallax / scale / dash
    -------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   .about__content > *,
-  .about__highlights .about__hl { opacity: 1; transform: none; transition: none; }
+  .about__features .about__feature { opacity: 1; transform: none; transition: none; }
   .about__visual[data-reveal] { opacity: 1; transform: none; transition: none; }
   .about__media,
-  .about__decor,
+  .about__flight,
+  .about__arc,
   .about__badge { transform: none !important; transition: none; }
   .about__media img { transform: none; }
   .about__visual:hover .about__media img { transform: none; }
-  .about__decor .about__path { animation: none; }
+  .about__flight .about__path { animation: none; }
 }
 
 
@@ -4452,6 +4491,16 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
           <symbol id="ic-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/>
           </symbol>
+          <!-- Feature icons (outline, 2px — same family) -->
+          <symbol id="ic-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9S9.5 5.6 12 3Z"/>
+          </symbol>
+          <symbol id="ic-headset" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 13v-1a7 7 0 0 1 14 0v1"/><rect x="3" y="13" width="4" height="7" rx="1.5"/><rect x="17" y="13" width="4" height="7" rx="1.5"/><path d="M19.5 20a3 3 0 0 1-3 3H13"/>
+          </symbol>
+          <symbol id="ic-route" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="6.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="6.5" r="2.5"/><path d="M8.6 15.4 15.4 8.6"/>
+          </symbol>
         </svg>
 
         <div class="about__inner container container--wide">
@@ -4467,12 +4516,12 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
             </p>
           </div>
 
-          <!-- Key highlights — refined vertical list -->
-          <ul class="about__highlights" data-reveal>
-            <li class="about__hl" data-about-hl><span class="about__check"><svg aria-hidden="true"><use href="#ic-check"/></svg></span><span class="about__hl-text">خدمات سفر متكاملة</span></li>
-            <li class="about__hl" data-about-hl><span class="about__check"><svg aria-hidden="true"><use href="#ic-check"/></svg></span><span class="about__hl-text">إجراءات موثوقة وسريعة</span></li>
-            <li class="about__hl" data-about-hl><span class="about__check"><svg aria-hidden="true"><use href="#ic-check"/></svg></span><span class="about__hl-text">فريق متخصص لخدمة العملاء</span></li>
-            <li class="about__hl" data-about-hl><span class="about__check"><svg aria-hidden="true"><use href="#ic-check"/></svg></span><span class="about__hl-text">تجربة احترافية من البداية حتى الوصول</span></li>
+          <!-- Feature strip — existing highlight labels as gold icon columns -->
+          <ul class="about__features" data-reveal>
+            <li class="about__feature"><span class="about__feature-icon"><svg aria-hidden="true"><use href="#ic-globe"/></svg></span><span class="about__feature-text">خدمات سفر متكاملة</span></li>
+            <li class="about__feature"><span class="about__feature-icon"><svg aria-hidden="true"><use href="#ic-partner"/></svg></span><span class="about__feature-text">إجراءات موثوقة وسريعة</span></li>
+            <li class="about__feature"><span class="about__feature-icon"><svg aria-hidden="true"><use href="#ic-headset"/></svg></span><span class="about__feature-text">فريق متخصص لخدمة العملاء</span></li>
+            <li class="about__feature"><span class="about__feature-icon"><svg aria-hidden="true"><use href="#ic-route"/></svg></span><span class="about__feature-text">تجربة احترافية من البداية حتى الوصول</span></li>
           </ul>
 
           <!-- Profile download CTA -->
@@ -4485,13 +4534,11 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
             </a>
           </div>
 
-          <!-- Interactive visual (dominant) -->
+          <!-- Framed visual (dominant image + gold flight-path + dashed arc) -->
           <div class="about__visual" data-reveal data-about-visual>
-            <svg class="about__decor" viewBox="0 0 460 520" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="120" cy="140" r="118" stroke="currentColor" stroke-width="1.5" opacity="0.40"/>
-              <circle cx="120" cy="140" r="74" stroke="currentColor" stroke-width="1" opacity="0.28"/>
-              <path class="about__path" d="M20 470 C 150 360, 300 360, 440 150" stroke="var(--color-accent)" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
-              <circle cx="440" cy="150" r="4" fill="var(--color-accent)"/>
+            <!-- Dashed arc wrapping the outer bottom corner (behind the photo) -->
+            <svg class="about__arc" viewBox="0 0 340 340" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="170" cy="170" r="150" stroke="currentColor" stroke-width="2.2"/>
             </svg>
 
             <figure class="about__media">
@@ -4502,6 +4549,14 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
                 style="--img-pos:center top"
                 loading="lazy" decoding="async">
             </figure>
+
+            <!-- Gold flight path + airplane arcing out toward the content -->
+            <svg class="about__flight" viewBox="0 0 250 200" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+              <path class="about__path" d="M22 178 C 74 120, 116 150, 170 74" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+              <g transform="translate(178 62) rotate(45) scale(1.35) translate(-12 -12)">
+                <path class="about__plane" d="M12 2 14 10 22 14 22 16 14 13.5 13.5 19 16 21 16 22 12 20.5 8 22 8 21 10.5 19 10 13.5 2 16 2 14 10 10Z"/>
+              </g>
+            </svg>
 
             <div class="about__badge">
               <span class="about__badge-icon"><svg aria-hidden="true"><use href="#ic-partner"/></svg></span>
