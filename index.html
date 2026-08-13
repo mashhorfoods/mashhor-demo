@@ -3411,19 +3411,37 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   gap: clamp(var(--space-48), 6vw, var(--space-120));
   margin-block-end: clamp(var(--space-80), 9vw, var(--space-140));
 }
-/* A short blue route-accent frames the belief as more than body copy */
-.vision__lead-accent {
-  display: block;
-  inline-size: calc(var(--space-40) + var(--space-8));
-  block-size: var(--border-width-thick);
-  margin-block-end: var(--space-24);
+/* The belief becomes a calm pull-quote — leading brand accent + quote mark */
+.vision__statement-content {
+  position: relative;
+  padding: clamp(var(--space-32), 4vw, var(--space-48));
+  padding-inline-start: clamp(var(--space-40), 4.5vw, var(--space-64));
+  background-color: var(--surface-primary);
+  border: var(--border-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+.vision__statement-content::before {
+  content: "";
+  position: absolute;
+  inset-block: clamp(var(--space-32), 4vw, var(--space-48));
+  inset-inline-start: 0;
+  inline-size: 3px;
   border-radius: var(--radius-pill);
-  background-color: var(--color-accent);
+  background-color: var(--color-primary);
+}
+.vision__quote {
+  display: block;
+  inline-size: calc(var(--space-32) + var(--space-8));
+  height: auto;
+  margin-block-end: var(--space-20);
+  color: var(--color-accent);
+  opacity: 0.5;
 }
 .vision__lead-title {
-  font-size: var(--font-size-h1);        /* the emotional centrepiece */
+  font-size: var(--font-size-h2);        /* the emotional centrepiece — set in the card */
   color: var(--text-primary);
-  line-height: var(--leading-tight);
+  line-height: var(--leading-snug);
   text-wrap: balance;
   margin-block-end: var(--space-24);
 }
@@ -3433,7 +3451,7 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   color: var(--text-secondary);
 }
 
-/* --- Abstract brand composition (slow fade + gentle scale) --- */
+/* --- Abstract brand ORBIT — the journey circles a brand at its centre --- */
 .vision__composition[data-reveal] {
   opacity: 0;
   transform: scale(0.96);
@@ -3446,23 +3464,23 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 .vision__stage {
   position: relative;
   inline-size: 100%;
-  min-block-size: clamp(320px, 38vw, 460px);
+  min-block-size: clamp(320px, 40vw, 480px);
+  display: grid;
+  place-items: center;
 }
-
-/* Soft blue gradient blob */
+/* Soft blue gradient glow behind the orbit */
 .vision__blob {
   position: absolute;
-  inset: 8% 6%;
+  inset: 6%;
   border-radius: var(--radius-round);
   background:
-      radial-gradient(60% 60% at 62% 38%, rgba(44, 123, 229, 0.20), transparent 62%),
-      radial-gradient(50% 50% at 30% 75%, rgba(124, 183, 255, 0.22), transparent 60%);
-  filter: blur(6px);
-  animation: vs-float 16s var(--ease-in-out) infinite;
+      radial-gradient(60% 60% at 60% 40%, rgba(44, 123, 229, 0.16), transparent 62%),
+      radial-gradient(52% 52% at 34% 72%, rgba(124, 183, 255, 0.20), transparent 60%);
+  filter: blur(8px);
+  animation: vs-float 18s var(--ease-in-out) infinite;
 }
-
-/* Concentric rings + curved travel path */
-.vision__rings {
+/* Concentric rings + drawn journey route + orbital nodes + arriving plane */
+.vision__orbit {
   position: absolute;
   inset: 0;
   inline-size: 100%;
@@ -3470,97 +3488,73 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   color: var(--color-accent-soft);
   overflow: visible;
 }
-.vision__rings .vs-path {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-}
-.vision__composition.is-inview .vision__rings .vs-path {
+.vision__orbit .vs-ring { fill: none; stroke: currentColor; }
+.vision__orbit .vs-path { fill: none; stroke: var(--color-accent); stroke-dasharray: 1; stroke-dashoffset: 1; }
+.vision__orbit .vs-node { fill: var(--color-accent-soft); stroke: none; opacity: 0.75; }
+.vision__orbit .vs-plane { fill: var(--color-primary); opacity: 0; }
+.vision__composition.is-inview .vision__orbit .vs-path {
   animation: vs-draw 2.4s var(--ease-smooth) 0.3s forwards, vs-dash 26s linear 2.7s infinite;
 }
-
-/* Glass-effect floating panels */
-.vision__glass {
-  position: absolute;
-  border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.55);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  border: var(--border-width-thin) solid rgba(255, 255, 255, 0.7);
-  box-shadow: var(--shadow-lg), 0 0 0 var(--border-width-thin) rgba(var(--shadow-rgb), 0.04) inset;
+.vision__composition.is-inview .vision__orbit .vs-plane {
+  animation: vs-fade var(--duration-slow) var(--ease-entrance) 2.2s forwards;
 }
-.vision__glass::before {
-  /* subtle glow */
+
+/* The brand mark at the centre of the journey */
+.vision__core {
+  position: relative;
+  z-index: var(--z-raised);
+  display: inline-grid;
+  place-items: center;
+  inline-size: clamp(116px, 15vw, 168px);
+  block-size: clamp(116px, 15vw, 168px);
+  border-radius: var(--radius-round);
+  background-color: var(--white);
+  box-shadow: var(--shadow-lg);
+}
+.vision__core::before {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: calc(var(--space-8) * -1);
   border-radius: inherit;
-  box-shadow: 0 0 40px rgba(44, 123, 229, 0.12);
-  pointer-events: none;
+  border: var(--border-width-thin) solid var(--color-border);
+  opacity: 0.7;
 }
-.vision__glass-line {
-  position: absolute;
-  inset-inline: var(--space-20);
-  block-size: var(--border-width-thin);
-  background: var(--color-border);
-}
-.vision__glass-dot {
-  position: absolute;
-  inline-size: var(--space-12);
-  block-size: var(--space-12);
-  border-radius: var(--radius-round);
-  background: var(--color-primary);
-  box-shadow: 0 0 0 4px var(--color-primary-subtle);
-}
-.vision__glass--a {
-  inset-block-start: 14%;
-  inset-inline-end: 8%;
-  inline-size: min(46%, 220px);
-  block-size: clamp(96px, 12vw, 128px);
-  animation: vs-float 14s var(--ease-in-out) infinite;
-}
-.vision__glass--a .vision__glass-dot { inset-block-start: var(--space-20); inset-inline-start: var(--space-20); }
-.vision__glass--a .vision__glass-line { inset-block-end: var(--space-24); }
-.vision__glass--a .vision__glass-line + .vision__glass-line { inset-block-end: var(--space-12); inset-inline-end: 40%; }
-.vision__glass--b {
-  inset-block-end: 12%;
-  inset-inline-start: 6%;
-  inline-size: min(38%, 170px);
-  block-size: clamp(84px, 10vw, 104px);
-  animation: vs-float 18s var(--ease-in-out) 1.5s infinite;
-}
-.vision__glass--b .vision__glass-dot { inset-block-start: var(--space-16); inset-inline-start: var(--space-16); background: var(--color-accent); }
-.vision__glass--b .vision__glass-line { inset-block-end: var(--space-20); }
-
-/* Floating accent dots */
-.vision__dot {
-  position: absolute;
-  inline-size: var(--space-8);
-  block-size: var(--space-8);
-  border-radius: var(--radius-round);
-  background: var(--color-accent);
-  opacity: 0.6;
-}
-.vision__dot--1 { inset-block-start: 22%; inset-inline-start: 18%; animation: vs-float 12s var(--ease-in-out) infinite; }
-.vision__dot--2 { inset-block-end: 26%; inset-inline-end: 24%; inline-size: var(--space-12); block-size: var(--space-12); background: var(--color-accent-soft); animation: vs-float 20s var(--ease-in-out) 2s infinite; }
+.vision__logo { inline-size: 58%; height: auto; }
 
 
 /* ==========================================================================
-   LAYER 03 · VISION & MISSION NARRATIVE  (whitespace only, no cards)
+   LAYER 03 · VISION & MISSION NARRATIVE
+   One integrated soft panel — two beliefs, an icon each, split by a hairline.
    ========================================================================== */
 .vision__narrative {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0;
-  max-width: var(--container-narrow);
+  max-width: 64rem;
   margin-inline: auto;
+  background-color: var(--surface-section);
+  border: var(--border-card);
+  border-radius: var(--radius-2xl);
+  padding: clamp(var(--space-40), 5vw, var(--space-64));
 }
-/* One continuous philosophy: a hairline separates the two beliefs */
-.vision__block { padding-inline: clamp(var(--space-40), 5vw, var(--space-80)); }
+.vision__block { padding-inline: clamp(var(--space-32), 4vw, var(--space-64)); }
 .vision__block:first-child { padding-inline-start: 0; }
 .vision__block:last-child {
   padding-inline-end: 0;
   border-inline-start: var(--border-divider);
 }
+.vision__block-icon {
+  display: grid;
+  place-items: center;
+  inline-size: calc(var(--space-48) + var(--space-8));
+  block-size: calc(var(--space-48) + var(--space-8));
+  margin-block-end: var(--space-24);
+  color: var(--color-primary);
+  background-color: var(--surface-primary);
+  border: var(--border-card);
+  border-radius: var(--radius-md);
+}
+.vision__block-icon svg { inline-size: 26px; block-size: 26px; }
 .vision__block-label {
   display: inline-block;
   margin-block-end: var(--space-20);
@@ -3655,6 +3649,7 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 @keyframes vs-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 @keyframes vs-draw  { to { stroke-dashoffset: 0; } }
 @keyframes vs-dash  { to { stroke-dashoffset: -240; } }
+@keyframes vs-fade  { to { opacity: 1; } }
 
 
 /* ==========================================================================
@@ -3663,11 +3658,11 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 @media (max-width: 900px) {
   .vision__statement { grid-template-columns: 1fr; gap: clamp(var(--space-40), 7vw, var(--space-64)); }
   .vision__composition { order: -1; }          /* the journey leads, then the belief */
-  .vision__stage { min-block-size: clamp(280px, 60vw, 380px); }
+  .vision__stage { min-block-size: clamp(300px, 66vw, 420px); }
 }
 /* Vision & Mission stack into one vertical narrative, split by a hairline */
 @media (max-width: 560px) {
-  .vision__narrative { grid-template-columns: 1fr; }
+  .vision__narrative { grid-template-columns: 1fr; padding: clamp(var(--space-24), 7vw, var(--space-40)); }
   .vision__block { padding-inline: 0; }
   .vision__block:last-child {
     border-inline-start: 0;
@@ -3685,13 +3680,10 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   .vision__reveal > * { opacity: 1; transform: none; transition: none; }
   .vision__composition[data-reveal] { opacity: 1; transform: none; transition: none; }
   .vision__blob,
-  .vision__glass--a,
-  .vision__glass--b,
-  .vision__dot--1,
-  .vision__dot--2,
   .vision__transition .vs-accent { animation: none; }
-  .vision__composition.is-inview .vision__rings .vs-path,
+  .vision__composition.is-inview .vision__orbit .vs-path,
   .vision__impact.is-inview .vs-path { animation: none; stroke-dashoffset: 0; }
+  .vision__orbit .vs-plane { opacity: 1; animation: none; }
   .vision__impact-line .vs-dot { opacity: 1; transition: none; }
   .vision__transition .vs-path { animation: none; }
 }
@@ -5239,6 +5231,16 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
            ================================================================ -->
       <section class="section section--soft vision" id="vision" data-section aria-labelledby="vision-title">
 
+        <!-- Outline icon sprite (2px, rounded — matches the icon family) -->
+        <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+          <symbol id="ic-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>
+          </symbol>
+          <symbol id="ic-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/>
+          </symbol>
+        </svg>
+
         <div class="vision__inner container container--wide">
 
           <!-- LAYER 01 · Editorial header -->
@@ -5254,7 +5256,7 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
           <!-- LAYER 02 · Editorial brand statement (content + composition) -->
           <div class="vision__statement">
             <div class="vision__statement-content vision__reveal" data-reveal>
-              <span class="vision__lead-accent" aria-hidden="true"></span>
+              <svg class="vision__quote" viewBox="0 0 40 32" aria-hidden="true"><path d="M0 32V18C0 8 6 2 16 0l2 5C11 7 8 11 8 16h6v16H0Zm22 0V18C22 8 28 2 38 0l2 5C33 7 30 11 30 16h6v16H22Z"/></svg>
               <h3 class="vision__lead-title">نصنع تجارب سفر...<br>تبدأ بالثقة وتنتهي بالاطمئنان.</h3>
               <p class="vision__lead-text">
                 في وكالة المدى، نؤمن أن كل رحلة تحمل مسؤولية، وأن نجاحها يبدأ بخدمة احترافية،
@@ -5262,29 +5264,26 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
               </p>
             </div>
 
-            <!-- Abstract brand composition (CSS/SVG only) -->
+            <!-- Abstract brand orbit — the journey circles a brand at its centre (CSS/SVG) -->
             <div class="vision__composition" data-reveal aria-hidden="true">
               <div class="vision__stage">
                 <span class="vision__blob"></span>
-                <svg class="vision__rings" viewBox="0 0 460 460" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="250" cy="200" r="150" stroke="currentColor" stroke-width="1" opacity="0.45"/>
-                  <circle cx="250" cy="200" r="104" stroke="currentColor" stroke-width="1" opacity="0.30"/>
-                  <circle cx="250" cy="200" r="58" stroke="currentColor" stroke-width="1" opacity="0.20"/>
-                  <path class="vs-path" pathLength="1" d="M40 380 C 180 250, 340 250, 430 90"
+                <svg class="vision__orbit" viewBox="0 0 480 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle class="vs-ring" cx="240" cy="240" r="206" stroke-width="1" opacity="0.30"/>
+                  <circle class="vs-ring" cx="240" cy="240" r="150" stroke-width="1" opacity="0.45"/>
+                  <circle class="vs-ring" cx="240" cy="240" r="98"  stroke-width="1" opacity="0.30"/>
+                  <path class="vs-path" pathLength="1" d="M64 408 C 150 332, 148 214, 250 154 C 338 102, 380 126, 430 70"
                         stroke="var(--color-accent)" stroke-width="1.5" stroke-linecap="round"/>
-                  <circle cx="430" cy="90" r="4" fill="var(--color-accent)"/>
+                  <circle class="vs-node" cx="240" cy="34"  r="5"/>
+                  <circle class="vs-node" cx="80"  cy="300" r="4"/>
+                  <circle class="vs-node" cx="404" cy="332" r="4"/>
+                  <g class="vs-plane" transform="translate(430 70) rotate(-40) scale(0.95) translate(-12 -12)">
+                    <path d="M12 2 14 10 22 14 22 16 14 13.5 13.5 19 16 21 16 22 12 20.5 8 22 8 21 10.5 19 10 13.5 2 16 2 14 10 10Z"/>
+                  </g>
                 </svg>
-                <div class="vision__glass vision__glass--a">
-                  <span class="vision__glass-dot"></span>
-                  <span class="vision__glass-line"></span>
-                  <span class="vision__glass-line"></span>
-                </div>
-                <div class="vision__glass vision__glass--b">
-                  <span class="vision__glass-dot"></span>
-                  <span class="vision__glass-line"></span>
-                </div>
-                <span class="vision__dot vision__dot--1"></span>
-                <span class="vision__dot vision__dot--2"></span>
+                <span class="vision__core">
+                  <img class="vision__logo" src="https://i.ibb.co/WNpF4ZFd/logo-icon-01.png" alt="" width="140" height="140" loading="lazy" decoding="async">
+                </span>
               </div>
             </div>
           </div>
@@ -5292,6 +5291,7 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
           <!-- LAYER 03 · Vision & Mission narrative (whitespace only) -->
           <div class="vision__narrative vision__reveal" data-reveal>
             <div class="vision__block">
+              <span class="vision__block-icon"><svg aria-hidden="true"><use href="#ic-eye"/></svg></span>
               <span class="vision__block-label">الرؤية</span>
               <p class="vision__block-text">
                 أن نكون الخيار الأول في خدمات السفر والسياحة، من خلال تقديم تجربة متكاملة
@@ -5299,6 +5299,7 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
               </p>
             </div>
             <div class="vision__block">
+              <span class="vision__block-icon"><svg aria-hidden="true"><use href="#ic-target"/></svg></span>
               <span class="vision__block-label">الرسالة</span>
               <p class="vision__block-text">
                 تقديم حلول سفر احترافية تجمع بين سرعة الإنجاز، ووضوح الإجراءات، وجودة الخدمة،
