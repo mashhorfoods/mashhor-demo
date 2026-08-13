@@ -3406,19 +3406,29 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
    ========================================================================== */
 .vision__statement {
   display: grid;
-  grid-template-columns: 45fr 55fr;
+  grid-template-columns: 52fr 48fr;      /* the belief leads · composition balances */
   align-items: center;
   gap: clamp(var(--space-48), 6vw, var(--space-120));
-  margin-block-end: clamp(var(--space-64), 8vw, var(--space-120));
+  margin-block-end: clamp(var(--space-80), 9vw, var(--space-140));
+}
+/* A short blue route-accent frames the belief as more than body copy */
+.vision__lead-accent {
+  display: block;
+  inline-size: calc(var(--space-40) + var(--space-8));
+  block-size: var(--border-width-thick);
+  margin-block-end: var(--space-24);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-accent);
 }
 .vision__lead-title {
-  font-size: var(--font-size-h2);
+  font-size: var(--font-size-h1);        /* the emotional centrepiece */
   color: var(--text-primary);
-  line-height: var(--leading-snug);
+  line-height: var(--leading-tight);
+  text-wrap: balance;
   margin-block-end: var(--space-24);
 }
 .vision__lead-text {
-  max-width: var(--measure);
+  max-width: 34rem;
   font-size: var(--font-size-body-lg);
   color: var(--text-secondary);
 }
@@ -3540,25 +3550,32 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 .vision__narrative {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: clamp(var(--space-48), 7vw, var(--space-120));
+  gap: 0;
   max-width: var(--container-narrow);
   margin-inline: auto;
 }
+/* One continuous philosophy: a hairline separates the two beliefs */
+.vision__block { padding-inline: clamp(var(--space-40), 5vw, var(--space-80)); }
+.vision__block:first-child { padding-inline-start: 0; }
+.vision__block:last-child {
+  padding-inline-end: 0;
+  border-inline-start: var(--border-divider);
+}
 .vision__block-label {
   display: inline-block;
-  margin-block-end: var(--space-16);
+  margin-block-end: var(--space-20);
   color: var(--color-primary);
-  font-size: var(--font-size-small);
-  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-h4);        /* a large typographic label */
+  font-weight: var(--font-weight-bold);
   position: relative;
-  padding-block-end: var(--space-12);
+  padding-block-end: var(--space-16);
 }
 .vision__block-label::after {
   content: "";
   position: absolute;
   inset-block-end: 0;
   inset-inline-start: 0;
-  inline-size: var(--space-40);
+  inline-size: calc(var(--space-40) + var(--space-8));
   block-size: var(--border-width-thick);
   border-radius: var(--radius-pill);
   background: var(--color-accent);
@@ -3568,6 +3585,7 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   font-weight: var(--font-weight-regular);
   line-height: var(--leading-relaxed);
   color: var(--text-primary);
+  text-wrap: pretty;
 }
 
 
@@ -3604,6 +3622,9 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 .vision__impact.is-inview .vs-path {
   animation: vs-draw 2.4s var(--ease-smooth) forwards, vs-dash 24s linear 2.6s infinite;
 }
+/* Destination point gently arrives once the route has drawn */
+.vision__impact-line .vs-dot { opacity: 0; transition: opacity var(--duration-slow) var(--ease-entrance) 1.9s; }
+.vision__impact.is-inview .vs-dot { opacity: 1; }
 
 
 /* ==========================================================================
@@ -3640,12 +3661,20 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
    RESPONSIVE
    ========================================================================== */
 @media (max-width: 900px) {
-  .vision__statement { grid-template-columns: 1fr; gap: var(--space-64); }
-  .vision__composition { order: 2; }           /* composition below the text */
+  .vision__statement { grid-template-columns: 1fr; gap: clamp(var(--space-40), 7vw, var(--space-64)); }
+  .vision__composition { order: -1; }          /* the journey leads, then the belief */
   .vision__stage { min-block-size: clamp(280px, 60vw, 380px); }
 }
+/* Vision & Mission stack into one vertical narrative, split by a hairline */
 @media (max-width: 560px) {
-  .vision__narrative { grid-template-columns: 1fr; gap: var(--space-48); }
+  .vision__narrative { grid-template-columns: 1fr; }
+  .vision__block { padding-inline: 0; }
+  .vision__block:last-child {
+    border-inline-start: 0;
+    margin-block-start: clamp(var(--space-32), 8vw, var(--space-48));
+    padding-block-start: clamp(var(--space-32), 8vw, var(--space-48));
+    border-block-start: var(--border-divider);
+  }
 }
 
 
@@ -3663,6 +3692,7 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   .vision__transition .vs-accent { animation: none; }
   .vision__composition.is-inview .vision__rings .vs-path,
   .vision__impact.is-inview .vs-path { animation: none; stroke-dashoffset: 0; }
+  .vision__impact-line .vs-dot { opacity: 1; transition: none; }
   .vision__transition .vs-path { animation: none; }
 }
 
@@ -5224,6 +5254,7 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
           <!-- LAYER 02 · Editorial brand statement (content + composition) -->
           <div class="vision__statement">
             <div class="vision__statement-content vision__reveal" data-reveal>
+              <span class="vision__lead-accent" aria-hidden="true"></span>
               <h3 class="vision__lead-title">نصنع تجارب سفر...<br>تبدأ بالثقة وتنتهي بالاطمئنان.</h3>
               <p class="vision__lead-text">
                 في وكالة المدى، نؤمن أن كل رحلة تحمل مسؤولية، وأن نجاحها يبدأ بخدمة احترافية،
@@ -5287,6 +5318,7 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
               <svg viewBox="0 0 460 60" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path class="vs-path" pathLength="1" d="M10 50 C 140 6, 320 6, 450 50"
                       stroke="var(--color-accent)" stroke-width="1.5" stroke-linecap="round"/>
+                <circle class="vs-dot" cx="450" cy="50" r="4" fill="var(--color-accent)"/>
               </svg>
             </div>
           </div>
