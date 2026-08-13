@@ -2484,13 +2484,13 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 .services__inner { position: relative; z-index: var(--z-raised); }
 
 /* ==========================================================================
-   LAYER 01 · EDITORIAL HEADER (centered, staggered reveal)
+   LAYER 01 · EDITORIAL HEADER (start-aligned, staggered reveal)
    ========================================================================== */
 .services__header {
-  max-width: 62rem;
-  margin-inline: auto;
-  margin-block-end: clamp(var(--space-40), 5vw, var(--space-64));
-  text-align: center;
+  max-width: 52rem;
+  margin-inline-end: auto;                 /* editorial: anchored to the start */
+  margin-block-end: clamp(var(--space-48), 6vw, var(--space-80));
+  text-align: start;
 }
 .services__header[data-reveal] { opacity: 1; transform: none; transition: none; }
 .services__header > * {
@@ -2514,10 +2514,10 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   font-size: var(--font-size-small);
   font-weight: var(--font-weight-semibold);
 }
-.services__eyebrow::before,
+.services__eyebrow::before { content: none; }   /* single trailing rule for a left/right editorial eyebrow */
 .services__eyebrow::after {
   content: "";
-  inline-size: var(--space-24);
+  inline-size: var(--space-40);
   block-size: var(--border-width-thick);
   border-radius: var(--radius-pill);
   background-color: var(--color-accent);
@@ -2525,25 +2525,27 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 .services__title {
   font-size: var(--font-size-h2);
   color: var(--text-primary);
+  max-width: 24ch;
   margin-block-end: var(--space-20);
   text-wrap: balance;
 }
 .services__intro {
-  max-width: 48rem;
-  margin-inline: auto;
+  max-width: 44rem;
   font-size: var(--font-size-body-lg);
   color: var(--text-secondary);
 }
 
 
 /* ==========================================================================
-   LAYER 02 · INTERACTIVE SERVICE NAVIGATION (tablist, 4×2 → 2 → swipe)
+   LAYER 02 · SERVICE INDEX (accessible tablist · 4 → 2 → swipe)
+   A sophisticated index: subtle number, secondary icon, dominant name,
+   short description. Active = an editorial selection, not a blue button.
    ========================================================================== */
 .services__nav {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--space-16);
-  margin-block-end: clamp(var(--space-40), 5vw, var(--space-64));
+  margin-block-end: clamp(var(--space-48), 6vw, var(--space-80));
 }
 .services__nav[data-reveal] { opacity: 1; transform: none; transition: none; }
 
@@ -2553,24 +2555,61 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   align-items: flex-start;
   gap: var(--space-16);
   padding: var(--space-20);
+  padding-inline-end: var(--space-40);      /* room for the index number */
   text-align: start;
   background-color: var(--surface-primary);
   border: var(--border-card);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-sm);
   cursor: pointer;
+  overflow: clip;
   transition:
       transform var(--duration-normal) var(--ease-smooth),
       box-shadow var(--duration-normal) var(--ease-smooth),
-      border-color var(--duration-normal) var(--ease-smooth);
+      border-color var(--duration-normal) var(--ease-smooth),
+      background-color var(--duration-normal) var(--ease-smooth);
+}
+/* Leading brand-accent bar (RTL-aware) — reveals on hover, full when active */
+.service-tab::before {
+  content: "";
+  position: absolute;
+  inset-block: var(--space-16);
+  inset-inline-start: 0;
+  inline-size: 3px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-primary);
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform var(--duration-normal) var(--ease-smooth);
 }
 .service-tab:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.service-tab:hover::before { transform: scaleY(0.5); }
 .service-tab:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
 
-/* Active state — blue border + soft glow */
+/* Subtle index number (top trailing corner) */
+.service-tab__num {
+  position: absolute;
+  inset-block-start: var(--space-16);
+  inset-inline-end: var(--space-16);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  transition: color var(--duration-normal) var(--ease-smooth);
+}
+
+/* Active — editorial selection: soft blue surface, brand border, full accent */
 .service-tab[aria-selected="true"] {
   border-color: var(--color-primary);
-  box-shadow: var(--shadow-md), 0 0 0 3px var(--color-primary-subtle);
+  background-color: var(--color-primary-subtle);
+}
+.service-tab[aria-selected="true"]::before { transform: scaleY(1); }
+.service-tab[aria-selected="true"] .service-tab__name { color: var(--color-primary); }
+.service-tab[aria-selected="true"] .service-tab__num { color: var(--color-primary); }
+.service-tab[aria-selected="true"] .service-tab__icon {
+  color: var(--white);
+  background-color: var(--color-primary);
 }
 
 .service-tab__icon {
@@ -2582,10 +2621,13 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   color: var(--color-primary);
   background-color: var(--color-primary-subtle);
   border-radius: var(--radius-md);
-  transition: transform var(--duration-normal) var(--ease-smooth);
+  transition:
+      transform var(--duration-normal) var(--ease-smooth),
+      color var(--duration-normal) var(--ease-smooth),
+      background-color var(--duration-normal) var(--ease-smooth);
 }
 .service-tab__icon svg { inline-size: 24px; block-size: 24px; }
-.service-tab:hover .service-tab__icon { transform: scale(1.06); }
+.service-tab:hover .service-tab__icon { transform: translateY(-2px); }   /* subtle 2px shift */
 
 .service-tab__name {
   display: block;
@@ -2593,6 +2635,7 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
   margin-block-end: var(--space-4);
+  transition: color var(--duration-normal) var(--ease-smooth);
 }
 .service-tab__desc {
   display: block;
@@ -2615,12 +2658,22 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   gap: clamp(var(--space-40), 5vw, var(--space-80));
 }
 
-/* --- Left content --- */
+/* --- Content --- */
 .showcase__content { max-width: 40rem; }
 .showcase__title {
   font-size: var(--font-size-h2);
   color: var(--text-primary);
   margin-block-end: var(--space-20);
+  text-wrap: balance;
+}
+.showcase__title::after {
+  content: "";
+  display: block;
+  inline-size: calc(var(--space-48) + var(--space-8));
+  block-size: var(--border-width-thick);
+  margin-block-start: var(--space-16);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-accent);
 }
 .showcase__desc {
   font-size: var(--font-size-body-lg);
@@ -2676,13 +2729,13 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 }
 .showcase__link:hover { color: var(--color-primary-hover); }
 
-/* --- Right visual --- */
+/* --- Visual (emotional anchor: large, minimal shadow) --- */
 .showcase__media {
   position: relative;
   margin: 0;
   border-radius: var(--radius-xl);
   overflow: hidden;
-  box-shadow: var(--shadow-floating);
+  box-shadow: var(--shadow-lg);
   aspect-ratio: 4 / 3;
   background-color: var(--surface-section);
 }
@@ -2713,26 +2766,31 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 
 
 /* ==========================================================================
-   LAYER 04 · TRUST STRIP (four minimal cards, single row)
+   LAYER 04 · TRUST BAND (a quiet confidence band — hairline dividers)
+   Supporting evidence, not the hero: no cards, just icon + label, divided.
    ========================================================================== */
 .services__trust {
-  margin-block-start: clamp(var(--space-48), 5vw, var(--space-80));
+  margin-block-start: clamp(var(--space-64), 7vw, var(--space-96));
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--space-16);
+  gap: 0;
+  border-block: var(--border-divider);
+  padding-block: var(--space-24);
 }
 .services__trust[data-reveal] { opacity: 1; transform: none; transition: none; }
 .trust-card {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-12);
-  padding: var(--space-20);
+  padding: var(--space-8) var(--space-24);
   opacity: 0;
   transform: translateY(16px);
   transition:
       opacity var(--duration-slow) var(--ease-entrance),
       transform var(--duration-slow) var(--ease-entrance);
 }
+.trust-card:not(:first-child) { border-inline-start: var(--border-divider); }
 .services__trust.is-inview .trust-card { opacity: 1; transform: none; }
 .services__trust.is-inview .trust-card:nth-child(1) { transition-delay: 0.08s; }
 .services__trust.is-inview .trust-card:nth-child(2) { transition-delay: 0.16s; }
@@ -2742,13 +2800,13 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   flex: 0 0 auto;
   display: inline-grid;
   place-items: center;
-  inline-size: var(--space-40);
-  block-size: var(--space-40);
+  inline-size: var(--space-32);
+  block-size: var(--space-32);
   color: var(--color-primary);
   background-color: var(--color-primary-subtle);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-round);
 }
-.trust-card__icon svg { inline-size: 20px; block-size: 20px; }
+.trust-card__icon svg { inline-size: 18px; block-size: 18px; }
 .trust-card__label {
   font-size: var(--font-size-small);
   font-weight: var(--font-weight-semibold);
@@ -2757,24 +2815,41 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 
 
 /* ==========================================================================
-   LAYER 05 · FINAL CTA (centered)
+   LAYER 05 · FINAL CTA (an editorial closing moment — navy surface)
    ========================================================================== */
 .services__cta {
+  position: relative;
+  overflow: clip;
   margin-block-start: clamp(var(--space-64), 7vw, var(--space-120));
-  padding: clamp(var(--space-40), 5vw, var(--space-64));
+  padding: clamp(var(--space-48), 6vw, var(--space-96)) clamp(var(--space-32), 5vw, var(--space-80));
   text-align: center;
-  background-color: var(--surface-primary);
-  border: var(--border-card);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
+  background-color: var(--surface-inverse);
+  color: var(--text-on-inverse);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-md);
 }
+/* A barely-there brand glow keeps the navy block from feeling flat */
+.services__cta::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset-block-start: -30%;
+  inset-inline-start: -8%;
+  inline-size: min(42vw, 460px);
+  block-size: min(42vw, 460px);
+  border-radius: var(--radius-round);
+  background: radial-gradient(circle at 50% 50%, rgba(124, 183, 255, 0.16), transparent 62%);
+  pointer-events: none;
+}
+.services__cta > * { position: relative; z-index: 1; }
 .services__cta[data-reveal] { transition-delay: 0.10s; }
-.services__cta-title { font-size: var(--font-size-h3); color: var(--text-primary); margin-block-end: var(--space-12); }
+.services__cta-title { font-size: var(--font-size-h2); color: var(--white); margin-block-end: var(--space-16); text-wrap: balance; }
 .services__cta-text {
   max-width: 44rem;
   margin-inline: auto;
   margin-block-end: var(--space-32);
-  color: var(--text-secondary);
+  font-size: var(--font-size-body-lg);
+  color: var(--text-on-inverse);
 }
 
 
@@ -2798,20 +2873,32 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 /* ==========================================================================
    RESPONSIVE
    ========================================================================== */
-/* Tablet — nav 2 columns · showcase stacks (content, then image) */
-@media (max-width: 768px) {
+/* Laptop / tablet — 2-column service index; showcase stacks (image first) */
+@media (max-width: 1024px) {
   .services__nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .showcase-panel.is-active { grid-template-columns: 1fr; gap: var(--space-40); }
-  .services__trust { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-16); }
-  .showcase__media { aspect-ratio: 16 / 10; }
 }
 
-/* Mobile — horizontally swipeable service nav; single-column showcase */
-@media (max-width: 480px) {
+/* Tablet — showcase becomes a vertical story: IMAGE → content */
+@media (max-width: 900px) {
+  .showcase-panel.is-active {
+    grid-template-columns: 1fr;
+    gap: clamp(var(--space-32), 5vw, var(--space-48));
+  }
+  .showcase__visual { order: -1; }        /* image leads on stacked layouts */
+  .showcase__media { aspect-ratio: 16 / 10; }
+  .services__trust { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* On a 2×2 band, reset the left divider on each row's first item, add a
+     top divider on the second row. */
+  .trust-card:nth-child(odd) { border-inline-start: 0; }
+  .trust-card:nth-child(n + 3) { border-block-start: var(--border-divider); }
+}
+
+/* Mobile — a compact, swipeable service selector; single-column showcase */
+@media (max-width: 600px) {
   .services__nav {
     grid-template-columns: none;
     grid-auto-flow: column;
-    grid-auto-columns: 78%;
+    grid-auto-columns: 80%;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
@@ -2821,7 +2908,11 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   .services__nav::-webkit-scrollbar { display: none; }
   .service-tab { scroll-snap-align: start; }
   .showcase__features { grid-template-columns: 1fr; }
-  .services__trust { grid-template-columns: 1fr; }
+  .showcase__media { aspect-ratio: 4 / 3; }
+  .showcase__actions { flex-direction: column; align-items: stretch; }
+  .showcase__actions .btn { width: 100%; }
+  .showcase__actions .showcase__link { text-align: center; padding-block: var(--space-8); }
+  .services__cta .btn { width: 100%; max-width: 22rem; }
 }
 
 
@@ -4800,34 +4891,42 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
           <!-- LAYER 02 · Interactive service navigation (tablist) -->
           <div class="services__nav" role="tablist" aria-label="اختيار الخدمة" data-reveal>
             <button class="service-tab" role="tab" id="tab-flights" aria-controls="panel-flights" aria-selected="true" tabindex="0">
+              <span class="service-tab__num" aria-hidden="true">01</span>
               <span class="service-tab__icon"><svg aria-hidden="true"><use href="#ic-plane"/></svg></span>
               <span class="service-tab__body"><span class="service-tab__name">حجوزات الطيران</span><span class="service-tab__desc">حجوزات مرنة على أفضل شركات الطيران.</span></span>
             </button>
             <button class="service-tab" role="tab" id="tab-cruises" aria-controls="panel-cruises" aria-selected="false" tabindex="-1">
+              <span class="service-tab__num" aria-hidden="true">02</span>
               <span class="service-tab__icon"><svg aria-hidden="true"><use href="#ic-ship"/></svg></span>
               <span class="service-tab__body"><span class="service-tab__name">حجوزات البواخر</span><span class="service-tab__desc">رحلات بحرية وبواخر بإجراءات ميسّرة.</span></span>
             </button>
             <button class="service-tab" role="tab" id="tab-security" aria-controls="panel-security" aria-selected="false" tabindex="-1">
+              <span class="service-tab__num" aria-hidden="true">03</span>
               <span class="service-tab__icon"><svg aria-hidden="true"><use href="#ic-security"/></svg></span>
               <span class="service-tab__body"><span class="service-tab__name">الموافقات الأمنية</span><span class="service-tab__desc">متابعة وإنجاز الموافقات باحترافية.</span></span>
             </button>
             <button class="service-tab" role="tab" id="tab-work-visa" aria-controls="panel-work-visa" aria-selected="false" tabindex="-1">
+              <span class="service-tab__num" aria-hidden="true">04</span>
               <span class="service-tab__icon"><svg aria-hidden="true"><use href="#ic-briefcase"/></svg></span>
               <span class="service-tab__body"><span class="service-tab__name">تأشيرات العمل</span><span class="service-tab__desc">إجراءات وفق المتطلبات الرسمية.</span></span>
             </button>
             <button class="service-tab" role="tab" id="tab-visit-visa" aria-controls="panel-visit-visa" aria-selected="false" tabindex="-1">
+              <span class="service-tab__num" aria-hidden="true">05</span>
               <span class="service-tab__icon"><svg aria-hidden="true"><use href="#ic-passport"/></svg></span>
               <span class="service-tab__body"><span class="service-tab__name">تأشيرات الزيارة</span><span class="service-tab__desc">للأفراد والعائلات بإجراءات سريعة.</span></span>
             </button>
             <button class="service-tab" role="tab" id="tab-hajj" aria-controls="panel-hajj" aria-selected="false" tabindex="-1">
+              <span class="service-tab__num" aria-hidden="true">06</span>
               <span class="service-tab__icon"><svg aria-hidden="true"><use href="#ic-hajj"/></svg></span>
               <span class="service-tab__body"><span class="service-tab__name">العمرة والحج</span><span class="service-tab__desc">برامج متكاملة بكل راحة واطمئنان.</span></span>
             </button>
             <button class="service-tab" role="tab" id="tab-insurance" aria-controls="panel-insurance" aria-selected="false" tabindex="-1">
+              <span class="service-tab__num" aria-hidden="true">07</span>
               <span class="service-tab__icon"><svg aria-hidden="true"><use href="#ic-insurance"/></svg></span>
               <span class="service-tab__body"><span class="service-tab__name">التأمين على السفر</span><span class="service-tab__desc">تغطية معتمدة توفّر راحة البال.</span></span>
             </button>
             <button class="service-tab" role="tab" id="tab-business" aria-controls="panel-business" aria-selected="false" tabindex="-1">
+              <span class="service-tab__num" aria-hidden="true">08</span>
               <span class="service-tab__icon"><svg aria-hidden="true"><use href="#ic-business"/></svg></span>
               <span class="service-tab__body"><span class="service-tab__name">خدمات الأعمال</span><span class="service-tab__desc">حلول احترافية للشركات ورواد الأعمال.</span></span>
             </button>
@@ -5000,17 +5099,17 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 
           <!-- LAYER 04 · Trust strip -->
           <div class="services__trust" data-reveal>
-            <div class="card trust-card"><span class="trust-card__icon"><svg aria-hidden="true"><use href="#ic-check"/></svg></span><span class="trust-card__label">سرعة الإنجاز</span></div>
-            <div class="card trust-card"><span class="trust-card__icon"><svg aria-hidden="true"><use href="#ic-check"/></svg></span><span class="trust-card__label">إجراءات موثوقة</span></div>
-            <div class="card trust-card"><span class="trust-card__icon"><svg aria-hidden="true"><use href="#ic-check"/></svg></span><span class="trust-card__label">فريق متخصص</span></div>
-            <div class="card trust-card"><span class="trust-card__icon"><svg aria-hidden="true"><use href="#ic-check"/></svg></span><span class="trust-card__label">دعم مستمر</span></div>
+            <div class="trust-card"><span class="trust-card__icon"><svg aria-hidden="true"><use href="#ic-check"/></svg></span><span class="trust-card__label">سرعة الإنجاز</span></div>
+            <div class="trust-card"><span class="trust-card__icon"><svg aria-hidden="true"><use href="#ic-check"/></svg></span><span class="trust-card__label">إجراءات موثوقة</span></div>
+            <div class="trust-card"><span class="trust-card__icon"><svg aria-hidden="true"><use href="#ic-check"/></svg></span><span class="trust-card__label">فريق متخصص</span></div>
+            <div class="trust-card"><span class="trust-card__icon"><svg aria-hidden="true"><use href="#ic-check"/></svg></span><span class="trust-card__label">دعم مستمر</span></div>
           </div>
 
           <!-- LAYER 05 · Final CTA -->
           <div class="services__cta" data-reveal>
             <h3 class="services__cta-title">هل تحتاج إلى استشارة؟</h3>
             <p class="services__cta-text">فريق وكالة المدى جاهز لمساعدتك في اختيار الخدمة الأنسب لاحتياجاتك.</p>
-            <a class="btn btn--primary btn--lg" href="#contact">تواصل معنا</a>
+            <a class="btn btn--light btn--lg" href="#contact">تواصل معنا</a>
           </div>
 
         </div>
