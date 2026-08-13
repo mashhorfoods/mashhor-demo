@@ -1822,26 +1822,28 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 
 
 /* --------------------------------------------------------------------------
-   1 · LAYOUT  (asymmetric · content right, dominant visual left · RTL)
+   1 · LAYOUT  (controlled asymmetric editorial · content right, dominant
+   visual left · RTL). Ratio ≈ 5/7 so the photograph reads as a major
+   editorial object with the text column deliberately positioned beside it.
    -------------------------------------------------------------------------- */
 .about { position: relative; overflow: clip; }
 .about__inner {
   position: relative;
   z-index: var(--z-raised);
   display: grid;
-  grid-template-columns: 0.85fr 1.15fr;   /* content | visual (visual dominant) */
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);  /* content | dominant visual */
   grid-template-areas:
     "content    visual"
     "highlights visual"
     "cta        visual";
   align-items: start;
-  column-gap: clamp(var(--space-48), 6vw, var(--space-120));
-  row-gap: var(--space-32);
+  column-gap: clamp(var(--space-48), 6vw, var(--space-140));
+  row-gap: clamp(var(--space-32), 3.5vw, var(--space-48));
 }
 
 
 /* --------------------------------------------------------------------------
-   2 · CONTENT  (label · heading · story) — fade-up
+   2 · CONTENT  (label · heading · story) — quiet, editorial fade-up
    -------------------------------------------------------------------------- */
 .about__content { grid-area: content; max-width: 34rem; }
 .about__content[data-reveal] { opacity: 1; transform: none; transition: none; }
@@ -1854,14 +1856,14 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 }
 .about__content.is-inview > * { opacity: 1; transform: none; }
 .about__content.is-inview > *:nth-child(1) { transition-delay: 0.05s; }
-.about__content.is-inview > *:nth-child(2) { transition-delay: 0.14s; }
-.about__content.is-inview > *:nth-child(3) { transition-delay: 0.23s; }
+.about__content.is-inview > *:nth-child(2) { transition-delay: 0.16s; }
+.about__content.is-inview > *:nth-child(3) { transition-delay: 0.27s; }
 
 .about__eyebrow {
   display: inline-flex;
   align-items: center;
   gap: var(--space-12);
-  margin-block-end: var(--space-16);
+  margin-block-end: var(--space-20);
   color: var(--color-primary);
   font-size: var(--font-size-small);
   font-weight: var(--font-weight-semibold);
@@ -1873,26 +1875,35 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   border-radius: var(--radius-pill);
   background-color: var(--color-accent);
 }
+/* Headline becomes the strongest type in the section — larger, tightly set,
+   width-controlled so Arabic wraps gracefully. */
 .about__title {
-  font-size: var(--font-size-h2);
+  font-size: var(--font-size-h1);
+  line-height: var(--leading-tight);
   color: var(--text-primary);
+  max-width: 28rem;
+  text-wrap: balance;
   margin-block-end: var(--space-24);
 }
 .about__story {
-  max-width: 34rem;
+  max-width: 32rem;
   font-size: var(--font-size-body-lg);
   color: var(--text-secondary);
+  text-wrap: pretty;
 }
 
 
 /* --------------------------------------------------------------------------
    3 · KEY HIGHLIGHTS  (refined vertical list — not cards) · sequential reveal
+   A hairline editorial rule separates the story from the highlights.
    -------------------------------------------------------------------------- */
 .about__highlights {
   grid-area: highlights;
   list-style: none;
   margin: 0;
   padding: 0;
+  padding-block-start: clamp(var(--space-24), 3vw, var(--space-40));
+  border-block-start: var(--border-divider);
   display: grid;
   gap: var(--space-4);
   max-width: 34rem;
@@ -1978,12 +1989,14 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   align-self: center;
   --mx: 0; --my: 0; --hl: 0px;
 }
+/* Image follows the text in the reading sequence (label → headline → story
+   → image); the scale is nearly invisible — quality, not a noticed animation. */
 .about__visual[data-reveal] {
   opacity: 0;
-  transform: scale(0.97);
+  transform: scale(0.98);
   transition:
-      opacity var(--duration-slower) var(--ease-entrance),
-      transform var(--duration-slower) var(--ease-entrance);
+      opacity var(--duration-slower) var(--ease-entrance) 0.12s,
+      transform var(--duration-slower) var(--ease-entrance) 0.12s;
 }
 .about__visual[data-reveal].is-inview { opacity: 1; transform: none; }
 
@@ -1993,7 +2006,7 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   margin: 0;
   border-radius: var(--radius-2xl);
   overflow: hidden;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-floating);   /* larger, more premium editorial depth */
   aspect-ratio: 4 / 5;
   background-color: var(--surface-section);
   transform: translate3d(calc(var(--mx) * 8px + var(--hl)), calc(var(--my) * 8px), 0);
@@ -2004,11 +2017,13 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   height: 100%;
   object-fit: cover;
   object-position: var(--img-pos, center);
-  transition: transform 600ms var(--ease-smooth);
+  transform: scale(1.04);               /* softly settles to 1 as it reveals */
+  transition: transform 900ms var(--ease-smooth);
 }
-.about__visual:hover .about__media img { transform: scale(1.02); }
+.about__visual.is-inview .about__media img { transform: scale(1); }
+.about__visual:hover .about__media img { transform: scale(1.03); }
 
-/* Decorative geometry — parallax at a different (larger) speed */
+/* Decorative geometry — subtle, secondary; parallax at a larger speed */
 .about__decor {
   position: absolute;
   z-index: var(--z-base);
@@ -2016,6 +2031,7 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   inset-inline-end: -8%;
   inline-size: min(42vw, 460px);
   color: var(--color-accent-soft);
+  opacity: 0.55;                        /* kept quiet so the photo dominates   */
   pointer-events: none;
   transform: translate3d(calc(var(--mx) * 15px), calc(var(--my) * 15px), 0);
   transition: transform 550ms var(--ease-smooth);
@@ -2061,24 +2077,54 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 
 /* --------------------------------------------------------------------------
    6 · RESPONSIVE
-   Mobile order: من نحن · headline · story · download CTA · visual · highlights
    -------------------------------------------------------------------------- */
+/* Large desktop — let the photograph become dominant with a gentle editorial
+   bleed toward the outer edge (safely clipped by .about { overflow: clip }). */
+@media (min-width: 1440px) {
+  .about__visual { margin-inline-end: clamp(0px, 2vw, var(--space-40)); }
+  .about__media { box-shadow: var(--shadow-hover); }
+}
+
+/* Laptop two-column range — the content track is narrow here, so step the
+   headline to the h2 token for a comfortable two-line Arabic wrap (the grand
+   h1 returns on large desktop and on the full-width stacked layout below). */
+@media (min-width: 901px) and (max-width: 1200px) {
+  .about__title { font-size: var(--font-size-h2); max-width: 24rem; }
+}
+
+/* Tablet & below — single controlled column. Reading order:
+   label · headline · story · IMAGE · highlights · download CTA */
 @media (max-width: 900px) {
   .about__inner {
     grid-template-columns: 1fr;
     grid-template-areas:
       "content"
-      "cta"
       "visual"
-      "highlights";
-    row-gap: var(--space-40);
+      "highlights"
+      "cta";
+    row-gap: clamp(var(--space-32), 5vw, var(--space-48));
+    column-gap: 0;
   }
+  .about__content { max-width: none; align-self: start; }
+  .about__title { max-width: 26rem; }
+  .about__story,
+  .about__highlights { max-width: 42rem; }
+  .about__visual { margin-inline: 0; }
   .about__media { aspect-ratio: 16 / 11; }
-  .about__decor { inline-size: min(52vw, 320px); }
+  .about__decor { inline-size: min(52vw, 300px); }
+  /* The rule reads as a divider between story and list on desktop; in the
+     stacked order it would sit under the image, so rely on spacing instead. */
+  .about__highlights { border-block-start: 0; padding-block-start: 0; }
+}
+
+/* Mobile — a deliberate, taller portrait crop keeps the subject present and
+   the image feeling intentional rather than a shrunken desktop card. */
+@media (max-width: 600px) {
+  .about__media { aspect-ratio: 4 / 5; }
+  .about__decor { inline-size: min(56vw, 240px); inset-inline-end: -10%; }
 }
 @media (max-width: 480px) {
   .about__profile { width: 100%; }
-  .about__media { aspect-ratio: 4 / 3; }
 }
 
 
