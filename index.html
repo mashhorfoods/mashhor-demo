@@ -738,13 +738,13 @@
   @media (max-width:1200px){
     .site-nav__link{padding-inline:var(--sp-12)}
   }
-  /* Header collapses to the drawer below 1080 — the full nav + CTA needs the room */
-  @media (max-width:1080px){
+  /* Header collapses to the drawer below 1120 — the six-item nav + CTA needs the room */
+  @media (max-width:1120px){
     .site-nav,.site-header__actions .btn{display:none}
     .site-header__menu-trigger{display:inline-flex}
   }
-  /* Tighten the desktop header in the 1081–1240 band so the CTA never clips */
-  @media (min-width:1081px) and (max-width:1240px){
+  /* Tighten the desktop header in the 1121–1280 band so the CTA never clips */
+  @media (min-width:1121px) and (max-width:1280px){
     .site-header__inner{gap:var(--sp-16)}
     .site-nav__link{padding-inline:var(--sp-8)}
     .site-header__actions{gap:var(--sp-12)}
@@ -1136,11 +1136,12 @@
         </a>
         <nav class="site-nav" aria-label="Primary">
           <ul class="site-nav__list">
+            <li><a class="site-nav__link" href="#capabilities" data-nav-link>Capabilities</a></li>
             <li><a class="site-nav__link" href="#work" data-nav-link>Work</a></li>
-            <li><a class="site-nav__link" href="#services" data-nav-link>Services</a></li>
             <li><a class="site-nav__link" href="#approach" data-nav-link>Approach</a></li>
             <li><a class="site-nav__link" href="#packages" data-nav-link>Packages</a></li>
             <li><a class="site-nav__link" href="#about" data-nav-link>About</a></li>
+            <li><a class="site-nav__link" href="#contact" data-nav-link>Contact</a></li>
           </ul>
         </nav>
         <div class="site-header__actions">
@@ -1153,8 +1154,8 @@
     <!-- ================= MOBILE DRAWER ================= -->
     <div class="mobile-nav" id="mobile-nav" data-mobile-nav data-state="closed" aria-label="Mobile menu" hidden>
       <ul class="mobile-nav__list">
+        <li><a class="mobile-nav__link" href="#capabilities" data-nav-link>Capabilities</a></li>
         <li><a class="mobile-nav__link" href="#work" data-nav-link>Work</a></li>
-        <li><a class="mobile-nav__link" href="#services" data-nav-link>Services</a></li>
         <li><a class="mobile-nav__link" href="#approach" data-nav-link>Approach</a></li>
         <li><a class="mobile-nav__link" href="#packages" data-nav-link>Packages</a></li>
         <li><a class="mobile-nav__link" href="#about" data-nav-link>About</a></li>
@@ -1219,7 +1220,7 @@
       </section>
 
       <!-- 03 · SERVICES / CAPABILITIES -->
-      <section class="section caps" id="services" data-section aria-labelledby="services-title">
+      <section class="section caps" id="capabilities" data-section aria-labelledby="services-title">
         <div class="container container--wide">
           <div class="caps__grid">
             <div class="caps__aside">
@@ -1550,8 +1551,8 @@
               <p class="site-footer__brand-tag">Connecting ideas to impact — a creative, design and communication agency.</p>
               <a class="site-footer__brand-mail keep-en" href="mailto:hello@quantumlink.agency">hello@quantumlink.agency</a>
             </div>
-            <nav class="footcol" aria-label="Explore"><p class="footcol__h">Explore</p><ul class="footcol__list"><li><a href="#work">Work</a></li><li><a href="#services">Services</a></li><li><a href="#approach">Approach</a></li><li><a href="#about">About</a></li><li><a href="#contact">Contact</a></li></ul></nav>
-            <nav class="footcol" aria-label="Services"><p class="footcol__h">Services</p><ul class="footcol__list"><li><a href="#services">Graphic Design</a></li><li><a href="#services">Visual Systems</a></li><li><a href="#services">Creative Campaigns</a></li><li><a href="#services">Digital Experiences</a></li><li><a href="#packages">Packages</a></li></ul></nav>
+            <nav class="footcol" aria-label="Explore"><p class="footcol__h">Explore</p><ul class="footcol__list"><li><a href="#capabilities">Capabilities</a></li><li><a href="#work">Work</a></li><li><a href="#approach">Approach</a></li><li><a href="#packages">Packages</a></li><li><a href="#about">About</a></li><li><a href="#contact">Contact</a></li></ul></nav>
+            <nav class="footcol" aria-label="Services"><p class="footcol__h">Services</p><ul class="footcol__list"><li><a href="#capabilities">Graphic Design</a></li><li><a href="#capabilities">Visual Systems</a></li><li><a href="#capabilities">Creative Campaigns</a></li><li><a href="#capabilities">Digital Experiences</a></li><li><a href="#packages">Packages</a></li></ul></nav>
             <div class="footcol"><p class="footcol__h">Connect</p><div class="site-footer__social"><a class="social-dot" href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a><a class="social-dot" href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5A2.5 2.5 0 1 1 5 8.5 2.5 2.5 0 0 1 4.98 3.5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.95 1.83-1.95 3.75-1.95C20.4 8.75 22 11 22 14.5V21h-4v-5.7c0-1.36-.02-3.1-1.9-3.1s-2.2 1.47-2.2 3v5.8H9z"/></svg></a><a class="social-dot" href="#" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 3h3l-6.6 7.5L21.8 21h-6l-4.3-5.6L6.5 21H3.4l7.1-8.1L2.3 3h6.1l3.9 5.1L17.5 3z"/></svg></a></div><a class="site-footer__start" href="#contact" style="margin-block-start:var(--sp-24);display:inline-block">Let’s start.</a></div>
           </div>
         </div>
@@ -1618,7 +1619,7 @@
           else if(!e.shiftKey && doc.activeElement === last){ e.preventDefault(); first.focus(); }
         }
       });
-      window.addEventListener("resize", function(){ if(window.innerWidth > 768 && isOpen) close(false); });
+      window.addEventListener("resize", function(){ if(window.innerWidth > 1120 && isOpen) close(false); });
       panel.hidden = true; panel.setAttribute("data-state","closed"); trigger.setAttribute("aria-expanded","false");
     }
 
