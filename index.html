@@ -2484,13 +2484,13 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 .services__inner { position: relative; z-index: var(--z-raised); }
 
 /* ==========================================================================
-   LAYER 01 · EDITORIAL HEADER (start-aligned, staggered reveal)
+   LAYER 01 · EDITORIAL HEADER (centered, staggered reveal)
    ========================================================================== */
 .services__header {
-  max-width: 52rem;
-  margin-inline-end: auto;                 /* editorial: anchored to the start */
-  margin-block-end: clamp(var(--space-48), 6vw, var(--space-80));
-  text-align: start;
+  max-width: 60rem;
+  margin-inline: auto;
+  margin-block-end: clamp(var(--space-40), 5vw, var(--space-64));
+  text-align: center;
 }
 .services__header[data-reveal] { opacity: 1; transform: none; transition: none; }
 .services__header > * {
@@ -2514,10 +2514,10 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   font-size: var(--font-size-small);
   font-weight: var(--font-weight-semibold);
 }
-.services__eyebrow::before { content: none; }   /* single trailing rule for a left/right editorial eyebrow */
+.services__eyebrow::before,
 .services__eyebrow::after {
   content: "";
-  inline-size: var(--space-40);
+  inline-size: var(--space-24);
   block-size: var(--border-width-thick);
   border-radius: var(--radius-pill);
   background-color: var(--color-accent);
@@ -2525,37 +2525,37 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 .services__title {
   font-size: var(--font-size-h2);
   color: var(--text-primary);
-  max-width: 24ch;
   margin-block-end: var(--space-20);
   text-wrap: balance;
 }
 .services__intro {
-  max-width: 44rem;
+  max-width: 48rem;
+  margin-inline: auto;
   font-size: var(--font-size-body-lg);
   color: var(--text-secondary);
 }
 
 
 /* ==========================================================================
-   LAYER 02 · SERVICE INDEX (accessible tablist · 4 → 2 → swipe)
-   A sophisticated index: subtle number, secondary icon, dominant name,
-   short description. Active = an editorial selection, not a blue button.
+   LAYER 02 · SERVICE INDEX (accessible tablist · one row of cards → swipe)
+   A premium index: subtle number, secondary icon, dominant name, short
+   description. The active service is a dominant navy card, not a button.
    ========================================================================== */
 .services__nav {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--space-16);
-  margin-block-end: clamp(var(--space-48), 6vw, var(--space-80));
+  grid-template-columns: repeat(8, minmax(0, 1fr));   /* the full index, one row */
+  gap: var(--space-12);
+  margin-block-end: clamp(var(--space-40), 5vw, var(--space-64));
 }
 .services__nav[data-reveal] { opacity: 1; transform: none; transition: none; }
 
 .service-tab {
   position: relative;
   display: flex;
+  flex-direction: column;
   align-items: flex-start;
   gap: var(--space-16);
-  padding: var(--space-20);
-  padding-inline-end: var(--space-40);      /* room for the index number */
+  padding: var(--space-20) var(--space-16);
   text-align: start;
   background-color: var(--surface-primary);
   border: var(--border-card);
@@ -2569,7 +2569,7 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
       border-color var(--duration-normal) var(--ease-smooth),
       background-color var(--duration-normal) var(--ease-smooth);
 }
-/* Leading brand-accent bar (RTL-aware) — reveals on hover, full when active */
+/* Leading brand-accent bar (RTL-aware) — previews on hover */
 .service-tab::before {
   content: "";
   position: absolute;
@@ -2580,9 +2580,10 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   background-color: var(--color-primary);
   transform: scaleY(0);
   transform-origin: center;
-  transition: transform var(--duration-normal) var(--ease-smooth);
+  transition: transform var(--duration-normal) var(--ease-smooth),
+              background-color var(--duration-normal) var(--ease-smooth);
 }
-.service-tab:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.service-tab:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
 .service-tab:hover::before { transform: scaleY(0.5); }
 .service-tab:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
 
@@ -2599,17 +2600,19 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   transition: color var(--duration-normal) var(--ease-smooth);
 }
 
-/* Active — editorial selection: soft blue surface, brand border, full accent */
+/* Active — a dominant deep-navy card (the selected service reads first) */
 .service-tab[aria-selected="true"] {
-  border-color: var(--color-primary);
-  background-color: var(--color-primary-subtle);
+  background-color: var(--surface-inverse);
+  border-color: var(--surface-inverse);
+  box-shadow: var(--shadow-md);
 }
-.service-tab[aria-selected="true"]::before { transform: scaleY(1); }
-.service-tab[aria-selected="true"] .service-tab__name { color: var(--color-primary); }
-.service-tab[aria-selected="true"] .service-tab__num { color: var(--color-primary); }
+.service-tab[aria-selected="true"]::before { transform: scaleY(1); background-color: var(--brand-blue-sky); }
+.service-tab[aria-selected="true"] .service-tab__name { color: var(--white); }
+.service-tab[aria-selected="true"] .service-tab__desc { color: var(--text-on-inverse); }
+.service-tab[aria-selected="true"] .service-tab__num { color: var(--brand-blue-sky); }
 .service-tab[aria-selected="true"] .service-tab__icon {
   color: var(--white);
-  background-color: var(--color-primary);
+  background-color: rgba(255, 255, 255, 0.12);
 }
 
 .service-tab__icon {
@@ -2629,12 +2632,14 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 .service-tab__icon svg { inline-size: 24px; block-size: 24px; }
 .service-tab:hover .service-tab__icon { transform: translateY(-2px); }   /* subtle 2px shift */
 
+.service-tab__body { inline-size: 100%; }        /* text wraps at the card width */
 .service-tab__name {
   display: block;
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-small);
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
   margin-block-end: var(--space-4);
+  text-wrap: balance;
   transition: color var(--duration-normal) var(--ease-smooth);
 }
 .service-tab__desc {
@@ -2648,14 +2653,23 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 /* ==========================================================================
    LAYER 03 · FEATURED SERVICE SHOWCASE (tabpanels · 45 / 55 split)
    ========================================================================== */
-.services__showcase { position: relative; }
+/* The showcase reads as one editorial feature — a calm white panel */
+.services__showcase {
+  position: relative;
+  background-color: var(--surface-primary);
+  border: var(--border-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  padding: clamp(var(--space-24), 3vw, var(--space-40));
+  overflow: clip;
+}
 
 .showcase-panel { display: none; }
 .showcase-panel.is-active {
   display: grid;
-  grid-template-columns: 45fr 55fr;
+  grid-template-columns: 45fr 55fr;      /* content (start/right) · image (end/left, larger) */
   align-items: center;
-  gap: clamp(var(--space-40), 5vw, var(--space-80));
+  gap: clamp(var(--space-32), 4vw, var(--space-64));
 }
 
 /* --- Content --- */
@@ -2770,11 +2784,14 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
    Supporting evidence, not the hero: no cards, just icon + label, divided.
    ========================================================================== */
 .services__trust {
-  margin-block-start: clamp(var(--space-64), 7vw, var(--space-96));
+  margin-block-start: clamp(var(--space-32), 4vw, var(--space-48));
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0;
-  border-block: var(--border-divider);
+  background-color: var(--surface-primary);
+  border: var(--border-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
   padding-block: var(--space-24);
 }
 .services__trust[data-reveal] { opacity: 1; transform: none; transition: none; }
@@ -2873,9 +2890,22 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 /* ==========================================================================
    RESPONSIVE
    ========================================================================== */
-/* Laptop / tablet — 2-column service index; showcase stacks (image first) */
-@media (max-width: 1024px) {
-  .services__nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* Below the full 8-up row — a swipeable service index (keeps card size,
+   scroll-snap, no arrows needed). Applies to laptop/tablet/mobile. */
+@media (max-width: 1200px) {
+  .services__nav {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: clamp(168px, 22vw, 210px);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-block-end: var(--space-12);
+    scroll-padding-inline: var(--space-4);
+    scrollbar-width: none;
+  }
+  .services__nav::-webkit-scrollbar { display: none; }
+  .service-tab { scroll-snap-align: start; }
 }
 
 /* Tablet — showcase becomes a vertical story: IMAGE → content */
@@ -2893,20 +2923,9 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   .trust-card:nth-child(n + 3) { border-block-start: var(--border-divider); }
 }
 
-/* Mobile — a compact, swipeable service selector; single-column showcase */
+/* Mobile — a wider swipeable selector; single-column showcase; full CTAs */
 @media (max-width: 600px) {
-  .services__nav {
-    grid-template-columns: none;
-    grid-auto-flow: column;
-    grid-auto-columns: 80%;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    padding-block-end: var(--space-12);
-    scrollbar-width: none;
-  }
-  .services__nav::-webkit-scrollbar { display: none; }
-  .service-tab { scroll-snap-align: start; }
+  .services__nav { grid-auto-columns: clamp(210px, 66vw, 250px); }
   .showcase__features { grid-template-columns: 1fr; }
   .showcase__media { aspect-ratio: 4 / 3; }
   .showcase__actions { flex-direction: column; align-items: stretch; }
