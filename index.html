@@ -46,7 +46,7 @@
     <style>
       [data-reveal],
       .hero__content > *, .about__content > *, .why__header > *, .services__header > *,
-      .why__values .why__primary, .why__values .why__item,
+      .why__values .why__card,
       .about__stats .about__stat, .services__trust .trust-card,
       .about__features .about__feature,
       .hero__chip, .hero__scroll {
@@ -2250,166 +2250,158 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 
 
 /* --------------------------------------------------------------------------
-   2 · EDITORIAL VALUE SYSTEM  (one dominant value + a quiet supporting list)
-   Not four equal cards: a strong primary panel reads first, three supporting
-   values sit beside it as a scannable editorial list.
+   2 · EDITORIAL BENTO  (one dominant navy anchor + three supporting cards)
+   Not four equal cards: a deep-navy anchor leads, three light cards support
+   it — numbered 01–04, one cohesive value story. RTL: anchor leads (right).
    -------------------------------------------------------------------------- */
 .why__values {
   display: grid;
-  grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);  /* primary | support */
-  gap: clamp(var(--space-24), 3vw, var(--space-40));
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas:
+    "primary v2 v2"
+    "primary v3 v4";
+  gap: clamp(var(--space-16), 1.8vw, var(--space-24));
   align-items: stretch;
 }
 .why__values[data-reveal] { opacity: 1; transform: none; transition: none; }
+.why__values > :nth-child(1) { grid-area: primary; }
+.why__values > :nth-child(2) { grid-area: v2; }
+.why__values > :nth-child(3) { grid-area: v3; }
+.why__values > :nth-child(4) { grid-area: v4; }
 
 
 /* --------------------------------------------------------------------------
-   3 · PRIMARY VALUE  (dominant · white panel on the tinted surface)
+   3 · CARD  (shared base) + reveal stagger
    -------------------------------------------------------------------------- */
-.why__primary {
+.why__card {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: var(--space-20);
-  padding: clamp(var(--space-32), 3.5vw, var(--space-48));
-  background-color: var(--surface-primary);
-  border: var(--border-card);
+  gap: var(--space-16);
+  padding: clamp(var(--space-24), 2.4vw, var(--space-40));
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
   overflow: clip;
   opacity: 0;
   transform: translateY(20px);
   transition:
       opacity var(--duration-slow) var(--ease-entrance),
       transform var(--duration-normal) var(--ease-smooth),
-      box-shadow var(--duration-normal) var(--ease-smooth);
+      box-shadow var(--duration-normal) var(--ease-smooth),
+      border-color var(--duration-normal) var(--ease-smooth);
 }
-.why__values.is-inview .why__primary { opacity: 1; transform: none; transition-delay: 0.05s; }
-/* Leading brand-accent bar (RTL-aware) — grows subtly on hover/focus */
-.why__primary::before {
-  content: "";
-  position: absolute;
-  inset-block: var(--space-24);
-  inset-inline-start: 0;
-  inline-size: 3px;
-  border-radius: var(--radius-pill);
-  background-color: var(--color-primary);
-  transition: inset-block var(--duration-normal) var(--ease-smooth);
-}
-.why__primary:hover,
-.why__primary:focus-within { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
-.why__primary:hover::before,
-.why__primary:focus-within::before { inset-block: var(--space-16); }
+.why__values.is-inview .why__card { opacity: 1; transform: none; }
+.why__values.is-inview .why__card:nth-child(1) { transition-delay: 0.05s; }
+.why__values.is-inview .why__card:nth-child(2) { transition-delay: 0.14s; }
+.why__values.is-inview .why__card:nth-child(3) { transition-delay: 0.22s; }
+.why__values.is-inview .why__card:nth-child(4) { transition-delay: 0.30s; }
 
-.why__primary-icon {
+/* Card header — icon leads (start/right in RTL), number trails (end/left) */
+.why__card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-16);
+}
+.why__num {
+  font-size: var(--font-size-h4);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  letter-spacing: 0.03em;
+  color: var(--color-accent);
+}
+.why__icon {
+  flex: 0 0 auto;
   display: inline-grid;
   place-items: center;
-  inline-size: calc(var(--space-48) + var(--space-16));   /* 64px */
-  block-size: calc(var(--space-48) + var(--space-16));
+  inline-size: calc(var(--space-48) + var(--space-8));   /* 56px */
+  block-size: calc(var(--space-48) + var(--space-8));
   color: var(--color-primary);
   background-color: var(--color-primary-subtle);
   border-radius: var(--radius-md);
 }
-.why__primary-icon svg {
-  inline-size: 30px;
-  block-size: 30px;
+.why__icon svg {
+  inline-size: 28px;
+  block-size: 28px;
   transition: transform var(--duration-normal) var(--ease-smooth);
 }
-.why__primary:hover .why__primary-icon svg { transform: scale(1.06); }
-.why__primary-title {
-  font-size: var(--font-size-h3);
+.why__card:hover .why__icon svg,
+.why__card:focus-within .why__icon svg { transform: translateY(-3px); }
+
+/* Title + a short accent line that grows on hover */
+.why__card-title {
+  font-size: var(--font-size-h4);
   color: var(--text-primary);
   text-wrap: balance;
 }
-.why__primary-desc {
-  max-width: 34rem;
-  font-size: var(--font-size-body-lg);
-  color: var(--text-secondary);
-}
-.why__primary-arrow {
-  margin-block-start: auto;
-  display: inline-flex;
-  color: var(--color-primary);
-  opacity: 0.5;
-  transition:
-      opacity var(--duration-fast) var(--ease-standard),
-      transform var(--duration-normal) var(--ease-smooth);
-}
-.why__primary-arrow svg { inline-size: 22px; block-size: 22px; }
-.why__primary:hover .why__primary-arrow,
-.why__primary:focus-within .why__primary-arrow {
-  opacity: 1;
-  transform: translateX(calc(var(--space-4) * -1));   /* toward the trailing edge (RTL) */
-}
-
-
-/* --------------------------------------------------------------------------
-   4 · SUPPORTING VALUES  (quiet editorial list — media rows + hairlines)
-   -------------------------------------------------------------------------- */
-.why__support {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-}
-.why__item {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-20);
-  flex: 1;
-  padding: clamp(var(--space-20), 2.4vw, var(--space-32)) var(--space-16);
-  border-radius: var(--radius-md);
-  opacity: 0;
-  transform: translateY(16px);
-  transition:
-      opacity var(--duration-slow) var(--ease-entrance),
-      transform var(--duration-slow) var(--ease-entrance),
-      background-color var(--duration-normal) var(--ease-smooth);
-}
-.why__item:not(:last-child) { border-block-end: var(--border-divider); }
-.why__values.is-inview .why__item { opacity: 1; transform: none; }
-.why__values.is-inview .why__item:nth-child(1) { transition-delay: 0.16s; }
-.why__values.is-inview .why__item:nth-child(2) { transition-delay: 0.24s; }
-.why__values.is-inview .why__item:nth-child(3) { transition-delay: 0.32s; }
-/* Hover — subtle surface wash; a thin accent line grows under the row */
-.why__item::after {
+.why__card-title::after {
   content: "";
-  position: absolute;
-  inset-block-end: -1px;
-  inset-inline-start: var(--space-16);
-  inline-size: 0;
+  display: block;
+  inline-size: var(--space-40);
   block-size: var(--border-width-thick);
+  margin-block-start: var(--space-16);
   border-radius: var(--radius-pill);
   background-color: var(--color-accent);
   transition: inline-size var(--duration-normal) var(--ease-smooth);
 }
-.why__item:hover,
-.why__item:focus-within { background-color: var(--surface-primary); }
-.why__item:hover::after,
-.why__item:focus-within::after { inline-size: calc(var(--space-40) + var(--space-8)); }
-
-.why__item-icon {
-  flex: 0 0 auto;
-  display: inline-grid;
-  place-items: center;
-  inline-size: calc(var(--space-40) + var(--space-8));   /* 48px */
-  block-size: calc(var(--space-40) + var(--space-8));
-  color: var(--color-primary);
-  background-color: var(--color-primary-subtle);
-  border-radius: var(--radius-md);
-  transition: transform var(--duration-normal) var(--ease-smooth);
-}
-.why__item-icon svg { inline-size: 24px; block-size: 24px; }
-.why__item:hover .why__item-icon { transform: translateY(-2px); }
-.why__item-text { display: flex; flex-direction: column; gap: var(--space-8); }
-.why__item-title { font-size: var(--font-size-h4); color: var(--text-primary); }
-.why__item-desc {
+.why__card:hover .why__card-title::after,
+.why__card:focus-within .why__card-title::after { inline-size: calc(var(--space-64) + var(--space-8)); }
+.why__card-desc {
   font-size: var(--font-size-small);
   color: var(--text-secondary);
   line-height: var(--leading-relaxed);
 }
+
+
+/* --------------------------------------------------------------------------
+   4 · SUPPORTING CARDS (light) + PRIMARY ANCHOR (deep navy)
+   -------------------------------------------------------------------------- */
+.why__card--support {
+  background-color: var(--surface-primary);
+  border: var(--border-card);
+  box-shadow: var(--shadow-sm);
+}
+.why__card--support:hover,
+.why__card--support:focus-within {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-border-strong);
+}
+
+/* Primary anchor — inverse navy surface, white content (the visual anchor) */
+.why__card--primary {
+  gap: var(--space-20);
+  padding: clamp(var(--space-32), 3vw, var(--space-48));
+  background-color: var(--surface-inverse);
+  color: var(--text-on-inverse);
+  box-shadow: var(--shadow-md);
+}
+.why__card--primary:hover,
+.why__card--primary:focus-within { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.why__card--primary .why__num { color: var(--brand-blue-sky); font-size: var(--font-size-h3); }
+.why__card--primary .why__icon {
+  inline-size: calc(var(--space-48) + var(--space-24));   /* 72px */
+  block-size: calc(var(--space-48) + var(--space-24));
+  color: var(--white);
+  background-color: rgba(255, 255, 255, 0.10);
+}
+.why__card--primary .why__icon svg { inline-size: 36px; block-size: 36px; }
+.why__card--primary .why__card-title { font-size: var(--font-size-h3); color: var(--white); }
+.why__card--primary .why__card-title::after { background-color: var(--brand-blue-sky); }
+.why__card--primary .why__card-desc {
+  font-size: var(--font-size-body);
+  color: var(--text-on-inverse);
+  max-width: 34rem;
+}
+
+/* Barely-there travel motif fills the anchor's taller footprint */
+.why__card-flight {
+  margin-block-start: auto;
+  inline-size: min(100%, 320px);
+  color: var(--brand-blue-sky);
+  opacity: 0.45;
+  pointer-events: none;
+}
+.why__card-flight .why__path { fill: none; stroke-dasharray: 3 8; animation: why-dash 26s linear infinite; }
 
 
 /* --------------------------------------------------------------------------
@@ -2433,48 +2425,38 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 
 /* --------------------------------------------------------------------------
    5 · RESPONSIVE
-   Desktop: primary | supporting list · Tablet: primary over a 3-up row ·
-   Mobile: a single vertical narrative (primary → supporting rows).
+   Desktop: navy anchor (tall) + wide 02 + 03/04 · Tablet: 2×2 (anchor leads) ·
+   Mobile: single-column narrative (anchor → 02 → 03 → 04).
    -------------------------------------------------------------------------- */
-/* Tablet — primary sits above three supporting columns */
+/* Tablet — a balanced 2×2; the navy anchor still leads (top-start) */
 @media (max-width: 1024px) {
-  .why__values { grid-template-columns: 1fr; gap: clamp(var(--space-24), 4vw, var(--space-40)); }
-  .why__support {
-    flex-direction: row;
+  .why__values {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "primary v2"
+      "v3      v4";
   }
-  .why__item {
-    flex: 1;
-    flex-direction: column;
-    align-items: flex-start;
-    padding-block: 0;
-    padding-inline: clamp(var(--space-16), 2.4vw, var(--space-24));
+  .why__card-flight { display: none; }               /* motif is a desktop grace note */
+  .why__card--primary .why__card-title { font-size: var(--font-size-h4); }
+  .why__card--primary .why__num { font-size: var(--font-size-h4); }
+  .why__card--primary .why__icon {
+    inline-size: calc(var(--space-48) + var(--space-8));
+    block-size: calc(var(--space-48) + var(--space-8));
   }
-  /* Swap horizontal hairlines for vertical dividers between the three columns */
-  .why__item:not(:last-child) { border-block-end: 0; }
-  .why__item:not(:first-child) { border-inline-start: var(--border-divider); }
-  .why__item::after { inset-block-end: auto; inset-block-start: 0; inset-inline-start: 0; }
-  .why__item:hover, .why__item:focus-within { background-color: transparent; }
+  .why__card--primary .why__icon svg { inline-size: 28px; block-size: 28px; }
 }
 
-/* Small tablet — two supporting columns wrap cleanly */
-@media (max-width: 720px) {
-  .why__support { flex-wrap: wrap; }
-  .why__item { flex: 1 1 40%; }
-  .why__item:nth-child(3) { border-inline-start: 0; }
-}
-
-/* Mobile — one vertical narrative: primary, then compact media rows */
+/* Mobile — one vertical narrative: anchor first, then the three supports */
 @media (max-width: 600px) {
-  .why__support { flex-direction: column; flex-wrap: nowrap; }
-  .why__item {
-    flex: 1;
-    flex-direction: row;
-    align-items: flex-start;
-    padding-block: clamp(var(--space-20), 5vw, var(--space-24));
+  .why__values {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "primary"
+      "v2"
+      "v3"
+      "v4";
+    gap: var(--space-16);
   }
-  .why__item:not(:last-child) { border-block-end: var(--border-divider); }
-  .why__item:not(:first-child) { border-inline-start: 0; }
-  .why__item::after { inset-block-start: auto; inset-block-end: -1px; inset-inline-start: var(--space-16); }
 }
 
 
@@ -2483,9 +2465,9 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
    -------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   .why__header > *,
-  .why__primary,
-  .why__item { opacity: 1; transform: none; transition: none; }
-  .why__decor .why__path { animation: none; }
+  .why__card { opacity: 1; transform: none; transition: none; }
+  .why__decor .why__path,
+  .why__card-flight .why__path { animation: none; }
 }
 
 
@@ -4730,38 +4712,51 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 
           <div class="why__values" data-reveal>
 
-            <!-- Primary value — the dominant differentiator -->
-            <article class="why__primary">
-              <span class="why__primary-icon"><svg aria-hidden="true"><use href="#ic-globe"/></svg></span>
-              <h3 class="why__primary-title">حلول سفر متكاملة</h3>
-              <p class="why__primary-desc">من الحجز وحتى إصدار التأشيرات والخدمات المساندة، نوفر كل ما تحتاجه في مكان واحد.</p>
-              <span class="why__primary-arrow" aria-hidden="true"><svg><use href="#ic-arrow"/></svg></span>
+            <!-- 01 · Primary anchor (deep navy) — trust as the visual anchor -->
+            <article class="why__card why__card--primary">
+              <div class="why__card-top">
+                <span class="why__icon"><svg aria-hidden="true"><use href="#ic-shield"/></svg></span>
+                <span class="why__num" aria-hidden="true">01</span>
+              </div>
+              <h3 class="why__card-title">موثوقية وشفافية</h3>
+              <p class="why__card-desc">نلتزم بالدقة والوضوح في جميع مراحل الخدمة لبناء علاقة طويلة الأمد مع عملائنا.</p>
+              <svg class="why__card-flight" viewBox="0 0 320 84" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+                <path class="why__path" d="M8 70 C 96 18, 214 18, 300 46" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <g transform="translate(300 46) rotate(30) scale(0.85) translate(-12 -12)">
+                  <path d="M12 2 14 10 22 14 22 16 14 13.5 13.5 19 16 21 16 22 12 20.5 8 22 8 21 10.5 19 10 13.5 2 16 2 14 10 10Z" fill="currentColor"/>
+                </g>
+              </svg>
             </article>
 
-            <!-- Supporting values — quiet editorial list -->
-            <ul class="why__support">
-              <li class="why__item">
-                <span class="why__item-icon"><svg aria-hidden="true"><use href="#ic-speed"/></svg></span>
-                <div class="why__item-text">
-                  <h3 class="why__item-title">سرعة في الإنجاز</h3>
-                  <p class="why__item-desc">إجراءات منظمة وسريعة تضمن تنفيذ طلباتك بكفاءة وضمن الوقت المناسب.</p>
-                </div>
-              </li>
-              <li class="why__item">
-                <span class="why__item-icon"><svg aria-hidden="true"><use href="#ic-shield"/></svg></span>
-                <div class="why__item-text">
-                  <h3 class="why__item-title">موثوقية وشفافية</h3>
-                  <p class="why__item-desc">نلتزم بالدقة والوضوح في جميع مراحل الخدمة لبناء علاقة طويلة الأمد مع عملائنا.</p>
-                </div>
-              </li>
-              <li class="why__item">
-                <span class="why__item-icon"><svg aria-hidden="true"><use href="#ic-support"/></svg></span>
-                <div class="why__item-text">
-                  <h3 class="why__item-title">خدمة تضعك أولًا</h3>
-                  <p class="why__item-desc">فريق متخصص يرافقك في كل خطوة ويقدم الدعم حتى اكتمال رحلتك.</p>
-                </div>
-              </li>
-            </ul>
+            <!-- 02 · حلول سفر متكاملة -->
+            <article class="why__card why__card--support">
+              <div class="why__card-top">
+                <span class="why__icon"><svg aria-hidden="true"><use href="#ic-globe"/></svg></span>
+                <span class="why__num" aria-hidden="true">02</span>
+              </div>
+              <h3 class="why__card-title">حلول سفر متكاملة</h3>
+              <p class="why__card-desc">من الحجز وحتى إصدار التأشيرات والخدمات المساندة، نوفر كل ما تحتاجه في مكان واحد.</p>
+            </article>
+
+            <!-- 03 · سرعة في الإنجاز -->
+            <article class="why__card why__card--support">
+              <div class="why__card-top">
+                <span class="why__icon"><svg aria-hidden="true"><use href="#ic-speed"/></svg></span>
+                <span class="why__num" aria-hidden="true">03</span>
+              </div>
+              <h3 class="why__card-title">سرعة في الإنجاز</h3>
+              <p class="why__card-desc">إجراءات منظمة وسريعة تضمن تنفيذ طلباتك بكفاءة وضمن الوقت المناسب.</p>
+            </article>
+
+            <!-- 04 · خدمة تضعك أولًا -->
+            <article class="why__card why__card--support">
+              <div class="why__card-top">
+                <span class="why__icon"><svg aria-hidden="true"><use href="#ic-support"/></svg></span>
+                <span class="why__num" aria-hidden="true">04</span>
+              </div>
+              <h3 class="why__card-title">خدمة تضعك أولًا</h3>
+              <p class="why__card-desc">فريق متخصص يرافقك في كل خطوة ويقدم الدعم حتى اكتمال رحلتك.</p>
+            </article>
 
           </div>
 
