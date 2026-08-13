@@ -1,120 +1,224 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#FFFFFF">
+  <meta name="theme-color" content="#111111">
 
-  <title>وكالة المدى للسياحة والسفر — Al Mada Travel &amp; Tourism</title>
-  <meta name="description" content="وكالة المدى للسياحة والسفر — خدمات سياحة وسفر بمعايير عالمية.">
+  <title>Quantum Link — Creative Design &amp; Communication Agency</title>
+  <meta name="description" content="Quantum Link is a creative, design and communication agency. We connect ideas with design and communication to create real impact — branding, visual systems, campaigns, and digital experiences.">
+  <link rel="canonical" href="https://quantumlink.agency/">
 
-  <!-- ================= FONTS · Cairo (Google Fonts) ================= -->
+  <!-- Open Graph / social -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Quantum Link">
+  <meta property="og:title" content="Quantum Link — Creative Design &amp; Communication Agency">
+  <meta property="og:description" content="Connecting ideas to impact. A creative agency for branding, visual systems, campaigns, and digital experiences.">
+  <meta property="og:url" content="https://quantumlink.agency/">
+  <meta property="og:locale" content="en">
+  <meta property="og:locale:alternate" content="ar">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Quantum Link — Creative Design &amp; Communication Agency">
+  <meta name="twitter:description" content="Connecting ideas to impact. Branding, visual systems, campaigns, and digital experiences.">
+
+  <!-- Structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CreativeWorkSeries",
+    "additionalType": "https://schema.org/Organization",
+    "name": "Quantum Link",
+    "alternateName": "Quantum Link Creative Agency",
+    "url": "https://quantumlink.agency/",
+    "email": "hello@quantumlink.agency",
+    "slogan": "Connecting ideas to impact",
+    "description": "Quantum Link is a creative, design and communication agency offering branding, visual systems, creative campaigns, and digital experiences.",
+    "knowsAbout": ["Branding","Visual Identity","Creative Campaigns","Digital Experience Design","Graphic Design","Communication Design"]
+  }
+  </script>
+
+  <!-- Favicon: Quantum mark (inline SVG data URI) -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='24' fill='%23111111'/%3E%3Ccircle cx='58' cy='56' r='34' fill='none' stroke='%232447FF' stroke-width='16'/%3E%3Cpath d='M62 58 L100 96 L58 84 L70 72 Z' fill='%232447FF'/%3E%3C/svg%3E">
+
+  <!-- ================= FONTS ================= -->
+  <!-- Manrope -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap">
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
 
   <style>
   /* ==========================================================================
-     AL MADA TRAVEL & TOURISM — DESIGN TOKENS (Stage 02)
-     Single source of truth. Never hardcode; always reference these.
+     QUANTUM LINK — DESIGN TOKENS  (Prompt 01 · Foundation & Visual System)
+     Single source of truth. Never hardcode values; always reference tokens.
+     Visual language: FRAME (angular) · LINK (thin lines) · ARC (curves) · SHIFT (motion)
      ========================================================================== */
   :root {
-    /* 1 · COLOR — RAW BRAND PALETTE (approved identity) */
-    --brand-blue:#0A4FB7; --brand-navy:#06357A; --brand-blue-bright:#2C7BE5; --brand-blue-sky:#7CB7FF;
-    --white:#FFFFFF; --neutral-soft:#FAFBFD; --neutral-section:#F4F7FB; --neutral-divider:#E6EAF0;
-    --ink-900:#1B2430; --ink-600:#556070; --ink-400:#8892A0;
+    /* ---------------------------------------------------------------------
+       1 · COLOR — RAW BRAND PALETTE (Visual Identity v2.0)
+       --------------------------------------------------------------------- */
+    --ql-black:#111111;      /* Quantum Black  */
+    --ql-paper:#F4F1EA;      /* Quantum Paper  */
+    --ql-blue:#2447FF;       /* Quantum Blue   */
+    --ql-lime:#C7F36B;       /* Quantum Lime   */
+    --ql-gray:#6B6B76;       /* Cool Gray      */
+    --ql-white:#FFFFFF;
 
-    /* 1b · COLOR — SEMANTIC */
-    --color-primary:var(--brand-blue); --color-primary-hover:var(--brand-blue-bright);
-    --color-primary-active:var(--brand-navy); --color-primary-subtle:rgba(10,79,183,0.08);
-    --color-accent:var(--brand-blue-bright); --color-accent-soft:var(--brand-blue-sky);
-    --surface-primary:var(--white); --surface-soft:var(--neutral-soft);
-    --surface-section:var(--neutral-section); --surface-inverse:var(--brand-navy);
-    --surface-overlay:rgba(6,21,43,0.55);
-    --text-primary:var(--ink-900); --text-secondary:var(--ink-600); --text-muted:var(--ink-400);
-    --text-on-primary:var(--white); --text-on-inverse:rgba(255,255,255,0.92);
-    --text-link:var(--color-primary); --text-link-hover:var(--color-primary-hover);
-    --color-border:var(--neutral-divider); --color-border-strong:#D3DAE6;
-    --color-focus:var(--brand-blue-bright); --color-focus-ring:rgba(44,123,229,0.40);
-    --color-success:#1F9D6B; --color-error:#D34A4A; --color-warning:#C98A21; --color-error-ring:rgba(211,74,74,0.32);
+    /* 1a · DERIVED TINTS / SHADES (kept in-family, for states & surfaces) */
+    --ql-black-elevated:#1A1A1C;   --ql-black-raised:#232327;
+    --ql-blue-bright:#4C68FF;      --ql-blue-deep:#1631C9;
+    --ql-lime-deep:#AEDB4E;
+    --ql-paper-dim:#E7E3D8;
 
-    /* 2 · TYPOGRAPHY — Cairo */
-    --font-family-base:"Cairo",ui-sans-serif,system-ui,-apple-system,"Segoe UI","Helvetica Neue",Arial,"Noto Sans Arabic",sans-serif;
-    --font-family-heading:var(--font-family-base);
-    --font-weight-regular:400; --font-weight-medium:500; --font-weight-semibold:600; --font-weight-bold:700;
-    --font-size-display:clamp(2.50rem,1.35rem + 4.6vw,4.50rem);
-    --font-size-h1:clamp(2.00rem,1.35rem + 2.6vw,3.50rem);
-    --font-size-h2:clamp(1.75rem,1.35rem + 1.6vw,2.50rem);
-    --font-size-h3:clamp(1.375rem,1.15rem + 0.9vw,1.75rem);
-    --font-size-h4:clamp(1.125rem,1.02rem + 0.4vw,1.375rem);
-    --font-size-body-lg:clamp(1.125rem,1.08rem + 0.2vw,1.25rem);
-    --font-size-body:1.0625rem; --font-size-small:0.9375rem; --font-size-caption:0.8125rem;
-    --font-size-button:1rem; --font-size-nav:1rem;
-    --leading-tight:1.15; --leading-snug:1.30; --leading-normal:1.50; --leading-relaxed:1.75;
-    --tracking-tight:-0.02em; --tracking-normal:0; --tracking-wide:0.08em; --tracking-wider:0.14em;
+    /* 1b · COLOR — SEMANTIC (dark-first: the site's default canvas is Quantum Black) */
+    --bg:var(--ql-black);
+    --bg-elevated:var(--ql-black-elevated);
+    --bg-raised:var(--ql-black-raised);
+    --surface-paper:var(--ql-paper);           /* light "Paper" sections */
 
-    /* 3 · SPACING */
-    --space-0:0; --space-2:0.125rem; --space-4:0.25rem; --space-8:0.5rem; --space-12:0.75rem;
-    --space-16:1rem; --space-20:1.25rem; --space-24:1.5rem; --space-32:2rem; --space-40:2.5rem;
-    --space-48:3rem; --space-64:4rem; --space-80:5rem; --space-96:6rem; --space-120:7.5rem;
-    --space-140:8.75rem; --space-160:10rem;
+    --text:var(--ql-paper);
+    --text-strong:var(--ql-white);
+    --text-muted:rgba(244,241,234,0.70);
+    --text-subtle:rgba(244,241,234,0.50);
+    --text-on-paper:var(--ql-black);
+    --text-on-paper-muted:#4A4A52;
+    --text-on-paper-subtle:var(--ql-gray);
 
-    /* 4 · LAYOUT / CONTAINER */
-    --container-max:1280px; --container-narrow:820px; --container-wide:1440px; --container-full:100%;
-    --measure:68ch; --container-padding:clamp(1.25rem,5vw,5rem);
-    --section-padding-y:clamp(4.5rem,9vw,8.75rem); --header-height:clamp(64px,7vw,80px);
+    --accent:var(--ql-blue);
+    --accent-hover:var(--ql-blue-bright);
+    --accent-active:var(--ql-blue-deep);
+    --accent-2:var(--ql-lime);                 /* secondary highlight */
+    --accent-2-hover:var(--ql-lime-deep);
+
+    --border:rgba(244,241,234,0.14);
+    --border-strong:rgba(244,241,234,0.26);
+    --border-on-paper:rgba(17,17,17,0.14);
+    --border-on-paper-strong:rgba(17,17,17,0.24);
+
+    --focus-ring:rgba(76,104,255,0.55);
+    --overlay:rgba(9,9,11,0.66);
+    --selection:rgba(36,71,255,0.32);
+
+    --color-success:#4FBE7E; --color-error:#F26B6B; --color-warning:#E7B34A;
+
+    /* ---------------------------------------------------------------------
+       2 · TYPOGRAPHY — Manrope
+       --------------------------------------------------------------------- */
+    --font-en:"Manrope",ui-sans-serif,system-ui,-apple-system,"Segoe UI","Helvetica Neue",Arial,sans-serif;
+    --font-base:var(--font-en);
+    --font-heading:var(--font-en);
+
+    --fw-regular:400; --fw-medium:500; --fw-semibold:600; --fw-bold:700; --fw-black:800;
+
+    /* Fluid type scale — clamped for 375 → 1440 */
+    --fs-display:clamp(2.75rem,1.20rem + 6.6vw,6.00rem);
+    --fs-h1:clamp(2.25rem,1.35rem + 3.8vw,4.25rem);
+    --fs-h2:clamp(1.75rem,1.25rem + 2.1vw,3.00rem);
+    --fs-h3:clamp(1.375rem,1.12rem + 1.1vw,2.00rem);
+    --fs-h4:clamp(1.20rem,1.08rem + 0.5vw,1.50rem);
+    --fs-body-lg:clamp(1.10rem,1.03rem + 0.3vw,1.30rem);
+    --fs-body:1.0625rem;
+    --fs-small:0.9375rem;
+    --fs-caption:0.8125rem;
+    --fs-eyebrow:0.80rem;
+    --fs-button:1rem;
+    --fs-nav:0.9375rem;
+
+    --lh-tight:1.04; --lh-snug:1.18; --lh-normal:1.5; --lh-relaxed:1.7;
+    --ls-tight:-0.03em; --ls-normal:0; --ls-wide:0.06em; --ls-wider:0.16em; --ls-widest:0.22em;
+
+    /* ---------------------------------------------------------------------
+       3 · SPACING SCALE
+       --------------------------------------------------------------------- */
+    --sp-2:0.125rem; --sp-4:0.25rem; --sp-8:0.5rem; --sp-12:0.75rem; --sp-16:1rem;
+    --sp-20:1.25rem; --sp-24:1.5rem; --sp-32:2rem; --sp-40:2.5rem; --sp-48:3rem;
+    --sp-56:3.5rem; --sp-64:4rem; --sp-80:5rem; --sp-96:6rem; --sp-120:7.5rem;
+    --sp-140:8.75rem; --sp-160:10rem;
+
+    /* ---------------------------------------------------------------------
+       4 · LAYOUT / CONTAINER  (design breakpoints: 1440 · 768 · 375)
+       --------------------------------------------------------------------- */
+    --container-max:1240px; --container-wide:1440px; --container-narrow:800px; --container-full:100%;
+    --measure:64ch;
+    --container-pad:clamp(1.25rem,5vw,4.5rem);
+    --section-pad-y:clamp(4.5rem,9vw,9rem);
+    --header-h:clamp(64px,7vw,84px);
 
     /* 5 · GRID */
-    --grid-columns:12; --grid-gutter:clamp(1rem,1.6vw,1.5rem);
+    --grid-cols:12; --grid-gutter:clamp(1rem,1.6vw,1.75rem);
 
-    /* 6 · RADIUS */
-    --radius-none:0; --radius-xs:6px; --radius-sm:10px; --radius-md:14px; --radius-lg:20px;
-    --radius-xl:28px; --radius-2xl:36px; --radius-pill:999px; --radius-round:50%;
-    --radius-button:var(--radius-sm); --radius-input:var(--radius-sm); --radius-card:var(--radius-lg);
-    --radius-image:var(--radius-lg); --radius-floating:var(--radius-xl); --radius-modal:var(--radius-xl);
+    /* ---------------------------------------------------------------------
+       6 · RADIUS — ARC language: curves live here (asymmetric arc corners)
+       --------------------------------------------------------------------- */
+    --radius-none:0; --radius-xs:6px; --radius-sm:10px; --radius-md:16px;
+    --radius-lg:24px; --radius-xl:32px; --radius-2xl:44px; --radius-pill:999px; --radius-round:50%;
+    --arc-sm:20px;      /* small card arc               */
+    --arc-md:32px;      /* default card arc             */
+    --arc-lg:56px;      /* signature large arc corner   */
+    --arc-xl:96px;      /* hero-scale arc               */
+    --radius-button:var(--radius-pill);
+    --radius-input:var(--radius-md);
+    --radius-card:var(--arc-md);
 
-    /* 7 · SHADOWS */
-    --shadow-rgb:15,42,92; --shadow-none:none;
-    --shadow-sm:0 1px 2px rgba(var(--shadow-rgb),0.04),0 1px 3px rgba(var(--shadow-rgb),0.06);
-    --shadow-md:0 2px 6px rgba(var(--shadow-rgb),0.05),0 8px 20px rgba(var(--shadow-rgb),0.07);
-    --shadow-lg:0 4px 10px rgba(var(--shadow-rgb),0.05),0 16px 36px rgba(var(--shadow-rgb),0.09);
-    --shadow-floating:0 8px 20px rgba(var(--shadow-rgb),0.08),0 28px 60px rgba(var(--shadow-rgb),0.12);
-    --shadow-hover:0 6px 16px rgba(var(--shadow-rgb),0.08),0 20px 44px rgba(var(--shadow-rgb),0.12);
-    --shadow-focus:0 0 0 3px var(--color-focus-ring); --shadow-error:0 0 0 3px var(--color-error-ring);
+    /* ---------------------------------------------------------------------
+       7 · FRAME — angular geometric primitive (cut-corner clip paths)
+       --------------------------------------------------------------------- */
+    --frame-cut:26px;   /* size of the angular cut                          */
+    --frame-clip-br:polygon(0 0, 100% 0, 100% calc(100% - var(--frame-cut)), calc(100% - var(--frame-cut)) 100%, 0 100%);
+    --frame-clip-tl:polygon(var(--frame-cut) 0, 100% 0, 100% 100%, 0 100%, 0 var(--frame-cut));
+    --frame-clip-diag:polygon(0 0, 100% 0, 100% 72%, 72% 100%, 0 100%);
 
-    /* 8 · BORDERS */
-    --border-width-hairline:1px; --border-width-thin:1px; --border-width-thick:2px;
-    --border-divider:var(--border-width-hairline) solid var(--color-border);
-    --border-input:var(--border-width-thin) solid var(--color-border-strong);
-    --border-input-focus:var(--border-width-thin) solid var(--color-focus);
-    --border-card:var(--border-width-hairline) solid var(--color-border);
+    /* ---------------------------------------------------------------------
+       8 · LINK — thin connector lines (process steps / relationships)
+       --------------------------------------------------------------------- */
+    --link-width:1px;
+    --link-color:var(--border-strong);
+    --link-color-active:var(--accent);
 
-    /* 9 · BREAKPOINTS (reference) */
-    --bp-mobile:480px; --bp-tablet:768px; --bp-laptop:1200px; --bp-desktop:1440px;
+    /* 9 · SHADOWS (used sparingly on Paper surfaces) */
+    --shadow-rgb:9,9,20;
+    --shadow-sm:0 1px 2px rgba(var(--shadow-rgb),0.20),0 1px 3px rgba(var(--shadow-rgb),0.12);
+    --shadow-md:0 4px 12px rgba(var(--shadow-rgb),0.24),0 10px 28px rgba(var(--shadow-rgb),0.16);
+    --shadow-lg:0 10px 30px rgba(var(--shadow-rgb),0.30),0 24px 60px rgba(var(--shadow-rgb),0.24);
+    --shadow-focus:0 0 0 3px var(--focus-ring);
 
-    /* 10 · Z-INDEX */
+    /* 10 · BORDERS */
+    --bw-hairline:1px; --bw-thin:1px; --bw-thick:2px;
+
+    /* 11 · BREAKPOINTS (reference only — used in media queries below) */
+    --bp-mobile:375px; --bp-tablet:768px; --bp-laptop:1200px; --bp-desktop:1440px;
+
+    /* 12 · Z-INDEX */
     --z-hide:-1; --z-base:0; --z-raised:10; --z-dropdown:1000; --z-sticky:1100;
-    --z-overlay:1200; --z-modal:1300; --z-popover:1400; --z-toast:1500; --z-max:9999;
+    --z-overlay:1200; --z-modal:1300; --z-toast:1500; --z-max:9999;
 
-    /* 11 · OPACITY */
-    --opacity-0:0; --opacity-disabled:0.45; --opacity-muted:0.65; --opacity-hover:0.85;
-    --opacity-overlay:0.55; --opacity-full:1;
+    /* 13 · OPACITY */
+    --opacity-disabled:0.45; --opacity-muted:0.66; --opacity-hover:0.86;
 
-    /* 12 · MOTION */
-    --duration-instant:80ms; --duration-fast:150ms; --duration-normal:260ms; --duration-slow:420ms; --duration-slower:640ms;
-    --ease-standard:cubic-bezier(0.4,0,0.2,1); --ease-smooth:cubic-bezier(0.22,1,0.36,1);
-    --ease-in-out:cubic-bezier(0.65,0,0.35,1); --ease-entrance:cubic-bezier(0.16,1,0.3,1);
-    --transition-hover:color var(--duration-normal) var(--ease-smooth),background-color var(--duration-normal) var(--ease-smooth),border-color var(--duration-normal) var(--ease-smooth),box-shadow var(--duration-normal) var(--ease-smooth),transform var(--duration-normal) var(--ease-smooth);
-    --transition-focus:box-shadow var(--duration-fast) var(--ease-standard),border-color var(--duration-fast) var(--ease-standard);
-    --transition-colors:color var(--duration-fast) var(--ease-standard),background-color var(--duration-fast) var(--ease-standard),border-color var(--duration-fast) var(--ease-standard);
+    /* ---------------------------------------------------------------------
+       14 · SHIFT — signature motion language (transformation / transitions)
+       --------------------------------------------------------------------- */
+    --shift-dist:8px;                                   /* nudge distance     */
+    --dur-instant:90ms; --dur-fast:170ms; --dur-normal:280ms; --dur-slow:460ms; --dur-slower:720ms;
+    --ease-standard:cubic-bezier(0.4,0,0.2,1);
+    --ease-shift:cubic-bezier(0.22,1,0.36,1);           /* the SHIFT easing   */
+    --ease-in-out:cubic-bezier(0.65,0,0.35,1);
+    --shift-transition:transform var(--dur-normal) var(--ease-shift),
+                       background-color var(--dur-normal) var(--ease-shift),
+                       color var(--dur-normal) var(--ease-shift),
+                       border-color var(--dur-normal) var(--ease-shift),
+                       box-shadow var(--dur-normal) var(--ease-shift),
+                       opacity var(--dur-normal) var(--ease-shift);
+    --transition-colors:color var(--dur-fast) var(--ease-standard),
+                        background-color var(--dur-fast) var(--ease-standard),
+                        border-color var(--dur-fast) var(--ease-standard);
 
-    /* 13 · GLOBAL BEHAVIOR */
-    --anchor-offset:96px; --ring-offset:2px; --tap-target-min:44px;
+    /* 15 · GLOBAL BEHAVIOR */
+    --anchor-offset:100px; --ring-offset:2px; --tap-min:44px;
   }
 
   /* ==========================================================================
-     GLOBAL STYLES (Stage 02)
+     GLOBAL RESET & BASE
      ========================================================================== */
   *,*::before,*::after{box-sizing:border-box}
   *{margin:0;padding:0}
@@ -123,113 +227,190 @@
     html{scroll-behavior:auto}
     *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
   }
-  body{min-height:100vh;min-height:100dvh;background-color:var(--surface-primary);color:var(--text-primary);font-family:var(--font-family-base);font-size:var(--font-size-body);font-weight:var(--font-weight-regular);line-height:var(--leading-relaxed);letter-spacing:var(--tracking-normal);text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none}
-  h1,h2,h3,h4,h5,h6{font-family:var(--font-family-heading);font-weight:var(--font-weight-bold);color:var(--text-primary);line-height:var(--leading-tight);letter-spacing:var(--tracking-tight);text-wrap:balance}
-  h1{font-size:var(--font-size-h1)} h2{font-size:var(--font-size-h2)}
-  h3{font-size:var(--font-size-h3);line-height:var(--leading-snug);letter-spacing:var(--tracking-normal)}
-  h4{font-size:var(--font-size-h4);line-height:var(--leading-snug);letter-spacing:var(--tracking-normal)}
-  h5{font-size:var(--font-size-body-lg);line-height:var(--leading-snug);letter-spacing:var(--tracking-normal)}
-  h6{font-size:var(--font-size-body);line-height:var(--leading-normal);letter-spacing:var(--tracking-normal)}
-  p{color:var(--text-secondary);line-height:var(--leading-relaxed);text-wrap:pretty}
-  strong,b{font-weight:var(--font-weight-semibold);color:var(--text-primary)} em,i{font-style:italic} small{font-size:var(--font-size-small)}
+  body{
+    min-height:100vh;min-height:100dvh;
+    background-color:var(--bg);color:var(--text);
+    font-family:var(--font-base);font-size:var(--fs-body);font-weight:var(--fw-regular);
+    line-height:var(--lh-relaxed);letter-spacing:var(--ls-normal);
+    text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none;
+    overflow-x:hidden;
+  }
+
+
+  h1,h2,h3,h4,h5,h6{font-family:var(--font-heading);font-weight:var(--fw-bold);color:var(--text-strong);line-height:var(--lh-tight);letter-spacing:var(--ls-tight);text-wrap:balance}
+  h1{font-size:var(--fs-h1)} h2{font-size:var(--fs-h2)}
+  h3{font-size:var(--fs-h3);line-height:var(--lh-snug);letter-spacing:-0.02em}
+  h4{font-size:var(--fs-h4);line-height:var(--lh-snug);letter-spacing:-0.01em}
+  h5{font-size:var(--fs-body-lg);line-height:var(--lh-snug);letter-spacing:var(--ls-normal)}
+  h6{font-size:var(--fs-body);line-height:var(--lh-normal);letter-spacing:var(--ls-normal)}
+  p{color:var(--text-muted);line-height:var(--lh-relaxed);text-wrap:pretty}
+  strong,b{font-weight:var(--fw-semibold);color:var(--text)} em,i{font-style:italic}
+  small{font-size:var(--fs-small)}
   .u-measure{max-width:var(--measure)}
-  ul,ol{list-style-position:outside;padding-inline-start:var(--space-24);color:var(--text-secondary);line-height:var(--leading-relaxed)}
-  li+li{margin-block-start:var(--space-8)}
+  ul,ol{list-style-position:outside;padding-inline-start:var(--sp-24);color:var(--text-muted);line-height:var(--lh-relaxed)}
+  li+li{margin-block-start:var(--sp-8)}
   .u-list-reset{list-style:none;padding:0;margin:0}
-  a{color:var(--text-link);text-decoration:none;text-underline-offset:.18em;text-decoration-thickness:1px;transition:var(--transition-colors)}
-  a:hover{color:var(--text-link-hover)} a:active{color:var(--color-primary-active)}
+  a{color:var(--accent-2);text-decoration:none;text-underline-offset:.18em;text-decoration-thickness:1px;transition:var(--transition-colors)}
+  a:hover{color:var(--accent-2-hover)}
   img,picture,svg,video,canvas{display:block;max-width:100%;height:auto}
-  img,video{border-radius:var(--radius-none)} svg{fill:currentColor}
+  svg{fill:currentColor}
   input,textarea,select,button{font-family:inherit;font-size:inherit;line-height:inherit;color:inherit}
-  input,textarea,select{width:100%;background-color:var(--surface-primary);color:var(--text-primary);border:var(--border-input);border-radius:var(--radius-input);padding:var(--space-12) var(--space-16);min-height:var(--tap-target-min);transition:var(--transition-focus);appearance:none}
-  input::placeholder,textarea::placeholder{color:var(--text-muted)}
-  input:hover,textarea:hover,select:hover{border-color:var(--color-border-strong)}
-  input:focus,textarea:focus,select:focus{outline:none;border:var(--border-input-focus);box-shadow:var(--shadow-focus)}
-  input:disabled,textarea:disabled,select:disabled,button:disabled{opacity:var(--opacity-disabled);cursor:not-allowed}
-  textarea{resize:vertical;min-height:calc(var(--tap-target-min)*2)} label{color:var(--text-primary);font-weight:var(--font-weight-medium)}
-  button,[type="button"],[type="submit"],[type="reset"]{font-family:inherit;font-size:var(--font-size-button);font-weight:var(--font-weight-semibold);line-height:var(--leading-normal);letter-spacing:var(--tracking-normal);color:inherit;background:none;border:none;border-radius:var(--radius-button);cursor:pointer;min-height:var(--tap-target-min);-webkit-tap-highlight-color:transparent;transition:var(--transition-hover)}
-  ::selection{background-color:rgba(124,183,255,.35);color:var(--text-primary)}
-  :focus-visible{outline:var(--border-width-thick) solid var(--color-focus);outline-offset:var(--ring-offset);border-radius:var(--radius-xs)}
+  ::selection{background-color:var(--selection);color:var(--text-strong)}
+  :focus-visible{outline:var(--bw-thick) solid var(--accent-hover);outline-offset:var(--ring-offset);border-radius:var(--radius-xs)}
   :focus:not(:focus-visible){outline:none}
-  *{scrollbar-width:thin;scrollbar-color:var(--color-border-strong) transparent}
-  ::-webkit-scrollbar{width:10px;height:10px} ::-webkit-scrollbar-track{background:transparent}
-  ::-webkit-scrollbar-thumb{background-color:var(--color-border-strong);border-radius:var(--radius-pill);border:2px solid var(--surface-primary)}
-  ::-webkit-scrollbar-thumb:hover{background-color:var(--text-muted)}
-  [lang="ar"],[dir="rtl"],[dir="rtl"] h1,[dir="rtl"] h2,[dir="rtl"] h3,[dir="rtl"] h4,[dir="rtl"] h5,[dir="rtl"] h6{letter-spacing:var(--tracking-normal)!important}
-  [dir="rtl"]{text-align:right}
-  .container{width:100%;max-width:var(--container-max);margin-inline:auto;padding-inline:var(--container-padding)}
+  *{scrollbar-width:thin;scrollbar-color:var(--border-strong) transparent}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background-color:var(--border-strong);border-radius:var(--radius-pill);border:2px solid var(--bg)}
+  ::-webkit-scrollbar-thumb:hover{background-color:var(--text-subtle)}
+
+  /* ==========================================================================
+     LAYOUT PRIMITIVES
+     ========================================================================== */
+  .container{width:100%;max-width:var(--container-max);margin-inline:auto;padding-inline:var(--container-pad)}
+  .container--wide{max-width:var(--container-wide)}
   .container--narrow{max-width:var(--container-narrow)}
-  .section{padding-block:var(--section-padding-y)}
-  .section--soft{background-color:var(--surface-soft)} .section--tinted{background-color:var(--surface-section)}
-  .section--inverse{background-color:var(--surface-inverse);color:var(--text-on-inverse)}
-  .grid{display:grid;grid-template-columns:repeat(var(--grid-columns),minmax(0,1fr));gap:var(--grid-gutter)}
+  .container--full{max-width:var(--container-full);padding-inline:0}
+  .section{padding-block:var(--section-pad-y);position:relative}
+  .section--compact{padding-block:var(--sp-80)}
+  .section--flush{padding-block:0}
+  .section--center{text-align:center}
+  .section--below-header{padding-block-start:calc(var(--section-pad-y) + var(--header-h))}
+  .section--paper{background-color:var(--surface-paper);color:var(--text-on-paper)}
+  .section--paper h1,.section--paper h2,.section--paper h3,.section--paper h4,.section--paper h5,.section--paper h6{color:var(--text-on-paper)}
+  .section--paper p{color:var(--text-on-paper-muted)}
+  .section--elevated{background-color:var(--bg-elevated)}
+  .grid{display:grid;grid-template-columns:repeat(var(--grid-cols),minmax(0,1fr));gap:var(--grid-gutter)}
   .col-1{grid-column:span 1}.col-2{grid-column:span 2}.col-3{grid-column:span 3}.col-4{grid-column:span 4}
   .col-5{grid-column:span 5}.col-6{grid-column:span 6}.col-7{grid-column:span 7}.col-8{grid-column:span 8}
   .col-9{grid-column:span 9}.col-10{grid-column:span 10}.col-11{grid-column:span 11}.col-12{grid-column:span 12}
-  .u-stack>*+*{margin-block-start:var(--space-24)}
+  .u-stack>*+*{margin-block-start:var(--sp-24)}
   .u-visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-  .skip-link{position:absolute;inset-inline-start:var(--space-16);inset-block-start:-100%;z-index:var(--z-max);padding:var(--space-12) var(--space-20);background:var(--color-primary);color:var(--text-on-primary);border-radius:var(--radius-sm);box-shadow:var(--shadow-md);transition:inset-block-start var(--duration-fast) var(--ease-standard)}
-  .skip-link:focus{inset-block-start:var(--space-16);color:var(--text-on-primary)}
-  a[role="button"],button,[type="button"],[type="submit"],summary{min-height:var(--tap-target-min)}
+  .skip-link{position:absolute;inset-inline-start:var(--sp-16);inset-block-start:-100%;z-index:var(--z-max);padding:var(--sp-12) var(--sp-20);background:var(--accent);color:var(--ql-white);border-radius:var(--radius-sm);box-shadow:var(--shadow-md);transition:inset-block-start var(--dur-fast) var(--ease-standard)}
+  .skip-link:focus{inset-block-start:var(--sp-16);color:var(--ql-white)}
 
   /* ==========================================================================
-     APPLICATION SHELL (Stage 03)
+     VISUAL LANGUAGE PRIMITIVES  ·  FRAME · LINK · ARC · SHIFT
+     Reusable building blocks that later sections compose. Documented so the
+     system stays consistent across every page.
+     ========================================================================== */
+
+  /* FRAME — angular geometric shape. Primary hero/background element.
+     .ql-frame clips a box into a cut-corner "frame"; corner brackets add focus. */
+  .ql-frame{position:relative;clip-path:var(--frame-clip-br)}
+  .ql-frame--tl{clip-path:var(--frame-clip-tl)}
+  .ql-frame--diag{clip-path:var(--frame-clip-diag)}
+  .ql-frame-brackets{position:relative}
+  .ql-frame-brackets::before,.ql-frame-brackets::after{
+    content:"";position:absolute;width:28px;height:28px;pointer-events:none;
+    border:var(--bw-thick) solid var(--accent-2);
+  }
+  .ql-frame-brackets::before{inset-block-start:0;inset-inline-start:0;border-inline-end:0;border-block-end:0}
+  .ql-frame-brackets::after{inset-block-end:0;inset-inline-end:0;border-inline-start:0;border-block-start:0}
+
+  /* Signature background blocks (the "Frame" motif used behind content) */
+  .ql-block{position:absolute;pointer-events:none;z-index:var(--z-hide)}
+  .ql-block--blue{background:var(--accent)}
+  .ql-block--lime{background:var(--accent-2)}
+  .ql-block--paper{background:var(--surface-paper)}
+
+  /* ARC — curves. Used for card corners (one signature large arc corner). */
+  .ql-arc{border-radius:var(--arc-md)}
+  .ql-arc-card{border-radius:var(--arc-md);border-end-start-radius:var(--arc-lg)}
+  .ql-arc-card--tr{border-radius:var(--arc-md);border-start-end-radius:var(--arc-lg)}
+  .ql-arc-full{border-radius:var(--radius-round)}
+  /* Decorative open arc (semicircle stroke) — "movement" motif */
+  .ql-arc-line{width:var(--_s,64px);height:calc(var(--_s,64px)/2);border:var(--bw-thick) solid currentColor;border-bottom:0;border-radius:var(--radius-pill) var(--radius-pill) 0 0}
+
+  /* LINK — thin connector line joining steps / related nodes. */
+  .ql-link{position:relative;display:block;background:var(--link-color);block-size:var(--link-width)}
+  .ql-link--v{inline-size:var(--link-width);block-size:auto}
+  .ql-link--active{background:var(--link-color-active)}
+  /* Two overlapping rings = the literal "Link" mark (connection) */
+  .ql-link-rings{display:inline-flex;align-items:center}
+  .ql-link-rings i{display:block;inline-size:20px;block-size:20px;border:var(--bw-thick) solid currentColor;border-radius:var(--radius-round)}
+  .ql-link-rings i+i{margin-inline-start:-9px;border-color:var(--accent-2)}
+
+  /* SHIFT — motion applied to interactive elements. */
+  .ql-shift{transition:var(--shift-transition)}
+  .ql-shift:hover{transform:translateY(calc(var(--shift-dist)*-1))}
+  /* Scroll reveal (SHIFT-in) */
+  [data-reveal]{opacity:0;transform:translateY(18px);transition:opacity var(--dur-slow) var(--ease-shift),transform var(--dur-slow) var(--ease-shift)}
+  [data-reveal].is-inview{opacity:1;transform:none}
+  [data-reveal][data-reveal="left"]{transform:translateX(-24px)}
+  [data-reveal][data-reveal="right"]{transform:translateX(24px)}
+  @media (prefers-reduced-motion:reduce){
+    [data-reveal]{opacity:1!important;transform:none!important}
+  }
+
+  /* Eyebrow / kicker label (used across sections) */
+  .eyebrow{display:inline-flex;align-items:center;gap:var(--sp-8);font-size:var(--fs-eyebrow);font-weight:var(--fw-semibold);letter-spacing:var(--ls-wider);text-transform:uppercase;color:var(--accent-2)}
+  .eyebrow::before{content:"";inline-size:var(--sp-24);block-size:var(--bw-thick);background:var(--accent-2)}
+
+  /* ==========================================================================
+     BRAND LOGO (inline SVG — recolors via currentColor + --mark-color)
+     ========================================================================== */
+  .ql-logo{display:inline-flex;align-items:center;gap:var(--sp-12);color:var(--text-strong);--mark-color:var(--accent)}
+  .ql-logo__mark{flex:0 0 auto;inline-size:var(--logo-mark,38px);block-size:var(--logo-mark,38px);color:var(--mark-color);transition:inline-size var(--dur-normal) var(--ease-shift),block-size var(--dur-normal) var(--ease-shift)}
+  .ql-logo__word{display:flex;flex-direction:column;justify-content:center;line-height:0.98;font-weight:var(--fw-bold);letter-spacing:0.02em;text-transform:uppercase;font-size:var(--logo-word,1.05rem);color:currentColor}
+  .ql-logo__word b{font-weight:var(--fw-bold)}
+  .ql-logo--lime{--mark-color:var(--accent-2)}
+  .ql-logo--paper{color:var(--text-on-paper);--mark-color:var(--ql-black)}
+
+  /* ==========================================================================
+     APPLICATION SHELL
      ========================================================================== */
   .site-shell{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
-  .site-header{position:fixed;inset-block-start:0;inset-inline:0;z-index:var(--z-sticky);display:flex;align-items:center;min-height:var(--header-height);background-color:transparent;border-block-end:var(--border-width-hairline) solid transparent;transition:background-color var(--duration-normal) var(--ease-standard),border-color var(--duration-normal) var(--ease-standard),box-shadow var(--duration-normal) var(--ease-standard)}
-  .site-header.is-scrolled{background-color:var(--surface-primary);border-block-end-color:var(--color-border);box-shadow:var(--shadow-sm)}
-  .site-header__inner{display:flex;align-items:center;justify-content:space-between;gap:var(--space-24);width:100%;min-height:var(--header-height)}
-  .site-header__logo{display:inline-flex;align-items:center;min-height:var(--tap-target-min);flex:0 0 auto}
-  .site-header__actions{display:flex;align-items:center;gap:var(--space-16);flex:0 0 auto}
-  .site-header__cta{display:inline-flex;align-items:center}
-  .site-header__menu-trigger{display:none;align-items:center;justify-content:center;width:var(--tap-target-min);height:var(--tap-target-min);border-radius:var(--radius-sm);color:var(--text-primary);background-color:transparent}
-  .site-header__menu-trigger:hover{background-color:var(--color-primary-subtle)}
-  .mobile-nav{position:fixed;inset:var(--header-height) 0 0 0;z-index:var(--z-overlay);display:flex;flex-direction:column;padding:var(--space-24) var(--container-padding) var(--space-48);background-color:var(--surface-primary);border-block-start:var(--border-divider);overflow-y:auto;overscroll-behavior:contain}
-  .mobile-nav[hidden]{display:none}
-  .has-mobile-nav-open{overflow:hidden}
-  .site-main{flex:1 0 auto;display:flex;flex-direction:column}
-  .section--center{text-align:center}
-  .section--divider-top{border-block-start:var(--border-divider)} .section--divider-bottom{border-block-end:var(--border-divider)}
-  .section--flush{padding-block:0} .section--compact{padding-block:var(--space-80)} .section--full{overflow:clip}
-  .section--below-header{padding-block-start:calc(var(--section-padding-y) + var(--header-height))}
-  .container--wide{max-width:var(--container-wide)}
-  .container--full{max-width:var(--container-full);padding-inline:0}
-  .site-footer{flex:0 0 auto;background-color:var(--surface-inverse);color:var(--text-on-inverse)}
-  .site-footer__top{padding-block:var(--space-96) var(--space-64)}
-  .site-footer__grid{display:grid;grid-template-columns:repeat(var(--grid-columns),minmax(0,1fr));gap:var(--grid-gutter) var(--space-32)}
-  .site-footer__brand{grid-column:span 4} .site-footer__links{grid-column:span 2} .site-footer__services{grid-column:span 2}
-  .site-footer__contact{grid-column:span 2} .site-footer__newsletter{grid-column:span 2} .site-footer__social{grid-column:span 12}
-  .site-footer__bottom{padding-block:var(--space-32);border-block-start:var(--border-width-hairline) solid rgba(255,255,255,.12)}
-  .site-footer__bottom-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-16)}
-  [data-reveal]{}
-  .shell-debug [data-slot],.shell-debug [data-region]{outline:var(--border-width-thin) dashed var(--color-border-strong);outline-offset:var(--space-4);min-height:var(--space-32)}
+  .site-header{position:fixed;inset-block-start:0;inset-inline:0;z-index:var(--z-sticky);display:flex;align-items:center;min-height:var(--header-h);background-color:transparent;border-block-end:var(--bw-hairline) solid transparent;transition:background-color var(--dur-normal) var(--ease-standard),border-color var(--dur-normal) var(--ease-standard),box-shadow var(--dur-normal) var(--ease-standard),min-height var(--dur-normal) var(--ease-shift)}
+  /* Compact editorial scrolled state — height settles, near-solid Quantum Black ground,
+     hairline separation + a whisper of depth. No pill, no glass, minimal blur. */
+  .site-header.is-scrolled{--header-h:clamp(56px,5.4vw,68px);background-color:rgba(17,17,17,0.92);-webkit-backdrop-filter:saturate(120%) blur(6px);backdrop-filter:saturate(120%) blur(6px);border-block-end-color:var(--border);box-shadow:0 1px 0 rgba(244,241,234,0.05),0 14px 34px -22px rgba(0,0,0,0.8)}
+  .site-header.is-scrolled .site-header__logo{--logo-mark:clamp(26px,2.8vw,34px)}
+  /* While the mobile menu is open, hold the header at full height so the panel meets it flush */
+  .has-mobile-nav-open .site-header{--header-h:clamp(64px,7vw,84px)}
+  .has-mobile-nav-open .site-header .site-header__logo{--logo-mark:clamp(30px,3.2vw,40px)}
+  .site-header__inner{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-24);width:100%;min-height:var(--header-h);transition:min-height var(--dur-normal) var(--ease-shift)}
+  .site-header__logo{display:inline-flex;align-items:center;min-height:var(--tap-min);flex:0 0 auto;border-radius:var(--radius-sm);--logo-mark:clamp(30px,3.2vw,40px)}
+  /* Prompt 02: header logo is monochrome Quantum Paper (#F4F1EA), icon + wordmark */
+  .site-header__logo .ql-logo{color:var(--ql-paper);--mark-color:var(--ql-paper);transition:opacity var(--dur-fast) var(--ease-standard),transform var(--dur-normal) var(--ease-shift)}
+  .site-header__logo:hover .ql-logo{opacity:var(--opacity-hover)}
+  .site-header__logo:active .ql-logo{transform:scale(.98)}
+  .site-header__actions{display:flex;align-items:center;gap:var(--sp-16);flex:0 0 auto}
 
-  /* ==========================================================================
-     NAVIGATION SYSTEM & HEADER UI (Stage 04)
-     ========================================================================== */
-  .site-header{--logo-h:clamp(32px,3.4vw,42px)}
-  .site-header__logo{gap:var(--space-12);border-radius:var(--radius-sm);padding-inline:var(--space-4)}
-  .site-logo{height:var(--logo-h);width:auto;display:block;transition:opacity var(--duration-fast) var(--ease-standard),transform var(--duration-normal) var(--ease-smooth)}
-  .site-header__logo:hover .site-logo{opacity:var(--opacity-hover)}
-  .site-header__logo:active .site-logo{transform:scale(.98)}
+  .site-nav__list{display:flex;align-items:center;gap:var(--sp-4);list-style:none;margin:0;padding:0}
+  .site-nav__link{position:relative;display:inline-flex;align-items:center;padding:var(--sp-8) var(--sp-16);font-size:var(--fs-nav);font-weight:var(--fw-semibold);letter-spacing:var(--ls-wide);text-transform:uppercase;color:var(--text-muted);white-space:nowrap;border-radius:var(--radius-pill);transition:color var(--dur-normal) var(--ease-shift)}
+  .site-nav__link::after{content:"";position:absolute;inset-block-end:var(--sp-2);inset-inline-start:50%;width:16px;height:var(--bw-thick);border-radius:var(--radius-pill);background-color:var(--accent-2);opacity:0;transform:translateX(-50%) scaleX(.3);transform-origin:center;transition:opacity var(--dur-fast) var(--ease-standard),transform var(--dur-normal) var(--ease-shift)}
+  .site-nav__link:hover{color:var(--text-strong)}
+  .site-nav__link:hover::after{opacity:.7;transform:translateX(-50%) scaleX(1)}
+  .site-nav__link.is-active{color:var(--text-strong)}
+  .site-nav__link.is-active::after{opacity:1;transform:translateX(-50%) scaleX(1)}
 
-  .site-nav__list{display:flex;align-items:center;gap:var(--space-4);list-style:none;margin:0;padding:0}
-  .site-nav__link{position:relative;display:inline-flex;align-items:center;padding:var(--space-8) var(--space-16);font-size:var(--font-size-nav);font-weight:var(--font-weight-medium);line-height:var(--leading-normal);color:var(--text-secondary);white-space:nowrap;border-radius:var(--radius-pill);transition:color var(--duration-normal) var(--ease-smooth)}
-  .site-nav__link::after{content:"";position:absolute;inset-block-end:var(--space-2);inset-inline-start:50%;width:var(--space-20);height:var(--border-width-thick);border-radius:var(--radius-pill);background-color:currentColor;opacity:0;transform:translateX(-50%) scaleX(.4);transform-origin:center;transition:opacity var(--duration-fast) var(--ease-standard),transform var(--duration-normal) var(--ease-smooth)}
-  .site-nav__link:hover{color:var(--text-primary)}
-  .site-nav__link:hover::after{opacity:.35;transform:translateX(-50%) scaleX(1)}
-  .site-nav__link.is-active{color:var(--color-primary);font-weight:var(--font-weight-semibold)}
-  .site-nav__link.is-active::after{opacity:1;transform:translateX(-50%) scaleX(1);background-color:var(--color-primary)}
-
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-8);padding:var(--space-12) var(--space-24);min-height:var(--tap-target-min);font-size:var(--font-size-button);font-weight:var(--font-weight-semibold);line-height:1;white-space:nowrap;border-radius:var(--radius-pill);cursor:pointer;transition:var(--transition-hover)}
-  .btn--primary{background-color:var(--color-primary);color:var(--text-on-primary);box-shadow:var(--shadow-sm)}
-  .btn--primary:hover{background-color:var(--color-primary-hover);box-shadow:var(--shadow-md);transform:translateY(-1px)}
-  .btn--primary:active{background-color:var(--color-primary-active);transform:translateY(0);box-shadow:var(--shadow-sm)}
+  /* Buttons */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-8);padding:var(--sp-12) var(--sp-24);min-height:var(--tap-min);font-family:var(--font-en);font-size:var(--fs-button);font-weight:var(--fw-bold);letter-spacing:var(--ls-wide);text-transform:uppercase;line-height:1;white-space:nowrap;border-radius:var(--radius-button);cursor:pointer;border:var(--bw-thick) solid transparent;transition:var(--shift-transition)}
+  .btn__icon{transition:transform var(--dur-normal) var(--ease-shift)}
+  .btn:hover .btn__icon{transform:translate(3px,-3px)}
+  .btn--primary{background-color:var(--accent);color:var(--ql-white);border-color:var(--accent)}
+  .btn--primary:hover{background-color:var(--accent-hover);border-color:var(--accent-hover);transform:translateY(-2px)}
+  .btn--primary:active{background-color:var(--accent-active);transform:translateY(0)}
   .btn--primary:focus-visible{outline:none;box-shadow:var(--shadow-focus)}
+  .btn--outline{background-color:transparent;color:var(--text);border-color:var(--accent-2)}
+  .btn--outline:hover{background-color:var(--accent-2);color:var(--ql-black);transform:translateY(-2px)}
+  .btn--ghost{background:transparent;color:var(--text);border-color:var(--border-strong)}
+  .btn--ghost:hover{border-color:var(--text);transform:translateY(-2px)}
+  /* Prompt 02: primary CTA "لنبدأ" — Blue #2447FF bg, Paper #F4F1EA text.
+     Arabic-safe: no uppercase, no letter-spacing (both break Arabic joining). */
+  .btn--start{background-color:var(--accent);color:var(--ql-paper);border-color:var(--accent);font-family:var(--font-en);font-weight:var(--fw-bold);text-transform:none;letter-spacing:0}
+  .btn--start:hover{background-color:var(--accent-hover);border-color:var(--accent-hover);transform:translateY(-2px)}
+  .btn--start:active{background-color:var(--accent-active);transform:translateY(0)}
+  .btn--start:focus-visible{outline:none;box-shadow:var(--shadow-focus)}
   .btn--block{width:100%}
+  .section--paper .btn--outline{color:var(--text-on-paper)}
+  .section--paper .btn--ghost{color:var(--text-on-paper);border-color:var(--border-on-paper-strong)}
 
-  .menu-icon{position:relative;width:22px;height:14px;color:currentColor}
-  .menu-icon span{position:absolute;inset-inline:0;height:var(--border-width-thick);border-radius:var(--radius-pill);background-color:currentColor;transition:transform var(--duration-normal) var(--ease-smooth),opacity var(--duration-fast) var(--ease-standard)}
+  /* Hamburger */
+  .site-header__menu-trigger{display:none;align-items:center;justify-content:center;width:var(--tap-min);height:var(--tap-min);border-radius:var(--radius-sm);color:var(--text-strong);background-color:transparent;border:0}
+  .menu-icon{position:relative;width:24px;height:14px;color:currentColor}
+  .menu-icon span{position:absolute;inset-inline:0;height:var(--bw-thick);border-radius:var(--radius-pill);background-color:currentColor;transition:transform var(--dur-normal) var(--ease-shift),opacity var(--dur-fast) var(--ease-standard)}
   .menu-icon span:nth-child(1){inset-block-start:0}
   .menu-icon span:nth-child(2){inset-block-start:50%;transform:translateY(-50%)}
   .menu-icon span:nth-child(3){inset-block-end:0}
@@ -237,134 +418,1242 @@
   .site-header__menu-trigger[aria-expanded="true"] .menu-icon span:nth-child(2){opacity:0}
   .site-header__menu-trigger[aria-expanded="true"] .menu-icon span:nth-child(3){inset-block-end:50%;transform:translateY(50%) rotate(-45deg)}
 
-  .mobile-nav{gap:var(--space-8);opacity:0;transform:translateY(calc(var(--space-8) * -1));transition:opacity var(--duration-normal) var(--ease-smooth),transform var(--duration-normal) var(--ease-smooth)}
-  .mobile-nav.is-open{opacity:1;transform:translateY(0)}
-  .mobile-nav__list{display:flex;flex-direction:column;list-style:none;margin:0;padding:0}
-  .mobile-nav__link{display:block;padding:var(--space-16) var(--space-4);font-size:var(--font-size-h4);font-weight:var(--font-weight-semibold);color:var(--text-primary);border-block-end:var(--border-divider);transition:color var(--duration-fast) var(--ease-standard)}
-  .mobile-nav__link:hover,.mobile-nav__link.is-active{color:var(--color-primary)}
-  .mobile-nav__cta{margin-block-start:var(--space-32)}
+  /* ------------------------------------------------------------------------
+     MOBILE MENU — a near-full-screen editorial navigation, not a drawer.
+     Large indexed type, generous rhythm, a resting Quantum signature, and a
+     contact/positioning footer. Opens with a soft progressive reveal; closes
+     fast and clean. Same brand system as the desktop header.
+     ------------------------------------------------------------------------ */
+  .mobile-nav{position:fixed;inset:var(--header-h) 0 0 0;z-index:var(--z-overlay);display:flex;flex-direction:column;padding:clamp(1.5rem,5vw,2.75rem) var(--container-pad) clamp(1.75rem,5vw,2.75rem);background-color:var(--bg);border-block-start:var(--bw-hairline) solid var(--border);overflow-y:auto;overscroll-behavior:contain;opacity:0;transform:translateY(-6px);transition:opacity var(--dur-fast) var(--ease-standard),transform var(--dur-fast) var(--ease-standard)}
+  .mobile-nav[hidden]{display:none}
+  .mobile-nav.is-open{opacity:1;transform:translateY(0);transition:opacity var(--dur-normal) var(--ease-shift),transform var(--dur-normal) var(--ease-shift)}
+  .has-mobile-nav-open{overflow:hidden}
+  .mobile-nav > *{position:relative;z-index:1}
+  /* Resting Quantum signature (FRAME/ARC) — anchors the composition, shifts in on open */
+  .mobile-nav__sig{position:absolute;z-index:0;inset-block-end:-8%;inset-inline-end:-10%;inline-size:min(72vw,340px);aspect-ratio:1;color:var(--ql-blue);opacity:0;transform:translate(14px,14px);pointer-events:none;transition:opacity var(--dur-slow) var(--ease-shift),transform var(--dur-slow) var(--ease-shift)}
+  .mobile-nav__sig svg{inline-size:100%;block-size:100%;overflow:visible}
+  .mobile-nav__sig svg path{fill:none;stroke:currentColor;stroke-width:30}
+  .mobile-nav.is-open .mobile-nav__sig{opacity:.10;transform:none;transition-delay:120ms}
 
-  .site-header--on-dark:not(.is-scrolled) .site-nav__link{color:var(--text-on-inverse)}
-  .site-header--on-dark:not(.is-scrolled) .site-nav__link:hover,
-  .site-header--on-dark:not(.is-scrolled) .site-nav__link.is-active{color:var(--white)}
-  .site-header--on-dark:not(.is-scrolled) .site-header__menu-trigger{color:var(--white)}
+  .mobile-nav__list{display:flex;flex-direction:column;list-style:none;margin:0;padding:0}
+  .mobile-nav__item{border-block-end:var(--bw-hairline) solid var(--border)}
+  .mobile-nav__link{display:flex;align-items:baseline;gap:clamp(0.9rem,4vw,1.4rem);padding:clamp(0.85rem,3.4vw,1.2rem) var(--sp-4);color:var(--text);transition:color var(--dur-fast) var(--ease-standard)}
+  .mobile-nav__index{flex:0 0 auto;min-inline-size:2.4ch;font-family:var(--font-en);font-size:var(--fs-caption);font-weight:var(--fw-bold);letter-spacing:var(--ls-wide);color:var(--ql-blue);transform:translateY(-0.35em);transition:color var(--dur-fast) var(--ease-standard)}
+  .mobile-nav__word{font-family:var(--font-en);font-weight:var(--fw-black);text-transform:uppercase;letter-spacing:-0.01em;line-height:1;font-size:clamp(1.75rem,8vw,2.5rem)}
+  .mobile-nav__link:hover,.mobile-nav__link:focus-visible,.mobile-nav__link.is-active{color:var(--accent-2)}
+  .mobile-nav__link.is-active .mobile-nav__index{color:var(--accent-2)}
+  /* Progressive reveal — items settle in sequence on open; instant on close */
+  .mobile-nav__item,.mobile-nav__foot{opacity:0;transform:translateY(12px);transition:opacity var(--dur-normal) var(--ease-shift),transform var(--dur-normal) var(--ease-shift)}
+  .mobile-nav.is-open .mobile-nav__item,.mobile-nav.is-open .mobile-nav__foot{opacity:1;transform:none}
+  .mobile-nav.is-open .mobile-nav__item:nth-child(1){transition-delay:70ms}
+  .mobile-nav.is-open .mobile-nav__item:nth-child(2){transition-delay:110ms}
+  .mobile-nav.is-open .mobile-nav__item:nth-child(3){transition-delay:150ms}
+  .mobile-nav.is-open .mobile-nav__item:nth-child(4){transition-delay:190ms}
+  .mobile-nav.is-open .mobile-nav__item:nth-child(5){transition-delay:230ms}
+  .mobile-nav.is-open .mobile-nav__item:nth-child(6){transition-delay:270ms}
+  .mobile-nav.is-open .mobile-nav__foot{transition-delay:320ms}
+
+  .mobile-nav__foot{margin-block-start:auto;padding-block-start:clamp(1.75rem,6vw,2.5rem)}
+  .mobile-nav__cta{width:100%}
+  .mobile-nav__meta{display:flex;flex-direction:column;gap:var(--sp-4);margin-block-start:var(--sp-24)}
+  .mobile-nav__mail{font-family:var(--font-en);font-weight:var(--fw-bold);letter-spacing:0.02em;color:var(--ql-paper)}
+  .mobile-nav__mail:hover{color:var(--accent-2)}
+  .mobile-nav__tag{font-size:var(--fs-small);color:var(--text-subtle)}
+  @media (prefers-reduced-motion:reduce){
+    .mobile-nav__item,.mobile-nav__foot,.mobile-nav__sig{transition:none!important;opacity:1!important;transform:none!important}
+    .mobile-nav.is-open .mobile-nav__sig{opacity:.10}
+  }
+
+  .site-main{flex:1 0 auto;display:flex;flex-direction:column}
+
+  /* Footer (Prompt 09) — minimalist, centered, Black bg (~180px) */
+  .site-footer{flex:0 0 auto;background-color:var(--ql-black);color:var(--text);border-block-start:var(--bw-hairline) solid var(--border)}
+  .site-footer__inner{display:flex;flex-direction:column;align-items:center;text-align:center;padding-block:var(--sp-40)}
+  .site-footer__logo{display:inline-flex;--logo-mark:42px;--logo-word:1.3rem;border-radius:var(--radius-sm)}
+  .site-footer__logo .ql-logo{color:var(--ql-paper);--mark-color:var(--ql-blue)}
+  .site-footer__thanks{margin-block-start:var(--sp-16);color:var(--ql-paper);font-weight:var(--fw-medium);font-size:1rem}
+  .site-footer__start{margin-block-start:var(--sp-4);color:var(--ql-lime);font-family:var(--font-en);font-weight:var(--fw-bold);font-size:clamp(1.25rem,1.1rem + 0.6vw,1.5rem);line-height:1.2;transition:var(--transition-colors)}
+  .site-footer__start:hover{color:var(--ql-lime-deep)}
+  .site-footer__start:focus-visible{outline:var(--bw-thick) solid var(--ql-lime);outline-offset:4px;border-radius:var(--radius-xs)}
 
   /* ==========================================================================
-     RESPONSIVE (Desktop-first)
+     HERO — elevated · asymmetric · Signature Quantum Link Frame + Shift + Link
+     ========================================================================== */
+  .hero{position:relative;display:flex;align-items:center;min-height:100vh;min-height:100dvh;overflow:clip;background:var(--ql-black)}
+  .hero::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(115% 90% at 12% 10%,rgba(36,71,255,.16),transparent 55%),radial-gradient(90% 80% at 96% 88%,rgba(199,243,107,.07),transparent 55%)}
+  .hero__grid{position:relative;z-index:1;display:grid;grid-template-columns:1.05fr 0.95fr;gap:clamp(2rem,4vw,4.5rem);align-items:center;width:100%;padding-block:calc(var(--header-h) + var(--sp-40)) var(--sp-64)}
+
+  /* Text column (left — English editorial) */
+  .hero__content{grid-column:1;grid-row:1;min-inline-size:0}
+  .hero__eyebrow{display:inline-flex;align-items:center;gap:var(--sp-12);color:var(--ql-lime);font-family:var(--font-en);font-size:var(--fs-eyebrow);font-weight:var(--fw-bold);letter-spacing:var(--ls-widest);text-transform:uppercase}
+  .hero__eyebrow::before{content:"";inline-size:34px;block-size:var(--bw-thick);background:currentColor}
+  .hero__title{margin-block-start:var(--sp-24);color:var(--ql-paper);font-weight:var(--fw-black);font-size:clamp(2.75rem,1.55rem + 5vw,5.5rem);line-height:1.02;letter-spacing:-0.01em}
+  .hero__accent{color:var(--ql-blue)}
+  .hero__lead{margin-block-start:var(--sp-24);max-inline-size:46ch;color:var(--ql-gray);font-weight:var(--fw-regular);font-size:clamp(1rem,0.92rem + 0.35vw,1.2rem);line-height:1.75}
+  .hero__actions{display:flex;align-items:center;gap:clamp(1.25rem,3vw,2.5rem);margin-block-start:var(--sp-40);flex-wrap:wrap}
+  .hero__pillars{display:flex;align-items:center;gap:var(--sp-12)}
+  .hero__pillar{font-family:var(--font-en);font-weight:var(--fw-black);font-size:0.85rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--ql-blue)}
+  .hero__sep{position:relative;inline-size:32px;block-size:var(--bw-thick);background:rgba(36,71,255,.4);flex:0 0 auto}
+  .hero__sep::before{content:"";position:absolute;inset-block-start:50%;inset-inline-start:50%;transform:translate(-50%,-50%);inline-size:6px;block-size:6px;border-radius:var(--radius-round);background:var(--ql-blue)}
+
+  /* Visual column (right) — Signature Frame composition */
+  .hero__visual{grid-column:2;grid-row:1;position:relative;inline-size:100%;max-inline-size:540px;aspect-ratio:1/1;margin-inline:auto;justify-self:center}
+  /* Signature Quantum Link Frame (rounded-corner arc, Paper) */
+  .hero__sig{position:absolute;inset:0;inline-size:100%;block-size:100%;color:var(--ql-paper);overflow:visible}
+  .hero__sig path{fill:none;stroke:currentColor;stroke-width:36;stroke-linecap:butt}
+  /* SHIFT — bold blue diagonal blade */
+  .hero__shift{position:absolute;inset-block-end:11%;inset-inline-start:6%;inline-size:60%;block-size:22%;background:var(--ql-blue);clip-path:polygon(0 0,70% 0,100% 100%,30% 100%)}
+  /* LINK — lime accent ring + dot */
+  .hero__ring{position:absolute;inset-block-start:1%;inset-inline-end:1%;inline-size:clamp(92px,25%,140px);aspect-ratio:1;border:var(--bw-thick) solid var(--ql-lime);border-radius:var(--radius-round)}
+  .hero__dot{position:absolute;inset-block-start:-2%;inset-inline-end:22%;inline-size:12px;block-size:12px;border-radius:var(--radius-round);background:var(--ql-lime)}
+
+  /* Scroll indicator — Lime, bobbing arrow */
+  .hero__scroll{position:absolute;inset-block-end:var(--sp-32);inset-inline-start:50%;transform:translateX(-50%);inline-size:var(--tap-min);block-size:var(--tap-min);display:flex;align-items:center;justify-content:center;color:var(--ql-lime);z-index:2}
+  .hero__scroll svg{inline-size:22px;block-size:22px;animation:hero-bob 1.8s var(--ease-in-out) infinite}
+  @keyframes hero-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+  @media (prefers-reduced-motion:reduce){.hero__scroll svg{animation:none}}
+
+  /* --------------------------------------------------------------------------
+     HERO — ENTRANCE CHOREOGRAPHY (SHIFT-in) + restrained signature motion.
+     Pure CSS so content is present without JS. Fast enough to feel responsive,
+     eased enough to feel premium; nothing blocks interaction (opacity/transform
+     only, no layout shift). prefers-reduced-motion collapses to instant/visible.
+     -------------------------------------------------------------------------- */
+  @keyframes ql-hero-rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+  @keyframes ql-hero-fade{from{opacity:0}to{opacity:1}}
+  @keyframes ql-arc-draw{from{stroke-dashoffset:var(--arc-len,340)}to{stroke-dashoffset:0}}
+  @keyframes ql-hero-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+
+  .hero__eyebrow{animation:ql-hero-rise var(--dur-slow) var(--ease-shift) both;animation-delay:80ms}
+  .hero__title{animation:ql-hero-rise var(--dur-slow) var(--ease-shift) both;animation-delay:200ms}
+  .hero__lead{animation:ql-hero-rise var(--dur-slow) var(--ease-shift) both;animation-delay:360ms}
+  .hero__cta-row{animation:ql-hero-rise var(--dur-slow) var(--ease-shift) both;animation-delay:500ms}
+  .hero__scroll{animation:ql-hero-fade var(--dur-slow) var(--ease-shift) both;animation-delay:820ms}
+
+  /* Visual column: parallax offset var + soft entrance; children carry the motion */
+  .hero__visual{transform:translate3d(var(--hero-px,0px),var(--hero-py,0px),0);transition:transform var(--dur-slow) var(--ease-shift);animation:ql-hero-fade var(--dur-slower) var(--ease-shift) both;animation-delay:300ms;will-change:transform}
+  .hero:not(.is-pointing) .hero__visual{transition:transform var(--dur-slower) var(--ease-shift)}
+  /* ARC = movement — the signature frame draws itself in, then rests */
+  .hero__sig path{stroke-dasharray:var(--arc-len,340);animation:ql-arc-draw 1100ms var(--ease-shift) both;animation-delay:420ms}
+  /* LINK = connection — lime ring + dot breathe gently (offset), FRAME blade settles */
+  .hero__ring{animation:ql-hero-fade var(--dur-slower) var(--ease-shift) 300ms both,ql-hero-float 6.5s var(--ease-in-out) 1.2s infinite}
+  .hero__dot{animation:ql-hero-fade var(--dur-slower) var(--ease-shift) 420ms both,ql-hero-float 6.5s var(--ease-in-out) -2s infinite}
+  .hero__shift{animation:ql-hero-rise var(--dur-slower) var(--ease-shift) both;animation-delay:520ms}
+
+  @media (prefers-reduced-motion:reduce){
+    .hero__eyebrow,.hero__title,.hero__lead,.hero__cta-row,.hero__scroll,
+    .hero__visual,.hero__sig path,.hero__ring,.hero__dot,.hero__shift{
+      animation:none!important;opacity:1!important;transform:none!important;stroke-dashoffset:0!important}
+    .hero__visual{transition:none!important}
+  }
+
+  /* HERO → POSITIONING — a quiet visual opening (LINK continuation under the cue),
+     so the hero resolves toward the next section instead of simply ending. */
+  .hero__scroll::before{content:"";position:absolute;inset-block-start:calc(100% - 2px);inset-inline-start:50%;transform:translateX(-50%);inline-size:var(--link-width);block-size:30px;background:linear-gradient(to bottom,var(--ql-lime),transparent);opacity:.5;pointer-events:none}
+
+  /* ==========================================================================
+     SERVICES  (Prompt 04) — "حلولنا" · Paper bg · 2×2 FRAME modules
+     ========================================================================== */
+  .services{background:var(--surface-paper);color:var(--text-on-paper)}
+  .services__head{max-inline-size:62ch;text-align:start}
+  .services__title{color:var(--ql-black);font-weight:var(--fw-bold);font-size:clamp(2rem,1.4rem + 2.6vw,3rem);line-height:1.1}
+  .services__intro{margin-block-start:var(--sp-16);color:var(--ql-gray);font-weight:var(--fw-regular);font-size:clamp(1.05rem,1rem + 0.3vw,1.125rem);line-height:1.75}
+
+  .services__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-32);margin-block-start:var(--sp-48)}
+  /* Module = thin FRAME (border) in Blue */
+  .service-card{position:relative;overflow:hidden;min-block-size:200px;padding:var(--sp-40);border:1.5px solid var(--ql-blue);border-radius:var(--radius-md);background:transparent;transition:var(--shift-transition)}
+  .service-card:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(36,71,255,.12)}
+  /* Bold number (Blue) — top-left corner, sized to clear the description text */
+  .service-card__num{position:absolute;inset-block-start:8px;left:24px;z-index:0;font-family:var(--font-en);font-weight:var(--fw-black);font-size:clamp(2.5rem,3.2vw,3.25rem);line-height:1;color:var(--ql-blue);pointer-events:none;-webkit-user-select:none;user-select:none}
+  .service-card__head{position:relative;z-index:1}
+  .service-card__title{color:var(--ql-blue);font-weight:var(--fw-bold);font-size:clamp(1.3rem,1.1rem + 0.8vw,1.6rem);line-height:1.2}
+  .service-card__desc{position:relative;z-index:1;margin-block-start:var(--sp-16);color:var(--ql-black);font-weight:var(--fw-regular);max-inline-size:42ch}
+
+  /* ==========================================================================
+     PACKAGES  (Prompt 05) — intro cards + interactive tab selector · Black bg
+     ========================================================================== */
+  .packages{background:var(--ql-black)}
+  .packages__head{max-inline-size:60ch;text-align:start}
+  .packages__title{color:var(--ql-paper);font-weight:var(--fw-bold);font-size:clamp(1.9rem,1.4rem + 2vw,2.5rem);line-height:1.15}
+  .packages__subtitle{margin-block-start:var(--sp-8);color:var(--ql-gray);font-weight:var(--fw-regular);font-size:clamp(1.05rem,1rem + 0.3vw,1.125rem)}
+
+  /* Part A — intro cards (Paper cards, thin blue FRAME) */
+  .pkg-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-24);margin-block-start:var(--sp-48);align-items:start}
+  .pkg-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:var(--sp-8);padding:var(--sp-40) var(--sp-24) var(--sp-32);background:var(--surface-paper);color:var(--text-on-paper);border:1.5px solid var(--ql-blue);border-radius:var(--radius-lg);text-align:center;overflow:hidden;transition:var(--shift-transition)}
+  .pkg-card:hover{transform:translateY(-6px);box-shadow:0 20px 46px rgba(0,0,0,.42)}
+  .pkg-card--featured{margin-block-start:-12px}                 /* MEDIUM taller by 12px — SHIFT */
+  .pkg-card__bar{position:absolute;inset-block-start:0;inset-inline:0;block-size:6px;background:var(--ql-lime)}
+  .pkg-card__name{display:inline-flex;align-items:center;gap:var(--sp-8);font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:0.12em;color:var(--ql-black);font-size:1.05rem}
+  .pkg-card__price{margin-block-start:var(--sp-8);font-family:var(--font-en);font-weight:var(--fw-black);font-size:clamp(2rem,1.6rem + 1.4vw,2.6rem);color:var(--ql-blue);line-height:1}
+  .pkg-card__dur{font-family:var(--font-en);font-weight:var(--fw-semibold);letter-spacing:0.14em;color:var(--ql-gray);font-size:0.82rem}
+  .pkg-card__badge{margin-block-start:var(--sp-4);padding:5px 14px;background:rgba(36,71,255,.12);color:var(--ql-blue);border-radius:var(--radius-pill);font-size:0.82rem;font-weight:var(--fw-semibold)}
+  .pkg-card__cta{margin-block-start:var(--sp-16);min-inline-size:150px}
+  .pkg-card__cta--lime{background:var(--ql-lime);color:var(--ql-black);border-color:var(--ql-lime)}   /* PREMIUM CTA */
+  .pkg-card__cta--lime:hover{background:var(--ql-lime-deep);border-color:var(--ql-lime-deep)}
+
+  /* Part B — tab selector */
+  .pkg-selector{margin-block-start:var(--sp-64)}
+  .pkg-tabs{display:inline-flex;gap:var(--sp-8);padding:var(--sp-4);border-radius:var(--radius-pill);background:rgba(244,241,234,.05)}
+  .pkg-tab{padding:var(--sp-12) var(--sp-32);border-radius:var(--radius-pill);font-family:var(--font-en);font-weight:var(--fw-bold);letter-spacing:0.08em;color:var(--ql-blue);background:transparent;border:1.5px solid transparent;cursor:pointer;transition:var(--shift-transition)}
+  .pkg-tab:hover{border-color:var(--ql-blue)}
+  .pkg-tab.is-active{background:var(--ql-blue);color:var(--ql-paper);border-color:var(--ql-blue)}   /* active tab */
+  .pkg-tab:focus-visible{outline:none;box-shadow:var(--shadow-focus)}
+  .pkg-panels{margin-block-start:var(--sp-32)}
+  .pkg-panel{display:grid;grid-template-columns:4fr 6fr;gap:var(--sp-48);padding:var(--sp-40);border:1.5px solid var(--border-strong);border-radius:var(--radius-lg)}
+  .pkg-panel[hidden]{display:none}
+  .pkg-panel__title{color:var(--ql-paper);font-weight:var(--fw-bold);font-size:clamp(1.5rem,1.2rem + 1.4vw,2rem);line-height:1.2}
+  .pkg-panel__desc{margin-block-start:var(--sp-16);color:var(--ql-gray);font-size:1rem;line-height:1.7}
+  .pkg-panel__price{margin-block-start:var(--sp-24);color:var(--ql-blue);font-family:var(--font-en);font-weight:var(--fw-bold);font-size:1.2rem}
+  .pkg-deliverables{display:flex;flex-direction:column;gap:var(--sp-24)}
+  .pkg-group + .pkg-group{border-block-start:var(--link-width) solid var(--border);padding-block-start:var(--sp-24)}  /* LINK divider */
+  .pkg-group__head{color:var(--ql-lime);font-weight:var(--fw-bold);font-size:0.95rem;margin-block-end:var(--sp-12)}
+  .pkg-group__sub{color:var(--ql-paper);font-size:0.9rem;opacity:.82;margin-block-end:var(--sp-8)}
+  .pkg-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:var(--sp-8)}
+  .pkg-list li{position:relative;padding-inline-start:var(--sp-20);color:var(--ql-paper);font-size:0.95rem;line-height:1.6}
+  .pkg-list li::before{content:"";position:absolute;inset-inline-start:0;inset-block-start:0.55em;inline-size:6px;block-size:6px;border-radius:var(--radius-round);background:var(--ql-blue)}
+  .pkg-note{margin-block-start:var(--sp-12);color:var(--ql-gray);font-size:0.85rem}
+  /* PREMIUM excludes ("لا يشمل") — light box */
+  .pkg-excludes{margin-block-start:var(--sp-24);padding:var(--sp-20) var(--sp-24);background:var(--surface-paper);color:var(--text-on-paper);border-radius:var(--radius-md)}
+  .pkg-excludes__head{color:var(--ql-black);font-weight:var(--fw-bold);margin-block-end:var(--sp-8)}
+  .pkg-excludes__list{color:var(--text-on-paper-muted);font-size:0.92rem;line-height:1.7}
+
+  /* ==========================================================================
+     COMPARISON TABLE (Prompt 06) — Black bg · framed columns · numbers Lime
+     ========================================================================== */
+  .compare{background:var(--ql-black)}
+  .compare__title{color:var(--ql-paper);font-weight:var(--fw-bold);font-size:clamp(1.6rem,1.3rem + 1.4vw,2rem);text-align:start}
+  .compare__wrap{margin-block-start:var(--sp-32)}
+  .cmp{inline-size:100%;border-collapse:separate;border-spacing:16px 0}
+  .cmp th,.cmp td{padding:14px 18px;text-align:center;font-size:0.95rem}
+  /* Column headers = top of each FRAME */
+  .cmp thead th{color:var(--ql-paper);font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:0.08em;padding-block:20px;border:1.5px solid var(--ql-blue);border-block-end:0;border-start-start-radius:var(--radius-md);border-start-end-radius:var(--radius-md)}
+  .cmp thead th:first-child{border:0}
+  .cmp tbody th{color:var(--ql-paper);font-weight:var(--fw-semibold);text-align:start;white-space:nowrap}
+  /* Framed columns (blue side borders; closed at the last row) */
+  .cmp tbody td{border-inline:1.5px solid var(--ql-blue);color:var(--ql-paper)}
+  .cmp tbody tr:last-child td{border-block-end:1.5px solid var(--ql-blue);border-end-start-radius:var(--radius-md);border-end-end-radius:var(--radius-md)}
+  .cmp .v-num{color:var(--ql-lime);font-weight:var(--fw-bold)}       /* prominent numbers */
+  .cmp .v-check{color:var(--ql-blue);font-weight:var(--fw-bold)}     /* included ✓ */
+  .cmp .v-dash{color:var(--ql-gray)}                                 /* — Cool Gray */
+  .cmp .v-text{color:var(--ql-paper)}
+  .cmp .v-price{color:var(--ql-lime);font-weight:var(--fw-black)}
+  .cmp__star{color:var(--ql-lime)}
+
+  /* ==========================================================================
+     ADDITIONAL SERVICES (Prompt 06) — Paper bg · 4-col grid (2 on mobile)
+     ========================================================================== */
+  .addons{background:var(--surface-paper);color:var(--text-on-paper)}
+  .addons__title{color:var(--ql-black);font-weight:var(--fw-bold);font-size:clamp(1.6rem,1.3rem + 1.4vw,2rem);text-align:start}
+  .addons__intro{margin-block-start:var(--sp-8);color:var(--ql-gray);max-inline-size:60ch}
+  .addons__grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--sp-16);margin-block-start:var(--sp-40)}
+  .addon{display:flex;align-items:center;gap:var(--sp-12);padding:var(--sp-20);background:transparent;border:1.5px solid var(--border-on-paper);border-radius:var(--radius-md);color:var(--ql-black);font-weight:var(--fw-medium);font-size:0.95rem;line-height:1.4;transition:var(--shift-transition)}
+  .addon:hover{border-color:var(--ql-blue);transform:translateY(-3px)}
+  .addon__mark{flex:0 0 auto;inline-size:24px;block-size:24px;display:grid;place-items:center;color:var(--ql-blue)}
+  .addon__mark svg{inline-size:16px;block-size:16px}
+  .addons__footer{margin-block-start:var(--sp-32);text-align:center;color:var(--ql-black);font-weight:var(--fw-semibold)}
+
+  /* ==========================================================================
+     PROCESS (Prompt 07) — Black bg · 6 steps (2×3) · LINK connectors
+     ========================================================================== */
+  .process{background:var(--ql-black)}
+  .process__title{color:var(--ql-paper);font-weight:var(--fw-bold);font-size:clamp(1.75rem,1.4rem + 1.8vw,2.5rem);text-align:start}
+  .process-flow{display:flex;flex-direction:column;gap:var(--sp-64);margin-block-start:var(--sp-48);list-style:none;padding:0}
+  .process-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-24);position:relative}
+  .process-row::before{content:"";position:absolute;inset-block-start:32px;inset-inline:16.6%;block-size:var(--link-width);background:var(--ql-blue);z-index:0}  /* horizontal LINK */
+  .pstep{display:flex;flex-direction:column;align-items:center;text-align:center}
+  .pstep__node{position:relative;z-index:1;flex:0 0 auto;inline-size:64px;block-size:64px;border-radius:var(--radius-round);background:var(--ql-blue);display:grid;place-items:center}
+  .pstep__num{font-family:var(--font-en);font-weight:var(--fw-black);color:var(--ql-lime);font-size:1.25rem}
+  .pstep__body{display:flex;flex-direction:column;align-items:center}
+  .pstep__name{margin-block-start:var(--sp-16);color:var(--ql-paper);font-weight:var(--fw-bold);font-size:1.15rem}
+  .pstep__link{inline-size:var(--link-width);block-size:24px;background:var(--ql-blue);margin-block:var(--sp-12)}  /* vertical LINK */
+  .pstep__desc{color:var(--ql-gray);font-size:0.9rem;line-height:1.6;max-inline-size:26ch}
+
+  /* ==========================================================================
+     POLICIES (Prompt 07) — Paper bg · 3 columns (Reviews / Payment / Terms)
+     ========================================================================== */
+  .policies{background:var(--surface-paper);color:var(--text-on-paper)}
+  .policies__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-40)}
+  .policy{padding-inline:var(--sp-20)}
+  .policy + .policy{border-inline-start:var(--bw-hairline) solid rgba(107,107,118,.35)}  /* Cool Gray column divider */
+  .policy__title{color:var(--ql-blue);font-weight:var(--fw-bold);font-size:1.3rem;padding-block-end:var(--sp-16);margin-block-end:var(--sp-20);border-block-end:var(--bw-hairline) solid rgba(107,107,118,.30)}
+  .policy__list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:var(--sp-12)}
+  .policy__list li{color:var(--ql-black);font-size:0.98rem;line-height:1.6}
+  .policy__list strong{color:var(--ql-blue);font-weight:var(--fw-bold)}
+  .policy__list--bullets li{position:relative;padding-inline-start:var(--sp-20)}
+  .policy__list--bullets li::before{content:"";position:absolute;inset-inline-start:0;inset-block-start:0.5em;inline-size:7px;block-size:7px;border-radius:var(--radius-round);background:var(--ql-blue)}
+  .policy__note{margin-block-start:var(--sp-16);color:var(--ql-gray);font-size:0.85rem;line-height:1.6}
+
+  /* ==========================================================================
+     CONTACT (Prompt 08) — Black bg · split (form left / visual right) · 2-step
+     ========================================================================== */
+  .contact{background:var(--ql-black)}
+  .contact__grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-64);align-items:stretch}
+  .contact__title{color:var(--ql-paper);font-weight:var(--fw-bold);font-size:clamp(2rem,1.5rem + 2vw,3rem);margin-block-end:var(--sp-32);text-align:start}
+  .form-step__heading{color:var(--ql-paper);font-weight:var(--fw-bold);font-size:1.1rem;padding-block-start:var(--sp-8);border-block-start:var(--link-width) solid var(--ql-blue)}  /* التواصل — LINK divider */
+
+  /* Progress indicator */
+  .form-progress{margin-block-end:var(--sp-32)}
+  .form-progress__bar{position:relative;block-size:6px;background:var(--bg-raised);border-radius:var(--radius-pill);overflow:hidden}
+  .form-progress__fill{position:absolute;inset-block:0;inset-inline-start:0;inline-size:50%;background:var(--ql-blue);border-radius:var(--radius-pill);transition:inline-size var(--dur-normal) var(--ease-shift)}
+  .form-progress__label{margin-block-start:var(--sp-8);color:var(--ql-gray);font-size:0.85rem}
+
+  /* Steps + fields */
+  .form-step{border:0;margin:0;padding:0;min-inline-size:0;display:flex;flex-direction:column;gap:var(--sp-20)}
+  .form-step[hidden]{display:none}
+  .field{display:flex;flex-direction:column;gap:var(--sp-8)}
+  .field label{color:var(--ql-paper);font-weight:var(--fw-medium);font-size:0.95rem}
+  /* Fields: transparent bg, bottom-border only (Cool Gray), Lime focus */
+  .contact input,.contact select{inline-size:100%;background:transparent;color:var(--ql-paper);border:0;border-block-end:1.5px solid var(--ql-gray);border-radius:0;padding:12px 4px;min-block-size:48px;transition:border-color var(--dur-fast) var(--ease-standard)}
+  .contact input::placeholder{color:var(--text-subtle)}
+  .contact input[type="date"]{color-scheme:dark}
+  .contact input:focus,.contact select:focus{outline:none;border-block-end-color:var(--ql-lime);border-block-end-width:2px}
+  .contact select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B6B76' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left center;background-size:16px}
+  .contact select:invalid{color:var(--text-subtle)}
+  .form-actions{margin-block-start:var(--sp-12);display:flex}
+  .form-actions--split{justify-content:space-between;gap:var(--sp-16)}
+  .contact .btn{font-family:var(--font-en);text-transform:none;letter-spacing:0}
+  .contact-submit{background:var(--ql-lime);color:var(--ql-black);border-color:var(--ql-lime);font-weight:var(--fw-bold)}
+  .contact-submit:hover{background:var(--ql-lime-deep);border-color:var(--ql-lime-deep);transform:translateY(-2px)}
+  .form-success{color:var(--ql-lime);font-size:1.3rem;font-weight:var(--fw-bold);text-align:center;padding-block:var(--sp-48)}
+
+  /* Right visual: Quantum FRAME with logo overlay */
+  .contact__visual{display:flex}
+  .contact__frame{position:relative;flex:1;min-block-size:440px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sp-24);padding:var(--sp-56);overflow:hidden;clip-path:var(--frame-clip-br);background:radial-gradient(circle at 28% 18%,rgba(36,71,255,.30),transparent 58%),radial-gradient(circle at 82% 88%,rgba(199,243,107,.16),transparent 55%),var(--bg-elevated)}
+  .contact__frame-line{position:absolute;inset-block-start:32px;inset-inline-start:32px;inline-size:110px;block-size:110px;border-block-start:var(--bw-thick) solid rgba(199,243,107,.55);border-inline-start:var(--bw-thick) solid rgba(199,243,107,.55)}
+  .contact__logo{--logo-mark:84px;--logo-word:1.9rem;color:var(--ql-paper);--mark-color:var(--ql-blue);gap:var(--sp-16);opacity:.5;position:relative;z-index:1}  /* semi-transparent watermark */
+  .contact__frame-text{position:relative;z-index:1;max-inline-size:24ch;text-align:center;color:var(--ql-paper);font-weight:var(--fw-semibold);font-size:1.25rem;line-height:1.6}
+
+  /* ==========================================================================
+     ELEVATION — world-class polish cascaded across every section
+     ========================================================================== */
+  /* Unified section titles: display scale + brand kicker bar */
+  .services__title,.packages__title,.compare__title,.addons__title,.process__title,.contact__title{
+    font-weight:var(--fw-black);letter-spacing:-0.02em;line-height:1.05;
+    font-size:clamp(2.25rem,1.5rem + 2.8vw,3.5rem)}
+  .services__title::before,.packages__title::before,.compare__title::before,.addons__title::before,.process__title::before,.contact__title::before{
+    content:"";display:block;inline-size:52px;block-size:4px;border-radius:2px;margin-block-end:var(--sp-20)}
+  .packages__title::before,.compare__title::before,.process__title::before,.contact__title::before{background:var(--ql-lime)}   /* dark sections */
+  .services__title::before,.addons__title::before{background:var(--ql-blue)}                                                     /* paper sections */
+
+  /* Keep section content above decorative accents */
+  .section > .container{position:relative;z-index:1}
+
+  /* Cards / tiles — ARC signature corner + refined SHIFT hover */
+  .pkg-card{border-end-start-radius:var(--arc-lg);direction:ltr}  /* English content — keep "20 DAYS" order */
+  .pkg-card--featured{box-shadow:0 24px 60px rgba(0,0,0,.5)}
+  .addon{border-end-start-radius:var(--arc-md)}
+  .addon:hover{border-color:var(--ql-blue);transform:translateY(-3px);box-shadow:0 12px 28px rgba(36,71,255,.12)}
+  .service-card{border-end-start-radius:var(--arc-lg)}
+  .service-card:hover{border-color:var(--ql-blue);transform:translateY(-4px);box-shadow:0 20px 44px rgba(36,71,255,.16)}
+
+  /* Signature Frame watermark — subtle brand motif in dark sections */
+  .packages,.compare,.process,.contact,.site-footer{overflow:clip}
+  .site-footer{position:relative}
+  .sig-accent{position:absolute;z-index:0;pointer-events:none;inline-size:min(40vw,440px);aspect-ratio:1;opacity:.06}
+  .sig-accent svg{inline-size:100%;block-size:100%;color:var(--ql-paper);overflow:visible}
+  .sig-accent svg path{fill:none;stroke:currentColor;stroke-width:34}
+  .sig-accent--tr{inset-block-start:-5%;inset-inline-end:-4%}
+  .sig-accent--bl{inset-block-end:-5%;inset-inline-start:-4%;transform:rotate(180deg)}
+  @media (max-width:768px){.sig-accent{inline-size:min(60vw,300px);opacity:.05}}
+
+  /* Staggered reveal — choreographed grid entrances */
+  [data-stagger] > *{opacity:0;transform:translateY(22px);transition:opacity var(--dur-slow) var(--ease-shift),transform var(--dur-slow) var(--ease-shift)}
+  [data-stagger].is-inview > *{opacity:1;transform:none}
+  [data-stagger].is-inview > *:nth-child(1){transition-delay:0ms}
+  [data-stagger].is-inview > *:nth-child(2){transition-delay:70ms}
+  [data-stagger].is-inview > *:nth-child(3){transition-delay:140ms}
+  [data-stagger].is-inview > *:nth-child(4){transition-delay:210ms}
+  [data-stagger].is-inview > *:nth-child(5){transition-delay:280ms}
+  [data-stagger].is-inview > *:nth-child(6){transition-delay:350ms}
+  [data-stagger].is-inview > *:nth-child(7){transition-delay:420ms}
+  [data-stagger].is-inview > *:nth-child(8){transition-delay:490ms}
+  [data-stagger].is-inview > *:nth-child(9){transition-delay:560ms}
+  [data-stagger].is-inview > *:nth-child(10){transition-delay:630ms}
+  [data-stagger].is-inview > *:nth-child(11){transition-delay:700ms}
+  [data-stagger].is-inview > *:nth-child(12){transition-delay:770ms}
+  [data-stagger].is-inview > *:nth-child(13){transition-delay:840ms}
+  /* Process: stagger the three steps within each row */
+  .process-row > [data-reveal]:nth-child(2){transition-delay:110ms}
+  .process-row > [data-reveal]:nth-child(3){transition-delay:220ms}
+  @media (prefers-reduced-motion:reduce){[data-stagger] > *{opacity:1!important;transform:none!important;transition:none!important}}
+
+  /* Contact + Footer — kicker + Signature Frame treatment (parity with sections) */
+  .site-footer__inner{position:relative;z-index:1}
+  .site-footer__inner::before{content:"";inline-size:48px;block-size:4px;background:var(--ql-lime);border-radius:2px;margin-block-end:var(--sp-24)}
+
+  /* ==========================================================================
+     MICRO-DETAILS — consistent focus rings, tactile press, hover refinements
+     ========================================================================== */
+  /* Unified keyboard focus-visible ring across interactive elements */
+  a:focus-visible,button:focus-visible,.btn:focus-visible,.site-nav__link:focus-visible,
+  .mobile-nav__link:focus-visible,.pkg-tab:focus-visible,.hero__scroll:focus-visible,
+  .site-header__logo:focus-visible,.site-footer__logo:focus-visible,.site-footer__start:focus-visible{
+    outline:var(--bw-thick) solid var(--accent-hover);outline-offset:3px;box-shadow:none;border-radius:var(--radius-sm)}
+  .contact input:focus-visible,.contact select:focus-visible{outline:var(--bw-thick) solid var(--accent-2);outline-offset:2px}
+
+  /* Tactile press (active) states */
+  .btn:active{transform:translateY(1px) scale(.985)}
+  .pkg-tab:active{transform:scale(.98)}
+  .site-nav__link:active,.mobile-nav__link:active{transform:translateY(1px)}
+  .site-header__logo:active .ql-logo,.site-footer__logo:active .ql-logo{transform:scale(.97)}
+
+  /* Footer "لنبدأ." — animated underline on hover/focus */
+  .site-footer__start{position:relative}
+  .site-footer__start::after{content:"";position:absolute;inset-block-end:-2px;inset-inline:0;block-size:2px;background:currentColor;transform:scaleX(0);transform-origin:right;transition:transform var(--dur-normal) var(--ease-shift)}
+  .site-footer__start:hover::after,.site-footer__start:focus-visible::after{transform:scaleX(1)}
+
+  /* Hero scroll cue — hover nudge (keeps horizontal centering) */
+  .hero__scroll{transition:color var(--dur-fast) var(--ease-standard),transform var(--dur-normal) var(--ease-shift)}
+  .hero__scroll:hover{color:var(--accent-2-hover);transform:translateX(-50%) translateY(3px)}
+
+  @media (prefers-reduced-motion:reduce){
+    .btn:active,.pkg-tab:active,.site-nav__link:active,.mobile-nav__link:active,
+    .site-header__logo:active .ql-logo,.site-footer__logo:active .ql-logo{transform:none}
+    .hero__scroll:hover{transform:translateX(-50%)}
+  }
+
+  /* ==========================================================================
+     RESPONSIVE  (Desktop-first · anchors: 1440 / 768 / 375)
      ========================================================================== */
   @media (max-width:1200px){
-    .grid{--grid-columns:12}
-    .site-nav__link{padding-inline:var(--space-12)}
+    .site-nav__link{padding-inline:var(--sp-12)}
+  }
+  /* Header collapses to the drawer below 1120 — the six-item nav + CTA needs the room */
+  @media (max-width:1120px){
+    .site-nav,.site-header__actions .btn{display:none}
+    .site-header__menu-trigger{display:inline-flex}
+  }
+  /* Tighten the desktop header in the 1121–1280 band so the CTA never clips */
+  @media (min-width:1121px) and (max-width:1280px){
+    .site-header__inner{gap:var(--sp-16)}
+    .site-nav__link{padding-inline:var(--sp-8)}
+    .site-header__actions{gap:var(--sp-12)}
+    .site-header__actions .btn{padding-inline:var(--sp-16)}
   }
   @media (max-width:768px){
-    :root{--anchor-offset:80px}
-    .grid{--grid-columns:8}
+    :root{--anchor-offset:84px;--grid-cols:8}
     .col-9,.col-10,.col-11,.col-12{grid-column:1 / -1}
-    .site-nav,.site-header__cta{display:none}
-    .site-header__menu-trigger{display:inline-flex}
-    .site-header{--logo-h:clamp(30px,6vw,38px)}
-    .site-footer__grid{gap:var(--space-40) var(--space-32)}
-    .site-footer__brand{grid-column:1 / -1}
-    .site-footer__links,.site-footer__services,.site-footer__contact,.site-footer__newsletter{grid-column:span 4}
-    .site-footer__social{grid-column:1 / -1}
+
+    /* HERO mobile: stack (content over visual), smaller signature */
+    .hero__grid{grid-template-columns:1fr;gap:var(--sp-40)}
+    .hero__content{grid-column:1;grid-row:1}
+    .hero__visual{grid-column:1;grid-row:2;max-inline-size:340px}
+    .hero__eyebrow{font-size:0.7rem;letter-spacing:0.18em}
+    .hero__eyebrow::before{inline-size:22px}
+    .hero__scroll{display:none}
+
+    /* SERVICES mobile: 4×1 column · FRAME → thick 4px left bar · small inline number */
+    .services__grid{grid-template-columns:1fr;gap:var(--sp-24)}
+    .service-card{overflow:visible;min-block-size:0;padding:var(--sp-24);border:0;border-left:4px solid var(--ql-blue);border-radius:0}
+    .service-card:hover{transform:none;box-shadow:none}
+    .service-card__head{display:flex;align-items:baseline;gap:var(--sp-12);flex-wrap:wrap}
+    .service-card__num{position:static;font-size:1.5rem;line-height:1.2}
+
+    /* PACKAGES mobile: cards stack, tabs become vertical buttons, panel one column */
+    .pkg-cards{grid-template-columns:1fr;gap:var(--sp-20);max-inline-size:440px;margin-inline:auto}
+    .pkg-card--featured{margin-block-start:0}
+    .pkg-tabs{display:flex;flex-direction:column;inline-size:100%;border-radius:var(--radius-md);gap:var(--sp-8)}
+    .pkg-tab{inline-size:100%;text-align:center}
+    .pkg-panel{grid-template-columns:1fr;gap:var(--sp-32);padding:var(--sp-24)}
+
+    /* COMPARISON mobile: NO horizontal scroll — each feature becomes a stacked card
+       showing all three values inline (e.g. "منشورات: 6 | 10 | 15"). */
+    .cmp{border-spacing:0}
+    .cmp thead{display:none}
+    .cmp tbody{display:flex;flex-direction:column;gap:var(--sp-16)}
+    .cmp tbody tr{display:flex;flex-wrap:wrap;align-items:stretch;gap:var(--sp-8);padding:var(--sp-16) var(--sp-20);border:1.5px solid var(--ql-blue);border-radius:var(--radius-md)}
+    .cmp tbody tr th{flex:1 0 100%;text-align:start;color:var(--ql-paper);font-weight:var(--fw-bold);padding:0 0 var(--sp-8);border:0;white-space:normal}
+    .cmp tbody tr td{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:0;border:0}
+    .cmp tbody tr td::before{content:attr(data-pkg);font-family:var(--font-en);font-size:0.66rem;letter-spacing:0.1em;color:var(--ql-gray)}
+    .cmp tbody tr:last-child td{border:0}
+
+    /* ADDITIONAL SERVICES mobile: 2-column grid */
+    .addons__grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+
+    /* PROCESS mobile: vertical timeline */
+    .process-flow{gap:0}
+    .process-row{display:contents}
+    .process-row::before{display:none}
+    .pstep{flex-direction:row;align-items:flex-start;text-align:start;gap:var(--sp-16);padding-block:12px;position:relative}
+    .pstep__node{margin-block-start:0}
+    .pstep__body{align-items:flex-start}
+    .pstep__name{margin-block-start:0}
+    .pstep__link{display:none}
+    .pstep__desc{max-inline-size:none;margin-block-start:var(--sp-4)}
+    .pstep::before{content:"";position:absolute;inset-inline-start:31px;inset-block-start:44px;block-size:100%;inline-size:var(--link-width);background:var(--ql-blue);z-index:0}  /* timeline LINK */
+    .pstep:last-child::before{display:none}
+
+    /* POLICIES mobile: single column, drop side dividers */
+    .policies__grid{grid-template-columns:1fr;gap:var(--sp-32)}
+    .policy{padding-inline:0}
+    .policy + .policy{border-inline-start:0}
+
+    /* CONTACT mobile: hide visual, form full width */
+    .contact__grid{grid-template-columns:1fr}
+    .contact__visual{display:none}
   }
-  @media (max-width:480px){
-    :root{--anchor-offset:72px}
-    .grid{--grid-columns:4}
+  @media (max-width:375px){
+    :root{--anchor-offset:76px;--grid-cols:4}
     .col-5,.col-6,.col-7,.col-8{grid-column:1 / -1}
-    .site-header{--logo-h:30px}
-    .site-footer__links,.site-footer__services,.site-footer__contact,.site-footer__newsletter{grid-column:1 / -1}
-    .site-footer__bottom-inner{justify-content:flex-start}
   }
   @media (prefers-reduced-motion:reduce){
-    .mobile-nav{transition:opacity var(--duration-fast) var(--ease-standard);transform:none}
+    .btn--primary:hover,.btn--outline:hover,.btn--ghost:hover,.ql-shift:hover{transform:none}
+    .mobile-nav{transition:opacity var(--dur-fast) var(--ease-standard);transform:none}
     .mobile-nav.is-open{transform:none}
-    .btn--primary:hover{transform:none}
   }
+
+  /* ==========================================================================
+     AGENCY RESTRUCTURE — editorial sections (reuses tokens · components · grammar)
+     ========================================================================== */
+  /* Shared editorial section heads */
+  .sec-eyebrow{display:inline-flex;align-items:center;gap:var(--sp-12);font-family:var(--font-en);font-size:var(--fs-eyebrow);font-weight:var(--fw-bold);letter-spacing:var(--ls-widest);text-transform:uppercase;color:var(--accent-2)}
+  .sec-eyebrow::before{content:"";inline-size:34px;block-size:var(--bw-thick);background:currentColor}
+  .section--paper .sec-eyebrow{color:var(--ql-blue)}
+  .sec-title{margin-block-start:var(--sp-20);font-weight:var(--fw-black);letter-spacing:-0.02em;line-height:1.03;font-size:clamp(2.25rem,1.35rem + 3vw,4rem);color:var(--ql-paper)}
+  .section--paper .sec-title{color:var(--ql-black)}
+  .sec-lead{margin-block-start:var(--sp-24);color:var(--ql-gray);font-size:clamp(1.05rem,1rem + 0.35vw,1.25rem);line-height:1.75;max-inline-size:58ch}
+
+  /* HERO — dual CTA row + secondary text link */
+  .hero__cta-row{display:flex;align-items:center;gap:clamp(1.25rem,3vw,2.5rem);margin-block-start:var(--sp-40);flex-wrap:wrap}
+  .link-cta{display:inline-flex;align-items:center;gap:var(--sp-12);font-family:var(--font-en);font-weight:var(--fw-bold);letter-spacing:0.08em;text-transform:uppercase;font-size:0.86rem;color:var(--ql-paper)}
+  .link-cta__line{inline-size:26px;block-size:var(--bw-thick);background:var(--accent-2);transition:inline-size var(--dur-normal) var(--ease-shift)}
+  .link-cta:hover{color:var(--ql-paper)} .link-cta:hover .link-cta__line{inline-size:42px}
+  .section--paper .link-cta{color:var(--ql-black)}
+
+  /* 02 · POSITIONING — one generative composition on Paper (philosophy, not services) */
+  .position,.diff,.work,.about{overflow:clip}
+  .position{background:var(--surface-paper);color:var(--text-on-paper)}
+
+  /* Header: plain label + underline rule, then asymmetric statement / support */
+  .position__label{margin:0;font-family:var(--font-en);font-weight:var(--fw-bold);font-size:var(--fs-eyebrow);letter-spacing:var(--ls-widest);text-transform:uppercase;color:var(--ql-blue)}
+  .position__divide{display:block;block-size:var(--bw-hairline);background:var(--border-on-paper-strong);margin-block:var(--sp-16) clamp(2rem,5vw,3.75rem)}
+  .position__lead{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,4fr);column-gap:clamp(2rem,5vw,5.5rem);row-gap:clamp(1.25rem,3vw,2rem);align-items:end}
+  .position__statement{margin:0;font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:-.02em;line-height:1.04;font-size:clamp(2.1rem,1.2rem + 3.1vw,4.1rem);color:var(--ql-black);text-wrap:balance}
+  .position__statement .hero__accent{color:var(--ql-blue)}
+  .position__support{margin:0;align-self:end;color:var(--ql-gray);font-size:clamp(1.02rem,.98rem + .3vw,1.2rem);line-height:1.7;max-inline-size:40ch}
+
+  /* Relationship field — two typographic columns meet across a central seam.
+     Connection is the transformation (hollow input -> solid outcome) + the
+     negative space between, NOT a drawn connector. One composition, not rows. */
+  .rel-field{margin-block-start:clamp(2.75rem,6vw,5.5rem)}
+  .rel{display:grid;grid-template-columns:1fr 1fr;column-gap:clamp(1.75rem,5vw,4.5rem);align-items:baseline;padding-block:clamp(.6rem,1.7vw,1.25rem)}
+  .rel__word{font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:-.02em;line-height:1;font-size:clamp(1.45rem,1rem + 2vw,2.6rem);white-space:nowrap}
+  .rel__from{justify-self:end;text-align:end;color:transparent;-webkit-text-stroke:1.4px var(--ql-black);transition:color var(--dur-normal) var(--ease-shift),-webkit-text-stroke-color var(--dur-normal) var(--ease-shift)}
+  .rel__to{justify-self:start;color:var(--ql-blue)}
+  .rel:hover .rel__from{color:var(--ql-black);-webkit-text-stroke-color:transparent}
+  @supports not ((-webkit-text-stroke:1px #000)){.rel__from{color:var(--ql-black)}}
+
+  /* Climax — CREATIVE -> IMPACT, focused by a generative open frame (FRAME + ARC).
+     Lime appears once, as a fill (black on lime) — the single visual trigger. */
+  .pos-climax{position:relative;margin-block-start:clamp(1.75rem,4vw,3.25rem);display:flex;flex-wrap:wrap;align-items:center;gap:clamp(.9rem,3vw,2.5rem);padding:clamp(1.6rem,3.4vw,2.9rem) clamp(1.3rem,3.4vw,2.9rem)}
+  .pos-frame{position:absolute;inset-block:0;inset-inline-start:0;inline-size:min(62%,500px);block-size:100%;border:var(--bw-thick) solid var(--ql-blue);border-inline-end:0;border-block-end:0;border-start-start-radius:clamp(28px,4.5vw,64px);pointer-events:none}
+  .pos-climax__word{font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:-.025em;line-height:1;font-size:clamp(2rem,1.25rem + 3.1vw,3.7rem)}
+  .pos-climax__from{color:transparent;-webkit-text-stroke:2px var(--ql-black)}
+  .pos-climax__to{display:inline-block;background:var(--ql-lime);color:var(--ql-black);padding:.06em .26em;border-radius:var(--radius-xs)}
+  @supports not ((-webkit-text-stroke:1px #000)){.pos-climax__from{color:var(--ql-black)}}
+
+  /* 03 · CAPABILITIES — editorial capability index (dark; one system, four expressions) */
+  .caps{background:var(--ql-black);color:var(--ql-paper);overflow:clip}
+  .packages,.compare,.addons,.process,.policies{overflow:clip}
+  .caps__grid{display:grid;grid-template-columns:minmax(0,4.6fr) minmax(0,7fr);column-gap:clamp(2rem,6vw,6rem);align-items:start}
+
+  .caps__label{margin:0;font-family:var(--font-en);font-weight:var(--fw-bold);font-size:var(--fs-eyebrow);letter-spacing:var(--ls-widest);text-transform:uppercase;color:var(--accent-2)}
+  .caps__divide{display:block;block-size:var(--bw-hairline);background:var(--border-strong);margin-block:var(--sp-16) clamp(1.5rem,3vw,2.5rem)}
+  .caps__statement{margin:0;font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:-.02em;line-height:1.05;font-size:clamp(1.9rem,1.2rem + 2.4vw,3.1rem);color:var(--ql-paper);text-wrap:balance}
+  .caps__statement .hero__accent{color:var(--ql-blue)}
+  .caps__support{margin-block-start:var(--sp-20);color:var(--text-muted);font-size:clamp(1rem,.95rem + .25vw,1.15rem);line-height:1.7;max-inline-size:34ch}
+  .caps__cue{display:inline-flex;align-items:center;gap:var(--sp-12);margin-block-start:clamp(1.75rem,3.5vw,2.75rem);font-family:var(--font-en);font-weight:var(--fw-bold);font-size:.82rem;letter-spacing:var(--ls-wide);text-transform:uppercase;color:var(--ql-paper);transition:var(--shift-transition)}
+  .caps__cue svg{inline-size:30px;block-size:30px;color:var(--accent-2);transition:transform var(--dur-normal) var(--ease-shift)}
+  .caps__cue:hover{color:var(--accent-2)}
+  .caps__cue:hover svg{transform:translate(3px,3px)}
+
+  .caps__list{display:flex;flex-direction:column;border-block-start:var(--bw-hairline) solid var(--border)}
+  .capx{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;column-gap:clamp(1rem,2.5vw,2.25rem);padding-block:clamp(1.4rem,3vw,2.35rem);padding-inline-start:clamp(.75rem,1.5vw,1.25rem);border-block-end:var(--bw-hairline) solid var(--border);transition:background-color var(--dur-normal) var(--ease-shift)}
+  .capx::before{content:"";position:absolute;inset-inline-start:0;inset-block:0;inline-size:2px;background:var(--ql-blue);transform:scaleY(0);transform-origin:top;transition:transform var(--dur-normal) var(--ease-shift)}
+  .capx.is-active::before,.capx:hover::before{transform:scaleY(1)}
+  .capx.is-active,.capx:hover{background:rgba(244,241,234,.03)}
+  .capx__num{font-family:var(--font-en);font-weight:var(--fw-black);font-size:clamp(1rem,.85rem + .5vw,1.35rem);color:var(--ql-blue);min-inline-size:2.5ch;transition:color var(--dur-normal) var(--ease-shift)}
+  .capx.is-active .capx__num,.capx:hover .capx__num{color:var(--accent-2)}
+  .capx__body{min-inline-size:0}
+  .capx__title{margin:0;font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:-.02em;line-height:1.05;font-size:clamp(1.5rem,1.1rem + 1.7vw,2.6rem);color:var(--ql-paper)}
+  .capx__desc{margin-block-start:var(--sp-8);color:var(--text-muted);font-size:clamp(.95rem,.92rem + .15vw,1.05rem);line-height:1.55;max-inline-size:40ch}
+  .capx__form{inline-size:clamp(72px,9vw,128px);block-size:clamp(72px,9vw,128px);flex:0 0 auto;color:var(--ql-blue);opacity:.5;transition:opacity var(--dur-normal) var(--ease-shift),transform var(--dur-slow) var(--ease-shift)}
+  .capx__form svg{inline-size:100%;block-size:100%;overflow:visible}
+  .capx.is-active .capx__form,.capx:hover .capx__form{opacity:1;transform:scale(1.05)}
+  .capx--layer.is-active .capx__form,.capx--layer:hover .capx__form{transform:translate(4px,-4px)}
+  .capx--expand.is-active .capx__form,.capx--expand:hover .capx__form{transform:scale(1.12)}
+  .cf-hot{opacity:0;transition:opacity var(--dur-normal) var(--ease-shift)}
+  .capx.is-active .cf-hot,.capx:hover .cf-hot{opacity:1}
+
+  /* 04 · SELECTED WORK — editorial asymmetric portfolio (the work is the hero) */
+  .work{background:var(--ql-black)}
+  .work__wall{display:grid;grid-template-columns:repeat(12,1fr);column-gap:clamp(1.5rem,3vw,2.5rem);row-gap:clamp(2.5rem,5vw,5rem);margin-block-start:clamp(2.5rem,5vw,4.5rem)}
+  .wp{position:relative;display:block;color:inherit;grid-column:1 / -1}
+  .wp--l{grid-column:1 / 8}
+  .wp--s{grid-column:8 / -1;margin-block-start:clamp(3rem,7vw,6.5rem)}
+  .wp--indent{grid-column:4 / -1}
+  .wp--minor{grid-column:1 / 7}
+
+  .wp__visual{position:relative;overflow:hidden;background:var(--bg-elevated);border-radius:var(--radius-sm);border-end-start-radius:var(--arc-xl);display:grid;place-items:center;aspect-ratio:16 / 10}
+  .wp--feature .wp__visual{aspect-ratio:2 / 1}
+  .wp--s .wp__visual{aspect-ratio:4 / 5}
+  .wp--indent .wp__visual{aspect-ratio:16 / 9}
+  .wp__visual svg{inline-size:58%;block-size:58%;overflow:visible;transition:transform var(--dur-slow) var(--ease-shift)}
+  .wp__scrim{position:absolute;inset:0;background:linear-gradient(135deg,rgba(36,71,255,.10),transparent 58%),linear-gradient(315deg,rgba(199,243,107,.07),transparent 58%);transition:opacity var(--dur-normal) var(--ease-shift)}
+  .wp:hover .wp__visual svg{transform:scale(1.05)}
+  .wp:hover .wp__scrim{opacity:.45}
+  .wp:hover .wp__visual{box-shadow:0 24px 60px rgba(0,0,0,.45)}
+
+  .wp__cat{display:block;margin-block-start:var(--sp-20);font-family:var(--font-en);font-size:var(--fs-caption);font-weight:var(--fw-bold);letter-spacing:var(--ls-wide);text-transform:uppercase;color:var(--ql-blue);transition:color var(--dur-normal) var(--ease-shift)}
+  .wp:hover .wp__cat{color:var(--accent-2)}
+  .wp__title{display:block;margin-block-start:var(--sp-8);font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:-.02em;font-size:clamp(1.35rem,1.05rem + 1vw,2rem);color:var(--ql-paper);line-height:1.12}
+  .wp--feature .wp__title{font-size:clamp(1.6rem,1.15rem + 1.6vw,2.6rem)}
+  .wp__desc{display:block;margin-block-start:var(--sp-8);color:var(--ql-gray);max-inline-size:52ch;font-size:clamp(.95rem,.92rem + .15vw,1.05rem);line-height:1.6}
+  .wp__view{display:inline-flex;align-items:center;gap:var(--sp-8);margin-block-start:var(--sp-16);font-family:var(--font-en);font-size:.78rem;font-weight:var(--fw-bold);letter-spacing:var(--ls-wide);text-transform:uppercase;color:var(--text-muted);transition:color var(--dur-normal) var(--ease-shift)}
+  .wp__view svg{inline-size:15px;block-size:15px;transition:transform var(--dur-normal) var(--ease-shift)}
+  .wp:hover .wp__view{color:var(--ql-paper)}
+  .wp:hover .wp__view svg{transform:translate(3px,-3px)}
+
+  /* closing bridge — shifts from "what we made" toward "how we work" */
+  .work__next{margin-block-start:clamp(3.5rem,7vw,6rem);padding-block-start:clamp(1.75rem,3.5vw,2.75rem);border-block-start:var(--bw-hairline) solid var(--border);display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-20) var(--sp-32);flex-wrap:wrap}
+  .work__next-line{margin:0;font-family:var(--font-en);font-weight:var(--fw-bold);letter-spacing:-.01em;font-size:clamp(1.2rem,1rem + .9vw,1.8rem);color:var(--ql-paper);max-inline-size:24ch}
+
+  /* 05 · APPROACH — a thinking-led creative journey (one evolving system, not a timeline) */
+  .approach{background:var(--surface-paper);color:var(--text-on-paper)}
+  .approach__intro{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,4fr);column-gap:clamp(2rem,5vw,5.5rem);row-gap:clamp(1rem,2.5vw,1.75rem);align-items:end}
+  .approach__label{margin:0;font-family:var(--font-en);font-weight:var(--fw-bold);font-size:var(--fs-eyebrow);letter-spacing:var(--ls-widest);text-transform:uppercase;color:var(--ql-blue)}
+  .approach__statement{margin-block-start:var(--sp-16);font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:-.02em;line-height:1.05;font-size:clamp(1.9rem,1.2rem + 2.4vw,3.2rem);color:var(--ql-black);text-wrap:balance}
+  .approach__statement .hero__accent{color:var(--ql-blue)}
+  .approach__lead{margin:0;align-self:end;color:var(--ql-gray);font-size:clamp(1rem,.95rem + .25vw,1.15rem);line-height:1.7;max-inline-size:36ch}
+
+  .journey{margin-block-start:clamp(2.5rem,6vw,5rem);border-block-start:var(--bw-hairline) solid var(--border-on-paper)}
+  .astage{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"num name glyph" "num desc glyph";align-items:center;column-gap:clamp(1.25rem,3vw,3.25rem);row-gap:var(--sp-4);padding-block:clamp(1.5rem,3vw,2.5rem);padding-inline-start:clamp(.75rem,1.5vw,1.25rem);border-block-end:var(--bw-hairline) solid var(--border-on-paper);transition:background-color var(--dur-normal) var(--ease-shift)}
+  .astage::before{content:"";position:absolute;inset-inline-start:0;inset-block:0;inline-size:2px;background:var(--ql-blue);transform:scaleY(0);transform-origin:top;transition:transform var(--dur-normal) var(--ease-shift)}
+  .astage.is-active::before{transform:scaleY(1)}
+  .astage.is-active{background:rgba(36,71,255,.03)}
+  .astage__num{grid-area:num;align-self:center;font-family:var(--font-en);font-weight:var(--fw-black);font-size:clamp(1rem,.85rem + .55vw,1.35rem);letter-spacing:0;color:var(--text-on-paper-subtle);min-inline-size:2.5ch;transition:color var(--dur-normal) var(--ease-shift)}
+  .astage.is-active .astage__num{color:var(--ql-blue)}
+  .astage__name{grid-area:name;margin:0;font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:-.02em;line-height:1.05;font-size:clamp(1.55rem,1.15rem + 1.8vw,2.75rem);color:var(--ql-black)}
+  .astage__desc{grid-area:desc;margin:0;color:var(--ql-gray);font-size:clamp(.95rem,.92rem + .15vw,1.05rem);line-height:1.55;max-inline-size:44ch}
+  .astage__glyph{grid-area:glyph;align-self:center;inline-size:clamp(64px,9vw,120px);block-size:clamp(64px,9vw,120px);color:var(--ql-blue);transition:opacity var(--dur-normal) var(--ease-shift),transform var(--dur-slow) var(--ease-shift)}
+  .astage__glyph svg{inline-size:100%;block-size:100%;overflow:visible}
+  /* the composition grows more resolved down the journey (open field -> resolved mark) */
+  .astage:nth-child(1) .astage__glyph{opacity:.5}
+  .astage:nth-child(2) .astage__glyph{opacity:.62}
+  .astage:nth-child(3) .astage__glyph{opacity:.74}
+  .astage:nth-child(4) .astage__glyph{opacity:.87}
+  .astage:nth-child(5) .astage__glyph{opacity:1}
+  .astage.is-active .astage__glyph{opacity:1;transform:scale(1.05)}
+
+  /* 06 · THE DIFFERENCE — brand philosophy (connection over isolation) */
+  .diff{background:var(--ql-black);color:var(--ql-paper)}
+  .diff__top{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,4fr);column-gap:clamp(2rem,5vw,5rem);row-gap:clamp(2rem,4vw,3rem);align-items:center}
+  .diff__label{margin:0;font-family:var(--font-en);font-weight:var(--fw-bold);font-size:var(--fs-eyebrow);letter-spacing:var(--ls-widest);text-transform:uppercase;color:var(--accent-2)}
+  .diff__statement{margin-block-start:var(--sp-20);font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:-.02em;line-height:1.04;font-size:clamp(2.1rem,1.3rem + 3vw,4rem);color:var(--ql-paper);text-wrap:balance}
+  .diff__statement .hero__accent{color:var(--ql-blue)}
+  .diff__sub{margin-block-start:var(--sp-24);color:var(--text-muted);font-size:clamp(1.05rem,1rem + .3vw,1.25rem);line-height:1.7;max-inline-size:46ch}
+  .diff__visual{justify-self:center;inline-size:min(100%,300px);aspect-ratio:6 / 5;color:var(--ql-paper)}
+  .diff__visual svg{inline-size:100%;block-size:100%;overflow:visible}
+
+  .diff__principles{display:grid;grid-template-columns:repeat(3,1fr);column-gap:clamp(1.5rem,3vw,3.25rem);row-gap:clamp(1.75rem,3vw,2.75rem);margin-block-start:clamp(3rem,6vw,5.5rem)}
+  .dp{position:relative;padding-block-start:var(--sp-20);border-block-start:var(--bw-thin) solid var(--border-strong)}
+  .dp::before{content:"";position:absolute;inset-block-start:-1px;inset-inline-start:0;inline-size:0;block-size:var(--bw-thick);background:var(--ql-blue);transition:inline-size var(--dur-normal) var(--ease-shift)}
+  .dp:hover::before{inline-size:40px}
+  .dp__no{font-family:var(--font-en);font-size:var(--fs-caption);font-weight:var(--fw-bold);letter-spacing:var(--ls-wide);color:var(--ql-gray);transition:color var(--dur-normal) var(--ease-shift)}
+  .dp:hover .dp__no{color:var(--ql-blue)}
+  .dp__title{margin-block-start:var(--sp-12);font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:-.01em;font-size:clamp(1.2rem,1.05rem + .6vw,1.5rem);color:var(--ql-paper);line-height:1.15}
+  .dp__desc{margin-block-start:var(--sp-8);color:var(--ql-gray);font-size:.95rem;line-height:1.55;max-inline-size:34ch}
+
+  .diff__next{margin-block-start:clamp(3rem,6vw,5rem);padding-block-start:clamp(1.75rem,3.5vw,2.5rem);border-block-start:var(--bw-hairline) solid var(--border);display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-20) var(--sp-32);flex-wrap:wrap}
+  .diff__next-line{margin:0;font-family:var(--font-en);font-weight:var(--fw-bold);letter-spacing:-.01em;font-size:clamp(1.2rem,1rem + .9vw,1.8rem);color:var(--ql-paper);max-inline-size:30ch}
+
+  /* 07 · WAYS TO ENGAGE — three engagement territories, one creative system */
+  .ways{background:var(--surface-paper);color:var(--text-on-paper)}
+  .ways__label{margin:0;font-family:var(--font-en);font-weight:var(--fw-bold);font-size:var(--fs-eyebrow);letter-spacing:var(--ls-widest);text-transform:uppercase;color:var(--ql-blue)}
+  .ways__statement{margin-block-start:var(--sp-16);font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:-.02em;line-height:1.05;font-size:clamp(2rem,1.25rem + 2.6vw,3.4rem);color:var(--ql-black);text-wrap:balance;max-inline-size:20ch}
+  .ways__statement .hero__accent{color:var(--ql-blue)}
+  .ways__lead{margin-block-start:var(--sp-20);color:var(--ql-gray);font-size:clamp(1.02rem,.98rem + .3vw,1.2rem);line-height:1.7;max-inline-size:46ch}
+
+  .ways__grid{display:grid;grid-template-columns:repeat(12,1fr);gap:clamp(1.25rem,2.5vw,2rem);margin-block-start:clamp(2.5rem,5vw,4.5rem)}
+  .terr{position:relative;display:flex;flex-direction:column;padding:clamp(1.75rem,3vw,2.85rem);background:var(--ql-paper-dim);border-radius:var(--radius-md);border-end-start-radius:var(--arc-xl);color:inherit;transition:transform var(--dur-normal) var(--ease-shift),box-shadow var(--dur-normal) var(--ease-shift)}
+  .terr:hover{transform:translateY(-4px);box-shadow:0 26px 60px rgba(17,17,17,.10)}
+  .terr--basic{grid-column:1 / 6}
+  .terr--standard{grid-column:6 / -1}
+  .terr--premium{grid-column:1 / -1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:clamp(1.5rem,4vw,4rem);align-items:center}
+  .terr__visual{block-size:clamp(72px,9vw,104px);color:var(--ql-blue);margin-block-end:var(--sp-24)}
+  .terr__visual svg{block-size:100%;inline-size:auto;max-inline-size:100%;overflow:visible}
+  .terr--premium .terr__visual{order:2;block-size:auto;inline-size:100%;margin:0}
+  .terr--premium .terr__body{order:1}
+  .terr__body{display:flex;flex-direction:column;flex:1 1 auto;min-inline-size:0}
+  .terr__name{font-family:var(--font-en);font-weight:var(--fw-black);letter-spacing:-.01em;line-height:1.05;font-size:clamp(1.5rem,1.2rem + 1.2vw,2.2rem);color:var(--ql-black)}
+  .terr__level{margin-block-start:var(--sp-8);font-family:var(--font-en);font-weight:var(--fw-bold);font-size:var(--fs-caption);letter-spacing:var(--ls-wide);text-transform:uppercase;color:var(--ql-blue)}
+  .terr__scope{margin-block-start:var(--sp-16);color:var(--text-on-paper-muted);font-size:clamp(.95rem,.92rem + .15vw,1.05rem);line-height:1.6;max-inline-size:46ch}
+  .terr__foot{margin-block-start:auto;padding-block-start:var(--sp-24);display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-12) var(--sp-20);flex-wrap:wrap}
+  .terr__price{font-family:var(--font-en);font-weight:var(--fw-black);font-size:clamp(1.35rem,1.15rem + .6vw,1.75rem);color:var(--ql-black);line-height:1;direction:ltr}
+  .terr__price small{font-family:var(--font-en);font-size:.72rem;font-weight:var(--fw-semibold);color:var(--ql-gray);letter-spacing:.1em;text-transform:uppercase}
+  .terr__view{display:inline-flex;align-items:center;gap:var(--sp-8);font-family:var(--font-en);font-size:.78rem;font-weight:var(--fw-bold);letter-spacing:var(--ls-wide);text-transform:uppercase;color:var(--text-on-paper-subtle);transition:color var(--dur-normal) var(--ease-shift)}
+  .terr__view svg{inline-size:15px;block-size:15px;transition:transform var(--dur-normal) var(--ease-shift)}
+  .terr:hover .terr__view{color:var(--ql-blue)}
+  .terr:hover .terr__view svg{transform:translate(3px,-3px)}
+
+  .ways__next{margin-block-start:clamp(2.5rem,5vw,4rem);padding-block-start:clamp(1.75rem,3.5vw,2.5rem);border-block-start:var(--bw-hairline) solid var(--border-on-paper);display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-16) var(--sp-32);flex-wrap:wrap}
+  .ways__next-line{margin:0;font-family:var(--font-en);font-weight:var(--fw-bold);letter-spacing:-.01em;font-size:clamp(1.15rem,1rem + .8vw,1.65rem);color:var(--ql-black);max-inline-size:34ch}
+
+  /* 08 · ABOUT — editorial */
+  .about{background:var(--ql-black)}
+  .about__grid{display:grid;grid-template-columns:1.1fr 0.9fr;gap:clamp(2rem,5vw,5rem);align-items:center}
+  .about__body p{color:var(--text-muted);font-size:clamp(1.05rem,1rem + 0.4vw,1.3rem);line-height:1.8}
+  .about__body p + p{margin-block-start:var(--sp-20)}
+  .about__body b{color:var(--ql-paper);font-weight:var(--fw-semibold)}
+  .about__stats{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-24);margin-block-start:var(--sp-40)}
+  .about-stat__n{font-family:var(--font-en);font-weight:var(--fw-black);font-size:clamp(2rem,1.4rem + 2vw,3rem);color:var(--ql-lime);line-height:1}
+  .about-stat__l{margin-block-start:var(--sp-8);color:var(--ql-gray);font-size:0.9rem}
+  .about__visual{position:relative;aspect-ratio:4 / 5;border-radius:var(--radius-lg);border-start-end-radius:var(--arc-xl);overflow:hidden;background:var(--bg-elevated);display:grid;place-items:center}
+  .about__visual svg{inline-size:70%;block-size:70%;overflow:visible;color:var(--ql-paper)}
+
+  /* 09 · START A PROJECT — conversational form */
+  .start__grid{display:grid;grid-template-columns:1.05fr 0.95fr;gap:clamp(2rem,5vw,5rem);align-items:start}
+  .start-form{margin-block-start:var(--sp-32)}
+  .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-24)}
+  .field-grid .field--full{grid-column:1 / -1}
+  .field textarea{inline-size:100%;background:transparent;color:var(--ql-paper);border:0;border-block-end:1.5px solid var(--ql-gray);border-radius:0;padding:12px 4px;min-block-size:96px;resize:vertical;font-family:var(--font-en);line-height:1.7;transition:border-color var(--dur-fast) var(--ease-standard)}
+  .field textarea:focus{outline:none;border-block-end-color:var(--ql-lime);border-block-end-width:2px}
+  .field textarea::placeholder{color:var(--text-subtle)}
+  .field__opt{color:var(--ql-gray);font-weight:var(--fw-regular);font-size:0.82rem}
+  .start__submit{margin-block-start:var(--sp-32);display:flex;align-items:center;gap:var(--sp-20);flex-wrap:wrap}
+  .start__aside{position:relative}
+  .start__aside .contact__frame{min-block-size:100%}
+
+  /* 10 · FOOTER — richer, branded, closing composition */
+  .site-footer__top{position:relative;z-index:1;padding-block:clamp(3.5rem,6vw,5.5rem) var(--sp-48)}
+  .site-footer__cols{display:grid;grid-template-columns:1.6fr 1fr 1fr 1.2fr;gap:clamp(2rem,4vw,3.5rem)}
+  .site-footer__brand-tag{margin-block-start:var(--sp-20);color:var(--ql-gray);max-inline-size:34ch;line-height:1.7}
+  .site-footer__brand-mail{display:inline-block;margin-block-start:var(--sp-20);color:var(--ql-paper);font-weight:var(--fw-semibold)}
+  .footcol__h{font-family:var(--font-en);font-size:var(--fs-caption);font-weight:var(--fw-bold);letter-spacing:var(--ls-wider);text-transform:uppercase;color:var(--ql-gray);margin-block-end:var(--sp-16)}
+  .footcol__list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:var(--sp-12)}
+  .footcol__list a{color:var(--ql-paper);font-weight:var(--fw-medium)}
+  .footcol__list a:hover{color:var(--ql-lime)}
+  .site-footer__social{display:flex;gap:var(--sp-12);margin-block-start:var(--sp-4)}
+  .social-dot{inline-size:42px;block-size:42px;border-radius:var(--radius-round);border:var(--bw-thin) solid var(--border-strong);display:grid;place-items:center;color:var(--ql-paper);transition:var(--shift-transition)}
+  .social-dot:hover{background:var(--accent);border-color:var(--accent);color:var(--ql-paper);transform:translateY(-3px)}
+  .social-dot svg{inline-size:18px;block-size:18px}
+  .site-footer__bottom{position:relative;z-index:1;padding-block:var(--sp-24);border-block-start:var(--bw-hairline) solid var(--border)}
+  .site-footer__bottom-inner{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-16);flex-wrap:wrap;color:var(--ql-gray);font-size:0.85rem}
+
+  /* ---- Restructure responsive ---- */
+  @media (max-width:960px){
+    .about__grid,.start__grid{grid-template-columns:1fr}
+    .position__lead{grid-template-columns:1fr}
+    .position__support{align-self:start}
+    .caps__grid{grid-template-columns:1fr;row-gap:clamp(2rem,6vw,3.25rem)}
+    .caps__support{max-inline-size:52ch}
+    .work__wall{grid-template-columns:1fr;row-gap:clamp(2.5rem,7vw,3.75rem)}
+    .wp,.wp--l,.wp--s,.wp--indent,.wp--minor{grid-column:1 / -1;margin-block-start:0}
+    .wp--feature .wp__visual{aspect-ratio:16 / 10}
+    .wp--s .wp__visual{aspect-ratio:4 / 3}
+    .diff__top{grid-template-columns:1fr}
+    .diff__visual{justify-self:start;inline-size:min(70%,240px)}
+    .diff__principles{grid-template-columns:1fr 1fr}
+    .tiers{grid-template-columns:1fr}
+    .tiers{max-inline-size:460px}
+    .site-footer__cols{grid-template-columns:1fr 1fr}
+    .about__visual{aspect-ratio:16 / 10}
+  }
+  @media (max-width:768px){
+    .approach__intro{grid-template-columns:1fr}
+    .approach__lead{align-self:start}
+    /* mobile journey: number → title → description → evolving visual, per stage */
+    .astage{grid-template-columns:auto minmax(0,1fr);grid-template-areas:"num name" ".   desc" ".   glyph";column-gap:var(--sp-16);row-gap:var(--sp-12);align-items:baseline;padding-block:clamp(1.75rem,6vw,2.4rem)}
+    .astage__num{align-self:baseline}
+    .astage__glyph{justify-self:start;margin-block-start:var(--sp-12);inline-size:clamp(76px,26vw,104px);block-size:clamp(76px,26vw,104px)}
+    .field-grid{grid-template-columns:1fr}
+    .start__aside{display:none}
+    /* engagement territories: single vertical sequence, complexity still evolves */
+    .terr--basic,.terr--standard,.terr--premium{grid-column:1 / -1}
+    .terr--premium{grid-template-columns:1fr}
+    .terr--premium .terr__visual{order:0;inline-size:100%;block-size:auto;margin-block-end:var(--sp-24)}
+    .terr--premium .terr__body{order:1}
+  }
+  @media (max-width:560px){
+    .diff__principles{grid-template-columns:1fr}
+    .site-footer__cols{grid-template-columns:1fr}
+    .about__stats{grid-template-columns:1fr 1fr}
+    .capx{grid-template-columns:auto 1fr;grid-template-areas:"num form" "body body";row-gap:var(--sp-16);column-gap:var(--sp-16)}
+    .capx__num{grid-area:num;align-self:center}
+    .capx__form{grid-area:form;justify-self:end;inline-size:clamp(60px,19vw,84px);block-size:clamp(60px,19vw,84px)}
+    .capx__body{grid-area:body}
+  }
+  /* 02 · POSITIONING — mobile: input stacks over outcome, transform reads vertically */
+  @media (max-width:640px){
+    .position__lead{grid-template-columns:1fr}
+    .position__support{align-self:start}
+    .rel{grid-template-columns:1fr;row-gap:var(--sp-2);padding-block:clamp(.9rem,4vw,1.4rem)}
+    .rel__from{justify-self:start;text-align:start}
+    .rel__to{justify-self:start}
+    .rel__word{font-size:clamp(1.85rem,10vw,2.5rem)}
+    .pos-climax{justify-content:flex-start;gap:var(--sp-4);padding:clamp(1.5rem,6vw,2.1rem) clamp(1.1rem,4vw,1.6rem)}
+    .pos-frame{inline-size:min(80%,340px)}
+    .pos-climax__word{font-size:clamp(2.3rem,12.5vw,3.2rem)}
+  }
+
   </style>
 </head>
 
 <body>
-  <a class="skip-link" href="#main">تخطَّ إلى المحتوى</a>
+  <a class="skip-link" href="#main">Skip to content</a>
   <span id="top"></span>
 
   <div class="site-shell">
 
-    <!-- GLOBAL HEADER (RTL: logo start · nav center · CTA end) -->
+    <!-- ================= GLOBAL HEADER ================= -->
     <header class="site-header" data-header>
       <div class="site-header__inner container container--wide">
-
-        <a class="site-header__logo" href="#top" aria-label="وكالة المدى للسياحة والسفر — الصفحة الرئيسية">
-          <img class="site-logo" src="https://i.ibb.co/bV5dVGm/transparent-01-01.png" alt="وكالة المدى للسياحة والسفر">
+        <a class="site-header__logo" href="#top" aria-label="Quantum Link — Home">
+          <span class="ql-logo" aria-hidden="true">
+            <svg class="ql-logo__mark" viewBox="0 0 120 120" role="img" aria-label="Quantum Link"><circle cx="55" cy="55" r="35" fill="none" stroke="currentColor" stroke-width="16"/><path d="M59 57 L104 102 L58 88 L72 74 Z" fill="currentColor"/></svg>
+            <span class="ql-logo__word"><b>Quantum</b><b>Link</b></span>
+          </span>
         </a>
-
-        <nav class="site-nav" aria-label="التنقل الرئيسي">
+        <nav class="site-nav" aria-label="Primary">
           <ul class="site-nav__list">
-            <li><a class="site-nav__link is-active" href="#home" data-nav-link aria-current="true">الرئيسية</a></li>
-            <li><a class="site-nav__link" href="#about" data-nav-link>من نحن</a></li>
-            <li><a class="site-nav__link" href="#services" data-nav-link>خدماتنا</a></li>
-            <li><a class="site-nav__link" href="#why-almada" data-nav-link>لماذا وكالة المدى؟</a></li>
-            <li><a class="site-nav__link" href="#vision" data-nav-link>رؤيتنا ورسالتنا</a></li>
-            <li><a class="site-nav__link" href="#contact" data-nav-link>تواصل معنا</a></li>
+            <li><a class="site-nav__link" href="#capabilities" data-nav-link>Capabilities</a></li>
+            <li><a class="site-nav__link" href="#work" data-nav-link>Work</a></li>
+            <li><a class="site-nav__link" href="#approach" data-nav-link>Approach</a></li>
+            <li><a class="site-nav__link" href="#packages" data-nav-link>Packages</a></li>
+            <li><a class="site-nav__link" href="#about" data-nav-link>About</a></li>
+            <li><a class="site-nav__link" href="#contact" data-nav-link>Contact</a></li>
           </ul>
         </nav>
-
         <div class="site-header__actions">
-          <a class="btn btn--primary site-header__cta" href="#contact">تواصل معنا</a>
-          <button type="button" class="site-header__menu-trigger" data-menu-trigger
-                  aria-label="فتح القائمة" aria-expanded="false" aria-controls="mobile-nav">
-            <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
-          </button>
+          <a class="btn btn--primary" href="#contact">Start a Project <span class="btn__icon" aria-hidden="true">↗</span></a>
+          <button type="button" class="site-header__menu-trigger" data-menu-trigger aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav"><span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>
         </div>
-
       </div>
     </header>
 
-    <!-- MOBILE DRAWER -->
-    <div class="mobile-nav" id="mobile-nav" data-mobile-nav data-state="closed" aria-label="قائمة الجوال" hidden>
+    <!-- ================= MOBILE DRAWER ================= -->
+    <div class="mobile-nav" id="mobile-nav" data-mobile-nav data-state="closed" aria-label="Mobile menu" hidden>
+      <span class="mobile-nav__sig" aria-hidden="true">
+        <svg viewBox="0 0 240 240" fill="none" preserveAspectRatio="xMidYMid meet"><path d="M48 224 L48 116 A68 68 0 0 1 116 48 L224 48"/></svg>
+      </span>
       <ul class="mobile-nav__list">
-        <li><a class="mobile-nav__link is-active" href="#home" data-nav-link>الرئيسية</a></li>
-        <li><a class="mobile-nav__link" href="#about" data-nav-link>من نحن</a></li>
-        <li><a class="mobile-nav__link" href="#services" data-nav-link>خدماتنا</a></li>
-        <li><a class="mobile-nav__link" href="#why-almada" data-nav-link>لماذا وكالة المدى؟</a></li>
-        <li><a class="mobile-nav__link" href="#vision" data-nav-link>رؤيتنا ورسالتنا</a></li>
-        <li><a class="mobile-nav__link" href="#contact" data-nav-link>تواصل معنا</a></li>
+        <li class="mobile-nav__item"><a class="mobile-nav__link" href="#capabilities" data-nav-link><span class="mobile-nav__index" aria-hidden="true">01</span><span class="mobile-nav__word">Capabilities</span></a></li>
+        <li class="mobile-nav__item"><a class="mobile-nav__link" href="#work" data-nav-link><span class="mobile-nav__index" aria-hidden="true">02</span><span class="mobile-nav__word">Work</span></a></li>
+        <li class="mobile-nav__item"><a class="mobile-nav__link" href="#approach" data-nav-link><span class="mobile-nav__index" aria-hidden="true">03</span><span class="mobile-nav__word">Approach</span></a></li>
+        <li class="mobile-nav__item"><a class="mobile-nav__link" href="#packages" data-nav-link><span class="mobile-nav__index" aria-hidden="true">04</span><span class="mobile-nav__word">Packages</span></a></li>
+        <li class="mobile-nav__item"><a class="mobile-nav__link" href="#about" data-nav-link><span class="mobile-nav__index" aria-hidden="true">05</span><span class="mobile-nav__word">About</span></a></li>
+        <li class="mobile-nav__item"><a class="mobile-nav__link" href="#contact" data-nav-link><span class="mobile-nav__index" aria-hidden="true">06</span><span class="mobile-nav__word">Contact</span></a></li>
       </ul>
-      <a class="btn btn--primary btn--block mobile-nav__cta" href="#contact">تواصل معنا</a>
+      <div class="mobile-nav__foot">
+        <a class="btn btn--primary btn--block mobile-nav__cta" href="#contact">Start a Project <span class="btn__icon" aria-hidden="true">↗</span></a>
+        <div class="mobile-nav__meta">
+          <a class="mobile-nav__mail" href="mailto:hello@quantumlink.agency">hello@quantumlink.agency</a>
+          <p class="mobile-nav__tag">Connecting ideas to impact.</p>
+        </div>
+      </div>
     </div>
 
-    <!-- MAIN — container for future sections -->
+    <!-- ================= MAIN ================= -->
     <main class="site-main" id="main">
-      <!-- Sections begin in the next stage (Hero). -->
+
+      <!-- 01 · HERO -->
+      <section class="hero" id="home" data-section aria-labelledby="hero-title">
+        <div class="hero__grid container container--wide">
+          <div class="hero__content">
+            <p class="hero__eyebrow">CREATIVE · DESIGN · COMMUNICATION</p>
+            <h1 class="hero__title" id="hero-title">Connecting ideas<br>to <span class="hero__accent">impact.</span></h1>
+            <p class="hero__lead">We are a creative agency that transforms ideas into meaningful brands, engaging experiences, and powerful communication.</p>
+            <div class="hero__cta-row">
+              <a class="btn btn--primary" href="#contact">Start a Project <span class="btn__icon" aria-hidden="true">↗</span></a>
+              <a class="link-cta" href="#work">Explore our work <span class="link-cta__line" aria-hidden="true"></span></a>
+            </div>
+          </div>
+          <div class="hero__visual" aria-hidden="true">
+            <svg class="hero__sig" viewBox="0 0 240 240" fill="none" preserveAspectRatio="xMidYMid meet"><path d="M48 224 L48 116 A68 68 0 0 1 116 48 L224 48"/></svg>
+            <span class="hero__shift"></span><span class="hero__ring"></span><span class="hero__dot"></span>
+          </div>
+        </div>
+        <a class="hero__scroll" href="#position" aria-label="Scroll to content"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v15M6 13l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      </section>
+
+      <!-- 02 · POSITIONING -->
+      <section class="section section--paper position" id="position" data-section aria-labelledby="position-title">
+        <div class="container container--wide">
+          <p class="position__label" data-reveal>POSITIONING</p>
+          <span class="position__divide" data-reveal aria-hidden="true"></span>
+          <div class="position__lead">
+            <h2 class="position__statement" id="position-title" data-reveal>Good ideas become meaningful <span class="hero__accent">when the right things connect.</span></h2>
+            <p class="position__support" data-reveal>We connect ideas with design and communication to create brands, experiences, and messages that move people.</p>
+          </div>
+
+          <div class="rel-field" data-stagger>
+            <div class="rel">
+              <span class="rel__word rel__from">Idea</span>
+              <span class="rel__word rel__to">Design</span>
+            </div>
+            <div class="rel">
+              <span class="rel__word rel__from">Message</span>
+              <span class="rel__word rel__to">Audience</span>
+            </div>
+            <div class="rel">
+              <span class="rel__word rel__from">Brand</span>
+              <span class="rel__word rel__to">Experience</span>
+            </div>
+            <div class="pos-climax">
+              <span class="pos-frame" aria-hidden="true"></span>
+              <span class="pos-climax__word pos-climax__from">Creative</span>
+              <span class="pos-climax__word pos-climax__to">Impact</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 03 · SERVICES / CAPABILITIES -->
+      <section class="section caps" id="capabilities" data-section aria-labelledby="services-title">
+        <div class="container container--wide">
+          <div class="caps__grid">
+            <div class="caps__aside">
+              <p class="caps__label" data-reveal>CAPABILITIES</p>
+              <span class="caps__divide" data-reveal aria-hidden="true"></span>
+              <h2 class="caps__statement" id="services-title" data-reveal>From the first idea to the <span class="hero__accent">final experience.</span></h2>
+              <p class="caps__support" data-reveal>We turn ideas into visual systems, campaigns, and experiences.</p>
+              <a class="caps__cue" href="#work" data-reveal>Explore our work <svg viewBox="0 0 30 30" fill="none" aria-hidden="true"><path d="M9 9 L21 9 L21 21 M21 9 L8 22" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            </div>
+
+            <div class="caps__list" data-stagger>
+              <article class="capx capx--frame">
+                <span class="capx__num">01</span>
+                <div class="capx__body">
+                  <h3 class="capx__title">Graphic Design</h3>
+                  <p class="capx__desc">Visual communication across digital and print.</p>
+                </div>
+                <span class="capx__form" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><path d="M22 46 L22 22 L46 22" stroke="currentColor" stroke-width="8" stroke-linecap="round"/><path d="M98 46 L98 22 L74 22" stroke="currentColor" stroke-width="8" stroke-linecap="round"/><rect x="34" y="66" width="52" height="9" rx="2.5" fill="currentColor"/><rect x="34" y="83" width="34" height="9" rx="2.5" fill="currentColor"/><circle class="cf-hot" cx="95" cy="94" r="7" fill="var(--ql-lime)"/></svg></span>
+              </article>
+              <article class="capx capx--system">
+                <span class="capx__num">02</span>
+                <div class="capx__body">
+                  <h3 class="capx__title">Visual Systems</h3>
+                  <p class="capx__desc">Identity systems and scalable visual languages.</p>
+                </div>
+                <span class="capx__form" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><g stroke="currentColor" stroke-width="7"><circle cx="30" cy="34" r="13"/><circle cx="60" cy="34" r="13"/><circle cx="90" cy="34" r="13"/><circle cx="30" cy="76" r="13"/><circle cx="60" cy="76" r="13"/><circle cx="90" cy="76" r="13"/></g><circle class="cf-hot" cx="90" cy="76" r="13" fill="var(--ql-lime)"/></svg></span>
+              </article>
+              <article class="capx capx--expand">
+                <span class="capx__num">03</span>
+                <div class="capx__body">
+                  <h3 class="capx__title">Creative Campaigns</h3>
+                  <p class="capx__desc">Ideas that become recognizable campaigns.</p>
+                </div>
+                <span class="capx__form" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><g stroke="currentColor" stroke-width="7" stroke-linecap="round"><path d="M30 92 A22 22 0 0 1 52 70"/><path d="M30 92 A44 44 0 0 1 74 48"/><path d="M30 92 A66 66 0 0 1 96 26"/></g><circle class="cf-hot" cx="30" cy="92" r="8" fill="var(--ql-lime)"/></svg></span>
+              </article>
+              <article class="capx capx--layer">
+                <span class="capx__num">04</span>
+                <div class="capx__body">
+                  <h3 class="capx__title">Digital Experiences</h3>
+                  <p class="capx__desc">Websites and digital experiences built around the brand.</p>
+                </div>
+                <span class="capx__form" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><rect x="22" y="32" width="58" height="46" rx="8" stroke="currentColor" stroke-width="7"/><rect x="44" y="52" width="58" height="46" rx="8" fill="var(--ql-black)" stroke="currentColor" stroke-width="7"/><rect class="cf-hot" x="44" y="52" width="58" height="9" rx="4.5" fill="var(--ql-lime)"/></svg></span>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 04 · SELECTED WORK -->
+      <section class="section work" id="work" data-section aria-labelledby="work-title">
+        <div class="container container--wide">
+          <div class="sec-head" data-reveal>
+            <p class="sec-eyebrow">SELECTED WORK</p>
+            <h2 class="sec-title" id="work-title">Ideas, made&nbsp;visible.</h2>
+            <p class="sec-lead">A selection of branding, campaign, and digital projects — where strategy meets craft.</p>
+          </div>
+          <div class="work__wall" data-stagger>
+
+            <!-- 01 · Featured -->
+            <a class="wp wp--feature" href="#contact" aria-label="Meridian — Brand Identity">
+              <span class="wp__visual"><span class="wp__scrim" aria-hidden="true"></span><svg viewBox="0 0 240 120" fill="none" aria-hidden="true"><path d="M48 108 L48 66 A34 34 0 0 1 82 32 L204 32" stroke="#F4F1EA" stroke-width="20"/><rect x="150" y="66" width="66" height="30" transform="rotate(-8 150 66)" fill="#2447FF"/><circle cx="204" cy="30" r="16" fill="none" stroke="#C7F36B" stroke-width="4"/></svg></span>
+              <span class="wp__cat">Visual Identity</span>
+              <span class="wp__title">Meridian — Brand Identity</span>
+              <span class="wp__desc">A complete visual identity and application system for a boutique property developer.</span>
+              <span class="wp__view">View project <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17 L17 7 M9 7 L17 7 L17 15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </a>
+
+            <!-- 02 · Large left -->
+            <a class="wp wp--l" href="#contact" aria-label="Aswaq — Seasonal Campaign">
+              <span class="wp__visual"><span class="wp__scrim" aria-hidden="true"></span><svg viewBox="0 0 200 125" fill="none" aria-hidden="true"><path d="M24 96 A52 52 0 0 1 128 96" stroke="#F4F1EA" stroke-width="16"/><rect x="126" y="36" width="58" height="28" transform="rotate(-10 126 36)" fill="#2447FF"/><circle cx="154" cy="92" r="10" fill="#C7F36B"/></svg></span>
+              <span class="wp__cat">Campaign</span>
+              <span class="wp__title">Aswaq — Seasonal Campaign</span>
+              <span class="wp__desc">Concept, key visual, and creative direction for a seasonal campaign.</span>
+              <span class="wp__view">View project <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17 L17 7 M9 7 L17 7 L17 15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </a>
+
+            <!-- 03 · Small right, offset down (tall) -->
+            <a class="wp wp--s" href="#contact" aria-label="Kanz — Packaging System">
+              <span class="wp__visual"><span class="wp__scrim" aria-hidden="true"></span><svg viewBox="0 0 150 180" fill="none" aria-hidden="true"><rect x="30" y="40" width="60" height="80" fill="#C7F36B" opacity=".9"/><rect x="62" y="72" width="60" height="80" fill="#2447FF"/></svg></span>
+              <span class="wp__cat">Packaging</span>
+              <span class="wp__title">Kanz — Packaging System</span>
+              <span class="wp__desc">A retail packaging language scaled across a full product line.</span>
+              <span class="wp__view">View project <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17 L17 7 M9 7 L17 7 L17 15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </a>
+
+            <!-- 04 · Indented feature -->
+            <a class="wp wp--indent" href="#contact" aria-label="Nawah — Digital Experience">
+              <span class="wp__visual"><span class="wp__scrim" aria-hidden="true"></span><svg viewBox="0 0 220 124" fill="none" aria-hidden="true"><path d="M60 38 L60 24 L74 24 M160 24 L174 24 L174 38 M174 92 L174 106 L160 106 M74 106 L60 106 L60 92" stroke="#F4F1EA" stroke-width="8"/><rect x="92" y="50" width="60" height="38" fill="#2447FF"/><circle cx="152" cy="50" r="8" fill="#C7F36B"/></svg></span>
+              <span class="wp__cat">Digital</span>
+              <span class="wp__title">Nawah — Digital Experience</span>
+              <span class="wp__desc">Website UI/UX and a component-based digital experience.</span>
+              <span class="wp__view">View project <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17 L17 7 M9 7 L17 7 L17 15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </a>
+
+            <!-- 05 · Minor left -->
+            <a class="wp wp--minor" href="#contact" aria-label="Sila — Content System">
+              <span class="wp__visual"><span class="wp__scrim" aria-hidden="true"></span><svg viewBox="0 0 200 130" fill="none" aria-hidden="true"><circle cx="80" cy="65" r="32" fill="none" stroke="#F4F1EA" stroke-width="12"/><circle cx="120" cy="65" r="32" fill="none" stroke="#C7F36B" stroke-width="12"/><rect x="150" y="90" width="34" height="18" transform="rotate(-8 150 90)" fill="#2447FF"/></svg></span>
+              <span class="wp__cat">Social Content</span>
+              <span class="wp__title">Sila — Content System</span>
+              <span class="wp__desc">A social content system and reusable templates for consistent presence.</span>
+              <span class="wp__view">View project <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17 L17 7 M9 7 L17 7 L17 15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </a>
+          </div>
+
+          <div class="work__next" data-reveal>
+            <p class="work__next-line">Good work starts before the design.</p>
+            <a class="link-cta" href="#approach">See how we work <span class="link-cta__line" aria-hidden="true"></span></a>
+          </div>
+        </div>
+      </section>
+
+      <!-- 05 · APPROACH -->
+      <section class="section section--paper approach" id="approach" data-section aria-labelledby="approach-title">
+        <div class="container container--wide">
+          <div class="approach__intro">
+            <div>
+              <p class="approach__label" data-reveal>HOW WE WORK</p>
+              <h2 class="approach__statement" id="approach-title" data-reveal>We start with understanding, then build <span class="hero__accent">what matters.</span></h2>
+            </div>
+            <p class="approach__lead" data-reveal>A thinking-led method — it sharpens the creative outcome rather than adding steps.</p>
+          </div>
+
+          <div class="journey" data-stagger>
+            <article class="astage">
+              <span class="astage__num">01</span>
+              <h3 class="astage__name">Understand</h3>
+              <p class="astage__desc">Context before creation.</p>
+              <span class="astage__glyph" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><g stroke="currentColor" stroke-width="4"><circle cx="24" cy="30" r="7"/><circle cx="94" cy="24" r="7"/><circle cx="58" cy="60" r="7"/><circle cx="30" cy="94" r="7"/><circle cx="98" cy="90" r="7"/></g></svg></span>
+            </article>
+            <article class="astage">
+              <span class="astage__num">02</span>
+              <h3 class="astage__name">Connect</h3>
+              <p class="astage__desc">Ideas, strategy, and communication.</p>
+              <span class="astage__glyph" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><path d="M28 32 L58 60 L94 26 M58 60 L32 92 M58 60 L96 90" stroke="currentColor" stroke-width="3"/><g fill="currentColor"><circle cx="28" cy="32" r="6"/><circle cx="94" cy="26" r="6"/><circle cx="58" cy="60" r="7"/><circle cx="32" cy="92" r="6"/><circle cx="96" cy="90" r="6"/></g></svg></span>
+            </article>
+            <article class="astage">
+              <span class="astage__num">03</span>
+              <h3 class="astage__name">Create</h3>
+              <p class="astage__desc">Design becomes tangible.</p>
+              <span class="astage__glyph" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><path d="M22 98 A54 54 0 0 1 98 40" stroke="currentColor" stroke-width="6" stroke-linecap="round"/><rect x="58" y="58" width="42" height="32" transform="rotate(-8 58 58)" fill="currentColor"/></svg></span>
+            </article>
+            <article class="astage">
+              <span class="astage__num">04</span>
+              <h3 class="astage__name">Refine</h3>
+              <p class="astage__desc">Make it sharper. Make it work.</p>
+              <span class="astage__glyph" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><path d="M28 96 L28 54 A26 26 0 0 1 54 28 L96 28" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><rect x="56" y="58" width="36" height="28" fill="none" stroke="currentColor" stroke-width="5"/></svg></span>
+            </article>
+            <article class="astage">
+              <span class="astage__num">05</span>
+              <h3 class="astage__name">Deliver</h3>
+              <p class="astage__desc">Ready for the real world.</p>
+              <span class="astage__glyph" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><path d="M28 96 L28 54 A26 26 0 0 1 54 28 L96 28" stroke="currentColor" stroke-width="8" stroke-linecap="round"/><rect x="56" y="58" width="36" height="28" fill="currentColor"/><circle cx="96" cy="28" r="7" fill="var(--ql-lime)"/></svg></span>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 06 · THE QUANTUM LINK DIFFERENCE -->
+      <section class="section diff" id="difference" aria-labelledby="diff-title">
+        <div class="container container--wide">
+          <div class="diff__top">
+            <div>
+              <p class="diff__label" data-reveal>THE DIFFERENCE</p>
+              <h2 class="diff__statement" id="diff-title" data-reveal>Design isn’t the destination — it’s the <span class="hero__accent">connection.</span></h2>
+              <p class="diff__sub" data-reveal>Good design connects what a brand means with what people experience.</p>
+            </div>
+            <span class="diff__visual" data-reveal aria-hidden="true"><svg viewBox="0 0 200 170" fill="none"><path d="M26 152 L26 58 A30 30 0 0 1 56 28 L176 28" stroke="currentColor" stroke-width="4" opacity=".5"/><path d="M54 132 A34 34 0 0 1 100 92" stroke="currentColor" stroke-width="12" stroke-linecap="round"/><rect x="98" y="80" width="54" height="46" transform="rotate(-6 98 80)" fill="#2447FF"/><circle cx="168" cy="36" r="6" fill="#C7F36B"/></svg></span>
+          </div>
+
+          <div class="diff__principles" data-stagger>
+            <div class="dp"><span class="dp__no">01</span><p class="dp__title">Ideas before decoration</p><p class="dp__desc">We start with the problem and the objective — not styling.</p></div>
+            <div class="dp"><span class="dp__no">02</span><p class="dp__title">Design with purpose</p><p class="dp__desc">Every visual decision serves a communication goal.</p></div>
+            <div class="dp"><span class="dp__no">03</span><p class="dp__title">Strategic thinking</p><p class="dp__desc">Choices informed by context, audience, and purpose.</p></div>
+            <div class="dp"><span class="dp__no">04</span><p class="dp__title">Systems, not one-offs</p><p class="dp__desc">Work that stays consistent everywhere a brand appears.</p></div>
+            <div class="dp"><span class="dp__no">05</span><p class="dp__title">Connection over isolation</p><p class="dp__desc">Brand, message, audience, and experience work as one.</p></div>
+            <div class="dp"><span class="dp__no">06</span><p class="dp__title">Creative problem solving</p><p class="dp__desc">Design that solves communication problems, not just looks.</p></div>
+          </div>
+
+          <div class="diff__next" data-reveal>
+            <p class="diff__next-line">This is how we think — here’s how we can work together.</p>
+            <a class="link-cta" href="#packages">Ways to engage <span class="link-cta__line" aria-hidden="true"></span></a>
+          </div>
+        </div>
+      </section>
+
+      <!-- 07 · ENGAGEMENT -->
+      <!-- 07 · WAYS TO ENGAGE -->
+      <section class="section section--paper ways" id="packages" data-section aria-labelledby="ways-title">
+        <div class="container container--wide">
+          <p class="ways__label" data-reveal>WAYS TO ENGAGE</p>
+          <h2 class="ways__statement" id="ways-title" data-reveal>Choose the level of creative support that <span class="hero__accent">fits your project.</span></h2>
+          <p class="ways__lead" data-reveal>One creative system, at three levels of depth — from a focused project to a full creative partnership.</p>
+
+          <div class="ways__grid" data-stagger>
+
+            <!-- BASIC · Focused -->
+            <a class="terr terr--basic" href="packages.html#basic" aria-label="Basic — focused creative support">
+              <span class="terr__visual" aria-hidden="true"><svg viewBox="0 0 120 104" fill="none"><path d="M28 88 L28 50 A22 22 0 0 1 50 28 L98 28" stroke="currentColor" stroke-width="10" stroke-linecap="round"/></svg></span>
+              <span class="terr__body">
+                <span class="terr__name keep-en">Basic</span>
+                <span class="terr__level">Focused</span>
+                <p class="terr__scope">Focused creative support — selected design deliverables for clearly defined needs.</p>
+                <span class="terr__foot">
+                  <span class="terr__price keep-en">$299 <small>· 7-day project</small></span>
+                  <span class="terr__view">View details <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17 L17 7 M9 7 L17 7 L17 15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </span>
+              </span>
+            </a>
+
+            <!-- STANDARD · Integrated -->
+            <a class="terr terr--standard" href="packages.html#standard" aria-label="Standard — integrated creative support">
+              <span class="terr__visual" aria-hidden="true"><svg viewBox="0 0 190 104" fill="none"><circle cx="42" cy="58" r="26" stroke="currentColor" stroke-width="9"/><rect x="70" y="36" width="48" height="44" fill="currentColor"/><path d="M128 30 L160 30 L160 62" stroke="currentColor" stroke-width="8" stroke-linecap="round"/><circle cx="160" cy="26" r="6" fill="var(--ql-lime)"/></svg></span>
+              <span class="terr__body">
+                <span class="terr__name keep-en">Standard</span>
+                <span class="terr__level">Integrated</span>
+                <p class="terr__scope">Integrated creative support — a broader visual system across multiple touchpoints.</p>
+                <span class="terr__foot">
+                  <span class="terr__price keep-en">$649 <small>· 10-day project</small></span>
+                  <span class="terr__view">View details <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17 L17 7 M9 7 L17 7 L17 15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </span>
+              </span>
+            </a>
+
+            <!-- PREMIUM · Comprehensive -->
+            <a class="terr terr--premium" href="packages.html#premium" aria-label="Premium — comprehensive creative partnership">
+              <span class="terr__visual" aria-hidden="true"><svg viewBox="0 0 320 130" fill="none"><path d="M24 108 L24 60 A28 28 0 0 1 52 32 L118 32" stroke="currentColor" stroke-width="9" stroke-linecap="round"/><rect x="94" y="60" width="52" height="46" fill="currentColor"/><circle cx="196" cy="66" r="30" stroke="currentColor" stroke-width="9"/><rect x="228" y="42" width="46" height="42" transform="rotate(-8 228 42)" fill="currentColor"/><path d="M288 102 L288 62 A20 20 0 0 1 308 42" stroke="currentColor" stroke-width="8" stroke-linecap="round"/><circle cx="118" cy="30" r="6" fill="var(--ql-lime)"/></svg></span>
+              <span class="terr__body">
+                <span class="terr__name keep-en">Premium</span>
+                <span class="terr__level">Comprehensive</span>
+                <p class="terr__scope">Comprehensive creative partnership — creative direction, visual systems, digital experience, and larger-scale execution.</p>
+                <span class="terr__foot">
+                  <span class="terr__price keep-en">$1,299 <small>· 20-day project</small></span>
+                  <span class="terr__view">View details <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17 L17 7 M9 7 L17 7 L17 15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </span>
+              </span>
+            </a>
+          </div>
+
+          <div class="ways__next" data-reveal>
+            <p class="ways__next-line">Not sure which level fits? Let’s talk it through.</p>
+            <a class="link-cta" style="color:var(--ql-black)" href="#contact">Start a conversation <span class="link-cta__line" aria-hidden="true"></span></a>
+          </div>
+        </div>
+      </section>
+
+<!-- 08 · ABOUT -->
+      <section class="section about" id="about" data-section aria-labelledby="about-title">
+        <div class="container container--wide">
+          <div class="about__grid">
+            <div class="about__body" data-reveal>
+              <p class="sec-eyebrow">ABOUT</p>
+              <h2 class="sec-title" id="about-title">A studio built on connection.</h2>
+              <p>Quantum Link is a creative, design and communication agency. We believe <b>one idea, well connected, becomes something new</b> — so we join strategy with craft to help brands look, sound, and feel coherent.</p>
+              <p>We think before we decorate. Every mark, system, and message is made to carry meaning across every platform it lives on.</p>
+              <div class="about__stats">
+                <div class="about-stat"><p class="about-stat__n">01</p><p class="about-stat__l">One connected idea per project</p></div>
+                <div class="about-stat"><p class="about-stat__n">04</p><p class="about-stat__l">Core creative capabilities</p></div>
+              </div>
+            </div>
+            <div class="about__visual" aria-hidden="true"><svg viewBox="0 0 240 240" fill="none"><path d="M56 208 L56 120 A56 56 0 0 1 112 64 L200 64" stroke="currentColor" stroke-width="30"/><rect x="150" y="150" width="56" height="28" transform="rotate(-8 150 150)" fill="#2447FF"/><circle cx="196" cy="60" r="18" fill="none" stroke="#C7F36B" stroke-width="4"/></svg></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 09 · START A PROJECT -->
+      <section class="section contact start" id="contact" data-section aria-labelledby="contact-title">
+        <div class="sig-accent sig-accent--bl" aria-hidden="true"><svg viewBox="0 0 240 240" fill="none"><path d="M48 224 L48 116 A68 68 0 0 1 116 48 L224 48"/></svg></div>
+        <div class="container container--wide">
+          <div class="start__grid">
+            <div>
+              <p class="sec-eyebrow">GET IN TOUCH</p>
+              <h2 class="sec-title" id="contact-title">Start a project</h2>
+              <p class="sec-lead">Tell us about your project, and let’s start a creative conversation.</p>
+              <form class="start-form" data-contact-form novalidate>
+                <div class="field-grid">
+                  <div class="field"><label for="cf-name">Name</label><input id="cf-name" name="name" type="text" placeholder="Full name" required></div>
+                  <div class="field"><label for="cf-email">Email</label><input id="cf-email" name="email" type="email" placeholder="you@company.com" required></div>
+                  <div class="field"><label for="cf-company">Company</label><input id="cf-company" name="company" type="text" placeholder="Organization"></div>
+                  <div class="field"><label for="cf-type">Project type</label>
+                    <select id="cf-type" name="type" required>
+                      <option value="" disabled selected>Select a type</option>
+                      <option>Branding</option><option>Visual Identity</option><option>Creative Campaign</option>
+                      <option>Packaging</option><option>Digital / Website</option><option>Content / Social</option><option>Other</option>
+                    </select>
+                  </div>
+                  <div class="field field--full"><label for="cf-desc">Project description</label><textarea id="cf-desc" name="description" placeholder="Tell us about the idea, the audience, and the outcome you’re after…" required></textarea></div>
+                  <div class="field"><label for="cf-budget">Budget <span class="field__opt">(optional)</span></label>
+                    <select id="cf-budget" name="budget">
+                      <option value="" disabled selected>Select a range</option>
+                      <option>Under $500</option><option>$500 – $1,500</option><option>$1,500 – $5,000</option><option>$5,000+</option>
+                    </select>
+                  </div>
+                  <div class="field"><label for="cf-timeline">Timeline <span class="field__opt">(optional)</span></label>
+                    <select id="cf-timeline" name="timeline">
+                      <option value="" disabled selected>Select a timeline</option>
+                      <option>As soon as possible</option><option>1–2 weeks</option><option>Within a month</option><option>Flexible</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="start__submit">
+                  <button type="submit" class="btn contact-submit">Start the conversation</button>
+                  <span class="link-cta" style="pointer-events:none"><span class="link-cta__line" aria-hidden="true"></span> We reply within 1–2 days</span>
+                </div>
+                <p class="form-success" data-form-success hidden>Thank you — we’ll be in touch shortly.</p>
+              </form>
+            </div>
+            <div class="start__aside" aria-hidden="true">
+              <div class="contact__frame">
+                <span class="contact__frame-line"></span>
+                <span class="ql-logo contact__logo"><svg class="ql-logo__mark" viewBox="0 0 120 120" aria-hidden="true"><circle cx="55" cy="55" r="35" fill="none" stroke="currentColor" stroke-width="16"/><path d="M59 57 L104 102 L58 88 L72 74 Z" fill="currentColor"/></svg><span class="ql-logo__word"><b>Quantum</b><b>Link</b></span></span>
+                <p class="contact__frame-text">Ready to turn ideas into clear, professional visual solutions.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </main>
 
-    <!-- GLOBAL FOOTER (structure only — empty placeholder regions) -->
+    <!-- ================= GLOBAL FOOTER ================= -->
     <footer class="site-footer" role="contentinfo">
+      <div class="sig-accent sig-accent--tr" aria-hidden="true"><svg viewBox="0 0 240 240" fill="none"><path d="M48 224 L48 116 A68 68 0 0 1 116 48 L224 48"/></svg></div>
       <div class="site-footer__top">
         <div class="container container--wide">
-          <div class="site-footer__grid">
-            <div class="site-footer__brand" data-region="brand"></div>
-            <nav class="site-footer__links" aria-label="روابط سريعة" data-region="quick-links"></nav>
-            <nav class="site-footer__services" aria-label="الخدمات" data-region="services"></nav>
-            <div class="site-footer__contact" data-region="contact"></div>
-            <div class="site-footer__newsletter" data-region="newsletter"></div>
-            <div class="site-footer__social" data-region="social"></div>
+          <div class="site-footer__cols">
+            <div class="site-footer__brand">
+              <a class="site-footer__logo" href="#top" aria-label="Quantum Link — Home"><span class="ql-logo" aria-hidden="true"><svg class="ql-logo__mark" viewBox="0 0 120 120" aria-hidden="true"><circle cx="55" cy="55" r="35" fill="none" stroke="currentColor" stroke-width="16"/><path d="M59 57 L104 102 L58 88 L72 74 Z" fill="currentColor"/></svg><span class="ql-logo__word"><b>Quantum</b><b>Link</b></span></span></a>
+              <p class="site-footer__brand-tag">Connecting ideas to impact — a creative, design and communication agency.</p>
+              <a class="site-footer__brand-mail keep-en" href="mailto:hello@quantumlink.agency">hello@quantumlink.agency</a>
+            </div>
+            <nav class="footcol" aria-label="Explore"><p class="footcol__h">Explore</p><ul class="footcol__list"><li><a href="#capabilities">Capabilities</a></li><li><a href="#work">Work</a></li><li><a href="#approach">Approach</a></li><li><a href="#packages">Packages</a></li><li><a href="#about">About</a></li><li><a href="#contact">Contact</a></li></ul></nav>
+            <nav class="footcol" aria-label="Services"><p class="footcol__h">Services</p><ul class="footcol__list"><li><a href="#capabilities">Graphic Design</a></li><li><a href="#capabilities">Visual Systems</a></li><li><a href="#capabilities">Creative Campaigns</a></li><li><a href="#capabilities">Digital Experiences</a></li><li><a href="#packages">Packages</a></li></ul></nav>
+            <div class="footcol"><p class="footcol__h">Connect</p><div class="site-footer__social"><a class="social-dot" href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a><a class="social-dot" href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5A2.5 2.5 0 1 1 5 8.5 2.5 2.5 0 0 1 4.98 3.5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.95 1.83-1.95 3.75-1.95C20.4 8.75 22 11 22 14.5V21h-4v-5.7c0-1.36-.02-3.1-1.9-3.1s-2.2 1.47-2.2 3v5.8H9z"/></svg></a><a class="social-dot" href="#" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 3h3l-6.6 7.5L21.8 21h-6l-4.3-5.6L6.5 21H3.4l7.1-8.1L2.3 3h6.1l3.9 5.1L17.5 3z"/></svg></a></div><a class="site-footer__start" href="#contact" style="margin-block-start:var(--sp-24);display:inline-block">Let’s start.</a></div>
           </div>
         </div>
       </div>
-      <div class="site-footer__bottom">
-        <div class="container container--wide site-footer__bottom-inner">
-          <div data-region="copyright"></div>
-          <div data-region="legal"></div>
-        </div>
-      </div>
+      <div class="site-footer__bottom"><div class="container container--wide site-footer__bottom-inner"><span class="keep-en">© 2025 Quantum Link. All rights reserved.</span><span>Connecting ideas to impact.</span></div></div>
     </footer>
 
   </div><!-- /.site-shell -->
 
   <script>
   /* ==========================================================================
-     AL MADA — APPLICATION SHELL + NAVIGATION BEHAVIOR (Stage 03 + 04)
+     QUANTUM LINK — SHELL BEHAVIOR (header · drawer · SHIFT reveal · scroll-spy)
      ========================================================================== */
   (function () {
     "use strict";
@@ -383,7 +1672,7 @@
       window.addEventListener("scroll", onScroll, { passive: true });
     }
 
-    /* 2 · MOBILE DRAWER — animated states + focus management */
+    /* 2 · MOBILE DRAWER — animated states + focus trap */
     function initMobileNav() {
       var trigger = doc.querySelector("[data-menu-trigger]");
       var panel = doc.querySelector("[data-mobile-nav]");
@@ -393,7 +1682,7 @@
       function open(){
         if(isOpen) return; isOpen = true; window.clearTimeout(closeTimer);
         panel.hidden = false; panel.setAttribute("data-state","opening");
-        trigger.setAttribute("aria-expanded","true"); trigger.setAttribute("aria-label","إغلاق القائمة");
+        trigger.setAttribute("aria-expanded","true"); trigger.setAttribute("aria-label","Close menu");
         root.classList.add("has-mobile-nav-open");
         window.requestAnimationFrame(function(){ panel.classList.add("is-open"); panel.setAttribute("data-state","opened"); });
         var f = focusables(); if(f.length) f[0].focus();
@@ -401,7 +1690,7 @@
       function close(returnFocus){
         if(!isOpen) return; isOpen = false;
         panel.classList.remove("is-open"); panel.setAttribute("data-state","closing");
-        trigger.setAttribute("aria-expanded","false"); trigger.setAttribute("aria-label","فتح القائمة");
+        trigger.setAttribute("aria-expanded","false"); trigger.setAttribute("aria-label","Open menu");
         root.classList.remove("has-mobile-nav-open");
         var delay = prefersReducedMotion ? 0 : 300;
         closeTimer = window.setTimeout(function(){ panel.hidden = true; panel.setAttribute("data-state","closed"); }, delay);
@@ -419,22 +1708,34 @@
           else if(!e.shiftKey && doc.activeElement === last){ e.preventDefault(); first.focus(); }
         }
       });
-      window.addEventListener("resize", function(){ if(window.innerWidth > 768 && isOpen) close(false); });
+      window.addEventListener("resize", function(){ if(window.innerWidth > 1120 && isOpen) close(false); });
       panel.hidden = true; panel.setAttribute("data-state","closed"); trigger.setAttribute("aria-expanded","false");
     }
 
-    /* 3 · SCROLL-REVEAL — architecture contract (no animation yet) */
+    /* 3 · SHIFT REVEAL — elements shift + fade into view (single + staggered) */
     function initReveal() {
-      var targets = doc.querySelectorAll("[data-reveal]");
+      var targets = doc.querySelectorAll("[data-reveal],[data-stagger]");
       if(!targets.length) return;
       if(prefersReducedMotion || !("IntersectionObserver" in window)){ targets.forEach(function(el){ el.classList.add("is-inview"); }); return; }
       var observer = new IntersectionObserver(function(entries){
         entries.forEach(function(entry){ if(entry.isIntersecting){ entry.target.classList.add("is-inview"); observer.unobserve(entry.target); } });
-      }, { rootMargin:"0px 0px -10% 0px", threshold:0.1 });
+      }, { rootMargin:"0px 0px -10% 0px", threshold:0.12 });
       targets.forEach(function(el){ observer.observe(el); });
     }
 
-    /* 4 · SCROLL-SPY / ACTIVE-NAV — drives .is-active on nav links */
+    /* 3b · CAPABILITIES — highlight the entry nearest the viewport centre */
+    function initCaps() {
+      /* highlights the capability / approach entry nearest the viewport centre */
+      var items = doc.querySelectorAll(".capx,.astage");
+      if(!items.length) return;
+      if(prefersReducedMotion || !("IntersectionObserver" in window)){ return; }
+      var obs = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){ entry.target.classList.toggle("is-active", entry.isIntersecting); });
+      }, { rootMargin:"-45% 0px -45% 0px", threshold:0 });
+      items.forEach(function(c){ obs.observe(c); });
+    }
+
+    /* 4 · SCROLL-SPY — drives .is-active on nav links */
     function initScrollSpy() {
       var sections = doc.querySelectorAll("[data-section][id]");
       if(!sections.length || !("IntersectionObserver" in window)) return;
@@ -453,7 +1754,90 @@
       sections.forEach(function(s){ observer.observe(s); });
     }
 
-    function init(){ initHeaderScrollState(); initMobileNav(); initReveal(); initScrollSpy(); }
+    /* 5 · PACKAGE TAB SELECTOR — switch BASIC / MEDIUM / PREMIUM detail */
+    function initPkgTabs() {
+      var root = doc.querySelector("[data-pkg-selector]");
+      if(!root) return;
+      var tabs = Array.prototype.slice.call(root.querySelectorAll("[data-pkg-tab]"));
+      var panels = Array.prototype.slice.call(root.querySelectorAll("[data-pkg-panel]"));
+      function activate(key, focusTab){
+        tabs.forEach(function(t){
+          var on = t.getAttribute("data-pkg-tab") === key;
+          t.classList.toggle("is-active", on);
+          t.setAttribute("aria-selected", on ? "true" : "false");
+          t.tabIndex = on ? 0 : -1;
+          if(on && focusTab) t.focus();
+        });
+        panels.forEach(function(p){
+          var on = p.getAttribute("data-pkg-panel") === key;
+          p.hidden = !on;
+          p.classList.toggle("is-active", on);
+        });
+      }
+      tabs.forEach(function(t){
+        t.addEventListener("click", function(){ activate(t.getAttribute("data-pkg-tab")); });
+        t.addEventListener("keydown", function(e){
+          var idx = tabs.indexOf(t), next = null;
+          if(e.key === "ArrowRight" || e.key === "ArrowDown") next = tabs[(idx + 1) % tabs.length];
+          else if(e.key === "ArrowLeft" || e.key === "ArrowUp") next = tabs[(idx - 1 + tabs.length) % tabs.length];
+          if(next){ e.preventDefault(); activate(next.getAttribute("data-pkg-tab"), true); }
+        });
+      });
+      /* Deep-link: /packages.html#basic|#medium|#premium opens that tab */
+      var h = (window.location.hash || "").replace("#","").toLowerCase();
+      if(["basic","medium","premium"].indexOf(h) >= 0){
+        activate(h);
+        window.requestAnimationFrame(function(){ root.scrollIntoView({block:"start"}); });
+      }
+    }
+
+    /* 6 · START-A-PROJECT FORM — single conversational form */
+    function initContactForm() {
+      var form = doc.querySelector("[data-contact-form]");
+      if(!form) return;
+      var success = form.querySelector("[data-form-success]");
+      var grid = form.querySelector(".field-grid");
+      var submitRow = form.querySelector(".start__submit");
+      form.addEventListener("submit", function(e){
+        e.preventDefault();
+        var fields = form.querySelectorAll("input,select,textarea");
+        for(var i=0;i<fields.length;i++){ if(!fields[i].checkValidity()){ fields[i].reportValidity(); return; } }
+        if(grid) grid.hidden = true;
+        if(submitRow) submitRow.hidden = true;
+        if(success) success.hidden = false;
+      });
+    }
+
+    /* 7 · HERO INTERACTION — restrained pointer parallax on the signature visual.
+       Fine pointers only, honours reduced-motion, transform-only, rAF-eased.
+       The composition shifts slightly; typography never moves. */
+    function initHeroInteraction() {
+      var hero = doc.querySelector(".hero");
+      if(!hero) return;
+      var visual = hero.querySelector(".hero__visual");
+      if(!visual) return;
+      var fine = window.matchMedia && window.matchMedia("(pointer:fine)").matches;
+      if(prefersReducedMotion || !fine) return;
+      var MAX = 12, tx = 0, ty = 0, cx = 0, cy = 0, raf = null;
+      function render(){
+        cx += (tx - cx) * 0.09; cy += (ty - cy) * 0.09;
+        visual.style.setProperty("--hero-px", cx.toFixed(2) + "px");
+        visual.style.setProperty("--hero-py", cy.toFixed(2) + "px");
+        if(Math.abs(tx - cx) > 0.1 || Math.abs(ty - cy) > 0.1){ raf = window.requestAnimationFrame(render); }
+        else { raf = null; }
+      }
+      function kick(){ if(!raf) raf = window.requestAnimationFrame(render); }
+      hero.addEventListener("pointermove", function(e){
+        if(e.pointerType && e.pointerType !== "mouse") return;
+        var r = hero.getBoundingClientRect();
+        tx = ((e.clientX - r.left) / r.width - 0.5) * (MAX * 2);
+        ty = ((e.clientY - r.top) / r.height - 0.5) * (MAX * 2);
+        hero.classList.add("is-pointing"); kick();
+      });
+      hero.addEventListener("pointerleave", function(){ tx = 0; ty = 0; hero.classList.remove("is-pointing"); kick(); });
+    }
+
+    function init(){ initHeaderScrollState(); initMobileNav(); initReveal(); initCaps(); initScrollSpy(); initPkgTabs(); initContactForm(); initHeroInteraction(); }
     if(doc.readyState === "loading"){ doc.addEventListener("DOMContentLoaded", init); } else { init(); }
   })();
   </script>
