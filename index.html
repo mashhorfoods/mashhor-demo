@@ -1379,13 +1379,17 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
    7 · RESPONSIVE  (inherits shell breakpoints: 1200 · 768 · 480)
    Desktop: full nav · Tablet: tighter nav · Mobile: drawer
    -------------------------------------------------------------------------- */
+/* Laptop — tighten the eight-item index so it stays on one row */
 @media (max-width: 1200px) {
-  .site-nav__link { padding-inline: var(--space-12); }
+  .site-nav__list { gap: 0; }
+  .site-nav__link { padding-inline: var(--space-8); }
+  .site-header__inner { gap: var(--space-16); }
 }
 
-/* Tablet & below — hide the desktop nav + CTA, show the mobile trigger.
-   (Declared here so it reliably overrides the .btn display on the CTA.) */
-@media (max-width: 768px) {
+/* Below ~1024 the full eight-item index no longer fits — collapse to the drawer
+   (same order + labels), so header and menu stay one navigation system.
+   Declared here so it reliably overrides the .btn display on the CTA. */
+@media (max-width: 1024px) {
   .site-nav { display: none; }
   .site-header__cta { display: none; }
   .site-header__menu-trigger { display: inline-flex; }
@@ -4524,8 +4528,10 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   inline-size: 0; block-size: var(--border-width-thin); background: var(--brand-blue-sky);
   transition: inline-size var(--duration-normal) var(--ease-smooth);
 }
-.footer__link:hover { color: var(--white); }
-.footer__link:hover::after { inline-size: 100%; }
+.footer__link:hover,
+.footer__link.is-active { color: var(--white); }
+.footer__link:hover::after,
+.footer__link.is-active::after { inline-size: 100%; }
 
 .footer__contact-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-12); }
 .footer__contact-list li { display: flex; align-items: center; gap: var(--space-12); color: var(--text-on-inverse); font-size: var(--font-size-small); margin: 0; }
@@ -4599,9 +4605,11 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
           <ul class="site-nav__list">
             <li><a class="site-nav__link is-active" href="#home"        data-nav-link aria-current="true">الرئيسية</a></li>
             <li><a class="site-nav__link" href="#about"       data-nav-link>من نحن</a></li>
-            <li><a class="site-nav__link" href="#services"    data-nav-link>خدماتنا</a></li>
             <li><a class="site-nav__link" href="#why-almada"  data-nav-link>لماذا وكالة المدى؟</a></li>
+            <li><a class="site-nav__link" href="#services"    data-nav-link>خدماتنا</a></li>
+            <li><a class="site-nav__link" href="#how-we-work" data-nav-link>كيف نعمل</a></li>
             <li><a class="site-nav__link" href="#vision"      data-nav-link>رؤيتنا ورسالتنا</a></li>
+            <li><a class="site-nav__link" href="#core-values" data-nav-link>قيمنا</a></li>
             <li><a class="site-nav__link" href="#contact"     data-nav-link>تواصل معنا</a></li>
           </ul>
         </nav>
@@ -4628,12 +4636,14 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
     <!-- Mobile navigation drawer -->
     <div class="mobile-nav" id="mobile-nav" data-mobile-nav data-state="closed" aria-label="قائمة الجوال" hidden>
       <ul class="mobile-nav__list">
-        <li><a class="mobile-nav__link is-active" href="#home"       data-nav-link>الرئيسية</a></li>
-        <li><a class="mobile-nav__link" href="#about"      data-nav-link>من نحن</a></li>
-        <li><a class="mobile-nav__link" href="#services"   data-nav-link>خدماتنا</a></li>
-        <li><a class="mobile-nav__link" href="#why-almada" data-nav-link>لماذا وكالة المدى؟</a></li>
-        <li><a class="mobile-nav__link" href="#vision"     data-nav-link>رؤيتنا ورسالتنا</a></li>
-        <li><a class="mobile-nav__link" href="#contact"    data-nav-link>تواصل معنا</a></li>
+        <li><a class="mobile-nav__link is-active" href="#home"        data-nav-link>الرئيسية</a></li>
+        <li><a class="mobile-nav__link" href="#about"       data-nav-link>من نحن</a></li>
+        <li><a class="mobile-nav__link" href="#why-almada"  data-nav-link>لماذا وكالة المدى؟</a></li>
+        <li><a class="mobile-nav__link" href="#services"    data-nav-link>خدماتنا</a></li>
+        <li><a class="mobile-nav__link" href="#how-we-work" data-nav-link>كيف نعمل</a></li>
+        <li><a class="mobile-nav__link" href="#vision"      data-nav-link>رؤيتنا ورسالتنا</a></li>
+        <li><a class="mobile-nav__link" href="#core-values" data-nav-link>قيمنا</a></li>
+        <li><a class="mobile-nav__link" href="#contact"     data-nav-link>تواصل معنا</a></li>
       </ul>
       <a class="btn btn--primary btn--block mobile-nav__cta" href="#contact">تواصل معنا</a>
     </div>
@@ -5443,7 +5453,7 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
       <!-- ================================================================
            FINAL CALL TO ACTION (Stage 12)
            ================================================================ -->
-      <section class="section cta" id="cta" data-section aria-labelledby="cta-title">
+      <section class="section cta" id="cta" aria-labelledby="cta-title">
 
         <!-- LAYER 05 · Editorial background composition -->
         <div class="cta__bg" aria-hidden="true">
@@ -5692,11 +5702,14 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
             <nav class="footer__col" aria-label="روابط سريعة">
               <h3 class="footer__heading">روابط سريعة</h3>
               <ul class="footer__list">
-                <li><a class="footer__link" href="#home">الرئيسية</a></li>
-                <li><a class="footer__link" href="#about">من نحن</a></li>
-                <li><a class="footer__link" href="#why-almada">لماذا وكالة المدى؟</a></li>
-                <li><a class="footer__link" href="#vision">رؤيتنا ورسالتنا</a></li>
-                <li><a class="footer__link" href="#core-values">قيمنا</a></li>
+                <li><a class="footer__link" href="#home"        data-nav-link>الرئيسية</a></li>
+                <li><a class="footer__link" href="#about"       data-nav-link>من نحن</a></li>
+                <li><a class="footer__link" href="#why-almada"  data-nav-link>لماذا وكالة المدى؟</a></li>
+                <li><a class="footer__link" href="#services"    data-nav-link>خدماتنا</a></li>
+                <li><a class="footer__link" href="#how-we-work" data-nav-link>كيف نعمل</a></li>
+                <li><a class="footer__link" href="#vision"      data-nav-link>رؤيتنا ورسالتنا</a></li>
+                <li><a class="footer__link" href="#core-values" data-nav-link>قيمنا</a></li>
+                <li><a class="footer__link" href="#contact"     data-nav-link>تواصل معنا</a></li>
               </ul>
             </nav>
 
