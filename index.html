@@ -375,7 +375,15 @@
   .site-header__logo .ql-logo{color:var(--ql-paper);--mark-color:var(--ql-paper);transition:opacity var(--dur-fast) var(--ease-standard),transform var(--dur-normal) var(--ease-shift)}
   .site-header__logo:hover .ql-logo{opacity:var(--opacity-hover)}
   .site-header__logo:active .ql-logo{transform:scale(.98)}
-  .site-header__actions{display:flex;align-items:center;gap:var(--sp-16);flex:0 0 auto}
+  .site-header__actions{display:flex;align-items:center;gap:var(--sp-12);flex:0 0 auto}
+  /* Reference-matched header chrome: single-line wordmark, blue Q, EN chip, circular menu */
+  .site-header__logo .ql-logo{--mark-color:var(--ql-blue)}
+  .ql-logo__word--inline{flex-direction:row;align-items:center;gap:0;line-height:1;letter-spacing:0.06em;white-space:nowrap}
+  .site-header__lang{display:inline-flex;align-items:center;gap:5px;min-height:40px;padding:8px 13px;border-radius:var(--radius-pill);border:var(--bw-thin) solid var(--border-strong);background:transparent;color:var(--ql-paper);font-family:var(--font-en);font-weight:var(--fw-bold);font-size:0.8rem;letter-spacing:0.08em;transition:var(--transition-colors)}
+  .site-header__lang:hover{border-color:var(--ql-paper)}
+  .site-header__lang svg{inline-size:12px;block-size:12px}
+  .site-header__menu-trigger{display:inline-flex;border:var(--bw-thin) solid var(--border-strong);border-radius:var(--radius-round);transition:border-color var(--dur-fast) var(--ease-standard),background-color var(--dur-fast) var(--ease-standard)}
+  .site-header__menu-trigger:hover{border-color:var(--ql-paper)}
 
   .site-nav__list{display:flex;align-items:center;gap:var(--sp-4);list-style:none;margin:0;padding:0}
   .site-nav__link{position:relative;display:inline-flex;align-items:center;padding:var(--sp-8) var(--sp-16);font-size:var(--fs-nav);font-weight:var(--fw-semibold);letter-spacing:var(--ls-wide);text-transform:uppercase;color:var(--text-muted);white-space:nowrap;border-radius:var(--radius-pill);transition:color var(--dur-normal) var(--ease-shift)}
@@ -542,14 +550,83 @@
 
   @media (prefers-reduced-motion:reduce){
     .hero__eyebrow,.hero__title,.hero__lead,.hero__cta-row,.hero__scroll,
-    .hero__visual,.hero__sig path,.hero__ring,.hero__dot,.hero__shift,.hero__field,.hero__frame{
+    .hero__visual,.hero__sig path,.hero__ring,.hero__dot,.hero__shift,.hero__field,.hero__frame,
+    .hero__rule,.hero__stats{
       animation:none!important;opacity:1!important;transform:none!important;stroke-dashoffset:0!important}
+    .hero__aside,.hero__dots{animation:none!important;opacity:1!important}
     .hero__visual,.hero__field{transition:none!important}
   }
 
   /* HERO → POSITIONING — a quiet visual opening (LINK continuation under the cue),
      so the hero resolves toward the next section instead of simply ending. */
   .hero__scroll::before{content:"";position:absolute;inset-block-start:calc(100% - 2px);inset-inline-start:50%;transform:translateX(-50%);inline-size:var(--link-width);block-size:30px;background:linear-gradient(to bottom,var(--ql-lime),transparent);opacity:.5;pointer-events:none}
+
+  /* ==========================================================================
+     HERO — REFERENCE COMPOSITION (benchmark-matched · Quantum grammar/colors)
+     Editorial left column (vertical label · rhythm dots · uppercase headline ·
+     lime rule · lead · dual CTA) over an atmospheric ARC + blue SHIFT blade,
+     with a credibility stat row anchored bottom-right. Palette + Manrope kept.
+     ========================================================================== */
+  .hero__grid{grid-template-columns:minmax(0,1fr);align-items:center;
+    padding-block:calc(var(--header-h) + clamp(2.5rem,7vw,5rem)) clamp(6rem,12vh,9rem)}
+  .hero__content{grid-column:1;grid-row:1;max-inline-size:min(58ch,62%)}
+
+  /* Far-left vertical positioning label (desktop only) */
+  .hero__aside{display:none}
+
+  /* Rhythm dots on the left margin (desktop only) */
+  .hero__dots{display:none;position:absolute;inset-inline-start:clamp(30px,3.4vw,54px);inset-block-start:50%;transform:translateY(-50%);flex-direction:column;gap:12px;list-style:none;margin:0;padding:0;z-index:2}
+  .hero__dots li{inline-size:9px;block-size:9px;border-radius:var(--radius-round);background:var(--ql-gray);opacity:.55}
+  .hero__dots li.is-active{background:var(--ql-blue);opacity:1}
+
+  /* Headline — uppercase, three lines, IDEAS in Quantum Blue */
+  .hero__title{position:relative;margin-block-start:0;color:var(--ql-paper);font-weight:var(--fw-black);text-transform:uppercase;font-size:clamp(2.6rem,1.15rem + 5.4vw,5rem);line-height:1.0;letter-spacing:-0.02em}
+  .hero__title .hero__word{display:block}
+  .hero__accent,.hero__dot-accent{color:var(--ql-blue)}
+  /* FRAME = focus — corner bracket keys the top-right of the headline */
+  .hero__frame{position:absolute;inset-block-start:-0.42em;inset-inline-end:-0.1em;inset-inline-start:auto;inline-size:26px;block-size:26px;border-block-start:var(--bw-thick) solid var(--accent-2);border-inline-end:var(--bw-thick) solid var(--accent-2)}
+
+  /* Lime rule under the headline */
+  .hero__rule{display:block;inline-size:56px;block-size:4px;border-radius:2px;background:var(--ql-lime);margin-block-start:clamp(1.25rem,3vw,2rem)}
+
+  .hero__lead{margin-block-start:clamp(1.25rem,3vw,2rem);max-inline-size:48ch;color:var(--ql-gray);font-weight:var(--fw-regular);font-size:clamp(1rem,0.94rem + 0.3vw,1.2rem);line-height:1.75}
+  .hero__cta-row{margin-block-start:clamp(1.75rem,4vw,2.75rem)}
+
+  /* Credibility stat row (numbers Lime · labels Cool Gray caps) */
+  .hero__stats{position:absolute;inset-block-end:clamp(2rem,5vh,4rem);inset-inline-end:var(--container-pad);display:flex;gap:clamp(1.75rem,4vw,3.5rem);margin:0;z-index:2}
+  .hstat{display:flex;flex-direction:column;gap:5px}
+  .hstat__num{font-family:var(--font-en);font-weight:var(--fw-black);font-size:clamp(1.6rem,1.05rem + 1.6vw,2.4rem);line-height:1;color:var(--ql-lime)}
+  .hstat__label{font-family:var(--font-en);font-size:var(--fs-caption);font-weight:var(--fw-semibold);letter-spacing:var(--ls-wide);text-transform:uppercase;color:var(--ql-gray)}
+
+  /* Atmospheric field — big thin ARC ring, blue SHIFT blade, thin LINK diagonal */
+  .hero__field svg{inset-inline-end:-4%;inline-size:min(64vw,760px)}
+  .hero__field .qf-ring{fill:none;stroke:var(--ql-paper);stroke-width:1.4;opacity:.16}
+  .hero__field .qf-ring--inner{opacity:.08}
+  .hero__field .qf-diag{stroke:var(--ql-blue);stroke-width:1.6;opacity:.5}
+  .hero__field .qf-wedge{fill:var(--ql-blue)}
+  .hero__field .qf-node{fill:var(--ql-lime);opacity:.9}
+
+  /* Entrance timing for the new hero elements */
+  .hero__rule{animation:ql-hero-rise var(--dur-slow) var(--ease-shift) both;animation-delay:300ms}
+  .hero__stats{animation:ql-hero-fade var(--dur-slower) var(--ease-shift) both;animation-delay:640ms}
+  .hero__aside{animation:ql-hero-fade var(--dur-slower) var(--ease-shift) both;animation-delay:720ms}
+  .hero__dots{animation:ql-hero-fade var(--dur-slower) var(--ease-shift) both;animation-delay:760ms}
+
+  @media (min-width:1200px){
+    .hero__aside{display:inline-flex;position:absolute;left:clamp(16px,1.9vw,36px);top:50%;transform:translateY(-50%) rotate(180deg);writing-mode:vertical-rl;text-orientation:mixed;font-family:var(--font-en);font-size:var(--fs-caption);font-weight:var(--fw-semibold);letter-spacing:var(--ls-wider);text-transform:uppercase;color:var(--ql-gray);z-index:2}
+    .hero__dots{display:flex}
+  }
+  @media (max-width:1024px){
+    .hero__content{max-inline-size:none}
+    .hero__stats{position:static;margin-block-start:clamp(2.5rem,7vw,3.5rem);gap:clamp(1.5rem,4vw,2.75rem);flex-wrap:wrap}
+    .hero__field svg{inline-size:min(96vw,620px);inset-inline-end:-14%}
+  }
+  @media (max-width:560px){
+    .hero__title{font-size:clamp(2.4rem,1rem + 8vw,3.4rem)}
+    .hero__stats{gap:var(--sp-20)}
+    .hstat__num{font-size:clamp(1.5rem,1rem + 3.5vw,2rem)}
+    .hstat__label{font-size:0.68rem}
+  }
 
   /* --------------------------------------------------------------------------
      HERO — ATMOSPHERIC DEPTH FIELD (ARC + LINK in the negative space).
@@ -842,14 +919,21 @@
   }
   /* Header collapses to the drawer below 1120 — the six-item nav + CTA needs the room */
   @media (max-width:1120px){
-    .site-nav,.site-header__actions .btn{display:none}
+    .site-nav,.site-header__actions .btn,.site-header__lang{display:none}
     .site-header__menu-trigger{display:inline-flex}
   }
   /* Tighten the desktop header in the 1121–1280 band so the CTA never clips */
-  @media (min-width:1121px) and (max-width:1280px){
+  /* Desktop header condenses so the full nav + CTA + EN + circular menu all fit */
+  @media (min-width:1121px){
     .site-header__inner{gap:var(--sp-16)}
-    .site-nav__link{padding-inline:var(--sp-8)}
-    .site-header__actions{gap:var(--sp-12)}
+    .site-nav__list{gap:0}
+    .site-nav__link{padding-inline:var(--sp-12)}
+    .site-header__actions{gap:var(--sp-8)}
+    .site-header__actions .btn{padding-inline:var(--sp-20)}
+    .site-header__menu-trigger{display:inline-flex}
+  }
+  @media (min-width:1121px) and (max-width:1320px){
+    .site-nav__link{padding-inline:var(--sp-8);font-size:0.9rem}
     .site-header__actions .btn{padding-inline:var(--sp-16)}
   }
   @media (max-width:768px){
@@ -1233,21 +1317,22 @@
         <a class="site-header__logo" href="#top" aria-label="Quantum Link — Home">
           <span class="ql-logo" aria-hidden="true">
             <svg class="ql-logo__mark" viewBox="0 0 120 120" role="img" aria-label="Quantum Link"><circle cx="55" cy="55" r="35" fill="none" stroke="currentColor" stroke-width="16"/><path d="M59 57 L104 102 L58 88 L72 74 Z" fill="currentColor"/></svg>
-            <span class="ql-logo__word"><b>Quantum</b><b>Link</b></span>
+            <span class="ql-logo__word ql-logo__word--inline"><b>Quantum</b>&nbsp;<b>Link</b></span>
           </span>
         </a>
         <nav class="site-nav" aria-label="Primary">
           <ul class="site-nav__list">
-            <li><a class="site-nav__link" href="#capabilities" data-nav-link>Capabilities</a></li>
-            <li><a class="site-nav__link" href="#work" data-nav-link>Work</a></li>
-            <li><a class="site-nav__link" href="#approach" data-nav-link>Approach</a></li>
-            <li><a class="site-nav__link" href="#packages" data-nav-link>Packages</a></li>
             <li><a class="site-nav__link" href="#about" data-nav-link>About</a></li>
-            <li><a class="site-nav__link" href="#contact" data-nav-link>Contact</a></li>
+            <li><a class="site-nav__link" href="#capabilities" data-nav-link>Capabilities</a></li>
+            <li><a class="site-nav__link" href="#approach" data-nav-link>Approach</a></li>
+            <li><a class="site-nav__link" href="#work" data-nav-link>Work</a></li>
+            <li><a class="site-nav__link" href="#diff" data-nav-link>Insights</a></li>
+            <li><a class="site-nav__link" href="#ways" data-nav-link>Ways to Engage</a></li>
           </ul>
         </nav>
         <div class="site-header__actions">
-          <a class="btn btn--primary" href="#contact">Start a Project <span class="btn__icon" aria-hidden="true">↗</span></a>
+          <a class="btn btn--primary" href="#contact">Let's Connect <span class="btn__icon" aria-hidden="true">→</span></a>
+          <button type="button" class="site-header__lang" aria-label="Language: English (English selected)">EN <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           <button type="button" class="site-header__menu-trigger" data-menu-trigger aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav"><span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>
         </div>
       </div>
@@ -1259,15 +1344,15 @@
         <svg viewBox="0 0 240 240" fill="none" preserveAspectRatio="xMidYMid meet"><path d="M48 224 L48 116 A68 68 0 0 1 116 48 L224 48"/></svg>
       </span>
       <ul class="mobile-nav__list">
-        <li class="mobile-nav__item"><a class="mobile-nav__link" href="#capabilities" data-nav-link><span class="mobile-nav__index" aria-hidden="true">01</span><span class="mobile-nav__word">Capabilities</span></a></li>
-        <li class="mobile-nav__item"><a class="mobile-nav__link" href="#work" data-nav-link><span class="mobile-nav__index" aria-hidden="true">02</span><span class="mobile-nav__word">Work</span></a></li>
+        <li class="mobile-nav__item"><a class="mobile-nav__link" href="#about" data-nav-link><span class="mobile-nav__index" aria-hidden="true">01</span><span class="mobile-nav__word">About</span></a></li>
+        <li class="mobile-nav__item"><a class="mobile-nav__link" href="#capabilities" data-nav-link><span class="mobile-nav__index" aria-hidden="true">02</span><span class="mobile-nav__word">Capabilities</span></a></li>
         <li class="mobile-nav__item"><a class="mobile-nav__link" href="#approach" data-nav-link><span class="mobile-nav__index" aria-hidden="true">03</span><span class="mobile-nav__word">Approach</span></a></li>
-        <li class="mobile-nav__item"><a class="mobile-nav__link" href="#packages" data-nav-link><span class="mobile-nav__index" aria-hidden="true">04</span><span class="mobile-nav__word">Packages</span></a></li>
-        <li class="mobile-nav__item"><a class="mobile-nav__link" href="#about" data-nav-link><span class="mobile-nav__index" aria-hidden="true">05</span><span class="mobile-nav__word">About</span></a></li>
-        <li class="mobile-nav__item"><a class="mobile-nav__link" href="#contact" data-nav-link><span class="mobile-nav__index" aria-hidden="true">06</span><span class="mobile-nav__word">Contact</span></a></li>
+        <li class="mobile-nav__item"><a class="mobile-nav__link" href="#work" data-nav-link><span class="mobile-nav__index" aria-hidden="true">04</span><span class="mobile-nav__word">Work</span></a></li>
+        <li class="mobile-nav__item"><a class="mobile-nav__link" href="#diff" data-nav-link><span class="mobile-nav__index" aria-hidden="true">05</span><span class="mobile-nav__word">Insights</span></a></li>
+        <li class="mobile-nav__item"><a class="mobile-nav__link" href="#ways" data-nav-link><span class="mobile-nav__index" aria-hidden="true">06</span><span class="mobile-nav__word">Ways to Engage</span></a></li>
       </ul>
       <div class="mobile-nav__foot">
-        <a class="btn btn--primary btn--block mobile-nav__cta" href="#contact">Start a Project <span class="btn__icon" aria-hidden="true">↗</span></a>
+        <a class="btn btn--primary btn--block mobile-nav__cta" href="#contact">Let's Connect <span class="btn__icon" aria-hidden="true">→</span></a>
         <div class="mobile-nav__meta">
           <a class="mobile-nav__mail" href="mailto:hello@quantumlink.agency">hello@quantumlink.agency</a>
           <p class="mobile-nav__tag">Connecting ideas to impact.</p>
@@ -1282,30 +1367,36 @@
       <section class="hero" id="home" data-section aria-labelledby="hero-title">
         <div class="hero__field" aria-hidden="true">
           <svg viewBox="0 0 1000 1000" fill="none" preserveAspectRatio="xMidYMid meet">
-            <circle class="qf-arc" cx="500" cy="500" r="470"/>
-            <circle class="qf-arc qf-arc--inner" cx="500" cy="500" r="362"/>
-            <circle class="qf-arc qf-arc--lime" cx="500" cy="500" r="250"/>
-            <line class="qf-link" x1="110" y1="770" x2="900" y2="300"/>
-            <circle class="qf-node" cx="900" cy="300" r="7"/>
+            <circle class="qf-ring" cx="545" cy="500" r="432"/>
+            <circle class="qf-ring qf-ring--inner" cx="545" cy="500" r="300"/>
+            <line class="qf-diag" x1="120" y1="852" x2="980" y2="236"/>
+            <path class="qf-wedge" d="M498 456 L586 476 L726 800 Z"/>
+            <circle class="qf-node" cx="900" cy="286" r="7"/>
           </svg>
         </div>
+        <span class="hero__aside" aria-hidden="true">Creative Design &amp; Communication Agency</span>
+        <ul class="hero__dots" aria-hidden="true"><li class="is-active"></li><li></li><li></li></ul>
         <div class="hero__grid container container--wide">
           <div class="hero__content">
-            <span class="hero__frame" aria-hidden="true"></span>
-            <p class="hero__eyebrow">CREATIVE · DESIGN · COMMUNICATION</p>
-            <h1 class="hero__title" id="hero-title">Connecting ideas<br>to <span class="hero__accent">impact.</span></h1>
-            <p class="hero__lead">We are a creative agency that transforms ideas into meaningful brands, engaging experiences, and powerful communication.</p>
+            <h1 class="hero__title" id="hero-title">
+              <span class="hero__word">Connecting</span>
+              <span class="hero__word hero__accent">Ideas</span>
+              <span class="hero__word">To Impact<span class="hero__dot-accent">.</span></span>
+              <span class="hero__frame" aria-hidden="true"></span>
+            </h1>
+            <span class="hero__rule" aria-hidden="true"></span>
+            <p class="hero__lead">We connect ideas with design and communication to create real impact — branding, visual systems, campaigns, and digital experiences.</p>
             <div class="hero__cta-row">
-              <a class="btn btn--primary" href="#contact">Start a Project <span class="btn__icon" aria-hidden="true">↗</span></a>
-              <a class="link-cta" href="#work">Explore our work <span class="link-cta__line" aria-hidden="true"></span></a>
+              <a class="btn btn--primary" href="#work">View our work <span class="btn__icon" aria-hidden="true">→</span></a>
+              <a class="link-cta" href="#capabilities">Explore capabilities <span class="link-cta__line" aria-hidden="true"></span></a>
             </div>
           </div>
-          <div class="hero__visual" aria-hidden="true">
-            <svg class="hero__sig" viewBox="0 0 240 240" fill="none" preserveAspectRatio="xMidYMid meet"><path d="M48 224 L48 116 A68 68 0 0 1 116 48 L224 48"/></svg>
-            <span class="hero__shift"></span><span class="hero__ring"></span><span class="hero__dot"></span>
-          </div>
+          <dl class="hero__stats">
+            <div class="hstat"><dt class="hstat__num">10+</dt><dd class="hstat__label">Years of impact</dd></div>
+            <div class="hstat"><dt class="hstat__num">150+</dt><dd class="hstat__label">Brands partnered</dd></div>
+            <div class="hstat"><dt class="hstat__num">25+</dt><dd class="hstat__label">Industries served</dd></div>
+          </dl>
         </div>
-        <a class="hero__scroll" href="#position" aria-label="Scroll to content"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v15M6 13l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
       </section>
 
       <!-- 02 · POSITIONING -->
@@ -1846,20 +1937,15 @@
     function initHeroInteraction() {
       var hero = doc.querySelector(".hero");
       if(!hero) return;
-      var visual = hero.querySelector(".hero__visual");
-      if(!visual) return;
       var field = hero.querySelector(".hero__field");
+      if(!field) return;
       var fine = window.matchMedia && window.matchMedia("(pointer:fine)").matches;
       if(prefersReducedMotion || !fine) return;
-      var MAX = 12, tx = 0, ty = 0, cx = 0, cy = 0, raf = null;
+      var MAX = 14, tx = 0, ty = 0, cx = 0, cy = 0, raf = null;
       function render(){
         cx += (tx - cx) * 0.09; cy += (ty - cy) * 0.09;
-        visual.style.setProperty("--hero-px", cx.toFixed(2) + "px");
-        visual.style.setProperty("--hero-py", cy.toFixed(2) + "px");
-        if(field){ /* deeper layer: smaller, counter-directional shift */
-          field.style.setProperty("--field-px", (cx * -0.45).toFixed(2) + "px");
-          field.style.setProperty("--field-py", (cy * -0.45).toFixed(2) + "px");
-        }
+        field.style.setProperty("--field-px", cx.toFixed(2) + "px");
+        field.style.setProperty("--field-py", cy.toFixed(2) + "px");
         if(Math.abs(tx - cx) > 0.1 || Math.abs(ty - cy) > 0.1){ raf = window.requestAnimationFrame(render); }
         else { raf = null; }
       }
