@@ -484,7 +484,7 @@
   .hero__grid{position:relative;z-index:1;display:grid;grid-template-columns:1.05fr 0.95fr;gap:clamp(2rem,4vw,4.5rem);align-items:center;width:100%;padding-block:calc(var(--header-h) + var(--sp-40)) var(--sp-64)}
 
   /* Text column (left — English editorial) */
-  .hero__content{grid-column:1;grid-row:1;min-inline-size:0}
+  .hero__content{grid-column:1;grid-row:1;min-inline-size:0;position:relative}
   .hero__eyebrow{display:inline-flex;align-items:center;gap:var(--sp-12);color:var(--ql-lime);font-family:var(--font-en);font-size:var(--fs-eyebrow);font-weight:var(--fw-bold);letter-spacing:var(--ls-widest);text-transform:uppercase}
   .hero__eyebrow::before{content:"";inline-size:34px;block-size:var(--bw-thick);background:currentColor}
   .hero__title{margin-block-start:var(--sp-24);color:var(--ql-paper);font-weight:var(--fw-black);font-size:clamp(2.75rem,1.55rem + 5vw,5.5rem);line-height:1.02;letter-spacing:-0.01em}
@@ -542,14 +542,36 @@
 
   @media (prefers-reduced-motion:reduce){
     .hero__eyebrow,.hero__title,.hero__lead,.hero__cta-row,.hero__scroll,
-    .hero__visual,.hero__sig path,.hero__ring,.hero__dot,.hero__shift{
+    .hero__visual,.hero__sig path,.hero__ring,.hero__dot,.hero__shift,.hero__field,.hero__frame{
       animation:none!important;opacity:1!important;transform:none!important;stroke-dashoffset:0!important}
-    .hero__visual{transition:none!important}
+    .hero__visual,.hero__field{transition:none!important}
   }
 
   /* HERO → POSITIONING — a quiet visual opening (LINK continuation under the cue),
      so the hero resolves toward the next section instead of simply ending. */
   .hero__scroll::before{content:"";position:absolute;inset-block-start:calc(100% - 2px);inset-inline-start:50%;transform:translateX(-50%);inline-size:var(--link-width);block-size:30px;background:linear-gradient(to bottom,var(--ql-lime),transparent);opacity:.5;pointer-events:none}
+
+  /* --------------------------------------------------------------------------
+     HERO — ATMOSPHERIC DEPTH FIELD (ARC + LINK in the negative space).
+     A large, faint concentric ARC and a thin diagonal LINK sit behind the
+     composition to give the first viewport depth and quiet energy — the
+     signature stays the hero; this is only atmosphere. It drifts subtly with
+     scroll and counter-shifts to the pointer for a layered parallax.
+     -------------------------------------------------------------------------- */
+  .hero__field{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:clip;
+    transform:translate3d(var(--field-px,0px),calc(var(--field-sy,0px) + var(--field-py,0px)),0);
+    transition:transform var(--dur-slower) var(--ease-shift);
+    opacity:0;animation:ql-hero-fade var(--dur-slower) var(--ease-shift) 180ms forwards;will-change:transform}
+  .hero__field svg{position:absolute;inset-block-start:50%;inset-inline-end:-8%;transform:translateY(-50%);inline-size:min(82vw,940px);block-size:auto;aspect-ratio:1;overflow:visible}
+  .hero__field .qf-arc{fill:none;stroke:var(--ql-blue);stroke-width:1.5;opacity:.16}
+  .hero__field .qf-arc--inner{stroke:var(--ql-blue);opacity:.09}
+  .hero__field .qf-arc--lime{stroke:var(--ql-lime);opacity:.08}
+  .hero__field .qf-link{stroke:var(--ql-blue);stroke-width:1.5;opacity:.22}
+  .hero__field .qf-node{fill:var(--ql-blue);opacity:.5}
+
+  /* FRAME = focus — a single restrained corner bracket keys the headline block */
+  .hero__frame{position:absolute;inset-block-start:-0.35em;inset-inline-end:2%;inline-size:26px;block-size:26px;border-block-start:var(--bw-thick) solid var(--accent-2);border-inline-end:var(--bw-thick) solid var(--accent-2);pointer-events:none;opacity:0;animation:ql-hero-fade var(--dur-slow) var(--ease-shift) 660ms forwards}
+  @media (max-width:768px){.hero__frame{display:none}}
 
   /* ==========================================================================
      SERVICES  (Prompt 04) — "حلولنا" · Paper bg · 2×2 FRAME modules
@@ -1258,8 +1280,18 @@
 
       <!-- 01 · HERO -->
       <section class="hero" id="home" data-section aria-labelledby="hero-title">
+        <div class="hero__field" aria-hidden="true">
+          <svg viewBox="0 0 1000 1000" fill="none" preserveAspectRatio="xMidYMid meet">
+            <circle class="qf-arc" cx="500" cy="500" r="470"/>
+            <circle class="qf-arc qf-arc--inner" cx="500" cy="500" r="362"/>
+            <circle class="qf-arc qf-arc--lime" cx="500" cy="500" r="250"/>
+            <line class="qf-link" x1="110" y1="770" x2="900" y2="300"/>
+            <circle class="qf-node" cx="900" cy="300" r="7"/>
+          </svg>
+        </div>
         <div class="hero__grid container container--wide">
           <div class="hero__content">
+            <span class="hero__frame" aria-hidden="true"></span>
             <p class="hero__eyebrow">CREATIVE · DESIGN · COMMUNICATION</p>
             <h1 class="hero__title" id="hero-title">Connecting ideas<br>to <span class="hero__accent">impact.</span></h1>
             <p class="hero__lead">We are a creative agency that transforms ideas into meaningful brands, engaging experiences, and powerful communication.</p>
@@ -1816,6 +1848,7 @@
       if(!hero) return;
       var visual = hero.querySelector(".hero__visual");
       if(!visual) return;
+      var field = hero.querySelector(".hero__field");
       var fine = window.matchMedia && window.matchMedia("(pointer:fine)").matches;
       if(prefersReducedMotion || !fine) return;
       var MAX = 12, tx = 0, ty = 0, cx = 0, cy = 0, raf = null;
@@ -1823,6 +1856,10 @@
         cx += (tx - cx) * 0.09; cy += (ty - cy) * 0.09;
         visual.style.setProperty("--hero-px", cx.toFixed(2) + "px");
         visual.style.setProperty("--hero-py", cy.toFixed(2) + "px");
+        if(field){ /* deeper layer: smaller, counter-directional shift */
+          field.style.setProperty("--field-px", (cx * -0.45).toFixed(2) + "px");
+          field.style.setProperty("--field-py", (cy * -0.45).toFixed(2) + "px");
+        }
         if(Math.abs(tx - cx) > 0.1 || Math.abs(ty - cy) > 0.1){ raf = window.requestAnimationFrame(render); }
         else { raf = null; }
       }
@@ -1837,7 +1874,29 @@
       hero.addEventListener("pointerleave", function(){ tx = 0; ty = 0; hero.classList.remove("is-pointing"); kick(); });
     }
 
-    function init(){ initHeaderScrollState(); initMobileNav(); initReveal(); initCaps(); initScrollSpy(); initPkgTabs(); initContactForm(); initHeroInteraction(); }
+    /* 8 · HERO FIELD — atmospheric geometry drifts gently with scroll (depth).
+       Restrained (max ~36px over the first viewport), passive, rAF, no jacking. */
+    function initHeroField() {
+      var hero = doc.querySelector(".hero");
+      if(!hero) return;
+      var field = hero.querySelector(".hero__field");
+      if(!field || prefersReducedMotion) return;
+      var ticking = false;
+      function update(){
+        var vh = window.innerHeight || 800;
+        var y = window.scrollY || window.pageYOffset || 0;
+        if(y < vh){ /* only while the hero is on screen */
+          var drift = Math.max(-36, Math.min(36, y * 0.08));
+          field.style.setProperty("--field-sy", drift.toFixed(2) + "px");
+        }
+        ticking = false;
+      }
+      function onScroll(){ if(!ticking){ window.requestAnimationFrame(update); ticking = true; } }
+      update();
+      window.addEventListener("scroll", onScroll, { passive: true });
+    }
+
+    function init(){ initHeaderScrollState(); initMobileNav(); initReveal(); initCaps(); initScrollSpy(); initPkgTabs(); initContactForm(); initHeroInteraction(); initHeroField(); }
     if(doc.readyState === "loading"){ doc.addEventListener("DOMContentLoaded", init); } else { init(); }
   })();
   </script>
