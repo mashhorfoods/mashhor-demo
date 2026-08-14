@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#4975BA">
+<title>عون الدرب — نظام تصميم الموقع (المرحلة 02)</title>
+<meta name="description" content="نظام تصميم موقع عون الدرب للنقل المتخصص: التوكنز، الألوان، الطباعة، الشبكة، المكوّنات، النماذج، الحركة، والوصول — قابل لإعادة الاستخدام وRTL.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Cairo:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="system.css">
+<style>
+/* ---- style-guide chrome only (not part of the system) ---- */
+.ds-hero{padding-block:clamp(3rem,7vw,5.5rem) clamp(2rem,4vw,3rem)}
+.ds-hero__logo{width:min(320px,60vw);height:auto;margin-block-end:2rem}
+.ds-stage{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--font-heading);font-weight:600;
+  font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--color-primary);
+  background:var(--aun-primary-subtle);border:1px solid rgba(73,117,186,.28);padding:.4rem .85rem;border-radius:999px;margin-block-end:1.5rem}
+.ds-hero h1{font-size:clamp(2rem,1.4rem+2.6vw,3rem)}
+.ds-toc{columns:2;column-gap:2.5rem;margin-block-start:1.5rem}
+@media(max-width:640px){.ds-toc{columns:1}}
+.ds-toc a{display:flex;gap:.75rem;padding:.5rem 0;border-block-end:1px solid var(--border);color:var(--text-primary);
+  break-inside:avoid;font-family:var(--font-heading);font-size:.95rem}
+.ds-toc a:hover{color:var(--color-primary)}
+.ds-toc .n{color:var(--color-primary);font-weight:600;min-width:1.8rem}
+.ds-block{padding-block:clamp(2.5rem,5vw,4rem);border-block-start:1px solid var(--border)}
+.ds-block__head{display:flex;align-items:baseline;gap:.85rem;margin-block-end:1.5rem}
+.ds-block__head .n{font-family:var(--font-heading);font-weight:600;color:var(--color-primary);font-size:.9rem;letter-spacing:.08em}
+.ds-block__head h2{font-size:clamp(1.4rem,1.1rem+1.4vw,2rem)}
+.ds-note{font-size:.9rem;color:var(--text-secondary);max-width:64ch;margin-block-end:1.5rem}
+.ds-demo{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:clamp(1.25rem,3vw,2rem);margin-block-end:1rem}
+.ds-demo--tinted{background:var(--bg-tinted)}
+.ds-row{display:flex;flex-wrap:wrap;gap:1rem;align-items:center}
+.ds-label{font-family:var(--font-heading);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-block-end:.6rem}
+.ds-grid-cards{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.ds-mono{font-family:var(--font-heading);font-variant-numeric:tabular-nums;font-size:.82rem;color:var(--text-secondary);direction:ltr;text-align:right}
+
+/* swatches */
+.ds-swatch{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface)}
+.ds-swatch__chip{height:76px}
+.ds-swatch__b{padding:.6rem .7rem}
+.ds-swatch__n{font-family:var(--font-heading);font-weight:600;font-size:.85rem}
+.ds-swatch__h{font-family:var(--font-heading);font-size:.75rem;color:var(--text-muted);direction:ltr;text-align:right}
+.ds-swatch__u{font-size:.72rem;color:var(--text-secondary);margin-block-start:.3rem;line-height:1.45}
+
+/* spec table */
+.ds-tablewrap{overflow-x:auto;border:1px solid var(--border);border-radius:12px;background:var(--surface)}
+table.ds-table{width:100%;border-collapse:collapse;font-size:.88rem;min-width:520px}
+.ds-table th,.ds-table td{text-align:right;padding:.7rem .85rem;border-block-end:1px solid var(--border);vertical-align:top}
+.ds-table th{font-family:var(--font-heading);font-weight:600;font-size:.78rem;color:var(--text-primary);background:var(--bg-tinted)}
+.ds-table td{color:var(--text-secondary)}
+.ds-table td:first-child{font-family:var(--font-heading);color:var(--text-primary);font-weight:500}
+.ds-table .ds-mono{white-space:nowrap}
+
+/* spacing viz */
+.ds-space-row{display:flex;align-items:center;gap:1rem;margin-block-end:.5rem}
+.ds-space-bar{height:16px;background:var(--color-primary);border-radius:3px}
+.ds-space-row .ds-mono{min-width:110px}
+
+/* grid viz */
+.ds-gridviz{display:grid;grid-template-columns:repeat(12,1fr);gap:8px}
+.ds-gridviz span{height:44px;background:var(--aun-primary-subtle);border:1px solid rgba(73,117,186,.3);border-radius:6px}
+
+/* skeleton for section templates */
+.ds-skel{border:1.5px dashed var(--border-strong);border-radius:var(--radius-md);padding:1rem;background:
+  repeating-linear-gradient(135deg,transparent,transparent 10px,rgba(73,117,186,.03) 10px,rgba(73,117,186,.03) 20px)}
+.ds-region{border:1px dashed var(--aun-blue-bright);border-radius:8px;padding:.9rem;color:var(--color-primary);
+  font-family:var(--font-heading);font-size:.8rem;text-align:center;background:var(--surface)}
+.ds-skel .ds-region+.ds-region{margin-block-start:.6rem}
+.ds-skel-split{display:grid;gap:.6rem}
+@media(min-width:640px){.ds-skel-split{grid-template-columns:1fr 1fr}}
+
+/* mini header/footer preview frame */
+.ds-frame{border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.ds-frame .site-header{position:static;backdrop-filter:none;background:var(--surface);border-block-end:1px solid var(--border)}
+
+.ds-swatches-grid{display:grid;gap:.85rem;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.ds-states{display:grid;gap:.6rem;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.ds-foot{background:var(--surface-inverse);color:var(--text-on-inverse);border-radius:20px 20px 0 0;margin-block-start:3rem}
+.ds-foot .container{padding-block:3rem}
+.ds-foot small{color:var(--text-on-inverse-muted);font-family:var(--font-heading);font-size:.8rem}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">تخطَّ إلى المحتوى</a>
+
+<!-- ===== HERO (documentation only) ===== -->
+<header class="ds-hero">
+  <div class="container">
+    <span class="ds-stage">المرحلة 02 — نظام تصميم الموقع</span>
+    <img class="ds-hero__logo" src="aun-aldrb-logo.svg" alt="عون الدرب للنقل المتخصص">
+    <h1>نظام تصميم موقع عون الدرب</h1>
+    <p class="text-body-lg u-measure" style="margin-block-start:1rem">نظام بصري وتفاعلي واحد قابل لإعادة الاستخدام، يرثه كل قسم مستقبلي — مبني منذ البداية لـ RTL العربية، والوصول، والأداء، والتجاوب. هذه المرحلة نظام فقط: لا تُصمَّم أي أقسام صفحة.</p>
+    <nav class="ds-toc" aria-label="محتويات النظام">
+      <a href="#t01"><span class="n">01</span>توكنز التصميم</a>
+      <a href="#t02"><span class="n">02</span>نظام الألوان</a>
+      <a href="#t03"><span class="n">03</span>الطباعة</a>
+      <a href="#t04"><span class="n">04</span>التباعد</a>
+      <a href="#t05"><span class="n">05</span>الحاويات والشبكة</a>
+      <a href="#t06"><span class="n">06</span>الزوايا والظلال</a>
+      <a href="#t07"><span class="n">07</span>الأزرار</a>
+      <a href="#t08"><span class="n">08</span>الروابط</a>
+      <a href="#t09"><span class="n">09</span>البطاقات</a>
+      <a href="#t10"><span class="n">10</span>الأيقونات</a>
+      <a href="#t11"><span class="n">11</span>الصور</a>
+      <a href="#t12"><span class="n">12</span>رسوم المسار</a>
+      <a href="#t13"><span class="n">13</span>الهيدر</a>
+      <a href="#t14"><span class="n">14</span>الفوتر</a>
+      <a href="#t15"><span class="n">15</span>النماذج</a>
+      <a href="#t16"><span class="n">16</span>قوالب الأقسام</a>
+      <a href="#t17"><span class="n">17</span>الحركة</a>
+      <a href="#t18"><span class="n">18</span>حالات المكوّنات</a>
+      <a href="#t19"><span class="n">19</span>التجاوب</a>
+      <a href="#t20"><span class="n">20</span>الوصول</a>
+      <a href="#t21"><span class="n">21</span>الأداء</a>
+      <a href="#t22"><span class="n">22</span>قواعد الاتساق</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="container container--wide">
+
+<!-- 01 TOKENS -->
+<section class="ds-block" id="t01">
+  <div class="ds-block__head"><span class="n">01</span><h2>توكنز التصميم</h2></div>
+  <p class="ds-note">مصدر واحد للحقيقة في <code>system.css</code>. كل قسم مستقبلي يستهلك هذه المتغيّرات ولا يُعرّف قيمًا خاصة. الفئات: ألوان، طباعة، تباعد، حاويات، شبكة، زوايا، ظلال، أيقونات، ارتفاعات المكوّنات، توقيت الحركة، نقاط التجاوب، z-index.</p>
+  <div class="ds-tablewrap"><table class="ds-table">
+    <thead><tr><th>الفئة</th><th>أمثلة على التوكنز</th></tr></thead>
+    <tbody>
+      <tr><td>الألوان الدلالية</td><td class="ds-mono">--color-primary · --surface · --text-primary · --border · --interactive-hover · --focus</td></tr>
+      <tr><td>الطباعة</td><td class="ds-mono">--font-heading · --font-body · --fs-h1…--fs-caption · --lh-* · --measure</td></tr>
+      <tr><td>التباعد</td><td class="ds-mono">--sp-4 … --sp-160 · --section-py</td></tr>
+      <tr><td>الحاويات/الشبكة</td><td class="ds-mono">--container-standard/wide/narrow · --grid-cols · --grid-gap</td></tr>
+      <tr><td>الزوايا/الظلال</td><td class="ds-mono">--radius-sm/md/lg/pill · --shadow-sm/md/focus</td></tr>
+      <tr><td>الأيقونات/الارتفاعات</td><td class="ds-mono">--icon-xs…--icon-xl · --control-sm/md/lg · --header-h · --tap-min</td></tr>
+      <tr><td>الحركة/التجاوب</td><td class="ds-mono">--dur-* · --ease-* · --bp-sm/md/lg/xl · --z-*</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 02 COLOR -->
+<section class="ds-block" id="t02">
+  <div class="ds-block__head"><span class="n">02</span><h2>نظام الألوان</h2></div>
+  <p class="ds-note">أدوار دلالية مبنية على لوحة المرحلة 01. الأزرق الأساسي يبقى الهوية المهيمنة، مع مساحات بيضاء ومحايدة سخيّة. لا تُضاف ألوان زخرفية للتنويع، ولا يُنقل معنى باللون وحده.</p>
+  <div class="ds-label">أساسية وثانوية</div>
+  <div class="ds-swatches-grid" style="margin-block-end:1.25rem">
+    <div class="ds-swatch"><div class="ds-swatch__chip" style="background:#4975BA"></div><div class="ds-swatch__b"><div class="ds-swatch__n">Primary</div><div class="ds-swatch__h">#4975BA</div><div class="ds-swatch__u">أزرار، روابط، عناوين كبيرة · 4.63:1</div></div></div>
+    <div class="ds-swatch"><div class="ds-swatch__chip" style="background:#2C4C82"></div><div class="ds-swatch__b"><div class="ds-swatch__n">Secondary</div><div class="ds-swatch__h">#2C4C82</div><div class="ds-swatch__u">نص العناوين، أسطح داكنة · 8.53:1</div></div></div>
+    <div class="ds-swatch"><div class="ds-swatch__chip" style="background:#5C86C6"></div><div class="ds-swatch__b"><div class="ds-swatch__n">Accent</div><div class="ds-swatch__h">#5C86C6</div><div class="ds-swatch__u">Hover / زخرفي · غير نصّي</div></div></div>
+    <div class="ds-swatch"><div class="ds-swatch__chip" style="background:#D9E4F3"></div><div class="ds-swatch__b"><div class="ds-swatch__n">Sky</div><div class="ds-swatch__h">#D9E4F3</div><div class="ds-swatch__u">خلفيات مميّزة، شارات</div></div></div>
+    <div class="ds-swatch"><div class="ds-swatch__chip" style="background:#EEF3FA"></div><div class="ds-swatch__b"><div class="ds-swatch__n">Mist / Tinted</div><div class="ds-swatch__h">#EEF3FA</div><div class="ds-swatch__u">خلفيات الأقسام البديلة</div></div></div>
+  </div>
+  <div class="ds-label">محايدة ونص</div>
+  <div class="ds-swatches-grid" style="margin-block-end:1.25rem">
+    <div class="ds-swatch"><div class="ds-swatch__chip" style="background:#1E2733"></div><div class="ds-swatch__b"><div class="ds-swatch__n">Text Primary</div><div class="ds-swatch__h">#1E2733</div><div class="ds-swatch__u">النص الأساسي · 15.07:1</div></div></div>
+    <div class="ds-swatch"><div class="ds-swatch__chip" style="background:#5A6675"></div><div class="ds-swatch__b"><div class="ds-swatch__n">Text Secondary</div><div class="ds-swatch__h">#5A6675</div><div class="ds-swatch__u">نص ثانوي · 5.85:1</div></div></div>
+    <div class="ds-swatch"><div class="ds-swatch__chip" style="background:#8B95A3"></div><div class="ds-swatch__b"><div class="ds-swatch__n">Muted</div><div class="ds-swatch__h">#8B95A3</div><div class="ds-swatch__u">نائب / غير نصّي فقط</div></div></div>
+    <div class="ds-swatch"><div class="ds-swatch__chip" style="background:#E4E9F0"></div><div class="ds-swatch__b"><div class="ds-swatch__n">Border</div><div class="ds-swatch__h">#E4E9F0</div><div class="ds-swatch__u">حدود وفواصل</div></div></div>
+    <div class="ds-swatch"><div class="ds-swatch__chip" style="background:#F6F8FB;border-block-end:1px solid #E4E9F0"></div><div class="ds-swatch__b"><div class="ds-swatch__n">Background</div><div class="ds-swatch__h">#F6F8FB</div><div class="ds-swatch__u">أرضية الصفحة</div></div></div>
+  </div>
+  <div class="ds-label">تغذية راجعة وظيفية (للنظام فقط — ليست ألوان علامة)</div>
+  <div class="ds-swatches-grid">
+    <div class="ds-swatch"><div class="ds-swatch__chip" style="background:#2E7D64"></div><div class="ds-swatch__b"><div class="ds-swatch__n">Success</div><div class="ds-swatch__h">#2E7D64</div><div class="ds-swatch__u">نجاح النماذج</div></div></div>
+    <div class="ds-swatch"><div class="ds-swatch__chip" style="background:#C0433B"></div><div class="ds-swatch__b"><div class="ds-swatch__n">Error</div><div class="ds-swatch__h">#C0433B</div><div class="ds-swatch__u">أخطاء وتحقّق</div></div></div>
+    <div class="ds-swatch"><div class="ds-swatch__chip" style="background:#B0791C"></div><div class="ds-swatch__b"><div class="ds-swatch__n">Warning</div><div class="ds-swatch__h">#B0791C</div><div class="ds-swatch__u">تنبيه</div></div></div>
+  </div>
+</section>
+
+<!-- 03 TYPOGRAPHY -->
+<section class="ds-block" id="t03">
+  <div class="ds-block__head"><span class="n">03</span><h2>الطباعة</h2></div>
+  <p class="ds-note">IBM Plex Sans Arabic للعناوين والواجهة والأرقام؛ Cairo للمتن. سلّم متجاوب بارتفاعات سطر مريحة للقراءة العربية، دون أوزان أو تأثيرات مبالغة.</p>
+  <div class="ds-demo">
+    <div style="display:flex;flex-direction:column;gap:.9rem">
+      <div class="text-display">نُعين ونُعاون <span class="ds-mono" style="font-size:.8rem;color:var(--text-muted)">Display · Plex 700 · 40–56px</span></div>
+      <h1>نقل متخصص بكرامة <span class="ds-mono" style="font-size:.8rem;color:var(--text-muted)">H1 · Plex 700</span></h1>
+      <h2>عنوان قسم رئيسي <span class="ds-mono" style="font-size:.8rem;color:var(--text-muted)">H2 · Plex 700</span></h2>
+      <h3>عنوان فرعي <span class="ds-mono" style="font-size:.8rem;color:var(--text-muted)">H3 · Plex 600</span></h3>
+      <h4>عنوان صغير <span class="ds-mono" style="font-size:.8rem;color:var(--text-muted)">H4 · Plex 600</span></h4>
+      <p class="text-body-lg">فقرة كبيرة تُبرز رسالة مهمة بوضوح واتزان. <span class="ds-mono" style="font-size:.75rem">Body L · Cairo 500</span></p>
+      <p>نص المتن الأساسي بارتفاع سطر 1.75 مريح للقراءة العربية الطويلة، ضمن قياس نصّي محدود. <span class="ds-mono" style="font-size:.75rem">Body · Cairo 400 · 17px</span></p>
+      <p class="text-small">نص صغير مساند. <span class="ds-mono" style="font-size:.75rem">Small · 15px</span></p>
+      <p class="text-caption">تعليق / caption · 13px</p>
+      <p><span class="eyebrow">تسمية · Label</span></p>
+      <p class="text-num" style="font-size:1.4rem">+966 53 554 4352 <span class="ds-mono" style="font-size:.75rem;color:var(--text-muted)">Numbers · tabular</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- 04 SPACING -->
+<section class="ds-block" id="t04">
+  <div class="ds-block__head"><span class="n">04</span><h2>سلّم التباعد</h2></div>
+  <p class="ds-note">إيقاع متوقّع بأساس 4px يحكم حشوة الأقسام والبطاقات والمسافات — لا قيم عشوائية. تباعد الأقسام: <span class="ds-mono">--section-py = clamp(3.5rem, 7vw, 7.5rem)</span>.</p>
+  <div class="ds-demo">
+    <div class="ds-space-row"><span class="ds-mono">--sp-4 · 4px</span><span class="ds-space-bar" style="width:4px"></span></div>
+    <div class="ds-space-row"><span class="ds-mono">--sp-8 · 8px</span><span class="ds-space-bar" style="width:8px"></span></div>
+    <div class="ds-space-row"><span class="ds-mono">--sp-16 · 16px</span><span class="ds-space-bar" style="width:16px"></span></div>
+    <div class="ds-space-row"><span class="ds-mono">--sp-24 · 24px</span><span class="ds-space-bar" style="width:24px"></span></div>
+    <div class="ds-space-row"><span class="ds-mono">--sp-32 · 32px</span><span class="ds-space-bar" style="width:32px"></span></div>
+    <div class="ds-space-row"><span class="ds-mono">--sp-48 · 48px</span><span class="ds-space-bar" style="width:48px"></span></div>
+    <div class="ds-space-row"><span class="ds-mono">--sp-64 · 64px</span><span class="ds-space-bar" style="width:64px"></span></div>
+    <div class="ds-space-row"><span class="ds-mono">--sp-96 · 96px</span><span class="ds-space-bar" style="width:96px"></span></div>
+    <div class="ds-space-row"><span class="ds-mono">--sp-160 · 160px</span><span class="ds-space-bar" style="width:160px"></span></div>
+  </div>
+</section>
+
+<!-- 05 CONTAINERS + GRID -->
+<section class="ds-block" id="t05">
+  <div class="ds-block__head"><span class="n">05</span><h2>الحاويات والشبكة</h2></div>
+  <p class="ds-note">حاويات: قياسية 1200px · واسعة 1360px · تحريرية ضيّقة 760px · كاملة العرض. شبكة 12 عمودًا (ديسكتوب) → 8 (لوحي) → 4/عمود واحد (جوال)، بمساحات بيضاء سخيّة دون ازدحام.</p>
+  <div class="ds-demo">
+    <div class="ds-label">شبكة 12 عمودًا</div>
+    <div class="ds-gridviz" style="margin-block-end:1.25rem"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    <div class="ds-tablewrap"><table class="ds-table">
+      <thead><tr><th>الحاوية</th><th>أقصى عرض</th><th>الاستخدام</th></tr></thead>
+      <tbody>
+        <tr><td>.container</td><td class="ds-mono">1200px</td><td>المحتوى القياسي</td></tr>
+        <tr><td>.container--wide</td><td class="ds-mono">1360px</td><td>الهيدر/الفوتر والتخطيطات العريضة</td></tr>
+        <tr><td>.container--narrow</td><td class="ds-mono">760px</td><td>النص التحريري وقياس القراءة العربي</td></tr>
+        <tr><td>.container--full</td><td class="ds-mono">100%</td><td>الوسائط كاملة العرض (full-bleed)</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- 06 RADIUS + SHADOW -->
+<section class="ds-block" id="t06">
+  <div class="ds-block__head"><span class="n">06</span><h2>الزوايا والظلال</h2></div>
+  <p class="ds-note">هندسة ناعمة محكومة وظلال مقيّدة بصبغة كحلية — لا ظلال ثقيلة ولا تأثيرات SaaS.</p>
+  <div class="ds-demo ds-row">
+    <div style="text-align:center"><div style="width:80px;height:56px;background:var(--aun-sky);border-radius:var(--radius-sm)"></div><div class="ds-mono" style="margin-block-start:.4rem">sm 10px</div></div>
+    <div style="text-align:center"><div style="width:80px;height:56px;background:var(--aun-sky);border-radius:var(--radius-md)"></div><div class="ds-mono" style="margin-block-start:.4rem">md 16px</div></div>
+    <div style="text-align:center"><div style="width:80px;height:56px;background:var(--aun-sky);border-radius:var(--radius-lg)"></div><div class="ds-mono" style="margin-block-start:.4rem">lg 24px</div></div>
+    <div style="text-align:center"><div style="width:80px;height:56px;background:var(--aun-sky);border-radius:var(--radius-pill)"></div><div class="ds-mono" style="margin-block-start:.4rem">pill</div></div>
+    <div style="width:1px;height:56px;background:var(--border)"></div>
+    <div style="text-align:center"><div style="width:80px;height:56px;background:var(--surface);border-radius:12px;box-shadow:var(--shadow-sm)"></div><div class="ds-mono" style="margin-block-start:.4rem">shadow-sm</div></div>
+    <div style="text-align:center"><div style="width:80px;height:56px;background:var(--surface);border-radius:12px;box-shadow:var(--shadow-md)"></div><div class="ds-mono" style="margin-block-start:.4rem">shadow-md</div></div>
+  </div>
+</section>
+
+<!-- 07 BUTTONS -->
+<section class="ds-block" id="t07">
+  <div class="ds-block__head"><span class="n">07</span><h2>الأزرار</h2></div>
+  <p class="ds-note">أساسي (لون العلامة) · ثانوي (محدود) · شبح/نصّي · زر أيقونة. لكل زر حالات: افتراضي، تمرير، تركيز، ضغط، معطّل، تحميل. الأيقونات تتبع اتجاه RTL.</p>
+  <div class="ds-demo">
+    <div class="ds-label">الأنواع</div>
+    <div class="ds-row" style="margin-block-end:1.25rem">
+      <button class="btn btn--primary">تواصل معنا</button>
+      <button class="btn btn--secondary">تعرّف أكثر</button>
+      <button class="btn btn--ghost">تفاصيل</button>
+      <button class="icon-btn" aria-label="اتصال"><svg class="icon" viewBox="0 0 24 24"><path d="M5 4h3l2 5-2 1c1 2 3 4 5 5l1-2 5 2v3c0 1-1 2-2 2A15 15 0 0 1 4 6c0-1 1-2 1-2z"/></svg></button>
+    </div>
+    <div class="ds-label">المقاسات</div>
+    <div class="ds-row" style="margin-block-end:1.25rem">
+      <button class="btn btn--primary btn--sm">صغير</button>
+      <button class="btn btn--primary">متوسط</button>
+      <button class="btn btn--primary btn--lg">كبير</button>
+    </div>
+    <div class="ds-label">الحالات</div>
+    <div class="ds-row">
+      <button class="btn btn--primary">افتراضي</button>
+      <button class="btn btn--primary is-loading">تحميل</button>
+      <button class="btn btn--primary" disabled>معطّل</button>
+      <button class="btn btn--secondary" style="box-shadow:var(--shadow-focus)">تركيز</button>
+    </div>
+  </div>
+</section>
+
+<!-- 08 LINKS -->
+<section class="ds-block" id="t08">
+  <div class="ds-block__head"><span class="n">08</span><h2>الروابط</h2></div>
+  <p class="ds-note">روابط نص، تنقّل، رابط بسهم واعٍ لاتجاه RTL، هاتف وواتساب بأرقام LTR معزولة. حالات تمرير وتركيز متّسقة.</p>
+  <div class="ds-demo ds-row" style="gap:1.75rem">
+    <a class="link" href="#t08">رابط نصّي قياسي</a>
+    <a class="link-arrow" href="#t08">اكتشف الخدمات <svg class="icon icon--sm" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></a>
+    <a class="link-icon" href="tel:+966535544352"><svg class="icon icon--sm" viewBox="0 0 24 24"><path d="M5 4h3l2 5-2 1c1 2 3 4 5 5l1-2 5 2v3c0 1-1 2-2 2A15 15 0 0 1 4 6c0-1 1-2 1-2z"/></svg><span class="link-num">+966 53 554 4352</span></a>
+    <a class="link-icon" href="https://wa.me/966535544352"><svg class="icon icon--sm" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0-7.7 13.6L3 21l4.5-1.2A9 9 0 1 0 12 3z"/><path d="M8.5 8.5c1 3 3.5 5.5 6.5 6.5"/></svg><span>واتساب</span></a>
+  </div>
+</section>
+
+<!-- 09 CARDS -->
+<section class="ds-block" id="t09">
+  <div class="ds-block__head"><span class="n">09</span><h2>البطاقات</h2></div>
+  <p class="ds-note">نظام بطاقات مؤسسي-تحريري مقيّد: بطاقة معلومات/خدمة/ميزة، عنصر قيمة، عنصر تجهيز. حدّ أدنى من الظلال والحدود — لا يهيمن على اللغة البصرية.</p>
+  <div class="ds-grid-cards">
+    <div class="card card--interactive">
+      <span class="card__icon"><svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="19" r="3"/><path d="M9 16V7h6"/><path d="M9 10h6l2 6h-2"/><circle cx="9" cy="4" r="1.4"/></svg></span>
+      <h4 class="card__title">بطاقة خدمة</h4>
+      <p class="card__text">عنوان + أيقونة + وصف قصير. حالة تمرير خفيفة تُظهر إمكانية التفاعل.</p>
+    </div>
+    <div class="card">
+      <span class="card__icon"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4-3 7-7 8-4-1-7-4-7-8V6z"/><path d="M9.5 12l1.8 1.8L15 10"/></svg></span>
+      <h4 class="card__title">بطاقة ميزة</h4>
+      <p class="card__text">للاستخدام في شبكات المزايا؛ خلفية بيضاء وحدود رفيعة.</p>
+    </div>
+    <div class="card">
+      <div class="ds-label">عناصر القيمة</div>
+      <div class="value-item"><span class="value-item__dot"></span><div><strong>الاحترام</strong><p class="card__text">نقطة مسار تُعلّم القيمة.</p></div></div>
+      <div class="value-item" style="margin-block-start:.75rem"><span class="value-item__dot"></span><div><strong>الأمان</strong><p class="card__text">إيقاع بصري واحد.</p></div></div>
+    </div>
+    <div class="card">
+      <div class="ds-label">عناصر التجهيزات</div>
+      <div class="equip-item"><svg class="icon" viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M6 20v-6l6-4 6 4v6"/></svg><span>منصّة رفع</span></div>
+      <div class="equip-item"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>خدمة 24/7</span></div>
+      <div class="equip-item" style="border-block-end:0"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4-3 7-7 8-4-1-7-4-7-8V6z"/></svg><span>أحزمة أمان خاصة</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 ICONS -->
+<section class="ds-block" id="t10">
+  <div class="ds-block__head"><span class="n">10</span><h2>الأيقونات</h2></div>
+  <p class="ds-note">لغة خطّية واحدة: سُمك 1.6، أطراف مُدوّرة، شبكة 24، لون <span class="ds-mono">currentColor</span>. مقاسات 16/20/24/32/40. لا أيقونات ممتلئة أو ثلاثية الأبعاد أو إيموجي كواجهة.</p>
+  <div class="ds-demo ds-row" style="gap:1.5rem">
+    <svg class="icon icon--lg" viewBox="0 0 24 24"><circle cx="9" cy="19" r="3"/><path d="M9 16V7h6"/><path d="M9 10h6l2 6h-2"/><circle cx="9" cy="4" r="1.4"/></svg>
+    <svg class="icon icon--lg" viewBox="0 0 24 24"><path d="M3 15V8h11l4 4v3"/><circle cx="7.5" cy="17" r="1.6"/><circle cx="16.5" cy="17" r="1.6"/></svg>
+    <svg class="icon icon--lg" viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M6 20v-6l6-4 6 4v6"/><path d="M9 20v-4h6v4"/></svg>
+    <svg class="icon icon--lg" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4-3 7-7 8-4-1-7-4-7-8V6z"/><path d="M9.5 12l1.8 1.8L15 10"/></svg>
+    <svg class="icon icon--lg" viewBox="0 0 24 24"><path d="M12 21s-6-5.3-6-10a6 6 0 0 1 12 0c0 4.7-6 10-6 10z"/><circle cx="12" cy="11" r="2.2"/></svg>
+    <svg class="icon icon--lg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+    <svg class="icon icon--lg" viewBox="0 0 24 24"><path d="M20 8.5c0 4-8 9.5-8 9.5S4 12.5 4 8.5A3.5 3.5 0 0 1 12 6a3.5 3.5 0 0 1 8 2.5z"/></svg>
+    <svg class="icon icon--lg" viewBox="0 0 24 24"><path d="M5 4h3l2 5-2 1c1 2 3 4 5 5l1-2 5 2v3c0 1-1 2-2 2A15 15 0 0 1 4 6c0-1 1-2 1-2z"/></svg>
+  </div>
+</section>
+
+<!-- 11 IMAGES -->
+<section class="ds-block" id="t11">
+  <div class="ds-block__head"><span class="n">11</span><h2>الصور</h2></div>
+  <p class="ds-note">نسب ثابتة (<span class="ds-mono">aspect-ratio</span>) لمنع القفز، <span class="ds-mono">object-fit:cover</span>، وزوايا موحّدة. تراكب كحلي لطيف فقط عند وضع نص فوق الصورة. لا يُقصّ مستخدم الكرسي أو ميزة الوصول أو التفاعل الإنساني بشكل يفقد المعنى.</p>
+  <div class="ds-demo ds-row" style="align-items:flex-start">
+    <div style="flex:1;min-width:180px"><div class="ratio ratio--16x9"></div><div class="ds-mono" style="margin-block-start:.4rem">16:9 هيرو/تحريري</div></div>
+    <div style="flex:1;min-width:150px"><div class="ratio ratio--4x3"></div><div class="ds-mono" style="margin-block-start:.4rem">4:3 مساند</div></div>
+    <div style="flex:1;min-width:120px"><div class="ratio ratio--1x1"></div><div class="ds-mono" style="margin-block-start:.4rem">1:1 تفصيلي</div></div>
+    <div style="flex:1;min-width:150px"><div class="ratio ratio--4x3 img-overlay" style="display:flex;align-items:flex-end;padding:.75rem"><span style="color:#fff;font-family:var(--font-heading);font-weight:600;font-size:.85rem">نص فوق صورة</span></div><div class="ds-mono" style="margin-block-start:.4rem">تراكب كحلي</div></div>
+  </div>
+</section>
+
+<!-- 12 ROUTE -->
+<section class="ds-block" id="t12">
+  <div class="ds-block__head"><span class="n">12</span><h2>رسوم المسار / الطريق</h2></div>
+  <p class="ds-note">أصل بصري مستوحى من اللوجو: خط مسار، منحنى، رابط، فاصل، نقطة مسار، علامة قسم — تدعم فكرة الحركة ← الإرشاد ← الاستمرارية ← المساعدة. يُستخدم بانتقاء ولا يتحوّل إلى نمط زخرفي.</p>
+  <div class="ds-demo">
+    <div class="ds-label">فاصل مسار (خط منتصف متقطّع)</div>
+    <div class="route-divider" aria-hidden="true"><svg viewBox="0 0 1000 22" preserveAspectRatio="none">
+      <path class="route-edge" d="M0 5 C 250 5 300 5 500 11 C 700 17 750 17 1000 17"/>
+      <path class="route-mid" d="M0 11 C 250 11 500 11 500 11 C 700 11 750 11 1000 11"/>
+      <path class="route-edge" d="M0 17 C 250 17 300 17 500 11 C 700 5 750 5 1000 5"/>
+    </svg></div>
+    <div class="ds-label" style="margin-block-start:1rem">منحنى مسار بنقاط (علامات محطات)</div>
+    <svg viewBox="0 0 900 160" style="width:100%;height:auto;color:var(--color-primary)" aria-hidden="true">
+      <path d="M20 120 C 160 120 180 40 320 40 C 470 40 480 120 620 120 C 760 120 780 55 880 55" stroke="currentColor" stroke-width="9" fill="none" stroke-linecap="round" opacity=".85"/>
+      <path d="M20 120 C 160 120 180 40 320 40 C 470 40 480 120 620 120 C 760 120 780 55 880 55" stroke="#fff" stroke-width="2" fill="none" stroke-dasharray="2 13" stroke-linecap="round"/>
+      <circle cx="20" cy="120" r="8" fill="#fff" stroke="currentColor" stroke-width="3"/>
+      <circle cx="320" cy="40" r="6" fill="#fff" stroke="currentColor" stroke-width="3"/>
+      <circle cx="620" cy="120" r="6" fill="#fff" stroke="currentColor" stroke-width="3"/>
+      <circle cx="880" cy="55" r="8" fill="currentColor"/>
+    </svg>
+  </div>
+</section>
+
+<!-- 13 HEADER -->
+<section class="ds-block" id="t13">
+  <div class="ds-block__head"><span class="n">13</span><h2>الهيدر / التنقّل</h2></div>
+  <p class="ds-note">معمارية عالمية قابلة لإعادة الاستخدام: لوجو (البداية) · تنقّل · CTA. على الجوال: لوجو + زر قائمة + درج تنقّل وصولي. ارتفاع، حالة نشطة، تمرير، وسلوك لاصق مع ضبابية عند التمرير. (ليس الهيرو ولا تنقّلًا خاصًا بصفحة.)</p>
+  <div class="ds-frame">
+    <header class="site-header"><div class="container container--wide"><div class="site-header__inner">
+      <img class="site-logo" src="aun-aldrb-logo.svg" alt="عون الدرب">
+      <nav class="site-nav" aria-label="التنقل الرئيسي"><ul class="site-nav__list">
+        <li><a class="site-nav__link is-active" href="#t13">الرئيسية</a></li>
+        <li><a class="site-nav__link" href="#t13">من نحن</a></li>
+        <li><a class="site-nav__link" href="#t13">خدماتنا</a></li>
+        <li><a class="site-nav__link" href="#t13">تواصل</a></li>
+      </ul></nav>
+      <a class="btn btn--primary" href="#t13">تواصل معنا</a>
+    </div></div></header>
+  </div>
+</section>
+
+<!-- 14 FOOTER -->
+<section class="ds-block" id="t14">
+  <div class="ds-block__head"><span class="n">14</span><h2>الفوتر</h2></div>
+  <p class="ds-note">بنية عالمية بنفس النظام: علامة، تنقّل، تواصل، وروابط مرافق عند الحاجة. لا تُختلق حسابات تواصل اجتماعي أو معلومات قانونية.</p>
+  <div class="ds-frame">
+    <footer class="site-footer" style="border-radius:0"><div class="site-footer__top"><div class="container container--wide">
+      <div class="site-footer__grid">
+        <div><img class="site-footer__logo" src="aun-aldrb-logo-white.svg" alt="عون الدرب"><p style="color:var(--text-on-inverse-muted);max-width:40ch">نُعين ونُعاون — نقل متخصص آمن ومجهّز بكوادر مدرّبة.</p></div>
+        <div><div class="site-footer__col-title">روابط</div><ul class="site-footer__list"><li><a href="#t14">من نحن</a></li><li><a href="#t14">خدماتنا</a></li></ul></div>
+        <div><div class="site-footer__col-title">الخدمات</div><ul class="site-footer__list"><li><a href="#t14">النقل بالكرسي</a></li><li><a href="#t14">النقل الطبي</a></li></ul></div>
+        <div><div class="site-footer__col-title">تواصل</div><ul class="site-footer__list"><li><span class="link-num">+966 53 554 4352</span></li><li>الرياض · حي السليمانية</li></ul></div>
+      </div>
+    </div></div>
+    <div class="site-footer__bottom"><div class="container container--wide site-footer__bottom-inner">
+      <small style="color:var(--text-on-inverse-muted)">© عون الدرب للنقل المتخصص</small>
+      <small style="color:var(--text-on-inverse-muted)">aunaldrb.com</small>
+    </div></div></footer>
+  </div>
+</section>
+
+<!-- 15 FORMS -->
+<section class="ds-block" id="t15">
+  <div class="ds-block__head"><span class="n">15</span><h2>النماذج</h2></div>
+  <p class="ds-note">حقول قابلة لإعادة الاستخدام: نص، هاتف (أرقام LTR)، منطقة نص، قائمة، اختيار متعدّد/أحادي، مع حالات خطأ ونجاح ومعطّل ومؤشّر إلزامي. محاذاة RTL، أهداف لمس كبيرة، تركيز مرئي.</p>
+  <div class="ds-demo" style="max-width:560px">
+    <div class="field"><label class="field__label" for="f1">الاسم <span class="field__req">*</span></label><input class="input" id="f1" placeholder="الاسم الكامل"></div>
+    <div class="field"><label class="field__label" for="f2">رقم الجوال</label><input class="input input--phone" id="f2" value="+966 5X XXX XXXX"></div>
+    <div class="field"><label class="field__label" for="f3">نوع الخدمة</label><select class="select" id="f3"><option>النقل بالكرسي المتحرك</option><option>النقل الطبي</option></select></div>
+    <div class="field"><label class="field__label" for="f4">تفاصيل</label><textarea class="textarea" id="f4" placeholder="اكتب طلبك…"></textarea></div>
+    <label class="choice"><input type="checkbox" checked> أوافق على سياسة الخصوصية</label>
+    <div class="field is-error" style="margin-block-start:1.25rem"><label class="field__label" for="f5">حقل بحالة خطأ</label><input class="input" id="f5" value="قيمة غير صحيحة"><span class="field__msg field__msg--error"><svg class="icon icon--xs" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>هذا الحقل مطلوب</span></div>
+    <div class="alert alert--success" style="margin-block-start:.5rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7L10 17l-5-5"/></svg>تم إرسال طلبك بنجاح.</div>
+  </div>
+</section>
+
+<!-- 16 SECTION TEMPLATES -->
+<section class="ds-block" id="t16">
+  <div class="ds-block__head"><span class="n">16</span><h2>قوالب الأقسام</h2></div>
+  <p class="ds-note">هياكل بنيوية قابلة لإعادة الاستخدام ترث الشبكة والطباعة والتباعد والألوان — <strong>دون محتوى صفحة</strong>. الأنواع: قياسي، مقسوم، تحريري، مزايا/شبكة، كامل العرض، CTA، تواصل.</p>
+  <div class="ds-grid-cards">
+    <div><div class="ds-label">قياسي</div><div class="ds-skel"><div class="ds-region">Eyebrow + Heading</div><div class="ds-region">Body</div></div></div>
+    <div><div class="ds-label">مقسوم (Split)</div><div class="ds-skel"><div class="ds-skel-split"><div class="ds-region">Media</div><div class="ds-region">Heading + Body + CTA</div></div></div></div>
+    <div><div class="ds-label">شبكة مزايا</div><div class="ds-skel"><div class="ds-region">Heading</div><div class="ds-skel-split"><div class="ds-region">Card</div><div class="ds-region">Card</div></div></div></div>
+    <div><div class="ds-label">CTA</div><div class="ds-skel"><div class="ds-region" style="background:var(--surface-inverse);color:#fff;border-color:transparent">Heading + Button</div></div></div>
+    <div><div class="ds-label">كامل العرض</div><div class="ds-skel" style="padding:.4rem"><div class="ds-region" style="min-height:70px">Full-bleed media + overlay</div></div></div>
+    <div><div class="ds-label">تواصل</div><div class="ds-skel"><div class="ds-skel-split"><div class="ds-region">Form</div><div class="ds-region">Contact items</div></div></div></div>
+  </div>
+</section>
+
+<!-- 17 MOTION -->
+<section class="ds-block" id="t17">
+  <div class="ds-block__head"><span class="n">17</span><h2>الحركة</h2></div>
+  <p class="ds-note">لغة حركة مقيّدة تُبلّغ الاستمرارية والاتجاه والتغذية الراجعة والهرمية: تلاشٍ خفيف، انزلاق محكوم، كشف خط المسار، انتقالات التمرير. سريعة، هادفة، ومعطّلة عند <span class="ds-mono">prefers-reduced-motion</span>.</p>
+  <div class="ds-demo ds-row">
+    <div class="ds-mono">instant 80ms</div><div class="ds-mono">fast 150ms</div><div class="ds-mono">normal 260ms</div><div class="ds-mono">slow 420ms</div>
+    <div style="width:1px;height:24px;background:var(--border)"></div>
+    <div class="ds-mono">ease-smooth</div><div class="ds-mono">ease-entrance</div>
+  </div>
+</section>
+
+<!-- 18 COMPONENT STATES -->
+<section class="ds-block" id="t18">
+  <div class="ds-block__head"><span class="n">18</span><h2>حالات المكوّنات</h2></div>
+  <p class="ds-note">كل مكوّن تفاعلي يُعرّف: افتراضي، تمرير، تركيز، ضغط، معطّل، وتحميل/خطأ عند اللزوم. لا يُعتمد على تغيّر اللون وحده — تُضاف حركة أو حدّ أو أيقونة.</p>
+  <div class="ds-tablewrap"><table class="ds-table">
+    <thead><tr><th>الحالة</th><th>الإشارة البصرية (غير لونية أيضًا)</th></tr></thead>
+    <tbody>
+      <tr><td>Hover</td><td>تغيّر خلفية + رفع طفيف / خط سفلي</td></tr>
+      <tr><td>Focus</td><td>حلقة تركيز مرئية <span class="ds-mono">box-shadow:0 0 0 3px</span></td></tr>
+      <tr><td>Active</td><td>لون أغمق + إزاحة للأسفل</td></tr>
+      <tr><td>Disabled</td><td>شفافية 0.45 + <span class="ds-mono">not-allowed</span></td></tr>
+      <tr><td>Loading</td><td>دوّار + تعطيل المؤشّر</td></tr>
+      <tr><td>Error/Success</td><td>حدّ + أيقونة + نص مساعد</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 19 RESPONSIVE -->
+<section class="ds-block" id="t19">
+  <div class="ds-block__head"><span class="n">19</span><h2>التجاوب</h2></div>
+  <p class="ds-note">مبني mobile-first مع تحوّلات تخطيط عند نقاط الكسر. الجوال ليس نسخة مضغوطة — أولوية العمود الواحد، هرمية واضحة، أهداف لمس كبيرة، دون تجاوز أفقي أو قصّ.</p>
+  <div class="ds-tablewrap"><table class="ds-table">
+    <thead><tr><th>العنصر</th><th>ديسكتوب ≥1024</th><th>لوحي 768–1023</th><th>جوال ≤767</th></tr></thead>
+    <tbody>
+      <tr><td>الشبكة</td><td>12 عمودًا</td><td>8 أعمدة</td><td>4 / عمود واحد</td></tr>
+      <tr><td>التنقّل</td><td>أفقي كامل</td><td>أفقي/مضغوط</td><td>درج + زر قائمة</td></tr>
+      <tr><td>الطباعة</td><td>سلّم كامل</td><td>مُقلّص</td><td>عناوين مضغوطة · متن ≥16px</td></tr>
+      <tr><td>الأزرار</td><td>حسب المحتوى</td><td>حسب المحتوى</td><td>عرض كامل (≤479px)</td></tr>
+      <tr><td>رسوم المسار</td><td>منحنيات ممتدة</td><td>مبسّطة</td><td>فاصل رفيع فقط</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 20 ACCESSIBILITY -->
+<section class="ds-block" id="t20">
+  <div class="ds-block__head"><span class="n">20</span><h2>الوصول</h2></div>
+  <p class="ds-note">الوصول جزء من النظام لا ترقيع لاحق — وهو جوهر علامة تخدم كبار السن وذوي الإعاقة.</p>
+  <div class="ds-grid-cards">
+    <div class="card"><h4 class="card__title">تباين WCAG</h4><p class="card__text">نص أساسي كحلي/حبر ≥4.5:1؛ الأزرق للعناصر الكبيرة والواجهات.</p></div>
+    <div class="card"><h4 class="card__title">تركيز مرئي</h4><p class="card__text">حلقة تركيز على كل عنصر عبر لوحة المفاتيح.</p></div>
+    <div class="card"><h4 class="card__title">أهداف لمس ≥44px</h4><p class="card__text">أزرار وروابط وحقول قابلة للاستخدام باللمس.</p></div>
+    <div class="card"><h4 class="card__title">بنية دلالية</h4><p class="card__text">هرمية عناوين، roles، skip-link، وبدائل نصية للصور.</p></div>
+    <div class="card"><h4 class="card__title">لا لون وحده</h4><p class="card__text">أي دلالة تُرفق بأيقونة أو نص.</p></div>
+    <div class="card"><h4 class="card__title">حركة مخفّضة</h4><p class="card__text">تعطيل الحركة عند prefers-reduced-motion.</p></div>
+  </div>
+</section>
+
+<!-- 21 PERFORMANCE -->
+<section class="ds-block" id="t21">
+  <div class="ds-block__head"><span class="n">21</span><h2>الأداء</h2></div>
+  <p class="ds-note">النظام يدعم موقعًا عالي الأداء: CSS واحد بلا تبعيات ثقيلة، أيقونات SVG مضمّنة خفيفة، حاويات صور بنسب ثابتة تمنع انزياح التخطيط (CLS)، وحركة مقيّدة دون parallax مفرط أو JS غير ضروري.</p>
+  <div class="ds-grid-cards">
+    <div class="card"><h4 class="card__title">بلا تبعيات</h4><p class="card__text">توكنز + CSS نقي؛ لا أطر ثقيلة.</p></div>
+    <div class="card"><h4 class="card__title">أبعاد متوقّعة</h4><p class="card__text">aspect-ratio لكل صورة — لا قفز تخطيط.</p></div>
+    <div class="card"><h4 class="card__title">أصول خفيفة</h4><p class="card__text">لوجو SVG متجهي، أيقونات مضمّنة.</p></div>
+  </div>
+</section>
+
+<!-- 22 CONSISTENCY -->
+<section class="ds-block" id="t22">
+  <div class="ds-block__head"><span class="n">22</span><h2>قواعد الاتساق والمكتبة</h2></div>
+  <p class="ds-note">مكتبة المكوّنات قابلة للتركيب وإعادة الاستخدام. أي قسم جديد يعيد استخدام النظام بدل ابتكار معالجة بصرية جديدة، ولا تُكرَّر مكوّنات بنفس الوظيفة.</p>
+  <div class="ds-row" style="gap:.5rem;flex-wrap:wrap">
+    <span class="btn btn--secondary btn--sm">Header</span><span class="btn btn--secondary btn--sm">Mobile Nav</span>
+    <span class="btn btn--secondary btn--sm">Logo</span><span class="btn btn--secondary btn--sm">Section Heading</span>
+    <span class="btn btn--secondary btn--sm">Eyebrow</span><span class="btn btn--secondary btn--sm">Button</span>
+    <span class="btn btn--secondary btn--sm">Text Link</span><span class="btn btn--secondary btn--sm">Icon</span>
+    <span class="btn btn--secondary btn--sm">Icon Button</span><span class="btn btn--secondary btn--sm">Card</span>
+    <span class="btn btn--secondary btn--sm">Service Card</span><span class="btn btn--secondary btn--sm">Feature Card</span>
+    <span class="btn btn--secondary btn--sm">Value Item</span><span class="btn btn--secondary btn--sm">Equipment Item</span>
+    <span class="btn btn--secondary btn--sm">Image Block</span><span class="btn btn--secondary btn--sm">Route Graphic</span>
+    <span class="btn btn--secondary btn--sm">Divider</span><span class="btn btn--secondary btn--sm">CTA Block</span>
+    <span class="btn btn--secondary btn--sm">Contact Item</span><span class="btn btn--secondary btn--sm">Footer</span>
+    <span class="btn btn--secondary btn--sm">Form Fields</span><span class="btn btn--secondary btn--sm">Section Templates</span>
+  </div>
+</section>
+
+</main>
+
+<footer class="ds-foot">
+  <div class="container">
+    <img src="aun-aldrb-logo-white.svg" alt="عون الدرب" style="height:38px;width:auto;margin-block-end:1rem">
+    <p style="color:var(--text-on-inverse-muted);max-width:60ch">المرحلة 02 — نظام تصميم الموقع. نظام واحد يرثه كل قسم مستقبلي. لا يُعاد تعريف الهوية أو التوكنز العالمية في أي مرحلة لاحقة.</p>
+    <p style="margin-block-start:1rem"><small>عون الدرب للنقل المتخصص · نُعين ونُعاون · aunaldrb.com</small></p>
+  </div>
+</footer>
+
+<script>
+/* header scroll state + simple reveal (system behavior demo) */
+(function(){
+  var h=document.querySelector('.ds-frame .site-header');
+  var io='IntersectionObserver' in window;
+  if(!window.matchMedia('(prefers-reduced-motion:reduce)').matches && io){
+    var obs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('is-inview');obs.unobserve(e.target);}});},{threshold:.1});
+    document.querySelectorAll('[data-reveal]').forEach(function(el){obs.observe(el);});
+  }
+})();
+</script>
+</body>
+</html>
