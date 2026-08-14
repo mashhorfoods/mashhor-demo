@@ -780,8 +780,10 @@ section[id]{scroll-margin-top:var(--anchor-offset)}
   padding:clamp(1.35rem,2.6vw,1.85rem);display:flex;flex-direction:column;gap:var(--sp-12);
   transition:border-color var(--dur-normal) var(--ease-smooth),box-shadow var(--dur-fast) var(--ease-standard),
   transform var(--dur-normal) var(--ease-smooth)}
-@media(hover:hover){.service:hover{border-color:var(--aun-sky);box-shadow:var(--shadow-md);transform:translateY(-3px)}
-  .service:hover .service__icon{background:var(--color-primary);color:#fff;border-color:var(--color-primary)}}
+/* service tiles are informational (no destination) — a restrained border
+   cue on hover, without the lift/elevation/icon-invert that would imply a
+   clickable control (Stage 17 motion audit) */
+@media(hover:hover){.service:hover{border-color:var(--aun-sky)}}
 .service__icon{width:52px;height:52px;flex:0 0 auto;border-radius:var(--radius-circle);display:grid;place-items:center;
   background:var(--aun-mist);border:1px solid var(--aun-sky);color:var(--color-primary);
   transition:var(--transition-control)}
