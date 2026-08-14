@@ -573,8 +573,9 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 .site-logo{transition:opacity var(--dur-fast) var(--ease-standard)}
 .site-header__actions{display:flex;align-items:center;gap:var(--sp-16);flex:0 0 auto}
 
-/* header CTA visibility helper (hidden on mobile — drawer carries the CTA) */
-.site-header__cta{display:inline-flex}
+/* header CTA inherits display from .btn; the max-width:767 rule above hides
+   it on mobile (the drawer carries the CTA). No unconditional display here,
+   or it would override that mobile hide. */
 
 /* hamburger icon inside .menu-trigger — animates to X when open */
 .menu-icon{position:relative;width:22px;height:14px}
@@ -1071,3 +1072,64 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 
 /* footer link tap targets >= 24px (AA 2.5.8) without altering the layout */
 .site-footer__list a,.site-footer__bottom-inner a{display:inline-block;padding-block:var(--sp-4)}
+
+/* ==========================================================================
+   HERO — REFERENCE MATCH (user-directed layout)
+   Adds a gold trust accent, audience cards, a bottom trust strip and a
+   bolder route graphic, on top of the approved blue/navy system.
+   ========================================================================== */
+.site-header__cta{gap:var(--sp-8)}
+.site-header__cta svg{width:18px;height:18px;flex:0 0 auto}
+
+.hero{padding-block-end:0}                        /* trust strip closes the hero */
+@media(min-width:1024px){.hero__inner{align-items:start}}
+.hero__aud-card{align-items:flex-start}
+.hero__eyebrow-gold{display:inline-flex;align-items:center;gap:var(--sp-8);font-family:var(--font-heading);
+  font-weight:var(--fw-semibold);font-size:var(--fs-small);letter-spacing:.01em;color:#8a6a12}
+.hero__eyebrow-gold svg{width:20px;height:20px;flex:0 0 auto;color:#8a6a12}
+.hero__title{font-size:clamp(2.5rem,1.7rem+3.5vw,4.4rem);margin-block:var(--sp-16) 0}
+.hero__lead{margin-block-start:var(--sp-16)}
+.hero__divider{display:block;width:66px;height:3px;border-radius:var(--radius-pill);
+  background:#b08a2e;margin-block-start:var(--sp-20)}
+
+/* audience cards */
+.hero__aud{list-style:none;display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-12);
+  margin-block-start:var(--sp-24)}
+.hero__aud-card{display:flex;flex-direction:column;gap:var(--sp-4);background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--radius-md);padding:var(--sp-16);box-shadow:var(--shadow-sm)}
+.hero__aud-icon{width:40px;height:40px;border-radius:var(--radius-circle);display:grid;place-items:center;
+  background:var(--aun-mist);border:1px solid var(--aun-sky);color:var(--color-primary);margin-block-end:var(--sp-4)}
+.hero__aud-icon svg{width:22px;height:22px}
+.hero__aud-title{font-family:var(--font-heading);font-weight:var(--fw-semibold);font-size:var(--fs-body);color:var(--color-secondary)}
+.hero__aud-desc{font-family:var(--font-body);font-size:var(--fs-small);line-height:var(--lh-normal);color:var(--text-secondary)}
+
+/* media — taller portrait to match the reference */
+.hero__media-frame{aspect-ratio:1/1}
+
+/* bolder brand road sweeping through the hero (behind content) */
+.hero__road{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.hero__road svg{position:absolute;inset-block-end:2%;inset-inline:0;width:100%;height:auto}
+
+/* bottom trust strip */
+.hero__trustbar{position:relative;z-index:1;background:var(--aun-mist);border-block-start:1px solid var(--border);
+  margin-block-start:clamp(2.5rem,5vw,4rem)}
+.hero__trustbar-inner{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(1rem,2vw,1.75rem);
+  padding-block:clamp(1.5rem,3vw,2rem)}
+.hero__trust{display:flex;align-items:center;gap:var(--sp-12)}
+.hero__trust-icon{width:46px;height:46px;flex:0 0 auto;border-radius:var(--radius-circle);display:grid;place-items:center;
+  background:var(--surface);border:1px solid var(--aun-sky);color:var(--color-primary)}
+.hero__trust-icon svg{width:22px;height:22px;stroke-width:1.6}
+.hero__trust b{display:block;font-family:var(--font-heading);font-weight:var(--fw-semibold);font-size:var(--fs-small);color:var(--color-secondary)}
+.hero__trust span{font-size:var(--fs-caption);color:var(--text-secondary);line-height:var(--lh-normal)}
+
+@media(max-width:1023px){
+  .hero__trustbar-inner{grid-template-columns:repeat(2,1fr);gap:var(--sp-20)}
+}
+@media(max-width:767px){
+  .hero__media-frame{aspect-ratio:4/3}
+  .hero__aud{grid-template-columns:1fr}
+  .hero__road{display:none}
+}
+@media(max-width:520px){
+  .hero__trustbar-inner{grid-template-columns:1fr}
+}

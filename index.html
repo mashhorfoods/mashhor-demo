@@ -59,6 +59,10 @@
         </nav>
 
         <div class="site-header__actions">
+          <a class="btn btn--primary site-header__cta" href="#contact">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h3l2 5-2 1c1 2 3 4 5 5l1-2 5 2v3c0 1-1 2-2 2A15 15 0 0 1 4 6c0-1 1-2 1-2z"/></svg>
+            تواصل معنا
+          </a>
           <button type="button" class="menu-trigger" data-menu-trigger
                   aria-label="فتح القائمة" aria-expanded="false" aria-controls="mobile-nav">
             <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
@@ -92,10 +96,11 @@
       <section class="section section--surface hero" id="home" data-section aria-labelledby="hero-title">
 
         <!-- subtle section-level route graphic (§10) — behind content -->
-        <span class="hero__route" aria-hidden="true">
-          <svg viewBox="0 0 600 600" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M600,30 C 380,110 300,300 360,570" stroke="currentColor" stroke-width="42" stroke-linecap="round" opacity=".5"/>
-            <path d="M600,116 C 432,188 360,340 408,548" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 13" opacity=".85"/>
+        <!-- brand road graphic sweeping through the hero -->
+        <span class="hero__road" aria-hidden="true">
+          <svg viewBox="0 0 1440 420" fill="none" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+            <path d="M-60 250 C 260 140 470 380 770 330 C 1050 284 1210 120 1520 70" stroke="#4975BA" stroke-width="64" fill="none" stroke-linecap="round"/>
+            <path d="M-60 250 C 260 140 470 380 770 330 C 1050 284 1210 120 1520 70" stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round" stroke-dasharray="2 24" opacity=".85"/>
           </svg>
         </span>
 
@@ -103,22 +108,29 @@
 
           <!-- CONTENT -->
           <div class="hero__content">
-            <p class="eyebrow" data-reveal>عون الدرب للنقل المتخصص</p>
+            <p class="hero__eyebrow-gold" data-reveal>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6l7-3Z"/><path d="M9.2 12l2 2 3.6-3.8"/></svg>
+              رعاية متخصصة وآمنة
+            </p>
             <h1 id="hero-title" class="hero__title" data-reveal>نُعين ونُعاون</h1>
             <p class="hero__lead" data-reveal>نقل متخصص يجمع بين الأمان، الراحة، والرعاية.</p>
+            <span class="hero__divider" aria-hidden="true" data-reveal></span>
 
-            <ul class="hero__scope" data-reveal>
-              <li>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7" r="3.2"/><path d="M6 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
-                كبار السن
+            <ul class="hero__aud" data-reveal>
+              <li class="hero__aud-card">
+                <span class="hero__aud-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="3.2"/><path d="M6 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg></span>
+                <span class="hero__aud-title">كبار السن</span>
+                <span class="hero__aud-desc">رعاية واهتمام في كل رحلة</span>
               </li>
-              <li>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="2.2"/><path d="M12 7.5v6l4.5 4.5M12 11h4"/><circle cx="10.5" cy="16.5" r="4"/></svg>
-                ذوو الإعاقة
+              <li class="hero__aud-card">
+                <span class="hero__aud-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.2"/><path d="M12 7.5v6l4.5 4.5M12 11h4"/><circle cx="10.5" cy="16.5" r="4"/></svg></span>
+                <span class="hero__aud-title">ذوو الإعاقة</span>
+                <span class="hero__aud-desc">نقل آمن ومريح يدعم استقلاليتهم</span>
               </li>
-              <li>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.5C7 17 4 13.6 4 9.8A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 8 2.8c0 3.8-3 7.2-8 10.7Z"/><path d="M12 9.2v3.4M10.3 10.9h3.4"/></svg>
-                المرضى المحتاجون لوسائل نقل مجهّزة
+              <li class="hero__aud-card">
+                <span class="hero__aud-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5C7 17 4 13.6 4 9.8A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 8 2.8c0 3.8-3 7.2-8 10.7Z"/><path d="M12 9.2v3.4M10.3 10.9h3.4"/></svg></span>
+                <span class="hero__aud-title">المرضى</span>
+                <span class="hero__aud-desc">المحتاجون لوسائل نقل مجهّزة</span>
               </li>
             </ul>
 
@@ -127,35 +139,45 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h3l2 5-2 1c1 2 3 4 5 5l1-2 5 2v3c0 1-1 2-2 2A15 15 0 0 1 4 6c0-1 1-2 1-2z"/></svg>
                 تواصل معنا
               </a>
-              <a class="btn btn--secondary btn--lg" href="#services">اكتشف خدماتنا</a>
+              <a class="btn btn--secondary btn--lg" href="#services">
+                اكتشف خدماتنا
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+              </a>
             </div>
           </div>
 
-          <!-- MEDIA — licensed photograph. Hosted externally for now;
-               host it on the aunaldrb.com domain (and add webp/avif srcset)
-               for production. object-fit:cover keeps staff + passenger +
-               vehicle centered in the 4/3 frame. -->
+          <!-- MEDIA — licensed photograph (host on aunaldrb.com + add srcset for production) -->
           <figure class="hero__media" data-reveal>
             <div class="hero__media-frame">
               <img src="https://i.ibb.co/8g53yMFY/01.webp"
-                   width="1600" height="1200" fetchpriority="high" decoding="async"
+                   width="1200" height="1200" fetchpriority="high" decoding="async"
                    alt="أخصائي نقل مدرّب يساعد راكبًا مسنًّا يستخدم كرسيًا متحركًا على منحدر مركبة حديثة مجهّزة للنقل المتخصص">
-
-              <span class="hero__badge">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6l7-3Z"/><path d="M9.2 12l2 2 3.6-3.8"/></svg>
-                رعاية متخصصة وآمنة
-              </span>
             </div>
           </figure>
 
         </div>
 
-        <!-- transition into About — the route continues (§ section transition) -->
-        <span class="hero__transition" aria-hidden="true">
-          <svg viewBox="0 0 1440 90" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0,64 C 360,26 1080,26 1440,64" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 14"/>
-          </svg>
-        </span>
+        <!-- trust strip -->
+        <div class="hero__trustbar">
+          <div class="container container--wide hero__trustbar-inner">
+            <div class="hero__trust">
+              <span class="hero__trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6l7-3Z"/><path d="M9.2 12l2 2 3.6-3.8"/></svg></span>
+              <div><b>أمان في كل رحلة</b><span>مركبات مجهزة ومعايير سلامة عالية</span></div>
+            </div>
+            <div class="hero__trust">
+              <span class="hero__trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="2.4"/><circle cx="16" cy="8.5" r="2"/><path d="M4.5 19c0-2.7 2-4.8 4.5-4.8"/><path d="M12.5 19c0-2.4 1.6-4.3 3.5-4.3s3.5 1.9 3.5 4.3"/></svg></span>
+              <div><b>طاقم مدرب ومحترف</b><span>رعاية إنسانية وخدمة باحترافية</span></div>
+            </div>
+            <div class="hero__trust">
+              <span class="hero__trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15v-3l2-3.2h8l2.4 3.2H19v3"/><path d="M3 15h1.6M15 15h4"/><circle cx="8" cy="16" r="1.7"/><circle cx="17" cy="16" r="1.7"/></svg></span>
+              <div><b>مركبات حديثة ومجهزة</b><span>تقنيات متقدمة لراحة المستفيد</span></div>
+            </div>
+            <div class="hero__trust">
+              <span class="hero__trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg></span>
+              <div><b>خدمة على مدار الساعة</b><span>متاحون على مدار الساعة لتلبية احتياجاتكم</span></div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- ==============================================================
