@@ -3,284 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#FFFFFF">
+  <meta name="theme-color" content="#4975BA">
 
-  <title>وكالة المدى للسياحة والسفر — Al Mada Travel &amp; Tourism</title>
-  <meta name="description" content="وكالة المدى للسياحة والسفر — خدمات سياحة وسفر بمعايير عالمية.">
+  <title>عون الدرب للنقل المتخصص — نُعين ونُعاون</title>
+  <meta name="description" content="شركة عون الدرب للنقل المتخصص — نقل آمن ومجهّز لكبار السن وذوي الإعاقة والمرضى، بكوادر مدرّبة في بيئة تحترم الإنسانية.">
 
-  <!-- ================= FONTS · Cairo (Google Fonts) ================= -->
+  <!-- FONTS — approved pairing (IBM Plex Sans Arabic + Cairo) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Cairo:wght@400;600;700&display=swap">
+
+  <!-- GLOBAL DESIGN SYSTEM (Stage 02 + Stage 03 additions) — single source of truth -->
+  <link rel="stylesheet" href="brand/system.css">
+  <link rel="icon" type="image/svg+xml" href="brand/aun-aldrb-logo.svg">
 
   <style>
-  /* ==========================================================================
-     AL MADA TRAVEL & TOURISM — DESIGN TOKENS (Stage 02)
-     Single source of truth. Never hardcode; always reference these.
-     ========================================================================== */
-  :root {
-    /* 1 · COLOR — RAW BRAND PALETTE (approved identity) */
-    --brand-blue:#0A4FB7; --brand-navy:#06357A; --brand-blue-bright:#2C7BE5; --brand-blue-sky:#7CB7FF;
-    --white:#FFFFFF; --neutral-soft:#FAFBFD; --neutral-section:#F4F7FB; --neutral-divider:#E6EAF0;
-    --ink-900:#1B2430; --ink-600:#556070; --ink-400:#8892A0;
-
-    /* 1b · COLOR — SEMANTIC */
-    --color-primary:var(--brand-blue); --color-primary-hover:var(--brand-blue-bright);
-    --color-primary-active:var(--brand-navy); --color-primary-subtle:rgba(10,79,183,0.08);
-    --color-accent:var(--brand-blue-bright); --color-accent-soft:var(--brand-blue-sky);
-    --surface-primary:var(--white); --surface-soft:var(--neutral-soft);
-    --surface-section:var(--neutral-section); --surface-inverse:var(--brand-navy);
-    --surface-overlay:rgba(6,21,43,0.55);
-    --text-primary:var(--ink-900); --text-secondary:var(--ink-600); --text-muted:var(--ink-400);
-    --text-on-primary:var(--white); --text-on-inverse:rgba(255,255,255,0.92);
-    --text-link:var(--color-primary); --text-link-hover:var(--color-primary-hover);
-    --color-border:var(--neutral-divider); --color-border-strong:#D3DAE6;
-    --color-focus:var(--brand-blue-bright); --color-focus-ring:rgba(44,123,229,0.40);
-    --color-success:#1F9D6B; --color-error:#D34A4A; --color-warning:#C98A21; --color-error-ring:rgba(211,74,74,0.32);
-
-    /* 2 · TYPOGRAPHY — Cairo */
-    --font-family-base:"Cairo",ui-sans-serif,system-ui,-apple-system,"Segoe UI","Helvetica Neue",Arial,"Noto Sans Arabic",sans-serif;
-    --font-family-heading:var(--font-family-base);
-    --font-weight-regular:400; --font-weight-medium:500; --font-weight-semibold:600; --font-weight-bold:700;
-    --font-size-display:clamp(2.50rem,1.35rem + 4.6vw,4.50rem);
-    --font-size-h1:clamp(2.00rem,1.35rem + 2.6vw,3.50rem);
-    --font-size-h2:clamp(1.75rem,1.35rem + 1.6vw,2.50rem);
-    --font-size-h3:clamp(1.375rem,1.15rem + 0.9vw,1.75rem);
-    --font-size-h4:clamp(1.125rem,1.02rem + 0.4vw,1.375rem);
-    --font-size-body-lg:clamp(1.125rem,1.08rem + 0.2vw,1.25rem);
-    --font-size-body:1.0625rem; --font-size-small:0.9375rem; --font-size-caption:0.8125rem;
-    --font-size-button:1rem; --font-size-nav:1rem;
-    --leading-tight:1.15; --leading-snug:1.30; --leading-normal:1.50; --leading-relaxed:1.75;
-    --tracking-tight:-0.02em; --tracking-normal:0; --tracking-wide:0.08em; --tracking-wider:0.14em;
-
-    /* 3 · SPACING */
-    --space-0:0; --space-2:0.125rem; --space-4:0.25rem; --space-8:0.5rem; --space-12:0.75rem;
-    --space-16:1rem; --space-20:1.25rem; --space-24:1.5rem; --space-32:2rem; --space-40:2.5rem;
-    --space-48:3rem; --space-64:4rem; --space-80:5rem; --space-96:6rem; --space-120:7.5rem;
-    --space-140:8.75rem; --space-160:10rem;
-
-    /* 4 · LAYOUT / CONTAINER */
-    --container-max:1280px; --container-narrow:820px; --container-wide:1440px; --container-full:100%;
-    --measure:68ch; --container-padding:clamp(1.25rem,5vw,5rem);
-    --section-padding-y:clamp(4.5rem,9vw,8.75rem); --header-height:clamp(64px,7vw,80px);
-
-    /* 5 · GRID */
-    --grid-columns:12; --grid-gutter:clamp(1rem,1.6vw,1.5rem);
-
-    /* 6 · RADIUS */
-    --radius-none:0; --radius-xs:6px; --radius-sm:10px; --radius-md:14px; --radius-lg:20px;
-    --radius-xl:28px; --radius-2xl:36px; --radius-pill:999px; --radius-round:50%;
-    --radius-button:var(--radius-sm); --radius-input:var(--radius-sm); --radius-card:var(--radius-lg);
-    --radius-image:var(--radius-lg); --radius-floating:var(--radius-xl); --radius-modal:var(--radius-xl);
-
-    /* 7 · SHADOWS */
-    --shadow-rgb:15,42,92; --shadow-none:none;
-    --shadow-sm:0 1px 2px rgba(var(--shadow-rgb),0.04),0 1px 3px rgba(var(--shadow-rgb),0.06);
-    --shadow-md:0 2px 6px rgba(var(--shadow-rgb),0.05),0 8px 20px rgba(var(--shadow-rgb),0.07);
-    --shadow-lg:0 4px 10px rgba(var(--shadow-rgb),0.05),0 16px 36px rgba(var(--shadow-rgb),0.09);
-    --shadow-floating:0 8px 20px rgba(var(--shadow-rgb),0.08),0 28px 60px rgba(var(--shadow-rgb),0.12);
-    --shadow-hover:0 6px 16px rgba(var(--shadow-rgb),0.08),0 20px 44px rgba(var(--shadow-rgb),0.12);
-    --shadow-focus:0 0 0 3px var(--color-focus-ring); --shadow-error:0 0 0 3px var(--color-error-ring);
-
-    /* 8 · BORDERS */
-    --border-width-hairline:1px; --border-width-thin:1px; --border-width-thick:2px;
-    --border-divider:var(--border-width-hairline) solid var(--color-border);
-    --border-input:var(--border-width-thin) solid var(--color-border-strong);
-    --border-input-focus:var(--border-width-thin) solid var(--color-focus);
-    --border-card:var(--border-width-hairline) solid var(--color-border);
-
-    /* 9 · BREAKPOINTS (reference) */
-    --bp-mobile:480px; --bp-tablet:768px; --bp-laptop:1200px; --bp-desktop:1440px;
-
-    /* 10 · Z-INDEX */
-    --z-hide:-1; --z-base:0; --z-raised:10; --z-dropdown:1000; --z-sticky:1100;
-    --z-overlay:1200; --z-modal:1300; --z-popover:1400; --z-toast:1500; --z-max:9999;
-
-    /* 11 · OPACITY */
-    --opacity-0:0; --opacity-disabled:0.45; --opacity-muted:0.65; --opacity-hover:0.85;
-    --opacity-overlay:0.55; --opacity-full:1;
-
-    /* 12 · MOTION */
-    --duration-instant:80ms; --duration-fast:150ms; --duration-normal:260ms; --duration-slow:420ms; --duration-slower:640ms;
-    --ease-standard:cubic-bezier(0.4,0,0.2,1); --ease-smooth:cubic-bezier(0.22,1,0.36,1);
-    --ease-in-out:cubic-bezier(0.65,0,0.35,1); --ease-entrance:cubic-bezier(0.16,1,0.3,1);
-    --transition-hover:color var(--duration-normal) var(--ease-smooth),background-color var(--duration-normal) var(--ease-smooth),border-color var(--duration-normal) var(--ease-smooth),box-shadow var(--duration-normal) var(--ease-smooth),transform var(--duration-normal) var(--ease-smooth);
-    --transition-focus:box-shadow var(--duration-fast) var(--ease-standard),border-color var(--duration-fast) var(--ease-standard);
-    --transition-colors:color var(--duration-fast) var(--ease-standard),background-color var(--duration-fast) var(--ease-standard),border-color var(--duration-fast) var(--ease-standard);
-
-    /* 13 · GLOBAL BEHAVIOR */
-    --anchor-offset:96px; --ring-offset:2px; --tap-target-min:44px;
+  /* ======================================================================
+     STAGE 03 SCAFFOLD-ONLY STYLES
+     Temporary placeholders for empty section containers. Each is removed as
+     its section is built in a later stage. NOT part of the design system.
+     ====================================================================== */
+  .scaffold{
+    border:1.5px dashed var(--border-strong);border-radius:var(--radius-md);
+    padding:clamp(1.5rem,4vw,3rem);text-align:center;color:var(--text-muted);
+    background:repeating-linear-gradient(135deg,transparent,transparent 12px,rgba(73,117,186,.025) 12px,rgba(73,117,186,.025) 24px);
   }
-
-  /* ==========================================================================
-     GLOBAL STYLES (Stage 02)
-     ========================================================================== */
-  *,*::before,*::after{box-sizing:border-box}
-  *{margin:0;padding:0}
-  html{-webkit-text-size-adjust:100%;text-size-adjust:100%;-moz-tab-size:4;tab-size:4;scroll-behavior:smooth;scroll-padding-top:var(--anchor-offset)}
-  @media (prefers-reduced-motion:reduce){
-    html{scroll-behavior:auto}
-    *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
-  }
-  body{min-height:100vh;min-height:100dvh;background-color:var(--surface-primary);color:var(--text-primary);font-family:var(--font-family-base);font-size:var(--font-size-body);font-weight:var(--font-weight-regular);line-height:var(--leading-relaxed);letter-spacing:var(--tracking-normal);text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-synthesis:none}
-  h1,h2,h3,h4,h5,h6{font-family:var(--font-family-heading);font-weight:var(--font-weight-bold);color:var(--text-primary);line-height:var(--leading-tight);letter-spacing:var(--tracking-tight);text-wrap:balance}
-  h1{font-size:var(--font-size-h1)} h2{font-size:var(--font-size-h2)}
-  h3{font-size:var(--font-size-h3);line-height:var(--leading-snug);letter-spacing:var(--tracking-normal)}
-  h4{font-size:var(--font-size-h4);line-height:var(--leading-snug);letter-spacing:var(--tracking-normal)}
-  h5{font-size:var(--font-size-body-lg);line-height:var(--leading-snug);letter-spacing:var(--tracking-normal)}
-  h6{font-size:var(--font-size-body);line-height:var(--leading-normal);letter-spacing:var(--tracking-normal)}
-  p{color:var(--text-secondary);line-height:var(--leading-relaxed);text-wrap:pretty}
-  strong,b{font-weight:var(--font-weight-semibold);color:var(--text-primary)} em,i{font-style:italic} small{font-size:var(--font-size-small)}
-  .u-measure{max-width:var(--measure)}
-  ul,ol{list-style-position:outside;padding-inline-start:var(--space-24);color:var(--text-secondary);line-height:var(--leading-relaxed)}
-  li+li{margin-block-start:var(--space-8)}
-  .u-list-reset{list-style:none;padding:0;margin:0}
-  a{color:var(--text-link);text-decoration:none;text-underline-offset:.18em;text-decoration-thickness:1px;transition:var(--transition-colors)}
-  a:hover{color:var(--text-link-hover)} a:active{color:var(--color-primary-active)}
-  img,picture,svg,video,canvas{display:block;max-width:100%;height:auto}
-  img,video{border-radius:var(--radius-none)} svg{fill:currentColor}
-  input,textarea,select,button{font-family:inherit;font-size:inherit;line-height:inherit;color:inherit}
-  input,textarea,select{width:100%;background-color:var(--surface-primary);color:var(--text-primary);border:var(--border-input);border-radius:var(--radius-input);padding:var(--space-12) var(--space-16);min-height:var(--tap-target-min);transition:var(--transition-focus);appearance:none}
-  input::placeholder,textarea::placeholder{color:var(--text-muted)}
-  input:hover,textarea:hover,select:hover{border-color:var(--color-border-strong)}
-  input:focus,textarea:focus,select:focus{outline:none;border:var(--border-input-focus);box-shadow:var(--shadow-focus)}
-  input:disabled,textarea:disabled,select:disabled,button:disabled{opacity:var(--opacity-disabled);cursor:not-allowed}
-  textarea{resize:vertical;min-height:calc(var(--tap-target-min)*2)} label{color:var(--text-primary);font-weight:var(--font-weight-medium)}
-  button,[type="button"],[type="submit"],[type="reset"]{font-family:inherit;font-size:var(--font-size-button);font-weight:var(--font-weight-semibold);line-height:var(--leading-normal);letter-spacing:var(--tracking-normal);color:inherit;background:none;border:none;border-radius:var(--radius-button);cursor:pointer;min-height:var(--tap-target-min);-webkit-tap-highlight-color:transparent;transition:var(--transition-hover)}
-  ::selection{background-color:rgba(124,183,255,.35);color:var(--text-primary)}
-  :focus-visible{outline:var(--border-width-thick) solid var(--color-focus);outline-offset:var(--ring-offset);border-radius:var(--radius-xs)}
-  :focus:not(:focus-visible){outline:none}
-  *{scrollbar-width:thin;scrollbar-color:var(--color-border-strong) transparent}
-  ::-webkit-scrollbar{width:10px;height:10px} ::-webkit-scrollbar-track{background:transparent}
-  ::-webkit-scrollbar-thumb{background-color:var(--color-border-strong);border-radius:var(--radius-pill);border:2px solid var(--surface-primary)}
-  ::-webkit-scrollbar-thumb:hover{background-color:var(--text-muted)}
-  [lang="ar"],[dir="rtl"],[dir="rtl"] h1,[dir="rtl"] h2,[dir="rtl"] h3,[dir="rtl"] h4,[dir="rtl"] h5,[dir="rtl"] h6{letter-spacing:var(--tracking-normal)!important}
-  [dir="rtl"]{text-align:right}
-  .container{width:100%;max-width:var(--container-max);margin-inline:auto;padding-inline:var(--container-padding)}
-  .container--narrow{max-width:var(--container-narrow)}
-  .section{padding-block:var(--section-padding-y)}
-  .section--soft{background-color:var(--surface-soft)} .section--tinted{background-color:var(--surface-section)}
-  .section--inverse{background-color:var(--surface-inverse);color:var(--text-on-inverse)}
-  .grid{display:grid;grid-template-columns:repeat(var(--grid-columns),minmax(0,1fr));gap:var(--grid-gutter)}
-  .col-1{grid-column:span 1}.col-2{grid-column:span 2}.col-3{grid-column:span 3}.col-4{grid-column:span 4}
-  .col-5{grid-column:span 5}.col-6{grid-column:span 6}.col-7{grid-column:span 7}.col-8{grid-column:span 8}
-  .col-9{grid-column:span 9}.col-10{grid-column:span 10}.col-11{grid-column:span 11}.col-12{grid-column:span 12}
-  .u-stack>*+*{margin-block-start:var(--space-24)}
-  .u-visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-  .skip-link{position:absolute;inset-inline-start:var(--space-16);inset-block-start:-100%;z-index:var(--z-max);padding:var(--space-12) var(--space-20);background:var(--color-primary);color:var(--text-on-primary);border-radius:var(--radius-sm);box-shadow:var(--shadow-md);transition:inset-block-start var(--duration-fast) var(--ease-standard)}
-  .skip-link:focus{inset-block-start:var(--space-16);color:var(--text-on-primary)}
-  a[role="button"],button,[type="button"],[type="submit"],summary{min-height:var(--tap-target-min)}
-
-  /* ==========================================================================
-     APPLICATION SHELL (Stage 03)
-     ========================================================================== */
-  .site-shell{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
-  .site-header{position:fixed;inset-block-start:0;inset-inline:0;z-index:var(--z-sticky);display:flex;align-items:center;min-height:var(--header-height);background-color:transparent;border-block-end:var(--border-width-hairline) solid transparent;transition:background-color var(--duration-normal) var(--ease-standard),border-color var(--duration-normal) var(--ease-standard),box-shadow var(--duration-normal) var(--ease-standard)}
-  .site-header.is-scrolled{background-color:var(--surface-primary);border-block-end-color:var(--color-border);box-shadow:var(--shadow-sm)}
-  .site-header__inner{display:flex;align-items:center;justify-content:space-between;gap:var(--space-24);width:100%;min-height:var(--header-height)}
-  .site-header__logo{display:inline-flex;align-items:center;min-height:var(--tap-target-min);flex:0 0 auto}
-  .site-header__actions{display:flex;align-items:center;gap:var(--space-16);flex:0 0 auto}
-  .site-header__cta{display:inline-flex;align-items:center}
-  .site-header__menu-trigger{display:none;align-items:center;justify-content:center;width:var(--tap-target-min);height:var(--tap-target-min);border-radius:var(--radius-sm);color:var(--text-primary);background-color:transparent}
-  .site-header__menu-trigger:hover{background-color:var(--color-primary-subtle)}
-  .mobile-nav{position:fixed;inset:var(--header-height) 0 0 0;z-index:var(--z-overlay);display:flex;flex-direction:column;padding:var(--space-24) var(--container-padding) var(--space-48);background-color:var(--surface-primary);border-block-start:var(--border-divider);overflow-y:auto;overscroll-behavior:contain}
-  .mobile-nav[hidden]{display:none}
-  .has-mobile-nav-open{overflow:hidden}
-  .site-main{flex:1 0 auto;display:flex;flex-direction:column}
-  .section--center{text-align:center}
-  .section--divider-top{border-block-start:var(--border-divider)} .section--divider-bottom{border-block-end:var(--border-divider)}
-  .section--flush{padding-block:0} .section--compact{padding-block:var(--space-80)} .section--full{overflow:clip}
-  .section--below-header{padding-block-start:calc(var(--section-padding-y) + var(--header-height))}
-  .container--wide{max-width:var(--container-wide)}
-  .container--full{max-width:var(--container-full);padding-inline:0}
-  .site-footer{flex:0 0 auto;background-color:var(--surface-inverse);color:var(--text-on-inverse)}
-  .site-footer__top{padding-block:var(--space-96) var(--space-64)}
-  .site-footer__grid{display:grid;grid-template-columns:repeat(var(--grid-columns),minmax(0,1fr));gap:var(--grid-gutter) var(--space-32)}
-  .site-footer__brand{grid-column:span 4} .site-footer__links{grid-column:span 2} .site-footer__services{grid-column:span 2}
-  .site-footer__contact{grid-column:span 2} .site-footer__newsletter{grid-column:span 2} .site-footer__social{grid-column:span 12}
-  .site-footer__bottom{padding-block:var(--space-32);border-block-start:var(--border-width-hairline) solid rgba(255,255,255,.12)}
-  .site-footer__bottom-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-16)}
-  [data-reveal]{}
-  .shell-debug [data-slot],.shell-debug [data-region]{outline:var(--border-width-thin) dashed var(--color-border-strong);outline-offset:var(--space-4);min-height:var(--space-32)}
-
-  /* ==========================================================================
-     NAVIGATION SYSTEM & HEADER UI (Stage 04)
-     ========================================================================== */
-  .site-header{--logo-h:clamp(32px,3.4vw,42px)}
-  .site-header__logo{gap:var(--space-12);border-radius:var(--radius-sm);padding-inline:var(--space-4)}
-  .site-logo{height:var(--logo-h);width:auto;display:block;transition:opacity var(--duration-fast) var(--ease-standard),transform var(--duration-normal) var(--ease-smooth)}
-  .site-header__logo:hover .site-logo{opacity:var(--opacity-hover)}
-  .site-header__logo:active .site-logo{transform:scale(.98)}
-
-  .site-nav__list{display:flex;align-items:center;gap:var(--space-4);list-style:none;margin:0;padding:0}
-  .site-nav__link{position:relative;display:inline-flex;align-items:center;padding:var(--space-8) var(--space-16);font-size:var(--font-size-nav);font-weight:var(--font-weight-medium);line-height:var(--leading-normal);color:var(--text-secondary);white-space:nowrap;border-radius:var(--radius-pill);transition:color var(--duration-normal) var(--ease-smooth)}
-  .site-nav__link::after{content:"";position:absolute;inset-block-end:var(--space-2);inset-inline-start:50%;width:var(--space-20);height:var(--border-width-thick);border-radius:var(--radius-pill);background-color:currentColor;opacity:0;transform:translateX(-50%) scaleX(.4);transform-origin:center;transition:opacity var(--duration-fast) var(--ease-standard),transform var(--duration-normal) var(--ease-smooth)}
-  .site-nav__link:hover{color:var(--text-primary)}
-  .site-nav__link:hover::after{opacity:.35;transform:translateX(-50%) scaleX(1)}
-  .site-nav__link.is-active{color:var(--color-primary);font-weight:var(--font-weight-semibold)}
-  .site-nav__link.is-active::after{opacity:1;transform:translateX(-50%) scaleX(1);background-color:var(--color-primary)}
-
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-8);padding:var(--space-12) var(--space-24);min-height:var(--tap-target-min);font-size:var(--font-size-button);font-weight:var(--font-weight-semibold);line-height:1;white-space:nowrap;border-radius:var(--radius-pill);cursor:pointer;transition:var(--transition-hover)}
-  .btn--primary{background-color:var(--color-primary);color:var(--text-on-primary);box-shadow:var(--shadow-sm)}
-  .btn--primary:hover{background-color:var(--color-primary-hover);box-shadow:var(--shadow-md);transform:translateY(-1px)}
-  .btn--primary:active{background-color:var(--color-primary-active);transform:translateY(0);box-shadow:var(--shadow-sm)}
-  .btn--primary:focus-visible{outline:none;box-shadow:var(--shadow-focus)}
-  .btn--block{width:100%}
-
-  .menu-icon{position:relative;width:22px;height:14px;color:currentColor}
-  .menu-icon span{position:absolute;inset-inline:0;height:var(--border-width-thick);border-radius:var(--radius-pill);background-color:currentColor;transition:transform var(--duration-normal) var(--ease-smooth),opacity var(--duration-fast) var(--ease-standard)}
-  .menu-icon span:nth-child(1){inset-block-start:0}
-  .menu-icon span:nth-child(2){inset-block-start:50%;transform:translateY(-50%)}
-  .menu-icon span:nth-child(3){inset-block-end:0}
-  .site-header__menu-trigger[aria-expanded="true"] .menu-icon span:nth-child(1){inset-block-start:50%;transform:translateY(-50%) rotate(45deg)}
-  .site-header__menu-trigger[aria-expanded="true"] .menu-icon span:nth-child(2){opacity:0}
-  .site-header__menu-trigger[aria-expanded="true"] .menu-icon span:nth-child(3){inset-block-end:50%;transform:translateY(50%) rotate(-45deg)}
-
-  .mobile-nav{gap:var(--space-8);opacity:0;transform:translateY(calc(var(--space-8) * -1));transition:opacity var(--duration-normal) var(--ease-smooth),transform var(--duration-normal) var(--ease-smooth)}
-  .mobile-nav.is-open{opacity:1;transform:translateY(0)}
-  .mobile-nav__list{display:flex;flex-direction:column;list-style:none;margin:0;padding:0}
-  .mobile-nav__link{display:block;padding:var(--space-16) var(--space-4);font-size:var(--font-size-h4);font-weight:var(--font-weight-semibold);color:var(--text-primary);border-block-end:var(--border-divider);transition:color var(--duration-fast) var(--ease-standard)}
-  .mobile-nav__link:hover,.mobile-nav__link.is-active{color:var(--color-primary)}
-  .mobile-nav__cta{margin-block-start:var(--space-32)}
-
-  .site-header--on-dark:not(.is-scrolled) .site-nav__link{color:var(--text-on-inverse)}
-  .site-header--on-dark:not(.is-scrolled) .site-nav__link:hover,
-  .site-header--on-dark:not(.is-scrolled) .site-nav__link.is-active{color:var(--white)}
-  .site-header--on-dark:not(.is-scrolled) .site-header__menu-trigger{color:var(--white)}
-
-  /* ==========================================================================
-     RESPONSIVE (Desktop-first)
-     ========================================================================== */
-  @media (max-width:1200px){
-    .grid{--grid-columns:12}
-    .site-nav__link{padding-inline:var(--space-12)}
-  }
-  @media (max-width:768px){
-    :root{--anchor-offset:80px}
-    .grid{--grid-columns:8}
-    .col-9,.col-10,.col-11,.col-12{grid-column:1 / -1}
-    .site-nav,.site-header__cta{display:none}
-    .site-header__menu-trigger{display:inline-flex}
-    .site-header{--logo-h:clamp(30px,6vw,38px)}
-    .site-footer__grid{gap:var(--space-40) var(--space-32)}
-    .site-footer__brand{grid-column:1 / -1}
-    .site-footer__links,.site-footer__services,.site-footer__contact,.site-footer__newsletter{grid-column:span 4}
-    .site-footer__social{grid-column:1 / -1}
-  }
-  @media (max-width:480px){
-    :root{--anchor-offset:72px}
-    .grid{--grid-columns:4}
-    .col-5,.col-6,.col-7,.col-8{grid-column:1 / -1}
-    .site-header{--logo-h:30px}
-    .site-footer__links,.site-footer__services,.site-footer__contact,.site-footer__newsletter{grid-column:1 / -1}
-    .site-footer__bottom-inner{justify-content:flex-start}
-  }
-  @media (prefers-reduced-motion:reduce){
-    .mobile-nav{transition:opacity var(--duration-fast) var(--ease-standard);transform:none}
-    .mobile-nav.is-open{transform:none}
-    .btn--primary:hover{transform:none}
-  }
+  .scaffold__stage{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--font-heading);
+    font-weight:600;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--color-primary);
+    background:var(--aun-primary-subtle);border:1px solid rgba(73,117,186,.25);padding:.35rem .8rem;border-radius:999px}
+  .scaffold__note{margin-block-start:.75rem;font-size:.9rem}
+  .section--inverse .scaffold{border-color:rgba(255,255,255,.28);color:var(--text-on-inverse-muted)}
+  .section--inverse .scaffold__stage{color:#fff;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25)}
+  .hero-scaffold{min-height:clamp(520px,80vh,760px);display:grid;place-items:center}
   </style>
 </head>
 
@@ -290,28 +44,29 @@
 
   <div class="site-shell">
 
-    <!-- GLOBAL HEADER (RTL: logo start · nav center · CTA end) -->
+    <!-- ==================================================================
+         GLOBAL HEADER  (§05 / §06)  — logo · nav · CTA · mobile trigger
+         ================================================================== -->
     <header class="site-header" data-header>
       <div class="site-header__inner container container--wide">
 
-        <a class="site-header__logo" href="#top" aria-label="وكالة المدى للسياحة والسفر — الصفحة الرئيسية">
-          <img class="site-logo" src="https://i.ibb.co/bV5dVGm/transparent-01-01.png" alt="وكالة المدى للسياحة والسفر">
+        <a class="site-header__logo" href="#top" aria-label="عون الدرب للنقل المتخصص — الصفحة الرئيسية">
+          <img class="site-logo" src="brand/aun-aldrb-logo.svg" alt="عون الدرب للنقل المتخصص" width="150" height="55">
         </a>
 
         <nav class="site-nav" aria-label="التنقل الرئيسي">
           <ul class="site-nav__list">
-            <li><a class="site-nav__link is-active" href="#home" data-nav-link aria-current="true">الرئيسية</a></li>
+            <li><a class="site-nav__link is-active" href="#home" data-nav-link aria-current="page">الرئيسية</a></li>
             <li><a class="site-nav__link" href="#about" data-nav-link>من نحن</a></li>
+            <li><a class="site-nav__link" href="#why-us" data-nav-link>لماذا عون الدرب</a></li>
             <li><a class="site-nav__link" href="#services" data-nav-link>خدماتنا</a></li>
-            <li><a class="site-nav__link" href="#why-almada" data-nav-link>لماذا وكالة المدى؟</a></li>
-            <li><a class="site-nav__link" href="#vision" data-nav-link>رؤيتنا ورسالتنا</a></li>
             <li><a class="site-nav__link" href="#contact" data-nav-link>تواصل معنا</a></li>
           </ul>
         </nav>
 
         <div class="site-header__actions">
           <a class="btn btn--primary site-header__cta" href="#contact">تواصل معنا</a>
-          <button type="button" class="site-header__menu-trigger" data-menu-trigger
+          <button type="button" class="menu-trigger" data-menu-trigger
                   aria-label="فتح القائمة" aria-expanded="false" aria-controls="mobile-nav">
             <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
           </button>
@@ -320,42 +75,162 @@
       </div>
     </header>
 
-    <!-- MOBILE DRAWER -->
-    <div class="mobile-nav" id="mobile-nav" data-mobile-nav data-state="closed" aria-label="قائمة الجوال" hidden>
-      <ul class="mobile-nav__list">
+    <!-- MOBILE DRAWER (§07) — same brand system, same nav order -->
+    <div class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="قائمة الجوال" hidden>
+      <ul class="mobile-nav__list" style="list-style:none;margin:0;padding:0">
         <li><a class="mobile-nav__link is-active" href="#home" data-nav-link>الرئيسية</a></li>
         <li><a class="mobile-nav__link" href="#about" data-nav-link>من نحن</a></li>
+        <li><a class="mobile-nav__link" href="#why-us" data-nav-link>لماذا عون الدرب</a></li>
         <li><a class="mobile-nav__link" href="#services" data-nav-link>خدماتنا</a></li>
-        <li><a class="mobile-nav__link" href="#why-almada" data-nav-link>لماذا وكالة المدى؟</a></li>
-        <li><a class="mobile-nav__link" href="#vision" data-nav-link>رؤيتنا ورسالتنا</a></li>
         <li><a class="mobile-nav__link" href="#contact" data-nav-link>تواصل معنا</a></li>
       </ul>
-      <a class="btn btn--primary btn--block mobile-nav__cta" href="#contact">تواصل معنا</a>
+      <a class="btn btn--primary btn--block" href="#contact" style="margin-block-start:var(--sp-32)">تواصل معنا</a>
     </div>
 
-    <!-- MAIN — container for future sections -->
+    <!-- ==================================================================
+         MAIN — global section architecture (§01)
+         Structural containers only. No section is designed in this stage.
+         ================================================================== -->
     <main class="site-main" id="main">
-      <!-- Sections begin in the next stage (Hero). -->
+
+      <!-- HERO · #home — reserved for STAGE 04 -->
+      <section class="section section--surface hero-scaffold" id="home" data-section aria-labelledby="home-h">
+        <div class="container container--wide">
+          <h1 id="home-h" class="u-visually-hidden">عون الدرب للنقل المتخصص</h1>
+          <div class="scaffold">
+            <span class="scaffold__stage">الهيرو · STAGE 04</span>
+            <p class="scaffold__note">حاوية القسم الأول جاهزة — يُبنى الهيرو في المرحلة القادمة عبر النظام العالمي.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABOUT · #about — 01 -->
+      <section class="section" id="about" data-section aria-labelledby="about-h">
+        <div class="container">
+          <div class="section-label"><span class="section-label__num">01</span><span class="section-label__rule"></span><span class="section-label__name">من نحن</span></div>
+          <h2 id="about-h" class="u-visually-hidden">من نحن</h2>
+          <div class="scaffold"><span class="scaffold__stage">من نحن · مرحلة لاحقة</span><p class="scaffold__note">حاوية القسم جاهزة للتعبئة.</p></div>
+        </div>
+      </section>
+
+      <!-- WHY AUN ALDRB · #why-us — 02 -->
+      <section class="section section--surface" id="why-us" data-section aria-labelledby="why-h">
+        <div class="container">
+          <div class="section-label"><span class="section-label__num">02</span><span class="section-label__rule"></span><span class="section-label__name">لماذا عون الدرب</span></div>
+          <h2 id="why-h" class="u-visually-hidden">لماذا عون الدرب</h2>
+          <div class="scaffold"><span class="scaffold__stage">لماذا عون الدرب · مرحلة لاحقة</span><p class="scaffold__note">حاوية القسم جاهزة للتعبئة.</p></div>
+        </div>
+      </section>
+
+      <!-- SERVICES · #services — 03 -->
+      <section class="section" id="services" data-section aria-labelledby="services-h">
+        <div class="container">
+          <div class="section-label"><span class="section-label__num">03</span><span class="section-label__rule"></span><span class="section-label__name">خدماتنا</span></div>
+          <h2 id="services-h" class="u-visually-hidden">خدماتنا</h2>
+          <div class="scaffold"><span class="scaffold__stage">الخدمات · مرحلة لاحقة</span><p class="scaffold__note">حاوية القسم جاهزة للتعبئة.</p></div>
+        </div>
+      </section>
+
+      <!-- HOW WE WORK · #how-we-work — 04 -->
+      <section class="section section--surface" id="how-we-work" data-section aria-labelledby="how-h">
+        <div class="container">
+          <div class="section-label"><span class="section-label__num">04</span><span class="section-label__rule"></span><span class="section-label__name">كيف نعمل</span></div>
+          <h2 id="how-h" class="u-visually-hidden">كيف نعمل</h2>
+          <div class="scaffold"><span class="scaffold__stage">كيف نعمل · مرحلة لاحقة</span><p class="scaffold__note">حاوية القسم جاهزة للتعبئة.</p></div>
+        </div>
+      </section>
+
+      <!-- VISION & MISSION · #vision-mission — 05 -->
+      <section class="section section--tinted" id="vision-mission" data-section aria-labelledby="vision-h">
+        <div class="container">
+          <div class="section-label"><span class="section-label__num">05</span><span class="section-label__rule"></span><span class="section-label__name">رؤيتنا ورسالتنا</span></div>
+          <h2 id="vision-h" class="u-visually-hidden">رؤيتنا ورسالتنا</h2>
+          <div class="scaffold"><span class="scaffold__stage">الرؤية والرسالة · مرحلة لاحقة</span><p class="scaffold__note">حاوية القسم جاهزة للتعبئة.</p></div>
+        </div>
+      </section>
+
+      <!-- CORE VALUES · #values — 06 -->
+      <section class="section section--surface" id="values" data-section aria-labelledby="values-h">
+        <div class="container">
+          <div class="section-label"><span class="section-label__num">06</span><span class="section-label__rule"></span><span class="section-label__name">قيمنا</span></div>
+          <h2 id="values-h" class="u-visually-hidden">قيمنا</h2>
+          <div class="scaffold"><span class="scaffold__stage">القيم · مرحلة لاحقة</span><p class="scaffold__note">حاوية القسم جاهزة للتعبئة.</p></div>
+        </div>
+      </section>
+
+      <!-- FINAL CTA · #cta -->
+      <section class="section section--inverse" id="cta" data-section aria-labelledby="cta-h">
+        <div class="container">
+          <h2 id="cta-h" class="u-visually-hidden">تواصل مع عون الدرب</h2>
+          <div class="scaffold"><span class="scaffold__stage">الدعوة للتواصل · مرحلة لاحقة</span><p class="scaffold__note">شريط التحويل النهائي — حاوية جاهزة.</p></div>
+        </div>
+      </section>
+
+      <!-- CONTACT · #contact — 07 -->
+      <section class="section" id="contact" data-section aria-labelledby="contact-h">
+        <div class="container">
+          <div class="section-label"><span class="section-label__num">07</span><span class="section-label__rule"></span><span class="section-label__name">تواصل معنا</span></div>
+          <h2 id="contact-h" class="u-visually-hidden">تواصل معنا</h2>
+          <div class="scaffold"><span class="scaffold__stage">التواصل · مرحلة لاحقة</span><p class="scaffold__note">حاوية القسم جاهزة للتعبئة.</p></div>
+        </div>
+      </section>
+
     </main>
 
-    <!-- GLOBAL FOOTER (structure only — empty placeholder regions) -->
+    <!-- ==================================================================
+         GLOBAL FOOTER (§20)  — approved company info only, same nav order
+         ================================================================== -->
     <footer class="site-footer" role="contentinfo">
       <div class="site-footer__top">
         <div class="container container--wide">
           <div class="site-footer__grid">
-            <div class="site-footer__brand" data-region="brand"></div>
-            <nav class="site-footer__links" aria-label="روابط سريعة" data-region="quick-links"></nav>
-            <nav class="site-footer__services" aria-label="الخدمات" data-region="services"></nav>
-            <div class="site-footer__contact" data-region="contact"></div>
-            <div class="site-footer__newsletter" data-region="newsletter"></div>
-            <div class="site-footer__social" data-region="social"></div>
+
+            <!-- Brand -->
+            <div>
+              <img class="site-footer__logo" src="brand/aun-aldrb-logo-white.svg" alt="عون الدرب للنقل المتخصص" width="150" height="55">
+              <p style="color:var(--text-on-inverse-muted);max-width:42ch">شركة عون الدرب للنقل المتخصص — نُعين ونُعاون.</p>
+            </div>
+
+            <!-- Quick links — SAME order as header & mobile nav -->
+            <nav aria-label="روابط سريعة">
+              <div class="site-footer__col-title">روابط سريعة</div>
+              <ul class="site-footer__list">
+                <li><a href="#home">الرئيسية</a></li>
+                <li><a href="#about">من نحن</a></li>
+                <li><a href="#why-us">لماذا عون الدرب</a></li>
+                <li><a href="#services">خدماتنا</a></li>
+                <li><a href="#contact">تواصل معنا</a></li>
+              </ul>
+            </nav>
+
+            <!-- Journey (secondary sections in the page) -->
+            <nav aria-label="أقسام الصفحة">
+              <div class="site-footer__col-title">الصفحة</div>
+              <ul class="site-footer__list">
+                <li><a href="#how-we-work">كيف نعمل</a></li>
+                <li><a href="#vision-mission">رؤيتنا ورسالتنا</a></li>
+                <li><a href="#values">قيمنا</a></li>
+              </ul>
+            </nav>
+
+            <!-- Contact -->
+            <div>
+              <div class="site-footer__col-title">تواصل</div>
+              <ul class="site-footer__list">
+                <li><a class="link-icon" href="tel:+966535544352"><svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h3l2 5-2 1c1 2 3 4 5 5l1-2 5 2v3c0 1-1 2-2 2A15 15 0 0 1 4 6c0-1 1-2 1-2z"/></svg><span class="link-num">+966 53 554 4352</span></a></li>
+                <li><a class="link-icon" href="https://wa.me/966535544352" target="_blank" rel="noopener"><svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.7 13.6L3 21l4.5-1.2A9 9 0 1 0 12 3z"/><path d="M8.5 8.5c1 3 3.5 5.5 6.5 6.5"/></svg><span>واتساب</span></a></li>
+                <li><a class="link-icon" href="https://aunaldrb.com" target="_blank" rel="noopener"><svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 13.5 0 18M12 3c-3 3.5-3 13.5 0 18"/></svg><span>aunaldrb.com</span></a></li>
+                <li style="color:var(--text-on-inverse-muted)">الرياض · شارع ابن كثير · حي السليمانية · 12233</li>
+              </ul>
+            </div>
+
           </div>
         </div>
       </div>
       <div class="site-footer__bottom">
         <div class="container container--wide site-footer__bottom-inner">
-          <div data-region="copyright"></div>
-          <div data-region="legal"></div>
+          <small style="color:var(--text-on-inverse-muted)">© <span id="year">2026</span> شركة عون الدرب للنقل المتخصص. جميع الحقوق محفوظة.</small>
+          <small style="color:var(--text-on-inverse-muted)">نُعين ونُعاون</small>
         </div>
       </div>
     </footer>
@@ -363,98 +238,87 @@
   </div><!-- /.site-shell -->
 
   <script>
-  /* ==========================================================================
-     AL MADA — APPLICATION SHELL + NAVIGATION BEHAVIOR (Stage 03 + 04)
-     ========================================================================== */
+  /* ========================================================================
+     AUN ALDARB — GLOBAL FOUNDATION BEHAVIOR (Stage 03)
+     Sticky header state · mobile drawer · scroll-spy active nav.
+     Anchor smooth-scroll + header offset handled in CSS (scroll-padding-top).
+     No dependencies. Respects prefers-reduced-motion.
+     ======================================================================== */
   (function () {
     "use strict";
-    var doc = document;
-    var root = doc.documentElement;
-    var prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var doc = document, root = doc.documentElement;
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    /* 1 · HEADER — transparent → solid on scroll */
-    function initHeaderScrollState() {
+    /* current year */
+    try { var y = doc.getElementById("year"); if (y) y.textContent = new Date().getFullYear(); } catch (e) {}
+
+    /* 1 · Header solid-on-scroll (§06) */
+    (function () {
       var header = doc.querySelector("[data-header]");
       if (!header) return;
-      var THRESHOLD = 8, ticking = false;
-      function update(){ header.classList.toggle("is-scrolled", window.scrollY > THRESHOLD); ticking = false; }
-      function onScroll(){ if(!ticking){ window.requestAnimationFrame(update); ticking = true; } }
+      var ticking = false;
+      function update() { header.classList.toggle("is-scrolled", window.scrollY > 8); ticking = false; }
+      function onScroll() { if (!ticking) { window.requestAnimationFrame(update); ticking = true; } }
       update();
       window.addEventListener("scroll", onScroll, { passive: true });
-    }
+    })();
 
-    /* 2 · MOBILE DRAWER — animated states + focus management */
-    function initMobileNav() {
+    /* 2 · Mobile drawer (§07) — focus mgmt, Esc, close on nav */
+    (function () {
       var trigger = doc.querySelector("[data-menu-trigger]");
       var panel = doc.querySelector("[data-mobile-nav]");
       if (!trigger || !panel) return;
-      var isOpen = false, closeTimer = null;
-      function focusables(){ return panel.querySelectorAll('a[href], button:not([disabled]), input, [tabindex]:not([tabindex="-1"])'); }
-      function open(){
-        if(isOpen) return; isOpen = true; window.clearTimeout(closeTimer);
-        panel.hidden = false; panel.setAttribute("data-state","opening");
-        trigger.setAttribute("aria-expanded","true"); trigger.setAttribute("aria-label","إغلاق القائمة");
-        root.classList.add("has-mobile-nav-open");
-        window.requestAnimationFrame(function(){ panel.classList.add("is-open"); panel.setAttribute("data-state","opened"); });
-        var f = focusables(); if(f.length) f[0].focus();
+      var open = false, timer = null;
+      function focusables() { return panel.querySelectorAll('a[href],button:not([disabled])'); }
+      function openMenu() {
+        if (open) return; open = true; window.clearTimeout(timer);
+        panel.hidden = false;
+        trigger.setAttribute("aria-expanded", "true"); trigger.setAttribute("aria-label", "إغلاق القائمة");
+        root.style.overflow = "hidden";
+        window.requestAnimationFrame(function () { panel.classList.add("is-open"); });
+        var f = focusables(); if (f.length) f[0].focus();
       }
-      function close(returnFocus){
-        if(!isOpen) return; isOpen = false;
-        panel.classList.remove("is-open"); panel.setAttribute("data-state","closing");
-        trigger.setAttribute("aria-expanded","false"); trigger.setAttribute("aria-label","فتح القائمة");
-        root.classList.remove("has-mobile-nav-open");
-        var delay = prefersReducedMotion ? 0 : 300;
-        closeTimer = window.setTimeout(function(){ panel.hidden = true; panel.setAttribute("data-state","closed"); }, delay);
-        if(returnFocus !== false) trigger.focus();
+      function closeMenu(returnFocus) {
+        if (!open) return; open = false;
+        panel.classList.remove("is-open");
+        trigger.setAttribute("aria-expanded", "false"); trigger.setAttribute("aria-label", "فتح القائمة");
+        root.style.overflow = "";
+        timer = window.setTimeout(function () { panel.hidden = true; }, reduce ? 0 : 260);
+        if (returnFocus !== false) trigger.focus();
       }
-      trigger.addEventListener("click", function(){ isOpen ? close() : open(); });
-      panel.addEventListener("click", function(e){ if(e.target.closest("a[href]")) close(false); });
-      doc.addEventListener("keydown", function(e){
-        if(!isOpen) return;
-        if(e.key === "Escape"){ close(); return; }
-        if(e.key === "Tab"){
-          var f = focusables(); if(!f.length) return;
-          var first = f[0], last = f[f.length-1];
-          if(e.shiftKey && doc.activeElement === first){ e.preventDefault(); last.focus(); }
-          else if(!e.shiftKey && doc.activeElement === last){ e.preventDefault(); first.focus(); }
+      trigger.addEventListener("click", function () { open ? closeMenu() : openMenu(); });
+      panel.addEventListener("click", function (e) { if (e.target.closest("a[href]")) closeMenu(false); });
+      doc.addEventListener("keydown", function (e) {
+        if (!open) return;
+        if (e.key === "Escape") { closeMenu(); return; }
+        if (e.key === "Tab") {
+          var f = focusables(); if (!f.length) return;
+          var first = f[0], last = f[f.length - 1];
+          if (e.shiftKey && doc.activeElement === first) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && doc.activeElement === last) { e.preventDefault(); first.focus(); }
         }
       });
-      window.addEventListener("resize", function(){ if(window.innerWidth > 768 && isOpen) close(false); });
-      panel.hidden = true; panel.setAttribute("data-state","closed"); trigger.setAttribute("aria-expanded","false");
-    }
+      window.addEventListener("resize", function () { if (window.innerWidth > 767 && open) closeMenu(false); });
+      panel.hidden = true;
+    })();
 
-    /* 3 · SCROLL-REVEAL — architecture contract (no animation yet) */
-    function initReveal() {
-      var targets = doc.querySelectorAll("[data-reveal]");
-      if(!targets.length) return;
-      if(prefersReducedMotion || !("IntersectionObserver" in window)){ targets.forEach(function(el){ el.classList.add("is-inview"); }); return; }
-      var observer = new IntersectionObserver(function(entries){
-        entries.forEach(function(entry){ if(entry.isIntersecting){ entry.target.classList.add("is-inview"); observer.unobserve(entry.target); } });
-      }, { rootMargin:"0px 0px -10% 0px", threshold:0.1 });
-      targets.forEach(function(el){ observer.observe(el); });
-    }
-
-    /* 4 · SCROLL-SPY / ACTIVE-NAV — drives .is-active on nav links */
-    function initScrollSpy() {
-      var sections = doc.querySelectorAll("[data-section][id]");
-      if(!sections.length || !("IntersectionObserver" in window)) return;
-      var navLinks = doc.querySelectorAll("[data-nav-link]");
-      function setActive(id){
-        doc.body.setAttribute("data-active-section", id);
-        navLinks.forEach(function(link){
+    /* 3 · Scroll-spy active nav (§09) — same logic across all breakpoints */
+    (function () {
+      var sections = doc.querySelectorAll("main [data-section][id]");
+      if (!sections.length || !("IntersectionObserver" in window)) return;
+      var links = doc.querySelectorAll("[data-nav-link]");
+      function setActive(id) {
+        links.forEach(function (link) {
           var match = link.getAttribute("href") === "#" + id;
           link.classList.toggle("is-active", match);
-          if(match) link.setAttribute("aria-current","true"); else link.removeAttribute("aria-current");
+          if (match) link.setAttribute("aria-current", "page"); else link.removeAttribute("aria-current");
         });
       }
-      var observer = new IntersectionObserver(function(entries){
-        entries.forEach(function(entry){ if(entry.isIntersecting) setActive(entry.target.id); });
-      }, { rootMargin:"-45% 0px -55% 0px", threshold:0 });
-      sections.forEach(function(s){ observer.observe(s); });
-    }
-
-    function init(){ initHeaderScrollState(); initMobileNav(); initReveal(); initScrollSpy(); }
-    if(doc.readyState === "loading"){ doc.addEventListener("DOMContentLoaded", init); } else { init(); }
+      var obs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) { if (entry.isIntersecting) setActive(entry.target.id); });
+      }, { rootMargin: "-45% 0px -55% 0px", threshold: 0 });
+      sections.forEach(function (s) { obs.observe(s); });
+    })();
   })();
   </script>
 </body>

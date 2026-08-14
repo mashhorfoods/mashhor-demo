@@ -552,3 +552,65 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
     transition-duration:.01ms!important;scroll-behavior:auto!important}
   [data-reveal]{opacity:1;transform:none}
 }
+
+/* ==========================================================================
+   STAGE 03 · GLOBAL FOUNDATION ADDITIONS
+   New reusable components only — nothing above is redefined.
+   ========================================================================== */
+
+/* anchor offset for every section target (works with html scroll-padding) */
+section[id]{scroll-margin-top:var(--anchor-offset)}
+
+/* §01 APP SHELL — sticky footer layout that holds header · main · footer */
+.site-shell{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
+.site-main{flex:1 0 auto}
+.site-footer{flex:0 0 auto}
+
+/* header sub-parts */
+.site-header__logo{display:inline-flex;align-items:center;min-height:var(--tap-min);border-radius:var(--radius-sm);flex:0 0 auto}
+.site-header__logo:hover .site-logo{opacity:.85}
+.site-logo{transition:opacity var(--dur-fast) var(--ease-standard)}
+.site-header__actions{display:flex;align-items:center;gap:var(--sp-16);flex:0 0 auto}
+
+/* header CTA visibility helper (hidden on mobile — drawer carries the CTA) */
+.site-header__cta{display:inline-flex}
+
+/* hamburger icon inside .menu-trigger — animates to X when open */
+.menu-icon{position:relative;width:22px;height:14px}
+.menu-icon span{position:absolute;inset-inline:0;height:2px;border-radius:var(--radius-pill);background:currentColor;
+  transition:transform var(--dur-normal) var(--ease-smooth),opacity var(--dur-fast) var(--ease-standard)}
+.menu-icon span:nth-child(1){inset-block-start:0}
+.menu-icon span:nth-child(2){inset-block-start:50%;transform:translateY(-50%)}
+.menu-icon span:nth-child(3){inset-block-end:0}
+.menu-trigger[aria-expanded="true"] .menu-icon span:nth-child(1){inset-block-start:50%;transform:translateY(-50%) rotate(45deg)}
+.menu-trigger[aria-expanded="true"] .menu-icon span:nth-child(2){opacity:0}
+.menu-trigger[aria-expanded="true"] .menu-icon span:nth-child(3){inset-block-end:50%;transform:translateY(50%) rotate(-45deg)}
+
+/* §13 SECTION LABEL — consistent numbered identifier for every section */
+.section-label{display:flex;align-items:center;gap:var(--sp-12);margin-block-end:var(--stack-heading)}
+.section-label__num{font-family:var(--font-heading);font-weight:var(--fw-semibold);font-variant-numeric:tabular-nums;
+  font-size:var(--fs-small);color:var(--color-primary);letter-spacing:.06em}
+.section-label__rule{width:28px;height:2px;border-radius:var(--radius-pill);background:var(--color-primary);opacity:.55;flex:0 0 auto}
+.section-label__name{font-family:var(--font-heading);font-weight:var(--fw-semibold);font-size:var(--fs-label);
+  letter-spacing:var(--track-caps);text-transform:uppercase;color:var(--text-secondary)}
+.section--inverse .section-label__name{color:var(--text-on-inverse-muted)}
+.section--inverse .section-label__num{color:#fff}
+.section--inverse .section-label__rule{background:#fff}
+
+/* §12 HEADING GROUP — eyebrow/label + title + lead, inherited by all sections */
+.heading-group{display:flex;flex-direction:column;gap:var(--stack-heading);max-width:var(--measure)}
+.heading-group__title{font-size:var(--fs-h2)}
+.heading-group__lead{font-size:var(--fs-body-lg);color:var(--text-secondary)}
+
+/* §21 CONTACT ACTIONS — reusable phone / whatsapp / website row */
+.contact-actions{display:flex;flex-wrap:wrap;gap:var(--sp-12)}
+.contact-action{display:inline-flex;align-items:center;gap:var(--sp-8);min-height:var(--tap-min);
+  padding-inline:var(--sp-16);border-radius:var(--radius-pill);font-family:var(--font-heading);
+  font-weight:var(--fw-semibold);font-size:var(--fs-small);color:var(--color-primary);
+  border:1.5px solid var(--border-strong);background:var(--surface);transition:var(--transition-control)}
+.contact-action:hover{border-color:var(--color-primary);background:var(--aun-primary-subtle);color:var(--color-primary)}
+.contact-action:focus-visible{outline:none;box-shadow:var(--shadow-focus)}
+.contact-action svg{width:var(--icon-sm);height:var(--icon-sm);flex:0 0 auto}
+.contact-action .link-num{color:inherit}
+.section--inverse .contact-action{background:transparent;color:#fff;border-color:rgba(255,255,255,.35)}
+.section--inverse .contact-action:hover{background:rgba(255,255,255,.10);border-color:#fff;color:#fff}
