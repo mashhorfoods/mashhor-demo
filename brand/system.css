@@ -469,7 +469,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 .site-footer a:hover{color:#fff}
 .site-footer__logo{height:40px;width:auto;margin-block-end:var(--sp-20)}
 .site-footer__col-title{font-family:var(--font-heading);font-size:var(--fs-caption);letter-spacing:var(--track-caps);
-  text-transform:uppercase;color:var(--aun-blue-bright);margin-block-end:var(--sp-16)}
+  text-transform:uppercase;color:var(--aun-sky);margin-block-end:var(--sp-16)}
 .site-footer__list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:var(--sp-12)}
 .site-footer__bottom{padding-block:var(--sp-24);border-block-start:1px solid rgba(255,255,255,.14)}
 .site-footer__bottom-inner{display:flex;flex-wrap:wrap;gap:var(--sp-16);align-items:center;justify-content:space-between}
@@ -983,7 +983,7 @@ section[id]{scroll-margin-top:var(--anchor-offset)}
 .contact__card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
   box-shadow:var(--shadow-sm);padding:clamp(1.5rem,3.5vw,2.5rem);display:flex;flex-direction:column;gap:var(--sp-24)}
 .contact__phone-label{font-family:var(--font-heading);font-weight:var(--fw-semibold);font-size:var(--fs-caption);
-  letter-spacing:var(--track-caps);text-transform:uppercase;color:var(--text-muted)}
+  letter-spacing:var(--track-caps);text-transform:uppercase;color:var(--text-secondary)}
 .contact__phone{display:inline-block;align-self:flex-start;direction:ltr;font-family:var(--font-heading);
   font-weight:var(--fw-bold);font-size:var(--fs-h2);color:var(--color-secondary);text-decoration:none;
   margin-block-start:var(--sp-4);padding-block:var(--sp-8);transition:color var(--dur-normal) var(--ease-smooth)}
@@ -1055,3 +1055,13 @@ section[id]{scroll-margin-top:var(--anchor-offset)}
   .btn--lg{padding-inline:var(--sp-16)}
 }
 .contact__card,.contact__aside{min-width:0}
+
+/* ==========================================================================
+   STAGE 15 · ACCESSIBILITY AUDIT — targeted corrections (no redesign)
+   ========================================================================== */
+/* focus visibility on navy surfaces: the blue outline (1.84:1 on navy)
+   becomes white (8.53:1) so keyboard focus is clearly visible there */
+.section--inverse :focus-visible,.site-footer :focus-visible{outline-color:#fff}
+
+/* footer link tap targets >= 24px (AA 2.5.8) without altering the layout */
+.site-footer__list a,.site-footer__bottom-inner a{display:inline-block;padding-block:var(--sp-4)}
