@@ -754,3 +754,57 @@ section[id]{scroll-margin-top:var(--anchor-offset)}
   .why__node svg{width:20px;height:20px}
   .why__list::before{inset-inline-start:21px;inset-block:22px 22px}
 }
+
+/* ==========================================================================
+   STAGE 07 · SERVICES / خدماتنا
+   Editorial services experience. Tokens + existing patterns only.
+   Grid: service 01 is a wider feature (primary rhythm); a navy CTA tile
+   completes the layout and bridges toward Contact. No new card system.
+   ========================================================================== */
+.services__intro{max-width:var(--container-narrow);margin-inline-start:0}
+.services__title{font-size:var(--fs-h2);line-height:var(--lh-tight);letter-spacing:var(--track-tight);
+  color:var(--color-secondary);margin-block-start:var(--sp-16)}
+.services__title span{color:var(--color-primary);display:block}
+.services__intro-lead{color:var(--text-secondary);margin-block-start:var(--sp-20);max-width:var(--measure)}
+
+.services__grid{display:grid;gap:clamp(1rem,2vw,1.25rem);margin-block-start:clamp(2.5rem,5vw,3.5rem);
+  grid-template-columns:1fr}
+@media(min-width:600px){.services__grid{grid-template-columns:repeat(2,1fr)}
+  .service--feature,.service-cta{grid-column:span 2}}
+@media(min-width:1024px){.services__grid{grid-template-columns:repeat(3,1fr)}
+  .service--feature{grid-column:span 2}
+  .service-cta{grid-column:auto}}
+
+/* service tile — white surface on the soft ground; hairline, not heavy */
+.service{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);
+  padding:clamp(1.35rem,2.6vw,1.85rem);display:flex;flex-direction:column;gap:var(--sp-12);
+  transition:border-color var(--dur-normal) var(--ease-smooth),box-shadow var(--dur-fast) var(--ease-standard),
+  transform var(--dur-normal) var(--ease-smooth)}
+@media(hover:hover){.service:hover{border-color:var(--aun-sky);box-shadow:var(--shadow-md);transform:translateY(-3px)}
+  .service:hover .service__icon{background:var(--color-primary);color:#fff;border-color:var(--color-primary)}}
+.service__icon{width:52px;height:52px;flex:0 0 auto;border-radius:var(--radius-circle);display:grid;place-items:center;
+  background:var(--aun-mist);border:1px solid var(--aun-sky);color:var(--color-primary);
+  transition:var(--transition-control)}
+.service__icon svg{width:26px;height:26px;stroke-width:1.6}
+.service__body{display:flex;flex-direction:column;gap:var(--sp-8);min-width:0}
+.service__num{font-family:var(--font-heading);font-weight:var(--fw-semibold);font-variant-numeric:tabular-nums;
+  font-size:var(--fs-small);color:var(--color-secondary);letter-spacing:.06em}
+.service__title{font-size:var(--fs-h4);color:var(--text-primary)}
+.service__desc{font-family:var(--font-body);color:var(--text-secondary);max-width:52ch;margin-block-start:var(--sp-4)}
+
+/* feature (01) — wider, a touch more presence */
+.service--feature{border-color:var(--aun-sky)}
+@media(min-width:1024px){
+  .service--feature{flex-direction:row;align-items:flex-start;gap:clamp(1.5rem,3vw,2.5rem);padding:clamp(1.75rem,3vw,2.5rem)}
+  .service--feature .service__icon{width:64px;height:64px}
+  .service--feature .service__icon svg{width:32px;height:32px}
+  .service--feature .service__title{font-size:var(--fs-h3)}
+  .service--feature .service__desc{font-size:var(--fs-body-lg)}
+}
+
+/* CTA tile — navy, bridges toward Contact */
+.service-cta{background:var(--surface-inverse);color:var(--text-on-inverse);border-radius:var(--radius-md);
+  padding:clamp(1.5rem,3vw,2rem);display:flex;flex-direction:column;justify-content:center;gap:var(--sp-16);
+  background-image:radial-gradient(120% 90% at 100% 0,rgba(255,255,255,.06),transparent 60%)}
+.service-cta__q{font-family:var(--font-heading);font-weight:var(--fw-semibold);font-size:var(--fs-h4);color:#fff;
+  max-width:26ch}
