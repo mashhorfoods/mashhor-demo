@@ -675,3 +675,38 @@ section[id]{scroll-margin-top:var(--anchor-offset)}
 @media(max-width:479px){
   .hero__actions .btn{width:100%}
 }
+
+/* ==========================================================================
+   STAGE 05 · ABOUT / من نحن
+   Editorial split (content start / media). Tokens + existing components only.
+   Source order = head → media → body, so mobile reads: label, heading,
+   image, body; desktop repositions media into the second (inline-end) column.
+   ========================================================================== */
+.about__grid{display:grid;gap:clamp(1.75rem,4vw,2.75rem)}
+@media(min-width:1024px){
+  .about__grid{grid-template-columns:minmax(0,1.05fr) minmax(0,0.95fr);
+    column-gap:clamp(2.5rem,5vw,5rem);row-gap:clamp(1.25rem,2.5vw,2rem);align-items:center}
+  .about__head{grid-column:1;grid-row:1;align-self:end}
+  .about__body{grid-column:1;grid-row:2;align-self:start}
+  .about__media{grid-column:2;grid-row:1 / span 2;align-self:center}
+}
+.about__head{max-width:var(--measure)}
+.about__title{font-size:var(--fs-h2);line-height:var(--lh-tight);letter-spacing:var(--track-tight);
+  color:var(--color-secondary)}
+.about__body{max-width:var(--measure)}
+.about__lead{font-family:var(--font-body);font-weight:var(--fw-medium);font-size:var(--fs-body-lg);
+  line-height:var(--lh-normal);color:var(--text-primary)}
+.about__body p + p{margin-block-start:var(--sp-20)}
+
+/* media — art-directed brand scene (swappable for a <picture> photo) */
+.about__media{position:relative;margin:0}
+.about__media-frame{position:relative;border-radius:var(--radius-lg);overflow:hidden;
+  background:var(--aun-mist);box-shadow:var(--shadow-md);aspect-ratio:4/5}
+.about__media-frame svg,.about__media-frame img{display:block;width:100%;height:100%;object-fit:cover}
+@media(max-width:1023px){.about__media{max-width:30rem;margin-inline:auto}}
+@media(max-width:767px){.about__media-frame{aspect-ratio:4/3}}
+
+/* subtle route connector framing the image corner (§10) — hidden on mobile */
+.about__route{position:absolute;inset-block-start:-4%;inset-inline-start:-9%;width:38%;height:auto;
+  color:var(--aun-sky);pointer-events:none;z-index:1}
+@media(max-width:767px){.about__route{display:none}}

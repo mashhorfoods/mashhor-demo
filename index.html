@@ -218,12 +218,92 @@
         </span>
       </section>
 
-      <!-- ABOUT · #about — 01 -->
+      <!-- ==============================================================
+           ABOUT · #about — 01 · STAGE 05 · من نحن
+           ============================================================== -->
       <section class="section" id="about" data-section aria-labelledby="about-h">
-        <div class="container">
-          <div class="section-label"><span class="section-label__num">01</span><span class="section-label__rule"></span><span class="section-label__name">من نحن</span></div>
-          <h2 id="about-h" class="u-visually-hidden">من نحن</h2>
-          <div class="scaffold"><span class="scaffold__stage">من نحن · مرحلة لاحقة</span><p class="scaffold__note">حاوية القسم جاهزة للتعبئة.</p></div>
+        <div class="container about__grid">
+
+          <!-- head: label + heading -->
+          <div class="about__head">
+            <div class="section-label" data-reveal><span class="section-label__num">01</span><span class="section-label__rule"></span><span class="section-label__name">من نحن</span></div>
+            <h2 id="about-h" class="about__title" data-reveal>من نحن</h2>
+          </div>
+
+          <!-- media: art-directed brand scene (swappable for a <picture> photo) -->
+          <figure class="about__media" data-reveal>
+            <span class="about__route" aria-hidden="true">
+              <svg viewBox="0 0 160 210" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M150,8 C 60,40 30,110 78,200" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 13"/>
+                <circle cx="150" cy="8" r="5" fill="#4975BA" stroke="#fff" stroke-width="2"/>
+              </svg>
+            </span>
+            <div class="about__media-frame">
+              <svg viewBox="0 0 600 750" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="about-img-title about-img-desc">
+                <title id="about-img-title">رعاية إنسانية ونقل مجهّز</title>
+                <desc id="about-img-desc">أخصائي نقل مدرّب يسند بلطف ذراع راكب مسنّ يستعين بعصا، إلى جانب مركبة حديثة مجهّزة ببابٍ منخفض، على طريق يمثّل درب الرحلة.</desc>
+
+                <rect width="600" height="750" fill="#EEF3FA"/>
+                <path d="M-40,240 C 200,150 430,150 660,250" fill="none" stroke="#D9E4F3" stroke-width="46" stroke-linecap="round" opacity=".5"/>
+                <path d="M0,540 C 160,506 340,494 600,528 L600,750 L0,750 Z" fill="#D9E4F3"/>
+
+                <!-- route / درب -->
+                <path d="M470,750 C 430,672 400,620 352,590 L250,590 C 300,632 360,676 372,750 Z" fill="#F6F8FB"/>
+                <path d="M430,742 C 392,672 360,620 300,592" fill="none" stroke="#2C4C82" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 14" opacity=".5"/>
+                <circle cx="404" cy="700" r="6" fill="#4975BA" stroke="#fff" stroke-width="3"/>
+                <circle cx="330" cy="628" r="6" fill="#4975BA" stroke="#fff" stroke-width="3"/>
+
+                <!-- modern accessible vehicle (low-floor, side door open) -->
+                <g>
+                  <ellipse cx="168" cy="560" rx="128" ry="13" fill="#2C4C82" opacity=".08"/>
+                  <path d="M250,506 L276,506 L322,560 L286,560 Z" fill="#5C86C6" stroke="#2C4C82" stroke-width="2" stroke-linejoin="round"/>
+                  <rect x="64" y="372" width="206" height="150" rx="20" fill="#ffffff" stroke="#2C4C82" stroke-width="4"/>
+                  <path d="M64,414 L64,392 A20 20 0 0 1 84,372 L108,372 L86,416 Z" fill="#D9E4F3" stroke="#2C4C82" stroke-width="4" stroke-linejoin="round"/>
+                  <rect x="104" y="392" width="46" height="36" rx="6" fill="#D9E4F3" stroke="#2C4C82" stroke-width="3"/>
+                  <rect x="188" y="392" width="66" height="112" rx="6" fill="#EEF3FA" stroke="#2C4C82" stroke-width="3"/>
+                  <line x1="221" y1="392" x2="221" y2="504" stroke="#2C4C82" stroke-width="2" opacity=".5"/>
+                  <circle cx="120" cy="528" r="25" fill="#2C4C82"/><circle cx="120" cy="528" r="9" fill="#fff"/>
+                  <circle cx="232" cy="528" r="25" fill="#2C4C82"/><circle cx="232" cy="528" r="9" fill="#fff"/>
+                  <circle cx="150" cy="356" r="16" fill="#4975BA"/>
+                  <circle cx="150" cy="347" r="3.2" fill="#fff"/>
+                  <path d="M147,351 v5 h7 l2,5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle cx="151" cy="359" r="6.5" fill="none" stroke="#fff" stroke-width="2"/>
+                </g>
+
+                <!-- trained staff (steadying, respectful) -->
+                <g>
+                  <ellipse cx="342" cy="646" rx="46" ry="11" fill="#2C4C82" opacity=".08"/>
+                  <line x1="330" y1="556" x2="326" y2="636" stroke="#2C4C82" stroke-width="17" stroke-linecap="round"/>
+                  <line x1="352" y1="556" x2="356" y2="636" stroke="#2C4C82" stroke-width="17" stroke-linecap="round"/>
+                  <path d="M316,470 h48 a16 16 0 0 1 16 16 v58 a24 24 0 0 1 -24 24 h-32 a24 24 0 0 1 -24 -24 v-58 a16 16 0 0 1 16 -16 Z" fill="#4975BA"/>
+                  <path d="M340,470 l-14,14 l14,10 l14,-10 Z" fill="#D9E4F3"/>
+                  <line x1="360" y1="496" x2="414" y2="486" stroke="#2C4C82" stroke-width="15" stroke-linecap="round"/>
+                  <circle cx="340" cy="442" r="23" fill="#2C4C82"/>
+                </g>
+
+                <!-- senior passenger (dignified, with cane) -->
+                <g>
+                  <ellipse cx="470" cy="650" rx="48" ry="11" fill="#2C4C82" opacity=".09"/>
+                  <line x1="462" y1="560" x2="452" y2="640" stroke="#2C4C82" stroke-width="16" stroke-linecap="round"/>
+                  <line x1="480" y1="560" x2="486" y2="640" stroke="#2C4C82" stroke-width="16" stroke-linecap="round"/>
+                  <line x1="470" y1="486" x2="470" y2="562" stroke="#4975BA" stroke-width="23" stroke-linecap="round"/>
+                  <line x1="458" y1="502" x2="418" y2="488" stroke="#4975BA" stroke-width="13" stroke-linecap="round"/>
+                  <line x1="482" y1="502" x2="510" y2="536" stroke="#4975BA" stroke-width="13" stroke-linecap="round"/>
+                  <path d="M516,520 q10,-2 10,8 v106" fill="none" stroke="#2C4C82" stroke-width="5" stroke-linecap="round"/>
+                  <circle cx="470" cy="462" r="22" fill="#2C4C82"/>
+                </g>
+              </svg>
+            </div>
+          </figure>
+
+          <!-- body: approved copy (verbatim) -->
+          <div class="about__body" data-reveal>
+            <p class="about__lead">شركة عون الدرب للنقل المتخصص شركة سعودية متخصصة في تقديم خدمات النقل لكبار السن وذوي الإعاقة والمرضى الذين يحتاجون إلى وسائل نقل مجهزة ومساعدة خاصة.</p>
+            <p>تعتمد الشركة على مركبات حديثة ومجهزة بأحدث التقنيات، إلى جانب طاقم مؤهل ومدرب للتعامل مع احتياجات المستفيدين، بما يضمن تقديم تجربة نقل آمنة ومريحة تراعي خصوصية كل حالة واحتياجاتها.</p>
+            <p>وتقدم عون الدرب خدماتها بما يتجاوز عملية النقل، من خلال توفير المساعدة عند الحاجة داخل المنزل، وأثناء النقل، وداخل المستشفيات، بما يدعم المستفيد خلال مختلف مراحل التنقل.</p>
+            <p>يقع مقر الشركة في مدينة الرياض، وتعمل على تقديم خدمات نقل متخصصة تجمع بين الرعاية، والتجهيز، والاحترافية، بما يسهم في تحسين جودة حياة من نخدمهم.</p>
+          </div>
+
         </div>
       </section>
 
