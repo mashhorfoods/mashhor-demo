@@ -854,3 +854,42 @@ section[id]{scroll-margin-top:var(--anchor-offset)}
   .hww__stage-body{padding-block-start:var(--sp-4)}
   .hww__stage-desc{max-width:48ch}
 }
+
+/* ==========================================================================
+   STAGE 09 · VISION & MISSION / رؤيتنا ورسالتنا
+   One connected moment: Vision (direction, primary) linked to Mission
+   (purpose, secondary) by the brand route. Tokens + existing patterns only.
+   ========================================================================== */
+.vm__head{max-width:var(--container-narrow)}
+.vm__title{font-size:var(--fs-h2);line-height:var(--lh-tight);letter-spacing:var(--track-tight);
+  color:var(--color-secondary);margin-block-start:var(--sp-16)}
+
+.vm__grid{display:grid;gap:clamp(1.25rem,3vw,1.75rem);margin-block-start:clamp(2.5rem,5vw,3.5rem)}
+@media(min-width:1024px){
+  .vm__grid{grid-template-columns:minmax(0,1.05fr) auto minmax(0,0.95fr);align-items:center;
+    gap:clamp(1.5rem,3vw,2.5rem)}
+}
+
+.vm__panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:clamp(1.6rem,3vw,2.5rem);display:flex;flex-direction:column;gap:var(--sp-20);box-shadow:var(--shadow-sm)}
+.vm__panel--vision{border-block-start:3px solid var(--color-primary)}
+.vm__head-row{display:flex;align-items:center;gap:var(--sp-16)}
+.vm__node{width:52px;height:52px;flex:0 0 auto;border-radius:var(--radius-circle);display:grid;place-items:center;
+  background:var(--aun-mist);border:1px solid var(--aun-sky);color:var(--color-primary)}
+.vm__node svg{width:26px;height:26px;stroke-width:1.6}
+.vm__num{display:block;font-family:var(--font-heading);font-weight:var(--fw-semibold);font-variant-numeric:tabular-nums;
+  font-size:var(--fs-small);color:var(--color-primary);letter-spacing:.08em}
+.vm__kicker{font-size:var(--fs-h3);color:var(--color-secondary)}
+.vm__text{font-family:var(--font-body);font-size:var(--fs-body-lg);line-height:var(--lh-relaxed);
+  color:var(--text-primary);max-width:54ch}
+.vm__panel--mission .vm__text{color:var(--text-secondary)}
+
+/* route connector — direction → purpose */
+.vm__link{display:flex;align-items:center;justify-content:center;color:var(--aun-border-strong)}
+.vm__link--v{display:flex}
+.vm__link--h{display:none}
+.vm__link svg{display:block}
+@media(min-width:1024px){
+  .vm__link--v{display:none}
+  .vm__link--h{display:flex}
+}
