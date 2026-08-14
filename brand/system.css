@@ -964,3 +964,53 @@ section[id]{scroll-margin-top:var(--anchor-offset)}
   .cta__actions{flex-direction:column;align-self:stretch}
   .cta__actions .btn{width:100%}
 }
+
+/* ==========================================================================
+   STAGE 12 · CONTACT EXPERIENCE / تواصل معنا
+   Editorial close: a raised actions card (primary) + a calm brand aside
+   (secondary) with a route leading toward the actions. Tokens + existing
+   components only. No form, no map dependency.
+   ========================================================================== */
+.contact__head{max-width:var(--container-narrow)}
+.contact__title{font-size:var(--fs-h2);line-height:var(--lh-tight);letter-spacing:var(--track-tight);
+  color:var(--color-secondary);margin-block-start:var(--sp-16)}
+.contact__lead{color:var(--text-secondary);margin-block-start:var(--sp-16);max-width:var(--measure)}
+
+.contact__grid{display:grid;gap:clamp(1.5rem,4vw,2.5rem);margin-block-start:clamp(2.5rem,5vw,3.5rem)}
+@media(min-width:900px){.contact__grid{grid-template-columns:minmax(0,1.15fr) minmax(0,0.85fr);align-items:stretch}}
+
+/* primary — actions card */
+.contact__card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-sm);padding:clamp(1.5rem,3.5vw,2.5rem);display:flex;flex-direction:column;gap:var(--sp-24)}
+.contact__phone-label{font-family:var(--font-heading);font-weight:var(--fw-semibold);font-size:var(--fs-caption);
+  letter-spacing:var(--track-caps);text-transform:uppercase;color:var(--text-muted)}
+.contact__phone{display:inline-block;align-self:flex-start;direction:ltr;font-family:var(--font-heading);
+  font-weight:var(--fw-bold);font-size:var(--fs-h2);color:var(--color-secondary);text-decoration:none;
+  margin-block-start:var(--sp-8);transition:color var(--dur-normal) var(--ease-smooth)}
+.contact__phone:hover{color:var(--color-primary)}
+.contact__phone:focus-visible{outline:none;box-shadow:var(--shadow-focus);border-radius:var(--radius-xs)}
+.contact__actions{display:flex;flex-wrap:wrap;gap:var(--sp-12)}
+.contact__actions .btn{gap:var(--sp-8)}
+.contact__actions .btn svg{width:20px;height:20px;flex:0 0 auto}
+
+.contact__meta{display:flex;flex-direction:column;gap:var(--sp-20);
+  border-block-start:1px solid var(--border);padding-block-start:var(--sp-24)}
+.contact-info{display:flex;align-items:flex-start;gap:var(--sp-16)}
+.contact-info__icon{width:44px;height:44px;flex:0 0 auto;border-radius:var(--radius-circle);display:grid;
+  place-items:center;background:var(--aun-mist);border:1px solid var(--aun-sky);color:var(--color-primary)}
+.contact-info__icon svg{width:20px;height:20px;stroke-width:1.6}
+.contact-info__label{display:flex;align-items:center;gap:var(--sp-8);font-family:var(--font-heading);
+  font-weight:var(--fw-semibold);font-size:var(--fs-small);color:var(--text-primary)}
+.contact-info__value{color:var(--text-secondary);font-size:var(--fs-small);margin-block-start:var(--sp-2);line-height:var(--lh-normal)}
+.contact-info__value a{color:var(--color-primary);text-decoration:none}
+.contact-info__value a:hover{text-decoration:underline}
+.contact__dot{width:8px;height:8px;border-radius:var(--radius-circle);background:var(--color-primary);flex:0 0 auto}
+
+/* secondary — brand aside with route toward the actions */
+.contact__aside{position:relative;display:flex;flex-direction:column;justify-content:center;gap:var(--sp-24);
+  padding:clamp(1rem,3vw,2rem) 0}
+.contact__closing{font-family:var(--font-heading);font-weight:var(--fw-medium);font-size:var(--fs-h3);
+  line-height:var(--lh-snug);color:var(--color-secondary);max-width:24ch}
+.contact__aside-tag{font-family:var(--font-heading);font-weight:var(--fw-semibold);color:var(--color-primary)}
+.contact__aside-route{width:min(100%,260px);height:auto;color:var(--aun-sky)}
+@media(max-width:899px){.contact__aside-route{display:none}}
