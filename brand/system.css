@@ -710,3 +710,47 @@ section[id]{scroll-margin-top:var(--anchor-offset)}
 .about__route{position:absolute;inset-block-start:-4%;inset-inline-start:-9%;width:38%;height:auto;
   color:var(--aun-sky);pointer-events:none;z-index:1}
 @media(max-width:767px){.about__route{display:none}}
+
+/* ==========================================================================
+   STAGE 06 · WHY US / ما يميزنا
+   Trust section as a route-journey: six reasons are "stops" on the brand
+   route line. Sticky editorial intro + connected list. Tokens + existing
+   patterns only; no new colors, fonts, or components.
+   ========================================================================== */
+.why__grid{display:grid;gap:clamp(2.5rem,6vw,4rem)}
+@media(min-width:1024px){
+  .why__grid{grid-template-columns:minmax(0,0.82fr) minmax(0,1.18fr);
+    column-gap:clamp(3rem,6vw,6rem);align-items:start}
+  .why__intro{position:sticky;top:calc(var(--header-h) + var(--sp-32))}
+}
+.why__intro-title{font-size:var(--fs-h2);line-height:var(--lh-tight);letter-spacing:var(--track-tight);
+  color:var(--color-secondary);margin-block-start:var(--sp-16)}
+.why__tagline{font-family:var(--font-heading);font-weight:var(--fw-semibold);font-size:var(--fs-h3);
+  color:var(--color-primary);margin-block-start:var(--sp-20)}
+.why__intro-note{color:var(--text-secondary);margin-block-start:var(--sp-12);max-width:38ch}
+
+/* the journey — six connected stops */
+.why__list{list-style:none;display:flex;flex-direction:column;gap:clamp(1.75rem,3.5vw,2.5rem);position:relative}
+.why__list::before{content:"";position:absolute;inset-inline-start:25px;inset-block:26px 26px;width:2px;
+  background:repeating-linear-gradient(var(--aun-border-strong) 0 5px,transparent 5px 13px)}
+.why__item{position:relative;display:grid;grid-template-columns:52px minmax(0,1fr);column-gap:var(--sp-20);align-items:start}
+.why__node{position:relative;z-index:1;width:52px;height:52px;border-radius:var(--radius-circle);
+  display:grid;place-items:center;background:var(--surface);border:2px solid var(--aun-sky);
+  color:var(--color-primary);box-shadow:var(--shadow-xs);transition:border-color var(--dur-normal) var(--ease-smooth),
+  background-color var(--dur-normal) var(--ease-smooth)}
+.why__node svg{width:24px;height:24px;stroke-width:1.6}
+.why__item:hover .why__node,.why__item:focus-within .why__node{border-color:var(--color-primary);background:var(--aun-primary-subtle)}
+.why__head{display:flex;align-items:baseline;gap:var(--sp-8);flex-wrap:wrap}
+.why__num{font-family:var(--font-heading);font-weight:var(--fw-semibold);font-variant-numeric:tabular-nums;
+  font-size:var(--fs-small);color:var(--color-secondary);letter-spacing:.06em}
+.why__item-title{font-size:var(--fs-h4);color:var(--text-primary)}
+.why__desc{font-family:var(--font-body);color:var(--text-secondary);margin-block-start:var(--sp-8);max-width:54ch}
+.why__247{margin-inline-start:auto;font-family:var(--font-heading);font-weight:var(--fw-bold);
+  font-variant-numeric:tabular-nums;font-size:clamp(1.5rem,4vw,2rem);line-height:1;color:var(--color-primary);letter-spacing:-.01em}
+
+@media(max-width:479px){
+  .why__item{grid-template-columns:44px minmax(0,1fr);column-gap:var(--sp-16)}
+  .why__node{width:44px;height:44px}
+  .why__node svg{width:20px;height:20px}
+  .why__list::before{inset-inline-start:21px;inset-block:22px 22px}
+}
