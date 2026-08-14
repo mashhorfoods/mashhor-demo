@@ -34,8 +34,7 @@
   .scaffold__note{margin-block-start:.75rem;font-size:.9rem}
   .section--inverse .scaffold{border-color:rgba(255,255,255,.28);color:var(--text-on-inverse-muted)}
   .section--inverse .scaffold__stage{color:#fff;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25)}
-  .hero-scaffold{min-height:clamp(520px,80vh,760px);display:grid;place-items:center}
-  </style>
+</style>
 </head>
 
 <body>
@@ -93,15 +92,131 @@
          ================================================================== -->
     <main class="site-main" id="main">
 
-      <!-- HERO · #home — reserved for STAGE 04 -->
-      <section class="section section--surface hero-scaffold" id="home" data-section aria-labelledby="home-h">
-        <div class="container container--wide">
-          <h1 id="home-h" class="u-visually-hidden">عون الدرب للنقل المتخصص</h1>
-          <div class="scaffold">
-            <span class="scaffold__stage">الهيرو · STAGE 04</span>
-            <p class="scaffold__note">حاوية القسم الأول جاهزة — يُبنى الهيرو في المرحلة القادمة عبر النظام العالمي.</p>
+      <!-- ==============================================================
+           HERO · #home — STAGE 04 · editorial first impression
+           ============================================================== -->
+      <section class="section section--surface hero" id="home" data-section aria-labelledby="hero-title">
+
+        <!-- subtle section-level route graphic (§10) — behind content -->
+        <span class="hero__route" aria-hidden="true">
+          <svg viewBox="0 0 600 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M600,30 C 380,110 300,300 360,570" stroke="currentColor" stroke-width="42" stroke-linecap="round" opacity=".5"/>
+            <path d="M600,116 C 432,188 360,340 408,548" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 13" opacity=".85"/>
+          </svg>
+        </span>
+
+        <div class="container container--wide hero__inner">
+
+          <!-- CONTENT -->
+          <div class="hero__content">
+            <p class="eyebrow" data-reveal>عون الدرب للنقل المتخصص</p>
+            <h1 id="hero-title" class="hero__title" data-reveal>نُعين ونُعاون</h1>
+            <p class="hero__lead" data-reveal>نقل متخصص يجمع بين الأمان، الراحة، والرعاية.</p>
+
+            <ul class="hero__scope" data-reveal>
+              <li>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7" r="3.2"/><path d="M6 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+                كبار السن
+              </li>
+              <li>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="2.2"/><path d="M12 7.5v6l4.5 4.5M12 11h4"/><circle cx="10.5" cy="16.5" r="4"/></svg>
+                ذوو الإعاقة
+              </li>
+              <li>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.5C7 17 4 13.6 4 9.8A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 8 2.8c0 3.8-3 7.2-8 10.7Z"/><path d="M12 9.2v3.4M10.3 10.9h3.4"/></svg>
+                المرضى المحتاجون لوسائل نقل مجهّزة
+              </li>
+            </ul>
+
+            <div class="hero__actions" data-reveal>
+              <a class="btn btn--primary btn--lg" href="#contact">تواصل معنا</a>
+              <a class="btn btn--secondary btn--lg" href="#services">اكتشف خدماتنا</a>
+            </div>
           </div>
+
+          <!-- MEDIA — art-directed brand scene.
+               A licensed photograph can replace the <svg> below via a
+               <picture> (webp/avif) inside .hero__media-frame, keeping the
+               same frame, ratio and route treatment. -->
+          <figure class="hero__media" data-reveal>
+            <div class="hero__media-frame">
+              <svg viewBox="0 0 600 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="hero-img-title hero-img-desc">
+                <title id="hero-img-title">نقل متخصص برعاية إنسانية</title>
+                <desc id="hero-img-desc">مختصّ مدرّب يقف باحترام إلى جانب راكب بالغ يستخدم كرسيًا متحركًا، عند مركبة مجهّزة بمنحدر صعود، على طريق يمثّل درب الرحلة.</desc>
+
+                <rect width="600" height="720" fill="#EEF3FA"/>
+                <path d="M-40,250 C 180,150 430,150 660,270" fill="none" stroke="#D9E4F3" stroke-width="46" stroke-linecap="round" opacity=".55"/>
+                <path d="M0,520 C 150,486 330,472 600,506 L600,720 L0,720 Z" fill="#D9E4F3"/>
+
+                <!-- road / route (الدرب) -->
+                <path d="M150,720 C 215,656 300,620 352,586 L434,586 C 476,628 402,672 332,720 Z" fill="#F6F8FB"/>
+                <path d="M242,716 C 300,652 358,612 392,588" fill="none" stroke="#2C4C82" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 14" opacity=".55"/>
+                <circle cx="262" cy="686" r="6" fill="#4975BA" stroke="#fff" stroke-width="3"/>
+                <circle cx="360" cy="626" r="6" fill="#4975BA" stroke="#fff" stroke-width="3"/>
+
+                <!-- equipped van + ramp -->
+                <g>
+                  <ellipse cx="510" cy="556" rx="96" ry="12" fill="#2C4C82" opacity=".08"/>
+                  <path d="M410,566 L470,520 L500,520 L452,566 Z" fill="#5C86C6" stroke="#2C4C82" stroke-width="2" stroke-linejoin="round"/>
+                  <rect x="432" y="430" width="162" height="112" rx="18" fill="#ffffff" stroke="#2C4C82" stroke-width="4"/>
+                  <path d="M432,470 L432,448 A18 18 0 0 1 450,430 L470,430 L452,472 Z" fill="#D9E4F3" stroke="#2C4C82" stroke-width="4" stroke-linejoin="round"/>
+                  <rect x="470" y="446" width="44" height="36" rx="6" fill="#D9E4F3" stroke="#2C4C82" stroke-width="3"/>
+                  <rect x="522" y="446" width="46" height="36" rx="6" fill="#D9E4F3" stroke="#2C4C82" stroke-width="3"/>
+                  <circle cx="474" cy="548" r="24" fill="#2C4C82"/><circle cx="474" cy="548" r="9" fill="#fff"/>
+                  <circle cx="556" cy="548" r="24" fill="#2C4C82"/><circle cx="556" cy="548" r="9" fill="#fff"/>
+                  <circle cx="548" cy="418" r="16" fill="#4975BA"/>
+                  <circle cx="548" cy="409" r="3.2" fill="#fff"/>
+                  <path d="M545,413 v5 h7 l2,5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle cx="549" cy="421" r="6.5" fill="none" stroke="#fff" stroke-width="2"/>
+                </g>
+
+                <!-- trained staff (respectful, guiding — not lifting) -->
+                <g>
+                  <ellipse cx="205" cy="612" rx="46" ry="11" fill="#2C4C82" opacity=".08"/>
+                  <line x1="192" y1="520" x2="192" y2="602" stroke="#2C4C82" stroke-width="17" stroke-linecap="round"/>
+                  <line x1="216" y1="520" x2="218" y2="602" stroke="#2C4C82" stroke-width="17" stroke-linecap="round"/>
+                  <path d="M180,432 h48 a16 16 0 0 1 16 16 v58 a24 24 0 0 1 -24 24 h-32 a24 24 0 0 1 -24 -24 v-58 a16 16 0 0 1 16 -16 Z" fill="#4975BA"/>
+                  <path d="M204,432 l-14,14 l14,10 l14,-10 Z" fill="#D9E4F3"/>
+                  <line x1="224" y1="456" x2="278" y2="516" stroke="#2C4C82" stroke-width="15" stroke-linecap="round"/>
+                  <circle cx="204" cy="404" r="24" fill="#2C4C82"/>
+                </g>
+
+                <!-- wheelchair passenger (active, dignified) -->
+                <g>
+                  <ellipse cx="336" cy="640" rx="74" ry="12" fill="#2C4C82" opacity=".09"/>
+                  <circle cx="336" cy="580" r="52" fill="none" stroke="#2C4C82" stroke-width="7"/>
+                  <circle cx="336" cy="580" r="44" fill="none" stroke="#4975BA" stroke-width="2"/>
+                  <circle cx="336" cy="580" r="7" fill="#2C4C82"/>
+                  <g stroke="#2C4C82" stroke-width="2" opacity=".45">
+                    <line x1="336" y1="580" x2="336" y2="530"/><line x1="336" y1="580" x2="386" y2="580"/>
+                    <line x1="336" y1="580" x2="336" y2="630"/><line x1="336" y1="580" x2="286" y2="580"/>
+                    <line x1="336" y1="580" x2="371" y2="545"/><line x1="336" y1="580" x2="301" y2="615"/>
+                  </g>
+                  <circle cx="392" cy="606" r="11" fill="#2C4C82"/>
+                  <line x1="330" y1="558" x2="392" y2="606" stroke="#2C4C82" stroke-width="4" stroke-linecap="round"/>
+                  <line x1="300" y1="488" x2="330" y2="556" stroke="#4975BA" stroke-width="24" stroke-linecap="round"/>
+                  <line x1="330" y1="556" x2="378" y2="552" stroke="#4975BA" stroke-width="19" stroke-linecap="round"/>
+                  <line x1="378" y1="552" x2="392" y2="588" stroke="#4975BA" stroke-width="17" stroke-linecap="round"/>
+                  <line x1="306" y1="504" x2="352" y2="540" stroke="#2C4C82" stroke-width="15" stroke-linecap="round"/>
+                  <circle cx="300" cy="464" r="22" fill="#2C4C82"/>
+                </g>
+              </svg>
+
+              <span class="hero__badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6l7-3Z"/><path d="M9.2 12l2 2 3.6-3.8"/></svg>
+                رعاية متخصصة وآمنة
+              </span>
+            </div>
+          </figure>
+
         </div>
+
+        <!-- transition into About — the route continues (§ section transition) -->
+        <span class="hero__transition" aria-hidden="true">
+          <svg viewBox="0 0 1440 90" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0,64 C 360,26 1080,26 1440,64" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 14"/>
+          </svg>
+        </span>
       </section>
 
       <!-- ABOUT · #about — 01 -->
@@ -318,6 +433,30 @@
         entries.forEach(function (entry) { if (entry.isIntersecting) setActive(entry.target.id); });
       }, { rootMargin: "-45% 0px -55% 0px", threshold: 0 });
       sections.forEach(function (s) { obs.observe(s); });
+    })();
+
+    /* 4 · Entrance reveal (§20) — subtle, one-shot; content-first */
+    (function () {
+      var items = doc.querySelectorAll("[data-reveal]");
+      if (!items.length) return;
+      if (reduce || !("IntersectionObserver" in window)) {
+        items.forEach(function (el) { el.classList.add("is-inview"); });
+        return;
+      }
+      var i = 0;
+      items.forEach(function (el) {
+        var rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight * 0.92) {           // above the fold → stagger in now
+          el.style.transitionDelay = (i++ * 70) + "ms";
+          window.requestAnimationFrame(function () { el.classList.add("is-inview"); });
+        }
+      });
+      var ro = new IntersectionObserver(function (entries, o) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) { entry.target.classList.add("is-inview"); o.unobserve(entry.target); }
+        });
+      }, { rootMargin: "0px 0px -12% 0px", threshold: 0.12 });
+      items.forEach(function (el) { if (!el.classList.contains("is-inview")) ro.observe(el); });
     })();
   })();
   </script>

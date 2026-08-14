@@ -614,3 +614,64 @@ section[id]{scroll-margin-top:var(--anchor-offset)}
 .contact-action .link-num{color:inherit}
 .section--inverse .contact-action{background:transparent;color:#fff;border-color:rgba(255,255,255,.35)}
 .section--inverse .contact-action:hover{background:rgba(255,255,255,.10);border-color:#fff;color:#fff}
+
+/* ==========================================================================
+   STAGE 04 · HERO / FIRST IMPRESSION
+   Editorial asymmetric hero. Tokens + existing components only; no new
+   colors, fonts, or effects. Route/road DNA used as a subtle connector.
+   ========================================================================== */
+.hero{position:relative;overflow:clip;
+  padding-block:calc(var(--header-h) + clamp(2rem,6vw,4rem)) clamp(3rem,7vw,6rem)}
+.hero__inner{position:relative;z-index:1;display:grid;gap:clamp(2rem,5vw,3.5rem);align-items:center}
+@media(min-width:1024px){
+  .hero__inner{grid-template-columns:minmax(0,1.02fr) minmax(0,0.98fr);gap:clamp(2.5rem,5vw,5rem)}
+}
+
+/* content column */
+.hero__content{position:relative;max-width:34rem}
+.hero__title{font-size:var(--fs-display);line-height:var(--lh-tight);letter-spacing:var(--track-tight);
+  color:var(--color-secondary);margin-block:var(--sp-16) 0}
+.hero__lead{font-family:var(--font-body);font-weight:var(--fw-medium);font-size:var(--fs-body-lg);
+  line-height:var(--lh-normal);color:var(--text-secondary);margin-block-start:var(--sp-20);max-width:44ch}
+.hero__scope{list-style:none;display:flex;flex-wrap:wrap;gap:var(--sp-12);margin-block-start:var(--sp-24)}
+.hero__scope li{display:inline-flex;align-items:center;gap:var(--sp-8);
+  font-family:var(--font-heading);font-weight:var(--fw-medium);font-size:var(--fs-small);color:var(--text-primary);
+  background:var(--aun-mist);border:1px solid var(--aun-sky);border-radius:var(--radius-pill);padding:.42rem .9rem}
+.hero__scope svg{width:18px;height:18px;color:var(--color-primary);flex:0 0 auto}
+.hero__actions{display:flex;flex-wrap:wrap;gap:var(--sp-16);margin-block-start:clamp(1.75rem,4vw,2.5rem)}
+
+/* media column — art-directed brand scene; swappable for a <picture> photo */
+.hero__media{position:relative;margin:0}
+.hero__media-frame{position:relative;border-radius:var(--radius-lg);overflow:hidden;
+  background:var(--aun-mist);box-shadow:var(--shadow-md);aspect-ratio:5/6}
+.hero__media-frame svg,.hero__media-frame img{display:block;width:100%;height:100%;object-fit:cover}
+.hero__badge{position:absolute;inset-block-end:var(--sp-16);inset-inline-start:var(--sp-16);
+  display:inline-flex;align-items:center;gap:var(--sp-8);background:rgba(255,255,255,.94);
+  backdrop-filter:saturate(140%) blur(4px);border:1px solid var(--border);border-radius:var(--radius-pill);
+  padding:.5rem .9rem;box-shadow:var(--shadow-sm);font-family:var(--font-heading);font-weight:var(--fw-semibold);
+  font-size:var(--fs-small);color:var(--color-secondary)}
+.hero__badge svg{width:20px;height:20px;color:var(--color-primary);flex:0 0 auto}
+
+/* section-level route graphic — subtle, behind content (§10) */
+.hero__route{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.hero__route svg{position:absolute;inset-block-start:-6%;inset-inline-end:-8%;width:min(58%,720px);height:auto;
+  color:var(--aun-sky);opacity:.9}
+@media(max-width:1023px){.hero__route svg{width:min(80%,560px);opacity:.6}}
+
+/* transition into About — thin route line + soft fade (§ section transition) */
+.hero__transition{position:absolute;inset-block-end:0;inset-inline:0;z-index:0;height:clamp(48px,8vw,90px);
+  pointer-events:none;color:var(--aun-sky)}
+.hero__transition svg{position:absolute;inset-block-end:0;inset-inline:0;width:100%;height:100%}
+
+/* tablet / mobile rebalance — deliberate stacked composition, not a squeeze */
+@media(max-width:1023px){
+  .hero__content{max-width:38rem}
+  .hero__media{max-width:30rem;margin-inline:auto}
+}
+@media(max-width:767px){
+  .hero__media-frame{aspect-ratio:4/3}
+  .hero__title{font-size:var(--fs-h1)}
+}
+@media(max-width:479px){
+  .hero__actions .btn{width:100%}
+}
