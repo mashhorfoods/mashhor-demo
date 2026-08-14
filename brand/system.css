@@ -926,3 +926,41 @@ section[id]{scroll-margin-top:var(--anchor-offset)}
   .value:hover::before{background:var(--color-primary);transform:scale(1.15)}
   .value:hover .value__num{opacity:1;color:var(--color-primary)}
 }
+
+/* ==========================================================================
+   STAGE 11 · FINAL CTA / الدعوة للتواصل
+   Calm, confident closing band on the navy surface. Tokens + existing
+   components only; adds one button variant (outline-on-inverse) for the
+   secondary action and a subtle route motif — no new decorative system.
+   ========================================================================== */
+.btn--outline-inverse{background:transparent;color:#fff;border-color:rgba(255,255,255,.5)}
+.btn--outline-inverse:hover{border-color:#fff;background:rgba(255,255,255,.1)}
+.btn--outline-inverse:active{background:rgba(255,255,255,.16)}
+.btn--outline-inverse:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(255,255,255,.55)}
+
+.cta{position:relative;overflow:clip}
+.cta__inner{position:relative;z-index:1;max-width:46rem;margin-inline:auto;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:var(--sp-20)}
+.cta__eyebrow{display:inline-flex;align-items:center;gap:var(--sp-12);font-family:var(--font-heading);
+  font-weight:var(--fw-semibold);font-size:var(--fs-small);letter-spacing:.04em;color:#fff}
+.cta__eyebrow::before,.cta__eyebrow::after{content:"";width:22px;height:2px;border-radius:var(--radius-pill);
+  background:currentColor;opacity:.55}
+.cta__title{font-size:var(--fs-h1);line-height:var(--lh-tight);letter-spacing:var(--track-tight);
+  color:#fff;max-width:20ch}
+.cta__text{font-family:var(--font-body);font-size:var(--fs-body-lg);line-height:var(--lh-normal);
+  color:var(--text-on-inverse-muted);max-width:54ch}
+.cta__actions{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sp-16);margin-block-start:var(--sp-4)}
+
+/* subtle route motif on the navy — secondary to content (§ graphic language) */
+.cta__route{position:absolute;inset:0;z-index:0;pointer-events:none;color:#fff;overflow:hidden}
+.cta__route svg{position:absolute;inset-block-start:50%;inset-inline-start:50%;
+  translate:-50% -50%;width:min(1100px,140%);height:auto;opacity:.07}
+
+/* downward route hint → transition into Contact */
+.cta__continue{position:absolute;z-index:1;inset-block-end:0;inset-inline:0;display:flex;justify-content:center;
+  color:rgba(255,255,255,.5);pointer-events:none}
+
+@media(max-width:479px){
+  .cta__actions{flex-direction:column;align-self:stretch}
+  .cta__actions .btn{width:100%}
+}
