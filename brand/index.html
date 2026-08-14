@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#4975BA">
+<title>عون الدرب — دليل الهوية الرقمية (المرحلة 01)</title>
+<meta name="description" content="أساس الهوية الرقمية لشركة عون الدرب للنقل المتخصص — اللوجو، الألوان، الطباعة، لغة المسار، RTL، والوصول.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Cairo:wght@400;600;700&display=swap">
+<style>
+
+:root{
+  /* Brand palette — derived from the single logo blue #4975BA */
+  --blue:#4975BA; --navy:#2C4C82; --blue-bright:#5C86C6;
+  --sky:#D9E4F3; --mist:#EEF3FA;
+  --ink:#1E2733; --slate:#5A6675; --gray:#8B95A3;
+  --page:#FFFFFF; --soft:#F6F8FB; --panel:#FFFFFF; --divider:#E4E9F0;
+  --on-navy:#FFFFFF; --sky-on-navy:#D9E4F3;
+  /* semantic */
+  --bg:var(--soft); --surface:var(--panel); --text:var(--ink); --muted:var(--slate);
+  --line:var(--divider); --accent:var(--blue); --accent-strong:var(--navy);
+  --code-bg:#F1F4F9;
+  --f-head:"IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  --f-body:"Cairo", ui-sans-serif, system-ui, sans-serif;
+  --measure:64ch;
+  --pad:clamp(1.25rem,5vw,4.5rem);
+}
+:root:not([data-theme="light"]){}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --blue:#6E9AD8; --navy:#0F1723; --blue-bright:#8FB2E4;
+    --sky:#33517F; --mist:#1B2536;
+    --ink:#EAEFF6; --slate:#A6B2C2; --gray:#7C8695;
+    --page:#0F1621; --soft:#0C1119; --panel:#141C28; --divider:#26313F;
+    --on-navy:#EAEFF6; --sky-on-navy:#C9D8ED;
+    --bg:var(--soft); --surface:var(--panel); --text:var(--ink); --muted:var(--slate);
+    --line:var(--divider); --accent:var(--blue); --accent-strong:#9CBCE6;
+    --code-bg:#0D141E;
+  }
+}
+:root[data-theme="dark"]{
+  --blue:#6E9AD8; --navy:#0F1723; --blue-bright:#8FB2E4;
+  --sky:#33517F; --mist:#1B2536;
+  --ink:#EAEFF6; --slate:#A6B2C2; --gray:#7C8695;
+  --page:#0F1621; --soft:#0C1119; --panel:#141C28; --divider:#26313F;
+  --on-navy:#EAEFF6; --sky-on-navy:#C9D8ED;
+  --bg:var(--soft); --surface:var(--panel); --text:var(--ink); --muted:var(--slate);
+  --line:var(--divider); --accent:var(--blue); --accent-strong:#9CBCE6;
+  --code-bg:#0D141E;
+}
+*,*::before,*::after{box-sizing:border-box}
+*{margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  direction:rtl; background:var(--bg); color:var(--text);
+  font-family:var(--f-body); font-size:1.0625rem; line-height:1.75;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+}
+.wrap{max-width:1180px;margin-inline:auto;padding-inline:var(--pad)}
+h1,h2,h3,h4,h5,.eyebrow,.num,.label,.mono{font-family:var(--f-head)}
+h2{font-size:clamp(1.6rem,1.1rem+1.9vw,2.5rem);line-height:1.15;letter-spacing:-.01em;color:var(--text);text-wrap:balance;font-weight:700}
+h3{font-size:clamp(1.15rem,1rem+.7vw,1.5rem);line-height:1.25;color:var(--text);font-weight:600;text-wrap:balance}
+h4{font-size:1.05rem;font-weight:600;color:var(--text)}
+p{color:var(--muted);max-width:var(--measure)}
+strong{color:var(--text);font-weight:600}
+.eyebrow{font-size:.72rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
+.mono{font-variant-numeric:tabular-nums;font-feature-settings:"tnum";letter-spacing:.02em}
+
+/* ---- Route motif: dashed centre-line divider (from the logo road) ---- */
+.route{display:block;width:100%;height:26px;color:var(--accent);opacity:.55;margin:clamp(3rem,7vw,5.5rem) 0}
+.route svg{width:100%;height:100%;display:block}
+.route path{stroke:currentColor;fill:none}
+.route .edge{stroke-width:2}
+.route .mid{stroke-width:2;stroke-dasharray:2 12;opacity:.85}
+
+/* ---- Cover ---- */
+.cover{min-height:92vh;display:flex;flex-direction:column;justify-content:center;padding-block:clamp(3rem,9vw,7rem);position:relative;overflow:hidden}
+.cover::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(120% 90% at 88% 8%, color-mix(in srgb,var(--accent) 12%,transparent), transparent 60%);
+  pointer-events:none}
+.cover__logo{width:min(430px,66vw);height:auto;filter:none}
+.cover__meta{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;margin-top:2.2rem;color:var(--muted);font-size:.9rem}
+.cover__meta span{display:inline-flex;align-items:center;gap:.5rem}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--accent);display:inline-block}
+.cover h1{font-family:var(--f-head);font-weight:700;font-size:clamp(2.1rem,1.3rem+3.4vw,4rem);line-height:1.08;letter-spacing:-.015em;color:var(--text);margin-top:2.6rem;text-wrap:balance}
+.cover .sub{font-size:clamp(1.05rem,.9rem+.7vw,1.4rem);color:var(--muted);margin-top:1rem;font-weight:500}
+.tag{display:inline-flex;align-items:center;gap:.6rem;margin-top:2rem;padding:.5rem 1.1rem;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-family:var(--f-head);font-weight:600;color:var(--accent-strong);font-size:1.05rem}
+.tag .dot{background:var(--accent)}
+.stage-pill{align-self:flex-start;font-family:var(--f-head);font-weight:600;font-size:.75rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);border:1px solid color-mix(in srgb,var(--accent) 28%,transparent);padding:.45rem .9rem;border-radius:999px}
+
+/* ---- Section scaffolding ---- */
+.section{padding-block:clamp(2.5rem,6vw,4.5rem)}
+.sec-head{display:flex;align-items:baseline;gap:1rem;margin-bottom:1.6rem}
+.sec-head .num{font-size:.95rem;font-weight:600;color:var(--accent);letter-spacing:.1em;flex:0 0 auto}
+.sec-head .rule{flex:1;height:1px;background:var(--line);align-self:center}
+.lead{font-size:clamp(1.05rem,1rem+.4vw,1.2rem);color:var(--text);max-width:var(--measure);margin-bottom:1.4rem;line-height:1.7}
+.grid{display:grid;gap:1.1rem}
+@media(min-width:640px){.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:960px){.g4{grid-template-columns:repeat(4,1fr)}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:1.4rem}
+.card h4{margin-bottom:.4rem}
+.card p{font-size:.95rem}
+
+/* index */
+.index{columns:2;column-gap:2.5rem}
+@media(max-width:640px){.index{columns:1}}
+.index a{display:flex;gap:.9rem;padding:.55rem 0;border-bottom:1px solid var(--line);color:var(--text);text-decoration:none;break-inside:avoid;align-items:baseline}
+.index a:hover{color:var(--accent)}
+.index .num{font-family:var(--f-head);font-weight:600;color:var(--accent);font-size:.85rem;min-width:1.7rem}
+.index .t{font-family:var(--f-head);font-weight:500}
+.index .en{color:var(--gray);font-size:.8rem;margin-inline-start:auto;letter-spacing:.04em}
+
+/* color swatches */
+.swatches{display:grid;gap:1rem;grid-template-columns:repeat(2,1fr)}
+@media(min-width:720px){.swatches{grid-template-columns:repeat(3,1fr)}}
+.sw{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}
+.sw__chip{height:96px;display:flex;align-items:flex-end;justify-content:flex-start;padding:.6rem .8rem}
+.sw__chip .role{font-family:var(--f-head);font-size:.72rem;font-weight:600;letter-spacing:.04em;padding:.2rem .5rem;border-radius:999px;background:rgba(255,255,255,.85);color:#1E2733}
+.sw__body{padding:.75rem .85rem}
+.sw__name{font-family:var(--f-head);font-weight:600;font-size:.95rem;color:var(--text)}
+.sw__hex{font-family:var(--f-head);font-size:.82rem;color:var(--muted);margin-top:.15rem}
+.sw__use{font-size:.82rem;color:var(--muted);margin-top:.4rem;line-height:1.5}
+.pair{display:inline-flex;align-items:center;gap:.35rem;font-family:var(--f-head);font-size:.72rem;font-weight:600;color:var(--accent-strong);background:color-mix(in srgb,var(--accent) 10%,transparent);padding:.15rem .5rem;border-radius:6px;margin-top:.5rem}
+
+/* type specimens */
+.type-row{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;padding:1rem 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.type-row .spec{font-family:var(--f-head);color:var(--text);line-height:1.1;text-wrap:balance}
+.type-row .meta{font-family:var(--f-head);color:var(--muted);font-size:.8rem;text-align:left;direction:ltr;white-space:nowrap}
+.font-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:1.6rem}
+.font-card .big{font-size:2.6rem;line-height:1.2;color:var(--text);margin:.3rem 0 .2rem}
+.font-card .glyphs{font-size:1.15rem;color:var(--muted);letter-spacing:.02em}
+
+/* do / dont */
+.dd{display:grid;gap:1.1rem}
+@media(min-width:720px){.dd{grid-template-columns:1fr 1fr}}
+.dd__col{border:1px solid var(--line);border-radius:16px;padding:1.4rem;background:var(--surface)}
+.dd__col h4{display:flex;align-items:center;gap:.55rem;margin-bottom:.9rem;font-size:1.1rem}
+.dd li{list-style:none;position:relative;padding-inline-start:1.6rem;margin-bottom:.6rem;color:var(--muted);font-size:.95rem;line-height:1.55}
+.dd li::before{position:absolute;inset-inline-start:0;top:.05rem;font-family:var(--f-head);font-weight:700}
+.dd--do{border-color:color-mix(in srgb,var(--accent) 35%,var(--line))}
+.dd--do li::before{content:"✓";color:var(--accent)}
+.dd--dont li::before{content:"✕";color:var(--gray)}
+.badge{width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-family:var(--f-head)}
+.badge--do{background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent-strong)}
+.badge--dont{background:color-mix(in srgb,var(--gray) 20%,transparent);color:var(--slate)}
+
+/* icons */
+.iconwall{display:grid;grid-template-columns:repeat(2,1fr);gap:.9rem}
+@media(min-width:560px){.iconwall{grid-template-columns:repeat(4,1fr)}}
+.ic{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:1.1rem;display:flex;flex-direction:column;align-items:center;gap:.6rem;text-align:center}
+.ic svg{width:34px;height:34px;color:var(--accent);stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.ic span{font-family:var(--f-head);font-size:.8rem;color:var(--muted)}
+
+/* logo usage */
+.logo-stage{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:2.4rem;display:flex;align-items:center;justify-content:center;min-height:180px}
+.logo-stage img{width:min(320px,70%);height:auto}
+.logo-stage--dark{background:var(--navy);border-color:var(--navy)}
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.9rem}
+.chip{font-family:var(--f-head);font-size:.8rem;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:.3rem .75rem}
+
+/* shape samples */
+.shapes{display:flex;flex-wrap:wrap;gap:1rem;align-items:center}
+.shape{background:var(--surface);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:var(--f-head);font-size:.78rem;color:var(--muted);width:96px;height:96px;text-align:center;padding:.4rem}
+.r-none{border-radius:2px}.r-sm{border-radius:10px}.r-md{border-radius:16px}.r-lg{border-radius:24px}.r-pill{border-radius:999px}.r-circle{border-radius:50%}
+
+/* callout */
+.callout{border:1px solid var(--line);border-inline-start:3px solid var(--accent);background:var(--surface);border-radius:12px;padding:1.1rem 1.3rem;margin:1.4rem 0}
+.callout p{color:var(--text);max-width:none}
+.callout .k{font-family:var(--f-head);font-weight:700;color:var(--accent-strong)}
+
+.mono-tag{font-family:var(--f-head);background:var(--code-bg);color:var(--accent-strong);border-radius:6px;padding:.1rem .45rem;font-size:.85em;direction:ltr;display:inline-block}
+
+/* responsive matrix */
+.matrix{width:100%;border-collapse:collapse;font-size:.9rem}
+.matrix th,.matrix td{text-align:right;padding:.75rem .9rem;border-bottom:1px solid var(--line);vertical-align:top}
+.matrix th{font-family:var(--f-head);font-weight:600;color:var(--text);font-size:.8rem;letter-spacing:.02em}
+.matrix td{color:var(--muted)}
+.matrix tr td:first-child{font-family:var(--f-head);color:var(--text);font-weight:500}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+
+/* footer */
+.foot{background:var(--navy);color:var(--on-navy);margin-top:clamp(3rem,7vw,5rem);border-radius:24px 24px 0 0}
+.foot .wrap{padding-block:clamp(2.5rem,6vw,4rem)}
+.foot img{width:210px;height:auto;margin-bottom:1.6rem}
+.foot h3{color:var(--on-navy)}
+.foot p{color:var(--sky-on-navy);max-width:56ch}
+.foot .contact{display:flex;flex-wrap:wrap;gap:1.2rem 2.4rem;margin-top:1.6rem;font-family:var(--f-head)}
+.foot .contact div{min-width:150px}
+.foot .contact .l{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--blue-bright)}
+.foot .contact .v{color:var(--on-navy);font-size:1rem;margin-top:.25rem;direction:ltr;text-align:right}
+.foot .rule{height:1px;background:rgba(255,255,255,.16);margin:2rem 0}
+.foot small{color:var(--sky-on-navy);font-family:var(--f-head);font-size:.8rem}
+
+/* theme toggle */
+.toggle{position:fixed;inset-block-start:14px;inset-inline-start:14px;z-index:50;background:var(--surface);border:1px solid var(--line);color:var(--text);border-radius:999px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.05rem;box-shadow:0 4px 14px rgba(20,30,50,.08)}
+.toggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+a.anchor{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+
+/* reveal */
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
+.reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+</style>
+</head>
+<body>
+
+
+<button class="toggle" id="tg" aria-label="تبديل الوضع الليلي">◐</button>
+
+<!-- ============ COVER ============ -->
+<header class="cover wrap">
+  <span class="stage-pill">المرحلة 01 — أساس الهوية</span>
+  <img class="cover__logo" style="margin-top:2rem" src="aun-aldrb-logo.svg" alt="شعار عون الدرب للنقل المتخصص — AOUN ALDARB">
+  <h1>دليل الهوية الرقمية<br>لعون الدرب</h1>
+  <p class="sub">ترجمة هوية «عون الدرب» إلى لغة بصرية رقمية واحدة، إنسانية وموثوقة، تحكم الموقع بالكامل قبل تصميم أي قسم.</p>
+  <span class="tag"><span class="dot"></span>نُعين ونُعاون</span>
+  <div class="cover__meta">
+    <span><span class="dot"></span>AOUN ALDARB — Specialized Transportation</span>
+    <span class="mono">aunaldrb.com</span>
+    <span class="mono">الرياض · KSA</span>
+  </div>
+</header>
+
+<div class="wrap"><div class="route" aria-hidden="true"><svg viewBox="0 0 1000 26" preserveAspectRatio="none" fill="none"><path class="edge" d="M0 6 C 250 6 300 6 500 13 C 700 20 750 20 1000 20"/><path class="mid" d="M0 13 C 250 13 300 13 500 13 C 700 13 750 13 1000 13"/><path class="edge" d="M0 20 C 250 20 300 20 500 13 C 700 6 750 6 1000 6"/></svg></div></div>
+
+<!-- ============ INDEX ============ -->
+<section class="section wrap" aria-label="المحتويات">
+  <div class="sec-head"><span class="num">00</span><h2>مخرجات هذه المرحلة</h2><span class="rule"></span></div>
+  <p class="lead">سبعة عشر أساسًا تُوثَّق الآن، لتحوّلها المرحلة 02 إلى «نظام تصميم الموقع». هذه المرحلة تُنشئ الهوية فقط — لا تُصمّم الهيرو ولا الأقسام ولا المكوّنات.</p>
+  <nav class="index">
+    <a class="anchor" href="#s1"><span class="num">01</span><span class="t">شخصية العلامة</span><span class="en">Personality</span></a>
+    <a class="anchor" href="#s2"><span class="num">02</span><span class="t">اللوجو ومبادئ استخدامه</span><span class="en">Logo</span></a>
+    <a class="anchor" href="#s3"><span class="num">03</span><span class="t">اللون الأساسي</span><span class="en">Primary</span></a>
+    <a class="anchor" href="#s4"><span class="num">04</span><span class="t">الألوان الثانوية</span><span class="en">Secondary</span></a>
+    <a class="anchor" href="#s5"><span class="num">05</span><span class="t">الألوان المحايدة</span><span class="en">Neutrals</span></a>
+    <a class="anchor" href="#s6"><span class="num">06</span><span class="t">نظام الطباعة</span><span class="en">Type</span></a>
+    <a class="anchor" href="#s7"><span class="num">07</span><span class="t">التدرّج الطباعي</span><span class="en">Hierarchy</span></a>
+    <a class="anchor" href="#s8"><span class="num">08</span><span class="t">اتجاه التصوير</span><span class="en">Photography</span></a>
+    <a class="anchor" href="#s9"><span class="num">09</span><span class="t">معالجة الصور</span><span class="en">Image</span></a>
+    <a class="anchor" href="#s10"><span class="num">10</span><span class="t">لغة المسار الرسومية</span><span class="en">Route</span></a>
+    <a class="anchor" href="#s11"><span class="num">11</span><span class="t">لغة الأشكال</span><span class="en">Shape</span></a>
+    <a class="anchor" href="#s12"><span class="num">12</span><span class="t">الأيقونات</span><span class="en">Icons</span></a>
+    <a class="anchor" href="#s13"><span class="num">13</span><span class="t">مبادئ التكوين</span><span class="en">Composition</span></a>
+    <a class="anchor" href="#s14"><span class="num">14</span><span class="t">مبادئ RTL</span><span class="en">RTL</span></a>
+    <a class="anchor" href="#s15"><span class="num">15</span><span class="t">افعل / لا تفعل</span><span class="en">Do / Don't</span></a>
+    <a class="anchor" href="#s16"><span class="num">16</span><span class="t">الهوية المتجاوبة</span><span class="en">Responsive</span></a>
+    <a class="anchor" href="#s17"><span class="num">17</span><span class="t">أسس الوصول</span><span class="en">Accessibility</span></a>
+  </nav>
+</section>
+
+<!-- 01 PERSONALITY -->
+<section class="section wrap reveal" id="s1">
+  <div class="sec-head"><span class="num">01</span><h2>شخصية العلامة</h2><span class="rule"></span></div>
+  <p class="lead">علامة تُعين وتُعاون: تنقل متخصص يحمل كرامة الإنسان قبل كل شيء. تتحدث بثقة دون قوّة زائدة، وبرعاية دون شفقة، وبتقنية دون برود.</p>
+  <div class="grid g4">
+    <div class="card"><h4>هادئة</h4><p>مساحات بيضاء واسعة وإيقاع بصري متزن يمنح شعورًا بالأمان.</p></div>
+    <div class="card"><h4>إنسانية</h4><p>الإنسان محور كل قرار بصري — لا الأداة ولا المركبة.</p></div>
+    <div class="card"><h4>موثوقة</h4><p>اتساق ودقّة يبنيان الثقة في كل نقطة تواصل.</p></div>
+    <div class="card"><h4>محترمة</h4><p>«كرامة لا شفقة» — نُظهر الاستقلالية لا الضعف.</p></div>
+    <div class="card"><h4>احترافية</h4><p>لغة مؤسسية واضحة دون ثقل أو رسمية باردة.</p></div>
+    <div class="card"><h4>مُيسِّرة</h4><p>الوصول جزء من الهوية، لا إضافة لاحقة.</p></div>
+    <div class="card"><h4>معاصرة</h4><p>تصميم حديث نظيف يخدم المحتوى ولا ينافسه.</p></div>
+    <div class="card"><h4>آمنة</h4><p>كل عنصر يوحي بالثبات والعناية والطمأنينة.</p></div>
+  </div>
+  <div class="callout"><p><span class="k">المبدأ الجوهري:</span> كرامة لا شفقة — DIGNITY, NOT PITY. نتجنّب لغة سيارات الأجرة العامة، والإسعاف والطوارئ، والمستشفيات، والفخامة، ورعاية الأطفال، والنقل الرخيص، والتقنية الباردة.</p></div>
+</section>
+
+<div class="wrap"><div class="route" aria-hidden="true"><svg viewBox="0 0 1000 26" preserveAspectRatio="none" fill="none"><path class="edge" d="M0 6 C 250 6 300 6 500 13 C 700 20 750 20 1000 20"/><path class="mid" d="M0 13 C 250 13 300 13 500 13 C 700 13 750 13 1000 13"/><path class="edge" d="M0 20 C 250 20 300 20 500 13 C 700 6 750 6 1000 6"/></svg></div></div>
+
+<!-- 02 LOGO -->
+<section class="section wrap reveal" id="s2">
+  <div class="sec-head"><span class="num">02</span><h2>اللوجو ومبادئ استخدامه</h2><span class="rule"></span></div>
+  <p class="lead">اللوجو هو مصدر الحقيقة. لا يُعاد رسمه، ولا تُغيَّر نسبه أو هندسته، ولا تُضاف إليه تأثيرات أو تدرّجات. عنصر الطريق داخله — الذي يتحوّل بلطف إلى حركة ومسار — هو الحمض النووي البصري للعلامة.</p>
+  <div class="grid g2">
+    <div>
+      <div class="logo-stage"><img src="aun-aldrb-logo.svg" alt="اللوجو الأساسي بالأزرق"></div>
+      <div class="chips"><span class="chip">الاستخدام الأساسي · خلفيات فاتحة</span><span class="chip">أزرق العلامة #4975BA</span></div>
+    </div>
+    <div>
+      <div class="logo-stage logo-stage--dark"><img src="aun-aldrb-logo-white.svg" alt="اللوجو الأبيض على خلفية داكنة"></div>
+      <div class="chips"><span class="chip">نسخة أحادية بيضاء · خلفيات داكنة/الفوتر</span><span class="chip">للتباين فقط</span></div>
+    </div>
+  </div>
+  <div class="grid g3" style="margin-top:1.1rem">
+    <div class="card"><h4>مساحة الحماية</h4><p>احفظ حول اللوجو مساحة فارغة لا تقل عن ارتفاع حرف «ع» من الكلمة العربية؛ لا يقترب منها أي عنصر.</p></div>
+    <div class="card"><h4>أصغر مقاس</h4><p>لا يقل عرض النسخة الأفقية عن ‎160px‎ على الشاشة حتى تبقى تفاصيل الطريق مقروءة.</p></div>
+    <div class="card"><h4>عنصر الطريق</h4><p>قد يُلهم لاحقًا المسارات والمنحنيات والفواصل — بشكل هادئ ووظيفي، لا نمطًا زخرفيًا متكررًا.</p></div>
+  </div>
+  <div class="dd" style="margin-top:1.1rem">
+    <div class="dd__col dd--dont"><h4><span class="badge badge--dont">✕</span>ممنوع مع اللوجو</h4>
+      <ul><li>إعادة رسمه أو تعديل هندسته ونِسبه</li><li>إضافة ظلال أو تدرّجات أو تأثيرات</li><li>تلوينه بألوان خارج نظام العلامة</li><li>وضعه على خلفية منخفضة التباين أو صورة مزدحمة</li><li>إنشاء تنويعات غير ضرورية</li></ul>
+    </div>
+    <div class="dd__col dd--do"><h4><span class="badge badge--do">✓</span>الصحيح</h4>
+      <ul><li>استخدم الملف الأصلي (SVG) دائمًا</li><li>النسخة الزرقاء على الفاتح، البيضاء على الداكن</li><li>احترم مساحة الحماية والحد الأدنى للمقاس</li><li>حافظ على النسب الأصلية عند التحجيم</li><li>ضعه على مساحة نظيفة وهادئة</li></ul>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><div class="route" aria-hidden="true"><svg viewBox="0 0 1000 26" preserveAspectRatio="none" fill="none"><path class="edge" d="M0 6 C 250 6 300 6 500 13 C 700 20 750 20 1000 20"/><path class="mid" d="M0 13 C 250 13 300 13 500 13 C 700 13 750 13 1000 13"/><path class="edge" d="M0 20 C 250 20 300 20 500 13 C 700 6 750 6 1000 6"/></svg></div></div>
+
+<!-- 03 PRIMARY COLOR -->
+<section class="section wrap reveal" id="s3">
+  <div class="sec-head"><span class="num">03</span><h2>اللون الأساسي</h2><span class="rule"></span></div>
+  <p class="lead">لونٌ واحد مستخرج مباشرة من اللوجو يقود النظام كله. لا نبتكر ألوانًا غير مرتبطة، ولا نُفرط في استخدام لون العلامة — البياض جزء أساسي من الهوية.</p>
+  <div class="swatches">
+    <div class="sw"><div class="sw__chip" style="background:#4975BA"><span class="role">Primary</span></div><div class="sw__body"><div class="sw__name">أزرق عون الدرب</div><div class="sw__hex mono">#4975BA · rgb(73,117,186)</div><div class="sw__use">الأزرار، الروابط، العناوين الكبيرة، عناصر الواجهة الأساسية.</div><span class="pair">تباين على الأبيض 4.63:1 · AA للنصوص الكبيرة والواجهات</span></div></div>
+    <div class="sw"><div class="sw__chip" style="background:#2C4C82"><span class="role" style="background:rgba(255,255,255,.9)">Navy</span></div><div class="sw__body"><div class="sw__name">كحلي عون الدرب</div><div class="sw__hex mono">#2C4C82 · rgb(44,76,130)</div><div class="sw__use">نصوص العناوين على الفاتح، الأسطح الداكنة، الفوتر.</div><span class="pair">تباين على الأبيض 8.53:1 · AAA</span></div></div>
+    <div class="sw"><div class="sw__chip" style="background:#5C86C6"><span class="role">Hover</span></div><div class="sw__body"><div class="sw__name">أزرق ساطع</div><div class="sw__hex mono">#5C86C6 · rgb(92,134,198)</div><div class="sw__use">حالات التمرير والتفاعل والعناصر الزخرفية فقط.</div><span class="pair">تباين 3.7:1 · زخرفي / غير نصّي</span></div></div>
+  </div>
+</section>
+
+<!-- 04 SECONDARY -->
+<section class="section wrap reveal" id="s4">
+  <div class="sec-head"><span class="num">04</span><h2>الألوان الثانوية والمساندة</h2><span class="rule"></span></div>
+  <p class="lead">درجات فاتحة من الأزرق نفسه توفّر خلفيات هادئة وحدودًا وفواصل، دون إدخال أي صبغة جديدة.</p>
+  <div class="swatches">
+    <div class="sw"><div class="sw__chip" style="background:#D9E4F3"><span class="role">Sky</span></div><div class="sw__body"><div class="sw__name">أزرق سماوي فاتح</div><div class="sw__hex mono">#D9E4F3</div><div class="sw__use">خلفيات البطاقات المميّزة، الشارات، الحدود اللطيفة.</div></div></div>
+    <div class="sw"><div class="sw__chip" style="background:#EEF3FA"><span class="role">Mist</span></div><div class="sw__body"><div class="sw__name">ضباب أزرق</div><div class="sw__hex mono">#EEF3FA</div><div class="sw__use">خلفيات الأقسام البديلة والمناطق الهادئة.</div></div></div>
+    <div class="sw"><div class="sw__chip" style="background:#F6F8FB;border:1px solid #E4E9F0"><span class="role">Soft</span></div><div class="sw__body"><div class="sw__name">خلفية ناعمة</div><div class="sw__hex mono">#F6F8FB</div><div class="sw__use">أرضية الصفحة العامة تحت الأبيض.</div></div></div>
+  </div>
+</section>
+
+<!-- 05 NEUTRALS -->
+<section class="section wrap reveal" id="s5">
+  <div class="sec-head"><span class="num">05</span><h2>الألوان المحايدة</h2><span class="rule"></span></div>
+  <p class="lead">محايدات ذات انحياز أزرق خفيف — مُختارة لا افتراضية — لتنسجم مع أزرق العلامة وتحافظ على الهدوء.</p>
+  <div class="swatches">
+    <div class="sw"><div class="sw__chip" style="background:#1E2733"><span class="role" style="background:rgba(255,255,255,.9)">Ink</span></div><div class="sw__body"><div class="sw__name">حبر داكن</div><div class="sw__hex mono">#1E2733</div><div class="sw__use">النصوص الأساسية والعناوين.</div><span class="pair">على الأبيض 15.07:1 · AAA</span></div></div>
+    <div class="sw"><div class="sw__chip" style="background:#5A6675"><span class="role" style="background:rgba(255,255,255,.9)">Slate</span></div><div class="sw__body"><div class="sw__name">رمادي أردوازي</div><div class="sw__hex mono">#5A6675</div><div class="sw__use">النصوص الثانوية والوصفية.</div><span class="pair">على الأبيض 5.85:1 · AA</span></div></div>
+    <div class="sw"><div class="sw__chip" style="background:#8B95A3"><span class="role" style="background:rgba(255,255,255,.9)">Gray</span></div><div class="sw__body"><div class="sw__name">رمادي فاتح</div><div class="sw__hex mono">#8B95A3</div><div class="sw__use">النصوص النائبة والعناصر غير النصية.</div><span class="pair">3.03:1 · غير نصّي فقط</span></div></div>
+    <div class="sw"><div class="sw__chip" style="background:#E4E9F0"><span class="role">Divider</span></div><div class="sw__body"><div class="sw__name">فاصل</div><div class="sw__hex mono">#E4E9F0</div><div class="sw__use">الحدود والخطوط الفاصلة الرفيعة.</div></div></div>
+    <div class="sw"><div class="sw__chip" style="background:#FFFFFF;border:1px solid #E4E9F0"><span class="role">White</span></div><div class="sw__body"><div class="sw__name">أبيض</div><div class="sw__hex mono">#FFFFFF</div><div class="sw__use">السطح الأساسي والمساحات البيضاء.</div></div></div>
+  </div>
+</section>
+
+<div class="wrap"><div class="route" aria-hidden="true"><svg viewBox="0 0 1000 26" preserveAspectRatio="none" fill="none"><path class="edge" d="M0 6 C 250 6 300 6 500 13 C 700 20 750 20 1000 20"/><path class="mid" d="M0 13 C 250 13 300 13 500 13 C 700 13 750 13 1000 13"/><path class="edge" d="M0 20 C 250 20 300 20 500 13 C 700 6 750 6 1000 6"/></svg></div></div>
+
+<!-- 06 TYPOGRAPHY -->
+<section class="section wrap reveal" id="s6">
+  <div class="sec-head"><span class="num">06</span><h2>نظام الطباعة</h2><span class="rule"></span></div>
+  <p class="lead">خطّان معتمدان فقط. لا تُدخل أي خطوط إضافية.</p>
+  <div class="grid g2">
+    <div class="font-card">
+      <span class="eyebrow">Primary — الصوت المؤسسي</span>
+      <div class="big" style="font-family:var(--f-head)">IBM Plex Sans Arabic</div>
+      <div class="glyphs" style="font-family:var(--f-head)">عون الدرب للنقل المتخصص</div>
+      <div class="glyphs mono" style="font-family:var(--f-head);margin-top:.4rem">0123456789 · AOUN ALDARB</div>
+      <p style="margin-top:.9rem;font-size:.9rem">العناوين، عناوين الأقسام، العبارات المفتاحية، التنقل، التسميات، الأرقام، وعناصر الواجهة المهمة.</p>
+    </div>
+    <div class="font-card">
+      <span class="eyebrow">Secondary — النص المتن</span>
+      <div class="big" style="font-family:var(--f-body)">Cairo</div>
+      <div class="glyphs" style="font-family:var(--f-body)">نقلٌ آمن ومريح يحفظ الكرامة</div>
+      <div class="glyphs mono" style="font-family:var(--f-body);margin-top:.4rem">0123456789 · aunaldrb.com</div>
+      <p style="margin-top:.9rem;font-size:.9rem">المتن، الأوصاف، المعلومات المساندة، والنصوص العربية الطويلة.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 07 HIERARCHY -->
+<section class="section wrap reveal" id="s7">
+  <div class="sec-head"><span class="num">07</span><h2>التدرّج الطباعي</h2><span class="rule"></span></div>
+  <p class="lead">سلّم واضح يعمل بطبيعته في التخطيط العربي RTL ويبقى مقروءًا على كل المقاسات.</p>
+  <div>
+    <div class="type-row"><span class="spec" style="font-size:clamp(2.2rem,1.4rem+3vw,3.5rem);font-weight:700">نُعين ونُعاون</span><span class="meta">Display · Plex · 700 · 40–56px</span></div>
+    <div class="type-row"><span class="spec" style="font-size:2.1rem;font-weight:700">نقل متخصص بكرامة</span><span class="meta">H1 · Plex · 700 · 32–48px</span></div>
+    <div class="type-row"><span class="spec" style="font-size:1.6rem;font-weight:700">لماذا عون الدرب</span><span class="meta">H2 · Plex · 700 · 28–40px</span></div>
+    <div class="type-row"><span class="spec" style="font-size:1.3rem;font-weight:600">خدمات النقل المتخصص</span><span class="meta">H3 · Plex · 600 · 22–28px</span></div>
+    <div class="type-row"><span class="spec" style="font-size:1.1rem;font-weight:600">النقل بواسطة الكرسي المتحرك</span><span class="meta">H4 · Plex · 600 · 18–22px</span></div>
+    <div class="type-row"><span class="spec" style="font-family:var(--f-body);font-size:1.2rem;font-weight:500">فقرة كبيرة تُبرز رسالة مهمة بوضوح.</span><span class="meta">Body L · Cairo · 500 · 18–20px</span></div>
+    <div class="type-row"><span class="spec" style="font-family:var(--f-body);font-size:1.0625rem;font-weight:400">نص المتن الأساسي بارتفاع سطر مريح للقراءة العربية الطويلة.</span><span class="meta">Body · Cairo · 400 · 17px · lh 1.75</span></div>
+    <div class="type-row"><span class="spec" style="font-family:var(--f-body);font-size:.9375rem;color:var(--muted)">تسمية صغيرة أو تعليق مساند.</span><span class="meta">Small · Cairo · 400 · 15px</span></div>
+    <div class="type-row"><span class="spec eyebrow" style="font-size:.8rem">الرئيسية · من نحن · خدماتنا</span><span class="meta">Nav / Label · Plex · 600 · caps+track</span></div>
+    <div class="type-row"><span class="spec mono" style="font-size:1.3rem;font-weight:600">+966 53 554 4352</span><span class="meta">Numbers · Plex · tabular</span></div>
+  </div>
+</section>
+
+<div class="wrap"><div class="route" aria-hidden="true"><svg viewBox="0 0 1000 26" preserveAspectRatio="none" fill="none"><path class="edge" d="M0 6 C 250 6 300 6 500 13 C 700 20 750 20 1000 20"/><path class="mid" d="M0 13 C 250 13 300 13 500 13 C 700 13 750 13 1000 13"/><path class="edge" d="M0 20 C 250 20 300 20 500 13 C 700 6 750 6 1000 6"/></svg></div></div>
+
+<!-- 08 PHOTOGRAPHY -->
+<section class="section wrap reveal" id="s8">
+  <div class="sec-head"><span class="num">08</span><h2>اتجاه التصوير</h2><span class="rule"></span></div>
+  <p class="lead">لغة تصوير موحّدة تحفظ معنى المحتوى وتعامل الأشخاص بكرامة: مواقف نقل واقعية، كبار سن وذوو إعاقة ومستخدمو كراسٍ متحركة، طاقم محترف، مركبات مجهّزة، ومساعدة حقيقية أثناء التنقل.</p>
+  <div class="grid g2">
+    <div class="dd__col dd--do"><h4><span class="badge badge--do">✓</span>نُصوّر</h4>
+      <ul><li>لحظات نقل واقعية وطبيعية</li><li>الاستقلالية والثقة والراحة</li><li>تفاعل إنساني محترم مع الطاقم</li><li>بيئة تنقل آمنة ومجهّزة</li><li>ضوء طبيعي وتعبيرات صادقة</li></ul>
+    </div>
+    <div class="dd__col dd--dont"><h4><span class="badge badge--dont">✕</span>نتجنّب</h4>
+      <ul><li>صور أرشيفية اصطناعية أو مبالغ في إخراجها</li><li>تصوير الإعاقة من زاوية الشفقة</li><li>مشاهد المستشفيات إلا عند الضرورة المباشرة</li><li>تعبيرات عاطفية مفتعلة</li><li>صور نمط حياة غير ذات صلة</li></ul>
+    </div>
+  </div>
+</section>
+
+<!-- 09 IMAGE TREATMENT -->
+<section class="section wrap reveal" id="s9">
+  <div class="sec-head"><span class="num">09</span><h2>معالجة الصور</h2><span class="rule"></span></div>
+  <p class="lead">معالجة خفيفة ومتّسقة تُبقي الصورة طبيعية. لا فلاتر ثقيلة، ولا نجعل كل صورة تبدو «مُعلّمة» بشكل مصطنع.</p>
+  <div class="grid g3">
+    <div class="card"><h4>حاويات منظّمة</h4><p>حواف مستقيمة أو زوايا ناعمة (‎16–24px‎) بحسب السياق، مع قصّ محكوم.</p></div>
+    <div class="card"><h4>تراكب لوني لطيف</h4><p>طبقة كحلي شفافة عند الحاجة فقط، لضمان قراءة النص فوق الصورة.</p></div>
+    <div class="card"><h4>استخدامات متعددة</h4><p>هيرو، تحريري، مساند، تفصيلي، عرض كامل، أو مقصوص — بنفس اللغة.</p></div>
+  </div>
+</section>
+
+<div class="wrap"><div class="route" aria-hidden="true"><svg viewBox="0 0 1000 26" preserveAspectRatio="none" fill="none"><path class="edge" d="M0 6 C 250 6 300 6 500 13 C 700 20 750 20 1000 20"/><path class="mid" d="M0 13 C 250 13 300 13 500 13 C 700 13 750 13 1000 13"/><path class="edge" d="M0 20 C 250 20 300 20 500 13 C 700 6 750 6 1000 6"/></svg></div></div>
+
+<!-- 10 ROUTE / GRAPHIC -->
+<section class="section wrap reveal" id="s10">
+  <div class="sec-head"><span class="num">10</span><h2>لغة المسار الرسومية</h2><span class="rule"></span></div>
+  <p class="lead">المفهوم الأساسي مستوحى من طريق اللوجو: مسار · حركة · اتصال. نظام مقيّد من المنحنيات والخطوط والنقاط يوحي بالرحلة والإرشاد والمساعدة — أنيق وتحريري، لا ينافس المحتوى أبدًا.</p>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="padding:2rem;background:var(--mist)"><svg viewBox="0 0 900 200" fill="none" style="width:100%;height:auto;color:#4975BA"><path d="M20 150 C 160 150 180 60 320 60 C 470 60 480 150 620 150 C 760 150 780 70 880 70" stroke="currentColor" stroke-width="10" fill="none" stroke-linecap="round" opacity=".9"/><path d="M20 150 C 160 150 180 60 320 60 C 470 60 480 150 620 150 C 760 150 780 70 880 70" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-dasharray="2 14" stroke-linecap="round"/><circle cx="20" cy="150" r="9" fill="#FFFFFF" stroke="currentColor" stroke-width="3"/><circle cx="320" cy="60" r="7" fill="#FFFFFF" stroke="currentColor" stroke-width="3"/><circle cx="620" cy="150" r="7" fill="#FFFFFF" stroke="currentColor" stroke-width="3"/><circle cx="880" cy="70" r="9" fill="currentColor"/></svg></div>
+  </div>
+  <div class="grid g4" style="margin-top:1.1rem">
+    <div class="card"><h4>مسارات منحنية</h4><p>تربط الأقسام بلطف كخيط بصري واحد.</p></div>
+    <div class="card"><h4>خط منتصف متقطّع</h4><p>يستعير علامة الطريق كفاصل وظيفي رفيع.</p></div>
+    <div class="card"><h4>نقاط المسار</h4><p>دوائر صغيرة تُعلّم المحطات والبدايات.</p></div>
+    <div class="card"><h4>اتجاه هادئ</h4><p>حركة تُقرأ طبيعيًا من اليمين لليسار.</p></div>
+  </div>
+  <div class="callout"><p><span class="k">قيد مهم:</span> لا يتحوّل عنصر المسار إلى نمط زخرفي متكرّر — يبقى دقيقًا ومقصودًا ووظيفيًا.</p></div>
+</section>
+
+<!-- 11 SHAPE -->
+<section class="section wrap reveal" id="s11">
+  <div class="sec-head"><span class="num">11</span><h2>لغة الأشكال</h2><span class="rule"></span></div>
+  <p class="lead">هندسة مقيّدة: منحنيات ناعمة، زوايا مُدوّرة محكومة، بُنى مستطيلة نظيفة، ونقاط دائرية للمسار — مع تباعد سخي.</p>
+  <div class="shapes">
+    <div class="shape r-none">2px</div>
+    <div class="shape r-sm">10px</div>
+    <div class="shape r-md">16px</div>
+    <div class="shape r-lg">24px</div>
+    <div class="shape r-pill">Pill</div>
+    <div class="shape r-circle">نقطة مسار</div>
+  </div>
+  <div class="grid g2" style="margin-top:1.1rem">
+    <div class="dd__col dd--do"><h4><span class="badge badge--do">✓</span>نُفضّل</h4><ul><li>منحنيات ناعمة وزوايا محكومة</li><li>بُنى مستطيلة نظيفة وتباعد سخي</li><li>نقاط دائرية بسيطة للمسار</li></ul></div>
+    <div class="dd__col dd--dont"><h4><span class="badge badge--dont">✕</span>نتجنّب</h4><ul><li>الإفراط في البطاقات المدوّرة</li><li>أشكال زخرفية عشوائية وظلال ثقيلة</li><li>عناصر ثلاثية الأبعاد وأنماط معقّدة</li></ul></div>
+  </div>
+</section>
+
+<div class="wrap"><div class="route" aria-hidden="true"><svg viewBox="0 0 1000 26" preserveAspectRatio="none" fill="none"><path class="edge" d="M0 6 C 250 6 300 6 500 13 C 700 20 750 20 1000 20"/><path class="mid" d="M0 13 C 250 13 300 13 500 13 C 700 13 750 13 1000 13"/><path class="edge" d="M0 20 C 250 20 300 20 500 13 C 700 6 750 6 1000 6"/></svg></div></div>
+
+<!-- 12 ICONS -->
+<section class="section wrap reveal" id="s12">
+  <div class="sec-head"><span class="num">12</span><h2>الأيقونات</h2><span class="rule"></span></div>
+  <p class="lead">نظام أيقونات واحد: خطّي بسيط بسُمك ثابت، هندسة نظيفة، أطراف مُدوّرة، وصور ظلية عالية الوضوح. لا نخلط أنماطًا ممتلئة أو ثلاثية الأبعاد أو متدرّجة.</p>
+  <div class="iconwall">
+    <div class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="19" r="3"/><path d="M9 16V7h6"/><path d="M9 10h6l2 6h-2"/><circle cx="9" cy="4" r="1.4"/></svg><span>كرسي متحرك</span></div>
+    <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 15V8h11l4 4v3"/><circle cx="7.5" cy="17" r="1.6"/><circle cx="16.5" cy="17" r="1.6"/><path d="M3 15h2M9 15h6M19 15h2"/></svg><span>مركبة مجهّزة</span></div>
+    <div class="ic"><svg viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M6 20v-6l6-4 6 4v6"/><path d="M9 20v-4h6v4"/></svg><span>منصّة رفع</span></div>
+    <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4-3 7-7 8-4-1-7-4-7-8V6z"/><path d="M9.5 12l1.8 1.8L15 10"/></svg><span>أمان وثبات</span></div>
+    <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 21s-6-5.3-6-10a6 6 0 0 1 12 0c0 4.7-6 10-6 10z"/><circle cx="12" cy="11" r="2.2"/></svg><span>نقطة مسار</span></div>
+    <div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>24/7</span></div>
+    <div class="ic"><svg viewBox="0 0 24 24"><path d="M20 8.5c0 4-8 9.5-8 9.5S4 12.5 4 8.5A3.5 3.5 0 0 1 12 6a3.5 3.5 0 0 1 8 2.5z"/></svg><span>رعاية</span></div>
+    <div class="ic"><svg viewBox="0 0 24 24"><path d="M5 4h3l2 5-2 1c1 2 3 4 5 5l1-2 5 2v3c0 1-1 2-2 2A15 15 0 0 1 4 6c0-1 1-2 1-2z"/></svg><span>تواصل</span></div>
+  </div>
+</section>
+
+<!-- 13 COMPOSITION -->
+<section class="section wrap reveal" id="s13">
+  <div class="sec-head"><span class="num">13</span><h2>مبادئ التكوين</h2><span class="rule"></span></div>
+  <p class="lead">تدرّج تحريري قوي، مساحات بيضاء سخيّة، محاذاة واضحة، وتباين محكوم — مع طباعة كبيرة ذات معنى وصور قوية ومسارات هادئة.</p>
+  <div class="grid g3">
+    <div class="card"><h4>رسالة واحدة لكل منطقة</h4><p>ONE PRIMARY MESSAGE PER VISUAL AREA — لا نُزاحم المعنى.</p></div>
+    <div class="card"><h4>البياض هوية</h4><p>لا نملأ الفراغ دون داعٍ؛ المساحة البيضاء جزء من العلامة.</p></div>
+    <div class="card"><h4>تباين مقصود</h4><p>عدم تناظر محكوم يمنح إيقاعًا حديثًا دون فوضى.</p></div>
+  </div>
+</section>
+
+<!-- 14 RTL -->
+<section class="section wrap reveal" id="s14">
+  <div class="sec-head"><span class="num">14</span><h2>مبادئ RTL</h2><span class="rule"></span></div>
+  <p class="lead">اللغة الأساسية عربية، والتصميم لتجربة RTL أصيلة — لا مجرد عكس لموقع غربي.</p>
+  <div class="grid g4">
+    <div class="card"><h4>محاذاة يمينية</h4><p>الطباعة والمحتوى يبدآن من اليمين طبيعيًا.</p></div>
+    <div class="card"><h4>تنقل RTL</h4><p>ترتيب القوائم والعناصر يتبع اتجاه القراءة.</p></div>
+    <div class="card"><h4>تباعد عربي</h4><p>ارتفاع سطر وتباعد مناسبان للحروف العربية.</p></div>
+    <div class="card"><h4>حركة طبيعية</h4><p>الاتجاه البصري والانتقالات تُقرأ من اليمين لليسار.</p></div>
+  </div>
+</section>
+
+<div class="wrap"><div class="route" aria-hidden="true"><svg viewBox="0 0 1000 26" preserveAspectRatio="none" fill="none"><path class="edge" d="M0 6 C 250 6 300 6 500 13 C 700 20 750 20 1000 20"/><path class="mid" d="M0 13 C 250 13 300 13 500 13 C 700 13 750 13 1000 13"/><path class="edge" d="M0 20 C 250 20 300 20 500 13 C 700 6 750 6 1000 6"/></svg></div></div>
+
+<!-- 15 DO / DONT -->
+<section class="section wrap reveal" id="s15">
+  <div class="sec-head"><span class="num">15</span><h2>افعل / لا تفعل</h2><span class="rule"></span></div>
+  <div class="dd">
+    <div class="dd__col dd--do"><h4><span class="badge badge--do">✓</span>افعل</h4>
+      <ul><li>حافظ على الهوية القائمة واللوجو كمصدر للحقيقة</li><li>ابنِ حول ألوان العلامة الموجودة</li><li>استخدم IBM Plex Sans Arabic + Cairo</li><li>صور ذات معنى ورسومات مستوحاة من المسار</li><li>مساحات بيضاء سخيّة وأيقونات متّسقة</li><li>أولوية الوصول والتصميم لـ RTL منذ البداية</li></ul>
+    </div>
+    <div class="dd__col dd--dont"><h4><span class="badge badge--dont">✕</span>لا تفعل</h4>
+      <ul><li>لا تُعِد تصميم اللوجو أو تُدخل ألوانًا/خطوطًا جديدة</li><li>لا تُنشئ هوية بصرية ثانية موازية</li><li>لا تُفرط في التدرّجات والظلال</li><li>لا تستخدم جماليات الرعاية الصحية العامة أو صور الشفقة</li><li>لا تزدحم التخطيطات</li><li>لا تُنشئ أنماطًا لا يمكن إعادة استخدامها عبر الموقع</li></ul>
+    </div>
+  </div>
+</section>
+
+<!-- 16 RESPONSIVE -->
+<section class="section wrap reveal" id="s16">
+  <div class="sec-head"><span class="num">16</span><h2>الهوية المتجاوبة</h2><span class="rule"></span></div>
+  <p class="lead">نظام متجاوب منذ البداية. الجوال ليس نسخة مصغّرة من سطح المكتب، بل تجربة «عون الدرب» كاملة.</p>
+  <div class="tablewrap">
+    <table class="matrix">
+      <thead><tr><th>العنصر</th><th>سطح المكتب</th><th>اللوحي</th><th>الجوال</th></tr></thead>
+      <tbody>
+        <tr><td>الطباعة</td><td>سلّم كامل، عناوين كبيرة</td><td>تقليص متدرّج</td><td>عناوين مضغوطة، متن مريح 16px+</td></tr>
+        <tr><td>التباعد</td><td>هوامش واسعة جدًا</td><td>متوسطة</td><td>مضغوطة مع بقاء التنفّس</td></tr>
+        <tr><td>الشبكة</td><td>12 عمودًا</td><td>8 أعمدة</td><td>4 أعمدة / عمود واحد</td></tr>
+        <tr><td>رسوم المسار</td><td>منحنيات ممتدة</td><td>مبسّطة</td><td>خط فاصل رفيع فقط</td></tr>
+        <tr><td>الصور</td><td>عرض كامل وتحريري</td><td>قصّ محكوم</td><td>نسب مُحسّنة للطول</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 17 ACCESSIBILITY -->
+<section class="section wrap reveal" id="s17">
+  <div class="sec-head"><span class="num">17</span><h2>أسس الوصول</h2><span class="rule"></span></div>
+  <p class="lead">الوصول جزء من الهوية لا إضافة لاحقة — وهو جوهر علامة تخدم كبار السن وذوي الإعاقة.</p>
+  <div class="grid g3">
+    <div class="card"><h4>تباين كافٍ</h4><p>النصوص الأساسية بالكحلي/الحبر (≥4.5:1)؛ الأزرق للعناصر الكبيرة والواجهات.</p></div>
+    <div class="card"><h4>لا معنى باللون وحده</h4><p>نُرفق أيقونة أو نصًّا مع أي دلالة لونية.</p></div>
+    <div class="card"><h4>طباعة عربية مقروءة</h4><p>ارتفاع سطر مريح وأحجام لا تقل عن 16px للمتن.</p></div>
+    <div class="card"><h4>نص فوق الصور</h4><p>تراكب كحلي يضمن القراءة دائمًا.</p></div>
+    <div class="card"><h4>أهداف لمس كبيرة</h4><p>عناصر تفاعلية ≥ 44px قابلة للاستخدام.</p></div>
+    <div class="card"><h4>تركيز واضح</h4><p>حالة تركيز مرئية لكل عنصر عبر لوحة المفاتيح.</p></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="foot">
+  <div class="wrap">
+    <img src="aun-aldrb-logo-white.svg" alt="عون الدرب">
+    <h3>شركة عون الدرب للنقل المتخصص</h3>
+    <p>نُعين ونُعاون — نقل المستفيدين الذين يحتاجون إلى رعاية خاصة بوسائل آمنة ومجهّزة وكوادر مدرّبة، في بيئة تحترم الإنسانية.</p>
+    <div class="contact">
+      <div><div class="l">هاتف / واتساب</div><div class="v">+966 53 554 4352</div></div>
+      <div><div class="l">العنوان</div><div class="v" style="direction:rtl">الرياض · حي السليمانية · 12233</div></div>
+      <div><div class="l">الموقع</div><div class="v">aunaldrb.com</div></div>
+    </div>
+    <div class="rule"></div>
+    <small>المرحلة 01 — أساس الهوية · هذه المرحلة تُنشئ الهوية فقط، وتُحوّلها المرحلة 02 إلى نظام تصميم الموقع.</small>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var root=document.documentElement, tg=document.getElementById('tg');
+  function cur(){return root.getAttribute('data-theme')|| (matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');}
+  tg.addEventListener('click',function(){var n=cur()==='dark'?'light':'dark';root.setAttribute('data-theme',n);});
+  if(!matchMedia('(prefers-reduced-motion:reduce)').matches&&'IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{rootMargin:'0px 0px -8% 0px',threshold:.08});
+    document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+  } else { document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('in');}); }
+})();
+</script>
+
+</body>
+</html>

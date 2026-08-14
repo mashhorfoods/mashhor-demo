@@ -1,0 +1,62 @@
+/* ==========================================================================
+   AOUN ALDARB — عون الدرب للنقل المتخصص
+   STAGE 01 · BRAND IDENTITY FOUNDATION — reference tokens
+   --------------------------------------------------------------------------
+   These are the FOUNDATION values only (color + type), derived directly from
+   the existing logo. Stage 02 converts these into the full website design
+   system (spacing, components, motion). Do NOT redefine or fork these values.
+   ========================================================================== */
+:root {
+  /* ---- COLOR · raw brand palette (single logo blue #4975BA + derivations) --- */
+  --aun-blue:        #4975BA;  /* Primary — buttons, links, large headings, UI accents */
+  --aun-navy:        #2C4C82;  /* Deep — accessible text on light, dark surfaces, footer */
+  --aun-blue-bright: #5C86C6;  /* Hover / decorative only (non-text) */
+  --aun-sky:         #D9E4F3;  /* Light supporting — feature card bg, chips, soft borders */
+  --aun-mist:        #EEF3FA;  /* Light supporting — alternating section backgrounds */
+
+  --aun-ink:         #1E2733;  /* Dark neutral — primary text (15.07:1 on white, AAA) */
+  --aun-slate:       #5A6675;  /* Secondary text (5.85:1 on white, AA) */
+  --aun-gray:        #8B95A3;  /* Placeholder / non-text only (3.03:1 — never body text) */
+  --aun-divider:     #E4E9F0;  /* Hairline borders and dividers */
+  --aun-soft:        #F6F8FB;  /* Soft page ground under white */
+  --aun-white:       #FFFFFF;  /* Base surface + brand white space */
+
+  /* ---- COLOR · semantic aliases ------------------------------------------- */
+  --color-primary:        var(--aun-blue);
+  --color-primary-strong: var(--aun-navy);
+  --color-primary-hover:  var(--aun-blue-bright);
+  --surface:              var(--aun-white);
+  --surface-soft:         var(--aun-soft);
+  --surface-tinted:       var(--aun-mist);
+  --surface-inverse:      var(--aun-navy);
+  --text-primary:         var(--aun-ink);
+  --text-secondary:       var(--aun-slate);
+  --text-on-primary:      var(--aun-white);
+  --border:               var(--aun-divider);
+
+  /* ---- TYPOGRAPHY · approved pairing --------------------------------------- */
+  /* Primary — structural/corporate voice: headings, nav, labels, numbers, UI */
+  --font-heading: "IBM Plex Sans Arabic", ui-sans-serif, system-ui, "Segoe UI", "Noto Sans Arabic", sans-serif;
+  /* Secondary — body, descriptions, long Arabic copy */
+  --font-body:    "Cairo", ui-sans-serif, system-ui, "Segoe UI", "Noto Sans Arabic", sans-serif;
+
+  --fw-regular:400; --fw-medium:500; --fw-semibold:600; --fw-bold:700;
+
+  /* Type scale (fluid, RTL-ready) */
+  --fs-display: clamp(2.50rem, 1.4rem + 3.0vw, 3.50rem);
+  --fs-h1:      clamp(2.00rem, 1.4rem + 2.6vw, 3.00rem);
+  --fs-h2:      clamp(1.60rem, 1.1rem + 1.9vw, 2.50rem);
+  --fs-h3:      clamp(1.15rem, 1.0rem + 0.7vw, 1.50rem);
+  --fs-h4:      1.10rem;
+  --fs-body-lg: clamp(1.125rem, 1.05rem + 0.3vw, 1.25rem);
+  --fs-body:    1.0625rem;   /* 17px — min body size */
+  --fs-small:   0.9375rem;   /* 15px */
+  --fs-nav:     1.00rem;
+
+  --lh-tight:1.15; --lh-snug:1.30; --lh-body:1.75;
+  --track-caps:0.16em;       /* nav / labels (uppercase Latin only) */
+
+  /* ---- ACCESSIBILITY guardrails ------------------------------------------- */
+  --min-tap: 44px;           /* minimum interactive touch target */
+  --min-body-size: 16px;     /* never render body copy smaller */
+}
