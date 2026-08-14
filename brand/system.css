@@ -625,7 +625,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
   padding-block:calc(var(--header-h) + clamp(2rem,6vw,4rem)) clamp(3rem,7vw,6rem)}
 .hero__inner{position:relative;z-index:1;display:grid;gap:clamp(2rem,5vw,3.5rem);align-items:center}
 @media(min-width:1024px){
-  .hero__inner{grid-template-columns:minmax(0,1.02fr) minmax(0,0.98fr);gap:clamp(2.5rem,5vw,5rem)}
+  .hero__inner{grid-template-columns:minmax(0,0.95fr) minmax(0,1.05fr);gap:clamp(2.5rem,5vw,5rem)}
 }
 
 /* content column */
@@ -640,12 +640,15 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
   background:var(--aun-mist);border:1px solid var(--aun-sky);border-radius:var(--radius-pill);padding:.42rem .9rem}
 .hero__scope svg{width:18px;height:18px;color:var(--color-primary);flex:0 0 auto}
 .hero__actions{display:flex;flex-wrap:wrap;gap:var(--sp-16);margin-block-start:clamp(1.75rem,4vw,2.5rem)}
+.hero__actions .btn{gap:var(--sp-8)}
+.hero__actions .btn svg{width:20px;height:20px;flex:0 0 auto}
 
 /* media column — art-directed brand scene; swappable for a <picture> photo */
 .hero__media{position:relative;margin:0}
 .hero__media-frame{position:relative;border-radius:var(--radius-lg);overflow:hidden;
-  background:var(--aun-mist);box-shadow:var(--shadow-md);aspect-ratio:5/6}
-.hero__media-frame svg,.hero__media-frame img{display:block;width:100%;height:100%;object-fit:cover}
+  background:var(--aun-mist);box-shadow:var(--shadow-md);aspect-ratio:4/3}
+.hero__media-frame svg,.hero__media-frame img{display:block;width:100%;height:100%;object-fit:cover;
+  object-position:center}
 .hero__badge{position:absolute;inset-block-end:var(--sp-16);inset-inline-start:var(--sp-16);
   display:inline-flex;align-items:center;gap:var(--sp-8);background:rgba(255,255,255,.94);
   backdrop-filter:saturate(140%) blur(4px);border:1px solid var(--border);border-radius:var(--radius-pill);
