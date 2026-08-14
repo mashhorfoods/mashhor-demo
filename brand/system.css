@@ -558,8 +558,9 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
    New reusable components only — nothing above is redefined.
    ========================================================================== */
 
-/* anchor offset for every section target (works with html scroll-padding) */
-section[id]{scroll-margin-top:var(--anchor-offset)}
+/* Anchor offset for section targets is handled once by html{scroll-padding-top}
+   above; a per-section scroll-margin-top would double it, so it is intentionally
+   not set here. */
 
 /* §01 APP SHELL — sticky footer layout that holds header · main · footer */
 .site-shell{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
