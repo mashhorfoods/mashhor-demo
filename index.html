@@ -3329,7 +3329,14 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   justify-content: center;
   gap: var(--space-16) var(--space-24);
 }
-.how__banner-link { color: var(--white); font-weight: var(--font-weight-semibold); }
+.how__banner-link {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 44px;                 /* comfortable touch target */
+  padding-inline: var(--space-8);
+  color: var(--white);
+  font-weight: var(--font-weight-semibold);
+}
 .how__banner-link:hover { color: var(--brand-blue-sky); }
 
 
@@ -4583,7 +4590,7 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 }
 .info-panel__num { font-size: var(--font-size-caption); font-weight: var(--font-weight-bold); color: var(--brand-blue-sky); }
 .info-panel__value { font-size: var(--font-size-body); font-weight: var(--font-weight-semibold); color: var(--text-primary); word-break: break-word; }
-.info-panel__value a { color: inherit; transition: color var(--duration-fast) var(--ease-standard); }
+.info-panel__value a { display: inline-block; padding-block: var(--space-4); color: inherit; transition: color var(--duration-fast) var(--ease-standard); }
 .info-panel__value a:hover { color: var(--color-primary); }
 .info-panel__desc { font-size: var(--font-size-small); color: var(--text-secondary); }
 .info-panel__icon {
@@ -4776,7 +4783,7 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 .footer__social { display: flex; gap: var(--space-12); list-style: none; margin: 0; padding: 0; }
 .footer__social a {
   display: inline-grid; place-items: center;
-  inline-size: var(--space-40); block-size: var(--space-40);
+  inline-size: calc(var(--space-40) + var(--space-4)); block-size: calc(var(--space-40) + var(--space-4)); /* 44px touch target */
   color: var(--text-on-inverse);
   border: var(--border-width-thin) solid rgba(255, 255, 255, 0.20);
   border-radius: var(--radius-md);
@@ -4788,11 +4795,14 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 .footer__social svg { inline-size: 18px; block-size: 18px; }
 
 .footer__heading { font-size: var(--font-size-small); font-weight: var(--font-weight-semibold); color: var(--white); margin-block-end: var(--space-16); }
-.footer__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-12); }
+.footer__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-8); }
 .footer__list li { margin: 0; }
 .footer__link {
   position: relative; color: var(--text-on-inverse); font-size: var(--font-size-small);
 }
+/* Larger tap area for the footer nav lists (clears WCAG AA 24px) */
+.footer__list .footer__link { display: inline-block; padding-block: var(--space-4); }
+.footer__list .footer__link::after { inset-block-end: var(--space-4); }
 .footer__link::after {
   content: ""; position: absolute; inset-block-end: -2px; inset-inline-start: 0;
   inline-size: 0; block-size: var(--border-width-thin); background: var(--brand-blue-sky);
@@ -4806,7 +4816,7 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 .footer__contact-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-12); }
 .footer__contact-list li { display: flex; align-items: center; gap: var(--space-12); color: var(--text-on-inverse); font-size: var(--font-size-small); margin: 0; }
 .footer__contact-list svg { inline-size: 18px; block-size: 18px; color: var(--brand-blue-sky); flex: 0 0 auto; }
-.footer__contact-list a { color: inherit; }
+.footer__contact-list a { display: inline-block; padding-block: var(--space-4); color: inherit; }
 .footer__contact-list a:hover { color: var(--white); }
 
 .site-footer__bottom-inner { color: var(--text-on-inverse); font-size: var(--font-size-small); }
@@ -4871,7 +4881,8 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
         <a class="site-header__logo" href="#top" aria-label="وكالة المدى للسياحة والسفر — الصفحة الرئيسية">
           <img class="site-logo"
                src="https://i.ibb.co/WNpF4ZFd/logo-icon-01.png"
-               alt="وكالة المدى للسياحة والسفر">
+               alt="وكالة المدى للسياحة والسفر"
+               width="140" height="140" decoding="async">
         </a>
 
         <!-- Primary navigation -->
@@ -6093,7 +6104,7 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
             <!-- Brand -->
             <div class="footer__brand">
               <a class="footer__logo-badge" href="#top" aria-label="وكالة المدى للسياحة والسفر — الصفحة الرئيسية">
-                <img src="https://i.ibb.co/WNpF4ZFd/logo-icon-01.png" alt="وكالة المدى للسياحة والسفر">
+                <img src="https://i.ibb.co/WNpF4ZFd/logo-icon-01.png" alt="وكالة المدى للسياحة والسفر" width="140" height="140" loading="lazy" decoding="async">
               </a>
               <p class="footer__statement">رحلتك تبدأ من هنا...<br>ونحن معك في كل خطوة.</p>
               <ul class="footer__social">
