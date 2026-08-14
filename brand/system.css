@@ -1014,3 +1014,33 @@ section[id]{scroll-margin-top:var(--anchor-offset)}
 .contact__aside-tag{font-family:var(--font-heading);font-weight:var(--fw-semibold);color:var(--color-primary)}
 .contact__aside-route{width:min(100%,260px);height:auto;color:var(--aun-sky)}
 @media(max-width:899px){.contact__aside-route{display:none}}
+
+/* ==========================================================================
+   STAGE 13 · IMAGE SYSTEM (raster photography layer)
+   One canonical media component for any licensed photograph added later.
+   Reserves space (no CLS), controlled cover-crop, approved navy overlay
+   only when text sits on the image (§ Brand Identity 09/16). The Hero and
+   About scene frames already implement this same contract.
+   ========================================================================== */
+.media{position:relative;overflow:hidden;border-radius:var(--radius-image);
+  background:var(--aun-mist);box-shadow:var(--shadow-md)}
+.media > img,.media > picture,.media > picture > img{display:block;width:100%;height:100%}
+.media > img,.media > picture > img{object-fit:cover;object-position:var(--media-pos,center)}
+
+/* aspect-ratio roles (image hierarchy §04/§06) — reserve space before load */
+.media--hero{aspect-ratio:5/6}
+.media--feature{aspect-ratio:4/5}
+.media--service{aspect-ratio:4/3}
+.media--equipment{aspect-ratio:4/3}
+.media--wide{aspect-ratio:16/9}
+.media--square{aspect-ratio:1/1}
+@media(max-width:767px){
+  .media--hero,.media--feature{aspect-ratio:4/3}   /* avoid excessive mobile height */
+}
+
+/* text-over-image: soft navy overlay for legibility (only when needed) */
+.media--overlay::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(44,76,130,0) 34%,rgba(44,76,130,.58))}
+.media__caption{position:absolute;z-index:1;inset-block-end:0;inset-inline:0;
+  padding:clamp(1rem,3vw,1.75rem);color:#fff}
+.media__caption *{color:#fff}
