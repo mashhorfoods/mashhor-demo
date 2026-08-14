@@ -689,19 +689,34 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
    ========================================================================== */
 .about__grid{display:grid;gap:clamp(1.75rem,4vw,2.75rem)}
 @media(min-width:1024px){
-  .about__grid{grid-template-columns:minmax(0,1.05fr) minmax(0,0.95fr);
-    column-gap:clamp(2.5rem,5vw,5rem);row-gap:clamp(1.25rem,2.5vw,2rem);align-items:center}
-  .about__head{grid-column:1;grid-row:1;align-self:end}
-  .about__body{grid-column:1;grid-row:2;align-self:start}
-  .about__media{grid-column:2;grid-row:1 / span 2;align-self:center}
+  .about__grid{grid-template-columns:minmax(0,1.1fr) minmax(0,0.9fr);
+    column-gap:clamp(2.5rem,5vw,5rem);row-gap:clamp(1rem,2vw,1.5rem);align-items:start}
+  .about__head{grid-column:1;grid-row:1}
+  .about__lead{grid-column:1;grid-row:2}
+  .about__body{grid-column:1;grid-row:3}
+  .about__media{grid-column:2;grid-row:1 / span 3;align-self:center}
+  .about__facts{grid-column:1 / -1;grid-row:4}
 }
 .about__head{max-width:var(--measure)}
 .about__title{font-size:var(--fs-h2);line-height:var(--lh-tight);letter-spacing:var(--track-tight);
   color:var(--color-secondary)}
 .about__body{max-width:var(--measure)}
 .about__lead{font-family:var(--font-body);font-weight:var(--fw-medium);font-size:var(--fs-body-lg);
-  line-height:var(--lh-normal);color:var(--text-primary)}
+  line-height:var(--lh-normal);color:var(--text-primary);max-width:var(--measure)}
 .about__body p + p{margin-block-start:var(--sp-20)}
+
+/* trust signals — surfaced from the approved copy (no new claims) */
+.about__facts{list-style:none;display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(1rem,2vw,1.5rem);
+  margin-block-start:clamp(2rem,4vw,3rem);padding-block-start:clamp(1.5rem,3vw,2rem);
+  border-block-start:1px solid var(--border)}
+.about__fact{display:flex;align-items:center;gap:var(--sp-12);min-width:0}
+.about__fact-icon{width:44px;height:44px;flex:0 0 auto;border-radius:var(--radius-circle);display:grid;place-items:center;
+  background:var(--aun-mist);border:1px solid var(--aun-sky);color:var(--color-primary)}
+.about__fact-icon svg{width:22px;height:22px;stroke-width:1.6}
+.about__fact-label{font-family:var(--font-heading);font-weight:var(--fw-semibold);font-size:var(--fs-small);
+  color:var(--color-secondary);line-height:var(--lh-snug)}
+@media(max-width:900px){.about__facts{grid-template-columns:repeat(2,1fr);gap:var(--sp-20)}}
+@media(max-width:420px){.about__facts{grid-template-columns:1fr}}
 
 /* media — art-directed brand scene (swappable for a <picture> photo) */
 .about__media{position:relative;margin:0}
