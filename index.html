@@ -3783,14 +3783,34 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 /* Ultra-light aura so glass panels read on the white surface */
 .values__aura {
   position: absolute;
-  inset-block-start: 18%;
+  inset-block-start: 8%;
   inset-inline: 0;
-  block-size: 60%;
+  block-size: 64%;
   z-index: var(--z-base);
   background:
-      radial-gradient(40% 50% at 78% 30%, var(--color-primary-subtle), transparent 70%),
-      radial-gradient(38% 46% at 20% 70%, rgba(124, 183, 255, 0.10), transparent 70%);
+      radial-gradient(38% 44% at 80% 16%, var(--color-primary-subtle), transparent 70%),
+      radial-gradient(40% 50% at 78% 40%, var(--color-primary-subtle), transparent 70%),
+      radial-gradient(38% 46% at 20% 68%, rgba(124, 183, 255, 0.10), transparent 70%);
   pointer-events: none;
+}
+
+/* Brand decoration — rings, dashed route, destination pin, dot grids */
+.values__decor {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  inline-size: 100%;
+  block-size: auto;
+  z-index: var(--z-base);
+  color: var(--color-accent-soft);
+  opacity: 0.85;
+  pointer-events: none;
+}
+.values__decor .vs-path { stroke-dasharray: 4 8; animation: vs-dash 26s linear infinite; }
+.values__pin-pulse { transform-box: fill-box; transform-origin: center; animation: values-pin 4.5s var(--ease-in-out) infinite; }
+@keyframes values-pin {
+  0%, 100% { opacity: 0.18; transform: scale(1); }
+  50%      { opacity: 0.05; transform: scale(1.75); }
 }
 
 /* Sequential reveal for direct children of a revealed block */
@@ -4086,6 +4106,7 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 
 /* Mobile — elegant vertical sequence, featured + closing stay differentiated */
 @media (max-width: 560px) {
+  .values__decor { display: none; }   /* keep the soft aura; drop intricate decor on phones */
   .values__grid { grid-template-columns: 1fr; }
   .value-panel--featured,
   .value-panel--wide { grid-column: 1 / -1; grid-row: auto; }
@@ -4103,7 +4124,9 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   .value-panel,
   .values__trust-item { opacity: 1; transform: none; transition: none; }
   .values__transition .vs-path,
-  .values__transition .vs-accent { animation: none; }
+  .values__transition .vs-accent,
+  .values__decor .vs-path,
+  .values__pin-pulse { animation: none; }
 }
 
 
@@ -5482,6 +5505,51 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
         </svg>
 
         <span class="values__aura" aria-hidden="true"></span>
+
+        <!-- Brand decoration: concentric rings · travel route · destination pin · dot grids -->
+        <svg class="values__decor" viewBox="0 0 1440 460" fill="none" aria-hidden="true" preserveAspectRatio="xMidYMin meet" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="valDots" x="0" y="0" width="26" height="26" patternUnits="userSpaceOnUse">
+              <circle cx="2" cy="2" r="1.6" fill="currentColor"/>
+            </pattern>
+          </defs>
+
+          <!-- concentric rings — start side -->
+          <g opacity="0.55" fill="none">
+            <circle cx="150" cy="150" r="150" stroke="currentColor" stroke-width="1"/>
+            <circle cx="150" cy="150" r="98" stroke="currentColor" stroke-width="1"/>
+            <circle cx="150" cy="150" r="46" stroke="currentColor" stroke-width="1"/>
+            <circle cx="150" cy="150" r="5" fill="var(--color-accent)"/>
+          </g>
+
+          <!-- concentric rings — end side -->
+          <g opacity="0.5" fill="none">
+            <circle cx="1300" cy="122" r="132" stroke="currentColor" stroke-width="1"/>
+            <circle cx="1300" cy="122" r="84" stroke="currentColor" stroke-width="1"/>
+            <circle cx="1300" cy="122" r="40" stroke="currentColor" stroke-width="1"/>
+          </g>
+
+          <!-- dashed travel route -->
+          <path class="vs-path" d="M120 150 C 430 60, 720 250, 1000 158 S 1235 120, 1300 122" fill="none" stroke="var(--color-accent)" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+
+          <!-- route waypoints -->
+          <g fill="var(--surface-primary)" stroke="var(--color-accent)" stroke-width="1.5" opacity="0.75">
+            <circle cx="120" cy="150" r="5"/>
+            <circle cx="612" cy="171" r="4.5"/>
+          </g>
+
+          <!-- destination pin at route end -->
+          <g class="values__pin" transform="translate(1300 122)">
+            <circle class="values__pin-pulse" cx="0" cy="-6" r="16" fill="var(--color-accent)" opacity="0.18"/>
+            <path d="M0 -34 C 16.5 -34, 26 -20.5, 26 -8 C 26 7.5, 8.5 21, 0 40 C -8.5 21, -26 7.5, -26 -8 C -26 -20.5, -16.5 -34, 0 -34 Z" fill="var(--color-accent)"/>
+            <circle cx="0" cy="-8" r="9" fill="var(--white)"/>
+            <circle cx="0" cy="-8" r="4" fill="var(--brand-navy)"/>
+          </g>
+
+          <!-- dot grids -->
+          <rect x="1176" y="300" width="150" height="120" fill="url(#valDots)" opacity="0.6"/>
+          <rect x="44" y="330" width="120" height="96" fill="url(#valDots)" opacity="0.4"/>
+        </svg>
 
         <div class="values__inner container container--wide">
 
