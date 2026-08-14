@@ -893,3 +893,36 @@ section[id]{scroll-margin-top:var(--anchor-offset)}
   .vm__link--v{display:none}
   .vm__link--h{display:flex}
 }
+
+/* ==========================================================================
+   STAGE 10 · CORE VALUES / قيمنا
+   Number-led editorial layout (large restrained numerals, hairline "lanes"
+   with route points). Tokens + existing patterns only; open items, not
+   boxed cards — the section breathes.
+   ========================================================================== */
+.values__head{max-width:var(--container-narrow)}
+.values__title{font-size:var(--fs-h2);line-height:var(--lh-tight);letter-spacing:var(--track-tight);
+  color:var(--color-secondary);margin-block-start:var(--sp-16)}
+
+.values__grid{display:grid;gap:clamp(2rem,4vw,2.75rem);margin-block-start:clamp(2.5rem,5vw,3.75rem)}
+@media(min-width:640px){.values__grid{grid-template-columns:repeat(2,1fr);
+  column-gap:clamp(2rem,4vw,3.5rem)}}
+@media(min-width:1024px){.values__grid{grid-template-columns:repeat(3,1fr)}}
+
+.value{position:relative;display:flex;flex-direction:column;gap:var(--sp-8);
+  padding-block-start:var(--sp-24);border-block-start:1px solid var(--border);
+  transition:border-color var(--dur-normal) var(--ease-smooth)}
+.value::before{content:"";position:absolute;inset-block-start:-4px;inset-inline-start:0;
+  width:8px;height:8px;border-radius:var(--radius-circle);background:var(--aun-sky);
+  transition:background-color var(--dur-normal) var(--ease-smooth),transform var(--dur-normal) var(--ease-smooth)}
+.value__num{font-family:var(--font-heading);font-weight:var(--fw-semibold);font-variant-numeric:tabular-nums;
+  font-size:clamp(2.1rem,4.5vw,2.9rem);line-height:1;letter-spacing:-.02em;
+  color:var(--aun-blue-bright);opacity:.5;transition:opacity var(--dur-normal) var(--ease-smooth),
+  color var(--dur-normal) var(--ease-smooth)}
+.value__name{font-size:var(--fs-h3);color:var(--color-secondary);margin-block-start:var(--sp-4)}
+.value__desc{font-family:var(--font-body);color:var(--text-secondary);max-width:44ch}
+@media(hover:hover){
+  .value:hover{border-block-start-color:var(--color-primary)}
+  .value:hover::before{background:var(--color-primary);transform:scale(1.15)}
+  .value:hover .value__num{opacity:1;color:var(--color-primary)}
+}
