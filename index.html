@@ -4319,8 +4319,8 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   background: rgba(255, 255, 255, 0.72);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  border: var(--border-width-thin) solid rgba(255, 255, 255, 0.85);
-  box-shadow: var(--shadow-floating);
+  border: var(--border-width-thin) solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 22px 48px -20px rgba(10, 79, 183, 0.38), 0 4px 14px -8px rgba(6, 53, 122, 0.20);
   opacity: 0;
   transform: translate(-50%, -50%) scale(0.92);
   transition:
@@ -4405,6 +4405,11 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   0%   { opacity: 0; transform: translateY(-8px) scale(0.8); }
   60%  { opacity: 1; transform: translateY(0) scale(1.08); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+/* Used by the contact location-card pin */
+@keyframes cta-glow {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50%      { transform: scale(1.25); opacity: 1; }
 }
 
 
@@ -4659,7 +4664,6 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   cursor: pointer;
 }
 
-.contact__form-note { font-size: var(--font-size-small); color: var(--text-muted); }
 .contact__form-success {
   display: none;
   align-items: center; gap: var(--space-12);
@@ -5100,9 +5104,6 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
             <circle cx="12" cy="12" r="9"/>
             <path d="M3 12h18"/>
             <path d="M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/>
-          </symbol>
-          <symbol id="ic-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 12H5M11 6l-6 6 6 6"/>
           </symbol>
         </svg>
 
@@ -5799,36 +5800,38 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
             </div>
 
             <!-- LAYER 05 · Abstract journey visual — the route arrives at Al Mada -->
-            <div class="cta__visual cta__reveal-visual" data-reveal aria-hidden="true">
+            <div class="cta__visual" data-reveal aria-hidden="true">
               <svg class="cta__journey" viewBox="0 0 480 520" fill="none" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
                 <defs>
-                  <pattern id="ctaDots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
-                    <circle cx="2" cy="2" r="1.6" fill="currentColor"/>
-                  </pattern>
+                  <radialGradient id="ctaGlow" cx="50%" cy="50%" r="50%">
+                    <stop offset="0" stop-color="#2C7BE5" stop-opacity="0.16"/>
+                    <stop offset="60%" stop-color="#2C7BE5" stop-opacity="0.05"/>
+                    <stop offset="100%" stop-color="#2C7BE5" stop-opacity="0"/>
+                  </radialGradient>
                 </defs>
 
-                <!-- destination — concentric rings -->
+                <!-- soft destination glow grounds the composition -->
+                <circle cx="250" cy="208" r="188" fill="url(#ctaGlow)"/>
+
+                <!-- destination — concentric rings (inner strongest, fading out) -->
                 <g fill="none" stroke="currentColor">
-                  <circle cx="250" cy="208" r="196" stroke-width="1" opacity="0.18"/>
-                  <circle cx="250" cy="208" r="150" stroke-width="1" opacity="0.28"/>
-                  <circle cx="250" cy="208" r="104" stroke-width="1" opacity="0.4"/>
+                  <circle cx="250" cy="208" r="176" stroke-width="1" opacity="0.20"/>
+                  <circle cx="250" cy="208" r="126" stroke-width="1" opacity="0.34"/>
+                  <circle cx="250" cy="208" r="84" stroke-width="1" opacity="0.5"/>
                 </g>
 
-                <!-- subtle dot grid -->
-                <rect x="356" y="24" width="112" height="86" fill="url(#ctaDots)" opacity="0.5"/>
-
                 <!-- travel route — drawn in on reveal -->
-                <path class="cta__route" pathLength="1" d="M78 496 C 158 456, 108 378, 210 356 C 268 344, 246 330, 248 318" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linecap="round"/>
+                <path class="cta__route" pathLength="1" d="M84 494 C 160 452, 112 380, 210 356 C 262 343, 246 326, 248 300" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linecap="round"/>
 
                 <!-- route waypoints -->
                 <g fill="var(--surface-primary)" stroke="var(--color-accent)" stroke-width="1.5">
-                  <circle cx="78" cy="496" r="5"/>
-                  <circle cx="150" cy="430" r="4.5"/>
+                  <circle cx="84" cy="494" r="5"/>
+                  <circle cx="150" cy="428" r="4.5"/>
                   <circle cx="212" cy="356" r="4.5"/>
                 </g>
 
                 <!-- destination pin -->
-                <g transform="translate(250 300)">
+                <g transform="translate(250 292)">
                   <g class="cta__pin">
                     <path d="M0 -30 C 15 -30, 23.5 -18.5, 23.5 -7 C 23.5 6.5, 8 19.5, 0 36 C -8 19.5, -23.5 6.5, -23.5 -7 C -23.5 -18.5, -15 -30, 0 -30 Z" fill="var(--color-accent)"/>
                     <circle cx="0" cy="-7" r="8" fill="var(--white)"/>
