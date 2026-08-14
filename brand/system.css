@@ -808,3 +808,49 @@ section[id]{scroll-margin-top:var(--anchor-offset)}
   background-image:radial-gradient(120% 90% at 100% 0,rgba(255,255,255,.06),transparent 60%)}
 .service-cta__q{font-family:var(--font-heading);font-weight:var(--fw-semibold);font-size:var(--fs-h4);color:#fff;
   max-width:26ch}
+
+/* ==========================================================================
+   STAGE 08 · HOW WE WORK / كيف نعمل
+   A continuous three-stage journey connected by the brand route line:
+   داخل المنزل -> أثناء النقل -> عند الوصول. Horizontal on desktop, vertical
+   on mobile. Tokens + existing patterns only; lighter than Services.
+   ========================================================================== */
+.hww__intro{max-width:var(--container-narrow)}
+.hww__title{font-size:var(--fs-h2);line-height:var(--lh-tight);letter-spacing:var(--track-tight);
+  color:var(--color-secondary);margin-block-start:var(--sp-16)}
+.hww__intro-lead{color:var(--text-secondary);margin-block-start:var(--sp-16);max-width:var(--measure)}
+
+.hww__journey{list-style:none;position:relative;display:grid;gap:clamp(1.75rem,4vw,2.25rem);
+  margin-block-start:clamp(2.5rem,5vw,3.75rem)}
+.hww__node{position:relative;z-index:1;width:64px;height:64px;flex:0 0 auto;border-radius:var(--radius-circle);
+  display:grid;place-items:center;background:var(--surface);border:2px solid var(--aun-sky);
+  color:var(--color-primary);box-shadow:var(--shadow-xs)}
+.hww__node svg{width:30px;height:30px;stroke-width:1.6}
+.hww__num{font-family:var(--font-heading);font-weight:var(--fw-semibold);font-variant-numeric:tabular-nums;
+  font-size:var(--fs-small);color:var(--color-secondary);letter-spacing:.08em}
+.hww__stage-title{font-size:var(--fs-h3);color:var(--color-secondary);margin-block-start:var(--sp-4)}
+.hww__stage-desc{color:var(--text-secondary);margin-block-start:var(--sp-8)}
+
+/* desktop / tablet — horizontal journey with a connecting route line */
+@media(min-width:768px){
+  .hww__journey{grid-template-columns:repeat(3,1fr);gap:0}
+  .hww__journey::before{content:"";position:absolute;top:31px;inset-inline:calc(100%/6);height:2px;z-index:0;
+    background:repeating-linear-gradient(to left,var(--aun-border-strong) 0 6px,transparent 6px 15px)}
+  .hww__stage{display:flex;flex-direction:column;align-items:center;text-align:center;
+    padding-inline:clamp(.75rem,2.5vw,1.75rem)}
+  .hww__stage-body{display:flex;flex-direction:column;align-items:center;gap:var(--sp-4)}
+  .hww__num{margin-block-start:var(--sp-16)}
+  .hww__stage-desc{max-width:34ch}
+}
+
+/* mobile — vertical journey, node + text, route line descends between nodes */
+@media(max-width:767px){
+  .hww__journey{gap:0}
+  .hww__stage{display:grid;grid-template-columns:64px minmax(0,1fr);column-gap:var(--sp-20);
+    align-items:start;position:relative;padding-block-end:clamp(1.75rem,5vw,2.25rem)}
+  .hww__stage:last-child{padding-block-end:0}
+  .hww__stage:not(:last-child)::before{content:"";position:absolute;inset-inline-start:31px;top:64px;bottom:0;width:2px;z-index:0;
+    background:repeating-linear-gradient(var(--aun-border-strong) 0 6px,transparent 6px 15px)}
+  .hww__stage-body{padding-block-start:var(--sp-4)}
+  .hww__stage-desc{max-width:48ch}
+}
