@@ -986,7 +986,7 @@ section[id]{scroll-margin-top:var(--anchor-offset)}
   letter-spacing:var(--track-caps);text-transform:uppercase;color:var(--text-muted)}
 .contact__phone{display:inline-block;align-self:flex-start;direction:ltr;font-family:var(--font-heading);
   font-weight:var(--fw-bold);font-size:var(--fs-h2);color:var(--color-secondary);text-decoration:none;
-  margin-block-start:var(--sp-8);transition:color var(--dur-normal) var(--ease-smooth)}
+  margin-block-start:var(--sp-4);padding-block:var(--sp-8);transition:color var(--dur-normal) var(--ease-smooth)}
 .contact__phone:hover{color:var(--color-primary)}
 .contact__phone:focus-visible{outline:none;box-shadow:var(--shadow-focus);border-radius:var(--radius-xs)}
 .contact__actions{display:flex;flex-wrap:wrap;gap:var(--sp-12)}
@@ -1044,3 +1044,14 @@ section[id]{scroll-margin-top:var(--anchor-offset)}
 .media__caption{position:absolute;z-index:1;inset-block-end:0;inset-inline:0;
   padding:clamp(1rem,3vw,1.75rem);color:#fff}
 .media__caption *{color:#fff}
+
+/* ==========================================================================
+   STAGE 14 · RESPONSIVE AUDIT — refinements only (no redesign)
+   Fix: long primary CTA labels (e.g. "تواصل عبر واتساب") in full-width
+   large buttons forced a 3px horizontal overflow at 320px. Trim large-
+   button side padding on very small screens and let grid text cards shrink.
+   ========================================================================== */
+@media(max-width:380px){
+  .btn--lg{padding-inline:var(--sp-16)}
+}
+.contact__card,.contact__aside{min-width:0}
