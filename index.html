@@ -3048,11 +3048,14 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   z-index: var(--z-base);
   transform: translateY(-50%);
 }
+.process__track,
+.process__progress { block-size: 3px; }
 .process__track { background-color: var(--color-border); }
 .process__progress {
   inset-inline-end: auto;
   inline-size: var(--progress, 0%);
-  background-color: var(--color-primary);
+  background-image: linear-gradient(to left, var(--brand-blue-bright), var(--brand-blue) 55%, var(--brand-navy));
+  box-shadow: 0 4px 14px -4px rgba(10, 79, 183, 0.55);
   transition: inline-size var(--duration-slow) var(--ease-smooth);
 }
 
@@ -3095,7 +3098,21 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
       color var(--duration-normal) var(--ease-smooth),
       box-shadow var(--duration-normal) var(--ease-smooth);
 }
-.process__node svg { inline-size: 26px; block-size: 26px; }
+.process__node svg { inline-size: 26px; block-size: 26px; position: relative; z-index: 1; }
+/* Halo ring — appears only on the active node */
+.process__node::after {
+  content: "";
+  position: absolute;
+  inset: calc(var(--space-8) * -1);
+  border-radius: inherit;
+  border: var(--border-width-thick) solid var(--color-primary);
+  opacity: 0;
+  transform: scale(0.85);
+  transition:
+      opacity var(--duration-normal) var(--ease-smooth),
+      transform var(--duration-normal) var(--ease-smooth);
+  pointer-events: none;
+}
 .process__num {
   position: absolute;
   inset-block-start: calc(var(--space-8) * -1);
@@ -3119,14 +3136,29 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   transition: color var(--duration-normal) var(--ease-smooth);
 }
 
-/* Active / completed states */
+/* Traveled path — steps already passed read as "reached" */
+.process__step-btn.is-reached .process__node {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background-color: var(--color-primary-subtle);
+}
+.process__step-btn.is-reached .process__step-name { color: var(--text-primary); }
+
+/* Active step — strongest state, with halo ring */
 .process__step-btn[aria-selected="true"] .process__node {
   background-color: var(--color-primary);
   border-color: var(--color-primary);
   color: var(--text-on-primary);
   box-shadow: var(--shadow-md);
 }
-.process__step-btn[aria-selected="true"] .process__step-name { color: var(--text-primary); }
+.process__step-btn[aria-selected="true"] .process__node::after {
+  opacity: 0.28;
+  transform: scale(1);
+}
+.process__step-btn[aria-selected="true"] .process__step-name {
+  color: var(--text-primary);
+  font-weight: var(--font-weight-bold);
+}
 
 
 /* ==========================================================================
@@ -3211,6 +3243,45 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
       opacity var(--duration-normal) var(--ease-standard),
       transform var(--duration-slower) var(--ease-smooth);
 }
+/* Framed-photo depth + gradient scrim anchoring the waypoint chip */
+.process__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+}
+.process__media-scrim {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  block-size: 42%;
+  background-image: linear-gradient(to top, rgba(6, 53, 122, 0.55), transparent);
+  pointer-events: none;
+}
+/* "You are here" stage counter riding the image */
+.process__waypoint {
+  position: absolute;
+  inset-block-end: var(--space-16);
+  inset-inline-start: var(--space-16);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.15em;
+  direction: ltr;
+  padding: var(--space-8) var(--space-16);
+  color: var(--white);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  background-color: rgba(6, 53, 122, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: var(--radius-pill);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.process__waypoint b { font-size: var(--font-size-body-lg); font-style: normal; }
+.process__waypoint i { opacity: 0.6; font-style: normal; margin-inline: 0.1em; }
+.process__waypoint em { font-size: var(--font-size-small); font-style: normal; opacity: 0.8; }
 
 /* Enter animations (re-triggered by .is-enter on each step change) */
 .process__panel.is-enter .process__badge,
@@ -3272,7 +3343,7 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   inset-inline-start: -5%;
   inline-size: min(28vw, 320px);
   color: var(--color-accent-soft);
-  opacity: 0.5;
+  opacity: 0.32;
   pointer-events: none;
 }
 .how__decor .how__path { stroke-dasharray: 4 8; animation: how-dash 24s linear infinite; }
@@ -3302,19 +3373,22 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
     inset-block: 0;
     inset-inline-start: calc(var(--node) / 2);
     inset-inline-end: auto;
-    inline-size: var(--border-width-thick);
+    inline-size: 3px;
     block-size: 100%;
     transform: translateX(50%);
   }
   .process__progress {
     block-size: var(--progress, 0%);
-    inline-size: var(--border-width-thick);
+    inline-size: 3px;
+    background-image: linear-gradient(to bottom, var(--brand-navy), var(--brand-blue) 45%, var(--brand-blue-bright));
     transition: block-size var(--duration-slow) var(--ease-smooth);
   }
   .process__step-btn {
     flex-direction: row;
     align-items: center;
     gap: var(--space-16);
+    padding-block: var(--space-8);
+    min-block-size: 44px;
     text-align: start;
   }
   .process__step-btn:hover { transform: none; }
@@ -3333,6 +3407,8 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
   .process__panel.is-enter .process__points li,
   .process__panel.is-enter .process__info { animation: none; }
   .process__media img { transition: none; }
+  .process__node,
+  .process__node::after { transition: none; }
   .how__decor .how__path { animation: none; }
 }
 
@@ -5216,6 +5292,10 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
             <div class="process__visual">
               <figure class="process__media">
                 <img data-img src="" alt="" width="1200" height="900" loading="lazy" decoding="async">
+                <span class="process__media-scrim" aria-hidden="true"></span>
+                <span class="process__waypoint" aria-hidden="true">
+                  <b data-num>01</b><i>/</i><em>05</em>
+                </span>
               </figure>
             </div>
           </div>
@@ -6177,7 +6257,7 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
 
     function render(i) {
       var s = STEPS[i];
-      panel.querySelector("[data-num]").textContent = s.num;
+      Array.prototype.forEach.call(panel.querySelectorAll("[data-num]"), function (n) { n.textContent = s.num; });
       panel.querySelector("[data-title]").textContent = s.title;
       panel.querySelector("[data-desc]").textContent = s.desc;
       panel.querySelector("[data-points]").innerHTML = s.points.map(function (p) {
@@ -6197,6 +6277,7 @@ a[role="button"], button, [type="button"], [type="submit"], summary {
         var sel = j === i;
         b.setAttribute("aria-selected", String(sel));
         b.setAttribute("tabindex", sel ? "0" : "-1");
+        b.classList.toggle("is-reached", j < i);
       });
       timeline.style.setProperty("--progress", last === 0 ? "0%" : (i / last) * 100 + "%");
       render(i);
