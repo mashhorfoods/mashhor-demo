@@ -1114,49 +1114,97 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 }
 
 /* ==========================================================================
-   STAGE 08 · HOW WE WORK / كيف نعمل
-   A continuous three-stage journey connected by the brand route line:
-   داخل المنزل -> أثناء النقل -> عند الوصول. Horizontal on desktop, vertical
-   on mobile. Tokens + existing patterns only; lighter than Services.
+   STAGE 07 · HOW WE WORK / كيف نعمل
+   One journey in three chapters, not three cards (§03/§16). Structure comes
+   from the node, the number and the route; the only surface is the section's.
+   Horizontal at 1024+, vertical below — the switch happens before the three
+   columns get cramped (§12).
    ========================================================================== */
-.hww__intro{max-width:var(--container-narrow)}
+.hww{position:relative;overflow:clip}
+.hww__intro{max-width:var(--container-narrow);margin-inline:auto;text-align:center}
 .hww__title{font-size:var(--fs-h2);line-height:var(--lh-tight);letter-spacing:var(--track-tight);
-  color:var(--color-secondary);margin-block-start:var(--sp-16)}
-.hww__intro-lead{color:var(--text-secondary);margin-block-start:var(--sp-16);max-width:var(--measure)}
+  color:var(--color-secondary);margin-block-start:var(--sp-16);text-wrap:balance}
+.hww__rule{display:block;position:relative;width:76px;height:2px;margin:var(--sp-20) auto 0;
+  background:repeating-linear-gradient(to right,var(--aun-border-strong) 0 4px,transparent 4px 11px)}
+.hww__rule::after{content:"";position:absolute;inset-inline-end:-4px;inset-block-start:-4px;
+  width:10px;height:10px;border-radius:var(--radius-circle);background:var(--color-primary);
+  border:2px solid var(--surface)}
+.hww__intro-lead{color:var(--text-secondary);margin-block-start:var(--sp-20);
+  max-width:56ch;margin-inline:auto}
 
-.hww__journey{list-style:none;position:relative;display:grid;gap:clamp(1.75rem,4vw,2.25rem);
-  margin-block-start:clamp(2.5rem,5vw,3.75rem)}
-.hww__node{position:relative;z-index:1;width:64px;height:64px;flex:0 0 auto;border-radius:var(--radius-circle);
+/* the quiet route behind the journey (§10) — decorative, aria-hidden */
+.hww__route{position:absolute;inset-inline:0;pointer-events:none;z-index:0;display:none}
+.hww__route svg{width:100%;height:100%}
+
+.hww__journey{list-style:none;padding:0;margin:0;position:relative;z-index:1;
+  display:grid;gap:clamp(1.75rem,4vw,2.25rem);margin-block-start:clamp(2.5rem,5vw,3.75rem)}
+.hww__journey li{margin-block-start:0}   /* the global li+li prose rule */
+
+/* -- the marker: node plus its number (§06) --------------------------------- */
+.hww__marker{position:relative;display:inline-grid;flex:0 0 auto}
+.hww__node{position:relative;z-index:1;width:72px;height:72px;border-radius:var(--radius-circle);
   display:grid;place-items:center;background:var(--surface);border:2px solid var(--aun-sky);
-  color:var(--color-primary);box-shadow:var(--shadow-xs)}
-.hww__node svg{width:30px;height:30px;stroke-width:1.6}
-.hww__num{font-family:var(--font-heading);font-weight:var(--fw-semibold);font-variant-numeric:tabular-nums;
-  font-size:var(--fs-small);color:var(--color-secondary);letter-spacing:.08em}
-.hww__stage-title{font-size:var(--fs-h3);color:var(--color-secondary);margin-block-start:var(--sp-4)}
+  color:var(--color-primary);box-shadow:var(--shadow-xs);
+  transition:border-color var(--dur-normal) var(--ease-smooth),
+    background-color var(--dur-normal) var(--ease-smooth)}
+.hww__node svg{width:32px;height:32px;stroke-width:1.6}
+/* the number rides the node's edge, so a stage reads as one marker */
+.hww__num{position:absolute;z-index:2;inset-block-start:-4px;inset-inline-start:-6px;
+  min-width:30px;height:30px;padding-inline:var(--sp-4);border-radius:var(--radius-pill);
+  display:grid;place-items:center;background:var(--color-secondary);color:#fff;
+  font-family:var(--font-heading);font-weight:var(--fw-semibold);font-variant-numeric:tabular-nums;
+  font-size:var(--fs-caption);line-height:1;letter-spacing:.04em;border:2px solid var(--surface)}
+
+.hww__stage-title{font-size:var(--fs-h3);line-height:1.35;color:var(--color-secondary);
+  transition:color var(--dur-normal) var(--ease-smooth)}
 .hww__stage-desc{color:var(--text-secondary);margin-block-start:var(--sp-8)}
 
-/* desktop / tablet — horizontal journey with a connecting route line */
-@media(min-width:768px){
+/* §07 — the current chapter, marked by emphasis only. Nothing resizes or
+   moves, so the journey cannot shift while it is read. */
+.hww__stage.is-current .hww__node{border-color:var(--color-primary);background:var(--aun-primary-subtle)}
+
+/* -- horizontal journey, 1024+ (§04/§05) ------------------------------------ */
+@media(min-width:1024px){
+  /* the band sits around the node row, clear of the intro: at 15rem the arc
+     was running straight through the introductory sentence (§10) */
+  .hww__route{display:block;inset-block-start:clamp(18rem,24vw,21rem);height:clamp(7rem,12vw,10rem)}
   .hww__journey{grid-template-columns:repeat(3,1fr);gap:0}
-  .hww__journey::before{content:"";position:absolute;top:31px;inset-inline:calc(100%/6);height:2px;z-index:0;
-    background:repeating-linear-gradient(to left,var(--aun-border-strong) 0 6px,transparent 6px 15px)}
+  /* the connecting run sits at node centre and stops one half-column short of
+     each edge, so it joins the three nodes and never trails off the section */
+  .hww__journey::before{content:"";position:absolute;inset-block-start:35px;inset-inline:calc(100%/6);
+    height:2px;z-index:0;
+    background:repeating-linear-gradient(to left,var(--aun-border-strong) 0 5px,transparent 5px 13px)}
   .hww__stage{display:flex;flex-direction:column;align-items:center;text-align:center;
-    padding-inline:clamp(.75rem,2.5vw,1.75rem)}
-  .hww__stage-body{display:flex;flex-direction:column;align-items:center;gap:var(--sp-4)}
-  .hww__num{margin-block-start:var(--sp-16)}
-  .hww__stage-desc{max-width:34ch}
+    padding-inline:clamp(1rem,2.5vw,2rem)}
+  /* the stem drops from the node to its chapter, tying the two together */
+  .hww__stage-body{position:relative;margin-block-start:var(--sp-32);
+    display:flex;flex-direction:column;align-items:center}
+  .hww__stage-body::before{content:"";position:absolute;inset-block-start:calc(var(--sp-32) * -1);
+    inset-inline-start:50%;transform:translateX(50%);width:2px;height:var(--sp-32);
+    background:repeating-linear-gradient(var(--aun-border-strong) 0 4px,transparent 4px 10px)}
+  .hww__stage-desc{max-width:32ch}
 }
 
-/* mobile — vertical journey, node + text, route line descends between nodes */
-@media(max-width:767px){
-  .hww__journey{gap:0}
-  .hww__stage{display:grid;grid-template-columns:64px minmax(0,1fr);column-gap:var(--sp-20);
-    align-items:start;position:relative;padding-block-end:clamp(1.75rem,5vw,2.25rem)}
+/* -- vertical journey below 1024 (§13/§14) ---------------------------------- */
+/* One axis down the reading edge: the node column is reserved so the dashed
+   run never crosses the Arabic. */
+@media(max-width:1023px){
+  .hww__journey{gap:0;max-width:44rem;margin-inline:auto}
+  .hww__stage{display:grid;grid-template-columns:72px minmax(0,1fr);column-gap:var(--sp-20);
+    align-items:start;position:relative;padding-block-end:clamp(1.75rem,5vw,2.5rem)}
   .hww__stage:last-child{padding-block-end:0}
-  .hww__stage:not(:last-child)::before{content:"";position:absolute;inset-inline-start:31px;top:64px;bottom:0;width:2px;z-index:0;
-    background:repeating-linear-gradient(var(--aun-border-strong) 0 6px,transparent 6px 15px)}
-  .hww__stage-body{padding-block-start:var(--sp-4)}
-  .hww__stage-desc{max-width:48ch}
+  .hww__stage:not(:last-child)::before{content:"";position:absolute;inset-inline-start:35px;
+    inset-block:72px 0;width:2px;z-index:0;
+    background:repeating-linear-gradient(var(--aun-border-strong) 0 5px,transparent 5px 13px)}
+  .hww__stage-body{padding-block-start:var(--sp-8)}
+  .hww__stage-desc{max-width:52ch}
+}
+@media(max-width:479px){
+  .hww__stage{grid-template-columns:60px minmax(0,1fr);column-gap:var(--sp-16)}
+  .hww__node{width:60px;height:60px}
+  .hww__node svg{width:28px;height:28px}
+  .hww__num{min-width:26px;height:26px}
+  .hww__stage:not(:last-child)::before{inset-inline-start:29px;inset-block:60px 0}
 }
 
 /* ==========================================================================
@@ -1391,7 +1439,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 }
 
 /* -- LEVEL 01 · eyebrow ---------------------------------------------------- */
-.hero__eyebrow,.about__label,.why__label,.services__label{display:inline-flex;align-items:center;
+.hero__eyebrow,.about__label,.why__label,.services__label,.hww__label{display:inline-flex;align-items:center;
   padding:var(--sp-8) var(--sp-16);border-radius:var(--radius-pill);
   background:var(--aun-mist);border:1px solid var(--aun-sky);
   font-family:var(--font-heading);font-weight:var(--fw-semibold);font-size:var(--fs-small);
@@ -1931,41 +1979,49 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
         <div class="container">
 
           <div class="hww__intro">
-            <div class="section-label" data-reveal><span class="section-label__num">04</span><span class="section-label__rule"></span><span class="section-label__name">كيف نعمل</span></div>
+            <p class="hww__label" data-reveal>كيف نعمل</p>
             <h2 id="how-h" class="hww__title" data-reveal>رحلة متكاملة من المساعدة إلى الوصول</h2>
+            <span class="hww__rule" aria-hidden="true" data-reveal></span>
             <p class="hww__intro-lead" data-reveal>نقدم المساندة للمستفيد وفق احتياجاته خلال مراحل التنقل، من داخل المنزل، وأثناء النقل، وحتى الوصول إلى الوجهة.</p>
           </div>
+
+          <span class="hww__route" aria-hidden="true">
+            <svg viewBox="0 0 1200 220" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M40 168 C 240 168 300 44 560 44 C 820 44 900 168 1160 168"
+                    stroke="#D9E4F3" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 12"/>
+            </svg>
+          </span>
 
           <ol class="hww__journey">
 
             <li class="hww__stage" data-reveal>
-              <span class="hww__node" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 5l8 6.5"/><path d="M6 10.2V19h12v-8.8"/><path d="M10 19v-4.2h4V19"/></svg>
+              <span class="hww__marker">
+                <span class="hww__node" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 5l8 6.5"/><path d="M6 10.2V19h12v-8.8"/><path d="M10 19v-4.2h4V19"/></svg></span>
+                <span class="hww__num" aria-hidden="true">01</span>
               </span>
               <div class="hww__stage-body">
-                <span class="hww__num">01</span>
                 <h3 class="hww__stage-title">داخل المنزل</h3>
                 <p class="hww__stage-desc">المساندة عند الحاجة قبل بدء عملية النقل.</p>
               </div>
             </li>
 
             <li class="hww__stage" data-reveal>
-              <span class="hww__node" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15v-3l2-3.2h8l2.4 3.2H19v3"/><path d="M3 15h1.6M15 15h4"/><circle cx="8" cy="16" r="1.7"/><circle cx="17" cy="16" r="1.7"/><path d="M9 8.8v3.2H3.6"/></svg>
+              <span class="hww__marker">
+                <span class="hww__node" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15v-3l2-3.2h8l2.4 3.2H19v3"/><path d="M3 15h1.6M15 15h4"/><circle cx="8" cy="16" r="1.7"/><circle cx="17" cy="16" r="1.7"/><path d="M9 8.8v3.2H3.6"/></svg></span>
+                <span class="hww__num" aria-hidden="true">02</span>
               </span>
               <div class="hww__stage-body">
-                <span class="hww__num">02</span>
                 <h3 class="hww__stage-title">أثناء النقل</h3>
                 <p class="hww__stage-desc">توفير وسيلة نقل مجهزة وطاقم مدرب بما يلائم احتياجات المستفيد.</p>
               </div>
             </li>
 
             <li class="hww__stage" data-reveal>
-              <span class="hww__node" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c4-4.4 6-7.7 6-10.5a6 6 0 1 0-12 0C6 13.3 8 16.6 12 21Z"/><circle cx="12" cy="10.4" r="2.3"/></svg>
+              <span class="hww__marker">
+                <span class="hww__node" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c4-4.4 6-7.7 6-10.5a6 6 0 1 0-12 0C6 13.3 8 16.6 12 21Z"/><circle cx="12" cy="10.4" r="2.3"/></svg></span>
+                <span class="hww__num" aria-hidden="true">03</span>
               </span>
               <div class="hww__stage-body">
-                <span class="hww__num">03</span>
                 <h3 class="hww__stage-title">عند الوصول</h3>
                 <p class="hww__stage-desc">استمرار المساندة وفق احتياجات المستفيد داخل المستشفى أو الوجهة.</p>
               </div>
@@ -2367,7 +2423,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
        Purely decorative, so it is skipped entirely under reduced motion and
        when IntersectionObserver is unavailable. */
     (function () {
-      var items = doc.querySelectorAll("#why-us .why__item");
+      var items = doc.querySelectorAll("#why-us .why__item, #how-we-work .hww__stage");
       if (!items.length || reduce || !("IntersectionObserver" in window)) return;
       var obs = new IntersectionObserver(function (entries) {
         entries.forEach(function (entry) {

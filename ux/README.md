@@ -64,6 +64,12 @@ uniform.
 
 The About illustration was replaced with the supplied photograph.
 
+**Stage 07 — how we work.** One journey in three chapters: a centred header,
+three nodes on a single axis joined by a dashed run, and a quiet decorative
+route behind them. The number rides each node's edge so a stage reads as one
+marker. Horizontal at 1024+, vertical below — earlier than the old 768 switch,
+so three columns never get cramped. No CTA in the section (§11/§19).
+
 ## Typography parse bug — repo-wide
 
 Every `clamp()` outside `brand/tokens.css` was written `1.55rem+2.9vw`, with no
@@ -97,8 +103,8 @@ blue is 4.35:1 as text on the page ground — this is why the About lead is navy
 rather than the brighter blue the mockup shows · **P7** trust claims still told
 twice · **P9** hero image is third-party with no `srcset`.
 
-The `section-label` component (`01 —— name`) still runs in the four sections
-after Services — How We Work, Vision, Values and Contact. Later stages should
+The `section-label` component (`01 —— name`) still runs in the three sections
+after How We Work — Vision, Values and Contact. Later stages should
 carry the pill across, or the first four sections should go back.
 
 **Services count.** The source carries SEVEN services; the Stage 06 brief and
