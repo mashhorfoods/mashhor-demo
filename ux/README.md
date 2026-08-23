@@ -80,6 +80,15 @@ anchor holds the context on columns 1-4 and the six values run as one column
 on 5-12, separated by hairlines. The numeral orients and stays a step below the
 value name. No icons — the brief is explicit that the section is number-led.
 
+**Stage 10 — contact.** The practical destination, not a second CTA. The
+actions card leads on the reading edge with the number as a live `tel:` link
+above WhatsApp and call; the three information rows sit beneath it as one
+divided list; the closing statement and the route close the page on the far
+side. No form, no chat widget, no invented channel.
+
+**All ten sections are now upgraded.** The `section-label` component is gone
+from the page — every section leads with the shared pill.
+
 ## Typography parse bug — repo-wide
 
 Every `clamp()` outside `brand/tokens.css` was written `1.55rem+2.9vw`, with no
@@ -113,7 +122,7 @@ blue is 4.35:1 as text on the page ground — this is why the About lead is navy
 rather than the brighter blue the mockup shows · **P7** trust claims still told
 twice · **P9** hero image is third-party with no `srcset`.
 
-The `section-label` component (`01 —— name`) now runs only in Contact. Later stages should
+The `section-label` component is fully retired — no section still uses it. Later stages should
 carry the pill across, or the first four sections should go back.
 
 **Item counts.** Two sections carry more content than their briefs list, and in

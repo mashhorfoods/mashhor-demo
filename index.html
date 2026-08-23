@@ -1402,6 +1402,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 .contact__meta{display:flex;flex-direction:column;gap:var(--sp-20);
   border-block-start:1px solid var(--border);padding-block-start:var(--sp-24)}
 .contact-info{display:flex;align-items:flex-start;gap:var(--sp-16)}
+.contact-info + .contact-info{border-block-start:1px solid var(--border);padding-block-start:var(--sp-20)}
 .contact-info__icon{width:44px;height:44px;flex:0 0 auto;border-radius:var(--radius-circle);display:grid;
   place-items:center;background:var(--aun-mist);border:1px solid var(--aun-sky);color:var(--color-primary)}
 .contact-info__icon svg{width:20px;height:20px;stroke-width:1.6}
@@ -1416,9 +1417,9 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 .contact__aside{position:relative;display:flex;flex-direction:column;justify-content:center;gap:var(--sp-24);
   padding:clamp(1rem,3vw,2rem) 0}
 .contact__closing{font-family:var(--font-heading);font-weight:var(--fw-medium);font-size:var(--fs-h3);
-  line-height:var(--lh-snug);color:var(--color-secondary);max-width:24ch}
+  line-height:var(--lh-snug);color:var(--color-secondary);max-width:22rem}
 .contact__aside-tag{font-family:var(--font-heading);font-weight:var(--fw-semibold);color:var(--color-primary)}
-.contact__aside-route{width:min(100%,260px);height:auto;color:var(--aun-sky)}
+.contact__aside-route{width:min(100%,240px);height:auto;color:var(--aun-border-strong)}
 @media(max-width:899px){.contact__aside-route{display:none}}
 
 /* ==========================================================================
@@ -1493,7 +1494,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 }
 
 /* -- LEVEL 01 · eyebrow ---------------------------------------------------- */
-.hero__eyebrow,.about__label,.why__label,.services__label,.hww__label,.vm__label,.values__label{display:inline-flex;align-items:center;
+.hero__eyebrow,.about__label,.why__label,.services__label,.hww__label,.vm__label,.values__label,.contact__label{display:inline-flex;align-items:center;
   padding:var(--sp-8) var(--sp-16);border-radius:var(--radius-pill);
   background:var(--aun-mist);border:1px solid var(--aun-sky);
   font-family:var(--font-heading);font-weight:var(--fw-semibold);font-size:var(--fs-small);
@@ -2237,7 +2238,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
         <div class="container">
 
           <div class="contact__head">
-            <div class="section-label" data-reveal><span class="section-label__num">07</span><span class="section-label__rule"></span><span class="section-label__name">تواصل معنا</span></div>
+            <p class="contact__label" data-reveal>تواصل معنا</p>
             <h2 id="contact-h" class="contact__title" data-reveal>نُعين ونُعاون</h2>
             <p class="contact__lead" data-reveal>نحن هنا لخدمتك. تواصل مع فريق عون الدرب لترتيب رحلة نقل متخصصة تناسب احتياجاتك، أو للاستفسار عن خدماتنا والمساعدة المتاحة.</p>
           </div>
@@ -2293,10 +2294,9 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
             <aside class="contact__aside" data-reveal>
               <span class="contact__aside-route" aria-hidden="true">
                 <svg viewBox="0 0 260 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M20 180 C 90 150 70 70 150 60 C 210 52 230 40 250 20" stroke="currentColor" stroke-width="34" stroke-linecap="round"/>
-                  <path d="M28 178 C 96 150 78 74 150 64" stroke="#2C4C82" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 13" opacity=".5"/>
-                  <circle cx="20" cy="180" r="7" fill="#4975BA" stroke="#fff" stroke-width="3"/>
-                  <circle cx="250" cy="20" r="7" fill="#4975BA" stroke="#fff" stroke-width="3"/>
+                  <path d="M20 180 C 90 150 70 70 150 60 C 210 52 230 40 250 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 12"/>
+                  <circle cx="20" cy="180" r="6" fill="#4975BA" stroke="#ffffff" stroke-width="3"/>
+                  <circle cx="250" cy="20" r="6" fill="#4975BA" stroke="#ffffff" stroke-width="3"/>
                 </svg>
               </span>
               <p class="contact__closing">في عون الدرب نرافق المستفيد في كل خطوة على الطريق، بأمانٍ ورعايةٍ واحترام. <span class="contact__aside-tag">نُعين ونُعاون.</span></p>
