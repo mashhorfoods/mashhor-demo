@@ -759,6 +759,23 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 @media(min-width:1024px){
   .hero__inner{grid-template-columns:minmax(0,0.95fr) minmax(0,1.05fr);gap:clamp(2.5rem,5vw,5rem)}
 }
+/* Small desktop: the content column takes priority. Below ~1280 the three
+   audience cues and the two buttons need the width more than the photo does. */
+@media(min-width:1024px) and (max-width:1279px){
+  .hero__inner{grid-template-columns:minmax(0,1.15fr) minmax(0,0.85fr);gap:clamp(2rem,3.5vw,3rem)}
+  .hero__aud{gap:var(--sp-8)}
+  .hero__aud-card{padding-inline:var(--sp-8)}
+}
+/* Mid desktop: even split — the content column is wide enough for the three
+   cues on two lines, and the photograph is no longer squeezed. */
+@media(min-width:1280px) and (max-width:1439px){
+  .hero__inner{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+}
+/* Wide desktop: the content is capped at 34rem anyway, so the surplus goes to
+   the photograph rather than sitting as dead track. */
+@media(min-width:1440px){
+  .hero__inner{grid-template-columns:minmax(0,0.85fr) minmax(0,1.15fr)}
+}
 
 /* content column */
 .hero__content{position:relative;max-width:34rem}
@@ -1216,8 +1233,13 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 .site-header__cta svg{width:18px;height:18px;flex:0 0 auto}
 
 /* Content starts at the top of the row: centring it against a tall media
-   column was what pushed the eyebrow down and away from the header. */
-@media(min-width:1024px){.hero__inner{align-items:start}}
+   column was what pushed the eyebrow down and away from the header. The
+   photograph instead sits at the foot of the row, so the subject grounds
+   level with the end of the content rather than floating above it. */
+@media(min-width:1024px){
+  .hero__inner{align-items:start}
+  .hero__media{align-self:end}
+}
 
 /* -- LEVEL 01 · eyebrow ---------------------------------------------------- */
 .hero__eyebrow{display:inline-flex;align-items:center;
@@ -1471,8 +1493,8 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
         </div>
 
         <!-- trust strip -->
-        <div class="hero__trustbar">
-          <div class="container container--wide hero__trustbar-inner">
+        <div class="hero__trustbar container container--wide">
+          <div class="hero__trustbar-inner">
             <div class="hero__trust">
               <span class="hero__trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="2.4"/><circle cx="16" cy="8.5" r="2"/><path d="M4.5 19c0-2.7 2-4.8 4.5-4.8"/><path d="M12.5 19c0-2.4 1.6-4.3 3.5-4.3s3.5 1.9 3.5 4.3"/></svg></span>
               <div><b>طاقم مدرب ومحترف</b><span>رعاية إنسانية وخدمة باحترافية</span></div>
