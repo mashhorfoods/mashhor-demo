@@ -1273,36 +1273,64 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 }
 
 /* ==========================================================================
-   STAGE 10 · CORE VALUES / قيمنا
-   Number-led editorial layout (large restrained numerals, hairline "lanes"
-   with route points). Tokens + existing patterns only; open items, not
-   boxed cards — the section breathes.
+   STAGE 09 · CORE VALUES / قيمنا
+   Number-led editorial list, not a card wall (§03/§28). The anchor holds the
+   context; the values run as one column with hairline dividers, so both a
+   fast scan of the six names and a full read work with no interaction (§22).
+   Structure is grid, numerals, dividers and whitespace — nothing else.
    ========================================================================== */
-.values__head{max-width:var(--container-narrow)}
+.values__grid{display:grid;gap:clamp(2rem,4vw,3rem)}
+/* §09 — anchor on columns 1-4, values on 5-12. In RTL column 1 is the reading
+   edge, so the anchor leads and the list follows. */
+@media(min-width:1024px){
+  .values__grid{grid-template-columns:minmax(0,4fr) minmax(0,8fr);
+    column-gap:clamp(2.5rem,5vw,5rem);align-items:start}
+  /* The anchor travels with the list instead of leaving ~700px of void beside
+     it. It is ~200px tall, so it always fits the viewport whole — it holds
+     context without trapping the reader, which is what §16 rules out. */
+  .values__head{position:sticky;top:calc(var(--header-h) + var(--sp-32))}
+}
 .values__title{font-size:var(--fs-h2);line-height:var(--lh-tight);letter-spacing:var(--track-tight);
-  color:var(--color-secondary);margin-block-start:var(--sp-16)}
+  color:var(--color-secondary);margin-block-start:var(--sp-16);text-wrap:balance}
+.values__rule{display:block;position:relative;width:76px;height:2px;margin-block-start:var(--sp-20);
+  background:repeating-linear-gradient(to right,var(--aun-border-strong) 0 4px,transparent 4px 11px)}
+.values__rule::after{content:"";position:absolute;inset-inline-end:-4px;inset-block-start:-4px;
+  width:10px;height:10px;border-radius:var(--radius-circle);background:var(--color-primary);
+  border:2px solid var(--surface)}
 
-.values__grid{display:grid;gap:clamp(2rem,4vw,2.75rem);margin-block-start:clamp(2.5rem,5vw,3.75rem)}
-@media(min-width:640px){.values__grid{grid-template-columns:repeat(2,1fr);
-  column-gap:clamp(2rem,4vw,3.5rem)}}
-@media(min-width:1024px){.values__grid{grid-template-columns:repeat(3,1fr)}}
-
-.value{position:relative;display:flex;flex-direction:column;gap:var(--sp-8);
-  padding-block-start:var(--sp-24);border-block-start:1px solid var(--border);
+/* -- the list (§04/§10) ----------------------------------------------------- */
+.values__list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column}
+.values__list li{margin-block-start:0}   /* the global li+li prose rule */
+.value{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:clamp(1rem,2.5vw,1.75rem);
+  align-items:start;padding-block:clamp(1.25rem,2.5vw,1.75rem);
   transition:border-color var(--dur-normal) var(--ease-smooth)}
-.value::before{content:"";position:absolute;inset-block-start:-4px;inset-inline-start:0;
-  width:8px;height:8px;border-radius:var(--radius-circle);background:var(--aun-sky);
-  transition:background-color var(--dur-normal) var(--ease-smooth),transform var(--dur-normal) var(--ease-smooth)}
+.value + .value{border-block-start:1px solid var(--border)}
+.value:first-child{padding-block-start:0}
+.value:last-child{padding-block-end:0}
+
+/* §06/§19 — the numeral orients, the name is remembered: it stays a step below
+   the value name, never a decorative slab above a small title. */
 .value__num{font-family:var(--font-heading);font-weight:var(--fw-semibold);font-variant-numeric:tabular-nums;
-  font-size:clamp(2.1rem,4.5vw,2.9rem);line-height:1;letter-spacing:-.02em;
-  color:var(--aun-blue-bright);opacity:.5;transition:opacity var(--dur-normal) var(--ease-smooth),
-  color var(--dur-normal) var(--ease-smooth)}
-.value__name{font-size:var(--fs-h3);color:var(--color-secondary);margin-block-start:var(--sp-4)}
-.value__desc{font-family:var(--font-body);color:var(--text-secondary);max-width:44ch}
+  font-size:var(--fs-body);line-height:1;letter-spacing:.04em;color:var(--text-secondary);
+  min-width:44px;padding:var(--sp-8) var(--sp-8);border-radius:var(--radius-sm);
+  background:var(--bg-tinted);text-align:center;
+  transition:color var(--dur-normal) var(--ease-smooth),background-color var(--dur-normal) var(--ease-smooth)}
+.value__body{min-width:0}
+.value__name{font-size:var(--fs-h4);line-height:1.35;color:var(--color-secondary);
+  transition:color var(--dur-normal) var(--ease-smooth)}
+.value__desc{color:var(--text-secondary);margin-block-start:var(--sp-8);max-width:29rem}
+
+/* §15/§16 — a reading state, not a control: the numeral firms and the divider
+   darkens. Nothing lifts, scales, glows or shifts the layout. */
 @media(hover:hover){
-  .value:hover{border-block-start-color:var(--color-primary)}
-  .value:hover::before{background:var(--color-primary);transform:scale(1.15)}
-  .value:hover .value__num{opacity:1;color:var(--color-primary)}
+  .value:hover .value__num{color:var(--color-primary);background:var(--aun-primary-subtle)}
+}
+.value.is-current .value__num{color:var(--color-primary);background:var(--aun-primary-subtle)}
+.value.is-current .value__name{color:var(--color-primary)}
+
+@media(max-width:479px){
+  .value{column-gap:var(--sp-12)}
+  .value__num{min-width:38px;padding-inline:var(--sp-4);font-size:var(--fs-small)}
 }
 
 /* ==========================================================================
@@ -1465,7 +1493,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 }
 
 /* -- LEVEL 01 · eyebrow ---------------------------------------------------- */
-.hero__eyebrow,.about__label,.why__label,.services__label,.hww__label,.vm__label{display:inline-flex;align-items:center;
+.hero__eyebrow,.about__label,.why__label,.services__label,.hww__label,.vm__label,.values__label{display:inline-flex;align-items:center;
   padding:var(--sp-8) var(--sp-16);border-radius:var(--radius-pill);
   background:var(--aun-mist);border:1px solid var(--aun-sky);
   font-family:var(--font-heading);font-weight:var(--fw-semibold);font-size:var(--fs-small);
@@ -2114,52 +2142,58 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
            Number-led editorial layout.
            ============================================================== -->
       <section class="section section--surface values" id="values" data-section data-nav-parent="#about" aria-labelledby="values-h">
-        <div class="container">
+        <div class="container values__grid">
 
           <div class="values__head">
-            <div class="section-label" data-reveal><span class="section-label__num">06</span><span class="section-label__rule"></span><span class="section-label__name">قيمنا</span></div>
+            <p class="values__label" data-reveal>قيمنا</p>
             <h2 id="values-h" class="values__title" data-reveal>القيم التي تقود تعاملنا وخدماتنا</h2>
+            <span class="values__rule" aria-hidden="true" data-reveal></span>
           </div>
 
-          <div class="values__grid">
-
-            <article class="value" data-reveal>
+          <ol class="values__list">
+            <li class="value" data-reveal>
               <span class="value__num" aria-hidden="true">01</span>
-              <h3 class="value__name">الاحترام</h3>
-              <p class="value__desc">نضع احترام المستفيد واحتياجاته وخصوصيته في مقدمة تعاملاتنا.</p>
-            </article>
-
-            <article class="value" data-reveal>
+              <div class="value__body">
+                <h3 class="value__name">الاحترام</h3>
+                <p class="value__desc">نضع احترام المستفيد واحتياجاته وخصوصيته في مقدمة تعاملاتنا.</p>
+              </div>
+            </li>
+            <li class="value" data-reveal>
               <span class="value__num" aria-hidden="true">02</span>
-              <h3 class="value__name">النزاهة</h3>
-              <p class="value__desc">نلتزم بالوضوح والمصداقية والمسؤولية في تقديم خدماتنا.</p>
-            </article>
-
-            <article class="value" data-reveal>
+              <div class="value__body">
+                <h3 class="value__name">النزاهة</h3>
+                <p class="value__desc">نلتزم بالوضوح والمصداقية والمسؤولية في تقديم خدماتنا.</p>
+              </div>
+            </li>
+            <li class="value" data-reveal>
               <span class="value__num" aria-hidden="true">03</span>
-              <h3 class="value__name">الإنصاف</h3>
-              <p class="value__desc">نحرص على تقديم خدمة تراعي احتياجات كل مستفيد وتتعامل معه بعدالة واحترام.</p>
-            </article>
-
-            <article class="value" data-reveal>
+              <div class="value__body">
+                <h3 class="value__name">الإنصاف</h3>
+                <p class="value__desc">نحرص على تقديم خدمة تراعي احتياجات كل مستفيد وتتعامل معه بعدالة واحترام.</p>
+              </div>
+            </li>
+            <li class="value" data-reveal>
               <span class="value__num" aria-hidden="true">04</span>
-              <h3 class="value__name">الابتكار</h3>
-              <p class="value__desc">نسعى إلى تطوير خدماتنا والاستفادة من التقنيات والتجهيزات الحديثة في النقل المتخصص.</p>
-            </article>
-
-            <article class="value" data-reveal>
+              <div class="value__body">
+                <h3 class="value__name">الابتكار</h3>
+                <p class="value__desc">نسعى إلى تطوير خدماتنا والاستفادة من التقنيات والتجهيزات الحديثة في النقل المتخصص.</p>
+              </div>
+            </li>
+            <li class="value" data-reveal>
               <span class="value__num" aria-hidden="true">05</span>
-              <h3 class="value__name">العمل الجماعي</h3>
-              <p class="value__desc">نعمل بروح الفريق لضمان تقديم خدمة متكاملة تلبي احتياجات المستفيدين.</p>
-            </article>
-
-            <article class="value" data-reveal>
+              <div class="value__body">
+                <h3 class="value__name">العمل الجماعي</h3>
+                <p class="value__desc">نعمل بروح الفريق لضمان تقديم خدمة متكاملة تلبي احتياجات المستفيدين.</p>
+              </div>
+            </li>
+            <li class="value" data-reveal>
               <span class="value__num" aria-hidden="true">06</span>
-              <h3 class="value__name">التميّز</h3>
-              <p class="value__desc">نلتزم بمستوى عالٍ من الجودة والاحترافية في كل رحلة وكل خدمة نقدمها.</p>
-            </article>
-
-          </div>
+              <div class="value__body">
+                <h3 class="value__name">التميّز</h3>
+                <p class="value__desc">نلتزم بمستوى عالٍ من الجودة والاحترافية في كل رحلة وكل خدمة نقدمها.</p>
+              </div>
+            </li>
+          </ol>
         </div>
       </section>
 
@@ -2445,7 +2479,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
        Purely decorative, so it is skipped entirely under reduced motion and
        when IntersectionObserver is unavailable. */
     (function () {
-      var items = doc.querySelectorAll("#why-us .why__item, #how-we-work .hww__stage");
+      var items = doc.querySelectorAll("#why-us .why__item, #how-we-work .hww__stage, #values .value");
       if (!items.length || reduce || !("IntersectionObserver" in window)) return;
       var obs = new IntersectionObserver(function (entries) {
         entries.forEach(function (entry) {

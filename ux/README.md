@@ -75,6 +75,11 @@ panels centre their icon, number, kicker and statement, and a single dashed run
 joins direction to purpose. Vision leads by border and text weight only — same
 surface, same shape, same size. Side by side above 1200, stacked below.
 
+**Stage 09 — values.** A number-led editorial list, not a card grid: the
+anchor holds the context on columns 1-4 and the six values run as one column
+on 5-12, separated by hairlines. The numeral orients and stays a step below the
+value name. No icons — the brief is explicit that the section is number-led.
+
 ## Typography parse bug — repo-wide
 
 Every `clamp()` outside `brand/tokens.css` was written `1.55rem+2.9vw`, with no
@@ -108,10 +113,16 @@ blue is 4.35:1 as text on the page ground — this is why the About lead is navy
 rather than the brighter blue the mockup shows · **P7** trust claims still told
 twice · **P9** hero image is third-party with no `srcset`.
 
-The `section-label` component (`01 —— name`) still runs in Values and Contact. Later stages should
+The `section-label` component (`01 —— name`) now runs only in Contact. Later stages should
 carry the pill across, or the first four sections should go back.
 
-**Services count.** The source carries SEVEN services; the Stage 06 brief and
-its mockup both list six, omitting `07 التنقل للمناسبات الاجتماعية`. All seven
-are kept — removing approved content is not a design decision — so the 3-column
-grid runs 3/3/1. Say the word and 07 comes out.
+**Item counts.** Two sections carry more content than their briefs list, and in
+both cases everything is kept — removing approved content is not a design
+decision to make unasked:
+
+- Services: SEVEN in the source, six in the Stage 06 brief and mockup. Missing
+  from both: `07 التنقل للمناسبات الاجتماعية`. The 3-column grid runs 3/3/1.
+- Values: SIX in the source, five in the Stage 09 brief and mockup. Missing
+  from both: `06 التميّز`.
+
+Say the word and either comes out.
