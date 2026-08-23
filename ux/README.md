@@ -70,6 +70,11 @@ route behind them. The number rides each node's edge so a stage reads as one
 marker. Horizontal at 1024+, vertical below — earlier than the old 768 switch,
 so three columns never get cramped. No CTA in the section (§11/§19).
 
+**Stage 08 — vision & mission.** One composition rather than two cards: the
+panels centre their icon, number, kicker and statement, and a single dashed run
+joins direction to purpose. Vision leads by border and text weight only — same
+surface, same shape, same size. Side by side above 1200, stacked below.
+
 ## Typography parse bug — repo-wide
 
 Every `clamp()` outside `brand/tokens.css` was written `1.55rem+2.9vw`, with no
@@ -103,8 +108,7 @@ blue is 4.35:1 as text on the page ground — this is why the About lead is navy
 rather than the brighter blue the mockup shows · **P7** trust claims still told
 twice · **P9** hero image is third-party with no `srcset`.
 
-The `section-label` component (`01 —— name`) still runs in the three sections
-after How We Work — Vision, Values and Contact. Later stages should
+The `section-label` component (`01 —— name`) still runs in Values and Contact. Later stages should
 carry the pill across, or the first four sections should go back.
 
 **Services count.** The source carries SEVEN services; the Stage 06 brief and

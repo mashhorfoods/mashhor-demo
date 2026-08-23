@@ -1208,40 +1208,66 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 }
 
 /* ==========================================================================
-   STAGE 09 · VISION & MISSION / رؤيتنا ورسالتنا
-   One connected moment: Vision (direction, primary) linked to Mission
-   (purpose, secondary) by the brand route. Tokens + existing patterns only.
+   STAGE 08 · VISION & MISSION / رؤيتنا ورسالتنا
+   One composition, not two cards: direction on one side, purpose on the
+   other, joined by the route. Same language as Stage 07, different meaning —
+   a relationship, not a sequence (§10/§25).
    ========================================================================== */
-.vm__head{max-width:var(--container-narrow)}
+.vm__head{max-width:var(--container-narrow);margin-inline:auto;text-align:center}
 .vm__title{font-size:var(--fs-h2);line-height:var(--lh-tight);letter-spacing:var(--track-tight);
-  color:var(--color-secondary);margin-block-start:var(--sp-16)}
+  color:var(--color-secondary);margin-block-start:var(--sp-16);text-wrap:balance}
+.vm__rule{display:block;position:relative;width:76px;height:2px;margin:var(--sp-20) auto 0;
+  background:repeating-linear-gradient(to right,var(--aun-border-strong) 0 4px,transparent 4px 11px)}
+.vm__rule::after{content:"";position:absolute;inset-inline-end:-4px;inset-block-start:-4px;
+  width:10px;height:10px;border-radius:var(--radius-circle);background:var(--color-primary);
+  border:2px solid var(--bg-tinted)}
 
 .vm__grid{display:grid;gap:clamp(1.25rem,3vw,1.75rem);margin-block-start:clamp(2.5rem,5vw,3.5rem)}
-@media(min-width:1024px){
-  .vm__grid{grid-template-columns:minmax(0,1.05fr) auto minmax(0,0.95fr);align-items:center;
-    gap:clamp(1.5rem,3vw,2.5rem)}
+@media(min-width:1200px){
+  .vm__grid{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:stretch;
+    gap:clamp(1rem,2vw,1.75rem)}
+  .vm__panel{padding:clamp(1.5rem,2.4vw,2rem)}
 }
 
+/* -- the panels (§07) ------------------------------------------------------- */
 .vm__panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
-  padding:clamp(1.6rem,3vw,2.5rem);display:flex;flex-direction:column;gap:var(--sp-20);box-shadow:var(--shadow-sm)}
+  padding:clamp(1.75rem,3.5vw,2.75rem);display:flex;flex-direction:column;align-items:center;
+  text-align:center;gap:var(--sp-16);box-shadow:var(--shadow-sm);
+  transition:border-color var(--dur-normal) var(--ease-smooth)}
+/* §21 — informational panels: the border firms slightly, nothing lifts or scales */
+@media(hover:hover){.vm__panel:hover{border-color:var(--aun-sky)}}
+/* §05 — Vision leads, by border and text weight only. Same surface, same
+   shape, same size: the difference is emphasis, never a different card. */
 .vm__panel--vision{border-block-start:3px solid var(--color-primary)}
-.vm__head-row{display:flex;align-items:center;gap:var(--sp-16)}
-.vm__node{width:52px;height:52px;flex:0 0 auto;border-radius:var(--radius-circle);display:grid;place-items:center;
-  background:var(--aun-mist);border:1px solid var(--aun-sky);color:var(--color-primary)}
-.vm__node svg{width:26px;height:26px;stroke-width:1.6}
-.vm__num{display:block;font-family:var(--font-heading);font-weight:var(--fw-semibold);font-variant-numeric:tabular-nums;
-  font-size:var(--fs-small);color:var(--color-primary);letter-spacing:.08em}
-.vm__kicker{font-size:var(--fs-h3);color:var(--color-secondary)}
+@media(hover:hover){.vm__panel--vision:hover{border-color:var(--aun-sky);border-block-start-color:var(--color-primary)}}
+
+.vm__node{width:64px;height:64px;flex:0 0 auto;border-radius:var(--radius-circle);
+  display:grid;place-items:center;background:var(--aun-mist);border:1px solid var(--aun-sky);
+  color:var(--color-primary)}
+.vm__node svg{width:30px;height:30px;stroke-width:1.6}
+.vm__num{font-family:var(--font-heading);font-weight:var(--fw-semibold);font-variant-numeric:tabular-nums;
+  font-size:var(--fs-caption);line-height:1;color:var(--text-secondary);letter-spacing:.1em}
+.vm__panel--vision .vm__num{color:var(--color-primary)}
+.vm__kicker{position:relative;font-size:var(--fs-h3);line-height:1.3;color:var(--color-secondary);
+  padding-block-end:var(--sp-16)}
+.vm__kicker::after{content:"";position:absolute;inset-block-end:0;inset-inline-start:50%;
+  transform:translateX(50%);width:40px;height:2px;border-radius:var(--radius-pill);
+  background:var(--aun-sky)}
+.vm__panel--vision .vm__kicker::after{background:var(--color-primary)}
+/* the statements carry the reading emphasis, not the labels (§17) */
 .vm__text{font-family:var(--font-body);font-size:var(--fs-body-lg);line-height:var(--lh-relaxed);
-  color:var(--text-primary);max-width:54ch}
+  color:var(--text-primary);max-width:29rem}
 .vm__panel--mission .vm__text{color:var(--text-secondary)}
 
-/* route connector — direction → purpose */
+/* -- the connector (§10/§11) ------------------------------------------------ */
+/* A relationship, not a timeline: one quiet dashed run into a single arrow. */
 .vm__link{display:flex;align-items:center;justify-content:center;color:var(--aun-border-strong)}
-.vm__link--v{display:flex}
 .vm__link--h{display:none}
-.vm__link svg{display:block}
-@media(min-width:1024px){
+.vm__link--v{display:grid;place-items:center;width:44px;height:44px;border-radius:var(--radius-circle);
+  background:var(--surface);border:1px solid var(--border);color:var(--color-primary)}
+.vm__link--v svg{width:20px;height:20px}
+.vm__link--h svg{display:block;width:56px;height:24px}
+@media(min-width:1200px){
   .vm__link--v{display:none}
   .vm__link--h{display:flex}
 }
@@ -1439,7 +1465,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 }
 
 /* -- LEVEL 01 · eyebrow ---------------------------------------------------- */
-.hero__eyebrow,.about__label,.why__label,.services__label,.hww__label{display:inline-flex;align-items:center;
+.hero__eyebrow,.about__label,.why__label,.services__label,.hww__label,.vm__label{display:inline-flex;align-items:center;
   padding:var(--sp-8) var(--sp-16);border-radius:var(--radius-pill);
   background:var(--aun-mist);border:1px solid var(--aun-sky);
   font-family:var(--font-heading);font-weight:var(--fw-semibold);font-size:var(--fs-small);
@@ -2039,47 +2065,43 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
         <div class="container">
 
           <div class="vm__head">
-            <div class="section-label" data-reveal><span class="section-label__num">05</span><span class="section-label__rule"></span><span class="section-label__name">رؤيتنا ورسالتنا</span></div>
+            <p class="vm__label" data-reveal>رؤيتنا ورسالتنا</p>
             <h2 id="vision-h" class="vm__title" data-reveal>رؤيتنا ورسالتنا</h2>
+            <span class="vm__rule" aria-hidden="true" data-reveal></span>
           </div>
 
           <div class="vm__grid">
 
             <!-- Vision — future direction (primary) -->
             <article class="vm__panel vm__panel--vision" data-reveal>
-              <div class="vm__head-row">
-                <span class="vm__node" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2.4 4.6L8.5 15.5l2.4-4.6z"/></svg>
-                </span>
-                <div>
-                  <span class="vm__num">01</span>
-                  <h3 class="vm__kicker">الرؤية</h3>
-                </div>
-              </div>
+              <span class="vm__node" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2.4 4.6L8.5 15.5l2.4-4.6z"/></svg></span>
+              <span class="vm__num" aria-hidden="true">01</span>
+              <h3 class="vm__kicker">الرؤية</h3>
               <p class="vm__text">أن نكون الخيار الأول في المملكة في مجال النقل المتخصص، من خلال توفير حلول نقل تجمع بين التقنية والرعاية، وتُحسّن جودة حياة من نخدمهم.</p>
             </article>
 
             <!-- route connector: direction -> purpose -->
             <div class="vm__link" aria-hidden="true">
               <span class="vm__link--h">
-                <svg viewBox="0 0 84 24" width="84" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M82 12H14" stroke-dasharray="2 7"/><circle cx="48" cy="12" r="3.2" fill="#fff"/><path d="M20 6l-7 6 7 6"/></svg>
+                <svg viewBox="0 0 56 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- points toward the reading end (left in RTL): الرؤية → الرسالة.
+                       SVG geometry is not mirrored by dir=rtl, so it is drawn that way. -->
+                  <path d="M54 12H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 9"/>
+                  <path d="M12 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
               </span>
               <span class="vm__link--v">
-                <svg viewBox="0 0 24 64" width="24" height="64" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v50" stroke-dasharray="2 7"/><circle cx="12" cy="30" r="3.2" fill="#fff"/><path d="M6 46l6 8 6-8"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 5v14M6 13l6 6 6-6"/>
+                </svg>
               </span>
             </div>
 
             <!-- Mission — present purpose (secondary) -->
             <article class="vm__panel vm__panel--mission" data-reveal>
-              <div class="vm__head-row">
-                <span class="vm__node" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-6-4.4-8-8.1C2.6 9 4.1 5.6 7.2 5.6c1.8 0 3 1.1 3.8 2.3.8-1.2 2-2.3 3.8-2.3 3.1 0 4.6 3.4 2.2 6.3C18 15.6 12 20 12 20Z"/></svg>
-                </span>
-                <div>
-                  <span class="vm__num">02</span>
-                  <h3 class="vm__kicker">الرسالة</h3>
-                </div>
-              </div>
+              <span class="vm__node" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-6-4.4-8-8.1C2.6 9 4.1 5.6 7.2 5.6c1.8 0 3 1.1 3.8 2.3.8-1.2 2-2.3 3.8-2.3 3.1 0 4.6 3.4 2.2 6.3C18 15.6 12 20 12 20Z"/></svg></span>
+              <span class="vm__num" aria-hidden="true">02</span>
+              <h3 class="vm__kicker">الرسالة</h3>
               <p class="vm__text">نقل المستفيدين الذين يحتاجون إلى رعاية خاصة بوسائل آمنة ومجهزة وكوادر مدربة، في بيئة تحترم الإنسانية وتراعي القيم المجتمعية.</p>
             </article>
 
