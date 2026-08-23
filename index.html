@@ -907,13 +907,12 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
    the corner was duplicate decoration (§08 refine, §20 don't over-decorate).
    The route language stays — in the illustration, in the rule under the
    heading, and in the dashed line joining the three paragraphs. */
-.about__route{display:none}
+/* (the route element left with the illustration swap) */
 
 /* -- responsive (§12/§13/§14) ---------------------------------------------- */
 @media(max-width:1023px){
   .about__media{width:100%;max-width:34rem;margin-inline:auto}
   .about__media-frame{aspect-ratio:16/10}
-  .about__route{display:none}
   .about__facts{margin-block-start:var(--sp-8)}
 }
 @media(max-width:767px){
@@ -1048,10 +1047,10 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 }
 
 /* ==========================================================================
-   STAGE 07 · SERVICES / خدماتنا
-   Editorial services experience. Tokens + existing patterns only.
-   Grid: service 01 is a wider feature (primary rhythm); a navy CTA tile
-   completes the layout and bridges toward Contact. No new card system.
+   STAGE 06 · SERVICES / خدماتنا
+   A catalogue, not a card wall. Every tile carries the same anatomy so the
+   seven services can be compared at a glance (§07), and the bridge to Contact
+   sits outside the grid so it never reads as another service (§21).
    ========================================================================== */
 .services__intro{max-width:var(--container-narrow);margin-inline-start:0}
 .services__title{font-size:var(--fs-h2);line-height:var(--lh-tight);letter-spacing:var(--track-tight);
@@ -1059,49 +1058,60 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 .services__title span{color:var(--color-primary);display:block}
 .services__intro-lead{color:var(--text-secondary);margin-block-start:var(--sp-20);max-width:var(--measure)}
 
-.services__grid{display:grid;gap:clamp(1rem,2vw,1.25rem);margin-block-start:clamp(2.5rem,5vw,3.5rem);
-  grid-template-columns:1fr}
-@media(min-width:600px){.services__grid{grid-template-columns:repeat(2,1fr)}
-  .service--feature,.service-cta{grid-column:span 2}}
-@media(min-width:1024px){.services__grid{grid-template-columns:repeat(3,1fr)}
-  .service--feature{grid-column:span 2}
-  .service-cta{grid-column:auto}}
+.services__grid{display:grid;gap:clamp(1rem,2vw,1.5rem);
+  margin-block-start:clamp(2.5rem,5vw,3.5rem);grid-template-columns:1fr}
+@media(min-width:600px){.services__grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1024px){.services__grid{grid-template-columns:repeat(3,1fr)}}
 
-/* service tile — white surface on the soft ground; hairline, not heavy */
+/* -- the tile (§08) --------------------------------------------------------- */
+/* White surface, hairline border, no shadow and no gradient. Informational,
+   so nothing here implies a destination (§13). */
 .service{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);
   padding:clamp(1.35rem,2.6vw,1.85rem);display:flex;flex-direction:column;gap:var(--sp-12);
-  transition:border-color var(--dur-normal) var(--ease-smooth),box-shadow var(--dur-fast) var(--ease-standard),
-  transform var(--dur-normal) var(--ease-smooth)}
-/* service tiles are informational (no destination) — a restrained border
-   cue on hover, without the lift/elevation/icon-invert that would imply a
-   clickable control (Stage 17 motion audit) */
+  transition:border-color var(--dur-normal) var(--ease-smooth)}
 @media(hover:hover){.service:hover{border-color:var(--aun-sky)}}
-.service__icon{width:52px;height:52px;flex:0 0 auto;border-radius:var(--radius-circle);display:grid;place-items:center;
-  background:var(--aun-mist);border:1px solid var(--aun-sky);color:var(--color-primary);
-  transition:var(--transition-control)}
-.service__icon svg{width:26px;height:26px;stroke-width:1.6}
-.service__body{display:flex;flex-direction:column;gap:var(--sp-8);min-width:0}
+
+/* icon and number share the head row: recognition on the reading edge,
+   orientation on the far edge, and the title always starts at the same height */
+.service__head{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-12)}
+.service__icon{display:grid;place-items:center;color:var(--color-primary)}
+.service__icon svg{width:34px;height:34px;stroke-width:1.5}
 .service__num{font-family:var(--font-heading);font-weight:var(--fw-semibold);font-variant-numeric:tabular-nums;
-  font-size:var(--fs-small);color:var(--color-secondary);letter-spacing:.06em}
-.service__title{font-size:var(--fs-h4);color:var(--text-primary)}
-.service__desc{font-family:var(--font-body);color:var(--text-secondary);max-width:52ch;margin-block-start:var(--sp-4)}
+  font-size:var(--fs-caption);line-height:1;color:var(--text-secondary);letter-spacing:.08em;
+  padding:var(--sp-4) var(--sp-8);border-radius:var(--radius-sm);background:var(--bg-tinted)}
+.service__title{font-size:var(--fs-h4);line-height:1.4;color:var(--color-secondary);text-wrap:balance}
+.service__desc{font-family:var(--font-body);color:var(--text-secondary);max-width:46ch}
 
-/* feature (01) — wider, a touch more presence */
-.service--feature{border-color:var(--aun-sky)}
-@media(min-width:1024px){
-  .service--feature{flex-direction:row;align-items:flex-start;gap:clamp(1.5rem,3vw,2.5rem);padding:clamp(1.75rem,3vw,2.5rem)}
-  .service--feature .service__icon{width:64px;height:64px}
-  .service--feature .service__icon svg{width:32px;height:32px}
-  .service--feature .service__title{font-size:var(--fs-h3)}
-  .service--feature .service__desc{font-size:var(--fs-body-lg)}
+/* §04/§06 — 01 is the featured entry point, marked by surface only. It keeps
+   the grid's rhythm: a larger tile would read as "the best service" rather
+   than "start here", and would break the scan the catalogue depends on. */
+.service--feature{border-color:var(--aun-sky);background:var(--aun-mist)}
+.service--feature .service__num{background:var(--surface)}
+
+/* -- the bridge to Contact (§20/§21) ---------------------------------------- */
+.services__cta{margin-block-start:clamp(1.5rem,3vw,2rem);
+  background:var(--surface-inverse);color:var(--text-on-inverse);border-radius:var(--radius-md);
+  padding:clamp(1.5rem,3vw,2rem) clamp(1.5rem,3vw,2.5rem);
+  display:flex;align-items:center;gap:clamp(1rem,2.5vw,1.75rem);flex-wrap:wrap}
+.services__cta-icon{width:52px;height:52px;flex:0 0 auto;border-radius:var(--radius-circle);
+  display:grid;place-items:center;background:rgba(255,255,255,.10);color:#fff;
+  border-inline-end:1px solid rgba(255,255,255,.18)}
+.services__cta-icon svg{width:26px;height:26px;stroke-width:1.6}
+.services__cta-q{flex:1 1 16rem;font-family:var(--font-heading);font-weight:var(--fw-semibold);
+  font-size:var(--fs-h4);line-height:1.4;color:#fff}
+.services__cta .btn{flex:0 0 auto;gap:var(--sp-8)}
+.services__cta .btn svg{width:20px;height:20px;flex:0 0 auto}
+
+/* -- responsive (§15/§16/§17) ----------------------------------------------- */
+@media(max-width:767px){
+  /* one service at a time, full content width — never two narrow tiles */
+  .services__cta{flex-direction:column;align-items:stretch;text-align:center}
+  /* flex-basis is a HEIGHT once the bar becomes a column — 16rem of it, which
+     inflated the bridge to 444px on a phone. */
+  .services__cta-q{flex:0 0 auto}
+  .services__cta-icon{margin-inline:auto;border-inline-end:0}
+  .services__cta .btn{width:100%}
 }
-
-/* CTA tile — navy, bridges toward Contact */
-.service-cta{background:var(--surface-inverse);color:var(--text-on-inverse);border-radius:var(--radius-md);
-  padding:clamp(1.5rem,3vw,2rem);display:flex;flex-direction:column;justify-content:center;gap:var(--sp-16);
-  background-image:radial-gradient(120% 90% at 100% 0,rgba(255,255,255,.06),transparent 60%)}
-.service-cta__q{font-family:var(--font-heading);font-weight:var(--fw-semibold);font-size:var(--fs-h4);color:#fff;
-  max-width:26ch}
 
 /* ==========================================================================
    STAGE 08 · HOW WE WORK / كيف نعمل
@@ -1381,7 +1391,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 }
 
 /* -- LEVEL 01 · eyebrow ---------------------------------------------------- */
-.hero__eyebrow,.about__label,.why__label{display:inline-flex;align-items:center;
+.hero__eyebrow,.about__label,.why__label,.services__label{display:inline-flex;align-items:center;
   padding:var(--sp-8) var(--sp-16);border-radius:var(--radius-pill);
   background:var(--aun-mist);border:1px solid var(--aun-sky);
   font-family:var(--font-heading);font-weight:var(--fw-semibold);font-size:var(--fs-small);
@@ -1668,67 +1678,10 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 
           <!-- media: art-directed brand scene (swappable for a <picture> photo) -->
           <figure class="about__media" data-reveal>
-            <span class="about__route" aria-hidden="true">
-              <svg viewBox="0 0 160 210" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M150,8 C 60,40 30,110 78,200" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 13"/>
-                <circle cx="150" cy="8" r="5" fill="#4975BA" stroke="#fff" stroke-width="2"/>
-              </svg>
-            </span>
             <div class="about__media-frame">
-              <svg viewBox="0 0 600 750" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="about-img-title about-img-desc">
-                <title id="about-img-title">رعاية إنسانية ونقل مجهّز</title>
-                <desc id="about-img-desc">أخصائي نقل مدرّب يسند بلطف ذراع راكب مسنّ يستعين بعصا، إلى جانب مركبة حديثة مجهّزة ببابٍ منخفض، على طريق يمثّل درب الرحلة.</desc>
-
-                <rect width="600" height="750" fill="#EEF3FA"/>
-                <path d="M-40,240 C 200,150 430,150 660,250" fill="none" stroke="#D9E4F3" stroke-width="46" stroke-linecap="round" opacity=".5"/>
-                <path d="M0,540 C 160,506 340,494 600,528 L600,750 L0,750 Z" fill="#D9E4F3"/>
-
-                <!-- route / درب -->
-                <path d="M470,750 C 430,672 400,620 352,590 L250,590 C 300,632 360,676 372,750 Z" fill="#F6F8FB"/>
-                <path d="M430,742 C 392,672 360,620 300,592" fill="none" stroke="#2C4C82" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 14" opacity=".5"/>
-                <circle cx="404" cy="700" r="6" fill="#4975BA" stroke="#fff" stroke-width="3"/>
-                <circle cx="330" cy="628" r="6" fill="#4975BA" stroke="#fff" stroke-width="3"/>
-
-                <!-- modern accessible vehicle (low-floor, side door open) -->
-                <g>
-                  <ellipse cx="168" cy="560" rx="128" ry="13" fill="#2C4C82" opacity=".08"/>
-                  <path d="M250,506 L276,506 L322,560 L286,560 Z" fill="#5C86C6" stroke="#2C4C82" stroke-width="2" stroke-linejoin="round"/>
-                  <rect x="64" y="372" width="206" height="150" rx="20" fill="#ffffff" stroke="#2C4C82" stroke-width="4"/>
-                  <path d="M64,414 L64,392 A20 20 0 0 1 84,372 L108,372 L86,416 Z" fill="#D9E4F3" stroke="#2C4C82" stroke-width="4" stroke-linejoin="round"/>
-                  <rect x="104" y="392" width="46" height="36" rx="6" fill="#D9E4F3" stroke="#2C4C82" stroke-width="3"/>
-                  <rect x="188" y="392" width="66" height="112" rx="6" fill="#EEF3FA" stroke="#2C4C82" stroke-width="3"/>
-                  <line x1="221" y1="392" x2="221" y2="504" stroke="#2C4C82" stroke-width="2" opacity=".5"/>
-                  <circle cx="120" cy="528" r="25" fill="#2C4C82"/><circle cx="120" cy="528" r="9" fill="#fff"/>
-                  <circle cx="232" cy="528" r="25" fill="#2C4C82"/><circle cx="232" cy="528" r="9" fill="#fff"/>
-                  <circle cx="150" cy="356" r="16" fill="#4975BA"/>
-                  <circle cx="150" cy="347" r="3.2" fill="#fff"/>
-                  <path d="M147,351 v5 h7 l2,5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <circle cx="151" cy="359" r="6.5" fill="none" stroke="#fff" stroke-width="2"/>
-                </g>
-
-                <!-- trained staff (steadying, respectful) -->
-                <g>
-                  <ellipse cx="342" cy="646" rx="46" ry="11" fill="#2C4C82" opacity=".08"/>
-                  <line x1="330" y1="556" x2="326" y2="636" stroke="#2C4C82" stroke-width="17" stroke-linecap="round"/>
-                  <line x1="352" y1="556" x2="356" y2="636" stroke="#2C4C82" stroke-width="17" stroke-linecap="round"/>
-                  <path d="M316,470 h48 a16 16 0 0 1 16 16 v58 a24 24 0 0 1 -24 24 h-32 a24 24 0 0 1 -24 -24 v-58 a16 16 0 0 1 16 -16 Z" fill="#4975BA"/>
-                  <path d="M340,470 l-14,14 l14,10 l14,-10 Z" fill="#D9E4F3"/>
-                  <line x1="360" y1="496" x2="414" y2="486" stroke="#2C4C82" stroke-width="15" stroke-linecap="round"/>
-                  <circle cx="340" cy="442" r="23" fill="#2C4C82"/>
-                </g>
-
-                <!-- senior passenger (dignified, with cane) -->
-                <g>
-                  <ellipse cx="470" cy="650" rx="48" ry="11" fill="#2C4C82" opacity=".09"/>
-                  <line x1="462" y1="560" x2="452" y2="640" stroke="#2C4C82" stroke-width="16" stroke-linecap="round"/>
-                  <line x1="480" y1="560" x2="486" y2="640" stroke="#2C4C82" stroke-width="16" stroke-linecap="round"/>
-                  <line x1="470" y1="486" x2="470" y2="562" stroke="#4975BA" stroke-width="23" stroke-linecap="round"/>
-                  <line x1="458" y1="502" x2="418" y2="488" stroke="#4975BA" stroke-width="13" stroke-linecap="round"/>
-                  <line x1="482" y1="502" x2="510" y2="536" stroke="#4975BA" stroke-width="13" stroke-linecap="round"/>
-                  <path d="M516,520 q10,-2 10,8 v106" fill="none" stroke="#2C4C82" stroke-width="5" stroke-linecap="round"/>
-                  <circle cx="470" cy="462" r="22" fill="#2C4C82"/>
-                </g>
-              </svg>
+              <img src="https://i.ibb.co/fV3wJsBq/10.webp"
+                   width="1200" height="1500" loading="lazy" decoding="async"
+                   alt="أخصائي نقل مدرّب من عون الدرب يساعد راكبًا مسنًّا يستخدم كرسيًا متحركًا عند منحدر مركبة حديثة مجهّزة.">
             </div>
           </figure>
 
@@ -1887,7 +1840,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 
           <!-- intro -->
           <div class="services__intro">
-            <div class="section-label" data-reveal><span class="section-label__num">03</span><span class="section-label__rule"></span><span class="section-label__name">خدماتنا</span></div>
+            <p class="services__label" data-reveal>خدماتنا</p>
             <h2 id="services-h" class="services__title" data-reveal>خدمات نقل متخصصة <span>مصممة لاحتياجات المستفيد</span></h2>
             <p class="services__intro-lead" data-reveal>تقدّم شركة عون الدرب مجموعة متكاملة من خدمات النقل المتخصص لتلبية احتياجات كبار السن وذوي الإعاقة والمرضى الذين يحتاجون إلى وسائل نقل مجهزة ومساعدة خاصة.</p>
           </div>
@@ -1896,88 +1849,76 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
           <div class="services__grid">
 
             <article class="service service--feature" data-reveal>
-              <span class="service__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="14" cy="5" r="1.7"/><path d="M14 7.4v4.1H9.2"/><path d="M9.2 11.5l2.6 4.4"/><circle cx="10.4" cy="16.6" r="4.3"/><path d="M14.4 15.2h2.3l1.3 3.2"/></svg>
-              </span>
-              <div class="service__body">
-                <span class="service__num">01</span>
-                <h3 class="service__title">النقل بواسطة الكرسي المتحرك</h3>
-                <p class="service__desc">خدمة نقل آمنة ومريحة لمستخدمي الكراسي المتحركة، مع تجهيز المركبة بما يسهّل عملية الصعود والنزول.</p>
+              <div class="service__head">
+                <span class="service__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="14" cy="5" r="1.7"/><path d="M14 7.4v4.1H9.2"/><path d="M9.2 11.5l2.6 4.4"/><circle cx="10.4" cy="16.6" r="4.3"/><path d="M14.4 15.2h2.3l1.3 3.2"/></svg></span>
+                <span class="service__num" aria-hidden="true">01</span>
               </div>
+              <h3 class="service__title">النقل بواسطة الكرسي المتحرك</h3>
+              <p class="service__desc">خدمة نقل آمنة ومريحة لمستخدمي الكراسي المتحركة، مع تجهيز المركبة بما يسهّل عملية الصعود والنزول.</p>
             </article>
 
             <article class="service" data-reveal>
-              <span class="service__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="5" r="1.6"/><path d="M13 7.2v4.3H9"/><path d="M6.5 15h9l-1 3.2H7.5z"/><circle cx="9" cy="19.4" r="1.3"/><circle cx="15" cy="19.4" r="1.3"/><path d="M17 12.5v-2M4 8l-1.6 2.2H4L3 12.4"/></svg>
-              </span>
-              <div class="service__body">
-                <span class="service__num">02</span>
-                <h3 class="service__title">النقل بواسطة الكرسي الكهربائي</h3>
-                <p class="service__desc">مركبات مجهزة لاستيعاب الكراسي الكهربائية، مع مراعاة الأمان والثبات أثناء التنقل.</p>
+              <div class="service__head">
+                <span class="service__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="5" r="1.6"/><path d="M13 7.2v4.3H9"/><path d="M6.5 15h9l-1 3.2H7.5z"/><circle cx="9" cy="19.4" r="1.3"/><circle cx="15" cy="19.4" r="1.3"/><path d="M17 12.5v-2M4 8l-1.6 2.2H4L3 12.4"/></svg></span>
+                <span class="service__num" aria-hidden="true">02</span>
               </div>
+              <h3 class="service__title">النقل بواسطة الكرسي الكهربائي</h3>
+              <p class="service__desc">مركبات مجهزة لاستيعاب الكراسي الكهربائية، مع مراعاة الأمان والثبات أثناء التنقل.</p>
             </article>
 
             <article class="service" data-reveal>
-              <span class="service__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16v-2.5h11a2.5 2.5 0 0 1 2.5 2.5V16"/><path d="M3 12.5V17M20 15v2"/><path d="M3 17h18"/><circle cx="7" cy="19" r="1.2"/><circle cx="17" cy="19" r="1.2"/><circle cx="7" cy="10.6" r="1.4"/><path d="M9 13.5c.6-1.6 2-1.6 2.7 0"/></svg>
-              </span>
-              <div class="service__body">
-                <span class="service__num">03</span>
-                <h3 class="service__title">النقل بواسطة السرير الطبي</h3>
-                <p class="service__desc">خدمة مخصصة للحالات التي تتطلب بقاء المستفيد على السرير طوال الرحلة، باستخدام وسائل نقل مناسبة.</p>
+              <div class="service__head">
+                <span class="service__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16v-2.5h11a2.5 2.5 0 0 1 2.5 2.5V16"/><path d="M3 12.5V17M20 15v2"/><path d="M3 17h18"/><circle cx="7" cy="19" r="1.2"/><circle cx="17" cy="19" r="1.2"/><circle cx="7" cy="10.6" r="1.4"/><path d="M9 13.5c.6-1.6 2-1.6 2.7 0"/></svg></span>
+                <span class="service__num" aria-hidden="true">03</span>
               </div>
+              <h3 class="service__title">النقل بواسطة السرير الطبي</h3>
+              <p class="service__desc">خدمة مخصصة للحالات التي تتطلب بقاء المستفيد على السرير طوال الرحلة، باستخدام وسائل نقل مناسبة.</p>
             </article>
 
             <article class="service" data-reveal>
-              <span class="service__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="7" r="2.2"/><path d="M4 19c0-2.7 2-4.8 4.5-4.8"/><circle cx="16" cy="8" r="2"/><path d="M12.5 19c0-2.4 1.6-4.3 3.5-4.3s3.5 1.9 3.5 4.3"/><path d="M11.5 13.2l3 1.2"/></svg>
-              </span>
-              <div class="service__body">
-                <span class="service__num">04</span>
-                <h3 class="service__title">خدمة مساعد السائق</h3>
-                <p class="service__desc">إمكانية توفير مساعد أو أكثر لمرافقة المستفيد ومساعدته أثناء النقل، وفقًا لحالته واحتياجاته الخاصة.</p>
+              <div class="service__head">
+                <span class="service__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="7" r="2.2"/><path d="M4 19c0-2.7 2-4.8 4.5-4.8"/><circle cx="16" cy="8" r="2"/><path d="M12.5 19c0-2.4 1.6-4.3 3.5-4.3s3.5 1.9 3.5 4.3"/><path d="M11.5 13.2l3 1.2"/></svg></span>
+                <span class="service__num" aria-hidden="true">04</span>
               </div>
+              <h3 class="service__title">خدمة مساعد السائق</h3>
+              <p class="service__desc">إمكانية توفير مساعد أو أكثر لمرافقة المستفيد ومساعدته أثناء النقل، وفقًا لحالته واحتياجاته الخاصة.</p>
             </article>
 
             <article class="service" data-reveal>
-              <span class="service__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15v-3l2-3.2h8l2.4 3.2H19v3"/><path d="M3 15h1.6M15 15h4"/><circle cx="8" cy="16" r="1.7"/><circle cx="17" cy="16" r="1.7"/><path d="M3.5 20h.01M7 20h.01M10.5 20h.01M14 20h.01"/></svg>
-              </span>
-              <div class="service__body">
-                <span class="service__num">05</span>
-                <h3 class="service__title">النقل اليومي</h3>
-                <p class="service__desc">خدمات نقل يومية لكبار السن وذوي الإعاقة، بما يوفر لهم تنقلًا آمنًا ومريحًا.</p>
+              <div class="service__head">
+                <span class="service__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15v-3l2-3.2h8l2.4 3.2H19v3"/><path d="M3 15h1.6M15 15h4"/><circle cx="8" cy="16" r="1.7"/><circle cx="17" cy="16" r="1.7"/><path d="M3.5 20h.01M7 20h.01M10.5 20h.01M14 20h.01"/></svg></span>
+                <span class="service__num" aria-hidden="true">05</span>
               </div>
+              <h3 class="service__title">النقل اليومي</h3>
+              <p class="service__desc">خدمات نقل يومية لكبار السن وذوي الإعاقة، بما يوفر لهم تنقلًا آمنًا ومريحًا.</p>
             </article>
 
             <article class="service" data-reveal>
-              <span class="service__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V9l7-4 7 4v11"/><path d="M3 20h18"/><rect x="9" y="14" width="6" height="6" rx=".5"/><path d="M12 8v4M10 10h4"/></svg>
-              </span>
-              <div class="service__body">
-                <span class="service__num">06</span>
-                <h3 class="service__title">النقل إلى المستشفيات والمراكز الطبية</h3>
-                <p class="service__desc">التوصيل إلى المستشفيات والمراكز الطبية، مع تقديم المساعدة وفقًا لاحتياجات المستفيد.</p>
+              <div class="service__head">
+                <span class="service__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V9l7-4 7 4v11"/><path d="M3 20h18"/><rect x="9" y="14" width="6" height="6" rx=".5"/><path d="M12 8v4M10 10h4"/></svg></span>
+                <span class="service__num" aria-hidden="true">06</span>
               </div>
+              <h3 class="service__title">النقل إلى المستشفيات والمراكز الطبية</h3>
+              <p class="service__desc">التوصيل إلى المستشفيات والمراكز الطبية، مع تقديم المساعدة وفقًا لاحتياجات المستفيد.</p>
             </article>
 
             <article class="service" data-reveal>
-              <span class="service__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="2"/><circle cx="15.5" cy="8.5" r="1.8"/><path d="M4.5 18.5c0-2.6 2-4.6 4.5-4.6s4.5 2 4.5 4.6"/><path d="M13.5 14.2c2.2-.5 4.5 1.2 4.5 4.3"/><path d="M18.5 3.5v3M17 5h3"/></svg>
-              </span>
-              <div class="service__body">
-                <span class="service__num">07</span>
-                <h3 class="service__title">التنقل للمناسبات الاجتماعية</h3>
-                <p class="service__desc">توفير وسائل نقل مناسبة ومريحة للتنقل إلى المناسبات والزيارات الاجتماعية.</p>
+              <div class="service__head">
+                <span class="service__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="2"/><circle cx="15.5" cy="8.5" r="1.8"/><path d="M4.5 18.5c0-2.6 2-4.6 4.5-4.6s4.5 2 4.5 4.6"/><path d="M13.5 14.2c2.2-.5 4.5 1.2 4.5 4.3"/><path d="M18.5 3.5v3M17 5h3"/></svg></span>
+                <span class="service__num" aria-hidden="true">07</span>
               </div>
+              <h3 class="service__title">التنقل للمناسبات الاجتماعية</h3>
+              <p class="service__desc">توفير وسائل نقل مناسبة ومريحة للتنقل إلى المناسبات والزيارات الاجتماعية.</p>
             </article>
+          </div>
 
-            <!-- CTA tile — bridge toward Contact -->
-            <div class="service-cta" data-reveal>
-              <p class="service-cta__q">هل تحتاج إلى خدمة نقل متخصصة؟</p>
-              <a class="btn btn--on-inverse" href="#contact">تواصل معنا</a>
-            </div>
-
+          <!-- §20/§21 — the bridge from the catalogue to Contact. Full width and
+               outside the grid, so it reads as the section's closing step rather
+               than an eighth service. Approved wording, unchanged. -->
+          <div class="services__cta" data-reveal>
+            <span class="services__cta-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18c3-1 3.4-5 7-5s4.2-4 7-5"/><circle cx="5" cy="18" r="1.7"/><circle cx="19" cy="8" r="1.7"/></svg></span>
+            <p class="services__cta-q">هل تحتاج إلى خدمة نقل متخصصة؟</p>
+            <a class="btn btn--on-inverse btn--lg" href="#contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h3l2 5-2 1c1 2 3 4 5 5l1-2 5 2v3c0 1-1 2-2 2A15 15 0 0 1 4 6c0-1 1-2 1-2z"/></svg> تواصل معنا</a>
           </div>
         </div>
       </section>

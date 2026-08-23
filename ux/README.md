@@ -55,6 +55,15 @@ to Services. A current-stop emphasis marks position on desktop — colour only o
 the node, number and title, so nothing reflows — and it is skipped entirely
 under reduced motion.
 
+**Stage 06 — services.** Every tile now carries the same anatomy — icon and
+number sharing a head row, then title, then description — so the catalogue can
+be compared at a glance. The navy bridge to Contact moved out of the grid and
+became a full-width bar, so it no longer reads as another service. Service 01
+stays the featured entry point but is marked by surface only, keeping the grid
+uniform.
+
+The About illustration was replaced with the supplied photograph.
+
 ## Typography parse bug — repo-wide
 
 Every `clamp()` outside `brand/tokens.css` was written `1.55rem+2.9vw`, with no
@@ -88,6 +97,11 @@ blue is 4.35:1 as text on the page ground — this is why the About lead is navy
 rather than the brighter blue the mockup shows · **P7** trust claims still told
 twice · **P9** hero image is third-party with no `srcset`.
 
-The `section-label` component (`01 —— name`) still runs in the five sections
-after Why Us — Services, How We Work, Vision, Values and Contact. Later stages
-should carry the pill across, or Hero/About/Why Us should go back.
+The `section-label` component (`01 —— name`) still runs in the four sections
+after Services — How We Work, Vision, Values and Contact. Later stages should
+carry the pill across, or the first four sections should go back.
+
+**Services count.** The source carries SEVEN services; the Stage 06 brief and
+its mockup both list six, omitting `07 التنقل للمناسبات الاجتماعية`. All seven
+are kept — removing approved content is not a design decision — so the 3-column
+grid runs 3/3/1. Say the word and 07 comes out.
