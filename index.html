@@ -830,39 +830,105 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 }
 
 /* ==========================================================================
-   STAGE 05 · ABOUT / من نحن
-   Editorial split (content start / media). Tokens + existing components only.
-   Source order = head → media → body, so mobile reads: label, heading,
-   image, body; desktop repositions media into the second (inline-end) column.
+   STAGE 04 · ABOUT / من نحن
+   Editorial, not carded (§20). Content column at inline-start, media at
+   inline-end (§11: visual left / content right). Every child is placed
+   explicitly — auto-placement previously dropped the lead statement into the
+   last row, so §05's most important element rendered below the facts.
+   Reading order is identical at every breakpoint:
+     label → heading → lead → visual → the three paragraphs → facts.
    ========================================================================== */
-.about__grid{display:grid;gap:clamp(1.75rem,4vw,2.75rem)}
+.about__grid{display:grid;gap:clamp(1.75rem,4vw,2.5rem)}
 @media(min-width:1024px){
   .about__grid{grid-template-columns:minmax(0,1.05fr) minmax(0,0.95fr);
-    column-gap:clamp(2.5rem,5vw,5rem);row-gap:clamp(1.25rem,2.5vw,2rem);align-items:center}
-  .about__head{grid-column:1;grid-row:1;align-self:end}
-  .about__body{grid-column:1;grid-row:2;align-self:start}
-  .about__media{grid-column:2;grid-row:1 / span 2;align-self:center}
+    column-gap:clamp(2.5rem,5vw,4.5rem);row-gap:clamp(1.5rem,3vw,2.25rem);align-items:start}
+  .about__head {grid-column:1;grid-row:1}
+  .about__lead {grid-column:1;grid-row:2}
+  .about__body {grid-column:1;grid-row:3}
+  .about__media{grid-column:2;grid-row:1 / span 3;align-self:center}
+  .about__facts{grid-column:1 / -1;grid-row:4;margin-block-start:clamp(1rem,2vw,1.75rem)}
 }
-.about__head{max-width:var(--measure)}
-.about__title{font-size:var(--fs-h2);line-height:var(--lh-tight);letter-spacing:var(--track-tight);
-  color:var(--color-secondary)}
-.about__body{max-width:var(--measure)}
-.about__lead{font-family:var(--font-body);font-weight:var(--fw-medium);font-size:var(--fs-body-lg);
-  line-height:var(--lh-normal);color:var(--text-primary)}
-.about__body p + p{margin-block-start:var(--sp-20)}
 
-/* media — art-directed brand scene (swappable for a <picture> photo) */
+/* -- 01 · label + heading -------------------------------------------------- */
+.about__title{font-size:var(--fs-h2);line-height:var(--lh-tight);letter-spacing:var(--track-tight);
+  color:var(--color-secondary);margin-block-start:var(--sp-16)}
+/* the route closing the heading: a short dashed run ending in a waypoint —
+   the same device the section uses elsewhere, at label scale */
+.about__rule{display:block;position:relative;width:76px;height:2px;margin-block-start:var(--sp-20);
+  background:repeating-linear-gradient(to right,var(--aun-border-strong) 0 4px,transparent 4px 11px)}
+.about__rule::after{content:"";position:absolute;inset-inline-end:-4px;inset-block-start:-4px;
+  width:10px;height:10px;border-radius:var(--radius-circle);background:var(--color-primary);
+  border:2px solid var(--bg)}
+
+/* -- 02 · lead statement (§05) --------------------------------------------- */
+/* Navy, not the brighter brand blue: at this section's ground (--bg #F6F8FB)
+   #4975BA measures 4.35:1, which clears AA only while the text stays large
+   text, and this clamps down to ~18px on small screens. Navy is 8.2:1 at every
+   size. Blue still carries the section through the rule, icons and waypoints. */
+.about__lead{font-family:var(--font-heading);font-weight:var(--fw-semibold);
+  font-size:var(--fs-h3);line-height:1.6;color:var(--color-secondary);max-width:46ch}
+
+/* -- 03 · the three paragraphs as stops on the route (§06/§08) -------------- */
+/* Not cards: an icon, the paragraph, and a dashed line joining them. */
+.about__body{position:relative;display:flex;flex-direction:column;
+  gap:clamp(1.25rem,2.5vw,1.75rem);max-width:58ch}
+.about__body::before{content:"";position:absolute;inset-inline-start:19px;inset-block:24px 24px;width:2px;
+  background:repeating-linear-gradient(var(--aun-border-strong) 0 4px,transparent 4px 12px)}
+.about__point{position:relative;display:grid;grid-template-columns:40px minmax(0,1fr);
+  column-gap:var(--sp-16);align-items:start}
+.about__point-icon{position:relative;z-index:1;width:40px;height:40px;flex:0 0 auto;
+  border-radius:var(--radius-circle);display:grid;place-items:center;
+  background:var(--surface);border:1px solid var(--aun-sky);color:var(--color-primary)}
+.about__point-icon svg{width:20px;height:20px;stroke-width:1.6}
+.about__point p{color:var(--text-secondary);line-height:var(--lh-relaxed)}
+
+/* -- 04 · facts (§07/§14) --------------------------------------------------- */
+/* Quick-scan proof, label only — no invented descriptions, no KPI numbers. */
+.about__facts{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(4,1fr);
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);
+  box-shadow:var(--shadow-sm);overflow:hidden}
+.about__facts li{margin-block-start:0}   /* the global li+li prose rule again */
+.about__fact{display:flex;flex-direction:column;align-items:center;text-align:center;
+  gap:var(--sp-12);padding:clamp(1.25rem,2.5vw,1.75rem) var(--sp-16)}
+.about__fact + .about__fact{border-inline-start:1px solid var(--border)}
+.about__fact-icon{display:grid;place-items:center;color:var(--color-primary)}
+.about__fact-icon svg{width:30px;height:30px;stroke-width:1.5}
+.about__fact-label{font-family:var(--font-heading);font-weight:var(--fw-semibold);
+  font-size:var(--fs-small);line-height:1.35;color:var(--color-secondary)}
+
+/* -- 05 · media (§08) ------------------------------------------------------- */
 .about__media{position:relative;margin:0}
 .about__media-frame{position:relative;border-radius:var(--radius-lg);overflow:hidden;
-  background:var(--aun-mist);box-shadow:var(--shadow-md);aspect-ratio:4/5}
+  background:var(--aun-mist);box-shadow:var(--shadow-sm);aspect-ratio:4/5}
 .about__media-frame svg,.about__media-frame img{display:block;width:100%;height:100%;object-fit:cover}
-@media(max-width:1023px){.about__media{max-width:30rem;margin-inline:auto}}
-@media(max-width:767px){.about__media-frame{aspect-ratio:4/3}}
 
-/* subtle route connector framing the image corner (§10) — hidden on mobile */
-.about__route{position:absolute;inset-block-start:-4%;inset-inline-start:-9%;width:38%;height:auto;
-  color:var(--aun-sky);pointer-events:none;z-index:1}
-@media(max-width:767px){.about__route{display:none}}
+/* The external route arc is gone: the illustration already draws the road, its
+   dashes and its waypoints inside the frame, so a second arc floating outside
+   the corner was duplicate decoration (§08 refine, §20 don't over-decorate).
+   The route language stays — in the illustration, in the rule under the
+   heading, and in the dashed line joining the three paragraphs. */
+.about__route{display:none}
+
+/* -- responsive (§12/§13/§14) ---------------------------------------------- */
+@media(max-width:1023px){
+  .about__media{width:100%;max-width:34rem;margin-inline:auto}
+  .about__media-frame{aspect-ratio:16/10}
+  .about__route{display:none}
+  .about__facts{margin-block-start:var(--sp-8)}
+}
+@media(max-width:767px){
+  .about__media-frame{aspect-ratio:4/3}
+  /* two per row, not four cramped columns and not four full-width cards */
+  .about__facts{grid-template-columns:repeat(2,1fr)}
+  .about__fact{padding:var(--sp-16) var(--sp-12);gap:var(--sp-8)}
+  .about__fact-icon svg{width:26px;height:26px}
+  .about__fact + .about__fact{border-inline-start:0}
+  .about__fact:nth-child(even){border-inline-start:1px solid var(--border)}
+  .about__fact:nth-child(n+3){border-block-start:1px solid var(--border)}
+  .about__body::before{inset-inline-start:17px}
+  .about__point{grid-template-columns:36px minmax(0,1fr);column-gap:var(--sp-12)}
+  .about__point-icon{width:36px;height:36px}
+}
 
 /* ==========================================================================
    STAGE 06 · WHY US / ما يميزنا
@@ -1242,7 +1308,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 }
 
 /* -- LEVEL 01 · eyebrow ---------------------------------------------------- */
-.hero__eyebrow{display:inline-flex;align-items:center;
+.hero__eyebrow,.about__label{display:inline-flex;align-items:center;
   padding:var(--sp-8) var(--sp-16);border-radius:var(--radius-pill);
   background:var(--aun-mist);border:1px solid var(--aun-sky);
   font-family:var(--font-heading);font-weight:var(--fw-semibold);font-size:var(--fs-small);
@@ -1519,8 +1585,9 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 
           <!-- head: label + heading -->
           <div class="about__head">
-            <div class="section-label" data-reveal><span class="section-label__num">01</span><span class="section-label__rule"></span><span class="section-label__name">من نحن</span></div>
+            <p class="about__label" data-reveal>من نحن</p>
             <h2 id="about-h" class="about__title" data-reveal>من نحن</h2>
+            <span class="about__rule" aria-hidden="true" data-reveal></span>
           </div>
 
           <!-- opening statement (approved copy, verbatim) -->
@@ -1594,9 +1661,18 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 
           <!-- body: approved copy (verbatim) — paragraphs 2-4 -->
           <div class="about__body" data-reveal>
-            <p>تعتمد الشركة على مركبات حديثة ومجهزة بأحدث التقنيات، إلى جانب طاقم مؤهل ومدرب للتعامل مع احتياجات المستفيدين، بما يضمن تقديم تجربة نقل آمنة ومريحة تراعي خصوصية كل حالة واحتياجاتها.</p>
-            <p>وتقدم عون الدرب خدماتها بما يتجاوز عملية النقل، من خلال توفير المساعدة عند الحاجة داخل المنزل، وأثناء النقل، وداخل المستشفيات، بما يدعم المستفيد خلال مختلف مراحل التنقل.</p>
-            <p>يقع مقر الشركة في مدينة الرياض، وتعمل على تقديم خدمات نقل متخصصة تجمع بين الرعاية، والتجهيز، والاحترافية، بما يسهم في تحسين جودة حياة من نخدمهم.</p>
+            <div class="about__point">
+              <span class="about__point-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6l7-3Z"/><path d="M9.2 12l2 2 3.6-3.8"/></svg></span>
+              <p>تعتمد الشركة على مركبات حديثة ومجهزة بأحدث التقنيات، إلى جانب طاقم مؤهل ومدرب للتعامل مع احتياجات المستفيدين، بما يضمن تقديم تجربة نقل آمنة ومريحة تراعي خصوصية كل حالة واحتياجاتها.</p>
+            </div>
+            <div class="about__point">
+              <span class="about__point-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18c3-1 3.4-5 7-5s4.2-4 7-5"/><circle cx="5" cy="18" r="1.7"/><circle cx="19" cy="8" r="1.7"/></svg></span>
+              <p>وتقدم عون الدرب خدماتها بما يتجاوز عملية النقل، من خلال توفير المساعدة عند الحاجة داخل المنزل، وأثناء النقل، وداخل المستشفيات، بما يدعم المستفيد خلال مختلف مراحل التنقل.</p>
+            </div>
+            <div class="about__point">
+              <span class="about__point-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c4-4.4 6-7.7 6-10.5a6 6 0 1 0-12 0C6 13.3 8 16.6 12 21Z"/><circle cx="12" cy="10.4" r="2.3"/></svg></span>
+              <p>يقع مقر الشركة في مدينة الرياض، وتعمل على تقديم خدمات نقل متخصصة تجمع بين الرعاية، والتجهيز، والاحترافية، بما يسهم في تحسين جودة حياة من نخدمهم.</p>
+            </div>
           </div>
 
           <!-- trust signals — surfaced from the approved copy (no new claims) -->

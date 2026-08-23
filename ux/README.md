@@ -37,6 +37,14 @@ frame — the photograph is transparent at the top and sides, so it sits directl
 on the page with the crop anchored to the bottom to trim the empty band. The
 desktop hero fits inside a 900px viewport.
 
+**Stage 04 — about.** Every child of the grid is now placed explicitly: the
+lead statement was auto-placed into the last row, so on desktop it rendered
+below both the body and the facts. The three approved paragraphs became stops
+on the route (icon, paragraph, dashed connector — not cards), the four facts
+became a single divided card (label only, no invented descriptions), and the
+section label became the same pill the hero eyebrow uses. `#about` went from
+2774px to 1093px at 1440.
+
 ## Typography parse bug — repo-wide
 
 Every `clamp()` outside `brand/tokens.css` was written `1.55rem+2.9vw`, with no
@@ -66,5 +74,9 @@ design, so it is left for a deliberate decision.
 ## Open findings from Stage 01
 
 **P4** `#cta` duplicates `#contact` and sits directly above it · **P6** primary
-blue is 4.35:1 as text on the page ground · **P7** trust claims still told twice
-· **P9** hero image is third-party with no `srcset`.
+blue is 4.35:1 as text on the page ground — this is why the About lead is navy
+rather than the brighter blue the mockup shows · **P7** trust claims still told
+twice · **P9** hero image is third-party with no `srcset`.
+
+The `section-label` component (`01 —— name`) still runs in the six sections
+after About. Stages 05+ should carry the pill across, or About should go back.

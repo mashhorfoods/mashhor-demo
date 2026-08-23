@@ -51,9 +51,13 @@ const ok = (c, m) => console.log(`  ${c ? 'PASS' : '**FAIL**'}  ${m}`);
 
   // ---------------- scroll-spy parent mapping ----------------
   console.log('\n### Active state never blanks (§04)');
+  // html{scroll-behavior:smooth} animates scrollIntoView, and the distance
+  // between sections changes whenever a section's height changes. Jump
+  // instantly so this measures the scroll-spy, not the animation.
+  await p.addStyleTag({ content: 'html{scroll-behavior:auto!important}' });
   for (const [id, expect] of [['how-we-work','#services'],['vision-mission','#about'],['values','#about'],['cta','#contact'],['about','#about']]) {
     await p.evaluate(i => document.getElementById(i).scrollIntoView(), id);
-    await p.waitForTimeout(450);
+    await p.waitForTimeout(400);
     const r = await p.evaluate(() => {
       const a = [...document.querySelectorAll('.site-nav__link.is-active')];
       const cur = [...document.querySelectorAll('.site-nav__link[aria-current]')];
