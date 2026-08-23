@@ -67,12 +67,12 @@
   --font-body:"Cairo",ui-sans-serif,system-ui,"Segoe UI","Noto Sans Arabic",sans-serif;
   --fw-regular:400; --fw-medium:500; --fw-semibold:600; --fw-bold:700;
 
-  --fs-display:clamp(2.50rem,1.55rem+2.9vw,3.50rem);
-  --fs-h1:clamp(2.00rem,1.45rem+2.3vw,3.00rem);
-  --fs-h2:clamp(1.60rem,1.20rem+1.7vw,2.375rem);
-  --fs-h3:clamp(1.25rem,1.08rem+0.7vw,1.50rem);
-  --fs-h4:clamp(1.10rem,1.02rem+0.35vw,1.25rem);
-  --fs-body-lg:clamp(1.125rem,1.06rem+0.28vw,1.25rem);
+  --fs-display:clamp(2.50rem,1.55rem + 2.9vw,3.50rem);
+  --fs-h1:clamp(2.00rem,1.45rem + 2.3vw,3.00rem);
+  --fs-h2:clamp(1.60rem,1.20rem + 1.7vw,2.375rem);
+  --fs-h3:clamp(1.25rem,1.08rem + 0.7vw,1.50rem);
+  --fs-h4:clamp(1.10rem,1.02rem + 0.35vw,1.25rem);
+  --fs-body-lg:clamp(1.125rem,1.06rem + 0.28vw,1.25rem);
   --fs-body:1.0625rem;   /* 17px */
   --fs-small:0.9375rem;  /* 15px */
   --fs-caption:0.8125rem;/* 13px */
@@ -1102,7 +1102,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 .hero__eyebrow-gold{display:inline-flex;align-items:center;gap:var(--sp-8);font-family:var(--font-heading);
   font-weight:var(--fw-semibold);font-size:var(--fs-small);letter-spacing:.01em;color:#8a6a12}
 .hero__eyebrow-gold svg{width:20px;height:20px;flex:0 0 auto;color:#8a6a12}
-.hero__title{font-size:clamp(2.5rem,1.7rem+3.5vw,4.4rem);margin-block:var(--sp-16) 0}
+.hero__title{font-size:clamp(2.5rem,1.7rem + 3.5vw,4.4rem);margin-block:var(--sp-16) 0}
 .hero__lead{margin-block-start:var(--sp-16)}
 .hero__divider{display:block;width:66px;height:3px;border-radius:var(--radius-pill);
   background:#b08a2e;margin-block-start:var(--sp-20)}

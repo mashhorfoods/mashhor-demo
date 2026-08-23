@@ -1,0 +1,934 @@
+<title>Aoun Al-Darb UX Spine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+
+<style>
+/* ==========================================================================
+   AOUN AL-DARB — STAGE 01 · GLOBAL UX ARCHITECTURE
+   Document identity: distinct from the website's own system. Brand navy is
+   used as the accent so the spec reads as part of the project; everything
+   else (neutrals, type, layout) belongs to the document.
+   ========================================================================== */
+:root{
+  --ground:#F1F3F6;
+  --surface:#FFFFFF;
+  --surface-2:#E7EBF0;
+  --ink:#141C25;
+  --ink-2:#4C5866;
+  --ink-3:#77828F;
+  --rule:#D6DCE3;
+  --rule-soft:#E5E9EE;
+  --accent:#2C4C82;
+  --accent-2:#4975BA;
+  --accent-soft:rgba(44,76,130,.07);
+  --pass:#256B55;   --pass-bg:rgba(46,125,100,.12);
+  --warn:#8F6014;   --warn-bg:rgba(176,121,28,.14);
+  --fail:#A5352E;   --fail-bg:rgba(192,67,59,.12);
+
+  --f-display:"Archivo",ui-sans-serif,system-ui,"Segoe UI",sans-serif;
+  --f-body:"Source Serif 4",ui-serif,Georgia,"Times New Roman",serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --f-ar:"IBM Plex Sans Arabic",ui-sans-serif,system-ui,"Segoe UI","Noto Sans Arabic",sans-serif;
+
+  --measure:68ch;
+  --pad:clamp(1.15rem,4vw,2.75rem);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F151C;
+    --surface:#161E27;
+    --surface-2:#1E2831;
+    --ink:#E3E8EF;
+    --ink-2:#9DA8B5;
+    --ink-3:#6E7A88;
+    --rule:#2A343F;
+    --rule-soft:#222C36;
+    --accent:#93B3E0;
+    --accent-2:#5C86C6;
+    --accent-soft:rgba(147,179,224,.11);
+    --pass:#63C3A2;  --pass-bg:rgba(99,195,162,.14);
+    --warn:#DDA946;  --warn-bg:rgba(221,169,70,.14);
+    --fail:#EB8078;  --fail-bg:rgba(235,128,120,.14);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0F151C;
+  --surface:#161E27;
+  --surface-2:#1E2831;
+  --ink:#E3E8EF;
+  --ink-2:#9DA8B5;
+  --ink-3:#6E7A88;
+  --rule:#2A343F;
+  --rule-soft:#222C36;
+  --accent:#93B3E0;
+  --accent-2:#5C86C6;
+  --accent-soft:rgba(147,179,224,.11);
+  --pass:#63C3A2;  --pass-bg:rgba(99,195,162,.14);
+  --warn:#DDA946;  --warn-bg:rgba(221,169,70,.14);
+  --fail:#EB8078;  --fail-bg:rgba(235,128,120,.14);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:var(--f-body);
+  font-size:17px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+
+/* ---------- shell ---------------------------------------------------- */
+.wrap{max-width:1260px;margin:0 auto;padding:0 var(--pad)}
+.layout{display:grid;gap:clamp(2rem,4vw,3.5rem);align-items:start}
+@media (min-width:1080px){ .layout{grid-template-columns:236px minmax(0,1fr)} }
+
+/* ---------- masthead -------------------------------------------------- */
+.mast{border-bottom:1px solid var(--rule);padding-block:clamp(2.5rem,6vw,4.5rem) clamp(1.75rem,4vw,2.75rem);margin-bottom:clamp(2rem,5vw,3.5rem)}
+.mast__eyebrow{
+  font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--accent);margin:0 0 1.1rem
+}
+.mast__title{
+  font-family:var(--f-display);font-weight:700;font-size:clamp(2.1rem,1.2rem + 3.6vw,3.65rem);
+  line-height:1.04;letter-spacing:-.022em;margin:0;text-wrap:balance;max-width:19ch
+}
+.mast__sub{
+  margin:1.4rem 0 0;max-width:64ch;font-size:clamp(1.05rem,1rem + .3vw,1.2rem);
+  line-height:1.6;color:var(--ink-2)
+}
+.mast__meta{
+  display:flex;flex-wrap:wrap;gap:.5rem 1.6rem;margin-top:2rem;
+  font-family:var(--f-mono);font-size:12.5px;color:var(--ink-3)
+}
+.mast__meta b{font-weight:500;color:var(--ink-2)}
+
+/* ---------- table of contents ---------------------------------------- */
+.toc{font-family:var(--f-display);font-size:13.5px;line-height:1.45}
+@media (min-width:1080px){ .toc{position:sticky;top:1.75rem;max-height:calc(100vh - 3.5rem);overflow-y:auto} }
+.toc__title{
+  font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 .9rem;padding-bottom:.7rem;border-bottom:1px solid var(--rule)
+}
+.toc ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.15rem}
+.toc a{
+  display:flex;gap:.65rem;text-decoration:none;color:var(--ink-2);
+  padding:.4rem .5rem;border-radius:4px;transition:background .15s,color .15s
+}
+.toc a:hover{background:var(--accent-soft);color:var(--ink)}
+.toc a span{font-family:var(--f-mono);font-size:11px;color:var(--ink-3);padding-top:.15em;flex:0 0 auto}
+@media (max-width:1079px){
+  .toc{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:1.25rem 1.1rem;margin-bottom:2.5rem}
+}
+
+/* ---------- sections -------------------------------------------------- */
+.sec{margin-bottom:clamp(3rem,7vw,5rem);scroll-margin-top:1.5rem}
+.sec__head{display:flex;gap:1rem;align-items:baseline;margin-bottom:1.4rem;padding-bottom:.85rem;border-bottom:1px solid var(--rule)}
+.sec__num{
+  font-family:var(--f-mono);font-size:12px;font-weight:500;color:var(--accent);
+  letter-spacing:.06em;flex:0 0 auto;padding-top:.2em
+}
+.sec__title{
+  font-family:var(--f-display);font-weight:600;font-size:clamp(1.35rem,1.15rem + .85vw,1.85rem);
+  line-height:1.2;letter-spacing:-.014em;margin:0;text-wrap:balance
+}
+p{margin:0 0 1.05rem;max-width:var(--measure)}
+p:last-child{margin-bottom:0}
+.lede{font-size:1.09rem;color:var(--ink-2)}
+h3{
+  font-family:var(--f-display);font-weight:600;font-size:1.02rem;letter-spacing:.005em;
+  margin:2.1rem 0 .8rem;color:var(--ink)
+}
+h3:first-child{margin-top:0}
+h4{
+  font-family:var(--f-mono);font-weight:500;font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-3);margin:1.6rem 0 .55rem
+}
+strong{font-weight:600}
+em{font-style:italic}
+a{color:var(--accent)}
+code,.mono{font-family:var(--f-mono);font-size:.87em}
+code{background:var(--surface-2);padding:.1em .35em;border-radius:3px;color:var(--ink)}
+.ar{font-family:var(--f-ar);font-size:.95em;font-weight:500}
+
+ul.list{margin:0 0 1.05rem;padding:0;list-style:none;max-width:var(--measure);display:flex;flex-direction:column;gap:.5rem}
+ul.list li{padding-left:1.15rem;position:relative}
+ul.list li::before{
+  content:"";position:absolute;left:.15rem;top:.68em;width:5px;height:5px;
+  border-radius:50%;background:var(--accent-2)
+}
+
+/* ---------- ordered priority list ------------------------------------ */
+ol.prio{
+  margin:.5rem 0 0;padding:0 0 0 1.4rem;max-width:var(--measure);
+  display:flex;flex-direction:column;gap:.4rem
+}
+ol.prio li{padding-left:.35rem}
+ol.prio li::marker{font-family:var(--f-mono);font-size:.8em;color:var(--accent)}
+
+/* ---------- callout --------------------------------------------------- */
+.note{
+  background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--accent);
+  border-radius:0 6px 6px 0;padding:1.1rem 1.25rem;margin:1.5rem 0;max-width:var(--measure)
+}
+.note h4{margin-top:0}
+.note p:last-child{margin-bottom:0}
+
+/* ---------- spine ----------------------------------------------------- */
+.spine{list-style:none;margin:1.75rem 0 0;padding:0;position:relative}
+.spine::before{
+  content:"";position:absolute;left:15px;top:14px;bottom:14px;width:2px;
+  background:repeating-linear-gradient(to bottom,var(--accent-2) 0 3px,transparent 3px 12px);
+  opacity:.6
+}
+.stop{position:relative;padding:0 0 1.6rem 3.15rem}
+.stop:last-child{padding-bottom:0}
+.stop__dot{
+  position:absolute;left:0;top:2px;width:32px;height:32px;border-radius:50%;
+  background:var(--surface);border:2px solid var(--accent-2);color:var(--accent);
+  display:grid;place-items:center;font-family:var(--f-mono);font-size:11.5px;font-weight:500
+}
+.stop--conv .stop__dot{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+:root[data-theme="dark"] .stop--conv .stop__dot{color:#0F151C}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .stop--conv .stop__dot{color:#0F151C}}
+.stop__name{font-family:var(--f-display);font-weight:600;font-size:1.02rem;margin:.25rem 0 .1rem;display:flex;flex-wrap:wrap;gap:.55rem;align-items:baseline}
+.stop__id{font-family:var(--f-mono);font-size:11px;font-weight:400;color:var(--ink-3)}
+.stop__q{margin:.35rem 0 0;max-width:60ch;color:var(--ink-2);font-size:.96rem}
+.stop__q b{color:var(--ink);font-weight:600}
+.stop__hand{
+  margin:.55rem 0 0;font-family:var(--f-mono);font-size:11.5px;color:var(--ink-3);
+  max-width:60ch;line-height:1.5
+}
+.stop__hand::before{content:"↳ ";color:var(--accent-2)}
+
+/* ---------- tables ---------------------------------------------------- */
+.tw{overflow-x:auto;margin:1.4rem 0;border:1px solid var(--rule);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;font-family:var(--f-display);font-weight:500}
+th,td{text-align:left;padding:.72rem .95rem;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+thead th{
+  font-family:var(--f-mono);font-size:10.5px;font-weight:500;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--ink-3);background:var(--surface-2);border-bottom:1px solid var(--rule);white-space:nowrap
+}
+tbody tr:last-child td{border-bottom:0}
+td.num,th.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink-2)}
+td small{display:block;font-family:var(--f-body);font-size:13px;font-weight:400;color:var(--ink-3);margin-top:.2rem;line-height:1.45}
+
+/* ---------- chips ----------------------------------------------------- */
+.chip{
+  display:inline-block;font-family:var(--f-mono);font-size:10.5px;font-weight:500;letter-spacing:.07em;
+  text-transform:uppercase;padding:.2em .55em;border-radius:3px;white-space:nowrap
+}
+.chip--pass{background:var(--pass-bg);color:var(--pass)}
+.chip--warn{background:var(--warn-bg);color:var(--warn)}
+.chip--fail{background:var(--fail-bg);color:var(--fail)}
+.chip--n{background:var(--accent-soft);color:var(--accent)}
+
+/* ---------- findings -------------------------------------------------- */
+.find{
+  background:var(--surface);border:1px solid var(--rule);border-radius:8px;
+  padding:1.15rem 1.3rem;margin-bottom:1rem;position:relative;overflow:hidden
+}
+.find::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ink-3)}
+.find--p1::before{background:var(--fail)}
+.find--p2::before{background:var(--warn)}
+.find--p3::before{background:var(--accent-2)}
+.find__head{display:flex;flex-wrap:wrap;gap:.55rem .85rem;align-items:baseline;margin-bottom:.6rem}
+.find__id{font-family:var(--f-mono);font-size:12px;font-weight:500;color:var(--ink-3)}
+.find__title{font-family:var(--f-display);font-weight:600;font-size:1rem;margin:0;flex:1 1 16rem;line-height:1.35}
+.find dl{margin:0;display:grid;gap:.45rem .9rem;grid-template-columns:auto minmax(0,1fr);font-size:14.5px}
+.find dt{
+  font-family:var(--f-mono);font-size:10.5px;font-weight:500;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--ink-3);padding-top:.35em
+}
+.find dd{margin:0;color:var(--ink-2);line-height:1.55;max-width:66ch}
+.find dd b{color:var(--ink);font-weight:600}
+@media (max-width:560px){
+  .find dl{grid-template-columns:1fr;gap:.15rem}
+  .find dd{margin-bottom:.5rem}
+}
+
+/* ---------- figure ---------------------------------------------------- */
+figure{margin:1.75rem 0;background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:1.4rem 1.25rem 1rem}
+figure svg{display:block;width:100%;max-width:100%;height:auto;color:var(--ink-2)}
+figure svg .hi{color:var(--accent)}
+figcaption{
+  margin-top:1rem;padding-top:.85rem;border-top:1px solid var(--rule-soft);
+  font-size:13.5px;line-height:1.55;color:var(--ink-3);max-width:70ch
+}
+figcaption b{color:var(--ink-2);font-weight:600}
+
+/* ---------- closing --------------------------------------------------- */
+.handoff{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:clamp(1.3rem,3vw,2rem)}
+.handoff ol{margin:0;padding-left:1.3rem;display:flex;flex-direction:column;gap:.6rem;max-width:var(--measure)}
+.handoff li{padding-left:.3rem}
+.foot{
+  border-top:1px solid var(--rule);margin-top:clamp(3rem,6vw,4.5rem);padding-block:1.75rem 3rem;
+  font-family:var(--f-mono);font-size:11.5px;color:var(--ink-3);line-height:1.7
+}
+@media (prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important} }
+</style>
+
+<div class="wrap">
+
+  <header class="mast">
+    <p class="mast__eyebrow">Stage 01 · Global UX Architecture</p>
+    <h1 class="mast__title">Aoun Al-Darb UX Spine</h1>
+    <p class="mast__sub">The structural foundation every later stage builds on: one canonical section order, four journeys routed through it, a CTA law, and a ranked account of where the current build breaks its own architecture. No visual redesign, no new brand, no altered Arabic copy.</p>
+    <div class="mast__meta">
+      <span><b>Scope</b> architecture only</span>
+      <span><b>Source of truth</b> <span class="mono">index.html</span>, 2,058 lines</span>
+      <span><b>Brand</b> unchanged</span>
+      <span><b>Copy</b> unchanged</span>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <nav class="toc" aria-label="Contents">
+      <p class="toc__title">Contents</p>
+      <ol>
+        <li><a href="#s1"><span>01</span>What this stage fixes</a></li>
+        <li><a href="#s2"><span>02</span>Baseline that holds</a></li>
+        <li><a href="#s3"><span>03</span>A conflict, resolved</a></li>
+        <li><a href="#s4"><span>04</span>The spine</a></li>
+        <li><a href="#s5"><span>05</span>The four journeys</a></li>
+        <li><a href="#s6"><span>06</span>Navigation</a></li>
+        <li><a href="#s7"><span>07</span>The CTA law</a></li>
+        <li><a href="#s8"><span>08</span>Trust ledger</a></li>
+        <li><a href="#s9"><span>09</span>Responsive tiers</a></li>
+        <li><a href="#s10"><span>10</span>Component register</a></li>
+        <li><a href="#s11"><span>11</span>Accessibility contract</a></li>
+        <li><a href="#s12"><span>12</span>Motion &amp; performance</a></li>
+        <li><a href="#s13"><span>13</span>Findings, ranked</a></li>
+        <li><a href="#s14"><span>14</span>Architectural test</a></li>
+        <li><a href="#s15"><span>15</span>Handoff to Stage 02</a></li>
+      </ol>
+    </nav>
+
+    <main>
+
+      <!-- 01 ============================================================ -->
+      <section class="sec" id="s1">
+        <div class="sec__head"><span class="sec__num">01</span><h2 class="sec__title">What this stage fixes, and what it deliberately leaves alone</h2></div>
+
+        <p class="lede">The site is not architecturally broken. It has a real design-token system, correct RTL logical properties, a working focus trap, and — checked line by line — not one invented claim. What it has instead is <em>drift</em>: the same four trust statements told three times, two conversion sections sitting back to back, and a mobile header that exposes no action at all.</p>
+
+        <p>Stage 01 sets the rules that stop the drift. Everything here is structural: order, routing, hierarchy, placement, states. Nothing here changes a colour, a typeface, a photograph, or a single Arabic word.</p>
+
+        <h4>In scope now</h4>
+        <ul class="list">
+          <li>The canonical section spine and the question each section answers</li>
+          <li>Journey routing for all four visitor types, including the mobile short-circuit</li>
+          <li>Navigation tiering and the "you are here" contract</li>
+          <li>CTA hierarchy, the four legitimate placement moments, and the ban on the fifth</li>
+          <li>A trust ledger that gives every claim exactly one home</li>
+          <li>Responsive transformation rules — what changes shape rather than merely narrowing</li>
+          <li>The reusable component register and its required states</li>
+        </ul>
+
+        <h4>Deferred by design</h4>
+        <ul class="list">
+          <li><strong>Stage 02</strong> — header and navigation UX, the first consumer of this spec</li>
+          <li><strong>Stage 03+</strong> — individual section treatments, in spine order</li>
+          <li><strong>Any stage</strong> — copy changes, which require explicit instruction that has not been given</li>
+        </ul>
+      </section>
+
+      <!-- 02 ============================================================ -->
+      <section class="sec" id="s2">
+        <div class="sec__head"><span class="sec__num">02</span><h2 class="sec__title">The baseline that holds — keep these, do not relitigate</h2></div>
+
+        <p>Seven foundations in the current build are correct and become fixed constraints for every later stage. Listing them matters as much as listing the faults: a redesign that quietly loses these would be a regression dressed as progress.</p>
+
+        <div class="tw">
+          <table>
+            <thead><tr><th>Foundation</th><th>Evidence in the current build</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>RTL correctness</td><td>Logical properties used throughout — <code>inset-inline</code>, <code>padding-inline</code>, <code>border-block-end</code>, <code>margin-block-start</code>. No physical <code>left</code>/<code>right</code> in layout.</td><td><span class="chip chip--pass">Keep</span></td></tr>
+              <tr><td>Token discipline</td><td>15 token groups on <code>:root</code>; semantic roles layered over raw brand values, so a brand change never touches a component.</td><td><span class="chip chip--pass">Keep</span></td></tr>
+              <tr><td>No layout jump on scroll</td><td>Header declares <code>border-block-end:1px solid transparent</code> up front; <code>.is-scrolled</code> changes colour only. <code>--header-h</code> feeds <code>scroll-padding-top</code>.</td><td><span class="chip chip--pass">Keep</span></td></tr>
+              <tr><td>Drawer accessibility</td><td>Real focus trap on Tab, Escape closes, focus returns to the trigger, <code>aria-expanded</code> and <code>aria-controls</code> both wired, background scroll locked.</td><td><span class="chip chip--pass">Keep</span></td></tr>
+              <tr><td>Concise navigation</td><td>Five primary items. Secondary sections live in the footer instead of crowding the header.</td><td><span class="chip chip--pass">Keep</span></td></tr>
+              <tr><td>Reduced motion</td><td><code>prefers-reduced-motion</code> honoured in CSS <em>and</em> read in JS to skip the drawer's close timer.</td><td><span class="chip chip--pass">Keep</span></td></tr>
+              <tr><td>Content integrity</td><td>Every trust item traces to approved Arabic copy. No fabricated statistic, certification, partnership, or award anywhere on the page.</td><td><span class="chip chip--pass">Keep</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 03 ============================================================ -->
+      <section class="sec" id="s3">
+        <div class="sec__head"><span class="sec__num">03</span><h2 class="sec__title">One conflict in the brief, and how it is resolved</h2></div>
+
+        <p>The brief specifies the page order twice, and the two specifications disagree. This has to be settled before anything downstream can be consistent.</p>
+
+        <div class="tw">
+          <table>
+            <thead><tr><th class="num">Position</th><th>§03 Information hierarchy</th><th>§08 Scroll experience</th></tr></thead>
+            <tbody>
+              <tr><td class="num">1</td><td>What we do</td><td>Hero</td></tr>
+              <tr><td class="num">2</td><td>Why we are relevant</td><td>About / context</td></tr>
+              <tr><td class="num">3</td><td><b>Services</b></td><td>Why us</td></tr>
+              <tr><td class="num">4</td><td>Why trust us</td><td><b>Services</b></td></tr>
+              <tr><td class="num">5</td><td>How it works</td><td>How we work</td></tr>
+              <tr><td class="num">6</td><td><b>Who we are</b> — about, vision, values</td><td>Vision / mission</td></tr>
+              <tr><td class="num">7</td><td>Contact</td><td>Values, then contact</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>§03 places Services third and pushes <span class="ar" dir="rtl">من نحن</span> to sixth; §08 places <span class="ar" dir="rtl">من نحن</span> second and Services fourth. They cannot both be the running order.</p>
+
+        <div class="note">
+          <h4>Resolution</h4>
+          <p><strong>§08 governs the scroll order. §03 governs the cognitive order, and is satisfied within sections rather than by moving them.</strong></p>
+          <p>The two documents are describing different things. §03 lists the <em>levels of question</em> a visitor works through; §08 lists the <em>sections</em> they scroll past. One section can answer more than one level — and here, one already does. §03's Level 02, "who we serve plus specialisation plus key trust signals", is answered inside the hero today by the three audience cards (<span class="ar" dir="rtl">كبار السن</span>, <span class="ar" dir="rtl">ذوو الإعاقة</span>, <span class="ar" dir="rtl">المرضى</span>) and the trust strip beneath it. It does not need its own section, and giving it one would push <span class="ar" dir="rtl">خدماتنا</span> further from the top, not closer.</p>
+          <p>§08 also happens to match the order already built, which honours the brief's own instruction to preserve existing foundations. Reordering nine sections to satisfy a reading of §03 that §08 contradicts would be churn without a visitor benefit.</p>
+        </div>
+      </section>
+
+      <!-- 04 ============================================================ -->
+      <section class="sec" id="s4">
+        <div class="sec__head"><span class="sec__num">04</span><h2 class="sec__title">The spine — nine stops, each answering the last one's question</h2></div>
+
+        <p class="lede">This is the canonical order. Every later stage designs <em>into</em> it and may not add, remove, or reorder a stop without revising this document. The test for each stop is not "is this section good" but "does it answer the question the previous stop raised, and hand a new one forward".</p>
+
+        <ol class="spine">
+          <li class="stop">
+            <span class="stop__dot" aria-hidden="true">01</span>
+            <p class="stop__name"><span class="ar" dir="rtl">الرئيسية</span> — Hero <span class="stop__id">#home</span></p>
+            <p class="stop__q">Answers: <b>What is this, and is it for someone like me?</b> Company, service category, and the three audiences, in that order.</p>
+            <p class="stop__hand">Hands forward: "Who is behind it?"</p>
+          </li>
+          <li class="stop">
+            <span class="stop__dot" aria-hidden="true">02</span>
+            <p class="stop__name"><span class="ar" dir="rtl">من نحن</span> — About <span class="stop__id">#about</span></p>
+            <p class="stop__q">Answers: <b>Who are you and where do you operate?</b> Saudi company, Riyadh, equipped vehicles, trained staff, support beyond the drive itself.</p>
+            <p class="stop__hand">Hands forward: "Plenty of firms claim that — why you?"</p>
+          </li>
+          <li class="stop">
+            <span class="stop__dot" aria-hidden="true">03</span>
+            <p class="stop__name"><span class="ar" dir="rtl">لماذا عون الدرب</span> — Why us <span class="stop__id">#why-us</span></p>
+            <p class="stop__q">Answers: <b>What separates you?</b> Six differentiators presented as connected stops on the route, not as a card grid.</p>
+            <p class="stop__hand">Hands forward: "Fine — what can I actually book?"</p>
+          </li>
+          <li class="stop">
+            <span class="stop__dot" aria-hidden="true">04</span>
+            <p class="stop__name"><span class="ar" dir="rtl">خدماتنا</span> — Services <span class="stop__id">#services</span></p>
+            <p class="stop__q">Answers: <b>Which service matches my situation?</b> Seven named services, scannable by title alone. This is the page's decision point.</p>
+            <p class="stop__hand">Hands forward: "If I choose one, what actually happens?"</p>
+          </li>
+          <li class="stop">
+            <span class="stop__dot" aria-hidden="true">05</span>
+            <p class="stop__name"><span class="ar" dir="rtl">كيف نعمل</span> — How we work <span class="stop__id">#how-we-work</span></p>
+            <p class="stop__q">Answers: <b>What happens on the day?</b> Three stages — at home, in transit, on arrival. Removes the fear of the unknown that stops a first call.</p>
+            <p class="stop__hand">Hands forward: "Are you the kind of company I want handling this?"</p>
+          </li>
+          <li class="stop">
+            <span class="stop__dot" aria-hidden="true">06</span>
+            <p class="stop__name"><span class="ar" dir="rtl">رؤيتنا ورسالتنا</span> — Vision &amp; mission <span class="stop__id">#vision-mission</span></p>
+            <p class="stop__q">Answers: <b>What are you trying to be?</b> Direction and purpose, in that order.</p>
+            <p class="stop__hand">Hands forward: "And how do you behave day to day?"</p>
+          </li>
+          <li class="stop">
+            <span class="stop__dot" aria-hidden="true">07</span>
+            <p class="stop__name"><span class="ar" dir="rtl">قيمنا</span> — Values <span class="stop__id">#values</span></p>
+            <p class="stop__q">Answers: <b>How do you treat the person in your care?</b> Six values. The last reassurance before the decision.</p>
+            <p class="stop__hand">Hands forward: "I'm convinced. How do I reach you?"</p>
+          </li>
+          <li class="stop stop--conv">
+            <span class="stop__dot" aria-hidden="true">08</span>
+            <p class="stop__name"><span class="ar" dir="rtl">تواصل معنا</span> — Contact <span class="stop__id">#contact</span></p>
+            <p class="stop__q">Answers: <b>How do I reach you, right now?</b> Phone, WhatsApp, hours, address. Absorbs today's separate <code>#cta</code> block as its opening — see finding P4.</p>
+            <p class="stop__hand">Hands forward: nothing. This is the terminus, and the only stop with no onward question.</p>
+          </li>
+          <li class="stop">
+            <span class="stop__dot" aria-hidden="true">09</span>
+            <p class="stop__name">Footer <span class="stop__id">site-footer</span></p>
+            <p class="stop__q">Answers: <b>Where was that thing I scrolled past?</b> Full information architecture — primary links, secondary sections, contact repeated as reference rather than as a pitch.</p>
+          </li>
+        </ol>
+
+        <div class="note">
+          <h4>The rule this spine enforces</h4>
+          <p>A section earns its place by answering a question the visitor is already holding. If a proposed section answers a question nobody asked at that point in the scroll, it does not belong there — move it or drop it. That single test is what disqualifies today's standalone <code>#cta</code> block, which re-asks a question <code>#contact</code> answers two hundred pixels later.</p>
+        </div>
+      </section>
+
+      <!-- 05 ============================================================ -->
+      <section class="sec" id="s5">
+        <div class="sec__head"><span class="sec__num">05</span><h2 class="sec__title">The four journeys, routed through the spine</h2></div>
+
+        <p>Journeys are not separate pages — they are different <em>paths</em> across the same nine stops. The architecture's job is to make each path short without hiding the others. Below, ● is a stop the journey depends on, ○ is one it passes through without needing.</p>
+
+        <div class="tw">
+          <table>
+            <thead>
+              <tr>
+                <th>Journey</th>
+                <th class="num">01<br>Hero</th><th class="num">02<br>About</th><th class="num">03<br>Why</th><th class="num">04<br>Serv.</th>
+                <th class="num">05<br>How</th><th class="num">06<br>V&amp;M</th><th class="num">07<br>Values</th><th class="num">08<br>Contact</th>
+                <th>Exit</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><b>A</b> — I need the service<small>Shortest path. Must never be lengthened for anyone else's benefit.</small></td>
+                <td class="num">●</td><td class="num">○</td><td class="num">○</td><td class="num">●</td><td class="num">○</td><td class="num">○</td><td class="num">○</td><td class="num">●</td>
+                <td>Hero CTA, or Services CTA</td>
+              </tr>
+              <tr>
+                <td><b>B</b> — I want to trust you<small>The long read. Every stop earns its keep here.</small></td>
+                <td class="num">●</td><td class="num">●</td><td class="num">●</td><td class="num">●</td><td class="num">○</td><td class="num">●</td><td class="num">●</td><td class="num">●</td>
+                <td>Contact, after Values</td>
+              </tr>
+              <tr>
+                <td><b>C</b> — How does it work?<small>Usually a returning visitor, or a family member checking logistics.</small></td>
+                <td class="num">●</td><td class="num">○</td><td class="num">○</td><td class="num">●</td><td class="num">●</td><td class="num">○</td><td class="num">○</td><td class="num">●</td>
+                <td>Contact, after How we work</td>
+              </tr>
+              <tr>
+                <td><b>D</b> — Mobile, needs help now<small>Must not traverse the spine at all.</small></td>
+                <td class="num">●</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td>
+                <td>Header action → call or WhatsApp</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Journey D is the one the current build fails</h3>
+
+        <p>Journeys A, B and C all work today, because scrolling is the interaction and the page scrolls well. Journey D is different: it is defined by <em>not</em> scrolling, and the current mobile header offers nothing to act on. At <code>max-width:767px</code> the stylesheet hides both the navigation and the header CTA:</p>
+
+        <figure>
+          <svg viewBox="0 0 880 300" role="img" aria-label="Comparison of the mobile contact path: today it takes three taps with a full-page scroll and a menu detour, whereas a persistent header action reduces it to one tap.">
+            <defs>
+              <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <polygon points="0,1 10,5 0,9" fill="currentColor"/>
+              </marker>
+            </defs>
+
+            <text x="0" y="20" font-family="IBM Plex Mono, monospace" font-size="12" fill="currentColor" opacity=".65">TODAY — 3 taps, 1 full-page scroll</text>
+
+            <rect x="0" y="38" width="150" height="52" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <text x="75" y="61" text-anchor="middle" font-family="Archivo, sans-serif" font-size="12.5" fill="currentColor">Lands on hero</text>
+            <text x="75" y="78" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".6">no action visible</text>
+
+            <line x1="152" y1="64" x2="212" y2="64" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+            <text x="182" y="55" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".6">tap 1</text>
+
+            <rect x="214" y="38" width="150" height="52" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <text x="289" y="61" text-anchor="middle" font-family="Archivo, sans-serif" font-size="12.5" fill="currentColor">Opens the menu</text>
+            <text x="289" y="78" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".6">full-screen drawer</text>
+
+            <line x1="366" y1="64" x2="426" y2="64" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+            <text x="396" y="55" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".6">tap 2</text>
+
+            <rect x="428" y="38" width="150" height="52" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <text x="503" y="61" text-anchor="middle" font-family="Archivo, sans-serif" font-size="12.5" fill="currentColor">Jumps to Contact</text>
+            <text x="503" y="78" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".6">scrolls past 7 stops</text>
+
+            <line x1="580" y1="64" x2="640" y2="64" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+            <text x="610" y="55" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".6">tap 3</text>
+
+            <rect x="642" y="38" width="150" height="52" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <text x="717" y="68" text-anchor="middle" font-family="Archivo, sans-serif" font-size="12.5" fill="currentColor">Calls / WhatsApp</text>
+
+            <line x1="0" y1="130" x2="880" y2="130" stroke="currentColor" stroke-width="1" opacity=".2"/>
+
+            <text class="hi" x="0" y="163" font-family="IBM Plex Mono, monospace" font-size="12" fill="currentColor">PROPOSED — 1 tap, no scroll, no menu</text>
+
+            <rect class="hi" x="0" y="181" width="150" height="52" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <text x="75" y="204" text-anchor="middle" font-family="Archivo, sans-serif" font-size="12.5" fill="currentColor">Lands on hero</text>
+            <text class="hi" x="75" y="221" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor">action in header</text>
+
+            <line class="hi" x1="152" y1="207" x2="632" y2="207" stroke="currentColor" stroke-width="1.5"/>
+            <polygon class="hi" points="632,202 642,207 632,212" fill="currentColor"/>
+            <text class="hi" x="396" y="198" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor">tap 1 — persistent header action</text>
+
+            <rect class="hi" x="642" y="181" width="150" height="52" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <text x="717" y="211" text-anchor="middle" font-family="Archivo, sans-serif" font-size="12.5" fill="currentColor">Calls / WhatsApp</text>
+
+            <text x="0" y="270" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".55">The menu stays exactly where it is — it stops being the only way to act.</text>
+          </svg>
+          <figcaption><b>Journey D, before and after.</b> The current build hides <code>.site-header__cta</code> below 768px, leaving the hamburger as the sole interactive control in the mobile header. The fastest route to a phone call is then three taps and a jump past seven sections. Restoring a persistent action beside the menu trigger — not replacing the menu — collapses that to one tap.</figcaption>
+        </figure>
+      </section>
+
+      <!-- 06 ============================================================ -->
+      <section class="sec" id="s6">
+        <div class="sec__head"><span class="sec__num">06</span><h2 class="sec__title">Navigation — two tiers, and a "you are here" that never goes blank</h2></div>
+
+        <p>The five-item primary navigation is correct and stays as it is. The secondary sections stay out of the header and remain reachable from the footer. What changes is the relationship between the two tiers.</p>
+
+        <div class="tw">
+          <table>
+            <thead><tr><th>Tier</th><th>Items</th><th>Where it appears</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><b>Primary</b><small>Load-bearing. Never exceeds five.</small></td>
+                <td class="ar" dir="rtl">الرئيسية · من نحن · لماذا عون الدرب · خدماتنا · تواصل معنا</td>
+                <td>Header, mobile drawer, footer quick links — same order in all three</td>
+              </tr>
+              <tr>
+                <td><b>Secondary</b><small>Reachable, never competing.</small></td>
+                <td class="ar" dir="rtl">كيف نعمل · رؤيتنا ورسالتنا · قيمنا</td>
+                <td>Footer only, plus in-page scroll. Never promoted to the header.</td>
+              </tr>
+              <tr>
+                <td><b>Action</b><small>Not navigation. Governed by §07.</small></td>
+                <td class="ar" dir="rtl">تواصل معنا</td>
+                <td>Header, persistent at every breakpoint</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>The scroll-spy blanking defect</h3>
+
+        <p>The current scroll-spy observes every <code>[data-section]</code> and calls <code>setActive(id)</code> with whatever section is centred. When that section is <code>#how-we-work</code>, <code>#vision-mission</code>, <code>#values</code> or <code>#cta</code>, no navigation link matches — so the function strips <code>.is-active</code> and <code>aria-current</code> from every link and sets none. For four of the nine stops, roughly a third of the page by height, the navigation reports the visitor is nowhere at all. Screen-reader users lose <code>aria-current</code> entirely across the same stretch.</p>
+
+        <div class="note">
+          <h4>Fix — parent mapping, not more nav items</h4>
+          <p>Every secondary section declares the primary item it belongs under, and the spy resolves through it. The header stays at five items; the active state stays continuous.</p>
+          <p><code>#how-we-work → #services</code> · <code>#vision-mission → #about</code> · <code>#values → #about</code> · <code>#cta → #contact</code></p>
+        </div>
+
+        <h3>Mobile drawer</h3>
+        <p>The drawer's structure is sound — full-screen below the header, focus-trapped, generous tap targets at <code>--fs-h4</code>. Two architectural additions, both serving Journey D:</p>
+        <ul class="list">
+          <li><strong>Direct actions above the link list.</strong> Call and WhatsApp as their own controls, so a visitor who opens the menu looking for a phone number finds one rather than a link to a section containing one.</li>
+          <li><strong>An active state that is not colour alone.</strong> Today <code>.mobile-nav__link.is-active</code> sets colour and nothing else, while the desktop equivalent also draws an underline bar. The drawer needs a non-colour marker to meet the same standard.</li>
+        </ul>
+      </section>
+
+      <!-- 07 ============================================================ -->
+      <section class="sec" id="s7">
+        <div class="sec__head"><span class="sec__num">07</span><h2 class="sec__title">The CTA law</h2></div>
+
+        <p class="lede">One primary action exists on this site: <span class="ar" dir="rtl">تواصل معنا</span>. Everything else is a means of performing it or a way of learning more before doing so.</p>
+
+        <div class="tw">
+          <table>
+            <thead><tr><th>Rank</th><th>Action</th><th>Role</th><th>Visual weight</th></tr></thead>
+            <tbody>
+              <tr><td><b>Primary</b></td><td class="ar" dir="rtl">تواصل معنا</td><td>The conversion. Stated as intent.</td><td>Filled. One per viewport, never two.</td></tr>
+              <tr><td><b>Secondary</b></td><td class="ar" dir="rtl">واتساب · اتصال</td><td>The mechanism. Only where intent is already established — inside Contact, in the drawer, in the footer.</td><td>Filled or outlined, but never alongside a primary in the same block.</td></tr>
+              <tr><td><b>Tertiary</b></td><td class="ar" dir="rtl">اكتشف خدماتنا</td><td>Deferral for the not-yet-ready. Points <em>forward</em> down the spine only.</td><td>Quiet. Text or outline.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>The four legitimate moments</h3>
+        <p>The brief lists five placements. On the §08 running order, two of them — "after service understanding" and "after the trust and value proposition" — land within a screen of each other, because Why-us precedes Services here. They collapse into one. Four moments, not five:</p>
+
+        <div class="tw">
+          <table>
+            <thead><tr><th class="num">#</th><th>Moment</th><th>Rendered as</th><th>Current state</th></tr></thead>
+            <tbody>
+              <tr><td class="num">1</td><td>Header, persistent</td><td>Primary button</td><td><span class="chip chip--fail">Hidden &lt;768px</span></td></tr>
+              <tr><td class="num">2</td><td>Hero, after the value proposition</td><td>Primary + tertiary pair</td><td><span class="chip chip--pass">Correct</span></td></tr>
+              <tr><td class="num">3</td><td>End of Services — the decision point</td><td>Primary, inside the grid as its closing tile</td><td><span class="chip chip--pass">Correct</span></td></tr>
+              <tr><td class="num">4</td><td>Contact — the terminus</td><td>Secondary pair: WhatsApp and call</td><td><span class="chip chip--warn">Preceded by a duplicate</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Where the current build overspends</h3>
+        <p>The string <span class="ar" dir="rtl">تواصل معنا</span> appears as an interactive control eight times on one page: header, hero, Services tile, the <code>#cta</code> block, the drawer button, and as a navigation item in the header, drawer and footer. Two of those — the Services tile and the <code>#cta</code> block — fire barely a screen and a half apart, and <code>#cta</code> then hands directly to <code>#contact</code>, which asks a third time.</p>
+
+        <div class="note">
+          <h4>Two rules that resolve it</h4>
+          <p><strong>Adjacency ban.</strong> Two consecutive stops may not both carry a primary CTA. A section that only introduces the next one is not a stop — it is that section's opening.</p>
+          <p><strong>No backward tertiaries at the terminus.</strong> <code>#cta</code> currently offers <span class="ar" dir="rtl">اكتشف خدماتنا</span> as its secondary action, sending a visitor who has read the entire page back up to stop 04. At the moment of conversion the only available directions are "act" and "keep reading downward".</p>
+        </div>
+      </section>
+
+      <!-- 08 ============================================================ -->
+      <section class="sec" id="s8">
+        <div class="sec__head"><span class="sec__num">08</span><h2 class="sec__title">Trust ledger — one claim, one home</h2></div>
+
+        <p>§14 asks for trust to be distributed across the journey. The current build distributes the <em>same</em> trust three times before the visitor reaches Services. Four claims each appear in the hero trust strip, again in the About facts, and again as Why-us items 01–04 — in near-identical words.</p>
+
+        <div class="tw">
+          <table>
+            <thead><tr><th>Claim</th><th>Hero strip</th><th>About facts</th><th>Why us</th><th>Assigned home</th></tr></thead>
+            <tbody>
+              <tr><td class="ar" dir="rtl">نقل آمن ومريح</td><td class="num">●</td><td class="num">—</td><td class="num">● 01</td><td>Why us 01</td></tr>
+              <tr><td class="ar" dir="rtl">طاقم مدرب ومحترف</td><td class="num">●</td><td class="num">●</td><td class="num">● 02</td><td>Why us 02</td></tr>
+              <tr><td class="ar" dir="rtl">مركبات حديثة ومجهزة</td><td class="num">●</td><td class="num">●</td><td class="num">● 03</td><td>Why us 03</td></tr>
+              <tr><td class="ar" dir="rtl">خدمة على مدار الساعة</td><td class="num">●</td><td class="num">—</td><td class="num">● 04</td><td>Why us 04 <b>+</b> Contact<small>The only claim that legitimately repeats — in Contact it is operational fact, not persuasion.</small></td></tr>
+              <tr><td class="ar" dir="rtl">مساندة خلال مراحل التنقل</td><td class="num">—</td><td class="num">●</td><td class="num">● 06</td><td>How we work<small>It is a process, and the process section already tells it in three stages.</small></td></tr>
+              <tr><td class="ar" dir="rtl">الرياض</td><td class="num">—</td><td class="num">●</td><td class="num">—</td><td>About <b>+</b> Contact<small>Location is reference information; repeating it at the terminus is correct.</small></td></tr>
+              <tr><td>Three audiences</td><td class="num">●</td><td class="num">—</td><td class="num">—</td><td>Hero<small>The one thing the hero must establish and nothing else repeats.</small></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note">
+          <h4>What this means for the hero</h4>
+          <p>The hero's four-item trust strip restates what Why-us says in full one screen later. It is the single largest block of pure repetition on the page and, on a phone, roughly 300&nbsp;px of it. The hero keeps the audience cards, which nothing else carries; the trust strip's job belongs to Why-us, which already does it better with six items instead of four.</p>
+          <p>This is a placement decision, not a copy decision. No approved wording is altered or deleted — the claims continue to appear, in the section that owns them.</p>
+        </div>
+      </section>
+
+      <!-- 09 ============================================================ -->
+      <section class="sec" id="s9">
+        <div class="sec__head"><span class="sec__num">09</span><h2 class="sec__title">Responsive architecture — three tiers, and what transforms</h2></div>
+
+        <p>The existing breakpoints stay: <code>480</code> / <code>768</code> / <code>1024</code> / <code>1280</code>, with the twelve-column grid dropping to four below 768. What this stage adds is the rule about <em>what</em> changes at each tier. Narrowing a desktop layout is not designing for mobile.</p>
+
+        <div class="tw">
+          <table>
+            <thead><tr><th>Tier</th><th>Composition</th><th>What must transform, not merely narrow</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><b>Desktop</b><small>≥1024px</small></td>
+                <td>12 columns, <code>--container-wide</code> 1360px</td>
+                <td>Reference composition. Sticky sub-columns permitted where a section has a stable anchor, as Why-us already does.</td>
+              </tr>
+              <tr>
+                <td><b>Tablet</b><small>768–1023px</small></td>
+                <td>12 columns, reduced spans</td>
+                <td>Complexity drops, hierarchy does not. Three-up grids go two-up. Decorative route graphics reduce in opacity before anything textual is touched.</td>
+              </tr>
+              <tr>
+                <td><b>Mobile</b><small>≤767px</small></td>
+                <td>4 columns, single reading column</td>
+                <td>Hero sheds supporting blocks rather than stacking them. Header keeps a visible action. Decorative graphics are removed entirely — the hero road already does this correctly.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>The mobile hero is roughly two full screens</h3>
+        <p>Measured against a 390×844 viewport, the current hero stacks: eyebrow, headline, lead, divider, three audience cards at full width, two full-width buttons, a 4:3 image, and a four-row trust strip. That totals approximately <strong>1,550&nbsp;px</strong> — about two complete screens before <span class="ar" dir="rtl">من نحن</span> begins. §10 asks for no overly tall hero; §11 asks that decoration be reduced before readability. Both point the same way.</p>
+
+        <h4>Mobile priority order, binding on every stage</h4>
+        <ol class="prio">
+          <li>What is <span class="ar" dir="rtl">عون الدرب</span> — headline and lead</li>
+          <li>What it provides — the service category</li>
+          <li>Who it is for — the three audience cards</li>
+          <li>Why trust it — deferred to Why-us, never duplicated in the hero</li>
+          <li>What I can do now — an action reachable without scrolling</li>
+        </ol>
+      </section>
+
+      <!-- 10 ============================================================ -->
+      <section class="sec" id="s10">
+        <div class="sec__head"><span class="sec__num">10</span><h2 class="sec__title">Component register</h2></div>
+
+        <p>Eleven patterns cover the entire site. A later stage that needs a twelfth must justify it here first; a later stage that produces a second visual variant of an existing one has made an error unless it can name the UX reason.</p>
+
+        <div class="tw">
+          <table>
+            <thead><tr><th>Pattern</th><th>Exists as</th><th>Required states</th></tr></thead>
+            <tbody>
+              <tr><td>Section header</td><td><code>.section-label</code> + heading</td><td>Number, rule, name. The number is real sequence information — it matches the spine.</td></tr>
+              <tr><td>Primary CTA</td><td><code>.btn--primary</code></td><td>rest · hover · focus-visible · active · on-inverse variant</td></tr>
+              <tr><td>Secondary CTA</td><td><code>.btn--secondary</code>, <code>.btn--outline-inverse</code></td><td>Same five. Never rendered adjacent to a primary at equal size.</td></tr>
+              <tr><td>Information card</td><td><code>.hero__aud-card</code>, <code>.value</code></td><td>rest · hover. Non-interactive cards must not imitate interactive ones.</td></tr>
+              <tr><td>Service card</td><td><code>.service</code>, <code>.service--feature</code></td><td>rest · hover · one feature variant only</td></tr>
+              <tr><td>Trust indicator</td><td><code>.about__fact</code>, <code>.why__item</code></td><td>Static. One home each, per the ledger in §08.</td></tr>
+              <tr><td>Contact item</td><td><code>.contact-info</code></td><td>Static and linked variants; linked meets the 44px target.</td></tr>
+              <tr><td>Navigation item</td><td><code>.site-nav__link</code></td><td>rest · hover · focus-visible · active. Active carries a non-colour marker.</td></tr>
+              <tr><td>Mobile navigation</td><td><code>.mobile-nav__link</code></td><td>Same four, including the non-colour active marker it currently lacks.</td></tr>
+              <tr><td>Responsive media</td><td><code>.hero__media-frame</code>, <code>.about__media-frame</code></td><td><code>aspect-ratio</code> reserved before load, always. No exceptions.</td></tr>
+              <tr><td>Section transition</td><td>Ground alternation + route motif</td><td>See below — the transition is a system, not a decoration.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Section transitions</h3>
+        <p>Continuity comes from alternating grounds — <code>--surface</code>, <code>--bg</code>, <code>--bg-tinted</code>, <code>--surface-inverse</code> — not from borders. The current sequence has one flaw: <code>#cta</code> is navy, <code>#contact</code> is light, and the footer is navy again. A light strip sandwiched between two dark blocks reads as an interruption exactly where the page should feel most continuous. Merging <code>#cta</code> into <code>#contact</code> resolves the rhythm and the CTA duplication in one move.</p>
+
+        <p>The route graphic is a connective device, used only where it carries meaning — journey, progression, arrival. It appears in the hero, in Why-us as the line joining six stops, in How-we-work as three stages, and in Vision→Mission as the link between direction and purpose. That is the whole permitted list. It does not become a background texture.</p>
+      </section>
+
+      <!-- 11 ============================================================ -->
+      <section class="sec" id="s11">
+        <div class="sec__head"><span class="sec__num">11</span><h2 class="sec__title">Accessibility contract</h2></div>
+
+        <p>Binding on every stage. The current build already satisfies most of it; two items below are open defects.</p>
+
+        <ul class="list">
+          <li><strong>Focus is always visible.</strong> Including on navy grounds, where the blue ring measures 1.84:1 and is replaced with white at 8.53:1 — already handled and to be preserved.</li>
+          <li><strong>Never colour alone.</strong> Active, selected, and error states all carry a second signal. <span class="chip chip--fail">Open</span> The mobile drawer's active link is colour-only.</li>
+          <li><strong>Primary blue is a fill colour, not a text colour on light grounds.</strong> <span class="chip chip--fail">Open</span> <code>#4975BA</code> on the page ground <code>#F6F8FB</code> measures <b>4.35:1</b> — below the 4.5:1 threshold. It affects <code>.section-label__num</code> at 15px semibold in <code>#about</code>, <code>#services</code> and <code>#contact</code>. The fix is a token, not a brand change: primary-coloured <em>text</em> resolves to navy <code>#2C4C82</code> at 8.53:1, which is already in the palette. Blue keeps every fill, icon and graphic use.</li>
+          <li><strong>44px minimum targets</strong> on every interactive element, met today via <code>--tap-min</code>.</li>
+          <li><strong>Semantic structure and RTL order</strong> — one <code>h1</code>, ordered headings, <code>&lt;ol&gt;</code> where sequence is real, logical properties throughout.</li>
+          <li><strong>Motion never carries meaning</strong> and always yields to <code>prefers-reduced-motion</code>.</li>
+        </ul>
+      </section>
+
+      <!-- 12 ============================================================ -->
+      <section class="sec" id="s12">
+        <div class="sec__head"><span class="sec__num">12</span><h2 class="sec__title">Motion and performance budget</h2></div>
+
+        <p>Interactions stay in the existing token range: <code>--dur-fast</code> 150ms for feedback, <code>--dur-normal</code> 260ms for transitions, <code>--dur-slow</code> 420ms for entrances. No parallax, no scroll-linked animation, no hover effect that moves layout.</p>
+
+        <h3>The reveal system is a hard dependency on JavaScript</h3>
+        <p><code>[data-reveal]</code> sets <code>opacity:0</code> in CSS and relies on script to add <code>.is-inview</code>. There is no <code>&lt;noscript&gt;</code> anywhere in the document. If the script fails to parse, is blocked, or errors before that block runs, the page renders as an empty shell — headline, lead, every card and every section invisible, on a site whose audience includes people using assistive technology and older devices.</p>
+        <p>The reveal also delays the largest contentful paint on purpose: above-fold elements are staggered at 70ms intervals and then transition over 420ms, so the headline finishes painting several hundred milliseconds after it could have.</p>
+
+        <div class="note">
+          <h4>Fix — invert the default</h4>
+          <p>Content is visible unless script says otherwise. An inline script in <code>&lt;head&gt;</code> marks the document as script-capable; the <code>opacity:0</code> rule applies only under that mark. Nothing is hidden by a stylesheet that a failure can strand.</p>
+          <p>Above-fold elements are exempt from the stagger entirely — the hero headline and lead paint immediately, and the reveal applies from the second stop onward.</p>
+        </div>
+
+        <p>Two further constraints carried forward: every media frame reserves its box with <code>aspect-ratio</code> before load, and the hero's LCP image — currently a 1200×1200 asset served from a third-party host with no <code>srcset</code> and no preconnect, down to a 350&nbsp;px-wide box on a phone — is self-hosted and responsive before launch. The source file's own comment already flags this.</p>
+      </section>
+
+      <!-- 13 ============================================================ -->
+      <section class="sec" id="s13">
+        <div class="sec__head"><span class="sec__num">13</span><h2 class="sec__title">Findings, ranked</h2></div>
+
+        <p class="lede">Ten defects in the current build, ordered by how much visitor value each one costs. P1–P3 are architectural and belong to this stage's remit; P4–P10 are scheduled against the stage that owns the affected surface.</p>
+
+        <div class="find find--p1">
+          <div class="find__head"><span class="find__id">P1</span><h3 class="find__title" style="margin:0">The mobile header exposes no action</h3><span class="chip chip--fail">Stage 02</span></div>
+          <dl>
+            <dt>Evidence</dt><dd><code>.site-nav,.site-header__cta{display:none}</code> at <code>max-width:767px</code>. The hamburger is the only interactive control in the mobile header.</dd>
+            <dt>Impact</dt><dd>Journey D — the visitor with the most urgent need — must open a menu before they can do anything. <b>Three taps and a jump past seven sections</b> to reach a phone call. The phone number itself is not visible anywhere until stop 08.</dd>
+            <dt>Fix</dt><dd>A persistent action beside the menu trigger at every breakpoint, icon-only if space demands, with an accessible label. The drawer keeps its own CTA and gains direct call and WhatsApp controls above the link list.</dd>
+          </dl>
+        </div>
+
+        <div class="find find--p1">
+          <div class="find__head"><span class="find__id">P2</span><h3 class="find__title" style="margin:0">The page is invisible without JavaScript</h3><span class="chip chip--fail">Stage 02</span></div>
+          <dl>
+            <dt>Evidence</dt><dd><code>[data-reveal]{opacity:0}</code> in CSS; <code>.is-inview</code> added only by script; zero <code>&lt;noscript&gt;</code> in 2,058 lines. 40+ elements carry the attribute, including the <code>h1</code>.</dd>
+            <dt>Impact</dt><dd>Any script failure renders a blank page rather than a degraded one. Also delays LCP by the stagger plus a 420ms transition.</dd>
+            <dt>Fix</dt><dd>Gate the hiding rule behind a script-set class on the root element, and exempt above-fold content from the stagger.</dd>
+          </dl>
+        </div>
+
+        <div class="find find--p2">
+          <div class="find__head"><span class="find__id">P3</span><h3 class="find__title" style="margin:0">The mobile hero runs about two full screens</h3><span class="chip chip--warn">Stage 04</span></div>
+          <dl>
+            <dt>Evidence</dt><dd>At ≤767px the audience cards go single-column, the media frame becomes 4:3, buttons go full width below 480px, and the trust strip stacks to four rows below 520px. Estimated total ≈ <b>1,550px</b> at 390×844.</dd>
+            <dt>Impact</dt><dd>Two screens of hero before <span class="ar" dir="rtl">من نحن</span>. Inverts the §11 mobile priority order — supporting material outweighs the message.</dd>
+            <dt>Fix</dt><dd>Hero on mobile carries headline, lead, audience cards, action pair, image. The trust strip returns to Why-us, which owns those claims per §08's ledger.</dd>
+          </dl>
+        </div>
+
+        <div class="find find--p2">
+          <div class="find__head"><span class="find__id">P4</span><h3 class="find__title" style="margin:0"><code>#cta</code> and <code>#contact</code> are adjacent duplicates</h3><span class="chip chip--warn">Stage 11/12</span></div>
+          <dl>
+            <dt>Evidence</dt><dd>Two consecutive sections, both headed <span class="ar" dir="rtl">تواصل معنا</span> in intent, one directly above the other. Grounds run navy → light → navy into the footer.</dd>
+            <dt>Impact</dt><dd>Asks the same question twice at the moment of decision, and interrupts the closing rhythm with a light band between two dark ones. <code>#cta</code>'s secondary action also points backward to stop 04.</dd>
+            <dt>Fix</dt><dd>Fold <code>#cta</code> into <code>#contact</code> as its opening block. Drop the backward tertiary. Nine stops become eight sections plus the footer.</dd>
+          </dl>
+        </div>
+
+        <div class="find find--p2">
+          <div class="find__head"><span class="find__id">P5</span><h3 class="find__title" style="margin:0">Scroll-spy blanks the navigation across a third of the page</h3><span class="chip chip--warn">Stage 02</span></div>
+          <dl>
+            <dt>Evidence</dt><dd><code>setActive(id)</code> matches links by <code>href</code>. Four observed sections have no corresponding link, so all links lose <code>.is-active</code> and <code>aria-current</code>.</dd>
+            <dt>Impact</dt><dd>No "you are here" for four of nine stops, and no <code>aria-current</code> for screen-reader users across the same stretch.</dd>
+            <dt>Fix</dt><dd>Parent mapping, per §06. Header stays at five items.</dd>
+          </dl>
+        </div>
+
+        <div class="find find--p3">
+          <div class="find__head"><span class="find__id">P6</span><h3 class="find__title" style="margin:0">Primary blue fails AA as text on the page ground</h3><span class="chip chip--n">Stage 03</span></div>
+          <dl>
+            <dt>Evidence</dt><dd><code>#4975BA</code> on <code>#F6F8FB</code> = <b>4.35:1</b>, below 4.5:1. Affects <code>.section-label__num</code> at 15px semibold in three sections. On pure white it is 4.63:1 — passing, but with no margin.</dd>
+            <dt>Impact</dt><dd>Section numbering, a wayfinding element, sits under the AA threshold on three of nine stops.</dd>
+            <dt>Fix</dt><dd>Split the role at token level: navy <code>#2C4C82</code> (8.53:1) for primary-coloured text on light grounds, blue for every fill and graphic. Both are already brand colours — the identity does not change.</dd>
+          </dl>
+        </div>
+
+        <div class="find find--p3">
+          <div class="find__head"><span class="find__id">P7</span><h3 class="find__title" style="margin:0">Four trust claims are told three times before Services</h3><span class="chip chip--n">Stage 04/06</span></div>
+          <dl>
+            <dt>Evidence</dt><dd>Hero trust strip, About facts, and Why-us items 01–04 restate the same four claims in near-identical wording. See the ledger in §08.</dd>
+            <dt>Impact</dt><dd>Roughly 300px of pure repetition on a phone, and a page that reads as padded rather than confident.</dd>
+            <dt>Fix</dt><dd>One claim, one home. Placement only — no approved wording is altered.</dd>
+          </dl>
+        </div>
+
+        <div class="find find--p3">
+          <div class="find__head"><span class="find__id">P8</span><h3 class="find__title" style="margin:0">Mobile drawer active state is colour-only</h3><span class="chip chip--n">Stage 02</span></div>
+          <dl>
+            <dt>Evidence</dt><dd><code>.mobile-nav__link.is-active{color:var(--color-primary)}</code> and nothing further. The desktop link adds an <code>::after</code> underline bar.</dd>
+            <dt>Impact</dt><dd>Direct §12 violation on the breakpoint where the drawer is the only navigation.</dd>
+            <dt>Fix</dt><dd>Add a non-colour marker matching the desktop treatment.</dd>
+          </dl>
+        </div>
+
+        <div class="find find--p3">
+          <div class="find__head"><span class="find__id">P9</span><h3 class="find__title" style="margin:0">Hero LCP image is third-party, oversized, and unresponsive</h3><span class="chip chip--n">Pre-launch</span></div>
+          <dl>
+            <dt>Evidence</dt><dd><code>fetchpriority="high"</code> on a 1200×1200 asset from <code>i.ibb.co</code>, no <code>srcset</code>, no preconnect for that host, rendered into a ~350px box on a phone.</dd>
+            <dt>Impact</dt><dd>An extra DNS and TLS handshake on the critical path, and several times the necessary bytes on mobile.</dd>
+            <dt>Fix</dt><dd>Self-host, add a <code>&lt;picture&gt;</code> with <code>srcset</code>. The source file's own comment already calls for this.</dd>
+          </dl>
+        </div>
+
+        <div class="find find--p3">
+          <div class="find__head"><span class="find__id">P10</span><h3 class="find__title" style="margin:0">Off-system gold hardcoded in the hero</h3><span class="chip chip--n">Stage 03 — decision needed</span></div>
+          <dl>
+            <dt>Evidence</dt><dd><code>#8a6a12</code> and <code>#b08a2e</code> written directly into <code>.hero__eyebrow-gold</code> and <code>.hero__divider</code>. Neither exists in the token set, whose own header states that sections must never hard-code values.</dd>
+            <dt>Impact</dt><dd>An accent outside the approved palette, invisible to any future brand change because it bypasses the tokens.</dd>
+            <dt>Fix</dt><dd>Not a Stage 01 call. Either promote it to a named brand token or remove it — a decision for whoever owns the identity, flagged here so it is made deliberately rather than inherited by default.</dd>
+          </dl>
+        </div>
+      </section>
+
+      <!-- 14 ============================================================ -->
+      <section class="sec" id="s14">
+        <div class="sec__head"><span class="sec__num">14</span><h2 class="sec__title">The §20 architectural test, scored honestly</h2></div>
+
+        <p>Scored against the build as it stands, not against the architecture proposed above. Every <span class="chip chip--fail">No</span> and <span class="chip chip--warn">Partial</span> has a finding assigned to it.</p>
+
+        <div class="tw">
+          <table>
+            <thead><tr><th class="num">#</th><th>Question</th><th>Verdict</th><th>Ref</th></tr></thead>
+            <tbody>
+              <tr><td class="num">1</td><td>Understand the company within seconds?</td><td><span class="chip chip--warn">Partial</span><small>Yes on desktop. On mobile the descriptor is one of eight stacked hero blocks.</small></td><td class="num">P3</td></tr>
+              <tr><td class="num">2</td><td>Identify the relevant service without reading everything?</td><td><span class="chip chip--pass">Yes</span><small>Seven titled services, scannable by heading alone.</small></td><td class="num">—</td></tr>
+              <tr><td class="num">3</td><td>Is the primary CTA obvious?</td><td><span class="chip chip--fail">No</span><small>Absent from the mobile header entirely.</small></td><td class="num">P1</td></tr>
+              <tr><td class="num">4</td><td>Can a mobile visitor make contact quickly?</td><td><span class="chip chip--fail">No</span><small>Three taps minimum, menu first, number never visible before stop 08.</small></td><td class="num">P1</td></tr>
+              <tr><td class="num">5</td><td>Does every section have a clear purpose?</td><td><span class="chip chip--fail">No</span><small><code>#cta</code> duplicates <code>#contact</code> immediately above it.</small></td><td class="num">P4</td></tr>
+              <tr><td class="num">6</td><td>Does each section lead naturally to the next?</td><td><span class="chip chip--pass">Yes</span><small>The question-chain in §04 holds across all nine stops.</small></td><td class="num">—</td></tr>
+              <tr><td class="num">7</td><td>Is the navigation concise?</td><td><span class="chip chip--pass">Yes</span><small>Five items, unchanged.</small></td><td class="num">—</td></tr>
+              <tr><td class="num">8</td><td>Secondary sections reachable without cluttering the header?</td><td><span class="chip chip--warn">Partial</span><small>Reachable via footer, but the nav reports "nowhere" while the visitor is inside them.</small></td><td class="num">P5</td></tr>
+              <tr><td class="num">9</td><td>Does it work equally in RTL desktop, tablet and mobile?</td><td><span class="chip chip--warn">Partial</span><small>RTL is genuinely correct at every tier. Mobile fails on hero length and header action, not on direction.</small></td><td class="num">P1, P3</td></tr>
+              <tr><td class="num">10</td><td>Does it feel like one journey rather than separate sections?</td><td><span class="chip chip--warn">Partial</span><small>Triple-told trust claims and the navy-light-navy close fragment it.</small></td><td class="num">P4, P7</td></tr>
+              <tr><td class="num">11</td><td>Has the existing identity remained untouched?</td><td><span class="chip chip--warn">Partial</span><small>Two gold values were introduced outside the palette and outside the token system.</small></td><td class="num">P10</td></tr>
+              <tr><td class="num">12</td><td>Has any unsupported content been invented?</td><td><span class="chip chip--pass">No — clean</span><small>Checked line by line. No fabricated statistic, certification, partnership or award. Every trust item traces to approved copy.</small></td><td class="num">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 15 ============================================================ -->
+      <section class="sec" id="s15">
+        <div class="sec__head"><span class="sec__num">15</span><h2 class="sec__title">Handoff to Stage 02</h2></div>
+
+        <div class="handoff">
+          <p style="margin-bottom:1.1rem"><strong>Stage 02 covers the global header and navigation UX only.</strong> It inherits these decisions and resolves four of the ten findings. It does not touch any section body.</p>
+          <ol>
+            <li><strong>Restore a persistent header action at every breakpoint</strong> — resolves P1, and with it test questions 3, 4 and half of 9.</li>
+            <li><strong>Add parent mapping to the scroll-spy</strong> so the active state never blanks — resolves P5 and question 8.</li>
+            <li><strong>Give the drawer a non-colour active marker</strong> and direct call/WhatsApp controls above the link list — resolves P8 and completes Journey D.</li>
+            <li><strong>Gate the reveal system behind a script-set root class</strong> — resolves P2. It sits in the global layer, so it belongs to the header stage rather than to any section.</li>
+          </ol>
+          <p style="margin:1.3rem 0 0;color:var(--ink-2)">Unchanged and not open for revision in Stage 02: the five primary navigation items and their order, the two-tier navigation model, the sticky header behaviour, the token system, the brand palette, and every word of approved Arabic copy.</p>
+        </div>
+      </section>
+
+      <footer class="foot">
+        Stage 01 · Global UX Architecture · <span class="ar" dir="rtl">عون الدرب للنقل المتخصص</span><br>
+        Architecture only — no visual redesign, no identity change, no copy change.<br>
+        Contrast values measured with the WCAG 2.x relative-luminance formula. Hero height estimated at 390×844.
+      </footer>
+
+    </main>
+  </div>
+</div>
