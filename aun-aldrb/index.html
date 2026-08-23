@@ -754,7 +754,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 /* .site-main reserves --header-h (Stage 02), so the hero must not reserve it a
    second time — that was ~80px of dead space above the eyebrow (§16). */
 .hero{position:relative;overflow:clip;
-  padding-block:clamp(1.75rem,4vw,3rem) clamp(2.5rem,5vw,4.5rem)}
+  padding-block:clamp(1rem,2.5vw,1.75rem) clamp(2.5rem,5vw,4.5rem)}
 .hero__inner{position:relative;z-index:1;display:grid;gap:clamp(2rem,5vw,3.5rem);align-items:center}
 @media(min-width:1024px){
   .hero__inner{grid-template-columns:minmax(0,0.95fr) minmax(0,1.05fr);gap:clamp(2.5rem,5vw,5rem)}
@@ -1215,7 +1215,9 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 .site-header__cta{gap:var(--sp-8)}
 .site-header__cta svg{width:18px;height:18px;flex:0 0 auto}
 
-@media(min-width:1024px){.hero__inner{align-items:center}}
+/* Content starts at the top of the row: centring it against a tall media
+   column was what pushed the eyebrow down and away from the header. */
+@media(min-width:1024px){.hero__inner{align-items:start}}
 
 /* -- LEVEL 01 · eyebrow ---------------------------------------------------- */
 .hero__eyebrow{display:inline-flex;align-items:center;
@@ -1254,11 +1256,15 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 .hero__actions{margin-block-start:clamp(1.5rem,3vw,2.25rem)}
 
 /* -- LEVEL 06 · media (§05/§06/§18) ---------------------------------------- */
-/* Editorial portrait on desktop; progressively wider crops down the tiers so
-   the image never eats the mobile viewport. object-position keeps the two
-   people and the ramp in frame at every ratio. */
-.hero__media-frame{aspect-ratio:4/5}
-.hero__media-frame img{object-position:50% 42%}
+/* The photograph is transparent at the top and sides, so it carries no frame:
+   no ground, no radius, no shadow. It sits directly on the page.
+   The source has a tall band of empty pixels above the subject; anchoring the
+   crop to the bottom trims that band. Because there is no ground behind the
+   image, the crop is invisible — it removes nothing but transparency, and the
+   sides are untouched, so the cut-out edge still reads. */
+.hero__media-frame{background:none;box-shadow:none;border-radius:0;
+  overflow:hidden;aspect-ratio:3/2}
+.hero__media-frame img{width:100%;height:100%;object-fit:cover;object-position:50% 100%}
 
 /* -- LEVEL 07 · trust strip (§12/§13) -------------------------------------- */
 /* A contained card, not a full-bleed banner — it closes the hero without
@@ -1287,14 +1293,12 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
    ========================================================================== */
 @media(max-width:1023px){
   .hero__content{max-width:none}
-  .hero__media{max-width:38rem;margin-inline:auto}
-  .hero__media-frame{aspect-ratio:16/10}
+  .hero__media{max-width:34rem;margin-inline:auto}
 }
 
 @media(max-width:767px){
   .hero__media{max-width:none}
-  .hero__media-frame{aspect-ratio:16/9}
-  .hero__media-frame img{object-position:50% 45%}
+  .hero__inner{gap:var(--sp-24)}
 
   /* Audience cues become compact rows: the same three cards cost roughly 230px
      instead of 460px, which is what keeps the primary action above the fold.

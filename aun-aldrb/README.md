@@ -112,6 +112,20 @@ The hero was reserving `--header-h` a second time on top of the reservation
 - **No route waypoint pin.** §14 says not to add decorative road graphics, and
   the position it would occupy is behind the trust card anyway.
 
+### Hero media: no frame
+
+The photograph is transparent at the top and sides, so it carries no container
+— no ground, no radius, no shadow. The source has a tall band of empty pixels
+above the subject, so the crop is anchored to the bottom (`object-position:
+50% 100%`) to trim it. With no ground behind the image the crop is invisible:
+it removes only transparency, and the sides are untouched so the cut-out edge
+still reads.
+
+The row is top-aligned on desktop. Centring the content against a tall media
+column was pushing the eyebrow about 75px down and making the hero read as
+detached from the header. The eyebrow now sits 28px below the header, and the
+whole desktop hero — trust card included — fits inside a 900px viewport.
+
 ## Handoff
 
 Stage 04 covers About / من نحن. Open from Stage 01: **P4** (`#cta` duplicates
