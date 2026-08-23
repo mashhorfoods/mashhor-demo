@@ -139,7 +139,16 @@
   --grid-gap:clamp(1rem,2vw,1.5rem);
 
   /* -- 9. RADIUS (STAGE 01 shape scale) ----------------------------------- */
-  --radius-xs:2px; --radius-sm:10px; --radius-md:16px; --radius-lg:24px;
+  /* CURVE SYSTEM (§03) — one hierarchy, four steps, used everywhere.
+     Marks -> controls -> cards -> media/panels -> featured containers.
+     Deliberately short: a component that needs a fifth radius is a component
+     that has drifted out of the system. --radius-pill stays for chips and
+     circles only; §31 rules out pill-shaped cards, images and paragraphs. */
+  --radius-xs:2px;      /* marks, rules, focus corners           */
+  --radius-sm:12px;     /* controls: buttons, inputs, chips      */
+  --radius-md:18px;     /* cards and tiles                       */
+  --radius-lg:26px;     /* media frames and information panels   */
+  --radius-xl:34px;     /* featured CTA containers               */
   --radius-pill:999px; --radius-circle:50%;
   --radius-button:var(--radius-sm);
   --radius-card:var(--radius-md);
@@ -1021,13 +1030,16 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
    Arabic, which §08 rules out. The column is trimmed instead — number 20px,
    node 44px — so the text still gets ~270px of a 350px screen. */
 @media(max-width:767px){
-  .why__item{grid-template-columns:20px 44px minmax(0,1fr);column-gap:var(--sp-8)}
+  /* 20px could not hold a tabular "01" at --fs-small: the numerals were
+     clipped by 3px on every phone. The column is 24px and the connector
+     follows the node centre. */
+  .why__item{grid-template-columns:24px 44px minmax(0,1fr);column-gap:var(--sp-8)}
   .why__num{line-height:44px}
   .why__node{width:44px;height:44px}
   .why__node svg{width:20px;height:20px}
   .why__head{min-height:44px;gap:var(--sp-8)}
   .why__desc{max-width:none}
-  .why__list::before{inset-inline-start:49px;inset-block:22px 22px}
+  .why__list::before{inset-inline-start:53px;inset-block:22px 22px}
   .why__actions{display:grid;grid-template-columns:1fr}
   .why__actions .btn{width:100%}
 }
@@ -1063,19 +1075,45 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 @media(min-width:600px){.services__grid{grid-template-columns:repeat(2,1fr)}}
 @media(min-width:1024px){.services__grid{grid-template-columns:repeat(3,1fr)}}
 
-/* -- the tile (§08) --------------------------------------------------------- */
-/* White surface, hairline border, no shadow and no gradient. Informational,
-   so nothing here implies a destination (§13). */
+/* -- the card (§09/§10/§15) -------------------------------------------------
+   Fixed reading order: icon, title, image, description, action. The
+   description is the only flexible band, so the action sits at the same
+   height on every card in a row however long the copy runs (§17/§18).
+   Depth comes from border, whitespace and proportion — no gradient, no
+   glass, no heavy shadow (§28). */
 .service{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);
-  padding:clamp(1.35rem,2.6vw,1.85rem);display:flex;flex-direction:column;gap:var(--sp-12);
+  padding:clamp(1.35rem,2.6vw,1.85rem);display:flex;flex-direction:column;gap:var(--sp-16);
   transition:border-color var(--dur-normal) var(--ease-smooth)}
 @media(hover:hover){.service:hover{border-color:var(--aun-sky)}}
+
+/* the image band. Absent until a real photograph exists for that service —
+   the card composes correctly either way, and a placeholder would be worse
+   than the honest omission (§13: the image must represent the service). */
+.service__media{margin:0;overflow:hidden;border-radius:var(--radius-lg);background:var(--aun-mist)}
+.service__media img{display:block;width:100%;height:100%;object-fit:cover;
+  aspect-ratio:4/3;object-position:center;
+  transition:transform var(--dur-slow) var(--ease-smooth)}
+/* §26 — the geometry never changes; only the bitmap moves, inside its clip */
+@media(hover:hover){.service:hover .service__media img{transform:scale(1.02)}}
+@media(prefers-reduced-motion:reduce){.service__media img{transition:none}
+  .service:hover .service__media img{transform:none}}
+
+/* the description takes the slack so the actions line up across a row */
+.service__desc{flex:1 1 auto}
+.service__cta{align-self:flex-start;margin-block-start:var(--sp-4)}
+.service__cta svg{width:18px;height:18px;flex:0 0 auto;
+  transition:transform var(--dur-normal) var(--ease-smooth)}
+/* §27 — the arrow drifts toward the reading end; the button itself stays put */
+@media(hover:hover){.service:hover .service__cta svg{transform:translateX(-3px)}}
+@media(prefers-reduced-motion:reduce){.service__cta svg{transition:none}
+  .service:hover .service__cta svg{transform:none}}
 
 /* icon and number share the head row: recognition on the reading edge,
    orientation on the far edge, and the title always starts at the same height */
 .service__head{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-12)}
-.service__icon{display:grid;place-items:center;color:var(--color-primary)}
-.service__icon svg{width:34px;height:34px;stroke-width:1.5}
+.service__icon{display:grid;place-items:center;width:56px;height:56px;flex:0 0 auto;
+  border-radius:var(--radius-md);background:var(--aun-mist);color:var(--color-primary)}
+.service__icon svg{width:30px;height:30px;stroke-width:1.5}
 .service__num{font-family:var(--font-heading);font-weight:var(--fw-semibold);font-variant-numeric:tabular-nums;
   font-size:var(--fs-caption);line-height:1;color:var(--text-secondary);letter-spacing:.08em;
   padding:var(--sp-4) var(--sp-8);border-radius:var(--radius-sm);background:var(--bg-tinted)}
@@ -1090,7 +1128,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 
 /* -- the bridge to Contact (§20/§21) ---------------------------------------- */
 .services__cta{margin-block-start:clamp(1.5rem,3vw,2rem);
-  background:var(--surface-inverse);color:var(--text-on-inverse);border-radius:var(--radius-md);
+  background:var(--surface-inverse);color:var(--text-on-inverse);border-radius:var(--radius-xl);
   padding:clamp(1.5rem,3vw,2rem) clamp(1.5rem,3vw,2.5rem);
   display:flex;align-items:center;gap:clamp(1rem,2.5vw,1.75rem);flex-wrap:wrap}
 .services__cta-icon{width:52px;height:52px;flex:0 0 auto;border-radius:var(--radius-circle);
@@ -1104,7 +1142,8 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 
 /* -- responsive (§15/§16/§17) ----------------------------------------------- */
 @media(max-width:767px){
-  /* one service at a time, full content width — never two narrow tiles */
+  /* one card per row, and an action wide enough to be tapped without aiming */
+  .service__cta{align-self:stretch;width:100%}
   .services__cta{flex-direction:column;align-items:stretch;text-align:center}
   /* flex-basis is a HEIGHT once the bar becomes a column — 16rem of it, which
      inflated the bridge to 444px on a phone. */
@@ -1377,10 +1416,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
    (secondary) with a route leading toward the actions. Tokens + existing
    components only. No form, no map dependency.
    ========================================================================== */
-.contact__head{max-width:var(--container-narrow)}
-.contact__title{font-size:var(--fs-h2);line-height:var(--lh-tight);letter-spacing:var(--track-tight);
-  color:var(--color-secondary);margin-block-start:var(--sp-16)}
-.contact__lead{color:var(--text-secondary);margin-block-start:var(--sp-16);max-width:var(--measure)}
+.contact__lead{color:var(--text-secondary);max-width:var(--measure)}
 
 .contact__grid{display:grid;gap:clamp(1.5rem,4vw,2.5rem);margin-block-start:clamp(2.5rem,5vw,3.5rem)}
 @media(min-width:900px){.contact__grid{grid-template-columns:minmax(0,1.15fr) minmax(0,0.85fr);align-items:stretch}}
@@ -1412,6 +1448,32 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 .contact-info__value a{color:var(--color-primary);text-decoration:none}
 .contact-info__value a:hover{text-decoration:underline}
 .contact__dot{width:8px;height:8px;border-radius:var(--radius-circle);background:var(--color-primary);flex:0 0 auto}
+
+/* -- P4 · the opening invitation (§04/§05/§06/§29) --------------------------
+   A soft destination, not a rectangular band: the largest radius in the
+   system, generous inner spacing, the route continuing behind it. It carries
+   no button of its own — the invitation sets up the action, the card below
+   performs it, which is the whole point of folding #cta in here. */
+.contact__invite{position:relative;overflow:hidden;isolation:isolate;
+  background:var(--surface-inverse);color:var(--text-on-inverse);
+  border-radius:var(--radius-xl);
+  padding:clamp(2rem,5vw,3.5rem) clamp(1.5rem,4vw,3rem);text-align:center}
+.contact__invite-inner{position:relative;z-index:1;max-width:44rem;margin-inline:auto;
+  display:flex;flex-direction:column;align-items:center;gap:var(--sp-16)}
+.contact__invite .contact__label{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.22);color:#fff}
+.contact__tagline{font-family:var(--font-heading);font-weight:var(--fw-semibold);
+  font-size:var(--fs-body);letter-spacing:.02em;color:var(--aun-sky)}
+.contact__invite .contact__title{font-size:var(--fs-h1);line-height:var(--lh-tight);
+  letter-spacing:var(--track-tight);color:#fff;margin:0;text-wrap:balance}
+.contact__invite-text{font-family:var(--font-body);font-size:var(--fs-body-lg);
+  line-height:var(--lh-normal);color:var(--text-on-inverse-muted);max-width:46ch}
+/* the route continues behind the invitation, well under the text */
+.contact__invite-route{position:absolute;inset:0;z-index:0;pointer-events:none;
+  color:#fff;opacity:.10;overflow:hidden}
+.contact__invite-route svg{position:absolute;inset-block-start:50%;inset-inline-start:50%;
+  transform:translate(50%,-50%);width:min(140%,1100px);height:auto}
+
+.contact__lead{margin-block-start:clamp(2rem,4vw,3rem)}
 
 /* secondary — brand aside with route toward the actions */
 .contact__aside{position:relative;display:flex;flex-direction:column;justify-content:center;gap:var(--sp-24);
@@ -1958,6 +2020,10 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
               </div>
               <h3 class="service__title">النقل بواسطة الكرسي المتحرك</h3>
               <p class="service__desc">خدمة نقل آمنة ومريحة لمستخدمي الكراسي المتحركة، مع تجهيز المركبة بما يسهّل عملية الصعود والنزول.</p>
+              <a class="btn btn--secondary service__cta" href="#contact">
+                تواصل معنا
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+              </a>
             </article>
 
             <article class="service" data-reveal>
@@ -1967,6 +2033,10 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
               </div>
               <h3 class="service__title">النقل بواسطة الكرسي الكهربائي</h3>
               <p class="service__desc">مركبات مجهزة لاستيعاب الكراسي الكهربائية، مع مراعاة الأمان والثبات أثناء التنقل.</p>
+              <a class="btn btn--secondary service__cta" href="#contact">
+                تواصل معنا
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+              </a>
             </article>
 
             <article class="service" data-reveal>
@@ -1976,6 +2046,10 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
               </div>
               <h3 class="service__title">النقل بواسطة السرير الطبي</h3>
               <p class="service__desc">خدمة مخصصة للحالات التي تتطلب بقاء المستفيد على السرير طوال الرحلة، باستخدام وسائل نقل مناسبة.</p>
+              <a class="btn btn--secondary service__cta" href="#contact">
+                تواصل معنا
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+              </a>
             </article>
 
             <article class="service" data-reveal>
@@ -1985,6 +2059,10 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
               </div>
               <h3 class="service__title">خدمة مساعد السائق</h3>
               <p class="service__desc">إمكانية توفير مساعد أو أكثر لمرافقة المستفيد ومساعدته أثناء النقل، وفقًا لحالته واحتياجاته الخاصة.</p>
+              <a class="btn btn--secondary service__cta" href="#contact">
+                تواصل معنا
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+              </a>
             </article>
 
             <article class="service" data-reveal>
@@ -1994,6 +2072,10 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
               </div>
               <h3 class="service__title">النقل اليومي</h3>
               <p class="service__desc">خدمات نقل يومية لكبار السن وذوي الإعاقة، بما يوفر لهم تنقلًا آمنًا ومريحًا.</p>
+              <a class="btn btn--secondary service__cta" href="#contact">
+                تواصل معنا
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+              </a>
             </article>
 
             <article class="service" data-reveal>
@@ -2003,6 +2085,10 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
               </div>
               <h3 class="service__title">النقل إلى المستشفيات والمراكز الطبية</h3>
               <p class="service__desc">التوصيل إلى المستشفيات والمراكز الطبية، مع تقديم المساعدة وفقًا لاحتياجات المستفيد.</p>
+              <a class="btn btn--secondary service__cta" href="#contact">
+                تواصل معنا
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+              </a>
             </article>
 
             <article class="service" data-reveal>
@@ -2012,6 +2098,10 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
               </div>
               <h3 class="service__title">التنقل للمناسبات الاجتماعية</h3>
               <p class="service__desc">توفير وسائل نقل مناسبة ومريحة للتنقل إلى المناسبات والزيارات الاجتماعية.</p>
+              <a class="btn btn--secondary service__cta" href="#contact">
+                تواصل معنا
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+              </a>
             </article>
           </div>
 
@@ -2198,50 +2288,34 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
         </div>
       </section>
 
-      <!-- ==============================================================
-           FINAL CTA · #cta — STAGE 11 · الدعوة للتواصل
-           Calm, confident conclusion of the story -> Contact.
-           ============================================================== -->
-      <section class="section section--inverse cta" id="cta" data-section data-nav-parent="#contact" aria-labelledby="cta-h">
-
-        <!-- subtle route motif (§ graphic language) -->
-        <span class="cta__route" aria-hidden="true">
-          <svg viewBox="0 0 1100 420" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M-20 300 C 260 180 480 180 620 250 C 780 330 980 300 1120 170" stroke="currentColor" stroke-width="46" stroke-linecap="round"/>
-            <path d="M-20 250 C 250 140 470 150 620 215" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 14"/>
-          </svg>
-        </span>
-
-        <div class="container">
-          <div class="cta__inner">
-            <p class="cta__eyebrow" data-reveal>نُعين ونُعاون</p>
-            <h2 id="cta-h" class="cta__title" data-reveal>لنكن عونك في كل رحلة</h2>
-            <p class="cta__text" data-reveal>تواصل مع عون الدرب لمعرفة كيف تلائم خدمات النقل المتخصص احتياجاتك ونكون إلى جانبك في كل مرحلة من مراحل التنقل.</p>
-            <div class="cta__actions" data-reveal>
-              <a class="btn btn--on-inverse btn--lg" href="#contact">تواصل معنا</a>
-              <a class="btn btn--outline-inverse btn--lg" href="#services">اكتشف خدماتنا</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- route hint continuing into Contact -->
-        <span class="cta__continue" aria-hidden="true">
-          <svg viewBox="0 0 24 40" width="24" height="40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v28" stroke-dasharray="2 7"/><path d="M6 26l6 8 6-8"/></svg>
-        </span>
-      </section>
-
-      <!-- ==============================================================
+            <!-- ==============================================================
            CONTACT · #contact — 07 · STAGE 12 · تواصل معنا
            The final chapter — clear, practical contact actions.
            ============================================================== -->
       <section class="section contact" id="contact" data-section aria-labelledby="contact-h">
         <div class="container">
 
-          <div class="contact__head">
-            <p class="contact__label" data-reveal>تواصل معنا</p>
-            <h2 id="contact-h" class="contact__title" data-reveal>نُعين ونُعاون</h2>
-            <p class="contact__lead" data-reveal>نحن هنا لخدمتك. تواصل مع فريق عون الدرب لترتيب رحلة نقل متخصصة تناسب احتياجاتك، أو للاستفسار عن خدماتنا والمساعدة المتاحة.</p>
+          <!-- P4 — the standalone #cta section folded in as this section's
+               opening. It asked the same question #contact answers, two
+               hundred pixels above it, and put a navy band between two light
+               ones. One conversion moment now, not two. Its two buttons are
+               gone: the primary linked to this very section, and the tertiary
+               pointed back up to Services at the point of conversion. The
+               real actions are WhatsApp and call, directly below. -->
+          <div class="contact__invite" data-reveal>
+            <span class="contact__invite-route" aria-hidden="true"><svg viewBox="0 0 1100 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M-20 300 C 260 180 480 180 620 250 C 780 330 980 300 1120 170" stroke="currentColor" stroke-width="46" stroke-linecap="round"/>
+            <path d="M-20 250 C 250 140 470 150 620 215" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 14"/>
+          </svg></span>
+            <div class="contact__invite-inner">
+              <p class="contact__label">تواصل معنا</p>
+              <p class="contact__tagline">نُعين ونُعاون</p>
+              <h2 id="contact-h" class="contact__title">لنكن عونك في كل رحلة</h2>
+              <p class="contact__invite-text">تواصل مع عون الدرب لمعرفة كيف تلائم خدمات النقل المتخصص احتياجاتك ونكون إلى جانبك في كل مرحلة من مراحل التنقل.</p>
+            </div>
           </div>
+
+          <p class="contact__lead" data-reveal>نحن هنا لخدمتك. تواصل مع فريق عون الدرب لترتيب رحلة نقل متخصصة تناسب احتياجاتك، أو للاستفسار عن خدماتنا والمساعدة المتاحة.</p>
 
           <div class="contact__grid">
 

@@ -55,7 +55,8 @@ const ok = (c, m) => console.log(`  ${c ? 'PASS' : '**FAIL**'}  ${m}`);
   // between sections changes whenever a section's height changes. Jump
   // instantly so this measures the scroll-spy, not the animation.
   await p.addStyleTag({ content: 'html{scroll-behavior:auto!important}' });
-  for (const [id, expect] of [['how-we-work','#services'],['vision-mission','#about'],['values','#about'],['cta','#contact'],['about','#about']]) {
+  // #cta was folded into #contact (P4), so it is no longer a section to map
+  for (const [id, expect] of [['how-we-work','#services'],['vision-mission','#about'],['values','#about'],['contact','#contact'],['about','#about']]) {
     await p.evaluate(i => document.getElementById(i).scrollIntoView(), id);
     await p.waitForTimeout(400);
     const r = await p.evaluate(() => {

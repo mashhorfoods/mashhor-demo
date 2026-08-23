@@ -89,6 +89,31 @@ side. No form, no chat widget, no invented channel.
 **All ten sections are now upgraded.** The `section-label` component is gone
 from the page — every section leads with the shared pill.
 
+## Curve system + P4
+
+**P4 resolved.** The standalone `#cta` section is folded into `#contact` as its
+opening invitation — a curved navy panel with the route behind it, then the
+practical contact card. It asked the same question `#contact` answered two
+hundred pixels below, and put a navy band between two light ones. Its two
+buttons are gone: the primary linked to the section it already sat in, and the
+tertiary pointed back up to Services at the point of conversion. The page is
+eight sections now, one conversion moment.
+
+**Curve system.** One hierarchy, four steps, used everywhere:
+`--radius-sm 12px` controls · `--radius-md 18px` cards · `--radius-lg 26px`
+media and panels · `--radius-xl 34px` featured CTA containers. Both featured
+containers — the contact invitation and the services bridge — share the same
+radius, which is the point of §29/§30. `--radius-pill` stays for chips and
+circles only.
+
+**Service cards.** Fixed reading order: icon, title, image, description,
+action. The description is the only flexible band, so the action sits at the
+same height on every card in a row whatever the copy length. Hover is a border
+firm, a 1.02 image scale inside its own clip, and a 3px arrow drift — the card
+geometry never moves, and all of it is dropped under reduced motion.
+
+**The image band is not yet populated** — see below.
+
 ## Typography parse bug — repo-wide
 
 Every `clamp()` outside `brand/tokens.css` was written `1.55rem+2.9vw`, with no
@@ -114,6 +139,15 @@ anywhere, only whitespace.
 values differ — e.g. `--fs-display` is `1.4rem + 3.0vw` in tokens.css and
 `1.55rem + 2.9vw` in the site. Re-aligning them would change the rendered
 design, so it is left for a deliberate decision.
+
+## Waiting on assets
+
+Every service card reserves an image band (`.service__media`), styled and ready,
+but no `<figure>` is emitted yet: there is no photograph for any individual
+service. The brief requires the image to represent the actual service, and the
+three photographs supplied so far (hero, about, why us) all show wheelchair
+transport — they would misrepresent the medical-bed, daily-transport and social-
+occasions services. Seven URLs will light the band up with no further work.
 
 ## Open findings from Stage 01
 
