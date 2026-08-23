@@ -45,6 +45,16 @@ became a single divided card (label only, no invented descriptions), and the
 section label became the same pill the hero eyebrow uses. `#about` went from
 2774px to 1093px at 1440.
 
+**Stage 05 — why us.** The six reasons became stops on one route: number, node,
+title, description, joined by a dashed connector, with dividers instead of six
+cards. The number moved out of the heading row into its own column, the 24/7
+marker became a small chip beside its title rather than being flung to the end
+of the row, and the intro gained the section photograph. One primary action
+(`تواصل معنا`) closes the journey, with the existing tertiary pointing forward
+to Services. A current-stop emphasis marks position on desktop — colour only on
+the node, number and title, so nothing reflows — and it is skipped entirely
+under reduced motion.
+
 ## Typography parse bug — repo-wide
 
 Every `clamp()` outside `brand/tokens.css` was written `1.55rem+2.9vw`, with no
@@ -78,5 +88,6 @@ blue is 4.35:1 as text on the page ground — this is why the About lead is navy
 rather than the brighter blue the mockup shows · **P7** trust claims still told
 twice · **P9** hero image is third-party with no `srcset`.
 
-The `section-label` component (`01 —— name`) still runs in the six sections
-after About. Stages 05+ should carry the pill across, or About should go back.
+The `section-label` component (`01 —— name`) still runs in the five sections
+after Why Us — Services, How We Work, Vision, Values and Contact. Later stages
+should carry the pill across, or Hero/About/Why Us should go back.
