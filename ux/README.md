@@ -384,3 +384,46 @@ extra graphics, no background re-alternation. §08's rhythm (white, mist,
 navy) already exists and re-cutting it would be churn, not polish. §48 is
 explicit: whitespace over decoration, contrast over shadow, composition over
 components.
+
+## Hero — the composition from the mockup
+
+Rebuilt as one stage with two parts, matching the supplied reference. No copy
+changed; every string was already on the page.
+
+**Desktop.** The photograph takes the inline-end track and reaches the viewport
+edge; the white panel takes the inline-start track, reaches its own edge, and
+comes back over the photograph by `clamp(-5rem,-4vw,-2rem)` -- 58px at 1440.
+Both are stretched to the same height by the grid, so their top and bottom
+edges line up exactly (measured 80..685 for both at 1440). The panel's
+inline-start padding is `max(--container-pad, calc(50vw - --container-wide/2))`,
+which keeps its text on the same vertical line as every other section's
+container edge however wide the viewport gets.
+
+**A wrong turn worth recording.** The first attempt bled both parts outward with
+`calc(50% - 50vw)` margins. The stage already spans the viewport, so those
+margins pushed the panel 360px past the right edge and took its text with it.
+Removing them entirely was the fix -- each grid track already reaches its own
+edge.
+
+**Stale rules were the real obstacle.** The old floating-image hero left eight
+`.hero__media` / `.hero__media-frame` declarations behind, including
+`align-self:end`, three `max-width` caps and two `aspect-ratio`s on a wrapper
+element that no longer exists. They were quietly overriding the new composition
+-- the photograph measured 60px tall until they came out.
+
+**Mobile leads with the content, not the photograph.** A banner above the panel
+costs about 200px and pushed the primary action off a 375x667 screen (measured:
+CTA ending at 864 against a 667 fold). Keeping that action in the first screen
+is a Stage 03 requirement the harness still enforces, so the photograph sits
+below the panel and reaches up under it instead.
+
+**The road belongs to the photograph now.** It moved inside `.hero__media`, so
+it can only ever draw over the image, and it was restyled from sky (#D9E4F3,
+invisible on a photo) to navy with a white dashed centre line.
+
+**No intrinsic dimensions on the image.** It is an absolutely-filled bleed layer
+-- `position:absolute; inset:0; object-fit:cover` -- so its own dimensions cannot
+enter the layout, and they cannot be read from this environment either. The hero
+harness assertion moved from "width/height are 1200x1200" to "the LCP hint is
+preserved and the photograph fills its frame", which is what actually matters
+once the frame drives the crop.

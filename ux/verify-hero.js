@@ -11,7 +11,7 @@ const VP = [[1440,900],[1280,800],[1024,768],[768,1024],[430,932],[390,844],[375
   const p = await b.newPage();
   // external hosts are unreachable in this sandbox and stall `load`; abort them
   // so measurements are fast and deterministic (layout is unaffected: the media
-  // box is reserved by aspect-ratio, not by the bitmap).
+  // box is reserved by the grid track, not by the bitmap).
   const offline = pg => pg.route('**', r => /^file:/.test(r.request().url()) ? r.continue() : r.abort());
   await offline(p);
 
@@ -28,10 +28,12 @@ const VP = [[1440,900],[1280,800],[1024,768],[768,1024],[430,932],[390,844],[375
         heroH: Math.round(hero.getBoundingClientRect().height),
         eyebrow: box('.hero__eyebrow'), h1: box('.hero__title'), lead: box('.hero__lead'),
         aud: box('.hero__aud'), acts: box('.hero__actions'),
-        media: box('.hero__media-frame'), trust: box('.hero__trustbar'),
+        media: box('.hero__media'), trust: box('.hero__trustbar'),
         primary: box('.hero__actions .btn--primary'), secondary: box('.hero__actions .btn--secondary'),
         h1px: parseFloat(cs('.hero__title').fontSize),
-        ratio: cs('.hero__media-frame').aspectRatio,
+        // the media is a stretched bleed layer now, so its shape comes from the
+        // stage rather than from an aspect-ratio on a wrapper
+        ratio: (box('.hero__media').w / box('.hero__media').h).toFixed(2),
         audCols: cs('.hero__aud').gridTemplateColumns.split(' ').length,
         trustCols: cs('.hero__trustbar-inner').gridTemplateColumns.split(' ').length,
         overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -66,7 +68,10 @@ const VP = [[1440,900],[1280,800],[1024,768],[768,1024],[430,932],[390,844],[375
       eyebrowText: document.querySelector('.hero__eyebrow').textContent.trim(),
       alt: document.querySelector('.hero__media img').getAttribute('alt'),
       fetchpri: document.querySelector('.hero__media img').getAttribute('fetchpriority'),
-      dims: document.querySelector('.hero__media img').getAttribute('width')+'x'+document.querySelector('.hero__media img').getAttribute('height'),
+      imgFills: (() => { const f=document.querySelector('.hero__media'), i=f.querySelector('img');
+        const a=f.getBoundingClientRect(), b=i.getBoundingClientRect();
+        return Math.abs(a.width-b.width)<2 && Math.abs(a.height-b.height)<2; })(),
+      objFit: getComputedStyle(document.querySelector('.hero__media img')).objectFit,
       trustItems: [...document.querySelectorAll('.hero__trust b')].map(e=>e.textContent.trim()),
       audItems: [...document.querySelectorAll('.hero__aud-title')].map(e=>e.textContent.trim()),
       audClickable: [...document.querySelectorAll('.hero__aud-card')].some(e=>e.matches('a,button')||e.onclick||getComputedStyle(e).cursor==='pointer'),
@@ -80,7 +85,11 @@ const VP = [[1440,900],[1280,800],[1024,768],[768,1024],[430,932],[390,844],[375
   ok(r2.h1Text === 'نُعين ونُعاون', `h1 reads exactly "${r2.h1Text}" despite the two-tone split`);
   ok(r2.eyebrowText === 'رعاية متخصصة وآمنة', `eyebrow unchanged: "${r2.eyebrowText}"`);
   ok(!!r2.alt && r2.alt.length > 30, 'image alt is meaningful');
-  ok(r2.fetchpri === 'high' && r2.dims === '1200x1200', `loading strategy preserved (${r2.fetchpri}, ${r2.dims})`);
+  // The photograph is an absolutely-filled bleed layer, so its intrinsic size
+  // cannot shift layout and is deliberately not declared (it also cannot be read
+  // from this environment). The LCP hint and the cover fill are what matter.
+  ok(r2.fetchpri === 'high', `LCP hint preserved (fetchpriority=${r2.fetchpri})`);
+  ok(r2.imgFills && r2.objFit === 'cover', `photograph fills its frame (${r2.objFit})`);
   ok(!r2.audClickable, '§22 audience cues are not fake-interactive');
   console.log(`   audience: ${r2.audItems.join(' · ')}`);
   console.log(`   trust:    ${r2.trustItems.join(' · ')}`);

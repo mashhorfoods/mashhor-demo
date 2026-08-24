@@ -807,28 +807,66 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
    ========================================================================== */
 /* .site-main reserves --header-h (Stage 02), so the hero must not reserve it a
    second time — that was ~80px of dead space above the eyebrow (§16). */
-.hero{position:relative;overflow:clip;
-  padding-block:clamp(1rem,2.5vw,1.75rem) clamp(2.5rem,5vw,4.5rem)}
-.hero__inner{position:relative;z-index:1;display:grid;gap:clamp(2rem,5vw,3.5rem);align-items:center}
+.hero{position:relative;overflow:clip;padding-block:0}
+
+/* ---------------------------------------------------------------------------
+   HERO COMPOSITION — one stage, two parts.
+   The photograph bleeds off the inline-end edge of the viewport and the panel
+   rides over it from the inline start, bleeding off the other edge. Neither
+   sits in the container: the container's gutter would put a stripe of page
+   ground down both sides and the composition would stop being a composition.
+   Below 1024 the two stack and the photograph becomes a banner.
+   --------------------------------------------------------------------------- */
+.hero__stage{position:relative;z-index:1;display:grid}
+
 @media(min-width:1024px){
-  .hero__inner{grid-template-columns:minmax(0,0.95fr) minmax(0,1.05fr);gap:clamp(2.5rem,5vw,5rem)}
+  .hero__stage{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:stretch;
+    min-block-size:clamp(30rem,42vw,40rem)}
+  /* The stage already spans the viewport, so each track reaches its own edge
+     and no bleed margin is needed -- an earlier attempt pushed the panel out
+     with a negative margin and sent its text 360px off-screen. */
+  .hero__media{grid-column:2;grid-row:1;position:relative;margin:0}
+  /* the panel holds the inline-start track and reaches back over the
+     photograph by a controlled amount */
+  .hero__panel{grid-column:1;grid-row:1;position:relative;z-index:2;
+    margin-inline-end:clamp(-5rem,-4vw,-2rem);
+    display:flex;align-items:center;
+    background:var(--surface);border:1px solid var(--border);
+    border-inline-start:none;
+    border-start-end-radius:var(--radius-xl);border-end-end-radius:var(--radius-xl);
+    box-shadow:var(--elev-featured);
+    padding-block:clamp(2.5rem,4.5vw,4rem);
+    /* the inline-start padding lines the text up with every other section's
+       container edge, however wide the viewport gets */
+    padding-inline:max(var(--container-pad),calc(50vw - var(--container-wide)/2)) clamp(2.5rem,4vw,4rem)}
+  .hero__content{max-width:36rem}
 }
-/* Small desktop: the content column takes priority. Below ~1280 the three
-   audience cues and the two buttons need the width more than the photo does. */
-@media(min-width:1024px) and (max-width:1279px){
-  .hero__inner{grid-template-columns:minmax(0,1.15fr) minmax(0,0.85fr);gap:clamp(2rem,3.5vw,3rem)}
-  .hero__aud{gap:var(--sp-8)}
-  .hero__aud-card{padding-inline:var(--sp-8)}
+
+/* Below 1024 the two parts stack. The photograph goes BELOW the panel, not
+   above it: leading with a banner costs about 200px and pushed the primary
+   action off a 375x667 screen (measured: CTA ending at 864 against a 667 fold),
+   and keeping that action in the first screen is a Stage 03 requirement the
+   harness still enforces. The photograph reaches up under the panel instead,
+   so the two still read as one composition. */
+@media(max-width:1023px){
+  .hero__stage{gap:0}
+  .hero__panel{order:1;position:relative;z-index:2;background:var(--surface);
+    border:1px solid var(--border);border-radius:var(--radius-lg);
+    box-shadow:var(--elev-card);
+    margin-inline:var(--container-pad);margin-block-start:clamp(1rem,3vw,1.75rem);
+    padding:clamp(1.5rem,5vw,2.25rem)}
+  .hero__media{order:2;margin:0;margin-block-start:clamp(-3.5rem,-7vw,-1.5rem)}
 }
-/* Mid desktop: even split — the content column is wide enough for the three
-   cues on two lines, and the photograph is no longer squeezed. */
-@media(min-width:1280px) and (max-width:1439px){
-  .hero__inner{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-}
-/* Wide desktop: the content is capped at 34rem anyway, so the surplus goes to
-   the photograph rather than sitting as dead track. */
-@media(min-width:1440px){
-  .hero__inner{grid-template-columns:minmax(0,0.85fr) minmax(0,1.15fr)}
+
+/* the photograph itself — a cover fill, so the frame's shape drives the crop */
+.hero__media{position:relative;overflow:hidden;align-self:stretch}
+/* absolutely filled, so the frame's shape drives the crop and the file's own
+   dimensions never enter the layout -- which matters here, because they cannot
+   be read from this environment. */
+.hero__media img{position:absolute;inset:0;display:block;inline-size:100%;block-size:100%;
+  object-fit:cover;object-position:50% 35%}
+@media(max-width:1023px){
+  .hero__media{block-size:clamp(16rem,52vw,26rem)}
 }
 
 /* content column */
@@ -846,12 +884,9 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 .hero__actions .btn{gap:var(--sp-8)}
 .hero__actions .btn svg{width:20px;height:20px;flex:0 0 auto}
 
-/* media column — art-directed brand scene; swappable for a <picture> photo */
-.hero__media{position:relative;margin:0}
-.hero__media-frame{position:relative;border-radius:var(--radius-lg);overflow:hidden;
-  background:var(--aun-mist);box-shadow:var(--shadow-md);aspect-ratio:4/3}
-.hero__media-frame svg,.hero__media-frame img{display:block;width:100%;height:100%;object-fit:cover;
-  object-position:center}
+/* the .hero__media-frame wrapper is gone with the old floating-image hero; the
+   photograph is a bleed layer now and its rules live in the composition block
+   above. What stayed behind here was fighting them. */
 .hero__badge{position:absolute;inset-block-end:var(--sp-16);inset-inline-start:var(--sp-16);
   display:inline-flex;align-items:center;gap:var(--sp-8);background:rgba(255,255,255,.94);
   backdrop-filter:saturate(140%) blur(4px);border:1px solid var(--border);border-radius:var(--radius-pill);
@@ -873,10 +908,8 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 /* tablet / mobile rebalance — deliberate stacked composition, not a squeeze */
 @media(max-width:1023px){
   .hero__content{max-width:38rem}
-  .hero__media{max-width:30rem;margin-inline:auto}
 }
 @media(max-width:767px){
-  .hero__media-frame{aspect-ratio:4/3}
   .hero__title{font-size:var(--fs-h1)}
 }
 @media(max-width:479px){
@@ -1719,10 +1752,8 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
    column was what pushed the eyebrow down and away from the header. The
    photograph instead sits at the foot of the row, so the subject grounds
    level with the end of the content rather than floating above it. */
-@media(min-width:1024px){
-  .hero__inner{align-items:start}
-  .hero__media{align-self:end}
-}
+/* the old two-column hero aligned its photograph to the block end; the stage
+   stretches both parts to the same height now. */
 
 /* -- LEVEL 01 · eyebrow ---------------------------------------------------- */
 .hero__eyebrow,.about__label,.why__label,.services__label,.hww__label,.vm__label,.values__label,.contact__label{display:inline-flex;align-items:center;
@@ -1767,9 +1798,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
    crop to the bottom trims that band. Because there is no ground behind the
    image, the crop is invisible — it removes nothing but transparency, and the
    sides are untouched, so the cut-out edge still reads. */
-.hero__media-frame{background:none;box-shadow:none;border-radius:0;
-  overflow:hidden;aspect-ratio:3/2}
-.hero__media-frame img{width:100%;height:100%;object-fit:cover;object-position:50% 100%}
+
 
 /* -- LEVEL 07 · trust strip (§12/§13) -------------------------------------- */
 /* A contained card, not a full-bleed banner — it closes the hero without
@@ -1790,20 +1819,22 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
   line-height:var(--lh-normal)}
 
 /* -- route / road: supporting device only (§14) ---------------------------- */
-.hero__road{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-.hero__road svg{position:absolute;inset-block-end:2%;inset-inline:0;width:100%;height:auto}
+/* the road belongs to the photograph now: it sweeps across the image and runs
+   out under the panel, which is what makes the two parts read as one scene. */
+.hero__road{position:absolute;inset-block-end:0;inset-inline:0;z-index:1;
+  block-size:min(62%,22rem);pointer-events:none;overflow:visible}
+.hero__road svg{position:absolute;inset-block-end:0;inset-inline-end:0;
+  inline-size:min(150%,1100px);height:auto}
+@media(max-width:1023px){.hero__road{block-size:min(55%,12rem)}}
 
 /* ==========================================================================
    HERO · RESPONSIVE TRANSFORMATION (§17)
    ========================================================================== */
 @media(max-width:1023px){
   .hero__content{max-width:none}
-  .hero__media{max-width:34rem;margin-inline:auto}
 }
 
 @media(max-width:767px){
-  .hero__media{max-width:none}
-  .hero__inner{gap:var(--sp-24)}
 
   /* Audience cues become compact rows: the same three cards cost roughly 230px
      instead of 460px, which is what keeps the primary action above the fold.
@@ -1919,60 +1950,60 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 
         <!-- subtle section-level route graphic (§10) — behind content -->
         <!-- brand road graphic sweeping through the hero -->
-        <span class="hero__road" aria-hidden="true">
-          <svg viewBox="0 0 1440 420" fill="none" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
-            <path d="M-60 250 C 260 140 470 380 770 330 C 1050 284 1210 120 1520 70" stroke="#D9E4F3" stroke-width="46" fill="none" stroke-linecap="round"/>
-            <path d="M-60 250 C 260 140 470 380 770 330 C 1050 284 1210 120 1520 70" stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round" stroke-dasharray="2 24" opacity=".9"/>
-          </svg>
-        </span>
 
-        <div class="container container--wide hero__inner">
+        <div class="hero__stage">
 
-          <!-- CONTENT -->
-          <div class="hero__content">
-            <p class="hero__eyebrow" data-reveal>رعاية متخصصة وآمنة</p>
-            <h1 id="hero-title" class="hero__title" data-reveal>نُعين <span class="hero__title-accent">ونُعاون</span></h1>
-            <p class="hero__lead" data-reveal>نقل متخصص يجمع بين الأمان، الراحة، والرعاية.</p>
+          <!-- CONTENT — the panel, riding over the photograph -->
+          <div class="hero__panel">
+            <div class="hero__content">
+              <p class="hero__eyebrow" data-reveal>رعاية متخصصة وآمنة</p>
+              <h1 id="hero-title" class="hero__title" data-reveal>نُعين <span class="hero__title-accent">ونُعاون</span></h1>
+              <p class="hero__lead" data-reveal>نقل متخصص يجمع بين الأمان، الراحة، والرعاية.</p>
 
-            <ul class="hero__aud" data-reveal>
-              <li class="hero__aud-card">
-                <span class="hero__aud-icon" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9.4" cy="6.6" r="2.9"/><path d="M3.6 20.4c0-3.2 2.6-5.8 5.8-5.8s5.8 2.6 5.8 5.8"/><path d="M19.4 20.4v-8.8a2.6 2.6 0 0 0-2.6-2.6"/></svg></span>
-                <span class="hero__aud-title">كبار السن</span>
-                <span class="hero__aud-desc">رعاية واهتمام في كل رحلة</span>
-              </li>
-              <li class="hero__aud-card">
-                <span class="hero__aud-icon" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="14" cy="4.6" r="2"/><path d="M14 7.6v4.6H9.4"/><path d="M9.4 12.2 12 16.6"/><circle cx="10.6" cy="16.4" r="4.8"/><path d="M14.6 15h2.4l1.5 3.5"/></svg></span>
-                <span class="hero__aud-title">ذوو الإعاقة</span>
-                <span class="hero__aud-desc">نقل آمن ومريح يدعم استقلاليتهم</span>
-              </li>
-              <li class="hero__aud-card">
-                <span class="hero__aud-icon" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.4C7.2 17 4 13.7 4 10.2A4.4 4.4 0 0 1 12 7.1a4.4 4.4 0 0 1 8 3.1c0 3.5-3.2 6.8-8 10.2Z"/><path d="M7.2 11.4h2.4l1.4-2.6 1.9 4.2 1.3-1.6h2.6"/></svg></span>
-                <span class="hero__aud-title">المرضى</span>
-                <span class="hero__aud-desc">المحتاجون لوسائل نقل مجهّزة</span>
-              </li>
-            </ul>
+              <ul class="hero__aud" data-reveal>
+                <li class="hero__aud-card">
+                  <span class="hero__aud-icon" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9.4" cy="6.6" r="2.9"/><path d="M3.6 20.4c0-3.2 2.6-5.8 5.8-5.8s5.8 2.6 5.8 5.8"/><path d="M19.4 20.4v-8.8a2.6 2.6 0 0 0-2.6-2.6"/></svg></span>
+                  <span class="hero__aud-title">كبار السن</span>
+                  <span class="hero__aud-desc">رعاية واهتمام في كل رحلة</span>
+                </li>
+                <li class="hero__aud-card">
+                  <span class="hero__aud-icon" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="14" cy="4.6" r="2"/><path d="M14 7.6v4.6H9.4"/><path d="M9.4 12.2 12 16.6"/><circle cx="10.6" cy="16.4" r="4.8"/><path d="M14.6 15h2.4l1.5 3.5"/></svg></span>
+                  <span class="hero__aud-title">ذوو الإعاقة</span>
+                  <span class="hero__aud-desc">نقل آمن ومريح يدعم استقلاليتهم</span>
+                </li>
+                <li class="hero__aud-card">
+                  <span class="hero__aud-icon" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.4C7.2 17 4 13.7 4 10.2A4.4 4.4 0 0 1 12 7.1a4.4 4.4 0 0 1 8 3.1c0 3.5-3.2 6.8-8 10.2Z"/><path d="M7.2 11.4h2.4l1.4-2.6 1.9 4.2 1.3-1.6h2.6"/></svg></span>
+                  <span class="hero__aud-title">المرضى</span>
+                  <span class="hero__aud-desc">المحتاجون لوسائل نقل مجهّزة</span>
+                </li>
+              </ul>
 
-            <div class="hero__actions" data-reveal>
-              <a class="btn btn--primary btn--lg" href="#contact">
-                <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.2 4h3.1l1.5 3.8-2 1.4a11.6 11.6 0 0 0 5.9 5.9l1.4-2 3.8 1.5v3.1a1.9 1.9 0 0 1-2.1 1.9C10.9 18.9 5.1 13.1 4.3 6.1A1.9 1.9 0 0 1 6.2 4Z"/></svg>
-                تواصل معنا
-              </a>
-              <a class="btn btn--secondary btn--lg" href="#services">
-                اكتشف خدماتنا
-                <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H6"/><path d="M11.5 6.5 6 12l5.5 5.5"/></svg>
-              </a>
+              <div class="hero__actions" data-reveal>
+                <a class="btn btn--primary btn--lg" href="#contact">
+                  <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.2 4h3.1l1.5 3.8-2 1.4a11.6 11.6 0 0 0 5.9 5.9l1.4-2 3.8 1.5v3.1a1.9 1.9 0 0 1-2.1 1.9C10.9 18.9 5.1 13.1 4.3 6.1A1.9 1.9 0 0 1 6.2 4Z"/></svg>
+                  تواصل معنا
+                </a>
+                <a class="btn btn--secondary btn--lg" href="#services">
+                  اكتشف خدماتنا
+                  <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H6"/><path d="M11.5 6.5 6 12l5.5 5.5"/></svg>
+                </a>
+              </div>
             </div>
           </div>
 
-          <!-- MEDIA — licensed photograph (host on aunaldrb.com + add srcset for production) -->
-          <figure class="hero__media" data-reveal>
-            <div class="hero__media-frame">
-              <img src="https://i.ibb.co/8g53yMFY/01.webp"
-                   width="1200" height="1200" fetchpriority="high" decoding="async"
-                   alt="أخصائي نقل مدرّب يساعد راكبًا مسنًّا يستخدم كرسيًا متحركًا على منحدر مركبة حديثة مجهّزة للنقل المتخصص">
-            </div>
+          <!-- MEDIA — full-bleed photograph on the inline end. The brand
+               road runs across it and out behind the panel. -->
+          <figure class="hero__media">
+            <span class="hero__road" aria-hidden="true">
+          <svg viewBox="0 0 1440 420" fill="none" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+            <path d="M-60 250 C 260 140 470 380 770 330 C 1050 284 1210 120 1520 70" stroke="#2C4C82" stroke-width="52" fill="none" stroke-linecap="round" opacity=".92"/>
+            <path d="M-60 250 C 260 140 470 380 770 330 C 1050 284 1210 120 1520 70" stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round" stroke-dasharray="10 22" opacity=".85"/>
+          </svg>
+            </span>
+            <img src="https://i.ibb.co/V0B0zN05/h001.webp"
+                 fetchpriority="high" decoding="async"
+                 alt="أخصائي نقل مدرّب يساعد راكبًا يستخدم كرسيًا متحركًا على منحدر مركبة عون الدرب المجهّزة للنقل المتخصص">
           </figure>
-
         </div>
 
         <!-- trust strip -->
