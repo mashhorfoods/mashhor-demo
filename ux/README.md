@@ -1354,3 +1354,88 @@ route to it is roundabout.
 **Footer navigation keeps its square, quiet treatment.** Those are links in a
 list, not actions, and the brand-blue tap highlight from M01 already gives them
 touch feedback.
+
+---
+
+## Stage M08 — «تواصل معنا» on mobile
+
+The section already held the right things: an invitation, a phone number large
+enough to read at arm's length, WhatsApp and call beside it, and three quiet
+rows of detail. What it did not have was an order that put the action first, a
+hierarchy between four equally large buttons, or any answer to a thumb on the
+two surfaces that are not buttons. 52 assertions in
+`verify-mobile-sections.js`.
+
+**The action came after a second paragraph.** The order was invitation → a
+supporting lead → the phone number and its two actions. So the invitation's own
+«تواصل معنا», which points at those actions, had a paragraph to scroll past
+first. The card moves up directly under the invitation and the supporting
+sentence follows it, as what it is: elaboration for anyone still reading.
+`order` does it — the message block contains no focusable element, so the
+reading order and the tab order are untouched, and there is an assertion that
+keeps it that way.
+
+**Four large buttons, no hierarchy.** Measured: every one of the four actions
+in the section was 56px tall. Two are the invitation's — one scrolls to the
+card below, one goes back to the catalogue — and two are the contact itself.
+They cannot all be the most important thing on the screen. The invitation's
+pair steps down to the standard control height; the card's pair keeps the large
+one. Nothing moves and nothing is renamed; the section now says plainly which
+two buttons are the point of it.
+
+**The two surfaces that are not buttons.** The phone number is a 61px target
+that answered a press with a colour change alone, and the website row was a
+132px link inside a 350px row — most of the row looked tappable and was not.
+Both behave like the rest of the CTA system now: the whole row is the target
+(260px at 360, 327px at 430) and a press is felt. The first attempt set
+`width:100%` on the link and changed nothing, because `.contact-info` is a flex
+row whose text block was shrink-to-fit: the link was already filling a column
+the width of its own text.
+
+### The measurement that had been wrong all along
+
+Chasing the invitation's outlined button turned up something worse than a
+finding: **every contrast number this project has reported for a translucent
+colour has been wrong.** The helper read the stated colour and ignored its
+alpha. `rgba(255,255,255,.42)` on the navy panel is not white — it composites
+to `rgb(133,151,182)` — and the boundary that had been reported as 8.53:1
+actually measures **2.88:1**, just under the 3:1 WCAG 1.4.11 asks of a
+control's boundary.
+
+Every colour is composited over what is behind it now, down the whole ancestor
+chain, before anything is compared. Re-run against the corrected maths, the
+site had exactly one such failure: that border. At 48% it composites to
+`rgb(139,157,186)` and measures 3.1, and the difference is not visible as a
+change of weight.
+
+`verify-cta.js` also names each measurement by its section now. The same
+classes in the hero and in the contact invitation are two different
+measurements — one on white, one on navy with its own overrides — and a
+failure that does not say which is a failure you have to go looking for.
+
+### What the brief asked for that does not exist here
+
+There is **no form, no map and no social account** anywhere in this project —
+verified, not assumed: zero `<form>`, `<input>`, `<textarea>`, `<select>` or
+`<iframe>` in the section. So the brief's sections on form fields, labels,
+focus, error and success states, the submit button, map presentation and social
+links have nothing to act on. Building any of them would mean inventing contact
+information, which the same brief forbids.
+
+The CTA system's form-facing states are nonetheless ready and asserted, from
+M07: a disabled treatment that does not rely on opacity, and a busy state that
+keeps its accessible name and blocks a second tap. When a form does arrive it
+will inherit both.
+
+Two assertions guard the boundary: the section contains no invented fields or
+frames, and every destination in it is one the site already had —
+`tel:+966535544352`, `wa.me/966535544352`, `aunaldrb.com`, or an in-page anchor.
+
+### One more scoping mistake
+
+The phone number's press state went inside the mobile block, so at 1440 the
+largest and most obviously tappable thing in the section answered a click with
+nothing. M07 had already settled this: a `tel:` link is as clickable on a
+desktop as on a handset, and a press is feedback rather than a touch
+affordance. Caught by the new assertion on its first run, at the one width the
+rule did not cover.

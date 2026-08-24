@@ -1871,7 +1871,12 @@ html:not(.js) .hww__path{display:none}
   gap:var(--sp-16);margin-block-start:var(--sp-16)}
 .contact__invite-actions .btn svg{width:20px;height:20px}
 .contact__invite .btn--on-inverse:hover{background:var(--aun-sky)}
-.contact__invite .btn--secondary{color:#fff;border-color:rgba(255,255,255,.42);background:transparent}
+/* M08 §34 — white at 42% over the navy panel composites to rgb(133,151,182),
+   which measures 2.88:1 against it: just under the 3:1 WCAG 1.4.11 asks of a
+   control's boundary. Reading the stated colour rather than the composited one
+   had been reporting this as 8.53. At 48% it composites to rgb(139,157,186)
+   and measures 3.1, and the difference is not visible as a change of weight. */
+.contact__invite .btn--secondary{color:#fff;border-color:rgba(255,255,255,.48);background:transparent}
 @media(hover:hover){.contact__invite .btn--secondary:hover{border-color:#fff;background:rgba(255,255,255,.10)}}
 .contact__invite .btn--secondary:active{background:rgba(255,255,255,.16)}
 /* the page's focus ring puts white inside navy outside; on navy that reads as
@@ -2792,6 +2797,68 @@ html:not(.js) .hww__path{display:none}
 @media(min-width:1024px){
   .contact-info__value a{display:inline-flex;align-items:center;min-height:24px}
 }
+
+
+/* ==========================================================================
+   STAGE M08 · MOBILE «تواصل معنا»
+   The section already held the right things: an invitation, a phone number
+   large enough to read at arm's length, WhatsApp and call beside it, and three
+   quiet rows of detail. What it did not have was an order that put the action
+   first, a hierarchy between four equally large buttons, or any answer to a
+   thumb on the two surfaces that are not buttons.
+
+   There is no form, no map and no social account anywhere in this project, so
+   the parts of the brief that cover them have nothing to act on — inventing an
+   email field or a map would be inventing contact information.
+   ========================================================================== */
+@media(max-width:899px){
+
+  /* -- M08·1 · THE ACTION COMES BEFORE THE ELABORATION (§05/§27) -----------
+     The order was invitation, a second lead paragraph, then the phone number
+     and its two actions. So the invitation's own «تواصل معنا» — which points
+     at those actions — had a paragraph to scroll past first. The card moves up
+     directly under the invitation, and the supporting sentence follows it as
+     what it is: elaboration for anyone still reading.
+
+     `order` does it. The message block contains no focusable element, so the
+     reading order a screen reader gets and the tab order both stay as they
+     are, and the only actions in the grid are still in source order. */
+  .contact__card   {order:1}
+  .contact__message{order:2}
+  .contact__grid   {row-gap:clamp(1.75rem,6vw,2.5rem)}
+
+  /* -- M08·2 · FOUR LARGE BUTTONS, NO HIERARCHY (§13/§28) ------------------
+     Measured: every one of the four actions in this section was 56px tall.
+     Two of them are the invitation's — one scrolls to the card below, one goes
+     back to the catalogue — and two are the contact itself. They cannot all be
+     the most important thing on the screen.
+
+     The invitation's pair steps down to the standard control height; the
+     card's pair keeps the large one. Nothing moves, nothing is renamed, and
+     the section now says plainly which two buttons are the point of it. */
+  .contact__invite-actions .btn{min-height:var(--control-md);
+    padding-inline:var(--sp-24);font-size:var(--fs-button)}
+
+  /* -- M08·3 · THE TWO SURFACES THAT ARE NOT BUTTONS (§10/§11) -------------
+     The phone number is a 61px tap target and answered a press with a colour
+     change alone; the website row was a 132px link inside a 350px row, so most
+     of the row looked tappable and was not. Both now behave like everything
+     else in the CTA system: the whole row is the target, and a press is felt. */
+  /* the link can only fill a column that has a width: .contact-info is a flex
+     row and its text block was shrink-to-fit, so `width:100%` on the link
+     resolved to the width of the text itself — 132px of a 350px row */
+  .contact-info > div{flex:1 1 auto;min-width:0}
+  .contact-info__value a{width:100%}
+}
+/* The phone number presses at every width, not only on a phone. M07 settled
+   that a click answers too: a tel: link is as clickable on a desktop as on a
+   handset, and the press is feedback rather than a touch affordance. It had
+   been inside the mobile block, so at 1440 the largest, most obviously
+   tappable thing in the section answered a click with nothing. */
+.contact__phone{transition:color var(--dur-normal) var(--ease-smooth),
+                           scale var(--dur-fast) var(--ease-standard)}
+.contact__phone:active{scale:.985}
+@media(prefers-reduced-motion:reduce){.contact__phone:active{scale:1}}
 
 </style>
   <!-- STAGE 02 — marks the document script-capable BEFORE first paint, so the

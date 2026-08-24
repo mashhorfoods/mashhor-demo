@@ -574,6 +574,119 @@ const PHONES = [[320,568],[360,640],[375,667],[390,844],[412,915],[430,932]];
   await p.close();
  }
 
+ /* ---- 13 · STAGE M08 · «تواصل معنا» --------------------------------------- */
+ for (const [w,h] of [[360,640],[375,667],[390,844],[412,915],[430,932],[768,1024],[1440,900]]) {
+  const p = w<768 ? await phone(w,h) : await b.newPage({viewport:{width:w,height:h}});
+  p.on('pageerror',e=>errs.push('contact '+w+': '+e.message));
+  await p.goto(URL,{waitUntil:'load'});
+  await p.addStyleTag({content:'html{scroll-behavior:auto!important}'});
+  await p.evaluate(()=>document.querySelectorAll('[data-reveal]').forEach(e=>e.classList.add('is-inview')));
+  await p.waitForTimeout(450);
+  const r=await p.evaluate(()=>{
+   /* alpha composited: a translucent border is not the colour it names */
+   const parse=c=>{const m=(c||'').match(/[\d.]+/g); if(!m)return null;
+     return {r:+m[0],g:+m[1],b:+m[2],a:m.length>3?+m[3]:1};};
+   const over=(f,g)=>({r:f.a*f.r+(1-f.a)*g.r,g:f.a*f.g+(1-f.a)*g.g,b:f.a*f.b+(1-f.a)*g.b,a:1});
+   const lum=c=>{const t=v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)};
+     return .2126*t(c.r)+.7152*t(c.g)+.0722*t(c.b)};
+   const R=(a,c)=>{const A=typeof a==='string'?parse(a):a, C=typeof c==='string'?parse(c):c;
+     if(!A||!C)return null; const top=A.a<1?over(A,C):A;
+     const x=lum(top),y=lum(C);
+     return Math.round(((Math.max(x,y)+.05)/(Math.min(x,y)+.05))*100)/100};
+   const ground=e=>{const st=[]; let x=e.parentElement;
+     while(x){const c=parse(getComputedStyle(x).backgroundColor);
+       if(c&&c.a>0){st.push(c); if(c.a===1)break;} x=x.parentElement;}
+     let base={r:255,g:255,b:255,a:1};
+     for(let i=st.length-1;i>=0;i--) base = st[i].a<1?over(st[i],base):st[i];
+     return base;};
+
+   const top=s=>Math.round(document.querySelector(s).getBoundingClientRect().top+scrollY);
+   const visual=[['invite','.contact__invite'],['card','.contact__card'],['message','.contact__message'],
+     ['info','.contact__info'],['note','.contact__closing-note']]
+     .map(([k,s])=>({k,t:top(s)})).sort((a,b)=>a.t-b.t).map(x=>x.k).join('>');
+   const domGrid=[...document.querySelector('.contact__grid').children]
+     .map(e=>e.className.split(' ')[0]).join('>');
+   const focusTops=[...document.querySelectorAll('#contact a[href],#contact button')]
+     .map(e=>Math.round(e.getBoundingClientRect().top+scrollY));
+
+   const acts=[...document.querySelectorAll('#contact .btn')].map(e=>{
+     const cs=getComputedStyle(e), g=ground(e);
+     const own=parse(cs.backgroundColor);
+     const bg = own&&own.a>0 ? (own.a<1?over(own,g):own) : g;
+     const bd=parse(cs.borderTopColor);
+     return {where:e.closest('.contact__invite')?'invite':'card',
+       h:Math.round(e.getBoundingClientRect().height),
+       text:R(cs.color,bg),
+       boundary:(bd&&bd.a>0)?R(bd,g):null,
+       surface:(own&&own.a>0)?R(bg,g):null,
+       txt:(e.textContent||'').trim().slice(0,14)};});
+
+   const web=document.querySelector('.contact-info__value a');
+   const webCol=web.closest('div');
+   const wr=web.getBoundingClientRect(), cr=webCol.getBoundingClientRect();
+   const ph=document.querySelector('.contact__phone');
+
+   return {visual, domGrid,
+     tabInOrder:focusTops.every((v,i)=>i===0||v>=focusTops[i-1]),
+     acts,
+     webW:Math.round(wr.width), webH:Math.round(wr.height), colW:Math.round(cr.width),
+     phoneH:Math.round(ph.getBoundingClientRect().height),
+     phonePress:getComputedStyle(ph).transitionProperty.includes('scale'),
+     invented:{forms:document.querySelectorAll('#contact form,#contact input,#contact textarea,#contact select').length,
+               frames:document.querySelectorAll('#contact iframe').length},
+     methods:[...document.querySelectorAll('#contact a[href]')].map(a=>a.getAttribute('href'))
+       .filter(h=>/^tel:|^mailto:|wa\.me|^https?:/.test(h)),
+     hOver:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+     gridCols:getComputedStyle(document.querySelector('.contact__grid')).gridTemplateColumns};
+  });
+
+  ok(r.hOver===0, `${w}: تواصل معنا adds no horizontal scroll (${r.hOver}px)`);
+  ok(r.invented.forms===0 && r.invented.frames===0,
+     `${w}: no form and no embedded map were invented (${r.invented.forms} fields, ${r.invented.frames} frames)`);
+  ok(r.methods.every(h=>/tel:\+966535544352|wa\.me\/966535544352|aunaldrb\.com|^#/.test(h)),
+     `${w}: every destination is one the site already had (${[...new Set(r.methods)].join(' ')})`);
+  const lowText=r.acts.filter(a=>a.text<4.5).map(a=>a.where+':'+a.txt+'('+a.text+')');
+  ok(lowText.length===0, `${w}: every action's label clears AA (${lowText.join(' ')||'ok'})`);
+  const weak=r.acts.filter(a=>{const id=Math.max(a.surface??0,a.boundary??0);
+    return (a.surface!==null||a.boundary!==null) && id<3;})
+    .map(a=>a.where+':'+a.txt+'(surface '+a.surface+', boundary '+a.boundary+')');
+  ok(weak.length===0, `${w}: and is identifiable by more than that label, alpha included (${weak.join(' ')||'ok'})`);
+  ok(r.phoneH>=44 && r.phonePress,
+     `${w}: the phone number is a target that answers a press (${r.phoneH}px, scale ${r.phonePress})`);
+  ok(r.tabInOrder, `${w}: tab order runs down the section`);
+  ok(r.domGrid==='contact__message>contact__card',
+     `${w}: the markup order is untouched (${r.domGrid})`);
+
+  if (w<=899) {
+   ok(r.visual==='invite>card>message>info>note',
+      `${w}: the action comes before the elaboration (${r.visual})`);
+   const inv=r.acts.filter(a=>a.where==='invite').map(a=>a.h);
+   const card=r.acts.filter(a=>a.where==='card').map(a=>a.h);
+   ok(inv.every(x=>x===48) && card.every(x=>x===56),
+      `${w}: the invitation's actions sit below the contact's (${inv.join('/')} vs ${card.join('/')})`);
+   ok(Math.abs(r.webW-r.colW)<=2 && r.webH>=44,
+      `${w}: the website row is tappable across its column, not just its text (${r.webW} of ${r.colW}, ${r.webH}px)`);
+  } else {
+   ok(r.gridCols.split(' ').length===2, `${w}: desktop keeps its two columns (${r.gridCols})`);
+  }
+  await p.close();
+ }
+
+ /* reduced motion keeps the functional feedback here too */
+ {
+  const ctx=await b.newContext({reducedMotion:'reduce',viewport:{width:390,height:844},
+    deviceScaleFactor:2,isMobile:true,hasTouch:true});
+  const p=await ctx.newPage(); await p.goto(URL,{waitUntil:'load'}); await p.waitForTimeout(500);
+  const r=await p.evaluate(()=>{
+   const all=[...document.querySelectorAll('#contact .btn,#contact .contact__phone,#contact a[href]')];
+   return {faded:all.filter(e=>parseFloat(getComputedStyle(e).opacity)<0.95).length,
+     count:all.length,
+     over:document.documentElement.scrollWidth-document.documentElement.clientWidth};});
+  ok(r.faded===0 && r.over===0,
+     `reduced motion: every contact action is present and usable (${r.count} actions, ${r.faded} faded, ${r.over}px)`);
+  await ctx.close();
+ }
+
  ok(errs.length===0, `no page errors (${errs.join(' | ')})`);
  console.log(`\n${n-f}/${n} checks pass`);
  await b.close(); process.exit(f?1:0);

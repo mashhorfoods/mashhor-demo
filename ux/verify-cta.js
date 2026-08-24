@@ -31,13 +31,34 @@ const RADIUS  = 18;
 
   const r = await p.evaluate(({SEL,HEIGHTS,PADX,RADIUS})=>{
    const px=v=>Math.round(parseFloat(v)*10)/10;
-   const lum=c=>{const m=c.match(/[\d.]+/g).map(Number);const [r,g,bl]=m.slice(0,3).map(v=>{v/=255;
-     return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)});return .2126*r+.7152*g+.0722*bl};
-   const R=(a,c)=>{const x=lum(a),y=lum(c);return Math.round(((Math.max(x,y)+.05)/(Math.min(x,y)+.05))*100)/100};
-   const ground=e=>{let x=e.parentElement;
-     while(x){const bg=getComputedStyle(x).backgroundColor;
-       if(bg&&bg!=='rgba(0, 0, 0, 0)'&&!/, 0\)$/.test(bg))return bg; x=x.parentElement}
-     return 'rgb(255, 255, 255)'};
+   /* Alpha is not decoration. A border of rgba(255,255,255,.42) on the navy
+      panel is not white — it composites to rgb(133,151,182), and reading the
+      stated colour instead of the composited one reported 8.53:1 for a
+      boundary that actually measures 2.88. Every colour is composited over
+      what is behind it before anything is compared. */
+   const parse=c=>{const m=(c||'').match(/[\d.]+/g);
+     if(!m) return null;
+     return {r:+m[0], g:+m[1], b:+m[2], a:m.length>3?+m[3]:1};};
+   const over=(fg,bg)=>({r:fg.a*fg.r+(1-fg.a)*bg.r, g:fg.a*fg.g+(1-fg.a)*bg.g,
+                         b:fg.a*fg.b+(1-fg.a)*bg.b, a:1});
+   const lum=c=>{const f=v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)};
+     return .2126*f(c.r)+.7152*f(c.g)+.0722*f(c.b)};
+   /* a and c may be colour strings or already-parsed opaque colours; the
+      second argument is treated as the opaque thing behind the first */
+   const R=(a,c)=>{const A=typeof a==='string'?parse(a):a, C=typeof c==='string'?parse(c):c;
+     if(!A||!C) return null;
+     const top=A.a<1?over(A,C):A;
+     const x=lum(top), y=lum(C);
+     return Math.round(((Math.max(x,y)+.05)/(Math.min(x,y)+.05))*100)/100};
+   /* the first opaque thing behind an element, composited down the chain */
+   const ground=e=>{
+     const stack=[]; let x=e.parentElement;
+     while(x){const c=parse(getComputedStyle(x).backgroundColor);
+       if(c&&c.a>0){ stack.push(c); if(c.a===1) break; }
+       x=x.parentElement;}
+     let base={r:255,g:255,b:255,a:1};
+     for(let i=stack.length-1;i>=0;i--) base = stack[i].a<1 ? over(stack[i],base) : stack[i];
+     return base;};
 
    const els=[...document.querySelectorAll(SEL)].filter(e=>{
      const cs=getComputedStyle(e);
@@ -46,14 +67,19 @@ const RADIUS  = 18;
 
    const rows=els.map(e=>{
     const cs=getComputedStyle(e), r=e.getBoundingClientRect(), g=ground(e);
-    const bg=cs.backgroundColor!=='rgba(0, 0, 0, 0)'?cs.backgroundColor:g;
+    const own=parse(cs.backgroundColor);
+    const bg = own && own.a>0 ? (own.a<1?over(own,g):own) : g;
     const hasBorder=px(cs.borderTopWidth)>0 && cs.borderTopColor!=='rgba(0, 0, 0, 0)'
                     && !/, 0\)$/.test(cs.borderTopColor);
     /* a control is identified either by its own surface or by its boundary;
        whichever does the identifying has to clear 3:1 */
-    const surfaceContrast = bg!==g ? R(bg,g) : null;
+    const surfaceContrast = (own && own.a>0) ? R(bg,g) : null;
     return {
-     k:([...e.classList].join('.')||e.tagName).slice(0,40),
+     /* the section is part of the name: the same classes in the hero and in
+        the contact invite are two different measurements, and a failure that
+        does not say which is a failure you have to go looking for */
+     k:(((e.closest('section[id]')||{}).id||'page')+'/'
+        +([...e.classList].join('.')||e.tagName)).slice(0,46),
      tag:e.tagName.toLowerCase(),
      h:Math.round(r.height), w:Math.round(r.width),
      radius:px(cs.borderTopLeftRadius),
@@ -168,9 +194,15 @@ const RADIUS  = 18;
   const p=await b.newPage({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true});
   await p.goto(URL,{waitUntil:'load'}); await p.waitForTimeout(400);
   const r=await p.evaluate(()=>{
-   const lum=c=>{const m=c.match(/[\d.]+/g).map(Number);const [r,g,bl]=m.slice(0,3).map(v=>{v/=255;
-     return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)});return .2126*r+.7152*g+.0722*bl};
-   const R=(a,c)=>{const x=lum(a),y=lum(c);return Math.round(((Math.max(x,y)+.05)/(Math.min(x,y)+.05))*100)/100};
+   const parse=c=>{const m=(c||'').match(/[\d.]+/g); if(!m)return null;
+     return {r:+m[0],g:+m[1],b:+m[2],a:m.length>3?+m[3]:1};};
+   const over=(fg,bg)=>({r:fg.a*fg.r+(1-fg.a)*bg.r,g:fg.a*fg.g+(1-fg.a)*bg.g,
+                         b:fg.a*fg.b+(1-fg.a)*bg.b,a:1});
+   const lum=c=>{const f=v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)};
+     return .2126*f(c.r)+.7152*f(c.g)+.0722*f(c.b)};
+   const R=(a,c)=>{const A=parse(a),C=parse(c); if(!A||!C)return null;
+     const top=A.a<1?over(A,C):A; const x=lum(top),y=lum(C);
+     return Math.round(((Math.max(x,y)+.05)/(Math.min(x,y)+.05))*100)/100};
    const out={};
    for (const variant of ['btn--primary','btn--secondary']) {
     for (const state of ['aria-disabled','aria-busy']) {
