@@ -39,6 +39,12 @@ Two things need configuring:
 2. **HTTPS**, because the page loads fonts and images over `https://` and the
    canonical URL is `https://aunaldrb.com/`.
 
+3. **Compression.** `index.html` is 174KB of markup and CSS, which gzips to
+   **34KB** — an 81% saving on the one render-blocking resource, for one line
+   of server config. If only one thing on this list gets done, make it this.
+   - Apache: enable `mod_deflate` for `text/html`, `text/css`, `image/svg+xml`
+   - Nginx: `gzip on; gzip_types text/html text/css image/svg+xml;`
+
 Caching: `index.html` should be revalidated (`Cache-Control: no-cache` or a
 short max-age) so updates appear; the files under `brand/` never change name
 and can be cached for a long time.
