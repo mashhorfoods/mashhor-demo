@@ -1425,9 +1425,29 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 .hww__intro-lead{color:var(--text-secondary);margin-block-start:var(--sp-20);
   max-width:56ch;margin-inline:auto}
 
-/* the quiet route behind the journey (§10) — decorative, aria-hidden */
-.hww__route{position:absolute;inset-inline:0;pointer-events:none;z-index:0;display:none}
-.hww__route svg{width:100%;height:100%}
+/* -- §03/§12 the progressive route -----------------------------------------
+   A track the full height of the journey, a fill scaled to the distance
+   covered, and a head riding the join. The fill is a scaleY transform rather
+   than a height, so progress runs on the compositor and never triggers layout;
+   the head is translated by the journey's measured height, which is the one
+   value script has to keep, and it is read on resize rather than per frame. */
+.hww__path{position:absolute;z-index:0;pointer-events:none;inline-size:2px;
+  background:repeating-linear-gradient(var(--aun-border-strong) 0 5px,transparent 5px 13px)}
+.hww__path-fill{position:absolute;inset:0;background:var(--color-primary);
+  transform:scaleY(var(--hww-progress,0));transform-origin:top;
+  transition:transform 120ms linear}
+.hww__path-head{position:absolute;inset-block-start:0;inset-inline-start:50%;
+  inline-size:12px;block-size:12px;margin-inline-start:-6px;margin-block-start:-6px;
+  border-radius:var(--radius-circle);background:var(--color-primary);
+  border:2px solid var(--surface);box-shadow:0 0 0 4px var(--aun-primary-subtle);
+  opacity:var(--hww-head,0);
+  transform:translateY(calc(var(--hww-progress,0) * var(--hww-path-h,0px)));
+  transition:transform 120ms linear,opacity var(--dur-normal) var(--ease-smooth)}
+@media(prefers-reduced-motion:reduce){
+  /* the whole route is simply drawn: no travelling head, no transitions */
+  .hww__path-fill{transform:scaleY(1);transition:none}
+  .hww__path-head{display:none}
+}
 
 .hww__journey{list-style:none;padding:0;margin:0;position:relative;z-index:1;
   display:grid;gap:clamp(1.75rem,4vw,2.25rem);margin-block-start:clamp(2.5rem,5vw,3.75rem)}
@@ -1435,7 +1455,12 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 
 /* -- the marker: node plus its number (§06) --------------------------------- */
 .hww__marker{position:relative;display:inline-grid;flex:0 0 auto}
-.hww__node{position:relative;z-index:1;width:72px;height:72px;border-radius:var(--radius-circle);
+/* One number for the marker. The grid column and the route's offset are both
+   derived from it, so a breakpoint that resizes the node can never leave the
+   route running beside the nodes instead of through them -- which is exactly
+   what a hard-coded 35px did once the node dropped to 60px under 768. */
+.hww{--hww-node:72px}
+.hww__node{position:relative;z-index:1;width:var(--hww-node);height:var(--hww-node);border-radius:var(--radius-circle);
   display:grid;place-items:center;background:var(--surface);border:2px solid var(--aun-sky);
   color:var(--color-primary);box-shadow:var(--shadow-xs);
   transition:border-color var(--dur-normal) var(--ease-smooth),
@@ -1452,52 +1477,61 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
   transition:color var(--dur-normal) var(--ease-smooth)}
 .hww__stage-desc{color:var(--text-secondary);margin-block-start:var(--sp-8)}
 
-/* §07 — the current chapter, marked by emphasis only. Nothing resizes or
-   moves, so the journey cannot shift while it is read. */
-.hww__stage.is-current .hww__node{border-color:var(--color-primary);background:var(--aun-primary-subtle)}
-
-/* -- horizontal journey, 1024+ (§04/§05) ------------------------------------ */
-@media(min-width:1024px){
-  /* the band sits around the node row, clear of the intro: at 15rem the arc
-     was running straight through the introductory sentence (§10) */
-  .hww__route{display:block;inset-block-start:clamp(18rem,24vw,21rem);height:clamp(7rem,12vw,10rem)}
-  .hww__journey{grid-template-columns:repeat(3,1fr);gap:0}
-  /* the connecting run sits at node centre and stops one half-column short of
-     each edge, so it joins the three nodes and never trails off the section */
-  .hww__journey::before{content:"";position:absolute;inset-block-start:35px;inset-inline:calc(100%/6);
-    height:2px;z-index:0;
-    background:repeating-linear-gradient(to left,var(--aun-border-strong) 0 5px,transparent 5px 13px)}
-  .hww__stage{display:flex;flex-direction:column;align-items:center;text-align:center;
-    padding-inline:clamp(1rem,2.5vw,2rem)}
-  /* the stem drops from the node to its chapter, tying the two together */
-  .hww__stage-body{position:relative;margin-block-start:var(--sp-32);
-    display:flex;flex-direction:column;align-items:center}
-  .hww__stage-body::before{content:"";position:absolute;inset-block-start:calc(var(--sp-32) * -1);
-    inset-inline-start:50%;transform:translateX(50%);width:2px;height:var(--sp-32);
-    background:repeating-linear-gradient(var(--aun-border-strong) 0 4px,transparent 4px 10px)}
-  .hww__stage-desc{max-width:32ch}
+/* §08 — three states, and the two that are not current stay fully readable:
+   emphasis moves through the node and the title colour, never through the
+   opacity of the Arabic. Upcoming is the base state.
+     done    — the route has passed it: the node is marked, quietly
+     current — the chapter being read: node filled, title in brand
+     upcoming— untouched */
+.hww__stage .hww__node{transform:scale(1);
+  transition:border-color var(--dur-normal) var(--ease-smooth),
+             background-color var(--dur-normal) var(--ease-smooth),
+             transform var(--dur-normal) var(--ease-smooth)}
+.hww__stage.is-done .hww__node{border-color:var(--color-primary)}
+.hww__stage.is-current .hww__node{border-color:var(--color-primary);
+  background:var(--aun-primary-subtle);transform:scale(1.06)}
+.hww__stage.is-current .hww__stage-title{color:var(--color-primary)}
+@media(prefers-reduced-motion:reduce){
+  .hww__stage .hww__node{transition:none}
+  .hww__stage.is-current .hww__node{transform:none}
 }
 
-/* -- vertical journey below 1024 (§13/§14) ---------------------------------- */
-/* One axis down the reading edge: the node column is reserved so the dashed
-   run never crosses the Arabic. */
+/* -- §17/§18 the journey, 1024+ ---------------------------------------------
+   Vertical, on one central axis, with the chapters alternating around it. The
+   alternation is what stops three equal steps reading as a card row; the axis
+   is what makes them read as one route. */
+@media(min-width:1024px){
+  .hww__journey{gap:clamp(3rem,7vh,5rem) 0;max-width:64rem;margin-inline:auto}
+  .hww__path{inset-inline-start:calc(50% - 1px);
+    inset-block:calc(var(--hww-node) / 2) calc(var(--hww-node) / 2)}
+  .hww__stage{display:grid;
+    grid-template-columns:minmax(0,1fr) 96px minmax(0,1fr);align-items:center}
+  .hww__marker{grid-column:2;justify-self:center}
+  /* Odd chapters at the inline start, even at the inline end. nth-of-type, not
+     nth-child: the route span is the journey's first child, so nth-child counts
+     it and hands chapter 01 the wrong side of the axis. */
+  .hww__stage-body{grid-column:1;text-align:start}
+  .hww__stage:nth-of-type(even) .hww__stage-body{grid-column:3}
+  .hww__stage-desc{max-width:26rem}
+}
+
+/* -- below 1024 (§29/§30): one axis down the reading edge -------------------- */
 @media(max-width:1023px){
   .hww__journey{gap:0;max-width:44rem;margin-inline:auto}
-  .hww__stage{display:grid;grid-template-columns:72px minmax(0,1fr);column-gap:var(--sp-20);
-    align-items:start;position:relative;padding-block-end:clamp(1.75rem,5vw,2.5rem)}
+  .hww__path{inset-inline-start:calc(var(--hww-node) / 2 - 1px);
+    inset-block:calc(var(--hww-node) / 2) calc(var(--hww-node) / 2)}
+  .hww__stage{display:grid;grid-template-columns:var(--hww-node) minmax(0,1fr);column-gap:var(--sp-20);
+    align-items:start;position:relative;padding-block-end:clamp(2rem,6vw,3rem)}
   .hww__stage:last-child{padding-block-end:0}
-  .hww__stage:not(:last-child)::before{content:"";position:absolute;inset-inline-start:35px;
-    inset-block:72px 0;width:2px;z-index:0;
-    background:repeating-linear-gradient(var(--aun-border-strong) 0 5px,transparent 5px 13px)}
   .hww__stage-body{padding-block-start:var(--sp-8)}
   .hww__stage-desc{max-width:52ch}
 }
 @media(max-width:479px){
-  .hww__stage{grid-template-columns:60px minmax(0,1fr);column-gap:var(--sp-16)}
-  .hww__node{width:60px;height:60px}
+  /* the marker shrinks; the column and the route follow it automatically */
+  .hww{--hww-node:60px}
+  .hww__stage{column-gap:var(--sp-16)}
   .hww__node svg{width:28px;height:28px}
   .hww__num{min-width:26px;height:26px}
-  .hww__stage:not(:last-child)::before{inset-inline-start:29px;inset-block:60px 0}
 }
 
 /* ==========================================================================
@@ -2532,14 +2566,16 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
             <p class="hww__intro-lead" data-reveal>نقدم المساندة للمستفيد وفق احتياجاته خلال مراحل التنقل، من داخل المنزل، وأثناء النقل، وحتى الوصول إلى الوجهة.</p>
           </div>
 
-          <span class="hww__route" aria-hidden="true">
-            <svg viewBox="0 0 1200 220" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M40 168 C 240 168 300 44 560 44 C 820 44 900 168 1160 168"
-                    stroke="#D9E4F3" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 12"/>
-            </svg>
-          </span>
-
           <ol class="hww__journey">
+
+            <!-- §03/§12/§22 — the route the journey is travelled on. The
+                 track is the whole run, the fill is the distance covered,
+                 the head is the point moving along it. Decorative: the
+                 stages beside it carry every word. -->
+            <span class="hww__path" aria-hidden="true">
+              <span class="hww__path-fill"></span>
+              <span class="hww__path-head"></span>
+            </span>
 
             <li class="hww__stage" data-reveal>
               <span class="hww__marker">
@@ -2971,7 +3007,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
        Purely decorative, so it is skipped entirely under reduced motion and
        when IntersectionObserver is unavailable. */
     (function () {
-      var items = doc.querySelectorAll("#how-we-work .hww__stage, #values .value");
+      var items = doc.querySelectorAll("#values .value");
       if (!items.length || reduce || !("IntersectionObserver" in window)) return;
       var obs = new IntersectionObserver(function (entries) {
         entries.forEach(function (entry) {
@@ -3119,6 +3155,67 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
       if (pinned.addEventListener) pinned.addEventListener("change", sync);
       else if (pinned.addListener) pinned.addListener(sync);
       sync();
+    })();
+
+    /* 4d · How We Work — the progressive journey.
+       Two things move: the route's fill, and which chapter is current.
+
+       The fill is a single custom property, --hww-progress, written on the
+       journey element. CSS turns it into a scaleY on the fill and a translateY
+       on the head, both of which composite; nothing here writes a length, so no
+       frame triggers layout. The one measurement script keeps is the path's own
+       height, and that is read on resize, not per frame.
+
+       Progress is derived from where the viewport's middle sits inside the
+       journey, so it is a pure function of scroll position: scrolling fast,
+       slow, or backwards all land on the same value, and flinging cannot
+       desynchronise it (§15). Reads are batched into one rAF per scroll burst.
+
+       Scrolling itself is untouched -- the listener is passive and only reads.
+
+       Under reduced motion none of this runs: CSS already draws the route in
+       full and every chapter stays at full strength. */
+    (function () {
+      var journey = doc.querySelector(".hww__journey");
+      var path = doc.querySelector(".hww__path");
+      if (!journey || !path) return;
+      var stages = [].slice.call(journey.querySelectorAll(".hww__stage"));
+      if (!stages.length || reduce) return;
+
+      var pathH = 0, ticking = false;
+      function measure() { pathH = path.getBoundingClientRect().height;
+        journey.style.setProperty("--hww-path-h", pathH + "px"); }
+
+      function frame() {
+        ticking = false;
+        var r = journey.getBoundingClientRect();
+        var mid = (window.innerHeight || doc.documentElement.clientHeight) / 2;
+        /* 0 as the journey's first node reaches the middle, 1 as its last does */
+        var span = r.height - 72;
+        var p = span > 0 ? (mid - (r.top + 36)) / span : 0;
+        p = p < 0 ? 0 : (p > 1 ? 1 : p);
+        journey.style.setProperty("--hww-progress", p);
+        journey.style.setProperty("--hww-head", p > 0.001 && p < 0.999 ? 1 : 0);
+
+        /* the chapter nearest the middle is current; everything above it is
+           done. One pass, so two chapters can never both be current. */
+        var best = -1, bestDist = Infinity;
+        for (var i = 0; i < stages.length; i++) {
+          var b = stages[i].getBoundingClientRect();
+          var d = Math.abs((b.top + b.bottom) / 2 - mid);
+          if (d < bestDist) { bestDist = d; best = i; }
+        }
+        var inView = r.bottom > 0 && r.top < (window.innerHeight || 0);
+        stages.forEach(function (el, i) {
+          el.classList.toggle("is-current", inView && i === best);
+          el.classList.toggle("is-done", inView && i < best);
+        });
+      }
+      function onScroll() { if (!ticking) { ticking = true; window.requestAnimationFrame(frame); } }
+
+      measure(); frame();
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", function () { measure(); onScroll(); }, { passive: true });
     })();
 
     /* 5 · Entrance reveal (§20) — subtle, one-shot; content-first */

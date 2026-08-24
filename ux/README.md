@@ -527,3 +527,57 @@ It took a screenshot to catch. The harness now asserts the composition too:
 the slide computes to `grid` with two tracks, image and information sit side by
 side rather than stacked, the image carries the greater width, and the CTA does
 not span its column.
+
+## How We Work — progressive journey
+
+The third distinct interaction, and deliberately unlike the other two. Why-Us
+pins a sidebar and scrolls text past it; Services pins a stage and transforms
+what is on it; here nothing pins at all -- a route draws itself as you scroll
+and the chapters light up in turn.
+
+**From horizontal to vertical.** The section was three nodes across a curved
+arc. It is one vertical axis now, with the chapters alternating around it above
+1024 and stacked at the reading edge below. The alternation is what stops three
+equal steps reading as a card row; the axis is what makes them read as one
+route. Every node sits exactly on the line -- verified, not eyeballed: node
+centres and path centre agree to within 2px at all seven widths.
+
+**The route is three elements, not an SVG path.** A dashed track for the whole
+run, a fill for the distance covered, and a head riding the join. The fill is a
+`scaleY` transform rather than a height, so progress runs on the compositor and
+no frame triggers layout. An SVG `stroke-dashoffset` would have been the
+obvious choice and is worse here: it cannot guarantee the nodes land on the
+line when chapter heights differ, which they do.
+
+**Progress is a pure function of scroll position** -- where the viewport's
+middle sits inside the journey -- not an accumulator. Scrolling fast, slow, or
+backwards all land on the same value, so a fling cannot desynchronise it. Reads
+are batched into one rAF per scroll burst, and the only measurement kept is the
+path's height, read on resize rather than per frame. The listener is passive
+and only reads: scrolling itself is untouched.
+
+**Three states, and two of them stay fully readable.** Done, current, upcoming.
+Emphasis moves through the node and the title colour -- never through the
+opacity of the Arabic, so no chapter is ever dimmed. Verified at every scroll
+position: exactly one current chapter, and the completed count always equals
+its index.
+
+**Under reduced motion none of the script runs.** CSS draws the route in full,
+the travelling head is removed, the node scale is dropped, and all three
+chapters render at full strength. Without script at all, the same.
+
+**How-We-Work left the shared emphasis observer**, which only knows one state.
+Values still uses it.
+
+**Two bugs the first run caught.**
+
+- The route ran 6px beside the nodes on every phone width. The node shrinks
+  from 72px to 60px under 480, and the route's offset was a hard-coded 35px
+  derived from the larger one. Patching the number would have fixed the symptom;
+  instead the marker's diameter is now a single token, `--hww-node`, and the
+  grid column and the route offset are both derived from it. A future
+  breakpoint that resizes the node cannot desynchronise them. Verified: node
+  centre and path centre agree exactly.
+- The alternation used `nth-child(even)`, but the route span is the journey's
+  first child, so it was counted and chapter 01 was handed the wrong side of the
+  axis. `nth-of-type` counts only the chapters.
