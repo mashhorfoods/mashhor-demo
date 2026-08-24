@@ -7,7 +7,7 @@ const { chromium } = require('playwright-core');
   const pinned = w>=1024;
   const p=await b.newPage({viewport:{width:w,height:900}});
   p.on('pageerror',e=>errs.push(w+': '+e.message));
-  await p.goto('' + require('path').resolve(__dirname,'..','index.html') + '',{waitUntil:'load'});
+  await p.goto('file://' + require('path').resolve(__dirname,'..','index.html') + '',{waitUntil:'load'});
   await p.addStyleTag({content:'html{scroll-behavior:auto!important}'});
   await p.evaluate(()=>document.querySelectorAll('[data-reveal]').forEach(e=>e.classList.add('is-inview')));
   await p.waitForTimeout(700);
@@ -98,7 +98,7 @@ const { chromium } = require('playwright-core');
  // reduced motion: the grid, everything visible and tabbable
  const p2=await b.newPage({viewport:{width:1440,height:900},reducedMotion:'reduce'});
  p2.on('pageerror',e=>errs.push('rm: '+e.message));
- await p2.goto('' + require('path').resolve(__dirname,'..','index.html') + '',{waitUntil:'load'});
+ await p2.goto('file://' + require('path').resolve(__dirname,'..','index.html') + '',{waitUntil:'load'});
  await p2.waitForTimeout(600);
  const rm=await p2.evaluate(()=>{
   const slides=[...document.querySelectorAll('.services__slides > .service')];
@@ -112,7 +112,7 @@ const { chromium } = require('playwright-core');
  // no script at all
  const ctx=await b.newContext({javaScriptEnabled:false,viewport:{width:1440,height:900}});
  const p3=await ctx.newPage();
- await p3.goto('' + require('path').resolve(__dirname,'..','index.html') + '',{waitUntil:'load'});
+ await p3.goto('file://' + require('path').resolve(__dirname,'..','index.html') + '',{waitUntil:'load'});
  const nj=await p3.evaluate(()=>{
   const slides=[...document.querySelectorAll('.services__slides > .service')];
   return {n:slides.length, faded:slides.filter(e=>parseFloat(getComputedStyle(e).opacity)<0.95).length,
@@ -121,6 +121,37 @@ const { chromium } = require('playwright-core');
  ok(nj && nj.n===7 && nj.faded===0 && nj.track==='none',
     `no script: all seven render as the grid (${nj?nj.n+' slides, '+nj.faded+' faded, track '+nj.track:'n/a'})`);
  await ctx.close();
+ // freeze regression: pinned scroll must stay modest, and the settled stage
+ // must never be blank and never show two services at once
+ for (const w of [1440,1280,1024]) {
+  const p4=await b.newPage({viewport:{width:w,height:900}});
+  p4.on('pageerror',e=>errs.push('freeze '+w+': '+e.message));
+  await p4.goto('file://' + require('path').resolve(__dirname,'..','index.html') + '',{waitUntil:'load'});
+  await p4.addStyleTag({content:'html{scroll-behavior:auto!important}'});
+  await p4.waitForTimeout(400);
+  const box=await p4.evaluate(()=>{const s=document.querySelector('.services__showcase');
+   const r=s.getBoundingClientRect();return {top:r.top+scrollY,h:s.offsetHeight};});
+  ok(box.h<3400, `${w}: pinned scroll stays under ~3.4k (${box.h}px)`);
+  let blank=0, multi=0;
+  for (let i=0;i<=18;i++) {
+   const y=Math.round(box.top - 200 + (box.h + 400) * i / 18);
+   await p4.evaluate(v=>scrollTo(0,v), y);
+   await p4.waitForTimeout(430);
+   const s=await p4.evaluate(()=>{
+    const st=document.querySelector('.services__stage').getBoundingClientRect();
+    const on=st.bottom>0 && st.top<innerHeight;
+    const vis=[...document.querySelectorAll('.services__slides > .service')]
+      .filter(e=>parseFloat(getComputedStyle(e).opacity)>0.05).length;
+    return {on,vis};
+   });
+   if (s.on && s.vis===0) blank++;
+   if (s.vis>1) multi++;
+  }
+  ok(blank===0, `${w}: the settled stage is never blank while on screen (${blank} of 19)`);
+  ok(multi===0, `${w}: never two services at once (${multi} of 19)`);
+  console.log(`${w}  showcase ${box.h}px  blank ${blank}  multi ${multi}`);
+  await p4.close();
+ }
  ok(errs.length===0, `no page errors (${errs.join(' | ')})`);
  console.log(`\n${n-f}/${n} checks pass`);
  await b.close(); process.exit(f?1:0);

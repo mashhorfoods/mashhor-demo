@@ -581,3 +581,39 @@ Values still uses it.
 - The alternation used `nth-child(even)`, but the route span is the journey's
   first child, so it was counted and chapter 01 was handed the wrong side of the
   axis. `nth-of-type` counts only the chapters.
+
+---
+
+## Fix — the Services section felt frozen
+
+Reported as "the website freezes when I reach the services section". It was not
+a hang: no long frame anywhere in a full scroll sweep, worst 24ms. Three
+separate defects in the pinned showcase, all mine, combined into something that
+reads as a stopped page.
+
+**The pinned run was five screens long.** Seven steps at `min-block-size:
+clamp(22rem,70vh,32rem)` is ~4137px of scrolling at 1440, over which the
+composition barely changes. The section measured 4237px at 1440 and 4506px at
+390. Steps are now `clamp(13rem,40vh,19rem)` and the showcase is 2128px — a
+deliberate pin rather than a wall.
+
+**The stage could be genuinely blank.** Throttling the CPU 6x and counting how
+many slides had opacity above 0.05 at each scroll position gave, at 1440,
+`0,0,0,0,1,1,1,2,0,0,1,1,1,2,0,1,...` — eight positions with nothing on the
+stage at all. Two causes: before the first observer callback no slide was
+active, and the observer band can be empty between steps. Now the first slide
+carries `is-active` in the markup, so it is correct before any script runs;
+`pick()` clamps to whichever end of the track it is past when the band is
+empty; and `sync()` falls back to the first slide. Blanks at 1440 fell 8 to 1,
+and to 0 once the crossfade settles.
+
+**The crossfade was 420ms.** At `--dur-slow` the stage spends a visible beat
+mid-dissolve. Now `--dur-normal`, 260ms.
+
+Nine assertions added to `verify-services.js` guard all three: the showcase
+must stay under ~3.4k of pinned scroll, and across nineteen parked positions at
+1440/1280/1024 the settled stage must never be blank while on screen and never
+show two services at once. 102/102 pass.
+
+Three `file://` prefixes had been stripped from the harness's `goto` calls at
+some point and it could not run at all; restored.

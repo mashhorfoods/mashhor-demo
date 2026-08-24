@@ -1245,7 +1245,11 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 @media(min-width:1024px) and (prefers-reduced-motion:no-preference){
   .js .services__track{grid-area:1/1;display:block}
   /* §13-equivalent: each step is the scroll distance one service is worth. */
-  .js .services__step{min-block-size:clamp(22rem,70vh,32rem)}
+  /* Seven services at 70vh was 4137px of pinned scroll on a 1440x844 screen --
+     roughly five screens in which the composition barely changed, which reads
+     as the page having stopped rather than as a showcase. 40vh keeps a real
+     pause per service and cuts the run to about half. */
+  .js .services__step{min-block-size:clamp(13rem,40vh,19rem)}
 
   .js .services__stage{position:sticky;align-self:start;z-index:1;
     inset-block-start:calc(var(--header-h-sm) + clamp(1rem,3vh,2rem));
@@ -1257,8 +1261,8 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
     block-size:clamp(26rem,62vh,36rem)}
   .js .services__slides > .service{grid-area:1/1;
     opacity:0;transform:scale(.98);pointer-events:none;
-    transition:opacity var(--dur-slow) var(--ease-smooth),
-               transform var(--dur-slow) var(--ease-smooth)}
+    transition:opacity var(--dur-normal) var(--ease-smooth),
+               transform var(--dur-normal) var(--ease-smooth)}
   .js .services__slides > .service.is-active{opacity:1;transform:none;pointer-events:auto}
 
   /* §04 — one slide: information at the inline start, image at the inline end
@@ -2391,7 +2395,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
             <div class="services__stage">
               <div class="services__slides">
 
-            <article data-slide="0" class="service service--feature" data-reveal>
+            <article data-slide="0" class="service service--feature is-active" data-reveal>
               <div class="service__head">
                 <span class="service__icon" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="14" cy="4.6" r="2"/><path d="M14 7.6v4.6H9.4"/><path d="M9.4 12.2 12 16.6"/><circle cx="10.6" cy="16.4" r="4.8"/><path d="M14.6 15h2.4l1.5 3.5"/></svg></span>
                 <span class="service__num" aria-hidden="true">01</span>
@@ -3122,7 +3126,8 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
       var visible = [];
       function pick() {
         if (!pinned.matches) return;
-        var mid = (window.innerHeight || doc.documentElement.clientHeight) / 2;
+        var vh = window.innerHeight || doc.documentElement.clientHeight;
+        var mid = vh / 2;
         var best = -1, bestDist = Infinity;
         for (var i = 0; i < steps.length; i++) {
           if (visible.indexOf(steps[i]) === -1) continue;
@@ -3130,7 +3135,17 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
           var d = Math.abs((r.top + r.bottom) / 2 - mid);
           if (d < bestDist) { bestDist = d; best = i; }
         }
-        if (best > -1) show(best);
+        /* An empty band must never mean an empty stage. It happens at the very
+           top of the section, before any step has reached the middle, and again
+           past the last one -- and a blank stage that persists for a screen of
+           scrolling is indistinguishable from a broken page. Clamp to whichever
+           end of the track we are past instead. */
+        if (best === -1) {
+          var t = showcase.getBoundingClientRect();
+          if (t.bottom < 0 || t.top > vh) return;
+          best = t.top > 0 ? 0 : steps.length - 1;
+        }
+        show(best);
       }
 
       var obs = new IntersectionObserver(function (entries) {
@@ -3151,7 +3166,11 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 
       /* Crossing the breakpoint hands the section back to the grid, where every
          slide must be visible and every link reachable again. */
-      function sync() { if (pinned.matches) { active = -1; pick(); } else { release(); } }
+      function sync() {
+        if (!pinned.matches) { release(); return; }
+        active = -1; pick();
+        if (active === -1) show(0);   /* first paint, before any scroll */
+      }
       if (pinned.addEventListener) pinned.addEventListener("change", sync);
       else if (pinned.addListener) pinned.addListener(sync);
       sync();
