@@ -935,8 +935,11 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
   .about__lead {grid-column:1;grid-row:2}
   .about__body {grid-column:1;grid-row:3}
   .about__media{grid-column:2;grid-row:1 / span 3;align-self:center}
-  .about__profile{grid-column:1;grid-row:4}
-  .about__facts{grid-column:1 / -1;grid-row:5;margin-block-start:clamp(1rem,2vw,1.75rem)}
+  /* M03 §17 — key information, then the doorway. The source order carries it
+     now, so the reading order a screen reader gets and the order on screen
+     agree at every tier instead of only below 1024. */
+  .about__facts{grid-column:1 / -1;grid-row:4;margin-block-start:clamp(1rem,2vw,1.75rem)}
+  .about__profile{grid-column:1;grid-row:5}
 }
 
 /* -- 01 · label + heading -------------------------------------------------- */
@@ -2354,6 +2357,108 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
   .hero__aud-title{min-height:2.6em;display:flex;align-items:center}
 }
 
+
+/* ==========================================================================
+   STAGE M03 · MOBILE «من نحن»
+   An editorial introduction to the company rather than a desktop block
+   folded down. Identity untouched: the label, the heading, the dashed route
+   under it, the icon nodes joining the three paragraphs, the photograph and
+   every word of the approved Arabic all stay exactly as they are — including
+   the approved term «ذوي الاحتياجات الخاصة» in the lead. What changes is the
+   order, the crop, the weight of the fact row, and the space between them.
+   ========================================================================== */
+@media(max-width:1023px){
+
+  /* -- M03·1 · THE PHOTOGRAPH IS NO LONGER CROPPED (§09/§10) ---------------
+     The source declares 1200x1500 — a 4:5 portrait — and the frame was
+     asking for 4:3 with object-fit:cover. That shows a 1200x900 band of a
+     1500-tall picture: 40% of its height thrown away, 20% off the top and
+     20% off the bottom, because object-position defaults to the centre. The
+     scene is a specialist helping a passenger at a vehicle ramp, which is a
+     vertical composition — heads at the top, ramp at the bottom, exactly
+     where the crop was cutting. The frame takes the source's own ratio, so
+     nothing is removed at any width, and it is the same crop the approved
+     desktop composition already shows. The width is capped at tablet so the
+     taller frame does not run away with the column. */
+  .about__media-frame{aspect-ratio:4/5}
+  .about__media{max-width:min(100%,24rem)}
+
+  /* -- M03·2 · RHYTHM (§05/§22) --------------------------------------------
+     One grid gap repeated between six blocks gave the heading, the lead,
+     the photograph and the fact row all the same separation, so nothing read
+     as belonging to anything. The steps are graded instead: the lead sits
+     close to the heading it explains, the photograph and the paragraphs get
+     a wider break, and the fact row gets the widest, because it is where the
+     section changes from reading to scanning. */
+  .about__grid{gap:0}
+  .about__lead   {margin-block-start:clamp(1.25rem,4vw,1.75rem)}
+  .about__media  {margin-block-start:clamp(1.75rem,6vw,2.5rem);margin-inline:auto}
+  .about__body   {margin-block-start:clamp(1.75rem,6vw,2.5rem)}
+  .about__facts  {margin-block-start:clamp(2rem,7vw,3rem)}
+  .about__profile{margin-block-start:clamp(1.5rem,5vw,2rem)}
+
+  /* -- M03·3 · THE FACTS STOP BEING A DASHBOARD (§14/§15) ------------------
+     Four labels drawn from the approved copy — no new claim, no number — but
+     they were wrapped in a white surface with a border, a shadow and internal
+     dividers, which is a card grid sitting under three paragraphs that are
+     deliberately NOT cards. The chrome goes and the ground shows through; a
+     single rule above the block separates it from the reading, and the
+     hairlines between cells are all the structure four short labels need.
+     Same four items, same icons, same words, one weight quieter. */
+  .about__facts{background:none;border:0;border-radius:0;box-shadow:none;overflow:visible;
+    border-block-start:1px solid var(--border)}
+  .about__fact{padding-block:clamp(1.25rem,4vw,1.5rem)}
+
+  /* -- M03·4 · THE PROFILE DOORWAY (§18/§19/§21) ---------------------------
+     It now closes the section, after the reader has met the company and
+     scanned the facts, which is what makes it read as "continue learning
+     about us" rather than an offer. It keeps its own surface and takes the
+     card step of the depth system, so it lifts off the section ground
+     without becoming the loudest thing in view. */
+  .about__profile{box-shadow:var(--elev-card)}
+}
+
+/* -- M03·5 · THE LEAD AT PHONE WIDTH (§07/§08) ------------------------------
+   --fs-h3 is 20px, and 20px in a 320px column puts 23 Arabic characters on a
+   line and runs the approved sentence to seven of them — short, ragged lines
+   that read as a second heading rather than an introduction. One step down
+   to --fs-body-lg gives about 28 to the line at the same 1.6 leading. The
+   copy is untouched; only its size is, and only below 768. It stays navy,
+   stays semibold, and stays the heaviest text in the section after the
+   heading, so the hierarchy §06 asks for is intact. */
+@media(max-width:767px){
+  .about__lead{font-size:var(--fs-body-lg)}
+}
+
+/* -- M03·6 · PRESS FEEDBACK ON THE DOORWAY (§19) ----------------------------
+   The CTA had a hover state and nothing else, so on a touch screen it gave no
+   acknowledgement at all. Surface, border and shadow move together on press,
+   with 1.5% of scale under a coarse pointer — the same amount the buttons
+   take, so the whole page answers a thumb the same way. No overshoot. */
+/* The selector carries [data-reveal] deliberately. `.js [data-reveal]` is
+   (0,2,0) and sets the whole `transition` shorthand, so it was overriding the
+   component's own (0,1,0) rule — the CTA's hover has been switching instantly
+   rather than easing since the reveal was introduced, which no one would see
+   as a bug because the colours still change. Matching the weight restores the
+   component's transitions and keeps the entrance exactly as it was: opacity
+   and transform still run at --dur-slow on --ease-entrance.
+
+   The press uses `scale`, not `transform`. The reveal already owns transform
+   for its 16px lift, and one property cannot hold two durations; `scale` is a
+   separate animatable property that composites the same way, so the two never
+   collide. */
+.about__profile,.about__profile[data-reveal]{
+  transition:opacity var(--dur-slow) var(--ease-entrance),
+    transform var(--dur-slow) var(--ease-entrance),
+    border-color var(--dur-normal) var(--ease-smooth),
+    background var(--dur-normal) var(--ease-smooth),
+    box-shadow var(--dur-fast) var(--ease-standard),
+    scale var(--dur-fast) var(--ease-standard)}
+.about__profile:active{background:var(--aun-primary-subtle);
+  border-color:var(--color-primary);box-shadow:none}
+@media(pointer:coarse){.about__profile:active{scale:.985}}
+@media(prefers-reduced-motion:reduce){.about__profile:active{scale:1}}
+
 </style>
   <!-- STAGE 02 — marks the document script-capable BEFORE first paint, so the
        reveal system can hide content without risking a blank page if JS fails. -->
@@ -2530,10 +2635,10 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
           </div>
 
           <!-- opening statement (approved copy, verbatim) -->
-          <p class="about__lead" data-reveal>شركة عون الدرب للنقل المتخصص شركة سعودية متخصصة في تقديم خدمات النقل لكبار السن وذوي الاحتياجات الخاصة والمرضى الذين يحتاجون إلى وسائل نقل مجهزة ومساعدة خاصة.</p>
+          <p class="about__lead" data-reveal data-reveal-step="2">شركة عون الدرب للنقل المتخصص شركة سعودية متخصصة في تقديم خدمات النقل لكبار السن وذوي الاحتياجات الخاصة والمرضى الذين يحتاجون إلى وسائل نقل مجهزة ومساعدة خاصة.</p>
 
           <!-- media: art-directed brand scene (swappable for a <picture> photo) -->
-          <figure class="about__media" data-reveal>
+          <figure class="about__media" data-reveal data-reveal-step="3">
             <div class="about__media-frame">
               <img src="https://i.ibb.co/fV3wJsBq/10.webp"
                    width="1200" height="1500" loading="lazy" decoding="async"
@@ -2542,7 +2647,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
           </figure>
 
           <!-- body: approved copy (verbatim) — paragraphs 2-4 -->
-          <div class="about__body" data-reveal>
+          <div class="about__body" data-reveal data-reveal-step="4">
             <div class="about__point">
               <span class="about__point-icon" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15.6v-3.6l2.2-3.8h8l2.8 3.8H21v3.6"/><path d="M3 15.6h1.8M15.4 15.6h3.6"/><circle cx="7.6" cy="16.6" r="2.2"/><circle cx="17.4" cy="16.6" r="2.2"/></svg></span>
               <p>تعتمد الشركة على مركبات حديثة ومجهزة بأحدث التقنيات، إلى جانب طاقم مؤهل ومدرب للتعامل مع احتياجات المستفيدين، بما يضمن تقديم تجربة نقل آمنة ومريحة تراعي خصوصية كل حالة واحتياجاتها.</p>
@@ -2557,17 +2662,8 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
             </div>
           </div>
 
-          <!-- the doorway to the full company profile: after the introduction,
-               before the trust strip, inside the text column. Opens in a new
-               tab; the destination explains itself, so no extra label. -->
-          <a class="about__profile" href="https://drive.google.com/file/d/1ulB4ayaLj4_VUgka7UG4T3_EZu1C5CUD/view"
-             target="_blank" rel="noopener noreferrer" data-reveal>
-            تعرف على المزيد
-            <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H6"/><path d="M11.5 6.5 6 12l5.5 5.5"/></svg>
-          </a>
-
           <!-- trust signals — surfaced from the approved copy (no new claims) -->
-          <ul class="about__facts" data-reveal>
+          <ul class="about__facts" data-reveal data-reveal-step="5">
             <li class="about__fact">
               <span class="about__fact-icon" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15.6v-3.6l2.2-3.8h8l2.8 3.8H21v3.6"/><path d="M3 15.6h1.8M15.4 15.6h3.6"/><circle cx="7.6" cy="16.6" r="2.2"/><circle cx="17.4" cy="16.6" r="2.2"/></svg></span>
               <span class="about__fact-label">مركبات مجهزة</span>
@@ -2585,6 +2681,15 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
               <span class="about__fact-label">الرياض</span>
             </li>
           </ul>
+
+          <!-- the doorway to the full company profile: after the introduction,
+               before the trust strip, inside the text column. Opens in a new
+               tab; the destination explains itself, so no extra label. -->
+          <a class="about__profile" href="https://drive.google.com/file/d/1ulB4ayaLj4_VUgka7UG4T3_EZu1C5CUD/view"
+             target="_blank" rel="noopener noreferrer" data-reveal data-reveal-step="5">
+            تعرف على المزيد<span class="u-visually-hidden"> (يفتح في صفحة جديدة)</span>
+            <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5V17a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4.5"/><path d="M5 5h5.5M5 5v5.5M5 5l6.5 6.5"/></svg>
+          </a>
 
         </div>
       </section>

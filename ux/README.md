@@ -810,8 +810,12 @@ Supplying two or three widths would let this become a `srcset`.
 
 ## Terminology standard — «ذوي الاحتياجات الخاصة»
 
-Project-wide replacement of «الإعاقة» and its variants. `verify-terminology.js`
-holds the rule: 44 assertions, run it before any content change ships.
+Project-wide replacement of the retired disability term and its variants.
+`verify-terminology.js` holds the rule: 44 assertions, run it before any
+content change ships. **This log deliberately does not quote the retired
+strings** — the harness scans every file in the repository, including this
+one, and a design note is exactly the kind of place a forbidden term gets
+copied back out of. The harness itself is the canonical list.
 
 **Fourteen occurrences across four files.** Nine in `index.html` — the meta
 description, the Open Graph description, the Twitter description, the hero
@@ -820,28 +824,29 @@ audience card, the About lead, a «ما يميزنا» chapter, the Services int
 one in `brand/design-system.html` and one in the Stage 01 UX note that quoted
 the card label.
 
-**Grammatical case was preserved, not flattened.** «وذوي الإعاقة» takes «وذوي
-الاحتياجات الخاصة» in the genitive; the standalone hero label «ذوو الإعاقة» is
-nominative and takes «ذوو الاحتياجات الخاصة»; the indefinite «ذوو إعاقة» in the
-brand photography note takes «ذوو احتياجات خاصة». A single literal
-find-and-replace would have made three of the fourteen grammatically wrong.
+**Grammatical case was preserved, not flattened.** The genitive form takes
+«وذوي الاحتياجات الخاصة»; the standalone hero label, which is nominative, takes
+«ذوو الاحتياجات الخاصة»; and the indefinite form in the brand photography note
+takes «ذوو احتياجات خاصة». A single literal find-and-replace would have made
+three of the fourteen grammatically wrong.
 
 **Two sentences needed rewriting, not replacing.** The new term contains the
 word «احتياجات», and in two places that collided with wording already there:
 
-- «للتعامل مع كبار السن وذوي الإعاقة **واحتياجاتهم الخاصة** أثناء عملية النقل»
-  became «…وذوي الاحتياجات الخاصة واحتياجاتهم الخاصة…» — the same phrase twice,
-  three words apart. The approved term already carries "their special needs",
-  so the trailing clause is now a repetition of itself and is dropped.
+- The «ما يميزنا» staff line ended «…**واحتياجاتهم الخاصة** أثناء عملية النقل»,
+  which after the swap read «…وذوي الاحتياجات الخاصة واحتياجاتهم الخاصة…» — the
+  same phrase twice, three words apart. The approved term already carries
+  "their special needs", so the trailing clause is now a repetition of itself
+  and is dropped.
 - «خدمات النقل المتخصص **لتلبية احتياجات** كبار السن وذوي الاحتياجات الخاصة»
   repeated «احتياجات» four words apart. The sentence closes with «الذين
   يحتاجون إلى وسائل نقل مجهزة ومساعدة خاصة», which already states the need, so
   the preposition alone carries it.
 
-Both keep the original meaning and add no new content. The brand note «تصوير
-الإعاقة من زاوية الشفقة» — a forbidden photography practice — became «تصوير ذوي
-الاحتياجات الخاصة من زاوية الشفقة», which says the same thing about the same
-practice.
+Both keep the original meaning and add no new content. The brand book's list of
+photography practices to avoid named the condition rather than the people; it
+now reads «تصوير ذوي الاحتياجات الخاصة من زاوية الشفقة», which forbids the same
+practice in the approved terms.
 
 **The term is 21 characters where the one it replaced was 11, and one layout
 could not absorb it.** The hero's audience cues are a three-up grid sized for a
@@ -869,3 +874,86 @@ then loads the rendered page and walks every text node plus `alt`,
 grep cannot prove what actually reaches a reader. It also asserts the approved
 term is present in the page, in `alt` and in all three meta descriptions, that
 it overflows nothing, and that the hero cue row stays aligned.
+
+---
+
+## Stage M03 — «من نحن» on mobile
+
+An editorial introduction to the company rather than the desktop block folded
+down. Identity untouched: the label, the heading, the dashed route under it,
+the icon nodes joining the three paragraphs, the photograph, and every word of
+the approved Arabic including the approved terminology in the lead. What
+changed is the order, the crop, the weight of the fact row, and the space
+between them. 79 assertions added to `verify-mobile.js`.
+
+**The photograph was losing 40% of itself.** The source declares 1200x1500 — a
+4:5 portrait — and the mobile frame was asking for 4:3 with `object-fit:cover`.
+That shows a 1200x900 band of a 1500-tall picture: 20% cut off the top and 20%
+off the bottom, because `object-position` defaults to the centre. The scene is
+a specialist helping a passenger at a vehicle ramp — a vertical composition,
+heads at the top and ramp at the bottom, exactly where the crop was cutting.
+The frame takes the source's own ratio now, so nothing is removed at any width,
+and it is the same crop the approved desktop composition already showed. There
+is an assertion that reads the ratio off the image's own `width`/`height`
+attributes and requires the frame to match, so a future ratio change cannot
+quietly reintroduce a crop.
+
+**Key information now comes before the doorway.** The profile CTA sat above the
+fact row, so the invitation to read more arrived before the reasons to want to.
+The facts move ahead of it — and the source order moves with them, so a screen
+reader gets the same sequence. Desktop's explicit grid rows were swapped to
+match rather than left as they were: the two tiers disagreeing about order is
+the WCAG 1.3.2 problem in miniature, and there was no reason to keep it.
+
+**The facts stopped being a dashboard.** Four labels drawn from the approved
+copy — no new claim, no number — wrapped in a white surface with a border, a
+shadow and internal dividers: a card grid sitting directly under three
+paragraphs that are deliberately *not* cards. Below 1024 the chrome is gone and
+the section ground shows through; one rule above the block separates it from
+the reading, and the hairlines between cells are all the structure four short
+labels need. Same four items, same icons, same words, one weight quieter. The
+desktop card is untouched, and asserted to stay that way.
+
+**The lead was set at heading size.** `--fs-h3` is 20px, and 20px in a 320px
+column puts 23 Arabic characters on a line and runs the approved sentence to
+seven of them — short ragged lines that read as a second heading rather than an
+introduction. One step down to `--fs-body-lg` below 768 gives about 26 to the
+line at the same 1.6 leading. The copy is untouched; only its size is. It stays
+navy, stays semibold, and stays the heaviest text in the section after the
+heading.
+
+**The doorway says where it goes.** It already opened in a new tab with
+`rel="noopener noreferrer"`; nothing said so. It now carries an external-link
+mark instead of the internal back-arrow — mirrored for RTL, so the page sits at
+the reading edge and the arrow leaves through the corner it opens — and a
+visually-hidden «(يفتح في صفحة جديدة)» for screen readers.
+
+**Two bugs the new assertions caught, one of them old.**
+
+- `.js [data-reveal]` is (0,2,0) and sets the whole `transition` shorthand, so
+  it had been overriding `.about__profile`'s own (0,1,0) rule ever since the
+  reveal was introduced. The CTA's hover was switching instantly rather than
+  easing — invisible as a bug, because the colours still changed. Matching the
+  weight restores it and keeps the entrance identical.
+- The press state uses `scale`, not `transform`. The reveal already owns
+  `transform` for its 16px lift and one property cannot hold two durations;
+  `scale` is a separate animatable property that composites the same way, so
+  the two cannot collide.
+
+**And one in the harness itself.** The rule-walker used
+`if (rule.cssRules) recurse`, which was written before CSS nesting gave every
+`CSSStyleRule` a `cssRules` list of its own — so it recursed into every leaf
+and never read a single declaration. It reported "no `:active` state" against a
+stylesheet that had three. Fixed to take declarations wherever they are and
+recurse only into groups that hold rules.
+
+### One thing left alone, deliberately
+
+The About section is the only one on the site whose label pill and heading
+carry the same words — «من نحن» twice, one above the other. Every other section
+pairs a distinct label with a distinct title («لماذا عون الدرب» over «ما
+يميزنا», and so on). It is a duplicated line at the top of the section's first
+screen, but the label is part of a system all seven sections share, and the
+alternative is either inventing a title or dropping an approved element from
+one section only. Both are content decisions, not layout ones.
+*To hide the pill here alone: `#about .about__label{display:none}`.*

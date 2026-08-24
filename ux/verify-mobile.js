@@ -294,6 +294,124 @@ const PHONES = [[320,568],[360,640],[375,667],[390,844],[412,915],[430,932]];
   await p.close();
  }
 
+ /* ---- 9 · STAGE M03 · «من نحن» ------------------------------------------- */
+ for (const [w,h] of [[360,640],[375,667],[390,844],[412,915],[430,932],[768,1024],[1440,900]]) {
+  const p = w<768 ? await phone(w,h) : await b.newPage({viewport:{width:w,height:h}});
+  p.on('pageerror',e=>errs.push('about '+w+': '+e.message));
+  await p.goto(URL,{waitUntil:'load'});
+  await p.evaluate(()=>document.querySelectorAll('[data-reveal]').forEach(e=>e.classList.add('is-inview')));
+  await p.waitForTimeout(400);
+  const r=await p.evaluate(()=>{
+   const q=s=>document.querySelector(s);
+   const px=v=>parseFloat(v);
+   const SEL=['.about__head','.about__lead','.about__media','.about__body','.about__facts','.about__profile'];
+   const tops=SEL.map(s=>({s,t:Math.round(q(s).getBoundingClientRect().top+scrollY)}));
+   /* the order the markup is in — a screen reader reads this one */
+   const grid=q('.about__grid');
+   const dom=[...grid.children].filter(e=>SEL.some(s=>e.matches(s))).map(e=>e.className.split(' ')[0]);
+   const img=q('.about__media img'), frame=q('.about__media-frame');
+   const declared=[+img.getAttribute('width'), +img.getAttribute('height')];
+   const ar=getComputedStyle(frame).aspectRatio;
+   const facts=q('.about__facts'), fc=getComputedStyle(facts);
+   const prof=q('.about__profile'), pc=getComputedStyle(prof), pr=prof.getBoundingClientRect();
+   /* line length of the lead, counted from real glyph positions */
+   const t=q('.about__lead').firstChild, str=t.textContent, rng=document.createRange(), rows=new Set();
+   for (let i=0;i<str.length;i++){rng.setStart(t,i);rng.setEnd(t,i+1);
+     const rr=rng.getBoundingClientRect(); if(rr.height) rows.add(Math.round(rr.top));}
+   /* contrast of the section's two text roles against the ground it sits on */
+   const lum=c=>{const [r,g,bl]=c.match(/[\d.]+/g).slice(0,3).map(Number).map(v=>{v/=255;
+     return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)});return .2126*r+.7152*g+.0722*bl};
+   const ratio=(f,g)=>{const a=lum(f),c=lum(g);return Math.round(((Math.max(a,c)+.05)/(Math.min(a,c)+.05))*100)/100};
+   const ground=getComputedStyle(q('#about')).backgroundColor==='rgba(0, 0, 0, 0)'
+     ? getComputedStyle(document.body).backgroundColor : getComputedStyle(q('#about')).backgroundColor;
+   /* the press state, read from the cascade rather than guessed */
+   let activeRule=null;
+   for (const sh of document.styleSheets){ let rs; try{rs=sh.cssRules}catch(e){continue}
+     /* CSS nesting gave every CSSStyleRule a cssRules list of its own, so a
+        `if (rl.cssRules) recurse` walker never reaches a leaf. Take the
+        declarations wherever they are, and recurse only into groups that
+        actually hold rules. */
+     const walk=list=>{ for (const rl of list){
+       if (rl.selectorText && rl.selectorText.includes('.about__profile:active'))
+         activeRule=(activeRule||'')+rl.style.cssText+';';
+       if (rl.cssRules && rl.cssRules.length) walk(rl.cssRules); }};
+     walk(rs); }
+   return {
+    tops, dom,
+    declaredAR: Math.round(declared[0]/declared[1]*1000)/1000,
+    frameAR: ar==='auto'?null:Math.round(eval(ar.replace('/','/'))*1000)/1000,
+    factsBg: fc.backgroundColor, factsShadow: fc.boxShadow, factsBorderTop: px(fc.borderTopWidth),
+    factsBorderAll: px(fc.borderBottomWidth),
+    profTarget: prof.target, profRel: prof.rel,
+    profHidden: !!prof.querySelector('.u-visually-hidden'),
+    profHiddenText: (prof.querySelector('.u-visually-hidden')||{}).textContent||'',
+    profIconPaths: prof.querySelectorAll('svg path').length,
+    profH: Math.round(pr.height), profW: Math.round(pr.width),
+    colW: Math.round(q('.about__lead').getBoundingClientRect().width),
+    profTrans: pc.transitionProperty, activeRule,
+    leadPerLine: Math.round(str.trim().length/rows.size), leadLines: rows.size,
+    crLead: ratio(getComputedStyle(q('.about__lead')).color, ground),
+    crPoint: ratio(getComputedStyle(q('.about__point p')).color, ground),
+    steps: SEL.map(s=>q(s).getAttribute('data-reveal-step')||(q(s).hasAttribute('data-reveal')?'1':null)),
+    mediaCol: (()=>{const m=q('.about__media').getBoundingClientRect(),
+      l=q('.about__lead').getBoundingClientRect();
+      return (m.left>=l.right-2||m.right<=l.left+2)?2:1})(),
+    delays: SEL.map(s=>Math.round((parseFloat(getComputedStyle(q(s)).transitionDelay)||0)*1000)),
+   };
+  });
+
+  /* Above 1024 the photograph moves into a second column and sits BESIDE the
+     text, so its top is meaningless in a single-file reading order — the
+     column order is what has to hold there. */
+  const seq = w>=1024 ? r.tops.filter(v=>v.s!=='.about__media') : r.tops;
+  const asc = seq.every((v,i)=>i===0||v.t>=seq[i-1].t);
+  ok(asc, `${w}: من نحن reads label > lead > ${w>=1024?'':'photograph > '}detail > facts > profile (${seq.map(v=>v.s.slice(8)+':'+v.t).join(' ')})`);
+  if (w>=1024) ok(r.mediaCol>1, `${w}: the photograph sits beside the text, not in the reading column (column ${r.mediaCol})`);
+  ok(r.dom.join('>')==='about__head>about__lead>about__media>about__body>about__facts>about__profile',
+     `${w}: the markup is in that same order, so a screen reader gets it too (${r.dom.join('>')})`);
+  ok(r.frameAR!==null && Math.abs(r.frameAR-r.declaredAR)<0.01,
+     `${w}: the photograph is shown at its own ratio, so nothing is cropped (frame ${r.frameAR} vs source ${r.declaredAR})`);
+  ok(r.profTarget==='_blank' && r.profRel.includes('noopener') && r.profRel.includes('noreferrer'),
+     `${w}: the profile opens in a new tab, safely (${r.profTarget} "${r.profRel}")`);
+  ok(r.profHidden && r.profHiddenText.includes('صفحة جديدة'),
+     `${w}: and says so to a screen reader ("${r.profHiddenText.trim()}")`);
+  ok(r.profIconPaths===2, `${w}: it carries the external-link mark, not the internal arrow (${r.profIconPaths} paths)`);
+  ok(r.profH>=44, `${w}: the doorway is comfortably tappable (${r.profH}px)`);
+  ok(r.profTrans.includes('transform') && r.profTrans.includes('background'),
+     `${w}: press feedback moves surface and scale together (${r.profTrans})`);
+  ok(r.activeRule && /background/.test(r.activeRule) && /box-shadow/.test(r.activeRule),
+     `${w}: there is a real :active state, not just :hover`);
+  ok(r.crLead>=4.5 && r.crPoint>=4.5, `${w}: both text roles clear AA on the section ground (${r.crLead}, ${r.crPoint})`);
+  const d=r.delays;
+  ok(d.every((v,i)=>i===0||v>=d[i-1]) && Math.max(...d)<=380,
+     `${w}: the section arrives in reading order and is done by 380ms (${d.join('/')}ms)`);
+  if (w<=767) {
+   ok(r.leadPerLine>=24 && r.leadPerLine<=45,
+      `${w}: the lead runs a comfortable Arabic measure (${r.leadPerLine} per line over ${r.leadLines})`);
+   ok(Math.abs(r.profW-r.colW)<=2, `${w}: the doorway spans the text column (${r.profW} of ${r.colW})`);
+  }
+  if (w<=1023) {
+   ok(r.factsBg==='rgba(0, 0, 0, 0)' && r.factsShadow==='none' && r.factsBorderAll===0 && r.factsBorderTop>0,
+      `${w}: the facts are editorial, not a card (bg ${r.factsBg}, shadow ${r.factsShadow}, box border ${r.factsBorderAll}, rule ${r.factsBorderTop})`);
+  } else {
+   ok(r.factsBg!=='rgba(0, 0, 0, 0)' && r.factsShadow!=='none',
+      `${w}: the desktop fact card is untouched (bg ${r.factsBg})`);
+  }
+  await p.close();
+ }
+
+ /* reduced motion clears the section's entrance */
+ {
+  const p=await phone(390,844,{reducedMotion:'reduce'});
+  await p.goto(URL,{waitUntil:'load'}); await p.waitForTimeout(500);
+  const r=await p.evaluate(()=>['.about__head','.about__lead','.about__media','.about__body','.about__facts','.about__profile']
+    .map(s=>({d:parseFloat(getComputedStyle(document.querySelector(s)).transitionDelay)||0,
+              o:parseFloat(getComputedStyle(document.querySelector(s)).opacity)})));
+  ok(r.every(x=>x.d===0 && x.o>0.95),
+     `reduced motion: من نحن arrives at once (${r.map(x=>x.d+'/'+x.o).join(' ')})`);
+  await p.close();
+ }
+
  ok(errs.length===0, `no page errors (${errs.join(' | ')})`);
  console.log(`\n${n-f}/${n} checks pass`);
  await b.close(); process.exit(f?1:0);
