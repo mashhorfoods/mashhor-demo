@@ -1236,3 +1236,121 @@ head and no per-gap connectors.
 
 **No CTA.** The section has never had one, and the brief says not to add one
 for decoration.
+
+---
+
+## Stage M07 — the CTA system
+
+One family, three levels, a few named variants, and the geometry of all of them
+from one place. Nothing here changes a label, a colour or a destination; it
+removes the drift that had crept in section by section, and fixes what
+measuring every action at once turned up. `verify-cta.js` — 44 assertions at
+390, 768 and 1440 — is the consistency audit as a test.
+
+### Two contrast failures that predate this stage
+
+**Outlined buttons had a 1.5:1 boundary.** An outlined button is identified by
+its outline, and `--border-strong` measures 1.5:1 against the page — well under
+the 3:1 WCAG 1.4.11 asks of a control's boundary. At a glance the button *was*
+its label and nothing else. The boundary takes the brand blue: 4.63:1 on white
+and 4.15:1 on the mist of the featured service card. It is also the colour the
+border already moved to on hover, so the resting state now keeps the promise
+the hover made, and hover keeps its tinted surface so the two stay distinct.
+The company-profile doorway was worse at 1.21:1 and takes the same treatment.
+
+**Secondary labels were below AA on two of the three grounds they sit on.**
+`--color-primary` at the button's 16px semibold is not "large text" by any
+definition WCAG uses, so it needs 4.5:1. Measured: 4.63 on pure white, **4.35
+on the page ground and 4.15 on the featured card's mist** — and secondary
+buttons appear on all three. The label takes the navy (7.65:1 at worst); the
+boundary keeps the brand blue, so the control is still identified in the
+brand's own colour and only the text darkens. Navy is what every heading on the
+site is already set in.
+
+Worst label contrast anywhere on the site is now 4.63 — the primary's white on
+brand blue — and every boundary clears 3:1.
+
+### Two states that would have failed the first time they were used
+
+**Disabled was `opacity:.45` and nothing else.** That drops the primary's
+white-on-blue to roughly 2:1 — a control you cannot read telling you it is a
+control you cannot use, which is exactly what §25 warns against. Unavailable is
+now said with a surface and an ink: slate on mist, 4.7:1, opacity untouched.
+
+**The busy spinner was invisible on every variant except the primary.** The
+loading state blanks `color` to hide the label, which also blanks
+`currentColor` — so the spinner had been hard-coded white and rendered white on
+white on every secondary. Each variant now names its ink once, in `--btn-ink`,
+and the label and the spinner read the same token. The state also answers to
+`aria-busy="true"` as well as the class, keeps the accessible name, and drops
+pointer events so a second tap cannot fire the same action twice.
+
+Nothing on the site uses either state today — there are no forms — which is
+precisely why both were broken. They are asserted now, so they will be right
+the first time something needs them.
+
+### The drift
+
+**The company-profile doorway had its own geometry**: the large control height
+with the default type size, 20px of side padding where every other button has
+24 or 32, and — measured across tiers — a card shadow below 1024 and none above
+it, so one component was two components depending on the screen. It keeps what
+makes it a doorway (label at the reading edge, mark at the far one, its own
+width cap) and takes everything else from the button system. The shadow goes at
+every width: §33 puts elevation on primary actions, and a company profile is an
+editorial continuation. That reverses the elevation I added in M03·4, which was
+right that the component should stand off the ground and wrong about how.
+
+**The menu trigger answered a tap with nothing** — no surface change, no
+scale — and it is the first control anyone touches on a phone.
+
+**The website address in the contact card was under two floors at once**: brand
+blue at 15px is 4.35:1, and it was 18px tall on desktop, under the 24px pointer
+minimum. Navy, and the target floor now applies at every width.
+
+**Two press mechanisms became one.** The buttons used `transform`, the doorway
+used `scale` — the second added in M03 only because the first collided with the
+entrance reveal's own transform. Everything presses with `scale` now: a
+separate animatable property that composites the same way and cannot collide
+with anything, anywhere. It applies to a mouse as well as a thumb, because a
+click that answers is feedback, not a touch affordance.
+
+### The same collision, walked into twice
+
+`verify-cta.js` failed on its first run with seven service CTAs reporting no
+press transition. M05's card-assembly rule sets the whole `transition`
+shorthand on every direct child of the card — and the card's action is one of
+them — so the stagger was overriding the button's own transition and those
+seven answered a tap by snapping rather than easing. It is the same
+specificity collision M03 found on the profile doorway, reintroduced in M05
+without noticing. Naming `scale` in the stagger's property list keeps both.
+
+That is what the audit was for: the bug was invisible by eye, in a section that
+had passed 84 of its own assertions.
+
+### Three assertions this stage got wrong first
+
+- A control is identified by its surface *or* its boundary. The first version
+  preferred the surface when one existed, and failed the doorway — a white
+  card on a near-white ground, identified perfectly well by its blue outline.
+- The size ladder is what the system *specifies*. Checking the rendered height
+  failed a service CTA at 47.6px, which is a 48px control landing a fraction
+  short inside its grid row.
+- `rgba(0, 0, 0, 0)` is not black. Measuring a transparent button's contrast
+  against its own `background-color` compared the navy spinner to black and
+  called it invisible.
+
+### Left alone, deliberately
+
+**The mobile menu's contact rows keep the 12px radius** of the menu, not the
+18px of the button system. They are navigation rows inside a panel, and they
+belong to the menu's shapes rather than to the CTA family.
+
+**The hero's secondary is a `btn--lg` overridden to the default metrics.** It
+looks like drift and is not: M02 stepped it down deliberately so two full-width
+boxes of the same height would stop competing. The result is correct; only the
+route to it is roundabout.
+
+**Footer navigation keeps its square, quiet treatment.** Those are links in a
+list, not actions, and the brand-blue tap highlight from M01 already gives them
+touch feedback.

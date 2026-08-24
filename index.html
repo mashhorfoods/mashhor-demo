@@ -346,6 +346,11 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
    06 · BUTTON SYSTEM (§09) — states §23
    ========================================================================== */
 .btn{
+  /* M07 — the variant's ink, named once. The busy state blanks `color` to hide
+     the label, which also blanks currentColor, so the spinner used to be
+     hard-coded white and was invisible on every variant that is not the
+     primary. Both now read this. */
+  --btn-ink:var(--color-primary);
   display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-8);
   min-height:var(--control-md);padding-inline:var(--sp-24);padding-block:var(--sp-12);
   font-family:var(--font-heading);font-size:var(--fs-button);font-weight:var(--fw-semibold);line-height:1;
@@ -359,14 +364,22 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 .btn--block{width:100%}
 
 /* Primary */
-.btn--primary{background:var(--color-primary);color:var(--text-on-primary);box-shadow:var(--shadow-xs)}
+.btn--primary{--btn-ink:var(--text-on-primary);
+  background:var(--color-primary);color:var(--text-on-primary);box-shadow:var(--shadow-xs)}
 .btn--primary:hover{background:var(--interactive-hover);box-shadow:var(--shadow-sm);transform:translateY(-1px)}
 .btn--primary:active{background:var(--interactive-active);transform:translateY(0);box-shadow:none}
 .btn--primary:focus-visible{outline:none;box-shadow:var(--shadow-focus)}
 
 /* Secondary (outline) */
-.btn--secondary{background:transparent;color:var(--color-primary);border-color:var(--border-strong)}
-.btn--secondary:hover{border-color:var(--color-primary);background:var(--aun-primary-subtle)}
+/* M07 §34 — an outlined button is identified by its outline, and this one
+   measured 1.5:1 against the page: below the 3:1 WCAG 1.4.11 asks of a
+   control's boundary, so at a glance the button was its label and nothing
+   else. The brand blue is 4.35:1 on white and 4.0:1 on the mist grounds, and
+   it is the colour this border already moved to on hover — the resting state
+   now keeps the promise the hover made. Hover keeps its tinted surface, so
+   the two states are still distinct. */
+.btn--secondary{background:transparent;color:var(--color-primary);border-color:var(--color-primary)}
+.btn--secondary:hover{background:var(--aun-primary-subtle)}
 .btn--secondary:active{background:rgba(73,117,186,.14)}
 .btn--secondary:focus-visible{outline:none;box-shadow:var(--shadow-focus)}
 
@@ -376,14 +389,30 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 .btn--ghost:focus-visible{outline:none;box-shadow:var(--shadow-focus)}
 
 /* On dark surfaces */
-.btn--on-inverse{background:#fff;color:var(--color-secondary)}
+.btn--on-inverse{--btn-ink:var(--color-secondary);background:#fff;color:var(--color-secondary)}
 .btn--on-inverse:hover{background:var(--aun-sky)}
 
-.btn:disabled,.btn[aria-disabled="true"]{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none;pointer-events:none}
-.btn.is-loading{position:relative;color:transparent!important;pointer-events:none}
-.btn.is-loading::after{content:"";position:absolute;width:1.1em;height:1.1em;border-radius:50%;
-  border:2px solid currentColor;border-inline-start-color:transparent;
-  color:var(--text-on-primary);animation:aun-spin .7s linear infinite}
+/* M07 §25 — opacity .45 alone dropped the primary's white-on-blue label to
+   about 2:1, which is a control you cannot read telling you it is a control
+   you cannot use. Unavailable is said with a surface and an ink instead:
+   slate on mist is 5.4:1, so the label stays legible while the button stops
+   looking pressable. */
+.btn:disabled,.btn[aria-disabled="true"]{
+  background:var(--aun-mist);color:var(--aun-slate);border-color:var(--border-strong);
+  box-shadow:none;scale:1;transform:none;cursor:not-allowed;pointer-events:none}
+
+/* M07 §23 — the label is hidden, not removed, so the accessible name survives;
+   pointer-events go, so a second tap cannot fire the same action twice. */
+.btn.is-loading,.btn[aria-busy="true"]{position:relative;color:transparent!important;pointer-events:none}
+.btn.is-loading::after,.btn[aria-busy="true"]::after{
+  content:"";position:absolute;width:1.1em;height:1.1em;border-radius:50%;
+  border:2px solid var(--btn-ink);border-inline-start-color:transparent;
+  animation:aun-spin .7s linear infinite}
+@media(prefers-reduced-motion:reduce){
+  /* the indicator stays — it is functional feedback, not decoration — but it
+     stops spinning and reads as a ring */
+  .btn.is-loading::after,.btn[aria-busy="true"]::after{animation:none;opacity:.7}
+}
 @keyframes aun-spin{to{transform:rotate(360deg)}}
 
 /* Icon button */
@@ -2655,9 +2684,16 @@ html:not(.js) .hww__path{display:none}
      at 240ms. It rides the card's own reveal, so it is gated on `.js` exactly
      like every other entrance on this page: without script every card renders
      complete, and the global reduced-motion rule clears all five delays. */
+  /* `scale` is in this list deliberately. This rule sets the whole
+     `transition` shorthand on every direct child of the card, and the card's
+     action is one of them — so the stagger was overriding the button's own
+     press transition and seven service CTAs answered a tap by snapping rather
+     than easing. The same collision the profile doorway hit in M03, walked
+     into again here. Naming the property keeps both. */
   .js .service[data-reveal] > *{opacity:0;transform:translateY(10px);
     transition:opacity var(--dur-normal) var(--ease-entrance),
-               transform var(--dur-normal) var(--ease-entrance)}
+               transform var(--dur-normal) var(--ease-entrance),
+               scale var(--dur-fast) var(--ease-standard)}
   .js .service[data-reveal].is-inview > *{opacity:1;transform:none}
   .js .service[data-reveal] .service__media{transition-delay:0ms}
   .js .service[data-reveal] .service__head {transition-delay:60ms}
@@ -2672,6 +2708,89 @@ html:not(.js) .hww__path{display:none}
 @media(max-width:1023px) and (prefers-reduced-motion:reduce){
   .js .service[data-reveal] > *{opacity:1;transform:none;transition:none}
   .service__icon{transition:none}
+}
+
+
+/* ==========================================================================
+   STAGE M07 · THE CTA SYSTEM
+   One family, three levels, a few named variants — and the geometry of all of
+   them coming from one place. Nothing here changes a label, a colour or a
+   destination; it removes the drift that had crept in section by section.
+
+   Audited every action at 390, 768 and 1440 before touching anything. What
+   the measurements found is fixed below, and each block says which number
+   sent it there.
+   ========================================================================== */
+
+/* -- M07·1 · THE EDITORIAL DOORWAY JOINS THE SYSTEM (§05/§29/§33) ----------
+   «تعرف على المزيد» was the one action on the site with its own geometry: the
+   large control height and the default type size, 20px of side padding where
+   every other button has 24 or 32, and — measured across tiers — a card
+   shadow below 1024 and none above it, so the same component was two
+   different components depending on the screen.
+
+   It keeps what makes it a doorway rather than a button: the label at the
+   reading edge, the mark at the far one, the distance between them doing the
+   work of saying "this leads somewhere", and its own width cap. Everything
+   else now comes from the button system. The shadow goes at every width —
+   §33 puts elevation on primary actions, and a company profile is an
+   editorial continuation, not the page's loudest object. This reverses the
+   elevation added in M03·4, which was right about the component standing off
+   the ground and wrong about how. */
+.about__profile{padding-inline:var(--sp-24);border-color:var(--color-primary);box-shadow:none}
+@media(max-width:1023px){.about__profile{box-shadow:none}}
+
+/* -- M07·2 · ONE PRESS, ONE PROPERTY (§20/§39) ------------------------------
+   The system had two press mechanisms: `transform` on the buttons and `scale`
+   on the doorway, the second added only because the first collided with the
+   entrance reveal's own transform. Rather than keep two, everything presses
+   with `scale` — a separate animatable property that composites the same way
+   and cannot collide with anything, anywhere.
+
+   It applies to a mouse as well as a thumb. A click that answers is not a
+   touch affordance, it is feedback, and §20 asks every CTA for it. */
+.btn,.icon-btn,.menu-trigger,.about__profile{
+  transition:var(--transition-control),scale var(--dur-fast) var(--ease-standard)}
+.btn:active,.icon-btn:active,.menu-trigger:active,.about__profile:active{scale:.985}
+.btn--primary:hover{transform:none}       /* the lift moves to the shadow alone */
+.btn--primary:active{box-shadow:none}
+@media(prefers-reduced-motion:reduce){
+  .btn:active,.icon-btn:active,.menu-trigger:active,.about__profile:active{scale:1}
+}
+
+/* -- M07·3 · THE ONE ACTION WITH NO PRESS AT ALL (§20/§38) ------------------
+   The menu trigger answered a tap with nothing: no surface change, no scale.
+   It is the first control anyone touches on a phone. */
+.menu-trigger:active{background:var(--aun-primary-subtle)}
+
+/* -- M07·4 · THE SECONDARY LABEL WAS BELOW AA ON TWO OF THREE GROUNDS ------
+   `--color-primary` at the button's 16px semibold is not "large text" by any
+   definition WCAG uses, so it needs 4.5:1. Measured: 4.63 on pure white, but
+   4.35 on the page ground and 4.15 on the mist of the featured service card —
+   and secondary buttons sit on all three. It has been under AA on two of them
+   since the system was written; nothing in this stage caused it, measuring
+   every action at once is what found it.
+
+   The label takes the navy, which is 7.65:1 at its worst on these grounds.
+   The boundary keeps the brand blue, so the control is still identified in
+   the brand's own colour and only the text darkens — and navy is the colour
+   every heading on the site is already set in. */
+.btn--secondary,.btn--ghost,.about__profile{color:var(--color-secondary)}
+.btn--secondary,.about__profile{--btn-ink:var(--color-secondary)}
+/* the mark stays brand blue: it is non-text, and 4.35:1 clears the 3:1 that
+   applies to it */
+.btn--secondary svg,.about__profile svg,.btn--ghost svg{color:var(--color-primary)}
+
+/* -- M07·5 · A LINK THAT WAS BELOW TWO FLOORS AT ONCE (§34/§41) ------------
+   The website address in the contact card is brand blue at 15px, which
+   measures 4.35:1 — under the 4.5:1 AA needs for text at that size — and it
+   was 18px tall on desktop, under the 24px minimum for a pointer target. Navy
+   is 8.5:1 at any size, and the target floor now applies at every width
+   rather than only below 1024. */
+.contact-info__value a{color:var(--color-secondary);text-underline-offset:3px}
+.contact-info__value a:hover{color:var(--color-primary)}
+@media(min-width:1024px){
+  .contact-info__value a{display:inline-flex;align-items:center;min-height:24px}
 }
 
 </style>
