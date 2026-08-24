@@ -2,7 +2,7 @@
    Usage: npm i -D playwright && node aun-aldrb/verify-header.js
    Covers the SS23 quality checklist: scroll states, anchor offset, active-state
    continuity, drawer behaviour, focus management and keyboard order. */
-const { chromium } = require('playwright');
+const { chromium } = require('playwright-core');
 const URL = 'file://' + require('path').resolve(__dirname, '..', 'index.html');
 const ok = (c, m) => console.log(`  ${c ? 'PASS' : '**FAIL**'}  ${m}`);
 

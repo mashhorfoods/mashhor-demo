@@ -2020,6 +2020,154 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 }
 
 
+
+/* ==========================================================================
+   STAGE M01 · MOBILE GLOBAL UX ARCHITECTURE
+   Mobile is rethought here, not shrunk. Nothing in the identity moves: the
+   logo, the palette, the two typefaces, the icon family, the Arabic copy,
+   the section order and the route language are all untouched. What changes
+   is what a phone actually needs — reach, rhythm, and the physics of touch.
+   Every value below was chosen from a measurement, and each block says which.
+   ========================================================================== */
+
+/* -- M01·1 · SAFE AREAS ----------------------------------------------------
+   viewport-fit=cover has been in the <meta> since Stage 01, but nothing was
+   consuming the insets, so in landscape on a notched phone the container's
+   20px gutter was the ONLY thing between Arabic text and the notch. The
+   gutter now takes whichever is larger, its own value or the inset. In RTL
+   inline-start is the right edge, which is why the right inset comes first. */
+.container{padding-inline:max(var(--container-pad),env(safe-area-inset-right))
+                          max(var(--container-pad),env(safe-area-inset-left))}
+.container--full{padding-inline:0}
+.mobile-nav{padding-block-end:calc(var(--sp-48) + env(safe-area-inset-bottom))}
+.site-footer__bottom{padding-block-end:calc(var(--sp-24) + env(safe-area-inset-bottom))}
+
+/* -- M01·2 · THE PHYSICS OF TOUCH ------------------------------------------
+   touch-action:manipulation drops the ~300ms double-tap-to-zoom wait that a
+   phone otherwise holds before dispatching a tap. It is the single largest
+   perceived-latency change on this page and it costs one declaration.
+   The highlight is the brand blue at 14%, so a tap is acknowledged in the
+   brand rather than in the platform's default grey-black wash. */
+@media(pointer:coarse){
+  a,button,label,summary,[role="button"]{
+    touch-action:manipulation;
+    -webkit-tap-highlight-color:rgba(73,117,186,.14)}
+}
+
+/* -- M01·3 · TAP TARGETS (§ WCAG 2.5.5 / 44px) -----------------------------
+   Measured at 360/375/390/412/430: twelve interactive elements sat under
+   44px, all of them in the footer — the two navigation lists at 38px and the
+   three contact links at 38px. Height comes from the target itself now, and
+   the list gap drops from 12px to 4px because a 44px row no longer needs a
+   gap to be separable. Net footer height is unchanged; every row is tappable. */
+@media(max-width:1023px){
+  .site-footer__list{gap:var(--sp-4)}
+  .site-footer__list a,
+  .site-footer__list a.link-icon{min-height:var(--tap-min);align-items:center;padding-block:0}
+  .site-footer__list a{display:flex;flex:1 1 auto}
+  .site-footer__list a.link-icon{display:flex;flex:1 1 auto}
+  .site-footer__list li{display:flex}
+  /* the same target rule for the one contact value rendered as bare prose */
+  .contact-info__value a{display:flex;align-items:center;min-height:var(--tap-min)}
+}
+
+/* -- M01·4 · ARABIC HEADINGS AT PHONE SIZE ---------------------------------
+   --lh-tight is 1.16, which is right for a display line that runs once. On a
+   phone every h2 that carries a real sentence wraps to two or three lines,
+   and at 1.16 the descender of ج and the dots under ي in one line arrive at
+   the same optical band as the next line's ascenders. Arabic needs more
+   leading than Latin at the same size for exactly this reason. 1.3 below the
+   tablet breakpoint; the token is untouched everywhere else, so no desktop
+   heading moves. */
+@media(max-width:767px){
+  :root{--lh-tight:1.3}
+}
+
+/* -- M01·5 · THE SERVICE CARD AT PHONE SIZE --------------------------------
+   Seven photographed services stacked one per column measured 4506px at
+   390 — five and a third screens. The photographs stay (all seven were
+   supplied for these cards and each one shows its own service), so the
+   height comes out of everything around them: the media band moves from 4:3
+   to 3:2, which is a photographic ratio rather than a crop, the icon chip
+   steps down with it, and the internal gaps tighten one step. The card keeps
+   its reading order, its elevation and its full-width action. */
+@media(max-width:767px){
+  .service{padding:var(--sp-20);gap:var(--sp-12)}
+  .service__media img{aspect-ratio:3/2}
+  .service__icon{width:48px;height:48px}
+  .service__icon svg{width:28px;height:28px}
+  .service__num{padding:var(--sp-2) var(--sp-8)}
+}
+/* §05 — ch again: 46ch is measured on the Latin zero and runs about 1.4x
+   wider than an average Arabic advance, so this cap was never doing the job
+   its number claims. In rem it is the same intended measure, honestly. */
+.service__desc{max-width:32rem}
+
+/* -- M01·6 · THE DRAWER ----------------------------------------------------
+   Measured at 390: the panel is 780px tall and its five items plus the CTA
+   use 180px of it, leaving roughly 600px of blank white in the middle — the
+   one screen on this site that reads as unfinished. The two direct-contact
+   actions that already exist in the footer move into that space. They are
+   the same two links with the same two labels, not new actions: on a phone,
+   a caregiver opening the menu is far more likely to want to call than to
+   read another section. The last item also loses its rule, which was drawing
+   a line into the void. */
+.mobile-nav__list li:last-child .mobile-nav__link{border-block-end:0}
+.mobile-nav__direct{margin-block-start:var(--sp-32);display:flex;flex-direction:column;gap:var(--sp-4)}
+.mobile-nav__direct-title{font-family:var(--font-heading);font-weight:var(--fw-semibold);
+  font-size:var(--fs-caption);letter-spacing:var(--track-caps);text-transform:uppercase;
+  color:var(--text-muted);margin-block-end:var(--sp-8)}
+.mobile-nav__direct a{display:flex;align-items:center;gap:var(--sp-12);
+  min-height:var(--tap-min);padding-inline:var(--sp-12);border-radius:var(--radius-sm);
+  font-family:var(--font-heading);font-weight:var(--fw-medium);color:var(--text-primary);
+  transition:background var(--dur-normal) var(--ease-smooth),color var(--dur-normal) var(--ease-smooth)}
+.mobile-nav__direct a:hover{background:var(--aun-primary-subtle);color:var(--color-primary)}
+.mobile-nav__direct a:focus-visible{outline:none;box-shadow:var(--shadow-focus-strong)}
+.mobile-nav__direct svg{width:var(--icon-sm);height:var(--icon-sm);color:var(--color-primary);flex:0 0 auto}
+.mobile-nav__direct .link-num{font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate}
+
+/* -- M01·SHORT · THE HERO ON A SHORT SCREEN --------------------------------
+   The rule that matters here is height, not width: a 360x640 and a 390x667
+   have the same problem and a 390x844 does not. Measured on a 640-tall
+   screen the hero's primary action finished 9px inside the fold, which is
+   not a margin — one notification banner and it is gone. Below 700px of
+   viewport the hero tightens by one spacing step in five places. Nothing is
+   removed: the eyebrow, the title, the lead and all three audience cues
+   stay, they simply stop being spaced for a tall screen. */
+@media(max-width:767px) and (max-height:700px){
+  .hero__panel{padding:var(--sp-16);margin-block-start:var(--sp-8)}
+  .hero__lead{margin-block-start:var(--sp-12)}
+  .hero__aud{margin-block-start:var(--sp-16);gap:var(--sp-4)}
+  .hero__aud-card{padding-block:var(--sp-4)}
+  .hero__actions{margin-block-start:var(--sp-16);gap:var(--sp-8)}
+}
+/* The narrowest screens still in use are also the shortest, and there the
+   third audience cue wraps to a second line. One more step, on both axes. */
+@media(max-width:359px) and (max-height:700px){
+  .hero__panel{padding:var(--sp-12)}
+  .hero__eyebrow{padding-block:var(--sp-4)}
+  .hero__title{margin-block-start:var(--sp-16)}
+  .hero__lead{margin-block-start:var(--sp-8)}
+  .hero__aud{gap:var(--sp-2)}
+  .hero__aud-card{padding-block:var(--sp-2)}
+}
+
+/* -- M01·7 · SCROLL DISCIPLINE ---------------------------------------------
+   The page must never scroll sideways and no inner scroller may chain its
+   overscroll to the document. Measured across 320-768: zero offenders today.
+   overflow-x:clip on the shell holds that as a guarantee rather than a
+   result — clip, not hidden, because hidden would turn the shell into a
+   scroll container and quietly break position:sticky inside it. */
+.site-shell{overflow-x:clip}
+.mobile-nav{overscroll-behavior:contain}
+
+/* -- M01·8 · THE ADDRESS BAR ------------------------------------------------
+   100dvh follows the address bar as it collapses; 100vh does not, and the
+   difference is the strip of page that appears to jump on the first scroll.
+   The shell already uses dvh; this holds the drawer to the same measure so
+   the panel and the page agree about where the bottom of the screen is. */
+.mobile-nav{block-size:auto;max-block-size:calc(100dvh - var(--header-h-now))}
+
 </style>
   <!-- STAGE 02 — marks the document script-capable BEFORE first paint, so the
        reveal system can hide content without risking a blank page if JS fails. -->
@@ -2086,6 +2234,15 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
         <li><a class="mobile-nav__link" href="#services" data-nav-link>خدماتنا</a></li>
         <li><a class="mobile-nav__link" href="#contact" data-nav-link>تواصل معنا</a></li>
       </ul>
+      <!-- M01·6 — the same two direct-contact actions the footer already
+           carries, in the space the panel was leaving blank. Same links,
+           same labels, no new wording. -->
+      <div class="mobile-nav__direct">
+        <div class="mobile-nav__direct-title">تواصل</div>
+        <a href="tel:+966535544352"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.2 4h3.1l1.5 3.8-2 1.4a11.6 11.6 0 0 0 5.9 5.9l1.4-2 3.8 1.5v3.1a1.9 1.9 0 0 1-2.1 1.9C10.9 18.9 5.1 13.1 4.3 6.1A1.9 1.9 0 0 1 6.2 4Z"/></svg><span class="link-num">+966 53 554 4352</span></a>
+        <a href="https://wa.me/966535544352" target="_blank" rel="noopener"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 11.8a8.8 8.8 0 0 1-13.1 7.7L3.2 20.8l1.3-4.5A8.8 8.8 0 1 1 20.8 11.8Z"/><path d="M9 8.5c.4-.3 1-.2 1.2.3l.6 1.3c.2.4.1.8-.2 1l-.5.4a7.6 7.6 0 0 0 3.4 3.4l.4-.5c.2-.3.6-.4 1-.2l1.3.6c.5.2.6.8.3 1.2-1.5 1.8-4.6.8-6.5-1.1S7.2 10 9 8.5Z"/></svg><span>واتساب</span></a>
+      </div>
+
       <div class="mobile-nav__cta">
         <a class="btn btn--primary btn--block btn--lg" href="#contact">تواصل معنا</a>
       </div>

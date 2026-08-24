@@ -617,3 +617,105 @@ show two services at once. 102/102 pass.
 
 Three `file://` prefixes had been stripped from the harness's `goto` calls at
 some point and it could not run at all; restored.
+
+---
+
+## Stage M01 — mobile global UX architecture
+
+Mobile was rethought, not shrunk. Nothing in the identity moved: the logo, the
+palette, both typefaces, the icon family, the Arabic copy, the section order
+and the route language are untouched. What changed is what a phone needs.
+
+Audited first, at 320 / 360 / 375 / 390 / 412 / 430 / 768 plus landscape
+844x390, before a line was written. `ux/verify-mobile.js` — 98 assertions —
+holds every finding below.
+
+**Already correct, and now guarded.** No horizontal page scrolling at any
+width, at any scroll position. Container gutter 20px. Body type 17px at 1.75
+leading. Form controls at 17px, above the 16px floor that stops iOS zooming
+the page on focus. The header compacts 64 to 56 on scroll. Reduced motion and
+no-script both render the whole page. Document height is stable through a full
+scroll sweep at every mobile width — 0px of shift.
+
+**Twelve targets under 44px, all in the footer.** Two navigation lists at 38px
+and three contact links at 38px, with the site link at 18px. Height now comes
+from the target itself and the list gap drops 12px to 4px, because a 44px row
+does not need a gap to be separable. Footer height is unchanged; the count is
+zero at every width.
+
+**Arabic headings were set at display leading.** `--lh-tight` is 1.16, which is
+right for a line that runs once. On a phone every h2 carrying a real sentence
+wraps, and at 1.16 the descender of ج and the dots under ي meet the next
+line's ascenders. Fixed at the token — `:root{--lh-tight:1.3}` below 768 —
+because each section title sets `line-height:var(--lh-tight)` through its own
+class, and a selector-by-selector fix would have missed the next one added.
+Nothing above 767 moves.
+
+**Safe-area insets were declared but never consumed.** `viewport-fit=cover`
+has been in the meta since Stage 01, so in landscape on a notched phone the
+20px gutter was all that stood between Arabic text and the notch. The gutter,
+the drawer and the footer now take whichever is larger, their own value or the
+inset. In RTL inline-start is the right edge, so the right inset comes first.
+
+**Taps were held for a double-tap.** `touch-action:manipulation` under a coarse
+pointer drops the ~300ms the browser otherwise waits to see whether a tap is
+the start of a double-tap-to-zoom. It is the largest perceived-latency change
+on the page and it costs one declaration. The tap highlight becomes brand blue
+at 14% rather than the platform's grey-black wash.
+
+**The services section was 4506px at 390** — five and a third screens of
+photographed cards. The photographs stay: all seven were supplied for these
+cards and each shows its own service, so hiding six of them on a phone would
+undo that. The height came out of everything around them instead — the media
+band moves 4:3 to 3:2, a photographic ratio rather than a crop; the icon chip
+steps down with it; the internal gaps tighten one step. 4506 to 4160. A phone
+is not the place to make seven photographed services short, and a swipe
+carousel would have been the wrong answer for an audience that includes people
+with limited hand mobility: it trades a scroll everyone can do for a gesture
+some cannot.
+
+**The drawer was 600px of blank white.** Measured at 390 the panel is 780px
+tall and its five items plus the CTA use 180px of it. The two direct-contact
+actions the footer already carries move into that space — the same two links
+with the same two labels, no new wording. On a phone, someone opening the menu
+is more likely to want to call than to read another section. The last item also
+loses its rule, which was drawing a line into the void.
+*To revert: delete `.mobile-nav__direct` from the markup and its block from
+STAGE M01·6.*
+
+**The hero's primary action fell below the fold on short screens.** At 360x640
+it finished 9px inside — not a margin; one notification banner and it is gone.
+At 320x568 it was 87px under. The rule that matters is height, not width, so
+the fix is a height query: below 700px of viewport the hero tightens by one
+spacing step in five places, and below 360 wide by one more. Nothing is
+removed — eyebrow, title, lead and all three audience cues stay, they simply
+stop being spaced for a tall screen. 320x568 now finishes 9px inside the fold,
+360x640 with 94px to spare.
+
+### One defect found and not fixed
+
+`verify-header.js` fails one assertion: the document grows 60px on first scroll
+at 1024 and above. It is not a regression — it reproduces identically on the
+commit before this stage. The cause is `03.webp` in «ما يميزنا»: above 1023 the
+photograph is shown whole, so `.why__media img` has no `aspect-ratio` and the
+image carries no `width`/`height`, and its box is zero until the bitmap
+decodes. Below 1024 the same image has `aspect-ratio:4/3` reserved, which is
+why every mobile width measures 0px of shift.
+
+The fix is one line, and it needs one number this environment cannot read:
+`i.ibb.co` is blocked by the network policy (403 at the agent proxy), so the
+intrinsic dimensions of `03.webp` and `h001.webp` are unknown here. Guessing a
+ratio would either crop a photograph that is meant to be shown whole or
+distort it. With the two pixel sizes, both images take `width`/`height`
+attributes and the shift goes to zero at every tier.
+
+### Deliberately not changed
+
+Section grounds alternate white / #F6F8FB / #EEF3FA and no two neighbours share
+one, but the steps are only 1.06-1.12 in relative luminance — soft on a phone
+in daylight. Raising them means changing brand values, and the eyebrow plus
+68px of section padding already marks each boundary, so they stand.
+
+The blanket `@media(max-width:479px){.btn{width:100%}}` stands too: measured at
+390 every call to action is already full width, and the service card's action
+was widened on purpose in an earlier stage so it can be tapped without aiming.
