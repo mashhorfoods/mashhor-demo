@@ -1134,18 +1134,27 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 
 /* the route: one dashed run threading every node, drawn behind them. Kept to a
    hairline so it never competes with the Arabic (§08). */
-.why__list::before{content:"";position:absolute;inset-block:30px 30px;inset-inline-start:59px;width:2px;
+.why__list::before{content:"";position:absolute;inset-block:30px 30px;
+  inset-inline-start:calc(var(--why-track) - 1px);width:2px;
   background:repeating-linear-gradient(var(--aun-border-strong) 0 5px,transparent 5px 13px)}
 
+/* M04 — the number column, the node and the gutter between them are one set of
+   numbers now. The route's offset is derived from them instead of being typed
+   again: it was hard-coded at 59px against a real node centre of 72px, so the
+   dashed line ran 12px beside every node from 768 up. Same failure the journey
+   section had, same fix — one token, no second copy to drift. */
+.why{--why-num:26px;--why-node:60px;--why-colgap:var(--sp-16);
+  --why-track:calc(var(--why-num) + var(--why-colgap) + var(--why-node) / 2)}
 .why__item{position:relative;display:grid;
-  grid-template-columns:26px 60px minmax(0,1fr);column-gap:var(--sp-16);align-items:start}
+  grid-template-columns:var(--why-num) var(--why-node) minmax(0,1fr);
+  column-gap:var(--why-colgap);align-items:start}
 .why__item + .why__item{border-block-start:1px solid var(--border);padding-block-start:clamp(1.5rem,3vw,2.25rem)}
 
 /* orientation marker — sits on the route, not in front of the heading (§05) */
 .why__num{font-family:var(--font-heading);font-weight:var(--fw-semibold);font-variant-numeric:tabular-nums;
-  font-size:var(--fs-small);line-height:60px;color:var(--text-muted);letter-spacing:.06em;text-align:center}
+  font-size:var(--fs-small);line-height:var(--why-node);color:var(--text-muted);letter-spacing:.06em;text-align:center}
 
-.why__node{position:relative;z-index:1;width:60px;height:60px;border-radius:var(--radius-circle);
+.why__node{position:relative;z-index:1;width:var(--why-node);height:var(--why-node);border-radius:var(--radius-circle);
   display:grid;place-items:center;background:var(--surface);border:2px solid var(--aun-sky);
   color:var(--color-primary);box-shadow:var(--shadow-xs);
   transition:border-color var(--dur-normal) var(--ease-smooth),
@@ -1193,13 +1202,10 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
   /* 20px could not hold a tabular "01" at --fs-small: the numerals were
      clipped by 3px on every phone. The column is 24px and the connector
      follows the node centre. */
-  .why__item{grid-template-columns:24px 44px minmax(0,1fr);column-gap:var(--sp-8)}
-  .why__num{line-height:44px}
-  .why__node{width:44px;height:44px}
+  .why{--why-num:24px;--why-node:44px;--why-colgap:var(--sp-8)}
   .why__node svg{width:24px;height:24px}
-  .why__head{min-height:44px;gap:var(--sp-8)}
+  .why__head{min-height:var(--why-node);gap:var(--sp-8)}
   .why__desc{max-width:none}
-  .why__list::before{inset-inline-start:53px;inset-block:22px 22px}
   .why__actions{display:grid;grid-template-columns:1fr}
   .why__actions .btn{width:100%}
 }
@@ -2459,6 +2465,105 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 @media(pointer:coarse){.about__profile:active{scale:.985}}
 @media(prefers-reduced-motion:reduce){.about__profile:active{scale:1}}
 
+
+/* ==========================================================================
+   STAGE M04 · MOBILE «ما يميزنا»
+   The desktop tells this story with a sticky anchor beside a scrolling
+   column. A phone has no beside, so the same idea is told down the page: one
+   route, six chapters on it, the one you are reading lit and the ones behind
+   you filled in. Identity untouched — same label, heading, tagline, six
+   approved chapters with their own numbers, icons, titles and sentences, the
+   photograph, and both closing actions. Nothing is added and nothing is cut.
+   ========================================================================== */
+@media(max-width:1023px){
+
+  /* -- M04·1 · THE PHOTOGRAPH WAS BEING STRETCHED (§11/§12/§13) ------------
+     `.why__media img` had `aspect-ratio:4/3` and, through the global reset,
+     `height:auto` with no object-fit — so the default `fill` squashed the
+     bitmap into a box of the wrong shape. Measured with a 3:2 stand-in: the
+     box came out 350x263 against a source ratio of 1.5, an 11% horizontal
+     squash on every phone. A circle in the source rendered as an ellipse.
+     That is worse than a bad crop; a crop loses the edges, this deforms the
+     faces and the vehicle in the middle.
+
+     The box is a real height now and the fit is `contain`, which can neither
+     crop nor stretch whatever the source's true ratio turns out to be — the
+     same reasoning the hero uses, and for the same reason: this file does not
+     declare this image's dimensions and the host is unreachable from here.
+     The frame keeps its mist surface, so the space contain leaves reads as
+     the frame rather than as a gap, and takes the card step of the depth
+     system, which is the "subtle shadow, clean surface" §13 asks for.
+     Reserving the height also means nothing below the photograph moves when
+     it finally loads. */
+  .why__media{background:var(--aun-mist);box-shadow:var(--elev-card)}
+  .why__media img{aspect-ratio:auto;inline-size:100%;
+    block-size:clamp(11rem,30vh,15rem);object-fit:contain;object-position:center}
+
+  /* -- M04·2 · SIX CHAPTERS, NOT SIX BLOCKS (§14/§25) ----------------------
+     A hairline sat between every pair of chapters — five rules down the
+     section — which is exactly what makes a story read as a stack. §25 rules
+     them out and asks for whitespace and the progress line instead, which is
+     what the section already had underneath. The rules go and the air between
+     chapters roughly doubles. */
+  .why__list{--why-gap:clamp(2.25rem,7vw,3rem);gap:var(--why-gap)}
+  .why__item + .why__item{border-block-start:0;padding-block-start:0}
+  .why__desc{margin-block-start:var(--sp-8)}
+
+  /* -- M04·3 · THE ROUTE BECOMES THE PROGRESS LINE (§09/§10) ---------------
+     One line spanning the whole list cannot know where the last node is: it
+     ended 30px from the list's bottom edge and the last node's centre is much
+     further up, so a dashed line hung 93 to 139px below chapter 06 at every
+     width — measured. Replaced by one segment per gap, each drawn from a
+     node's bottom to the next node's top, so it cannot overshoot at either
+     end however tall a chapter runs.
+
+     Segments are also what make the ladder §10 draws possible: a segment
+     behind you is solid brand blue, a segment ahead of you is the dashed
+     route. No new element, no second indicator competing with the story —
+     the line that was already threading the chapters now reports position. */
+  .why__list::before{display:none}
+  .why__item:not(:last-child)::after{content:"";position:absolute;z-index:0;
+    inset-inline-start:calc(var(--why-track) - 1px);
+    inset-block-start:var(--why-node);
+    inset-block-end:calc(-1 * var(--why-gap));
+    inline-size:2px;
+    background:repeating-linear-gradient(var(--aun-border-strong) 0 5px,transparent 5px 13px);
+    transition:background var(--dur-normal) var(--ease-smooth)}
+  .why__item.is-past::after{background:var(--color-primary)}
+
+  /* -- M04·4 · THREE CHAPTER STATES (§08/§26/§35) --------------------------
+     Read: the node takes a ring and a filled ground, the number goes navy and
+     bold, the title goes navy. Behind you: the node's border turns brand blue
+     and its segment fills, so the ladder reads at a glance. Ahead: the sky
+     border it always had — quiet, but at full contrast and fully legible,
+     because nothing here is communicated by opacity.
+
+     Every one of these states is added by script. Without it, and under
+     reduced motion where the script does not run at all, all six chapters
+     render at full strength and the route stays dashed throughout — the story
+     is complete, it simply does not follow the reader. */
+  .why__item.is-past .why__node{border-color:var(--color-primary)}
+  .why__item.is-past .why__num{color:var(--text-secondary)}
+  .why__item.is-current .why__node{box-shadow:0 0 0 4px var(--aun-primary-subtle),var(--shadow-xs)}
+  .why__item.is-current .why__num{color:var(--color-secondary);font-weight:var(--fw-bold)}
+
+  /* -- M04·5 · THE OPENING PAUSE (§05/§22) --------------------------------- */
+  .why__story{gap:clamp(2.5rem,8vw,3.5rem)}
+  .why__actions{margin-block-start:clamp(2.75rem,8vw,3.5rem)}
+}
+
+/* -- M04·6 · THE PHOTOGRAPH ARRIVES SOFTLY (§11/§30/§32) --------------------
+   A fade with a small settle, not a zoom: 1.5% of scale, on `scale` rather
+   than `transform` so it cannot collide with the reveal's own 16px lift. The
+   global reduced-motion rule clears the reveal, and this clears with it. */
+@media(max-width:1023px) and (prefers-reduced-motion:no-preference){
+  .js .why__media[data-reveal]{scale:.985;
+    transition:opacity var(--dur-slow) var(--ease-entrance),
+               transform var(--dur-slow) var(--ease-entrance),
+               scale var(--dur-slow) var(--ease-entrance)}
+  .js .why__media[data-reveal].is-inview{scale:1}
+}
+
 </style>
   <!-- STAGE 02 — marks the document script-capable BEFORE first paint, so the
        reveal system can hide content without risking a blank page if JS fails. -->
@@ -3496,7 +3601,12 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
           var d = Math.abs((r.top + r.bottom) / 2 - mid);
           if (d < bestDist) { bestDist = d; best = i; }
         }
-        chapters.forEach(function (el, i) { el.classList.toggle("is-current", i === best); });
+        /* M04 — chapters carry the same past/current pair the desktop dots
+           already had, so the mobile route can fill in behind the reader. */
+        chapters.forEach(function (el, i) {
+          el.classList.toggle("is-current", i === best);
+          el.classList.toggle("is-past", best > -1 && i < best);
+        });
         steps.forEach(function (step, i) {
           step.classList.toggle("is-current", i === best);
           step.classList.toggle("is-past", best > -1 && i < best);

@@ -957,3 +957,101 @@ screen, but the label is part of a system all seven sections share, and the
 alternative is either inventing a title or dropping an approved element from
 one section only. Both are content decisions, not layout ones.
 *To hide the pill here alone: `#about .about__label{display:none}`.*
+
+---
+
+## Stage M04 — «ما يميزنا» on mobile
+
+The desktop tells this story with a sticky anchor beside a scrolling column. A
+phone has no beside, so the same idea is told down the page: one route, six
+chapters on it, the one you are reading lit and the ones behind you filled in.
+Identity untouched — same label, heading, tagline, six approved chapters with
+their numbers, icons, titles and sentences, the photograph, and both closing
+actions. Nothing added, nothing cut. 66 assertions in `verify-mobile.js`.
+
+**The photograph was being stretched, on every phone.** `.why__media img` had
+`aspect-ratio:4/3`, and through the global reset it had `height:auto` with no
+`object-fit` — so the default `fill` squashed the bitmap into a box of the
+wrong shape. Measured with a 3:2 stand-in: a 350x263 box against a source ratio
+of 1.5, an 11% horizontal squash. A circle in the source rendered as an
+ellipse, which is what a face and a vehicle were doing too. That is worse than
+a bad crop — a crop loses the edges, this deforms the middle.
+
+The box is a real height now with `object-fit:contain`, which can neither crop
+nor stretch whatever the source's true ratio turns out to be. Same reasoning as
+the hero, and for the same reason: this file does not declare this image's
+dimensions and the host is unreachable from here. The frame keeps its mist
+surface so the space `contain` leaves reads as the frame rather than a gap, and
+it takes the card step of the depth system — which is also the "subtle shadow,
+clean surface" the brief asks for. Reserving the height means nothing below the
+photograph moves when it loads, so the section's layout shift is gone at mobile.
+
+**Five hairlines were cutting the story into six blocks.** A rule sat between
+every pair of chapters. The brief rules them out and asks for whitespace and
+the progress line instead, which the section already had underneath. The rules
+are gone and the air between chapters roughly doubles.
+
+**The route now reports position.** One line spanning the whole list cannot
+know where the last node is: it ended 30px from the list's bottom edge while
+the last node's centre is much further up, so a dashed line hung **93 to 139px
+below chapter 06 at every width** — measured, at 360 / 390 / 430 / 768 / 1024 /
+1440. It is now one segment per gap, each drawn from a node's bottom to the
+next node's top, so it cannot overshoot at either end however tall a chapter
+runs. Segments are also what make the progress ladder possible: a segment
+behind you is solid brand blue, a segment ahead is the dashed route. No new
+element and no second indicator competing with the story — the line that was
+already threading the chapters now carries the progress.
+
+**And it was running 12px beside the nodes from 768 up.** The offset was typed
+as 59px against a real node centre of 72px. The number column, the node and the
+gutter between them are one set of tokens now, and the route derives its
+position from them — the same fix, and the same lesson, as the journey
+section's `--hww-node`. This one corrected desktop and tablet as well as
+mobile; there is an assertion at every width that the route and the first
+node's centre agree to within a pixel.
+
+**Three chapter states.** Reading: the node takes a ring and a filled ground,
+the number goes navy and bold, the title goes navy. Behind you: the node's
+border turns brand blue and its segment fills. Ahead: the sky border it always
+had — quiet, but at full contrast and fully legible, because nothing here is
+communicated by opacity. All three are added by script; without it, and under
+reduced motion where the script does not run, all six chapters render at full
+strength and the route stays dashed throughout.
+
+Swept at 31 scroll positions across three phone sizes: never two chapters lit,
+never a gap once the story starts, never a step backwards, the filled route
+always matching the chapter reached, and the story always reaching chapter 06.
+
+### Deliberately not done
+
+**No tonal shift between chapters.** The brief allows a very light background
+change per chapter within the existing palette. Six alternating tints down one
+section reads as stripes, not as a story, and the chapters are already
+distinguished by the number, the node, the route state and the whitespace.
+
+**No separate progress widget.** The brief sketches a small vertical indicator
+beside the story. The section already had that geometry — a number column, a
+node column and a route behind them — so the indicator is that route rather
+than a second one drawn next to it.
+
+**The desktop route still overshoots its last node by about 137px.** The
+per-segment fix depends on the node sitting at the top of its chapter, which is
+true below 1024 and not above it: desktop chapters are tall blocks with their
+content centred, so a segment cannot know where the next node's centre falls.
+Correcting it properly needs either a measured value from script or a change to
+the desktop chapter rhythm, and neither belongs in a mobile stage.
+
+### Still open, and now one line away
+
+`verify-header.js` has failed the same assertion since Stage M01: the document
+grows 59px on first scroll at 1024 and above, because `03.webp` is shown at
+natural proportions on desktop with no reserved box. Two stages ago this needed
+the image's pixel dimensions. It no longer does — M04 just proved the
+ratio-agnostic fix works, in this very section: a reserved height plus
+`object-fit:contain` inside the mist frame. Applying it above 1024 as well
+would close the last layout shift on the site. The cost is a band of mist above
+and below the photograph on desktop whenever its ratio does not match the
+reserved box, which is a visible change to an approved composition — so it is
+offered rather than taken.
+*One line, inside the M04·1 block, with the media query widened:*
+`.why__media img{block-size:clamp(11rem,30vh,15rem);object-fit:contain}`

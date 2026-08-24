@@ -412,6 +412,122 @@ const PHONES = [[320,568],[360,640],[375,667],[390,844],[412,915],[430,932]];
   await p.close();
  }
 
+ /* ---- 10 · STAGE M04 · «ما يميزنا» --------------------------------------- */
+ for (const [w,h] of [[360,640],[375,667],[390,844],[412,915],[430,932],[768,1024],[1440,900]]) {
+  const p = w<768 ? await phone(w,h) : await b.newPage({viewport:{width:w,height:h}});
+  p.on('pageerror',e=>errs.push('why '+w+': '+e.message));
+  await p.goto(URL,{waitUntil:'load'});
+  await p.addStyleTag({content:'html{scroll-behavior:auto!important}'});
+  await p.evaluate(()=>document.querySelectorAll('[data-reveal]').forEach(e=>e.classList.add('is-inview')));
+  await p.waitForTimeout(400);
+  const r=await p.evaluate(()=>{
+   const px=v=>Math.round(parseFloat(v)*10)/10;
+   const items=[...document.querySelectorAll('.why__item')];
+   const nodes=items.map(it=>{const n=it.querySelector('.why__node').getBoundingClientRect();
+     return {cx:(n.left+n.right)/2, top:n.top, bot:n.bottom};});
+   /* every connector must sit on the node centre and touch the node at each
+      end — the two ways a route drawn from a typed offset goes wrong */
+   const segs=items.slice(0,-1).map((it,i)=>{
+     const cs=getComputedStyle(it,'::after');
+     if (cs.content==='none' || cs.display==='none') return null;
+     const ir=it.getBoundingClientRect();
+     const x  = ir.right - parseFloat(cs.insetInlineStart) - parseFloat(cs.width)/2;
+     const top= ir.top + parseFloat(cs.top);
+     const bot= top + parseFloat(cs.height);
+     return {dx:Math.round(x-nodes[i].cx),
+             gapTop:Math.round(top-nodes[i].bot),
+             gapBot:Math.round(nodes[i+1].top-bot)};
+   }).filter(Boolean);
+   const list=document.querySelector('.why__list'), lc=getComputedStyle(list,'::before');
+   let lineDx=null;
+   if (lc.display!=='none') { const lr=list.getBoundingClientRect();
+     lineDx=Math.round(lr.right-parseFloat(lc.insetInlineStart)-parseFloat(lc.width)/2-nodes[0].cx); }
+   const img=document.querySelector('.why__media img'), ic=getComputedStyle(img);
+   const fig=document.querySelector('.why__media'), fc=getComputedStyle(fig);
+   const lum=c=>{const [r,g,bl]=c.match(/[\d.]+/g).slice(0,3).map(Number).map(v=>{v/=255;
+     return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)});return .2126*r+.7152*g+.0722*bl};
+   const ratio=(f,g)=>{const a=lum(f),c=lum(g);return Math.round(((Math.max(a,c)+.05)/(Math.min(a,c)+.05))*100)/100};
+   const ground=getComputedStyle(document.querySelector('#why-us')).backgroundColor;
+   return {
+    n:items.length,
+    segs, segCount:segs.length, lineDx,
+    ruleBetween: items.slice(1).filter(e=>px(getComputedStyle(e).borderTopWidth)>0).length,
+    imgFit:ic.objectFit, imgBlock:ic.blockSize, imgAR:ic.aspectRatio,
+    figBg:fc.backgroundColor, figShadow:fc.boxShadow!=='none', figRadius:px(fc.borderRadius),
+    crTitle:ratio(getComputedStyle(document.querySelector('.why__item-title')).color, ground),
+    crDesc:ratio(getComputedStyle(document.querySelector('.why__desc')).color, ground),
+    hOver:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+   };
+  });
+  ok(r.n===6, `${w}: all six approved chapters are present (${r.n})`);
+  ok(r.hOver===0, `${w}: ما يميزنا adds no horizontal scroll (${r.hOver}px)`);
+  ok(r.crTitle>=4.5 && r.crDesc>=4.5, `${w}: chapter title and text clear AA (${r.crTitle}, ${r.crDesc})`);
+  if (w<=1023) {
+   ok(r.imgFit==='contain' && r.imgAR==='auto' && parseFloat(r.imgBlock)>0,
+      `${w}: the photograph is neither cropped nor stretched, in a reserved box (${r.imgFit}, ${r.imgBlock})`);
+   ok(r.figBg!=='rgba(0, 0, 0, 0)' && r.figShadow && r.figRadius>=20,
+      `${w}: its frame has the surface, shadow and radius the language uses (${r.figBg}, shadow ${r.figShadow}, r${r.figRadius})`);
+   ok(r.ruleBetween===0, `${w}: no hard rule between chapters — it reads as one story (${r.ruleBetween} rules)`);
+   ok(r.segCount===5, `${w}: one route segment per gap (${r.segCount} of 5)`);
+   ok(r.segs.every(s=>Math.abs(s.dx)<=1), `${w}: every segment sits on the node centre (${r.segs.map(s=>s.dx).join(',')})`);
+   ok(r.segs.every(s=>Math.abs(s.gapTop)<=1 && Math.abs(s.gapBot)<=1),
+      `${w}: and meets the node at both ends, so it cannot overshoot (${r.segs.map(s=>s.gapTop+'/'+s.gapBot).join(' ')})`);
+  } else {
+   ok(r.lineDx!==null && Math.abs(r.lineDx)<=1,
+      `${w}: the desktop route runs through the nodes, not beside them (${r.lineDx}px off)`);
+  }
+  await p.close();
+ }
+
+ /* the story follows the reader: one chapter at a time, forwards, no gaps */
+ for (const [w,h] of [[360,640],[390,844],[430,932]]) {
+  const p=await phone(w,h); p.on('pageerror',e=>errs.push('why scroll '+w+': '+e.message));
+  await p.goto(URL,{waitUntil:'load'});
+  await p.addStyleTag({content:'html{scroll-behavior:auto!important}'});
+  await p.waitForTimeout(350);
+  const box=await p.evaluate(()=>{const s=document.querySelector('#why-us');
+    const r=s.getBoundingClientRect();return {t:Math.round(r.top+scrollY),h:Math.round(s.offsetHeight)}});
+  const seq=[]; let multi=0, mismatch=0;
+  for (let i=0;i<=30;i++) {
+   await p.evaluate(v=>scrollTo(0,v), Math.round(box.t-h*0.4+(box.h+h*0.8)*i/30));
+   await p.waitForTimeout(130);
+   const s=await p.evaluate(()=>{const it=[...document.querySelectorAll('.why__item')];
+     return {c:it.findIndex(e=>e.classList.contains('is-current')),
+             n:it.filter(e=>e.classList.contains('is-current')).length,
+             past:it.filter(e=>e.classList.contains('is-past')).length}});
+   if (s.n>1) multi++;
+   if (s.c>-1 && s.past!==s.c) mismatch++;
+   seq.push(s.c);
+  }
+  const live=seq.filter(v=>v>-1);
+  const first=seq.indexOf(live[0]), last=seq.lastIndexOf(live[live.length-1]);
+  const gaps=seq.slice(first,last+1).filter(v=>v===-1).length;
+  const backwards=live.filter((v,i)=>i>0 && v<live[i-1]).length;
+  ok(multi===0, `${w}x${h}: never two chapters lit at once (${multi} of 31)`);
+  ok(gaps===0, `${w}x${h}: once the story starts it never goes blank (${gaps} gaps)`);
+  ok(backwards===0, `${w}x${h}: it only ever moves forward (${backwards})`);
+  ok(mismatch===0, `${w}x${h}: the filled route always matches the chapter reached (${mismatch})`);
+  ok(live.length && live[live.length-1]===5, `${w}x${h}: the story reaches its last chapter (${live[live.length-1]})`);
+  await p.close();
+ }
+
+ /* without script, and under reduced motion, the whole story is simply there */
+ for (const mode of ['reduce','nojs']) {
+  const ctx = mode==='nojs'
+    ? await b.newContext({javaScriptEnabled:false,viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true})
+    : await b.newContext({reducedMotion:'reduce',viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true});
+  const p=await ctx.newPage(); await p.goto(URL,{waitUntil:'load'}); await p.waitForTimeout(550);
+  const r=await p.evaluate(()=>{const it=[...document.querySelectorAll('.why__item')];
+    return {n:it.length,
+      state:it.filter(e=>e.classList.contains('is-current')||e.classList.contains('is-past')).length,
+      faded:it.filter(e=>parseFloat(getComputedStyle(e).opacity)<0.95).length,
+      titles:it.filter(e=>e.querySelector('.why__item-title')).length,
+      over:document.documentElement.scrollWidth-document.documentElement.clientWidth}});
+  ok(r.n===6 && r.state===0 && r.faded===0 && r.titles===6 && r.over===0,
+     `${mode}: all six chapters render at full strength with no route state (${r.n}/${r.state}/${r.faded}/${r.over})`);
+  await ctx.close();
+ }
+
  ok(errs.length===0, `no page errors (${errs.join(' | ')})`);
  console.log(`\n${n-f}/${n} checks pass`);
  await b.close(); process.exit(f?1:0);
