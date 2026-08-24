@@ -2915,6 +2915,38 @@ html:not(.js) .hww__path{display:none}
   .site-footer__grid > :first-child{grid-column:1 / -1}
 }
 
+
+/* ==========================================================================
+   STAGE M10 · FINAL POLISH
+   A refinement pass, not a redesign. Every value below came out of one sweep
+   of the whole page — radius, shadow, stroke, timing, type scale, section
+   grounds, Arabic measure, touch targets, icons and contrast, all tallied at
+   once. Most of the system held; what did not is here, and nothing else was
+   touched.
+   ========================================================================== */
+
+/* -- M10·1 · THREE PIECES OF TEXT BELOW AA (§07/§27) ------------------------
+   The sweep read every rendered text leaf against its own composited ground.
+   Three failed, all of them small type in a brand colour on a light surface,
+   and all of them predating the mobile work:
+
+   .why__num   3.03:1 — the chapter numerals 01 to 06 were --text-muted, and
+                        that token's own comment in this file says "non-text /
+                        placeholder only". They are text. --text-secondary is
+                        5.85:1 and just as quiet against the route beside it.
+   .why__247   4.19:1 — 17px bold is not "large text" by any WCAG definition
+                        (that needs 18.66px bold), so the badge needs 4.5. The
+                        navy is 7.65:1 on its subtle-blue chip.
+   .contact__aside-tag
+               4.35:1 — the same brand blue at 17px semibold on a light
+                        ground, the same fix M07 applied to every secondary
+                        button label.
+
+   No colour is added: all three move to tokens already in the palette. */
+.why__num{color:var(--text-secondary)}
+.why__247{color:var(--color-secondary)}
+.contact__aside-tag{color:var(--color-secondary)}
+
 </style>
   <!-- STAGE 02 — marks the document script-capable BEFORE first paint, so the
        reveal system can hide content without risking a blank page if JS fails. -->
@@ -3556,7 +3588,7 @@ html:not(.js) .hww__path{display:none}
                 </svg>
               </span>
               <span class="vm__link--v">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M12 5v14M6 13l6 6 6-6"/>
                 </svg>
               </span>

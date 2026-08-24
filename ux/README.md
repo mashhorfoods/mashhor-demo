@@ -1513,3 +1513,93 @@ side and their tops say nothing, and the brand paragraph is lower than a column
 title only because the logo above it is taller. Below 640 the order is the
 layout; from 640 what has to hold is that the brand opens the grid and the
 legal bar closes the footer.
+
+## Stage M10 — the final polish
+
+M01 to M09 each built one region. M10 is the first pass that asks a question
+only answerable once they are all in place: does the mobile site read as **one
+product**? So this stage started as measurement, not design. Two sweeps walked
+every painted element on the page and tallied what it was actually using —
+radius, shadow, border, transition duration, type scale, section grounds,
+Arabic measure, touch targets, icons, images and contrast — and the finding
+worth reporting first is that **most of the system held**.
+
+- **Radius** — five values in use, all five on the documented ladder: 18px
+  (×40), 50% (×22), 12px (×9), 26px (×6), 34px (×1). No drift.
+- **Elevation** — three depths plus one focus ring. Nothing invented its own.
+- **Motion** — 260ms, 420ms, 150ms and one deliberate 120ms. On the ladder.
+- **Grounds** — every section alternates; no two neighbours share one.
+- **Icons** — every glyph on the `.ico` system, at 20/24/28/32, stroking 2px.
+- **Type** — every "rare" size/weight pair traced back to a deliberate role.
+- **Measure** — 23 to 41 characters per Arabic line across 33 paragraphs.
+- **Targets** — nothing interactive under 44px at 360, 375, 390 or 430.
+- **Borders** — every real border a system width and a system colour.
+- **Position** — only `.skip-link` and `.site-header` are fixed or sticky.
+
+Four things did not hold. All four are now fixed, and the whole sweep is
+`ux/verify-polish.js` — 52 assertions across four widths, plus reduced motion
+and no-JS. Run against the file as it stood before this stage it reports
+44/52, failing on exactly these four.
+
+**Three pieces of text below AA.** The sweep reads each text leaf against its
+own composited ground, and three failed — all small type in a brand colour on
+a light surface, all of them older than the mobile work:
+
+| | measured | needs | fix |
+|---|---|---|---|
+| `.why__num` — the chapter numerals 01–06 | 3.03:1 | 4.5 | `--text-secondary` (5.85:1) |
+| `.why__247` — the badge | 4.19:1 | 4.5 | `--color-secondary` (7.65:1) |
+| `.contact__aside-tag` | 4.35:1 | 4.5 | `--color-secondary` |
+
+The numerals are the clearest of the three: they were painted in
+`--text-muted`, and that token's own comment in this file reads *"non-text /
+placeholder only"*. They are text. The badge is the WCAG "large text" trap —
+17px **bold** is not large; that threshold is 18.66px bold, so it needs the
+full 4.5. No new colour enters the palette for any of them; all three move to
+tokens that were already there, and none of them changes weight or size.
+
+**One icon still hand-drawn.** The connector arrow between «رؤيتنا» and
+«رسالتنا» carried its own `stroke-width`, `stroke-linecap` and `fill`
+attributes instead of the class every other glyph on the site uses. It looked
+identical, which is why it survived the icon stage — but it was outside the
+system, so a change to the system would have left it behind. It is `.ico` now.
+
+### Two bugs in my own measuring, worth writing down
+
+Both would have made this stage report a clean page that was not one.
+
+**The contrast helper was walking to the parent for the ground.** An element
+with its own opaque background *is* its own ground; starting the walk one level
+up measured white-on-blue as white-on-white and returned 1:1 — a number so
+wrong it reads as a bug, but it silently passed every element that paints its
+own surface. The white-on-navy CTA labels were among them.
+
+**The border tally was not filtering by width.** `getComputedStyle` reports a
+`border-color` on every element whether or not there is a border to colour, so
+the first pass "found" dozens of borders that do not exist and buried the four
+that do. A side is only a border if its style is not `none` **and** its width
+is above zero.
+
+### What the brief asked for that the measurements did not support
+
+**§04 asks for varied section rhythm.** Every section carries an identical
+67.5px of top and bottom padding on mobile, which looks like the flatness the
+brief describes — but it is not. The transitions between sections are already
+carried by the alternating grounds, and the sections differ in height by a
+factor of six. Adding a second variable to a rhythm that already works would
+be new visual language solving no observed problem, which §42 rules out.
+
+**§25 asks for responsive image sources.** There is no `srcset` anywhere, and
+there cannot be one without the image files at more than one width. What §25
+is actually protecting against — content jumping while an image loads — does
+not happen on mobile: every image box is reserved by CSS `aspect-ratio` before
+the file arrives, and there is an assertion holding that.
+
+### Still open, unchanged by this stage
+
+`verify-header.js` still fails one assertion: **59px of document growth on
+first scroll at 1024 and up**, because `03.webp` has no reserved box on
+desktop. This does not need the image's dimensions — the ratio-agnostic fix
+(a reserved height plus `object-fit:contain`) is proven in «ما يميزنا» — but
+it puts a mist band into a desktop composition you approved from a screenshot,
+and M10 is a mobile stage. It stays offered, not taken.
