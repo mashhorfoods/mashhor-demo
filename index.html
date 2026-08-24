@@ -2168,6 +2168,158 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
    the panel and the page agree about where the bottom of the screen is. */
 .mobile-nav{block-size:auto;max-block-size:calc(100dvh - var(--header-h-now))}
 
+
+/* ==========================================================================
+   STAGE M02 · MOBILE HERO
+   A first impression composed for a narrow screen, not a desktop hero folded
+   down. Same identity throughout: same logo, same blues, same two faces, same
+   icon family, same Arabic — every word of it — and the same desktop split
+   above 1024. What changes below that is the order things arrive in, the
+   space between them, and how the photograph reserves its place.
+
+   Measured before: at 375x667 the photograph began at 626 and ended at 715,
+   entirely below a 667 fold; at 360x640 it started at 649. The first screen
+   showed a label, a headline, a lead, three audience cards and two buttons —
+   everything except the picture that explains what the company does.
+   ========================================================================== */
+@media(max-width:1023px){
+
+  /* -- M02·1 · ONE FLAT COLUMN --------------------------------------------
+     The panel and the content wrapper stop being boxes and hand their
+     children straight to the stage. That does two things at once: it gives
+     every element of the hero a single ordering context, so the composition
+     can be sequenced (below); and it removes a white card with a hairline
+     border that was sitting on the hero's own white ground — measured
+     rgb(255,255,255) on rgb(255,255,255) with a 1px #E4E9F0 rule around it.
+     A rectangle drawn around nothing is decoration, and §39 puts creativity
+     in typography, space and depth instead. The desktop panel, which rides
+     over the photograph and genuinely needs its surface, is untouched. */
+  .hero__panel,.hero__content{display:contents}
+  .hero__stage{--hero-gutter:max(var(--container-pad),env(safe-area-inset-right));
+    display:flex;flex-direction:column;gap:0;
+    padding-inline:var(--hero-gutter);
+    padding-block-start:clamp(1.25rem,4vw,2rem)}
+
+  /* -- M02·2 · INFORMATION PRIORITY (§06/§33) ------------------------------
+     1 headline · 2 primary action · 3 the photograph · 4 supporting text ·
+     5 the audience cues. Nothing is removed — all three cues keep their
+     icon, their title and their sentence — they simply stop standing
+     between the lead and the action, which is where 180-235px of the first
+     screen was going. Source order is unchanged, so the reading order for a
+     screen reader and the tab order both stay as they were. */
+  /* the eyebrow is a pill, so it must hug its text: a flex column stretches
+     its children by default and the label was running the full screen width */
+  .hero__eyebrow{order:1;align-self:start}
+  .hero__title  {order:2}
+  .hero__lead   {order:3}
+  .hero__actions{order:4}
+  .hero__media  {order:5}
+  .hero__aud    {order:6}
+
+  /* -- M02·3 · RHYTHM (§31) ------------------------------------------------
+     Deliberate space between every level rather than one gap repeated. The
+     steps widen as the eye moves down: tight between label and headline,
+     open before the action, wider still before the photograph, widest
+     before the secondary block. */
+  .hero__title{margin-block-start:var(--sp-20)}
+  .hero__lead{margin-block-start:var(--sp-16);max-width:30rem}
+  .hero__actions{margin-block-start:clamp(1.5rem,5vw,2rem)}
+  .hero__media{margin-block-start:clamp(1.75rem,6vw,2.5rem)}
+  .hero__aud{margin-block-start:clamp(2rem,7vw,3rem)}
+
+  /* -- M02·4 · THE PHOTOGRAPH (§13/§14/§28/§37) ----------------------------
+     The image keeps its full width and bleeds past the gutter, exactly as
+     it did. Two things change.
+
+     It reserves its box. block-size is a real height from the first paint,
+     so nothing below it moves when the bitmap lands — the layout no longer
+     depends on a ratio this file does not declare. That was the one
+     unresolved shift left from Stage M01, and it mattered more here than
+     anywhere because the photograph is now inside the first screen.
+
+     object-fit is contain, not cover. Contain cannot crop, so §14 is
+     satisfied by construction: the driver, the passenger, the wheelchair
+     and the ramp cannot be cut by a box whose proportions we do not know.
+     The photograph is a cut-out with transparent margins, so the space
+     contain leaves around it is transparent, not letterbox bars — it reads
+     as air, which is what the composition wants there anyway. */
+  .hero__media{margin-inline:calc(-1 * var(--hero-gutter));align-self:stretch}
+  .hero__media img{inline-size:100%;
+    block-size:clamp(12.5rem,34vh,18.75rem);
+    object-fit:contain;object-position:center bottom}
+
+  /* -- M02·5 · ACTION HIERARCHY (§09/§10/§12) ------------------------------
+     One primary, full width, at the large size: the strongest object on the
+     screen after the headline. The secondary drops to the standard control
+     height and to its own width, centred. Two full-width boxes of the same
+     height compete by shape however differently they are filled; a shorter,
+     narrower outline does not. It stays 48px tall and about 190px wide,
+     well clear of the 44px target, and the gap between them goes to 16px so
+     neither is caught by a thumb aimed at the other. */
+  .hero__actions{display:flex;gap:var(--sp-16)}
+  .hero__actions .btn--secondary{min-height:var(--control-md);
+    padding-inline:var(--sp-24);font-size:var(--fs-button)}
+
+  /* -- M02·6 · THE AUDIENCE CUES BELOW THE FOLD ----------------------------
+     Now that they are secondary they can also be quieter: the same three
+     rows, one step less border weight, on the page ground rather than on a
+     white plate that no longer has a white plate above it to belong to. */
+  .hero__aud-card{background:var(--bg-tinted);border-color:transparent}
+}
+
+/* Phones: stacked, the primary edge to edge. */
+@media(max-width:767px){
+  .hero__actions{flex-direction:column;align-items:stretch}
+  .hero__actions .btn--primary{width:100%}
+  .hero__actions .btn--secondary{width:auto;align-self:center}
+}
+/* Tablet: the same two actions, side by side at their own widths, hugging the
+   reading edge. A full-width primary is a phone decision — stretched across
+   768px it measured 1350px of button, which reads as a banner, not an action.
+   This is also the first step of the move toward the desktop row (§27). */
+@media(min-width:768px) and (max-width:1023px){
+  .hero__actions{flex-direction:row;flex-wrap:wrap;align-items:center}
+  .hero__actions .btn{width:auto}
+}
+
+/* -- M02·SHORT · THE SAME COMPOSITION ON A SHORT SCREEN --------------------
+   M01 already tightened the hero below 700px of viewport, but those rules sit
+   earlier in this file than M02's rhythm and lose to it at equal specificity,
+   so the short screens quietly went back to tall-screen spacing. Re-stated
+   here, in terms of the new composition. Measured at 360x640 the photograph
+   was finishing 2px past the fold; it now ends 26px inside it. Nothing is
+   dropped or shrunk — every step simply moves down one notch on the scale. */
+@media(max-width:1023px) and (max-height:700px){
+  .hero__stage{padding-block-start:var(--sp-12)}
+  .hero__title{margin-block-start:var(--sp-16)}
+  .hero__lead{margin-block-start:var(--sp-12)}
+  .hero__actions{margin-block-start:var(--sp-16);gap:var(--sp-12)}
+  .hero__media{margin-block-start:var(--sp-20)}
+  .hero__aud{margin-block-start:var(--sp-24)}
+}
+
+/* -- M02·7 · PRESS FEEDBACK (§11) -----------------------------------------
+   The primary already darkens and drops its shadow when pressed. On a touch
+   screen there is no hover to precede that, so the press needs to be felt as
+   well as seen: 1.5% of scale, in and out, with no overshoot. Scale only —
+   a transform does not touch layout, so it cannot cost a frame. */
+@media(pointer:coarse){
+  .btn{transition:var(--transition-control),transform var(--dur-fast) var(--ease-standard)}
+  .btn:active{transform:scale(.985)}
+  .btn--primary:active{transform:scale(.985)}
+}
+
+/* -- M02·8 · ENTRANCE (§22/§36) --------------------------------------------
+   Label, headline, lead, action, photograph — in reading order, 90ms apart,
+   the last of them starting at 270ms. The steps delay only the fade; nothing
+   is ever made unclickable, so the primary action is live from first paint.
+   Under prefers-reduced-motion the global rule already clears every delay
+   and shows the hero immediately. */
+.js .hero__eyebrow[data-reveal]{transition-delay:0ms}
+.js .hero__title[data-reveal]{transition-delay:90ms}
+.js .hero__lead[data-reveal]{transition-delay:180ms}
+.js .hero__actions[data-reveal]{transition-delay:270ms}
+
 </style>
   <!-- STAGE 02 — marks the document script-capable BEFORE first paint, so the
        reveal system can hide content without risking a blank page if JS fails. -->

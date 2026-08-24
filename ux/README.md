@@ -719,3 +719,89 @@ in daylight. Raising them means changing brand values, and the eyebrow plus
 The blanket `@media(max-width:479px){.btn{width:100%}}` stands too: measured at
 390 every call to action is already full width, and the service card's action
 was widened on purpose in an earlier stage so it can be tapped without aiming.
+
+---
+
+## Stage M02 — the mobile hero
+
+Composed for a narrow screen rather than folded down from the desktop one.
+Identity untouched: same logo, same blues, same two faces, same icon family,
+every word of the Arabic, and the same two-column desktop split above 1024.
+What changed is the order things arrive in, the space between them, and how
+the photograph reserves its place. 75 assertions in `verify-mobile.js`.
+
+**The photograph was not in the first screen.** Measured before: at 375x667 it
+began at 626 and ended at 715, entirely below a 667 fold; at 360x640 it started
+at 649. The first screen showed a label, a headline, a lead, three audience
+cards and two buttons — everything except the picture that explains what the
+company does. The three cards were taking 180-235px of it, standing between
+the lead and the action.
+
+Re-ordered to §06's priority — headline, primary action, photograph, then the
+supporting cues — the photograph now ends at 606 of 640, 615 of 667, 711 of
+844. Nothing was removed: all three cues keep their icon, their title and their
+sentence, they just sit below the picture now.
+
+**The order is visual only.** `order` on a flex column, with the DOM left
+exactly as it was, so the reading order for a screen reader and the tab order
+are both unchanged. That is only safe because nothing that moved is focusable —
+the audience cues are spans in list items, not links — and there is an
+assertion that keeps it that way: every focusable element in the hero must
+still run down the screen.
+
+**The mobile panel was a rectangle drawn around nothing.** Measured
+`rgb(255,255,255)` on a `rgb(255,255,255)` ground, with a 1px #E4E9F0 border
+and a shadow at 5% — a white card on white. `display:contents` on the panel and
+its content wrapper hands their children straight to the stage, which both
+removes the card and gives every element one ordering context. The desktop
+panel, which rides over the photograph and genuinely needs its surface, is
+untouched.
+
+**The photograph now reserves its box.** `block-size:clamp(12.5rem,34vh,18.75rem)`
+with `object-fit:contain`. Two things follow. Nothing below it moves when the
+bitmap lands, so the last unresolved shift from M01 is closed at mobile — and
+it mattered more here than anywhere, because the photograph is now inside the
+first screen. And contain cannot crop: §14 asks that the driver, the passenger,
+the wheelchair and the ramp survive the mobile crop, and the only way to
+guarantee that against a ratio this file does not declare is not to crop at
+all. The image is a cut-out with transparent margins, so the space contain
+leaves is transparent — air, not letterbox bars.
+
+**Two full-width buttons were competing by shape.** Same height, same width,
+different fill. The primary keeps the full content width at the large size; the
+secondary drops to the standard 48px control and to its own width, centred.
+At 768 neither is full width — stretched across a tablet the primary measured
+1350px, which reads as a banner — so both sit on one row, primary on the
+reading edge. That row is also the first step toward the desktop composition,
+which is what §27 asks for.
+
+**Press feedback.** The primary already darkened and dropped its shadow, but on
+a touch screen there is no hover to precede that. A 1.5% scale, in and out, no
+overshoot. Transform only, so it cannot cost a frame.
+
+**Entrance.** Label, headline, lead, action — reading order, 90ms apart, the
+last starting at 270ms. The delay is on the fade only; nothing is ever made
+unclickable, so the primary action is live from first paint. Under
+prefers-reduced-motion every delay clears and the hero arrives at once.
+
+**No scroll indicator was added.** At 375x667 the photograph ends at 615 and
+the first audience card is already peeking at the fold. That is the cue §21
+describes, and it costs nothing.
+
+### Two deviations, both flagged
+
+**§16/§17 asked for a radius and a soft shadow on the hero image; it stays
+frameless.** The instruction "keep image frame invisible… don't crop the image"
+was given twice, about this exact photograph, and the image is a cut-out with
+transparent margins — a radius would clip corners that are already transparent,
+and a shadow would trace the *box*, printing a rectangle around a floating
+subject. That is the frame that was rejected. Separation comes from the space
+above it and the tinted cue cards below instead.
+*To apply the brief literally: add
+`.hero__media img{border-radius:var(--radius-lg);box-shadow:var(--elev-card)}`
+inside the M02·4 block.*
+
+**§28 asked for responsive image sizing; there is one source.** Generating
+width variants needs the file, and `i.ibb.co` is blocked here (403 at the
+proxy). The reserved box at least tells the browser the display size up front.
+Supplying two or three widths would let this become a `srcset`.

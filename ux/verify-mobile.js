@@ -175,6 +175,125 @@ const PHONES = [[320,568],[360,640],[375,667],[390,844],[412,915],[430,932]];
   await p.close();
  }
 
+ /* ---- 8 · STAGE M02 · the mobile hero ------------------------------------ */
+ for (const [w,h] of [[360,640],[375,667],[390,844],[412,915],[430,932]]) {
+  const p=await phone(w,h); p.on('pageerror',e=>errs.push('hero '+w+': '+e.message));
+  await p.goto(URL,{waitUntil:'load'});
+  await p.evaluate(()=>document.querySelectorAll('[data-reveal]').forEach(e=>e.classList.add('is-inview')));
+  await p.waitForTimeout(400);
+  const r=await p.evaluate(()=>{
+   const q=s=>document.querySelector(s);
+   const top=s=>{const e=q(s);return e?Math.round(e.getBoundingClientRect().top+scrollY):null};
+   const box=s=>{const e=q(s);if(!e)return null;const b=e.getBoundingClientRect();
+     return {t:Math.round(b.top+scrollY),b:Math.round(b.bottom+scrollY),w:Math.round(b.width),h:Math.round(b.height)}};
+   /* the DOM order the assistive-technology reading order and the tab order
+      both come from — it must NOT have been reshuffled to get the visual one */
+   const stage=q('.hero__stage');
+   const domOrder=[...stage.querySelectorAll('.hero__eyebrow,.hero__title,.hero__lead,.hero__aud,.hero__actions,.hero__media')]
+     .map(e=>e.className.split(' ')[0]);
+   const img=q('.hero__media img'), ic=getComputedStyle(img);
+   const prim=q('.hero__actions .btn--primary'), sec=q('.hero__actions .btn--secondary');
+   return {
+    domOrder,
+    visual:['.hero__eyebrow','.hero__title','.hero__lead','.hero__actions','.hero__media','.hero__aud']
+      .map(s=>({s,t:top(s)})),
+    media:box('.hero__media'), vh:innerHeight,
+    imgH:ic.blockSize, imgFit:ic.objectFit, imgPos:ic.objectPosition,
+    panelDisplay:getComputedStyle(q('.hero__panel')).display,
+    contentDisplay:getComputedStyle(q('.hero__content')).display,
+    prim:box('.hero__actions .btn--primary'), sec:box('.hero__actions .btn--secondary'),
+    stageW:Math.round(stage.getBoundingClientRect().width),
+    stagePadStart:Math.round(parseFloat(getComputedStyle(stage).paddingInlineStart)),
+    eyebrowW:box('.hero__eyebrow').w,
+    ctaEvents:getComputedStyle(prim).pointerEvents,
+    delays:['.hero__eyebrow','.hero__title','.hero__lead','.hero__actions']
+      .map(s=>parseFloat(getComputedStyle(q(s)).transitionDelay)||0),
+    press:(()=>{const t=getComputedStyle(q('.btn')).transitionProperty;return t.includes('transform')})(),
+    /* WCAG 1.3.2: the visual order differs from the DOM order, so the tab
+       order must not. It only can if nothing that moved is focusable. */
+    focusables:[...stage.querySelectorAll('a[href],button,input,select,textarea,[tabindex]:not([tabindex="-1"])')]
+      .map(e=>({t:Math.round(e.getBoundingClientRect().top+scrollY),
+                l:(e.textContent||'').trim().slice(0,12)}))
+   };
+  });
+  ok(r.domOrder.join('>')==='hero__eyebrow>hero__title>hero__lead>hero__aud>hero__actions>hero__media',
+     `${w}: source order is untouched, so reading and tab order are (${r.domOrder.join('>')})`);
+  const asc=r.visual.every((v,i)=>i===0||v.t>=r.visual[i-1].t);
+  ok(asc, `${w}: on screen it reads label > headline > lead > action > photograph > cues (${r.visual.map(v=>v.s.slice(7)+':'+v.t).join(' ')})`);
+  ok(r.media.b<=r.vh, `${w}x${h}: the photograph is inside the first screen (ends ${r.media.b} of ${r.vh})`);
+  ok(r.imgH!=='auto' && parseFloat(r.imgH)>0, `${w}: the photograph reserves its box before it loads (${r.imgH})`);
+  ok(r.imgFit==='contain', `${w}: contain, so an unknown ratio cannot crop the subject (${r.imgFit})`);
+  ok(r.panelDisplay==='contents' && r.contentDisplay==='contents',
+     `${w}: the white-on-white panel is gone (${r.panelDisplay}/${r.contentDisplay})`);
+  ok(Math.abs(r.prim.w - (r.stageW - r.stagePadStart*2)) <= 2,
+     `${w}: the primary action runs the full content width (${r.prim.w} of ${r.stageW - r.stagePadStart*2})`);
+  ok(r.sec.w < r.prim.w && r.sec.h < r.prim.h,
+     `${w}: the secondary is visibly secondary — narrower and shorter (${r.sec.w}x${r.sec.h} vs ${r.prim.w}x${r.prim.h})`);
+  ok(r.sec.w>=44 && r.sec.h>=44, `${w}: the secondary is still comfortably tappable (${r.sec.w}x${r.sec.h})`);
+  ok(r.eyebrowW < r.stageW - r.stagePadStart*2 - 8,
+     `${w}: the label hugs its text instead of stretching (${r.eyebrowW} of ${r.stageW - r.stagePadStart*2})`);
+  ok(r.ctaEvents!=='none', `${w}: the primary action is never made unclickable by the entrance (${r.ctaEvents})`);
+  ok(Math.max(...r.delays)<=0.28, `${w}: the entrance finishes starting within 280ms (${r.delays.map(d=>Math.round(d*1000)).join('/')}ms)`);
+  ok(r.press, `${w}: the press state is a transform, so it costs no layout (${r.press})`);
+  const tabAsc=r.focusables.every((x,i)=>i===0||x.t>=r.focusables[i-1].t);
+  ok(tabAsc, `${w}: tab order still runs down the screen — nothing reordered is focusable (${r.focusables.map(x=>x.l+':'+x.t).join(' ')})`);
+  await p.close();
+ }
+
+ /* the photograph's box must not depend on the bitmap arriving */
+ {
+  const p=await phone(390,844);
+  await p.route('**://i.ibb.co/**', route=>route.abort());
+  await p.goto(URL,{waitUntil:'load'}); await p.waitForTimeout(500);
+  const blocked=await p.evaluate(()=>({doc:document.documentElement.scrollHeight,
+    media:Math.round(document.querySelector('.hero__media').getBoundingClientRect().height)}));
+  await p.close();
+  const p2=await phone(390,844);
+  const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAMAAAACCAIAAAB7RTuqAAAAHElEQVQI12P8//8/AzbAxIAHDDvJ/xEAAP//AwCzSAV1nGr6QAAAAABJRU5ErkJggg==','base64');
+  await p2.route('**://i.ibb.co/**', route=>route.fulfill({status:200,contentType:'image/png',body:png}));
+  await p2.goto(URL,{waitUntil:'load'}); await p2.waitForTimeout(500);
+  const loaded=await p2.evaluate(()=>({doc:document.documentElement.scrollHeight,
+    media:Math.round(document.querySelector('.hero__media').getBoundingClientRect().height)}));
+  await p2.close();
+  ok(blocked.media===loaded.media && blocked.doc===loaded.doc,
+     `390: the hero photograph shifts nothing when it arrives (media ${blocked.media}/${loaded.media}, doc ${blocked.doc}/${loaded.doc})`);
+ }
+
+ /* tablet keeps the composition but not the phone's full-width action */
+ {
+  const p=await b.newPage({viewport:{width:768,height:1024}});
+  await p.goto(URL,{waitUntil:'load'});
+  await p.evaluate(()=>document.querySelectorAll('[data-reveal]').forEach(e=>e.classList.add('is-inview')));
+  await p.waitForTimeout(350);
+  const r=await p.evaluate(()=>{
+   const a=document.querySelector('.hero__actions');
+   const prim=document.querySelector('.hero__actions .btn--primary').getBoundingClientRect();
+   const sec=document.querySelector('.hero__actions .btn--secondary').getBoundingClientRect();
+   return {dir:getComputedStyle(a).flexDirection, primW:Math.round(prim.width),
+     /* they are centred on each other, not top-aligned: the primary is the
+        large control and the secondary the standard one, so compare middles */
+     sameRow:Math.abs((prim.top+prim.bottom)/2-(sec.top+sec.bottom)/2)<2,
+     stageW:Math.round(a.getBoundingClientRect().width),
+     order:[...document.querySelectorAll('.hero__actions,.hero__media')]
+       .map(e=>Math.round(e.getBoundingClientRect().top))};});
+  ok(r.dir==='row' && r.sameRow, `768: both actions sit on one row (${r.dir}, same row ${r.sameRow})`);
+  ok(r.primW < r.stageW * 0.7, `768: the primary is an action, not a banner (${r.primW} of ${r.stageW})`);
+  ok(r.order[0] < r.order[1], `768: the action still comes before the photograph`);
+  await p.close();
+ }
+
+ /* reduced motion clears the hero's entrance delays */
+ {
+  const p=await phone(390,844,{reducedMotion:'reduce'});
+  await p.goto(URL,{waitUntil:'load'}); await p.waitForTimeout(500);
+  const r=await p.evaluate(()=>['.hero__eyebrow','.hero__title','.hero__lead','.hero__actions']
+    .map(s=>({d:getComputedStyle(document.querySelector(s)).transitionDelay,
+              o:getComputedStyle(document.querySelector(s)).opacity})));
+  ok(r.every(x=>parseFloat(x.d)===0 && parseFloat(x.o)>0.95),
+     `reduced motion: the hero arrives at once, with no delay (${r.map(x=>x.d+'/'+x.o).join(' ')})`);
+  await p.close();
+ }
+
  ok(errs.length===0, `no page errors (${errs.join(' | ')})`);
  console.log(`\n${n-f}/${n} checks pass`);
  await b.close(); process.exit(f?1:0);
