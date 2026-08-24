@@ -1337,10 +1337,12 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 /* §10/§12/§31 — the cards had no elevation at all and leaned entirely on a
    border to separate from the ground. They take the card step now, which is
    depth doing the work a darker line was doing. */
-.service{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);
+.service{--service-pad:clamp(1.35rem,2.6vw,1.85rem);
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);
   box-shadow:var(--elev-card);
-  padding:clamp(1.35rem,2.6vw,1.85rem);display:flex;flex-direction:column;gap:var(--sp-16);
-  transition:border-color var(--dur-normal) var(--ease-smooth)}
+  padding:var(--service-pad);display:flex;flex-direction:column;gap:var(--sp-16);
+  transition:border-color var(--dur-normal) var(--ease-smooth),
+             box-shadow var(--dur-normal) var(--ease-smooth)}
 @media(hover:hover){.service:hover{border-color:var(--aun-sky);box-shadow:var(--elev-card-hover)}}
 
 /* the image band. Absent until a real photograph exists for that service —
@@ -2101,7 +2103,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
    steps down with it, and the internal gaps tighten one step. The card keeps
    its reading order, its elevation and its full-width action. */
 @media(max-width:767px){
-  .service{padding:var(--sp-20);gap:var(--sp-12)}
+  .service{--service-pad:var(--sp-20);gap:var(--sp-12)}
   .service__media img{aspect-ratio:3/2}
   .service__icon{width:48px;height:48px}
   .service__icon svg{width:28px;height:28px}
@@ -2562,6 +2564,89 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
                transform var(--dur-slow) var(--ease-entrance),
                scale var(--dur-slow) var(--ease-entrance)}
   .js .why__media[data-reveal].is-inview{scale:1}
+}
+
+
+/* ==========================================================================
+   STAGE M05 · MOBILE «خدماتنا»
+   Desktop pins one service on a stage while the track beside it scrolls. A
+   phone gets the catalogue instead: seven cards, each one leading with its
+   photograph, and the one you have reached carrying the elevation. Identity
+   untouched — same seven approved services in the same order, same numerals,
+   same outline icons, same photographs, same titles and sentences, same
+   «تواصل معنا» on every card.
+   ========================================================================== */
+@media(max-width:1023px){
+
+  /* -- M05·1 · THE CARDS WERE TOUCHING (§09/§34) ---------------------------
+     `.services__grid` still carries the gap, the two-up rule and the three-up
+     rule — but that class left the markup when the pinned showcase replaced
+     it, so none of it has applied since. Measured at 360, 390 and 430: the
+     gap between all six pairs of cards was 0px. Seven photographed services
+     stacked edge to edge with only their 1px borders between them is the
+     opposite of what a catalogue should feel like. */
+  .services__slides{display:flex;flex-direction:column;
+    gap:clamp(1.5rem,5vw,2.25rem)}
+
+  /* -- M05·2 · THE PHOTOGRAPH LEADS THE CARD (§05/§06/§15) -----------------
+     The order was icon and numeral, then title, then photograph. A catalogue
+     card is recognised by its picture first, so the photograph moves to the
+     top and bleeds to the card's own edges, where the card's radius clips it.
+     Everything else keeps its order and its wording; only the picture moved.
+     `order` does it, so the markup — and therefore the reading order and the
+     tab order — is untouched, and the one focusable thing in the card, its
+     action, is still last in both. */
+  .service{overflow:clip}
+  .service__media{order:1;
+    margin:calc(-1 * var(--service-pad)) calc(-1 * var(--service-pad)) 0;
+    border-radius:0}
+  .service__head {order:2}
+  .service__title{order:3}
+  .service__desc {order:4}
+  .service__cta  {order:5}
+
+  /* -- M05·3 · THE SERVICE YOU HAVE REACHED (§04/§10/§11/§32/§41) ----------
+     The card you are on takes the hover step of the elevation scale and its
+     border moves to sky; its icon chip fills and grows 6%. The cards around
+     it keep the card step and stay at full opacity and full contrast — they
+     are quieter, never dimmed, never blurred, and nothing is hidden. Three
+     channels carry the state (depth, border, chip), so none of it depends on
+     opacity alone, and the card itself never scales, so no neighbour moves
+     while it is being read.
+
+     This is deliberately not the mechanic «ما يميزنا» uses. That section
+     lights a rail running between its chapters; this one lifts the card
+     surface. Same idea — you are here — told with different means. */
+  .service.is-near{border-color:var(--aun-sky);box-shadow:var(--elev-card-hover)}
+  .service.is-near .service__icon{background:var(--aun-primary-subtle);scale:1.06}
+  .service__icon{transition:background var(--dur-normal) var(--ease-smooth),
+                            scale var(--dur-normal) var(--ease-smooth)}
+  /* the featured card already carries the featured step; lifting it further
+     would put it two above its neighbours rather than one */
+  .service--feature.is-near{box-shadow:var(--elev-featured)}
+
+  /* -- M05·4 · THE CARD ASSEMBLES (§20/§37) --------------------------------
+     Photograph, chip, title, sentence, action — 60ms apart, the last starting
+     at 240ms. It rides the card's own reveal, so it is gated on `.js` exactly
+     like every other entrance on this page: without script every card renders
+     complete, and the global reduced-motion rule clears all five delays. */
+  .js .service[data-reveal] > *{opacity:0;transform:translateY(10px);
+    transition:opacity var(--dur-normal) var(--ease-entrance),
+               transform var(--dur-normal) var(--ease-entrance)}
+  .js .service[data-reveal].is-inview > *{opacity:1;transform:none}
+  .js .service[data-reveal] .service__media{transition-delay:0ms}
+  .js .service[data-reveal] .service__head {transition-delay:60ms}
+  .js .service[data-reveal] .service__title{transition-delay:120ms}
+  .js .service[data-reveal] .service__desc {transition-delay:180ms}
+  .js .service[data-reveal] .service__cta  {transition-delay:240ms}
+
+  /* -- M05·5 · ROOM AROUND THE INTRODUCTION (§29/§34) ---------------------- */
+  .services__showcase{margin-block-start:clamp(2rem,7vw,3rem)}
+}
+
+@media(max-width:1023px) and (prefers-reduced-motion:reduce){
+  .js .service[data-reveal] > *{opacity:1;transform:none;transition:none}
+  .service__icon{transition:none}
 }
 
 </style>
@@ -3732,6 +3817,56 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
       if (pinned.addEventListener) pinned.addEventListener("change", sync);
       else if (pinned.addListener) pinned.addListener(sync);
       sync();
+    })();
+
+    /* 4c-mobile · Services — the card you have reached.
+       Below 1024 the pinned showcase is off and the seven services are a
+       vertical catalogue. The card nearest the viewport's reading line takes
+       the elevation; everything else stays exactly as legible as it was. The
+       observer only reads scroll position — no wheel, touch or key handler
+       exists here, and the class is removed the moment the breakpoint hands
+       the section back to the pinned stage.
+
+       Skipped entirely under reduced motion, where every card renders at the
+       same strength and the catalogue is simply a catalogue. */
+    (function () {
+      var cards = [].slice.call(doc.querySelectorAll(".services__slides > .service"));
+      if (!cards.length || reduce || !("IntersectionObserver" in window)) return;
+      var phone = window.matchMedia("(max-width:1023px)");
+      var visible = [];
+
+      function clear() { cards.forEach(function (c) { c.classList.remove("is-near"); }); }
+
+      function pick() {
+        if (!phone.matches) { clear(); return; }
+        var vh = window.innerHeight || doc.documentElement.clientHeight;
+        /* the reading line sits above the middle: on a phone the card being
+           read is the one under the thumb's resting zone, not the one
+           straddling the centre of a very tall card */
+        var line = vh * 0.42;
+        var best = -1, bestDist = Infinity;
+        for (var i = 0; i < cards.length; i++) {
+          if (visible.indexOf(cards[i]) === -1) continue;
+          var r = cards[i].getBoundingClientRect();
+          var d = Math.abs((r.top + r.bottom) / 2 - line);
+          if (d < bestDist) { bestDist = d; best = i; }
+        }
+        cards.forEach(function (c, i) { c.classList.toggle("is-near", i === best); });
+      }
+
+      var obs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          var at = visible.indexOf(entry.target);
+          if (entry.isIntersecting) { if (at === -1) visible.push(entry.target); }
+          else if (at > -1) { visible.splice(at, 1); }
+        });
+        pick();
+      }, { rootMargin: "-25% 0px -25% 0px", threshold: 0 });
+      cards.forEach(function (c) { obs.observe(c); });
+
+      if (phone.addEventListener) phone.addEventListener("change", pick);
+      else if (phone.addListener) phone.addListener(pick);
+      pick();
     })();
 
     /* 4d · How We Work — the progressive journey.

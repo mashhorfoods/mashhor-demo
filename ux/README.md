@@ -1055,3 +1055,89 @@ reserved box, which is a visible change to an approved composition — so it is
 offered rather than taken.
 *One line, inside the M04·1 block, with the media query widened:*
 `.why__media img{block-size:clamp(11rem,30vh,15rem);object-fit:contain}`
+
+---
+
+## Stage M05 — «خدماتنا» on mobile
+
+Desktop pins one service on a stage while the track beside it scrolls. A phone
+gets the catalogue instead: seven cards, each leading with its photograph, and
+the one you have reached carrying the elevation. Identity untouched — the same
+seven approved services in the same order, same numerals, same outline icons,
+same photographs, same titles and sentences, same «تواصل معنا» on every card.
+84 assertions in `verify-mobile-sections.js`.
+
+**The cards were touching.** `.services__grid` still carries the gap, the
+two-up rule and the three-up rule — but that class left the markup when the
+pinned showcase replaced it, so none of it had applied since. Measured at 360,
+390 and 430: the gap between all six pairs of cards was **0px**. Seven
+photographed services stacked edge to edge with only their 1px borders between
+them. They now sit `clamp(1.5rem,5vw,2.25rem)` apart, which is the single
+biggest change in this stage and the one that makes it read as a catalogue.
+
+**The photograph leads the card.** The order was icon and numeral, then title,
+then photograph. A catalogue card is recognised by its picture first, so the
+photograph moves to the top and bleeds to the card's own edges, where the
+card's radius clips it. `order` does it, so the markup — and with it the
+reading order and the tab order — is untouched, and the one focusable thing in
+the card, its action, is still last in both. There is an assertion for exactly
+that.
+
+**The service you have reached.** Its border moves to sky, it takes the hover
+step of the elevation scale, and its icon chip fills and grows 6%. The cards
+around it keep the card step at full opacity and full contrast — quieter, never
+dimmed, never blurred, nothing hidden. Three channels carry the state, so none
+of it depends on opacity, and the card itself never scales, so no neighbour
+moves while it is being read. Both of those are asserted across a 35-position
+sweep at three phone sizes, along with: never two lit, no gap once it starts,
+never backwards, and always reaching the seventh service.
+
+This is deliberately not the mechanic «ما يميزنا» uses. That section lights a
+rail running between its chapters; this one lifts the card surface. Same idea —
+you are here — told with different means.
+
+**The card assembles.** Photograph, chip, title, sentence, action, 60ms apart,
+the last starting at 240ms. It rides the card's own reveal, so without script
+every card renders complete and the global reduced-motion rule clears all five
+delays.
+
+### Deliberately not done
+
+**No progress counter.** The brief allows one where it improves orientation and
+warns against adding it automatically. Every card already carries its own
+numeral, 01 through 07, in a chip on the reading edge — a separate "03 / 07"
+would be the same information twice, and «ما يميزنا» already owns the
+node-ladder idiom.
+
+**The seven photographs keep `object-fit:cover` at one ratio.** The brief asks
+for a consistent ratio across the cards and, separately, that a mobile crop
+never remove the subject. Those pull against each other when the sources'
+dimensions are unknown, and `i.ibb.co` is unreachable from here. Consistency
+won, because seven differently-letterboxed cards would break the catalogue
+scan that is the whole point of the section. `object-position` stays centred,
+which is the safest default for a photograph of a person beside a vehicle.
+Adding `width`/`height` to the seven `<img>` tags would let this be verified
+rather than assumed.
+
+### The harness was split
+
+`verify-mobile.js` passed ten minutes a run once M04 landed, which is long
+enough to stop running it. It is now two files: `verify-mobile.js` keeps the
+global architecture and the hero (M01, M02), and `verify-mobile-sections.js`
+holds the sections (M03, M04, M05). Same assertions, roughly half the wall
+clock each, and either can be run alone while working on one stage.
+
+### Two assertions this stage got wrong first
+
+Worth recording because both would have been easy to "fix" in the wrong place.
+
+- A full-width service action is a phone decision. The first version asserted
+  it at every width and failed at 768, where the card is 646px wide and a
+  button spanning it is exactly the oversized CTA the brief rules out. The
+  assertion was too strict, not the CSS.
+- "No card is ever dimmed to say another is active" caught the site's own
+  entrance reveal instead: cards below the fold sit at opacity 0 until they
+  arrive, and the sweep was reading them 110ms after a 420ms fade began. The
+  test now waits for the entrance to settle and only considers cards that have
+  finished arriving. The property being tested is real; the first two ways of
+  asking for it were not.
