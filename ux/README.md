@@ -234,3 +234,53 @@ widths check that every icon carries the family class, computes to a 2px stroke
 with round caps and joins, has no fill on itself or any child, sits on the 24
 grid, keeps geometry plus half a stroke inside that grid (no clipping), is
 square, lands on the size scale, and holds 1-8 components.
+
+## Stage 11 — the final CTA
+
+Built on the invitation panel that already carries this stage's approved copy,
+because P4 folded the standalone `#cta` into `#contact` and that instruction is
+newer than the stage plan. See the structural note below.
+
+**One boundary, one opened corner.** Three corners hold the system's largest
+radius (34px) and the fourth opens into `clamp(3.5rem,10vw,8rem)` -- 128px at
+1440. It is the block-end inline-end corner, which in this RTL document is the
+corner the eye leaves through and the corner the route runs out of on its way
+to the contact card. One curve, not several competing ones. Below 768px it
+collapses to a single uniform radius, as the brief asks.
+
+**The route moved.** It used to sit at `inset:0`, centred behind the Arabic.
+It now occupies a band at the block end, below the actions -- measured at seven
+widths, the route's top edge is always at or below the actions' bottom edge. It
+was also redrawn: the old sweep had a large vertical amplitude and read as a
+decorative wave, which §05 rules out. It is now a long shallow run descending
+toward the opened corner.
+
+**The trail.** A short dashed run with a waypoint dot carries the eye from the
+panel to the details, and `.contact__lead` moved up to meet it, so the join is
+a continuation rather than a section gap.
+
+**The two actions are back, with honest destinations.** P4 removed them because
+the primary linked to the section it already sat in and the tertiary pointed
+back up to Services at the point of conversion. The primary now goes to
+`#contact-actions` -- the card that actually performs the contact -- and the
+secondary to `#services`. No third action.
+
+**Measure.** The body was capped at `46ch`, which let 63 real Arabic characters
+onto a line. It is now a rem cap holding 55 characters per line on desktop.
+
+**Structural note, unresolved by design.** Stage 11 frames this as the section
+*before* Contact, and closes with "NEXT: STAGE 12 — CONTACT". But Contact was
+built at Stage 10 and P4 merged the CTA into it at the user's explicit request.
+The stage plan predates both. The work here upgrades the panel in place rather
+than splitting it back out, because undoing an explicit instruction is worse
+than following a plan that has drifted. Splitting it into its own section again
+is a small change if that is what is wanted -- the panel is self-contained.
+
+**Verified** at 1440/1280/1024/768/430/390/375, 150 assertions: the opened
+corner and its mobile collapse, the route sitting below the actions and inside
+the panel, the trail bridging panel to details, exactly two actions with
+verbatim copy and correct destinations, primary solid and secondary quiet,
+contrast (primary 8.53, secondary 8.53, body 4.9), 44px touch targets, the
+approved Arabic unchanged character for character, the h2 still the section
+heading, route and icons aria-hidden, reading measure, stacked full-width
+actions on mobile, no clipping and no horizontal overflow.
