@@ -1560,6 +1560,10 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 
 /* footer link tap targets >= 24px (AA 2.5.8) without altering the layout */
 .site-footer__list a,.site-footer__bottom-inner a{display:inline-block;padding-block:var(--sp-4)}
+/* ...except the icon links, which are flex rows: the rule above outranks
+   .link-icon and was dropping the icon onto its own line above the label at
+   every width. Icon and Arabic label sit on one baseline again (§27). */
+.site-footer__list a.link-icon{display:inline-flex;align-items:center;gap:var(--sp-8)}
 
 /* ==========================================================================
    STAGE 03 · HERO / FIRST IMPRESSION
