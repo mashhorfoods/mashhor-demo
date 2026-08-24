@@ -1439,3 +1439,77 @@ nothing. M07 had already settled this: a `tel:` link is as clickable on a
 desktop as on a handset, and a press is feedback rather than a touch
 affordance. Caught by the new assertion on its first run, at the one width the
 rule did not cover.
+
+---
+
+## Stage M09 — the footer
+
+The footer already had the right sequence — brand, navigation, contact, legal —
+and 44px rows for every link since M01. What it did not have was a hierarchy
+between what those rows say, an answer to a press, or a tablet layout that did
+not orphan a whole group. 40 assertions in `verify-mobile.js`.
+
+**Four jobs, one voice.** Measured: the brand line, every navigation link,
+every contact link and the street address all rendered at 17px/400. The address
+is the only item in that list you cannot tap — it is supporting information,
+not a destination — so it steps down to the small size and sits with the legal
+line rather than with the links above it. The column titles (13px/600) and the
+links (17px/400) already had their own levels; this gives the fourth one its
+own, and there is an assertion that supporting text stays quieter than the
+links it sits beside.
+
+**The last screen of the site answered nothing.** Eleven links, every one a
+44px row, and not one of them moved when pressed. The rest of the site has
+answered a press since M07. Same property, same amount, same easing — `scale`,
+1.5%, no overshoot — so the footer belongs to the same system as everything
+above it.
+
+**A group orphaned on its own row.** From 640 the grid went to three columns
+for four groups, so «تواصل» — the phone number, WhatsApp and the website —
+wrapped alone onto a second row with two empty columns beside it: a 330px block
+under 330 + 165 + 165 at 768.
+
+The first fix was two columns, which traded one imbalance for another. The
+brand cell is a logo and a single line; pairing it with a five-item list left
+roughly **450px of nothing** beneath it. The brand takes the full width now and
+opens the footer, with the three lists in a row under it — which is what the
+four columns above 1024 already do with more room. The tablet footer went from
+807px to 640px, and an assertion requires every row to be full: either one
+cell spanning the grid, or as many cells as there are columns.
+
+**Four inline `style` attributes became classes.** The brand line, the address
+and the two legal lines were carrying their colour inline, which is why they
+could not have a type hierarchy — there was nowhere to put one. The brand
+line's `max-width:42ch` went to rem with them: the `ch` unit is measured on the
+Latin zero and runs about 1.4x wider than an average Arabic advance.
+
+### What the brief asked for that does not exist here
+
+There are **no social accounts, no footer CTA and no legal pages** anywhere in
+this project — verified, not assumed. So the brief's sections on social links
+and their interaction, the final CTA and its hierarchy, the company-profile
+button in the footer, and legal link spacing have nothing to act on. Adding any
+of them would be inventing content, which the same brief forbids.
+
+Two assertions hold that line: the footer contains no social destination and no
+`.btn`, and every link in it goes to an in-page anchor,
+`tel:+966535544352`, `wa.me/966535544352` or `aunaldrb.com`.
+
+### One thing worth your decision
+
+The brief asks for the location to be clickable "when supported". The address
+is currently plain text, and making it open a map would mean adding an external
+destination that does not exist in the project today. That is a content
+decision rather than a layout one, so it is left as it is.
+*If you want it: the address becomes a link to a maps search for the existing
+string, and it would take the same 44px row and press state as its neighbours.*
+
+### One more assertion that was wrong first
+
+The sequence check — brand, navigation, contact, legal — failed at 1440,
+reading `logo>nav>contact>brand>address>legal`. Reading order is a
+single-column idea: once the footer is a four-column row the groups sit side by
+side and their tops say nothing, and the brand paragraph is lower than a column
+title only because the logo above it is taller. Below 640 the order is the
+layout; from 640 what has to hold is that the brand opens the grid and the
+legal bar closes the footer.

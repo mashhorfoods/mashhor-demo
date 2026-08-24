@@ -330,6 +330,154 @@ const PHONES = [[320,568],[360,640],[375,667],[390,844],[412,915],[430,932]];
   await p.close();
  }
 
+ /* ---- 14 · STAGE M09 · the footer ---------------------------------------- */
+ for (const [w,h] of [[360,640],[375,667],[390,844],[412,915],[430,932],[640,900],[768,1024],[1440,900]]) {
+  const p = w<768 ? await phone(w,h) : await b.newPage({viewport:{width:w,height:h}});
+  p.on('pageerror',e=>errs.push('footer '+w+': '+e.message));
+  await p.goto(URL,{waitUntil:'load'});
+  await p.addStyleTag({content:'html{scroll-behavior:auto!important}'});
+  await p.evaluate(()=>document.querySelector('.site-footer').scrollIntoView());
+  await p.waitForTimeout(400);
+  const r=await p.evaluate(()=>{
+   const px=v=>Math.round(parseFloat(v)*10)/10;
+   const parse=c=>{const m=(c||'').match(/[\d.]+/g); if(!m)return null;
+     return {r:+m[0],g:+m[1],b:+m[2],a:m.length>3?+m[3]:1};};
+   const over=(f,g)=>({r:f.a*f.r+(1-f.a)*g.r,g:f.a*f.g+(1-f.a)*g.g,b:f.a*f.b+(1-f.a)*g.b,a:1});
+   const lum=c=>{const t=v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)};
+     return .2126*t(c.r)+.7152*t(c.g)+.0722*t(c.b)};
+   const R=(a,c)=>{const A=typeof a==='string'?parse(a):a, C=typeof c==='string'?parse(c):c;
+     if(!A||!C)return null; const top=A.a<1?over(A,C):A;
+     const x=lum(top),y=lum(C);
+     return Math.round(((Math.max(x,y)+.05)/(Math.min(x,y)+.05))*100)/100};
+   const ground=e=>{const st=[]; let x=e.parentElement;
+     while(x){const c=parse(getComputedStyle(x).backgroundColor);
+       if(c&&c.a>0){st.push(c); if(c.a===1)break;} x=x.parentElement;}
+     let base={r:255,g:255,b:255,a:1};
+     for(let i=st.length-1;i>=0;i--) base = st[i].a<1?over(st[i],base):st[i];
+     return base;};
+
+   const f=document.querySelector('.site-footer');
+   const links=[...f.querySelectorAll('a')].map(e=>{
+     const cs=getComputedStyle(e), b=e.getBoundingClientRect();
+     return {w:Math.round(b.width), h:Math.round(b.height), fs:px(cs.fontSize),
+       fw:+cs.fontWeight, contrast:R(cs.color,ground(e)),
+       press:cs.transitionProperty.includes('scale'),
+       named:((e.getAttribute('aria-label')||e.textContent||'').trim().length>0),
+       href:e.getAttribute('href')};});
+
+   const size=s=>{const e=f.querySelector(s); if(!e)return null;
+     const cs=getComputedStyle(e); return {fs:px(cs.fontSize), fw:+cs.fontWeight,
+       contrast:R(cs.color,ground(e))};};
+
+   /* the sequence, read off the page rather than assumed */
+   const top=s=>{const e=f.querySelector(s); return e?Math.round(e.getBoundingClientRect().top):null};
+   const seq=[['logo','.site-footer__logo'],['brand','.site-footer__brand-note'],
+     ['nav','nav'],['contact','.link-icon'],['address','.site-footer__address'],
+     ['legal','.site-footer__legal']]
+     .map(([k,s])=>({k,t:top(s)})).filter(x=>x.t!==null)
+     .sort((a,b)=>a.t-b.t).map(x=>x.k).join('>');
+
+   /* one grid, and no row left half empty */
+   const g=f.querySelector('.site-footer__grid');
+   const kids=[...g.children].map(e=>{const b=e.getBoundingClientRect();
+     return {t:Math.round(b.top), w:Math.round(b.width)};});
+   const rowTops=[...new Set(kids.map(k=>k.t))];
+   const rows=rowTops.map(t=>kids.filter(k=>k.t===t));
+   const cols=getComputedStyle(g).gridTemplateColumns.split(' ').length;
+   /* a row is "full" if its cells span the grid: either it is one full-width
+      cell or it has as many cells as the grid has columns */
+   const gw=Math.round(g.getBoundingClientRect().width);
+   const ragged=rows.filter(row=>{
+     if(row.length===cols) return false;
+     const spanned=row.reduce((a,c)=>a+c.w,0);
+     return spanned < gw - 40;}).length;
+
+   const bordered=[...f.querySelectorAll('*')].filter(e=>{
+     const cs=getComputedStyle(e);
+     return px(cs.borderTopWidth)>0||px(cs.borderBottomWidth)>0;}).length;
+
+   return {
+    links, cols, rows:rowTops.length, perRow:rows.map(r=>r.length).join('+'), ragged, bordered, seq,
+    brandFirst: g.children[0].contains(f.querySelector('.site-footer__brand-note')),
+    legalLast: (()=>{const bar=f.querySelector('.site-footer__bottom');
+      return !!bar && bar.getBoundingClientRect().top >= g.getBoundingClientRect().bottom - 1;})(),
+    title:size('.site-footer__col-title'), brand:size('.site-footer__brand-note'),
+    address:size('.site-footer__address'), legal:size('.site-footer__legal'),
+    social:f.querySelectorAll('[href*="twitter"],[href*="instagram"],[href*="linkedin"],[href*="facebook"],[href*="x.com"],[href*="snapchat"],[href*="tiktok"]').length,
+    buttons:f.querySelectorAll('.btn').length,
+    semantic:{tag:f.tagName.toLowerCase(),
+      navs:[...f.querySelectorAll('nav')].filter(n=>n.getAttribute('aria-label')).length,
+      allNavs:f.querySelectorAll('nav').length},
+    hOver:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+   };
+  });
+
+  ok(r.hOver===0, `${w}: the footer adds no horizontal scroll (${r.hOver}px)`);
+  /* The sequence is a single-column idea. Once the footer is a grid, the
+     groups sit side by side and their tops say nothing about reading order —
+     the brand paragraph is lower than a column title only because the logo
+     above it is taller. Below 640 the order is the layout; from 640 what has
+     to hold is that the brand opens the grid and the legal bar closes the
+     footer. */
+  if (r.cols===1) {
+   ok(r.seq==='logo>brand>nav>contact>address>legal',
+      `${w}: brand, navigation, contact, then legal (${r.seq})`);
+  } else {
+   ok(r.brandFirst && r.legalLast,
+      `${w}: the brand opens the grid and the legal bar closes the footer (${r.brandFirst}/${r.legalLast})`);
+  }
+
+  const small=r.links.filter(l=>w<1024 ? (l.h<44) : (l.h<24)).length;
+  ok(small===0, `${w}: every footer link is a comfortable target (${small} of ${r.links.length} under)`);
+  ok(r.links.every(l=>l.press), `${w}: and every one answers a press (${r.links.filter(l=>!l.press).length} silent)`);
+  ok(r.links.every(l=>l.named), `${w}: and has an accessible name`);
+  const low=r.links.filter(l=>l.contrast<4.5).length;
+  ok(low===0, `${w}: every link clears AA on the navy (${low} under, worst ${Math.min(...r.links.map(l=>l.contrast))})`);
+  ok([r.brand,r.address,r.legal,r.title].every(x=>x && x.contrast>=4.5),
+     `${w}: so does every line of text (${[r.brand,r.address,r.legal,r.title].map(x=>x&&x.contrast).join('/')})`);
+
+  /* four jobs, four voices — the address is the one item you cannot tap and
+     must not read like the links above it */
+  const linkFs = r.links[0].fs;
+  ok(r.address.fs < linkFs && r.legal.fs < linkFs && r.title.fs < linkFs,
+     `${w}: supporting text is quieter than the links (title ${r.title.fs}, link ${linkFs}, address ${r.address.fs}, legal ${r.legal.fs})`);
+  ok(r.title.fw > r.links[0].fw,
+     `${w}: and the column titles carry their own weight (${r.title.fw} vs ${r.links[0].fw})`);
+
+  ok(r.ragged===0, `${w}: no group is left orphaned on a half-empty row (${r.cols} cols, rows ${r.perRow})`);
+  ok(r.bordered<=1, `${w}: grouping is done with space, not rules (${r.bordered} bordered)`);
+
+  /* nothing invented: the brief lists social, a footer CTA and legal pages,
+     and this project has none of the three */
+  ok(r.social===0 && r.buttons===0,
+     `${w}: no social account or footer CTA was invented (${r.social} social, ${r.buttons} buttons)`);
+  ok(r.links.every(l=>/^#|tel:\+966535544352|wa\.me\/966535544352|aunaldrb\.com/.test(l.href)),
+     `${w}: every destination is one the site already had`);
+  ok(r.semantic.tag==='footer' && r.semantic.navs===r.semantic.allNavs && r.semantic.allNavs>=1,
+     `${w}: a real footer with labelled navigation (${r.semantic.tag}, ${r.semantic.navs}/${r.semantic.allNavs} labelled)`);
+  await p.close();
+ }
+
+ /* reduced motion keeps the press, drops the movement */
+ {
+  const ctx=await b.newContext({reducedMotion:'reduce',viewport:{width:390,height:844},
+    deviceScaleFactor:2,isMobile:true,hasTouch:true});
+  const p=await ctx.newPage(); await p.goto(URL,{waitUntil:'load'}); await p.waitForTimeout(400);
+  const r=await p.evaluate(()=>{
+   let pressRule=false;
+   for (const sh of document.styleSheets){ let rs; try{rs=sh.cssRules}catch(e){continue}
+     const walk=list=>{ for (const rl of list){
+       if (rl.selectorText && /\.site-footer a:active/.test(rl.selectorText)) pressRule=true;
+       if (rl.cssRules && rl.cssRules.length) walk(rl.cssRules); }};
+     walk(rs); }
+   const links=[...document.querySelectorAll('.site-footer a')];
+   return {pressRule, faded:links.filter(e=>parseFloat(getComputedStyle(e).opacity)<0.95).length,
+     n:links.length};});
+  ok(r.pressRule && r.faded===0,
+     `reduced motion: the footer is complete and still answers a press (${r.n} links, ${r.faded} faded)`);
+  await ctx.close();
+ }
+
  ok(errs.length===0, `no page errors (${errs.join(' | ')})`);
  console.log(`\n${n-f}/${n} checks pass`);
  await b.close(); process.exit(f?1:0);
