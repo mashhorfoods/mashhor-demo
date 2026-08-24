@@ -337,3 +337,50 @@ nothing else, the destination, new-tab safety, position after the introduction
 and before the trust strip, the decorative arrow from the global family, no
 shadow, the 18px control radius, a 1px border, a 56px touch target, compact on
 desktop and full width on mobile, no iframe, no overflow.
+
+## Stage 14 — global visual polish
+
+Six systems changes, each one a number the audit said was wrong. No new
+decoration was added: the brief offers route fragments and overlaps as options
+(§15/§16) and then rules against piling them on (§18, §48), so the impact here
+comes from space, depth and measure instead.
+
+**§04 — tablets were getting mobile spacing.** `--section-py` was
+`clamp(3.5rem,7vw,7.5rem)`, whose 7vw middle does not clear its own 56px floor
+until roughly 800px wide. Measured: 101px at 1440 (target 110-150), **56px at
+768** (target 80-120), 56px at 390 (target 64-96) -- the whole tablet range
+pinned to the mobile floor. A rem+vw middle starts above the floor immediately.
+Now 120 / 86 / 68.
+
+**§05/§21 — the measure was in `ch` again.** `--measure:64ch` is sized on the
+Latin zero, which runs about 1.4x wider than an average Arabic advance, so the
+page was running up to **77 characters** to the line against a 45-70 target.
+Now `42rem`, plus two local caps where a column went full width. Desktop reads
+30-56, tablet 31-61, mobile 23-41.
+
+**§10/§12/§31 — the service cards had no elevation at all.** They separated
+from the ground with a border and nothing else. They take the card step now and
+the featured entry takes one step above it -- the only card on the page that
+does -- so depth carries what a darker line was carrying.
+
+**§11/§32 — one shadow language, four named levels.** The scale was retuned to
+large blur, low opacity, short offset (nothing above 8%, nothing casting
+further than it blurs), and the levels are named by role rather than size:
+`--elev-surface`, `--elev-card`, `--elev-card-hover`, `--elev-featured`. A
+component picks its depth from what it is.
+
+**§46 — depth is a desktop-scale effect.** Below 768px each elevation step
+drops back one, because the same shadow at phone size reads as grime around
+every edge.
+
+**§20/§44 — the service grid.** 24px on desktop read as a catalogue packed
+tight and 16px on a phone let cards very nearly touch. Now 34.5 / 24 / 24.
+
+**§22 — one heading rhythm.** Services put 20px between its h2 and its lead
+where About gives 58 and Why-Us 70. It is 32px now, on a clamp.
+
+**What was deliberately not done.** No new route fragments, no overlaps, no
+extra graphics, no background re-alternation. §08's rhythm (white, mist,
+navy) already exists and re-cutting it would be churn, not polish. §48 is
+explicit: whitespace over decoration, contrast over shadow, composition over
+components.

@@ -117,14 +117,21 @@
 
   --lh-tight:1.16; --lh-snug:1.32; --lh-normal:1.55; --lh-relaxed:1.75;
   --track-tight:-0.01em; --track-normal:0; --track-caps:0.14em;
-  --measure:64ch;        /* comfortable Arabic reading measure */
-  --measure-narrow:52ch;
+  /* §05 — in rem, not ch: the ch unit is sized on the Latin zero and runs about
+     1.4x wider than an average Arabic advance, so 64ch was letting 77 characters
+     onto a line against a 45-70 target. */
+  --measure:42rem;
+  --measure-narrow:34rem;
 
   /* -- 6. SPACING SCALE (4px base) ---------------------------------------- */
   --sp-0:0; --sp-2:.125rem; --sp-4:.25rem; --sp-8:.5rem; --sp-12:.75rem;
   --sp-16:1rem; --sp-20:1.25rem; --sp-24:1.5rem; --sp-32:2rem; --sp-40:2.5rem;
   --sp-48:3rem; --sp-64:4rem; --sp-80:5rem; --sp-96:6rem; --sp-120:7.5rem; --sp-160:10rem;
-  --section-py:clamp(3.5rem,7vw,7.5rem);
+  /* STAGE 14 §04 — the old clamp(3.5rem,7vw,7.5rem) had a 7vw middle that did
+     not clear its own 56px floor until roughly 800px wide, so every tablet got
+     mobile spacing: 56px measured at 768 against an 80-120px target. A rem+vw
+     middle starts above the floor immediately. */
+  --section-py:clamp(4rem,3rem + 5vw,8.75rem);
   --stack-heading:var(--sp-16);   /* heading → body */
   --stack-block:var(--sp-24);     /* between blocks */
 
@@ -160,9 +167,19 @@
 
   /* -- 10. SHADOWS (restrained, navy-tinted) ------------------------------ */
   --shadow-rgb:29,39,51;
+  /* §11 — one language: large blur, low opacity, short offset, so the shadow is
+     felt and not noticed. Each step lifts blur and distance together; nothing
+     here goes above 8% or casts further than it blurs. */
   --shadow-xs:0 1px 2px rgba(var(--shadow-rgb),.05);
-  --shadow-sm:0 1px 2px rgba(var(--shadow-rgb),.04),0 2px 6px rgba(var(--shadow-rgb),.05);
-  --shadow-md:0 2px 6px rgba(var(--shadow-rgb),.05),0 10px 24px rgba(var(--shadow-rgb),.07);
+  --shadow-sm:0 1px 2px rgba(var(--shadow-rgb),.04),0 4px 12px rgba(var(--shadow-rgb),.05);
+  --shadow-md:0 2px 4px rgba(var(--shadow-rgb),.04),0 10px 28px rgba(var(--shadow-rgb),.07);
+  --shadow-lg:0 4px 8px rgba(var(--shadow-rgb),.04),0 18px 44px rgba(var(--shadow-rgb),.08);
+  /* §32 — four levels named by role, so a component picks its depth from what
+     it IS: ground -> soft surface -> card -> featured. */
+  --elev-surface:none;
+  --elev-card:var(--shadow-sm);
+  --elev-card-hover:var(--shadow-md);
+  --elev-featured:var(--shadow-md);
   --shadow-focus:0 0 0 3px var(--focus-ring);
   /* STAGE 02 §09 — the translucent ring above measures ~1.5:1 against white,
      under the 3:1 non-text threshold. Header controls use a two-tone navy
@@ -709,6 +726,12 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
    New reusable components only — nothing above is redefined.
    ========================================================================== */
 
+/* §46 — depth is a desktop-scale effect: at phone size the same shadow reads as
+   grime around every edge, so the card steps drop back one. */
+@media(max-width:767px){
+  :root{--elev-card:var(--shadow-xs);--elev-card-hover:var(--shadow-sm);--elev-featured:var(--shadow-sm)}
+}
+
 /* Anchor offset for section targets is handled once by html{scroll-padding-top}
    above; a per-section scroll-margin-top would double it, so it is intentionally
    not set here. */
@@ -912,7 +935,9 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
   border-radius:var(--radius-circle);display:grid;place-items:center;
   background:var(--surface);border:1px solid var(--aun-sky);color:var(--color-primary)}
 .about__point-icon svg{width:24px;height:24px}
-.about__point p{color:var(--text-secondary);line-height:var(--lh-relaxed)}
+/* §05 — in the 768-899 band the About body is one full-width column, and these
+   ran 72 characters to the line. The narrow measure only binds there. */
+.about__point p{color:var(--text-secondary);line-height:var(--lh-relaxed);max-width:var(--measure-narrow)}
 
 /* -- 04 · facts (§07/§14) --------------------------------------------------- */
 /* Quick-scan proof, label only — no invented descriptions, no KPI numbers. */
@@ -1119,9 +1144,15 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 .services__title{font-size:var(--fs-h2);line-height:var(--lh-tight);letter-spacing:var(--track-tight);
   color:var(--color-secondary);margin-block-start:var(--sp-16)}
 .services__title span{color:var(--color-primary);display:block}
-.services__intro-lead{color:var(--text-secondary);margin-block-start:var(--sp-20);max-width:var(--measure)}
+/* §05/§22 — this lead ran 77 characters to the line at the shared measure, and
+   sat 20px under its heading where the other sections give 50-70. Both fixed
+   here: a narrower cap and the same breathing gap the rest of the page uses. */
+.services__intro-lead{color:var(--text-secondary);
+  margin-block-start:clamp(1.25rem,2.5vw,2rem);max-width:var(--measure-narrow)}
 
-.services__grid{display:grid;gap:clamp(1rem,2vw,1.5rem);
+/* §20/§44 — 24px on desktop read as a catalogue packed tight, and 16px on a
+   phone let cards very nearly touch. */
+.services__grid{display:grid;gap:clamp(1.5rem,2.4vw,2.5rem);
   margin-block-start:clamp(2.5rem,5vw,3.5rem);grid-template-columns:1fr}
 @media(min-width:600px){.services__grid{grid-template-columns:repeat(2,1fr)}}
 @media(min-width:1024px){.services__grid{grid-template-columns:repeat(3,1fr)}}
@@ -1132,10 +1163,14 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
    height on every card in a row however long the copy runs (§17/§18).
    Depth comes from border, whitespace and proportion — no gradient, no
    glass, no heavy shadow (§28). */
+/* §10/§12/§31 — the cards had no elevation at all and leaned entirely on a
+   border to separate from the ground. They take the card step now, which is
+   depth doing the work a darker line was doing. */
 .service{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);
+  box-shadow:var(--elev-card);
   padding:clamp(1.35rem,2.6vw,1.85rem);display:flex;flex-direction:column;gap:var(--sp-16);
   transition:border-color var(--dur-normal) var(--ease-smooth)}
-@media(hover:hover){.service:hover{border-color:var(--aun-sky)}}
+@media(hover:hover){.service:hover{border-color:var(--aun-sky);box-shadow:var(--elev-card-hover)}}
 
 /* the image band. Absent until a real photograph exists for that service —
    the card composes correctly either way, and a placeholder would be worse
@@ -1178,7 +1213,9 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 /* §04/§06 — 01 is the featured entry point, marked by surface only. It keeps
    the grid's rhythm: a larger tile would read as "the best service" rather
    than "start here", and would break the scan the catalogue depends on. */
-.service--feature{border-color:var(--aun-sky);background:var(--aun-mist)}
+/* §12/§17 — the featured entry sits one step higher, and it is the only card
+   on the page that does. */
+.service--feature{border-color:var(--aun-sky);background:var(--aun-mist);box-shadow:var(--elev-featured)}
 .service--feature .service__num{background:var(--surface)}
 /* the icon container is mist too, so on the mist featured card it vanished:
    it takes the same white the numeral does, keeping the container readable
@@ -1493,7 +1530,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 
 /* primary — actions card */
 .contact__card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
-  box-shadow:var(--shadow-sm);padding:clamp(1.5rem,3.5vw,2.5rem);display:flex;flex-direction:column;gap:var(--sp-24)}
+  box-shadow:var(--elev-featured);padding:clamp(1.5rem,3.5vw,2.5rem);display:flex;flex-direction:column;gap:var(--sp-24)}
 .contact__phone-label{font-family:var(--font-heading);font-weight:var(--fw-semibold);font-size:var(--fs-caption);
   letter-spacing:var(--track-caps);text-transform:uppercase;color:var(--text-secondary)}
 .contact__phone{display:inline-block;align-self:flex-start;direction:ltr;font-family:var(--font-heading);
