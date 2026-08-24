@@ -440,3 +440,45 @@ enter the layout, and they cannot be read from this environment either. The hero
 harness assertion moved from "width/height are 1200x1200" to "the LCP hint is
 preserved and the photograph fills its frame", which is what actually matters
 once the frame drives the crop.
+
+## Why-Us — sticky split, scroll-driven
+
+The section changed shape, not content. All six chapters, their titles and
+descriptions, the label, the title, the tagline and the photograph are the
+same strings they were.
+
+**The anchor holds, the story scrolls.** `.why__intro` became `.why__anchor`:
+label, title, tagline, one line of orientation, and a six-node progress path.
+Nothing else. That restraint is load-bearing -- a sticky element taller than
+its viewport scrolls away instead of sticking, which is *the* failure mode of
+this layout, so the anchor carries a `max-block-size` of the viewport minus the
+header and is verified to fit. The photograph moved out of it and now opens the
+scrolling story column.
+
+**Chapter rhythm.** Above 1024 each chapter takes `clamp(15rem,34vh,20rem)` of
+scroll with its content centred in that space, so the section reads pause /
+discover / read / move rather than six stacked paragraphs. Below 1024 that is
+dropped entirely -- at phone width it would be six screens of mostly nothing.
+
+**The progress path** is the route language reduced to nodes on a dashed run.
+It reports position; it is not a scrollbar and not a control. It mirrors
+whichever chapter the existing IntersectionObserver has marked current by
+*reading the DOM* rather than keeping its own counter, so it cannot drift out
+of step. Below 1024 it is hidden: each chapter already carries its own number
+on the same route, and a second copy would be noise.
+
+**No scroll-jacking.** Nothing intercepts wheel, touch or key events. The only
+JavaScript is the observer that was already there, plus a function that mirrors
+its result onto six dots.
+
+**Accessibility.** The progress path is `aria-hidden` -- every label it could
+carry is in the story beside it. Under reduced motion the observer returns
+early, so nothing is emphasised and nothing is dimmed: all six chapters render
+at full strength. Inactive chapters were never dimmed with opacity in the first
+place; emphasis moves through the node, the numeral and the title colour, so
+text contrast never drops.
+
+**The photograph is shown whole here too.** It had `aspect-ratio:3/4` with
+`object-fit:cover`, which cropped it. Same treatment as the hero now: its own
+proportions, no crop. The rule that stretched it to meet the journey's last
+line went with the layout that needed it.

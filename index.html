@@ -1054,11 +1054,20 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
    ========================================================================== */
 .why__grid{display:grid;gap:clamp(2.5rem,6vw,4rem)}
 @media(min-width:1024px){
-  .why__grid{grid-template-columns:minmax(0,0.86fr) minmax(0,1.14fr);
+  .why__grid{grid-template-columns:minmax(0,0.82fr) minmax(0,1.18fr);
     column-gap:clamp(3rem,5vw,5rem);align-items:start}
-  .why__intro  {grid-column:1;grid-row:1}
-  .why__list   {grid-column:2;grid-row:1}
+  .why__anchor {grid-column:1;grid-row:1}
+  .why__story  {grid-column:2;grid-row:1}
   .why__actions{grid-column:1 / -1;grid-row:2}
+
+  /* §01/§03 — the anchor holds still while the story scrolls past it. It is
+     kept deliberately short (identity, one line of orientation, six nodes) so
+     it fits inside the viewport at any height: a sticky element taller than
+     its viewport scrolls away, which is the failure mode this layout has. */
+  .why__anchor{position:sticky;align-self:start;
+    inset-block-start:calc(var(--header-h-sm) + clamp(1.5rem,4vh,3rem));
+    max-block-size:calc(100dvh - var(--header-h-sm) - clamp(3rem,8vh,6rem));
+    display:flex;flex-direction:column;gap:var(--sp-16)}
 }
 
 /* -- intro (§09) ------------------------------------------------------------ */
@@ -1074,11 +1083,50 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 /* Portrait on desktop: a landscape crop left the intro column far shorter than
    the journey beside it, with a long void under the photograph. The stacked
    tiers widen it again, where a tall image would push the journey too far down. */
-.why__media img{display:block;width:100%;height:100%;object-fit:cover;aspect-ratio:3/4}
+/* shown whole, like the hero: its own proportions decide the height. */
+.why__media img{display:block;width:100%;height:auto}
+
+/* -- §07/§08 the progress path ---------------------------------------------
+   The route language, reduced to nodes on a dashed run. It reports position;
+   it is not a scrollbar and not a control. Below 1024 it is redundant -- each
+   chapter already carries its own number on the same route -- so it goes. */
+.why__progress{list-style:none;padding:0;margin:0;display:none;position:relative;
+  flex-direction:column;gap:clamp(.55rem,1.4vh,1rem);margin-block-start:var(--sp-8)}
+@media(min-width:1024px){.why__progress{display:flex}}
+.why__progress::before{content:"";position:absolute;inset-block:9px;inset-inline-start:8px;width:2px;
+  background:repeating-linear-gradient(var(--aun-border-strong) 0 5px,transparent 5px 13px)}
+.why__progress-step{display:flex;align-items:center;gap:var(--sp-12);margin-block-start:0}
+.why__progress-dot{position:relative;z-index:1;inline-size:18px;block-size:18px;flex:0 0 auto;
+  border-radius:var(--radius-circle);background:var(--surface);
+  border:2px solid var(--aun-sky);
+  transition:border-color var(--dur-normal) var(--ease-smooth),
+             background var(--dur-normal) var(--ease-smooth)}
+.why__progress-num{font-family:var(--font-heading);font-weight:var(--fw-semibold);
+  font-variant-numeric:tabular-nums;font-size:var(--fs-caption);letter-spacing:.06em;
+  color:var(--text-muted);transition:color var(--dur-normal) var(--ease-smooth)}
+.why__progress-step.is-past .why__progress-dot{border-color:var(--color-primary)}
+.why__progress-step.is-current .why__progress-dot{border-color:var(--color-primary);
+  background:var(--color-primary);box-shadow:0 0 0 4px var(--aun-primary-subtle)}
+.why__progress-step.is-current .why__progress-num{color:var(--color-secondary)}
+@media(prefers-reduced-motion:reduce){
+  .why__progress-dot,.why__progress-num{transition:none}
+}
 
 /* -- the journey (§03/§05/§08) ---------------------------------------------- */
+/* §14 — the story column: photograph, then six chapters. */
+.why__story{display:flex;flex-direction:column;gap:clamp(2rem,4vw,3rem)}
+
 .why__list{list-style:none;padding:0;margin:0;position:relative;
   display:flex;flex-direction:column;gap:clamp(1.5rem,3vw,2.25rem)}
+/* §13/§14 — each chapter gets its own scroll distance, and its content sits in
+   the middle of it, so the rhythm is pause / discover / read / move rather than
+   six paragraphs stacked. Desktop only: on a phone this would be six screens of
+   mostly nothing. */
+@media(min-width:1024px){
+  .why__list{gap:0}
+  .why__item{min-block-size:clamp(15rem,34vh,20rem);align-content:center}
+  .why__item + .why__item{border-block-start:1px solid var(--border)}
+}
 .why__list li{margin-block-start:0}    /* the global li+li prose rule */
 
 /* the route: one dashed run threading every node, drawn behind them. Kept to a
@@ -1154,18 +1202,10 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 }
 
 /* Desktop finish — placed after the base rules so these actually win.
-   The intro column stretches to the journey's height and the photograph takes
-   up the slack, instead of ending early and leaving a long void beside the
-   list. The closing actions centre under the whole section rather than
-   huddling in the intro column, which the journey does not end near. */
+   The closing actions centre under the whole section rather than huddling in
+   one column. The photograph no longer stretches to fill a void beside the
+   list -- it opens the story column instead, at its own proportions. */
 @media(min-width:1024px){
-  .why__intro{align-self:stretch;display:flex;flex-direction:column}
-  /* No cap: the photograph takes all the slack, so its bottom edge lands on
-     the journey's last line instead of ending early and leaving a void. The
-     frame gets tall and narrow at this width, so the crop is anchored at the
-     top third, where a person in the scene sits, rather than at dead centre. */
-  .why__media{flex:1 1 auto;min-height:22rem}
-  .why__media img{height:100%;aspect-ratio:auto;object-position:center 32%}
   .why__actions{justify-content:center}
 }
 
@@ -2092,22 +2132,39 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
       <section class="section section--surface why" id="why-us" data-section aria-labelledby="why-h">
         <div class="container why__grid">
 
-          <!-- intro / focal anchor (sticky on desktop) -->
-          <div class="why__intro">
+          <!-- The sticky anchor: it answers "where am I" and nothing else, so
+               it stays short enough to fit any viewport (§03/§12). -->
+          <div class="why__anchor">
             <p class="why__label" data-reveal>لماذا عون الدرب</p>
             <h2 id="why-h" class="why__intro-title" data-reveal>ما يميزنا</h2>
             <p class="why__tagline" data-reveal>نُعين ونُعاون</p>
             <p class="why__intro-note" data-reveal>رحلة نقل متخصصة متكاملة: من الأمان، إلى الطاقم المؤهل والمركبات المجهزة، وصولًا إلى المساندة عند الحاجة.</p>
+
+
+            <!-- §07/§08 the progress path: the same route language reduced to
+                 its nodes. Decorative -- every label it could carry is already
+                 in the story beside it, so it stays out of the a11y tree. -->
+            <ol class="why__progress" aria-hidden="true">
+              <li class="why__progress-step"><span class="why__progress-dot"></span><span class="why__progress-num">01</span></li>
+              <li class="why__progress-step"><span class="why__progress-dot"></span><span class="why__progress-num">02</span></li>
+              <li class="why__progress-step"><span class="why__progress-dot"></span><span class="why__progress-num">03</span></li>
+              <li class="why__progress-step"><span class="why__progress-dot"></span><span class="why__progress-num">04</span></li>
+              <li class="why__progress-step"><span class="why__progress-dot"></span><span class="why__progress-num">05</span></li>
+              <li class="why__progress-step"><span class="why__progress-dot"></span><span class="why__progress-num">06</span></li>
+            </ol>
+          </div>
+
+          <!-- the scrolling story: the photograph opens it, then six chapters -->
+          <div class="why__story">
 
             <figure class="why__media" data-reveal>
               <img src="https://i.ibb.co/prPnxsMC/03.webp"
                    loading="lazy" decoding="async"
                    alt="مشهد من خدمة النقل المتخصص لدى عون الدرب: راكب يستخدم كرسيًا متحركًا مع مركبة مجهّزة.">
             </figure>
-          </div>
 
-          <!-- the journey: 6 stops connected by the brand route line -->
-          <ol class="why__list">
+            <!-- the journey: 6 stops connected by the brand route line -->
+            <ol class="why__list">
 
             <li class="why__item" data-reveal>
               <span class="why__num" aria-hidden="true">01</span>
@@ -2175,7 +2232,9 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
               </div>
             </li>
 
-          </ol>
+            </ol>
+
+          </div>
 
           <!-- §21 — one primary action, after the journey is complete. The
                second is the existing tertiary that points forward to the very
@@ -2800,7 +2859,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
        Purely decorative, so it is skipped entirely under reduced motion and
        when IntersectionObserver is unavailable. */
     (function () {
-      var items = doc.querySelectorAll("#why-us .why__item, #how-we-work .hww__stage, #values .value");
+      var items = doc.querySelectorAll("#how-we-work .hww__stage, #values .value");
       if (!items.length || reduce || !("IntersectionObserver" in window)) return;
       var obs = new IntersectionObserver(function (entries) {
         entries.forEach(function (entry) {
@@ -2808,6 +2867,51 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
         });
       }, { rootMargin: "-45% 0px -45% 0px", threshold: 0 });
       items.forEach(function (el) { obs.observe(el); });
+    })();
+
+    /* 4b · Why Us — the scroll-driven story.
+       Why-Us needs a stricter rule than the band above: exactly one chapter may
+       be active. A band tall enough to be reliable is also tall enough to hold
+       two chapters at a boundary, which it did -- measured at five scroll
+       positions per sweep. So the band only nominates candidates, and the
+       chapter whose centre is nearest the viewport's centre wins. The progress
+       path is driven from the same index, so it cannot drift out of step.
+
+       Nothing here touches wheel, touch or key events: the browser's scroll is
+       untouched and this only reads the result. Decorative, so it is skipped
+       entirely under reduced motion, where every chapter renders at full
+       strength. */
+    (function () {
+      var chapters = [].slice.call(doc.querySelectorAll("#why-us .why__item"));
+      var steps = [].slice.call(doc.querySelectorAll("#why-us .why__progress-step"));
+      if (!chapters.length || reduce || !("IntersectionObserver" in window)) return;
+
+      var visible = [];
+      function apply() {
+        var mid = (window.innerHeight || doc.documentElement.clientHeight) / 2;
+        var best = -1, bestDist = Infinity;
+        for (var i = 0; i < chapters.length; i++) {
+          if (visible.indexOf(chapters[i]) === -1) continue;
+          var r = chapters[i].getBoundingClientRect();
+          var d = Math.abs((r.top + r.bottom) / 2 - mid);
+          if (d < bestDist) { bestDist = d; best = i; }
+        }
+        chapters.forEach(function (el, i) { el.classList.toggle("is-current", i === best); });
+        steps.forEach(function (step, i) {
+          step.classList.toggle("is-current", i === best);
+          step.classList.toggle("is-past", best > -1 && i < best);
+        });
+      }
+
+      var obs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          var at = visible.indexOf(entry.target);
+          if (entry.isIntersecting) { if (at === -1) visible.push(entry.target); }
+          else if (at > -1) { visible.splice(at, 1); }
+        });
+        apply();
+      }, { rootMargin: "-40% 0px -40% 0px", threshold: 0 });
+      chapters.forEach(function (el) { obs.observe(el); });
     })();
 
     /* 5 · Entrance reveal (§20) — subtle, one-shot; content-first */
