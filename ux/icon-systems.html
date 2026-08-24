@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>عون الدرب — ثلاثة أنظمة أيقونات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Cairo:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --aun-blue:#4975BA; --aun-navy:#2C4C82; --aun-sky:#D9E4F3; --aun-mist:#EEF3FA;
+  --ink:#1E2733; --slate:#5A6675; --divider:#E4E9F0; --surface:#fff; --ground:#F6F8FC;
+  --font-h:"IBM Plex Sans Arabic",system-ui,sans-serif;
+  --font-b:"Cairo","IBM Plex Sans Arabic",system-ui,sans-serif;
+  --r-sm:12px; --r-md:18px; --r-lg:26px; --r-pill:999px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--font-b);
+  font-size:15px;line-height:1.8;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin-inline:auto;padding:clamp(1.5rem,4vw,3.5rem) clamp(1rem,3vw,2rem)}
+h1,h2,h3,h4{font-family:var(--font-h);margin:0;line-height:1.35;text-wrap:balance}
+h1{font-size:clamp(1.7rem,3.4vw,2.6rem);font-weight:700;color:var(--aun-navy)}
+h2{font-size:clamp(1.3rem,2.4vw,1.8rem);font-weight:700;color:var(--aun-navy)}
+h3{font-size:1.05rem;font-weight:600;color:var(--aun-navy)}
+p{margin:0}
+.lede{color:var(--slate);max-width:52rem;margin-block-start:.75rem}
+
+.pill{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem 1rem;border-radius:var(--r-pill);
+  background:var(--aun-mist);border:1px solid var(--aun-sky);color:var(--aun-navy);
+  font-family:var(--font-h);font-size:.78rem;font-weight:600;letter-spacing:.02em}
+
+.note{margin-block-start:1.5rem;padding:1rem 1.25rem;border-radius:var(--r-md);
+  background:var(--surface);border:1px solid var(--divider);color:var(--slate);font-size:.92rem}
+.note strong{color:var(--ink)}
+
+/* ---- system panel ---- */
+.sys{margin-block-start:clamp(2rem,4vw,3rem);background:var(--surface);
+  border:1px solid var(--divider);border-radius:var(--r-lg);overflow:hidden}
+.sys__head{display:flex;flex-wrap:wrap;align-items:flex-start;gap:1rem 1.5rem;
+  padding:clamp(1.25rem,3vw,2rem);border-block-end:1px solid var(--divider);background:var(--aun-mist)}
+.sys__id{display:grid;place-items:center;width:52px;height:52px;flex:0 0 auto;
+  border-radius:var(--r-md);background:var(--aun-navy);color:#fff;
+  font-family:var(--font-h);font-size:1.3rem;font-weight:700}
+.sys__name{flex:1 1 16rem;min-width:0}
+.sys__name p{color:var(--slate);font-size:.95rem;margin-block-start:.35rem}
+.sys__en{font-family:var(--font-h);font-size:.8rem;font-weight:500;color:var(--aun-blue);
+  letter-spacing:.06em;text-transform:uppercase;direction:ltr;display:block}
+.specs{display:flex;flex-wrap:wrap;gap:.4rem;margin-block-start:.85rem}
+.spec{font-family:var(--font-h);font-size:.72rem;font-weight:600;color:var(--aun-navy);
+  background:var(--surface);border:1px solid var(--aun-sky);border-radius:var(--r-sm);padding:.25rem .6rem;
+  direction:ltr}
+.spec[dir="rtl"]{direction:rtl}
+
+.sys__body{padding:clamp(1.25rem,3vw,2rem)}
+.block+.block{margin-block-start:2rem;padding-block-start:1.75rem;border-block-start:1px dashed var(--divider)}
+.block__t{display:flex;align-items:baseline;gap:.6rem;margin-block-end:1.1rem}
+.block__t span{font-size:.85rem;color:var(--slate)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:.6rem}
+.cell{display:flex;flex-direction:column;align-items:center;gap:.5rem;padding:.9rem .4rem;
+  border-radius:var(--r-md);background:var(--ground);border:1px solid transparent;text-align:center}
+.cell svg{color:var(--aun-blue)}
+.cell b{font-family:var(--font-h);font-size:.72rem;font-weight:500;color:var(--slate);line-height:1.45}
+
+.ladder{display:flex;align-items:flex-end;flex-wrap:wrap;gap:1.4rem;
+  padding:1.1rem 1.25rem;border-radius:var(--r-md);background:var(--ground)}
+.rung{display:flex;flex-direction:column;align-items:center;gap:.45rem;color:var(--aun-navy)}
+.rung small{font-family:var(--font-h);font-size:.68rem;color:var(--slate);direction:ltr}
+
+.situ{display:flex;flex-wrap:wrap;align-items:center;gap:1rem}
+.chip{display:grid;place-items:center;width:56px;height:56px;border-radius:var(--r-md);
+  background:var(--aun-mist);color:var(--aun-blue)}
+.chip svg{width:30px;height:30px}
+.node{display:grid;place-items:center;width:44px;height:44px;border-radius:var(--r-pill);
+  background:var(--surface);border:1.5px solid var(--aun-sky);color:var(--aun-blue)}
+.node svg{width:22px;height:22px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
+  min-height:48px;padding-inline:1.5rem;border-radius:var(--r-md);
+  font-family:var(--font-h);font-size:.95rem;font-weight:600;line-height:1;border:1.5px solid transparent}
+.btn svg{width:18px;height:18px}
+.btn--p{background:var(--aun-blue);color:#fff}
+.btn--s{background:transparent;color:var(--aun-blue);border-color:#C3CEDC}
+
+/* ---- side-by-side ---- */
+.compare{margin-block-start:clamp(2rem,4vw,3rem);background:var(--surface);
+  border:1px solid var(--divider);border-radius:var(--r-lg);padding:clamp(1.25rem,3vw,2rem)}
+.cmp-scroll{overflow-x:auto;margin-block-start:1.25rem}
+table{border-collapse:collapse;width:100%;min-width:520px}
+th,td{padding:.7rem .5rem;border-block-end:1px solid var(--divider);text-align:center;vertical-align:middle}
+th{font-family:var(--font-h);font-size:.8rem;font-weight:600;color:var(--aun-navy);white-space:nowrap}
+td:first-child,th:first-child{text-align:start;font-family:var(--font-h);font-size:.8rem;
+  font-weight:500;color:var(--slate);white-space:nowrap}
+td svg{color:var(--aun-blue);vertical-align:middle}
+tbody tr:last-child td{border-block-end:none}
+
+.foot{margin-block-start:clamp(2rem,4vw,3rem);padding:clamp(1.25rem,3vw,2rem);
+  border-radius:var(--r-lg);background:var(--aun-navy);color:#fff}
+.foot h2{color:#fff}
+.foot p{color:var(--aun-sky);margin-block-start:.6rem}
+.foot ul{margin:1rem 0 0;padding-inline-start:1.2rem;color:var(--aun-sky)}
+.foot li+li{margin-block-start:.4rem}
+.foot b{color:#fff}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <span class="pill">نظام الأيقونات</span>
+  <h1>ثلاثة أنظمة أيقونات — اختر واحدًا</h1>
+  <p class="lede">
+    الموقع يحتوي اليوم على <b>٣٢ أيقونة</b> موزّعة على تسع مجموعات: الخدمات السبع، عقد رحلة
+    «ما يميزنا» الستة، مراحل «كيف نعمل» الثلاث، الرؤية والرسالة، شرائح الجمهور والثقة في الواجهة،
+    حقائق «من نحن»، وأيقونات التواصل. الأنظمة الثلاثة أدناه كلها <b>خطية (outline)</b> وواضحة وحديثة،
+    وكلها مرسومة على شبكة ٢٤ بكسل بلون العلامة — الفرق بينها في سُمك الخط، ونهايات الخطوط،
+    ومقدار التفصيل. اختر رقمًا وسأطبّقه على الأيقونات الاثنتين والثلاثين كلها.
+  </p>
+
+  <div class="note">
+    <strong>ما لا يتغيّر:</strong> خط المسار الذي يربط عقد «ما يميزنا» و«كيف نعمل» و«الرؤية والرسالة»
+    ليس أيقونة — هو جزء من لغة الرحلة البصرية للعلامة ويبقى كما هو في الأنظمة الثلاثة. كذلك الشعار
+    وألوان العلامة والخطوط.
+  </div>
+
+  <!-- ================= SYSTEM 1 ================= -->
+  <section class="sys" id="sys-1">
+    <div class="sys__head">
+      <div class="sys__id">١</div>
+      <div class="sys__name">
+        <span class="sys__en">Soft Rounded Line</span>
+        <h2>الخط اللَّيِّن</h2>
+        <p>
+          نهايات دائرية ومفاصل دائرية وزوايا واسعة. أقرب نظام إلى دفء خط Cairo وإلى
+          انحناء الأزرار الجديد. يقرأ: إنساني، هادئ، مُرحِّب — وهو الأنسب لجمهور يبحث عن الطمأنينة
+          قبل أن يبحث عن المواصفات.
+        </p>
+        <div class="specs">
+          <span class="spec">grid 24</span>
+          <span class="spec">stroke 1.75</span>
+          <span class="spec">round caps</span>
+          <span class="spec">round joins</span>
+          <span class="spec" dir="rtl">تفصيل متوسط</span>
+        </div>
+      </div>
+    </div>
+    <div class="sys__body">
+      <div class="block">
+        <div class="block__t"><h3>الأيقونات</h3><span>معروضة بمقاس ٣٠ بكسل — مقاس أيقونة الخدمة في الموقع</span></div>
+        <div class="grid" data-grid="1"></div>
+      </div>
+      <div class="block">
+        <div class="block__t"><h3>سُلَّم الوضوح</h3><span>هل تبقى الأيقونة مقروءة وهي صغيرة؟</span></div>
+        <div class="ladder" data-ladder="1"></div>
+      </div>
+      <div class="block">
+        <div class="block__t"><h3>في موضعها</h3><span>مربّع الخدمة، عقدة المسار، وداخل الأزرار</span></div>
+        <div class="situ" data-situ="1"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SYSTEM 2 ================= -->
+  <section class="sys" id="sys-2">
+    <div class="sys__head">
+      <div class="sys__id">٢</div>
+      <div class="sys__name">
+        <span class="sys__en">Precision Line</span>
+        <h2>الخط الدقيق</h2>
+        <p>
+          خط أرفع، هندسة أضبط، وتفصيل داخلي أكثر: مركز العجلة، نافذة المركبة، حاجز السرير،
+          علامات الساعة. يقرأ: مُتقَن، تقني، طبّي المستوى — يسند ادّعاء «مركبات مجهّزة بأحدث
+          التقنيات» بصريًا.
+        </p>
+        <div class="specs">
+          <span class="spec">grid 24</span>
+          <span class="spec">stroke 1.5</span>
+          <span class="spec">square caps</span>
+          <span class="spec">tight radii</span>
+          <span class="spec" dir="rtl">تفصيل عالٍ</span>
+        </div>
+      </div>
+    </div>
+    <div class="sys__body">
+      <div class="block">
+        <div class="block__t"><h3>الأيقونات</h3><span>معروضة بمقاس ٣٠ بكسل — مقاس أيقونة الخدمة في الموقع</span></div>
+        <div class="grid" data-grid="2"></div>
+      </div>
+      <div class="block">
+        <div class="block__t"><h3>سُلَّم الوضوح</h3><span>هل تبقى الأيقونة مقروءة وهي صغيرة؟</span></div>
+        <div class="ladder" data-ladder="2"></div>
+      </div>
+      <div class="block">
+        <div class="block__t"><h3>في موضعها</h3><span>مربّع الخدمة، عقدة المسار، وداخل الأزرار</span></div>
+        <div class="situ" data-situ="2"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SYSTEM 3 ================= -->
+  <section class="sys" id="sys-3">
+    <div class="sys__head">
+      <div class="sys__id">٣</div>
+      <div class="sys__name">
+        <span class="sys__en">Bold Accessible Line</span>
+        <h2>الخط العريض</h2>
+        <p>
+          خط أعرض وشكل مُبسَّط عمدًا: تفاصيل أقل، فراغات داخلية أوسع، ولا خط يقلّ عن ثلاث
+          وحدات. أعلى الأنظمة الثلاثة وضوحًا عند المقاسات الصغيرة ولضعاف البصر — وهي مسألة
+          تخصّ هذا الجمهور مباشرة. يقرأ: واثق، صريح، لا يحتاج تدقيقًا.
+        </p>
+        <div class="specs">
+          <span class="spec">grid 24</span>
+          <span class="spec">stroke 2.25</span>
+          <span class="spec">round caps</span>
+          <span class="spec">simplified</span>
+          <span class="spec" dir="rtl">تفصيل منخفض</span>
+        </div>
+      </div>
+    </div>
+    <div class="sys__body">
+      <div class="block">
+        <div class="block__t"><h3>الأيقونات</h3><span>معروضة بمقاس ٣٠ بكسل — مقاس أيقونة الخدمة في الموقع</span></div>
+        <div class="grid" data-grid="3"></div>
+      </div>
+      <div class="block">
+        <div class="block__t"><h3>سُلَّم الوضوح</h3><span>هل تبقى الأيقونة مقروءة وهي صغيرة؟</span></div>
+        <div class="ladder" data-ladder="3"></div>
+      </div>
+      <div class="block">
+        <div class="block__t"><h3>في موضعها</h3><span>مربّع الخدمة، عقدة المسار، وداخل الأزرار</span></div>
+        <div class="situ" data-situ="3"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SIDE BY SIDE ================= -->
+  <section class="compare">
+    <h2>الأنظمة الثلاثة جنبًا إلى جنب</h2>
+    <p class="lede">نفس الأيقونة في الأنظمة الثلاثة، بمقاس ٣٢ بكسل. هذه أوضح طريقة لرؤية الفرق.</p>
+    <div class="cmp-scroll">
+      <table>
+        <thead><tr><th>الأيقونة</th><th>١ · اللَّيِّن</th><th>٢ · الدقيق</th><th>٣ · العريض</th></tr></thead>
+        <tbody data-compare></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <section class="foot">
+    <h2>كيف تختار</h2>
+    <p>ثلاثة أسئلة تحسم الاختيار غالبًا:</p>
+    <ul>
+      <li><b>هل الأولوية للطمأنينة أم للاحترافية؟</b> الطمأنينة → ١ · اللَّيِّن. الاحترافية → ٢ · الدقيق.</li>
+      <li><b>كم من جمهورك يقرأ على هاتف أو بنظر ضعيف؟</b> إن كان كثيرًا → ٣ · العريض، فهو الوحيد الذي يبقى واضحًا تمامًا عند ١٦ بكسل.</li>
+      <li><b>هل ستطبع الأيقونات</b> على مركبة أو لوحة أو مطبوعة؟ ٣ · العريض ينجو من التصغير والطباعة، و٢ · الدقيق يفقد تفاصيله.</li>
+    </ul>
+    <p style="margin-block-start:1.25rem">قل «١» أو «٢» أو «٣» وسأطبّق النظام على الأيقونات الاثنتين والثلاثين كلها في الموقع.</p>
+  </section>
+
+</div>
+
+<script>
+/* ==========================================================================
+   Icon data. Every icon is drawn on the same 24x24 grid, fill:none,
+   stroke:currentColor, so the ONLY difference between the systems is the
+   drawing itself plus its stroke attributes.
+   ========================================================================== */
+var SYS = {
+  1: { w: 1.75, cap: 'round', join: 'round' },
+  2: { w: 1.5,  cap: 'square', join: 'miter' },
+  3: { w: 2.25, cap: 'round', join: 'round' }
+};
+
+var NAMES = [
+  ['chair',    'الكرسي المتحرك'],
+  ['power',    'الكرسي الكهربائي'],
+  ['bed',      'السرير الطبي'],
+  ['assist',   'مساعد السائق'],
+  ['van',      'النقل اليومي'],
+  ['hospital', 'المستشفيات'],
+  ['group',    'المناسبات'],
+  ['phone',    'اتصال'],
+  ['pin',      'العنوان'],
+  ['shield',   'أمان'],
+  ['clock',    'على مدار الساعة'],
+  ['arrow',    'سهم الزر']
+];
+
+var D = {
+  /* ---------------- 1 · SOFT ROUNDED LINE ---------------- */
+  1: {
+    chair:'<circle cx="14.2" cy="4.7" r="1.8"/><path d="M14.2 7.7v4.2H9.6"/><path d="M9.6 11.9l2.7 4.6"/><circle cx="10.6" cy="16.4" r="4.6"/><path d="M14.7 15h2.4l1.4 3.4"/>',
+    power:'<circle cx="13.4" cy="4.8" r="1.7"/><path d="M13.4 7.6v4.4H9.2"/><path d="M6.6 14.7h9.3l-1.1 3.4H7.7z"/><circle cx="9.1" cy="19.7" r="1.4"/><circle cx="15.3" cy="19.7" r="1.4"/><path d="M17.6 12.6v-2.2"/><path d="M4.4 7.9L2.8 10.2h1.9L3.5 12.5"/>',
+    bed:'<path d="M2.8 18.2V8.6"/><path d="M2.8 10.8h3.4"/><circle cx="9" cy="11.4" r="1.8"/><path d="M2.8 14.8h13.8a4 4 0 0 1 4 4"/><path d="M20.6 18.2v-3"/><path d="M2.8 18.2h17.8"/><circle cx="7.2" cy="20.2" r="1.3"/><circle cx="17" cy="20.2" r="1.3"/>',
+    assist:'<circle cx="7.4" cy="9" r="2.1"/><path d="M3.6 19.6c0-2.5 1.7-4.6 3.8-4.6s3.8 2.1 3.8 4.6"/><circle cx="16.8" cy="5.4" r="2"/><path d="M13.6 19.6c0-3.9 1.4-6.4 3.2-6.4s3.2 2.5 3.2 6.4"/><path d="M15 10.2c-1.5 1.3-3.3 2-5.2 2.1"/>',
+    van:'<path d="M2.8 15.4v-3.6L5 8.2h8.4l2.6 3.6h4.2v3.6"/><path d="M2.8 15.4h1.9M15.5 15.4h4.7"/><circle cx="7.6" cy="16.4" r="2"/><circle cx="17" cy="16.4" r="2"/>',
+    hospital:'<path d="M4.6 20V8.6L12 4.2l7.4 4.4V20"/><path d="M2.6 20h18.8"/><path d="M9.4 20v-5.2h5.2V20"/><path d="M12 8.4v3.7M10.2 10.3h3.6"/>',
+    group:'<circle cx="12" cy="7" r="2.1"/><path d="M8.2 18.6c0-2.5 1.7-4.6 3.8-4.6s3.8 2.1 3.8 4.6"/><circle cx="5.5" cy="9.5" r="1.7"/><path d="M2.5 18.6c0-2.1 1.3-3.8 3-3.8"/><circle cx="18.5" cy="9.5" r="1.7"/><path d="M21.5 18.6c0-2.1-1.3-3.8-3-3.8"/>',
+    phone:'<path d="M6.2 3.9h3.2l1.6 4-2 1.4a11.2 11.2 0 0 0 5.4 5.4l1.4-2 4 1.6v3.2a1.8 1.8 0 0 1-2 1.8C11.2 18.6 5.4 12.8 4.4 5.9a1.8 1.8 0 0 1 1.8-2Z"/>',
+    pin:'<path d="M12 20.9c4.2-4.4 6.3-7.7 6.3-10.2a6.3 6.3 0 1 0-12.6 0c0 2.5 2.1 5.8 6.3 10.2Z"/><circle cx="12" cy="10.6" r="2.4"/>',
+    shield:'<path d="M12 3.2L19 6v5.4c0 4.6-3 7.9-7 9.4-4-1.5-7-4.8-7-9.4V6Z"/><path d="M9 12.2l2.2 2.2 3.9-4.1"/>',
+    clock:'<circle cx="12" cy="12" r="8.4"/><path d="M12 7.4V12l3.2 1.9"/>',
+    arrow:'<path d="M19.2 12H5.2M11.2 6l-6 6 6 6"/>'
+  },
+  /* ---------------- 2 · PRECISION LINE ---------------- */
+  2: {
+    chair:'<circle cx="14.4" cy="4.4" r="1.6"/><path d="M14.4 7.2v4.6H9.4"/><path d="M9.4 11.8L12 16.2"/><circle cx="10.4" cy="16.4" r="4.8"/><circle cx="10.4" cy="16.4" r="1.6"/><path d="M14.8 15h2.2l1.4 3.4"/>',
+    power:'<circle cx="13.2" cy="4.4" r="1.5"/><path d="M13.2 7.1v4.6H9"/><rect x="6.4" y="14.2" width="9.6" height="3.5" rx=".6"/><path d="M8.2 15.4h2.2"/><circle cx="8.8" cy="19.4" r="1.5"/><circle cx="14.9" cy="19.4" r="1.5"/><path d="M17.6 12.4v-2.2M17 11.3h1.2"/><path d="M4.2 7.9L2.6 10.2h1.8L3.3 12.5"/>',
+    bed:'<path d="M2.6 18.3V8.4"/><path d="M2.6 10.6h3.6M2.6 12.6h3.6M6.2 10.6v2"/><circle cx="9.1" cy="11.3" r="1.7"/><path d="M2.6 14.9h13.9a3.9 3.9 0 0 1 3.9 3.9"/><path d="M20.4 18.3v-3.1"/><path d="M2.6 18.3h17.8"/><path d="M11.6 14.9v-1.4h4.2v1.4"/><circle cx="7.1" cy="20.3" r="1.3"/><circle cx="16.9" cy="20.3" r="1.3"/>',
+    assist:'<circle cx="7.3" cy="9" r="2"/><path d="M3.6 19.6v-.8c0-2.2 1.7-4 3.7-4s3.7 1.8 3.7 4v.8"/><circle cx="16.8" cy="5.3" r="1.8"/><path d="M13.7 19.6v-1.2c0-3.4 1.4-5.6 3.1-5.6s3.1 2.2 3.1 5.6v1.2"/><path d="M15 10.1c-1.5 1.4-3.3 2.1-5.3 2.2"/><path d="M3.6 19.6h7.4M13.7 19.6h6.2"/>',
+    van:'<path d="M2.6 15.3v-3.5L4.9 8.1h8.6l2.6 3.7h5.3v3.5"/><path d="M2.6 15.3h1.6M15.7 15.3h5.8"/><circle cx="7.4" cy="16.3" r="1.9"/><circle cx="17.2" cy="16.3" r="1.9"/><path d="M6.3 11.8h4.4V8.4"/><path d="M3.3 13.3h1.7"/>',
+    hospital:'<path d="M4.4 20V8.4L12 4l7.6 4.4V20"/><path d="M2.4 20h19.2"/><path d="M9.6 20v-4.8h4.8V20"/><path d="M12 8v3.5M10.3 9.8h3.4"/><path d="M7 12.6h1.6M15.4 12.6H17"/>',
+    group:'<circle cx="12" cy="6.9" r="2"/><path d="M8.3 18.8v-.7c0-2.2 1.7-4 3.7-4s3.7 1.8 3.7 4v.7"/><circle cx="5.5" cy="9.4" r="1.6"/><path d="M2.6 18.8v-.6c0-1.9 1.3-3.4 2.9-3.4"/><circle cx="18.5" cy="9.4" r="1.6"/><path d="M21.4 18.8v-.6c0-1.9-1.3-3.4-2.9-3.4"/><path d="M2.6 18.8h18.8"/>',
+    phone:'<path d="M5.6 4h3.6l1.6 4-2.2 1.5c1 2.3 2.9 4.2 5.2 5.2l1.5-2.2 4 1.6v3.6a1.6 1.6 0 0 1-1.8 1.6C10.8 18.6 5.4 13.2 4 6.2A1.6 1.6 0 0 1 5.6 4Z"/><path d="M14.4 4.6a5.2 5.2 0 0 1 4.2 4.2"/>',
+    pin:'<path d="M12 20.6c4-4.2 6-7.4 6-9.8a6 6 0 1 0-12 0c0 2.4 2 5.6 6 9.8Z"/><circle cx="12" cy="10.8" r="2.2"/><path d="M8 20.6h8"/>',
+    shield:'<path d="M12 3l6.8 2.7v5.2c0 4.4-2.9 7.6-6.8 9.1-3.9-1.5-6.8-4.7-6.8-9.1V5.7Z"/><path d="M9.2 12l2.2 2.2 3.8-4"/><path d="M5.2 8.4h13.6"/>',
+    clock:'<circle cx="12" cy="12" r="8.2"/><path d="M12 7.6V12l3 1.8"/><path d="M12 3.8v1.3M12 18.9v1.3M3.8 12h1.3M18.9 12h1.3"/>',
+    arrow:'<path d="M19.4 12H4.6M11 5.6L4.6 12 11 18.4"/>'
+  },
+  /* ---------------- 3 · BOLD ACCESSIBLE LINE ---------------- */
+  3: {
+    chair:'<circle cx="14.4" cy="4.8" r="1.9"/><path d="M14.4 8v4.3H9.8"/><circle cx="11" cy="16.2" r="5"/><path d="M15 15.2h2.2l1.4 3.4"/>',
+    power:'<circle cx="13.2" cy="5" r="1.8"/><path d="M13.2 8.2v4.2H9.2"/><path d="M6.6 15h9.4l-1.2 3.2H7.8z"/><circle cx="9.2" cy="19.8" r="1.4"/><circle cx="15" cy="19.8" r="1.4"/>',
+    bed:'<path d="M3 18.2V8.8"/><path d="M3 11h3.4"/><circle cx="9" cy="11.4" r="1.9"/><path d="M3 14.9h13.6a4.2 4.2 0 0 1 4.2 4.2"/><path d="M3 18.2h17.8"/><circle cx="7.2" cy="20.3" r="1.3"/><circle cx="16.9" cy="20.3" r="1.3"/>',
+    assist:'<circle cx="7.3" cy="9.2" r="2.3"/><path d="M3.4 19.8c0-2.6 1.8-4.7 3.9-4.7s3.9 2.1 3.9 4.7"/><circle cx="16.9" cy="5.2" r="2.2"/><path d="M13.4 19.8c0-4 1.6-6.5 3.5-6.5s3.5 2.5 3.5 6.5"/><path d="M15 10.4c-1.5 1.4-3.4 2.1-5.3 2.2"/>',
+    van:'<path d="M3 15.2v-3.6L5.4 8h8l2.6 3.6H21v3.6"/><circle cx="7.8" cy="16.4" r="2.1"/><circle cx="17.2" cy="16.4" r="2.1"/>',
+    hospital:'<path d="M4.6 20V8.6L12 4.2l7.4 4.4V20"/><path d="M2.6 20h18.8"/><path d="M12 8.6v4.2M9.9 10.7h4.2"/>',
+    group:'<circle cx="12" cy="7.2" r="2.3"/><path d="M8 18.8c0-2.6 1.8-4.7 4-4.7s4 2.1 4 4.7"/><circle cx="5.4" cy="9.7" r="1.8"/><path d="M2.4 18.8c0-2.1 1.3-3.8 3-3.8"/><circle cx="18.6" cy="9.7" r="1.8"/><path d="M21.6 18.8c0-2.1-1.3-3.8-3-3.8"/>',
+    phone:'<path d="M6 4h3.4l1.6 4-2.2 1.5a11.4 11.4 0 0 0 5.7 5.7l1.5-2.2 4 1.6v3.4A1.8 1.8 0 0 1 18 20C10.8 19.2 4.8 13.2 4 6a1.8 1.8 0 0 1 2-2Z"/>',
+    pin:'<path d="M12 21c4.4-4.6 6.6-8 6.6-10.5a6.6 6.6 0 1 0-13.2 0C5.4 13 7.6 16.4 12 21Z"/><circle cx="12" cy="10.5" r="2.4"/>',
+    shield:'<path d="M12 3l7.2 2.8v5.4c0 4.6-3 8-7.2 9.6-4.2-1.6-7.2-5-7.2-9.6V5.8Z"/><path d="M9 12.2l2.2 2.2 3.9-4.2"/>',
+    clock:'<circle cx="12" cy="12" r="8.6"/><path d="M12 7.2V12l3.2 2"/>',
+    arrow:'<path d="M19 12H5.4M11.4 6.4L5.4 12l6 5.6"/>'
+  }
+};
+
+function icon(sys, name, size) {
+  var s = SYS[sys];
+  return '<svg viewBox="0 0 24 24" width="' + size + '" height="' + size + '" fill="none" ' +
+    'stroke="currentColor" stroke-width="' + s.w + '" stroke-linecap="' + s.cap +
+    '" stroke-linejoin="' + s.join + '" aria-hidden="true">' + D[sys][name] + '</svg>';
+}
+
+/* icon grids */
+[1, 2, 3].forEach(function (sys) {
+  document.querySelector('[data-grid="' + sys + '"]').innerHTML =
+    NAMES.map(function (n) {
+      return '<div class="cell">' + icon(sys, n[0], 30) + '<b>' + n[1] + '</b></div>';
+    }).join('');
+
+  document.querySelector('[data-ladder="' + sys + '"]').innerHTML =
+    [16, 20, 24, 30, 40, 56].map(function (px) {
+      return '<div class="rung">' + icon(sys, 'chair', px) + '<small>' + px + 'px</small></div>';
+    }).join('');
+
+  document.querySelector('[data-situ="' + sys + '"]').innerHTML =
+    '<span class="chip">' + icon(sys, 'chair', 30) + '</span>' +
+    '<span class="node">' + icon(sys, 'shield', 22) + '</span>' +
+    '<span class="node">' + icon(sys, 'clock', 22) + '</span>' +
+    '<a class="btn btn--p">تواصل معنا' + icon(sys, 'phone', 18) + '</a>' +
+    '<a class="btn btn--s">تواصل معنا' + icon(sys, 'arrow', 18) + '</a>';
+});
+
+/* side-by-side table */
+document.querySelector('[data-compare]').innerHTML = NAMES.map(function (n) {
+  return '<tr><td>' + n[1] + '</td>' +
+    [1, 2, 3].map(function (s) { return '<td>' + icon(s, n[0], 32) + '</td>'; }).join('') +
+    '</tr>';
+}).join('');
+</script>
+</body>
+</html>

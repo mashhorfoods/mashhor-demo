@@ -150,7 +150,10 @@
   --radius-lg:26px;     /* media frames and information panels   */
   --radius-xl:34px;     /* featured CTA containers               */
   --radius-pill:999px; --radius-circle:50%;
-  --radius-button:var(--radius-sm);
+  /* Buttons sit one step above the other controls: at button scale the card
+     radius reads as a soft, smoothly curved box rather than a clipped
+     corner, and it is an existing step -- no fifth radius is introduced. */
+  --radius-button:var(--radius-md);
   --radius-card:var(--radius-md);
   --radius-input:var(--radius-sm);
   --radius-image:var(--radius-lg);
@@ -368,7 +371,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 
 /* Icon button */
 .icon-btn{display:inline-flex;align-items:center;justify-content:center;
-  width:var(--tap-min);height:var(--tap-min);border-radius:var(--radius-sm);
+  width:var(--tap-min);height:var(--tap-min);border-radius:var(--radius-button);
   color:var(--text-primary);background:transparent;transition:var(--transition-control)}
 .icon-btn:hover{background:var(--aun-primary-subtle);color:var(--color-primary)}
 .icon-btn:focus-visible{outline:none;box-shadow:var(--shadow-focus)}
@@ -525,7 +528,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 .site-header__call:focus-visible,.mobile-nav__link:focus-visible{outline:none;box-shadow:var(--shadow-focus-strong)}
 
 .menu-trigger{display:none;width:var(--tap-min);height:var(--tap-min);align-items:center;justify-content:center;
-  border-radius:var(--radius-sm);color:var(--text-primary)}
+  border-radius:var(--radius-button);color:var(--text-primary)}
 .menu-trigger:hover{background:var(--aun-primary-subtle)}
 /* focus handled by the strong-ring rule above (§09) */
 
