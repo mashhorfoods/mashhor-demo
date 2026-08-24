@@ -1118,6 +1118,10 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
   font-size:var(--fs-caption);line-height:1;color:var(--text-secondary);letter-spacing:.08em;
   padding:var(--sp-4) var(--sp-8);border-radius:var(--radius-sm);background:var(--bg-tinted)}
 .service__title{font-size:var(--fs-h4);line-height:1.4;color:var(--color-secondary);text-wrap:balance}
+/* §09 — titles run 1-2 lines. Reserving two lines from the point the grid goes
+   multi-column keeps every image band in a row starting on the same line, so
+   the row scans as one shelf rather than a stagger. */
+@media(min-width:600px){.service__title{min-height:2.8em}}
 .service__desc{font-family:var(--font-body);color:var(--text-secondary);max-width:46ch}
 
 /* §04/§06 — 01 is the featured entry point, marked by surface only. It keeps
@@ -2019,6 +2023,11 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
                 <span class="service__num" aria-hidden="true">01</span>
               </div>
               <h3 class="service__title">النقل بواسطة الكرسي المتحرك</h3>
+              <figure class="service__media">
+                <img src="https://i.ibb.co/20HGPHhy/chair1.webp"
+                     loading="lazy" decoding="async"
+                     alt="راكب يستخدم كرسيًا متحركًا أثناء نقله بمركبة عون الدرب المجهّزة.">
+              </figure>
               <p class="service__desc">خدمة نقل آمنة ومريحة لمستخدمي الكراسي المتحركة، مع تجهيز المركبة بما يسهّل عملية الصعود والنزول.</p>
               <a class="btn btn--secondary service__cta" href="#contact">
                 تواصل معنا
@@ -2032,6 +2041,11 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
                 <span class="service__num" aria-hidden="true">02</span>
               </div>
               <h3 class="service__title">النقل بواسطة الكرسي الكهربائي</h3>
+              <figure class="service__media">
+                <img src="https://i.ibb.co/hRk6Szn9/12.webp"
+                     loading="lazy" decoding="async"
+                     alt="كرسي كهربائي داخل مركبة مجهّزة بوسائل التثبيت أثناء التنقل.">
+              </figure>
               <p class="service__desc">مركبات مجهزة لاستيعاب الكراسي الكهربائية، مع مراعاة الأمان والثبات أثناء التنقل.</p>
               <a class="btn btn--secondary service__cta" href="#contact">
                 تواصل معنا
@@ -2045,6 +2059,11 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
                 <span class="service__num" aria-hidden="true">03</span>
               </div>
               <h3 class="service__title">النقل بواسطة السرير الطبي</h3>
+              <figure class="service__media">
+                <img src="https://i.ibb.co/Wpzyc7gB/14.webp"
+                     loading="lazy" decoding="async"
+                     alt="نقل مستفيد على سرير طبي بوسيلة نقل مناسبة لحالته.">
+              </figure>
               <p class="service__desc">خدمة مخصصة للحالات التي تتطلب بقاء المستفيد على السرير طوال الرحلة، باستخدام وسائل نقل مناسبة.</p>
               <a class="btn btn--secondary service__cta" href="#contact">
                 تواصل معنا
@@ -2058,6 +2077,11 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
                 <span class="service__num" aria-hidden="true">04</span>
               </div>
               <h3 class="service__title">خدمة مساعد السائق</h3>
+              <figure class="service__media">
+                <img src="https://i.ibb.co/h1yb1ZvJ/15.webp"
+                     loading="lazy" decoding="async"
+                     alt="مساعد من عون الدرب يرافق المستفيد ويقدّم له المساعدة أثناء النقل.">
+              </figure>
               <p class="service__desc">إمكانية توفير مساعد أو أكثر لمرافقة المستفيد ومساعدته أثناء النقل، وفقًا لحالته واحتياجاته الخاصة.</p>
               <a class="btn btn--secondary service__cta" href="#contact">
                 تواصل معنا
@@ -2071,6 +2095,11 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
                 <span class="service__num" aria-hidden="true">05</span>
               </div>
               <h3 class="service__title">النقل اليومي</h3>
+              <figure class="service__media">
+                <img src="https://i.ibb.co/fGNp77dQ/05.webp"
+                     loading="lazy" decoding="async"
+                     alt="رحلة نقل يومية لكبار السن وذوي الإعاقة بمركبة عون الدرب.">
+              </figure>
               <p class="service__desc">خدمات نقل يومية لكبار السن وذوي الإعاقة، بما يوفر لهم تنقلًا آمنًا ومريحًا.</p>
               <a class="btn btn--secondary service__cta" href="#contact">
                 تواصل معنا
@@ -2084,6 +2113,11 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
                 <span class="service__num" aria-hidden="true">06</span>
               </div>
               <h3 class="service__title">النقل إلى المستشفيات والمراكز الطبية</h3>
+              <figure class="service__media">
+                <img src="https://i.ibb.co/tGF8qR5/11.webp"
+                     loading="lazy" decoding="async"
+                     alt="توصيل مستفيد إلى مستشفى مع تقديم المساعدة عند الوصول.">
+              </figure>
               <p class="service__desc">التوصيل إلى المستشفيات والمراكز الطبية، مع تقديم المساعدة وفقًا لاحتياجات المستفيد.</p>
               <a class="btn btn--secondary service__cta" href="#contact">
                 تواصل معنا
@@ -2097,6 +2131,11 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
                 <span class="service__num" aria-hidden="true">07</span>
               </div>
               <h3 class="service__title">التنقل للمناسبات الاجتماعية</h3>
+              <figure class="service__media">
+                <img src="https://i.ibb.co/DfT15MLX/15-1.webp"
+                     loading="lazy" decoding="async"
+                     alt="تنقل مريح إلى مناسبة اجتماعية بمركبة نقل مجهّزة.">
+              </figure>
               <p class="service__desc">توفير وسائل نقل مناسبة ومريحة للتنقل إلى المناسبات والزيارات الاجتماعية.</p>
               <a class="btn btn--secondary service__cta" href="#contact">
                 تواصل معنا

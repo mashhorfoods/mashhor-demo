@@ -140,14 +140,29 @@ values differ — e.g. `--fs-display` is `1.4rem + 3.0vw` in tokens.css and
 `1.55rem + 2.9vw` in the site. Re-aligning them would change the rendered
 design, so it is left for a deliberate decision.
 
-## Waiting on assets
+## Service card images
 
-Every service card reserves an image band (`.service__media`), styled and ready,
-but no `<figure>` is emitted yet: there is no photograph for any individual
-service. The brief requires the image to represent the actual service, and the
-three photographs supplied so far (hero, about, why us) all show wheelchair
-transport — they would misrepresent the medical-bed, daily-transport and social-
-occasions services. Seven URLs will light the band up with no further work.
+The seven per-service photographs are in. Each card now emits a
+`<figure class="service__media">` between its title and description, keeping the
+§09 reading order icon → title → image → description → CTA. No CSS was needed for
+the band itself — it was already styled, clipped and hover-wired.
+
+Two notes on how they are written:
+
+- **No `width`/`height` attributes.** The real pixel dimensions of these files
+  cannot be read from this environment (`i.ibb.co` is blocked by the network
+  policy), and a guessed intrinsic size is worse than none. `.service__media img`
+  already carries `aspect-ratio:4/3`, which reserves the box and prevents layout
+  shift on its own. If the true dimensions are ever known, adding them is safe.
+- **Alt text describes the service scene**, matching the pattern used for the
+  hero, About and Why-Us images. Nobody here has seen these seven files, so each
+  alt should be checked against the actual photograph before launch.
+
+`.service__title` now reserves two lines (`min-height:2.8em`) from 600px up,
+where the grid goes multi-column. Titles run one or two lines depending on
+width, and without the reserve the image bands in a row started on different
+lines — measured at 1440/1280/1024/768, now aligned at all four. Below 600px the
+grid is one column, so nothing is reserved and one-line titles stay tight.
 
 ## Open findings from Stage 01
 
