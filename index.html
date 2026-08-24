@@ -862,9 +862,8 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 /* The photograph is shown whole: no frame, no surface, no shadow, and its own
    proportions decide the height. A stretched box with object-fit:cover was
    cutting the subject out of the frame at every width -- the whole point of
-   this image is the person and the ramp, and cover was throwing both away.
-   The box only exists to clip the road that runs across it. */
-.hero__media{position:relative;overflow:hidden;align-self:center;
+   this image is the person and the ramp, and cover was throwing both away. */
+.hero__media{position:relative;align-self:center;
   background:none;border:none;box-shadow:none;border-radius:0}
 .hero__media img{display:block;inline-size:100%;block-size:auto;
   max-inline-size:100%;object-fit:fill}
@@ -1818,15 +1817,6 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 .hero__trust span{display:block;font-size:var(--fs-caption);color:var(--text-secondary);
   line-height:var(--lh-normal)}
 
-/* -- route / road: supporting device only (§14) ---------------------------- */
-/* the road belongs to the photograph now: it sweeps across the image and runs
-   out under the panel, which is what makes the two parts read as one scene. */
-.hero__road{position:absolute;inset-block-end:0;inset-inline:0;z-index:1;
-  block-size:min(58%,20rem);pointer-events:none;overflow:visible}
-.hero__road svg{position:absolute;inset-block-end:0;inset-inline-end:0;
-  inline-size:min(150%,1100px);height:auto}
-@media(max-width:1023px){.hero__road{block-size:min(55%,12rem)}}
-
 /* ==========================================================================
    HERO · RESPONSIVE TRANSFORMATION (§17)
    ========================================================================== */
@@ -1994,12 +1984,6 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
           <!-- MEDIA — full-bleed photograph on the inline end. The brand
                road runs across it and out behind the panel. -->
           <figure class="hero__media">
-            <span class="hero__road" aria-hidden="true">
-          <svg viewBox="0 0 1440 420" fill="none" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
-            <path d="M-60 250 C 260 140 470 380 770 330 C 1050 284 1210 120 1520 70" stroke="#2C4C82" stroke-width="52" fill="none" stroke-linecap="round" opacity=".92"/>
-            <path d="M-60 250 C 260 140 470 380 770 330 C 1050 284 1210 120 1520 70" stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round" stroke-dasharray="10 22" opacity=".85"/>
-          </svg>
-            </span>
             <img src="https://i.ibb.co/V0B0zN05/h001.webp"
                  fetchpriority="high" decoding="async"
                  alt="أخصائي نقل مدرّب يساعد راكبًا يستخدم كرسيًا متحركًا على منحدر مركبة عون الدرب المجهّزة للنقل المتخصص">
