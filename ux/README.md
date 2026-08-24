@@ -482,3 +482,48 @@ text contrast never drops.
 `object-fit:cover`, which cropped it. Same treatment as the hero now: its own
 proportions, no crop. The rule that stretched it to meet the journey's last
 line went with the layout that needed it.
+
+## Services — pinned showcase
+
+A different mechanic from Why-Us, deliberately. There a sidebar anchor holds
+still and text scrolls past it. Here the whole stage pins and the service *on*
+it transforms, driven by an empty track that supplies the scroll distance.
+
+**Stage and track share one grid cell.** The track's height defines the scroll,
+the stage sticks inside it. No negative margins, no measured offsets, nothing
+to drift out of sync when type or spacing changes.
+
+**The grid is the base state, not a fallback bolted on.** Without script, below
+1024px, or under reduced motion, the track collapses to `display:none` and the
+seven slides lay out exactly as the grid always did. The pinned behaviour is
+gated on `.js` + `min-width:1024` + `prefers-reduced-motion:no-preference` in
+CSS, and on the same conditions in script.
+
+**One service on stage at a time.** The step whose centre is nearest the
+viewport's centre wins, so a step shorter than the observer band can never leave
+two services active -- the failure Why-Us hit and this avoids by construction.
+
+**Two accessibility details that are not decoration.** Inactive slides keep
+`opacity:0` rather than `visibility:hidden`, so all seven headings and
+descriptions stay in the accessibility tree and a screen reader can browse the
+whole catalogue rather than only whatever happens to be on stage. What that
+breaks is the tab order -- a transparent link is still tabbable -- so each
+slide's single link takes `tabindex="-1"` while it is off stage, verified across
+a full scroll sweep. And focus moving into a slide brings that slide on stage,
+so keyboard use stays coherent when focus arrives from anywhere but the tab key.
+
+**Crossing the breakpoint hands the section back.** A `matchMedia` listener
+clears every active class and every `tabindex` when the viewport drops below
+1024, because in the grid all seven must be visible and reachable again.
+
+**No scroll-jacking.** No wheel, touch or key handler exists in this section.
+
+**One bug the behaviour harness could not see.** The stage slide sets
+`grid-template-columns`, but the base card is `display:flex` -- and
+grid-template-columns does nothing to a flex container. Every behavioural
+assertion passed (81/81: active states, progress tracking, tab order, both
+fallbacks) while the stage rendered as a stacked card with a full-width image.
+It took a screenshot to catch. The harness now asserts the composition too:
+the slide computes to `grid` with two tracks, image and information sit side by
+side rather than stacked, the image carries the greater width, and the CTA does
+not span its column.

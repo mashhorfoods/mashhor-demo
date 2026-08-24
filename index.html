@@ -1225,6 +1225,89 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 .services__intro-lead{color:var(--text-secondary);
   margin-block-start:clamp(1.25rem,2.5vw,2rem);max-width:var(--measure-narrow)}
 
+/* ==========================================================================
+   §02/§05 · PINNED SERVICE SHOWCASE
+   The mechanic is deliberately not the one Why-Us uses. There the sidebar is
+   an anchor that never changes and text scrolls past it; here the whole stage
+   pins and the service on it transforms, driven by an empty track that supplies
+   the scroll distance. Stage and track share one grid cell, so the track's
+   height defines the scroll and the stage sticks inside it -- no negative
+   margins, no measured offsets, nothing to drift.
+
+   Everything below is an enhancement. Its base state IS the grid: no script,
+   under 1024, or with reduced motion, the track collapses to nothing and the
+   seven slides lay out exactly as they did before.
+   ========================================================================== */
+.services__showcase{display:grid;grid-template-columns:minmax(0,1fr)}
+.services__stage{grid-area:1/1}
+.services__track,.services__progress{display:none}
+
+@media(min-width:1024px) and (prefers-reduced-motion:no-preference){
+  .js .services__track{grid-area:1/1;display:block}
+  /* §13-equivalent: each step is the scroll distance one service is worth. */
+  .js .services__step{min-block-size:clamp(22rem,70vh,32rem)}
+
+  .js .services__stage{position:sticky;align-self:start;z-index:1;
+    inset-block-start:calc(var(--header-h-sm) + clamp(1rem,3vh,2rem));
+    display:flex;flex-direction:column;gap:clamp(1.25rem,3vh,2rem);
+    padding-block-start:clamp(1rem,3vh,2rem)}
+
+  /* the slides stack in one cell and cross-fade (§07/§08) */
+  .js .services__slides{display:grid;grid-template-columns:minmax(0,1fr);
+    block-size:clamp(26rem,62vh,36rem)}
+  .js .services__slides > .service{grid-area:1/1;
+    opacity:0;transform:scale(.98);pointer-events:none;
+    transition:opacity var(--dur-slow) var(--ease-smooth),
+               transform var(--dur-slow) var(--ease-smooth)}
+  .js .services__slides > .service.is-active{opacity:1;transform:none;pointer-events:auto}
+
+  /* §04 — one slide: information at the inline start, image at the inline end
+     and carrying the greater weight. The card's own children are placed
+     directly, so the markup is the markup the grid already used. */
+  .js .services__slides > .service{
+    /* the base card is a flex column; the stage needs a two-track grid, and
+       grid-template-columns alone does nothing to a flex container. */
+    display:grid;
+    grid-template-columns:minmax(0,0.86fr) minmax(0,1.14fr);
+    grid-template-rows:auto auto 1fr auto;
+    column-gap:clamp(2rem,4vw,3.5rem);row-gap:clamp(.75rem,1.6vh,1.25rem);
+    align-content:center;
+    padding:clamp(1.75rem,3.4vw,2.75rem);
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius-lg);box-shadow:var(--elev-featured)}
+  .js .services__slides > .service .service__head {grid-column:1;grid-row:1}
+  .js .services__slides > .service .service__title{grid-column:1;grid-row:2;font-size:var(--fs-h3)}
+  .js .services__slides > .service .service__desc {grid-column:1;grid-row:3;
+    max-width:var(--measure-narrow);align-self:start}
+  /* §14 — compact: a grid item stretches its track by default, and a
+     full-column CTA dominates the service it belongs to. */
+  .js .services__slides > .service .service__cta  {grid-column:1;grid-row:4;
+    align-self:end;justify-self:start;width:auto}
+  /* §09 — a bounded media frame, not a generic card */
+  .js .services__slides > .service .service__media{grid-column:2;grid-row:1 / -1;
+    block-size:100%;border-radius:var(--radius-lg);overflow:hidden}
+  .js .services__slides > .service .service__media img{block-size:100%;object-fit:cover;aspect-ratio:auto}
+  /* the featured slide keeps its tint but not a second surface on the stage */
+  .js .services__slides > .service--feature{background:var(--surface)}
+
+  /* §16/§18 — the run of nodes under the stage */
+  .js .services__progress{display:flex;align-items:center;justify-content:center;
+    gap:0;list-style:none;padding:0;margin:0}
+  .js .services__progress-step{display:flex;align-items:center;margin-block-start:0}
+  .js .services__progress-step + .services__progress-step::before{content:"";
+    inline-size:clamp(1.25rem,3vw,2.75rem);block-size:2px;
+    background:repeating-linear-gradient(to left,var(--aun-border-strong) 0 5px,transparent 5px 11px)}
+  .js .services__progress-dot{inline-size:10px;block-size:10px;border-radius:var(--radius-circle);
+    background:var(--surface);border:2px solid var(--aun-sky);
+    transition:background var(--dur-normal) var(--ease-smooth),
+               border-color var(--dur-normal) var(--ease-smooth),
+               transform var(--dur-normal) var(--ease-smooth)}
+  .js .services__progress-step.is-past .services__progress-dot{border-color:var(--color-primary)}
+  .js .services__progress-step.is-current .services__progress-dot{border-color:var(--color-primary);
+    background:var(--color-primary);transform:scale(1.35);
+    box-shadow:0 0 0 4px var(--aun-primary-subtle)}
+}
+
 /* §20/§44 — 24px on desktop read as a catalogue packed tight, and 16px on a
    phone let cards very nearly touch. */
 .services__grid{display:grid;gap:clamp(1.5rem,2.4vw,2.5rem);
@@ -2265,10 +2348,16 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
             <p class="services__intro-lead" data-reveal>تقدّم شركة عون الدرب مجموعة متكاملة من خدمات النقل المتخصص لتلبية احتياجات كبار السن وذوي الإعاقة والمرضى الذين يحتاجون إلى وسائل نقل مجهزة ومساعدة خاصة.</p>
           </div>
 
-          <!-- services grid: 01 feature + 6 tiles + navy CTA tile -->
-          <div class="services__grid">
+          <!-- §02/§05 — the pinned showcase. The stage holds still while the
+               track beside it supplies the scroll, and the service on the stage
+               transforms. Without script, below 1024, or under reduced motion
+               the track collapses and the slides fall back to the grid they
+               have always been. -->
+          <div class="services__showcase">
+            <div class="services__stage">
+              <div class="services__slides">
 
-            <article class="service service--feature" data-reveal>
+            <article data-slide="0" class="service service--feature" data-reveal>
               <div class="service__head">
                 <span class="service__icon" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="14" cy="4.6" r="2"/><path d="M14 7.6v4.6H9.4"/><path d="M9.4 12.2 12 16.6"/><circle cx="10.6" cy="16.4" r="4.8"/><path d="M14.6 15h2.4l1.5 3.5"/></svg></span>
                 <span class="service__num" aria-hidden="true">01</span>
@@ -2286,7 +2375,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
               </a>
             </article>
 
-            <article class="service" data-reveal>
+            <article data-slide="1" class="service" data-reveal>
               <div class="service__head">
                 <span class="service__icon" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="13.4" cy="4.8" r="2"/><path d="M13.4 8.2v4.2H9.4"/><path d="M6.6 15h9.6l-1.2 3.2H7.8Z"/><circle cx="9.2" cy="20" r="1.6"/><circle cx="15.2" cy="20" r="1.6"/><path d="M4.4 8.4 2.8 10.8h2L4 13.2"/></svg></span>
                 <span class="service__num" aria-hidden="true">02</span>
@@ -2304,7 +2393,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
               </a>
             </article>
 
-            <article class="service" data-reveal>
+            <article data-slide="2" class="service" data-reveal>
               <div class="service__head">
                 <span class="service__icon" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18.6V9"/><path d="M3 11.4h3.6"/><circle cx="9.4" cy="11.6" r="2"/><path d="M3 15h13.6a4.2 4.2 0 0 1 4.2 4.2"/><path d="M3 18.6h17.8"/><circle cx="7.2" cy="20.6" r="1.3"/><circle cx="16.8" cy="20.6" r="1.3"/></svg></span>
                 <span class="service__num" aria-hidden="true">03</span>
@@ -2322,7 +2411,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
               </a>
             </article>
 
-            <article class="service" data-reveal>
+            <article data-slide="3" class="service" data-reveal>
               <div class="service__head">
                 <span class="service__icon" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="7.4" cy="9.2" r="2.4"/><path d="M3.4 20c0-2.7 1.8-4.9 4-4.9s4 2.2 4 4.9"/><circle cx="16.8" cy="5.4" r="2.3"/><path d="M13.3 20c0-4.1 1.6-6.7 3.5-6.7s3.5 2.6 3.5 6.7"/><path d="M14.9 10.6c-1.5 1.5-3.4 2.2-5.4 2.3"/></svg></span>
                 <span class="service__num" aria-hidden="true">04</span>
@@ -2340,7 +2429,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
               </a>
             </article>
 
-            <article class="service" data-reveal>
+            <article data-slide="4" class="service" data-reveal>
               <div class="service__head">
                 <span class="service__icon" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.6 16.8v-3.4l2.1-3.6h7.5l2.6 3.6h4.6v3.4"/><path d="M2.6 16.8h1.6M14.8 16.8h3.4"/><circle cx="6.8" cy="17.8" r="2.1"/><circle cx="16.4" cy="17.8" r="2.1"/><circle cx="17.8" cy="5.6" r="3.4"/><path d="M17.8 3.7v2l1.4.9"/></svg></span>
                 <span class="service__num" aria-hidden="true">05</span>
@@ -2358,7 +2447,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
               </a>
             </article>
 
-            <article class="service" data-reveal>
+            <article data-slide="5" class="service" data-reveal>
               <div class="service__head">
                 <span class="service__icon" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.4 20.4V9.4L12 4l7.6 5.4v11"/><path d="M2.6 20.4h18.8"/><path d="M12 9.6v4.4M9.8 11.8h4.4"/></svg></span>
                 <span class="service__num" aria-hidden="true">06</span>
@@ -2376,7 +2465,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
               </a>
             </article>
 
-            <article class="service" data-reveal>
+            <article data-slide="6" class="service" data-reveal>
               <div class="service__head">
                 <span class="service__icon" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7.2" r="2.4"/><path d="M8 19c0-2.6 1.8-4.7 4-4.7s4 2.1 4 4.7"/><circle cx="5.2" cy="9.8" r="1.9"/><path d="M2.2 19c0-2.2 1.3-3.9 3-3.9"/><circle cx="18.8" cy="9.8" r="1.9"/><path d="M21.8 19c0-2.2-1.3-3.9-3-3.9"/></svg></span>
                 <span class="service__num" aria-hidden="true">07</span>
@@ -2393,6 +2482,29 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
                 <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H6"/><path d="M11.5 6.5 6 12l5.5 5.5"/></svg>
               </a>
             </article>
+              </div>
+
+              <!-- §16/§18 — the service journey, as nodes on a run. Decorative:
+                   every label it could carry is on the stage beside it. -->
+              <ol class="services__progress" aria-hidden="true">
+                <li class="services__progress-step"><span class="services__progress-dot"></span></li>
+                <li class="services__progress-step"><span class="services__progress-dot"></span></li>
+                <li class="services__progress-step"><span class="services__progress-dot"></span></li>
+                <li class="services__progress-step"><span class="services__progress-dot"></span></li>
+                <li class="services__progress-step"><span class="services__progress-dot"></span></li>
+                <li class="services__progress-step"><span class="services__progress-dot"></span></li>
+                <li class="services__progress-step"><span class="services__progress-dot"></span></li>
+              </ol>
+            </div>
+
+            <!-- the scroll the stage rides on: empty by design, so nothing is
+                 announced twice and nothing here can take focus. -->
+            <div class="services__track" aria-hidden="true">
+              <div class="services__step"></div><div class="services__step"></div>
+              <div class="services__step"></div><div class="services__step"></div>
+              <div class="services__step"></div><div class="services__step"></div>
+              <div class="services__step"></div>
+            </div>
           </div>
 
           <!-- §20/§21 — the bridge from the catalogue to Contact. Full width and
@@ -2912,6 +3024,101 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
         apply();
       }, { rootMargin: "-40% 0px -40% 0px", threshold: 0 });
       chapters.forEach(function (el) { obs.observe(el); });
+    })();
+
+    /* 4c · Services — the pinned showcase.
+       The track's seven steps decide which service is on the stage: the step
+       whose centre is nearest the viewport's centre wins, so a step shorter
+       than the observer band can never leave two services active at once.
+
+       Scrolling is untouched -- no wheel, touch or key handler exists here.
+
+       Two details that are not decoration:
+       - Inactive slides keep opacity:0 rather than visibility:hidden, so all
+         seven headings and descriptions stay in the accessibility tree and a
+         screen reader can still browse the whole catalogue. What would break
+         is the tab order, since a transparent link is still tabbable, so each
+         slide's single link is given tabindex="-1" while it is off stage.
+       - Focus moving into a slide brings that slide on stage, which keeps
+         keyboard use coherent if focus arrives from anywhere but the tab key.
+
+       Gated exactly like the CSS: no enhancement without script, under 1024,
+       or with reduced motion, where the seven slides render as the grid. */
+    (function () {
+      var showcase = doc.querySelector(".services__showcase");
+      if (!showcase || reduce || !("IntersectionObserver" in window)) return;
+      var slides = [].slice.call(showcase.querySelectorAll(".services__slides > .service"));
+      var steps  = [].slice.call(showcase.querySelectorAll(".services__step"));
+      var dots   = [].slice.call(showcase.querySelectorAll(".services__progress-step"));
+      if (slides.length !== steps.length || !slides.length) return;
+
+      var pinned = window.matchMedia("(min-width:1024px)");
+      var active = -1;
+
+      function show(i) {
+        if (i === active) return;
+        active = i;
+        slides.forEach(function (slide, n) {
+          var on = n === i;
+          slide.classList.toggle("is-active", on);
+          var link = slide.querySelector("a");
+          if (link) {
+            if (on) { link.removeAttribute("tabindex"); }
+            else { link.setAttribute("tabindex", "-1"); }
+          }
+        });
+        dots.forEach(function (dot, n) {
+          dot.classList.toggle("is-current", n === i);
+          dot.classList.toggle("is-past", i > -1 && n < i);
+        });
+      }
+
+      function release() {
+        active = -1;
+        slides.forEach(function (slide) {
+          slide.classList.remove("is-active");
+          var link = slide.querySelector("a");
+          if (link) link.removeAttribute("tabindex");
+        });
+        dots.forEach(function (d) { d.classList.remove("is-current", "is-past"); });
+      }
+
+      var visible = [];
+      function pick() {
+        if (!pinned.matches) return;
+        var mid = (window.innerHeight || doc.documentElement.clientHeight) / 2;
+        var best = -1, bestDist = Infinity;
+        for (var i = 0; i < steps.length; i++) {
+          if (visible.indexOf(steps[i]) === -1) continue;
+          var r = steps[i].getBoundingClientRect();
+          var d = Math.abs((r.top + r.bottom) / 2 - mid);
+          if (d < bestDist) { bestDist = d; best = i; }
+        }
+        if (best > -1) show(best);
+      }
+
+      var obs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          var at = visible.indexOf(entry.target);
+          if (entry.isIntersecting) { if (at === -1) visible.push(entry.target); }
+          else if (at > -1) { visible.splice(at, 1); }
+        });
+        pick();
+      }, { rootMargin: "-35% 0px -35% 0px", threshold: 0 });
+      steps.forEach(function (el) { obs.observe(el); });
+
+      showcase.addEventListener("focusin", function (e) {
+        if (!pinned.matches) return;
+        var slide = e.target.closest ? e.target.closest(".services__slides > .service") : null;
+        if (slide) show(slides.indexOf(slide));
+      });
+
+      /* Crossing the breakpoint hands the section back to the grid, where every
+         slide must be visible and every link reachable again. */
+      function sync() { if (pinned.matches) { active = -1; pick(); } else { release(); } }
+      if (pinned.addEventListener) pinned.addEventListener("change", sync);
+      else if (pinned.addListener) pinned.addListener(sync);
+      sync();
     })();
 
     /* 5 · Entrance reveal (§20) — subtle, one-shot; content-first */
