@@ -312,8 +312,15 @@ const PHONES = [[320,568],[360,640],[375,667],[390,844],[412,915],[430,932]];
      `${w}: the action is ${w<=767?'full width and ':''}comfortably tappable (${r.ctaW}x${r.ctaH} of ${r.inner})`);
   ok(r.ctaTrans.includes('transform'), `${w}: it answers a press (${r.ctaTrans.slice(0,50)})`);
   ok(r.crTitle>=4.5 && r.crDesc>=4.5, `${w}: title and description clear AA (${r.crTitle}, ${r.crDesc})`);
-  if (w<=1023) ok(r.delays.join('/')==='0/60/120/180/240',
-     `${w}: the card assembles photograph > chip > title > text > action (${r.delays.join('/')}ms)`);
+  /* M11 replaced this card's own 60ms ladder with the site-wide --stagger, so
+     the assertion tests the shape it has to keep — five parts, in order, one
+     even step apart — rather than the numbers it happened to use. */
+  if (w<=1023) {
+    const st = r.delays[1]-r.delays[0];
+    const even = r.delays.every((d,i)=>d===r.delays[0]+st*i);
+    ok(r.delays[0]===0 && st>0 && st<=60 && even && r.delays.length===5,
+       `${w}: the card assembles photograph > chip > title > text > action (${r.delays.join('/')}ms)`);
+  }
   await p.close();
  }
 

@@ -204,6 +204,9 @@
 
   /* -- 13. MOTION (§20) --------------------------------------------------- */
   --dur-instant:80ms; --dur-fast:150ms; --dur-normal:260ms; --dur-slow:420ms;
+  /* M11 §26 — the gap between one revealed element and the next. One value,
+     so the hero, the service card and the global ladder cannot drift apart. */
+  --stagger:40ms;
   --ease-standard:cubic-bezier(.4,0,.2,1);
   --ease-smooth:cubic-bezier(.22,1,.36,1);
   --ease-entrance:cubic-bezier(.16,1,.3,1);
@@ -260,7 +263,17 @@ img,picture,svg,video{display:block;max-width:100%;height:auto}
 ul,ol{padding-inline-start:var(--sp-24);color:var(--text-secondary)}
 li+li{margin-block-start:var(--sp-8)}
 a{color:var(--interactive);text-decoration:none;transition:color var(--dur-fast) var(--ease-standard)}
-a:hover{color:var(--interactive-hover)}
+/* STAGE M11 §05/§36 — this was the only unguarded :hover in the file. Two
+   consequences, both measured: on a phone :hover sticks after a tap, and on
+   .btn--primary — whose own hover background is this exact colour — it painted
+   the label the same value as the surface behind it. Text and ground both
+   rgb(92,134,198): a 1:1 ratio, an invisible CTA, on desktop as well as touch.
+   Guarded like every other hover here, and kept off the components that own
+   their ink (a .btn takes its colour from --btn-ink, not from being a link). */
+@media(hover:hover){
+  a:not(.btn):not(.about__profile):not(.contact-action):not(.skip-link):not(.site-header__logo):hover{
+    color:var(--interactive-hover)}
+}
 button{font-family:inherit;background:none;border:none;cursor:pointer}
 
 /* keyboard focus — visible on every interactive element (§19/§23) */
@@ -366,7 +379,13 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 /* Primary */
 .btn--primary{--btn-ink:var(--text-on-primary);
   background:var(--color-primary);color:var(--text-on-primary);box-shadow:var(--shadow-xs)}
-.btn--primary:hover{background:var(--interactive-hover);box-shadow:var(--shadow-sm);transform:translateY(-1px)}
+/* STAGE M11 §36 — this hover LIGHTENED the primary button, to --blue-bright,
+   and the label on it is white: 3.70:1, under AA, in the state a desktop user
+   is in whenever they are about to click. A hover should not cost contrast.
+   It darkens now, one step to the navy already in the palette (8.53:1), which
+   also puts hover and press on the same ladder instead of opposite sides of
+   the rest colour: #4975BA -> #2C4C82 -> #22406F. */
+@media(hover:hover){.btn--primary:hover{background:var(--color-secondary);box-shadow:var(--shadow-sm);transform:translateY(-1px)}}
 .btn--primary:active{background:var(--interactive-active);transform:translateY(0);box-shadow:none}
 .btn--primary:focus-visible{outline:none;box-shadow:var(--shadow-focus)}
 
@@ -379,18 +398,18 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
    now keeps the promise the hover made. Hover keeps its tinted surface, so
    the two states are still distinct. */
 .btn--secondary{background:transparent;color:var(--color-primary);border-color:var(--color-primary)}
-.btn--secondary:hover{background:var(--aun-primary-subtle)}
+@media(hover:hover){.btn--secondary:hover{background:var(--aun-primary-subtle)}}
 .btn--secondary:active{background:rgba(73,117,186,.14)}
 .btn--secondary:focus-visible{outline:none;box-shadow:var(--shadow-focus)}
 
 /* Ghost / text */
 .btn--ghost{background:transparent;color:var(--color-primary);padding-inline:var(--sp-12)}
-.btn--ghost:hover{background:var(--aun-primary-subtle)}
+@media(hover:hover){.btn--ghost:hover{background:var(--aun-primary-subtle)}}
 .btn--ghost:focus-visible{outline:none;box-shadow:var(--shadow-focus)}
 
 /* On dark surfaces */
 .btn--on-inverse{--btn-ink:var(--color-secondary);background:#fff;color:var(--color-secondary)}
-.btn--on-inverse:hover{background:var(--aun-sky)}
+@media(hover:hover){.btn--on-inverse:hover{background:var(--aun-sky)}}
 
 /* M07 §25 — opacity .45 alone dropped the primary's white-on-blue label to
    about 2:1, which is a control you cannot read telling you it is a control
@@ -419,7 +438,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 .icon-btn{display:inline-flex;align-items:center;justify-content:center;
   width:var(--tap-min);height:var(--tap-min);border-radius:var(--radius-button);
   color:var(--text-primary);background:transparent;transition:var(--transition-control)}
-.icon-btn:hover{background:var(--aun-primary-subtle);color:var(--color-primary)}
+@media(hover:hover){.icon-btn:hover{background:var(--aun-primary-subtle);color:var(--color-primary)}}
 .icon-btn:focus-visible{outline:none;box-shadow:var(--shadow-focus)}
 .icon-btn svg{width:var(--icon-md);height:var(--icon-md)}
 
@@ -427,13 +446,13 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
    07 · LINK SYSTEM (§10) — direction-aware for RTL
    ========================================================================== */
 .link{color:var(--interactive);text-underline-offset:.2em;text-decoration-thickness:1px}
-.link:hover{color:var(--interactive-hover);text-decoration:underline}
+@media(hover:hover){.link:hover{color:var(--interactive-hover);text-decoration:underline}}
 .link:focus-visible{outline:none;box-shadow:var(--shadow-focus);border-radius:var(--radius-xs)}
 
 /* arrow link — arrow points to reading-end (left in RTL); nudges on hover */
 .link-arrow{display:inline-flex;align-items:center;gap:var(--sp-8);font-family:var(--font-heading);font-weight:var(--fw-semibold)}
 .link-arrow svg{width:var(--icon-sm);height:var(--icon-sm);transition:transform var(--dur-normal) var(--ease-smooth)}
-.link-arrow:hover svg{transform:translateX(-4px)}   /* moves toward inline-end in RTL */
+@media(hover:hover){.link-arrow:hover svg{transform:translateX(-4px)}}   /* moves toward inline-end in RTL */
 
 .link-icon{display:inline-flex;align-items:center;gap:var(--sp-8)}
 .link-icon svg{width:var(--icon-sm);height:var(--icon-sm);color:var(--color-primary);flex:0 0 auto}
@@ -446,7 +465,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
   padding:clamp(1.25rem,2.5vw,1.75rem);transition:border-color var(--dur-normal) var(--ease-standard),
   box-shadow var(--dur-normal) var(--ease-standard),transform var(--dur-normal) var(--ease-smooth)}
 .card--interactive{cursor:pointer}
-.card--interactive:hover{border-color:var(--border-strong);box-shadow:var(--shadow-md);transform:translateY(-2px)}
+@media(hover:hover){.card--interactive:hover{border-color:var(--border-strong);box-shadow:var(--shadow-md);transform:translateY(-2px)}}
 .card--interactive:focus-within{box-shadow:var(--shadow-focus)}
 .card__icon{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;
   border-radius:var(--radius-sm);background:var(--aun-primary-subtle);color:var(--color-primary);margin-block-end:var(--sp-16)}
@@ -572,15 +591,19 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 /* §08 — hover moves toward the brand blue and previews the indicator.
    The bar is always in the DOM and only ever scales, so the active state
    can never shift the navigation layout. */
-.site-nav__link:hover{color:var(--color-primary)}
+@media(hover:hover){.site-nav__link:hover{color:var(--color-primary)}}
 .site-nav__link.is-active{color:var(--color-primary);font-weight:var(--fw-semibold)}
 .site-nav__link::after{content:"";position:absolute;inset-block-end:6px;inset-inline-start:50%;
   width:20px;height:2px;border-radius:var(--radius-pill);background:var(--color-primary);
   transform:translateX(50%) scaleX(0);opacity:0;
   transition:transform var(--dur-normal) var(--ease-smooth),opacity var(--dur-fast) var(--ease-standard)}
-.site-nav__link:hover::after{transform:translateX(50%) scaleX(.55);opacity:.45}
-.site-nav__link.is-active::after,
-.site-nav__link.is-active:hover::after{transform:translateX(50%) scaleX(1);opacity:1}
+@media(hover:hover){.site-nav__link:hover::after{transform:translateX(50%) scaleX(.55);opacity:.45}}
+/* M11 — this selector list mixed a state with a hover, so gating the whole
+   rule would have taken the ACTIVE nav indicator away from every touch
+   device. The state stands on its own; only the hover half is gated. */
+.site-nav__link.is-active::after{transform:translateX(50%) scaleX(1);opacity:1}
+@media(hover:hover){
+  .site-nav__link.is-active:hover::after{transform:translateX(50%) scaleX(1);opacity:1}}
 /* §09 — header controls take the strong focus ring. */
 .site-nav__link:focus-visible,.site-header__logo:focus-visible{outline:none;box-shadow:var(--shadow-focus-strong)}
 .menu-trigger:focus-visible,.site-header__cta:focus-visible,
@@ -588,7 +611,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 
 .menu-trigger{display:none;width:var(--tap-min);height:var(--tap-min);align-items:center;justify-content:center;
   border-radius:var(--radius-button);color:var(--text-primary)}
-.menu-trigger:hover{background:var(--aun-primary-subtle)}
+@media(hover:hover){.menu-trigger:hover{background:var(--aun-primary-subtle)}}
 /* focus handled by the strong-ring rule above (§09) */
 
 /* mobile drawer */
@@ -611,7 +634,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
   font-family:var(--font-heading);font-size:var(--fs-h4);font-weight:var(--fw-semibold);
   color:var(--text-primary);border-block-end:1px solid var(--border);border-radius:var(--radius-sm);
   transition:color var(--dur-normal) var(--ease-smooth),background var(--dur-normal) var(--ease-smooth)}
-.mobile-nav__link:hover{color:var(--color-primary)}
+@media(hover:hover){.mobile-nav__link:hover{color:var(--color-primary)}}
 
 /* §12 / accessibility — the active state carries a SHAPE, not colour alone:
    a bar at the reading edge (inline-start = right in RTL), plus aria-current. */
@@ -634,7 +657,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 .site-footer__top{padding-block:var(--sp-80) var(--sp-48)}
 .site-footer__grid{display:grid;gap:var(--sp-40) var(--grid-gap);grid-template-columns:1fr}
 .site-footer a{color:var(--text-on-inverse)}
-.site-footer a:hover{color:#fff}
+@media(hover:hover){.site-footer a:hover{color:#fff}}
 .site-footer__logo{height:40px;width:auto;margin-block-end:var(--sp-20)}
 .site-footer__col-title{font-family:var(--font-heading);font-weight:var(--fw-semibold);font-size:var(--fs-caption);
   letter-spacing:var(--track-caps);text-transform:uppercase;color:var(--aun-sky);margin-block-end:var(--sp-16)}
@@ -658,7 +681,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
   transition:border-color var(--dur-fast) var(--ease-standard),box-shadow var(--dur-fast) var(--ease-standard);
   appearance:none;text-align:start}
 .input::placeholder,.textarea::placeholder{color:var(--text-muted)}
-.input:hover,.textarea:hover,.select:hover{border-color:var(--aun-slate)}
+@media(hover:hover){.input:hover,.textarea:hover,.select:hover{border-color:var(--aun-slate)}}
 .input:focus,.textarea:focus,.select:focus{outline:none;border-color:var(--focus);box-shadow:var(--shadow-focus)}
 .textarea{min-height:calc(var(--control-md)*2.4);resize:vertical;line-height:var(--lh-normal)}
 .select{background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='none' stroke='%235A6675' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 8l5 5 5-5'/%3E%3C/svg%3E");
@@ -691,14 +714,21 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 /* STAGE 02 — the reveal is opt-in, gated on the .js class the inline script in
    <head> sets. Without script the page renders fully rather than blank. */
 .js [data-reveal]{opacity:0;transform:translateY(16px);
-  transition:opacity var(--dur-slow) var(--ease-entrance),transform var(--dur-slow) var(--ease-entrance)}
+  /* M11 §27/§33 — was --dur-slow (420ms). With the step delays below that put
+     the last element of a group 800ms away from being readable. --dur-normal
+     is inside the 260-350ms band the brief allows for a noticeable
+     transition, and content stops being something you wait for. */
+  transition:opacity var(--dur-normal) var(--ease-entrance),transform var(--dur-normal) var(--ease-entrance)}
 .js [data-reveal].is-inview{opacity:1;transform:none}
 /* STAGE 11 §25 — an ordered arrival for a composition that reads top to
    bottom. The steps delay only the entrance, never a hover or a focus ring. */
-.js [data-reveal][data-reveal-step="2"]{transition-delay:90ms}
-.js [data-reveal][data-reveal-step="3"]{transition-delay:180ms}
-.js [data-reveal][data-reveal-step="4"]{transition-delay:270ms}
-.js [data-reveal][data-reveal-step="5"]{transition-delay:380ms}
+/* M11 §26 — one ladder, one step. 90/180/270/380 made the order legible by
+   making the reader wait for it; 40ms per step still arrives in sequence and
+   puts the fifth element 160ms behind the first instead of 380. */
+.js [data-reveal][data-reveal-step="2"]{transition-delay:calc(var(--stagger) * 1)}
+.js [data-reveal][data-reveal-step="3"]{transition-delay:calc(var(--stagger) * 2)}
+.js [data-reveal][data-reveal-step="4"]{transition-delay:calc(var(--stagger) * 3)}
+.js [data-reveal][data-reveal-step="5"]{transition-delay:calc(var(--stagger) * 4)}
 .route-draw{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.1s var(--ease-standard)}
 .route-draw.is-inview{stroke-dashoffset:0}
 
@@ -772,7 +802,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 
 /* header sub-parts */
 .site-header__logo{display:inline-flex;align-items:center;min-height:var(--tap-min);border-radius:var(--radius-sm);flex:0 0 auto}
-.site-header__logo:hover .site-logo{opacity:.85}
+@media(hover:hover){.site-header__logo:hover .site-logo{opacity:.85}}
 .site-logo{transform-origin:right center;
   transition:opacity var(--dur-fast) var(--ease-standard),transform var(--dur-normal) var(--ease-smooth)}
 :root.has-scrolled .site-logo{transform:scale(.9)}
@@ -784,7 +814,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
    keeps for assistive technology via aria-label. */
 .site-header__call svg{width:24px;height:24px}
 .site-header__call{background:var(--color-primary);color:var(--text-on-primary);box-shadow:var(--shadow-xs)}
-.site-header__call:hover{background:var(--interactive-hover);color:var(--text-on-primary)}
+@media(hover:hover){.site-header__call:hover{background:var(--color-secondary);color:var(--text-on-primary)}}
 .site-header__call:active{background:var(--interactive-active)}
 
 /* hamburger icon inside .menu-trigger — animates to X when open */
@@ -822,12 +852,12 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
   padding-inline:var(--sp-16);border-radius:var(--radius-pill);font-family:var(--font-heading);
   font-weight:var(--fw-semibold);font-size:var(--fs-small);color:var(--color-primary);
   border:1.5px solid var(--border-strong);background:var(--surface);transition:var(--transition-control)}
-.contact-action:hover{border-color:var(--color-primary);background:var(--aun-primary-subtle);color:var(--color-primary)}
+@media(hover:hover){.contact-action:hover{border-color:var(--color-primary);background:var(--aun-primary-subtle);color:var(--color-primary)}}
 .contact-action:focus-visible{outline:none;box-shadow:var(--shadow-focus)}
 .contact-action svg{width:var(--icon-sm);height:var(--icon-sm);flex:0 0 auto}
 .contact-action .link-num{color:inherit}
 .section--inverse .contact-action{background:transparent;color:#fff;border-color:rgba(255,255,255,.35)}
-.section--inverse .contact-action:hover{background:rgba(255,255,255,.10);border-color:#fff;color:#fff}
+@media(hover:hover){.section--inverse .contact-action:hover{background:rgba(255,255,255,.10);border-color:#fff;color:#fff}}
 
 /* ==========================================================================
    STAGE 04 · HERO / FIRST IMPRESSION
@@ -1030,7 +1060,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 .about__profile:focus-visible{outline:none;box-shadow:var(--shadow-focus);border-color:var(--color-primary)}
 @media(prefers-reduced-motion:reduce){
   .about__profile svg{transition:none}
-  .about__profile:hover svg{transform:none}
+  @media(hover:hover){.about__profile:hover svg{transform:none}}
 }
 @media(max-width:767px){.about__profile{inline-size:100%}}
 
@@ -1384,7 +1414,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 /* §26 — the geometry never changes; only the bitmap moves, inside its clip */
 @media(hover:hover){.service:hover .service__media img{transform:scale(1.02)}}
 @media(prefers-reduced-motion:reduce){.service__media img{transition:none}
-  .service:hover .service__media img{transform:none}}
+  @media(hover:hover){.service:hover .service__media img{transform:none}}}
 
 /* the description takes the slack so the actions line up across a row */
 .service__desc{flex:1 1 auto}
@@ -1394,7 +1424,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 /* §27 — the arrow drifts toward the reading end; the button itself stays put */
 @media(hover:hover){.service:hover .service__cta svg{transform:translateX(-3px)}}
 @media(prefers-reduced-motion:reduce){.service__cta svg{transition:none}
-  .service:hover .service__cta svg{transform:none}}
+  @media(hover:hover){.service:hover .service__cta svg{transform:none}}}
 
 /* icon and number share the head row: recognition on the reading edge,
    orientation on the far edge, and the title always starts at the same height */
@@ -1736,7 +1766,7 @@ html:not(.js) .hww__path{display:none}
    secondary action and a subtle route motif — no new decorative system.
    ========================================================================== */
 .btn--outline-inverse{background:transparent;color:#fff;border-color:rgba(255,255,255,.5)}
-.btn--outline-inverse:hover{border-color:#fff;background:rgba(255,255,255,.1)}
+@media(hover:hover){.btn--outline-inverse:hover{border-color:#fff;background:rgba(255,255,255,.1)}}
 .btn--outline-inverse:active{background:rgba(255,255,255,.16)}
 .btn--outline-inverse:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(255,255,255,.55)}
 
@@ -1797,7 +1827,7 @@ html:not(.js) .hww__path{display:none}
 .contact__phone{display:inline-block;align-self:flex-start;direction:ltr;font-family:var(--font-heading);
   font-weight:var(--fw-bold);font-size:var(--fs-h2);color:var(--color-secondary);text-decoration:none;
   margin-block-start:var(--sp-4);padding-block:var(--sp-8);transition:color var(--dur-normal) var(--ease-smooth)}
-.contact__phone:hover{color:var(--color-primary)}
+@media(hover:hover){.contact__phone:hover{color:var(--color-primary)}}
 .contact__phone:focus-visible{outline:none;box-shadow:var(--shadow-focus);border-radius:var(--radius-xs)}
 /* §17/§19 — the two actions share a row when the card is wide enough and take
    a row each when it is not, instead of wrapping ragged: at 1024 they used to
@@ -1829,7 +1859,7 @@ html:not(.js) .hww__path{display:none}
   font-weight:var(--fw-semibold);font-size:var(--fs-small);color:var(--text-primary)}
 .contact-info__value{color:var(--text-secondary);font-size:var(--fs-small);margin-block-start:var(--sp-2);line-height:var(--lh-normal)}
 .contact-info__value a{color:var(--color-primary);text-decoration:none}
-.contact-info__value a:hover{text-decoration:underline}
+@media(hover:hover){.contact-info__value a:hover{text-decoration:underline}}
 .contact__dot{width:8px;height:8px;border-radius:var(--radius-circle);background:var(--color-primary);flex:0 0 auto}
 /* §35 — the section signs off, then the footer. */
 .contact__closing-note{margin-block-start:clamp(2rem,4.5vw,3rem);text-align:center;
@@ -1870,7 +1900,7 @@ html:not(.js) .hww__path{display:none}
 .contact__invite-actions{display:flex;flex-wrap:wrap;justify-content:center;
   gap:var(--sp-16);margin-block-start:var(--sp-16)}
 .contact__invite-actions .btn svg{width:20px;height:20px}
-.contact__invite .btn--on-inverse:hover{background:var(--aun-sky)}
+@media(hover:hover){.contact__invite .btn--on-inverse:hover{background:var(--aun-sky)}}
 /* M08 §34 — white at 42% over the navy panel composites to rgb(133,151,182),
    which measures 2.88:1 against it: just under the 3:1 WCAG 1.4.11 asks of a
    control's boundary. Reading the stated colour rather than the composited one
@@ -2191,7 +2221,7 @@ html:not(.js) .hww__path{display:none}
   min-height:var(--tap-min);padding-inline:var(--sp-12);border-radius:var(--radius-sm);
   font-family:var(--font-heading);font-weight:var(--fw-medium);color:var(--text-primary);
   transition:background var(--dur-normal) var(--ease-smooth),color var(--dur-normal) var(--ease-smooth)}
-.mobile-nav__direct a:hover{background:var(--aun-primary-subtle);color:var(--color-primary)}
+@media(hover:hover){.mobile-nav__direct a:hover{background:var(--aun-primary-subtle);color:var(--color-primary)}}
 .mobile-nav__direct a:focus-visible{outline:none;box-shadow:var(--shadow-focus-strong)}
 .mobile-nav__direct svg{width:var(--icon-sm);height:var(--icon-sm);color:var(--color-primary);flex:0 0 auto}
 .mobile-nav__direct .link-num{font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate}
@@ -2372,23 +2402,27 @@ html:not(.js) .hww__path{display:none}
    The primary already darkens and drops its shadow when pressed. On a touch
    screen there is no hover to precede that, so the press needs to be felt as
    well as seen: 1.5% of scale, in and out, with no overshoot. Scale only —
-   a transform does not touch layout, so it cannot cost a frame. */
-@media(pointer:coarse){
-  .btn{transition:var(--transition-control),transform var(--dur-fast) var(--ease-standard)}
-  .btn:active{transform:scale(.985)}
-  .btn--primary:active{transform:scale(.985)}
-}
+   a transform does not touch layout, so it cannot cost a frame.
+
+   SUPERSEDED BY M07/M11 — the rules that were here scaled .btn with the
+   `transform` property while M07 later scaled it again with the independent
+   `scale` property. Both applied, so a coarse pointer compressed a button to
+   .985 x .985 = .970 — twice the intended depth, and only in the sections
+   where a reveal rule did not happen to pin `transform:none`. One press, one
+   property: see M11-2. */
 
 /* -- M02·8 · ENTRANCE (§22/§36) --------------------------------------------
-   Label, headline, lead, action, photograph — in reading order, 90ms apart,
-   the last of them starting at 270ms. The steps delay only the fade; nothing
+   Label, headline, lead, action, photograph — in reading order, one --stagger
+   apart (M11 §26 took that step from 90ms to 40ms). The steps delay only the fade; nothing
    is ever made unclickable, so the primary action is live from first paint.
    Under prefers-reduced-motion the global rule already clears every delay
    and shows the hero immediately. */
 .js .hero__eyebrow[data-reveal]{transition-delay:0ms}
-.js .hero__title[data-reveal]{transition-delay:90ms}
-.js .hero__lead[data-reveal]{transition-delay:180ms}
-.js .hero__actions[data-reveal]{transition-delay:270ms}
+.js .hero__title[data-reveal]{transition-delay:calc(var(--stagger) * 1)}
+.js .hero__lead[data-reveal]{transition-delay:calc(var(--stagger) * 2)}
+/* M11 §40 — the primary CTA is the first thing on the priority list; it was
+   the last thing to arrive, 700ms in. Now 380ms, ladder intact. */
+.js .hero__actions[data-reveal]{transition-delay:calc(var(--stagger) * 3)}
 
 
 /* ==========================================================================
@@ -2515,8 +2549,10 @@ html:not(.js) .hww__path{display:none}
    separate animatable property that composites the same way, so the two never
    collide. */
 .about__profile,.about__profile[data-reveal]{
-  transition:opacity var(--dur-slow) var(--ease-entrance),
-    transform var(--dur-slow) var(--ease-entrance),
+  /* M11 §33 — opacity and transform were --dur-slow; with its step delay this
+     was the slowest arrival on the page at 580ms. --dur-normal like the rest. */
+  transition:opacity var(--dur-normal) var(--ease-entrance),
+    transform var(--dur-normal) var(--ease-entrance),
     border-color var(--dur-normal) var(--ease-smooth),
     background var(--dur-normal) var(--ease-smooth),
     box-shadow var(--dur-fast) var(--ease-standard),
@@ -2619,9 +2655,10 @@ html:not(.js) .hww__path{display:none}
    global reduced-motion rule clears the reveal, and this clears with it. */
 @media(max-width:1023px) and (prefers-reduced-motion:no-preference){
   .js .why__media[data-reveal]{scale:.985;
-    transition:opacity var(--dur-slow) var(--ease-entrance),
-               transform var(--dur-slow) var(--ease-entrance),
-               scale var(--dur-slow) var(--ease-entrance)}
+    /* M11 §33 — one duration for every reveal on the page. */
+    transition:opacity var(--dur-normal) var(--ease-entrance),
+               transform var(--dur-normal) var(--ease-entrance),
+               scale var(--dur-normal) var(--ease-entrance)}
   .js .why__media[data-reveal].is-inview{scale:1}
 }
 
@@ -2701,10 +2738,10 @@ html:not(.js) .hww__path{display:none}
                scale var(--dur-fast) var(--ease-standard)}
   .js .service[data-reveal].is-inview > *{opacity:1;transform:none}
   .js .service[data-reveal] .service__media{transition-delay:0ms}
-  .js .service[data-reveal] .service__head {transition-delay:60ms}
-  .js .service[data-reveal] .service__title{transition-delay:120ms}
-  .js .service[data-reveal] .service__desc {transition-delay:180ms}
-  .js .service[data-reveal] .service__cta  {transition-delay:240ms}
+  .js .service[data-reveal] .service__head {transition-delay:calc(var(--stagger) * 1)}
+  .js .service[data-reveal] .service__title{transition-delay:calc(var(--stagger) * 2)}
+  .js .service[data-reveal] .service__desc {transition-delay:calc(var(--stagger) * 3)}
+  .js .service[data-reveal] .service__cta  {transition-delay:calc(var(--stagger) * 4)}
 
   /* -- M05·5 · ROOM AROUND THE INTRODUCTION (§29/§34) ---------------------- */
   .services__showcase{margin-block-start:clamp(2rem,7vw,3rem)}
@@ -2757,7 +2794,7 @@ html:not(.js) .hww__path{display:none}
 .btn,.icon-btn,.menu-trigger,.about__profile{
   transition:var(--transition-control),scale var(--dur-fast) var(--ease-standard)}
 .btn:active,.icon-btn:active,.menu-trigger:active,.about__profile:active{scale:.985}
-.btn--primary:hover{transform:none}       /* the lift moves to the shadow alone */
+@media(hover:hover){.btn--primary:hover{transform:none}}       /* the lift moves to the shadow alone */
 .btn--primary:active{box-shadow:none}
 @media(prefers-reduced-motion:reduce){
   .btn:active,.icon-btn:active,.menu-trigger:active,.about__profile:active{scale:1}
@@ -2793,7 +2830,9 @@ html:not(.js) .hww__path{display:none}
    is 8.5:1 at any size, and the target floor now applies at every width
    rather than only below 1024. */
 .contact-info__value a{color:var(--color-secondary);text-underline-offset:3px}
-.contact-info__value a:hover{color:var(--color-primary)}
+/* M11 §36 — 4.35:1 on the card ground. The rest colour is already navy, so
+   the hover steps darker rather than lighter, like the primary button. */
+@media(hover:hover){.contact-info__value a:hover{color:var(--interactive-active)}}
 @media(min-width:1024px){
   .contact-info__value a{display:inline-flex;align-items:center;min-height:24px}
 }
@@ -2946,6 +2985,94 @@ html:not(.js) .hww__path{display:none}
 .why__num{color:var(--text-secondary)}
 .why__247{color:var(--color-secondary)}
 .contact__aside-tag{color:var(--color-secondary)}
+
+
+/* ==========================================================================
+   STAGE M11 · MICRO-INTERACTIONS & FEEDBACK
+   Not more animation — less, and each piece of it doing a job. The audit that
+   produced this block forced :active and :hover through CDP one element at a
+   time, so hover and press could be told apart, and waited for each transition
+   to settle before reading it. (Reading on the first frame reports every
+   value's start, not its end; that mistake made the first pass say the press
+   scale was 1 everywhere.) Four fixes are in place above, at their cause; what
+   is genuinely new is here.
+   ========================================================================== */
+
+/* -- M11·1 · ONE PRESS, ONE PROPERTY (§05/§41) ------------------------------
+   Handled above by retiring M02·7. Recorded here because the symptom was
+   invisible in the CSS and only showed up under measurement: .btn compressed
+   to .970 in the hero, why-us and contact, but to .985 in services and the
+   header — the same button at two depths, because the services reveal rule
+   pins `transform:none` and so happened to cancel one of the two systems.
+   `scale` is the survivor: it is an independent property, so it can never
+   collide with a reveal transform the way `transform:scale()` did. */
+
+/* -- M11·2 · A PRESS THAT ANSWERS AT PRESS SPEED (§33/§34) ------------------
+   Measured on every control: `scale` answered in 150ms while the surface under
+   it — background, colour, border — took 260ms, and .about__profile's took
+   420ms and had not finished after 420. So the button moved, then caught up
+   with itself. §33 puts a touch response at 120-180ms.
+   Only the duration of the pressed state changes. The return to default is
+   still the base transition, which is what §06 asks for: quick in, smooth out.
+   --ease-smooth is the file's existing ease-out; no curve is added. */
+.btn:active,.icon-btn:active,.menu-trigger:active,.about__profile:active,
+.contact__phone:active,.site-footer a:active,.skip-link:active,
+.site-header__logo:active,.contact-info__value a:active{
+  transition-duration:var(--dur-fast);
+  transition-timing-function:var(--ease-smooth)}
+/* The services CTA needed its own line at matching weight. `.js .service
+   [data-reveal] > *` is (0,3,0) and sets the whole transition shorthand, so it
+   outranks `.btn:active` — the same specificity trap this project has now hit
+   three times (M03 on .about__profile, M05 on .service__cta, and here). Its
+   press was running at 260ms on the entrance curve while every other control
+   answered in 150 on the ease-out. Duration and curve only; naming the
+   shorthand here is what caused the trap in the first place. */
+.js .service[data-reveal] > .service__cta:active{
+  transition-duration:var(--dur-fast);
+  transition-timing-function:var(--ease-smooth)}
+
+/* -- M11·3 · THREE CONTROLS ANSWERED A PRESS WITH NOTHING (§20/§31) ---------
+   The skip link, the header logo and the website link in the contact card
+   matched no :active rule at all — confirmed by asking the engine for the
+   rules it had matched, not by reading the stylesheet. The logo is an anchor
+   to #top, so it navigates and §31 says it gets a pressed state; it gets the
+   same 1.5% every other control uses and nothing decorative. */
+.skip-link:active,.site-header__logo:active,.contact-info__value a:active{scale:.985}
+.contact-info__value a:active{color:var(--interactive-active)}
+
+/* -- M11·3b · THE INVERSE BUTTON HAD A HOVER AND NO PRESS (§06/§40) --------
+   .btn--on-inverse is the primary action of the contact invitation. It
+   answered a mouse and not a thumb: a :hover that lightened to sky, and no
+   :active at all. The hover is guarded now — like every other one — and the
+   press steps one further down the same light-blue ladder, to --border-strong.
+   Navy ink on it measures 5.71:1. */
+.btn--on-inverse:active,.contact__invite .btn--on-inverse:active{
+  background:var(--border-strong)}
+
+/* -- M11·4 · THE DIRECTIONAL ICON HAD NO TOUCH RESPONSE (§07) --------------
+   «تعرف على المزيد →» nudged its arrow on hover only, so on a phone — where
+   there is no hover — the icon never moved. Same distance, same direction as
+   the hover the section already shipped: toward inline-end in RTL. */
+.service__cta:active svg,.link-arrow:active svg{transform:translateX(-3px)}
+.service__cta svg{transition:transform var(--dur-fast) var(--ease-smooth)}
+
+/* -- M11·5 · OUTLINED CONTROLS HAD NO STROKE FEEDBACK (§29) ----------------
+   The secondary button changed its fill on press but not its edge, so the
+   component whose identity IS its outline was the one that did not answer
+   with it. It steps from the primary blue to the navy already beside it —
+   more defined, no new colour, and it stays above the 3:1 that 1.4.11 asks
+   of a control's identifying boundary. */
+.btn--secondary:active,.about__profile:active{border-color:var(--color-secondary)}
+.contact__invite .btn--secondary:active{border-color:rgba(255,255,255,.82)}
+
+/* -- M11·6 · REDUCED MOTION (§35) ------------------------------------------
+   The global reduced-motion rule already collapses every duration, so state
+   changes survive as instant changes — which is what §35 asks to keep. What
+   has to go is the movement: the two new press scales and the icon nudge. */
+@media(prefers-reduced-motion:reduce){
+  .skip-link:active,.site-header__logo:active,.contact-info__value a:active{scale:1}
+  .service__cta:active svg,.link-arrow:active svg{transform:none}
+}
 
 </style>
   <!-- STAGE 02 — marks the document script-capable BEFORE first paint, so the
@@ -4281,12 +4408,25 @@ html:not(.js) .hww__path{display:none}
         items.forEach(function (el) { el.classList.add("is-inview"); });
         return;
       }
+      /* STAGE M11 §26/§41 — this was a fourth stagger ladder. It ran at 70ms a
+         step, uncapped, and it wrote an INLINE transition-delay, so it silently
+         beat all three CSS ladders: the hero's fifth element was arriving at
+         280ms while the stylesheet said 120. It now reads the same --stagger
+         token the CSS uses, stops climbing after four steps, and — the part
+         that matters beyond the entrance — clears the inline delay once the
+         element has arrived. An inline delay is never scoped to the entrance:
+         it stays on the element, so a [data-reveal] that is also interactive
+         (.about__profile is both) would have carried it into its press. */
+      var step = parseFloat(getComputedStyle(doc.documentElement)
+                   .getPropertyValue("--stagger")) || 40;
       var i = 0;
       items.forEach(function (el) {
         var rect = el.getBoundingClientRect();
         if (rect.top < window.innerHeight * 0.92) {           // above the fold → stagger in now
-          el.style.transitionDelay = (i++ * 70) + "ms";
+          var d = Math.min(i++, 4) * step;
+          el.style.transitionDelay = d + "ms";
           window.requestAnimationFrame(function () { el.classList.add("is-inview"); });
+          window.setTimeout(function () { el.style.transitionDelay = ""; }, d + 600);
         }
       });
       var ro = new IntersectionObserver(function (entries, o) {

@@ -1603,3 +1603,127 @@ desktop. This does not need the image's dimensions — the ratio-agnostic fix
 (a reserved height plus `object-fit:contain`) is proven in «ما يميزنا» — but
 it puts a mist band into a desktop composition you approved from a screenshot,
 and M10 is a mobile stage. It stays offered, not taken.
+
+## Stage M11 — micro-interactions and feedback
+
+Feedback is the one layer that cannot be audited by reading the stylesheet.
+What an element does when you touch it is decided by the cascade, by media
+queries, by inline styles written by script, and by whichever of several press
+systems happens to win — none of which is visible in the source. So this stage
+asked the browser instead: `CSS.forcePseudoState` over CDP, one element at a
+time, `:active` and `:hover` forced *separately*, and every reading taken after
+the transition had settled. 71 assertions in `ux/verify-interactions.js`,
+across 360/375/390/412/430. Run against the file as it stood before this stage
+it reports **19/71**.
+
+### The one that mattered
+
+**The primary CTA label was invisible.** Not low-contrast — invisible, at
+exactly 1:1. `a:hover{color:var(--interactive-hover)}` was the only ungated
+`:hover` in a file where every other one sits inside `@media(hover:hover)`. On
+`.btn--primary`, whose own hover background is *that same token*, the label was
+painted the identical value as the surface behind it. The harness reports it as
+`home/btn hover 1 (needs 4.5)`; a screenshot of the button in that state is a
+blue rectangle with nothing in it.
+
+This was never mobile-only — it is what a desktop user saw whenever the pointer
+was over the button they were about to click. On a phone it is worse, because
+`:hover` sticks after a tap: touch the hero CTA, and the label stays gone.
+
+Three more states failed the same check once it existed: the skip link at
+1.25:1, the contact CTA at 2.88, the service CTA at 3.32.
+
+### What the measurements found beyond that
+
+**Two press systems, stacked.** M02 scaled `.btn` with `transform`; M07 later
+scaled it again with the independent `scale` property. Both applied. A coarse
+pointer compressed a button to `.985 × .985 = .970` — twice the intended depth
+— *except* in services, where a reveal rule pins `transform:none` and happened
+to cancel one of the two. The same button at two depths depending on which
+section it was in. M02's rule is retired; `scale` survives, because it cannot
+collide with a reveal transform the way `transform:scale()` did.
+
+**Four stagger ladders, and the one that won was in JavaScript.** The CSS had
+three (global 90/180/270/380, hero 0/90/180/270, services 0/60/120/180). The
+script had a fourth, uncapped at 70ms a step, written as an **inline**
+`transition-delay` — so it silently beat all three: the stylesheet said the
+hero CTA arrived at 120ms; it actually arrived at 280. There is now one
+`--stagger` token, one ladder, capped at four steps.
+
+That inline delay was also never cleared. An inline `transition-delay` is not
+scoped to the entrance — it stays on the element and rides into *every* later
+transition, including its press. `.about__profile` is both a revealed element
+and a control. The script clears it once the element has arrived.
+
+**The press was slower than the movement.** `scale` answered in 150ms while the
+surface under it — background, colour, border — took 260, and
+`.about__profile`'s took 420 and had not finished after 420. The button moved,
+then caught up with itself. Only the *pressed* state's duration changed, so the
+return is still the base transition: quick in, smooth out. Every control now
+answers in 150ms on one ease-out curve.
+
+**Three controls answered a press with nothing at all** — the skip link, the
+header logo and the website link in the contact card. Confirmed by asking the
+engine which rules it had matched, not by reading the stylesheet.
+
+**Two more gaps:** `.btn--on-inverse`, the primary action of the contact
+invitation, had a `:hover` and no `:active` — it answered a mouse and not a
+thumb. And the directional arrow in «تعرف على المزيد» nudged on hover only, so
+on a phone the icon never moved.
+
+**A hover that cost contrast.** `.btn--primary:hover` *lightened* the button,
+to `--blue-bright`, under a white label: 3.70:1, below AA, in the state a
+desktop user is in just before clicking. It darkens now, one step to the navy
+already in the palette. Hover and press sit on the same ladder instead of
+opposite sides of the rest colour: `#4975BA → #2C4C82 → #22406F`.
+
+**And 25 ungated `:hover` rules.** All of them now follow the file's own
+convention. One needed care: `.site-nav__link.is-active::after,
+.site-nav__link.is-active:hover::after` mixes a *state* with a hover, and
+gating the whole rule would have taken the active nav indicator away from every
+touch device. Only the hover half is gated.
+
+### The arrival budget
+
+| | before | after |
+|---|---|---|
+| slowest element readable | 800ms | 420ms |
+| hero CTA (§40 priority 1) | 700ms | 420ms |
+| reveal duration | 420ms | 260ms |
+| stagger step | 70/60/90ms | 40ms, one token |
+
+### Two mistakes in my own measuring
+
+**I read the computed style on the transition's first frame.** That reports
+every value's *start*, not its end — so the first pass reported the press scale
+as `1` everywhere, i.e. "no press movement on the entire site". There is no
+such bug; there was a missing `await`. Every reading in the harness now settles
+first.
+
+**I checked label contrast on an element that renders no label.** The header
+logo is an anchor around an `<img>`. It has a computed `color` and paints no
+text, and the check failed it against a label that does not exist.
+
+### The specificity trap, for the third time
+
+`.js .service[data-reveal] > *` is (0,3,0) and sets the whole `transition`
+shorthand, so it outranks `.btn:active` at (0,2,0). The services CTA was
+pressing at 260ms on the entrance curve while every other control answered in
+150 on the ease-out. This project has now hit the same trap in M03
+(`.about__profile`), M05 (`.service__cta`) and here. The fix is always the
+same: name the individual properties, never the shorthand.
+
+### What the brief asked for that does not exist here
+
+There are **no forms, no accordions, no dropdowns and no social icons** in this
+project — verified, not assumed. So §16 (form inputs), §17 (validation), §18
+(success), §21 (social icons), §22 (accordions) and §23 (dropdowns) have
+nothing to act on. §19 (loading states) is the near-miss: `.btn.is-loading`
+exists as a capability from M07, with the geometry preserved exactly as §19
+asks, but there is no asynchronous action anywhere on the site to trigger it.
+It stays ready and unused.
+
+§30 asks not to add image zoom interactions. One already exists —
+`.service__media img` scales 1.02 on hover — but it is hover-gated and so never
+runs on a phone. Left alone: removing it is a desktop change, and this is a
+mobile stage.
