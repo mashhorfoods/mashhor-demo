@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#4975BA">
 
   <title>عون الدرب للنقل المتخصص — نُعين ونُعاون</title>
-  <meta name="description" content="شركة عون الدرب للنقل المتخصص — نقل آمن ومجهّز لكبار السن وذوي الإعاقة والمرضى، بكوادر مدرّبة في بيئة تحترم الإنسانية.">
+  <meta name="description" content="شركة عون الدرب للنقل المتخصص — نقل آمن ومجهّز لكبار السن وذوي الاحتياجات الخاصة والمرضى، بكوادر مدرّبة في بيئة تحترم الإنسانية.">
   <link rel="canonical" href="https://aunaldrb.com/">
 
   <!-- Open Graph / social sharing (approved content only) -->
@@ -15,11 +15,11 @@
   <meta property="og:locale" content="ar_AR">
   <meta property="og:url" content="https://aunaldrb.com/">
   <meta property="og:title" content="عون الدرب للنقل المتخصص — نُعين ونُعاون">
-  <meta property="og:description" content="نقل متخصص آمن ومجهّز لكبار السن وذوي الإعاقة والمرضى، بكوادر مدرّبة في بيئة تحترم الإنسانية.">
+  <meta property="og:description" content="نقل متخصص آمن ومجهّز لكبار السن وذوي الاحتياجات الخاصة والمرضى، بكوادر مدرّبة في بيئة تحترم الإنسانية.">
   <meta property="og:image" content="https://aunaldrb.com/brand/aun-aldrb-logo.png">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="عون الدرب للنقل المتخصص — نُعين ونُعاون">
-  <meta name="twitter:description" content="نقل متخصص آمن ومجهّز لكبار السن وذوي الإعاقة والمرضى، بكوادر مدرّبة في بيئة تحترم الإنسانية.">
+  <meta name="twitter:description" content="نقل متخصص آمن ومجهّز لكبار السن وذوي الاحتياجات الخاصة والمرضى، بكوادر مدرّبة في بيئة تحترم الإنسانية.">
   <meta name="twitter:image" content="https://aunaldrb.com/brand/aun-aldrb-logo.png">
 
   <!-- FONTS — approved pairing (IBM Plex Sans Arabic + Cairo) -->
@@ -2320,6 +2320,40 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 .js .hero__lead[data-reveal]{transition-delay:180ms}
 .js .hero__actions[data-reveal]{transition-delay:270ms}
 
+
+/* ==========================================================================
+   TERMINOLOGY · «ذوي الاحتياجات الخاصة»
+   The approved term is 21 characters where the one it replaces was 11, and
+   the hero's audience cues are a three-up grid sized for a short label. It
+   measured 3 lines at 1024 and 2 at 1440 while its two neighbours stayed at
+   1, so the three descriptions started at three different heights — 401 /
+   445 / 401 at 1024. Two corrections, both to the container, none to the
+   term. Nothing else on the page needed one: no text overflows its box and
+   no width gains a horizontal scroll.
+   ========================================================================== */
+
+/* 1024-1279 · the panel is half the viewport here, so each cue gets about
+   98px of text width — not enough for the term on any number of lines that
+   looks deliberate. The cues take the row treatment the phone tier already
+   uses: icon beside label, three stacked rows across the full panel width.
+   Same card, same icon, same words, and it is 30px SHORTER than the grid. */
+@media(min-width:1024px) and (max-width:1279px){
+  .hero__aud{grid-template-columns:1fr;gap:var(--sp-8)}
+  .hero__aud-card{display:grid;grid-template-columns:auto minmax(0,1fr);
+    column-gap:var(--sp-16);row-gap:2px;align-items:center;text-align:start;
+    padding:var(--sp-12) var(--sp-16)}
+  .hero__aud-icon{grid-row:1 / span 2;margin-block-end:0}
+  .hero__aud-icon svg{width:24px;height:24px}
+}
+
+/* 1280+ · the grid has room, but the term still runs to two lines while
+   «كبار السن» and «المرضى» run to one. Reserving two lines of label on all
+   three cards puts every description back on the same baseline — the same
+   idiom the service cards use for the same reason. */
+@media(min-width:1280px){
+  .hero__aud-title{min-height:2.6em;display:flex;align-items:center}
+}
+
 </style>
   <!-- STAGE 02 — marks the document script-capable BEFORE first paint, so the
        reveal system can hide content without risking a blank page if JS fails. -->
@@ -2431,7 +2465,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
                 </li>
                 <li class="hero__aud-card">
                   <span class="hero__aud-icon" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="14" cy="4.6" r="2"/><path d="M14 7.6v4.6H9.4"/><path d="M9.4 12.2 12 16.6"/><circle cx="10.6" cy="16.4" r="4.8"/><path d="M14.6 15h2.4l1.5 3.5"/></svg></span>
-                  <span class="hero__aud-title">ذوو الإعاقة</span>
+                  <span class="hero__aud-title">ذوو الاحتياجات الخاصة</span>
                   <span class="hero__aud-desc">نقل آمن ومريح يدعم استقلاليتهم</span>
                 </li>
                 <li class="hero__aud-card">
@@ -2496,7 +2530,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
           </div>
 
           <!-- opening statement (approved copy, verbatim) -->
-          <p class="about__lead" data-reveal>شركة عون الدرب للنقل المتخصص شركة سعودية متخصصة في تقديم خدمات النقل لكبار السن وذوي الإعاقة والمرضى الذين يحتاجون إلى وسائل نقل مجهزة ومساعدة خاصة.</p>
+          <p class="about__lead" data-reveal>شركة عون الدرب للنقل المتخصص شركة سعودية متخصصة في تقديم خدمات النقل لكبار السن وذوي الاحتياجات الخاصة والمرضى الذين يحتاجون إلى وسائل نقل مجهزة ومساعدة خاصة.</p>
 
           <!-- media: art-directed brand scene (swappable for a <picture> photo) -->
           <figure class="about__media" data-reveal>
@@ -2614,7 +2648,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
               </span>
               <div>
                 <div class="why__head"><h3 class="why__item-title">طاقم مدرب ومحترف</h3></div>
-                <p class="why__desc">أفراد طاقم مؤهلون ومدربون للتعامل مع كبار السن وذوي الإعاقة واحتياجاتهم الخاصة أثناء عملية النقل.</p>
+                <p class="why__desc">أفراد طاقم مؤهلون ومدربون للتعامل مع كبار السن وذوي الاحتياجات الخاصة أثناء عملية النقل.</p>
               </div>
             </li>
 
@@ -2692,7 +2726,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
           <div class="services__intro">
             <p class="services__label" data-reveal>خدماتنا</p>
             <h2 id="services-h" class="services__title" data-reveal>خدمات نقل متخصصة <span>مصممة لاحتياجات المستفيد</span></h2>
-            <p class="services__intro-lead" data-reveal>تقدّم شركة عون الدرب مجموعة متكاملة من خدمات النقل المتخصص لتلبية احتياجات كبار السن وذوي الإعاقة والمرضى الذين يحتاجون إلى وسائل نقل مجهزة ومساعدة خاصة.</p>
+            <p class="services__intro-lead" data-reveal>تقدّم شركة عون الدرب مجموعة متكاملة من خدمات النقل المتخصص لكبار السن وذوي الاحتياجات الخاصة والمرضى الذين يحتاجون إلى وسائل نقل مجهزة ومساعدة خاصة.</p>
           </div>
 
           <!-- §02/§05 — the pinned showcase. The stage holds still while the
@@ -2785,9 +2819,9 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
               <figure class="service__media">
                 <img src="https://i.ibb.co/fGNp77dQ/05.webp"
                      loading="lazy" decoding="async"
-                     alt="رحلة نقل يومية لكبار السن وذوي الإعاقة بمركبة عون الدرب.">
+                     alt="رحلة نقل يومية لكبار السن وذوي الاحتياجات الخاصة بمركبة عون الدرب.">
               </figure>
-              <p class="service__desc">خدمات نقل يومية لكبار السن وذوي الإعاقة، بما يوفر لهم تنقلًا آمنًا ومريحًا.</p>
+              <p class="service__desc">خدمات نقل يومية لكبار السن وذوي الاحتياجات الخاصة، بما يوفر لهم تنقلًا آمنًا ومريحًا.</p>
               <a class="btn btn--secondary service__cta" href="#contact">
                 تواصل معنا
                 <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H6"/><path d="M11.5 6.5 6 12l5.5 5.5"/></svg>

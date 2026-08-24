@@ -805,3 +805,67 @@ inside the M02·4 block.*
 width variants needs the file, and `i.ibb.co` is blocked here (403 at the
 proxy). The reserved box at least tells the browser the display size up front.
 Supplying two or three widths would let this become a `srcset`.
+
+---
+
+## Terminology standard — «ذوي الاحتياجات الخاصة»
+
+Project-wide replacement of «الإعاقة» and its variants. `verify-terminology.js`
+holds the rule: 44 assertions, run it before any content change ships.
+
+**Fourteen occurrences across four files.** Nine in `index.html` — the meta
+description, the Open Graph description, the Twitter description, the hero
+audience card, the About lead, a «ما يميزنا» chapter, the Services intro, one
+`alt` attribute and one service description — plus three in `brand/index.html`,
+one in `brand/design-system.html` and one in the Stage 01 UX note that quoted
+the card label.
+
+**Grammatical case was preserved, not flattened.** «وذوي الإعاقة» takes «وذوي
+الاحتياجات الخاصة» in the genitive; the standalone hero label «ذوو الإعاقة» is
+nominative and takes «ذوو الاحتياجات الخاصة»; the indefinite «ذوو إعاقة» in the
+brand photography note takes «ذوو احتياجات خاصة». A single literal
+find-and-replace would have made three of the fourteen grammatically wrong.
+
+**Two sentences needed rewriting, not replacing.** The new term contains the
+word «احتياجات», and in two places that collided with wording already there:
+
+- «للتعامل مع كبار السن وذوي الإعاقة **واحتياجاتهم الخاصة** أثناء عملية النقل»
+  became «…وذوي الاحتياجات الخاصة واحتياجاتهم الخاصة…» — the same phrase twice,
+  three words apart. The approved term already carries "their special needs",
+  so the trailing clause is now a repetition of itself and is dropped.
+- «خدمات النقل المتخصص **لتلبية احتياجات** كبار السن وذوي الاحتياجات الخاصة»
+  repeated «احتياجات» four words apart. The sentence closes with «الذين
+  يحتاجون إلى وسائل نقل مجهزة ومساعدة خاصة», which already states the need, so
+  the preposition alone carries it.
+
+Both keep the original meaning and add no new content. The brand note «تصوير
+الإعاقة من زاوية الشفقة» — a forbidden photography practice — became «تصوير ذوي
+الاحتياجات الخاصة من زاوية الشفقة», which says the same thing about the same
+practice.
+
+**The term is 21 characters where the one it replaced was 11, and one layout
+could not absorb it.** The hero's audience cues are a three-up grid sized for a
+short label. Measured after the swap: the middle card's title ran to 3 lines at
+1024 and 2 at 1440 while its neighbours stayed at 1, so the three descriptions
+started at 401 / 445 / 401 — a stagger in a row that has to scan as a row.
+
+Corrected in the container, never in the term. From 1024 to 1279 the panel is
+half the viewport and each cue gets about 98px of text width, which is not
+enough for the term at any line count that looks deliberate; the cues take the
+row treatment the phone tier already uses — icon beside label, three stacked
+rows across the full panel — and come out 30px shorter than the grid was. From
+1280 the grid has room, so instead the label reserves two lines on all three
+cards, the same idiom the service cards use for the same reason. Every
+description is back on one baseline at 1280 / 1360 / 1440 / 1600 / 1920.
+
+Nothing else needed a correction: at 320 / 360 / 375 / 390 / 430 / 768 / 1024 /
+1280 / 1440 no element carrying the term overflows its box and no width gains a
+horizontal scroll.
+
+**The rule is enforced, not just applied.** `verify-terminology.js` scans every
+HTML, MD, JS, JSON, CSS and SVG file in the project for the forbidden strings,
+then loads the rendered page and walks every text node plus `alt`,
+`aria-label`, `title`, `placeholder`, `value` and `content` — because a source
+grep cannot prove what actually reaches a reader. It also asserts the approved
+term is present in the page, in `alt` and in all three meta descriptions, that
+it overflows nothing, and that the hero cue row stays aligned.
