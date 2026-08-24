@@ -877,7 +877,8 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
   .about__lead {grid-column:1;grid-row:2}
   .about__body {grid-column:1;grid-row:3}
   .about__media{grid-column:2;grid-row:1 / span 3;align-self:center}
-  .about__facts{grid-column:1 / -1;grid-row:4;margin-block-start:clamp(1rem,2vw,1.75rem)}
+  .about__profile{grid-column:1;grid-row:4}
+  .about__facts{grid-column:1 / -1;grid-row:5;margin-block-start:clamp(1rem,2vw,1.75rem)}
 }
 
 /* -- 01 · label + heading -------------------------------------------------- */
@@ -915,6 +916,32 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 
 /* -- 04 · facts (§07/§14) --------------------------------------------------- */
 /* Quick-scan proof, label only — no invented descriptions, no KPI numbers. */
+/* -- the company-profile gateway -------------------------------------------
+   A doorway, not a banner: it sits in the text column at the end of the
+   introduction, bounded and quiet, so it can never read as the page's
+   conversion action. Label at the inline start, arrow at the inline end, the
+   distance between them doing the work of saying "this leads somewhere". */
+.about__profile{align-self:start;display:inline-flex;align-items:center;justify-content:space-between;
+  gap:var(--sp-24);inline-size:min(100%,22rem);min-height:var(--control-lg);
+  padding-block:var(--sp-12);padding-inline:var(--sp-20);
+  border:1px solid var(--aun-sky);border-radius:var(--radius-button);
+  background:var(--surface);color:var(--color-primary);
+  font-family:var(--font-heading);font-weight:var(--fw-semibold);font-size:var(--fs-button);
+  line-height:1;text-decoration:none;
+  transition:border-color var(--dur-normal) var(--ease-smooth),background var(--dur-normal) var(--ease-smooth)}
+.about__profile svg{width:20px;height:20px;flex:0 0 auto;
+  transition:transform var(--dur-normal) var(--ease-smooth)}
+@media(hover:hover){
+  .about__profile:hover{border-color:var(--color-primary);background:var(--aun-primary-subtle)}
+  .about__profile:hover svg{transform:translateX(-4px)}
+}
+.about__profile:focus-visible{outline:none;box-shadow:var(--shadow-focus);border-color:var(--color-primary)}
+@media(prefers-reduced-motion:reduce){
+  .about__profile svg{transition:none}
+  .about__profile:hover svg{transform:none}
+}
+@media(max-width:767px){.about__profile{inline-size:100%}}
+
 .about__facts{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(4,1fr);
   background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);
   box-shadow:var(--shadow-sm);overflow:hidden}
@@ -1450,8 +1477,19 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
    ========================================================================== */
 .contact__lead{color:var(--text-secondary);max-width:var(--measure)}
 
-.contact__grid{display:grid;gap:clamp(1.5rem,4vw,2.5rem);margin-block-start:clamp(2.5rem,5vw,3.5rem)}
-@media(min-width:900px){.contact__grid{grid-template-columns:minmax(0,1.15fr) minmax(0,0.85fr);align-items:stretch}}
+/* STAGE 12 §05/§15 — MESSAGE -> ACTION side by side, DETAILS across the bottom.
+   The message sits at the inline start (the right, in this RTL document) so the
+   reading order is message then action, and the route runs from it toward the
+   card rather than away from it. */
+.contact__grid{display:grid;gap:clamp(1.5rem,4vw,2.5rem);margin-block-start:clamp(1.5rem,3.5vw,2.25rem)}
+@media(min-width:900px){.contact__grid{grid-template-columns:minmax(0,0.92fr) minmax(0,1.08fr);align-items:stretch}}
+.contact__message{position:relative;display:flex;flex-direction:column;justify-content:center;gap:var(--sp-24)}
+/* §21 — the journey terminates here, at the action: a dashed run ending in a
+   solid node on the side the card sits on. */
+.contact__message-route{position:relative;display:block;inline-size:100%;
+  block-size:clamp(4rem,9vw,7rem);color:var(--aun-sky);pointer-events:none}
+.contact__message-route svg{display:block;width:100%;height:100%;overflow:visible}
+@media(max-width:899px){.contact__message-route{block-size:3.5rem}}
 
 /* primary — actions card */
 .contact__card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
@@ -1463,14 +1501,29 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
   margin-block-start:var(--sp-4);padding-block:var(--sp-8);transition:color var(--dur-normal) var(--ease-smooth)}
 .contact__phone:hover{color:var(--color-primary)}
 .contact__phone:focus-visible{outline:none;box-shadow:var(--shadow-focus);border-radius:var(--radius-xs)}
+/* §17/§19 — the two actions share a row when the card is wide enough and take
+   a row each when it is not, instead of wrapping ragged: at 1024 they used to
+   break with one button at 279px and the other at 175px. flex-basis is reset to
+   auto in the column block, because a basis on a column flex item is a HEIGHT. */
 .contact__actions{display:flex;flex-wrap:wrap;gap:var(--sp-12)}
-.contact__actions .btn{gap:var(--sp-8)}
+.contact__actions .btn{flex:1 1 15rem;gap:var(--sp-8)}
+@media(max-width:767px){
+  .contact__actions{flex-direction:column}
+  .contact__actions .btn{flex:0 0 auto;width:100%}
+}
 .contact__actions .btn svg{width:20px;height:20px;flex:0 0 auto}
 
-.contact__meta{display:flex;flex-direction:column;gap:var(--sp-20);
-  border-block-start:1px solid var(--border);padding-block-start:var(--sp-24)}
+/* §12/§14/§20 — supporting information, not three more cards: no surface, no
+   shadow, one hairline between them, and enough room to read on a phone. */
+.contact__info{display:grid;gap:clamp(1.25rem,3vw,2rem);
+  margin-block-start:clamp(2rem,4.5vw,3rem);padding-block-start:clamp(1.5rem,3vw,2rem);
+  border-block-start:1px solid var(--border)}
+@media(min-width:768px){.contact__info{grid-template-columns:repeat(3,minmax(0,1fr));
+  column-gap:clamp(1.5rem,3.5vw,3rem)}}
 .contact-info{display:flex;align-items:flex-start;gap:var(--sp-16)}
-.contact-info + .contact-info{border-block-start:1px solid var(--border);padding-block-start:var(--sp-20)}
+@media(max-width:767px){
+  .contact-info + .contact-info{border-block-start:1px solid var(--border);padding-block-start:clamp(1.25rem,4vw,1.75rem)}
+}
 .contact-info__icon{width:44px;height:44px;flex:0 0 auto;border-radius:var(--radius-circle);display:grid;
   place-items:center;background:var(--aun-mist);border:1px solid var(--aun-sky);color:var(--color-primary)}
 .contact-info__icon svg{width:24px;height:24px}
@@ -1480,6 +1533,9 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 .contact-info__value a{color:var(--color-primary);text-decoration:none}
 .contact-info__value a:hover{text-decoration:underline}
 .contact__dot{width:8px;height:8px;border-radius:var(--radius-circle);background:var(--color-primary);flex:0 0 auto}
+/* §35 — the section signs off, then the footer. */
+.contact__closing-note{margin-block-start:clamp(2rem,4.5vw,3rem);text-align:center;
+  max-width:38rem;margin-inline:auto;color:var(--text-secondary)}
 
 /* -- STAGE 11 · the final invitation ----------------------------------------
    Not a banner: the destination the journey arrives at (§03). One dominant
@@ -1548,18 +1604,13 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
   .contact__invite-route{block-size:3rem}
 }
 
-/* the trail already carries the eye out of the panel, so the lead sits closer
-   than a bare section gap would put it (§23). */
-.contact__lead{margin-block-start:clamp(1rem,2vw,1.5rem)}
+/* the lead now lives inside the message column; the grid owns the spacing, and
+   the trail from STAGE 11 lands on the grid rather than on a stray paragraph. */
+.contact__lead{margin-block-start:0}
 
-/* secondary — brand aside with route toward the actions */
-.contact__aside{position:relative;display:flex;flex-direction:column;justify-content:center;gap:var(--sp-24);
-  padding:clamp(1rem,3vw,2rem) 0}
-.contact__closing{font-family:var(--font-heading);font-weight:var(--fw-medium);font-size:var(--fs-h3);
-  line-height:var(--lh-snug);color:var(--color-secondary);max-width:22rem}
+/* the closing line keeps its emphasis token; the aside that used to hold it is
+   gone -- STAGE 12 moved the message beside the card and the details below. */
 .contact__aside-tag{font-family:var(--font-heading);font-weight:var(--fw-semibold);color:var(--color-primary)}
-.contact__aside-route{width:min(100%,240px);height:auto;color:var(--aun-border-strong)}
-@media(max-width:899px){.contact__aside-route{display:none}}
 
 /* ==========================================================================
    STAGE 13 · IMAGE SYSTEM (raster photography layer)
@@ -1600,7 +1651,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 @media(max-width:380px){
   .btn--lg{padding-inline:var(--sp-16)}
 }
-.contact__card,.contact__aside{min-width:0}
+.contact__card,.contact__message{min-width:0}
 
 /* ==========================================================================
    STAGE 15 · ACCESSIBILITY AUDIT — targeted corrections (no redesign)
@@ -1946,6 +1997,15 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
               <p>يقع مقر الشركة في مدينة الرياض، وتعمل على تقديم خدمات نقل متخصصة تجمع بين الرعاية، والتجهيز، والاحترافية، بما يسهم في تحسين جودة حياة من نخدمهم.</p>
             </div>
           </div>
+
+          <!-- the doorway to the full company profile: after the introduction,
+               before the trust strip, inside the text column. Opens in a new
+               tab; the destination explains itself, so no extra label. -->
+          <a class="about__profile" href="https://drive.google.com/file/d/1ulB4ayaLj4_VUgka7UG4T3_EZu1C5CUD/view"
+             target="_blank" rel="noopener noreferrer" data-reveal>
+            تعرف على المزيد
+            <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H6"/><path d="M11.5 6.5 6 12l5.5 5.5"/></svg>
+          </a>
 
           <!-- trust signals — surfaced from the approved copy (no new claims) -->
           <ul class="about__facts" data-reveal>
@@ -2444,12 +2504,23 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
             <circle cx="1" cy="57" r="2.5" fill="currentColor"/>
           </svg></span>
 
-          <p class="contact__lead" data-reveal>نحن هنا لخدمتك. تواصل مع فريق عون الدرب لترتيب رحلة نقل متخصصة تناسب احتياجاتك، أو للاستفسار عن خدماتنا والمساعدة المتاحة.</p>
-
           <div class="contact__grid">
 
-            <!-- primary — contact actions card -->
-            <div class="contact__card" id="contact-actions" data-reveal>
+            <!-- §05 MESSAGE — the supporting copy, and the route arriving at
+                 the action beside it. -->
+            <div class="contact__message" data-reveal>
+              <p class="contact__lead">نحن هنا لخدمتك. تواصل مع فريق عون الدرب لترتيب رحلة نقل متخصصة تناسب احتياجاتك، أو للاستفسار عن خدماتنا والمساعدة المتاحة.</p>
+              <span class="contact__message-route" aria-hidden="true">
+                <svg viewBox="0 0 260 100" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+                  <path d="M248 14 C 190 60 140 22 92 58 C 70 74 52 80 30 82" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 12"/>
+                  <circle cx="248" cy="14" r="5" fill="currentColor"/>
+                  <circle cx="26" cy="82" r="7" fill="#4975BA" stroke="#ffffff" stroke-width="3"/>
+                </svg>
+              </span>
+            </div>
+
+            <!-- §07 ACTION — the anchor of the section. -->
+            <div class="contact__card" id="contact-actions" data-reveal data-reveal-step="2">
               <div>
                 <p class="contact__phone-label">الهاتف · واتساب</p>
                 <a class="contact__phone" href="tel:+966535544352" aria-label="اتصل على الرقم ‎+966 53 554 4352">‎+966&nbsp;53&nbsp;554&nbsp;4352</a>
@@ -2465,45 +2536,37 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
                   اتصل بنا
                 </a>
               </div>
-
-              <div class="contact__meta">
-                <div class="contact-info">
-                  <span class="contact-info__icon" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.2 4h3.1l1.5 3.8-2 1.4a11.6 11.6 0 0 0 5.9 5.9l1.4-2 3.8 1.5v3.1a1.9 1.9 0 0 1-2.1 1.9C10.9 18.9 5.1 13.1 4.3 6.1A1.9 1.9 0 0 1 6.2 4Z"/></svg></span>
-                  <div>
-                    <div class="contact-info__label"><span class="contact__dot" aria-hidden="true"></span>خدمة العملاء</div>
-                    <p class="contact-info__value">على مدار 24 ساعة طوال أيام الأسبوع.</p>
-                  </div>
-                </div>
-
-                <div class="contact-info">
-                  <span class="contact-info__icon" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21c4.4-4.7 6.6-8.1 6.6-10.6a6.6 6.6 0 1 0-13.2 0C5.4 12.9 7.6 16.3 12 21Z"/><circle cx="12" cy="10.4" r="2.5"/></svg></span>
-                  <div>
-                    <div class="contact-info__label">العنوان</div>
-                    <p class="contact-info__value">الرياض - شارع ابن كثير<br>حي السليمانية، 12233</p>
-                  </div>
-                </div>
-
-                <div class="contact-info">
-                  <span class="contact-info__icon" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.8"/><path d="M3.2 12h17.6"/><path d="M12 3.2c2.9 3.4 2.9 14.2 0 17.6"/><path d="M12 3.2c-2.9 3.4-2.9 14.2 0 17.6"/></svg></span>
-                  <div>
-                    <div class="contact-info__label">الموقع الإلكتروني</div>
-                    <p class="contact-info__value"><a href="https://aunaldrb.com" target="_blank" rel="noopener">aunaldrb.com</a></p>
-                  </div>
-                </div>
-              </div>
             </div>
 
-            <!-- secondary — brand aside -->
-            <aside class="contact__aside" data-reveal>
-              <span class="contact__aside-route" aria-hidden="true">
-                <svg viewBox="0 0 260 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M20 180 C 90 150 70 70 150 60 C 210 52 230 40 250 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 12"/>
-                  <circle cx="20" cy="180" r="6" fill="#4975BA" stroke="#ffffff" stroke-width="3"/>
-                  <circle cx="250" cy="20" r="6" fill="#4975BA" stroke="#ffffff" stroke-width="3"/>
-                </svg>
-              </span>
-              <p class="contact__closing">في عون الدرب نرافق المستفيد في كل خطوة على الطريق، بأمانٍ ورعايةٍ واحترام. <span class="contact__aside-tag">نُعين ونُعاون.</span></p>
-            </aside>
+          </div>
+
+          <!-- §12 DETAILS — out of the card and across the bottom, in the
+               brief's order: website, location, availability. -->
+          <div class="contact__info">
+            <div class="contact-info" data-reveal>
+              <span class="contact-info__icon" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.8"/><path d="M3.2 12h17.6"/><path d="M12 3.2c2.9 3.4 2.9 14.2 0 17.6"/><path d="M12 3.2c-2.9 3.4-2.9 14.2 0 17.6"/></svg></span>
+              <div>
+                <div class="contact-info__label">الموقع الإلكتروني</div>
+                <p class="contact-info__value"><a href="https://aunaldrb.com" target="_blank" rel="noopener">aunaldrb.com</a></p>
+              </div>
+            </div>
+            <div class="contact-info" data-reveal data-reveal-step="2">
+              <span class="contact-info__icon" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21c4.4-4.7 6.6-8.1 6.6-10.6a6.6 6.6 0 1 0-13.2 0C5.4 12.9 7.6 16.3 12 21Z"/><circle cx="12" cy="10.4" r="2.5"/></svg></span>
+              <div>
+                <div class="contact-info__label">العنوان</div>
+                <p class="contact-info__value">الرياض - شارع ابن كثير<br>حي السليمانية، 12233</p>
+              </div>
+            </div>
+            <div class="contact-info" data-reveal data-reveal-step="3">
+              <span class="contact-info__icon" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.6"/><path d="M12 7.2V12l3.4 2"/></svg></span>
+              <div>
+                <div class="contact-info__label"><span class="contact__dot" aria-hidden="true"></span>خدمة العملاء</div>
+                <p class="contact-info__value">على مدار 24 ساعة طوال أيام الأسبوع.</p>
+              </div>
+            </div>
+          </div>
+
+          <p class="contact__closing-note" data-reveal data-reveal-step="4">في عون الدرب نرافق المستفيد في كل خطوة على الطريق، بأمانٍ ورعايةٍ واحترام. <span class="contact__aside-tag">نُعين ونُعاون.</span></p>
 
           </div>
         </div>

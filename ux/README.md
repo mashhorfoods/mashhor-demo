@@ -284,3 +284,56 @@ contrast (primary 8.53, secondary 8.53, body 4.9), 44px touch targets, the
 approved Arabic unchanged character for character, the h2 still the section
 heading, route and icons aria-hidden, reading measure, stacked full-width
 actions on mobile, no clipping and no horizontal overflow.
+
+## Stage 12 — Contact
+
+The section already carried all of this stage's approved content. What changed
+is where it sits.
+
+**MESSAGE -> ACTION -> DETAILS -> CLOSING.** The three information items used to
+live *inside* the contact card, which made one card carry the phone, both
+actions, and all the supporting detail. They are now their own light row below
+the card -- no surface, no shadow, one hairline between them on mobile -- in the
+brief's order: website, location, availability. The lead moved out of a
+full-width paragraph into a message column beside the card, at the inline start
+so the reading order is message then action. The closing line, which used to
+fill the second grid column, is now the section's last word before the footer.
+
+**The availability icon was wrong.** That item's value is "على مدار 24 ساعة
+طوال أيام الأسبوع" and it carried a phone icon after the icon rollout. It is a
+clock now.
+
+**Ragged action buttons.** The card's two actions wrapped on available width
+alone: at 1024 they broke with one at 279px and the other at 175px. They now
+carry `flex:1 1 15rem`, so they either share a row at equal width or take a row
+each -- never ragged. The column block resets flex-basis to auto, because a
+basis on a column flex item is a height, which is the bug that inflated the
+services CTA bridge to 444px on a phone.
+
+**One deviation.** §12 labels the third item "التوفر". The site's approved label
+is "خدمة العملاء" and §02 forbids rewriting approved content, so the existing
+label stands. Say the word if the brief's label should win.
+
+**Verified** at seven widths, 286 assertions: the four-part hierarchy, the
+details out of the card, all three labels and values verbatim, the clock, the
+card actions' copy and destinations, exactly two actions, WhatsApp solid and
+call quiet but not disabled, contrast, 44px targets, the number as a `tel:` link
+rendering LTR at 25-38px, the website link opening with noopener, the route's
+destination node, one h2, no form and no map embed, every icon from the global
+family, no clipping, no horizontal overflow.
+
+## The company-profile gateway
+
+A compact bounded link at the end of the About introduction, before the trust
+strip, inside the text column: label at the inline start, the family's arrow at
+the inline end, thin sky border, white surface, brand-blue text, the global
+control radius, no shadow. It moves the arrow 4px on hover and nothing else.
+352x56 on desktop -- about two thirds of its column, so it cannot be mistaken
+for the page's conversion action -- and full width below 768px. Opens in a new
+tab with `noopener noreferrer`; nothing is embedded.
+
+Verified at seven widths, 105 assertions: a real `<a>`, the approved wording and
+nothing else, the destination, new-tab safety, position after the introduction
+and before the trust strip, the decorative arrow from the global family, no
+shadow, the 18px control radius, a 1px border, a 56px touch target, compact on
+desktop and full width on mobile, no iframe, no overflow.
