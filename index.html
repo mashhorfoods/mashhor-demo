@@ -1054,10 +1054,12 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
    huddling in the intro column, which the journey does not end near. */
 @media(min-width:1024px){
   .why__intro{align-self:stretch;display:flex;flex-direction:column}
-  /* takes up the slack, but capped: an unbounded stretch made the frame about
-     1:2, which would crop a real photograph past the point of reading it */
-  .why__media{flex:1 1 auto;min-height:22rem;max-height:34rem}
-  .why__media img{height:100%;aspect-ratio:auto}
+  /* No cap: the photograph takes all the slack, so its bottom edge lands on
+     the journey's last line instead of ending early and leaving a void. The
+     frame gets tall and narrow at this width, so the crop is anchored at the
+     top third, where a person in the scene sits, rather than at dead centre. */
+  .why__media{flex:1 1 auto;min-height:22rem}
+  .why__media img{height:100%;aspect-ratio:auto;object-position:center 32%}
   .why__actions{justify-content:center}
 }
 
@@ -1911,9 +1913,9 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
             <p class="why__intro-note" data-reveal>رحلة نقل متخصصة متكاملة: من الأمان، إلى الطاقم المؤهل والمركبات المجهزة، وصولًا إلى المساندة عند الحاجة.</p>
 
             <figure class="why__media" data-reveal>
-              <img src="https://i.ibb.co/C3SHPnFb/why-us01.webp"
-                   width="1200" height="900" loading="lazy" decoding="async"
-                   alt="أخصائي نقل مدرّب يرافق راكبًا مسنًّا يستخدم كرسيًا متحركًا عند منحدر مركبة عون الدرب المجهّزة.">
+              <img src="https://i.ibb.co/prPnxsMC/03.webp"
+                   loading="lazy" decoding="async"
+                   alt="مشهد من خدمة النقل المتخصص لدى عون الدرب: راكب يستخدم كرسيًا متحركًا مع مركبة مجهّزة.">
             </figure>
           </div>
 
