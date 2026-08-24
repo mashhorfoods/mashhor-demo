@@ -859,15 +859,15 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 }
 
 /* the photograph itself — a cover fill, so the frame's shape drives the crop */
-.hero__media{position:relative;overflow:hidden;align-self:stretch}
-/* absolutely filled, so the frame's shape drives the crop and the file's own
-   dimensions never enter the layout -- which matters here, because they cannot
-   be read from this environment. */
-.hero__media img{position:absolute;inset:0;display:block;inline-size:100%;block-size:100%;
-  object-fit:cover;object-position:50% 35%}
-@media(max-width:1023px){
-  .hero__media{block-size:clamp(16rem,52vw,26rem)}
-}
+/* The photograph is shown whole: no frame, no surface, no shadow, and its own
+   proportions decide the height. A stretched box with object-fit:cover was
+   cutting the subject out of the frame at every width -- the whole point of
+   this image is the person and the ramp, and cover was throwing both away.
+   The box only exists to clip the road that runs across it. */
+.hero__media{position:relative;overflow:hidden;align-self:center;
+  background:none;border:none;box-shadow:none;border-radius:0}
+.hero__media img{display:block;inline-size:100%;block-size:auto;
+  max-inline-size:100%;object-fit:fill}
 
 /* content column */
 .hero__content{position:relative;max-width:34rem}
@@ -1822,7 +1822,7 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 /* the road belongs to the photograph now: it sweeps across the image and runs
    out under the panel, which is what makes the two parts read as one scene. */
 .hero__road{position:absolute;inset-block-end:0;inset-inline:0;z-index:1;
-  block-size:min(62%,22rem);pointer-events:none;overflow:visible}
+  block-size:min(58%,20rem);pointer-events:none;overflow:visible}
 .hero__road svg{position:absolute;inset-block-end:0;inset-inline-end:0;
   inline-size:min(150%,1100px);height:auto}
 @media(max-width:1023px){.hero__road{block-size:min(55%,12rem)}}

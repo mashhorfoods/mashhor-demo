@@ -421,6 +421,19 @@ below the panel and reaches up under it instead.
 it can only ever draw over the image, and it was restyled from sky (#D9E4F3,
 invisible on a photo) to navy with a white dashed centre line.
 
+**Then the crop came out.** The stretched box with `object-fit:cover` was
+cutting the subject out of the frame at every width -- the whole point of this
+photograph is the person and the ramp, and cover was throwing both away. The
+photograph now shows whole: its own proportions decide its height, it fills its
+column's width, and it carries no frame at all -- no border, no surface, no
+shadow, no radius. It centres against the panel rather than stretching to it.
+The `.hero__media` box only survives to clip the road that runs across it.
+
+The hero harness now encodes that directly: object-fit is neither `cover` nor
+`none` (nothing may crop it), the image is not letterboxed inside its box, and
+the box has zero border width, no shadow, a transparent background and zero
+radius (nothing may frame it).
+
 **No intrinsic dimensions on the image.** It is an absolutely-filled bleed layer
 -- `position:absolute; inset:0; object-fit:cover` -- so its own dimensions cannot
 enter the layout, and they cannot be read from this environment either. The hero

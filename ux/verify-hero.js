@@ -72,6 +72,8 @@ const VP = [[1440,900],[1280,800],[1024,768],[768,1024],[430,932],[390,844],[375
         const a=f.getBoundingClientRect(), b=i.getBoundingClientRect();
         return Math.abs(a.width-b.width)<2 && Math.abs(a.height-b.height)<2; })(),
       objFit: getComputedStyle(document.querySelector('.hero__media img')).objectFit,
+      frame: (() => { const c=getComputedStyle(document.querySelector('.hero__media'));
+        return {bw:c.borderTopWidth, sh:c.boxShadow, bg:c.backgroundColor, br:c.borderTopLeftRadius}; })(),
       trustItems: [...document.querySelectorAll('.hero__trust b')].map(e=>e.textContent.trim()),
       audItems: [...document.querySelectorAll('.hero__aud-title')].map(e=>e.textContent.trim()),
       audClickable: [...document.querySelectorAll('.hero__aud-card')].some(e=>e.matches('a,button')||e.onclick||getComputedStyle(e).cursor==='pointer'),
@@ -89,7 +91,13 @@ const VP = [[1440,900],[1280,800],[1024,768],[768,1024],[430,932],[390,844],[375
   // cannot shift layout and is deliberately not declared (it also cannot be read
   // from this environment). The LCP hint and the cover fill are what matter.
   ok(r2.fetchpri === 'high', `LCP hint preserved (fetchpriority=${r2.fetchpri})`);
-  ok(r2.imgFills && r2.objFit === 'cover', `photograph fills its frame (${r2.objFit})`);
+  // The photograph is shown whole and unframed, by request: nothing may crop it
+  // and nothing may draw a frame around it.
+  ok(r2.objFit !== 'cover' && r2.objFit !== 'none', `photograph is not cropped (object-fit:${r2.objFit})`);
+  ok(r2.imgFills, 'photograph is not letterboxed inside its box');
+  ok(parseFloat(r2.frame.bw) === 0 && r2.frame.sh === 'none'
+     && /rgba\(0, 0, 0, 0\)|transparent/.test(r2.frame.bg) && parseFloat(r2.frame.br) === 0,
+     `no visible frame (border ${r2.frame.bw}, shadow ${r2.frame.sh}, bg ${r2.frame.bg}, radius ${r2.frame.br})`);
   ok(!r2.audClickable, '§22 audience cues are not fake-interactive');
   console.log(`   audience: ${r2.audItems.join(' · ')}`);
   console.log(`   trust:    ${r2.trustItems.join(' · ')}`);
