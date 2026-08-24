@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Single-page site: one canonical URL. The section anchors (#about,
+     #why-us, #services, #how-we-work, #contact) are fragments of this
+     document, not separate pages, so they are not listed as URLs. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://aunaldrb.com/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>

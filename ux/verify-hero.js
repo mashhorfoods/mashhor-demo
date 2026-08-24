@@ -2,7 +2,11 @@
    Usage: CHROMIUM_PATH=<chrome> node aun-aldrb/verify-hero.js
    Covers the SS26 viewport list plus fold budget, hierarchy and a11y. */
 const { chromium } = require('playwright-core');
-const URL = 'file://' + require('path').resolve(__dirname, '..', 'index.html');
+/* SITE_URL lets the same assertions run against the production build in
+   dist/ as well as the source. Development success is not production
+   success (M12 §55), so the suite has to be able to test what ships. */
+const URL = process.env.SITE_URL ||
+  ('file://' + require('path').resolve(__dirname, '..', 'index.html'));
 const ok = (c,m)=>console.log(`  ${c?'PASS':'**FAIL**'}  ${m}`);
 const VP = [[1440,900],[1280,800],[1024,768],[768,1024],[430,932],[390,844],[375,667]];
 

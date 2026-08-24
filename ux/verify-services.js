@@ -1,4 +1,8 @@
 const { chromium } = require('playwright-core');
+/* SITE_URL lets the same assertions run against the production build in
+   dist/ as well as the source (M12 §55). */
+const SITE = process.env.SITE_URL ||
+  ('file://' + require('path').resolve(__dirname, '..', 'index.html'));
 (async()=>{
  const b=await chromium.launch({executablePath: process.env.CHROMIUM_PATH || undefined});
  let n=0,f=0; const ok=(c,m)=>{n++;if(!c){f++;console.log('  FAIL '+m)}};
@@ -7,7 +11,7 @@ const { chromium } = require('playwright-core');
   const pinned = w>=1024;
   const p=await b.newPage({viewport:{width:w,height:900}});
   p.on('pageerror',e=>errs.push(w+': '+e.message));
-  await p.goto('file://' + require('path').resolve(__dirname,'..','index.html') + '',{waitUntil:'load'});
+  await p.goto(SITE,{waitUntil:'load'});
   await p.addStyleTag({content:'html{scroll-behavior:auto!important}'});
   await p.evaluate(()=>document.querySelectorAll('[data-reveal]').forEach(e=>e.classList.add('is-inview')));
   await p.waitForTimeout(700);
@@ -98,7 +102,7 @@ const { chromium } = require('playwright-core');
  // reduced motion: the grid, everything visible and tabbable
  const p2=await b.newPage({viewport:{width:1440,height:900},reducedMotion:'reduce'});
  p2.on('pageerror',e=>errs.push('rm: '+e.message));
- await p2.goto('file://' + require('path').resolve(__dirname,'..','index.html') + '',{waitUntil:'load'});
+ await p2.goto(SITE,{waitUntil:'load'});
  await p2.waitForTimeout(600);
  const rm=await p2.evaluate(()=>{
   const slides=[...document.querySelectorAll('.services__slides > .service')];
@@ -112,7 +116,7 @@ const { chromium } = require('playwright-core');
  // no script at all
  const ctx=await b.newContext({javaScriptEnabled:false,viewport:{width:1440,height:900}});
  const p3=await ctx.newPage();
- await p3.goto('file://' + require('path').resolve(__dirname,'..','index.html') + '',{waitUntil:'load'});
+ await p3.goto(SITE,{waitUntil:'load'});
  const nj=await p3.evaluate(()=>{
   const slides=[...document.querySelectorAll('.services__slides > .service')];
   return {n:slides.length, faded:slides.filter(e=>parseFloat(getComputedStyle(e).opacity)<0.95).length,
@@ -126,7 +130,7 @@ const { chromium } = require('playwright-core');
  for (const w of [1440,1280,1024]) {
   const p4=await b.newPage({viewport:{width:w,height:900}});
   p4.on('pageerror',e=>errs.push('freeze '+w+': '+e.message));
-  await p4.goto('file://' + require('path').resolve(__dirname,'..','index.html') + '',{waitUntil:'load'});
+  await p4.goto(SITE,{waitUntil:'load'});
   await p4.addStyleTag({content:'html{scroll-behavior:auto!important}'});
   await p4.waitForTimeout(400);
   const box=await p4.evaluate(()=>{const s=document.querySelector('.services__showcase');

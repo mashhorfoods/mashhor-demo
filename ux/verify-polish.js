@@ -6,7 +6,11 @@
    Nothing here is scoped to a section; a value that drifts anywhere fails.
    Run: CHROMIUM_PATH=<chrome> node ux/verify-polish.js                       */
 const { chromium } = require('playwright-core');
-const URL = 'file://' + require('path').resolve(__dirname, '..', 'index.html');
+/* SITE_URL lets the same assertions run against the production build in
+   dist/ as well as the source. Development success is not production
+   success (M12 §55), so the suite has to be able to test what ships. */
+const URL = process.env.SITE_URL ||
+  ('file://' + require('path').resolve(__dirname, '..', 'index.html'));
 
 /* the documented ladders. A number that is not on one of these is drift,
    whatever it looks like on screen. */

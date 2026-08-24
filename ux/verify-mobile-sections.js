@@ -3,7 +3,11 @@
    verify-mobile.js, which holds the global architecture and the hero.
    Run: CHROMIUM_PATH=<chrome> node ux/verify-mobile-sections.js              */
 const { chromium } = require('playwright-core');
-const URL = 'file://' + require('path').resolve(__dirname, '..', 'index.html');
+/* SITE_URL lets the same assertions run against the production build in
+   dist/ as well as the source. Development success is not production
+   success (M12 §55), so the suite has to be able to test what ships. */
+const URL = process.env.SITE_URL ||
+  ('file://' + require('path').resolve(__dirname, '..', 'index.html'));
 const PHONES = [[320,568],[360,640],[375,667],[390,844],[412,915],[430,932]];
 /* 320x568 and 360x640 are the short screens the hero's height rules exist for. */
 

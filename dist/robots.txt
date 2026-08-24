@@ -1,0 +1,9 @@
+# عون الدرب للنقل المتخصص — https://aunaldrb.com/
+User-agent: *
+Allow: /
+
+# development and verification tooling — not content
+Disallow: /ux/
+Disallow: /brand/design-system.html
+
+Sitemap: https://aunaldrb.com/sitemap.xml

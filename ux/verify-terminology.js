@@ -10,7 +10,8 @@
 const { chromium } = require('playwright-core');
 const fs = require('fs'), path = require('path');
 const ROOT = path.resolve(__dirname, '..');
-const URL = 'file://' + path.join(ROOT, 'index.html');
+/* SITE_URL lets the same assertions run against dist/ as well as source (M12 §55). */
+const URL = process.env.SITE_URL || ('file://' + path.join(ROOT, 'index.html'));
 
 /* Written as escapes so this file itself never contains the forbidden strings
    and can never be the thing that trips its own grep. */

@@ -5,7 +5,11 @@
    own rules.
    Run: CHROMIUM_PATH=<chrome> node ux/verify-cta.js                          */
 const { chromium } = require('playwright-core');
-const URL = 'file://' + require('path').resolve(__dirname, '..', 'index.html');
+/* SITE_URL lets the same assertions run against the production build in
+   dist/ as well as the source. Development success is not production
+   success (M12 §55), so the suite has to be able to test what ships. */
+const URL = process.env.SITE_URL ||
+  ('file://' + require('path').resolve(__dirname, '..', 'index.html'));
 
 /* every component that behaves as an action */
 const ACTIONS = '.btn, .about__profile, .icon-btn, .menu-trigger';

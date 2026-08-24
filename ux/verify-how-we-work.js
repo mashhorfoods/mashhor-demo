@@ -1,4 +1,8 @@
 const { chromium } = require('playwright-core');
+/* SITE_URL lets the same assertions run against the production build in
+   dist/ as well as the source (M12 §55). */
+const SITE = process.env.SITE_URL ||
+  ('file://' + require('path').resolve(__dirname, '..', 'index.html'));
 (async()=>{
  const b=await chromium.launch({executablePath: process.env.CHROMIUM_PATH || undefined});
  let n=0,f=0; const ok=(c,m)=>{n++;if(!c){f++;console.log('  FAIL '+m)}};
@@ -7,7 +11,7 @@ const { chromium } = require('playwright-core');
   const wide=w>=1024;
   const p=await b.newPage({viewport:{width:w,height:900}});
   p.on('pageerror',e=>errs.push(w+': '+e.message));
-  await p.goto('file://' + require('path').resolve(__dirname,'..','index.html'),{waitUntil:'load'});
+  await p.goto(SITE,{waitUntil:'load'});
   await p.addStyleTag({content:'html{scroll-behavior:auto!important}'});
   await p.evaluate(()=>document.querySelectorAll('[data-reveal]').forEach(e=>e.classList.add('is-inview')));
   await p.waitForTimeout(600);
@@ -47,7 +51,12 @@ const { chromium } = require('playwright-core');
   // scroll sweep: progress monotonic, one current, done accumulates
   const sweep=await p.evaluate(async ()=>{
    const sec=document.querySelector('#how-we-work');
-   const j=document.querySelector('.hww__journey');
+   /* M12 moved the route out of the <ol> (a <span> is not a permitted child of
+      a list), so --hww-progress is written on the path that consumes it. Read
+      it there, and check the RENDERED fill beside it — the variable is the
+      instruction, the transform is what the user actually sees. */
+   const j=document.querySelector('.hww__path');
+   const fill=document.querySelector('.hww__path-fill');
    const st=[...document.querySelectorAll('.hww__stage')];
    const out=[];
    const top=sec.getBoundingClientRect().top+window.scrollY;
@@ -56,9 +65,11 @@ const { chromium } = require('playwright-core');
      await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
      await new Promise(r=>setTimeout(r,30));
      const p=parseFloat(getComputedStyle(j).getPropertyValue('--hww-progress'))||0;
+     const m=(getComputedStyle(fill).transform||'').match(/matrix\(([^)]+)\)/);
+     const drawn=m?parseFloat(m[1].split(',')[3]):(p>0?1:0);
      const cur=st.map(e=>e.classList.contains('is-current'));
      const done=st.map(e=>e.classList.contains('is-done'));
-     out.push({p, nCur:cur.filter(Boolean).length, ci:cur.indexOf(true),
+     out.push({p, drawn, nCur:cur.filter(Boolean).length, ci:cur.indexOf(true),
        done:done.filter(Boolean).length});
    }
    window.scrollTo(0,0);
@@ -74,6 +85,9 @@ const { chromium } = require('playwright-core');
   ok(oob===0, `${w} progress stays within 0..1 (${oob} out of range)`);
   ok(nonMono===0, `${w} progress only advances while scrolling down (${nonMono} reversals)`);
   ok(maxP>0.98, `${w} the route completes (max ${maxP.toFixed(2)})`);
+  /* the instruction reaching 1 is not proof the line was drawn */
+  const maxD=Math.max(...sweep.map(x=>x.drawn));
+  ok(maxD>0.98, `${w} and the fill is actually drawn to the end (scaleY ${maxD.toFixed(2)})`);
   ok(reached.size===3, `${w} every chapter becomes current (${reached.size}/3)`);
   ok(badDone===0, `${w} completed count always matches position (${badDone} mismatches)`);
   console.log(`${w}  path@${pathMid} nodes ${base.nodeCentres.join('/')}  cols ${base.bodyCols.join('/')}  maxP ${maxP.toFixed(2)}`);
@@ -82,7 +96,7 @@ const { chromium } = require('playwright-core');
  // reduced motion: route drawn in full, no head, nothing dimmed
  const p2=await b.newPage({viewport:{width:1440,height:900},reducedMotion:'reduce'});
  p2.on('pageerror',e=>errs.push('rm: '+e.message));
- await p2.goto('file://' + require('path').resolve(__dirname,'..','index.html'),{waitUntil:'load'});
+ await p2.goto(SITE,{waitUntil:'load'});
  await p2.waitForTimeout(500);
  const rm=await p2.evaluate(()=>{
   const fill=document.querySelector('.hww__path-fill');
@@ -99,7 +113,7 @@ const { chromium } = require('playwright-core');
  // no script
  const ctx=await b.newContext({javaScriptEnabled:false,viewport:{width:1440,height:900}});
  const p3=await ctx.newPage();
- await p3.goto('file://' + require('path').resolve(__dirname,'..','index.html'),{waitUntil:'load'});
+ await p3.goto(SITE,{waitUntil:'load'});
  const nj=await p3.evaluate(()=>{
   const st=[...document.querySelectorAll('.hww__stage')];
   return {n:st.length, dim:st.filter(e=>parseFloat(getComputedStyle(e).opacity)<0.99).length};

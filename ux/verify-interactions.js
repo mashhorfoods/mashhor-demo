@@ -9,7 +9,11 @@
    That mistake made an early pass report the press scale as 1 everywhere.)
    Run: CHROMIUM_PATH=<chrome> node ux/verify-interactions.js                 */
 const { chromium } = require('playwright-core');
-const URL = 'file://' + require('path').resolve(__dirname, '..', 'index.html');
+/* SITE_URL lets the same assertions run against the production build in
+   dist/ as well as the source. Development success is not production
+   success (M12 §55), so the suite has to be able to test what ships. */
+const URL = process.env.SITE_URL ||
+  ('file://' + require('path').resolve(__dirname, '..', 'index.html'));
 
 const INTERACTIVE = 'a[href],button,[tabindex]:not([tabindex="-1"])';
 const PRESS_SCALE = 0.985;      /* one depth, everywhere */

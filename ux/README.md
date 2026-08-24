@@ -1727,3 +1727,168 @@ It stays ready and unused.
 `.service__media img` scales 1.02 on hover — but it is hover-gated and so never
 runs on a phone. Left alone: removing it is a desktop change, and this is a
 mobile stage.
+
+## Stage M12 — final QA, performance and the production build
+
+The rule for this stage was the brief's own: *if it is not tested, it is not
+ready*. So most of what follows is measurement, and the fixes are the small
+number of things the measurements actually found.
+
+### What was tested, and how
+
+The whole site was loaded at **17 viewports** — 360/375/390/412/430,
+768/820/1024, 1280/1366/1440/1536/1920/2560, plus three landscape sizes —
+each with a full scroll, with the real Google fonts served to the browser and a
+stand-in for every photograph. At every one of them: no horizontal scroll, no
+element outside the viewport, no clipped text, no broken image, no console
+error, no failed request. The content container caps at **1360px** and stays
+there from 1366 up to 2560.
+
+Two things had to be built before any of that was trustworthy:
+
+- **A real HTTP server.** Playwright's `route.fulfill()` serves from memory, so
+  network throttling never touched the resources it handled. The first set of
+  throttled numbers — LCP 132ms on "3G" — were measuring nothing. Everything
+  below is served over real HTTP with CDP throttling applied.
+- **The actual fonts.** Chromium in this environment cannot reach
+  `fonts.googleapis.com`, so every earlier stage measured Arabic text in a
+  fallback face. The font CSS and all 15 `woff2` files are fetched and served
+  locally, so the type being measured is the type that ships.
+
+### The production build
+
+`index.html` is the whole application — no framework, no bundler. That is a
+strength, but it means the file that is good to work in and the file that
+should be shipped are not the same file. `build.js` is the difference, and it
+does only three provably lossless things:
+
+| | |
+|---|---|
+| The brand logo is inlined as base64 **three times** — favicon, header, footer. Decoded, two are byte-identical to `brand/aun-aldrb-logo.svg` and one to `brand/aun-aldrb-logo-white.svg`, files that already ship. Base64 also inflates every byte by a third. | **−84KB** |
+| CSS comments — the design log of twelve stages. They belong in source; they cost every visitor bandwidth in production. | **−88KB** |
+| HTML comments, same reasoning. | **−8KB** |
+
+Nothing is minified beyond that: no selector rewriting, no property reordering,
+no JavaScript touched. The comment stripper is a scanner rather than a regex,
+because a `/*` inside a quoted `content:` value or a `url()` is not a comment
+and removing it would corrupt the rule.
+
+**354KB → 174KB, a 51% reduction on the one render-blocking resource.**
+
+What that bought, measured over real HTTP with throttling:
+
+| | source | dist | |
+|---|---|---|---|
+| First Contentful Paint · Slow 4G | 1392ms | **712ms** | −49% |
+| First Contentful Paint · 3G | 5692ms | **2564ms** | −55% |
+| Total transfer (mobile) | 598KB | **481KB** | −20% |
+
+### The hero image was discovered too late
+
+LCP is the hero photograph at every size. The browser could not find it until
+the parser had worked through the entire document, so on a slow connection the
+largest paint waited on a request that had barely started. A `preload` plus a
+`preconnect` to the image host makes it discoverable in the first bytes:
+
+| Largest Contentful Paint | before | after |
+|---|---|---|
+| 390 · Slow 4G | 2128ms | **760ms** |
+| 390 · 3G | 7900ms | **2800ms** |
+| 1440 · 3G | 9132ms | **2808ms** |
+
+LCP now essentially equals FCP — the hero arrives with the first paint.
+
+### What the audit actually found
+
+**A `<span>` inside an `<ol>`.** The journey route in «كيف نعمل» was a direct
+child of the ordered list, and only `<li>` is permitted there. It was
+`aria-hidden`, so no screen reader ever saw it, but the document was invalid.
+It now sits in a wrapper that is the list's own box, so the geometry the
+journey measures is unchanged — the path still centres on every node at every
+width. The five custom properties it needs are written on the path itself,
+which is the only thing that reads them.
+
+**Five decorative SVGs were exposed to assistive technology** with no
+accessible name — a CTA arrow and four route graphics, each beside text that
+already says the thing. All `aria-hidden` now.
+
+**`<footer role="contentinfo">`** restates what `<footer>` already means. The
+brief's own rule: do not use ARIA to compensate for HTML. Removed.
+
+**One inline `style` attribute** on the mobile nav list, moved to the
+stylesheet. It was the only one on the page.
+
+**Missing production files:** there was no `robots.txt`, no `sitemap.xml` and
+no 404 page. All three now exist. The 404 uses the same tokens, the same
+button, the same radius and elevation as the site, and is self-contained so it
+renders even if everything else is missing. *Its Arabic copy is mine and is the
+one piece of invented content in this stage — it needs your approval.*
+
+### What was checked and found already correct
+
+- **Zero** `console.log`, `debugger`, `TODO`, `FIXME`, `localhost`, staging
+  URL, API key or credential anywhere in the file. The only `http://` is the
+  SVG XML namespace, which is an identifier and not a request.
+- Every one of the 11 in-page anchors resolves to an element that exists.
+- The company-profile CTA points at the approved Drive URL, opens in a new tab,
+  and carries `rel="noopener noreferrer"`.
+- The hero image is **not** lazy-loaded and carries `fetchpriority="high"`;
+  all nine below-the-fold images are lazy. That is exactly what §22 asks for.
+- One `<h1>`, no skipped heading levels, every link and button has an
+  accessible name, every image has `alt`, `lang="ar" dir="rtl"`, correct
+  landmarks, no positive `tabindex`.
+- **Keyboard: 34 of 34 focusable elements reachable on mobile**, every one with
+  a visible focus indicator, no trap. The mobile menu moves focus in, closes on
+  Escape, restores focus to the trigger and releases the body scroll.
+- Seven `!important` declarations, all legitimate: the screen-reader utility,
+  the button loading state, and the reduced-motion block.
+- Third parties: Google Fonts, the image host, Google Drive (the profile) and
+  `wa.me`. **No analytics, no tracking, no widgets, no embeds.**
+
+### A finding I reported to myself and then withdrew
+
+At desktop the pinned services showcase stacks seven cards; Tab reaches only
+one of them, and I recorded that as six unreachable controls. Reading the
+source before writing it up, it is deliberate and documented: inactive slides
+keep `opacity:0` rather than `visibility:hidden` *specifically* so all seven
+services stay in the accessibility tree, their links are given `tabindex="-1"`
+so the tab order stays coherent, and a `focusin` handler brings a slide on
+stage if focus arrives from anywhere else. I tested that last path — focusing
+an off-stage CTA does bring its slide up, at full opacity and with pointer
+events restored. There is no defect here.
+
+### Two mistakes in my own measuring
+
+**The throttling wasn't throttling anything.** Route handlers that fulfil from
+memory bypass CDP's network emulation entirely, so the first "3G" numbers were
+fiction. Fixed by serving over real HTTP.
+
+**A pixel diff that wasn't a defect.** Source and dist rendered 2.6% different
+pixels at 390 — a service photograph filled in one and empty in the other. The
+document heights matched exactly, and counting loaded images in both showed
+12/12 either way: it was `fullPage` screenshot timing against lazy loading, not
+a build difference. At 1440 the two renders are byte-for-byte identical.
+
+### Go / no-go
+
+Nothing found in this stage is **CRITICAL** or **HIGH**. What remains:
+
+**MEDIUM — every photograph on the site is hosted on `i.ibb.co`.** Ten images,
+a free image-sharing host, on the critical path of a production site. If it
+throttles, rate-limits or drops them, the site has no photography and the LCP
+element is gone. They belong on the same origin as the site. *This environment
+cannot reach that host — the gateway returns 403 — so it is also the one thing
+in this audit I could not verify: I cannot confirm those ten URLs still
+resolve, what they weigh, or what their real dimensions are.*
+
+**MEDIUM — no `srcset`.** Every screen gets the same file. Cannot be fixed
+without the image files themselves.
+
+**LOW — CLS 0.0124 mobile / 0.0395 desktop**, all of it the webfont swap
+reflowing the hero. Both are inside Google's "good" band (<0.1). The remedy is
+a metric-matched fallback (`size-adjust` on an `@font-face`), which needs both
+fonts' real metrics.
+
+**LOW — nine of ten photographs have no `width`/`height`.** The boxes are
+reserved by CSS `aspect-ratio`, so there is no measured shift; explicit
+dimensions would still be better and need the files.

@@ -3,7 +3,11 @@
    Covers the SS23 quality checklist: scroll states, anchor offset, active-state
    continuity, drawer behaviour, focus management and keyboard order. */
 const { chromium } = require('playwright-core');
-const URL = 'file://' + require('path').resolve(__dirname, '..', 'index.html');
+/* SITE_URL lets the same assertions run against the production build in
+   dist/ as well as the source. Development success is not production
+   success (M12 §55), so the suite has to be able to test what ships. */
+const URL = process.env.SITE_URL ||
+  ('file://' + require('path').resolve(__dirname, '..', 'index.html'));
 const ok = (c, m) => console.log(`  ${c ? 'PASS' : '**FAIL**'}  ${m}`);
 
 (async () => {

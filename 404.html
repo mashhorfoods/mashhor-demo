@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#4975BA">
+  <title>الصفحة غير موجودة — عون الدرب للنقل المتخصص</title>
+  <meta name="description" content="الصفحة المطلوبة غير موجودة على موقع عون الدرب للنقل المتخصص.">
+  <!-- a 404 must never be indexed as content -->
+  <meta name="robots" content="noindex, follow">
+  <link rel="icon" type="image/svg+xml" href="/brand/aun-aldrb-logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@500;600;700&family=Cairo:wght@400;500&display=swap">
+<style>
+/* STAGE M12 §54 — the 404 belongs to the same system as the site: the same
+   tokens, the same button, the same radius and elevation ladders. It is
+   deliberately small and self-contained (no shared stylesheet exists to
+   import), so it renders even if everything else is missing. */
+:root{
+  --aun-blue:#4975BA; --aun-navy:#2C4C82; --aun-blue-dark:#22406F;
+  --aun-mist:#EEF3FA; --aun-ink:#1E2733; --aun-slate:#5A6675; --aun-divider:#E4E9F0;
+  --font-heading:"IBM Plex Sans Arabic",ui-sans-serif,system-ui,"Segoe UI","Noto Sans Arabic",sans-serif;
+  --font-body:"Cairo",ui-sans-serif,system-ui,"Segoe UI","Noto Sans Arabic",sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  min-block-size:100svh; display:grid; place-items:center;
+  padding:clamp(1.5rem,5vw,3rem);
+  padding-block-start:max(clamp(1.5rem,5vw,3rem),env(safe-area-inset-top));
+  padding-block-end:max(clamp(1.5rem,5vw,3rem),env(safe-area-inset-bottom));
+  background:#fff; color:var(--aun-ink);
+  font-family:var(--font-body); line-height:1.75;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{inline-size:min(34rem,100%); text-align:center}
+.logo{inline-size:min(15rem,62vw); block-size:auto; margin-inline:auto; display:block}
+.code{
+  margin-block:clamp(1.75rem,5vw,2.5rem) 0;
+  font-family:var(--font-heading); font-weight:700; line-height:1;
+  font-size:clamp(3.5rem,14vw,6rem); color:var(--aun-mist);
+  letter-spacing:.02em;
+}
+h1{
+  margin-block:clamp(.5rem,2vw,.75rem) 0;
+  font-family:var(--font-heading); font-weight:600;
+  font-size:clamp(1.375rem,5vw,1.875rem); line-height:1.45; color:var(--aun-navy);
+}
+p{margin-block:clamp(.75rem,2vw,1rem) 0; color:var(--aun-slate); font-size:clamp(1rem,2.6vw,1.0625rem)}
+.actions{
+  display:flex; flex-wrap:wrap; gap:.75rem; justify-content:center;
+  margin-block-start:clamp(1.5rem,4vw,2rem);
+}
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:.5rem;
+  min-block-size:48px; padding-inline:1.5rem; border-radius:18px;
+  font-family:var(--font-heading); font-weight:600; font-size:1rem;
+  text-decoration:none; border:1.5px solid transparent; cursor:pointer;
+  transition:background-color .26s cubic-bezier(.22,1,.36,1),
+             color .26s cubic-bezier(.22,1,.36,1),
+             border-color .26s cubic-bezier(.22,1,.36,1),
+             scale .15s cubic-bezier(.22,1,.36,1);
+}
+.btn--primary{background:var(--aun-blue); color:#fff}
+.btn--secondary{background:transparent; color:var(--aun-navy); border-color:var(--aun-blue)}
+@media(hover:hover){
+  .btn--primary:hover{background:var(--aun-navy)}
+  .btn--secondary:hover{background:rgba(73,117,186,.08)}
+}
+.btn:active{scale:.985; transition-duration:.15s}
+.btn--primary:active{background:var(--aun-blue-dark)}
+.btn--secondary:active{background:rgba(73,117,186,.14); border-color:var(--aun-navy)}
+.btn:focus-visible{outline:none; box-shadow:0 0 0 2px #fff,0 0 0 4px var(--aun-navy)}
+.tel{
+  margin-block-start:clamp(1.75rem,5vw,2.5rem); padding-block-start:clamp(1.25rem,3vw,1.5rem);
+  border-block-start:1px solid var(--aun-divider);
+  font-size:.9375rem; color:var(--aun-slate);
+}
+.tel a{color:var(--aun-navy); font-weight:600; text-decoration:none; unicode-bidi:plaintext}
+.tel a:focus-visible{outline:2px solid var(--aun-navy); outline-offset:2px; border-radius:2px}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition-duration:.01ms!important}
+  .btn:active{scale:1}
+}
+</style>
+</head>
+<body>
+  <main class="wrap">
+    <img class="logo" src="/brand/aun-aldrb-logo.svg" width="455" height="166"
+         alt="عون الدرب للنقل المتخصص">
+    <p class="code" aria-hidden="true">404</p>
+    <h1>الصفحة غير موجودة</h1>
+    <p>الرابط الذي فتحته غير صحيح أو لم يعد متاحًا. يمكنك العودة إلى الصفحة الرئيسية أو التواصل معنا مباشرة.</p>
+    <div class="actions">
+      <a class="btn btn--primary" href="/">العودة إلى الصفحة الرئيسية</a>
+      <a class="btn btn--secondary" href="/#contact">تواصل معنا</a>
+    </div>
+    <p class="tel">للتواصل المباشر: <a href="tel:+966535544352" aria-label="اتصل على الرقم ‎+966 53 554 4352">‎+966&nbsp;53&nbsp;554&nbsp;4352</a></p>
+  </main>
+</body>
+</html>
