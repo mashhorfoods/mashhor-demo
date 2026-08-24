@@ -1141,3 +1141,98 @@ Worth recording because both would have been easy to "fix" in the wrong place.
   test now waits for the entrance to settle and only considers cards that have
   finished arriving. The property being tested is real; the first two ways of
   asking for it were not.
+
+---
+
+## Stage M06 — «كيف نعمل» on mobile
+
+The section already had the right idea: one route, three stages on it, a fill
+that follows the reader, three node states, no scroll hijacking, and a
+reduced-motion path that is simply drawn. Most of this stage was checking that,
+finding out where it was quietly wrong, and giving the three steps room to be a
+journey. 79 assertions in `verify-mobile-sections.js`.
+
+**Three steps were sharing half a screen.** Measured at 390, the whole journey
+was 372px — all three stages visible at once inside an 844px viewport, so the
+route filled in a fraction of a scroll and there was nothing to progress
+through. Each stage now has a floor of `clamp(9rem,26vh,13rem)`, taking the
+journey to 624px. It is a floor and not padding: a stage whose sentence runs
+long simply grows past it, and nothing here exists to make the animation
+longer — it exists so a step can be read before the next one arrives.
+
+**The route ran past its own last node.** `inset-block:calc(node/2)` at both
+ends is right at the top, where the node sits at its stage's top edge, and
+wrong at the bottom, where the last stage's title and sentence run on past it.
+Measured: the dashed line hung **43px below node 03 at 390 and 100px at 1440**.
+Script measures both ends from the nodes themselves now, once and on resize,
+and the CSS values are the fallback. Every width reports the track beginning
+and ending on a node centre to within a pixel — including desktop, which had
+been overshooting since the section was built.
+
+**And the measurement had to avoid the reveal.** The first version measured
+with `getBoundingClientRect`, which includes the entrance reveal's
+`translateY(16px)` — so on first paint the track sat 16px below both nodes and
+stayed there until something forced a resize. `offsetTop` accumulated up the
+node → marker → stage → journey chain is layout, which no transform can reach.
+
+**The progress span was still typed in.** `r.height - 72` and `r.top + 36` are
+the desktop node's size and half of it. On a phone the node is 60, so progress
+started six pixels late and finished six early. Both numbers come from the same
+measurement as the track now. This is the third time this section's geometry
+has been corrected by deriving it instead of typing it; there is nothing left
+in it that knows a node's size by heart.
+
+**The journey now finishes.** When the route fills, `is-complete` goes on the
+journey and the last node takes a quiet filled ground. It reads as arrived
+rather than as having stopped on whichever step was lit last.
+
+### A regression the old harness caught
+
+The first version of that completion state *removed* `is-current` when the
+route filled — "finished, so nothing is current any more". `verify-how-we-work`
+failed three assertions immediately: at 375, 390 and 430 the third step went
+straight from upcoming to finished without ever lighting, because its centre
+only reaches the middle of the screen after its node has already passed. The
+brief ties completion to the final step *becoming active*, so the two are not
+alternatives: `is-complete` is added alongside `is-current`, not instead of it.
+A new assertion now requires every stage to get its own active moment.
+
+### A site-wide defect this stage turned up
+
+Chasing why one stage was rendering at `opacity:0`, the entrance reveal turned
+out to lose content after any jump. An IntersectionObserver only reports a
+*change*, and a jump — an anchor link, a restored scroll position, a hard fling
+— can carry a block from below the viewport to clean above it without ever
+landing on an intersecting frame. Measured: **one jump to `#values` left 42 of
+the 47 blocks above the viewport still invisible**, so scrolling back up made
+the page assemble itself a screen at a time instead of simply being there.
+Every navigation link in the header, the drawer and the footer is such a jump.
+
+A pass over what is still pending fixes it: anything the reader has already
+gone past is marked seen. It costs one array walk per scroll burst while
+anything is pending and unhooks itself when the list empties. A large top
+`rootMargin` was tried first and got it down to 2 — and the two it missed were
+the blocks at the very top of the page, because "large enough" means a number
+big enough for this page. Four assertions in `verify-mobile.js` cover it: three
+jump targets leave nothing invisible behind them, and the ordinary downward
+contract is unchanged, with all 64 below-fold blocks still arriving on their own.
+
+**Without script the route is now absent rather than wrong.** Nothing measures
+its two ends, and the CSS fallback can only be right at the top — measured, it
+ran 148px past node 03. The route is decorative and `aria-hidden`; every step
+carries its own number, node, title and sentence, so the journey is complete
+without it. A line that stops in the wrong place is worse than no line.
+
+### Deliberately not done
+
+**No staggered reveal inside a step.** The brief allows node → icon → title →
+description to arrive in sequence. «خدماتنا» just took that idiom for its
+cards, and this section's distinctive mechanic is the route itself; giving both
+the same assembling entrance would blur exactly the difference the brief asks
+for. There is now an assertion that the three sections keep their own
+mechanisms: «ما يميزنا» its per-gap connectors, «خدماتنا» its card state with
+no rail at all, «كيف نعمل» one continuous track with a fill and a travelling
+head and no per-gap connectors.
+
+**No CTA.** The section has never had one, and the brief says not to add one
+for decoration.

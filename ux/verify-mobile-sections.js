@@ -421,6 +421,159 @@ const PHONES = [[320,568],[360,640],[375,667],[390,844],[412,915],[430,932]];
   await p.close();
  }
 
+ /* ---- 12 · STAGE M06 · «كيف نعمل» ----------------------------------------- */
+ for (const [w,h] of [[360,640],[375,667],[390,844],[412,915],[430,932],[768,1024],[1440,900]]) {
+  const p = w<768 ? await phone(w,h) : await b.newPage({viewport:{width:w,height:h}});
+  p.on('pageerror',e=>errs.push('hww '+w+': '+e.message));
+  await p.goto(URL,{waitUntil:'load'});
+  await p.addStyleTag({content:'html{scroll-behavior:auto!important}'});
+  await p.evaluate(()=>document.querySelectorAll('[data-reveal]').forEach(e=>e.classList.add('is-inview')));
+  await p.waitForTimeout(450);
+  const r=await p.evaluate(()=>{
+   const stages=[...document.querySelectorAll('.hww__stage')];
+   const nodes=stages.map(s=>s.querySelector('.hww__node').getBoundingClientRect());
+   const path=document.querySelector('.hww__path').getBoundingClientRect();
+   const c=n=>({x:(n.left+n.right)/2, y:(n.top+n.bottom)/2});
+   const lum=k=>{const [r,g,bl]=k.match(/[\d.]+/g).slice(0,3).map(Number).map(v=>{v/=255;
+     return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)});return .2126*r+.7152*g+.0722*bl};
+   const ratio=(f,g)=>{const a=lum(f),b=lum(g);return Math.round(((Math.max(a,b)+.05)/(Math.min(a,b)+.05))*100)/100};
+   const ground=getComputedStyle(document.querySelector('#how-we-work')).backgroundColor;
+   return {
+    n:stages.length,
+    dx:Math.round((path.left+path.right)/2 - c(nodes[0]).x),
+    topOff:Math.round(path.top - c(nodes[0]).y),
+    botOff:Math.round(path.bottom - c(nodes[nodes.length-1]).y),
+    edge:Math.round(Math.min(path.left, innerWidth-path.right)),
+    stageH:stages.map(s=>Math.round(s.getBoundingClientRect().height)),
+    vh:innerHeight,
+    alternating:(()=>{ if(innerWidth<1024) return null;
+      const cols=stages.map(s=>getComputedStyle(s.querySelector('.hww__stage-body')).gridColumnStart);
+      return cols.join(','); })(),
+    crTitle:ratio(getComputedStyle(document.querySelector('.hww__stage-title')).color, ground),
+    crDesc:ratio(getComputedStyle(document.querySelector('.hww__stage-desc')).color, ground),
+    hOver:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+   };
+  });
+  ok(r.n===3, `${w}: the three approved stages, no more and no fewer (${r.n})`);
+  ok(r.hOver===0, `${w}: كيف نعمل adds no horizontal scroll (${r.hOver}px)`);
+  ok(Math.abs(r.dx)<=1, `${w}: the route runs through the nodes (${r.dx}px off)`);
+  ok(Math.abs(r.topOff)<=1 && Math.abs(r.botOff)<=1,
+     `${w}: and begins and ends exactly on them (${r.topOff} / ${r.botOff})`);
+  ok(r.edge>=24, `${w}: the route keeps clear of the screen edge (${r.edge}px)`);
+  ok(r.crTitle>=4.5 && r.crDesc>=4.5, `${w}: stage title and text clear AA (${r.crTitle}, ${r.crDesc})`);
+  if (w<=1023) ok(r.stageH.every(x=>x>=Math.min(144, r.vh*0.24)),
+     `${w}x${h}: each step has its own reading distance (${r.stageH.join(',')} against ${Math.round(r.vh*0.24)})`);
+  else ok(r.alternating==='1,3,1', `${w}: the desktop journey still alternates around its axis (${r.alternating})`);
+  await p.close();
+ }
+
+ /* progress is a pure function of scroll: forwards only, and it finishes */
+ for (const [w,h] of [[360,640],[390,844],[430,932],[1440,900]]) {
+  const p = w<768 ? await phone(w,h) : await b.newPage({viewport:{width:w,height:h}});
+  p.on('pageerror',e=>errs.push('hww scroll '+w+': '+e.message));
+  await p.goto(URL,{waitUntil:'load'});
+  await p.addStyleTag({content:'html{scroll-behavior:auto!important}'});
+  await p.waitForTimeout(400);
+  const box=await p.evaluate(()=>{const s=document.querySelector('#how-we-work');
+    const r=s.getBoundingClientRect();return {t:Math.round(r.top+scrollY),h:Math.round(s.offsetHeight)}});
+  let multi=0, back=0, dips=0, lastC=-1, lastP=-1, completed=false, headOn=0, curWhenDone=0;
+  const seen={};
+  for (let i=0;i<=28;i++) {
+   await p.evaluate(v=>scrollTo(0,v), Math.round(box.t-h*0.6+(box.h+h*1.2)*i/28));
+   await p.waitForTimeout(130);
+   const s=await p.evaluate(()=>{const st=[...document.querySelectorAll('.hww__stage')];
+     const j=document.querySelector('.hww__journey');
+     return {c:st.findIndex(e=>e.classList.contains('is-current')),
+       nCur:st.filter(e=>e.classList.contains('is-current')).length,
+       done:st.filter(e=>e.classList.contains('is-done')).length,
+       complete:j.classList.contains('is-complete'),
+       p:parseFloat(getComputedStyle(j).getPropertyValue('--hww-progress'))||0,
+       head:parseFloat(getComputedStyle(j).getPropertyValue('--hww-head'))||0}});
+   if (s.nCur>1) multi++;
+   if (s.c>-1) { if (s.c<lastC) back++; lastC=s.c; }
+   if (s.p < lastP-0.02) dips++;
+   lastP=s.p;
+   if (s.c>-1) seen[s.c]=true;
+   if (s.complete) { completed=true;
+     if (s.head!==0) headOn++;
+     /* §26 reads completion as the final step becoming active, so the last
+        step is both current and the end of the road: what must hold is that
+        everything before it is done. */
+     if (s.c !== 2 || s.done !== 2) curWhenDone++; }
+  }
+  ok(multi===0, `${w}x${h}: never two stages current (${multi} of 29)`);
+  ok(back===0, `${w}x${h}: the journey only moves forward (${back})`);
+  ok(dips===0, `${w}x${h}: the route never runs backwards (${dips})`);
+  ok(completed, `${w}x${h}: the journey reaches completion`);
+  ok(curWhenDone===0, `${w}x${h}: at completion the last stage is the current one and the two before it are done (${curWhenDone})`);
+  ok(Object.keys(seen).length===3, `${w}x${h}: every stage gets its own active moment (${Object.keys(seen).sort().join(',')})`);
+  ok(headOn===0, `${w}x${h}: and the travelling head stops (${headOn})`);
+  await p.close();
+ }
+
+ /* the degraded states: the route is drawn, or it is absent — never wrong */
+ for (const mode of ['reduce','nojs']) {
+  const ctx = mode==='nojs'
+    ? await b.newContext({javaScriptEnabled:false,viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true})
+    : await b.newContext({reducedMotion:'reduce',viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true});
+  const p=await ctx.newPage(); await p.goto(URL,{waitUntil:'load'});
+  await p.evaluate(()=>document.querySelector('#how-we-work').scrollIntoView()).catch(()=>{});
+  await p.waitForTimeout(650);
+  const r=await p.evaluate(()=>{const st=[...document.querySelectorAll('.hww__stage')];
+    const path=document.querySelector('.hww__path');
+    const shown=getComputedStyle(path).display!=='none';
+    const nodes=st.map(e=>e.querySelector('.hww__node').getBoundingClientRect());
+    const pr=path.getBoundingClientRect();
+    const c=n=>(n.top+n.bottom)/2;
+    return {stages:st.length, titles:st.filter(e=>e.querySelector('h3')).length,
+      descs:st.filter(e=>e.querySelector('p')).length,
+      state:st.filter(e=>e.classList.contains('is-current')||e.classList.contains('is-done')).length,
+      faded:st.filter(e=>parseFloat(getComputedStyle(e).opacity)<0.95).length,
+      shown, fill:getComputedStyle(document.querySelector('.hww__path-fill')).transform,
+      head:getComputedStyle(document.querySelector('.hww__path-head')).display,
+      topOff:shown?Math.round(pr.top-c(nodes[0])):0,
+      botOff:shown?Math.round(pr.bottom-c(nodes[2])):0,
+      over:document.documentElement.scrollWidth-document.documentElement.clientWidth}});
+  ok(r.stages===3 && r.titles===3 && r.descs===3 && r.faded===0 && r.state===0 && r.over===0,
+     `${mode}: the whole process is readable with no state and no overflow (${r.stages}/${r.titles}/${r.descs}/${r.faded}/${r.state}/${r.over})`);
+  if (mode==='reduce') ok(r.shown && r.fill==='matrix(1, 0, 0, 1, 0, 0)' && r.head==='none'
+      && Math.abs(r.topOff)<=1 && Math.abs(r.botOff)<=1,
+     `reduce: the route is simply drawn in full, between the nodes, with nothing travelling (${r.fill}, head ${r.head}, ${r.topOff}/${r.botOff})`);
+  else ok(!r.shown, `nojs: the route is absent rather than ending in the wrong place (shown ${r.shown})`);
+  await ctx.close();
+ }
+
+ /* §44/§45 — the three mobile sections must not converge on one mechanism */
+ {
+  const p=await phone(390,844);
+  await p.goto(URL,{waitUntil:'load'});
+  await p.addStyleTag({content:'html{scroll-behavior:auto!important}'});
+  await p.waitForTimeout(350);
+  const r=await p.evaluate(()=>({
+    /* «ما يميزنا»: a connector per gap, filled behind the reader */
+    whySegments:[...document.querySelectorAll('.why__item')].slice(0,-1)
+      .filter(e=>getComputedStyle(e,'::after').content!=='none').length,
+    whyHasScalingFill:!!document.querySelector('.why__list .hww__path-fill'),
+    /* «خدماتنا»: state on the card surface, no rail at all */
+    servicesRail:!!document.querySelector('.services__slides > .service::after')
+      || [...document.querySelectorAll('.services__slides > .service')]
+         .some(e=>getComputedStyle(e,'::after').content!=='none'),
+    servicesUsesCardState:!!document.querySelector('.services__slides > .service'),
+    /* «كيف نعمل»: one continuous track with a scaling fill and a head */
+    hwwFill:!!document.querySelector('.hww__path-fill'),
+    hwwHead:!!document.querySelector('.hww__path-head'),
+    hwwSegments:[...document.querySelectorAll('.hww__stage')].slice(0,-1)
+      .filter(e=>getComputedStyle(e,'::after').content!=='none').length,
+  }));
+  ok(r.whySegments===5 && !r.whyHasScalingFill,
+     `ما يميزنا keeps its per-gap connectors and no scaling fill (${r.whySegments})`);
+  ok(!r.servicesRail && r.servicesUsesCardState,
+     `خدماتنا carries its state on the card, with no rail of its own (rail ${r.servicesRail})`);
+  ok(r.hwwFill && r.hwwHead && r.hwwSegments===0,
+     `كيف نعمل keeps one continuous track with a fill and a head, and no per-gap connectors (${r.hwwSegments})`);
+  await p.close();
+ }
+
  ok(errs.length===0, `no page errors (${errs.join(' | ')})`);
  console.log(`\n${n-f}/${n} checks pass`);
  await b.close(); process.exit(f?1:0);

@@ -297,6 +297,39 @@ const PHONES = [[320,568],[360,640],[375,667],[390,844],[412,915],[430,932]];
   await p.close();
  }
 
+
+ /* ---- 7b · nothing stays invisible after a jump -------------------------- */
+ for (const target of ['#values','#contact','#services']) {
+  const p=await phone(390,844); p.on('pageerror',e=>errs.push('jump '+target+': '+e.message));
+  await p.goto(URL,{waitUntil:'load'});
+  await p.addStyleTag({content:'html{scroll-behavior:auto!important}'});
+  await p.waitForTimeout(400);
+  await p.evaluate(t=>{document.querySelector(t).scrollIntoView()}, target);
+  await p.waitForTimeout(700);
+  const r=await p.evaluate(()=>{
+   const all=[...document.querySelectorAll('[data-reveal]')];
+   const above=all.filter(e=>e.getBoundingClientRect().bottom<0);
+   const hidden=above.filter(e=>parseFloat(getComputedStyle(e).opacity)<0.95);
+   return {above:above.length, hidden:hidden.length,
+     which:hidden.slice(0,5).map(e=>e.className.split(' ')[0]||e.tagName)};});
+  ok(r.hidden===0,
+     `jump to ${target}: nothing the reader has already gone past is left invisible (${r.hidden} of ${r.above}${r.which.length?': '+r.which.join(', '):''})`);
+  await p.close();
+ }
+ /* and the ordinary downward contract is untouched: what is below the fold
+    still waits its turn rather than all arriving at once */
+ {
+  const p=await phone(390,844);
+  await p.goto(URL,{waitUntil:'load'}); await p.waitForTimeout(700);
+  const r=await p.evaluate(()=>{
+   const all=[...document.querySelectorAll('[data-reveal]')];
+   const below=all.filter(e=>e.getBoundingClientRect().top>innerHeight);
+   return {below:below.length, waiting:below.filter(e=>parseFloat(getComputedStyle(e).opacity)<0.95).length};});
+  ok(r.below>0 && r.waiting===r.below,
+     `at the top: everything below the fold still arrives on its own (${r.waiting} of ${r.below})`);
+  await p.close();
+ }
+
  ok(errs.length===0, `no page errors (${errs.join(' | ')})`);
  console.log(`\n${n-f}/${n} checks pass`);
  await b.close(); process.exit(f?1:0);

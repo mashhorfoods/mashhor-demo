@@ -1506,6 +1506,10 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 .hww__stage.is-current .hww__node{border-color:var(--color-primary);
   background:var(--aun-primary-subtle);transform:scale(1.06)}
 .hww__stage.is-current .hww__stage-title{color:var(--color-primary)}
+/* §26 — once the route is full nothing is "current" any more: every node is
+   marked and the last one takes a quiet filled ground. The journey reads as
+   finished rather than as having stopped on whichever step was last lit. */
+.hww__journey.is-complete .hww__stage:last-child .hww__node{background:var(--aun-primary-subtle)}
 @media(prefers-reduced-motion:reduce){
   .hww__stage .hww__node{transition:none}
   .hww__stage.is-current .hww__node{transform:none}
@@ -1515,10 +1519,25 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
    Vertical, on one central axis, with the chapters alternating around it. The
    alternation is what stops three equal steps reading as a card row; the axis
    is what makes them read as one route. */
+/* M06 — the track has to begin at the first node's centre and stop at the last
+   one's. calc(node/2) is right at the top, where the node sits at its stage's
+   own top edge, and wrong at the bottom, where the last stage's title and
+   sentence run on past its node: measured, the dashed line hung 43px below
+   node 03 at 390 and 100px at 1440. Script measures both ends once and on
+   resize; these two values are the fallback for the first paint and for the
+   case where script never runs. */
+.hww__path{inset-block-start:var(--hww-path-start,calc(var(--hww-node) / 2));
+           inset-block-end:var(--hww-path-end,calc(var(--hww-node) / 2))}
+/* Without script nothing measures those two ends, and the fallback above can
+   only be right at the top — measured, the track ran 148px past node 03. The
+   route is decorative and aria-hidden; every step already carries its own
+   number, node, title and sentence, so the journey is complete without it.
+   A line that stops in the wrong place is worse than no line. */
+html:not(.js) .hww__path{display:none}
+
 @media(min-width:1024px){
   .hww__journey{gap:clamp(3rem,7vh,5rem) 0;max-width:64rem;margin-inline:auto}
-  .hww__path{inset-inline-start:calc(50% - 1px);
-    inset-block:calc(var(--hww-node) / 2) calc(var(--hww-node) / 2)}
+  .hww__path{inset-inline-start:calc(50% - 1px)}
   .hww__stage{display:grid;
     grid-template-columns:minmax(0,1fr) 96px minmax(0,1fr);align-items:center}
   .hww__marker{grid-column:2;justify-self:center}
@@ -1533,10 +1552,16 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
 /* -- below 1024 (§29/§30): one axis down the reading edge -------------------- */
 @media(max-width:1023px){
   .hww__journey{gap:0;max-width:44rem;margin-inline:auto}
-  .hww__path{inset-inline-start:calc(var(--hww-node) / 2 - 1px);
-    inset-block:calc(var(--hww-node) / 2) calc(var(--hww-node) / 2)}
+  .hww__path{inset-inline-start:calc(var(--hww-node) / 2 - 1px)}
+  /* M06 §22/§23 — measured at 390, the whole journey was 372px: three steps
+     inside half a viewport, so the route filled in a fraction of a scroll and
+     there was no progression to feel. Each step gets its own reading moment
+     now. The height is a floor, not padding: a step whose sentence runs long
+     simply grows past it, and nothing here exists to make the animation
+     longer — it exists so a step can be read before the next one arrives. */
   .hww__stage{display:grid;grid-template-columns:var(--hww-node) minmax(0,1fr);column-gap:var(--sp-20);
-    align-items:start;position:relative;padding-block-end:clamp(2rem,6vw,3rem)}
+    align-items:start;position:relative;padding-block-end:clamp(2rem,6vw,3rem);
+    min-block-size:clamp(9rem,26vh,13rem)}
   .hww__stage:last-child{padding-block-end:0}
   .hww__stage-body{padding-block-start:var(--sp-8)}
   .hww__stage-desc{max-width:52ch}
@@ -3892,19 +3917,49 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
       var path = doc.querySelector(".hww__path");
       if (!journey || !path) return;
       var stages = [].slice.call(journey.querySelectorAll(".hww__stage"));
-      if (!stages.length || reduce) return;
+      if (!stages.length) return;
 
-      var pathH = 0, ticking = false;
-      function measure() { pathH = path.getBoundingClientRect().height;
-        journey.style.setProperty("--hww-path-h", pathH + "px"); }
+      var pathH = 0, startOff = 0, ticking = false;
+
+      /* Where the track begins and ends is layout, not motion, so it is
+         measured whether or not anything is going to animate -- under reduced
+         motion CSS draws the route in full, and a route drawn in full still
+         has to stop at the last node. Both ends come from the nodes
+         themselves, so a breakpoint that resizes them, or a sentence that runs
+         to an extra line, cannot leave the line hanging past the end. */
+      /* offsetTop, not getBoundingClientRect: the entrance reveal holds every
+         stage at translateY(16px) until it arrives, and a rect includes that
+         transform. Measured through rects, the track began 16px below node 01
+         and ended 16px below node 03 on first paint and stayed there until
+         something forced a resize. offsetTop is layout, so a transform cannot
+         reach it, and the chain node -> marker -> stage -> journey is all
+         positioned, so accumulating up it lands exactly on the journey. */
+      function topWithin(el, root) {
+        var y = 0;
+        while (el && el !== root) { y += el.offsetTop; el = el.offsetParent; }
+        return y;
+      }
+      function measure() {
+        var first = stages[0].querySelector(".hww__node");
+        var last = stages[stages.length - 1].querySelector(".hww__node");
+        startOff = topWithin(first, journey) + first.offsetHeight / 2;
+        var endOff = journey.offsetHeight - (topWithin(last, journey) + last.offsetHeight / 2);
+        journey.style.setProperty("--hww-path-start", startOff + "px");
+        journey.style.setProperty("--hww-path-end", endOff + "px");
+        pathH = journey.offsetHeight - startOff - endOff;
+        journey.style.setProperty("--hww-path-h", pathH + "px");
+      }
 
       function frame() {
         ticking = false;
         var r = journey.getBoundingClientRect();
         var mid = (window.innerHeight || doc.documentElement.clientHeight) / 2;
-        /* 0 as the journey's first node reaches the middle, 1 as its last does */
-        var span = r.height - 72;
-        var p = span > 0 ? (mid - (r.top + 36)) / span : 0;
+        /* 0 as the first node reaches the middle, 1 as the last one does. Both
+           numbers come from measure(); they used to be a hard-coded 72 and 36,
+           which are the desktop node's size and half of it, so on a phone --
+           where the node is 60 -- progress started six pixels late and ended
+           six early. */
+        var p = pathH > 0 ? (mid - (r.top + startOff)) / pathH : 0;
         p = p < 0 ? 0 : (p > 1 ? 1 : p);
         journey.style.setProperty("--hww-progress", p);
         journey.style.setProperty("--hww-head", p > 0.001 && p < 0.999 ? 1 : 0);
@@ -3918,6 +3973,16 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
           if (d < bestDist) { bestDist = d; best = i; }
         }
         var inView = r.bottom > 0 && r.top < (window.innerHeight || 0);
+        /* §26 ties completion to the final step BECOMING ACTIVE, so the two
+           are not alternatives: when the route fills, the last step is the one
+           being read and it is also the end of the journey. An earlier version
+           suppressed is-current once the route was full, and the third step
+           then went straight from upcoming to finished without ever lighting —
+           caught at 375, 390 and 430, where its centre only reaches the middle
+           after its node has already passed. is-complete is added alongside,
+           not instead. */
+        var done = inView && p > 0.999;
+        journey.classList.toggle("is-complete", done);
         stages.forEach(function (el, i) {
           el.classList.toggle("is-current", inView && i === best);
           el.classList.toggle("is-done", inView && i < best);
@@ -3925,9 +3990,14 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
       }
       function onScroll() { if (!ticking) { ticking = true; window.requestAnimationFrame(frame); } }
 
-      measure(); frame();
+      measure();
+      window.addEventListener("resize", function () {
+        measure(); if (!reduce) onScroll();
+      }, { passive: true });
+      if (reduce) return;   /* CSS has already drawn the route in full */
+
+      frame();
       window.addEventListener("scroll", onScroll, { passive: true });
-      window.addEventListener("resize", function () { measure(); onScroll(); }, { passive: true });
     })();
 
     /* 5 · Entrance reveal (§20) — subtle, one-shot; content-first */
@@ -3951,7 +4021,38 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
           if (entry.isIntersecting) { entry.target.classList.add("is-inview"); o.unobserve(entry.target); }
         });
       }, { rootMargin: "0px 0px -12% 0px", threshold: 0.12 });
-      items.forEach(function (el) { if (!el.classList.contains("is-inview")) ro.observe(el); });
+
+      /* An IntersectionObserver only reports a CHANGE, and a jump — an anchor
+         link, a restored scroll position, a hard fling — can carry a block
+         from below the viewport to clean above it without ever landing on an
+         intersecting frame. Measured: one jump to #values left 42 of the 47
+         blocks above the viewport still at opacity 0, so scrolling back up
+         made the page assemble itself a screen at a time instead of simply
+         being there.
+
+         A pass over what is still pending catches exactly that: anything the
+         reader has already gone past is marked seen. It costs one array walk
+         per scroll burst while anything is still pending, and unhooks itself
+         the moment the list empties. A large top rootMargin would have done
+         most of this too, but "most" means a number big enough for this page,
+         and the two blocks it missed were the ones at the very top. */
+      var pending = [];
+      items.forEach(function (el) {
+        if (!el.classList.contains("is-inview")) { pending.push(el); ro.observe(el); }
+      });
+      function sweep() {
+        pending = pending.filter(function (el) {
+          if (el.getBoundingClientRect().bottom >= 0) return true;
+          el.classList.add("is-inview"); ro.unobserve(el); return false;
+        });
+        if (!pending.length) {
+          window.removeEventListener("scroll", sweep);
+          window.removeEventListener("hashchange", sweep);
+        }
+      }
+      window.addEventListener("scroll", sweep, { passive: true });
+      window.addEventListener("hashchange", sweep);
+      sweep();   /* a hash in the URL jumps before any scroll event fires */
     })();
   })();
   </script>
