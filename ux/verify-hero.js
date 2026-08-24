@@ -72,6 +72,11 @@ const VP = [[1440,900],[1280,800],[1024,768],[768,1024],[430,932],[390,844],[375
         const a=f.getBoundingClientRect(), b=i.getBoundingClientRect();
         return Math.abs(a.width-b.width)<2 && Math.abs(a.height-b.height)<2; })(),
       objFit: getComputedStyle(document.querySelector('.hero__media img')).objectFit,
+      overlap: (() => { const m=document.querySelector('.hero__media').getBoundingClientRect(),
+        p=document.querySelector('.hero__panel').getBoundingClientRect();
+        const x = Math.max(0, Math.min(m.right,p.right) - Math.max(m.left,p.left));
+        const y = Math.max(0, Math.min(m.bottom,p.bottom) - Math.max(m.top,p.top));
+        return Math.round(Math.min(x,y)); })(),
       frame: (() => { const c=getComputedStyle(document.querySelector('.hero__media'));
         return {bw:c.borderTopWidth, sh:c.boxShadow, bg:c.backgroundColor, br:c.borderTopLeftRadius}; })(),
       trustItems: [...document.querySelectorAll('.hero__trust b')].map(e=>e.textContent.trim()),
@@ -95,6 +100,7 @@ const VP = [[1440,900],[1280,800],[1024,768],[768,1024],[430,932],[390,844],[375
   // and nothing may draw a frame around it.
   ok(r2.objFit !== 'cover' && r2.objFit !== 'none', `photograph is not cropped (object-fit:${r2.objFit})`);
   ok(r2.imgFills, 'photograph is not letterboxed inside its box');
+  ok(r2.overlap === 0, `nothing covers the photograph (panel overlaps it by ${r2.overlap}px)`);
   ok(parseFloat(r2.frame.bw) === 0 && r2.frame.sh === 'none'
      && /rgba\(0, 0, 0, 0\)|transparent/.test(r2.frame.bg) && parseFloat(r2.frame.br) === 0,
      `no visible frame (border ${r2.frame.bw}, shadow ${r2.frame.sh}, bg ${r2.frame.bg}, radius ${r2.frame.br})`);

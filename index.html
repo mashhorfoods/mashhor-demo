@@ -826,10 +826,11 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
      and no bleed margin is needed -- an earlier attempt pushed the panel out
      with a negative margin and sent its text 360px off-screen. */
   .hero__media{grid-column:2;grid-row:1;position:relative;margin:0}
-  /* the panel holds the inline-start track and reaches back over the
-     photograph by a controlled amount */
+  /* The panel used to reach back over the photograph with a negative inline-end
+     margin -- up to 80px of the image hidden behind it, which is a crop by
+     another name. The two tracks meet edge to edge now, so the whole
+     photograph is visible. */
   .hero__panel{grid-column:1;grid-row:1;position:relative;z-index:2;
-    margin-inline-end:clamp(-5rem,-4vw,-2rem);
     display:flex;align-items:center;
     background:var(--surface);border:1px solid var(--border);
     border-inline-start:none;
@@ -849,13 +850,15 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
    harness still enforces. The photograph reaches up under the panel instead,
    so the two still read as one composition. */
 @media(max-width:1023px){
-  .hero__stage{gap:0}
+  .hero__stage{gap:clamp(1.5rem,4vw,2.5rem)}
   .hero__panel{order:1;position:relative;z-index:2;background:var(--surface);
     border:1px solid var(--border);border-radius:var(--radius-lg);
     box-shadow:var(--elev-card);
     margin-inline:var(--container-pad);margin-block-start:clamp(1rem,3vw,1.75rem);
     padding:clamp(1.5rem,5vw,2.25rem)}
-  .hero__media{order:2;margin:0;margin-block-start:clamp(-3.5rem,-7vw,-1.5rem)}
+  /* same reason as the desktop overlap: the photograph used to slide up under
+     the panel, which hid its top edge. It sits clear of it now. */
+  .hero__media{order:2;margin:0}
 }
 
 /* the photograph itself — a cover fill, so the frame's shape drives the crop */
