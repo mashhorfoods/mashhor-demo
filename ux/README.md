@@ -184,3 +184,53 @@ decision to make unasked:
   from both: `06 التميّز`.
 
 Say the word and either comes out.
+
+## Icon system
+
+Every icon on the site is one family now. 54 icons, one 24x24 grid, outline
+only, round caps and joins, drawn with no presentation attributes of their own
+-- weight and geometry live in a single `.ico` rule, so the family cannot drift
+apart again the way it had.
+
+**What it replaced.** The audit found three stroke weights (1.5, 1.6, 1.7) and
+eight display sizes (18, 20, 22, 26, 28, 30, 32) across nine sections. Icons
+from visibly different construction logics sat next to each other. That is the
+"do not mix libraries" problem stated as measurements.
+
+**The stroke.** `.ico` sets `stroke-width:2` on the 24 grid and every shape
+carries `vector-effect:non-scaling-stroke`, which holds the *rendered* stroke at
+2 CSS px whatever the display size. Without it, a 32px icon at stroke 2 renders
+a 2.67px line and a 20px icon renders 1.67px -- the same declaration producing
+three different weights. This is what makes one stroke language literally true
+rather than approximately true.
+
+**The size scale.** Four steps, and nothing off them: 20px small UI (button and
+link icons), 24px small UI upper (utility, contact rows, trust cues), 28px
+standard feature (journey nodes, about facts, audience cues), 32px feature
+(service cards, how-we-work and vision/mission nodes). Verified at seven widths:
+every icon lands on one of those four.
+
+**What is deliberately not an icon.** Six drawings stay outside the family --
+the hero road, the how-we-work route, the two vision/mission links, and the two
+contact routes. They are the brand's journey language, which the brief protects.
+The one route mark that is displayed inside an icon container (the services
+bridge) keeps its geometry but takes the family's stroke, so it stops looking
+like a stray weight.
+
+**Three deviations from the brief, all for semantic accuracy:**
+
+- §13 asks for a *supporting hand* for "المساعدة عند الحاجة". Drawn and
+  rendered, an open palm reads as "stop", not "help" -- a real semantic defect
+  visible at 32px. It is now two figures with the taller one reaching across,
+  which is what assistance actually looks like.
+- §12 asks for "daily mobility / recurring transport". A directional arrow above
+  the van read as "forward", and pointed against the RTL reading direction. It
+  is now a van with a clock badge: scheduled, recurring.
+- §16 refers to values icons. The values section has never had icons -- Stage 09
+  ruled them out and the brief for that stage forbade them. Nothing to replace.
+
+**Quality control** (§29) runs as a harness: 3,738 assertions across seven
+widths check that every icon carries the family class, computes to a 2px stroke
+with round caps and joins, has no fill on itself or any child, sits on the 24
+grid, keeps geometry plus half a stroke inside that grid (no clipping), is
+square, lands on the size scale, and holds 1-8 components.
