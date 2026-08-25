@@ -36,7 +36,13 @@ const PHONES = [[320,568],[360,640],[375,667],[390,844],[412,915],[430,932]];
    const dom=[...grid.children].filter(e=>SEL.some(s=>e.matches(s))).map(e=>e.className.split(' ')[0]);
    const img=q('.about__media img'), frame=q('.about__media-frame');
    const declared=[+img.getAttribute('width'), +img.getAttribute('height')];
-   const ar=getComputedStyle(frame).aspectRatio;
+   /* M13 — this used to read the frame's declared `aspect-ratio` and treat
+      `auto` as a failure. That tested the mechanism rather than the outcome:
+      the frame now takes its shape from the image's own dimensions, which is a
+      better way to reach the same goal and reports `auto`. What actually has
+      to hold is that the box on screen is the shape of the photograph, so the
+      RENDERED box is measured against the image's intrinsic ratio. */
+   const fr=frame.getBoundingClientRect();
    const facts=q('.about__facts'), fc=getComputedStyle(facts);
    const prof=q('.about__profile'), pc=getComputedStyle(prof), pr=prof.getBoundingClientRect();
    /* line length of the lead, counted from real glyph positions */
@@ -64,7 +70,8 @@ const PHONES = [[320,568],[360,640],[375,667],[390,844],[412,915],[430,932]];
    return {
     tops, dom,
     declaredAR: Math.round(declared[0]/declared[1]*1000)/1000,
-    frameAR: ar==='auto'?null:Math.round(eval(ar.replace('/','/'))*1000)/1000,
+    frameAR: fr.height ? Math.round(fr.width/fr.height*1000)/1000 : null,
+    naturalAR: img.naturalWidth ? Math.round(img.naturalWidth/img.naturalHeight*1000)/1000 : null,
     factsBg: fc.backgroundColor, factsShadow: fc.boxShadow, factsBorderTop: px(fc.borderTopWidth),
     factsBorderAll: px(fc.borderBottomWidth),
     profTarget: prof.target, profRel: prof.rel,
@@ -94,8 +101,13 @@ const PHONES = [[320,568],[360,640],[375,667],[390,844],[412,915],[430,932]];
   if (w>=1024) ok(r.mediaCol>1, `${w}: the photograph sits beside the text, not in the reading column (column ${r.mediaCol})`);
   ok(r.dom.join('>')==='about__head>about__lead>about__media>about__body>about__facts>about__profile',
      `${w}: the markup is in that same order, so a screen reader gets it too (${r.dom.join('>')})`);
-  ok(r.frameAR!==null && Math.abs(r.frameAR-r.declaredAR)<0.01,
-     `${w}: the photograph is shown at its own ratio, so nothing is cropped (frame ${r.frameAR} vs source ${r.declaredAR})`);
+  /* a 1% tolerance: the rendered box is subpixel, the declared ratio is not */
+  ok(r.frameAR!==null && Math.abs(r.frameAR-r.declaredAR)/r.declaredAR<0.01,
+     `${w}: the photograph is shown at its own ratio, so nothing is cropped (frame ${r.frameAR} vs declared ${r.declaredAR})`);
+  /* and the declared dimensions are the file's real ones, so the box reserved
+     before the image arrives is the box it actually needs */
+  ok(r.naturalAR===null || Math.abs(r.naturalAR-r.declaredAR)/r.declaredAR<0.01,
+     `${w}: width/height match the actual file (declared ${r.declaredAR} vs file ${r.naturalAR})`);
   ok(r.profTarget==='_blank' && r.profRel.includes('noopener') && r.profRel.includes('noreferrer'),
      `${w}: the profile opens in a new tab, safely (${r.profTarget} "${r.profRel}")`);
   ok(r.profHidden && r.profHiddenText.includes('صفحة جديدة'),
