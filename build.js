@@ -111,6 +111,29 @@ function build() {
   fs.rmSync(DIST, { recursive: true, force: true });          /* §48 — never ship a stale build */
   fs.mkdirSync(path.join(DIST, 'brand'), { recursive: true });
   fs.writeFileSync(path.join(DIST, 'index.html'), html);
+
+  /* M13 — the photographs that ship are exactly the ones the built page asks
+     for, read back out of the markup rather than kept in a list here. The
+     originals in img/ are the masters that tools-images.js resizes from; they
+     are several times larger than any variant and must never be uploaded. */
+  const referenced = new Set();
+  for (const m of html.matchAll(/(?:src|srcset|href)="([^"]*)"/g)) {
+    for (const part of m[1].split(',')) {
+      const u = part.trim().split(/\s+/)[0];
+      if (u.startsWith('img/')) referenced.add(u);
+    }
+  }
+  let imgBytes = 0;
+  for (const u of referenced) {
+    const src = path.join(ROOT, u);
+    if (!fs.existsSync(src)) throw new Error('the page references a missing image: ' + u);
+    fs.mkdirSync(path.dirname(path.join(DIST, u)), { recursive: true });
+    fs.copyFileSync(src, path.join(DIST, u));
+    imgBytes += fs.statSync(src).size;
+  }
+  console.log('  photographs        : ' + referenced.size + ' variants, '
+    + (imgBytes/1024).toFixed(0) + 'KB (originals not shipped)');
+
   for (const f of SHIP) {
     const src = path.join(ROOT, f);
     if (!fs.existsSync(src)) { console.warn('  ! missing, not shipped: ' + f); continue; }

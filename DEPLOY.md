@@ -2,16 +2,24 @@
 
 ## What to upload
 
-Run the build, then upload **the contents of `dist/`** to the web root.
+Build, then upload **the contents of `dist/`** to the web root.
 
 ```sh
-node build.js      # regenerates dist/ from scratch
+node tools-images.js   # resize the photo masters in img/ into the width ladder
+node build.js          # regenerate dist/ from scratch
 ```
+
+The first step is only needed when a photograph in `img/` has changed. It reads
+the full-size masters and writes the `-360`, `-520`, `-690`… variants that
+`srcset` serves; those variants are generated, not source, so they are not in
+git. `build.js` copies only the ones the page actually references and never
+uploads the masters, which are several times larger.
 
 `dist/` after a build:
 
 ```
 index.html                       the site
+img/                             44 photo variants (srcset)
 404.html                         not-found page
 robots.txt
 sitemap.xml
