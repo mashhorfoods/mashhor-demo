@@ -1,0 +1,6 @@
+# Pixora
+User-agent: *
+Allow: /
+Disallow: /styleguide.html
+
+Sitemap: https://zaokalyamamah.online/sitemap.xml
