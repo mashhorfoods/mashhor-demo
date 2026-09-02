@@ -29,6 +29,21 @@ measurement.
 
 ## A · Deploy, and prove it on the real host — **yours**
 
+> **Staging first.** The site is being brought up on a temporary domain,
+> `https://zaokalyamamah.online`, and moves to `aunaldrb.com` once it is
+> verified. Set `APP_URL` to the temporary domain in `.env` — preflight reads
+> it, and nothing else in the application depends on it. `.htaccess` no longer
+> names a domain: `www` → apex and `http` → `https` both preserve whatever
+> host was asked for, so the same file works on both, and section 3b sends
+> `X-Robots-Tag: noindex, nofollow` on every host *except* `aunaldrb.com`, so
+> the temporary copy cannot be indexed while carrying canonical URLs that name
+> the real one. Nothing has to be edited at cutover.
+>
+> One thing does not move by itself: the seeded content lives in the database,
+> so the real domain needs its own `migrate` + `seed` + `seed-content` run, or
+> a copy of the staging database.
+
+
 I have no access to Hostinger, so this stage is yours and it blocks every
 other one. The goal is not to get files onto the server; it is to run the same
 293 checks against MySQL over HTTPS and see what a real host says.

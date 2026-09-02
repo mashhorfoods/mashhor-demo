@@ -192,6 +192,43 @@ check('Strict-Transport-Security set', isset($h['strict-transport-security']) ? 
 check('compression negotiated', isset($h['content-encoding']) ? true : null,
     $h['content-encoding'] ?? 'not applied to HTML');
 
+/* ------------------------------------------------------------------ */
+/* canonical host — the real domain, or one we are staging on?         */
+/* ------------------------------------------------------------------ */
+$host      = strtolower((string) parse_url($URL, PHP_URL_HOST));
+$canonical = (bool) preg_match('/^(www\\.)?aunaldrb\\.com$/', $host);
+$robots    = strtolower($h['x-robots-tag'] ?? '');
+
+if ($local) {
+    check('canonical-host rules', null,
+        'skipped — the development server does not apply .htaccess');
+} elseif ($canonical) {
+    check('this is the canonical domain', true, $host);
+    check('nothing is telling crawlers to ignore the site',
+        !str_contains($robots, 'noindex'),
+        $robots !== '' ? "X-Robots-Tag: {$robots}" : '');
+} else {
+    check('serving from a temporary domain', null,
+        "{$host} — the page's canonical URL still names aunaldrb.com");
+    check('crawlers are told not to index the temporary copy',
+        str_contains($robots, 'noindex'),
+        $robots !== '' ? "X-Robots-Tag: {$robots}" : 'absent — section 3b of .htaccess is not being applied');
+}
+
+/* A plain-http request must reach https on the SAME host. A redirect that
+ * lands anywhere else means .htaccess still names a domain. */
+$plain = $local ? null : fetch('http://' . $host . '/');
+if ($plain === null) {
+    /* nothing to say: there is no https on a local development server */
+} elseif (in_array($plain['status'], [301, 302, 307, 308], true)) {
+    $to = strtolower((string) parse_url($plain['headers']['location'] ?? '', PHP_URL_HOST));
+    check('http redirects to https on this same host', $to === $host || $to === '',
+        'to ' . ($plain['headers']['location'] ?? '(no Location)'));
+} else {
+    check('plain http is redirected to https', $plain['status'] === 200 ? null : false,
+        "status={$plain['status']}");
+}
+
 }
 
 /* ================================================================== */
