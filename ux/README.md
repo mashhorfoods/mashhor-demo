@@ -696,7 +696,7 @@ stop being spaced for a tall screen. 320x568 now finishes 9px inside the fold,
 
 `verify-header.js` fails one assertion: the document grows 60px on first scroll
 at 1024 and above. It is not a regression — it reproduces identically on the
-commit before this stage. The cause is `03.webp` in «ما يميزنا»: above 1023 the
+commit before this stage. The cause is `wheelchair-passenger-vehicle.webp` in «ما يميزنا»: above 1023 the
 photograph is shown whole, so `.why__media img` has no `aspect-ratio` and the
 image carries no `width`/`height`, and its box is zero until the bitmap
 decodes. Below 1024 the same image has `aspect-ratio:4/3` reserved, which is
@@ -704,7 +704,7 @@ why every mobile width measures 0px of shift.
 
 The fix is one line, and it needs one number this environment cannot read:
 `i.ibb.co` is blocked by the network policy (403 at the agent proxy), so the
-intrinsic dimensions of `03.webp` and `h001.webp` are unknown here. Guessing a
+intrinsic dimensions of `wheelchair-passenger-vehicle.webp` and `wheelchair-ramp-boarding.webp` are unknown here. Guessing a
 ratio would either crop a photograph that is meant to be shown whole or
 distort it. With the two pixel sizes, both images take `width`/`height`
 attributes and the shift goes to zero at every tier.
@@ -1044,7 +1044,7 @@ the desktop chapter rhythm, and neither belongs in a mobile stage.
 ### Still open, and now one line away
 
 `verify-header.js` has failed the same assertion since Stage M01: the document
-grows 59px on first scroll at 1024 and above, because `03.webp` is shown at
+grows 59px on first scroll at 1024 and above, because `wheelchair-passenger-vehicle.webp` is shown at
 natural proportions on desktop with no reserved box. Two stages ago this needed
 the image's pixel dimensions. It no longer does — M04 just proved the
 ratio-agnostic fix works, in this very section: a reserved height plus
@@ -1598,7 +1598,7 @@ the file arrives, and there is an assertion holding that.
 ### Still open, unchanged by this stage
 
 `verify-header.js` still fails one assertion: **59px of document growth on
-first scroll at 1024 and up**, because `03.webp` has no reserved box on
+first scroll at 1024 and up**, because `wheelchair-passenger-vehicle.webp` has no reserved box on
 desktop. This does not need the image's dimensions — the ratio-agnostic fix
 (a reserved height plus `object-fit:contain`) is proven in «ما يميزنا» — but
 it puts a mist band into a desktop composition you approved from a screenshot,
@@ -1892,3 +1892,149 @@ fonts' real metrics.
 **LOW — nine of ten photographs have no `width`/`height`.** The boxes are
 reserved by CSS `aspect-ratio`, so there is no measured shift; explicit
 dimensions would still be better and need the files.
+
+---
+
+## Stage M13 — SEO, mobile performance, and the deployment package
+
+Three jobs: give the site a keyword system it can actually stand behind, find
+out why mobile was scoring ~70, and make the folder that gets uploaded correct.
+
+### The ~70 was one line of HTML
+
+The site loaded its typography from `fonts.googleapis.com` with a
+render-blocking `<link rel="stylesheet">`. That is a third origin, in front of
+every font file, on the critical path: DNS, TLS and a round trip before the
+browser has seen a single face — and while the browser is waiting for it, it
+paints nothing.
+
+The measurement that made it undeniable was Lighthouse's own filmstrip. Mobile
+performance 77, but **Speed Index 20.2 seconds** and an LCP breakdown whose
+`elementRenderDelay` was **13.5s** against 117ms of actual image loading. The
+frames explain both numbers: the page is blank at 3.5s, blank at 8.9s, blank at
+12.4s, and complete at 14.2s. It was not slow. It was waiting.
+
+Self-hosting the two families removed the request and the two origins with it:
+
+| | before | after |
+|---|---|---|
+| Speed Index | 20.2s | 1.1s |
+| First Contentful Paint | 2.3s | 0.9s |
+| Best Practices | 96 | 100 |
+| Performance (mobile) | 77 | 92 |
+
+`tools-fonts.js` builds the faces: the five weights the design system uses and
+no others, two subsets each (`arabic` whole, `latin` cut to printable ASCII —
+it carries the phone number, 24/7 and the numerals and nothing else). Cairo is
+a variable font and Google serves the *same file* for its 400 and its 500, so
+one file ships for both with its `wght` axis limited to that range. Ten
+declared faces, eight files, 147KB — against 272KB and a blocking stylesheet.
+
+### The encoder was costing 30% of every photograph
+
+`tools-images.js` resized through a Chromium canvas, because the environment
+had no image library. Measured against the master with PSNR (alpha masked out,
+since the hero is a cut-out), libwebp writes the hero's 780w variant at
+**87KB where the canvas wrote 116KB at the same fidelity** — and the canvas's
+alpha channel was 17dB worse on top of that. Quality 80 is the lowest setting
+at which every variant measures at least as good as the file it replaces.
+
+The hero also gets an AVIF ladder, and only the hero: it is the LCP element at
+every width, so its bytes are the ones on the critical path. At q65 its 780w
+AVIF measures *better* than the WebP (39.3dB against 38.4) at **46KB against
+87KB**. `<picture>` keeps the WebP ladder behind it for Safari before 16.4, and
+the preload carries `type="image/avif"` so a browser that cannot decode it does
+not fetch it.
+
+LCP went 2.6s → 1.8s on that change alone.
+
+### content-visibility: built, measured, and left out
+
+The page is 14,900px tall on a phone and all of it was being laid out before
+the first frame, so `content-visibility:auto` on the last four blocks was the
+obvious next move. It worked: TBT 320ms → 140ms, performance 92 → 96.
+
+It is not in the file. Once the fonts were self-hosted and the hero re-encoded,
+the work it was skipping had stopped being the bottleneck. Paired runs, four
+each, alternating: **98 with it and 98 without**, LCP within 2ms, TBT 0ms
+against 71ms — both far inside the 200ms the metric cares about. What it still
+cost was real: a jump straight to `#contact` showed the section a few hundred
+milliseconds late, it came back blank in full-page screenshot capture, and
+`contain-intrinsic-size` is one number per section for sections that are
+1075px tall at 390 and 783px at 1440. The reasoning is kept as a comment where
+the rule would have gone, because the next person will wonder.
+
+### The one JavaScript fix
+
+Every listener on this page was already batched into one `requestAnimationFrame`
+per scroll burst — except the reveal system's `sweep()`, which read a
+`getBoundingClientRect()` per pending block **on the scroll event itself**. The
+list starts at 96, so a single flick could ask for several thousand rect reads,
+each one a forced layout. It is throttled like everything else now. Nothing
+about when a block arrives changed.
+
+`build.js` also strips JavaScript comments now — 10KB of the behaviour script's
+25KB is the design log of why each observer exists. The stripper is a scanner,
+not a regex, and the output was checked to be **token-identical** to the source
+with comments removed.
+
+### SEO
+
+The keyword map is `seo/KEYWORDS.md`: thirteen categories, every one grounded in
+something the page actually says, and a table of what was deliberately left out
+and why — no other city, no prices, no "أفضل شركة", no ratings. **No approved
+copy was rewritten for it.** The work landed in metadata, structured data and
+alt text, which is where there was no approved copy to touch.
+
+- `<title>` and the description now carry the two primary services and the one
+  city the site actually serves.
+- The page publishes a `LocalBusiness`, a `WebSite`, a `WebPage` and seven
+  `Service` nodes. Every value is copied from the page — the address from the
+  footer, the seven service descriptions word for word, the hours from the
+  «على مدار 24 ساعة» the page states twice. `areaServed` is Riyadh and nothing
+  more: «الرؤية» says the company *aims* to be the first choice في المملكة, and
+  an aim is not a coverage area. No `AggregateRating`, no `Offer`, no
+  `BreadcrumbList` on a one-page site.
+- `og:image` pointed at a 5041×3577 transparent PNG, which every social client
+  with a dark surface was compositing the blue wordmark onto black. It is now a
+  1200×630 card on the brand's own light ground, generated from the vector.
+- The ten photographs were named `h001`, `03`, `10`, `chair1`, `12`, `14`,
+  `15`, `05`, `11` and `15 (1)` — the last of which put a space and brackets in
+  a URL. They now say what they are.
+
+### Results
+
+Median of three mobile and five desktop Lighthouse runs against the production
+build, served with the compression `.htaccess` configures:
+
+| | mobile | desktop |
+|---|---|---|
+| Performance | **99** (98–100) | **100** (5/5) |
+| Accessibility | 100 | 100 |
+| Best Practices | 100 | 100 |
+| SEO | 100 | 100 |
+| LCP | 2.18s | 0.53s |
+| TBT | 28ms | 0ms |
+| CLS | **0.000** | 0.0009 (0.0120 in 1 of 5) |
+| FCP / Speed Index | 0.94s | 0.41s |
+| transfer | 249KB, 11 requests | 299KB, 14 requests |
+
+Mobile was 77 with compression and 70-ish without, and its Speed Index was
+20.2s. **Zero third-party requests**, down from three origins.
+
+All ten harnesses pass against the production build: 1,231 assertions. The
+responsive sweep runs 14 widths from 360 to 2560 with a full scroll at each —
+no horizontal overflow, no failed request, no console message anywhere.
+
+### Still open
+
+**LOW — desktop CLS is 0.0009, and 0.0120 in one run of five.** All of it is
+the webfont swap reflowing the desktop nav. Mobile is 0.000. The remedy is a
+metric-matched fallback (`size-adjust`/`ascent-override` on an `@font-face`),
+and it is not obviously worth it: the correct override differs per platform,
+so matching Segoe UI can make Noto Sans Arabic worse, and 0.012 is an eighth
+of the "good" threshold.
+
+**LOW — the company-profile link goes to Google Drive.** It is the one external
+destination on the page and the only asset outside this origin. It resolves for
+the client; it cannot be verified from this environment.

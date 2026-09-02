@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Single-page site: one canonical URL. The section anchors (#about,
-     #why-us, #services, #how-we-work, #contact) are fragments of this
-     document, not separate pages, so they are not listed as URLs. -->
+     #why-us, #services, #how-we-work, #vision-mission, #values, #contact)
+     are fragments of this document, not separate pages, so they are not
+     listed as URLs. /404.html is noindex and is not listed either.
+     lastmod is the date of the last content or metadata change; update it
+     when the page changes, not on every deploy. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://aunaldrb.com/</loc>
+    <lastmod>2026-09-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>

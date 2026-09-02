@@ -1,0 +1,17 @@
+{
+  "name": "aun-aldrb-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "عون الدرب للنقل المتخصص — static single-page site. index.html IS the application; there is no framework and no bundler. These scripts prepare what ships.",
+  "scripts": {
+    "images": "node tools-images.js",
+    "fonts": "node tools-fonts.js",
+    "brand": "node tools-brand-images.js",
+    "build": "node build.js",
+    "preview": "node tools-serve.js"
+  },
+  "devDependencies": {
+    "sharp": "^0.35.4"
+  },
+  "engines": { "node": ">=18" }
+}

@@ -5,22 +5,49 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#4975BA">
 
-  <title>عون الدرب للنقل المتخصص — نُعين ونُعاون</title>
-  <meta name="description" content="شركة عون الدرب للنقل المتخصص — نقل آمن ومجهّز لكبار السن وذوي الاحتياجات الخاصة والمرضى، بكوادر مدرّبة في بيئة تحترم الإنسانية.">
+  <!-- ==================================================================
+       SEO METADATA (STAGE M13 §07/§08/§09)
+       One page, one canonical URL, one intent: someone in Riyadh arranging
+       equipped transport for an older parent, a family member who uses a
+       wheelchair, or a patient with a hospital appointment.
+
+       The title leads with the name because brand search is the highest-
+       intent query this site gets, then carries the two services the page is
+       actually about and the one city it actually serves. The description is
+       the same promise in a sentence, and every noun in it is something the
+       page delivers: the three audiences, the equipped vehicles, the trained
+       crew, the round-the-clock availability, Riyadh.
+
+       Nothing here claims a branch, a price, a rating or a coverage area the
+       site does not have. seo/KEYWORDS.md records what was considered and
+       what was deliberately left out.
+       ================================================================== -->
+  <title>عون الدرب للنقل المتخصص | نقل كبار السن وذوي الاحتياجات الخاصة بالرياض</title>
+  <meta name="description" content="نقل متخصص في الرياض لكبار السن وذوي الاحتياجات الخاصة والمرضى: مركبات مجهزة للكراسي المتحركة والسرير الطبي، وطاقم مدرب، ومساندة عند الحاجة — على مدار الساعة.">
   <link rel="canonical" href="https://aunaldrb.com/">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 
   <!-- Open Graph / social sharing (approved content only) -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="عون الدرب للنقل المتخصص">
   <meta property="og:locale" content="ar_AR">
   <meta property="og:url" content="https://aunaldrb.com/">
-  <meta property="og:title" content="عون الدرب للنقل المتخصص — نُعين ونُعاون">
-  <meta property="og:description" content="نقل متخصص آمن ومجهّز لكبار السن وذوي الاحتياجات الخاصة والمرضى، بكوادر مدرّبة في بيئة تحترم الإنسانية.">
-  <meta property="og:image" content="https://aunaldrb.com/brand/aun-aldrb-logo.png">
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="عون الدرب للنقل المتخصص — نُعين ونُعاون">
-  <meta name="twitter:description" content="نقل متخصص آمن ومجهّز لكبار السن وذوي الاحتياجات الخاصة والمرضى، بكوادر مدرّبة في بيئة تحترم الإنسانية.">
-  <meta name="twitter:image" content="https://aunaldrb.com/brand/aun-aldrb-logo.png">
+  <meta property="og:title" content="عون الدرب للنقل المتخصص | نقل كبار السن وذوي الاحتياجات الخاصة بالرياض">
+  <meta property="og:description" content="نقل متخصص في الرياض لكبار السن وذوي الاحتياجات الخاصة والمرضى، بمركبات مجهزة وطاقم مدرب، في بيئة تحترم الإنسانية. نُعين ونُعاون.">
+  <!-- M13 §08 — this pointed at brand/aun-aldrb-logo.png: 5041x3577, 217KB,
+       and transparent, so every social client that composites onto a dark
+       surface put the blue wordmark on black. og-image.png is the same logo
+       on the brand's own light ground at the 1200x630 the cards are laid out
+       for, generated from the vector by tools-brand-images.js. -->
+  <meta property="og:image" content="https://aunaldrb.com/brand/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="شعار شركة عون الدرب للنقل المتخصص">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="عون الدرب للنقل المتخصص | نقل كبار السن وذوي الاحتياجات الخاصة بالرياض">
+  <meta name="twitter:description" content="نقل متخصص في الرياض لكبار السن وذوي الاحتياجات الخاصة والمرضى، بمركبات مجهزة وطاقم مدرب، في بيئة تحترم الإنسانية. نُعين ونُعاون.">
+  <meta name="twitter:image" content="https://aunaldrb.com/brand/og-image.png">
+  <meta name="twitter:image:alt" content="شعار شركة عون الدرب للنقل المتخصص">
 
   <!-- STAGE M12 §32 — the hero photograph is the LCP element on every screen
        size. Without this the browser cannot discover it until the parser has
@@ -28,19 +55,61 @@
        waits on it. Measured on a throttled 3G profile, this is the difference
        between the largest paint arriving at 7.9s and at 4.4s. It also needs
        its own preconnect: the image host is a third origin, and the TLS
-       handshake to it would otherwise begin only when the request does. -->
-  <link rel="preload" as="image" fetchpriority="high"
-        href="img/h001-1024.webp"
-        imagesrcset="img/h001-400.webp 400w, img/h001-560.webp 560w, img/h001-780.webp 780w, img/h001-1024.webp 1024w"
+       handshake to it would otherwise begin only when the request does.
+
+       M13 — the photographs are self-hosted now, so there is no third origin
+       left to preconnect to, and the hero is served as AVIF with the WebP
+       ladder behind it in <picture>. The preload carries type="image/avif",
+       which is what keeps a browser that cannot decode AVIF from fetching a
+       file it will not use: it skips this hint and takes the WebP through the
+       picture element instead. At 780w that is 46KB rather than 87KB, on the
+       one request that decides LCP. -->
+  <link rel="preload" as="image" fetchpriority="high" type="image/avif"
+        href="img/wheelchair-ramp-boarding-1024.avif"
+        imagesrcset="img/wheelchair-ramp-boarding-400.avif 400w, img/wheelchair-ramp-boarding-560.avif 560w, img/wheelchair-ramp-boarding-780.avif 780w, img/wheelchair-ramp-boarding-1024.avif 1024w"
         imagesizes="(min-width:1024px) min(50vw, 1280px), 100vw">
 
-  <!-- FONTS — approved pairing (IBM Plex Sans Arabic + Cairo) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@500;600;700&family=Cairo:wght@400;500&display=swap">
+  <!-- FONTS — approved pairing (IBM Plex Sans Arabic + Cairo), self-hosted.
+       STAGE M13 §19/§26 — this was a stylesheet on fonts.googleapis.com. It
+       was render-blocking, on a third origin, and it sat in front of every
+       font file: DNS, TLS and a round trip before the browser had seen a
+       single face. On a throttled mobile profile it was the largest single
+       cost on the page, and when the request was slow the document stayed
+       blank for as long as the browser was willing to wait for it.
+       The @font-face rules now live in the inline stylesheet below, so the
+       faces are discovered while the CSS is parsed with nothing in front of
+       them, and the files come from this origin under this origin's cache
+       rules. Regenerate with `node tools-fonts.js`; both families are under
+       the SIL Open Font License 1.1, reproduced in fonts/OFL.txt. -->
 
   <!-- GLOBAL DESIGN SYSTEM (Stage 02 + Stage 03 additions) — single source of truth -->
   <style>
+/* ==========================================================================
+   00 · WEBFONTS (STAGE M13 §19/§20)
+   --------------------------------------------------------------------------
+   Five weights, and only the five the design system uses:
+     Cairo 400/500                    body copy · .hero__lead
+     IBM Plex Sans Arabic 500/600/700 nav & labels · h3/h4 · h1/h2 & the phone
+   Two subsets each, and only two: `arabic` carries every word of copy and is
+   shipped whole; `latin` carries the phone number, 24/7 and the numerals and
+   is cut to printable ASCII. Cairo is a variable font and Google serves one
+   file for both its weights, so one file ships for both, its wght axis
+   limited to 400–500.
+   font-display:swap on every face: the fallback stack is a system Arabic
+   sans, so text is readable from first paint and is never invisible while a
+   face is in flight. The stacks are matched in --font-heading/--font-body
+   below, which keeps the swap from moving the layout.
+   Generated by tools-fonts.js — do not hand-edit these rules.
+   ========================================================================== */
+@font-face{font-family:'Cairo';font-style:normal;font-weight:400 500;font-display:swap;src:url(fonts/cairo-400500-arabic.woff2) format('woff2');unicode-range:U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC4, U+10EFC-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1}
+@font-face{font-family:'Cairo';font-style:normal;font-weight:400 500;font-display:swap;src:url(fonts/cairo-400500-latin.woff2) format('woff2');unicode-range:U+0020-007E, U+00A0, U+200C-200E, U+2010-2011}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-500-arabic.woff2) format('woff2');unicode-range:U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC4, U+10EFC-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-500-latin.woff2) format('woff2');unicode-range:U+0020-007E, U+00A0, U+200C-200E, U+2010-2011}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-600-arabic.woff2) format('woff2');unicode-range:U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC4, U+10EFC-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-600-latin.woff2) format('woff2');unicode-range:U+0020-007E, U+00A0, U+200C-200E, U+2010-2011}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-700-arabic.woff2) format('woff2');unicode-range:U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC4, U+10EFC-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-700-latin.woff2) format('woff2');unicode-range:U+0020-007E, U+00A0, U+200C-200E, U+2010-2011}
+
 /* ==========================================================================
    AOUN ALDARB — عون الدرب للنقل المتخصص
    STAGE 02 · WEBSITE DESIGN SYSTEM
@@ -3094,12 +3163,347 @@ html:not(.js) .hww__path{display:none}
   .service__cta:active svg,.link-arrow:active svg{transform:none}
 }
 
+/* ==========================================================================
+   STAGE M13 · RENDERING WORK BELOW THE FOLD — MEASURED, NOT ADOPTED
+   --------------------------------------------------------------------------
+   The document is one page and about 14,900px tall on a phone, so every
+   pixel of it is styled, laid out and painted before the first frame. That
+   made content-visibility:auto on the last four blocks an obvious candidate,
+   and it was built and measured: with the render-blocking font stylesheet
+   still in place it moved Total Blocking Time from 320ms to 140ms.
+
+   It is not here, because once the fonts were self-hosted and the hero was
+   re-encoded, the work it was skipping had stopped being the bottleneck.
+   Paired runs, four each, alternating: 98 with it and 98 without, LCP within
+   2ms of each other, TBT 0ms against 71ms — both far inside the 200ms the
+   metric cares about.
+
+   What it still cost was real. A skipped section renders only once it is
+   near the viewport, so a jump straight to #contact showed the section a
+   few hundred milliseconds late, and it came back blank in full-page
+   screenshot capture. contain-intrinsic-size is also a single number per
+   section while these sections are 1075px tall at 390 and 783px at 1440, so
+   the page reported a height it did not have until it had been scrolled.
+
+   Kept as a note rather than as code: the technique is right for this shape
+   of page, and worth revisiting if the page grows much longer, but paying
+   for it at no measured gain is not.
+   ========================================================================== */
+
 </style>
   <!-- STAGE 02 — marks the document script-capable BEFORE first paint, so the
        reveal system can hide content without risking a blank page if JS fails. -->
   <script>document.documentElement.classList.add("js")</script>
 
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4bWxuczppbmtzY2FwZT0iaHR0cDovL3d3dy5pbmtzY2FwZS5vcmcvbmFtZXNwYWNlcy9pbmtzY2FwZSIgdmVyc2lvbj0iMS4xIiB3aWR0aD0iNDU1LjA1IiBoZWlnaHQ9IjE2Ni4yOCIgdmlld0JveD0iNzAuMzggMTI1Ljg4IDQ1NS4wNSAxNjYuMjgiPgo8ZGVmcz4KPGNsaXBQYXRoIGlkPSJjbGlwXzEiPgo8cGF0aCB0cmFuc2Zvcm09Im1hdHJpeCgxLDAsMCwtMSwwLDQxOS41MjgpIiBkPSJNMCA0MTkuNTI4SDU5NS4yNzZWMEgwWiIvPgo8L2NsaXBQYXRoPgo8L2RlZnM+CjxnIGlua3NjYXBlOmdyb3VwbW9kZT0ibGF5ZXIiIGlua3NjYXBlOmxhYmVsPSJMYXllciAxIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXBfMSkiPgo8cGF0aCB0cmFuc2Zvcm09Im1hdHJpeCgxLDAsMCwtMSwyMzIuMTgyMSwyMjkuNjQ1MjIpIiBkPSJNMCAwQy0uNjU1IDAtMS4wNjItLjQwNi0xLjA2Mi0xLjA2MVYtNS4zMTNDLTEuMDYyLTUuOTY3LS42NTUtNi4zNzIgMC02LjM3MkgzLjk2MUM0LjYxNC02LjM3MiA1LjAyMS01Ljk2NyA1LjAyMS01LjMxM1YtMS4wNjFDNS4wMjEtLjQwNiA0LjYxNCAwIDMuOTYxIDBaIiBmaWxsPSIjNGE3NmJiIi8+CjxwYXRoIHRyYW5zZm9ybT0ibWF0cml4KDEsMCwwLC0xLDIyMC4yOTc5LDIyNS4xODMzMikiIGQ9Ik0wIDBIMjguMDIxQzMwLjY3NiAwIDMyLjYwMSAuNjUyIDMzLjczOCAxLjkzNyAzNC44NiAzLjIwNyAzNS40MjkgNS4xODUgMzUuNDI5IDcuODE4VjIzLjcyMUMzNS40MjkgMjQuMzc1IDM1LjAyNCAyNC43ODIgMzQuMzY5IDI0Ljc4MkgzMC42NDJDMjkuOTg4IDI0Ljc4MiAyOS41ODEgMjQuMzc1IDI5LjU4MSAyMy43MjFWOC4xMDlDMjkuNTgxIDcuMDk2IDI5LjM5OCA2LjM3NiAyOS4wNTIgNi4wMjggMjguNyA1LjY3NyAyOC4wNzkgNS40OTggMjcuMjA1IDUuNDk4SC44NzRDLjAzOSA1LjQ5OC0uNTYzIDUuNjc3LS45MTUgNi4wMjgtMS4yNjEgNi4zNzUtMS40NDUgNy4wOTUtMS40NDUgOC4xMDlWMTkuOTkzQy0xLjQ0NSAyMC42NDYtMS44NTEgMjEuMDUzLTIuNTA1IDIxLjA1M0gtNi4yMzRDLTYuODg3IDIxLjA1My03LjI5MiAyMC42NDYtNy4yOTIgMTkuOTkzVjcuODE4Qy03LjI5MiA1LjE4NS02LjcyMyAzLjIwNy01LjYgMS45MzctNC40NjIgLjY1Mi0yLjU3OCAwIDAgMCIgZmlsbD0iIzRhNzZiYiIvPgo8cGF0aCB0cmFuc2Zvcm09Im1hdHJpeCgxLDAsMCwtMSwyNjkuNTIyLDIwMC40MDIwMSkiIGQ9Ik0wIDBILTMuNzI4Qy00LjM4MSAwLTQuNzg4LS40MDUtNC43ODgtMS4wNlYtMjYuNEMtNC43ODgtMjkuNDUzLTYuMTM1LTMwLjg3NC05LjAzLTMwLjg3NEgtMTAuMzY5Qy0xMS4wMjItMzAuODc0LTExLjQyOS0zMS4yODEtMTEuNDI5LTMxLjkzNVYtMzUuMzEzQy0xMS40MjktMzUuOTY3LTExLjAyMi0zNi4zNzQtMTAuMzY5LTM2LjM3NEgtOC43OTdDLTUuNjA5LTM2LjM3NC0zLjE0My0zNS41MDItMS40NjQtMzMuNzgyIC4yMTEtMzIuMDY2IDEuMDYyLTI5LjU0NCAxLjA2Mi0yNi4yODNWLTEuMDZDMS4wNjItLjQwNSAuNjU1IDAgMCAwIiBmaWxsPSIjNGE3NmJiIi8+CjxwYXRoIHRyYW5zZm9ybT0ibWF0cml4KDEsMCwwLC0xLDM1My45NDA0LDIyMy4yNDU4MikiIGQ9Ik0wIDBDMS4xMjMgMS4yNjkgMS42OTIgMy4yNDcgMS42OTIgNS44OFYzNy41N0MxLjY5MiAzOC4yMjQgMS4yODcgMzguNjMxIC42MzMgMzguNjMxSC0zLjA5NkMtMy43NDkgMzguNjMxLTQuMTU1IDM4LjIyNC00LjE1NSAzNy41N1Y2LjE3MUMtNC4xNTUgNS4xNTgtNC4zMzkgNC40MzktNC42ODUgNC4wOTItNS4wMzYgMy43NC01LjYzOSAzLjU2Mi02LjQ3NSAzLjU2MkgtNDkuNTgxQy01MS4wNjggMy41NjItNTIuMjYzIDMuODY2LTUzLjEyNyA0LjQ2Ny01My45NDggNS4wMzYtNTQuMzQ3IDUuODc5LTU0LjM0NyA3LjA0NVYxMy4wNDVDLTU0LjM0NyAxNi43NDItNTUuMzQxIDE5LjUwOC01Ny4zMDMgMjEuMjY2LTU5LjI0OSAyMy4wMDgtNjEuNzg2IDIzLjg5Mi02NC44NDUgMjMuODkySC03My40MDhDLTc0LjA2MyAyMy44OTItNzQuNDY4IDIzLjQ4NS03NC40NjggMjIuODMyVjE5LjQ1M0MtNzQuNDY4IDE4Ljc5OS03NC4wNjMgMTguMzk0LTczLjQwOCAxOC4zOTRILTY2LjY1MUMtNjIuNTAzIDE4LjM5NC02MC40ODcgMTYuNjI1LTYwLjQ4NyAxMi45ODdWOC4zMjdDLTYwLjQ4NyA3LjM1Mi02MC41NDIgNi41MzYtNjAuNjU1IDUuOTA1LTYwLjc1NSA1LjMzNC02MC45NTUgNC44NzEtNjEuMjQ2IDQuNTMtNjEuNTI5IDQuMTk5LTYxLjk1OCAzLjk1Ni02Mi41MiAzLjgwOC02My4xNCAzLjY0NC02My45NzkgMy41NjItNjUuMDE5IDMuNTYySC03Ni4xNDZDLTc2Ljc5OSAzLjU2Mi03Ny4yMDcgMy4xNTQtNzcuMjA3IDIuNTAxVi0uODc4Qy03Ny4yMDctMS41MzEtNzYuNzk5LTEuOTM3LTc2LjE0Ni0xLjkzN0gtNjMuMjEzQy02MS4yOTItMS45MzctNTkuNzAzLTEuNjgxLTU4LjQ4NS0xLjE3My01Ny40NzgtLjc1NC01Ni42MzgtLjA1NS01NS45NzggLjkwNy01NS40OTUgLjA4My01NC44MTQtLjU2OS01My45NDMtMS4wMzYtNTIuODMtMS42MzUtNTEuNTYtMS45MzctNTAuMTY0LTEuOTM3SC01LjYwMUMtMy4wMjItMS45MzctMS4xMzYtMS4yODYgMCAwIiBmaWxsPSIjNGE3NmJiIi8+CjxwYXRoIHRyYW5zZm9ybT0ibWF0cml4KDEsMCwwLC0xLDM2My44OTQ1LDIyNS4xODIzMSkiIGQ9Ik0wIDBIMy43MjlDNC4zODIgMCA0Ljc4OCAuNDA1IDQuNzg4IDEuMDU5VjM5LjUwN0M0Ljc4OCA0MC4xNiA0LjM4MiA0MC41NjcgMy43MjkgNDAuNTY3SDBDLS42NTUgNDAuNTY3LTEuMDYyIDQwLjE2LTEuMDYyIDM5LjUwN1YxLjA1OUMtMS4wNjIgLjQwNS0uNjU1IDAgMCAwIiBmaWxsPSIjNGE3NmJiIi8+CjxwYXRoIHRyYW5zZm9ybT0ibWF0cml4KDEsMCwwLC0xLDQwMi42MzI4LDIwNC45MTAzMSkiIGQ9Ik0wIDBIMy45NkM0LjYxNSAwIDUuMDIyIC40MDcgNS4wMjIgMS4wNTlWNS4zMTNDNS4wMjIgNS45NjUgNC42MTUgNi4zNzIgMy45NiA2LjM3MkgwQy0uNjU1IDYuMzcyLTEuMDYxIDUuOTY1LTEuMDYxIDUuMzEzVjEuMDU5Qy0xLjA2MSAuNDA3LS42NTUgMCAwIDAiIGZpbGw9IiM0YTc2YmIiLz4KPHBhdGggdHJhbnNmb3JtPSJtYXRyaXgoMSwwLDAsLTEsNDE2Ljc5ODgsMjIzLjUzOTcyKSIgZD0iTTAgMFYxNy4wNjdDMCAxNy43MjEtLjQwNSAxOC4xMjktMS4wNTkgMTguMTI5SC00Ljc4OEMtNS40NDEgMTguMTI5LTUuODQ4IDE3LjcyMS01Ljg0OCAxNy4wNjdWLjA1N0MtNS44NDgtMi42NTEtNi41OTEtNC42MjQtOC4wNTgtNS44MDQtOS41NTctNy4wMDktMTEuNTE0LTcuNjItMTMuODc1LTcuNjItMTQuODM5LTcuNjItMTUuODM3LTcuNDg5LTE2Ljg0Mi03LjIyOS0xNy44MzEtNi45NzItMTguNzU3LTYuNTM2LTE5LjU5Ny01LjkzNC0yMC40MjQtNS4zNDItMjEuMTA5LTQuNTE4LTIxLjYzNS0zLjQ4Mi0yMi4xNTktMi40NTEtMjIuNDI3LTEuMTI0LTIyLjQyNyAuNDY1LTIyLjQyNyAyLjE0NC0yMi4xMTUgMy43Ny0yMS41MDEgNS4yOTctMjAuODczIDYuODU0LTIwLjIxIDguMTgxLTE5LjUyOSA5LjI0MS0xOS4xOTIgOS43NzgtMTkuMzE4IDEwLjMyLTE5Ljg3OSAxMC42N0wtMjMuMDY2IDEyLjQxQy0yMy40MTQgMTIuNjE5LTIzLjcxOSAxMi42ODItMjQgMTIuNjA5LTI0LjE1OCAxMi41NjktMjQuMzgyIDEyLjQ2LTI0LjUxNyAxMi4yMTYtMjUuNTQ3IDEwLjc1Mi0yNi40NiA4LjkyLTI3LjIyOCA2Ljc3MS0yNy45OTkgNC42MTItMjguMzkxIDIuMzM1LTI4LjM5MSAwLTI4LjM5MS0yLjExNi0yOC4wNDUtNC4wMTEtMjcuMzY0LTUuNjMyLTI2LjY4Mi03LjI2Mi0yNS43MS04LjY2LTI0LjQ3OS05Ljc5LTIzLjI1LTEwLjkxNy0yMS43NDItMTEuNzg0LTE5Ljk5Ni0xMi4zNjgtMTguMjY0LTEyLjk0NC0xNi4zMDMtMTMuMjM2LTE0LjE2NS0xMy4yMzYtOS42MzQtMTMuMjM2LTYuMTAyLTEyLjA1NC0zLjY3MS05LjcyNS0xLjIzMy03LjM4OCAwLTQuMTE2IDAgMCIgZmlsbD0iIzRhNzZiYiIvPgo8cGF0aCB0cmFuc2Zvcm09Im1hdHJpeCgxLDAsMCwtMSw0MzAuMzA5NiwyMDYuOTg5NDEpIiBkPSJNMCAwQzEuMDYgMS40MzkgMi40NDggMi4xMzcgNC4yNDcgMi4xMzcgNi4yNjkgMi4xMzcgNy42NzIgMS41MDEgOC41MzggLjE5NiA5LjQzMy0xLjE1NiA5Ljg4Ni0zLjA4NiA5Ljg4Ni01LjU0MlYtMTIuNjk2SDQuNDc5QzIuNDQxLTEyLjY5NiAuODk3LTEyLjIxLS4xMTMtMTEuMjUzLTEuMTE3LTEwLjMwMi0xLjYyNi04LjQ5OS0xLjYyNi01Ljg5LTEuNjI2LTMuNDQzLTEuMDc5LTEuNDYxIDAgME0tNC4zNTQtMTUuNDcyQy0zLjMzMi0xNi40MzEtMi4wODItMTcuMTM2LS42MzYtMTcuNTYyIC43NzctMTcuOTgxIDIuMzg0LTE4LjE5NCA0LjEzLTE4LjE5NEg5Ljg4NlYtMTkuMjNDOS44ODYtMjAuMjUxIDkuNzU5LTIxLjEwNyA5LjUxLTIxLjc2OSA5LjI2Ny0yMi40MSA4LjkzMi0yMi45MTEgOC41MTMtMjMuMjY0IDguMDg0LTIzLjYyNCA3LjU2OC0yMy44ODYgNi45NzktMjQuMDQyIDYuMzYyLTI0LjIwNSA1LjY3Ny0yNC4yODcgNC45NDYtMjQuMjg3SC0yLjA0NUMtMi42OTgtMjQuMjg3LTMuMTA0LTI0LjY5NC0zLjEwNC0yNS4zNDdWLTI4LjcyNkMtMy4xMDQtMjkuMzgxLTIuNjk4LTI5Ljc4Ny0yLjA0NS0yOS43ODdINS4xNzhDNi43MzMtMjkuNzg3IDguMTcxLTI5LjU4MyA5LjQ1Ny0yOS4xODIgMTAuNzY0LTI4Ljc3NCAxMS44OTUtMjguMTMgMTIuODE1LTI3LjI3IDEzLjczOC0yNi40MDkgMTQuNDY0LTI1LjI5MSAxNC45NzUtMjMuOTQ0IDE1LjQ3OS0yMi42MTIgMTUuNzM0LTIwLjk4NyAxNS43MzQtMTkuMTE1Vi0xOC4xOTRIODQuOTg2Qzg1LjY0LTE4LjE5NCA4Ni4wNDctMTcuNzg4IDg2LjA0Ny0xNy4xMzNWLTEzLjc1NUM4Ni4wNDctMTMuMTAyIDg1LjY0LTEyLjY5NiA4NC45ODYtMTIuNjk2SDcyLjQyNkM3Mi4xMDQtMTIuNTggNzEuNjYzLTEyLjM3NSA3MS4xMTMtMTIuMDgxIDcwLjU0Mi0xMS43NzkgNjkuOTY5LTExLjMxMyA2OS40MDYtMTAuNjk1IDY4Ljg0MS0xMC4wNzUgNjguMzMtOS4yNzQgNjcuODg2LTguMzExIDY3LjQ1MS03LjM3IDY3LjIzMS02LjIwMyA2Ny4yMzEtNC44NDEgNjcuMjMxLTIuODMgNjcuNzgyLTEuMTM3IDY4Ljg3IC4xODUgNjkuOTM1IDEuNDgxIDcxLjYxMyAyLjEzNyA3My44NTkgMi4xMzcgNzYuMzc3IDIuMTM3IDc4LjQxMyAxLjIgODAuMDgtLjcyNSA4MC40NzktMS4xOTQgODEuMDI4LTEuMjQxIDgxLjU2MS0uODQyTDg0LjEwOCAxLjI0MkM4NC42MTggMS42MjUgODQuNzI4IDIuMTY5IDg0LjM5IDIuNzA5IDgzLjMzOSA0LjI0NSA4MS45MjYgNS40NjQgODAuMTkgNi4zMzMgNzguNDYgNy4xOTcgNzYuMzkgNy42MzYgNzQuMDM0IDcuNjM2IDcxLjQ0OCA3LjYzNiA2OS4yOTEgNy4yMTcgNjcuNjE4IDYuMzkzIDY1Ljk0OSA1LjU2NiA2NC42MDggNC41MTIgNjMuNjM3IDMuMjU2IDYyLjY2OSAyLjAwNSA2MS45OTIgLjYyMiA2MS42My0uODU0IDYxLjI3MS0yLjMwMyA2MS4wOTEtMy42NjYgNjEuMDkxLTQuOTAxIDYxLjA5MS02Ljg2NCA2MS40MTktOC41NzggNjIuMDY1LTkuOTkyIDYyLjUzMS0xMS4wMTMgNjMuMDgxLTExLjkxOSA2My43MDQtMTIuNjk2SDE1LjczNFYtNS41NDJDMTUuNzM0LS45NjkgMTQuNzEgMi40MDYgMTIuNjg2IDQuNDkgMTAuNjYxIDYuNTc4IDcuODIgNy42MzYgNC4yNDcgNy42MzYgMi42OCA3LjYzNiAxLjE3MiA3LjM2MS0uMjM2IDYuODE3LTEuNjU2IDYuMjctMi45MTkgNS40MjgtMy45OTEgNC4zMTQtNS4wNjIgMy4yMDMtNS45MiAxLjc3NC02LjU0MiAuMDY5LTcuMTU5LTEuNjI1LTcuNDczLTMuNjMtNy40NzMtNS44OS03LjQ3My04LjE0OS03LjIxLTEwLjA4MS02LjY5Mi0xMS42MzQtNi4xNjQtMTMuMjE2LTUuMzc4LTE0LjUwOC00LjM1NC0xNS40NzIiIGZpbGw9IiM0YTc2YmIiLz4KPHBhdGggdHJhbnNmb3JtPSJtYXRyaXgoMSwwLDAsLTEsMjIwLjkxNDEsMjcwLjk4NDE0KSIgZD0iTTAgMCA0LjYzNSAxMy4yNTggOS4yMjYgMFpNNy4zMzIgMjAuNjE0QzcuMTcgMjEuMTMzIDYuNzc0IDIxLjQzIDYuMjQ0IDIxLjQzSDMuMDc5QzIuNTc0IDIxLjQzIDIuMTk1IDIxLjEyOSAyLjA0NCAyMC42MjZMLTkuNDU5LTExLjU0M0MtOS41NzYtMTEuOTM4LTkuNDc0LTEyLjE5Mi05LjM2OC0xMi4zMzYtOS4yNjMtMTIuNDc3LTkuMDU1LTEyLjY0NS04LjY1OS0xMi42NDVILTUuMjUxQy00Ljk2Ni0xMi42NDUtNC40NDktMTIuNTQxLTQuMTY2LTExLjgzOEwtMS43NDctNC45NDlIMTAuOTdMMTMuMzg1LTExLjgxN0MxMy41NDMtMTIuMzQzIDEzLjk0LTEyLjY0NSAxNC40NzQtMTIuNjQ1SDE3Ljg4NUMxOC4yNzktMTIuNjQ1IDE4LjQ4Ny0xMi40NzcgMTguNTkyLTEyLjMzNiAxOC42OTgtMTIuMTkyIDE4LjgtMTEuOTM4IDE4LjY3Ni0xMS41MjFaIiBmaWxsPSIjNGE3NmJiIi8+CjxwYXRoIHRyYW5zZm9ybT0ibWF0cml4KDEsMCwwLC0xLDI2Mi42MjQsMjY5LjY5MjEpIiBkPSJNMCAwQy0uMDMyLS44NTctLjA4OC0xLjYxMy0uMTY3LTIuMjQ2LS4yNDctMi44ODYtLjMyNy0zLjQyLS40MDUtMy44NTEtLjQ4Mi00LjI2NC0uNTY2LTQuNjExLS42NTktNC44ODUtMS4xNDQtNi4zNy0xLjkzOC03LjUxOS0zLjAxOC04LjI5OC00LjA5Ny05LjA4LTUuNTI1LTkuNDc2LTcuMjY3LTkuNDc2LTkuMDA2LTkuNDc2LTEwLjQyOC05LjA4LTExLjQ5MS04LjMwMS0xMi41NTctNy41MjEtMTMuMzQyLTYuMzctMTMuODI2LTQuODgyLTEzLjkxOC00LjYwNC0xNC4wMDQtNC4yNTctMTQuMDc5LTMuODQ5LTE0LjE1OS0zLjQxOS0xNC4yMzgtMi44ODYtMTQuMzE4LTIuMjQ2LTE0LjM5Ny0xLjYxMy0xNC40NTQtLjg1Ny0xNC40ODUgLjAwMS0xNC41MTcgLjg3My0xNC41MzIgMS45MDUtMTQuNTMyIDMuMTAxLTE0LjUzMiA0LjI5NS0xNC41MTcgNS4zMjgtMTQuNDg1IDYuMTk5LTE0LjQ1NCA3LjA1OC0xNC4zOTcgNy44MTQtMTQuMzE4IDguNDQ4LTE0LjIzOCA5LjA4NS0xNC4xNTkgOS42Mi0xNC4wNzkgMTAuMDUzLTE0LjAwNCAxMC40NTgtMTMuOTE4IDEwLjgwNi0xMy44MjYgMTEuMDg2LTEzLjM0MiAxMi41NzEtMTIuNTU3IDEzLjcyMi0xMS40OTEgMTQuNTAyLTEwLjQyNiAxNS4yOC05LjAwNSAxNS42NzctNy4yNjcgMTUuNjc3LTUuNTI3IDE1LjY3Ny00LjA5NyAxNS4yOC0zLjAxOCAxNC41LTEuOTM4IDEzLjcyLTEuMTQ0IDEyLjU3MS0uNjU4IDExLjA4NC0uNTY2IDEwLjgxMi0uNDgyIDEwLjQ2NC0uNDA3IDEwLjA1My0uMzI3IDkuNjIxLS4yNDcgOS4wODctLjE2NyA4LjQ0Ny0uMDg4IDcuODE0LS4wMzIgNy4wNTggMCA2LjE5OSAuMDMyIDUuMzI4IC4wNDggNC4yOTUgLjA0OCAzLjEwMSAuMDQ4IDEuOTA1IC4wMzIgLjg3MyAwIDBNNS4xOSA5LjE1OUM1LjEyMyA5Ljg4MSA1LjAyOSAxMC41MTQgNC45MTIgMTEuMDQ0IDQuNzk1IDExLjU3OSA0LjY1MSAxMi4xMDQgNC40ODYgMTIuNjAxIDMuNjExIDE1LjI1NyAyLjE0NiAxNy4yOTEgLjEzNSAxOC42NDUtMS44NzEgMTkuOTkxLTQuMzYxIDIwLjY3My03LjI2NyAyMC42NzMtMTAuMTQzIDIwLjY3My0xMi42MTYgMTkuOTkxLTE0LjYyIDE4LjY0NS0xNi42MzMgMTcuMjg5LTE4LjA5NyAxNS4yNTctMTguOTcxIDEyLjYwMi0xOS4xMzkgMTIuMTAxLTE5LjI4MSAxMS41NzYtMTkuMzk3IDExLjA0Ni0xOS41MTYgMTAuNTA4LTE5LjYwNyA5Ljg5Mi0xOS42NzYgOS4xNTktMTkuNzQgOC40NTQtMTkuNzkyIDcuNjAxLTE5LjgyMiA2LjYyMy0xOS44NTYgNS42NDYtMTkuODcyIDQuNDcxLTE5Ljg3MiAzLjEwMS0xOS44NzIgMS43MzEtMTkuODU2IC41NTctMTkuODIyLS40MjItMTkuNzkyLTEuNC0xOS43NC0yLjI1NC0xOS42NzYtMi45NTktMTkuNjA3LTMuNjkyLTE5LjUxNi00LjMwOS0xOS4zOTctNC44NDItMTkuMjgzLTUuMzcyLTE5LjEzOS01Ljg5Ny0xOC45NzEtNi4zOTktMTguMDk3LTkuMDU2LTE2LjYzMy0xMS4wOS0xNC42Mi0xMi40NDMtMTIuNjE3LTEzLjc4OS0xMC4xNDQtMTQuNDczLTcuMjY3LTE0LjQ3My00LjM1OC0xNC40NzMtMS44NjgtMTMuNzg5IC4xMzUtMTIuNDQzIDIuMTQ2LTExLjA5MSAzLjYxMS05LjA1OCA0LjQ4Ni02LjQwMiA0LjY1My01LjkgNC43OTYtNS4zNzUgNC45MTItNC44NDMgNS4wMjktNC4zMTMgNS4xMjMtMy42OCA1LjE5LTIuOTU5IDUuMjU0LTIuMjYgNS4zMDUtMS40MDYgNS4zMzgtLjQyMiA1LjM3IC41NTcgNS4zODYgMS43MzEgNS4zODYgMy4xMDEgNS4zODYgNC40NzEgNS4zNyA1LjY0NSA1LjMzOCA2LjYyMyA1LjMwNSA3LjYwNSA1LjI1NCA4LjQ1OSA1LjE5IDkuMTU5IiBmaWxsPSIjNGE3NmJiIi8+CjxwYXRoIHRyYW5zZm9ybT0ibWF0cml4KDEsMCwwLC0xLDI5Ny4yNDMyLDI0OS41NTQ0MikiIGQ9Ik0wIDBILTMuMzYxQy0zLjk0NiAwLTQuMzI1LS4zNzgtNC4zMjUtLjk2NVYtMjIuMDA0Qy00LjMyNS0yNC41NTYtNC45NTktMjYuNDgzLTYuMjA3LTI3LjczLTcuNDU2LTI4Ljk3OS05LjEzNi0yOS42MTItMTEuMjAzLTI5LjYxMi0xMy4zMDEtMjkuNjEyLTE0Ljk5OC0yOC45NzktMTYuMjQ2LTI3LjczLTE3LjQ5NS0yNi40ODMtMTguMTI3LTI0LjU1Ni0xOC4xMjctMjIuMDA0Vi0uOTY1Qy0xOC4xMjctLjM3OC0xOC41MDUgMC0xOS4wOTMgMEgtMjIuNDUyQy0yMy4wMzggMC0yMy40MTctLjM3OC0yMy40MTctLjk2NVYtMjIuMDU0Qy0yMy40MTctMjYuMDk2LTIyLjMyLTI5LjIzMy0yMC4xNi0zMS4zNzktMTgtMzMuNTIyLTE0Ljk4Ni0zNC42MDgtMTEuMjAzLTM0LjYwOC03LjQ1LTM0LjYwOC00LjQ1NS0zMy41MjItMi4yOTQtMzEuMzc5LS4xMzItMjkuMjMzIC45NjUtMjYuMDk2IC45NjUtMjIuMDU0Vi0uOTY1Qy45NjUtLjM3OCAuNTg0IDAgMCAwIiBmaWxsPSIjNGE3NmJiIi8+CjxwYXRoIHRyYW5zZm9ybT0ibWF0cml4KDEsMCwwLC0xLDMyOC44NTE2LDI0OS41NTQ0MikiIGQ9Ik0wIDBILTMuMDY4Qy0zLjY1MyAwLTQuMDMyLS4zNzgtNC4wMzItLjk2NVYtMjQuNDEzTC0xOC4zMjQtLjc1MkMtMTguNTY1LS4yNjctMTkuMDEzIDAtMTkuNTc5IDBILTIyLjY5NkMtMjMuMjgyIDAtMjMuNjU5LS4zNzgtMjMuNjU5LS45NjVWLTMzLjEwOUMtMjMuNjU5LTMzLjY5NS0yMy4yODItMzQuMDc0LTIyLjY5Ni0zNC4wNzRILTE5LjYyN0MtMTkuMDQxLTM0LjA3NC0xOC42NjItMzMuNjk1LTE4LjY2Mi0zMy4xMDlWLTkuODMxTC00LjM3MS0zMy4zMjNDLTQuMTI5LTMzLjgwOC0zLjY4NC0zNC4wNzQtMy4xMTctMzQuMDc0SDBDLjU4Ni0zNC4wNzQgLjk2Ni0zMy42OTUgLjk2Ni0zMy4xMDlWLS45NjVDLjk2Ni0uMzc4IC41ODYgMCAwIDAiIGZpbGw9IiM0YTc2YmIiLz4KPHBhdGggdHJhbnNmb3JtPSJtYXRyaXgoMSwwLDAsLTEsMzU1LjI5LDI3MC45ODQxNCkiIGQ9Ik0wIDAgNC42MzMgMTMuMjU4IDkuMjI0IDBaTTcuMzMgMjAuNjE0QzcuMTcgMjEuMTMzIDYuNzcyIDIxLjQzIDYuMjQyIDIxLjQzSDMuMDc3QzIuNTcyIDIxLjQzIDIuMTkzIDIxLjEyOSAyLjA0MyAyMC42MjZMLTkuNDYxLTExLjU0M0MtOS41NzctMTEuOTM4LTkuNDc2LTEyLjE5Mi05LjM2OS0xMi4zMzYtOS4yNjUtMTIuNDc3LTkuMDU3LTEyLjY0NS04LjY2MS0xMi42NDVILTUuMjUyQy00Ljk2OC0xMi42NDUtNC40NS0xMi41NDEtNC4xNjgtMTEuODM4TC0xLjc0Ny00Ljk0OUgxMC45N0wxMy4zODMtMTEuODE3QzEzLjU0Mi0xMi4zNDMgMTMuOTM4LTEyLjY0NSAxNC40NzMtMTIuNjQ1SDE3Ljg4M0MxOC4yNzgtMTIuNjQ1IDE4LjQ4NS0xMi40NzcgMTguNTktMTIuMzM2IDE4LjY5Ni0xMi4xOTIgMTguOC0xMS45MzggMTguNjc1LTExLjUyMVoiIGZpbGw9IiM0YTc2YmIiLz4KPHBhdGggdHJhbnNmb3JtPSJtYXRyaXgoMSwwLDAsLTEsMzk5LjE3OTcsMjc4LjYzMDUpIiBkPSJNMCAwSC0xNS41OTVWMjguMTExQy0xNS41OTUgMjguNjk4LTE1Ljk3MyAyOS4wNzYtMTYuNTU3IDI5LjA3NkgtMTkuOTE5Qy0yMC41MDUgMjkuMDc2LTIwLjg4MyAyOC42OTgtMjAuODgzIDI4LjExMVYtNC4wMzJDLTIwLjg4My00LjYyLTIwLjUwNS00Ljk5Ny0xOS45MTktNC45OTdIMEMuNTg4LTQuOTk3IC45NjYtNC42MiAuOTY2LTQuMDMyVi0uOTY1Qy45NjYtLjM3OSAuNTg4IDAgMCAwIiBmaWxsPSIjNGE3NmJiIi8+CjxwYXRoIHRyYW5zZm9ybT0ibWF0cml4KDEsMCwwLC0xLDQyMy4zOTU1LDI2OS44Mzc2MykiIGQ9Ik0wIDBDLS4wMy0uODY4LS4wNzMtMS42MDEtLjEyLTIuMTk0LS4xNjctMi43NjgtLjIzNi0zLjI0Mi0uMzI4LTMuNjA0LS40MTktMy45NzktLjUxNi00LjMxLS42MDgtNC41ODgtMS4xMi02LjA5MS0xLjk0OC03LjE3NC0zLjA3LTcuODA5LTQuMjI2LTguNDYyLTUuNzg1LTguNzk0LTcuNzA1LTguNzk0SC0xMy42MDdWMTUuMjg1SC03LjcwNUMtNS43ODYgMTUuMjg1LTQuMjI2IDE0Ljk1NC0zLjA3IDE0LjMwMS0xLjk0OCAxMy42NjUtMS4xMiAxMi41OC0uNjA4IDExLjA4My0uNTE2IDEwLjgwMS0uNDE5IDEwLjQ3MS0uMzI4IDEwLjA5NS0uMjM2IDkuNzM0LS4xNjcgOS4yNjEtLjEyIDguNjg4LS4wNzMgOC4wOTItLjAzIDcuMzU5IDAgNi40OTIgLjAzMSA1LjYxOSAuMDUgNC41MzcgLjA1IDMuMjQ2IC4wNSAxLjk1NCAuMDMxIC44NzMgMCAwTTUuMTY2IDkuNTgzQzUuMDgzIDEwLjMwNiA0Ljk4MiAxMC45MzIgNC44NjIgMTEuNDQgNC43NDYgMTEuOTM1IDQuNjI0IDEyLjQxMyA0LjQ4NyAxMi44OTIgMi44OTYgMTcuNzk2LS44OTQgMjAuMjgyLTYuNzggMjAuMjgySC0xNy45MzJDLTE4LjUyIDIwLjI4Mi0xOC44OTcgMTkuOTA1LTE4Ljg5NyAxOS4zMTlWLTEyLjgyNkMtMTguODk3LTEzLjQxMi0xOC41Mi0xMy43OTEtMTcuOTMyLTEzLjc5MUgtNi43OEMtLjg5NC0xMy43OTEgMi44OTctMTEuMzAzIDQuNDkxLTYuMzgzIDQuNjI0LTUuOTIxIDQuNzQ2LTUuNDQzIDQuODYzLTQuOTQ3IDQuOTgyLTQuNDM4IDUuMDgzLTMuODE0IDUuMTY2LTMuMDkxIDUuMjQ3LTIuMzY4IDUuMzA2LTEuNDg3IDUuMzM5LS40NzEgNS4zNzEgLjUzOSA1LjM4OCAxLjc3OSA1LjM4OCAzLjI0NiA1LjM4OCA0LjcxNCA1LjM3MSA1Ljk1MiA1LjMzOSA2Ljk2MiA1LjMwNiA3Ljk3OSA1LjI0NyA4Ljg1OSA1LjE2NiA5LjU4MyIgZmlsbD0iIzRhNzZiYiIvPgo8cGF0aCB0cmFuc2Zvcm09Im1hdHJpeCgxLDAsMCwtMSw0NDAuNjE3MiwyNzAuOTg0MTQpIiBkPSJNMCAwIDQuNjM2IDEzLjI1OCA5LjIyNyAwWk03LjMzMiAyMC42MTRDNy4xNzEgMjEuMTMzIDYuNzc1IDIxLjQzIDYuMjQ0IDIxLjQzSDMuMDc5QzIuNTc0IDIxLjQzIDIuMTk1IDIxLjEyOSAyLjA0NSAyMC42MjZMLTkuNDU4LTExLjU0M0MtOS41NzUtMTEuOTM4LTkuNDc0LTEyLjE5Mi05LjM2Ny0xMi4zMzYtOS4yNjMtMTIuNDc3LTkuMDU1LTEyLjY0NS04LjY1OC0xMi42NDVILTUuMjQ5Qy00Ljk2NS0xMi42NDUtNC40NDgtMTIuNTQxLTQuMTY2LTExLjgzOEwtMS43NDUtNC45NDlIMTAuOTcyTDEzLjM4Ni0xMS44MTdDMTMuNTQ0LTEyLjM0MyAxMy45NDEtMTIuNjQ1IDE0LjQ3NS0xMi42NDVIMTcuODg2QzE4LjI4MS0xMi42NDUgMTguNDg3LTEyLjQ3NyAxOC41OTMtMTIuMzM2IDE4LjY5OC0xMi4xOTIgMTguODAyLTExLjkzOCAxOC42NzctMTEuNTIxWiIgZmlsbD0iIzRhNzZiYiIvPgo8cGF0aCB0cmFuc2Zvcm09Im1hdHJpeCgxLDAsMCwtMSw0NzYuNDc0NiwyNjQuNjA0MjMpIiBkPSJNMCAwSC03LjU2VjEwLjA1MkgwQzEuODE2IDEwLjA1MiAzLjIzNCA5LjYxIDQuMjEgOC43MzcgNS4xODUgNy44NjUgNS42NTkgNi42NTEgNS42NTkgNS4wMjYgNS42NTkgMy40MDEgNS4xODUgMi4xODcgNC4yMSAxLjMxNSAzLjIzNCAuNDQyIDEuODE4IDAgMCAwTS03Ljc0NC0uNDc3LTcuNzQ4IDBILTcuNzQ0Wk00LjYxNy00LjI1NkM2LjQ3My0zLjU2MSA3Ljk3OS0yLjQ1MyA5LjEtLjk1OCAxMC4zMjcgLjY3NyAxMC45NDcgMi42OTEgMTAuOTQ3IDUuMDI2IDEwLjk0NyA2LjUxMyAxMC42ODIgNy44OTQgMTAuMTU0IDkuMTM0IDkuNjI3IDEwLjM3NyA4Ljg3NCAxMS40NDggNy45MTkgMTIuMzE5IDYuOTY5IDEzLjE4NiA1LjgxNyAxMy44NjQgNC40OTUgMTQuMzQxIDMuMTgzIDE0LjgxMSAxLjcwMiAxNS4wNDkgLjA5NiAxNS4wNDlILTExLjg4NEMtMTIuNDcgMTUuMDQ5LTEyLjg0OSAxNC42NzEtMTIuODQ5IDE0LjA4NVYtMTguMDZDLTEyLjg0OS0xOC42NDYtMTIuNDctMTkuMDI1LTExLjg4NC0xOS4wMjVILTguNTIyQy03LjkzNy0xOS4wMjUtNy41Ni0xOC42NDYtNy41Ni0xOC4wNlYtNC45OTdILS43MzZMNS43NDEtMTguMjM4QzYuMDE1LTE4LjkyMiA2LjUzMy0xOS4wMjUgNi44MTgtMTkuMDI1SDEwLjcxNEMxMS4xNjQtMTkuMDI1IDExLjM4LTE4Ljc2OSAxMS40NzItMTguNjExIDExLjU1OC0xOC40NTggMTEuNjY3LTE4LjEzNiAxMS40MzMtMTcuNzQ3WiIgZmlsbD0iIzRhNzZiYiIvPgo8cGF0aCB0cmFuc2Zvcm09Im1hdHJpeCgxLDAsMCwtMSw1MTAuNzI1NiwyNzcuMzc1NzQpIiBkPSJNMCAwQy0uOTQzLS44OTctMi4zNTYtMS4zNTQtNC4yMDEtMS4zNTRILTExLjc2VjguNjAySC00LjIwMUMtMi4zNTYgOC42MDItLjk0NCA4LjE0NiAwIDcuMjQ5IC45NDggNi4zNDIgMS40MDkgNS4xNTggMS40MDkgMy42MjUgMS40MDkgMi4wOTEgLjk0OCAuOTA2IDAgME0tMTEuNzYgMjMuMTFWMjMuMTA2SC0xMi4yMzZaTS0uNDg0IDIxLjYzOEMuNDI5IDIwLjc4MiAuODc0IDE5LjY1MiAuODc0IDE4LjE4NyAuODc0IDE2Ljc1NCAuNDI5IDE1LjY0MS0uNDg0IDE0Ljc4Ni0xLjM5NiAxMy45MzUtMi43MjggMTMuNTAzLTQuNDQ0IDEzLjUwM0gtMTEuNzZWMjIuOTIxSC00LjQ0NEMtMi43MjggMjIuOTIxLTEuMzk2IDIyLjQ5LS40ODQgMjEuNjM4TTYuMjA5IDYuODAzQzUuODg1IDcuNzI1IDUuNDU4IDguNTMxIDQuOTQ1IDkuMiA0LjQzMSA5Ljg2OCAzLjg0NCAxMC40MjkgMy4yMDEgMTAuODY0IDIuODkzIDExLjA3MiAyLjU4NiAxMS4yNTMgMi4yODMgMTEuNDAzIDMuMjY2IDExLjk1MyA0LjEwNCAxMi43MTQgNC43ODUgMTMuNjc0IDUuNjY3IDE0LjkyIDYuMTE1IDE2LjU4NyA2LjExNSAxOC42MjYgNi4xMTUgMjEuNDEgNS4yMyAyMy42NjYgMy40ODMgMjUuMzI3IDEuNzQ0IDI2Ljk4Mi0uODkyIDI3LjgyMS00LjM0NyAyNy44MjFILTE2LjA4NUMtMTYuNjcgMjcuODIxLTE3LjA1IDI3LjQ0My0xNy4wNSAyNi44NTZWLTUuMjg4Qy0xNy4wNS01Ljg3NC0xNi42Ny02LjI1My0xNi4wODUtNi4yNTNILTQuNTkxQy0xLjAxNy02LjI1MyAxLjc4NC01LjQxIDMuNzMxLTMuNzUyIDUuNy0yLjA3MyA2LjcgLjQyNSA2LjcgMy42NzMgNi43IDQuODI0IDYuNTM0IDUuODc4IDYuMjA5IDYuODAzIiBmaWxsPSIjNGE3NmJiIi8+CjxwYXRoIHRyYW5zZm9ybT0ibWF0cml4KDEsMCwwLC0xLDE5MS41MTk1LDE4MC45NTI4MikiIGQ9Ik0wIDBDLS4wNTYtLjAxMy0uMTE0LS4wMTktLjE2OS0uMDE5LS41MDYtLjAxOS0uODA5IC4yMS0uODg5IC41NTEtMS40ODYgMy4wODctMi43NyA1LjM4OS00LjYwMyA3LjIxLTQuODkyIDcuNDk5LTQuODkzIDcuOTY3LTQuNjA1IDguMjU3LTQuMzE3IDguNTQ2LTMuODQ5IDguNTQ3LTMuNTU5IDguMjU5LTEuNTMxIDYuMjQzLS4xMDkgMy42OTQgLjU1IC44OSAuNjQ0IC40OTIgLjM5NyAuMDk0IDAgME0tLjA3OC03LjU0OEMtMS4wNzktOS44MTItMi43NjUtMTEuODgtNS4zODQtMTQuMDU5LTUuNTIyLTE0LjE3My01LjY5MS0xNC4yMy01Ljg1Ny0xNC4yMy02LjA2OS0xNC4yMy02LjI4LTE0LjEzOS02LjQyNS0xMy45NjMtNi42ODctMTMuNjQ5LTYuNjQ1LTEzLjE4Mi02LjMzMS0xMi45MjItMy44OTQtMTAuODk0LTIuMzM2LTguOTk3LTEuNDMxLTYuOTUtMS4yNjUtNi41NzctLjgyNy02LjQwNy0uNDU2LTYuNTcyLS4wODItNi43MzcgLjA4Ny03LjE3NC0uMDc4LTcuNTQ4TS0xMi41NDEtMTguNDQxQy0xNC41MDQtMTguOTM3LTE3LjIwNS0xOS4yMDEtMjAuNzk1LTE5LjI0N0gtMjAuODA1Qy0yMS4yMDktMTkuMjQ3LTIxLjU0LTE4LjkyMi0yMS41NDUtMTguNTE3LTIxLjU1LTE4LjEwOC0yMS4yMjMtMTcuNzcyLTIwLjgxNC0xNy43NjctMTcuMzQxLTE3LjcyNC0xNC43NTMtMTcuNDc1LTEyLjkwNC0xNy4wMDctMTIuNTA2LTE2LjkwOC0xMi4xMDYtMTcuMTQ3LTEyLjAwNC0xNy41NDMtMTEuOTA1LTE3LjkzOS0xMi4xNDYtMTguMzQxLTEyLjU0MS0xOC40NDFNLTI4Ljk0MS0xOS4wODVDLTI4Ljk1Mi0xOS4wODUtMjguOTYxLTE5LjA4NS0yOC45NzItMTkuMDg0LTMwLjAwNi0xOS4wNDItMzEuMDMxLTE4Ljk5Ny0zMi4wMzItMTguOTUxLTMzLjgyLTE4Ljg3MS0zNS41MzQtMTguNzk1LTM3LjA5Mi0xOC43NUwtMzcuMDUtMTcuMjcxQy0zNS40ODQtMTcuMzE2LTMzLjc2MS0xNy4zOTQtMzEuOTY2LTE3LjQ3NC0zMC45NjctMTcuNTE5LTI5Ljk0NC0xNy41NjQtMjguOTExLTE3LjYwNi0yOC41MDMtMTcuNjIzLTI4LjE4Ny0xNy45NjctMjguMjA0LTE4LjM3Ni0yOC4yMTgtMTguNzczLTI4LjU0Ny0xOS4wODUtMjguOTQxLTE5LjA4NU0tNDUuMjA2LTE4LjYwMkgtNDUuMjEzQy00Ny45MTgtMTguNTgyLTUwLjYyNi0xOC41OTEtNTMuMzMyLTE4LjYzMUgtNTMuMzQzQy01My43NDYtMTguNjMxLTU0LjA3Ni0xOC4zMDctNTQuMDgzLTE3LjkwMi01NC4wODgtMTcuNDk0LTUzLjc2Mi0xNy4xNTgtNTMuMzU0LTE3LjE1MS01MC42MzctMTcuMTEzLTQ3LjkxOC0xNy4xMDMtNDUuMjAxLTE3LjEyMy00NC43OTMtMTcuMTI1LTQ0LjQ2NC0xNy40NTgtNDQuNDY3LTE3Ljg2OC00NC40Ny0xOC4yNzQtNDQuODAxLTE4LjYwMi00NS4yMDYtMTguNjAyTS02MS40NDgtMTguODQxQy02My43MjQtMTguOTI2LTY2LjAyNi0xOS4wMzMtNjguMjg5LTE5LjE2MS02OC43MDgtMTkuMTg0LTY5LjEyOC0xOS4yMTEtNjkuNTQ4LTE5LjI0My02OS41NjctMTkuMjQzLTY5LjU4NC0xOS4yNDQtNjkuNjA0LTE5LjI0NC02OS45ODctMTkuMjQ0LTcwLjMxMi0xOC45NDctNzAuMzQtMTguNTU5LTcwLjM3LTE4LjE1Mi03MC4wNjMtMTcuNzk2LTY5LjY1Ny0xNy43NjctNjkuMjI4LTE3LjczNS02OC44LTE3LjcwOC02OC4zNzQtMTcuNjgzLTY2LjEtMTcuNTU1LTYzLjc4OS0xNy40NDctNjEuNTAyLTE3LjM2My02MS4wODctMTcuMzQ5LTYwLjc1LTE3LjY2Ni02MC43MzYtMTguMDc1LTYwLjcyMi0xOC40ODItNjEuMDM5LTE4LjgyNy02MS40NDgtMTguODQxTS03Ny40OTMtMjAuMzU5Qy04MC4yNDUtMjAuOTYzLTgyLjc5My0yMS43OTQtODUuMDY1LTIyLjgyNy04NS4xNjYtMjIuODcyLTg1LjI3LTIyLjg5NC04NS4zNzEtMjIuODk0LTg1LjY1My0yMi44OTQtODUuOTIyLTIyLjczMi04Ni4wNDYtMjIuNDYxLTg2LjIxNC0yMi4wODgtODYuMDUtMjEuNjQ5LTg1LjY3OC0yMS40ODEtODMuMzExLTIwLjQwMy04MC42NjMtMTkuNTQxLTc3LjgxMS0xOC45MTQtNzcuNDE0LTE4LjgyMy03Ny4wMTctMTkuMDc5LTc2LjkzLTE5LjQ3OC03Ni44NDMtMTkuODc3LTc3LjA5NC0yMC4yNzEtNzcuNDkzLTIwLjM1OU0tOTEuNzU3LTI3LjAzNS05Mi4wNDEtMjcuMjgyQy05My45MDQtMjguOTE0LTk1LjYyNS0zMC43OTMtOTcuMTU2LTMyLjg2Ny05Ny4zMDEtMzMuMDYzLTk3LjUyNC0zMy4xNjctOTcuNzUxLTMzLjE2Ny05Ny45MDQtMzMuMTY3LTk4LjA1OC0zMy4xMi05OC4xOS0zMy4wMjItOTguNTE4LTMyLjc4MS05OC41ODgtMzIuMzE3LTk4LjM0Ni0zMS45ODgtOTYuNzUzLTI5LjgyOS05NC45NTktMjcuODctOTMuMDE2LTI2LjE2N0wtOTIuNzE1LTI1LjkwOEMtOTIuNDAyLTI1LjY0NS05MS45MzctMjUuNjgyLTkxLjY3LTI1Ljk5My05MS40MDctMjYuMzA0LTkxLjQ0NS0yNi43NzEtOTEuNzU3LTI3LjAzNU0tOTkuNDI3LTc4LjkzMUMtOTkuNTQyLTc4Ljk5NS05OS42NjgtNzkuMDI2LTk5Ljc5Mi03OS4wMjYtMTAwLjA0OS03OS4wMjYtMTAwLjI5OC03OC44OTItMTAwLjQzNS03OC42NTItMTAyLjA4NS03NS43NS0xMDMuMjI5LTczLjQ4NS0xMDQuMTQxLTcxLjMxMy0xMDQuMjk5LTcwLjkzNi0xMDQuMTIyLTcwLjUwMy0xMDMuNzQ1LTcwLjM0NS0xMDMuMzY5LTcwLjE4OC0xMDIuOTM0LTcwLjM2My0xMDIuNzc2LTcwLjc0LTEwMS44ODgtNzIuODU4LTEwMC43NjktNzUuMDcyLTk5LjE0OS03Ny45MjItOTguOTQ2LTc4LjI3Ni05OS4wNzEtNzguNzI5LTk5LjQyNy03OC45MzFNLTk1Ljc5Ny04NC41MDFDLTk1LjQ4OC04NC4yMzYtOTUuMDE5LTg0LjI3Mi05NC43NTQtODQuNTg0LTkzLjA1Ni04Ni41ODMtOTEuMDY5LTg4LjM1NC04OC44NTMtODkuODQ4LTg4LjUxNC05MC4wNzUtODguNDI1LTkwLjUzNC04OC42NTItOTAuODc0LTg4Ljc5Ni05MS4wODYtODkuMDI5LTkxLjIwMS04OS4yNjYtOTEuMjAxLTg5LjQwOS05MS4yMDEtODkuNTUyLTkxLjE2LTg5LjY3OS05MS4wNzQtOTIuMDA4LTg5LjUwNC05NC4wOTQtODcuNjQ1LTk1Ljg4Mi04NS41NDMtOTYuMTQ2LTg1LjIzMS05Ni4xMDgtODQuNzY1LTk1Ljc5Ny04NC41MDFNLTgyLjcxNS05My44NThDLTgyLjU3OC05My40NzYtODIuMTU2LTkzLjI3NS04MS43Ny05My40MTMtNzkuMzI3LTk0LjI5My03Ni43MjMtOTQuOTE4LTc0LjAyOC05NS4yNjktNzMuNjI0LTk1LjMyMi03My4zMzctOTUuNjk0LTczLjM5Mi05Ni4xLTczLjQ0LTk2LjQ3Mi03My43NTgtOTYuNzQyLTc0LjEyMy05Ni43NDItNzQuMTU1LTk2Ljc0Mi03NC4xODgtOTYuNzQtNzQuMjItOTYuNzM3LTc3LjAyLTk2LjM3LTc5LjcyOS05NS43MjEtODIuMjctOTQuODA2LTgyLjY1NC05NC42NjgtODIuODU0LTk0LjI0NC04Mi43MTUtOTMuODU4TS0xMDQuNzc4LTQ3Ljc5N0MtMTA1LjE3NC00Ny42OTUtMTA1LjQxNC00Ny4yOTMtMTA1LjMxMy00Ni44OTYtMTA0LjYyNy00NC4yMDUtMTAzLjY5Ny00MS41ODctMTAyLjU0OS0zOS4xMTEtMTAyLjM3OC0zOC43NDEtMTAxLjkzOS0zOC41OC0xMDEuNTY2LTM4Ljc1Mi0xMDEuMTk2LTM4LjkyNC0xMDEuMDM2LTM5LjM2My0xMDEuMjA3LTM5LjczNC0xMDIuMzE3LTQyLjEyNi0xMDMuMjE2LTQ0LjY1OC0xMDMuODc5LTQ3LjI2Mi0xMDMuOTY2LTQ3LjU5Ny0xMDQuMjY2LTQ3LjgxOS0xMDQuNTk2LTQ3LjgxOS0xMDQuNjU2LTQ3LjgxOS0xMDQuNzE3LTQ3LjgxMy0xMDQuNzc4LTQ3Ljc5N00tMTA1LjU4LTYzLjk1OEMtMTA1LjYxMS02My45NjEtMTA1LjY0Mi02My45NjQtMTA1LjY3Mi02My45NjQtMTA2LjA0MS02My45NjQtMTA2LjM1OC02My42OS0xMDYuNDA2LTYzLjMxNi0xMDYuNjItNjEuNjA4LTEwNi43MjgtNTkuODQ2LTEwNi43MjgtNTguMDc3LTEwNi43MjgtNTcuMDcyLTEwNi42OTMtNTYuMDU1LTEwNi42MjUtNTUuMDUzLTEwNi41OTYtNTQuNjQ2LTEwNi4yNDgtNTQuMzM5LTEwNS44MzUtNTQuMzY1LTEwNS40MjktNTQuMzk0LTEwNS4xMjEtNTQuNzQ2LTEwNS4xNDgtNTUuMTUzLTEwNS4yMTUtNTYuMTIyLTEwNS4yNDgtNTcuMTA2LTEwNS4yNDktNTguMDc4LTEwNS4yNDktNTkuNzgzLTEwNS4xNDUtNjEuNDg0LTEwNC45MzgtNjMuMTMyLTEwNC44ODctNjMuNTM3LTEwNS4xNzMtNjMuOTA3LTEwNS41OC02My45NThNLTY2LjA1MS05NS41MjZDLTYzLjQwMS05NS4zNi02MC43NDQtOTQuOTQ2LTU4LjE1Ni05NC4yOTctNTcuNzY1LTk0LjItNTcuMzU4LTk0LjQzOC01Ny4yNTktOTQuODM0LTU3LjE1OS05NS4yMy01Ny40LTk1LjYzMy01Ny43OTctOTUuNzMxLTYwLjQ3MS05Ni40MDMtNjMuMjE3LTk2LjgzMS02NS45NTktOTcuMDAzLTY1Ljk3NC05Ny4wMDQtNjUuOTktOTcuMDA0LTY2LjAwNS05Ny4wMDQtNjYuMzkzLTk3LjAwNC02Ni43MTgtOTYuNzAzLTY2Ljc0My05Ni4zMTItNjYuNzY5LTk1LjkwMy02Ni40Ni05NS41NTItNjYuMDUxLTk1LjUyNk0tNTAuNjIyLTkxLjY0NEMtNDguMTY1LTkwLjUwOC00NS44NTQtODkuMTQ2LTQzLjc1NS04Ny41OTMtNDMuNDI3LTg3LjM1LTQyLjk2My04Ny40Mi00Mi43MjItODcuNzQ4LTQyLjQ3OC04OC4wNzYtNDIuNTQ2LTg4LjUzOS00Mi44NzYtODguNzgyLTQ1LjA1Ny05MC4zOTUtNDcuNDU0LTkxLjgwOS01MC4wMDEtOTIuOTg3LTUwLjEwMi05My4wMzMtNTAuMjA4LTkzLjA1NS01MC4zMTEtOTMuMDU1LTUwLjU5MS05My4wNTUtNTAuODU4LTkyLjg5Ni01MC45ODMtOTIuNjI1LTUxLjE1NS05Mi4yNTUtNTAuOTkzLTkxLjgxNC01MC42MjItOTEuNjQ0TS0zNy45MzMtODIuMTg1Qy0zNy42OTMtODEuOTA0LTM3LjQ2LTgxLjYxOS0zNy4yMjgtODEuMzMtMzUuNzQtNzkuNDYtMzQuNDU3LTc3LjUzOS0zMy40MTgtNzUuNjIxLTMzLjIyNC03NS4yNjMtMzIuNzc1LTc1LjEyOC0zMi40MTYtNzUuMzI0LTMyLjA1Ny03NS41MTktMzEuOTIyLTc1Ljk2Ny0zMi4xMTgtNzYuMzI2LTMzLjE5OC03OC4zMTktMzQuNTI5LTgwLjMxMy0zNi4wNzItODIuMjUyLTM2LjMxMy04Mi41NTQtMzYuNTU4LTgyLjg1MS0zNi44MDYtODMuMTQ0LTM2Ljk1My04My4zMTUtMzcuMTYxLTgzLjQwNC0zNy4zNjktODMuNDA0LTM3LjU0LTgzLjQwNC0zNy43MDktODMuMzQ3LTM3Ljg1LTgzLjIyNy0zOC4xNi04Mi45NjItMzguMTk4LTgyLjQ5NS0zNy45MzMtODIuMTg1TS0zMC41MDQtNjguMjQzQy0yOS44NzUtNjUuODEzLTI5LjUtNjMuMjM0LTI5LjM2LTYwLjM1OC0yOS4zNC01OS45NS0yOC45OTgtNTkuNjM4LTI4LjU4NC01OS42NTUtMjguMTc3LTU5LjY3Ni0yNy44NjMtNjAuMDIyLTI3Ljg4Mi02MC40MzEtMjguMDI4LTYzLjQwOC0yOC40MTgtNjYuMDg2LTI5LjA3My02OC42MTQtMjkuMTU5LTY4Ljk0Ni0yOS40NTktNjkuMTY4LTI5Ljc4Ny02OS4xNjgtMjkuODQ5LTY5LjE2OC0yOS45MTItNjkuMTYtMjkuOTc0LTY5LjE0NS0zMC4zNy02OS4wNDMtMzAuNjA3LTY4LjYzOC0zMC41MDQtNjguMjQzTS0yOS4xMTQtNDYuNzEyQy0yOC43MDctNDYuNjgzLTI4LjM1Mi00Ni45ODUtMjguMzIxLTQ3LjM5NC0yOC4xOTQtNDkuMDM2LTI4LjA3Ni01MC42NDQtMjcuOTg3LTUyLjIyMi0yNy45NjItNTIuNjI5LTI4LjI3NS01Mi45NzktMjguNjgyLTUzLjAwM0gtMjguNzI2Qy0yOS4xMTQtNTMuMDAzLTI5LjQ0MS01Mi43LTI5LjQ2Mi01Mi4zMDYtMjkuNTUzLTUwLjczNy0yOS42Ny00OS4xNC0yOS43OTUtNDcuNTA2LTI5LjgyNi00Ny4wOTktMjkuNTIyLTQ2Ljc0My0yOS4xMTQtNDYuNzEyTS0xMC40NDIgMTEuMzMzQy0xMC41MjEgMTAuOTg4LTEwLjgyNSAxMC43NTYtMTEuMTY0IDEwLjc1Ni0xMS4yMTggMTAuNzU2LTExLjI3MiAxMC43NjEtMTEuMzI2IDEwLjc3My0xMy4wMjMgMTEuMTU0LTE0LjkxNCAxMS4zMzgtMTcuMTA3IDExLjMzOC0xNy44MTMgMTEuMzM4LTE4LjUyIDExLjMxOS0xOS4yMjYgMTEuMjg5LTE5LjYyNyAxMS4yNzUtMTkuOTc5IDExLjU4Ni0xOS45OTggMTEuOTk0LTIwLjAxNiAxMi40MDItMTkuNyAxMi43NDgtMTkuMjkxIDEyLjc2Ni0xOC41NjQgMTIuNzk4LTE3LjgzNCAxMi44MTctMTcuMTA3IDEyLjgxOC0xNC44MDQgMTIuODE4LTEyLjgwNyAxMi42MjEtMTEuMDAzIDEyLjIxNi0xMC42MDQgMTIuMTI3LTEwLjM1MyAxMS43My0xMC40NDIgMTEuMzMzTS0yNy42MyAxMC44NzdDLTMwLjcwNiAxMC44NzctMzMuMzIzIDExLjEzLTM1LjYzMyAxMS42NTEtMzYuMDMxIDExLjc0Mi0zNi4yODEgMTIuMTM3LTM2LjE5MiAxMi41MzctMzYuMTAzIDEyLjkzNS0zNS43MDUgMTMuMTg1LTM1LjMwNyAxMy4wOTUtMzMuMTA2IDEyLjU5OS0zMC41OTUgMTIuMzU2LTI3LjYzIDEyLjM1NkwtMjcuMzg4IDEyLjM1Ny0yNy4zOCAxMC44NzhaTS00MC42ODEgMzYuNTU0Qy00Mi45NjIgMzUuMTc2LTQ0LjUxNyAzMy4yMjItNDUuMzAyIDMwLjc0OC00NS40MDQgMzAuNDMzLTQ1LjY5NCAzMC4yMzItNDYuMDA4IDMwLjIzMi00Ni4wODMgMzAuMjMyLTQ2LjE1NyAzMC4yNDQtNDYuMjMxIDMwLjI2Ny00Ni42MjEgMzAuMzkyLTQ2LjgzNSAzMC44MDctNDYuNzEzIDMxLjE5Ni00NS44MTQgMzQuMDIyLTQ0LjA0MiAzNi4yNS00MS40NDcgMzcuODItNDEuMDk3IDM4LjAzMS00MC42NDMgMzcuOTE4LTQwLjQzMSAzNy41NjktNDAuMjIgMzcuMjItNDAuMzMyIDM2Ljc2NS00MC42ODEgMzYuNTU0TS00Mi4xNzIgMTUuMzZDLTQyLjMxOCAxNS4yLTQyLjUxOCAxNS4xMTktNDIuNzE3IDE1LjExOS00Mi44OTYgMTUuMTE5LTQzLjA3NCAxNS4xODMtNDMuMjE2IDE1LjMxMi00NS4yODYgMTcuMjAyLTQ2LjYwNSAxOS43MjItNDcuMTM0IDIyLjgtNDcuMjAyIDIzLjIwMy00Ni45MzIgMjMuNTg0LTQ2LjUyOSAyMy42NTQtNDYuMTI1IDIzLjcyNS00NS43NDYgMjMuNDUyLTQ1LjY3NSAyMy4wNTEtNDUuMjAzIDIwLjMwNC00NC4wNDEgMTguMDY3LTQyLjIxOSAxNi40MDUtNDEuOTE3IDE2LjEyOS00MS44OTYgMTUuNjYxLTQyLjE3MiAxNS4zNk0tMzMuNDYzIDQwLjM3MUMtMzEuMDU5IDQwLjY4OS0yOC4zMTIgNDAuNzczLTI1LjIwNCA0MC42MTUtMjQuNzk2IDQwLjU5NS0yNC40ODMgNDAuMjQ3LTI0LjUwMyAzOS44MzktMjQuNTI1IDM5LjQzLTI0Ljg3NSAzOS4xMTUtMjUuMjggMzkuMTM5LTI4LjI5OSAzOS4yOTItMzAuOTU1IDM5LjIxMS0zMy4yNjggMzguOTA1LTMzLjMwMSAzOC45LTMzLjMzNCAzOC44OTgtMzMuMzY2IDM4Ljg5OC0zMy43MzIgMzguODk4LTM0LjA0OSAzOS4xNjgtMzQuMSAzOS41NC0zNC4xNTMgMzkuOTQ1LTMzLjg2OCA0MC4zMTYtMzMuNDYzIDQwLjM3MU0tMTYuMTMyIDE4LjQ3SC0yMC44NTktMjcuMzAzLTMxLjYyNUMtMzUuOTAzIDE4LjQ3LTM5LjM4MiAyMS43MTktMzkuMzgyIDI1LjcxNC0zOS4zODIgMjkuNzA4LTM1LjkwMyAzMi45NTgtMzEuNjI1IDMyLjk1OEgtMjAuODU5VjQ3LjA3MkgtMjcuMzAzLTMxLjYyNUMtNDQuMjM2IDQ3LjA3Mi01NC40OTUgMzcuNDktNTQuNDk1IDI1LjcxNC01NC40OTUgMTMuOTM4LTQ0LjIzNiA0LjM1NS0zMS42MjUgNC4zNTVMLTE2LjMyMSA0LjM1M0gtMTYuMDlDLTExLjgzMyA0LjMyOS04LjM3NiAxLjA5Mi04LjM3Ni0yLjg4N1YtNC4wNzdDLTguMzc2LTguMDcyLTExLjg1NS0xMS4zMjEtMTYuMTMyLTExLjMyMUgtMjAuODU5TC0zNS43MTItMTEuMzEzSC02NS45NjRWLTExLjM0Qy02Ni4zNzQtMTEuMzMtNjYuNzgtMTEuMzEtNjcuMTkyLTExLjMxLTkyLjU3MS0xMS4zMS0xMTMuMTQ0LTMxLjg4Mi0xMTMuMTQ0LTU3LjI2LTExMy4xNDQtODIuNjQtOTIuNTcxLTEwMy4yMTItNjcuMTkyLTEwMy4yMTItNDEuODE0LTEwMy4yMTItMjEuMjQxLTgyLjY0LTIxLjI0MS01Ny4yNi0yMS4yNDEtNTIuMjY5LTIyLjAzNy00Ny40NjItMjMuNTA4LTQyLjk2Mi0yMy41MTItNDIuOTUzLTIzLjUxNS00Mi45NDYtMjMuNTE3LTQyLjkzOEgtMzguNjQxQy0zNy45NDEtNDQuMzM3LTM3LjMzMy00NS43OTktMzYuODM1LTQ3LjMyMS0zNS43OTItNTAuNTEyLTM1LjI2Mi01My44NTctMzUuMjYyLTU3LjI2LTM1LjI2Mi03NC44NjctNDkuNTg2LTg5LjE5MS02Ny4xOTItODkuMTkxLTg0Ljc5OC04OS4xOTEtOTkuMTIzLTc0Ljg2Ny05OS4xMjMtNTcuMjYtOTkuMTIzLTM5LjY1NC04NC43OTgtMjUuMzMtNjcuMTkyLTI1LjMzTC0zNC4wNDctMjUuNDQ1SC0zMy45OC0zMS45NTZMLTE2LjEzMi0yNS40MzVDLTMuNTIzLTI1LjQzNSA2LjczNy0xNS44NTQgNi43MzctNC4wNzdWLTIuODg3QzYuNzM3IDguODg5LTMuNTIzIDE4LjQ3LTE2LjEzMiAxOC40NyIgZmlsbD0iIzRhNzZiYiIvPgo8L2c+CjwvZz4KPC9zdmc+Cg==">
+  <!-- M13 §08 — the SVG above stays the primary icon (build.js points it at
+       brand/aun-aldrb-logo.svg, which is already downloaded for the header).
+       These two are the fallbacks it cannot cover: a PNG for browsers that do
+       not take an SVG favicon, and the iOS home-screen icon, without which
+       Safari saves a screenshot of the page instead. Both carry the mark
+       alone — the wordmark is a wide lockup and would be four illegible
+       letters in a square — and both are generated from the same vector by
+       tools-brand-images.js. -->
+  <link rel="icon" type="image/png" sizes="32x32" href="brand/favicon-32.png">
+  <link rel="apple-touch-icon" href="brand/apple-touch-icon.png">
+
+  <!-- ==================================================================
+       STRUCTURED DATA (STAGE M13 §11)
+       Every value below is copied out of the page, not written for the
+       crawler. The address is the one in the footer, the phone is the one in
+       «تواصل معنا», the seven services carry their own headings and their own
+       descriptions word for word, and the hours are the «على مدار 24 ساعة
+       طوال أيام الأسبوع» the page states twice.
+
+       LocalBusiness rather than plain Organization because the company has a
+       physical address in Riyadh and serves customers from it — which is what
+       the type means, and it is true here.
+
+       areaServed is the city of Riyadh and nothing more. «الرؤية» says the
+       company aims to be the first choice في المملكة; an aim is not a
+       coverage area, and claiming the Kingdom would be claiming branches the
+       site does not have.
+
+       NOT INCLUDED, deliberately:
+         · AggregateRating / Review — the site publishes none, and inventing
+           them is the one structured-data lie Google penalises by name.
+         · Offer / priceRange — no prices are published.
+         · BreadcrumbList — one page, one URL. A breadcrumb of a single item
+           describes nothing.
+         · FAQPage — there is no FAQ section on the page to mark up.
+         · sameAs — no social profiles are linked from the site.
+         · geo coordinates — not published anywhere in the project.
+       ================================================================== -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "LocalBusiness",
+      "@id": "https://aunaldrb.com/#organization",
+      "name": "شركة عون الدرب للنقل المتخصص",
+      "alternateName": [
+        "عون الدرب",
+        "AOUN ALDARB"
+      ],
+      "slogan": "نُعين ونُعاون",
+      "url": "https://aunaldrb.com/",
+      "description": "شركة سعودية متخصصة في تقديم خدمات النقل لكبار السن وذوي الاحتياجات الخاصة والمرضى الذين يحتاجون إلى وسائل نقل مجهزة ومساعدة خاصة، بمركبات حديثة وطاقم مؤهل ومدرب.",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://aunaldrb.com/brand/logo.png",
+        "width": 1000,
+        "height": 343
+      },
+      "image": "https://aunaldrb.com/brand/og-image.png",
+      "telephone": "+966535544352",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "شارع ابن كثير، حي السليمانية",
+        "addressLocality": "الرياض",
+        "postalCode": "12233",
+        "addressCountry": "SA"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "الرياض",
+        "containedInPlace": {
+          "@type": "Country",
+          "name": "المملكة العربية السعودية"
+        }
+      },
+      "knowsLanguage": "ar",
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday"
+          ],
+          "opens": "00:00",
+          "closes": "23:59"
+        }
+      ],
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "telephone": "+966535544352",
+          "contactType": "customer service",
+          "availableLanguage": [
+            "ar"
+          ],
+          "areaServed": "SA",
+          "hoursAvailable": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday"
+            ],
+            "opens": "00:00",
+            "closes": "23:59"
+          }
+        }
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://aunaldrb.com/#website",
+      "url": "https://aunaldrb.com/",
+      "name": "عون الدرب للنقل المتخصص",
+      "inLanguage": "ar",
+      "publisher": {
+        "@id": "https://aunaldrb.com/#organization"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://aunaldrb.com/#webpage",
+      "url": "https://aunaldrb.com/",
+      "name": "عون الدرب للنقل المتخصص | نقل كبار السن وذوي الاحتياجات الخاصة بالرياض",
+      "description": "نقل متخصص في الرياض لكبار السن وذوي الاحتياجات الخاصة والمرضى: مركبات مجهزة للكراسي المتحركة والسرير الطبي، وطاقم مدرب، ومساندة عند الحاجة — على مدار الساعة.",
+      "inLanguage": "ar",
+      "isPartOf": {
+        "@id": "https://aunaldrb.com/#website"
+      },
+      "about": {
+        "@id": "https://aunaldrb.com/#organization"
+      },
+      "primaryImageOfPage": {
+        "@type": "ImageObject",
+        "url": "https://aunaldrb.com/img/wheelchair-ramp-boarding-1024.webp",
+        "width": 1024,
+        "height": 877,
+        "caption": "أخصائي نقل مدرّب يساعد راكبًا يستخدم كرسيًا متحركًا على منحدر مركبة عون الدرب المجهّزة للنقل المتخصص"
+      }
+    },
+    {
+      "@type": "Service",
+      "@id": "https://aunaldrb.com/#service-wheelchair",
+      "name": "النقل بواسطة الكرسي المتحرك",
+      "description": "خدمة نقل آمنة ومريحة لمستخدمي الكراسي المتحركة، مع تجهيز المركبة بما يسهّل عملية الصعود والنزول.",
+      "serviceType": "نقل متخصص",
+      "provider": {
+        "@id": "https://aunaldrb.com/#organization"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "الرياض",
+        "containedInPlace": {
+          "@type": "Country",
+          "name": "المملكة العربية السعودية"
+        }
+      },
+      "audience": {
+        "@type": "PeopleAudience",
+        "audienceType": "كبار السن وذوو الاحتياجات الخاصة والمرضى"
+      }
+    },
+    {
+      "@type": "Service",
+      "@id": "https://aunaldrb.com/#service-power-wheelchair",
+      "name": "النقل بواسطة الكرسي الكهربائي",
+      "description": "مركبات مجهزة لاستيعاب الكراسي الكهربائية، مع مراعاة الأمان والثبات أثناء التنقل.",
+      "serviceType": "نقل متخصص",
+      "provider": {
+        "@id": "https://aunaldrb.com/#organization"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "الرياض",
+        "containedInPlace": {
+          "@type": "Country",
+          "name": "المملكة العربية السعودية"
+        }
+      },
+      "audience": {
+        "@type": "PeopleAudience",
+        "audienceType": "كبار السن وذوو الاحتياجات الخاصة والمرضى"
+      }
+    },
+    {
+      "@type": "Service",
+      "@id": "https://aunaldrb.com/#service-medical-bed",
+      "name": "النقل بواسطة السرير الطبي",
+      "description": "خدمة مخصصة للحالات التي تتطلب بقاء المستفيد على السرير طوال الرحلة، باستخدام وسائل نقل مناسبة.",
+      "serviceType": "نقل متخصص",
+      "provider": {
+        "@id": "https://aunaldrb.com/#organization"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "الرياض",
+        "containedInPlace": {
+          "@type": "Country",
+          "name": "المملكة العربية السعودية"
+        }
+      },
+      "audience": {
+        "@type": "PeopleAudience",
+        "audienceType": "كبار السن وذوو الاحتياجات الخاصة والمرضى"
+      }
+    },
+    {
+      "@type": "Service",
+      "@id": "https://aunaldrb.com/#service-driver-assistant",
+      "name": "خدمة مساعد السائق",
+      "description": "إمكانية توفير مساعد أو أكثر لمرافقة المستفيد ومساعدته أثناء النقل، وفقًا لحالته واحتياجاته الخاصة.",
+      "serviceType": "نقل متخصص",
+      "provider": {
+        "@id": "https://aunaldrb.com/#organization"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "الرياض",
+        "containedInPlace": {
+          "@type": "Country",
+          "name": "المملكة العربية السعودية"
+        }
+      },
+      "audience": {
+        "@type": "PeopleAudience",
+        "audienceType": "كبار السن وذوو الاحتياجات الخاصة والمرضى"
+      }
+    },
+    {
+      "@type": "Service",
+      "@id": "https://aunaldrb.com/#service-daily",
+      "name": "النقل اليومي",
+      "description": "خدمات نقل يومية لكبار السن وذوي الاحتياجات الخاصة، بما يوفر لهم تنقلًا آمنًا ومريحًا.",
+      "serviceType": "نقل متخصص",
+      "provider": {
+        "@id": "https://aunaldrb.com/#organization"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "الرياض",
+        "containedInPlace": {
+          "@type": "Country",
+          "name": "المملكة العربية السعودية"
+        }
+      },
+      "audience": {
+        "@type": "PeopleAudience",
+        "audienceType": "كبار السن وذوو الاحتياجات الخاصة والمرضى"
+      }
+    },
+    {
+      "@type": "Service",
+      "@id": "https://aunaldrb.com/#service-hospital",
+      "name": "النقل إلى المستشفيات والمراكز الطبية",
+      "description": "التوصيل إلى المستشفيات والمراكز الطبية، مع تقديم المساعدة وفقًا لاحتياجات المستفيد.",
+      "serviceType": "نقل متخصص",
+      "provider": {
+        "@id": "https://aunaldrb.com/#organization"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "الرياض",
+        "containedInPlace": {
+          "@type": "Country",
+          "name": "المملكة العربية السعودية"
+        }
+      },
+      "audience": {
+        "@type": "PeopleAudience",
+        "audienceType": "كبار السن وذوو الاحتياجات الخاصة والمرضى"
+      }
+    },
+    {
+      "@type": "Service",
+      "@id": "https://aunaldrb.com/#service-social",
+      "name": "التنقل للمناسبات الاجتماعية",
+      "description": "توفير وسائل نقل مناسبة ومريحة للتنقل إلى المناسبات والزيارات الاجتماعية.",
+      "serviceType": "نقل متخصص",
+      "provider": {
+        "@id": "https://aunaldrb.com/#organization"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "الرياض",
+        "containedInPlace": {
+          "@type": "Country",
+          "name": "المملكة العربية السعودية"
+        }
+      },
+      "audience": {
+        "@type": "PeopleAudience",
+        "audienceType": "كبار السن وذوو الاحتياجات الخاصة والمرضى"
+      }
+    }
+  ]
+}
+  </script>
+
 </head>
 
 <body>
@@ -3231,9 +3635,17 @@ html:not(.js) .hww__path{display:none}
           <!-- MEDIA — full-bleed photograph on the inline end. The brand
                road runs across it and out behind the panel. -->
           <figure class="hero__media">
-            <img src="img/h001-1024.webp" srcset="img/h001-400.webp 400w, img/h001-560.webp 560w, img/h001-780.webp 780w, img/h001-1024.webp 1024w" sizes="(min-width:1024px) min(50vw, 1280px), 100vw" width="1024" height="877"
-                 fetchpriority="high" decoding="async"
-                 alt="أخصائي نقل مدرّب يساعد راكبًا يستخدم كرسيًا متحركًا على منحدر مركبة عون الدرب المجهّزة للنقل المتخصص">
+            <!-- M13 §14/§15 — the LCP element at every width. AVIF first,
+                 the WebP ladder behind it for Safari before 16.4. Never
+                 lazy-loaded, never low priority: it IS the main content. -->
+            <picture>
+              <source type="image/avif"
+                      srcset="img/wheelchair-ramp-boarding-400.avif 400w, img/wheelchair-ramp-boarding-560.avif 560w, img/wheelchair-ramp-boarding-780.avif 780w, img/wheelchair-ramp-boarding-1024.avif 1024w"
+                      sizes="(min-width:1024px) min(50vw, 1280px), 100vw">
+              <img src="img/wheelchair-ramp-boarding-1024.webp" srcset="img/wheelchair-ramp-boarding-400.webp 400w, img/wheelchair-ramp-boarding-560.webp 560w, img/wheelchair-ramp-boarding-780.webp 780w, img/wheelchair-ramp-boarding-1024.webp 1024w" sizes="(min-width:1024px) min(50vw, 1280px), 100vw" width="1024" height="877"
+                   fetchpriority="high" decoding="async"
+                   alt="أخصائي نقل مدرّب يساعد راكبًا يستخدم كرسيًا متحركًا على منحدر مركبة عون الدرب المجهّزة للنقل المتخصص">
+            </picture>
           </figure>
         </div>
 
@@ -3275,7 +3687,7 @@ html:not(.js) .hww__path{display:none}
           <!-- media: art-directed brand scene (swappable for a <picture> photo) -->
           <figure class="about__media" data-reveal data-reveal-step="3">
             <div class="about__media-frame">
-              <img src="img/10-950.webp" srcset="img/10-360.webp 360w, img/10-480.webp 480w, img/10-720.webp 720w, img/10-950.webp 950w" sizes="(min-width:1024px) 475px, 90vw" width="950" height="621" loading="lazy" decoding="async"
+              <img src="img/equipped-vehicle-fleet-950.webp" srcset="img/equipped-vehicle-fleet-360.webp 360w, img/equipped-vehicle-fleet-480.webp 480w, img/equipped-vehicle-fleet-720.webp 720w, img/equipped-vehicle-fleet-950.webp 950w" sizes="(min-width:1024px) 475px, 90vw" width="950" height="621" loading="lazy" decoding="async"
                    alt="أسطول مركبات عون الدرب المجهّزة للنقل المتخصص، بهوية الشركة على المركبات.">
             </div>
           </figure>
@@ -3361,7 +3773,7 @@ html:not(.js) .hww__path{display:none}
           <div class="why__story">
 
             <figure class="why__media" data-reveal>
-              <img src="img/03-1122.webp" srcset="img/03-380.webp 380w, img/03-600.webp 600w, img/03-860.webp 860w, img/03-1122.webp 1122w" sizes="(min-width:1024px) 590px, 92vw" width="1122" height="1402"
+              <img src="img/wheelchair-passenger-vehicle-1122.webp" srcset="img/wheelchair-passenger-vehicle-380.webp 380w, img/wheelchair-passenger-vehicle-600.webp 600w, img/wheelchair-passenger-vehicle-860.webp 860w, img/wheelchair-passenger-vehicle-1122.webp 1122w" sizes="(min-width:1024px) 590px, 92vw" width="1122" height="1402"
                    loading="lazy" decoding="async"
                    alt="مشهد من خدمة النقل المتخصص لدى عون الدرب: راكب يستخدم كرسيًا متحركًا مع مركبة مجهّزة.">
             </figure>
@@ -3484,7 +3896,7 @@ html:not(.js) .hww__path{display:none}
               </div>
               <h3 class="service__title">النقل بواسطة الكرسي المتحرك</h3>
               <figure class="service__media">
-                <img src="img/chair1-686.webp" srcset="img/chair1-360.webp 360w, img/chair1-520.webp 520w, img/chair1-686.webp 686w" sizes="(min-width:1024px) 530px, (min-width:768px) 689px, 90vw" width="686" height="707"
+                <img src="img/wheelchair-transport-686.webp" srcset="img/wheelchair-transport-360.webp 360w, img/wheelchair-transport-520.webp 520w, img/wheelchair-transport-686.webp 686w" sizes="(min-width:1024px) 530px, (min-width:768px) 689px, 90vw" width="686" height="707"
                      loading="lazy" decoding="async"
                      alt="راكب يستخدم كرسيًا متحركًا أثناء نقله بمركبة عون الدرب المجهّزة.">
               </figure>
@@ -3502,7 +3914,7 @@ html:not(.js) .hww__path{display:none}
               </div>
               <h3 class="service__title">النقل بواسطة الكرسي الكهربائي</h3>
               <figure class="service__media">
-                <img src="img/12-1378.webp" srcset="img/12-360.webp 360w, img/12-520.webp 520w, img/12-690.webp 690w, img/12-1040.webp 1040w, img/12-1378.webp 1378w" sizes="(min-width:1024px) 530px, (min-width:768px) 689px, 90vw" width="1378" height="1066"
+                <img src="img/power-wheelchair-transport-1378.webp" srcset="img/power-wheelchair-transport-360.webp 360w, img/power-wheelchair-transport-520.webp 520w, img/power-wheelchair-transport-690.webp 690w, img/power-wheelchair-transport-1040.webp 1040w, img/power-wheelchair-transport-1378.webp 1378w" sizes="(min-width:1024px) 530px, (min-width:768px) 689px, 90vw" width="1378" height="1066"
                      loading="lazy" decoding="async"
                      alt="كرسي كهربائي متخصص لتجاوز الدرجات بمرافقة فني مدرّب.">
               </figure>
@@ -3520,7 +3932,7 @@ html:not(.js) .hww__path{display:none}
               </div>
               <h3 class="service__title">النقل بواسطة السرير الطبي</h3>
               <figure class="service__media">
-                <img src="img/14-1378.webp" srcset="img/14-360.webp 360w, img/14-520.webp 520w, img/14-690.webp 690w, img/14-1040.webp 1040w, img/14-1378.webp 1378w" sizes="(min-width:1024px) 530px, (min-width:768px) 689px, 90vw" width="1378" height="1021"
+                <img src="img/medical-bed-transport-1378.webp" srcset="img/medical-bed-transport-360.webp 360w, img/medical-bed-transport-520.webp 520w, img/medical-bed-transport-690.webp 690w, img/medical-bed-transport-1040.webp 1040w, img/medical-bed-transport-1378.webp 1378w" sizes="(min-width:1024px) 530px, (min-width:768px) 689px, 90vw" width="1378" height="1021"
                      loading="lazy" decoding="async"
                      alt="نقل مستفيد على سرير طبي بوسيلة نقل مناسبة لحالته.">
               </figure>
@@ -3538,7 +3950,7 @@ html:not(.js) .hww__path{display:none}
               </div>
               <h3 class="service__title">خدمة مساعد السائق</h3>
               <figure class="service__media">
-                <img src="img/15-1111.webp" srcset="img/15-360.webp 360w, img/15-520.webp 520w, img/15-690.webp 690w, img/15-1040.webp 1040w, img/15-1111.webp 1111w" sizes="(min-width:1024px) 530px, (min-width:768px) 689px, 90vw" width="1111" height="949"
+                <img src="img/driver-assistant-escort-1111.webp" srcset="img/driver-assistant-escort-360.webp 360w, img/driver-assistant-escort-520.webp 520w, img/driver-assistant-escort-690.webp 690w, img/driver-assistant-escort-1040.webp 1040w, img/driver-assistant-escort-1111.webp 1111w" sizes="(min-width:1024px) 530px, (min-width:768px) 689px, 90vw" width="1111" height="949"
                      loading="lazy" decoding="async"
                      alt="مساعد من عون الدرب يرافق المستفيد ويقدّم له المساعدة أثناء النقل.">
               </figure>
@@ -3556,7 +3968,7 @@ html:not(.js) .hww__path{display:none}
               </div>
               <h3 class="service__title">النقل اليومي</h3>
               <figure class="service__media">
-                <img src="img/05-1378.webp" srcset="img/05-360.webp 360w, img/05-520.webp 520w, img/05-690.webp 690w, img/05-1040.webp 1040w, img/05-1378.webp 1378w" sizes="(min-width:1024px) 530px, (min-width:768px) 689px, 90vw" width="1378" height="1034"
+                <img src="img/daily-transport-elderly-1378.webp" srcset="img/daily-transport-elderly-360.webp 360w, img/daily-transport-elderly-520.webp 520w, img/daily-transport-elderly-690.webp 690w, img/daily-transport-elderly-1040.webp 1040w, img/daily-transport-elderly-1378.webp 1378w" sizes="(min-width:1024px) 530px, (min-width:768px) 689px, 90vw" width="1378" height="1034"
                      loading="lazy" decoding="async"
                      alt="رحلة نقل يومية لكبار السن وذوي الاحتياجات الخاصة بمركبة عون الدرب.">
               </figure>
@@ -3574,7 +3986,7 @@ html:not(.js) .hww__path{display:none}
               </div>
               <h3 class="service__title">النقل إلى المستشفيات والمراكز الطبية</h3>
               <figure class="service__media">
-                <img src="img/11-1378.webp" srcset="img/11-360.webp 360w, img/11-520.webp 520w, img/11-690.webp 690w, img/11-1040.webp 1040w, img/11-1378.webp 1378w" sizes="(min-width:1024px) 530px, (min-width:768px) 689px, 90vw" width="1378" height="1034"
+                <img src="img/hospital-medical-centre-1378.webp" srcset="img/hospital-medical-centre-360.webp 360w, img/hospital-medical-centre-520.webp 520w, img/hospital-medical-centre-690.webp 690w, img/hospital-medical-centre-1040.webp 1040w, img/hospital-medical-centre-1378.webp 1378w" sizes="(min-width:1024px) 530px, (min-width:768px) 689px, 90vw" width="1378" height="1034"
                      loading="lazy" decoding="async"
                      alt="منظر جوي لمجمع طبي حديث من الوجهات التي تصل إليها رحلات عون الدرب.">
               </figure>
@@ -3592,7 +4004,7 @@ html:not(.js) .hww__path{display:none}
               </div>
               <h3 class="service__title">التنقل للمناسبات الاجتماعية</h3>
               <figure class="service__media">
-                <img src="img/15-1-1023.webp" srcset="img/15-1-360.webp 360w, img/15-1-520.webp 520w, img/15-1-690.webp 690w, img/15-1-1023.webp 1023w" sizes="(min-width:1024px) 530px, (min-width:768px) 689px, 90vw" width="1023" height="872"
+                <img src="img/riyadh-social-mobility-1023.webp" srcset="img/riyadh-social-mobility-360.webp 360w, img/riyadh-social-mobility-520.webp 520w, img/riyadh-social-mobility-690.webp 690w, img/riyadh-social-mobility-1023.webp 1023w" sizes="(min-width:1024px) 530px, (min-width:768px) 689px, 90vw" width="1023" height="872"
                      loading="lazy" decoding="async"
                      alt="أفق مدينة الرياض التي تغطي خدمة عون الدرب التنقل بين أنحائها.">
               </figure>
@@ -4482,16 +4894,29 @@ html:not(.js) .hww__path{display:none}
         if (!el.classList.contains("is-inview")) { pending.push(el); ro.observe(el); }
       });
       function sweep() {
+        swept = false;
         pending = pending.filter(function (el) {
           if (el.getBoundingClientRect().bottom >= 0) return true;
           el.classList.add("is-inview"); ro.unobserve(el); return false;
         });
         if (!pending.length) {
-          window.removeEventListener("scroll", sweep);
+          window.removeEventListener("scroll", onSweep);
           window.removeEventListener("hashchange", sweep);
         }
       }
-      window.addEventListener("scroll", sweep, { passive: true });
+      /* STAGE M13 §24 — the sweep is the one listener on the page that was
+         doing real work on the scroll event itself. It reads a rect per
+         pending block, and the list starts at 96, so a single flick could ask
+         for several thousand rect reads in the frames it spans — each one a
+         forced layout, because the pass before it has just written a class.
+         Every other listener on this page is already batched into one rAF per
+         burst; this one now is too. Nothing about when a block arrives
+         changes: a burst still ends in exactly one pass, it just ends in one
+         pass instead of thirty. The listener still unhooks itself the moment
+         the list empties. */
+      var swept = false;
+      function onSweep() { if (!swept) { swept = true; window.requestAnimationFrame(sweep); } }
+      window.addEventListener("scroll", onSweep, { passive: true });
       window.addEventListener("hashchange", sweep);
       sweep();   /* a hash in the URL jumps before any scroll event fires */
     })();

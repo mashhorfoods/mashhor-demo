@@ -13,10 +13,15 @@ const VP = [[1440,900],[1280,800],[1024,768],[768,1024],[430,932],[390,844],[375
 (async () => {
   const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
   const p = await b.newPage();
-  // external hosts are unreachable in this sandbox and stall `load`; abort them
-  // so measurements are fast and deterministic (layout is unaffected: the media
-  // box is reserved by the grid track, not by the bitmap).
-  const offline = pg => pg.route('**', r => /^file:/.test(r.request().url()) ? r.continue() : r.abort());
+  // Third-party hosts stall `load` and are not what this harness measures, so
+  // they are cut off. Anything the site serves itself is not third-party:
+  // M13 moved the photographs and the two font families onto this origin, and
+  // a rule that only let file:// through was aborting the DOCUMENT when the
+  // suite ran against the production build over http (SITE_URL=...:8102),
+  // which is exactly the case it exists to support.
+  const ORIGIN = /^file:/.test(URL) ? 'file://' : new (require('url').URL)(URL).origin;
+  const mine = u => u.startsWith(ORIGIN);
+  const offline = pg => pg.route('**', r => mine(r.request().url()) ? r.continue() : r.abort());
   await offline(p);
 
   console.log('### §26 viewport sweep — fold budget & composition');

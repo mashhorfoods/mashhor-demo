@@ -16,6 +16,11 @@
         twelve stages. They belong in source and cost every visitor bandwidth
         in production.
      3. HTML comments are removed, for the same reason.
+     4. JavaScript comments are removed, for the same reason: 10KB of the
+        behaviour script's 25KB is the design log of why each observer exists.
+
+   M13 also copies the self-hosted faces and the responsive photo variants,
+   both read out of the built markup rather than kept in a list here.
 
    Nothing is minified beyond that: no selector rewriting, no property
    reordering, no JavaScript touched. The output must be byte-for-byte
@@ -35,9 +40,25 @@ const DIST = path.join(ROOT, 'dist');
 const SHIP = [
   '404.html', 'robots.txt', 'sitemap.xml',
   'google192f612c4e876e6f.html',
-  'brand/aun-aldrb-logo.svg', 'brand/aun-aldrb-logo-white.svg',
-  'brand/aun-aldrb-logo.png', 'brand/aun-aldrb-logo-white.png',
+  /* M13 §28/§29 — compression, cache headers, the 404 handler and the MIME
+     types for avif/woff2. Measured on this build: without compression the
+     mobile performance score is 93 and LCP is 3.1s; with it, 99 and 2.2s.
+     Inert on Nginx — DEPLOY.md carries the equivalent server block. */
+  '.htaccess',
+  /* M13 — the licence that permits redistributing the two font families.
+     fonts/font-face.css is source: its rules are already inside the inline
+     stylesheets, so shipping it would be a second copy nothing requests. */
+  'fonts/OFL.txt',
 ];
+
+/* Everything else — photographs, faces, logos, the social card, the icons —
+   is worked out from the markup instead of listed, so an asset that stops
+   being referenced stops being uploaded on the next build without anyone
+   having to remember. M13 removed brand/aun-aldrb-logo-white.png from the
+   package this way: nothing had referenced it since the Open Graph image
+   became og-image.png. */
+const SITE = 'https://aunaldrb.com/';
+const ASSET_DIRS = ['img/', 'fonts/', 'brand/'];
 
 /* --- 1 · the three inlined logos ----------------------------------------- */
 function externaliseLogos(html) {
@@ -86,6 +107,63 @@ function stripCssComments(css) {
   return out.replace(/[ \t]+$/gm, '').replace(/\n{3,}/g, '\n\n').replace(/^\n+/, '');
 }
 
+/* --- 2b · JavaScript comments ---------------------------------------------
+   M13. The behaviour script is 25KB of which 10KB is prose: why each observer
+   exists, what was measured, what broke before. That belongs in source and is
+   parsed by every visitor in production.
+
+   The same scanner shape as the CSS one, with the two things JavaScript adds:
+   a `//` line comment, and the fact that `/` is ambiguous — divide or the
+   start of a regex literal. The last significant character decides: after a
+   value (identifier, number, `)`, `]`) a slash divides; after an operator,
+   `(`, `,`, `{`, `;` or `return` it opens a regex. Template literals are
+   tracked too, since `${...}` can nest quotes inside them.
+
+   Nothing else is touched. No renaming, no whitespace games, no reordering:
+   the output must run identically, and the harnesses in ux/ are run against
+   it to prove that it does. */
+function stripJsComments(js) {
+  let out = '', i = 0, prev = '';
+  const opensRegex = () => !prev || '(,=:[!&|?{};+-*%~^<>'.includes(prev)
+    || /\b(return|typeof|instanceof|in|of|new|delete|void|do|else|case)$/.test(out.trimEnd());
+  while (i < js.length) {
+    const c = js[i], n = js[i + 1];
+
+    if (c === '/' && n === '*') { const e = js.indexOf('*/', i + 2); i = e < 0 ? js.length : e + 2; continue; }
+    if (c === '/' && n === '/') { const e = js.indexOf('\n', i);    i = e < 0 ? js.length : e;     continue; }
+
+    if (c === '"' || c === "'" || c === '`') {          /* a string, verbatim */
+      const q = c; out += c; i++;
+      while (i < js.length) {
+        const d = js[i];
+        if (d === '\\') { out += d + (js[i + 1] || ''); i += 2; continue; }
+        out += d; i++;
+        if (d === q) break;
+      }
+      prev = q; continue;
+    }
+
+    if (c === '/' && opensRegex()) {                    /* a regex, verbatim */
+      out += c; i++;
+      let cls = false;
+      while (i < js.length) {
+        const d = js[i];
+        if (d === '\\') { out += d + (js[i + 1] || ''); i += 2; continue; }
+        if (d === '[') cls = true; else if (d === ']') cls = false;
+        out += d; i++;
+        if (d === '/' && !cls) break;
+        if (d === '\n') break;                          /* not a regex after all */
+      }
+      prev = '/'; continue;
+    }
+
+    out += c; i++;
+    if (!/\s/.test(c)) prev = c;
+  }
+  /* the comments leave blank and trailing-whitespace lines behind */
+  return out.replace(/[ \t]+$/gm, '').replace(/\n{3,}/g, '\n\n');
+}
+
 function build() {
   console.log('building production output → dist/\n');
   let html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
@@ -99,6 +177,16 @@ function build() {
   const css = stripCssComments(style[1]);
   console.log(`  css comments       : ${((cssBefore - Buffer.byteLength(css))/1024).toFixed(1)}KB removed`);
   html = html.replace(style[0], '<style>' + css + '</style>');
+
+  /* M13 — the same for the behaviour script */
+  let jsBefore = 0, jsAfter = 0;
+  html = html.replace(/<script>([\s\S]*?)<\/script>/g, (whole, js) => {
+    jsBefore += Buffer.byteLength(js);
+    const stripped = stripJsComments(js);
+    jsAfter += Buffer.byteLength(stripped);
+    return '<script>' + stripped + '</script>';
+  });
+  console.log(`  js comments        : ${((jsBefore - jsAfter)/1024).toFixed(1)}KB removed`);
 
   /* HTML comments, but never inside the script or style blocks */
   const parts = html.split(/(<script[\s\S]*?<\/script>|<style>[\s\S]*?<\/style>)/);
@@ -117,22 +205,51 @@ function build() {
      originals in img/ are the masters that tools-images.js resizes from; they
      are several times larger than any variant and must never be uploaded. */
   const referenced = new Set();
-  for (const m of html.matchAll(/(?:src|srcset|href)="([^"]*)"/g)) {
-    for (const part of m[1].split(',')) {
-      const u = part.trim().split(/\s+/)[0];
-      if (u.startsWith('img/')) referenced.add(u);
-    }
+  const note = raw => {
+    if (!raw) return;
+    /* the same asset is written three ways across the project: relative from
+       index.html, root-absolute from 404.html, and fully qualified inside the
+       JSON-LD and the Open Graph tags. All three name one file. */
+    let u = raw.trim();
+    if (u.startsWith(SITE)) u = u.slice(SITE.length);
+    if (u.startsWith('/')) u = u.slice(1);
+    if (ASSET_DIRS.some(d => u.startsWith(d))) referenced.add(u);
+  };
+  /* src, srcset, imagesrcset, href — srcset values are comma-separated and
+     carry a width descriptor after the URL */
+  for (const m of html.matchAll(/(?:src|srcset|href|content)="([^"]*)"/g)) {
+    for (const part of m[1].split(',')) note(part.trim().split(/\s+/)[0]);
   }
-  let imgBytes = 0;
-  for (const u of referenced) {
+  /* and the faces, out of the @font-face rules, so a weight that stops being
+     declared stops being uploaded */
+  for (const m of html.matchAll(/url\(([^)"']+)\)/g)) note(m[1]);
+  /* and anything the JSON-LD names, where the assets are values in an object
+     rather than attributes on an element */
+  for (const m of html.matchAll(new RegExp(SITE.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[^"\\s]+', 'g')))
+    note(m[0]);
+
+  /* 404.html ships too, and it has its own logo, icons and @font-face rules */
+  {
+    const nf = fs.readFileSync(path.join(ROOT, '404.html'), 'utf8');
+    for (const m of nf.matchAll(/(?:src|href)="([^"]*)"/g)) note(m[1]);
+    for (const m of nf.matchAll(/url\(([^)"']+)\)/g)) note(m[1]);
+    /* §26 — no document may reach off-origin for a render-blocking stylesheet */
+    if (/<link[^>]+rel="stylesheet"[^>]+href="https?:/.test(nf))
+      throw new Error('404.html links an external stylesheet');
+  }
+  if (/<link[^>]+rel="stylesheet"[^>]+href="https?:/.test(html))
+    throw new Error('index.html links an external stylesheet');
+
+  let assetBytes = 0;
+  for (const u of [...referenced].sort()) {
     const src = path.join(ROOT, u);
-    if (!fs.existsSync(src)) throw new Error('the page references a missing image: ' + u);
+    if (!fs.existsSync(src)) throw new Error('the page references a missing asset: ' + u);
     fs.mkdirSync(path.dirname(path.join(DIST, u)), { recursive: true });
     fs.copyFileSync(src, path.join(DIST, u));
-    imgBytes += fs.statSync(src).size;
+    assetBytes += fs.statSync(src).size;
   }
-  console.log('  photographs        : ' + referenced.size + ' variants, '
-    + (imgBytes/1024).toFixed(0) + 'KB (originals not shipped)');
+  console.log('  referenced assets  : ' + referenced.size + ' files, '
+    + (assetBytes/1024).toFixed(0) + 'KB (image masters not shipped)');
 
   for (const f of SHIP) {
     const src = path.join(ROOT, f);

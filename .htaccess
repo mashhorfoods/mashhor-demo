@@ -1,0 +1,75 @@
+# عون الدرب للنقل المتخصص — Apache configuration for the uploaded site
+# STAGE M13 §28/§29/§46
+#
+# This site is static: no runtime, no database, no build server. Three things
+# still have to be configured, and leaving them to the host is the difference
+# between a mobile Lighthouse performance score of 99 and one of 93 — measured
+# on this exact build, with the whole difference in LCP (2.2s against 3.1s).
+#
+# On Apache with AllowOverride enabled this file does all three by itself. On
+# Nginx it is inert; DEPLOY.md carries the equivalent server block.
+#
+# Every directive is wrapped in <IfModule> so a host without the module gets a
+# working site rather than a 500.
+
+# --- 1 · not-found -----------------------------------------------------------
+ErrorDocument 404 /404.html
+
+# --- 2 · compression ---------------------------------------------------------
+# index.html is 182KB of markup and inline CSS, which gzips to 34KB. It is the
+# one render-blocking resource on the page, so this is the single highest-value
+# line in the file. Images and fonts are already compressed formats and are
+# deliberately not re-compressed.
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE application/xml application/xhtml+xml
+  AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+<IfModule mod_brotli.c>
+  AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css text/xml
+  AddOutputFilterByType BROTLI_COMPRESS application/javascript application/json
+  AddOutputFilterByType BROTLI_COMPRESS application/xml application/xhtml+xml
+  AddOutputFilterByType BROTLI_COMPRESS image/svg+xml
+</IfModule>
+
+# --- 3 · caching -------------------------------------------------------------
+# The photographs and the fonts carry their width or their weight in the
+# filename, so a changed file is a changed name and a year is safe. index.html
+# is not versioned and must revalidate, or an update never reaches anyone.
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/webp              "access plus 1 year"
+  ExpiresByType image/avif              "access plus 1 year"
+  ExpiresByType image/png               "access plus 1 year"
+  ExpiresByType image/svg+xml           "access plus 1 year"
+  ExpiresByType font/woff2              "access plus 1 year"
+  ExpiresByType text/css                "access plus 1 year"
+  ExpiresByType application/javascript  "access plus 1 year"
+  ExpiresByType text/html               "access plus 0 seconds"
+</IfModule>
+<IfModule mod_headers.c>
+  <FilesMatch "\.(webp|avif|png|svg|woff2)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+  # the fonts are same-origin, but a CDN in front of the site may not be
+  <FilesMatch "\.woff2$">
+    Header set Access-Control-Allow-Origin "*"
+  </FilesMatch>
+  # safe, uncontroversial hardening for a site with no forms, no cookies and
+  # no third-party requests at all
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# --- 4 · correct types -------------------------------------------------------
+# some shared hosts still do not know AVIF or WOFF2, and serve them as
+# application/octet-stream, which the browser will not decode
+<IfModule mod_mime.c>
+  AddType image/avif  .avif
+  AddType image/webp  .webp
+  AddType font/woff2  .woff2
+</IfModule>

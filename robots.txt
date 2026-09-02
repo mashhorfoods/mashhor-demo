@@ -1,9 +1,9 @@
 # عون الدرب للنقل المتخصص — https://aunaldrb.com/
+# Everything uploaded is content. The development material — ux/, build.js,
+# brand/*.md, brand/design-system.html, the image masters — is not uploaded at
+# all (see DEPLOY.md), so there is nothing here to disallow: a Disallow line
+# for a path the server does not serve only tells a crawler the path exists.
 User-agent: *
 Allow: /
-
-# development and verification tooling — not content
-Disallow: /ux/
-Disallow: /brand/design-system.html
 
 Sitemap: https://aunaldrb.com/sitemap.xml
