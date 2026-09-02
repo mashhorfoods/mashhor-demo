@@ -13,6 +13,8 @@ Separate track from `ux/`, which covers the public site.
 | `services.html` | **Stage 08 — الخدمات.** The seven approved services with their real copy and photographs: edit, reorder, show/hide, and replace images. |
 | `settings.html` | **Stage 09 — الإعدادات.** Six settings categories carrying the site's real company, contact and search-listing values. |
 | `users.html` | **Stage 09 — المستخدمون والصلاحيات.** Administrators, the three approved roles, and a per-module view/edit permission matrix. |
+| `media.html` | **Stage 12 — الوسائط والأصول.** The website's real image library, with usage tracking that protects published assets from deletion. |
+| `QA-REPORT.md` · `stage-10-qa-report.html` | **Stage 10 — production readiness audit.** |
 
 The built site (`../index.html`) is the source of truth for services, content areas,
 contact details and terminology. Nothing in this track invents business features.
@@ -283,3 +285,57 @@ deactivation is the reversible alternative.
 **These are frontend controls only.** Every rule above — role, permission, guard — must be
 enforced again server-side, per §12 and §19. The interface hiding a control is a convenience,
 never the security boundary.
+
+## Stage 12 — الوسائط والأصول
+
+`media.html` is built on the site's **actual asset inventory**, not a sample: eighteen real
+files read straight from `img/`, `dist/img/` and `brand/`, each with its true filename,
+byte size and dimensions parsed from the file headers. Usage is **computed from `index.html`** —
+which section references which image — so the library knows that `wheelchair-ramp-boarding.webp`
+is the hero and `hospital-medical-centre.webp` is a service photograph.
+
+Two assets are genuinely unused: `aun-aldrb-logo-white.png` and `aun-aldrb-logo-white.svg` are
+referenced nowhere in the site. That gave a real "unused" state without inventing one, and it is
+the only pair the module will let you delete.
+
+**Safety is the point of the module.** A used asset cannot be deleted: the button is disabled,
+and the sheet says which sections depend on it and what to do instead. Replacement keeps the
+path and filename, so every reference in the site keeps resolving — the operation swaps the
+file's contents, never its identity.
+
+**Validation** runs before anything enters the library: MIME type against the four supported
+formats, a 3 MB ceiling, a zero-byte check, and — the one that catches a mislabelled or
+corrupted file — the browser must actually decode it as an image before the confirm button
+enables. Filenames are sanitised (path segments stripped, unsafe characters removed) and a
+collision with an existing name is refused with the name spelled out, rather than silently
+overwriting.
+
+**Performance (§20).** The grid never loads a master image. Thumbnails come from the smallest
+built rendition (360w), every grid image carries `loading="lazy"`, and the two 5041×3577 logo
+masters — which have no small rendition — show a placeholder reading *بلا مصغّرة* instead of
+pulling 217 KB into a tile. Twelve per page.
+
+**Content integration (§13)** is wired end to end: the services editor's image panel now offers
+*اختيار من المكتبة*, which hands off to `media.html?pick=…&return=…`. The library switches to
+picker mode, the chosen path returns through `sessionStorage`, and the editor restores
+everything the administrator had already typed — not just the image. The editor never carries a
+second copy of the library.
+
+**Navigation** gained one flat item, الوسائط والأصول, under the الموقع الإلكتروني group beside
+المحتوى — no nested navigation, consistent with Stage 04. All seven pages carry it.
+
+Audited to the Stage 10 bar: no overflow at any of the fourteen required widths, no missing alt
+text, labels or accessible names, no duplicate ids, no undersized targets, `dir=rtl`, and no
+runtime errors. One bidi defect was found and fixed in review: dimensions and file sizes are
+Latin runs inside RTL cards and were reordering — `1448×1086` reading back as `1086×1448` —
+so each value now sits in its own LTR isolate.
+
+**Known cost:** `media.html` is 512 KB because sixteen thumbnails are embedded as data URIs to
+keep it a single self-contained file. In production the thumbnails should be served as files —
+the same finding Stage 10 recorded for `services.html`.
+
+**Still open:** §13's full workflow assumes the المحتوى module, which does not exist. The
+integration is demonstrated against the services editor instead. The Stage 10 verdict is
+unchanged: **NOT READY FOR DEPLOYMENT** until المحتوى and التقارير exist and a backend provides
+authentication, persistence and server-side authorization — including for media operations,
+which §22 rightly treats as high-privilege.

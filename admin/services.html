@@ -872,6 +872,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
 <symbol id="ic-note" viewBox="0 0 24 24"><path d="M4.6 5.6a2 2 0 0 1 2-2h10.8a2 2 0 0 1 2 2v9.2l-4.6 4.6H6.6a2 2 0 0 1-2-2z"/><path d="M19.4 14.8h-4.6v4.6"/><path d="M8.4 9h7.2M8.4 12.4h4.6"/></symbol>
 <symbol id="ic-list" viewBox="0 0 24 24"><path d="M8.6 6.6h11.8M8.6 12h11.8M8.6 17.4h11.8"/><circle cx="4.6" cy="6.6" r="1.2" fill="currentColor" stroke="none"/><circle cx="4.6" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="4.6" cy="17.4" r="1.2" fill="currentColor" stroke="none"/></symbol>
 <symbol id="ic-upload" viewBox="0 0 24 24"><path d="M12 15.6V4.4"/><path d="m7.6 8.8 4.4-4.4 4.4 4.4"/><path d="M4.4 15.2v3.2a2 2 0 0 0 2 2h11.2a2 2 0 0 0 2-2v-3.2"/></symbol>
+<symbol id="ic-image" viewBox="0 0 24 24"><rect x="3.4" y="4.6" width="17.2" height="14.8" rx="2.2"/><circle cx="8.8" cy="9.6" r="1.6"/><path d="m4.4 17.4 4.8-4.4 3.4 3 3-2.6 4 3.6"/></symbol>
 </defs></svg>
 
 <a class="skip" href="#main">تخطَّ إلى المحتوى</a>
@@ -889,6 +890,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
       <p class="side__grp">الموقع الإلكتروني</p>
       <a class="navitem" href="#" aria-current="page"><svg class="i" aria-hidden="true"><use href="#ic-service"/></svg><span class="navitem__lbl">الخدمات</span></a>
       <a class="navitem is-pending" href="#" aria-disabled="true" title="قيد الإنشاء — لم تُبنَ هذه الوحدة بعد"><svg class="i" aria-hidden="true"><use href="#ic-content"/></svg><span class="navitem__lbl">المحتوى</span></a>
+      <a class="navitem" href="media.html" data-nav="media"><svg class="i" aria-hidden="true"><use href="#ic-image"/></svg><span class="navitem__lbl">الوسائط والأصول</span></a>
       <p class="side__grp">النظام</p>
       <a class="navitem is-pending" href="#" aria-disabled="true" title="قيد الإنشاء — لم تُبنَ هذه الوحدة بعد"><svg class="i" aria-hidden="true"><use href="#ic-report"/></svg><span class="navitem__lbl">التقارير</span></a>
       <a class="navitem" href="users.html"><svg class="i" aria-hidden="true"><use href="#ic-shield"/></svg><span class="navitem__lbl">المستخدمون والصلاحيات</span></a>
@@ -1070,7 +1072,11 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
                     <svg class="i i--lg" aria-hidden="true" style="color:var(--navy)"><use href="#ic-upload"/></svg>
                     <strong>استبدال الصورة</strong>
                     <span>WebP أو JPG أو PNG · حتى 2 ميجابايت</span>
-                    <label class="btn btn--secondary" for="file" style="margin-top:var(--s2)">اختيار صورة</label>
+                    <span style="display:flex;flex-wrap:wrap;gap:var(--s2);justify-content:center;margin-top:var(--s2)">
+                      <a class="btn btn--secondary" id="pickbtn" href="#">
+                        <svg class="i i--sm" aria-hidden="true"><use href="#ic-image"/></svg>اختيار من المكتبة</a>
+                      <label class="btn btn--ghost" for="file">رفع صورة جديدة</label>
+                    </span>
                     <input type="file" id="file" accept="image/webp,image/jpeg,image/png">
                   </div>
                   <span class="field__err" id="errImg" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
@@ -1129,6 +1135,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   <p class="side__grp">الموقع الإلكتروني</p>
   <a class="navitem" href="#" aria-current="page"><svg class="i" aria-hidden="true"><use href="#ic-service"/></svg><span class="navitem__lbl">الخدمات</span></a>
   <a class="navitem is-pending" href="#" aria-disabled="true" title="قيد الإنشاء — لم تُبنَ هذه الوحدة بعد"><svg class="i" aria-hidden="true"><use href="#ic-content"/></svg><span class="navitem__lbl">المحتوى</span></a>
+  <a class="navitem" href="media.html" data-nav="media"><svg class="i" aria-hidden="true"><use href="#ic-image"/></svg><span class="navitem__lbl">الوسائط والأصول</span></a>
   <p class="side__grp">النظام</p>
   <a class="navitem is-pending" href="#" aria-disabled="true" title="قيد الإنشاء — لم تُبنَ هذه الوحدة بعد"><svg class="i" aria-hidden="true"><use href="#ic-report"/></svg><span class="navitem__lbl">التقارير</span></a>
   <a class="navitem" href="users.html"><svg class="i" aria-hidden="true"><use href="#ic-shield"/></svg><span class="navitem__lbl">المستخدمون والصلاحيات</span></a>
@@ -1469,6 +1476,53 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
     toast("تعذّر استخدام الصورة", true);
   }
 
+  /* ---------- §13 · centralized media --------------------------------------
+     The editor never reimplements the library: it hands off to الوسائط والأصول
+     and reads the choice back, keeping the rest of the draft intact.        */
+  $("pickbtn").addEventListener("click", function(e){
+    e.preventDefault();
+    if (!canModify || !current) return;
+    try {
+      window.sessionStorage.setItem("aun-service-draft", JSON.stringify({
+        slug: current.slug, title: draft.title, desc: draft.desc,
+        on: draft.on, order: draft.order
+      }));
+    } catch(err){}
+    window.location.href = "media.html?pick=" + encodeURIComponent("صورة الخدمة")
+      + "&return=" + encodeURIComponent("services.html");
+  });
+
+  function resumeFromPick(){
+    var slug=null, picked=null, saved=null;
+    try {
+      picked = window.sessionStorage.getItem("aun-media-pick");
+      saved  = window.sessionStorage.getItem("aun-service-draft");
+      window.sessionStorage.removeItem("aun-media-pick");
+      window.sessionStorage.removeItem("aun-service-draft");
+    } catch(err){ return; }
+    if (!saved) return;
+    var d;
+    try { d = JSON.parse(saved); } catch(err){ return; }
+    var svc = findS(d.slug);
+    if (!svc) return;
+    openS(d.slug);
+    /* everything the administrator had typed is restored, not just the image */
+    $("fTitle").value = d.title; $("fDesc").value = d.desc;
+    $("fOrder").value = d.order; setVis(d.on);
+    if (picked){
+      var slug2 = picked.split("/").pop().replace(/\.[a-z]+$/,"");
+      draft.imgName = picked.split("/").pop();
+      draft.imgSize = "—";
+      if (IMG[slug2]) draft.img = IMG[slug2];
+      $("pImg").src = draft.img;
+      $("mName").textContent = draft.imgName;
+      $("mSize").textContent = draft.imgSize;
+      toast(IMG[slug2] ? "اختير الملف من المكتبة — لم يُحفظ بعد"
+                       : "اختير «"+draft.imgName+"» — لا تتوفر معاينة له هنا");
+    }
+    touched();
+  }
+
   /* ---------- save: edit → validate → confirm ---------------------------- */
   $("form").addEventListener("submit", function(e){
     e.preventDefault();
@@ -1653,5 +1707,6 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   window.addEventListener("online",net); window.addEventListener("offline",net); net();
 
   render();
+  resumeFromPick();
 })();
 </script>
