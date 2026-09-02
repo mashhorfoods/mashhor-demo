@@ -1,0 +1,299 @@
+<title>Aoun Al-Darb Admin Sign-in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+
+<style>
+/* ==========================================================================
+   AOUN AL-DARB — ADMIN SIGN-IN  ·  RECOVERY 01 §08
+
+   The one admin page that must answer without a session. It introduces no new
+   colour, face, radius, shadow or control: the tokens below are Stage 03
+   verbatim, and every element is a component the admin shell already defines.
+   ========================================================================== */
+/* === TOKENS · Stage 03, unchanged ====================================== */
+:root{
+  --blue:#4975BA; --navy:#2C4C82; --blue-hover:#3F68A8; --blue-pressed:#22406F;
+  --sky:#D9E4F3; --mist:#EEF3FA; --primary-subtle:rgba(73,117,186,.08);
+  --ink:#1E2733; --slate:#5A6675; --gray:#8B95A3; --divider:#E4E9F0;
+  --soft:#F6F8FB; --white:#FFFFFF;
+  --row-hover:#F2F5FA; --row-selected:#E8EFF9;
+  --disabled-surface:#F1F3F7; --disabled-ink:#6B7683; --placeholder:#6E7986;
+  --control-border:#8B95A3;
+  --focus-ring:rgba(73,117,186,.38); --focus-ring-inverse:rgba(217,228,243,.55);
+
+  --success:#2E7D64; --success-bg:#EAF5F0; --success-ink:#256B55;
+  --warning:#B0791C; --warning-bg:#FBF3E4; --warning-ink:#8F6014;
+  --error:#C0433B;   --error-bg:#FBEDEC;   --error-ink:#A5352E; --error-hover:#A5352E;
+  --info:#4975BA;    --info-bg:#EEF3FA;    --info-ink:#2C4C82;
+
+  --st-new-ink:#2C4C82;       --st-new-bg:#EEF3FA;       --st-new-mark:#4975BA;
+  --st-review-ink:#8F6014;    --st-review-bg:#FBF3E4;    --st-review-mark:#B0791C;
+  --st-confirmed-ink:#22406F; --st-confirmed-bg:#D9E4F3; --st-confirmed-mark:#2C4C82;
+  --st-done-ink:#256B55;      --st-done-bg:#EAF5F0;      --st-done-mark:#2E7D64;
+  --st-cancel-ink:#47525F;    --st-cancel-bg:#EFF1F4;    --st-cancel-mark:#5A6675;
+
+  --f-ar:"IBM Plex Sans Arabic",ui-sans-serif,system-ui,"Segoe UI","Noto Sans Arabic",sans-serif;
+  --f-ar-body:"Cairo",ui-sans-serif,system-ui,"Segoe UI","Noto Sans Arabic",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+
+  --fs-page:1.625rem; --fs-section:1.25rem; --fs-card:1.0625rem;
+  --fs-body:1rem; --fs-sec:.9375rem; --fs-label:.875rem; --fs-caption:.8125rem;
+
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px;
+  --s6:24px; --s8:32px; --s10:40px; --s12:48px; --s16:64px;
+
+  --r-xs:3px; --r-control:8px; --r-card:12px; --r-modal:16px; --r-pill:999px;
+
+  --sh-rgb:29,39,51;
+  --sh-card:0 1px 2px rgba(var(--sh-rgb),.04);
+  --sh-raised:0 1px 2px rgba(var(--sh-rgb),.05),0 2px 6px rgba(var(--sh-rgb),.05);
+  --sh-dropdown:0 4px 10px rgba(var(--sh-rgb),.07),0 12px 28px rgba(var(--sh-rgb),.09);
+  --sh-modal:0 12px 28px rgba(var(--sh-rgb),.12),0 32px 64px rgba(var(--sh-rgb),.14);
+  --sh-focus:0 0 0 3px var(--focus-ring);
+
+  --dur:150ms; --dur-mid:220ms; --ease:cubic-bezier(.4,0,.2,1); --tap:44px;
+
+  --side-w:248px; --rail-w:72px; --hdr-h:64px; --content-max:1440px;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+/* [hidden] must win over any component display rule */
+[hidden]{display:none!important}
+
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--soft);color:var(--ink);
+  font-family:var(--f-ar);font-size:var(--fs-body);line-height:1.6;
+  direction:rtl;-webkit-font-smoothing:antialiased
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:var(--r-xs)}
+h1,h2,h3,h4,p{margin:0}
+button{font:inherit}
+a{color:var(--navy)}
+
+.i{width:20px;height:20px;flex:0 0 auto;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.i--lg{width:24px;height:24px}
+.i--sm{width:16px;height:16px;stroke-width:1.9}
+.i--flip{transform:scaleX(-1)}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* === SIGN-IN ============================================================ */
+body{display:block;background:var(--ground)}
+.auth{min-height:100vh;display:grid;place-items:center;padding:var(--s6) var(--s4)}
+.auth__card{
+  width:min(26rem,100%);background:var(--white);border:1px solid var(--divider);
+  border-radius:var(--r-card);box-shadow:var(--sh-card);padding:var(--s7) var(--s6) var(--s6)}
+.auth__brand{display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s6)}
+.auth__mark{
+  width:40px;height:40px;border-radius:var(--r-control);background:var(--navy);color:var(--white);
+  display:grid;place-items:center;font-weight:700;font-size:1.15rem;flex:0 0 auto}
+.auth__name{display:flex;flex-direction:column;line-height:1.3}
+.auth__name b{font-weight:600;font-size:var(--fs-body);color:var(--ink)}
+.auth__name span{font-family:var(--f-ar-body);font-size:var(--fs-caption);color:var(--slate)}
+.auth__h{font-size:var(--fs-card);font-weight:600;color:var(--ink);margin-bottom:var(--s2)}
+.auth__d{font-family:var(--f-ar-body);font-size:var(--fs-sec);color:var(--slate);
+  line-height:1.7;margin-bottom:var(--s6)}
+.auth__f{display:flex;flex-direction:column;gap:var(--s5)}
+.auth__foot{margin-top:var(--s6);padding-top:var(--s5);border-top:1px solid var(--divider);
+  font-family:var(--f-ar-body);font-size:var(--fs-caption);color:var(--slate);line-height:1.7}
+
+.field{display:flex;flex-direction:column;gap:var(--s2);min-width:0}
+.field__label{font-size:var(--fs-label);font-weight:500;color:var(--ink)}
+.ctl{
+  font-family:var(--f-ar);font-size:var(--fs-body);color:var(--ink);background:var(--white);
+  border:1px solid var(--control-border);border-radius:var(--r-control);
+  min-height:var(--tap);padding:.5rem var(--s3);width:100%}
+.ctl:hover{border-color:var(--navy)}
+.ctl:focus{outline:none;border-color:var(--blue);box-shadow:var(--sh-focus)}
+.ctl.is-error{border-color:var(--error)}
+.ctl.ltr{direction:ltr;text-align:start}
+.field__err{font-size:var(--fs-caption);font-weight:500;color:var(--error-ink)}
+.field__err[hidden]{display:none}
+
+.alert{display:flex;gap:var(--s3);padding:var(--s4);border-radius:var(--r-control);
+  border:1px solid transparent;align-items:flex-start}
+.alert--error{background:var(--error-bg);border-color:rgba(192,67,59,.28);color:var(--error-ink)}
+.alert--info{background:var(--info-bg);border-color:rgba(44,76,130,.2);color:var(--navy)}
+.alert[hidden]{display:none}
+.alert__t{display:block;font-weight:600;font-size:var(--fs-sec)}
+.alert__b{display:block;font-family:var(--f-ar-body);font-size:var(--fs-caption);
+  line-height:1.65;margin-top:.15rem}
+
+.btn{
+  font-family:var(--f-ar);font-size:var(--fs-sec);font-weight:600;line-height:1;
+  display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
+  min-height:var(--control-md);padding:0 var(--s5);border-radius:var(--r-control);
+  border:1px solid transparent;cursor:pointer;width:100%}
+.btn--primary{background:var(--navy);color:var(--white)}
+.btn--primary:hover{background:var(--blue-hover)}
+.btn--primary:active{background:var(--blue-pressed)}
+.btn:focus-visible{outline:none;box-shadow:var(--sh-focus)}
+.btn:disabled{background:var(--disabled-surface);color:var(--disabled-ink);
+  border-color:var(--divider);cursor:not-allowed}
+
+.i{width:18px;height:18px;flex:0 0 auto;fill:none;stroke:currentColor;
+  stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+<symbol id="ic-alert" viewBox="0 0 24 24"><path d="M12 3.8 2.8 19.8h18.4z"/><path d="M12 9.6v4.2"/><circle cx="12" cy="16.8" r="1" fill="currentColor" stroke="none"/></symbol>
+<symbol id="ic-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4"/><path d="M12 11.4v4.8"/><circle cx="12" cy="8.2" r="1" fill="currentColor" stroke="none"/></symbol>
+<symbol id="ic-logout" viewBox="0 0 24 24"><path d="M9.4 20.2H6.2a2 2 0 0 1-2-2V5.8a2 2 0 0 1 2-2h3.2"/><path d="M15.4 15.8 19.6 12l-4.2-3.8"/><path d="M19.6 12H9.4"/></symbol>
+</defs></svg>
+
+<main class="auth">
+  <div class="auth__card">
+    <div class="auth__brand">
+      <span class="auth__mark" aria-hidden="true">ع</span>
+      <span class="auth__name"><b>عون الدرب</b><span>لوحة التحكم</span></span>
+    </div>
+
+    <h1 class="auth__h">تسجيل الدخول</h1>
+    <p class="auth__d">لوحة التحكم مخصّصة لفريق عون الدرب. أدخل بريدك وكلمة المرور للمتابعة.</p>
+
+    <div class="alert alert--info" id="noticeSession" hidden>
+      <svg class="i" aria-hidden="true"><use href="#ic-info"/></svg>
+      <span><span class="alert__t">انتهت الجلسة</span>
+        <span class="alert__b">سجّل الدخول من جديد للمتابعة من حيث توقفت.</span></span>
+    </div>
+
+    <div class="alert alert--error" id="err" hidden role="alert">
+      <svg class="i" aria-hidden="true"><use href="#ic-alert"/></svg>
+      <span><span class="alert__t" id="errT">تعذّر تسجيل الدخول</span>
+        <span class="alert__b" id="errB"></span></span>
+    </div>
+
+    <form class="auth__f" id="loginform" method="post" action="/api/auth/login" novalidate>
+      <div class="field">
+        <label class="field__label" for="email">البريد الإلكتروني</label>
+        <input class="ctl ltr" id="email" name="email" type="email" autocomplete="username"
+               required aria-describedby="email-err">
+        <p class="field__err" id="email-err" hidden></p>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="password">كلمة المرور</label>
+        <input class="ctl ltr" id="password" name="password" type="password"
+               autocomplete="current-password" required aria-describedby="password-err">
+        <p class="field__err" id="password-err" hidden></p>
+      </div>
+
+      <button class="btn btn--primary" type="submit" id="submit">
+        <svg class="i" aria-hidden="true"><use href="#ic-logout"/></svg>
+        <span id="submitLabel">دخول</span>
+      </button>
+    </form>
+
+    <p class="auth__foot">إن نسيت كلمة المرور، تواصل مع مدير النظام لإعادة تعيينها.
+      لا يمكن استعادتها من هنا لأن النظام لا يحتفظ بها.</p>
+  </div>
+</main>
+
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){ return document.getElementById(id); };
+  var form = $("loginform"), busy = false;
+
+  var params = new URLSearchParams(location.search);
+  if (params.get("reason") === "session") $("noticeSession").hidden = false;
+
+  /* Only a bare page name is ever followed after login — an open redirect is
+     one of the cheapest ways to turn a login page into a phishing hop. */
+  function nextPage(){
+    var n = params.get("next") || "dashboard.html";
+    return /^[a-z0-9][a-z0-9-]*\.html$/.test(n) ? n : "dashboard.html";
+  }
+
+  function clearErrors(){
+    $("err").hidden = true;
+    ["email","password"].forEach(function(k){
+      $(k).classList.remove("is-error");
+      $(k).removeAttribute("aria-invalid");
+      $(k + "-err").hidden = true;
+      $(k + "-err").textContent = "";
+    });
+  }
+  function fieldError(k, msg){
+    var el = $(k), m = $(k + "-err");
+    if (!el) return;
+    el.classList.add("is-error");
+    el.setAttribute("aria-invalid","true");
+    m.textContent = msg; m.hidden = false;
+  }
+  function showError(msg){
+    $("errB").textContent = msg;
+    $("err").hidden = false;
+  }
+  function setBusy(on){
+    busy = on;
+    $("submit").disabled = on;
+    $("submitLabel").textContent = on ? "جارٍ الدخول…" : "دخول";
+  }
+
+  function csrf(){
+    return fetch("/api/csrf", { credentials:"same-origin", headers:{ Accept:"application/json" } })
+      .then(function(r){ return r.json(); })
+      .then(function(b){ return (b && b.token) || ""; });
+  }
+
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    if (busy) return;
+    clearErrors();
+
+    var email = $("email").value.trim(), password = $("password").value;
+    var bad = null;
+    if (!email){ fieldError("email","أدخل بريدك الإلكتروني."); bad = bad || $("email"); }
+    if (!password){ fieldError("password","أدخل كلمة المرور."); bad = bad || $("password"); }
+    if (bad){ bad.focus(); return; }
+
+    setBusy(true);
+    csrf().then(function(token){
+      return fetch("/api/auth/login", {
+        method:"POST",
+        credentials:"same-origin",
+        headers:{ "Content-Type":"application/json", Accept:"application/json", "X-CSRF-Token":token },
+        body: JSON.stringify({ csrf_token:token, email:email, password:password })
+      });
+    }).then(function(res){
+      return res.text().then(function(t){
+        var b = null; try { b = t ? JSON.parse(t) : null; } catch(_){}
+        return { status:res.status, body:b };
+      });
+    }).then(function(r){
+      setBusy(false);
+
+      if (r.status === 200 && r.body && r.body.ok && r.body.user){
+        /* the session cookie is set; nothing about it is readable here */
+        location.href = nextPage();
+        return;
+      }
+      if (r.status === 422 && r.body && r.body.errors){
+        Object.keys(r.body.errors).forEach(function(k){ fieldError(k, r.body.errors[k]); });
+        showError("تحقّق من الحقول المميّزة أعلاه.");
+        $("email").focus();
+        return;
+      }
+      if (r.status === 429){
+        showError((r.body && r.body.error && r.body.error.message)
+          || "محاولات كثيرة خلال وقت قصير. انتظر قليلاً ثم أعد المحاولة.");
+        return;
+      }
+      /* 401 and everything else share one message: the server does not tell
+         the page which half was wrong, and neither does the page */
+      showError((r.body && r.body.error && r.body.error.message)
+        || "البريد الإلكتروني أو كلمة المرور غير صحيحة.");
+      $("password").value = "";
+      $("password").focus();
+    }).catch(function(){
+      setBusy(false);
+      showError("تعذّر الاتصال بالخادم. تحقّق من اتصالك وأعد المحاولة.");
+    });
+  });
+
+  $("email").focus();
+})();
+</script>

@@ -74,6 +74,91 @@ Hostinger also has its own **Force HTTPS** toggle. Either that or the
 
 ---
 
+## 6 · The database and the backend (RECOVERY 01)
+
+The site above is static and works on its own. The admin dashboard and the
+public request form need PHP and MySQL, which the shared plan already
+provides — nothing extra to buy, and the files came up in the same zip.
+
+**a. Create the database.** hPanel → **Databases → MySQL Databases**. Create a
+database and a user, give the user all privileges on it, and note the three
+values. Hostinger prefixes both names with your account id; use the prefixed
+forms exactly as shown.
+
+**b. Write `.env`.** In the File Manager, go **up one level from
+`public_html`** — to your home directory — and create a file called `.env`
+there. Copy `public_html/.env.example` into it and fill in:
+
+```
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://aunaldrb.com
+DB_DRIVER=mysql
+DB_HOST=localhost
+DB_NAME=u123456789_aun
+DB_USER=u123456789_aun
+DB_PASS=…the password you set…
+APP_KEY=…64 hex characters…
+SESSION_COOKIE_SECURE=true
+```
+
+Above `public_html` is the right place: nothing there is reachable over HTTP
+under any misconfiguration. `public_html/app/.env` also works and is denied by
+`.htaccess`, but it is the weaker of the two.
+
+For `APP_KEY`, hPanel → **Advanced → SSH Access** (or any PHP host) and run:
+
+```sh
+php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"
+```
+
+**c. Create the tables and the first administrator.** Over SSH, from
+`public_html`:
+
+```sh
+php bin/migrate.php
+php bin/seed.php --admin-email=you@aunaldrb.com --admin-name="اسمك"
+```
+
+`seed.php` prints a generated password **once**. It is not written to the log
+or the database — only its hash is stored. Save it, sign in, change it.
+
+If SSH is not enabled on your plan, hPanel → **Advanced → Cron Jobs** will run
+the same two commands once each; set them to run once, check the output mail,
+then delete them. The generated password arrives in that mail, so change it
+immediately afterwards.
+
+**d. Check it.** Open `https://aunaldrb.com/api/health`. You want:
+
+```json
+{"ok":true,"db":{"driver":"mysql","connected":true,"missingTables":[]}}
+```
+
+It reports which settings are *present*, never their values, so it is safe to
+open in a browser. If `connected` is false, the three `DB_` values are wrong —
+the reason is in `app/storage/logs/`, not in the response.
+
+**e. Sign in.** `https://aunaldrb.com/admin/` redirects to the login page.
+After signing in you land on الرئيسية. Open `https://aunaldrb.com/admin/requests.html`
+in a private window to confirm it redirects instead of showing the page.
+
+**f. Submit a real request.** Fill in «اطلب رحلة» on the public site. You
+should get a رقم الطلب back, and it should appear in طلبات النقل as **جديد**.
+That is the whole flow: form → API → database → dashboard.
+
+### If the backend does not answer
+
+| Symptom | Cause |
+| --- | --- |
+| `/api/health` returns the site's 404 page | `api/.htaccess` did not upload (hidden file), or `mod_rewrite` is off |
+| `{"connected":false}` | `DB_NAME`, `DB_USER` or `DB_PASS` is wrong, or the user has no privileges on that database |
+| `missingTables` is not empty | `php bin/migrate.php` has not been run |
+| The admin pages show raw HTML without a login | `admin/.htaccess` did not upload — **take the site down until it does**; the pages are readable by anyone until then |
+| PHP source appears in the browser | the host is not executing PHP; contact support, and do not leave it in that state |
+| Login says the form expired | the clock is far off, or cookies are blocked; `SESSION_COOKIE_SECURE=true` on an `http://` URL will also do it |
+
+---
+
 ## After it is live
 
 1. Open `https://aunaldrb.com/` and confirm the Arabic text renders in the

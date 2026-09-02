@@ -53,6 +53,31 @@ const SHIP = [
      fonts/font-face.css is source: its rules are already inside the inline
      stylesheets, so shipping it would be a second copy nothing requests. */
   'fonts/OFL.txt',
+  /* RECOVERY 01 — the configuration template, so an operator has the shape to
+     fill in on the server. It holds no values; .htaccess denies it over HTTP
+     anyway, and the real .env belongs above the web root. */
+  '.env.example',
+];
+
+/* RECOVERY 01 — the backend and the admin ship as whole directory trees,
+   because unlike the public site they are not reachable from index.html and
+   so cannot be worked out from the markup.
+
+   app/ sits under the document root only because the documented Hostinger
+   deployment is a single zip extracted into public_html. Its own .htaccess
+   denies the whole directory, and every file in it also guards on AUN_APP —
+   two independent locks, because a host that ignores .htaccess would
+   otherwise serve the source. DEPLOY.md explains how to move .env above the
+   web root, which is stronger still.
+
+   Excluded on purpose: .env (credentials never enter a build), the SQLite
+   database and the logs (runtime state), and the design logs and QA reports
+   in admin/, which are working documents rather than part of the app. */
+const SHIP_TREES = [
+  { dir: 'api',   skip: () => false },
+  { dir: 'app',   skip: (rel) => rel.startsWith('storage/') && !rel.endsWith('.htaccess') },
+  { dir: 'admin', skip: (rel) => rel.endsWith('.md') || /^stage-\d/.test(rel) },
+  { dir: 'bin',   skip: (rel) => rel === 'verify.php' },
 ];
 
 /* Everything else — photographs, faces, logos, the social card, the icons —
@@ -261,6 +286,29 @@ function build() {
     fs.mkdirSync(path.dirname(path.join(DIST, f)), { recursive: true });
     fs.copyFileSync(src, path.join(DIST, f));
   }
+
+  let treeFiles = 0, treeBytes = 0;
+  for (const { dir, skip } of SHIP_TREES) {
+    const base = path.join(ROOT, dir);
+    if (!fs.existsSync(base)) { console.warn('  ! missing, not shipped: ' + dir + '/'); continue; }
+    (function walk(abs) {
+      for (const e of fs.readdirSync(abs, { withFileTypes: true })) {
+        const p = path.join(abs, e.name);
+        const rel = path.relative(base, p).split(path.sep).join('/');
+        if (e.isDirectory()) { walk(p); continue; }
+        /* credentials and runtime state never ship */
+        if (e.name === '.env' || e.name.endsWith('.sqlite') || e.name.endsWith('.log')) continue;
+        if (e.name.startsWith('.env.') && e.name !== '.env.example') continue;
+        if (skip(rel)) continue;
+        const dest = path.join(DIST, dir, rel);
+        fs.mkdirSync(path.dirname(dest), { recursive: true });
+        fs.copyFileSync(p, dest);
+        treeFiles++; treeBytes += fs.statSync(p).size;
+      }
+    })(base);
+  }
+  console.log('  backend + admin    : ' + treeFiles + ' files, '
+    + (treeBytes / 1024).toFixed(0) + 'KB');
   const after = Buffer.byteLength(html);
   console.log(`\n  index.html         : ${(before/1024).toFixed(0)}KB → ${(after/1024).toFixed(0)}KB `
     + `(-${(100 - after/before*100).toFixed(0)}%)`);

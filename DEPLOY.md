@@ -54,7 +54,14 @@ larger than any variant), or `node_modules/`.
 
 ## Server requirements
 
-There is no build server, no runtime and no database — this is static hosting.
+**RECOVERY 01 changed this.** The public site is still static and still renders
+without anything running behind it. The admin dashboard and the request form
+are not: they need **PHP 8.1+ with PDO, pdo_mysql, mbstring and openssl**, and
+a **MySQL or MariaDB** database. Hostinger's shared plans provide both, and the
+backend ships inside the same zip — see `BACKEND.md` for the architecture and
+`HOSTINGER.md` §6 for the five steps that bring it up.
+
+Everything below still describes the static site.
 **The only third-party request the site makes is Google Analytics**: the
 photographs, both font families and every icon are served from this origin, so
 nothing outside `aunaldrb.com` has to resolve for the page to *render* — the

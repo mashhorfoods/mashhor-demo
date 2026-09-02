@@ -13,3 +13,16 @@ local-preview.html
 img/*-[0-9]*.webp
 img/*-[0-9]*.avif
 img/manifest.json
+
+# --- backend (RECOVERY 01) ---------------------------------------------------
+# Real configuration never enters the repository. .env.example carries the
+# shape; .env carries the credentials and stays on the server.
+.env
+.env.*
+!.env.example
+
+# Runtime state: the SQLite database used for local development and the
+# verification suite, and the application log.
+app/storage/*.sqlite
+app/storage/*.sqlite-*
+app/storage/logs/*.log

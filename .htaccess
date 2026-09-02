@@ -109,6 +109,33 @@ ErrorDocument 404 /404.html
   Header set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>
 
+# --- 5b · never serve configuration or source (RECOVERY 01 §22/§23) ----------
+# The application lives in app/, which has its own "deny all". These rules are
+# the second lock, at the document root, for the case where a host ignores a
+# nested .htaccess: nothing that could carry a credential, a schema or a stack
+# trace is servable from anywhere under public_html.
+<FilesMatch "^\.env|\.(env|ini|log|sqlite|sqlite3|db|md|yml|yaml|lock|json)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+  </IfModule>
+</FilesMatch>
+# ...except the two JSON documents the public site legitimately serves.
+<FilesMatch "^(manifest|site)\.webmanifest$">
+  <IfModule mod_authz_core.c>
+    Require all granted
+  </IfModule>
+</FilesMatch>
+
+# PHP is executed, never listed: the whole app/ tree and the two CLI scripts
+# are off limits over HTTP. api/index.php and admin/guard.php are the only
+# entry points, and each lives behind its own directory's rules.
+RedirectMatch 404 ^/(app|bin)/
+RedirectMatch 404 ^/\.git
+
 # --- 6 · correct types -------------------------------------------------------
 # some shared hosts still do not know AVIF or WOFF2, and serve them as
 # application/octet-stream, which the browser will not decode

@@ -5197,6 +5197,21 @@ html:not(.js) .hww__path{display:none}
         error: "اختر تاريخاً من اليوم فأحدث." }
     ];
 
+    /* The hidden csrf_token field says "filled by the server", and on a static
+       page nothing fills it. The backend issues one against a short-lived
+       guest session; without it the submission is refused, which is the point.
+       If this call fails the form still validates locally and the submission
+       fails cleanly — it never reports a success that did not happen. */
+    var csrfField = form.querySelector('input[name="csrf_token"]');
+    function primeCsrf() {
+      if (!csrfField) return;
+      fetch("/api/csrf", { credentials: "same-origin", headers: { "Accept": "application/json" } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (b) { if (b && b.token) csrfField.value = b.token; })
+        .catch(function () { /* the submit path reports the failure, not this */ });
+    }
+    primeCsrf();
+
     /* today is the earliest bookable trip; the picker enforces it too */
     var dateEl = document.getElementById("req-date");
     if (dateEl && !dateEl.min) {
@@ -5309,6 +5324,18 @@ html:not(.js) .hww__path{display:none}
             return;
           }
 
+          /* the token expired while the form sat open; fetch a fresh one so
+             the next attempt succeeds instead of failing the same way */
+          if (r.status === 419) {
+            primeCsrf();
+            showError("انتهت صلاحية النموذج. بياناتك كما أدخلتها — اضغط «إرسال الطلب» مرة أخرى.");
+            return;
+          }
+          if (r.status === 429) {
+            showError((r.body && r.body.error && r.body.error.message)
+              || "وصلت إلى الحد المسموح من الطلبات. حاول بعد قليل أو اتصل بنا على ‎+966 53 554 4352.");
+            return;
+          }
           showError("لم يصل الطلب ولم يُسجَّل شيء. بياناتك كما أدخلتها — أعد المحاولة، أو اتصل بنا على ‎+966 53 554 4352.");
         })
         .catch(function () {

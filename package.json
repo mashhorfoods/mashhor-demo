@@ -2,17 +2,24 @@
   "name": "aun-aldrb-site",
   "version": "1.0.0",
   "private": true,
-  "description": "عون الدرب للنقل المتخصص — static single-page site. index.html IS the application; there is no framework and no bundler. These scripts prepare what ships.",
+  "description": "عون الدرب للنقل المتخصص — the public site is a static single page; index.html IS that page. RECOVERY 01 added a PHP 8 + MySQL backend under api/ and app/ that the admin and the public request form run on. These scripts prepare what ships and exercise the backend; see BACKEND.md.",
   "scripts": {
     "images": "node tools-images.js",
     "fonts": "node tools-fonts.js",
     "brand": "node tools-brand-images.js",
     "build": "node build.js",
     "package": "node build.js && node tools-package.js",
-    "preview": "node tools-serve.js"
+    "preview": "node tools-serve.js",
+    "serve": "php -S 127.0.0.1:8088 -t . router-dev.php",
+    "migrate": "php bin/migrate.php",
+    "seed": "php bin/seed.php",
+    "verify": "php bin/verify.php http://127.0.0.1:8088"
   },
   "devDependencies": {
     "sharp": "^0.35.4"
   },
-  "engines": { "node": ">=18" }
+  "engines": {
+    "node": ">=18",
+    "php": ">=8.1"
+  }
 }

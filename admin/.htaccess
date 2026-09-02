@@ -1,0 +1,57 @@
+# Protected admin routes (§11).
+#
+# Every .html page in this directory is served by guard.php, which checks the
+# session BEFORE reading the file. Without this the pages are plain static
+# files and anyone with the URL reads them — which is exactly the hole this
+# recovery stage exists to close.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /admin/
+
+  # guard.php itself, and the shared script, are served directly
+  RewriteRule ^guard\.php$ - [L]
+  RewriteRule ^app\.js$ - [L]
+
+  # /admin/ with no page named
+  RewriteRule ^$ guard.php?page=dashboard.html [QSA,L]
+
+  # every .html page goes through the guard
+  RewriteRule ^([a-z0-9][a-z0-9-]*\.html)$ guard.php?page=$1 [QSA,L]
+</IfModule>
+
+# If mod_rewrite is unavailable the pages would be served raw, which is worse
+# than not serving them. Deny by default and let the rewrite above re-open the
+# specific paths it handles.
+<IfModule !mod_rewrite.c>
+  <FilesMatch "\.html$">
+    <IfModule mod_authz_core.c>
+      Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+      Order deny,allow
+      Deny from all
+    </IfModule>
+  </FilesMatch>
+</IfModule>
+
+# Never cache an admin page: a cached page still renders after logout.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|js)$">
+    Header always set Cache-Control "no-store, no-cache, must-revalidate, private"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-Content-Type-Options "nosniff"
+  </FilesMatch>
+</IfModule>
+
+# The design logs and QA reports are working documents, not part of the app.
+<FilesMatch "\.md$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+DirectoryIndex guard.php
