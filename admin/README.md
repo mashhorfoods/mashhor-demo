@@ -9,6 +9,7 @@ Separate track from `ux/`, which covers the public site.
 | `stage-03-design-system.html` | **Stage 03 — design system & UI components.** Tokens, eighteen component families rendered live in Arabic RTL, a measured contrast ledger, and per-component responsive contracts. |
 | `dashboard.html` | **Stages 04 + 05 — the admin shell and الرئيسية.** A working, self-contained page: sidebar, header, account area, notifications, mobile drawer, page-header pattern, and the dashboard built inside it. |
 | `requests.html` | **Stage 06 — طلبات النقل.** The full request workflow: list with working search, filters and pagination, and a detail view with status changes, editing, notes and contact actions. |
+| `customers.html` | **Stage 07 — العملاء.** Customer list and profile, with every customer figure derived from the request records rather than stored. |
 
 The built site (`../index.html`) is the source of truth for services, content areas,
 contact details and terminology. Nothing in this track invents business features.
@@ -155,3 +156,32 @@ Two defects fixed here, the second of which also applied to `dashboard.html` and
 in both so the pages stay identical: single values were breaking mid-token in table cells, and
 Arabic author names were rendering glyph-by-glyph because the metadata lines used the mono
 face, which carries no Arabic.
+
+## Stage 07 — العملاء
+
+`customers.html` holds the module's one real architectural decision: **customers are derived
+from requests, keyed by phone number.** Nothing about a customer is stored twice — the request
+count, first and last activity, and the completed/cancelled mix are all computed from the
+request records. That is what enforces one customer to one record however many times they
+call, and it means no figure on the screen was invented. The twelve customers on the page are
+what sixteen demo requests actually produce, with three of them repeat callers.
+
+**List.** Name, phone, request count, last request with its service and status, and a row
+action. Search matches name or phone digits. One filter — whether the customer has an active
+request — because that is the operational question ("who am I still working for?"); §4 warns
+against inventing filters, so there are no others. Sorting offers most recent activity, most
+requests, or name. "Most recent activity" means the latest request *created*, not the furthest
+future trip date; a booking for next month is not recent activity.
+
+**Profile.** Derived stat strip, request history, customer information and contact actions.
+Each history row hands off to `requests.html#REQ-…` — the requests module opens that record
+directly, so the two are genuinely linked rather than one reimplementing the other. Editing
+covers name, phone and an administrative note only; the panel states that counts and activity
+dates come from the request records and are never edited by hand. Changing the phone number
+is treated as changing the customer's identity: it moves the whole history with it and is
+refused outright if another customer already holds that number.
+
+**Not built here:** no customer status field, because the data model has none, and §13 forbids
+inventing one. Empty states cover no customers, no search results, a customer with no history,
+and missing optional fields — an absent note reads as "لا توجد ملاحظات على هذا العميل" rather
+than as a blank.
