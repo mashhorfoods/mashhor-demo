@@ -64,7 +64,9 @@ final class Schema
             $fn();
             Db::run('INSERT INTO migrations (name, applied_at) VALUES (?, ?)', [$name, Db::now()]);
             $applied[] = $name;
-            if ($verbose) fwrite(STDOUT, "  applied {$name}\n");
+            /* STDOUT exists only under the CLI SAPI; install.php runs the
+               same migration from a web request (§—). */
+            if ($verbose && defined('STDOUT')) fwrite(STDOUT, "  applied {$name}\n");
         }
         return $applied;
     }

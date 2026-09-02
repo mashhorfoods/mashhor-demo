@@ -57,7 +57,13 @@ other one. The goal is not to get files onto the server; it is to run the same
    ```
 3. Place `.env` **one level above** `public_html`. `Env.php` looks there first,
    and a file outside the web root cannot be fetched by any request.
-4. Run the CLI scripts over SSH, or as a one-off hPanel cron entry:
+4. **If the account has no usable terminal** — SSH refusing, cron not firing —
+   run `install.php` from a browser instead. Put a `SETUP_TOKEN` (16+ chars) in
+   `.env`, open `https://aunaldrb.com/install.php?t=<token>`, and it performs
+   the same three steps by calling the same `app/Setup.php` code. Without the
+   token it answers a bare 404; it refuses once a Super Admin exists; it
+   deletes itself on success. Then remove `SETUP_TOKEN` from `.env` —
+   `preflight` fails if either survives. Otherwise, run the CLI scripts:
    ```sh
    php bin/migrate.php        # 20 tables, 2 migrations
    php bin/seed.php           # roles + the first Super Admin

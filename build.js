@@ -57,6 +57,10 @@ const SHIP = [
      fill in on the server. It holds no values; .htaccess denies it over HTTP
      anyway, and the real .env belongs above the web root. */
   '.env.example',
+  /* The one-time browser installer, for an account with no usable terminal.
+     Inert without SETUP_TOKEN in .env, refuses once a Super Admin exists, and
+     deletes itself after a successful run — see the header of install.php. */
+  'install.php',
 ];
 
 /* RECOVERY 01 — the backend and the admin ship as whole directory trees,

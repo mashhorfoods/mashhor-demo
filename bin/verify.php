@@ -1109,6 +1109,28 @@ foreach ([
 }
 
 /* ================================================================== */
+section('INSTALLER — install.php answers nothing without SETUP_TOKEN');
+/* ================================================================== */
+$inst = new Client($BASE);
+foreach (['/install.php', '/install.php?t=', '/install.php?t=wrong-token-guess'] as $p) {
+    $res = $inst->get($p);
+    check('installer', "{$p} is a bare 404", $res['status'] === 404, "status={$res['status']}");
+    check('installer', 'and discloses nothing',
+        !str_contains($res['raw'], 'تشغيل التثبيت')
+        && !str_contains($res['raw'], 'SETUP_TOKEN')
+        && !str_contains($res['raw'], 'DB_')
+        && strlen($res['raw']) < 512, strlen($res['raw']) . ' bytes');
+}
+$res = $inst->post('/install.php', 't=wrong&email=attacker@example.com');
+check('installer', 'a POST without the token is a 404 too', $res['status'] === 404, "status={$res['status']}");
+check('installer', 'and created no account',
+    Repo_Users::findByEmail('attacker@example.com') === null);
+check('installer', 'install.php ships in the package',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/build.js'), "'install.php'"));
+check('installer', 'and refuses to run once a Super Admin exists',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/install.php'), '!$installed'));
+
+/* ================================================================== */
 section('§32  PERSISTENCE ACROSS A RESTART');
 /* ================================================================== */
 Db::reset();

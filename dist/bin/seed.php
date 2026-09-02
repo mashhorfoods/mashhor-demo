@@ -9,9 +9,8 @@
  * printed to your terminal and nowhere else: not the log, not the database
  * (only its hash), not any response (§06).
  *
- * Services and media are lifted from the built site, never invented: the seven
- * approved services with their approved copy, and the assets index.html
- * actually references. §35 forbids anything beyond that.
+ * The work itself lives in app/Setup.php, so that this script and the browser
+ * installer produce byte-for-byte the same database.
  */
 declare(strict_types=1);
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
@@ -27,89 +26,24 @@ function arg(string $name, ?string $default = null): ?string
     return $default;
 }
 
-$SERVICES = [
-    ['wheelchair-transport', 'النقل بواسطة الكرسي المتحرك',
-     'خدمة نقل آمنة ومريحة لمستخدمي الكراسي المتحركة، مع تجهيز المركبة بما يسهّل عملية الصعود والنزول.'],
-    ['power-wheelchair-transport', 'النقل بواسطة الكرسي الكهربائي',
-     'مركبات مجهزة لاستيعاب الكراسي الكهربائية، مع مراعاة الأمان والثبات أثناء التنقل.'],
-    ['medical-bed-transport', 'النقل بواسطة السرير الطبي',
-     'خدمة مخصصة للحالات التي تتطلب بقاء المستفيد على السرير طوال الرحلة، باستخدام وسائل نقل مناسبة.'],
-    ['driver-assistant-escort', 'خدمة مساعد السائق',
-     'إمكانية توفير مساعد أو أكثر لمرافقة المستفيد ومساعدته أثناء النقل، وفقًا لحالته واحتياجاته الخاصة.'],
-    ['daily-transport-elderly', 'النقل اليومي',
-     'خدمات نقل يومية لكبار السن وذوي الاحتياجات الخاصة، بما يوفر لهم تنقلًا آمنًا ومريحًا.'],
-    ['hospital-medical-centre', 'النقل إلى المستشفيات والمراكز الطبية',
-     'التوصيل إلى المستشفيات والمراكز الطبية، مع تقديم المساعدة وفقًا لاحتياجات المستفيد.'],
-    ['riyadh-social-mobility', 'التنقل للمناسبات الاجتماعية',
-     'توفير وسائل نقل مناسبة ومريحة للتنقل إلى المناسبات والزيارات الاجتماعية.'],
-];
+function say(array $lines): void { foreach ($lines as $l) fwrite(STDOUT, $l . "\n"); }
 
 try {
     if (!Db::ping()) { fwrite(STDERR, "Cannot reach the database.\n"); exit(2); }
     Schema::migrate();
 
-    /* --- services ---------------------------------------------------- */
-    $added = 0;
-    foreach ($SERVICES as $i => [$slug, $title, $desc]) {
-        if (Repo_Content::findServiceBySlug($slug) !== null) continue;
-        $now = Db::now();
-        Db::run(
-            'INSERT INTO services (slug, title, description, sort_order, is_published, image_path, created_at, updated_at)
-             VALUES (?,?,?,?,?,?,?,?)',
-            [$slug, $title, $desc, $i + 1, 1, 'img/' . $slug . '.webp', $now, $now]
-        );
-        $added++;
-    }
-    fwrite(STDOUT, "services: {$added} added, " . count(Repo_Content::services()) . " total\n");
+    say(Setup::services());
+    say(Setup::media());
 
-    /* --- media references -------------------------------------------- */
-    $assets = [
-        'img/daily-transport-elderly.webp', 'img/driver-assistant-escort.webp',
-        'img/equipped-vehicle-fleet.webp', 'img/hospital-medical-centre.webp',
-        'img/medical-bed-transport.webp', 'img/power-wheelchair-transport.webp',
-        'img/riyadh-social-mobility.webp', 'img/wheelchair-passenger-vehicle.webp',
-        'img/wheelchair-ramp-boarding.webp', 'img/wheelchair-transport.webp',
-        'brand/apple-touch-icon.png', 'brand/aun-aldrb-logo-white.png',
-        'brand/aun-aldrb-logo-white.svg', 'brand/aun-aldrb-logo.png',
-        'brand/aun-aldrb-logo.svg', 'brand/favicon-32.png',
-        'brand/logo.png', 'brand/og-image.png',
-    ];
-    foreach ($assets as $p) {
-        $abs = AUN_ROOT . '/' . $p;
-        $size = is_file($abs) ? (int) filesize($abs) : null;
-        $dim  = is_file($abs) && function_exists('getimagesize') ? @getimagesize($abs) : false;
-        Repo_Content::upsertMedia([
-            'path'     => $p,
-            'filename' => basename($p),
-            'mime'     => $dim ? ($dim['mime'] ?? null) : null,
-            'width'    => $dim ? (int) $dim[0] : null,
-            'height'   => $dim ? (int) $dim[1] : null,
-            'bytes'    => $size,
-        ]);
-    }
-    fwrite(STDOUT, "media: " . count(Repo_Content::media()) . " assets indexed\n");
-
-    /* --- the first administrator -------------------------------------- */
     $email = arg('admin-email');
     if ($email === null) {
         fwrite(STDOUT, "no --admin-email given; skipping administrator creation\n");
         exit(0);
     }
-    if (Repo_Users::findByEmail($email) !== null) {
-        fwrite(STDOUT, "administrator {$email} already exists; leaving it alone\n");
-        exit(0);
-    }
-    $name = arg('admin-name', 'مدير النظام');
-    $pw   = arg('admin-password');
-    $generated = false;
-    if ($pw === null || strlen($pw) < 12) {
-        $pw = rtrim(strtr(base64_encode(random_bytes(18)), '+/', 'Aa'), '=');
-        $generated = true;
-    }
-    $id = Repo_Users::create((string) $name, $email, $pw, 'super', true, null);
-    fwrite(STDOUT, "administrator created: {$email} (Super Admin, id {$id})\n");
-    if ($generated) {
-        fwrite(STDOUT, "\n  password: {$pw}\n\n"
+    $res = Setup::admin($email, (string) arg('admin-name', 'مدير النظام'), arg('admin-password'));
+    say($res['lines']);
+    if ($res['password'] !== null) {
+        fwrite(STDOUT, "\n  password: {$res['password']}\n\n"
             . "  Shown once. It is not written to the log or the database —\n"
             . "  only its hash is stored. Save it now, then change it.\n\n");
     }

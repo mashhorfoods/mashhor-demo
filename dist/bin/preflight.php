@@ -151,6 +151,21 @@ foreach (['api/index.php', 'app/bootstrap.php', 'admin/login.html', 'admin/guard
 check('bin/verify.php is NOT on the server', !is_file(AUN_ROOT . '/bin/verify.php') ? true : null,
     is_file(AUN_ROOT . '/bin/verify.php') ? 'delete it once you are done — it writes scratch data' : '');
 
+/* The installer is meant to remove itself. If it is still here after the system
+   is installed, that removal failed and it must be deleted by hand. */
+$installer = is_file(AUN_ROOT . '/install.php');
+$setupDone = $dbUp && Setup::isInstalled();
+check('install.php is NOT on the server',
+    !$installer ? true : ($setupDone ? false : null),
+    !$installer ? ''
+        : ($setupDone
+            ? 'the system is installed — delete install.php now, and SETUP_TOKEN from .env'
+            : 'still awaiting the install run; it deletes itself when it succeeds'));
+check('SETUP_TOKEN has been removed from .env',
+    ((string) Env::get('SETUP_TOKEN', '')) === '' ? true : ($setupDone ? false : null),
+    ((string) Env::get('SETUP_TOKEN', '')) === '' ? ''
+        : ($setupDone ? 'installation is complete — delete the line' : 'in use for the pending install'));
+
 /* ================================================================== */
 if ($URL !== '') {
 section('OVER HTTP');
