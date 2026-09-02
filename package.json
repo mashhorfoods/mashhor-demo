@@ -8,6 +8,7 @@
     "fonts": "node tools-fonts.js",
     "brand": "node tools-brand-images.js",
     "build": "node build.js",
+    "package": "node build.js && node tools-package.js",
     "preview": "node tools-serve.js"
   },
   "devDependencies": {

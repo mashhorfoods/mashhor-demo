@@ -12,10 +12,25 @@
 # Every directive is wrapped in <IfModule> so a host without the module gets a
 # working site rather than a 500.
 
-# --- 1 · not-found -----------------------------------------------------------
+# --- 1 · which file answers "/" ----------------------------------------------
+# Named explicitly, because the default order on most shared hosts puts
+# index.php ahead of index.html — and shared hosts hand you a public_html with
+# a placeholder default.php or index.php already in it. Delete the placeholder,
+# but do not rely on having remembered to: this makes index.html the answer
+# either way.
+DirectoryIndex index.html
+
+# --- 2 · not-found -----------------------------------------------------------
 ErrorDocument 404 /404.html
 
-# --- 1b · one canonical address ----------------------------------------------
+# There is no index file in img/, fonts/ or brand/, and without this the server
+# offers a browsable listing of them instead of a 404. Nothing in there is
+# secret; a file index is simply not part of the site.
+<IfModule mod_autoindex.c>
+  IndexIgnore *
+</IfModule>
+
+# --- 3 · one canonical address ----------------------------------------------
 # The <link rel="canonical">, the sitemap, the Open Graph tags and the JSON-LD
 # all name exactly one address: https://aunaldrb.com/ . Without the two rules
 # below the server also answers on http:// and on www., which is the same page
@@ -40,11 +55,15 @@ ErrorDocument 404 /404.html
   RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
 </IfModule>
 
-# --- 2 · compression ---------------------------------------------------------
+# --- 4 · compression ---------------------------------------------------------
 # index.html is 182KB of markup and inline CSS, which gzips to 34KB. It is the
 # one render-blocking resource on the page, so this is the single highest-value
 # line in the file. Images and fonts are already compressed formats and are
 # deliberately not re-compressed.
+# On LiteSpeed — which is what Hostinger and most cPanel hosts actually run —
+# mod_deflate is not present, so this block is skipped and LiteSpeed's own
+# gzip/brotli does the work instead. That is on by default there. The block
+# stays for real Apache, where nothing else would compress the page.
 <IfModule mod_deflate.c>
   AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
   AddOutputFilterByType DEFLATE application/javascript application/json
@@ -58,7 +77,7 @@ ErrorDocument 404 /404.html
   AddOutputFilterByType BROTLI_COMPRESS image/svg+xml
 </IfModule>
 
-# --- 3 · caching -------------------------------------------------------------
+# --- 5 · caching -------------------------------------------------------------
 # The photographs and the fonts carry their width or their weight in the
 # filename, so a changed file is a changed name and a year is safe. index.html
 # is not versioned and must revalidate, or an update never reaches anyone.
@@ -90,7 +109,7 @@ ErrorDocument 404 /404.html
   Header set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>
 
-# --- 4 · correct types -------------------------------------------------------
+# --- 6 · correct types -------------------------------------------------------
 # some shared hosts still do not know AVIF or WOFF2, and serve them as
 # application/octet-stream, which the browser will not decode
 <IfModule mod_mime.c>

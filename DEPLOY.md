@@ -2,7 +2,11 @@
 
 ## What to upload
 
-Build, then upload **the contents of `dist/`** to the web root.
+Build, then upload **the contents of `dist/`** to the web root — or run
+`node tools-package.js` and upload the single archive it makes. For Hostinger
+specifically, follow **[HOSTINGER.md](HOSTINGER.md)**, which covers the two
+things that actually go wrong there: extracting one level too deep, and the
+placeholder `index.php` that answers `/` instead of the site.
 
 ```sh
 npm install            # once — sharp, for the two image tools
@@ -10,6 +14,7 @@ node tools-images.js   # only when a photograph in img/ has changed
 node tools-fonts.js    # only when a font weight is added or dropped
 node tools-brand-images.js   # only when the logo changes
 node build.js          # always — regenerates dist/ from scratch
+node tools-package.js  # optional — dist/ as one uploadable, verified archive
 ```
 
 `build.js` deletes `dist/` before writing it, so the folder is never stale, and
