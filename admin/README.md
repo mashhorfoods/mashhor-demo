@@ -6,6 +6,7 @@ Separate track from `ux/`, which covers the public site.
 | Path | What it is |
 | --- | --- |
 | `stage-02-admin-ux.html` | **Stage 02 — UX architecture & user flows.** Ten behavioural patterns, eight module dossiers, the context contract, and six open decisions. |
+| `stage-03-design-system.html` | **Stage 03 — design system & UI components.** Tokens, eighteen component families rendered live in Arabic RTL, a measured contrast ledger, and per-component responsive contracts. |
 
 The built site (`../index.html`) is the source of truth for services, content areas,
 contact details and terminology. Nothing in this track invents business features.
@@ -40,3 +41,38 @@ Arabic-first, RTL as the layout rather than a switch.
 Six decisions are left open for the client (D1–D6), each with a working assumption so
 Stage 03 is not blocked. No colour, type, spacing, component or implementation decision
 is made here — those are Stage 03.
+
+## Stage 03 — design system and UI components
+
+Built on `brand/tokens.css` and `brand/system.css`, not beside them. The brand palette,
+the IBM Plex Sans Arabic + Cairo pairing and the accessibility guardrails carry over
+unchanged. Two things were narrowed for interface density and stated as derivations:
+body type sits on the brand's 16px floor rather than the marketing 17px, and the radius
+ramp steps down one notch (10/16/24 → 8/12/16) because a 16px radius on a 44px input
+reads inflated.
+
+Every contrast pairing was measured, and three findings changed the system:
+
+- **Warning text failed on its own tint** — `#B0791C` on `#FBF3E4` is 3.40:1. Badge and
+  alert text now uses `#8F6014` (4.94:1); the original hue stays as the marker colour.
+  Success and error were also just short of AA and got the same treatment.
+- **The brand focus ring is invisible on the navy sidebar** (1.84:1). Dark surfaces use a
+  light ring, `rgba(217,228,243,.55)` → 6.63:1. It is the system's only inverse token.
+- **Four of the five status hues collapse in greyscale** (luminance 101–126), so colour
+  cannot carry status. Every badge pairs its word with a distinct icon silhouette, and
+  the greyscale proof row in §13 is the test.
+
+Two status decisions worth flagging: `مؤكد` takes the deep navy so the three positive
+states stay distinguishable, and `ملغي` is **neutral, not red** — a cancelled trip is a
+valid outcome, not a fault. Red is reserved for errors and destructive confirmation.
+
+Delivered: colour, type, spacing, radius, depth and motion tokens; a hand-drawn 33-icon
+outline set (24px canvas, 1.75px stroke) with the RTL mirroring rule; buttons, form
+controls, cards, tables with pagination and both empty states, status badges, three
+navigation forms, header, modal, drawer, alerts, toasts, loaders, skeletons and empty
+states — all rendered live in Arabic RTL; plus per-component responsive contracts and
+the accessibility rules each must keep.
+
+Light theme only, deliberately: the brand has no approved dark palette and deriving one
+would be a second identity. No page layouts are designed — every specimen is a component
+in isolation. Composition is Stage 04.

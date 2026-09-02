@@ -1,0 +1,1535 @@
+<title>Aoun Al-Darb Admin Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+/* ==========================================================================
+   AOUN AL-DARB — ADMIN STAGE 03 · DESIGN SYSTEM & UI COMPONENTS
+   --------------------------------------------------------------------------
+   Every colour and face below is inherited from brand/tokens.css and
+   brand/system.css. Nothing here forks the brand: the admin system narrows
+   the website's ramps for interface density and adds only the tokens an
+   operational product needs and a marketing site does not — the five request
+   statuses, an informational state, and the interaction states of controls.
+
+   The page is deliberately single-theme. It renders the product, and the
+   product is light: the brand has no approved dark palette, and inventing
+   one here would be a second identity. Every colour is therefore painted
+   explicitly so the page holds on any host ground.
+   ========================================================================== */
+
+:root{
+  /* -- brand, carried unchanged from brand/tokens.css --------------------- */
+  --blue:#4975BA;          /* primary */
+  --navy:#2C4C82;          /* deep / secondary / accessible text */
+  --blue-hover:#3F68A8;    /* derived: primary one step down for hover */
+  --blue-pressed:#22406F;  /* = --aun-blue-dark */
+  --sky:#D9E4F3;
+  --mist:#EEF3FA;
+  --primary-subtle:rgba(73,117,186,.08);
+
+  --ink:#1E2733;
+  --slate:#5A6675;
+  --gray:#8B95A3;          /* non-text; also the accessible control boundary (3.03:1) */
+  --divider:#E4E9F0;
+  --soft:#F6F8FB;
+  --white:#FFFFFF;
+
+  /* -- admin-only additions ---------------------------------------------- */
+  --row-hover:#F2F5FA;
+  --row-selected:#E8EFF9;
+  --disabled-surface:#F1F3F7;
+  --disabled-ink:#6B7683;
+  --placeholder:#6E7986;
+  --control-border:#8B95A3;
+  --focus-ring:rgba(73,117,186,.38);
+  --focus-ring-inverse:rgba(217,228,243,.55);
+
+  /* -- feedback, from brand/system.css ----------------------------------- */
+  --success:#2E7D64;  --success-bg:#EAF5F0;  --success-ink:#256B55;
+  --warning:#B0791C;  --warning-bg:#FBF3E4;  --warning-ink:#8F6014;
+  --error:#C0433B;    --error-bg:#FBEDEC;    --error-ink:#A5352E;
+  --error-hover:#A5352E;
+  --info:#4975BA;     --info-bg:#EEF3FA;     --info-ink:#2C4C82;
+
+  /* -- the five approved request statuses -------------------------------- */
+  --st-new-ink:#2C4C82;        --st-new-bg:#EEF3FA;        --st-new-mark:#4975BA;
+  --st-review-ink:#8F6014;     --st-review-bg:#FBF3E4;     --st-review-mark:#B0791C;
+  --st-confirmed-ink:#22406F;  --st-confirmed-bg:#D9E4F3;  --st-confirmed-mark:#2C4C82;
+  --st-done-ink:#256B55;       --st-done-bg:#EAF5F0;       --st-done-mark:#2E7D64;
+  --st-cancel-ink:#47525F;     --st-cancel-bg:#EFF1F4;     --st-cancel-mark:#5A6675;
+
+  /* -- type -------------------------------------------------------------- */
+  --f-ar:"IBM Plex Sans Arabic",ui-sans-serif,system-ui,"Segoe UI","Noto Sans Arabic",sans-serif;
+  --f-ar-body:"Cairo",ui-sans-serif,system-ui,"Segoe UI","Noto Sans Arabic",sans-serif;
+  --f-lat:"IBM Plex Sans",ui-sans-serif,system-ui,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+
+  /* -- admin type scale (narrowed from the site's marketing ramp) --------- */
+  --fs-page:1.625rem;    /* 26px */
+  --fs-section:1.25rem;  /* 20px */
+  --fs-card:1.0625rem;   /* 17px */
+  --fs-body:1rem;        /* 16px — the brand's stated floor for reading copy */
+  --fs-sec:0.9375rem;    /* 15px */
+  --fs-label:0.875rem;   /* 14px */
+  --fs-caption:0.8125rem;/* 13px */
+
+  /* -- spacing · 4px base ------------------------------------------------ */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px;
+  --s6:24px; --s8:32px; --s10:40px; --s12:48px; --s16:64px;
+
+  /* -- radius · the site ramp stepped down one notch for control scale --- */
+  --r-control:8px; --r-card:12px; --r-modal:16px; --r-pill:999px; --r-xs:3px;
+
+  /* -- depth ------------------------------------------------------------- */
+  --sh-rgb:29,39,51;
+  --sh-card:0 1px 2px rgba(var(--sh-rgb),.04);
+  --sh-raised:0 1px 2px rgba(var(--sh-rgb),.05), 0 2px 6px rgba(var(--sh-rgb),.05);
+  --sh-dropdown:0 4px 10px rgba(var(--sh-rgb),.07), 0 12px 28px rgba(var(--sh-rgb),.09);
+  --sh-modal:0 12px 28px rgba(var(--sh-rgb),.12), 0 32px 64px rgba(var(--sh-rgb),.14);
+  --sh-focus:0 0 0 3px var(--focus-ring);
+
+  --dur:150ms; --dur-mid:220ms;
+  --ease:cubic-bezier(.4,0,.2,1);
+  --tap:44px;
+
+  /* -- document chrome (this page only, not part of the product) --------- */
+  --doc-ground:#EDF0F5;
+  --doc-rule:#D8DEE7;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--doc-ground);color:var(--ink);
+  font-family:var(--f-lat);font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased
+}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:var(--r-xs)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+img,svg{max-width:100%}
+
+/* ---------- document shell -------------------------------------------- */
+.wrap{max-width:1300px;margin:0 auto;padding:0 clamp(1.1rem,4vw,2.75rem)}
+.layout{display:grid;gap:clamp(1.75rem,4vw,3.25rem);align-items:start}
+@media (min-width:1120px){.layout{grid-template-columns:224px minmax(0,1fr)}}
+
+.mast{border-bottom:1px solid var(--doc-rule);padding-block:clamp(2.4rem,6vw,4rem) clamp(1.6rem,4vw,2.5rem);margin-bottom:clamp(1.8rem,4vw,3rem)}
+.mast__eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--navy);margin:0 0 1rem}
+.mast__title{font-family:var(--f-lat);font-weight:600;font-size:clamp(2rem,1.2rem + 3.2vw,3.25rem);line-height:1.05;letter-spacing:-.022em;margin:0;max-width:20ch;text-wrap:balance}
+.mast__sub{margin:1.25rem 0 0;max-width:62ch;font-size:clamp(1rem,.97rem + .25vw,1.12rem);color:var(--slate);line-height:1.62}
+.mast__meta{display:flex;flex-wrap:wrap;gap:.45rem 1.5rem;margin-top:1.8rem;font-family:var(--f-mono);font-size:12px;color:var(--slate)}
+.mast__meta b{font-weight:500;color:var(--ink)}
+
+.toc{font-size:13.5px;line-height:1.45}
+@media (min-width:1120px){.toc{position:sticky;top:1.5rem;max-height:calc(100vh - 3rem);overflow-y:auto}}
+.toc__title{font-family:var(--f-mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--slate);margin:0 0 .8rem;padding-bottom:.65rem;border-bottom:1px solid var(--doc-rule)}
+.toc ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.1rem}
+.toc a{display:flex;gap:.6rem;text-decoration:none;color:var(--slate);padding:.34rem .45rem;border-radius:var(--r-xs);transition:background var(--dur),color var(--dur)}
+.toc a:hover{background:var(--primary-subtle);color:var(--ink)}
+.toc a span{font-family:var(--f-mono);font-size:10.5px;color:var(--gray);padding-top:.2em;flex:0 0 auto}
+
+.sec{margin-bottom:clamp(2.6rem,6vw,4.25rem);scroll-margin-top:1.25rem}
+.sec__head{display:flex;gap:.9rem;align-items:baseline;margin-bottom:1.15rem;padding-bottom:.75rem;border-bottom:1px solid var(--doc-rule)}
+.sec__num{font-family:var(--f-mono);font-size:12px;color:var(--navy);flex:0 0 auto;padding-top:.3em}
+.sec__title{font-family:var(--f-lat);font-weight:600;font-size:clamp(1.25rem,1.1rem + .6vw,1.6rem);letter-spacing:-.014em;margin:0;line-height:1.22}
+.sec p{margin:0 0 .95rem;max-width:66ch;color:var(--slate)}
+.sec p b{color:var(--ink);font-weight:600}
+h3.h{font-family:var(--f-lat);font-weight:600;font-size:1rem;color:var(--ink);margin:1.9rem 0 .6rem;letter-spacing:-.006em}
+a{color:var(--navy)}
+code{font-family:var(--f-mono);font-size:.84em;background:var(--white);border:1px solid var(--divider);padding:.08em .35em;border-radius:var(--r-xs);color:var(--navy)}
+
+ul.list{margin:0 0 1rem;padding:0;list-style:none;max-width:66ch;display:flex;flex-direction:column;gap:.42rem}
+ul.list li{position:relative;padding-left:1.1rem;color:var(--slate)}
+ul.list li::before{content:"—";position:absolute;left:0;color:var(--gray)}
+ul.list li b{color:var(--ink);font-weight:600}
+
+.note{background:var(--mist);border-left:3px solid var(--blue);padding:.95rem 1.1rem;margin:1.4rem 0;border-radius:0 var(--r-card) var(--r-card) 0;max-width:66ch}
+.note h4{margin:0 0 .4rem;font-family:var(--f-lat);font-weight:600;font-size:.95rem;color:var(--ink)}
+.note p{margin:0;color:var(--slate);font-size:.95rem}
+.note p + p{margin-top:.55rem}
+
+/* ---------- specimen stage -------------------------------------------- */
+.stage{background:var(--white);border:1px solid var(--divider);border-radius:var(--r-card);margin:1.2rem 0 1.5rem;overflow:hidden}
+.stage__bar{display:flex;flex-wrap:wrap;gap:.4rem .9rem;align-items:baseline;padding:.55rem .9rem;background:var(--soft);border-bottom:1px solid var(--divider);font-family:var(--f-mono);font-size:11px;color:var(--slate)}
+.stage__bar b{color:var(--navy);font-weight:500}
+.stage__body{padding:clamp(1rem,2.5vw,1.6rem)}
+.stage__body--flush{padding:0}
+.stage--ground .stage__body{background:var(--soft)}
+.rtl{direction:rtl;text-align:right;font-family:var(--f-ar)}
+.row{display:flex;flex-wrap:wrap;gap:var(--s3);align-items:center}
+.row--top{align-items:flex-start}
+.col{display:flex;flex-direction:column;gap:var(--s3)}
+.cap{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--gray);margin:0 0 .45rem}
+
+/* ---------- doc tables ------------------------------------------------- */
+.tw{overflow-x:auto;margin:1.2rem 0;border:1px solid var(--divider);border-radius:var(--r-card);background:var(--white)}
+table.doc{border-collapse:collapse;width:100%;font-size:14px;min-width:36rem}
+table.doc th,table.doc td{text-align:left;padding:.6rem .8rem;border-bottom:1px solid var(--divider);vertical-align:top;color:var(--slate)}
+table.doc thead th{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--slate);background:var(--soft);white-space:nowrap}
+table.doc tbody tr:last-child td{border-bottom:none}
+table.doc td b{color:var(--ink);font-weight:600}
+.mono{font-family:var(--f-mono);font-size:12px;color:var(--navy);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ok{color:var(--success);font-weight:600}
+.bad{color:var(--error);font-weight:600}
+
+/* ======================================================================
+   THE PRODUCT SYSTEM — everything below this line ships in the dashboard
+   ====================================================================== */
+
+/* ---------- swatches --------------------------------------------------- */
+.sw{display:grid;gap:var(--s3);grid-template-columns:repeat(auto-fill,minmax(11rem,1fr))}
+.sw__i{border:1px solid var(--divider);border-radius:var(--r-card);overflow:hidden;background:var(--white)}
+.sw__chip{height:56px}
+.sw__m{padding:.5rem .6rem .6rem;font-family:var(--f-mono);font-size:11px;line-height:1.5;color:var(--slate)}
+.sw__m b{display:block;color:var(--ink);font-weight:500;font-size:11.5px}
+.sw__m i{font-style:normal;color:var(--gray)}
+
+/* ---------- type specimens --------------------------------------------- */
+.ty{display:flex;flex-direction:column;gap:var(--s5)}
+.ty__r{display:grid;gap:.15rem .9rem;grid-template-columns:minmax(0,1fr);border-bottom:1px solid var(--divider);padding-bottom:var(--s4)}
+.ty__r:last-child{border-bottom:none;padding-bottom:0}
+@media (min-width:760px){.ty__r{grid-template-columns:minmax(0,1fr) 15rem;align-items:baseline}}
+.ty__spec{font-family:var(--f-mono);font-size:11px;color:var(--slate);line-height:1.6}
+.ty__spec b{color:var(--navy);font-weight:500}
+
+.t-page{font-family:var(--f-ar);font-weight:600;font-size:var(--fs-page);line-height:1.3;color:var(--ink);margin:0;letter-spacing:-.01em}
+.t-section{font-family:var(--f-ar);font-weight:600;font-size:var(--fs-section);line-height:1.35;color:var(--ink);margin:0}
+.t-card{font-family:var(--f-ar);font-weight:600;font-size:var(--fs-card);line-height:1.4;color:var(--ink);margin:0}
+.t-body{font-family:var(--f-ar-body);font-weight:400;font-size:var(--fs-body);line-height:1.75;color:var(--ink);margin:0}
+.t-sec{font-family:var(--f-ar-body);font-weight:400;font-size:var(--fs-sec);line-height:1.7;color:var(--slate);margin:0}
+.t-label{font-family:var(--f-ar);font-weight:500;font-size:var(--fs-label);line-height:1.5;color:var(--ink);margin:0}
+.t-table{font-family:var(--f-ar);font-weight:400;font-size:var(--fs-sec);line-height:1.5;color:var(--ink);margin:0}
+.t-help{font-family:var(--f-ar-body);font-weight:400;font-size:var(--fs-caption);line-height:1.6;color:var(--slate);margin:0}
+.t-status{font-family:var(--f-ar);font-weight:600;font-size:var(--fs-caption);line-height:1.4;margin:0}
+.t-nav{font-family:var(--f-ar);font-weight:500;font-size:var(--fs-sec);line-height:1.4;margin:0}
+
+/* ---------- spacing scale --------------------------------------------- */
+.sp{display:flex;flex-direction:column;gap:.45rem}
+.sp__r{display:flex;align-items:center;gap:.8rem;font-family:var(--f-mono);font-size:11px;color:var(--slate)}
+.sp__b{background:var(--sky);border-left:2px solid var(--blue);height:16px;border-radius:2px;flex:0 0 auto}
+.sp__n{width:8.5rem;flex:0 0 auto;color:var(--navy)}
+
+/* ---------- radius + depth specimens ---------------------------------- */
+.demo-grid{display:grid;gap:var(--s4);grid-template-columns:repeat(auto-fill,minmax(9.5rem,1fr))}
+.demo-box{background:var(--white);border:1px solid var(--divider);height:78px;display:flex;align-items:flex-end;justify-content:center;padding:.5rem;font-family:var(--f-mono);font-size:10.5px;color:var(--slate)}
+.d-card{box-shadow:var(--sh-card)} .d-raised{box-shadow:var(--sh-raised)}
+.d-drop{box-shadow:var(--sh-dropdown)} .d-modal{box-shadow:var(--sh-modal)}
+
+/* ---------- ICONS ------------------------------------------------------ */
+.i{width:20px;height:20px;flex:0 0 auto;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.i--lg{width:24px;height:24px}
+.i--sm{width:16px;height:16px;stroke-width:1.9}
+.i--flip{transform:scaleX(-1)}
+.icongrid{display:grid;gap:.5rem;grid-template-columns:repeat(auto-fill,minmax(7.2rem,1fr))}
+.icongrid figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:.35rem;padding:.7rem .4rem;border:1px solid var(--divider);border-radius:var(--r-control);color:var(--navy);background:var(--white)}
+.icongrid figcaption{font-family:var(--f-mono);font-size:10px;color:var(--slate);text-align:center;line-height:1.3}
+
+/* ---------- BUTTONS ---------------------------------------------------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
+  font-family:var(--f-ar);font-weight:600;font-size:var(--fs-sec);line-height:1;
+  min-height:40px;padding:0 var(--s4);border-radius:var(--r-control);
+  border:1px solid transparent;background:none;cursor:pointer;
+  transition:background var(--dur) var(--ease),border-color var(--dur) var(--ease),color var(--dur) var(--ease),box-shadow var(--dur) var(--ease);
+  text-decoration:none;white-space:nowrap
+}
+.btn:focus-visible{outline:none;box-shadow:var(--sh-focus)}
+.btn--lg{min-height:var(--tap);padding:0 var(--s5);font-size:var(--fs-body)}
+.btn--sm{min-height:32px;padding:0 var(--s3);font-size:var(--fs-caption)}
+.btn--icon{padding:0;width:40px;min-height:40px}
+
+.btn--primary{background:var(--blue);color:var(--white);border-color:var(--blue)}
+.btn--primary:hover{background:var(--blue-hover);border-color:var(--blue-hover)}
+.btn--primary.is-pressed,.btn--primary:active{background:var(--blue-pressed);border-color:var(--blue-pressed)}
+
+.btn--secondary{background:var(--white);color:var(--navy);border-color:var(--control-border)}
+.btn--secondary:hover{background:var(--mist);border-color:var(--navy)}
+.btn--secondary.is-pressed,.btn--secondary:active{background:var(--sky);border-color:var(--navy)}
+
+.btn--ghost{background:transparent;color:var(--navy);border-color:transparent}
+.btn--ghost:hover{background:var(--primary-subtle)}
+.btn--ghost.is-pressed,.btn--ghost:active{background:var(--sky)}
+
+.btn--danger{background:var(--white);color:var(--error-ink);border-color:var(--error)}
+.btn--danger:hover{background:var(--error);color:var(--white);border-color:var(--error)}
+.btn--danger.is-pressed,.btn--danger:active{background:var(--error-hover);color:var(--white);border-color:var(--error-hover)}
+
+.btn:disabled,.btn.is-disabled{
+  background:var(--disabled-surface);color:var(--disabled-ink);border-color:var(--divider);
+  cursor:not-allowed;box-shadow:none
+}
+.btn.is-focus{box-shadow:var(--sh-focus)}
+
+/* ---------- FORMS ------------------------------------------------------ */
+.field{display:flex;flex-direction:column;gap:var(--s2);max-width:22rem}
+.field__label{font-family:var(--f-ar);font-weight:500;font-size:var(--fs-label);color:var(--ink);display:flex;gap:.4rem;align-items:baseline}
+.field__req{font-family:var(--f-ar);font-size:var(--fs-caption);font-weight:400;color:var(--slate)}
+.field__help{font-family:var(--f-ar-body);font-size:var(--fs-caption);color:var(--slate);margin:0}
+.field__err{font-family:var(--f-ar);font-size:var(--fs-caption);font-weight:500;color:var(--error-ink);display:flex;gap:.35rem;align-items:center;margin:0}
+
+.ctl{
+  font-family:var(--f-ar);font-size:var(--fs-body);color:var(--ink);
+  background:var(--white);border:1px solid var(--control-border);border-radius:var(--r-control);
+  min-height:var(--tap);padding:.5rem var(--s3);width:100%;
+  transition:border-color var(--dur) var(--ease),box-shadow var(--dur) var(--ease)
+}
+.ctl::placeholder{color:var(--placeholder);font-family:var(--f-ar-body)}
+.ctl:hover{border-color:var(--navy)}
+.ctl:focus,.ctl.is-focus{outline:none;border-color:var(--blue);box-shadow:var(--sh-focus)}
+.ctl.is-error{border-color:var(--error)}
+.ctl.is-error:focus,.ctl.is-error.is-focus{box-shadow:0 0 0 3px rgba(192,67,59,.28)}
+.ctl:disabled,.ctl.is-disabled{background:var(--disabled-surface);color:var(--disabled-ink);border-color:var(--divider);cursor:not-allowed}
+textarea.ctl{min-height:96px;resize:vertical;line-height:1.7;font-family:var(--f-ar-body)}
+select.ctl{appearance:none;background-image:none}
+.ctl-wrap{position:relative;display:block}
+.ctl-wrap__i{position:absolute;top:50%;transform:translateY(-50%);color:var(--slate);pointer-events:none}
+.rtl .ctl-wrap__i--lead{right:var(--s3)}
+.rtl .ctl-wrap__i--trail{left:var(--s3)}
+.rtl .ctl-wrap--lead .ctl{padding-right:2.6rem}
+.rtl .ctl-wrap--trail .ctl{padding-left:2.6rem}
+
+.choice{display:flex;align-items:center;gap:var(--s3);min-height:var(--tap);font-family:var(--f-ar);font-size:var(--fs-body);color:var(--ink);cursor:pointer}
+.choice__box{width:22px;height:22px;border:1px solid var(--control-border);border-radius:var(--r-xs);background:var(--white);display:grid;place-items:center;flex:0 0 auto;color:var(--white);transition:background var(--dur),border-color var(--dur)}
+.choice__box--radio{border-radius:50%}
+.choice.is-on .choice__box{background:var(--blue);border-color:var(--blue)}
+.choice.is-focus .choice__box{box-shadow:var(--sh-focus)}
+.choice.is-disabled{color:var(--disabled-ink);cursor:not-allowed}
+.choice.is-disabled .choice__box{background:var(--disabled-surface);border-color:var(--divider)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--white)}
+
+.toggle{display:flex;align-items:center;gap:var(--s3);min-height:var(--tap);font-family:var(--f-ar);font-size:var(--fs-body);color:var(--ink);cursor:pointer}
+.toggle__t{width:46px;height:26px;border-radius:var(--r-pill);background:var(--gray);position:relative;flex:0 0 auto;transition:background var(--dur) var(--ease)}
+.toggle__t::after{content:"";position:absolute;top:3px;width:20px;height:20px;border-radius:50%;background:var(--white);box-shadow:var(--sh-card);transition:inset-inline-start var(--dur) var(--ease);inset-inline-start:3px}
+.toggle.is-on .toggle__t{background:var(--blue)}
+.toggle.is-on .toggle__t::after{inset-inline-start:23px}
+.toggle.is-focus .toggle__t{box-shadow:var(--sh-focus)}
+.toggle__state{font-family:var(--f-ar);font-size:var(--fs-caption);font-weight:600;color:var(--slate)}
+
+.upload{
+  border:1px dashed var(--control-border);border-radius:var(--r-card);background:var(--soft);
+  padding:var(--s6);display:flex;flex-direction:column;align-items:center;gap:var(--s2);text-align:center;color:var(--slate)
+}
+.upload strong{font-family:var(--f-ar);font-size:var(--fs-sec);color:var(--ink);font-weight:600}
+.upload span{font-family:var(--f-ar-body);font-size:var(--fs-caption)}
+
+/* ---------- CARDS ------------------------------------------------------ */
+.card{background:var(--white);border:1px solid var(--divider);border-radius:var(--r-card);padding:var(--s5);box-shadow:var(--sh-card)}
+.card__head{display:flex;align-items:baseline;justify-content:space-between;gap:var(--s3);margin-bottom:var(--s3)}
+.card__body{display:flex;flex-direction:column;gap:var(--s2)}
+.card--stat{display:flex;flex-direction:column;gap:var(--s2)}
+.card--stat .stat__l{font-family:var(--f-ar);font-size:var(--fs-label);color:var(--slate);font-weight:500;display:flex;align-items:center;gap:.45rem}
+.card--stat .stat__n{font-family:var(--f-ar);font-size:2rem;font-weight:700;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+.card--stat .stat__m{font-family:var(--f-ar-body);font-size:var(--fs-caption);color:var(--slate)}
+.card--interactive{cursor:pointer;transition:border-color var(--dur) var(--ease),box-shadow var(--dur) var(--ease)}
+.card--interactive:hover{border-color:var(--control-border);box-shadow:var(--sh-raised)}
+.card--accent{border-inline-start:3px solid var(--blue)}
+.cards{display:grid;gap:var(--s4);grid-template-columns:repeat(auto-fill,minmax(13.5rem,1fr))}
+
+.activity{display:flex;gap:var(--s3);padding:var(--s3) 0;border-bottom:1px solid var(--divider);align-items:flex-start}
+.activity:last-child{border-bottom:none}
+.activity__i{width:32px;height:32px;border-radius:50%;background:var(--mist);color:var(--navy);display:grid;place-items:center;flex:0 0 auto}
+.activity__t{font-family:var(--f-ar);font-size:var(--fs-sec);color:var(--ink);margin:0}
+.activity__m{font-family:var(--f-mono);font-size:var(--fs-caption);color:var(--slate);margin:.15rem 0 0;direction:ltr;text-align:right}
+
+/* ---------- STATUS BADGES ---------------------------------------------- */
+.badge{
+  display:inline-flex;align-items:center;gap:.35rem;
+  font-family:var(--f-ar);font-weight:600;font-size:var(--fs-caption);line-height:1;
+  padding:.35rem .6rem .35rem .5rem;border-radius:var(--r-pill);white-space:nowrap;border:1px solid transparent
+}
+.badge .i{width:14px;height:14px;stroke-width:2}
+.badge--new{background:var(--st-new-bg);color:var(--st-new-ink);border-color:rgba(44,76,130,.18)}
+.badge--review{background:var(--st-review-bg);color:var(--st-review-ink);border-color:rgba(143,96,20,.22)}
+.badge--confirmed{background:var(--st-confirmed-bg);color:var(--st-confirmed-ink);border-color:rgba(34,64,111,.22)}
+.badge--done{background:var(--st-done-bg);color:var(--st-done-ink);border-color:rgba(37,107,85,.22)}
+.badge--cancel{background:var(--st-cancel-bg);color:var(--st-cancel-ink);border-color:rgba(71,82,95,.2)}
+.greyproof{filter:grayscale(1)}
+
+/* ---------- TABLE ------------------------------------------------------ */
+.tbl-wrap{overflow-x:auto;background:var(--white)}
+table.tbl{border-collapse:collapse;width:100%;min-width:44rem;font-family:var(--f-ar);font-size:var(--fs-sec)}
+table.tbl th,table.tbl td{text-align:right;padding:var(--s3) var(--s4);vertical-align:middle}
+table.tbl thead th{
+  font-family:var(--f-ar);font-weight:600;font-size:var(--fs-caption);color:var(--slate);
+  background:var(--soft);border-bottom:1px solid var(--divider);white-space:nowrap
+}
+table.tbl tbody td{border-bottom:1px solid var(--divider);color:var(--ink)}
+table.tbl tbody tr:last-child td{border-bottom:none}
+table.tbl tbody tr{transition:background var(--dur) var(--ease)}
+table.tbl tbody tr:hover{background:var(--row-hover)}
+table.tbl tbody tr.is-selected{background:var(--row-selected)}
+table.tbl tbody tr.is-selected td:first-child{box-shadow:inset -3px 0 0 var(--blue)}
+.cell-id{font-family:var(--f-mono);font-size:var(--fs-caption);color:var(--slate);direction:ltr;display:inline-block}
+.cell-name{font-weight:600}
+.cell-sub{display:block;font-family:var(--f-ar-body);font-size:var(--fs-caption);color:var(--slate);font-weight:400;margin-top:.1rem}
+.cell-date{font-family:var(--f-mono);font-size:var(--fs-caption);color:var(--slate);direction:ltr;display:inline-block;font-variant-numeric:tabular-nums}
+.cell-act{display:flex;gap:.2rem;justify-content:flex-start}
+.iconbtn{
+  width:34px;height:34px;display:grid;place-items:center;border-radius:var(--r-control);
+  border:1px solid transparent;background:transparent;color:var(--slate);cursor:pointer;
+  transition:background var(--dur),color var(--dur)
+}
+.iconbtn:hover{background:var(--mist);color:var(--navy)}
+.iconbtn:focus-visible{outline:none;box-shadow:var(--sh-focus);color:var(--navy)}
+.iconbtn--danger:hover{background:var(--error-bg);color:var(--error-ink)}
+
+.pager{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--s3);padding:var(--s3) var(--s4);border-top:1px solid var(--divider);background:var(--white)}
+.pager__c{font-family:var(--f-ar-body);font-size:var(--fs-caption);color:var(--slate)}
+.pager__n{display:flex;gap:.25rem;align-items:center}
+.pager__b{
+  min-width:34px;height:34px;padding:0 .5rem;display:grid;place-items:center;border-radius:var(--r-control);
+  border:1px solid var(--divider);background:var(--white);color:var(--slate);cursor:pointer;
+  font-family:var(--f-mono);font-size:12.5px;font-variant-numeric:tabular-nums
+}
+.pager__b:hover{border-color:var(--control-border);color:var(--navy)}
+.pager__b.is-current{background:var(--navy);border-color:var(--navy);color:var(--white);font-weight:500}
+.pager__b:disabled{color:var(--gray);cursor:not-allowed;background:var(--disabled-surface)}
+
+/* mobile record card — the table's responsive transformation */
+.reccard{border:1px solid var(--divider);border-radius:var(--r-card);padding:var(--s4);background:var(--white);display:flex;flex-direction:column;gap:var(--s3);max-width:23rem;box-shadow:var(--sh-card)}
+.reccard__top{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s3)}
+.reccard__n{font-family:var(--f-ar);font-weight:600;font-size:var(--fs-body);color:var(--ink);margin:0}
+.reccard__s{font-family:var(--f-ar-body);font-size:var(--fs-caption);color:var(--slate);margin:.15rem 0 0}
+.reccard__meta{display:flex;flex-wrap:wrap;gap:.3rem var(--s4);font-family:var(--f-ar);font-size:var(--fs-caption);color:var(--slate)}
+.reccard__meta b{color:var(--ink);font-weight:600}
+.reccard__acts{display:flex;gap:var(--s2);border-top:1px solid var(--divider);padding-top:var(--s3)}
+.reccard__acts .btn{flex:1 1 0}
+
+/* ---------- NAVIGATION -------------------------------------------------- */
+.side{
+  background:var(--navy);color:var(--white);width:248px;border-radius:var(--r-card);
+  padding:var(--s4) var(--s3);display:flex;flex-direction:column;gap:var(--s2);flex:0 0 auto
+}
+.side__brand{display:flex;align-items:center;gap:var(--s3);padding:var(--s2) var(--s3) var(--s5)}
+.side__mark{width:34px;height:34px;border-radius:var(--r-control);background:var(--white);display:grid;place-items:center;color:var(--navy);flex:0 0 auto;font-family:var(--f-ar);font-weight:700;font-size:14px}
+.side__name{font-family:var(--f-ar);font-weight:600;font-size:var(--fs-sec);line-height:1.25}
+.side__name span{display:block;font-family:var(--f-ar-body);font-weight:400;font-size:var(--fs-caption);color:rgba(217,228,243,.8)}
+.side__grp{font-family:var(--f-ar);font-size:var(--fs-caption);font-weight:600;color:rgba(217,228,243,.72);padding:var(--s4) var(--s3) var(--s2);margin:0}
+.navitem{
+  display:flex;align-items:center;gap:var(--s3);min-height:var(--tap);padding:0 var(--s3);
+  border-radius:var(--r-control);color:#B9C9E4;text-decoration:none;
+  font-family:var(--f-ar);font-weight:500;font-size:var(--fs-sec);position:relative;
+  transition:background var(--dur) var(--ease),color var(--dur) var(--ease)
+}
+.navitem:hover{background:rgba(255,255,255,.08);color:var(--white)}
+.navitem.is-active{background:var(--white);color:var(--navy);font-weight:600}
+.navitem.is-active::before{content:"";position:absolute;inset-inline-start:0;top:50%;transform:translateY(-50%);width:3px;height:22px;border-radius:var(--r-pill);background:var(--blue)}
+.navitem:focus-visible{outline:none;box-shadow:0 0 0 3px var(--focus-ring-inverse)}
+.navitem__count{
+  margin-inline-start:auto;font-family:var(--f-mono);font-size:11.5px;font-variant-numeric:tabular-nums;
+  background:var(--blue);color:var(--white);border-radius:var(--r-pill);padding:.1rem .42rem;font-weight:500
+}
+.navitem.is-active .navitem__count{background:var(--blue);color:var(--white)}
+
+.side--rail{width:72px;padding:var(--s4) var(--s2);align-items:center}
+.side--rail .navitem{width:48px;justify-content:center;padding:0}
+.side--rail .navitem.is-active::before{display:none}
+
+.mobnav{
+  display:flex;background:var(--white);border:1px solid var(--divider);border-radius:var(--r-card);
+  padding:var(--s2);gap:var(--s1);max-width:23rem;box-shadow:var(--sh-raised)
+}
+.mobnav__i{
+  flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:.2rem;
+  padding:.5rem .2rem;border-radius:var(--r-control);color:var(--slate);text-decoration:none;
+  font-family:var(--f-ar);font-size:11px;font-weight:500;min-height:56px;justify-content:center
+}
+.mobnav__i.is-active{background:var(--mist);color:var(--navy);font-weight:600}
+
+/* ---------- HEADER ------------------------------------------------------ */
+.hdr{
+  display:flex;align-items:center;gap:var(--s4);flex-wrap:wrap;
+  background:var(--white);border:1px solid var(--divider);border-radius:var(--r-card);
+  padding:var(--s3) var(--s4);box-shadow:var(--sh-card)
+}
+.hdr__t{display:flex;flex-direction:column;gap:.15rem;margin-inline-end:auto;min-width:0}
+.hdr__crumb{display:flex;align-items:center;gap:.35rem;font-family:var(--f-ar-body);font-size:var(--fs-caption);color:var(--slate)}
+.hdr__crumb a{color:var(--slate);text-decoration:none}
+.hdr__crumb a:hover{color:var(--navy);text-decoration:underline}
+.hdr__title{font-family:var(--f-ar);font-weight:600;font-size:var(--fs-page);color:var(--ink);margin:0;line-height:1.25}
+.hdr__acts{display:flex;align-items:center;gap:var(--s2)}
+.bell{position:relative}
+.bell__d{position:absolute;top:6px;inset-inline-end:6px;width:8px;height:8px;border-radius:50%;background:var(--error);border:2px solid var(--white)}
+.who{display:flex;align-items:center;gap:var(--s2);padding:.3rem .5rem;border-radius:var(--r-control);cursor:pointer;border:1px solid transparent;background:none}
+.who:hover{background:var(--soft);border-color:var(--divider)}
+.who__av{width:34px;height:34px;border-radius:50%;background:var(--sky);color:var(--navy);display:grid;place-items:center;font-family:var(--f-ar);font-weight:600;font-size:13px;flex:0 0 auto}
+.who__n{font-family:var(--f-ar);font-size:var(--fs-caption);font-weight:600;color:var(--ink);line-height:1.3;text-align:right}
+.who__n span{display:block;font-weight:400;color:var(--slate)}
+.langsw{display:inline-flex;border:1px solid var(--divider);border-radius:var(--r-control);overflow:hidden}
+.langsw button{
+  font-family:var(--f-ar);font-size:var(--fs-caption);font-weight:600;padding:.4rem .7rem;min-height:36px;
+  background:var(--white);color:var(--slate);border:none;cursor:pointer
+}
+.langsw button.is-on{background:var(--navy);color:var(--white)}
+
+/* ---------- MODAL / DRAWER ---------------------------------------------- */
+.scrim{background:rgba(30,39,51,.42);border-radius:var(--r-card);padding:var(--s8) var(--s4);display:grid;place-items:center}
+.modal{
+  background:var(--white);border-radius:var(--r-modal);box-shadow:var(--sh-modal);
+  width:min(100%,26rem);padding:var(--s6);display:flex;flex-direction:column;gap:var(--s4)
+}
+.modal__h{display:flex;gap:var(--s3);align-items:flex-start}
+.modal__ic{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto}
+.modal__ic--danger{background:var(--error-bg);color:var(--error-ink)}
+.modal__ic--info{background:var(--mist);color:var(--navy)}
+.modal__t{font-family:var(--f-ar);font-weight:600;font-size:var(--fs-card);color:var(--ink);margin:0}
+.modal__b{font-family:var(--f-ar-body);font-size:var(--fs-sec);color:var(--slate);margin:.3rem 0 0;line-height:1.7}
+.modal__b b{color:var(--ink);font-weight:600}
+.modal__f{display:flex;gap:var(--s2);justify-content:flex-start}
+
+.drawer{
+  background:var(--white);border-radius:var(--r-modal) var(--r-modal) 0 0;box-shadow:var(--sh-modal);
+  width:min(100%,23rem);padding:var(--s5) var(--s5) var(--s6);display:flex;flex-direction:column;gap:var(--s4)
+}
+.drawer__grab{width:38px;height:4px;border-radius:var(--r-pill);background:var(--divider);margin:0 auto}
+.drawer__h{display:flex;align-items:center;justify-content:space-between;gap:var(--s3)}
+
+/* ---------- FEEDBACK ---------------------------------------------------- */
+.alert{
+  display:flex;gap:var(--s3);padding:var(--s3) var(--s4);border-radius:var(--r-card);
+  border:1px solid transparent;align-items:flex-start;max-width:34rem
+}
+.alert__i{flex:0 0 auto;margin-top:1px}
+.alert__t{font-family:var(--f-ar);font-weight:600;font-size:var(--fs-sec);margin:0}
+.alert__b{font-family:var(--f-ar-body);font-size:var(--fs-caption);margin:.2rem 0 0;line-height:1.65;color:var(--slate)}
+.alert--success{background:var(--success-bg);border-color:rgba(37,107,85,.2);color:var(--success-ink)}
+.alert--error{background:var(--error-bg);border-color:rgba(165,53,46,.22);color:var(--error-ink)}
+.alert--warning{background:var(--warning-bg);border-color:rgba(143,96,20,.22);color:var(--warning-ink)}
+.alert--info{background:var(--info-bg);border-color:rgba(44,76,130,.2);color:var(--info-ink)}
+
+.toast{
+  display:flex;gap:var(--s3);align-items:center;background:var(--white);border:1px solid var(--divider);
+  border-radius:var(--r-card);box-shadow:var(--sh-dropdown);padding:var(--s3) var(--s4);max-width:24rem
+}
+.toast__i{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto}
+.toast__i--ok{background:var(--success-bg);color:var(--success-ink)}
+.toast__i--err{background:var(--error-bg);color:var(--error-ink)}
+.toast__t{font-family:var(--f-ar);font-weight:600;font-size:var(--fs-sec);color:var(--ink);margin:0;flex:1 1 auto}
+
+.spinner{width:22px;height:22px;border-radius:50%;border:2.5px solid var(--sky);border-top-color:var(--blue);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.bar{height:3px;background:var(--sky);border-radius:var(--r-pill);overflow:hidden;max-width:20rem}
+.bar__f{height:100%;width:38%;background:var(--blue);border-radius:var(--r-pill);animation:slide 1.4s var(--ease) infinite}
+@keyframes slide{0%{transform:translateX(120%)}100%{transform:translateX(-320%)}}
+
+.skel{background:linear-gradient(90deg,#EEF1F6 25%,#E3E8F0 37%,#EEF1F6 63%);background-size:400% 100%;animation:shim 1.4s ease infinite;border-radius:var(--r-xs)}
+@keyframes shim{0%{background-position:100% 50%}100%{background-position:0 50%}}
+.skel--line{height:12px} .skel--title{height:18px;width:45%} .skel--pill{height:22px;width:88px;border-radius:var(--r-pill)}
+
+/* ---------- EMPTY STATES ------------------------------------------------ */
+.empty{
+  display:flex;flex-direction:column;align-items:center;text-align:center;gap:var(--s3);
+  padding:var(--s12) var(--s5);max-width:30rem;margin:0 auto
+}
+.empty__ic{width:52px;height:52px;border-radius:50%;background:var(--mist);color:var(--navy);display:grid;place-items:center}
+.empty__t{font-family:var(--f-ar);font-weight:600;font-size:var(--fs-card);color:var(--ink);margin:0}
+.empty__b{font-family:var(--f-ar-body);font-size:var(--fs-sec);color:var(--slate);margin:0;line-height:1.7;max-width:34ch}
+
+.foot{border-top:1px solid var(--doc-rule);margin-top:clamp(2.4rem,6vw,4rem);padding-block:1.5rem 3rem;font-family:var(--f-mono);font-size:11.5px;color:var(--slate);display:flex;flex-wrap:wrap;gap:.4rem 1.4rem}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+<symbol id="ic-home" viewBox="0 0 24 24"><path d="M3.5 10.6 12 3.8l8.5 6.8"/><path d="M5.6 9.6V19a1.2 1.2 0 0 0 1.2 1.2h3V15h4.4v5.2h3A1.2 1.2 0 0 0 18.4 19V9.6"/></symbol>
+<symbol id="ic-request" viewBox="0 0 24 24"><rect x="4.2" y="3.2" width="15.6" height="17.6" rx="2.2"/><path d="M8.2 8.4h7.6M8.2 12h7.6M8.2 15.6h4.6"/></symbol>
+<symbol id="ic-users" viewBox="0 0 24 24"><circle cx="9.4" cy="8.4" r="3.4"/><path d="M3.4 19.6a6 6 0 0 1 12 0"/><path d="M16.2 5.4a3.2 3.2 0 0 1 0 6.1"/><path d="M17.6 14.4a5.4 5.4 0 0 1 3.2 5.2"/></symbol>
+<symbol id="ic-service" viewBox="0 0 24 24"><rect x="3.4" y="3.4" width="7.2" height="7.2" rx="1.8"/><rect x="13.4" y="3.4" width="7.2" height="7.2" rx="1.8"/><rect x="3.4" y="13.4" width="7.2" height="7.2" rx="1.8"/><rect x="13.4" y="13.4" width="7.2" height="7.2" rx="1.8"/></symbol>
+<symbol id="ic-content" viewBox="0 0 24 24"><path d="M13.4 3.2H6.6a2 2 0 0 0-2 2v13.6a2 2 0 0 0 2 2h10.8a2 2 0 0 0 2-2V9.2z"/><path d="M13.4 3.2v6h6"/><path d="M8.6 13.4h6.8M8.6 16.8h4.4"/></symbol>
+<symbol id="ic-settings" viewBox="0 0 24 24"><path d="M3.6 7h16.8M3.6 12h16.8M3.6 17h16.8"/><circle cx="9" cy="7" r="2.2"/><circle cx="15.4" cy="12" r="2.2"/><circle cx="7.6" cy="17" r="2.2"/></symbol>
+<symbol id="ic-shield" viewBox="0 0 24 24"><path d="M12 3.2 5 6v5.6c0 4.2 2.9 7.5 7 9.2 4.1-1.7 7-5 7-9.2V6z"/><path d="m9.2 12 2 2 3.6-3.9"/></symbol>
+<symbol id="ic-report" viewBox="0 0 24 24"><path d="M4 20h16"/><rect x="5.6" y="11.4" width="3.6" height="6" rx="1.1"/><rect x="10.2" y="7.4" width="3.6" height="10" rx="1.1"/><rect x="14.8" y="4.2" width="3.6" height="13.2" rx="1.1"/></symbol>
+<symbol id="ic-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.4"/><path d="m15.6 15.6 4 4"/></symbol>
+<symbol id="ic-filter" viewBox="0 0 24 24"><path d="M3.6 5.6h16.8M6.8 12h10.4M10 18.4h4"/></symbol>
+<symbol id="ic-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="ic-edit" viewBox="0 0 24 24"><path d="M4.4 19.6h4l9.4-9.4a2.1 2.1 0 0 0 0-3l-1-1a2.1 2.1 0 0 0-3 0L4.4 15.6z"/><path d="m14.2 6.2 3.6 3.6"/></symbol>
+<symbol id="ic-trash" viewBox="0 0 24 24"><path d="M4.6 6.6h14.8"/><path d="M9.4 6.6V4.8a1.4 1.4 0 0 1 1.4-1.4h2.4a1.4 1.4 0 0 1 1.4 1.4v1.8"/><path d="M6.6 6.6 7.5 19a1.6 1.6 0 0 0 1.6 1.5h5.8a1.6 1.6 0 0 0 1.6-1.5l.9-12.4"/><path d="M10.4 10.4v6M13.6 10.4v6"/></symbol>
+<symbol id="ic-check" viewBox="0 0 24 24"><path d="m4.8 12.6 4.6 4.6L19.2 7.4"/></symbol>
+<symbol id="ic-checks" viewBox="0 0 24 24"><path d="m2.6 12.8 3.8 3.8L15 8"/><path d="m9.6 15.4 1.4 1.4L20 7.6"/></symbol>
+<symbol id="ic-x" viewBox="0 0 24 24"><path d="M6.2 6.2l11.6 11.6M17.8 6.2 6.2 17.8"/></symbol>
+<symbol id="ic-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.2V12l3.2 2"/></symbol>
+<symbol id="ic-newdot" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></symbol>
+<symbol id="ic-xcircle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4"/><path d="M9.2 9.2l5.6 5.6M14.8 9.2 9.2 14.8"/></symbol>
+<symbol id="ic-checkcircle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4"/><path d="m8.4 12.2 2.6 2.6 4.6-5"/></symbol>
+<symbol id="ic-phone" viewBox="0 0 24 24"><path d="M7.4 3.8h-2A2.2 2.2 0 0 0 3.2 6.2c0 8 6.6 14.6 14.6 14.6a2.2 2.2 0 0 0 2.4-2.2v-2l-4.2-1.6-2 2.2a13.4 13.4 0 0 1-6.8-6.8l2.2-2z"/></symbol>
+<symbol id="ic-chat" viewBox="0 0 24 24"><path d="M20.4 11.6a7.9 7.9 0 0 1-8.4 7.9 8.7 8.7 0 0 1-3.4-.7l-4.8 1.4 1.4-4.4a7.8 7.8 0 0 1-.9-3.6 8 8 0 0 1 8.1-7.9 8 8 0 0 1 8 7.3z"/></symbol>
+<symbol id="ic-chevron" viewBox="0 0 24 24"><path d="m9.6 5.6 6.4 6.4-6.4 6.4"/></symbol>
+<symbol id="ic-dots" viewBox="0 0 24 24"><circle cx="12" cy="5.6" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="18.4" r="1.5" fill="currentColor" stroke="none"/></symbol>
+<symbol id="ic-bell" viewBox="0 0 24 24"><path d="M18 16.4V11a6 6 0 1 0-12 0v5.4L4.4 18.6h15.2z"/><path d="M10.2 18.6a1.9 1.9 0 0 0 3.6 0"/></symbol>
+<symbol id="ic-user" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="10" r="2.9"/><path d="M6.6 18.6a6 6 0 0 1 10.8 0"/></symbol>
+<symbol id="ic-menu" viewBox="0 0 24 24"><path d="M3.8 6.6h16.4M3.8 12h16.4M3.8 17.4h16.4"/></symbol>
+<symbol id="ic-calendar" viewBox="0 0 24 24"><rect x="3.6" y="5.2" width="16.8" height="15.2" rx="2.2"/><path d="M3.6 10h16.8M8.4 3.4v3.4M15.6 3.4v3.4"/></symbol>
+<symbol id="ic-alert" viewBox="0 0 24 24"><path d="M12 3.8 2.8 19.8h18.4z"/><path d="M12 9.6v4.2"/><circle cx="12" cy="16.8" r="1" fill="currentColor" stroke="none"/></symbol>
+<symbol id="ic-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4"/><path d="M12 11.4v4.8"/><circle cx="12" cy="8.2" r="1" fill="currentColor" stroke="none"/></symbol>
+<symbol id="ic-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13.2 5.6 19.6 12l-6.4 6.4"/></symbol>
+<symbol id="ic-inbox" viewBox="0 0 24 24"><path d="M3.4 13.4h4.2l1.4 2.6h6l1.4-2.6h4.2"/><path d="M5.6 4.6h12.8l2.2 8.8v4.2a2.2 2.2 0 0 1-2.2 2.2H5.6a2.2 2.2 0 0 1-2.2-2.2v-4.2z"/></symbol>
+<symbol id="ic-upload" viewBox="0 0 24 24"><path d="M12 15.6V4.4"/><path d="m7.6 8.8 4.4-4.4 4.4 4.4"/><path d="M4.4 15.2v3.2a2 2 0 0 0 2 2h11.2a2 2 0 0 0 2-2v-3.2"/></symbol>
+</defs></svg>
+
+<div class="wrap">
+
+  <header class="mast">
+    <p class="mast__eyebrow">Admin dashboard · Stage 03</p>
+    <h1 class="mast__title">Design System &amp; UI Components</h1>
+    <p class="mast__sub">The reusable visual language for the <span style="font-family:var(--f-ar);font-weight:600">عون الدرب للنقل المتخصص</span>
+      dashboard, derived from the approved brand rather than assembled beside it. Every token traces to
+      <code>brand/tokens.css</code>; every contrast figure below was measured, not assumed.</p>
+    <div class="mast__meta">
+      <span>Foundation · <b>brand/tokens.css · brand/system.css</b></span>
+      <span>Continues · <b>Stage 02 UX</b></span>
+      <span>Theme · <b>Light, single, deliberate</b></span>
+      <span>Scope · <b>Components only — no page layouts</b></span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Contents">
+      <p class="toc__title">Contents</p>
+      <ol>
+        <li><a href="#s1"><span>01</span>Direction &amp; inheritance</a></li>
+        <li><a href="#s2"><span>02</span>Colour tokens</a></li>
+        <li><a href="#s3"><span>03</span>Contrast ledger</a></li>
+        <li><a href="#s4"><span>04</span>Typography</a></li>
+        <li><a href="#s5"><span>05</span>Spacing</a></li>
+        <li><a href="#s6"><span>06</span>Grid &amp; layout</a></li>
+        <li><a href="#s7"><span>07</span>Radius</a></li>
+        <li><a href="#s8"><span>08</span>Depth</a></li>
+        <li><a href="#s9"><span>09</span>Icons</a></li>
+        <li><a href="#s10"><span>10</span>Buttons</a></li>
+        <li><a href="#s11"><span>11</span>Form controls</a></li>
+        <li><a href="#s12"><span>12</span>Cards</a></li>
+        <li><a href="#s13"><span>13</span>Status badges</a></li>
+        <li><a href="#s14"><span>14</span>Tables</a></li>
+        <li><a href="#s15"><span>15</span>Navigation</a></li>
+        <li><a href="#s16"><span>16</span>Header</a></li>
+        <li><a href="#s17"><span>17</span>Modals &amp; drawers</a></li>
+        <li><a href="#s18"><span>18</span>Feedback</a></li>
+        <li><a href="#s19"><span>19</span>Empty states</a></li>
+        <li><a href="#s20"><span>20</span>Responsive behaviour</a></li>
+        <li><a href="#s21"><span>21</span>Accessibility rules</a></li>
+        <li><a href="#s22"><span>22</span>Decisions &amp; handoff</a></li>
+      </ol>
+    </nav>
+
+    <main>
+
+<!-- 01 ================================================================== -->
+<section class="sec" id="s1">
+  <div class="sec__head"><span class="sec__num">01</span><h2 class="sec__title">Direction &amp; inheritance</h2></div>
+  <p>The brand already has a complete system: a single-blue palette derived from the logo, an approved Arabic
+    type pairing, a radius ramp, a shadow set and accessibility guardrails. Stage 03 does not restate it and does
+    not fork it. It <b>narrows</b> it for interface density and <b>extends</b> it only where an operational product
+    needs something a marketing site never did.</p>
+
+  <div class="tw"><table class="doc">
+    <thead><tr><th>Decision</th><th>Website value</th><th>Admin value</th><th>Why it changed</th></tr></thead>
+    <tbody>
+      <tr><td><b>Palette</b></td><td>Single blue <span class="mono">#4975BA</span> + navy</td><td class="ok">Identical</td><td>Unchanged. No second palette exists in this document.</td></tr>
+      <tr><td><b>Type pairing</b></td><td>IBM Plex Sans Arabic + Cairo</td><td class="ok">Identical</td><td>Plex Arabic carries UI and headings; Cairo carries reading copy. Latin here is IBM Plex Sans — the same superfamily, so annotation never introduces a third voice.</td></tr>
+      <tr><td><b>Body size</b></td><td><span class="mono">17px</span></td><td><span class="mono">16px</span></td><td>The brand floor is 16px and the ramp above it is tuned to marketing measure. Admin sits on the floor exactly — never below it.</td></tr>
+      <tr><td><b>Radius ramp</b></td><td><span class="mono">10 / 16 / 24</span></td><td><span class="mono">8 / 12 / 16</span></td><td>Stepped down one notch. A 16px radius on a 44px input reads inflated; the proportion and the soft-modern character are preserved at control scale.</td></tr>
+      <tr><td><b>Feedback colours</b></td><td>success / warning / error</td><td>+ <b>info</b>, + text-safe inks</td><td>Two of the three fail AA as small text on their own tint. §03 measures it and fixes it.</td></tr>
+      <tr><td><b>Statuses</b></td><td>None</td><td><b>Five</b></td><td>The request lifecycle is operational; a marketing site had no equivalent. All five derive from brand hues.</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="note">
+    <h4>What "premium" means in this product</h4>
+    <p>Not ornament. A dispatcher looks at this screen for hours, so the premium signal is <b>restraint</b>: one accent
+      colour, one shadow that is almost invisible, generous row height, a table that stays readable at the eleventh
+      row, and no gradient, glass or decorative illustration anywhere. Every visual device below is spent on
+      hierarchy or state — never on interest.</p>
+  </div>
+</section>
+
+<!-- 02 ================================================================== -->
+<section class="sec" id="s2">
+  <div class="sec__head"><span class="sec__num">02</span><h2 class="sec__title">Colour tokens</h2></div>
+
+  <h3 class="h">Brand — carried unchanged</h3>
+  <div class="stage"><div class="stage__bar"><b>--blue --navy --sky --mist</b><span>from brand/tokens.css</span></div>
+  <div class="stage__body"><div class="sw">
+    <div class="sw__i"><div class="sw__chip" style="background:#4975BA"></div><div class="sw__m"><b>--blue</b>#4975BA<br><i>Primary fill, active marker</i></div></div>
+    <div class="sw__i"><div class="sw__chip" style="background:#2C4C82"></div><div class="sw__m"><b>--navy</b>#2C4C82<br><i>Sidebar, links, deep text</i></div></div>
+    <div class="sw__i"><div class="sw__chip" style="background:#3F68A8"></div><div class="sw__m"><b>--blue-hover</b>#3F68A8<br><i>Primary hover</i></div></div>
+    <div class="sw__i"><div class="sw__chip" style="background:#22406F"></div><div class="sw__m"><b>--blue-pressed</b>#22406F<br><i>Primary pressed</i></div></div>
+    <div class="sw__i"><div class="sw__chip" style="background:#D9E4F3"></div><div class="sw__m"><b>--sky</b>#D9E4F3<br><i>Tint, confirmed status</i></div></div>
+    <div class="sw__i"><div class="sw__chip" style="background:#EEF3FA"></div><div class="sw__m"><b>--mist</b>#EEF3FA<br><i>Soft tint, info</i></div></div>
+  </div></div></div>
+
+  <h3 class="h">Neutrals — surfaces, text, boundaries</h3>
+  <div class="stage"><div class="stage__bar"><b>--ink --slate --gray --divider --soft</b></div>
+  <div class="stage__body"><div class="sw">
+    <div class="sw__i"><div class="sw__chip" style="background:#1E2733"></div><div class="sw__m"><b>--ink</b>#1E2733<br><i>Primary text · 15.07:1</i></div></div>
+    <div class="sw__i"><div class="sw__chip" style="background:#5A6675"></div><div class="sw__m"><b>--slate</b>#5A6675<br><i>Secondary text · 5.85:1</i></div></div>
+    <div class="sw__i"><div class="sw__chip" style="background:#8B95A3"></div><div class="sw__m"><b>--control-border</b>#8B95A3<br><i>Control boundary · 3.03:1</i></div></div>
+    <div class="sw__i"><div class="sw__chip" style="background:#E4E9F0"></div><div class="sw__m"><b>--divider</b>#E4E9F0<br><i>Hairlines only — never a boundary</i></div></div>
+    <div class="sw__i"><div class="sw__chip" style="background:#F6F8FB"></div><div class="sw__m"><b>--soft</b>#F6F8FB<br><i>Page ground, table head</i></div></div>
+    <div class="sw__i"><div class="sw__chip" style="background:#FFFFFF;box-shadow:inset 0 0 0 1px #E4E9F0"></div><div class="sw__m"><b>--white</b>#FFFFFF<br><i>Cards, inputs, rows</i></div></div>
+  </div></div></div>
+
+  <h3 class="h">Interaction surfaces — admin additions</h3>
+  <div class="stage"><div class="stage__bar"><b>--row-hover --row-selected --disabled-*</b><span>derived from --mist and --soft</span></div>
+  <div class="stage__body"><div class="sw">
+    <div class="sw__i"><div class="sw__chip" style="background:#F2F5FA"></div><div class="sw__m"><b>--row-hover</b>#F2F5FA<br><i>Table row hover</i></div></div>
+    <div class="sw__i"><div class="sw__chip" style="background:#E8EFF9"></div><div class="sw__m"><b>--row-selected</b>#E8EFF9<br><i>Selected row + edge marker</i></div></div>
+    <div class="sw__i"><div class="sw__chip" style="background:#F1F3F7"></div><div class="sw__m"><b>--disabled-surface</b>#F1F3F7<br><i>Disabled fill</i></div></div>
+    <div class="sw__i"><div class="sw__chip" style="background:#6B7683"></div><div class="sw__m"><b>--disabled-ink</b>#6B7683<br><i>Disabled text · 4.16:1</i></div></div>
+    <div class="sw__i"><div class="sw__chip" style="background:rgba(73,117,186,.38)"></div><div class="sw__m"><b>--focus-ring</b>38% blue<br><i>3px ring on light surfaces</i></div></div>
+    <div class="sw__i"><div class="sw__chip" style="background:#2C4C82;box-shadow:inset 0 0 0 3px rgba(217,228,243,.55)"></div><div class="sw__m"><b>--focus-ring-inverse</b><br><i>Ring on the navy sidebar</i></div></div>
+  </div></div></div>
+
+  <h3 class="h">Feedback and the five statuses</h3>
+  <p>The five request statuses from Stage 02 are all drawn from brand hues. Two choices are worth stating:
+    <b><span style="font-family:var(--f-ar)">مؤكد</span> takes the deep navy</b> — it reads as settled rather than
+    as another kind of new — and <b><span style="font-family:var(--f-ar)">ملغي</span> is neutral, not red</b>. A
+    cancelled trip is an ordinary outcome, not a fault; painting a column of them red makes a normal list look like
+    an incident. Red stays reserved for errors and destructive confirmation.</p>
+  <div class="stage"><div class="stage__bar"><b>--st-* --success --warning --error --info</b></div>
+  <div class="stage__body"><div class="sw">
+    <div class="sw__i"><div class="sw__chip" style="background:#EEF3FA;box-shadow:inset 0 0 0 1px rgba(44,76,130,.18)"></div><div class="sw__m"><b>جديد</b>bg #EEF3FA<br><i>ink #2C4C82 · 7.65:1</i></div></div>
+    <div class="sw__i"><div class="sw__chip" style="background:#FBF3E4;box-shadow:inset 0 0 0 1px rgba(143,96,20,.22)"></div><div class="sw__m"><b>قيد المراجعة</b>bg #FBF3E4<br><i>ink #8F6014 · 4.94:1</i></div></div>
+    <div class="sw__i"><div class="sw__chip" style="background:#D9E4F3;box-shadow:inset 0 0 0 1px rgba(34,64,111,.22)"></div><div class="sw__m"><b>مؤكد</b>bg #D9E4F3<br><i>ink #22406F · 8.05:1</i></div></div>
+    <div class="sw__i"><div class="sw__chip" style="background:#EAF5F0;box-shadow:inset 0 0 0 1px rgba(37,107,85,.22)"></div><div class="sw__m"><b>مكتمل</b>bg #EAF5F0<br><i>ink #256B55 · 5.68:1</i></div></div>
+    <div class="sw__i"><div class="sw__chip" style="background:#EFF1F4;box-shadow:inset 0 0 0 1px rgba(71,82,95,.2)"></div><div class="sw__m"><b>ملغي</b>bg #EFF1F4<br><i>ink #47525F · 7.03:1</i></div></div>
+    <div class="sw__i"><div class="sw__chip" style="background:#FBEDEC;box-shadow:inset 0 0 0 1px rgba(165,53,46,.22)"></div><div class="sw__m"><b>error</b>bg #FBEDEC<br><i>ink #A5352E · 5.85:1</i></div></div>
+  </div></div></div>
+</section>
+
+<!-- 03 ================================================================== -->
+<section class="sec" id="s3">
+  <div class="sec__head"><span class="sec__num">03</span><h2 class="sec__title">Contrast ledger</h2></div>
+  <p>Every pairing that ships was measured against WCAG 2.1. Three findings changed the system rather than being
+    noted and ignored.</p>
+
+  <div class="tw"><table class="doc">
+    <thead><tr><th>Finding</th><th>Measured</th><th>Resolution</th></tr></thead>
+    <tbody>
+      <tr><td><b>Warning text on its own tint failed.</b> <span class="mono">#B0791C</span> on <span class="mono">#FBF3E4</span></td><td class="bad">3.40:1</td><td>Badge and alert text uses <span class="mono">#8F6014</span> → <span class="ok">4.94:1</span>. The original hue stays as the marker colour.</td></tr>
+      <tr><td><b>Success and error text on tint fell just short.</b></td><td class="bad">4.44 / 4.49</td><td>Text inks <span class="mono">#256B55</span> and <span class="mono">#A5352E</span> → <span class="ok">5.68 / 5.85</span>.</td></tr>
+      <tr><td><b>The brand focus ring is invisible on the navy sidebar.</b> Blue ring on <span class="mono">#2C4C82</span></td><td class="bad">1.84:1</td><td>Dark surfaces use a light ring, <span class="mono">rgba(217,228,243,.55)</span> → <span class="ok">6.63:1</span>. This is the only inverse token in the system.</td></tr>
+      <tr><td>Input and control boundaries</td><td class="ok">3.03:1</td><td><span class="mono">#8B95A3</span> is the boundary colour. <span class="mono">--divider</span> at 1.22:1 is a hairline only and never outlines a control.</td></tr>
+      <tr><td>Disabled text</td><td class="ok">4.16:1</td><td>Exempt under WCAG, but Stage 02 §23 required it to stay readable, so it does.</td></tr>
+      <tr><td>Primary button, white on <span class="mono">#4975BA</span></td><td class="ok">4.63:1</td><td>Passes AA. Hover deepens to 5.59 and pressed to 10.34 — states never reduce contrast.</td></tr>
+      <tr><td>Body and secondary text</td><td class="ok">15.07 / 5.85</td><td>AAA and AA respectively, unchanged from brand.</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="note">
+    <h4>The greyscale proof</h4>
+    <p>Reduced to luminance, four of the five status hues land within twelve levels of each other — blue 113,
+      amber 126, green 106, slate 101. Colour alone therefore <b>cannot</b> carry status in this product, which is
+      why every badge in §13 pairs its word with a distinct icon shape. The greyscale row there is the test.</p>
+  </div>
+</section>
+
+<!-- 04 ================================================================== -->
+<section class="sec" id="s4">
+  <div class="sec__head"><span class="sec__num">04</span><h2 class="sec__title">Typography</h2></div>
+  <p>Eleven roles, two Arabic faces, three weights. <b>IBM Plex Sans Arabic</b> carries structure — titles, labels,
+    navigation, tables, numbers — because its even rhythm holds at small sizes in a dense row.
+    <b>Cairo</b> carries reading copy, where its wider counters are easier over paragraphs. No role uses a
+    fourth weight, and no role is set below 13px.</p>
+
+  <div class="stage"><div class="stage__bar"><b>type roles</b><span>IBM Plex Sans Arabic 500/600/700 · Cairo 400</span></div>
+  <div class="stage__body"><div class="rtl ty">
+    <div class="ty__r"><p class="t-page">طلبات النقل</p><p class="ty__spec"><b>Page title</b> · 26px / 600 / 1.3<br>Plex Arabic · one per screen</p></div>
+    <div class="ty__r"><p class="t-section">الطلبات التي تحتاج انتباهك</p><p class="ty__spec"><b>Section title</b> · 20px / 600 / 1.35<br>Plex Arabic</p></div>
+    <div class="ty__r"><p class="t-card">تفاصيل الرحلة</p><p class="ty__spec"><b>Card title</b> · 17px / 600 / 1.4<br>Plex Arabic</p></div>
+    <div class="ty__r"><p class="t-body">نقل متخصص وآمن يراعي احتياجات المستفيد من باب المنزل حتى الوصول، مع طاقم مدرب على المرافقة والمساعدة.</p><p class="ty__spec"><b>Body</b> · 16px / 400 / 1.75<br>Cairo · the brand's stated floor</p></div>
+    <div class="ty__r"><p class="t-sec">آخر تعديل بواسطة نورة العتيبي</p><p class="ty__spec"><b>Secondary</b> · 15px / 400 / 1.7<br>Cairo · slate</p></div>
+    <div class="ty__r"><p class="t-label">رقم الجوال</p><p class="ty__spec"><b>Form label</b> · 14px / 500<br>Plex Arabic · always visible</p></div>
+    <div class="ty__r"><p class="t-table">النقل بواسطة الكرسي المتحرك</p><p class="ty__spec"><b>Table cell</b> · 15px / 400 / 1.5<br>Plex Arabic</p></div>
+    <div class="ty__r"><p class="t-nav">المستخدمون والصلاحيات</p><p class="ty__spec"><b>Navigation</b> · 15px / 500<br>Plex Arabic</p></div>
+    <div class="ty__r"><p class="t-help">يُستخدم للتواصل مع العميل وتأكيد الرحلة.</p><p class="ty__spec"><b>Helper</b> · 13px / 400 / 1.6<br>Cairo · slate</p></div>
+    <div class="ty__r"><p class="t-status" style="color:var(--st-review-ink)">قيد المراجعة</p><p class="ty__spec"><b>Status</b> · 13px / 600<br>Plex Arabic · never alone (§13)</p></div>
+    <div class="ty__r"><p class="cell-date" style="font-size:13px">2026-09-14 · 08:30</p><p class="ty__spec"><b>Data / numerals</b> · Plex Mono, tabular<br>Western digits, LTR run inside RTL</p></div>
+  </div></div></div>
+
+  <ul class="list">
+    <li><b>Numerals never switch.</b> The site uses Western digits, so the dashboard does too — dates, times, phone
+      numbers, counts and request numbers all sit in a mono, tabular, left-to-right run inside the Arabic line.</li>
+    <li><b>Line height rises with measure.</b> 1.3 for titles, 1.5 in table cells where rows must stay countable,
+      1.75 for Arabic reading copy where diacritic clearance matters.</li>
+    <li><b>Letter-spacing is never applied to Arabic.</b> The brand's <code>--track-caps</code> exists for uppercase
+      Latin only; tracking Arabic breaks joins.</li>
+  </ul>
+</section>
+
+<!-- 05 ================================================================== -->
+<section class="sec" id="s5">
+  <div class="sec__head"><span class="sec__num">05</span><h2 class="sec__title">Spacing</h2></div>
+  <p>A 4px base. Ten steps, and nothing between them.</p>
+  <div class="stage"><div class="stage__bar"><b>--s1 … --s16</b><span>4px base</span></div>
+  <div class="stage__body"><div class="sp">
+    <div class="sp__r"><span class="sp__n">--s1 · 4px</span><span class="sp__b" style="width:4px"></span><span>icon-to-label, badge internals</span></div>
+    <div class="sp__r"><span class="sp__n">--s2 · 8px</span><span class="sp__b" style="width:8px"></span><span>label-to-control, button gaps</span></div>
+    <div class="sp__r"><span class="sp__n">--s3 · 12px</span><span class="sp__b" style="width:12px"></span><span>table cell padding, control gaps</span></div>
+    <div class="sp__r"><span class="sp__n">--s4 · 16px</span><span class="sp__b" style="width:16px"></span><span>table cell inline padding, card gaps</span></div>
+    <div class="sp__r"><span class="sp__n">--s5 · 20px</span><span class="sp__b" style="width:20px"></span><span>card padding, field stacking</span></div>
+    <div class="sp__r"><span class="sp__n">--s6 · 24px</span><span class="sp__b" style="width:24px"></span><span>modal padding, group separation</span></div>
+    <div class="sp__r"><span class="sp__n">--s8 · 32px</span><span class="sp__b" style="width:32px"></span><span>section spacing</span></div>
+    <div class="sp__r"><span class="sp__n">--s10 · 40px</span><span class="sp__b" style="width:40px"></span><span>page margin (tablet)</span></div>
+    <div class="sp__r"><span class="sp__n">--s12 · 48px</span><span class="sp__b" style="width:48px"></span><span>major section breaks, empty states</span></div>
+    <div class="sp__r"><span class="sp__n">--s16 · 64px</span><span class="sp__b" style="width:64px"></span><span>page margin (wide desktop)</span></div>
+  </div></div></div>
+  <ul class="list">
+    <li><b>Page margins</b> — 16px mobile, 24px tablet, 32–64px desktop, fluid between.</li>
+    <li><b>Card padding</b> — 20px, dropping to 16px on mobile. Stat cards keep 20px so the figure never crowds its label.</li>
+    <li><b>Table rows</b> — 12px block padding gives a 48px row: countable at a glance, and still a comfortable touch target.</li>
+    <li><b>Form fields</b> — 8px label-to-control, 20px between fields. Related fields group at 12px, and the tighter
+      gap is the only thing signalling the group — no boxes inside boxes.</li>
+  </ul>
+</section>
+
+<!-- 06 ================================================================== -->
+<section class="sec" id="s6">
+  <div class="sec__head"><span class="sec__num">06</span><h2 class="sec__title">Grid &amp; layout</h2></div>
+  <div class="tw"><table class="doc">
+    <thead><tr><th>Tier</th><th>Range</th><th>Shell</th><th>Content grid</th><th>Margin</th></tr></thead>
+    <tbody>
+      <tr><td><b>Desktop</b></td><td class="mono">≥1080px</td><td>Persistent 248px sidebar on the right; content fills the rest to a 1440px cap.</td><td>12 columns, 24px gutter</td><td class="mono">32–64px</td></tr>
+      <tr><td><b>Tablet</b></td><td class="mono">768–1079px</td><td>Sidebar collapses to a 72px icon rail; it expands over the content on demand rather than pushing it.</td><td>8 columns, 20px gutter</td><td class="mono">24px</td></tr>
+      <tr><td><b>Mobile</b></td><td class="mono">≤767px</td><td>No sidebar. A bottom bar carries the four most-used modules; the rest live behind the menu.</td><td>4 columns, 16px gutter</td><td class="mono">16px</td></tr>
+    </tbody>
+  </table></div>
+  <ul class="list">
+    <li><b>Alignment is one rule:</b> everything starts on the right edge of the content column. Labels, titles, first
+      table columns and card contents share that edge, so the eye tracks one line down the screen.</li>
+    <li><b>Content caps at 1440px</b>, and reading copy caps at 70 characters inside it. A settings form on a 27-inch
+      monitor stays a column, not a stretched band.</li>
+    <li><b>The rail expands over content, never beside it</b> — on a tablet, pushing the layout would reflow a table
+      mid-task.</li>
+  </ul>
+</section>
+
+<!-- 07 ================================================================== -->
+<section class="sec" id="s7">
+  <div class="sec__head"><span class="sec__num">07</span><h2 class="sec__title">Radius</h2></div>
+  <div class="stage"><div class="stage__bar"><b>--r-xs --r-control --r-card --r-modal --r-pill</b></div>
+  <div class="stage__body"><div class="demo-grid">
+    <div class="demo-box" style="border-radius:3px">3px · --r-xs<br>checkbox, focus</div>
+    <div class="demo-box" style="border-radius:8px">8px · --r-control<br>buttons, inputs, select</div>
+    <div class="demo-box" style="border-radius:12px">12px · --r-card<br>cards, tables, alerts</div>
+    <div class="demo-box" style="border-radius:16px">16px · --r-modal<br>modals, drawers</div>
+    <div class="demo-box" style="border-radius:999px">pill · --r-pill<br>badges, toggles, counts</div>
+  </div></div></div>
+  <p>One ramp, no exceptions. A control is 8, a container is 12, an overlay is 16, and anything that states a
+    status or a count is a pill. Nesting always steps <b>down</b>: a 12px card holds 8px controls, never the reverse.</p>
+</section>
+
+<!-- 08 ================================================================== -->
+<section class="sec" id="s8">
+  <div class="sec__head"><span class="sec__num">08</span><h2 class="sec__title">Depth</h2></div>
+  <p>Four levels, all built from one shadow colour — the ink at low opacity, so shadows read as the page's own
+    neutral rather than as grey haze. Borders do most of the separating; shadow only signals <b>which layer</b>
+    something is on.</p>
+  <div class="stage stage--ground"><div class="stage__bar"><b>--sh-card --sh-raised --sh-dropdown --sh-modal</b></div>
+  <div class="stage__body"><div class="demo-grid">
+    <div class="demo-box d-card" style="border-radius:12px">--sh-card<br>resting cards, rows</div>
+    <div class="demo-box d-raised" style="border-radius:12px">--sh-raised<br>hovered card, header</div>
+    <div class="demo-box d-drop" style="border-radius:12px">--sh-dropdown<br>menus, toasts, popovers</div>
+    <div class="demo-box d-modal" style="border-radius:16px">--sh-modal<br>modals, drawers</div>
+  </div></div></div>
+  <ul class="list">
+    <li><b>Borders separate; shadows elevate.</b> A card on the page ground gets a 1px divider and almost no shadow.
+      Only things that float above the page — menus, toasts, modals — carry real depth.</li>
+    <li><b>No gradients, no glass, no glow.</b> The sidebar is flat navy; the header is white with a hairline.</li>
+    <li><b>The scrim is <span class="mono">rgba(30,39,51,.42)</span></b> — the ink, not black, so the dimmed page keeps its
+      colour temperature.</li>
+  </ul>
+</section>
+
+<!-- 09 ================================================================== -->
+<section class="sec" id="s9">
+  <div class="sec__head"><span class="sec__num">09</span><h2 class="sec__title">Icons</h2></div>
+  <p>One outline set, drawn for this product: 24px canvas, <b>1.75px stroke</b>, round caps and joins, rendered at
+    20px in navigation and buttons and 16px inside badges and dense rows. Nothing decorative, nothing filled except
+    the deliberate solid dots that make three status marks distinguishable in greyscale.</p>
+
+  <div class="stage"><div class="stage__bar"><b>.i</b><span>24 canvas · 1.75 stroke · currentColor</span></div>
+  <div class="stage__body"><div class="icongrid">
+    <figure><svg class="i i--lg"><use href="#ic-home"/></svg><figcaption>home<br>الرئيسية</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-request"/></svg><figcaption>request<br>طلبات النقل</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-users"/></svg><figcaption>users<br>العملاء</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-service"/></svg><figcaption>service<br>الخدمات</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-content"/></svg><figcaption>content<br>المحتوى</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-settings"/></svg><figcaption>settings<br>الإعدادات</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-shield"/></svg><figcaption>shield<br>الصلاحيات</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-report"/></svg><figcaption>report<br>التقارير</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-search"/></svg><figcaption>search</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-filter"/></svg><figcaption>filter</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-plus"/></svg><figcaption>plus</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-edit"/></svg><figcaption>edit</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-trash"/></svg><figcaption>delete</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-phone"/></svg><figcaption>call</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-chat"/></svg><figcaption>message</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-calendar"/></svg><figcaption>date</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-clock"/></svg><figcaption>time</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-newdot"/></svg><figcaption>new</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-checkcircle"/></svg><figcaption>confirmed</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-checks"/></svg><figcaption>completed</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-xcircle"/></svg><figcaption>cancelled</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-bell"/></svg><figcaption>notifications</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-user"/></svg><figcaption>account</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-menu"/></svg><figcaption>menu</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-inbox"/></svg><figcaption>empty</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-upload"/></svg><figcaption>upload</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-alert"/></svg><figcaption>warning</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-info"/></svg><figcaption>info</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-dots"/></svg><figcaption>more</figcaption></figure>
+    <figure><svg class="i i--lg"><use href="#ic-arrow"/></svg><figcaption>arrow · mirrors</figcaption></figure>
+  </div></div></div>
+
+  <div class="note">
+    <h4>RTL rule: only direction mirrors</h4>
+    <p><b>Mirror</b> anything that points — arrows, chevrons, the return control, progress direction. <b>Never mirror</b>
+      anything that represents an object or a reading of the world: the clock, the phone, the calendar, the checkmark,
+      the person. A mirrored checkmark reads as a mistake; a mirrored clock reads as a broken clock.</p>
+    <p>Icons in navigation and buttons take <code>currentColor</code>, so an active or disabled state changes the label
+      and the icon together and they can never drift apart.</p>
+  </div>
+</section>
+
+<!-- 10 ================================================================== -->
+<section class="sec" id="s10">
+  <div class="sec__head"><span class="sec__num">10</span><h2 class="sec__title">Buttons</h2></div>
+  <p>Four variants. Exactly one primary per screen region — if two things look primary, neither is.
+    Minimum height is 40px on pointer devices and 44px on touch, matching the brand's <code>--min-tap</code>.</p>
+
+  <div class="stage"><div class="stage__bar"><b>.btn</b><span>default · hover · focus · pressed · disabled</span></div>
+  <div class="stage__body"><div class="rtl col" style="gap:var(--s5)">
+    <div><p class="cap">Primary — the one main action</p><div class="row">
+      <button class="btn btn--primary"><svg class="i i--sm"><use href="#ic-plus"/></svg>تسجيل طلب</button>
+      <button class="btn btn--primary" style="background:var(--blue-hover);border-color:var(--blue-hover)">Hover</button>
+      <button class="btn btn--primary is-focus">Focus</button>
+      <button class="btn btn--primary is-pressed">Pressed</button>
+      <button class="btn btn--primary" disabled>Disabled</button>
+    </div></div>
+    <div><p class="cap">Secondary — supporting action</p><div class="row">
+      <button class="btn btn--secondary">حفظ التغييرات</button>
+      <button class="btn btn--secondary" style="background:var(--mist);border-color:var(--navy)">Hover</button>
+      <button class="btn btn--secondary is-focus">Focus</button>
+      <button class="btn btn--secondary is-pressed">Pressed</button>
+      <button class="btn btn--secondary" disabled>Disabled</button>
+    </div></div>
+    <div><p class="cap">Ghost — low emphasis, and every table row action</p><div class="row">
+      <button class="btn btn--ghost">تراجع</button>
+      <button class="btn btn--ghost" style="background:var(--primary-subtle)">Hover</button>
+      <button class="btn btn--ghost is-focus">Focus</button>
+      <button class="btn btn--ghost is-pressed">Pressed</button>
+      <button class="btn btn--ghost" disabled>Disabled</button>
+    </div></div>
+    <div><p class="cap">Destructive — outlined at rest, filled only on commitment</p><div class="row">
+      <button class="btn btn--danger"><svg class="i i--sm"><use href="#ic-x"/></svg>إلغاء الطلب</button>
+      <button class="btn btn--danger" style="background:var(--error);color:#fff;border-color:var(--error)">Hover</button>
+      <button class="btn btn--danger is-focus">Focus</button>
+      <button class="btn btn--danger is-pressed">Pressed</button>
+      <button class="btn btn--danger" disabled>Disabled</button>
+    </div></div>
+    <div><p class="cap">Sizes — 32 / 40 / 44px, plus the square icon button</p><div class="row">
+      <button class="btn btn--secondary btn--sm">صغير</button>
+      <button class="btn btn--primary">قياسي</button>
+      <button class="btn btn--primary btn--lg">كبير · لمس</button>
+      <button class="btn btn--secondary btn--icon" aria-label="خيارات"><svg class="i"><use href="#ic-dots"/></svg></button>
+    </div></div>
+  </div></div></div>
+
+  <ul class="list">
+    <li><b>Destructive is outlined, not filled.</b> A red block is the loudest thing on a screen; at rest it should not
+      outrank the safe primary action. It fills red only on hover and press — at the moment of commitment.</li>
+    <li><b>Icons lead the label</b> in RTL (to its right) and are always 16px against 15px text.</li>
+    <li><b>Disabled buttons keep their shape</b> and never carry a tooltip as their only explanation — if a control is
+      unavailable, the reason is on the screen (Stage 02 §16).</li>
+  </ul>
+</section>
+
+<!-- 11 ================================================================== -->
+<section class="sec" id="s11">
+  <div class="sec__head"><span class="sec__num">11</span><h2 class="sec__title">Form controls</h2></div>
+  <p>Every control is 44px tall, has a visible label above it, and shows its error beside the field it belongs to.
+    Boundaries use <span class="mono">#8B95A3</span> so a control's edge is discernible at 3:1 — the hairline
+    divider is not strong enough to outline anything interactive.</p>
+
+  <div class="stage"><div class="stage__bar"><b>.field .ctl</b><span>label · control · helper · error</span></div>
+  <div class="stage__body"><div class="rtl" style="display:grid;gap:var(--s6);grid-template-columns:repeat(auto-fit,minmax(17rem,1fr))">
+
+    <div class="field">
+      <label class="field__label" for="d1">اسم العميل <span class="field__req">(مطلوب)</span></label>
+      <input class="ctl" id="d1" type="text" value="عبدالله الشهري">
+      <p class="field__help">كما يُنطق في المكالمة.</p>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="d2">رقم الجوال <span class="field__req">(مطلوب)</span></label>
+      <input class="ctl is-focus" id="d2" type="text" value="0535544352" style="direction:ltr;text-align:left">
+      <p class="field__help">الحقل الأول عند تسجيل الطلب — يتعرّف على العميل المسجّل.</p>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="d3">بحث</label>
+      <span class="ctl-wrap ctl-wrap--lead">
+        <svg class="i ctl-wrap__i ctl-wrap__i--lead"><use href="#ic-search"/></svg>
+        <input class="ctl" id="d3" type="search" placeholder="الاسم أو رقم الجوال أو رقم الطلب">
+      </span>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="d4">الخدمة المطلوبة</label>
+      <span class="ctl-wrap ctl-wrap--trail">
+        <svg class="i ctl-wrap__i ctl-wrap__i--trail" style="transform:translateY(-50%) rotate(90deg)"><use href="#ic-chevron"/></svg>
+        <select class="ctl" id="d4">
+          <option>النقل بواسطة الكرسي المتحرك</option>
+          <option>النقل بواسطة الكرسي الكهربائي</option>
+          <option>النقل بواسطة السرير الطبي</option>
+          <option>خدمة مساعد السائق</option>
+          <option>النقل اليومي</option>
+          <option>النقل إلى المستشفيات والمراكز الطبية</option>
+          <option>التنقل للمناسبات الاجتماعية</option>
+        </select>
+      </span>
+      <p class="field__help">الخدمات المعتمدة فقط — لا يُكتب نص حر.</p>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="d5">تاريخ الرحلة</label>
+      <span class="ctl-wrap ctl-wrap--trail">
+        <svg class="i ctl-wrap__i ctl-wrap__i--trail"><use href="#ic-calendar"/></svg>
+        <input class="ctl" id="d5" type="text" value="2026-09-14" style="direction:ltr;text-align:left">
+      </span>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="d6">وقت الرحلة</label>
+      <span class="ctl-wrap ctl-wrap--trail">
+        <svg class="i ctl-wrap__i ctl-wrap__i--trail"><use href="#ic-clock"/></svg>
+        <input class="ctl" id="d6" type="text" value="08:30" style="direction:ltr;text-align:left">
+      </span>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="d7">رقم الجوال <span class="field__req">(مطلوب)</span></label>
+      <input class="ctl is-error" id="d7" type="text" value="05355" aria-describedby="e7" style="direction:ltr;text-align:left">
+      <p class="field__err" id="e7"><svg class="i i--sm"><use href="#ic-alert"/></svg>الرقم غير مكتمل — أدخل 10 أرقام تبدأ بـ 05.</p>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="d8">رقم الطلب</label>
+      <input class="ctl" id="d8" type="text" value="REQ-2026-0148" disabled style="direction:ltr;text-align:left">
+      <p class="field__help">يُنشأ تلقائياً ولا يمكن تعديله.</p>
+    </div>
+
+    <div class="field" style="max-width:none;grid-column:1/-1">
+      <label class="field__label" for="d9">ملاحظات</label>
+      <textarea class="ctl" id="d9" rows="3">يحتاج المستفيد إلى مساعد عند النزول من المنزل. المرافق سيكون بصحبته.</textarea>
+      <p class="field__help">تُضاف الملاحظة باسم من كتبها وتاريخها.</p>
+    </div>
+  </div>
+
+  <div class="rtl" style="margin-top:var(--s6);display:grid;gap:var(--s5);grid-template-columns:repeat(auto-fit,minmax(15rem,1fr))">
+    <div><p class="cap">Checkbox</p><div class="col" style="gap:0">
+      <span class="choice is-on"><span class="choice__box"><svg class="i i--sm"><use href="#ic-check"/></svg></span>إظهار على الموقع</span>
+      <span class="choice"><span class="choice__box"></span>إخفاء مؤقتاً</span>
+      <span class="choice is-focus is-on"><span class="choice__box"><svg class="i i--sm"><use href="#ic-check"/></svg></span>حالة التركيز</span>
+      <span class="choice is-disabled"><span class="choice__box"></span>غير متاح</span>
+    </div></div>
+    <div><p class="cap">Radio</p><div class="col" style="gap:0">
+      <span class="choice is-on"><span class="choice__box choice__box--radio"><span class="dot"></span></span>هاتف</span>
+      <span class="choice"><span class="choice__box choice__box--radio"></span>واتساب</span>
+      <span class="choice is-disabled"><span class="choice__box choice__box--radio"></span>الموقع الإلكتروني</span>
+    </div></div>
+    <div><p class="cap">Toggle — instant, not a saved field</p><div class="col" style="gap:0">
+      <span class="toggle is-on"><span class="toggle__t"></span>الخدمة ظاهرة<span class="toggle__state">مفعّل</span></span>
+      <span class="toggle"><span class="toggle__t"></span>الخدمة مخفية<span class="toggle__state">غير مفعّل</span></span>
+    </div></div>
+    <div><p class="cap">Upload</p>
+      <div class="upload"><svg class="i i--lg" style="color:var(--navy)"><use href="#ic-upload"/></svg>
+        <strong>اسحب الصورة هنا أو اخترها</strong><span>PNG أو JPG · حتى 2 ميجابايت</span></div>
+    </div>
+  </div>
+  </div></div>
+
+  <ul class="list">
+    <li><b>The label never becomes a placeholder.</b> Placeholders are examples of the expected value, and they
+      disappear exactly when the user needs the label most.</li>
+    <li><b>Required is a word, not an asterisk</b> — <span style="font-family:var(--f-ar)">(مطلوب)</span> beside the label.</li>
+    <li><b>Errors carry an icon as well as red</b>, sit under their field, and are tied to it for assistive technology.</li>
+    <li><b>Latin-content fields run LTR inside the RTL form</b> — phone, date, time, request number — while their labels
+      stay Arabic and right-aligned. The value's direction follows the value, not the page.</li>
+    <li><b>A toggle acts immediately; a checkbox waits for save.</b> That distinction is the reason both exist, and it
+      is never blurred.</li>
+  </ul>
+</section>
+
+<!-- 12 ================================================================== -->
+<section class="sec" id="s12">
+  <div class="sec__head"><span class="sec__num">12</span><h2 class="sec__title">Cards</h2></div>
+  <p>One card. Four uses. The variants differ by what they hold, not by how they are styled — no section gets a
+    decorative treatment of its own.</p>
+
+  <div class="stage stage--ground"><div class="stage__bar"><b>.card .card--stat .card--accent .activity</b></div>
+  <div class="stage__body"><div class="rtl col" style="gap:var(--s5)">
+    <div><p class="cap">Statistic — the figure is the point, so it leads</p>
+    <div class="cards">
+      <div class="card card--stat"><span class="stat__l"><svg class="i i--sm"><use href="#ic-newdot"/></svg>طلبات جديدة</span><span class="stat__n">7</span><span class="stat__m">بانتظار المراجعة</span></div>
+      <div class="card card--stat"><span class="stat__l"><svg class="i i--sm"><use href="#ic-clock"/></svg>قيد المراجعة</span><span class="stat__n">3</span><span class="stat__m">تجاوزت 24 ساعة</span></div>
+      <div class="card card--stat"><span class="stat__l"><svg class="i i--sm"><use href="#ic-checkcircle"/></svg>رحلات اليوم</span><span class="stat__n">12</span><span class="stat__m">مؤكدة</span></div>
+      <div class="card card--stat"><span class="stat__l"><svg class="i i--sm"><use href="#ic-users"/></svg>عملاء جدد</span><span class="stat__n">5</span><span class="stat__m">هذا الأسبوع</span></div>
+    </div></div>
+
+    <div><p class="cap">Information group · accented card · activity list</p>
+    <div style="display:grid;gap:var(--s4);grid-template-columns:repeat(auto-fit,minmax(17rem,1fr))">
+      <div class="card">
+        <div class="card__head"><h4 class="t-card">معلومات الرحلة</h4><span class="badge badge--confirmed"><svg class="i"><use href="#ic-checkcircle"/></svg>مؤكد</span></div>
+        <div class="card__body">
+          <p class="t-sec" style="margin:0">من: حي السليمانية، الرياض</p>
+          <p class="t-sec" style="margin:0">إلى: مستشفى الملك فيصل التخصصي</p>
+          <p class="cell-date">2026-09-14 · 08:30</p>
+        </div>
+      </div>
+      <div class="card card--accent">
+        <div class="card__head"><h4 class="t-card">يحتاج انتباهك</h4></div>
+        <p class="t-sec" style="margin:0">3 طلبات في «قيد المراجعة» منذ أكثر من يوم.</p>
+        <div style="margin-top:var(--s4)"><button class="btn btn--secondary btn--sm">عرض الطلبات<svg class="i i--sm i--flip"><use href="#ic-arrow"/></svg></button></div>
+      </div>
+      <div class="card">
+        <div class="card__head"><h4 class="t-card">آخر النشاطات</h4></div>
+        <div class="activity"><span class="activity__i"><svg class="i i--sm"><use href="#ic-checkcircle"/></svg></span><div><p class="activity__t">تم تأكيد الطلب REQ-2026-0148</p><p class="activity__m">نورة العتيبي · 09:14</p></div></div>
+        <div class="activity"><span class="activity__i"><svg class="i i--sm"><use href="#ic-edit"/></svg></span><div><p class="activity__t">تعديل محتوى «من نحن»</p><p class="activity__m">سارة القحطاني · 08:40</p></div></div>
+      </div>
+    </div></div>
+  </div></div></div>
+  <p style="margin-top:var(--s3)"><b>Rules.</b> A card is a 1px divider, 12px radius, 20px padding and the faintest
+    shadow. It gains a 3px leading rule only when it is the one thing on screen asking for action. Cards never nest,
+    and a card never sits inside a card to create a section — spacing does that job.</p>
+  <p class="t-help" style="font-family:var(--f-lat);color:var(--slate)">Figures and names throughout this document are illustrative examples, not live data.</p>
+</section>
+
+<!-- 13 ================================================================== -->
+<section class="sec" id="s13">
+  <div class="sec__head"><span class="sec__num">13</span><h2 class="sec__title">Status badges</h2></div>
+  <p>The five approved statuses. Each pairs its Arabic word with a <b>distinct icon silhouette</b> — a ringed dot, a
+    clock, a single check in a ring, a double check, a cross in a ring. The shapes are different enough to be told
+    apart at 14px without any colour at all.</p>
+
+  <div class="stage"><div class="stage__bar"><b>.badge</b><span>word + shape + colour, in that order of importance</span></div>
+  <div class="stage__body"><div class="rtl col" style="gap:var(--s5)">
+    <div><p class="cap">In colour</p><div class="row">
+      <span class="badge badge--new"><svg class="i"><use href="#ic-newdot"/></svg>جديد</span>
+      <span class="badge badge--review"><svg class="i"><use href="#ic-clock"/></svg>قيد المراجعة</span>
+      <span class="badge badge--confirmed"><svg class="i"><use href="#ic-checkcircle"/></svg>مؤكد</span>
+      <span class="badge badge--done"><svg class="i"><use href="#ic-checks"/></svg>مكتمل</span>
+      <span class="badge badge--cancel"><svg class="i"><use href="#ic-xcircle"/></svg>ملغي</span>
+    </div></div>
+    <div><p class="cap">The same row in greyscale — the accessibility test, not a decoration</p><div class="row greyproof">
+      <span class="badge badge--new"><svg class="i"><use href="#ic-newdot"/></svg>جديد</span>
+      <span class="badge badge--review"><svg class="i"><use href="#ic-clock"/></svg>قيد المراجعة</span>
+      <span class="badge badge--confirmed"><svg class="i"><use href="#ic-checkcircle"/></svg>مؤكد</span>
+      <span class="badge badge--done"><svg class="i"><use href="#ic-checks"/></svg>مكتمل</span>
+      <span class="badge badge--cancel"><svg class="i"><use href="#ic-xcircle"/></svg>ملغي</span>
+    </div></div>
+  </div></div></div>
+
+  <div class="tw"><table class="doc">
+    <thead><tr><th>Status</th><th>Means</th><th>Shape</th><th>Colour reasoning</th></tr></thead>
+    <tbody>
+      <tr><td><b>جديد</b></td><td>Recorded, not yet looked at</td><td>Ringed solid dot</td><td>Brand blue — unread, and the one status the dashboard counts.</td></tr>
+      <tr><td><b>قيد المراجعة</b></td><td>Being checked and arranged</td><td>Clock</td><td>Amber — in hand, time passing. The only status that can age badly.</td></tr>
+      <tr><td><b>مؤكد</b></td><td>Agreed with the customer</td><td>Check in a ring</td><td>Deep navy — settled. Distinct from blue "new" and from green "done".</td></tr>
+      <tr><td><b>مكتمل</b></td><td>Trip carried out · final</td><td>Double check</td><td>Success green. The double check is the visual step beyond مؤكد.</td></tr>
+      <tr><td><b>ملغي</b></td><td>Cancelled · final</td><td>Cross in a ring</td><td><b>Neutral, not red.</b> A cancelled trip is a valid outcome, not an error.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 14 ================================================================== -->
+<section class="sec" id="s14">
+  <div class="sec__head"><span class="sec__num">14</span><h2 class="sec__title">Tables</h2></div>
+  <p>The dashboard's densest surface, and the one most easily got wrong in Arabic. Columns read right to left with
+    the identifying column first on the right; every numeric or Latin value keeps its own LTR run.</p>
+
+  <div class="stage"><div class="stage__bar"><b>.tbl</b><span>header · row · hover · selected · status · actions · pagination</span></div>
+  <div class="stage__body stage__body--flush"><div class="rtl">
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th>رقم الطلب</th><th>العميل</th><th>الخدمة</th><th>تاريخ الرحلة</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+      <tbody>
+        <tr><td><span class="cell-id">REQ-2026-0148</span></td>
+          <td><span class="cell-name">عبدالله الشهري<span class="cell-sub">0535544352</span></span></td>
+          <td>النقل إلى المستشفيات والمراكز الطبية</td><td><span class="cell-date">2026-09-14</span></td>
+          <td><span class="badge badge--new"><svg class="i"><use href="#ic-newdot"/></svg>جديد</span></td>
+          <td><div class="cell-act">
+            <button class="iconbtn" aria-label="اتصال"><svg class="i"><use href="#ic-phone"/></svg></button>
+            <button class="iconbtn" aria-label="واتساب"><svg class="i"><use href="#ic-chat"/></svg></button>
+            <button class="iconbtn" aria-label="خيارات"><svg class="i"><use href="#ic-dots"/></svg></button></div></td></tr>
+        <tr class="is-selected"><td><span class="cell-id">REQ-2026-0147</span></td>
+          <td><span class="cell-name">منيرة الدوسري<span class="cell-sub">0501122334</span></span></td>
+          <td>النقل بواسطة الكرسي المتحرك</td><td><span class="cell-date">2026-09-14</span></td>
+          <td><span class="badge badge--confirmed"><svg class="i"><use href="#ic-checkcircle"/></svg>مؤكد</span></td>
+          <td><div class="cell-act">
+            <button class="iconbtn" aria-label="اتصال"><svg class="i"><use href="#ic-phone"/></svg></button>
+            <button class="iconbtn" aria-label="واتساب"><svg class="i"><use href="#ic-chat"/></svg></button>
+            <button class="iconbtn" aria-label="خيارات"><svg class="i"><use href="#ic-dots"/></svg></button></div></td></tr>
+        <tr><td><span class="cell-id">REQ-2026-0146</span></td>
+          <td><span class="cell-name">فهد العنزي<span class="cell-sub">0559988776</span></span></td>
+          <td>خدمة مساعد السائق</td><td><span class="cell-date">2026-09-13</span></td>
+          <td><span class="badge badge--review"><svg class="i"><use href="#ic-clock"/></svg>قيد المراجعة</span></td>
+          <td><div class="cell-act">
+            <button class="iconbtn" aria-label="اتصال"><svg class="i"><use href="#ic-phone"/></svg></button>
+            <button class="iconbtn" aria-label="واتساب"><svg class="i"><use href="#ic-chat"/></svg></button>
+            <button class="iconbtn" aria-label="خيارات"><svg class="i"><use href="#ic-dots"/></svg></button></div></td></tr>
+        <tr><td><span class="cell-id">REQ-2026-0145</span></td>
+          <td><span class="cell-name">سارة القحطاني<span class="cell-sub">0533344556</span></span></td>
+          <td>النقل اليومي</td><td><span class="cell-date">2026-09-12</span></td>
+          <td><span class="badge badge--done"><svg class="i"><use href="#ic-checks"/></svg>مكتمل</span></td>
+          <td><div class="cell-act">
+            <button class="iconbtn" aria-label="اتصال"><svg class="i"><use href="#ic-phone"/></svg></button>
+            <button class="iconbtn" aria-label="واتساب"><svg class="i"><use href="#ic-chat"/></svg></button>
+            <button class="iconbtn" aria-label="خيارات"><svg class="i"><use href="#ic-dots"/></svg></button></div></td></tr>
+        <tr><td><span class="cell-id">REQ-2026-0144</span></td>
+          <td><span class="cell-name">خالد المطيري<span class="cell-sub">0544455667</span></span></td>
+          <td>التنقل للمناسبات الاجتماعية</td><td><span class="cell-date">2026-09-11</span></td>
+          <td><span class="badge badge--cancel"><svg class="i"><use href="#ic-xcircle"/></svg>ملغي</span></td>
+          <td><div class="cell-act">
+            <button class="iconbtn" aria-label="اتصال"><svg class="i"><use href="#ic-phone"/></svg></button>
+            <button class="iconbtn" aria-label="واتساب"><svg class="i"><use href="#ic-chat"/></svg></button>
+            <button class="iconbtn" aria-label="خيارات"><svg class="i"><use href="#ic-dots"/></svg></button></div></td></tr>
+      </tbody>
+    </table></div>
+    <div class="pager">
+      <span class="pager__c">عرض 1–5 من 34 طلباً</span>
+      <span class="pager__n">
+        <button class="pager__b" disabled aria-label="السابق"><svg class="i i--sm"><use href="#ic-chevron"/></svg></button>
+        <button class="pager__b is-current">1</button><button class="pager__b">2</button>
+        <button class="pager__b">3</button><button class="pager__b">…</button><button class="pager__b">7</button>
+        <button class="pager__b" aria-label="التالي"><svg class="i i--sm i--flip"><use href="#ic-chevron"/></svg></button>
+      </span>
+    </div>
+  </div></div></div>
+
+  <h3 class="h">Empty table, and the mobile transformation</h3>
+  <div class="row row--top" style="align-items:stretch">
+    <div class="stage" style="flex:1 1 20rem;margin:0"><div class="stage__bar"><b>table · empty</b></div>
+      <div class="stage__body stage__body--flush"><div class="rtl">
+        <div class="tbl-wrap"><table class="tbl" style="min-width:0">
+          <thead><tr><th>رقم الطلب</th><th>العميل</th><th>الحالة</th></tr></thead></table></div>
+        <div class="empty" style="padding:var(--s10) var(--s5)">
+          <span class="empty__ic"><svg class="i i--lg"><use href="#ic-search"/></svg></span>
+          <h4 class="empty__t">لا توجد نتائج مطابقة</h4>
+          <p class="empty__b">لا يوجد طلب يطابق التصفية الحالية. جرّب توسيع الفترة أو إزالة التصفية.</p>
+          <button class="btn btn--secondary">إعادة تعيين التصفية</button>
+        </div>
+      </div></div>
+    </div>
+    <div class="stage stage--ground" style="flex:0 1 25rem;margin:0"><div class="stage__bar"><b>.reccard</b><span>≤767px — the table becomes cards</span></div>
+      <div class="stage__body"><div class="rtl">
+        <div class="reccard">
+          <div class="reccard__top">
+            <div><p class="reccard__n">عبدالله الشهري</p><p class="reccard__s">النقل إلى المستشفيات والمراكز الطبية</p></div>
+            <span class="badge badge--new"><svg class="i"><use href="#ic-newdot"/></svg>جديد</span>
+          </div>
+          <div class="reccard__meta"><span>تاريخ الرحلة <b><span class="cell-date">2026-09-14</span></b></span><span>الوقت <b><span class="cell-date">08:30</span></b></span></div>
+          <div class="reccard__acts">
+            <button class="btn btn--secondary btn--sm"><svg class="i i--sm"><use href="#ic-phone"/></svg>اتصال</button>
+            <button class="btn btn--secondary btn--sm"><svg class="i i--sm"><use href="#ic-chat"/></svg>واتساب</button>
+          </div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <ul class="list">
+    <li><b>48px rows</b> — 12px block padding on 15px text. Countable, and a comfortable touch target.</li>
+    <li><b>The selected row is marked twice</b> — a tint <i>and</i> a 3px rule on its leading (right) edge — so selection
+      survives greyscale like everything else.</li>
+    <li><b>Row actions are ghost icon buttons</b> that stay visible rather than appearing on hover; hover-only actions
+      do not exist on touch.</li>
+    <li><b>The two empties are different components</b> — "nothing matched these filters" offers a reset, while
+      "nothing here yet" offers creation (§19). They are never interchanged.</li>
+    <li><b>Below 768px the table becomes cards</b>, keeping name, service, trip date and status, and promoting call and
+      WhatsApp to full controls — the priority order set in Stage 02 §22.</li>
+  </ul>
+</section>
+
+<!-- 15 ================================================================== -->
+<section class="sec" id="s15">
+  <div class="sec__head"><span class="sec__num">15</span><h2 class="sec__title">Navigation</h2></div>
+  <p>Navy carries the sidebar — the brand's deepest colour, used once, at the edge of the screen, so the working
+    area stays white and calm. The active item inverts to a white pill with a blue leading rule: position, weight,
+    fill and a marker, four signals rather than a colour change.</p>
+
+  <div class="row row--top">
+    <div class="stage stage--ground" style="margin:0"><div class="stage__bar"><b>.side</b><span>desktop · 248px</span></div>
+      <div class="stage__body"><div class="rtl"><nav class="side">
+        <div class="side__brand"><span class="side__mark">ع</span><span class="side__name">عون الدرب<span>لوحة التحكم</span></span></div>
+        <a class="navitem is-active" href="#s15"><svg class="i"><use href="#ic-home"/></svg>الرئيسية</a>
+        <a class="navitem" href="#s15"><svg class="i"><use href="#ic-request"/></svg>طلبات النقل<span class="navitem__count">7</span></a>
+        <a class="navitem" href="#s15"><svg class="i"><use href="#ic-users"/></svg>العملاء</a>
+        <p class="side__grp">الموقع الإلكتروني</p>
+        <a class="navitem" href="#s15"><svg class="i"><use href="#ic-service"/></svg>الخدمات</a>
+        <a class="navitem" href="#s15"><svg class="i"><use href="#ic-content"/></svg>المحتوى</a>
+        <p class="side__grp">النظام</p>
+        <a class="navitem" href="#s15"><svg class="i"><use href="#ic-settings"/></svg>الإعدادات</a>
+        <a class="navitem" href="#s15"><svg class="i"><use href="#ic-shield"/></svg>المستخدمون والصلاحيات</a>
+        <a class="navitem" href="#s15"><svg class="i"><use href="#ic-report"/></svg>التقارير</a>
+      </nav></div></div>
+    </div>
+    <div class="col" style="flex:1 1 18rem">
+      <div class="stage stage--ground" style="margin:0"><div class="stage__bar"><b>.side--rail</b><span>tablet · 72px</span></div>
+        <div class="stage__body"><div class="rtl"><nav class="side side--rail">
+          <a class="navitem is-active" href="#s15" aria-label="الرئيسية"><svg class="i"><use href="#ic-home"/></svg></a>
+          <a class="navitem" href="#s15" aria-label="طلبات النقل"><svg class="i"><use href="#ic-request"/></svg></a>
+          <a class="navitem" href="#s15" aria-label="العملاء"><svg class="i"><use href="#ic-users"/></svg></a>
+          <a class="navitem" href="#s15" aria-label="الخدمات"><svg class="i"><use href="#ic-service"/></svg></a>
+          <a class="navitem" href="#s15" aria-label="المحتوى"><svg class="i"><use href="#ic-content"/></svg></a>
+        </nav></div></div>
+      </div>
+      <div class="stage" style="margin:0"><div class="stage__bar"><b>.mobnav</b><span>mobile · the four most-used</span></div>
+        <div class="stage__body"><div class="rtl"><nav class="mobnav">
+          <a class="mobnav__i is-active" href="#s15"><svg class="i"><use href="#ic-home"/></svg>الرئيسية</a>
+          <a class="mobnav__i" href="#s15"><svg class="i"><use href="#ic-request"/></svg>الطلبات</a>
+          <a class="mobnav__i" href="#s15"><svg class="i"><use href="#ic-users"/></svg>العملاء</a>
+          <a class="mobnav__i" href="#s15"><svg class="i"><use href="#ic-menu"/></svg>المزيد</a>
+        </nav></div></div>
+      </div>
+    </div>
+  </div>
+
+  <ul class="list">
+    <li><b>Grouping is a quiet label, not a box</b> — three groups: the daily work, the website, then the system.
+      Modules a role cannot reach are absent, so the sidebar length itself tells a person what kind of account they have.</li>
+    <li><b>The count pill belongs to <span style="font-family:var(--f-ar)">طلبات النقل</span> only.</b> If every item
+      carries a number, none of them means anything.</li>
+    <li><b>The rail keeps the icon but drops the label</b>, with the name on <code>aria-label</code> and in a tooltip —
+      it never invents smaller text.</li>
+    <li><b>Focus on navy uses the light ring.</b> The brand's blue ring measures 1.84:1 there and is effectively invisible.</li>
+  </ul>
+</section>
+
+<!-- 16 ================================================================== -->
+<section class="sec" id="s16">
+  <div class="sec__head"><span class="sec__num">16</span><h2 class="sec__title">Header</h2></div>
+  <div class="stage stage--ground"><div class="stage__bar"><b>.hdr</b><span>return · title · contextual action · notifications · account</span></div>
+  <div class="stage__body"><div class="rtl col" style="gap:var(--s4)">
+    <header class="hdr">
+      <div class="hdr__t">
+        <span class="hdr__crumb"><svg class="i i--sm"><use href="#ic-arrow"/></svg><a href="#s16">العودة إلى الطلبات</a></span>
+        <h2 class="hdr__title">طلب REQ-2026-0148</h2>
+      </div>
+      <div class="hdr__acts">
+        <button class="btn btn--primary">تغيير الحالة</button>
+        <button class="iconbtn bell" aria-label="التنبيهات"><svg class="i"><use href="#ic-bell"/></svg><span class="bell__d"></span></button>
+        <button class="who"><span class="who__av">ن ع</span><span class="who__n">نورة العتيبي<span>مدير النظام</span></span></button>
+      </div>
+    </header>
+    <header class="hdr">
+      <div class="hdr__t"><h2 class="hdr__title">المحتوى</h2></div>
+      <div class="hdr__acts">
+        <span class="langsw"><button class="is-on">العربية</button><button>EN</button></span>
+        <button class="iconbtn bell" aria-label="التنبيهات"><svg class="i"><use href="#ic-bell"/></svg></button>
+        <button class="who"><span class="who__av">س ق</span><span class="who__n">سارة القحطاني<span>مدير المحتوى</span></span></button>
+      </div>
+    </header>
+  </div></div></div>
+  <ul class="list">
+    <li><b>The return control is a single named destination</b>, not a trail — Stage 02 §06. Its arrow points right,
+      toward where the user came from, and it is present only when there is somewhere specific to return to.</li>
+    <li><b>One contextual action per header</b>, and it is the screen's primary action.</li>
+    <li><b>The language switch appears only if a second language exists.</b> The site is Arabic-only today, so it is
+      shown here as a defined component and stays hidden until it has something to switch to.</li>
+    <li><b>Settings are not in the account menu.</b> Settings are a module; the account corner holds the person's own
+      name, role and sign-out.</li>
+  </ul>
+</section>
+
+<!-- 17 ================================================================== -->
+<section class="sec" id="s17">
+  <div class="sec__head"><span class="sec__num">17</span><h2 class="sec__title">Modals &amp; drawers</h2></div>
+  <p>Modals confirm; they do not edit. Anything with more than one decision in it is a screen, per Stage 02 §06.</p>
+  <div class="row row--top">
+    <div class="stage" style="flex:1 1 21rem;margin:0"><div class="stage__bar"><b>.modal</b><span>destructive confirmation</span></div>
+      <div class="stage__body stage__body--flush"><div class="rtl scrim">
+        <div class="modal">
+          <div class="modal__h"><span class="modal__ic modal__ic--danger"><svg class="i i--lg"><use href="#ic-alert"/></svg></span>
+            <div><h4 class="modal__t">إلغاء الطلب REQ-2026-0148؟</h4>
+              <p class="modal__b">سيتم إلغاء طلب <b>عبدالله الشهري</b> ليوم <b>2026-09-14</b>. لا يمكن التراجع عن الإلغاء، ويبقى الطلب في سجل العميل.</p></div></div>
+          <div class="modal__f"><button class="btn btn--danger">إلغاء الطلب</button><button class="btn btn--ghost">تراجع</button></div>
+        </div>
+      </div></div>
+    </div>
+    <div class="stage" style="flex:1 1 19rem;margin:0"><div class="stage__bar"><b>.drawer</b><span>mobile filter sheet</span></div>
+      <div class="stage__body stage__body--flush"><div class="rtl scrim" style="align-items:end;padding-bottom:0">
+        <div class="drawer">
+          <span class="drawer__grab"></span>
+          <div class="drawer__h"><h4 class="modal__t">تصفية الطلبات</h4><button class="iconbtn" aria-label="إغلاق"><svg class="i"><use href="#ic-x"/></svg></button></div>
+          <div class="field" style="max-width:none"><span class="field__label">الحالة</span>
+            <div class="row" style="gap:var(--s2)">
+              <span class="badge badge--new"><svg class="i"><use href="#ic-newdot"/></svg>جديد</span>
+              <span class="badge badge--review"><svg class="i"><use href="#ic-clock"/></svg>قيد المراجعة</span>
+            </div></div>
+          <div class="row" style="gap:var(--s2)"><button class="btn btn--primary btn--lg" style="flex:1 1 0">تطبيق</button><button class="btn btn--ghost btn--lg">إعادة تعيين</button></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <ul class="list">
+    <li><b>The confirmation names the record and the consequence</b>, and its buttons say what they do —
+      never a bare yes and no (Stage 02 §20).</li>
+    <li><b>The destructive button is not the visual primary</b>, and the safe way out sits beside it as a ghost.</li>
+    <li><b>One overlay at a time.</b> Nothing opens above a modal or a sheet.</li>
+    <li><b>Drawers are the mobile form of a menu or filter set</b>, never of a record. Focus is trapped while open and
+      returns to the control that opened it.</li>
+  </ul>
+</section>
+
+<!-- 18 ================================================================== -->
+<section class="sec" id="s18">
+  <div class="sec__head"><span class="sec__num">18</span><h2 class="sec__title">Feedback</h2></div>
+  <div class="stage"><div class="stage__bar"><b>.alert .toast .spinner .bar .skel</b></div>
+  <div class="stage__body"><div class="rtl col" style="gap:var(--s5)">
+    <div><p class="cap">Inline messages — they stay with the thing they describe</p><div class="col">
+      <div class="alert alert--success"><span class="alert__i"><svg class="i"><use href="#ic-checkcircle"/></svg></span><div><p class="alert__t">تم حفظ التغييرات</p><p class="alert__b">ظهرت التعديلات على صفحة «من نحن».</p></div></div>
+      <div class="alert alert--error"><span class="alert__i"><svg class="i"><use href="#ic-alert"/></svg></span><div><p class="alert__t">تعذّر الحفظ</p><p class="alert__b">انقطع الاتصال. بياناتك محفوظة في النموذج — أعد المحاولة.</p></div></div>
+      <div class="alert alert--warning"><span class="alert__i"><svg class="i"><use href="#ic-alert"/></svg></span><div><p class="alert__t">3 طلبات تجاوزت يوماً في «قيد المراجعة»</p><p class="alert__b">راجعها قبل نهاية اليوم.</p></div></div>
+      <div class="alert alert--info"><span class="alert__i"><svg class="i"><use href="#ic-info"/></svg></span><div><p class="alert__t">لا تظهر على الموقع بعد</p><p class="alert__b">يمكن إدارة هذا المحتوى الآن، ولن يراه الزائر حتى تُضاف الصفحة.</p></div></div>
+    </div></div>
+    <div><p class="cap">Toast — brief, corner, self-dismissing, never blocking</p><div class="col">
+      <div class="toast"><span class="toast__i toast__i--ok"><svg class="i i--sm"><use href="#ic-check"/></svg></span><p class="toast__t">تم تأكيد الطلب</p><button class="iconbtn" aria-label="إغلاق"><svg class="i i--sm"><use href="#ic-x"/></svg></button></div>
+      <div class="toast"><span class="toast__i toast__i--err"><svg class="i i--sm"><use href="#ic-x"/></svg></span><p class="toast__t">تعذّر تغيير الحالة</p><button class="btn btn--ghost btn--sm">إعادة المحاولة</button></div>
+    </div></div>
+    <div><p class="cap">Loading — first load is a skeleton, an update is a bar</p>
+      <div class="row" style="gap:var(--s6);align-items:flex-start">
+        <div class="col" style="gap:var(--s2);flex:1 1 16rem">
+          <div class="skel skel--title"></div><div class="skel skel--line" style="width:100%"></div>
+          <div class="skel skel--line" style="width:78%"></div><div class="skel skel--pill"></div>
+        </div>
+        <div class="col" style="gap:var(--s4);flex:0 1 12rem">
+          <div class="row" style="gap:var(--s3)"><span class="spinner"></span><span class="t-sec">جارٍ التحميل…</span></div>
+          <div class="bar"><span class="bar__f"></span></div>
+        </div>
+      </div>
+    </div>
+  </div></div></div>
+  <ul class="list">
+    <li><b>Success is a toast; failure is an alert.</b> A success can be missed without cost, so it self-dismisses. A
+      failure needs a decision, so it stays until it is resolved.</li>
+    <li><b>Every error names the recovery.</b> "Your data is still in the form — try again" is the message; a code is not.</li>
+    <li><b>Skeletons hold the real shape</b> of what is arriving, so nothing shifts when content lands. A list already
+      on screen dims and shows the bar rather than being replaced by skeletons.</li>
+    <li><b>Feedback is announced to assistive technology</b> without moving focus (Stage 02 §23).</li>
+  </ul>
+</section>
+
+<!-- 19 ================================================================== -->
+<section class="sec" id="s19">
+  <div class="sec__head"><span class="sec__num">19</span><h2 class="sec__title">Empty states</h2></div>
+  <p>One layout, three sentences: what is empty, why, and what to do. A muted icon in a soft circle, never an
+    illustration.</p>
+  <div class="row row--top">
+    <div class="stage" style="flex:1 1 19rem;margin:0"><div class="stage__bar"><b>empty · nothing yet</b></div>
+      <div class="stage__body"><div class="rtl empty">
+        <span class="empty__ic"><svg class="i i--lg"><use href="#ic-inbox"/></svg></span>
+        <h4 class="empty__t">لا توجد طلبات بعد</h4>
+        <p class="empty__b">تصل الطلبات عبر الهاتف والواتساب، وتُسجَّل هنا. سجّل أول طلب لتبدأ المتابعة.</p>
+        <button class="btn btn--primary"><svg class="i i--sm"><use href="#ic-plus"/></svg>تسجيل طلب</button>
+      </div></div>
+    </div>
+    <div class="stage" style="flex:1 1 19rem;margin:0"><div class="stage__bar"><b>empty · nothing matched</b></div>
+      <div class="stage__body"><div class="rtl empty">
+        <span class="empty__ic"><svg class="i i--lg"><use href="#ic-search"/></svg></span>
+        <h4 class="empty__t">لا توجد نتائج مطابقة</h4>
+        <p class="empty__b">لا يوجد طلب يطابق التصفية الحالية. جرّب توسيع الفترة أو إزالة التصفية.</p>
+        <button class="btn btn--secondary">إعادة تعيين التصفية</button>
+      </div></div>
+    </div>
+    <div class="stage" style="flex:1 1 19rem;margin:0"><div class="stage__bar"><b>empty · nothing to do</b></div>
+      <div class="stage__body"><div class="rtl empty">
+        <span class="empty__ic" style="background:var(--success-bg);color:var(--success-ink)"><svg class="i i--lg"><use href="#ic-checkcircle"/></svg></span>
+        <h4 class="empty__t">لا شيء يحتاج انتباهك الآن</h4>
+        <p class="empty__b">جميع الطلبات الجديدة تمت مراجعتها.</p>
+      </div></div>
+    </div>
+  </div>
+  <p style="margin-top:var(--s3)">The third is the one usually missed. An empty attention band is <b>good news</b>, so it
+    reads as good news — green, resolved, and with no action button, because there is nothing to do.</p>
+</section>
+
+<!-- 20 ================================================================== -->
+<section class="sec" id="s20">
+  <div class="sec__head"><span class="sec__num">20</span><h2 class="sec__title">Responsive behaviour</h2></div>
+  <p>Every component's behaviour at all three tiers. Where a component <b>changes structure</b> rather than scale,
+    that is stated — those are the rows that matter.</p>
+  <div class="tw"><table class="doc">
+    <thead><tr><th>Component</th><th>Desktop ≥1080</th><th>Tablet 768–1079</th><th>Mobile ≤767</th></tr></thead>
+    <tbody>
+      <tr><td><b>Sidebar</b></td><td>248px, persistent</td><td>72px rail, expands over content</td><td class="ok">Becomes a bottom bar of four + menu</td></tr>
+      <tr><td><b>Table</b></td><td>All columns</td><td>Drops request number and created date</td><td class="ok">Becomes record cards</td></tr>
+      <tr><td><b>Filters</b></td><td>Inline above the list</td><td>Inline, condensed</td><td class="ok">One control → drawer with applied count</td></tr>
+      <tr><td><b>Header</b></td><td>Return, title, action, account</td><td>Same, account collapses to avatar</td><td>Title + one action; account moves into the menu</td></tr>
+      <tr><td><b>Buttons</b></td><td>40px</td><td>44px</td><td>44px; the primary action spans full width in forms and sheets</td></tr>
+      <tr><td><b>Form</b></td><td>Two columns where fields are related</td><td>Single column</td><td>Single column, 44px controls, save pinned to the bottom</td></tr>
+      <tr><td><b>Cards</b></td><td>Grid, min 13.5rem</td><td>Two per row</td><td>One per row, 16px padding</td></tr>
+      <tr><td><b>Modal</b></td><td>Centred, 26rem</td><td>Centred, 26rem</td><td class="ok">Becomes a bottom drawer</td></tr>
+      <tr><td><b>Toast</b></td><td>Bottom leading corner</td><td>Bottom leading corner</td><td>Full width above the bottom bar</td></tr>
+      <tr><td><b>Badges</b></td><td colspan="3">Identical at every size — status must never be abbreviated to an icon alone.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 21 ================================================================== -->
+<section class="sec" id="s21">
+  <div class="sec__head"><span class="sec__num">21</span><h2 class="sec__title">Accessibility rules</h2></div>
+  <div class="tw"><table class="doc">
+    <thead><tr><th>Rule</th><th>How this system meets it</th></tr></thead>
+    <tbody>
+      <tr><td><b>Text contrast</b></td><td>Body 15.07:1, secondary 5.85:1, every badge and alert ink ≥4.94:1. Measured in §03, not estimated.</td></tr>
+      <tr><td><b>Component contrast (1.4.11)</b></td><td>Control boundaries at <span class="mono">#8B95A3</span> = 3.03:1. The 1.22:1 divider is a hairline and never outlines a control.</td></tr>
+      <tr><td><b>Focus visible</b></td><td>A 3px ring on every interactive element, with an inverse ring for the navy sidebar where the standard ring measures 1.84:1.</td></tr>
+      <tr><td><b>Not colour alone (1.4.1)</b></td><td>Statuses carry a word and a distinct icon shape; selected rows carry a tint <i>and</i> an edge rule; errors carry an icon and text.</td></tr>
+      <tr><td><b>Target size</b></td><td>44px for every control; icon buttons are 34px visually with a 44px hit area. Adjacent safe and destructive actions are separated by at least 8px.</td></tr>
+      <tr><td><b>Labels</b></td><td>Always visible, never replaced by a placeholder. Icon-only controls carry <code>aria-label</code>.</td></tr>
+      <tr><td><b>Keyboard</b></td><td>Reading order is the DOM order, right to left. Overlays trap focus and return it to the opener.</td></tr>
+      <tr><td><b>Announcements</b></td><td>Save results and errors are announced without moving focus.</td></tr>
+      <tr><td><b>Motion</b></td><td>Nothing moves for longer than 260ms, and everything stops under <code>prefers-reduced-motion</code>.</td></tr>
+      <tr><td><b>Language</b></td><td>Arabic, RTL. Latin and numeric values keep their own direction inside the line.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 22 ================================================================== -->
+<section class="sec" id="s22">
+  <div class="sec__head"><span class="sec__num">22</span><h2 class="sec__title">Decisions &amp; handoff</h2></div>
+  <h3 class="h">Decisions taken here, and why</h3>
+  <ul class="list">
+    <li><b>Light theme only.</b> The brand has no approved dark palette, and deriving one would be a second identity —
+      the one thing §02 of the brief forbids. If long-shift comfort later argues for a dark mode, it is a brand
+      decision first and a system change second.</li>
+    <li><b>Cancelled is neutral, not red.</b> Red is reserved for errors and destructive confirmation.</li>
+    <li><b>Confirmed takes navy.</b> It keeps the lifecycle's three "positive" states — new, confirmed, completed —
+      distinguishable from each other rather than three shades of agreement.</li>
+    <li><b>The radius ramp stepped down one notch</b> from the website's, for control scale. This is the only
+      geometry that differs from the site, and it is proportional rather than arbitrary.</li>
+    <li><b>No dashboard, requests or content page is designed here</b>, per §23 of the brief. Every specimen above is a
+      component shown in isolation; none is assembled into a screen.</li>
+  </ul>
+  <h3 class="h">What Stage 04 inherits</h3>
+  <div class="tw"><table class="doc">
+    <thead><tr><th>Ready</th><th>Contents</th></tr></thead>
+    <tbody>
+      <tr><td><b>Tokens</b></td><td>Colour, type, spacing, radius, depth and motion, all named and all traceable to the brand.</td></tr>
+      <tr><td><b>Components</b></td><td>Buttons, form controls, cards, tables with pagination and both empties, status badges, icons, three navigation forms, header, modal, drawer, alerts, toasts, loaders, skeletons, empty states.</td></tr>
+      <tr><td><b>Contracts</b></td><td>Responsive behaviour per component (§20) and the accessibility rules that each must keep (§21).</td></tr>
+      <tr><td><b>Still open</b></td><td>Page composition — how these parts assemble into the dashboard, requests, customers, services, content, settings, users and reports screens. That is Stage 04, and it introduces no new components.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<footer class="foot">
+  <span>Aoun Al-Darb · Admin dashboard</span>
+  <span>Stage 03 — design system &amp; UI components</span>
+  <span>Foundation: brand/tokens.css</span>
+  <span>Next: Stage 04 — page composition</span>
+</footer>
+
+    </main>
+  </div>
+</div>
