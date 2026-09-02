@@ -7,6 +7,7 @@ Separate track from `ux/`, which covers the public site.
 | --- | --- |
 | `stage-02-admin-ux.html` | **Stage 02 — UX architecture & user flows.** Ten behavioural patterns, eight module dossiers, the context contract, and six open decisions. |
 | `stage-03-design-system.html` | **Stage 03 — design system & UI components.** Tokens, eighteen component families rendered live in Arabic RTL, a measured contrast ledger, and per-component responsive contracts. |
+| `dashboard.html` | **Stages 04 + 05 — the admin shell and الرئيسية.** A working, self-contained page: sidebar, header, account area, notifications, mobile drawer, page-header pattern, and the dashboard built inside it. |
 
 The built site (`../index.html`) is the source of truth for services, content areas,
 contact details and terminology. Nothing in this track invents business features.
@@ -76,3 +77,40 @@ the accessibility rules each must keep.
 Light theme only, deliberately: the brand has no approved dark palette and deriving one
 would be a second identity. No page layouts are designed — every specimen is a component
 in isolation. Composition is Stage 04.
+
+## Stages 04 + 05 — the shell, and الرئيسية
+
+`dashboard.html` is a real working page, not a specification: open it in a browser and the
+sidebar collapses, the drawer traps focus, the notification panel marks items read, and the
+four data blocks cycle through their states. It has no dependencies — one file, one font
+request, an inline icon sprite and about 120 lines of vanilla JavaScript. No libraries, no
+polling, no background effects.
+
+**Stage 04 — the shell.** Collapsible navy sidebar (remembered per browser), sticky header
+with global search, notifications and account menu, the page-header pattern, and the content
+container capped at 1440px (1560px above 1600px wide). Sidebar → 72px rail at 1023px →
+hidden behind a drawer at 767px. Shell-level states: a top load bar, an offline banner driven
+by the browser's own online/offline events, and a session-expiry dialog that promises the
+user their place back.
+
+**Mobile navigation is a drawer, not a bottom bar** — a reversal of the Stage 03 sketch, made
+for the reason Stage 04 §12 raises: eight modules do not fit a bottom bar, and splitting them
+four-plus-"more" breaks the guarantee that the current location is always obvious, because
+anything behind "more" shows no active state.
+
+**Stage 05 — الرئيسية.** Page header → five metrics → status distribution → recent requests →
+recent activity → quick actions. The distribution is a plain stacked bar plus a legend whose
+every row is a link into the filtered list — no chart library. Recent requests are a table on
+desktop and record cards below 767px. Every data block owns its own state, so one failed
+fetch shows one error card while the rest of the page keeps working; the state preview button
+demonstrates exactly that.
+
+Demo data is labelled as demo data on the page itself, per Stage 05 §15 — nothing here should
+be mistaken for a real business figure.
+
+Two defects worth recording, both found by measuring rather than by eye: inline `display`
+styles on the state blocks silently beat the state-switching CSS, so the KPI states could
+never have toggled; and the flex text spans had the default `min-width:auto`, which on a
+390px viewport is the classic cause of a page wider than its own viewport. The mobile
+layout that looked broken in the first captures was a screenshot artifact of RTL scroll
+origin — `scrollWidth` measured exactly 390 with zero overflowing elements.

@@ -1,0 +1,1043 @@
+<title>Aoun Al-Darb Admin Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+
+<style>
+/* ==========================================================================
+   AOUN AL-DARB — ADMIN
+   Stage 04 · the shell        (lines marked === SHELL ===)
+   Stage 05 · الرئيسية          (lines marked === DASHBOARD ===)
+
+   Tokens and components are Stage 03 verbatim — no colour, face, radius,
+   shadow, button or icon is introduced here. The two sections below are kept
+   separate so the shell can be lifted into admin.css unchanged when the real
+   application is built; Stages 06+ add only their own module section.
+   ========================================================================== */
+
+/* === TOKENS · Stage 03, unchanged ====================================== */
+:root{
+  --blue:#4975BA; --navy:#2C4C82; --blue-hover:#3F68A8; --blue-pressed:#22406F;
+  --sky:#D9E4F3; --mist:#EEF3FA; --primary-subtle:rgba(73,117,186,.08);
+  --ink:#1E2733; --slate:#5A6675; --gray:#8B95A3; --divider:#E4E9F0;
+  --soft:#F6F8FB; --white:#FFFFFF;
+  --row-hover:#F2F5FA; --row-selected:#E8EFF9;
+  --disabled-surface:#F1F3F7; --disabled-ink:#6B7683; --placeholder:#6E7986;
+  --control-border:#8B95A3;
+  --focus-ring:rgba(73,117,186,.38); --focus-ring-inverse:rgba(217,228,243,.55);
+
+  --success:#2E7D64; --success-bg:#EAF5F0; --success-ink:#256B55;
+  --warning:#B0791C; --warning-bg:#FBF3E4; --warning-ink:#8F6014;
+  --error:#C0433B;   --error-bg:#FBEDEC;   --error-ink:#A5352E; --error-hover:#A5352E;
+  --info:#4975BA;    --info-bg:#EEF3FA;    --info-ink:#2C4C82;
+
+  --st-new-ink:#2C4C82;       --st-new-bg:#EEF3FA;       --st-new-mark:#4975BA;
+  --st-review-ink:#8F6014;    --st-review-bg:#FBF3E4;    --st-review-mark:#B0791C;
+  --st-confirmed-ink:#22406F; --st-confirmed-bg:#D9E4F3; --st-confirmed-mark:#2C4C82;
+  --st-done-ink:#256B55;      --st-done-bg:#EAF5F0;      --st-done-mark:#2E7D64;
+  --st-cancel-ink:#47525F;    --st-cancel-bg:#EFF1F4;    --st-cancel-mark:#5A6675;
+
+  --f-ar:"IBM Plex Sans Arabic",ui-sans-serif,system-ui,"Segoe UI","Noto Sans Arabic",sans-serif;
+  --f-ar-body:"Cairo",ui-sans-serif,system-ui,"Segoe UI","Noto Sans Arabic",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+
+  --fs-page:1.625rem; --fs-section:1.25rem; --fs-card:1.0625rem;
+  --fs-body:1rem; --fs-sec:.9375rem; --fs-label:.875rem; --fs-caption:.8125rem;
+
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px;
+  --s6:24px; --s8:32px; --s10:40px; --s12:48px; --s16:64px;
+
+  --r-xs:3px; --r-control:8px; --r-card:12px; --r-modal:16px; --r-pill:999px;
+
+  --sh-rgb:29,39,51;
+  --sh-card:0 1px 2px rgba(var(--sh-rgb),.04);
+  --sh-raised:0 1px 2px rgba(var(--sh-rgb),.05),0 2px 6px rgba(var(--sh-rgb),.05);
+  --sh-dropdown:0 4px 10px rgba(var(--sh-rgb),.07),0 12px 28px rgba(var(--sh-rgb),.09);
+  --sh-modal:0 12px 28px rgba(var(--sh-rgb),.12),0 32px 64px rgba(var(--sh-rgb),.14);
+  --sh-focus:0 0 0 3px var(--focus-ring);
+
+  --dur:150ms; --dur-mid:220ms; --ease:cubic-bezier(.4,0,.2,1); --tap:44px;
+
+  --side-w:248px; --rail-w:72px; --hdr-h:64px; --content-max:1440px;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--soft);color:var(--ink);
+  font-family:var(--f-ar);font-size:var(--fs-body);line-height:1.6;
+  direction:rtl;-webkit-font-smoothing:antialiased
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:var(--r-xs)}
+h1,h2,h3,h4,p{margin:0}
+button{font:inherit}
+a{color:var(--navy)}
+
+.i{width:20px;height:20px;flex:0 0 auto;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.i--lg{width:24px;height:24px}
+.i--sm{width:16px;height:16px;stroke-width:1.9}
+.i--flip{transform:scaleX(-1)}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* === SHELL · skip link ================================================= */
+.skip{
+  position:absolute;top:-100px;inset-inline-start:var(--s4);z-index:90;
+  background:var(--white);color:var(--navy);border:1px solid var(--navy);
+  border-radius:var(--r-control);padding:.6rem 1rem;font-weight:600;font-size:var(--fs-sec);
+  text-decoration:none
+}
+.skip:focus{top:var(--s3)}
+
+/* === SHELL · frame ===================================================== */
+.app{display:grid;grid-template-columns:var(--side-w) minmax(0,1fr);min-height:100vh}
+.app.is-collapsed{grid-template-columns:var(--rail-w) minmax(0,1fr)}
+
+/* === SHELL · sidebar =================================================== */
+.side{
+  background:var(--navy);color:var(--white);display:flex;flex-direction:column;
+  padding:var(--s4) var(--s3) var(--s5);gap:var(--s1);
+  position:sticky;top:0;height:100vh;overflow-y:auto;overscroll-behavior:contain
+}
+.side__brand{display:flex;align-items:center;gap:var(--s3);padding:var(--s2) var(--s3) var(--s5);min-height:56px}
+.side__mark{
+  width:36px;height:36px;border-radius:var(--r-control);background:var(--white);color:var(--navy);
+  display:grid;place-items:center;flex:0 0 auto;font-weight:700;font-size:15px
+}
+.side__name{font-weight:600;font-size:var(--fs-sec);line-height:1.25;white-space:nowrap;overflow:hidden}
+.side__name span{display:block;font-family:var(--f-ar-body);font-weight:400;font-size:var(--fs-caption);color:rgba(217,228,243,.8)}
+.side__grp{
+  font-size:var(--fs-caption);font-weight:600;color:rgba(217,228,243,.72);
+  padding:var(--s4) var(--s3) var(--s2);white-space:nowrap
+}
+.navitem{
+  display:flex;align-items:center;gap:var(--s3);min-height:var(--tap);padding:0 var(--s3);
+  border-radius:var(--r-control);color:#B9C9E4;text-decoration:none;
+  font-weight:500;font-size:var(--fs-sec);position:relative;
+  transition:background var(--dur) var(--ease),color var(--dur) var(--ease)
+}
+.navitem:hover{background:rgba(255,255,255,.08);color:var(--white)}
+.navitem[aria-current="page"]{background:var(--white);color:var(--navy);font-weight:600}
+.navitem[aria-current="page"]::before{
+  content:"";position:absolute;inset-inline-start:0;top:50%;transform:translateY(-50%);
+  width:3px;height:22px;border-radius:var(--r-pill);background:var(--blue)
+}
+.navitem:focus-visible{outline:none;box-shadow:0 0 0 3px var(--focus-ring-inverse)}
+.navitem__lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.navitem__count{
+  margin-inline-start:auto;font-family:var(--f-mono);font-size:11.5px;font-variant-numeric:tabular-nums;
+  background:var(--blue);color:var(--white);border-radius:var(--r-pill);padding:.1rem .42rem;font-weight:500
+}
+.side__foot{margin-top:auto;padding-top:var(--s4)}
+.side__toggle{
+  display:flex;align-items:center;gap:var(--s3);width:100%;min-height:var(--tap);padding:0 var(--s3);
+  background:transparent;border:none;border-radius:var(--r-control);color:#B9C9E4;
+  font-weight:500;font-size:var(--fs-sec);cursor:pointer;text-align:start
+}
+.side__toggle:hover{background:rgba(255,255,255,.08);color:var(--white)}
+.side__toggle:focus-visible{outline:none;box-shadow:0 0 0 3px var(--focus-ring-inverse)}
+.side__toggle .i{transition:transform var(--dur-mid) var(--ease)}
+
+.is-collapsed .side{padding-inline:var(--s2);align-items:center}
+.is-collapsed .side__brand{padding:var(--s2) 0 var(--s5);justify-content:center}
+.is-collapsed .side__name,
+.is-collapsed .navitem__lbl,
+.is-collapsed .navitem__count,
+.is-collapsed .side__grp,
+.is-collapsed .side__toggle span{display:none}
+.is-collapsed .navitem,.is-collapsed .side__toggle{width:48px;justify-content:center;padding:0}
+.is-collapsed .navitem[aria-current="page"]::before{display:none}
+.is-collapsed .side__toggle .i{transform:scaleX(-1)}
+.is-collapsed .side__grp{display:block;padding:var(--s3) 0 var(--s1);height:1px;overflow:hidden;
+  border-top:1px solid rgba(217,228,243,.18);margin:var(--s2) auto;width:28px;color:transparent}
+
+/* === SHELL · header ==================================================== */
+.hdr{
+  position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:var(--s3);
+  min-height:var(--hdr-h);padding:0 clamp(var(--s4),3vw,var(--s8));
+  background:rgba(255,255,255,.94);backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--divider)
+}
+.hdr .hdr__menu{display:none}
+.hdr__ctx{font-size:var(--fs-sec);font-weight:600;color:var(--ink);margin-inline-end:auto}
+.hdr__ctx span{display:block;font-family:var(--f-ar-body);font-weight:400;font-size:var(--fs-caption);color:var(--slate)}
+.hdr__spacer{margin-inline-end:auto}
+.hdr__search{position:relative;flex:0 1 22rem;display:none}
+@media (min-width:900px){.hdr__search{display:block}}
+.hdr__search .i{position:absolute;inset-inline-start:var(--s3);top:50%;transform:translateY(-50%);color:var(--slate);pointer-events:none}
+.hdr__search input{
+  width:100%;min-height:40px;padding-block:.4rem;
+  padding-inline-start:2.6rem;padding-inline-end:var(--s3);
+  font-family:var(--f-ar);font-size:var(--fs-sec);color:var(--ink);
+  background:var(--soft);border:1px solid var(--divider);border-radius:var(--r-control)
+}
+.hdr__search input::placeholder{color:var(--placeholder);font-family:var(--f-ar-body)}
+.hdr__search input:hover{border-color:var(--control-border)}
+.hdr__search input:focus{outline:none;background:var(--white);border-color:var(--blue);box-shadow:var(--sh-focus)}
+.hdr__acts{display:flex;align-items:center;gap:var(--s2)}
+
+.iconbtn{
+  width:40px;height:40px;display:grid;place-items:center;border-radius:var(--r-control);
+  border:1px solid transparent;background:transparent;color:var(--slate);cursor:pointer;
+  position:relative;transition:background var(--dur),color var(--dur)
+}
+.iconbtn:hover{background:var(--mist);color:var(--navy)}
+.iconbtn:focus-visible{outline:none;box-shadow:var(--sh-focus);color:var(--navy)}
+.iconbtn[aria-expanded="true"]{background:var(--mist);color:var(--navy)}
+.bell__d{
+  position:absolute;top:7px;inset-inline-end:7px;width:9px;height:9px;border-radius:50%;
+  background:var(--error);border:2px solid var(--white)
+}
+.who{display:flex;align-items:center;gap:var(--s2);padding:.25rem .45rem;border-radius:var(--r-control);
+  cursor:pointer;border:1px solid transparent;background:none}
+.who:hover{background:var(--soft);border-color:var(--divider)}
+.who:focus-visible{outline:none;box-shadow:var(--sh-focus)}
+.who[aria-expanded="true"]{background:var(--soft);border-color:var(--divider)}
+.who__av{width:34px;height:34px;border-radius:50%;background:var(--sky);color:var(--navy);
+  display:grid;place-items:center;font-weight:600;font-size:13px;flex:0 0 auto}
+.who__n{font-size:var(--fs-caption);font-weight:600;color:var(--ink);line-height:1.3;text-align:start;display:none}
+.who__n span{display:block;font-weight:400;color:var(--slate)}
+@media (min-width:700px){.who__n{display:block}}
+
+/* === SHELL · popovers ================================================== */
+.pop{
+  position:absolute;top:calc(100% + 8px);inset-inline-end:0;z-index:50;
+  background:var(--white);border:1px solid var(--divider);border-radius:var(--r-card);
+  box-shadow:var(--sh-dropdown);width:min(21rem,calc(100vw - 2rem));overflow:hidden
+}
+.pop[hidden]{display:none}
+.pop__h{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);
+  padding:var(--s3) var(--s4);border-bottom:1px solid var(--divider)}
+.pop__t{font-size:var(--fs-sec);font-weight:600;color:var(--ink)}
+.pop__list{max-height:19rem;overflow-y:auto}
+.pop__f{padding:var(--s2);border-top:1px solid var(--divider);background:var(--soft)}
+.wrap-rel{position:relative}
+
+.notif{display:flex;gap:var(--s3);padding:var(--s3) var(--s4);width:100%;text-align:start;
+  background:none;border:none;border-bottom:1px solid var(--divider);cursor:pointer;align-items:flex-start}
+.notif:last-child{border-bottom:none}
+.notif:hover{background:var(--row-hover)}
+.notif:focus-visible{outline:none;box-shadow:inset var(--sh-focus)}
+.notif__i{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;
+  background:var(--mist);color:var(--navy)}
+.notif__i--ok{background:var(--success-bg);color:var(--success-ink)}
+.notif__i--warn{background:var(--warning-bg);color:var(--warning-ink)}
+.notif__b{min-width:0;flex:1 1 auto}
+.notif__t{display:block;font-size:var(--fs-sec);color:var(--ink);font-weight:500;line-height:1.45}
+.notif__m{display:block;font-family:var(--f-mono);font-size:var(--fs-caption);color:var(--slate);
+  margin-top:.15rem;direction:ltr;text-align:start}
+.notif__unread{width:8px;height:8px;border-radius:50%;background:var(--blue);flex:0 0 auto;margin-top:.55rem}
+.notif.is-read{background:var(--white)}
+.notif.is-read .notif__t{font-weight:400;color:var(--slate)}
+.notif.is-read .notif__unread{background:transparent}
+
+.menu__i{display:flex;align-items:center;gap:var(--s3);width:100%;min-height:var(--tap);
+  padding:0 var(--s4);background:none;border:none;color:var(--ink);font-size:var(--fs-sec);
+  cursor:pointer;text-align:start}
+.menu__i:hover{background:var(--row-hover)}
+.menu__i:focus-visible{outline:none;box-shadow:inset var(--sh-focus)}
+.menu__i--danger{color:var(--error-ink)}
+.menu__i--danger:hover{background:var(--error-bg)}
+.menu__sep{height:1px;background:var(--divider);margin:var(--s1) 0}
+.menu__id{padding:var(--s4);border-bottom:1px solid var(--divider);display:flex;gap:var(--s3);align-items:center}
+.menu__id > span{min-width:0}
+.menu__id b{display:block;font-size:var(--fs-sec);color:var(--ink)}
+.menu__id span{display:block;font-family:var(--f-ar-body);font-size:var(--fs-caption);color:var(--slate)}
+
+/* === SHELL · mobile drawer ============================================= */
+.scrim{position:fixed;inset:0;background:rgba(30,39,51,.42);z-index:60;border:none;padding:0}
+.scrim[hidden]{display:none}
+.drawer{
+  position:fixed;inset-block:0;inset-inline-start:0;z-index:70;width:min(19rem,86vw);
+  background:var(--navy);color:var(--white);display:flex;flex-direction:column;
+  padding:var(--s4) var(--s3) var(--s5);overflow-y:auto;
+  transform:translateX(-100%);transition:transform var(--dur-mid) var(--ease)
+}
+.drawer[hidden]{display:none}
+.drawer.is-open{transform:translateX(0)}
+.drawer__h{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);padding-bottom:var(--s4)}
+.drawer .iconbtn{color:#B9C9E4}
+.drawer .iconbtn:hover{background:rgba(255,255,255,.08);color:var(--white)}
+.drawer .iconbtn:focus-visible{box-shadow:0 0 0 3px var(--focus-ring-inverse)}
+
+/* === SHELL · content =================================================== */
+.main{min-width:0;display:flex;flex-direction:column}
+.content{
+  width:100%;max-width:var(--content-max);margin:0 auto;
+  padding:var(--s6) clamp(var(--s4),3vw,var(--s8)) var(--s12);
+  display:flex;flex-direction:column;gap:var(--s6)
+}
+
+/* === SHELL · page header pattern ======================================= */
+.page{display:flex;flex-wrap:wrap;align-items:flex-end;gap:var(--s4);row-gap:var(--s3)}
+.page__t{min-width:0;flex:1 1 min(20rem,100%);display:flex;flex-direction:column;gap:.2rem}
+.page__crumb{display:flex;align-items:center;gap:.35rem;font-family:var(--f-ar-body);
+  font-size:var(--fs-caption);color:var(--slate)}
+.page__crumb a{color:var(--slate);text-decoration:none}
+.page__crumb a:hover{color:var(--navy);text-decoration:underline}
+.page__h{font-size:var(--fs-page);font-weight:600;color:var(--ink);line-height:1.25}
+.page__d{font-family:var(--f-ar-body);font-size:var(--fs-sec);color:var(--slate);line-height:1.6;max-width:62ch}
+.page__a{display:flex;flex-wrap:wrap;gap:var(--s2);align-items:center}
+
+/* === SHELL · buttons (Stage 03) ======================================== */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
+  font-family:var(--f-ar);font-weight:600;font-size:var(--fs-sec);line-height:1;
+  min-height:40px;padding:0 var(--s4);border-radius:var(--r-control);
+  border:1px solid transparent;background:none;cursor:pointer;text-decoration:none;white-space:nowrap;
+  transition:background var(--dur) var(--ease),border-color var(--dur) var(--ease),color var(--dur) var(--ease),box-shadow var(--dur) var(--ease)
+}
+.btn:focus-visible{outline:none;box-shadow:var(--sh-focus)}
+.btn--sm{min-height:32px;padding:0 var(--s3);font-size:var(--fs-caption)}
+.btn--lg{min-height:var(--tap);padding:0 var(--s5);font-size:var(--fs-body)}
+.btn--primary{background:var(--blue);color:var(--white);border-color:var(--blue)}
+.btn--primary:hover{background:var(--blue-hover);border-color:var(--blue-hover)}
+.btn--primary:active{background:var(--blue-pressed);border-color:var(--blue-pressed)}
+.btn--secondary{background:var(--white);color:var(--navy);border-color:var(--control-border)}
+.btn--secondary:hover{background:var(--mist);border-color:var(--navy)}
+.btn--secondary:active{background:var(--sky)}
+.btn--ghost{background:transparent;color:var(--navy)}
+.btn--ghost:hover{background:var(--primary-subtle)}
+.btn:disabled{background:var(--disabled-surface);color:var(--disabled-ink);border-color:var(--divider);cursor:not-allowed}
+
+/* === SHELL · cards, badges, alerts (Stage 03) ========================== */
+.card{background:var(--white);border:1px solid var(--divider);border-radius:var(--r-card);
+  box-shadow:var(--sh-card);display:flex;flex-direction:column}
+.card__h{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s3);
+  padding:var(--s4) var(--s5);border-bottom:1px solid var(--divider)}
+.card__t{font-size:var(--fs-card);font-weight:600;color:var(--ink);margin-inline-end:auto}
+.card__b{padding:var(--s5)}
+.card__b--flush{padding:0}
+.card__f{padding:var(--s3) var(--s5);border-top:1px solid var(--divider);background:var(--soft);
+  border-radius:0 0 var(--r-card) var(--r-card)}
+
+.badge{display:inline-flex;align-items:center;gap:.35rem;font-weight:600;font-size:var(--fs-caption);
+  line-height:1;padding:.35rem .6rem .35rem .5rem;border-radius:var(--r-pill);
+  white-space:nowrap;border:1px solid transparent}
+.badge .i{width:14px;height:14px;stroke-width:2}
+.badge--new{background:var(--st-new-bg);color:var(--st-new-ink);border-color:rgba(44,76,130,.18)}
+.badge--review{background:var(--st-review-bg);color:var(--st-review-ink);border-color:rgba(143,96,20,.22)}
+.badge--confirmed{background:var(--st-confirmed-bg);color:var(--st-confirmed-ink);border-color:rgba(34,64,111,.22)}
+.badge--done{background:var(--st-done-bg);color:var(--st-done-ink);border-color:rgba(37,107,85,.22)}
+.badge--cancel{background:var(--st-cancel-bg);color:var(--st-cancel-ink);border-color:rgba(71,82,95,.2)}
+
+.alert{display:flex;gap:var(--s3);padding:var(--s3) var(--s4);border-radius:var(--r-card);
+  border:1px solid transparent;align-items:flex-start}
+.alert > span{min-width:0;flex:1 1 auto}
+.alert__t{display:block;font-weight:600;font-size:var(--fs-sec)}
+.alert__b{display:block;font-family:var(--f-ar-body);font-size:var(--fs-caption);margin-top:.2rem;
+  line-height:1.65;color:var(--slate)}
+.alert--info{background:var(--info-bg);border-color:rgba(44,76,130,.2);color:var(--info-ink)}
+.alert--warning{background:var(--warning-bg);border-color:rgba(143,96,20,.22);color:var(--warning-ink)}
+.alert--error{background:var(--error-bg);border-color:rgba(165,53,46,.22);color:var(--error-ink)}
+
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:var(--s3);
+  padding:var(--s10) var(--s5);margin:0 auto;max-width:30rem}
+.empty__ic{width:52px;height:52px;border-radius:50%;background:var(--mist);color:var(--navy);
+  display:grid;place-items:center}
+.empty__t{font-size:var(--fs-card);font-weight:600;color:var(--ink)}
+.empty__b{font-family:var(--f-ar-body);font-size:var(--fs-sec);color:var(--slate);
+  line-height:1.7;max-width:34ch}
+
+.skel{background:linear-gradient(90deg,#EEF1F6 25%,#E3E8F0 37%,#EEF1F6 63%);
+  background-size:400% 100%;animation:shim 1.4s ease infinite;border-radius:var(--r-xs)}
+@keyframes shim{0%{background-position:100% 50%}100%{background-position:0 50%}}
+.skel--line{height:12px}
+
+/* === DASHBOARD · demo-data notice ====================================== */
+.demobar{display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap}
+.demobar > span{flex:1 1 18rem}
+.demobar .btn{margin-inline-start:auto}
+
+/* === DASHBOARD · KPI row =============================================== */
+.kpis{display:grid;gap:var(--s4);grid-template-columns:repeat(auto-fit,minmax(11rem,1fr))}
+.kpi{background:var(--white);border:1px solid var(--divider);border-radius:var(--r-card);
+  box-shadow:var(--sh-card);padding:var(--s5);display:flex;flex-direction:column;gap:var(--s2);
+  text-decoration:none;color:inherit;transition:border-color var(--dur) var(--ease),box-shadow var(--dur) var(--ease)}
+a.kpi:hover{border-color:var(--control-border);box-shadow:var(--sh-raised)}
+a.kpi:focus-visible{outline:none;box-shadow:var(--sh-focus)}
+.kpi--attention{border-inline-start:3px solid var(--blue)}
+.kpi__l{display:flex;align-items:center;gap:.45rem;font-size:var(--fs-label);
+  font-weight:500;color:var(--slate)}
+.kpi__n{font-size:2rem;font-weight:700;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+.kpi__m{display:block;font-family:var(--f-ar-body);font-size:var(--fs-caption);color:var(--slate)}
+.kpi__m b{color:var(--ink);font-weight:600}
+
+/* === DASHBOARD · two-column body ======================================= */
+.grid{display:grid;gap:var(--s5);align-items:start}
+@media (min-width:1024px){.grid{grid-template-columns:minmax(0,1.62fr) minmax(0,1fr)}}
+.colmain{display:flex;flex-direction:column;gap:var(--s5);min-width:0}
+.colside{display:flex;flex-direction:column;gap:var(--s5);min-width:0}
+
+/* === DASHBOARD · status distribution =================================== */
+.dist{display:flex;height:14px;border-radius:var(--r-pill);overflow:hidden;background:var(--divider);gap:2px}
+.dist__seg{height:100%;min-width:6px}
+.dist__seg--new{background:var(--st-new-mark)}
+.dist__seg--review{background:var(--st-review-mark)}
+.dist__seg--confirmed{background:var(--st-confirmed-mark)}
+.dist__seg--done{background:var(--st-done-mark)}
+.dist__seg--cancel{background:var(--st-cancel-mark)}
+.legend{display:flex;flex-direction:column;margin-top:var(--s5)}
+.legend__r{display:flex;align-items:center;gap:var(--s3);padding:var(--s3) var(--s2);
+  border-radius:var(--r-control);text-decoration:none;color:inherit;
+  border-bottom:1px solid var(--divider)}
+.legend__r:last-child{border-bottom:none}
+.legend__r:hover{background:var(--row-hover)}
+.legend__r:focus-visible{outline:none;box-shadow:var(--sh-focus)}
+.legend__n{font-family:var(--f-mono);font-size:var(--fs-sec);font-weight:500;color:var(--ink);
+  font-variant-numeric:tabular-nums;margin-inline-start:auto}
+.legend__p{font-family:var(--f-mono);font-size:var(--fs-caption);color:var(--slate);
+  font-variant-numeric:tabular-nums;width:3.2rem;text-align:end}
+
+/* === DASHBOARD · recent requests ======================================= */
+.tbl-wrap{overflow-x:auto}
+table.tbl{border-collapse:collapse;width:100%;min-width:38rem;font-size:var(--fs-sec)}
+table.tbl th,table.tbl td{text-align:start;padding:var(--s3) var(--s5);vertical-align:middle}
+table.tbl thead th{font-weight:600;font-size:var(--fs-caption);color:var(--slate);
+  background:var(--soft);border-bottom:1px solid var(--divider);white-space:nowrap}
+table.tbl tbody td{border-bottom:1px solid var(--divider);color:var(--ink)}
+table.tbl tbody tr:last-child td{border-bottom:none}
+table.tbl tbody tr{transition:background var(--dur) var(--ease)}
+table.tbl tbody tr:hover{background:var(--row-hover)}
+table.tbl tbody tr:focus-within{background:var(--row-hover)}
+.cell-id{font-family:var(--f-mono);font-size:var(--fs-caption);color:var(--slate);direction:ltr;
+  display:inline-block;white-space:nowrap}
+.cell-name{font-weight:600;color:var(--ink);text-decoration:none}
+.cell-name:hover{text-decoration:underline}
+.cell-name:focus-visible{outline:none;box-shadow:var(--sh-focus);border-radius:var(--r-xs)}
+.cell-sub{display:block;font-family:var(--f-ar-body);font-size:var(--fs-caption);
+  color:var(--slate);font-weight:400;margin-top:.1rem}
+.cell-date{font-family:var(--f-mono);font-size:var(--fs-caption);color:var(--slate);
+  direction:ltr;display:inline-block;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.reclist{display:none;flex-direction:column}
+.reccard{display:flex;flex-direction:column;gap:var(--s3);padding:var(--s4) var(--s5);
+  border-bottom:1px solid var(--divider);text-decoration:none;color:inherit}
+.reccard:last-child{border-bottom:none}
+.reccard:hover{background:var(--row-hover)}
+.reccard:focus-visible{outline:none;box-shadow:inset var(--sh-focus)}
+.reccard__top{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s3)}
+.reccard__top > span:first-child{min-width:0}
+.reccard__n{display:block;font-weight:600;font-size:var(--fs-body);color:var(--ink)}
+.reccard__s{display:block;font-family:var(--f-ar-body);font-size:var(--fs-caption);color:var(--slate);margin-top:.15rem}
+.reccard__meta{display:flex;flex-wrap:wrap;gap:.3rem var(--s4);font-size:var(--fs-caption);color:var(--slate)}
+.reccard__meta b{color:var(--ink);font-weight:600}
+
+/* === DASHBOARD · activity + quick actions ============================== */
+.act{display:flex;gap:var(--s3);padding:var(--s3) 0;border-bottom:1px solid var(--divider);align-items:flex-start}
+.act:last-child{border-bottom:none;padding-bottom:0}
+.act:first-child{padding-top:0}
+.act__i{width:32px;height:32px;border-radius:50%;background:var(--mist);color:var(--navy);
+  display:grid;place-items:center;flex:0 0 auto}
+.act__i--ok{background:var(--success-bg);color:var(--success-ink)}
+.act__i--new{background:var(--st-new-bg);color:var(--st-new-ink)}
+.act > span + span{min-width:0;flex:1 1 auto}
+.act__t{display:block;font-size:var(--fs-sec);color:var(--ink);line-height:1.5}
+.act__t b{font-weight:600}
+.act__m{display:block;font-family:var(--f-mono);font-size:var(--fs-caption);color:var(--slate);
+  margin-top:.15rem;direction:ltr;text-align:start}
+
+.qa{display:flex;flex-direction:column;gap:var(--s2)}
+.qa__i{display:flex;align-items:center;gap:var(--s3);min-height:var(--tap);padding:0 var(--s3);
+  border:1px solid var(--divider);border-radius:var(--r-control);background:var(--white);
+  color:var(--ink);text-decoration:none;font-size:var(--fs-sec);font-weight:500;
+  transition:border-color var(--dur) var(--ease),background var(--dur) var(--ease)}
+.qa__i:hover{background:var(--mist);border-color:var(--control-border)}
+.qa__i:focus-visible{outline:none;box-shadow:var(--sh-focus)}
+.qa__i .i:first-child{color:var(--navy)}
+.qa__i .i:last-child{margin-inline-start:auto;color:var(--slate)}
+
+/* === DASHBOARD · per-block states ====================================== */
+[data-state] > .state{display:none}
+[data-state="ready"] > .state--ready,
+[data-state="loading"] > .state--loading,
+[data-state="error"] > .state--error,
+[data-state="empty"] > .state--empty{display:block}
+#kpis[data-state="ready"] > .state--ready{display:contents}
+.errbox{padding:var(--s6) var(--s5);display:flex;flex-direction:column;align-items:center;
+  gap:var(--s3);text-align:center}
+.errbox .empty__ic{background:var(--error-bg);color:var(--error-ink)}
+.skelrow{display:flex;align-items:center;gap:var(--s4);padding:var(--s4) var(--s5);
+  border-bottom:1px solid var(--divider)}
+.skelrow:last-child{border-bottom:none}
+
+/* === SHELL · global bars =============================================== */
+.loadbar{position:fixed;inset-block-start:0;inset-inline:0;height:3px;z-index:80;background:transparent;overflow:hidden}
+.loadbar[hidden]{display:none}
+.loadbar__f{height:100%;width:35%;background:var(--blue);animation:slide 1.3s var(--ease) infinite}
+@keyframes slide{0%{transform:translateX(120%)}100%{transform:translateX(-330%)}}
+.offline{display:flex;align-items:center;justify-content:center;gap:var(--s3);
+  padding:var(--s2) var(--s4);background:var(--warning-bg);color:var(--warning-ink);
+  border-bottom:1px solid rgba(143,96,20,.22);font-size:var(--fs-sec);font-weight:600}
+.offline[hidden]{display:none}
+
+.modal{background:var(--white);border-radius:var(--r-modal);box-shadow:var(--sh-modal);
+  width:min(100%,26rem);padding:var(--s6);display:flex;flex-direction:column;gap:var(--s4)}
+.modalwrap{position:fixed;inset:0;z-index:75;display:grid;place-items:center;padding:var(--s4);
+  background:rgba(30,39,51,.42)}
+.modalwrap[hidden]{display:none}
+.modal__h{display:flex;gap:var(--s3);align-items:flex-start}
+.modal__ic{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;
+  background:var(--mist);color:var(--navy)}
+.modal__t{font-size:var(--fs-card);font-weight:600;color:var(--ink)}
+.modal__b{font-family:var(--f-ar-body);font-size:var(--fs-sec);color:var(--slate);margin-top:.3rem;line-height:1.7}
+.modal__f{display:flex;gap:var(--s2)}
+
+/* === SHELL · responsive ================================================ */
+@media (min-width:1600px){
+  :root{--content-max:1560px}
+}
+@media (max-width:1023px){
+  .app,.app.is-collapsed{grid-template-columns:var(--rail-w) minmax(0,1fr)}
+  .side__name,.navitem__lbl,.navitem__count,.side__grp,.side__toggle span{display:none}
+  .side{padding-inline:var(--s2);align-items:center}
+  .side__brand{padding:var(--s2) 0 var(--s5);justify-content:center}
+  .navitem,.side__toggle{width:48px;justify-content:center;padding:0}
+  .navitem[aria-current="page"]::before{display:none}
+  .side__foot{display:none}
+}
+@media (max-width:767px){
+  .app,.app.is-collapsed{grid-template-columns:minmax(0,1fr)}
+  .side{display:none}
+  .hdr .hdr__menu{display:grid}
+  .hdr__search{display:none}
+  .content{padding:var(--s5) var(--s4) var(--s10);gap:var(--s5)}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s3)}
+  .kpi{padding:var(--s4)}
+  /* five metrics in two columns orphans the last one — give the total the full row */
+  .kpi:last-child{grid-column:1 / -1}
+  .kpi__n{font-size:1.75rem}
+  .card__b,.card__h{padding-inline:var(--s4)}
+  .card__f{padding-inline:var(--s4)}
+  table.tbl{display:none}
+  .reclist{display:flex}
+  .page__a{width:100%}
+  .page__a .btn{flex:1 1 0}
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+<symbol id="ic-home" viewBox="0 0 24 24"><path d="M3.5 10.6 12 3.8l8.5 6.8"/><path d="M5.6 9.6V19a1.2 1.2 0 0 0 1.2 1.2h3V15h4.4v5.2h3A1.2 1.2 0 0 0 18.4 19V9.6"/></symbol>
+<symbol id="ic-request" viewBox="0 0 24 24"><rect x="4.2" y="3.2" width="15.6" height="17.6" rx="2.2"/><path d="M8.2 8.4h7.6M8.2 12h7.6M8.2 15.6h4.6"/></symbol>
+<symbol id="ic-users" viewBox="0 0 24 24"><circle cx="9.4" cy="8.4" r="3.4"/><path d="M3.4 19.6a6 6 0 0 1 12 0"/><path d="M16.2 5.4a3.2 3.2 0 0 1 0 6.1"/><path d="M17.6 14.4a5.4 5.4 0 0 1 3.2 5.2"/></symbol>
+<symbol id="ic-service" viewBox="0 0 24 24"><rect x="3.4" y="3.4" width="7.2" height="7.2" rx="1.8"/><rect x="13.4" y="3.4" width="7.2" height="7.2" rx="1.8"/><rect x="3.4" y="13.4" width="7.2" height="7.2" rx="1.8"/><rect x="13.4" y="13.4" width="7.2" height="7.2" rx="1.8"/></symbol>
+<symbol id="ic-content" viewBox="0 0 24 24"><path d="M13.4 3.2H6.6a2 2 0 0 0-2 2v13.6a2 2 0 0 0 2 2h10.8a2 2 0 0 0 2-2V9.2z"/><path d="M13.4 3.2v6h6"/><path d="M8.6 13.4h6.8M8.6 16.8h4.4"/></symbol>
+<symbol id="ic-settings" viewBox="0 0 24 24"><path d="M3.6 7h16.8M3.6 12h16.8M3.6 17h16.8"/><circle cx="9" cy="7" r="2.2"/><circle cx="15.4" cy="12" r="2.2"/><circle cx="7.6" cy="17" r="2.2"/></symbol>
+<symbol id="ic-shield" viewBox="0 0 24 24"><path d="M12 3.2 5 6v5.6c0 4.2 2.9 7.5 7 9.2 4.1-1.7 7-5 7-9.2V6z"/><path d="m9.2 12 2 2 3.6-3.9"/></symbol>
+<symbol id="ic-report" viewBox="0 0 24 24"><path d="M4 20h16"/><rect x="5.6" y="11.4" width="3.6" height="6" rx="1.1"/><rect x="10.2" y="7.4" width="3.6" height="10" rx="1.1"/><rect x="14.8" y="4.2" width="3.6" height="13.2" rx="1.1"/></symbol>
+<symbol id="ic-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.4"/><path d="m15.6 15.6 4 4"/></symbol>
+<symbol id="ic-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="ic-edit" viewBox="0 0 24 24"><path d="M4.4 19.6h4l9.4-9.4a2.1 2.1 0 0 0 0-3l-1-1a2.1 2.1 0 0 0-3 0L4.4 15.6z"/><path d="m14.2 6.2 3.6 3.6"/></symbol>
+<symbol id="ic-checks" viewBox="0 0 24 24"><path d="m2.6 12.8 3.8 3.8L15 8"/><path d="m9.6 15.4 1.4 1.4L20 7.6"/></symbol>
+<symbol id="ic-x" viewBox="0 0 24 24"><path d="M6.2 6.2l11.6 11.6M17.8 6.2 6.2 17.8"/></symbol>
+<symbol id="ic-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.2V12l3.2 2"/></symbol>
+<symbol id="ic-newdot" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></symbol>
+<symbol id="ic-xcircle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4"/><path d="M9.2 9.2l5.6 5.6M14.8 9.2 9.2 14.8"/></symbol>
+<symbol id="ic-checkcircle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4"/><path d="m8.4 12.2 2.6 2.6 4.6-5"/></symbol>
+<symbol id="ic-chevron" viewBox="0 0 24 24"><path d="m9.6 5.6 6.4 6.4-6.4 6.4"/></symbol>
+<symbol id="ic-bell" viewBox="0 0 24 24"><path d="M18 16.4V11a6 6 0 1 0-12 0v5.4L4.4 18.6h15.2z"/><path d="M10.2 18.6a1.9 1.9 0 0 0 3.6 0"/></symbol>
+<symbol id="ic-user" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="10" r="2.9"/><path d="M6.6 18.6a6 6 0 0 1 10.8 0"/></symbol>
+<symbol id="ic-menu" viewBox="0 0 24 24"><path d="M3.8 6.6h16.4M3.8 12h16.4M3.8 17.4h16.4"/></symbol>
+<symbol id="ic-alert" viewBox="0 0 24 24"><path d="M12 3.8 2.8 19.8h18.4z"/><path d="M12 9.6v4.2"/><circle cx="12" cy="16.8" r="1" fill="currentColor" stroke="none"/></symbol>
+<symbol id="ic-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4"/><path d="M12 11.4v4.8"/><circle cx="12" cy="8.2" r="1" fill="currentColor" stroke="none"/></symbol>
+<symbol id="ic-inbox" viewBox="0 0 24 24"><path d="M3.4 13.4h4.2l1.4 2.6h6l1.4-2.6h4.2"/><path d="M5.6 4.6h12.8l2.2 8.8v4.2a2.2 2.2 0 0 1-2.2 2.2H5.6a2.2 2.2 0 0 1-2.2-2.2v-4.2z"/></symbol>
+<symbol id="ic-logout" viewBox="0 0 24 24"><path d="M9.4 20.2H6.2a2 2 0 0 1-2-2V5.8a2 2 0 0 1 2-2h3.2"/><path d="M15.4 15.8 19.6 12l-4.2-3.8"/><path d="M19.6 12H9.4"/></symbol>
+<symbol id="ic-refresh" viewBox="0 0 24 24"><path d="M20 11.4a8 8 0 1 1-2.4-5.2"/><path d="M20 4.2v5.2h-5.2"/></symbol>
+<symbol id="ic-collapse" viewBox="0 0 24 24"><path d="M14.4 5.6 8 12l6.4 6.4"/><path d="M19.6 4.4v15.2"/></symbol>
+<symbol id="ic-offline" viewBox="0 0 24 24"><path d="M3.2 3.2 20.8 20.8"/><path d="M8.2 15.4a5.4 5.4 0 0 1 7.6 0"/><path d="M5 12.2a9.8 9.8 0 0 1 3.2-2.1M18.9 12.2a9.8 9.8 0 0 0-5.6-2.6"/><circle cx="12" cy="18.6" r="1" fill="currentColor" stroke="none"/></symbol>
+</defs></svg>
+
+<a class="skip" href="#main">تخطَّ إلى المحتوى</a>
+<div class="loadbar" id="loadbar" hidden><span class="loadbar__f"></span></div>
+
+<div class="app" id="app">
+
+  <!-- === SHELL · sidebar ============================================== -->
+  <aside class="side" id="side">
+    <div class="side__brand">
+      <span class="side__mark" aria-hidden="true">ع</span>
+      <span class="side__name">عون الدرب<span>لوحة التحكم</span></span>
+    </div>
+    <nav aria-label="التنقل الرئيسي" style="display:contents">
+      <p class="side__grp">العمل اليومي</p>
+      <a class="navitem" href="#" aria-current="page"><svg class="i" aria-hidden="true"><use href="#ic-home"/></svg><span class="navitem__lbl">الرئيسية</span></a>
+      <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-request"/></svg><span class="navitem__lbl">طلبات النقل</span><span class="navitem__count">7</span></a>
+      <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-users"/></svg><span class="navitem__lbl">العملاء</span></a>
+      <p class="side__grp">الموقع الإلكتروني</p>
+      <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-service"/></svg><span class="navitem__lbl">الخدمات</span></a>
+      <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-content"/></svg><span class="navitem__lbl">المحتوى</span></a>
+      <p class="side__grp">النظام</p>
+      <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-report"/></svg><span class="navitem__lbl">التقارير</span></a>
+      <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-shield"/></svg><span class="navitem__lbl">المستخدمون والصلاحيات</span></a>
+      <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-settings"/></svg><span class="navitem__lbl">الإعدادات</span></a>
+    </nav>
+    <div class="side__foot">
+      <button class="side__toggle" id="collapse" aria-expanded="true" aria-controls="side">
+        <svg class="i" aria-hidden="true"><use href="#ic-collapse"/></svg><span>تصغير القائمة</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="offline" id="offline" hidden role="status">
+      <svg class="i i--sm" aria-hidden="true"><use href="#ic-offline"/></svg>
+      لا يوجد اتصال بالإنترنت — آخر تحديث قبل قليل
+    </div>
+
+    <!-- === SHELL · header ============================================= -->
+    <header class="hdr">
+      <button class="iconbtn hdr__menu" id="menubtn" aria-label="فتح القائمة" aria-expanded="false" aria-controls="drawer">
+        <svg class="i" aria-hidden="true"><use href="#ic-menu"/></svg>
+      </button>
+      <p class="hdr__ctx" id="hdrctx">الرئيسية<span>عون الدرب للنقل المتخصص</span></p>
+
+      <div class="hdr__search">
+        <svg class="i" aria-hidden="true"><use href="#ic-search"/></svg>
+        <label class="sr" for="gsearch">بحث في الطلبات والعملاء</label>
+        <input id="gsearch" type="search" placeholder="ابحث بالاسم أو رقم الجوال أو رقم الطلب">
+      </div>
+
+      <div class="hdr__acts">
+        <span class="wrap-rel">
+          <button class="iconbtn" id="bell" aria-label="التنبيهات — 3 غير مقروءة" aria-expanded="false" aria-controls="notifpop">
+            <svg class="i" aria-hidden="true"><use href="#ic-bell"/></svg><span class="bell__d" id="belldot"></span>
+          </button>
+          <div class="pop" id="notifpop" hidden role="dialog" aria-label="التنبيهات">
+            <div class="pop__h"><span class="pop__t">التنبيهات</span>
+              <button class="btn btn--ghost btn--sm" id="readall">تعليم الكل كمقروء</button></div>
+            <div class="pop__list" id="notiflist">
+              <button class="notif"><span class="notif__unread" aria-hidden="true"></span>
+                <span class="notif__i notif__i--new"><svg class="i i--sm" aria-hidden="true"><use href="#ic-newdot"/></svg></span>
+                <span class="notif__b"><span class="notif__t">طلب جديد من عبدالله الشهري</span>
+                <span class="notif__m">09:42</span></span></button>
+              <button class="notif"><span class="notif__unread" aria-hidden="true"></span>
+                <span class="notif__i notif__i--warn"><svg class="i i--sm" aria-hidden="true"><use href="#ic-clock"/></svg></span>
+                <span class="notif__b"><span class="notif__t">3 طلبات في «قيد المراجعة» منذ أكثر من يوم</span>
+                <span class="notif__m">08:15</span></span></button>
+              <button class="notif"><span class="notif__unread" aria-hidden="true"></span>
+                <span class="notif__i notif__i--ok"><svg class="i i--sm" aria-hidden="true"><use href="#ic-checkcircle"/></svg></span>
+                <span class="notif__b"><span class="notif__t">تم تأكيد الطلب REQ-2026-0147</span>
+                <span class="notif__m">أمس · 17:30</span></span></button>
+              <button class="notif is-read"><span class="notif__unread" aria-hidden="true"></span>
+                <span class="notif__i"><svg class="i i--sm" aria-hidden="true"><use href="#ic-edit"/></svg></span>
+                <span class="notif__b"><span class="notif__t">تم تحديث محتوى «من نحن»</span>
+                <span class="notif__m">أمس · 14:05</span></span></button>
+            </div>
+            <div class="pop__f"><a class="btn btn--ghost btn--sm" href="#" style="width:100%">عرض كل التنبيهات</a></div>
+          </div>
+        </span>
+
+        <span class="wrap-rel">
+          <button class="who" id="whobtn" aria-expanded="false" aria-controls="whopop">
+            <span class="who__av" aria-hidden="true">ن ع</span>
+            <span class="who__n">نورة العتيبي<span>مدير النظام</span></span>
+          </button>
+          <div class="pop" id="whopop" hidden role="menu" aria-label="حساب المستخدم" style="width:min(17rem,calc(100vw - 2rem))">
+            <div class="menu__id"><span class="who__av" aria-hidden="true">ن ع</span>
+              <span><b>نورة العتيبي</b><span>مدير النظام</span></span></div>
+            <button class="menu__i" role="menuitem"><svg class="i i--sm" aria-hidden="true"><use href="#ic-user"/></svg>معلومات الحساب</button>
+            <button class="menu__i" role="menuitem"><svg class="i i--sm" aria-hidden="true"><use href="#ic-settings"/></svg>تغيير كلمة المرور</button>
+            <span class="menu__sep"></span>
+            <button class="menu__i menu__i--danger" role="menuitem"><svg class="i i--sm" aria-hidden="true"><use href="#ic-logout"/></svg>تسجيل الخروج</button>
+          </div>
+        </span>
+      </div>
+    </header>
+
+    <!-- === DASHBOARD · الرئيسية ======================================= -->
+    <main class="content" id="main">
+
+      <div class="alert alert--info demobar" id="demobar">
+        <svg class="i alert__i" aria-hidden="true"><use href="#ic-info"/></svg>
+        <span><span class="alert__t">بيانات تجريبية للعرض</span>
+          <span class="alert__b">الأرقام والسجلات أدناه أمثلة توضيحية، وستُستبدل ببيانات النظام الفعلية عند الربط.</span></span>
+        <button class="btn btn--ghost btn--sm" id="statebtn">تجربة الحالات</button>
+      </div>
+
+      <!-- page header pattern (Stage 04) -->
+      <div class="page">
+        <div class="page__t">
+          <h1 class="page__h">الرئيسية</h1>
+          <p class="page__d">صباح الخير نورة — لديك <b>7 طلبات جديدة</b> و<b>3 طلبات</b> تجاوزت يوماً في المراجعة.</p>
+        </div>
+        <div class="page__a">
+          <button class="btn btn--primary"><svg class="i i--sm" aria-hidden="true"><use href="#ic-plus"/></svg>تسجيل طلب</button>
+        </div>
+      </div>
+
+      <!-- key metrics -->
+      <section aria-labelledby="kpis-h">
+        <h2 class="sr" id="kpis-h">المؤشرات الرئيسية</h2>
+        <div class="kpis" id="kpis" data-state="ready">
+          <div class="state state--ready">
+            <a class="kpi kpi--attention" href="#">
+              <span class="kpi__l"><svg class="i i--sm" aria-hidden="true"><use href="#ic-newdot"/></svg>الطلبات الجديدة</span>
+              <span class="kpi__n">7</span><span class="kpi__m">بانتظار المراجعة</span></a>
+            <a class="kpi" href="#">
+              <span class="kpi__l"><svg class="i i--sm" aria-hidden="true"><use href="#ic-clock"/></svg>قيد المراجعة</span>
+              <span class="kpi__n">5</span><span class="kpi__m"><b>3</b> تجاوزت يوماً</span></a>
+            <a class="kpi" href="#">
+              <span class="kpi__l"><svg class="i i--sm" aria-hidden="true"><use href="#ic-checkcircle"/></svg>الطلبات المؤكدة</span>
+              <span class="kpi__n">9</span><span class="kpi__m"><b>4</b> رحلات اليوم</span></a>
+            <a class="kpi" href="#">
+              <span class="kpi__l"><svg class="i i--sm" aria-hidden="true"><use href="#ic-checks"/></svg>الطلبات المكتملة</span>
+              <span class="kpi__n">11</span><span class="kpi__m">هذا الشهر</span></a>
+            <a class="kpi" href="#">
+              <span class="kpi__l"><svg class="i i--sm" aria-hidden="true"><use href="#ic-request"/></svg>إجمالي الطلبات</span>
+              <span class="kpi__n">34</span><span class="kpi__m">هذا الشهر</span></a>
+          </div>
+          <div class="state state--loading">
+            <div class="kpis">
+              <div class="kpi"><span class="skel skel--line" style="width:60%"></span><span class="skel" style="height:32px;width:40%"></span><span class="skel skel--line" style="width:50%"></span></div>
+              <div class="kpi"><span class="skel skel--line" style="width:60%"></span><span class="skel" style="height:32px;width:40%"></span><span class="skel skel--line" style="width:50%"></span></div>
+              <div class="kpi"><span class="skel skel--line" style="width:60%"></span><span class="skel" style="height:32px;width:40%"></span><span class="skel skel--line" style="width:50%"></span></div>
+              <div class="kpi"><span class="skel skel--line" style="width:60%"></span><span class="skel" style="height:32px;width:40%"></span><span class="skel skel--line" style="width:50%"></span></div>
+              <div class="kpi"><span class="skel skel--line" style="width:60%"></span><span class="skel" style="height:32px;width:40%"></span><span class="skel skel--line" style="width:50%"></span></div>
+            </div>
+          </div>
+          <div class="state state--error">
+            <div class="card">
+              <div class="errbox">
+                <span class="empty__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-alert"/></svg></span>
+                <span class="empty__t">تعذّر تحميل المؤشرات</span>
+                <span class="empty__b">لم نتمكن من جلب أرقام الطلبات. بقية الصفحة تعمل بشكل طبيعي.</span>
+                <button class="btn btn--secondary"><svg class="i i--sm" aria-hidden="true"><use href="#ic-refresh"/></svg>إعادة المحاولة</button>
+              </div>
+            </div>
+          </div>
+          <div class="state state--empty">
+            <div class="card"><div class="empty">
+              <span class="empty__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-inbox"/></svg></span>
+              <span class="empty__t">لا توجد طلبات بعد</span>
+              <span class="empty__b">تصل الطلبات عبر الهاتف والواتساب وتُسجَّل هنا. سجّل أول طلب لتبدأ المتابعة.</span>
+              <button class="btn btn--primary"><svg class="i i--sm" aria-hidden="true"><use href="#ic-plus"/></svg>تسجيل طلب</button>
+            </div></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="grid">
+        <div class="colmain">
+
+          <!-- requests overview -->
+          <section class="card" aria-labelledby="dist-h" data-state="ready" id="distblock">
+            <div class="card__h"><h2 class="card__t" id="dist-h">توزيع الطلبات حسب الحالة</h2>
+              <a class="btn btn--ghost btn--sm" href="#">عرض كل الطلبات<svg class="i i--sm i--flip" aria-hidden="true"><use href="#ic-chevron"/></svg></a></div>
+            <div class="state state--ready">
+              <div class="card__b">
+                <div class="dist" role="img" aria-label="توزيع 34 طلباً: جديد 7، قيد المراجعة 5، مؤكد 9، مكتمل 11، ملغي 2">
+                  <span class="dist__seg dist__seg--new" style="width:20.6%"></span>
+                  <span class="dist__seg dist__seg--review" style="width:14.7%"></span>
+                  <span class="dist__seg dist__seg--confirmed" style="width:26.5%"></span>
+                  <span class="dist__seg dist__seg--done" style="width:32.4%"></span>
+                  <span class="dist__seg dist__seg--cancel" style="width:5.8%"></span>
+                </div>
+                <div class="legend">
+                  <a class="legend__r" href="#"><span class="badge badge--new"><svg class="i" aria-hidden="true"><use href="#ic-newdot"/></svg>جديد</span><span class="legend__n">7</span><span class="legend__p">21%</span></a>
+                  <a class="legend__r" href="#"><span class="badge badge--review"><svg class="i" aria-hidden="true"><use href="#ic-clock"/></svg>قيد المراجعة</span><span class="legend__n">5</span><span class="legend__p">15%</span></a>
+                  <a class="legend__r" href="#"><span class="badge badge--confirmed"><svg class="i" aria-hidden="true"><use href="#ic-checkcircle"/></svg>مؤكد</span><span class="legend__n">9</span><span class="legend__p">26%</span></a>
+                  <a class="legend__r" href="#"><span class="badge badge--done"><svg class="i" aria-hidden="true"><use href="#ic-checks"/></svg>مكتمل</span><span class="legend__n">11</span><span class="legend__p">32%</span></a>
+                  <a class="legend__r" href="#"><span class="badge badge--cancel"><svg class="i" aria-hidden="true"><use href="#ic-xcircle"/></svg>ملغي</span><span class="legend__n">2</span><span class="legend__p">6%</span></a>
+                </div>
+              </div>
+            </div>
+            <div class="state state--loading"><div class="card__b">
+              <span class="skel" style="height:14px;width:100%;border-radius:999px;display:block"></span>
+              <div style="margin-top:var(--s5);display:flex;flex-direction:column;gap:var(--s4)">
+                <span class="skel skel--line" style="width:100%"></span><span class="skel skel--line" style="width:100%"></span>
+                <span class="skel skel--line" style="width:100%"></span><span class="skel skel--line" style="width:100%"></span>
+              </div></div></div>
+            <div class="state state--error"><div class="errbox">
+              <span class="empty__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-alert"/></svg></span>
+              <span class="empty__t">تعذّر تحميل التوزيع</span>
+              <span class="empty__b">تحقّق من الاتصال ثم أعد المحاولة.</span>
+              <button class="btn btn--secondary"><svg class="i i--sm" aria-hidden="true"><use href="#ic-refresh"/></svg>إعادة المحاولة</button>
+            </div></div>
+            <div class="state state--empty"><div class="empty">
+              <span class="empty__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-inbox"/></svg></span>
+              <span class="empty__t">لا توجد طلبات لعرض توزيعها</span>
+              <span class="empty__b">سيظهر التوزيع تلقائياً بعد تسجيل أول طلب.</span>
+            </div></div>
+          </section>
+
+          <!-- recent requests -->
+          <section class="card" aria-labelledby="recent-h" data-state="ready" id="recentblock">
+            <div class="card__h"><h2 class="card__t" id="recent-h">أحدث الطلبات</h2>
+              <a class="btn btn--ghost btn--sm" href="#">عرض كل الطلبات<svg class="i i--sm i--flip" aria-hidden="true"><use href="#ic-chevron"/></svg></a></div>
+            <div class="state state--ready">
+              <div class="card__b card__b--flush">
+                <div class="tbl-wrap"><table class="tbl">
+                  <caption class="sr">أحدث خمسة طلبات نقل</caption>
+                  <thead><tr><th scope="col">رقم الطلب</th><th scope="col">العميل</th><th scope="col">الخدمة</th><th scope="col">تاريخ الرحلة</th><th scope="col">الحالة</th></tr></thead>
+                  <tbody>
+                    <tr><td><span class="cell-id">REQ-2026-0148</span></td>
+                      <td><a class="cell-name" href="#">عبدالله الشهري</a><span class="cell-sub">0535544352</span></td>
+                      <td>النقل إلى المستشفيات والمراكز الطبية</td><td><span class="cell-date">2026-09-14</span></td>
+                      <td><span class="badge badge--new"><svg class="i" aria-hidden="true"><use href="#ic-newdot"/></svg>جديد</span></td></tr>
+                    <tr><td><span class="cell-id">REQ-2026-0147</span></td>
+                      <td><a class="cell-name" href="#">منيرة الدوسري</a><span class="cell-sub">0501122334</span></td>
+                      <td>النقل بواسطة الكرسي المتحرك</td><td><span class="cell-date">2026-09-14</span></td>
+                      <td><span class="badge badge--confirmed"><svg class="i" aria-hidden="true"><use href="#ic-checkcircle"/></svg>مؤكد</span></td></tr>
+                    <tr><td><span class="cell-id">REQ-2026-0146</span></td>
+                      <td><a class="cell-name" href="#">فهد العنزي</a><span class="cell-sub">0559988776</span></td>
+                      <td>خدمة مساعد السائق</td><td><span class="cell-date">2026-09-13</span></td>
+                      <td><span class="badge badge--review"><svg class="i" aria-hidden="true"><use href="#ic-clock"/></svg>قيد المراجعة</span></td></tr>
+                    <tr><td><span class="cell-id">REQ-2026-0145</span></td>
+                      <td><a class="cell-name" href="#">سارة القحطاني</a><span class="cell-sub">0533344556</span></td>
+                      <td>النقل اليومي</td><td><span class="cell-date">2026-09-12</span></td>
+                      <td><span class="badge badge--done"><svg class="i" aria-hidden="true"><use href="#ic-checks"/></svg>مكتمل</span></td></tr>
+                    <tr><td><span class="cell-id">REQ-2026-0144</span></td>
+                      <td><a class="cell-name" href="#">خالد المطيري</a><span class="cell-sub">0544455667</span></td>
+                      <td>التنقل للمناسبات الاجتماعية</td><td><span class="cell-date">2026-09-11</span></td>
+                      <td><span class="badge badge--cancel"><svg class="i" aria-hidden="true"><use href="#ic-xcircle"/></svg>ملغي</span></td></tr>
+                  </tbody>
+                </table></div>
+                <div class="reclist">
+                  <a class="reccard" href="#"><span class="reccard__top"><span><span class="reccard__n">عبدالله الشهري</span><span class="reccard__s">النقل إلى المستشفيات والمراكز الطبية</span></span><span class="badge badge--new"><svg class="i" aria-hidden="true"><use href="#ic-newdot"/></svg>جديد</span></span><span class="reccard__meta"><span>تاريخ الرحلة <b><span class="cell-date">2026-09-14</span></b></span><span class="cell-id">REQ-2026-0148</span></span></a>
+                  <a class="reccard" href="#"><span class="reccard__top"><span><span class="reccard__n">منيرة الدوسري</span><span class="reccard__s">النقل بواسطة الكرسي المتحرك</span></span><span class="badge badge--confirmed"><svg class="i" aria-hidden="true"><use href="#ic-checkcircle"/></svg>مؤكد</span></span><span class="reccard__meta"><span>تاريخ الرحلة <b><span class="cell-date">2026-09-14</span></b></span><span class="cell-id">REQ-2026-0147</span></span></a>
+                  <a class="reccard" href="#"><span class="reccard__top"><span><span class="reccard__n">فهد العنزي</span><span class="reccard__s">خدمة مساعد السائق</span></span><span class="badge badge--review"><svg class="i" aria-hidden="true"><use href="#ic-clock"/></svg>قيد المراجعة</span></span><span class="reccard__meta"><span>تاريخ الرحلة <b><span class="cell-date">2026-09-13</span></b></span><span class="cell-id">REQ-2026-0146</span></span></a>
+                  <a class="reccard" href="#"><span class="reccard__top"><span><span class="reccard__n">سارة القحطاني</span><span class="reccard__s">النقل اليومي</span></span><span class="badge badge--done"><svg class="i" aria-hidden="true"><use href="#ic-checks"/></svg>مكتمل</span></span><span class="reccard__meta"><span>تاريخ الرحلة <b><span class="cell-date">2026-09-12</span></b></span><span class="cell-id">REQ-2026-0145</span></span></a>
+                  <a class="reccard" href="#"><span class="reccard__top"><span><span class="reccard__n">خالد المطيري</span><span class="reccard__s">التنقل للمناسبات الاجتماعية</span></span><span class="badge badge--cancel"><svg class="i" aria-hidden="true"><use href="#ic-xcircle"/></svg>ملغي</span></span><span class="reccard__meta"><span>تاريخ الرحلة <b><span class="cell-date">2026-09-11</span></b></span><span class="cell-id">REQ-2026-0144</span></span></a>
+                </div>
+              </div>
+            </div>
+            <div class="state state--loading">
+              <div class="skelrow"><span class="skel skel--line" style="width:22%"></span><span class="skel skel--line" style="width:26%"></span><span class="skel skel--line" style="width:34%"></span></div>
+              <div class="skelrow"><span class="skel skel--line" style="width:22%"></span><span class="skel skel--line" style="width:26%"></span><span class="skel skel--line" style="width:34%"></span></div>
+              <div class="skelrow"><span class="skel skel--line" style="width:22%"></span><span class="skel skel--line" style="width:26%"></span><span class="skel skel--line" style="width:34%"></span></div>
+              <div class="skelrow"><span class="skel skel--line" style="width:22%"></span><span class="skel skel--line" style="width:26%"></span><span class="skel skel--line" style="width:34%"></span></div>
+            </div>
+            <div class="state state--error"><div class="errbox">
+              <span class="empty__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-alert"/></svg></span>
+              <span class="empty__t">تعذّر تحميل الطلبات</span>
+              <span class="empty__b">لم نتمكن من جلب أحدث الطلبات. المؤشرات أعلاه محدّثة.</span>
+              <button class="btn btn--secondary"><svg class="i i--sm" aria-hidden="true"><use href="#ic-refresh"/></svg>إعادة المحاولة</button>
+            </div></div>
+            <div class="state state--empty"><div class="empty">
+              <span class="empty__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-inbox"/></svg></span>
+              <span class="empty__t">لا توجد طلبات بعد</span>
+              <span class="empty__b">تصل الطلبات عبر الهاتف والواتساب وتُسجَّل هنا.</span>
+              <button class="btn btn--primary"><svg class="i i--sm" aria-hidden="true"><use href="#ic-plus"/></svg>تسجيل طلب</button>
+            </div></div>
+          </section>
+        </div>
+
+        <div class="colside">
+          <!-- recent activity -->
+          <section class="card" aria-labelledby="act-h" data-state="ready" id="actblock">
+            <div class="card__h"><h2 class="card__t" id="act-h">آخر النشاطات</h2></div>
+            <div class="state state--ready"><div class="card__b">
+              <div class="act"><span class="act__i act__i--new"><svg class="i i--sm" aria-hidden="true"><use href="#ic-newdot"/></svg></span>
+                <span><span class="act__t">طلب جديد من <b>عبدالله الشهري</b></span><span class="act__m">09:42</span></span></div>
+              <div class="act"><span class="act__i act__i--ok"><svg class="i i--sm" aria-hidden="true"><use href="#ic-checkcircle"/></svg></span>
+                <span><span class="act__t">تأكيد الطلب <b>REQ-2026-0147</b> — نورة العتيبي</span><span class="act__m">أمس · 17:30</span></span></div>
+              <div class="act"><span class="act__i"><svg class="i i--sm" aria-hidden="true"><use href="#ic-edit"/></svg></span>
+                <span><span class="act__t">تحديث محتوى <b>«من نحن»</b> — سارة القحطاني</span><span class="act__m">أمس · 14:05</span></span></div>
+              <div class="act"><span class="act__i"><svg class="i i--sm" aria-hidden="true"><use href="#ic-service"/></svg></span>
+                <span><span class="act__t">إخفاء خدمة <b>«التنقل للمناسبات الاجتماعية»</b> مؤقتاً</span><span class="act__m">أمس · 11:20</span></span></div>
+            </div></div>
+            <div class="state state--loading"><div class="card__b" style="display:flex;flex-direction:column;gap:var(--s5)">
+              <span class="skel skel--line" style="width:85%"></span><span class="skel skel--line" style="width:70%"></span>
+              <span class="skel skel--line" style="width:90%"></span><span class="skel skel--line" style="width:65%"></span>
+            </div></div>
+            <div class="state state--error"><div class="errbox">
+              <span class="empty__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-alert"/></svg></span>
+              <span class="empty__t">تعذّر تحميل النشاطات</span>
+              <button class="btn btn--secondary btn--sm"><svg class="i i--sm" aria-hidden="true"><use href="#ic-refresh"/></svg>إعادة المحاولة</button>
+            </div></div>
+            <div class="state state--empty"><div class="empty" style="padding:var(--s8) var(--s5)">
+              <span class="empty__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-clock"/></svg></span>
+              <span class="empty__t">لا توجد نشاطات بعد</span>
+              <span class="empty__b">ستظهر هنا التغييرات التي يجريها فريقك على الطلبات والمحتوى.</span>
+            </div></div>
+          </section>
+
+          <!-- quick actions -->
+          <section class="card" aria-labelledby="qa-h">
+            <div class="card__h"><h2 class="card__t" id="qa-h">إجراءات سريعة</h2></div>
+            <div class="card__b"><div class="qa">
+              <a class="qa__i" href="#"><svg class="i" aria-hidden="true"><use href="#ic-request"/></svg>عرض الطلبات الجديدة
+                <svg class="i i--sm i--flip" aria-hidden="true"><use href="#ic-chevron"/></svg></a>
+              <a class="qa__i" href="#"><svg class="i" aria-hidden="true"><use href="#ic-service"/></svg>إدارة الخدمات
+                <svg class="i i--sm i--flip" aria-hidden="true"><use href="#ic-chevron"/></svg></a>
+              <a class="qa__i" href="#"><svg class="i" aria-hidden="true"><use href="#ic-content"/></svg>تعديل محتوى الموقع
+                <svg class="i i--sm i--flip" aria-hidden="true"><use href="#ic-chevron"/></svg></a>
+            </div></div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- === SHELL · mobile drawer ========================================== -->
+<div class="scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" hidden aria-label="التنقل الرئيسي">
+  <div class="drawer__h">
+    <span class="side__brand" style="padding:0"><span class="side__mark" aria-hidden="true">ع</span>
+      <span class="side__name">عون الدرب<span>لوحة التحكم</span></span></span>
+    <button class="iconbtn" id="drawerclose" aria-label="إغلاق القائمة"><svg class="i" aria-hidden="true"><use href="#ic-x"/></svg></button>
+  </div>
+  <p class="side__grp">العمل اليومي</p>
+  <a class="navitem" href="#" aria-current="page"><svg class="i" aria-hidden="true"><use href="#ic-home"/></svg><span class="navitem__lbl">الرئيسية</span></a>
+  <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-request"/></svg><span class="navitem__lbl">طلبات النقل</span><span class="navitem__count">7</span></a>
+  <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-users"/></svg><span class="navitem__lbl">العملاء</span></a>
+  <p class="side__grp">الموقع الإلكتروني</p>
+  <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-service"/></svg><span class="navitem__lbl">الخدمات</span></a>
+  <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-content"/></svg><span class="navitem__lbl">المحتوى</span></a>
+  <p class="side__grp">النظام</p>
+  <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-report"/></svg><span class="navitem__lbl">التقارير</span></a>
+  <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-shield"/></svg><span class="navitem__lbl">المستخدمون والصلاحيات</span></a>
+  <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-settings"/></svg><span class="navitem__lbl">الإعدادات</span></a>
+</nav>
+
+<!-- === SHELL · session expiry ========================================= -->
+<div class="modalwrap" id="expiry" hidden role="dialog" aria-modal="true" aria-labelledby="exp-t">
+  <div class="modal">
+    <div class="modal__h"><span class="modal__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-clock"/></svg></span>
+      <div><h2 class="modal__t" id="exp-t">انتهت الجلسة</h2>
+        <p class="modal__b">لحمايتك أُغلقت الجلسة بعد فترة من عدم الاستخدام. سجّل الدخول للعودة إلى <b>الصفحة نفسها</b> — لن تفقد ما كنت تعمل عليه.</p></div></div>
+    <div class="modal__f"><button class="btn btn--primary" id="expok">تسجيل الدخول</button></div>
+  </div>
+</div>
+
+<script>
+/* === SHELL behaviour — no libraries, no polling, no background effects === */
+(function(){
+  "use strict";
+  var $ = function(id){ return document.getElementById(id); };
+
+  /* --- sidebar collapse (desktop), remembered per browser --------------- */
+  var app = $("app"), collapse = $("collapse");
+  function setCollapsed(on){
+    app.classList.toggle("is-collapsed", on);
+    collapse.setAttribute("aria-expanded", on ? "false" : "true");
+    collapse.querySelector("span").textContent = on ? "توسيع القائمة" : "تصغير القائمة";
+    collapse.setAttribute("aria-label", on ? "توسيع القائمة" : "تصغير القائمة");
+    try { localStorage.setItem("aun-admin-collapsed", on ? "1" : "0"); } catch(e){}
+  }
+  try { if (localStorage.getItem("aun-admin-collapsed") === "1") setCollapsed(true); } catch(e){}
+  collapse.addEventListener("click", function(){ setCollapsed(!app.classList.contains("is-collapsed")); });
+
+  /* --- popovers: one open at a time, Esc closes, click-away closes ------ */
+  var pops = [
+    { btn: $("bell"),   pop: $("notifpop") },
+    { btn: $("whobtn"), pop: $("whopop") }
+  ];
+  function closePops(except){
+    pops.forEach(function(p){
+      if (p.pop === except) return;
+      p.pop.hidden = true;
+      p.btn.setAttribute("aria-expanded", "false");
+    });
+  }
+  pops.forEach(function(p){
+    p.btn.addEventListener("click", function(e){
+      e.stopPropagation();
+      var open = p.pop.hidden;
+      closePops(open ? p.pop : null);
+      p.pop.hidden = !open;
+      p.btn.setAttribute("aria-expanded", open ? "true" : "false");
+      if (open){
+        var first = p.pop.querySelector("button, a, input");
+        if (first) first.focus();
+      }
+    });
+    p.pop.addEventListener("click", function(e){ e.stopPropagation(); });
+  });
+  document.addEventListener("click", function(){ closePops(null); });
+
+  /* --- notifications: read / unread ------------------------------------ */
+  var list = $("notiflist"), belldot = $("belldot"), bell = $("bell");
+  function refreshUnread(){
+    var n = list.querySelectorAll(".notif:not(.is-read)").length;
+    belldot.style.display = n ? "" : "none";
+    bell.setAttribute("aria-label", n ? ("التنبيهات — " + n + " غير مقروءة") : "التنبيهات — لا جديد");
+  }
+  list.addEventListener("click", function(e){
+    var item = e.target.closest(".notif");
+    if (item){ item.classList.add("is-read"); refreshUnread(); }
+  });
+  $("readall").addEventListener("click", function(){
+    Array.prototype.forEach.call(list.querySelectorAll(".notif"), function(n){ n.classList.add("is-read"); });
+    refreshUnread();
+  });
+  refreshUnread();
+
+  /* --- mobile drawer: focus trapped, Esc closes, scrim closes ---------- */
+  var drawer = $("drawer"), scrim = $("scrim"), menubtn = $("menubtn"), drawerclose = $("drawerclose");
+  var lastFocus = null;
+  function openDrawer(){
+    lastFocus = document.activeElement;
+    drawer.hidden = false; scrim.hidden = false;
+    requestAnimationFrame(function(){ drawer.classList.add("is-open"); });
+    menubtn.setAttribute("aria-expanded", "true");
+    document.body.style.overflow = "hidden";
+    drawerclose.focus();
+  }
+  function closeDrawer(){
+    drawer.classList.remove("is-open");
+    menubtn.setAttribute("aria-expanded", "false");
+    document.body.style.overflow = "";
+    scrim.hidden = true;
+    window.setTimeout(function(){ drawer.hidden = true; }, 220);
+    if (lastFocus) lastFocus.focus();
+  }
+  menubtn.addEventListener("click", openDrawer);
+  drawerclose.addEventListener("click", closeDrawer);
+  scrim.addEventListener("click", closeDrawer);
+  drawer.addEventListener("keydown", function(e){
+    if (e.key !== "Tab") return;
+    var f = drawer.querySelectorAll("a[href], button:not([disabled])");
+    if (!f.length) return;
+    var first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  });
+
+  /* --- session expiry --------------------------------------------------- */
+  var expiry = $("expiry");
+  $("expok").addEventListener("click", function(){ expiry.hidden = true; });
+
+  document.addEventListener("keydown", function(e){
+    if (e.key !== "Escape") return;
+    if (!drawer.hidden) { closeDrawer(); return; }
+    if (!expiry.hidden) { expiry.hidden = true; return; }
+    closePops(null);
+  });
+
+  /* --- offline: the browser tells us, we do not poll -------------------- */
+  var offline = $("offline");
+  function netState(){ offline.hidden = navigator.onLine; }
+  window.addEventListener("online", netState);
+  window.addEventListener("offline", netState);
+  netState();
+
+  /* --- block-level states ----------------------------------------------
+     Each data block owns its state, so one failure never takes the page
+     down. In the real application these are set by the fetch that fills
+     the block; here a preview control cycles them.                      */
+  var blocks = ["kpis", "distblock", "recentblock", "actblock"];
+  var modes = [
+    { key: "ready",   label: "الحالة الطبيعية" },
+    { key: "loading", label: "أثناء التحميل" },
+    { key: "empty",   label: "بدون بيانات" },
+    { key: "error",   label: "فشل التحميل" }
+  ];
+  var mode = 0;
+  var loadbar = $("loadbar");
+  $("statebtn").addEventListener("click", function(){
+    mode = (mode + 1) % modes.length;
+    var m = modes[mode];
+    /* the error preview fails one block only — the rest keep working */
+    blocks.forEach(function(id, idx){
+      var el = $(id);
+      if (!el) return;
+      if (m.key === "error") el.setAttribute("data-state", idx === 2 ? "error" : "ready");
+      else el.setAttribute("data-state", m.key);
+    });
+    loadbar.hidden = m.key !== "loading";
+    this.textContent = "الحالة: " + m.label;
+  });
+})();
+</script>
