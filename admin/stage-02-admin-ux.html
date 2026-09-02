@@ -1,0 +1,1383 @@
+<title>Aoun Al-Darb Admin UX Spine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+
+<style>
+/* ==========================================================================
+   AOUN AL-DARB — ADMIN STAGE 02 · UX ARCHITECTURE & USER FLOWS
+   Continues the document system established by ux/stage-01-ux-architecture.html.
+   Same tokens, same faces, same shell. Added here: the flow rail, the module
+   dossier, the lifecycle track, and the pattern matrix.
+   ========================================================================== */
+:root{
+  --ground:#F1F3F6;
+  --surface:#FFFFFF;
+  --surface-2:#E7EBF0;
+  --ink:#141C25;
+  --ink-2:#4C5866;
+  --ink-3:#77828F;
+  --rule:#D6DCE3;
+  --rule-soft:#E5E9EE;
+  --accent:#2C4C82;
+  --accent-2:#4975BA;
+  --accent-soft:rgba(44,76,130,.07);
+  --pass:#256B55;   --pass-bg:rgba(46,125,100,.12);
+  --warn:#8F6014;   --warn-bg:rgba(176,121,28,.14);
+  --fail:#A5352E;   --fail-bg:rgba(192,67,59,.12);
+
+  --f-display:"Archivo",ui-sans-serif,system-ui,"Segoe UI",sans-serif;
+  --f-body:"Source Serif 4",ui-serif,Georgia,"Times New Roman",serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --f-ar:"IBM Plex Sans Arabic",ui-sans-serif,system-ui,"Segoe UI","Noto Sans Arabic",sans-serif;
+
+  --measure:68ch;
+  --pad:clamp(1.15rem,4vw,2.75rem);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F151C;
+    --surface:#161E27;
+    --surface-2:#1E2831;
+    --ink:#E3E8EF;
+    --ink-2:#9DA8B5;
+    --ink-3:#6E7A88;
+    --rule:#2A343F;
+    --rule-soft:#222C36;
+    --accent:#93B3E0;
+    --accent-2:#5C86C6;
+    --accent-soft:rgba(147,179,224,.11);
+    --pass:#63C3A2;  --pass-bg:rgba(99,195,162,.14);
+    --warn:#DDA946;  --warn-bg:rgba(221,169,70,.14);
+    --fail:#EB8078;  --fail-bg:rgba(235,128,120,.14);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0F151C;
+  --surface:#161E27;
+  --surface-2:#1E2831;
+  --ink:#E3E8EF;
+  --ink-2:#9DA8B5;
+  --ink-3:#6E7A88;
+  --rule:#2A343F;
+  --rule-soft:#222C36;
+  --accent:#93B3E0;
+  --accent-2:#5C86C6;
+  --accent-soft:rgba(147,179,224,.11);
+  --pass:#63C3A2;  --pass-bg:rgba(99,195,162,.14);
+  --warn:#DDA946;  --warn-bg:rgba(221,169,70,.14);
+  --fail:#EB8078;  --fail-bg:rgba(235,128,120,.14);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:var(--f-body);
+  font-size:17px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ---------- shell ---------------------------------------------------- */
+.wrap{max-width:1260px;margin:0 auto;padding:0 var(--pad)}
+.layout{display:grid;gap:clamp(2rem,4vw,3.5rem);align-items:start}
+@media (min-width:1080px){ .layout{grid-template-columns:236px minmax(0,1fr)} }
+
+/* ---------- masthead -------------------------------------------------- */
+.mast{border-bottom:1px solid var(--rule);padding-block:clamp(2.5rem,6vw,4.5rem) clamp(1.75rem,4vw,2.75rem);margin-bottom:clamp(2rem,5vw,3.5rem)}
+.mast__eyebrow{
+  font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--accent);margin:0 0 1.1rem
+}
+.mast__title{
+  font-family:var(--f-display);font-weight:700;font-size:clamp(2.1rem,1.2rem + 3.6vw,3.65rem);
+  line-height:1.04;letter-spacing:-.022em;margin:0;text-wrap:balance;max-width:19ch
+}
+.mast__sub{
+  margin:1.4rem 0 0;max-width:64ch;font-size:clamp(1.05rem,1rem + .3vw,1.2rem);
+  line-height:1.6;color:var(--ink-2)
+}
+.mast__meta{
+  display:flex;flex-wrap:wrap;gap:.5rem 1.6rem;margin-top:2rem;
+  font-family:var(--f-mono);font-size:12.5px;color:var(--ink-3)
+}
+.mast__meta b{font-weight:500;color:var(--ink-2)}
+
+/* ---------- table of contents ---------------------------------------- */
+.toc{font-family:var(--f-display);font-size:13.5px;line-height:1.45}
+@media (min-width:1080px){ .toc{position:sticky;top:1.75rem;max-height:calc(100vh - 3.5rem);overflow-y:auto} }
+.toc__title{
+  font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 .9rem;padding-bottom:.7rem;border-bottom:1px solid var(--rule)
+}
+.toc ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.15rem}
+.toc a{
+  display:flex;gap:.65rem;text-decoration:none;color:var(--ink-2);
+  padding:.4rem .5rem;border-radius:4px;transition:background .15s,color .15s
+}
+.toc a:hover{background:var(--accent-soft);color:var(--ink)}
+.toc a span{font-family:var(--f-mono);font-size:11px;color:var(--ink-3);padding-top:.15em;flex:0 0 auto}
+
+/* ---------- sections -------------------------------------------------- */
+.sec{margin-bottom:clamp(3rem,7vw,5rem);scroll-margin-top:1.5rem}
+.sec__head{display:flex;gap:1rem;align-items:baseline;margin-bottom:1.4rem;padding-bottom:.85rem;border-bottom:1px solid var(--rule)}
+.sec__num{
+  font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.1em;
+  color:var(--accent);flex:0 0 auto;padding-top:.35em
+}
+.sec__title{
+  font-family:var(--f-display);font-weight:600;font-size:clamp(1.32rem,1.15rem + .7vw,1.75rem);
+  letter-spacing:-.014em;margin:0;line-height:1.2;text-wrap:balance
+}
+h3{font-family:var(--f-display);font-weight:600;font-size:1.06rem;letter-spacing:-.008em;margin:2rem 0 .7rem;line-height:1.3}
+h4{font-family:var(--f-display);font-weight:600;font-size:.95rem;margin:1.5rem 0 .5rem}
+p{margin:0 0 1.05rem;max-width:var(--measure)}
+.lede{font-size:1.09rem;color:var(--ink-2)}
+a{color:var(--accent)}
+b,strong{font-weight:600}
+code{font-family:var(--f-mono);font-size:.85em;background:var(--surface-2);padding:.1em .38em;border-radius:3px;color:var(--ink)}
+
+/* Arabic inline term */
+.ar{font-family:var(--f-ar);font-size:.95em;font-weight:500;font-feature-settings:"kern"}
+.ar--h{font-weight:600}
+
+ul.list{margin:0 0 1.05rem;padding:0;list-style:none;max-width:var(--measure);display:flex;flex-direction:column;gap:.5rem}
+ul.list li{position:relative;padding-left:1.15rem;color:var(--ink-2)}
+ul.list li::before{content:"—";position:absolute;left:0;color:var(--ink-3)}
+ul.list li b{color:var(--ink)}
+
+.note{
+  background:var(--accent-soft);border-left:3px solid var(--accent-2);
+  padding:1rem 1.15rem;margin:1.5rem 0;border-radius:0 6px 6px 0;max-width:var(--measure)
+}
+.note h4{margin-top:0}
+.note p:last-child{margin-bottom:0}
+
+/* RTL run — Arabic sets that would otherwise reorder inside an LTR sentence */
+.rtl{
+  direction:rtl;text-align:right;font-family:var(--f-ar);font-weight:500;
+  background:var(--surface);border:1px solid var(--rule);border-radius:6px;
+  padding:.75rem .9rem;margin:.75rem 0;font-size:.97rem;line-height:1.9;color:var(--ink)
+}
+.rtl b{font-weight:600}
+.rtl__c{
+  direction:rtl;display:grid;gap:.15rem .9rem;grid-template-columns:repeat(auto-fill,minmax(13.5rem,1fr));
+  margin:0;padding:0;list-style:none
+}
+.rtl__c li{position:relative;padding-right:.95rem}
+.rtl__c li::before{content:"·";position:absolute;right:.15rem;color:var(--ink-3)}
+
+/* ---------- flow rail ------------------------------------------------- */
+.flow{
+  display:flex;flex-wrap:wrap;align-items:center;gap:.4rem .1rem;
+  margin:1.2rem 0 1.6rem;padding:.95rem 1.1rem;
+  background:var(--surface);border:1px solid var(--rule);border-radius:8px;
+  font-family:var(--f-mono);font-size:12.5px;line-height:1.5
+}
+.flow__step{
+  background:var(--surface-2);color:var(--ink);border-radius:4px;
+  padding:.3rem .55rem;white-space:nowrap
+}
+.flow__step .ar{font-size:12.5px}
+.flow__step--start{background:var(--accent);color:var(--surface)}
+.flow__step--end{background:var(--pass-bg);color:var(--pass);font-weight:500}
+.flow__arw{color:var(--ink-3);padding:0 .42rem;flex:0 0 auto}
+.flow__lbl{
+  font-family:var(--f-mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-3);width:100%;margin-bottom:.15rem
+}
+
+/* ---------- lifecycle track ------------------------------------------- */
+.life{margin:1.6rem 0 1.2rem;padding:1.3rem 1.2rem;background:var(--surface);border:1px solid var(--rule);border-radius:8px}
+.life__row{display:flex;flex-wrap:wrap;align-items:stretch;gap:.35rem}
+.life__node{
+  flex:1 1 8.5rem;border:1px solid var(--rule);border-radius:6px;background:var(--ground);
+  padding:.7rem .75rem;display:flex;flex-direction:column;gap:.25rem;min-width:0
+}
+.life__node b{font-family:var(--f-ar);font-weight:600;font-size:1rem;color:var(--ink)}
+.life__node span{font-family:var(--f-mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.06em}
+.life__node--term{border-style:solid;border-color:var(--pass);background:var(--pass-bg)}
+.life__node--term b{color:var(--pass)}
+.life__arw{display:flex;align-items:center;color:var(--ink-3);font-family:var(--f-mono);font-size:15px;flex:0 0 auto}
+.life__branch{
+  margin-top:.85rem;padding-top:.85rem;border-top:1px dashed var(--rule);
+  display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;font-size:14.5px;color:var(--ink-2)
+}
+.life__cancel{
+  border:1px solid var(--fail);background:var(--fail-bg);color:var(--fail);
+  border-radius:6px;padding:.5rem .75rem;font-family:var(--f-ar);font-weight:600;font-size:.98rem
+}
+
+/* ---------- tables ---------------------------------------------------- */
+.tw{overflow-x:auto;margin:1.4rem 0;border:1px solid var(--rule);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:34rem}
+th,td{text-align:left;padding:.68rem .85rem;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+thead th{
+  font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);background:var(--surface-2);border-bottom:1px solid var(--rule);white-space:nowrap
+}
+tbody tr:last-child td{border-bottom:none}
+td b{color:var(--ink);font-weight:600}
+td{color:var(--ink-2)}
+.num{font-family:var(--f-mono);font-size:12px;color:var(--ink-3);white-space:nowrap;font-variant-numeric:tabular-nums}
+.yes{color:var(--pass);font-weight:600}
+.no{color:var(--ink-3)}
+.part{color:var(--warn);font-weight:600}
+
+.chip{
+  display:inline-block;font-family:var(--f-mono);font-size:10.5px;font-weight:500;letter-spacing:.08em;
+  text-transform:uppercase;padding:.16rem .45rem;border-radius:3px;white-space:nowrap
+}
+.chip--pass{background:var(--pass-bg);color:var(--pass)}
+.chip--warn{background:var(--warn-bg);color:var(--warn)}
+.chip--fail{background:var(--fail-bg);color:var(--fail)}
+.chip--n{background:var(--accent-soft);color:var(--accent)}
+
+/* ---------- findings -------------------------------------------------- */
+.find{
+  position:relative;background:var(--surface);border:1px solid var(--rule);border-radius:8px;
+  padding:1.1rem 1.25rem 1.15rem 1.5rem;margin-bottom:1rem;overflow:hidden
+}
+.find::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ink-3)}
+.find--p1::before{background:var(--fail)}
+.find--p2::before{background:var(--warn)}
+.find--p3::before{background:var(--accent-2)}
+.find__head{display:flex;flex-wrap:wrap;gap:.55rem .85rem;align-items:baseline;margin-bottom:.6rem}
+.find__id{font-family:var(--f-mono);font-size:12px;font-weight:500;color:var(--ink-3)}
+.find__title{font-family:var(--f-display);font-weight:600;font-size:1rem;margin:0;flex:1 1 16rem;line-height:1.35}
+.find dl{margin:0;display:grid;gap:.45rem .9rem;grid-template-columns:auto minmax(0,1fr);font-size:14.5px}
+.find dt{
+  font-family:var(--f-mono);font-size:10.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);padding-top:.35em;white-space:nowrap
+}
+.find dd{margin:0;color:var(--ink-2);line-height:1.55;max-width:66ch}
+.find dd b{color:var(--ink);font-weight:600}
+@media (max-width:620px){
+  .find dl{grid-template-columns:minmax(0,1fr);gap:.15rem .9rem}
+  .find dt{padding-top:.6em}
+}
+
+/* ---------- module dossier -------------------------------------------- */
+.mod{
+  background:var(--surface);border:1px solid var(--rule);border-radius:8px;
+  padding:1.25rem 1.35rem 1.35rem;margin-bottom:1.15rem
+}
+.mod__head{display:flex;flex-wrap:wrap;gap:.5rem .9rem;align-items:baseline;padding-bottom:.8rem;margin-bottom:.9rem;border-bottom:1px solid var(--rule-soft)}
+.mod__num{font-family:var(--f-mono);font-size:12px;font-weight:500;color:var(--accent);flex:0 0 auto}
+.mod__name{font-family:var(--f-ar);font-weight:700;font-size:1.25rem;margin:0;color:var(--ink);line-height:1.3}
+.mod__en{font-family:var(--f-display);font-weight:500;font-size:.86rem;color:var(--ink-3);letter-spacing:.01em}
+.mod dl{margin:0;display:grid;gap:.5rem .95rem;grid-template-columns:7.4rem minmax(0,1fr);font-size:14.5px}
+.mod dt{
+  font-family:var(--f-mono);font-size:10.5px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);padding-top:.4em
+}
+.mod dd{margin:0;color:var(--ink-2);line-height:1.55}
+.mod dd b{color:var(--ink);font-weight:600}
+.mod dd .ar{color:var(--ink)}
+@media (max-width:620px){
+  .mod dl{grid-template-columns:minmax(0,1fr);gap:.12rem .9rem}
+  .mod dt{padding-top:.75em}
+}
+
+/* ---------- pattern cards --------------------------------------------- */
+.pats{display:grid;gap:.8rem;grid-template-columns:repeat(auto-fill,minmax(15.5rem,1fr));margin:1.4rem 0}
+.pat{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:.95rem 1.05rem;display:flex;flex-direction:column;gap:.3rem}
+.pat__id{font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.09em;color:var(--accent)}
+.pat__name{font-family:var(--f-ar);font-weight:600;font-size:1rem;color:var(--ink);margin:0}
+.pat__en{font-family:var(--f-display);font-size:.8rem;color:var(--ink-3);margin:0}
+.pat__body{font-size:14px;color:var(--ink-2);margin:.3rem 0 0;line-height:1.5}
+
+/* ---------- handoff / foot -------------------------------------------- */
+.handoff{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:clamp(1.3rem,3vw,2rem)}
+.handoff ol{margin:0;padding-left:1.3rem;display:flex;flex-direction:column;gap:.6rem;max-width:var(--measure)}
+.handoff li{padding-left:.3rem;color:var(--ink-2)}
+.handoff li b{color:var(--ink)}
+.foot{
+  border-top:1px solid var(--rule);margin-top:clamp(2.5rem,6vw,4rem);padding-block:1.6rem 3rem;
+  font-family:var(--f-mono);font-size:12px;color:var(--ink-3);display:flex;flex-wrap:wrap;gap:.4rem 1.5rem
+}
+</style>
+
+<div class="wrap">
+
+  <header class="mast">
+    <p class="mast__eyebrow">Admin dashboard · Stage 02</p>
+    <h1 class="mast__title">UX Architecture &amp; User Flows</h1>
+    <p class="mast__sub">The task flow map for the <span class="ar">عون الدرب للنقل المتخصص</span> admin dashboard.
+      Ten behavioural patterns, eight module dossiers, and one context contract — resolved against what the
+      live site actually is, not against what an admin dashboard usually is.</p>
+    <div class="mast__meta">
+      <span>Source of truth · <b>index.html</b> (built site)</span>
+      <span>Continues · <b>Stage 01 architecture</b></span>
+      <span>Hands to · <b>Stage 03 design system</b></span>
+      <span>Scope · <b>UX behaviour only</b></span>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <nav class="toc" aria-label="Contents">
+      <p class="toc__title">Contents</p>
+      <ol>
+        <li><a href="#s1"><span>01</span>What the site actually is</a></li>
+        <li><a href="#s2"><span>02</span>Stage 01 baseline</a></li>
+        <li><a href="#s3"><span>03</span>Operating rules</a></li>
+        <li><a href="#s4"><span>04</span>The global flow</a></li>
+        <li><a href="#s5"><span>05</span>The context contract</a></li>
+        <li><a href="#s6"><span>06</span>Navigation model</a></li>
+        <li><a href="#s7"><span>07</span>Dashboard flow</a></li>
+        <li><a href="#s8"><span>08</span>Requests — discovery</a></li>
+        <li><a href="#s9"><span>09</span>Requests — the record</a></li>
+        <li><a href="#s10"><span>10</span>The status lifecycle</a></li>
+        <li><a href="#s11"><span>11</span>Customers</a></li>
+        <li><a href="#s12"><span>12</span>Services</a></li>
+        <li><a href="#s13"><span>13</span>Website content</a></li>
+        <li><a href="#s14"><span>14</span>FAQs &amp; testimonials</a></li>
+        <li><a href="#s15"><span>15</span>Settings</a></li>
+        <li><a href="#s16"><span>16</span>Users &amp; permissions</a></li>
+        <li><a href="#s17"><span>17</span>Reports</a></li>
+        <li><a href="#s18"><span>18</span>Search &amp; filter</a></li>
+        <li><a href="#s19"><span>19</span>Forms</a></li>
+        <li><a href="#s20"><span>20</span>Destructive actions</a></li>
+        <li><a href="#s21"><span>21</span>The four states</a></li>
+        <li><a href="#s22"><span>22</span>Responsive behaviour</a></li>
+        <li><a href="#s23"><span>23</span>Accessibility</a></li>
+        <li><a href="#s24"><span>24</span>The pattern library</a></li>
+        <li><a href="#s25"><span>25</span>Module flow map</a></li>
+        <li><a href="#s26"><span>26</span>Open decisions</a></li>
+        <li><a href="#s27"><span>27</span>Handoff to Stage 03</a></li>
+      </ol>
+    </nav>
+
+    <main>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s1">
+  <div class="sec__head"><span class="sec__num">01</span><h2 class="sec__title">What the site actually is</h2></div>
+  <p class="lede">Stage 02 was read against the built site before any flow was drawn. Four facts came back
+    that change the UX, and they are stated first because every later section depends on them.</p>
+
+  <div class="find find--p1">
+    <div class="find__head"><span class="find__id">F1</span>
+      <h3 class="find__title" style="margin:0">There is no request form on the website</h3>
+      <span class="chip chip--fail">Shapes the whole module</span></div>
+    <dl>
+      <dt>Evidence</dt><dd>The <span class="ar">تواصل معنا</span> section contains zero <code>&lt;input&gt;</code> and no
+        <code>&lt;form&gt;</code>. The only contact affordances on the entire page are <code>tel:+966535544352</code>
+        and <code>wa.me/966535544352</code>.</dd>
+      <dt>Consequence</dt><dd><span class="ar">طلبات النقل</span> is <b>not an inbox</b>. Requests arrive by phone and
+        WhatsApp, and someone types them in. So <b>recording a request is a primary action</b>, not a rare one —
+        it belongs on the dashboard, on the requests list, and inside the customer profile.</dd>
+      <dt>Design for</dt><dd>The record form is used <b>while the admin is on the call</b>. That is the single most
+        demanding flow in the product: fast, forgiving, phone-shaped, and it must never lose typed input.</dd>
+      <dt>Future</dt><dd>One field — <span class="ar">مصدر الطلب</span> (phone / WhatsApp) — keeps the module ready for a
+        website form later without restructuring. See <a href="#s26">D1</a>.</dd>
+    </dl>
+  </div>
+
+  <div class="find find--p2">
+    <div class="find__head"><span class="find__id">F2</span>
+      <h3 class="find__title" style="margin:0">FAQs and testimonials have nowhere to appear</h3>
+      <span class="chip chip--warn">Needs a client decision</span></div>
+    <dl>
+      <dt>Evidence</dt><dd>Neither <span class="ar">الأسئلة الشائعة</span> nor <span class="ar">آراء العملاء</span> exists
+        anywhere in the built page.</dd>
+      <dt>Consequence</dt><dd>The dashboard can manage both, but saving one publishes it nowhere. Managing content that
+        has no destination is the fastest way to lose a client's trust in a CMS.</dd>
+      <dt>Resolution</dt><dd>Both content types ship, and both carry a standing, honest status:
+        <span class="chip chip--warn">لا تظهر على الموقع بعد</span> — shown on the content hub and inside each editor,
+        until a website section exists to receive them. See <a href="#s26">D2</a>.</dd>
+    </dl>
+  </div>
+
+  <div class="find find--p3">
+    <div class="find__head"><span class="find__id">F3</span>
+      <h3 class="find__title" style="margin:0">Contact information has two candidate homes</h3></div>
+    <dl>
+      <dt>Evidence</dt><dd>Stage 01 lists <span class="ar">معلومات التواصل</span> under both <span class="ar">المحتوى</span>
+        and <span class="ar">الإعدادات</span>, while also forbidding duplicated content management.</dd>
+      <dt>Resolution</dt><dd>Contact information is <b>company data, edited once, in <span class="ar">الإعدادات</span></b> —
+        it feeds the header, the contact section and the footer simultaneously, so it is not a page of copy.
+        <span class="ar">المحتوى</span> shows it <b>read-only with a link</b>, never a second editor. One field, one home.</dd>
+      <dt>Also</dt><dd>The site currently carries <b>no social links at all</b>. That settings category ships empty
+        rather than inventing accounts.</dd>
+    </dl>
+  </div>
+
+  <div class="find find--p3">
+    <div class="find__head"><span class="find__id">F4</span>
+      <h3 class="find__title" style="margin:0">The site has three editable areas Stage 01 did not list</h3></div>
+    <dl>
+      <dt>Evidence</dt><dd>Live sections include <span class="ar">كيف نعمل</span> (3 stages),
+        <span class="ar">رؤيتنا ورسالتنا</span>, and <span class="ar">القيم</span> (6 values) — all real published copy.</dd>
+      <dt>Consequence</dt><dd>Stage 01's content list was introduced with "such as", and the built site is the source of
+        truth. All three enter <span class="ar">المحتوى</span>. Leaving them out would mean the client can edit
+        two-thirds of their own page.</dd>
+      <dt>Not added</dt><dd>Nothing else. No blog, no media library, no pages builder.</dd>
+    </dl>
+  </div>
+
+  <div class="note">
+    <h4>The inventory this stage is built against</h4>
+    <p>The seven approved services, in the order the website publishes them:</p>
+    <ul class="rtl rtl__c">
+      <li>النقل بواسطة الكرسي المتحرك</li>
+      <li>النقل بواسطة الكرسي الكهربائي</li>
+      <li>النقل بواسطة السرير الطبي</li>
+      <li>خدمة مساعد السائق</li>
+      <li>النقل اليومي</li>
+      <li>النقل إلى المستشفيات والمراكز الطبية</li>
+      <li>التنقل للمناسبات الاجتماعية</li>
+    </ul>
+    <p>Alongside them: <b>6 differentiators</b>, <b>6 values</b>, <b>3 journey stages</b>, a vision, a mission and one
+      contact block. Numerals on the site are <b>Western digits</b>, and the dashboard follows. The audience is named
+      <span class="ar">ذوي الاحتياجات الخاصة</span> — 10 uses on the page, zero violations, and this stage introduces none.</p>
+  </div>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s2">
+  <div class="sec__head"><span class="sec__num">02</span><h2 class="sec__title">Stage 01 baseline</h2></div>
+  <p>The eight approved modules, their access, and the roles — carried forward unchanged so Stage 02 has a
+    fixed spine to attach flows to. Access is stated as <b>what a role can reach</b>, not as a permission matrix;
+    the client never sees this table.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th class="num">#</th><th>Module</th><th>Purpose in one line</th><th>Super Admin</th><th>Admin</th><th>Content Manager</th></tr></thead>
+      <tbody>
+        <tr><td class="num">01</td><td><b><span class="ar ar--h">الرئيسية</span></b></td><td>What needs attention, what changed, what to do next</td><td class="yes">Full</td><td class="yes">Full</td><td class="part">Content view</td></tr>
+        <tr><td class="num">02</td><td><b><span class="ar ar--h">طلبات النقل</span></b></td><td>Record, track and close transportation requests</td><td class="yes">Full</td><td class="yes">Full</td><td class="no">None</td></tr>
+        <tr><td class="num">03</td><td><b><span class="ar ar--h">العملاء</span></b></td><td>Customer records and their request history</td><td class="yes">Full</td><td class="yes">Full</td><td class="no">None</td></tr>
+        <tr><td class="num">04</td><td><b><span class="ar ar--h">الخدمات</span></b></td><td>Edit, order and show/hide the 7 approved services</td><td class="yes">Full</td><td class="yes">Full</td><td class="yes">Full</td></tr>
+        <tr><td class="num">05</td><td><b><span class="ar ar--h">المحتوى</span></b></td><td>Edit the website's published copy</td><td class="yes">Full</td><td class="yes">Full</td><td class="yes">Full</td></tr>
+        <tr><td class="num">06</td><td><b><span class="ar ar--h">الإعدادات</span></b></td><td>Company, contact, social, site and language settings</td><td class="yes">Full</td><td class="part">If granted</td><td class="no">None</td></tr>
+        <tr><td class="num">07</td><td><b><span class="ar ar--h">المستخدمون والصلاحيات</span></b></td><td>Who can sign in, and what they can reach</td><td class="yes">Full</td><td class="no">None</td><td class="no">None</td></tr>
+        <tr><td class="num">08</td><td><b><span class="ar ar--h">التقارير</span></b></td><td>Basic request and customer counts over a period</td><td class="yes">Full</td><td class="yes">Full</td><td class="no">None</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p><b>Hidden, not disabled.</b> A role that cannot reach a module does not see it greyed out in the navigation —
+    it is absent. A Content Manager signing in sees four items, not eight with four locks. Locks invite requests;
+    absence is quiet.</p>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s3">
+  <div class="sec__head"><span class="sec__num">03</span><h2 class="sec__title">Operating rules</h2></div>
+  <p>The Stage 01 principles restated as rules that can be checked against a screen. Each is testable.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th class="num">Rule</th><th>Statement</th><th>How it is checked</th></tr></thead>
+      <tbody>
+        <tr><td class="num">R1</td><td><b>One screen, one question.</b> Every screen answers a single question the client actually asks.</td><td>Name the question. If it takes an "and", the screen is doing two jobs.</td></tr>
+        <tr><td class="num">R2</td><td><b>Two moves to any record.</b> Any request or customer is reachable in at most two interactions from <span class="ar">الرئيسية</span>.</td><td>Count the taps from a cold start.</td></tr>
+        <tr><td class="num">R3</td><td><b>Never lose the place.</b> Finishing an action returns the user to where they started it, in the state they left it.</td><td>See the <a href="#s5">context contract</a>.</td></tr>
+        <tr><td class="num">R4</td><td><b>Never lose the typing.</b> No error, validation failure, or accidental navigation discards entered text.</td><td>Fail a save on a full form; the values survive.</td></tr>
+        <tr><td class="num">R5</td><td><b>One modal deep.</b> Confirmations and filter sheets never stack on each other.</td><td>No path opens a second overlay above the first.</td></tr>
+        <tr><td class="num">R6</td><td><b>Status is never colour alone.</b> Every state carries a word; colour only reinforces it.</td><td>Greyscale the screen — meaning survives.</td></tr>
+        <tr><td class="num">R7</td><td><b>Reversible beats destructive.</b> Where hiding achieves the goal, deletion is not offered.</td><td>Count delete actions in the product. Each one must justify itself.</td></tr>
+        <tr><td class="num">R8</td><td><b>RTL is the layout, not a switch.</b> Reading, navigation, progression and table columns all run right to left.</td><td>Nothing mirrors incorrectly; numerals and phone numbers stay Western and LTR.</td></tr>
+        <tr><td class="num">R9</td><td><b>Same verb, same behaviour.</b> Save, cancel, filter and status change behave identically in all eight modules.</td><td>The <a href="#s24">pattern matrix</a> has no exceptions column.</td></tr>
+        <tr><td class="num">R10</td><td><b>Plain Arabic, no system words.</b> The interface names things the way the client says them out loud.</td><td>No "record", "entity", "slug", "publish state", "CMS", "API".</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    <h4>What RTL actually means here</h4>
+    <p>Primary navigation sits on the <b>right</b>. Progression moves <b>right to left</b>, so the return control sits at
+      the <b>start</b> of the content — the right edge — and its arrow points <b>right</b> (<code>→</code>), toward where the user
+      came from. Table columns read right to left, with the identifying column first on the right. Phone numbers,
+      dates, times and counts stay in Western digits and keep their own left-to-right run inside the Arabic line.</p>
+  </div>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s4">
+  <div class="sec__head"><span class="sec__num">04</span><h2 class="sec__title">The global flow</h2></div>
+  <p>One spine, followed by every module without exception.</p>
+
+  <div class="flow">
+    <span class="flow__lbl">Global task spine</span>
+    <span class="flow__step flow__step--start"><span class="ar">تسجيل الدخول</span></span><span class="flow__arw">→</span>
+    <span class="flow__step"><span class="ar">الرئيسية</span></span><span class="flow__arw">→</span>
+    <span class="flow__step">Module</span><span class="flow__arw">→</span>
+    <span class="flow__step">List</span><span class="flow__arw">→</span>
+    <span class="flow__step">Filter / search</span><span class="flow__arw">→</span>
+    <span class="flow__step">Record</span><span class="flow__arw">→</span>
+    <span class="flow__step">Action</span><span class="flow__arw">→</span>
+    <span class="flow__step">Confirm</span><span class="flow__arw">→</span>
+    <span class="flow__step flow__step--end">Result + return to origin</span>
+  </div>
+
+  <h3>Entry: the session flow</h3>
+  <div class="flow">
+    <span class="flow__lbl">Sign-in</span>
+    <span class="flow__step flow__step--start">Sign-in screen</span><span class="flow__arw">→</span>
+    <span class="flow__step">Validate</span><span class="flow__arw">→</span>
+    <span class="flow__step">Role resolved</span><span class="flow__arw">→</span>
+    <span class="flow__step flow__step--end">Landing for that role</span>
+  </div>
+  <ul class="list">
+    <li><b>Wrong credentials</b> — one message above the form: what to do next, not what failed technically. The typed
+      identifier survives; only the password field clears.</li>
+    <li><b>Forgotten password</b> — no self-service email reset is assumed, because no mail system exists in this
+      project. The screen states who to contact, and the Super Admin resets it from
+      <span class="ar">المستخدمون والصلاحيات</span>. See <a href="#s26">D4</a>.</li>
+    <li><b>Session expiry</b> — signing back in returns the user to <b>the screen they were on</b>, not to the dashboard.
+      Any unsaved form content is restored with it (R4).</li>
+    <li><b>Landing by role</b> — Super Admin and Admin land on <span class="ar">الرئيسية</span>; a Content Manager lands on
+      the content-shaped variant of it.</li>
+  </ul>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s5">
+  <div class="sec__head"><span class="sec__num">05</span><h2 class="sec__title">The context contract</h2></div>
+  <p class="lede">R3 is the rule most easily broken by accident, so it is specified rather than asserted.
+    "Return to the appropriate previous context" means exactly this:</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>What is preserved</th><th>Rule</th></tr></thead>
+      <tbody>
+        <tr><td><b>List state</b></td><td>Active filters, search text, sort, page and scroll position are all restored on return. They survive a full page reload, because they live in the address, not in memory.</td></tr>
+        <tr><td><b>Origin</b></td><td>Return goes back to <b>where the user came from</b>, not to a fixed page. A request opened from a customer profile returns to that profile. The same request opened from the dashboard returns to the dashboard's filtered list.</td></tr>
+        <tr><td><b>After save</b></td><td>Editing an existing record returns to the record, updated, with an inline confirmation. The user stays where the work is.</td></tr>
+        <tr><td><b>After create</b></td><td>Creating lands on <b>the new record</b>, not back on the list — the admin is usually still on the phone and needs to read back what was captured.</td></tr>
+        <tr><td><b>After status change</b></td><td>Stays on the record. The state on screen updates in place. No navigation.</td></tr>
+        <tr><td><b>After delete or hide</b></td><td>Returns to the list, with the same filters, and says what was removed.</td></tr>
+        <tr><td><b>After cancel</b></td><td>Abandoning a form returns to the exact origin and changes nothing. If anything was typed, the user is asked first (R4).</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    <h4>Why the address bar carries filter state</h4>
+    <p>Because it is the only mechanism that survives a reload, a back button, a shared link and a session timeout at
+      once. A dashboard counter reading <span class="ar">طلبات جديدة</span> is then simply a link to the requests list
+      already filtered — one mechanism serving navigation, restoration and hand-off to a colleague, instead of three.</p>
+  </div>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s6">
+  <div class="sec__head"><span class="sec__num">06</span><h2 class="sec__title">Navigation model</h2></div>
+  <p>Two tiers only, per Stage 01. Tier one is the eight modules. Tier two lives inside a module and never
+    climbs into the main navigation.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Tier</th><th>Holds</th><th>Never holds</th></tr></thead>
+      <tbody>
+        <tr><td><b>Primary</b><br><span class="num">Persistent</span></td><td>The eight modules the signed-in role can reach. Current module is marked with text and position, not colour alone.</td><td>Filters, individual records, statuses, create actions, report names, content types.</td></tr>
+        <tr><td><b>In-module</b><br><span class="num">Contextual</span></td><td>Content types, settings categories, report selection, list filters, record actions.</td><td>Anything that belongs to a different module.</td></tr>
+        <tr><td><b>Account</b><br><span class="num">Corner</span></td><td>The signed-in name, role, and sign-out.</td><td>Settings — those are a module, not a personal menu.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ul class="list">
+    <li><b>Global search</b> sits in the header and covers requests and customers only — the two things looked up by
+      name or number under time pressure. It does not search website copy.</li>
+    <li><b>Breadcrumb</b> is a single return control, not a trail: <span class="ar">→ العودة إلى الطلبات</span>. It names the
+      destination so it can be trusted without thought, and it honours the origin rule in §05.</li>
+    <li><b>Depth limit.</b> No module goes deeper than <b>list → record → edit</b>. Anything that wants a fourth level is
+      a sign the record view is under-built.</li>
+  </ul>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s7">
+  <div class="sec__head"><span class="sec__num">07</span><h2 class="sec__title">Dashboard flow</h2></div>
+  <p class="lede"><span class="ar ar--h">الرئيسية</span> answers three questions in this order, top to bottom.
+    It is a launcher, not a report.</p>
+
+  <div class="flow">
+    <span class="flow__lbl">Attention → action</span>
+    <span class="flow__step flow__step--start"><span class="ar">الرئيسية</span></span><span class="flow__arw">→</span>
+    <span class="flow__step">Scan attention band</span><span class="flow__arw">→</span>
+    <span class="flow__step">Tap a count</span><span class="flow__arw">→</span>
+    <span class="flow__step flow__step--end">Requests, already filtered</span>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Band</th><th>Answers</th><th>Contains</th><th>Every item links to</th></tr></thead>
+      <tbody>
+        <tr><td><b>1 · <span class="ar ar--h">يحتاج انتباهك</span></b></td><td>What needs my attention?</td><td>New requests awaiting a first look; requests sitting in <span class="ar">قيد المراجعة</span> longer than expected; confirmed trips dated today and tomorrow.</td><td>The requests list, pre-filtered to exactly that set.</td></tr>
+        <tr><td><b>2 · <span class="ar ar--h">حالة الطلبات</span></b></td><td>Where does everything stand?</td><td>One count per status — five figures, in lifecycle order, with the words.</td><td>The requests list filtered to that status.</td></tr>
+        <tr><td><b>3 · <span class="ar ar--h">آخر النشاطات</span></b></td><td>What happened recently?</td><td>The last several changes: what changed, on which record, by whom, when.</td><td>The record that changed.</td></tr>
+        <tr><td><b>4 · <span class="ar ar--h">إجراءات سريعة</span></b></td><td>What can I do next?</td><td><span class="ar">تسجيل طلب</span> first (F1), then <span class="ar">إضافة عميل</span> and <span class="ar">تعديل محتوى الموقع</span>.</td><td>The relevant form or hub.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ul class="list">
+    <li><b>Band 1 is the point of the screen.</b> If it is empty, it says so plainly —
+      <span class="ar">لا توجد طلبات تحتاج انتباهك الآن</span> — and the screen is quiet. An empty attention band is
+      good news and should read like it, not like a broken widget.</li>
+    <li><b>No charts here.</b> Trends belong to <span class="ar">التقارير</span>. The dashboard carries counts and names only.</li>
+    <li><b>Content Manager variant.</b> Bands 1–3 are request-shaped and that role cannot see requests. They land on a
+      screen listing the content areas with when each was last edited, and a single quick action:
+      <span class="ar">تعديل محتوى الموقع</span>.</li>
+    <li><b>States.</b> First run — no requests exist yet, so the screen explains how requests get here (they are
+      recorded from calls) and offers <span class="ar">تسجيل طلب</span>. Loading — counts appear as placeholders holding
+      their final size, so nothing jumps. Error — a band that fails to load says so and offers retry, and the other
+      bands still work.</li>
+  </ul>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s8">
+  <div class="sec__head"><span class="sec__num">08</span><h2 class="sec__title">Requests — discovery</h2></div>
+  <p>Five entry points, one destination. The list is the module's home and remembers how it was left.</p>
+
+  <div class="flow">
+    <span class="flow__lbl">Discovery</span>
+    <span class="flow__step flow__step--start">Entry point</span><span class="flow__arw">→</span>
+    <span class="flow__step">Requests list</span><span class="flow__arw">→</span>
+    <span class="flow__step">Search / filter / sort</span><span class="flow__arw">→</span>
+    <span class="flow__step flow__step--end">Open the request</span>
+  </div>
+
+  <ul class="list">
+    <li><b>Entry points</b> — primary navigation; a dashboard count (arrives pre-filtered); the dashboard quick action
+      (arrives at the record form); a customer's request history; global search by name, phone or request number.</li>
+    <li><b>Default view</b> — everything, newest first. New requests are marked in the row itself, so the default view
+      never hides them behind a filter the client has to know to apply.</li>
+    <li><b>Sort</b> — creation date and trip date, ascending or descending. Two axes, because those are the two the
+      work actually turns on: what came in, and what is coming up.</li>
+  </ul>
+
+  <h3>Filters</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Filter</th><th>Options</th><th>Behaviour</th></tr></thead>
+      <tbody>
+        <tr><td><b><span class="ar ar--h">الحالة</span></b></td><td>The five statuses, plus <span class="ar">الكل</span></td><td>Single select. Reflected in the address so a dashboard count can link straight to it.</td></tr>
+        <tr><td><b><span class="ar ar--h">التاريخ</span></b></td><td><span class="ar">اليوم · هذا الأسبوع · هذا الشهر · فترة مخصصة</span></td><td>Applies to the trip date by default; a switch changes it to the creation date. One control, stated clearly, rather than two date filters.</td></tr>
+        <tr><td><b><span class="ar ar--h">الخدمة</span></b></td><td>The 7 approved services</td><td>Single select from the same list the site publishes — never free text.</td></tr>
+        <tr><td><b><span class="ar ar--h">المصدر</span></b></td><td><span class="ar">هاتف · واتساب</span></td><td>Present because of F1. Ready to gain <span class="ar">الموقع</span> with no restructuring.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>The row</h3>
+  <p>Desktop shows, reading right to left: request number, customer name, service, trip date, status, created.
+    Mobile drops to a record card carrying <b>name, service, trip date, status</b> — plus call and WhatsApp,
+    which are first-class on mobile because that is the device the admin is holding when the customer needs
+    reaching. See §22.</p>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s9">
+  <div class="sec__head"><span class="sec__num">09</span><h2 class="sec__title">Requests — the record</h2></div>
+  <p class="lede">Opening a request opens a focused screen, not a modal. The order below is the order the
+    information is needed in during a call, which is not the order it was collected in.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th class="num">#</th><th>Block</th><th>Holds</th><th>Why it sits here</th></tr></thead>
+      <tbody>
+        <tr><td class="num">1</td><td><b>Identity &amp; state</b></td><td>Request number, current status, created date</td><td>The first question is always "where is this one?"</td></tr>
+        <tr><td class="num">2</td><td><b>Customer &amp; contact</b></td><td>Name, phone — with call and WhatsApp actions attached</td><td>The second thing anyone does is reach the customer. The action sits on the number, not in a menu.</td></tr>
+        <tr><td class="num">3</td><td><b>Service</b></td><td>One of the 7 approved services</td><td>Determines the vehicle and the crew.</td></tr>
+        <tr><td class="num">4</td><td><b>The trip</b></td><td>Pickup, destination, date and time</td><td>Read together, in that order, because that is the sentence being confirmed on the phone.</td></tr>
+        <tr><td class="num">5</td><td><b>Notes</b></td><td>Free text, appended over time, each entry stamped with who and when</td><td>This is where everything the form did not anticipate lands — including why a request was cancelled.</td></tr>
+        <tr><td class="num">6</td><td><b>Status history</b></td><td>Each change: from, to, by whom, when</td><td>Answers "who confirmed this?" without a phone call. Read-only.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Actions on a request</h3>
+  <ul class="list">
+    <li><b>Primary</b> — <span class="ar">تغيير الحالة</span>. One control, always in the same place, moving the request
+      along the lifecycle in §10.</li>
+    <li><b>Secondary</b> — <span class="ar">اتصال</span>, <span class="ar">واتساب</span> (both act on the stored number),
+      <span class="ar">تعديل الطلب</span>, <span class="ar">إضافة ملاحظة</span>.</li>
+    <li><b>Consequential</b> — <span class="ar">إلغاء الطلب</span>. Sits apart, at the end of the action set, never styled
+      as the obvious next step, and always confirmed (§20).</li>
+    <li><b>Not offered</b> — deleting a request. A cancelled request is a business fact worth keeping; erasing it
+      destroys the customer's history and the report counts along with it (R7).</li>
+  </ul>
+
+  <h3>Recording a request — the F1 flow</h3>
+  <div class="flow">
+    <span class="flow__lbl">On the call</span>
+    <span class="flow__step flow__step--start"><span class="ar">تسجيل طلب</span></span><span class="flow__arw">→</span>
+    <span class="flow__step">Phone number first</span><span class="flow__arw">→</span>
+    <span class="flow__step">Known customer? auto-fill</span><span class="flow__arw">→</span>
+    <span class="flow__step">Trip details</span><span class="flow__arw">→</span>
+    <span class="flow__step">Save</span><span class="flow__arw">→</span>
+    <span class="flow__step flow__step--end">The new request, ready to read back</span>
+  </div>
+  <ul class="list">
+    <li><b>The phone number is the first field</b>, because it is what the caller gives first and because it is the key
+      that decides whether this is a returning customer. If it matches, the name and any notes fill in and the
+      screen says so — <span class="ar">عميل مسجّل مسبقاً</span> — rather than quietly creating a duplicate.</li>
+    <li><b>One screen, one save.</b> No wizard, no steps. A caller does not read their details in the order a
+      multi-step form wants them, so every field stays reachable at once.</li>
+    <li><b>Typed input is never lost</b> — not on a validation failure, not on a connection error, not on an accidental
+      back. This form carries R4 more than any other screen in the product.</li>
+    <li><b>New requests start at</b> <span class="ar">جديد</span>. The status control is not part of the create form.</li>
+  </ul>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s10">
+  <div class="sec__head"><span class="sec__num">10</span><h2 class="sec__title">The status lifecycle</h2></div>
+  <p>The approved five. No operational statuses are added at this stage.</p>
+
+  <div class="life">
+    <div class="life__row">
+      <div class="life__node"><b><span class="ar">جديد</span></b><span>Recorded, not yet looked at</span></div>
+      <div class="life__arw">→</div>
+      <div class="life__node"><b><span class="ar">قيد المراجعة</span></b><span>Being checked and arranged</span></div>
+      <div class="life__arw">→</div>
+      <div class="life__node"><b><span class="ar">مؤكد</span></b><span>Agreed with the customer</span></div>
+      <div class="life__arw">→</div>
+      <div class="life__node life__node--term"><b><span class="ar">مكتمل</span></b><span>Trip carried out · final</span></div>
+    </div>
+    <div class="life__branch">
+      <span class="life__cancel"><span class="ar">ملغي</span></span>
+      <span>Reachable from <b>any</b> state before <span class="ar">مكتمل</span>. Final once set. Always confirmed, and the reason is written into the notes rather than becoming a new field.</span>
+    </div>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Movement</th><th>Behaviour</th></tr></thead>
+      <tbody>
+        <tr><td><b>Forward, one step</b></td><td>The default and the easiest thing to do. The control names the destination, so the client reads <span class="ar">تأكيد الطلب</span> rather than picking from a menu of five.</td></tr>
+        <tr><td><b>To <span class="ar ar--h">مؤكد</span>, <span class="ar ar--h">مكتمل</span> or <span class="ar ar--h">ملغي</span></b></td><td>Confirmed before it happens. These are the three the customer feels, and two of them are final.</td></tr>
+        <tr><td><b>Backward</b></td><td>Allowed, because mistakes happen and the alternative is a wrong record standing forever. Confirmed, and the correction is visible in the status history.</td></tr>
+        <tr><td><b>Out of a final state</b></td><td>Not offered. <span class="ar">مكتمل</span> and <span class="ar">ملغي</span> close the record. A customer who calls back needs a new request, not a resurrected one.</td></tr>
+        <tr><td><b>Skipping a step</b></td><td>Allowed forward — a request phoned in and agreed on the spot goes straight to <span class="ar">مؤكد</span>. Forcing a fictional review step teaches the client to lie to their own dashboard.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p><b>How the state reads (R6).</b> Every status appears as its Arabic word, in a consistent position on the row and
+    on the record. Its colour and its shape reinforce that word and never replace it: a status is still legible in
+    greyscale, to a screen reader, and to someone who cannot distinguish the two warm tones.</p>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s11">
+  <div class="sec__head"><span class="sec__num">11</span><h2 class="sec__title">Customers</h2></div>
+
+  <div class="flow">
+    <span class="flow__lbl">Customer flow</span>
+    <span class="flow__step flow__step--start"><span class="ar">العملاء</span></span><span class="flow__arw">→</span>
+    <span class="flow__step">Search / filter</span><span class="flow__arw">→</span>
+    <span class="flow__step">Customer profile</span><span class="flow__arw">→</span>
+    <span class="flow__step flow__step--end">Their requests, in place</span>
+  </div>
+
+  <ul class="list">
+    <li><b>The profile is one screen.</b> Information, contact actions, notes and the full request history sit together.
+      Understanding a customer must never cost a second navigation — that is the whole promise of the module.</li>
+    <li><b>Request history</b> lists trips newest first with service, date and status. Opening one goes to the request;
+      returning comes back to <b>the profile</b>, per §05.</li>
+    <li><b>Primary action</b> — <span class="ar">تسجيل طلب لهذا العميل</span>, with the customer already filled in. This is
+      the returning-caller flow, and it is one tap from their history.</li>
+    <li><b>Secondary</b> — <span class="ar">اتصال</span>, <span class="ar">واتساب</span>, <span class="ar">تعديل البيانات</span>,
+      <span class="ar">إضافة ملاحظة</span>.</li>
+    <li><b>Records are created by the work.</b> Recording a request for an unrecognised number creates the customer
+      automatically. Manual creation exists too, but it is the secondary path — a customer with no request is rare.</li>
+    <li><b>The phone number is the identity.</b> It is what the caller offers and what the admin searches. Matching on it
+      at record time is what stops the same customer existing three times.</li>
+    <li><b>Deletion is not offered</b> — a customer carries request history, and removing them would silently rewrite it.
+      See <a href="#s26">D5</a>.</li>
+  </ul>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s12">
+  <div class="sec__head"><span class="sec__num">12</span><h2 class="sec__title">Services</h2></div>
+
+  <div class="flow">
+    <span class="flow__lbl">Service flow</span>
+    <span class="flow__step flow__step--start"><span class="ar">الخدمات</span></span><span class="flow__arw">→</span>
+    <span class="flow__step">The 7 services</span><span class="flow__arw">→</span>
+    <span class="flow__step">Service</span><span class="flow__arw">→</span>
+    <span class="flow__step"><span class="ar">تعديل</span></span><span class="flow__arw">→</span>
+    <span class="flow__step flow__step--end"><span class="ar">حفظ</span> → back to the list</span>
+  </div>
+
+  <ul class="list">
+    <li><b>The list is the approved set</b>, shown in the order the website publishes them, each identified by its own
+      name. Seven items — no pagination, no search, nothing to hunt for.</li>
+    <li><b>Editing</b> covers the service's own published wording. Nothing technical is exposed.</li>
+    <li><b>Show / hide</b> is the reversible control: a hidden service disappears from the website and stays in the
+      dashboard, clearly marked. This is how a service is retired without destroying it.</li>
+    <li><b>Ordering</b> changes the sequence on the website. Drag on desktop; explicit up and down controls on touch,
+      because dragging inside a scrolling page is a poor bargain on a phone. Both paths produce the same result and
+      save on the same action.</li>
+    <li><b>No adding, no deleting.</b> The seven are approved. Adding an eighth is a business decision, not a dashboard
+      action — and the site's own layout and imagery are built for the approved set.</li>
+    <li><b>States</b> — no empty state exists here, by definition. Loading, saving, error, and the unsaved-changes guard
+      all behave exactly as §19 specifies.</li>
+  </ul>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s13">
+  <div class="sec__head"><span class="sec__num">13</span><h2 class="sec__title">Website content</h2></div>
+  <p class="lede">A hub listing what is on the website, in the order it appears on the page, so the client can
+    find a piece of copy by picturing their own site rather than by learning a taxonomy.</p>
+
+  <div class="flow">
+    <span class="flow__lbl">Content flow</span>
+    <span class="flow__step flow__step--start"><span class="ar">المحتوى</span></span><span class="flow__arw">→</span>
+    <span class="flow__step">Content area</span><span class="flow__arw">→</span>
+    <span class="flow__step">Editor <span style="opacity:.7">(or list → item)</span></span><span class="flow__arw">→</span>
+    <span class="flow__step"><span class="ar">معاينة</span></span><span class="flow__arw">→</span>
+    <span class="flow__step flow__step--end"><span class="ar">حفظ</span> → back to the hub</span>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Content area</th><th>Shape</th><th>On the site today</th></tr></thead>
+      <tbody>
+        <tr><td><b><span class="ar ar--h">من نحن</span></b></td><td>Single entry</td><td class="yes">Published</td></tr>
+        <tr><td><b><span class="ar ar--h">ما يميزنا</span></b></td><td>List · 6 items</td><td class="yes">Published</td></tr>
+        <tr><td><b><span class="ar ar--h">كيف نعمل</span></b></td><td>List · 3 ordered stages</td><td class="yes">Published</td></tr>
+        <tr><td><b><span class="ar ar--h">رؤيتنا ورسالتنا</span></b></td><td>Single entry · two parts</td><td class="yes">Published</td></tr>
+        <tr><td><b><span class="ar ar--h">القيم</span></b></td><td>List · 6 items</td><td class="yes">Published</td></tr>
+        <tr><td><b><span class="ar ar--h">الأسئلة الشائعة</span></b></td><td>List · question and answer</td><td class="part">No section yet — F2</td></tr>
+        <tr><td><b><span class="ar ar--h">آراء العملاء</span></b></td><td>List · approval controlled</td><td class="part">No section yet — F2</td></tr>
+        <tr><td><b><span class="ar ar--h">معلومات التواصل</span></b></td><td>Read-only pointer</td><td class="yes">Edited in <span class="ar">الإعدادات</span> — F3</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Two editor shapes, and only two</h3>
+  <ul class="list">
+    <li><b>Single entry</b> — the area opens straight into its editor. There is one of it; a list of one is a wasted screen.</li>
+    <li><b>Repeating list</b> — the area opens a list of its items, in published order, with add, edit, reorder and
+      show/hide. Item editing follows §19 exactly.</li>
+  </ul>
+
+  <ul class="list">
+    <li><b>Every editor states where the words land</b> — the section name, as the visitor sees it. Preview shows the
+      copy in its place on the site before saving; if a live preview is not available in build, the fallback is a link
+      to the published section, clearly labelled as showing the <b>saved</b> version. See <a href="#s26">D3</a>.</li>
+    <li><b>Every editor shows when it was last changed and by whom.</b> With several people editing, this is the fact
+      that prevents the phone call.</li>
+    <li><b>Nothing technical is exposed</b> — no identifiers, no markup, no layout fields (R10).</li>
+    <li><b>Terminology is protected.</b> The audience is <span class="ar">ذوي الاحتياجات الخاصة</span>. This is stated in the
+      editor as a standing note, so a well-meaning edit does not reintroduce forbidden wording.</li>
+  </ul>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s14">
+  <div class="sec__head"><span class="sec__num">14</span><h2 class="sec__title">FAQs &amp; testimonials</h2></div>
+  <p>Same list-and-editor mechanics, one deliberate difference in the control that governs visibility —
+    because the two content types differ in who wrote them.</p>
+
+  <div class="flow">
+    <span class="flow__lbl">FAQ</span>
+    <span class="flow__step flow__step--start"><span class="ar">الأسئلة الشائعة</span></span><span class="flow__arw">→</span>
+    <span class="flow__step">List</span><span class="flow__arw">→</span>
+    <span class="flow__step"><span class="ar">إضافة</span> / <span class="ar">تعديل</span></span><span class="flow__arw">→</span>
+    <span class="flow__step"><span class="ar">حفظ</span></span><span class="flow__arw">→</span>
+    <span class="flow__step flow__step--end"><span class="ar">مفعّل</span> / <span class="ar">غير مفعّل</span></span>
+  </div>
+  <div class="flow">
+    <span class="flow__lbl">Testimonials</span>
+    <span class="flow__step flow__step--start"><span class="ar">آراء العملاء</span></span><span class="flow__arw">→</span>
+    <span class="flow__step">List</span><span class="flow__arw">→</span>
+    <span class="flow__step"><span class="ar">إضافة</span> / <span class="ar">تعديل</span></span><span class="flow__arw">→</span>
+    <span class="flow__step"><span class="ar">اعتماد</span> / <span class="ar">إخفاء</span></span><span class="flow__arw">→</span>
+    <span class="flow__step flow__step--end"><span class="ar">حفظ</span></span>
+  </div>
+
+  <ul class="list">
+    <li><b>The FAQ toggle is about readiness</b> — the company wrote the answer, and it is either ready to show or not.
+      A half-written answer stays <span class="ar">غير مفعّل</span>.</li>
+    <li><b>The testimonial control is about approval</b> — the words came from a customer, and publishing them is a
+      decision. A new testimonial is <b>never visible by default</b>; it waits for
+      <span class="ar">اعتماد</span>. That default is the entire reason the two controls are not identical.</li>
+    <li><b>Ordering</b> works in both, using the same control as services (§12).</li>
+    <li><b>Both carry the F2 status</b> — <span class="chip chip--warn">لا تظهر على الموقع بعد</span> — stated on the list and
+      in the editor, so the client is never left believing they have published something the visitor can see.</li>
+    <li><b>Removal</b> is hiding, not deleting, in both. Deleting is offered only for an item never approved.</li>
+  </ul>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s15">
+  <div class="sec__head"><span class="sec__num">15</span><h2 class="sec__title">Settings</h2></div>
+
+  <div class="flow">
+    <span class="flow__lbl">Settings flow</span>
+    <span class="flow__step flow__step--start"><span class="ar">الإعدادات</span></span><span class="flow__arw">→</span>
+    <span class="flow__step">Category</span><span class="flow__arw">→</span>
+    <span class="flow__step"><span class="ar">تعديل</span></span><span class="flow__arw">→</span>
+    <span class="flow__step flow__step--end"><span class="ar">حفظ</span> → back to the categories</span>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Category</th><th>Holds</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr><td><b><span class="ar ar--h">معلومات الشركة</span></b></td><td>Registered name, tagline, address</td><td>The site currently carries <span class="ar">شركة عون الدرب للنقل المتخصص</span>, <span class="ar">نُعين ونُعاون</span>, and a Riyadh address. See <a href="#s26">D6</a>.</td></tr>
+        <tr><td><b><span class="ar ar--h">معلومات التواصل</span></b></td><td>Phone, WhatsApp number, website address</td><td>The single home for contact data (F3). Feeds header, contact section and footer at once.</td></tr>
+        <tr><td><b><span class="ar ar--h">روابط التواصل الاجتماعي</span></b></td><td>Social profile links</td><td>Ships empty — the site has none today. The category states that rather than showing blank fields with no explanation.</td></tr>
+        <tr><td><b><span class="ar ar--h">إعدادات الموقع</span></b></td><td>Site title and description as they appear when the site is shared or found</td><td>Described by effect, never by technical name (R10).</td></tr>
+        <tr><td><b><span class="ar ar--h">اللغة</span></b></td><td>The site's language setup</td><td>The site is Arabic-only and right-to-left today. This category reflects that state; it does not offer a second language that does not exist.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ul class="list">
+    <li><b>Each category saves on its own.</b> No single long page, and no save button that commits five unrelated things
+      the client did not mean to touch.</li>
+    <li><b>Contact details are checked as they are typed</b> — the phone and WhatsApp numbers are what a customer will
+      dial, and a typo here breaks the business quietly rather than loudly.</li>
+  </ul>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s16">
+  <div class="sec__head"><span class="sec__num">16</span><h2 class="sec__title">Users &amp; permissions</h2></div>
+
+  <div class="flow">
+    <span class="flow__lbl">Users flow</span>
+    <span class="flow__step flow__step--start"><span class="ar">المستخدمون والصلاحيات</span></span><span class="flow__arw">→</span>
+    <span class="flow__step">User list</span><span class="flow__arw">→</span>
+    <span class="flow__step">User</span><span class="flow__arw">→</span>
+    <span class="flow__step">Role &amp; access</span><span class="flow__arw">→</span>
+    <span class="flow__step flow__step--end"><span class="ar">حفظ</span></span>
+  </div>
+
+  <ul class="list">
+    <li><b>The role is chosen as a sentence, not a matrix.</b> Each role is described by what the person can do —
+      "manages the website's content and services" — with the module list shown underneath as confirmation. The
+      client picks a role; they do not assemble one.</li>
+    <li><b>Admin is the only role with adjustable access</b>, and it is adjusted by ticking the modules from Stage 01's
+      operational set. Super Admin and Content Manager are fixed, because a role that can be edited into anything
+      is not a role.</li>
+    <li><b>Actions</b> — <span class="ar">إضافة مستخدم</span>, <span class="ar">تغيير الدور</span>,
+      <span class="ar">تعطيل المستخدم</span>, <span class="ar">إعادة تعيين كلمة المرور</span>.</li>
+    <li><b>Disable, don't delete.</b> A disabled user cannot sign in, and everything they did stays attributed in the
+      request history. Deleting them would blank out the record of who confirmed which trip (R7).</li>
+    <li><b>Two guards, stated in the interface before they are needed</b> — a user cannot change or remove their own
+      role, and the last Super Admin cannot be disabled or demoted. The control is unavailable with the reason
+      shown, not a failure after the fact.</li>
+    <li><b>Access is enforced everywhere</b>, not just in navigation: a link, a bookmark or a returning session that
+      points into a forbidden module is met with an explanation and a way back, never a blank screen.</li>
+  </ul>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s17">
+  <div class="sec__head"><span class="sec__num">17</span><h2 class="sec__title">Reports</h2></div>
+
+  <div class="flow">
+    <span class="flow__lbl">Reports flow</span>
+    <span class="flow__step flow__step--start"><span class="ar">التقارير</span></span><span class="flow__arw">→</span>
+    <span class="flow__step">Report + period</span><span class="flow__arw">→</span>
+    <span class="flow__step">Results</span><span class="flow__arw">→</span>
+    <span class="flow__step flow__step--end">Drill into the matching requests</span>
+  </div>
+
+  <ul class="list">
+    <li><b>Four reports, no more</b> — requests by status, requests by service, requests over a period, and new
+      customers. Each is a count the client can act on.</li>
+    <li><b>One period control</b>, using the same options and the same words as the requests filter (§18). Learning it
+      once is the point.</li>
+    <li><b>Every figure is a link</b> into the requests list filtered to exactly the rows behind it. A number the client
+      cannot open is a number they cannot trust.</li>
+    <li><b>Read at a glance.</b> Each report opens with the answer in words, then the breakdown. No dense analytics
+      surface at this stage.</li>
+    <li><b>Empty period</b> — says there were no requests in that period and offers a wider one, rather than showing
+      a row of zeroes.</li>
+  </ul>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s18">
+  <div class="sec__head"><span class="sec__num">18</span><h2 class="sec__title">Search &amp; filter</h2></div>
+  <p>One pattern, applied identically wherever a list exists. Learned once, in
+    <span class="ar">طلبات النقل</span>, and never re-learned.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Aspect</th><th>Behaviour</th></tr></thead>
+      <tbody>
+        <tr><td><b>Position</b></td><td>Directly above the list, in the same place in every module.</td></tr>
+        <tr><td><b>Search</b></td><td>One field. Its placeholder names what it searches — "name, phone or request number" — so nobody has to guess the scope.</td></tr>
+        <tr><td><b>Timing</b></td><td>Desktop results update as the client types, after a short pause. Mobile applies on submit, so a slow connection and a soft keyboard do not fight each other.</td></tr>
+        <tr><td><b>Filters</b></td><td>Labelled with the field they filter, never with a bare icon. All are single-select at this stage.</td></tr>
+        <tr><td><b>Active state</b></td><td>Applied filters are visible as words while looking at the results. The client can always see why they are seeing fewer rows.</td></tr>
+        <tr><td><b>Reset</b></td><td>One control, <span class="ar">إعادة تعيين</span>, clearing search and all filters together. It appears only when something is applied.</td></tr>
+        <tr><td><b>Persistence</b></td><td>Filter state lives in the address (§05), so it survives reload, back, sharing and re-login.</td></tr>
+        <tr><td><b>Empty result</b></td><td>Distinct from an empty module: it says nothing matched <b>these filters</b> and offers to clear them. See §21.</td></tr>
+        <tr><td><b>Mobile</b></td><td>Filters collapse to a single <span class="ar">تصفية</span> control showing how many are applied; it opens a sheet, and applying closes it. No permanent screen space is spent on controls that are usually idle.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s19">
+  <div class="sec__head"><span class="sec__num">19</span><h2 class="sec__title">Forms</h2></div>
+
+  <div class="flow">
+    <span class="flow__lbl">Every form, everywhere</span>
+    <span class="flow__step flow__step--start">Identify</span><span class="flow__arw">→</span>
+    <span class="flow__step">Enter / edit</span><span class="flow__arw">→</span>
+    <span class="flow__step">Validate</span><span class="flow__arw">→</span>
+    <span class="flow__step flow__step--end">Save + confirmation</span>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Aspect</th><th>Behaviour</th></tr></thead>
+      <tbody>
+        <tr><td><b>Identify</b></td><td>Every form names what is being edited, by its own name: the request number, the customer, the service, the section of the site.</td></tr>
+        <tr><td><b>Labels</b></td><td>Always visible above the field. Never a placeholder standing in for a label — it disappears exactly when it is needed.</td></tr>
+        <tr><td><b>Required</b></td><td>Marked in words on the field. An asterisk alone is a symbol the client has to have been taught.</td></tr>
+        <tr><td><b>Validation</b></td><td>On leaving a field, and again on save. The message sits with its field, says what is wrong and what to do, and the first affected field takes focus on a failed save.</td></tr>
+        <tr><td><b>Preservation</b></td><td>Nothing typed is discarded on a failed validation, a failed save or a lost connection (R4).</td></tr>
+        <tr><td><b>Leaving</b></td><td>Navigating away with unsaved changes asks first, and names what would be lost. Leaving an untouched form asks nothing.</td></tr>
+        <tr><td><b>Saving</b></td><td>The save control shows it is working and cannot be pressed twice.</td></tr>
+        <tr><td><b>Success</b></td><td>Confirmed where the client is looking, in words. It does not steal focus or block the next action (§21).</td></tr>
+        <tr><td><b>Failure</b></td><td>Says what happened and offers the way forward. The form stays exactly as it was, filled in, ready to retry.</td></tr>
+        <tr><td><b>Steps</b></td><td>None. No form in this product is multi-step, including the request form — see §09.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s20">
+  <div class="sec__head"><span class="sec__num">20</span><h2 class="sec__title">Destructive actions</h2></div>
+
+  <div class="flow">
+    <span class="flow__lbl">Destructive</span>
+    <span class="flow__step flow__step--start">Action</span><span class="flow__arw">→</span>
+    <span class="flow__step">Confirmation naming the record</span><span class="flow__arw">→</span>
+    <span class="flow__step flow__step--end">Result, stated</span>
+  </div>
+
+  <ul class="list">
+    <li><b>The confirmation names the thing.</b> Not "are you sure?" but the record and the consequence: this request,
+      this customer, and what will happen to it.</li>
+    <li><b>The buttons say what they do.</b> <span class="ar">إلغاء الطلب</span> and <span class="ar">تراجع</span> — never a
+      bare yes and no, which force the client to re-read the question to know which is which.</li>
+    <li><b>Never the primary action.</b> A destructive control is never the most prominent thing on a screen and never
+      sits where the safe primary action sits elsewhere. Nothing destructive is reachable by muscle memory.</li>
+    <li><b>Reversible first (R7).</b> Where hiding does the job, deletion is not offered at all — that is why services,
+      customers, requests, testimonials and users are hidden, cancelled or disabled rather than deleted.</li>
+    <li><b>Status changes get confirmation, not warning.</b> Confirming or completing a trip is consequential but
+      ordinary. It is confirmed calmly, and it is undone by another status change (§10), not by an undo affordance
+      that promises more than it can deliver.</li>
+    <li><b>The result is stated.</b> Every destructive action reports what happened, in the same words the confirmation
+      used.</li>
+  </ul>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s21">
+  <div class="sec__head"><span class="sec__num">21</span><h2 class="sec__title">The four states</h2></div>
+  <p>Defined once as behaviour, then applied module by module in §25.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>State</th><th>Behaviour</th></tr></thead>
+      <tbody>
+        <tr><td><b>Empty · nothing yet</b></td><td>Explains what would appear here and how it gets here, then offers the action that creates the first one. The requests list explains that requests are recorded from calls, and offers <span class="ar">تسجيل طلب</span>.</td></tr>
+        <tr><td><b>Empty · nothing matched</b></td><td>A different state, and it must not be confused with the one above. It says nothing matched the current filters and offers <span class="ar">إعادة تعيين</span>. It never suggests creating a record.</td></tr>
+        <tr><td><b>Loading · first</b></td><td>Placeholders that hold the shape and size of what is coming, so nothing shifts under the cursor when content lands.</td></tr>
+        <tr><td><b>Loading · subsequent</b></td><td>Filtering or sorting an already-loaded list keeps the list on screen and marks it as updating. The screen never goes blank on a change the client just made.</td></tr>
+        <tr><td><b>Error</b></td><td>Says what failed, in the client's terms, and offers the recovery — retry, or go back. Never a code. Never a dead end. A failure in one part of a screen does not take down the parts that work.</td></tr>
+        <tr><td><b>Success</b></td><td>Confirmed in words, near the work, and it disappears on its own. It does not block, it does not move focus, and it does not require dismissal — except after a destructive action, where it stays until acknowledged.</td></tr>
+        <tr><td><b>Permission</b></td><td>Reaching something out of role explains that the area is not part of their access and offers the way back — never a blank screen or a raw error.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s22">
+  <div class="sec__head"><span class="sec__num">22</span><h2 class="sec__title">Responsive behaviour</h2></div>
+  <p class="lede">Mobile is not the desktop made smaller. It is a different set of priorities, because the admin
+    holding a phone is usually mid-call or away from the office — which, given F1, is when most requests are recorded.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Aspect</th><th>Desktop</th><th>Tablet</th><th>Mobile</th></tr></thead>
+      <tbody>
+        <tr><td><b>Navigation</b></td><td>Persistent, on the right, all permitted modules visible</td><td>Collapsed to a rail; opens on demand</td><td>Hidden behind one control, plus direct reach to the most-used modules</td></tr>
+        <tr><td><b>Lists</b></td><td>Full table, all columns</td><td>Table with secondary columns dropped</td><td>Record cards, never a scrolling table</td></tr>
+        <tr><td><b>Filters</b></td><td>Inline above the list</td><td>Inline, condensed</td><td>One <span class="ar">تصفية</span> control with an applied count, opening a sheet</td></tr>
+        <tr><td><b>Record view</b></td><td>Blocks side by side; actions in view</td><td>Blocks stacked, actions in view</td><td>Single column in the §09 order; the primary action stays reachable while scrolling</td></tr>
+        <tr><td><b>Contact actions</b></td><td>Present on the record</td><td>Present on the record</td><td><b>Promoted</b> — call and WhatsApp appear on the list card itself, not only inside the record</td></tr>
+        <tr><td><b>Forms</b></td><td>Multi-column where fields are related</td><td>Single column</td><td>Single column, ordered as the caller speaks (§09)</td></tr>
+        <tr><td><b>Targets</b></td><td>Pointer-sized</td><td>Touch-sized</td><td>Touch-sized, comfortably spaced, thumb-reachable for primary actions</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    <h4>The table-to-card rule</h4>
+    <p>When a table becomes cards, columns are <b>dropped by priority, never squeezed</b>. A request card keeps the
+      customer name, the service, the trip date and the status — the four facts that let the admin decide whether to
+      open it. The request number and creation date live in the record. Nothing is truncated to fit; anything that
+      does not fit is not shown on the card.</p>
+  </div>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s23">
+  <div class="sec__head"><span class="sec__num">23</span><h2 class="sec__title">Accessibility</h2></div>
+  <p>Behavioural requirements only. Contrast values, sizes and focus styling are set in Stage 03 against these rules.</p>
+  <ul class="list">
+    <li><b>Arabic hierarchy is real</b> — heading, label, body and caption are distinguishable without reading them, in a
+      face that renders Arabic properly at every level.</li>
+    <li><b>Contrast is sufficient for body text, labels, status words and the disabled state alike.</b> The disabled state
+      is the one usually forgotten, and it still has to be readable.</li>
+    <li><b>Targets are large enough and separated enough</b> that adjacent actions — particularly a safe action next to a
+      consequential one — cannot be confused by a thumb.</li>
+    <li><b>Everything is reachable by keyboard</b>, in the reading order, right to left. Filters, sheets and confirmations
+      trap focus while open and return it to the control that opened them.</li>
+    <li><b>Focus is always visible</b>, on every interactive element, including inside overlays.</li>
+    <li><b>Labels are permanent and meaningful.</b> Icon-only controls carry a name for assistive technology.</li>
+    <li><b>Status is text first (R6)</b> — colour reinforces the word, never replaces it, so status survives greyscale,
+      colour blindness and a screen reader.</li>
+    <li><b>Errors are tied to their field</b> and announced, so someone not looking at that part of the screen still
+      learns what went wrong.</li>
+    <li><b>Save results are announced</b> without stealing focus, so a keyboard or screen-reader user knows the save
+      landed and keeps their place.</li>
+    <li><b>Structure is meaningful</b> — landmarks, real headings and real tables, so the page can be navigated by
+      structure rather than by scrolling.</li>
+    <li><b>Language and direction are declared</b> as Arabic, right to left, matching the site.</li>
+  </ul>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s24">
+  <div class="sec__head"><span class="sec__num">24</span><h2 class="sec__title">The pattern library</h2></div>
+  <p class="lede">Ten behavioural patterns. Every screen in the product is assembled from these, which is what
+    makes R9 checkable rather than aspirational. Stage 03 gives each one a visual form; none is defined here.</p>
+
+  <div class="pats">
+    <div class="pat"><span class="pat__id">P01</span><p class="pat__name"><span class="ar">القائمة</span></p><p class="pat__en">List</p><p class="pat__body">Rows on desktop, cards on touch. Same sort, same paging, same row-opens-record behaviour everywhere.</p></div>
+    <div class="pat"><span class="pat__id">P02</span><p class="pat__name"><span class="ar">البحث والتصفية</span></p><p class="pat__en">Search &amp; filter</p><p class="pat__body">§18, unchanged in every module. One search field, labelled filters, one reset, state in the address.</p></div>
+    <div class="pat"><span class="pat__id">P03</span><p class="pat__name"><span class="ar">السجل</span></p><p class="pat__en">Record view</p><p class="pat__body">A focused screen — never a modal — with information ordered by need and actions in a constant place.</p></div>
+    <div class="pat"><span class="pat__id">P04</span><p class="pat__name"><span class="ar">النموذج</span></p><p class="pat__en">Form</p><p class="pat__body">§19. Identify, enter, validate, save. Single step, visible labels, nothing lost.</p></div>
+    <div class="pat"><span class="pat__id">P05</span><p class="pat__name"><span class="ar">التأكيد</span></p><p class="pat__en">Confirmation</p><p class="pat__body">§20. Names the record and the consequence; buttons say what they do; result reported.</p></div>
+    <div class="pat"><span class="pat__id">P06</span><p class="pat__name"><span class="ar">تغيير الحالة</span></p><p class="pat__en">Status change</p><p class="pat__body">§10. Names the destination, confirms the consequential moves, records who and when.</p></div>
+    <div class="pat"><span class="pat__id">P07</span><p class="pat__name"><span class="ar">التفعيل والإخفاء</span></p><p class="pat__en">Show / hide</p><p class="pat__body">The reversible alternative to deletion. Immediate, stated, undone the same way it was done.</p></div>
+    <div class="pat"><span class="pat__id">P08</span><p class="pat__name"><span class="ar">الترتيب</span></p><p class="pat__en">Reorder</p><p class="pat__body">Drag on pointer, explicit moves on touch, one saved result. Used by services, values, differentiators, stages, FAQs, testimonials.</p></div>
+    <div class="pat"><span class="pat__id">P09</span><p class="pat__name"><span class="ar">الحالات</span></p><p class="pat__en">Empty / loading / error / success</p><p class="pat__body">§21. Two distinct empties, two loadings, a recoverable error, a non-blocking success.</p></div>
+    <div class="pat"><span class="pat__id">P10</span><p class="pat__name"><span class="ar">العودة والسياق</span></p><p class="pat__en">Return &amp; context</p><p class="pat__body">§05. One return control naming its destination, and a preserved list state behind it.</p></div>
+  </div>
+
+  <h3>Where each pattern is used</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Module</th><th>P01</th><th>P02</th><th>P03</th><th>P04</th><th>P05</th><th>P06</th><th>P07</th><th>P08</th><th>P09</th><th>P10</th></tr></thead>
+      <tbody>
+        <tr><td><b><span class="ar ar--h">الرئيسية</span></b></td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td><b><span class="ar ar--h">طلبات النقل</span></b></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td><b><span class="ar ar--h">العملاء</span></b></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td><b><span class="ar ar--h">الخدمات</span></b></td><td class="yes">✓</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td><b><span class="ar ar--h">المحتوى</span></b></td><td class="yes">✓</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td><b><span class="ar ar--h">الإعدادات</span></b></td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td><b><span class="ar ar--h">المستخدمون والصلاحيات</span></b></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="yes">✓</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td><b><span class="ar ar--h">التقارير</span></b></td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Note the shape of that table: no module invents a pattern of its own, and the two content-heavy modules use
+    exactly the same set. That is what "consistent without becoming repetitive" looks like when it is checkable —
+    the behaviour repeats, while the content does not.</p>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s25">
+  <div class="sec__head"><span class="sec__num">25</span><h2 class="sec__title">Module flow map</h2></div>
+  <p class="lede">The Stage 02 deliverable. Each module carries its entry point, main flow, primary and secondary
+    actions, required states, and exit behaviour.</p>
+
+  <div class="mod">
+    <div class="mod__head"><span class="mod__num">01</span><h3 class="mod__name"><span class="ar">الرئيسية</span></h3><span class="mod__en">Home</span></div>
+    <dl>
+      <dt>Entry</dt><dd>Sign-in lands here; the product name in the header returns here.</dd>
+      <dt>Main flow</dt><dd>Land → scan <b><span class="ar">يحتاج انتباهك</span></b> → tap a count → the requests list, already filtered.</dd>
+      <dt>Primary</dt><dd><span class="ar">تسجيل طلب</span> · open the new requests</dd>
+      <dt>Secondary</dt><dd>Open a status count · open a recent activity item · <span class="ar">إضافة عميل</span> · <span class="ar">تعديل محتوى الموقع</span></dd>
+      <dt>States</dt><dd>Empty attention band as good news · first-run with no requests · per-band loading · per-band error that leaves the rest usable</dd>
+      <dt>Exit</dt><dd>Every element is a link into a module. Coming back always shows live state — the dashboard is never restored to a stale view.</dd>
+      <dt>Access</dt><dd>Super Admin · Admin · Content Manager sees the content-shaped variant</dd>
+    </dl>
+  </div>
+
+  <div class="mod">
+    <div class="mod__head"><span class="mod__num">02</span><h3 class="mod__name"><span class="ar">طلبات النقل</span></h3><span class="mod__en">Transportation requests</span></div>
+    <dl>
+      <dt>Entry</dt><dd>Navigation · a dashboard count (pre-filtered) · the dashboard quick action (straight to the form) · a customer's history · global search</dd>
+      <dt>Main flow</dt><dd>List → search / filter / sort → request → act → confirm → back to the list exactly as it was.<br>
+        Recording: <span class="ar">تسجيل طلب</span> → phone number → known customer fills in → trip details → save → the new request.</dd>
+      <dt>Primary</dt><dd><span class="ar">تغيير الحالة</span> · <span class="ar">تسجيل طلب</span></dd>
+      <dt>Secondary</dt><dd><span class="ar">اتصال</span> · <span class="ar">واتساب</span> · <span class="ar">تعديل</span> · <span class="ar">إضافة ملاحظة</span> · sort · filter · open the customer</dd>
+      <dt>Consequential</dt><dd><span class="ar">إلغاء الطلب</span> — confirmed, final, kept in the record. No deletion.</dd>
+      <dt>States</dt><dd>All of §21. The two empties are distinct: no requests at all explains how requests arrive; no matches offers a reset.</dd>
+      <dt>Exit</dt><dd>Status change and edit stay on the record. Create lands on the new record. Return honours the origin.</dd>
+      <dt>Access</dt><dd>Super Admin · Admin</dd>
+    </dl>
+  </div>
+
+  <div class="mod">
+    <div class="mod__head"><span class="mod__num">03</span><h3 class="mod__name"><span class="ar">العملاء</span></h3><span class="mod__en">Customers</span></div>
+    <dl>
+      <dt>Entry</dt><dd>Navigation · the customer name on a request · global search · after recording a request for a new number</dd>
+      <dt>Main flow</dt><dd>List → search → profile, with information, contact actions, notes and full request history on one screen → open a request, or record a new one already filled in.</dd>
+      <dt>Primary</dt><dd><span class="ar">تسجيل طلب لهذا العميل</span></dd>
+      <dt>Secondary</dt><dd><span class="ar">اتصال</span> · <span class="ar">واتساب</span> · <span class="ar">تعديل البيانات</span> · <span class="ar">إضافة ملاحظة</span> · <span class="ar">إضافة عميل</span></dd>
+      <dt>States</dt><dd>All of §21, plus a profile with no requests yet, which offers to record the first.</dd>
+      <dt>Exit</dt><dd>A request opened from a profile returns <b>to the profile</b>. Editing returns to the profile, updated.</dd>
+      <dt>Access</dt><dd>Super Admin · Admin</dd>
+    </dl>
+  </div>
+
+  <div class="mod">
+    <div class="mod__head"><span class="mod__num">04</span><h3 class="mod__name"><span class="ar">الخدمات</span></h3><span class="mod__en">Services</span></div>
+    <dl>
+      <dt>Entry</dt><dd>Navigation · the read-only pointer on the content hub</dd>
+      <dt>Main flow</dt><dd>The 7 approved services in published order → service → <span class="ar">تعديل</span> → <span class="ar">حفظ</span> → back to the list.</dd>
+      <dt>Primary</dt><dd><span class="ar">تعديل</span></dd>
+      <dt>Secondary</dt><dd><span class="ar">إظهار</span> / <span class="ar">إخفاء</span> · <span class="ar">ترتيب</span> · <span class="ar">معاينة على الموقع</span></dd>
+      <dt>Not offered</dt><dd>Adding or deleting a service. The set is approved, and the site is built for it.</dd>
+      <dt>States</dt><dd>No empty state exists. Loading, saving, error, success, unsaved-changes guard.</dd>
+      <dt>Exit</dt><dd>Save returns to the list with the change visible in place.</dd>
+      <dt>Access</dt><dd>All three roles</dd>
+    </dl>
+  </div>
+
+  <div class="mod">
+    <div class="mod__head"><span class="mod__num">05</span><h3 class="mod__name"><span class="ar">المحتوى</span></h3><span class="mod__en">Website content</span></div>
+    <dl>
+      <dt>Entry</dt><dd>Navigation · the dashboard's content quick action</dd>
+      <dt>Main flow</dt><dd>Hub, listing the site's areas in page order → area → single editor, or list → item → <span class="ar">معاينة</span> → <span class="ar">حفظ</span> → back to the hub.</dd>
+      <dt>Primary</dt><dd><span class="ar">تعديل</span> · <span class="ar">حفظ</span></dd>
+      <dt>Secondary</dt><dd><span class="ar">إضافة</span> and <span class="ar">ترتيب</span> within list areas · <span class="ar">إظهار</span> / <span class="ar">إخفاء</span> · <span class="ar">معاينة</span></dd>
+      <dt>States</dt><dd>All of §21 · the F2 marker on the two unpublished areas · the last-edited stamp on every area</dd>
+      <dt>Exit</dt><dd>Save returns to the hub with the change confirmed. Leaving with unsaved edits asks first.</dd>
+      <dt>Access</dt><dd>All three roles</dd>
+    </dl>
+  </div>
+
+  <div class="mod">
+    <div class="mod__head"><span class="mod__num">06</span><h3 class="mod__name"><span class="ar">الإعدادات</span></h3><span class="mod__en">Settings</span></div>
+    <dl>
+      <dt>Entry</dt><dd>Navigation · the contact pointer on the content hub</dd>
+      <dt>Main flow</dt><dd>Five categories → category → <span class="ar">تعديل</span> → <span class="ar">حفظ</span> → back to the categories.</dd>
+      <dt>Primary</dt><dd><span class="ar">حفظ</span> — per category, never all at once</dd>
+      <dt>Secondary</dt><dd><span class="ar">تراجع</span> · the read-only statement of the current language setup</dd>
+      <dt>States</dt><dd>Loading · saving · validation on contact details · error · success · the empty social category explaining that no links exist yet</dd>
+      <dt>Exit</dt><dd>Returns to the category list, confirmed. One category's save never touches another's.</dd>
+      <dt>Access</dt><dd>Super Admin · Admin if granted</dd>
+    </dl>
+  </div>
+
+  <div class="mod">
+    <div class="mod__head"><span class="mod__num">07</span><h3 class="mod__name"><span class="ar">المستخدمون والصلاحيات</span></h3><span class="mod__en">Users &amp; permissions</span></div>
+    <dl>
+      <dt>Entry</dt><dd>Navigation — Super Admin only. The module is absent for everyone else.</dd>
+      <dt>Main flow</dt><dd>User list → user → role, described as a sentence, with module access shown underneath → <span class="ar">حفظ</span>.</dd>
+      <dt>Primary</dt><dd><span class="ar">إضافة مستخدم</span> · <span class="ar">تغيير الدور</span></dd>
+      <dt>Secondary</dt><dd><span class="ar">تعطيل المستخدم</span> · <span class="ar">إعادة تعيين كلمة المرور</span> · search</dd>
+      <dt>Guards</dt><dd>No self-role change · the last Super Admin cannot be disabled or demoted. Both unavailable with the reason shown, before the attempt.</dd>
+      <dt>States</dt><dd>All of §21 · the permission state, shown wherever a forbidden area is reached by link or bookmark</dd>
+      <dt>Exit</dt><dd>Save returns to the user, updated. Disabling returns to the list and says who was disabled.</dd>
+      <dt>Access</dt><dd>Super Admin only</dd>
+    </dl>
+  </div>
+
+  <div class="mod">
+    <div class="mod__head"><span class="mod__num">08</span><h3 class="mod__name"><span class="ar">التقارير</span></h3><span class="mod__en">Reports</span></div>
+    <dl>
+      <dt>Entry</dt><dd>Navigation</dd>
+      <dt>Main flow</dt><dd>Pick a report and a period → read the answer in words, then the breakdown → open any figure as a filtered request list.</dd>
+      <dt>Primary</dt><dd>Select report · select period</dd>
+      <dt>Secondary</dt><dd>Drill into the requests behind a figure · change the period without losing the report</dd>
+      <dt>States</dt><dd>Loading · error with retry · an empty period that offers a wider one instead of a row of zeroes</dd>
+      <dt>Exit</dt><dd>Drilling out goes to <span class="ar">طلبات النقل</span>; returning comes back to the same report and period.</dd>
+      <dt>Access</dt><dd>Super Admin · Admin</dd>
+    </dl>
+  </div>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s26">
+  <div class="sec__head"><span class="sec__num">26</span><h2 class="sec__title">Open decisions</h2></div>
+  <p>Six points where the build needs a client answer. Each has a working assumption, so Stage 03 is not blocked
+    on any of them.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th class="num">#</th><th>Question</th><th>Working assumption</th></tr></thead>
+      <tbody>
+        <tr><td class="num">D1</td><td>Is a request form being added to the website, or do requests stay phone and WhatsApp only?</td><td>Phone and WhatsApp only. <span class="ar">مصدر الطلب</span> is recorded so a website source can be added later without restructuring the module.</td></tr>
+        <tr><td class="num">D2</td><td>Are <span class="ar">الأسئلة الشائعة</span> and <span class="ar">آراء العملاء</span> getting sections on the website?</td><td>Not yet. Both are manageable and clearly marked as not appearing on the site (F2).</td></tr>
+        <tr><td class="num">D3</td><td>Can content preview show unsaved edits in place, or only the published version?</td><td>Published version, opened in its place on the site and labelled as such. A true draft preview is an upgrade, not a requirement.</td></tr>
+        <tr><td class="num">D4</td><td>How is a forgotten password recovered, with no mail system in the project?</td><td>The Super Admin resets it from <span class="ar">المستخدمون والصلاحيات</span>, and the sign-in screen says so.</td></tr>
+        <tr><td class="num">D5</td><td>Does the client ever need to delete a customer outright?</td><td>No. Deletion would silently rewrite request history and report counts.</td></tr>
+        <tr><td class="num">D6</td><td>The site says <span class="ar">شركة عون الدرب للنقل المتخصص</span>; the brief says <span class="ar">وكالة</span>. Which is the registered name?</td><td>The site, as the source of truth. The value is editable in <span class="ar">معلومات الشركة</span>, so correcting it is a settings change, not a rebuild.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Held back for later, deliberately</h3>
+  <p>Drivers, vehicles, scheduling, dispatch, notifications, payments and advanced reporting are <b>not modules and not
+    screens</b> in this stage. The architecture accommodates them — each would enter as a new primary module beside the
+    eight, reusing P01–P10 without changing them — but none is built, exposed or hinted at in the navigation.</p>
+</section>
+
+<!-- ====================================================================== -->
+<section class="sec" id="s27">
+  <div class="sec__head"><span class="sec__num">27</span><h2 class="sec__title">Handoff to Stage 03</h2></div>
+  <div class="handoff">
+    <ol>
+      <li><b>Ten patterns need visual form</b> — P01 to P10 in §24. Designing these ten designs the whole product;
+        designing screens one by one does not.</li>
+      <li><b>Five statuses need a visual treatment that survives greyscale</b> (R6) — a word, a shape and a position, with
+        colour reinforcing rather than carrying the meaning.</li>
+      <li><b>Three list densities</b> — the desktop table, the tablet reduction, and the mobile record card, with the
+        drop-by-priority rule from §22 applied to requests, customers and users.</li>
+      <li><b>The record form is the screen to design first.</b> Because of F1 it is used under time pressure, on a phone,
+        mid-call. If it works there, everything else in the product is easier.</li>
+      <li><b>Arabic typography carries the hierarchy</b> — heading, label, body, caption, and the status word, all in a
+        face that holds up at small sizes in an RTL table.</li>
+      <li><b>Four state treatments</b> — the two empties, loading, error and success from §21, as a set, so they are
+        recognisably related.</li>
+      <li><b>Not yet decided, and out of scope until Stage 03</b> — colour, type scale, spacing, radius, elevation,
+        motion, iconography and component anatomy. None of it is implied by anything above.</li>
+    </ol>
+  </div>
+</section>
+
+<footer class="foot">
+  <span>Aoun Al-Darb · Admin dashboard</span>
+  <span>Stage 02 — UX architecture &amp; user flows</span>
+  <span>Source of truth: the built site</span>
+  <span>Next: Stage 03 — admin design system</span>
+</footer>
+
+    </main>
+  </div>
+</div>
