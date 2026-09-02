@@ -10,6 +10,7 @@ Separate track from `ux/`, which covers the public site.
 | `dashboard.html` | **Stages 04 + 05 — the admin shell and الرئيسية.** A working, self-contained page: sidebar, header, account area, notifications, mobile drawer, page-header pattern, and the dashboard built inside it. |
 | `requests.html` | **Stage 06 — طلبات النقل.** The full request workflow: list with working search, filters and pagination, and a detail view with status changes, editing, notes and contact actions. |
 | `customers.html` | **Stage 07 — العملاء.** Customer list and profile, with every customer figure derived from the request records rather than stored. |
+| `services.html` | **Stage 08 — الخدمات.** The seven approved services with their real copy and photographs: edit, reorder, show/hide, and replace images. |
 
 The built site (`../index.html`) is the source of truth for services, content areas,
 contact details and terminology. Nothing in this track invents business features.
@@ -185,3 +186,41 @@ refused outright if another customer already holds that number.
 inventing one. Empty states cover no customers, no search results, a customer with no history,
 and missing optional fields — an absent note reads as "لا توجد ملاحظات على هذا العميل" rather
 than as a blank.
+
+## Stage 08 — الخدمات
+
+`services.html` manages the seven approved services. **Every title, description and photograph
+was lifted from the built site**, not written for the dashboard: the copy is byte-for-byte what
+`index.html` publishes, and the seven service photographs are embedded as data URIs from
+`dist/img/*-360.webp`, so the module shows real content rather than placeholders. There is no
+way to add an eighth service — the approved set is the source of truth.
+
+**List.** Order number with up/down controls, photograph, name, description, visibility badge,
+last update, and edit/hide actions. Reordering uses explicit buttons plus the order number
+rather than drag-and-drop: §7 allows either, and buttons are the option that works on touch,
+with a keyboard, and with a screen reader. Search by name and one visibility filter, per §10.
+
+**Editor.** Basic information, service image, and publishing, each in its own card. Character
+counts on both text fields, a sticky save bar stating that changes publish on save, and a
+visibility toggle whose helper text explains that a hidden service keeps its content and can be
+brought back.
+
+**The terminology rule is enforced, not documented.** The editor refuses to save any title or
+description containing `الإعاقة`, `ذوي الإعاقة`, `معاق`, `معاقين` or related forms, and names the
+offending word in the error alongside the approved `ذوي الاحتياجات الخاصة`. A future
+administrator cannot put prohibited wording onto the website through this form.
+
+**Image replacement** validates type (WebP/JPG/PNG) and size (2 MB), shows real read progress,
+previews the result, and marks it as pending until save — an uploaded image never looks
+published before it is.
+
+**Unsaved work** is tracked: an indicator appears in the header, the save button stays disabled
+until something actually changes, leaving the editor asks first and names what would be lost,
+and the browser's own unload prompt is armed as a backstop. A save is refused outright while
+the browser reports no connection, because §8 forbids reporting a save that did not happen.
+
+**One implementation caveat for the build.** The save bar says changes publish immediately.
+That is true of a database-backed site; this site is a **static build** (`build.js` → `dist/`),
+so an immediate-publishing model requires saving to trigger a rebuild and deploy. If the
+deployment cannot do that, the wording must change to describe the real model rather than the
+intended one.
