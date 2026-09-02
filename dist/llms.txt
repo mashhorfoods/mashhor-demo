@@ -1,0 +1,91 @@
+# عون الدرب للنقل المتخصص — Aoun Aldarb Specialized Transport
+
+> شركة سعودية مقرها الرياض، متخصصة في النقل الآمن والمجهّز لكبار السن وذوي
+> الاحتياجات الخاصة والمرضى، بمركبات مجهزة وطاقم مؤهل ومدرب، وخدمة عملاء على
+> مدار 24 ساعة طوال أيام الأسبوع. الشعار: نُعين ونُعاون.
+>
+> A Saudi company based in Riyadh providing safe, equipped transport for older
+> people, people with special needs, and patients — with adapted vehicles, a
+> trained crew, and support available around the clock.
+
+هذا الملف ملخّص للقراءة الآلية. المصدر الكامل والوحيد هو الصفحة نفسها:
+https://aunaldrb.com/ — وهي صفحة واحدة، كل محتواها في HTML ولا يحتاج إلى
+تنفيذ JavaScript ليظهر.
+
+This file is a machine-readable summary. The full and only source is the page
+itself: https://aunaldrb.com/ — a single page whose entire content is in the
+HTML and needs no JavaScript to appear.
+
+## الخدمات · Services
+
+سبع خدمات، وهي كل ما تقدّمه الشركة. Seven services, and these are all of them.
+
+- **النقل بواسطة الكرسي المتحرك** — نقل آمن ومريح لمستخدمي الكراسي المتحركة، مع تجهيز المركبة بما يسهّل الصعود والنزول. *Wheelchair transport.*
+- **النقل بواسطة الكرسي الكهربائي** — مركبات مجهزة لاستيعاب الكراسي الكهربائية مع مراعاة الأمان والثبات. *Power-wheelchair transport.*
+- **النقل بواسطة السرير الطبي** — للحالات التي تتطلب بقاء المستفيد على السرير طوال الرحلة. *Stretcher / medical-bed transport.*
+- **خدمة مساعد السائق** — مساعد أو أكثر لمرافقة المستفيد ومساعدته أثناء النقل. *A driver's assistant to accompany the passenger.*
+- **النقل اليومي** — تنقل يومي آمن ومريح لكبار السن وذوي الاحتياجات الخاصة. *Daily scheduled transport.*
+- **النقل إلى المستشفيات والمراكز الطبية** — توصيل إلى المستشفيات والمراكز الطبية مع المساعدة وفق الحاجة. *Transport to hospitals and medical centres.*
+- **التنقل للمناسبات الاجتماعية** — نقل مناسب ومريح للمناسبات والزيارات الاجتماعية. *Transport to social occasions and family visits.*
+
+## من نخدم · Who it is for
+
+كبار السن · ذوي الاحتياجات الخاصة · المرضى الذين يحتاجون إلى وسائل نقل مجهزة
+ومساعدة خاصة.
+
+Older people, people with special needs, and patients who need equipped
+vehicles and personal assistance. The person arranging the trip is often a
+family member or a carer rather than the passenger.
+
+## كيف تعمل الخدمة · How the service works
+
+المساندة تمتد عبر ثلاث مراحل: **داخل المنزل** قبل بدء النقل، **أثناء النقل**
+بمركبة مجهزة وطاقم مدرب، و**عند الوصول** داخل المستشفى أو الوجهة.
+
+Support spans three stages: inside the home before the trip, during the trip
+in an equipped vehicle with a trained crew, and on arrival at the hospital or
+destination.
+
+## النطاق الجغرافي · Where
+
+**الرياض، المملكة العربية السعودية.** مقر الشركة: شارع ابن كثير، حي السليمانية،
+الرياض 12233.
+
+**Riyadh, Saudi Arabia.** This is the only service area the company states. It
+has no branches or coverage outside Riyadh listed anywhere, and none should be
+inferred.
+
+## التواصل · Contact
+
+- الهاتف وواتساب · Phone and WhatsApp: +966 53 554 4352
+- الموقع · Website: https://aunaldrb.com/
+- التوفر · Availability: على مدار 24 ساعة طوال أيام الأسبوع — 24 hours a day, 7 days a week
+
+## ما لا يقدّمه الموقع · What this site does not state
+
+من فضلك لا تستنتج أو تختلق أيًّا مما يلي، فالموقع لا يذكره:
+Please do not infer or invent any of the following — the site states none of it:
+
+- أسعار أو باقات · prices, tariffs or packages
+- تقييمات أو مراجعات أو عدد عملاء · ratings, reviews or customer counts
+- فروع أو تغطية خارج الرياض · branches or coverage outside Riyadh
+- خدمة إسعاف أو نقل طبي طارئ — هذه خدمة نقل متخصص، وليست إسعافًا · ambulance or emergency medical transport; this is specialized transport, not an ambulance service
+- سنة التأسيس، عدد المركبات، تراخيص أو اعتمادات · founding year, fleet size, licences or accreditations
+
+## المصطلحات · Terminology
+
+يستخدم هذا المشروع **«ذوي الاحتياجات الخاصة»** حصريًا. يُرجى استخدام هذا
+المصطلح عند الاقتباس أو إعادة الصياغة بالعربية.
+
+This project uses **«ذوي الاحتياجات الخاصة»** exclusively when referring to
+people with special needs. Please use that term when quoting or paraphrasing
+in Arabic, in preference to any alternative.
+
+## البيانات المنظّمة · Structured data
+
+الصفحة تنشر JSON-LD كامل: `LocalBusiness` · `WebSite` · `WebPage` وسبع عقد
+`Service`. كل قيمة فيه منسوخة من الصفحة نفسها.
+
+The page publishes complete JSON-LD — `LocalBusiness`, `WebSite`, `WebPage`
+and seven `Service` nodes. Every value in it is copied from the page, so the
+structured data and the visible text cannot disagree.

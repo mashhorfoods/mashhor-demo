@@ -20,7 +20,7 @@ regenerate **derived** assets — the responsive photo variants, the self-hosted
 font subsets, the social card and icons — and their outputs are committed, so a
 clean checkout can build without running them.
 
-`dist/` after a build — **69 files, 3.3MB**, of which a first visit downloads
+`dist/` after a build — **70 files, 3.3MB**, of which a first visit downloads
 about 250KB:
 
 ```
@@ -29,6 +29,7 @@ index.html                          the site
 .htaccess                           compression, caching, 404, MIME types
 robots.txt
 sitemap.xml
+llms.txt                            machine-readable summary for AI assistants
 google192f612c4e876e6f.html         Search Console verification
 img/                                62 photo variants (srcset), WebP + AVIF hero
 fonts/                              8 woff2 subsets + OFL.txt
@@ -49,12 +50,22 @@ larger than any variant), or `node_modules/`.
 ## Server requirements
 
 There is no build server, no runtime and no database — this is static hosting.
-**The site makes zero third-party requests**: the photographs, both font
-families and every icon are served from this origin. Nothing outside
-`aunaldrb.com` has to resolve for the page to render.
+**The only third-party request the site makes is Google Analytics**: the
+photographs, both font families and every icon are served from this origin, so
+nothing outside `aunaldrb.com` has to resolve for the page to *render* — the
+analytics tag is `async` and nothing waits for it.
 
 **On Apache**, `.htaccess` ships with the site and configures everything below
 by itself, as long as the host allows overrides.
+
+> **One block in `.htaccess` needs a decision before you upload.** It redirects
+> `http://` to `https://` and `www.` to the apex, so the site answers on the one
+> address its canonical tag, sitemap, Open Graph tags and structured data all
+> name. That assumes the TLS certificate is installed and covers both
+> `aunaldrb.com` and `www.aunaldrb.com` — which is a requirement of this site
+> anyway. **If the certificate is not in place yet, comment that block out
+> until it is**; redirecting to an address that cannot be served takes the site
+> down. It is marked in the file.
 
 **On Nginx**, `.htaccess` is inert and this belongs in the server block:
 
@@ -110,6 +121,29 @@ what an unconfigured host costs.
 
 All ten harnesses pass against the production build — 1,231 assertions.
 
+## Being found — search engines and AI assistants
+
+Three surfaces do this work, and all three ship:
+
+- **`robots.txt`** names twenty-two crawlers explicitly and blocks none of
+  them. Naming matters: a crawler that finds its own name uses *its* group and
+  stops reading the wildcard one, so leaving them to inherit is not the same
+  as allowing them. `Google-Extended` and `Applebot-Extended` are in there on
+  purpose — they are not crawlers but the opt-out switches for Gemini and
+  Apple Intelligence, and this site opts in.
+- **`sitemap.xml`** — one canonical URL with a `lastmod`. Update the `lastmod`
+  when the content changes, not on every deploy.
+- **`llms.txt`** — the convention AI assistants look for. It carries the same
+  facts as the page plus an explicit list of what the site does *not* state:
+  no prices, no ratings, no branches outside Riyadh, no ambulance service. An
+  assistant with a gap tends to fill it; this closes the gaps.
+
+The thing that matters most is not a file. **Every word of the page is in the
+first HTTP response** — 5,477 characters of text, 32 headings, no JavaScript
+required. Most AI crawlers do not execute JavaScript at all, and a site whose
+content only appears after a script runs is, to them, an empty page. Verify it
+stays that way with `ux/verify-crawlability.js`.
+
 ## Search Console, after the first deploy
 
 1. `google192f612c4e876e6f.html` is already in the package; verification will
@@ -121,3 +155,19 @@ All ten harnesses pass against the production build — 1,231 assertions.
    ratings, reviews, offers or prices, because the site publishes none.
 4. `sitemap.xml` carries a `lastmod`. Update it when the content changes — not
    on every deploy.
+5. **Check Google Analytics is receiving.** The GA4 tag (property
+   `G-NG6B8KSZQ9`) is in the `<head>`. `googletagmanager.com` is unreachable
+   from the environment this build was verified in, so the tag was never seen
+   to execute here — confirm the first pageview lands in GA4 Realtime.
+6. **Re-run Lighthouse on the live URL**, via PageSpeed Insights. It is the
+   only place the analytics tag's real cost can be measured, and the only
+   place the `https://` and `www.` redirects can be confirmed.
+
+## A note on cookies
+
+GA4 sets first-party cookies (`_ga`, `_ga_NG6B8KSZQ9`). Saudi PDPL, and the
+GDPR rules that apply to EU and UK visitors, make a consent banner the safe
+default for analytics. **There is no consent banner on this site.** If one is
+added, the `gtag('config', ...)` call in the `<head>` is what it has to gate —
+loading the script is harmless, sending the pageview is the part that needs
+consent. This is a decision for the client, not a defect in the build.

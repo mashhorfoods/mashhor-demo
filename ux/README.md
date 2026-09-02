@@ -2038,3 +2038,85 @@ of the "good" threshold.
 **LOW — the company-profile link goes to Google Drive.** It is the one external
 destination on the page and the only asset outside this origin. It resolves for
 the client; it cannot be verified from this environment.
+
+### M13 addendum — discoverability, and the analytics tag
+
+Two follow-ups, one of which changes the shape of the page's network graph.
+
+#### Being reachable, for two kinds of reader
+
+A search crawler and an AI assistant want different things, and only one of
+them runs JavaScript.
+
+The thing that already worked is the thing that matters most: **the entire
+page is in the first HTTP response.** Measured both ways — 5,314 characters of
+text, 862 words and all 32 headings, identical with JavaScript on and off.
+With JavaScript off the reveal system simply never hides anything, so a
+crawler that does not execute scripts sees *more* than a browser does at first
+paint, not less. Most AI crawlers do not execute scripts at all, and to them a
+site whose content arrives after a script is an empty page.
+
+What was added:
+
+- **`robots.txt` names twenty-two crawlers explicitly** and blocks none. This
+  is not decoration. A crawler that finds its own `User-agent` line uses that
+  group and *stops reading the wildcard one* — so a file that looks generous
+  can starve a named crawler that inherits nothing. Each group is spelled out
+  in full. `Google-Extended` and `Applebot-Extended` are in there deliberately:
+  they are not crawlers but the opt-out switches for Gemini and Apple
+  Intelligence, and a service business whose customers describe what they need
+  rather than name it wants to be quotable.
+- **`llms.txt`**, the convention AI assistants look for. Same facts as the
+  page, plus the section that earns its place: an explicit list of what the
+  site does *not* state — no prices, no ratings, no branches outside Riyadh,
+  no ambulance service, no founding year. An assistant with a gap fills it.
+- **One canonical address.** The canonical tag, the sitemap, the Open Graph
+  tags and the JSON-LD all name `https://aunaldrb.com/`, but the server would
+  also have answered on `http://` and on `www.` — the same page at three URLs,
+  and a crawler left to guess which is real. `.htaccess` now redirects both,
+  in one hop, with a comment saying what to do if the certificate is not ready.
+- **`ux/verify-crawlability.js`**, 23 assertions, and it needs no browser —
+  which is the point. It parses `robots.txt` the way a crawler does (longest
+  match wins, a named group shadows the wildcard), probes the page as
+  Googlebot, GPTBot, ClaudeBot and PerplexityBot, and checks that the JSON-LD
+  still parses and still contains no invented rating, review or offer. If a
+  check in there needed a browser to pass, the crawlers without one would fail
+  it.
+
+#### Google Analytics 4 — `G-NG6B8KSZQ9`
+
+Added to the `<head>`, `async`, exactly as specified. It is now the only
+third-party request the site makes.
+
+Two deliberate omissions. There is **no preconnect** to
+`googletagmanager.com`: a preconnect opens a TLS connection to a third origin
+inside the same window the LCP image is competing for bandwidth in, to speed
+up a script nothing on the page waits for. And the tag is **not deferred or
+lazy-loaded**, because moving it would cost measurement accuracy for a page
+whose own metrics it does not touch.
+
+Measured, three runs each, same server, same build with and without the tag:
+
+| | without | with |
+|---|---|---|
+| Performance | 98 | 98 |
+| LCP | 2186ms | 2179ms |
+| TBT | 0ms | 0ms |
+| CLS | 0.000 | 0.000 |
+| Speed Index | 1807ms | 1803ms |
+| requests | 11 | 12 |
+
+**What is not measured, and cannot be here:** `googletagmanager.com` is
+unreachable from this environment by policy, so every local run records the
+request failing rather than executing. That failure is also the whole of the
+Best Practices drop from 100 to 96 — one console entry,
+`ERR_TUNNEL_CONNECTION_FAILED`, and nothing else. What these runs establish is
+that the tag changes nothing about the page's own loading. What gtag.js costs
+once it actually runs has to be measured on the live URL with PageSpeed
+Insights after the first deploy.
+
+**Not a defect, but a decision the client owes:** GA4 sets first-party cookies
+and there is no consent banner. Saudi PDPL and the GDPR rules covering EU and
+UK visitors make one the safe default. If it is added, the `gtag('config',…)`
+call is what it has to gate — loading the script is harmless, sending the
+pageview is the part that needs consent.

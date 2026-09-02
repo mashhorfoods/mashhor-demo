@@ -1,9 +1,91 @@
 # عون الدرب للنقل المتخصص — https://aunaldrb.com/
-# Everything uploaded is content. The development material — ux/, build.js,
-# brand/*.md, brand/design-system.html, the image masters — is not uploaded at
-# all (see DEPLOY.md), so there is nothing here to disallow: a Disallow line
-# for a path the server does not serve only tells a crawler the path exists.
+#
+# The whole site is one public page and every word of it is meant to be found.
+# Nothing here is disallowed, because there is nothing to hide: the
+# development material (ux/, seo/, build.js, brand/*.md, the design-system
+# pages, the image masters) is never uploaded at all — see DEPLOY.md — so a
+# Disallow line for those paths would only tell a crawler they exist.
+#
+# The named groups below are declarative. A crawler that matches its own name
+# uses ITS group and ignores the wildcard one, so each is spelled out in full
+# rather than left to inherit. Search and AI assistants are both welcome: this
+# is a service business whose customers ask for it by description, and being
+# quotable by an assistant is the same thing as being findable.
+
+# ── everything else ──────────────────────────────────────────────────────────
 User-agent: *
+Allow: /
+
+# ── search engines ───────────────────────────────────────────────────────────
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+# ── AI assistants and their indexes ─────────────────────────────────────────
+# Google-Extended and Applebot-Extended are not crawlers. They are the opt-out
+# switches for Gemini and Apple Intelligence: a Disallow here removes this site
+# from those assistants' answers without affecting search ranking. Allowed, on
+# purpose.
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: MistralAI-User
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: CCBot
 Allow: /
 
 Sitemap: https://aunaldrb.com/sitemap.xml

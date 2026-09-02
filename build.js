@@ -40,6 +40,10 @@ const DIST = path.join(ROOT, 'dist');
 const SHIP = [
   '404.html', 'robots.txt', 'sitemap.xml',
   'google192f612c4e876e6f.html',
+  /* M13 — the machine-readable summary AI assistants look for at /llms.txt.
+     Same facts as the page, plus an explicit list of what the site does NOT
+     state, so an assistant has no gap to fill in with an invention. */
+  'llms.txt',
   /* M13 §28/§29 — compression, cache headers, the 404 handler and the MIME
      types for avif/woff2. Measured on this build: without compression the
      mobile performance score is 93 and LCP is 3.1s; with it, 99 and 2.2s.

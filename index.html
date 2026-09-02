@@ -3504,6 +3504,49 @@ html:not(.js) .hww__path{display:none}
 }
   </script>
 
+  <!-- ==================================================================
+       ANALYTICS — Google Analytics 4, property G-NG6B8KSZQ9
+       STAGE M13 §26/§42
+
+       This is the only third-party request the site makes. Everything else —
+       photographs, both font families, every icon — is served from this
+       origin, so this tag is the one thing on the page whose cost belongs to
+       somebody else's server.
+
+       `async` keeps it off the critical path: it neither blocks the parser
+       nor delays the hero. There is deliberately NO preconnect to
+       googletagmanager.com, because a preconnect opens a TLS connection to a
+       third origin inside the same window the LCP image is competing for
+       bandwidth in, to speed up a script nothing on the page waits for.
+
+       ITS REAL COST IS NOT MEASURED. The environment this build was verified
+       in cannot reach googletagmanager.com, so every local Lighthouse run
+       records the request failing rather than executing. What the local runs
+       do establish is that the tag changes nothing about the page's own
+       loading: LCP, CLS and TBT are unmoved with the snippet present. What
+       they cannot establish is what gtag.js costs once it actually runs.
+       Check that on the live URL with PageSpeed Insights after the first
+       deploy — that is the only place the number will be real.
+
+       Two things to know before launch:
+       · GA4 sets first-party cookies (_ga, _ga_NG6B8KSZQ9). Saudi PDPL and
+         EU/UK visitors make a consent banner the safe default. There is none
+         on this site yet; if one is added, the config call below is what it
+         has to gate.
+       · The measurement ID is public by design — it identifies the property
+         to the collector and grants nothing. It is not a secret and is
+         correct to have in the markup.
+       ================================================================== -->
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-NG6B8KSZQ9"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-NG6B8KSZQ9');
+  </script>
+
 </head>
 
 <body>
