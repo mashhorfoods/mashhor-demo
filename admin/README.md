@@ -389,3 +389,59 @@ UA rule for `[hidden]`, so an error panel rendered alongside the success panel. 
 **The decision still needed:** whether the request form goes onto the public site. Until it
 does, this stage delivers the intake path complete and ready to wire, and website-sourced
 requests remain something the admin can represent but the visitor cannot yet create.
+
+## Stage 15 — integration and data flow
+
+An audit stage. Every claim below was measured against the files, and three real
+integration defects were found and fixed.
+
+### Verified consistent
+
+- **Service names** — the seven approved services are byte-identical across six independent
+  copies: the site's `خدماتنا` section, the public request form's option list, and the
+  `requests`, `customers`, `intake` and `services` modules. No drift.
+- **Contact details** — one number, `966535544352`, across the site's `tel:` link, its `wa.me`
+  link, and the settings module. Company name, tagline, address and website URL agree between
+  the site and settings.
+- **Statuses** — the approved five, everywhere, with no sixth label anywhere in the system.
+- **Request ID scheme** — `REQ-YYYY-NNNN`, well-formed in every module.
+- **Cross-page links** — every outbound link in all eight admin pages resolves.
+- **Terminology** — `ذوي الاحتياجات الخاصة` only; zero prohibited terms in any rendered copy
+  across the public site, the built `dist/` page and all admin pages.
+- **Responsive** — no horizontal overflow on any of the nine pages at any of the fourteen
+  required widths (126 measurements).
+- **Accessibility** — zero missing alt text, unlabelled controls, unnamed links or undersized
+  targets across all nine pages; `dir=rtl` everywhere.
+- **Runtime** — zero console errors on all eight admin pages, the public site and the built page.
+
+### Fixed
+
+1. **The request datasets had drifted.** `requests.html` and `customers.html` each carried
+   their own copy of the same records. Twelve agreed exactly, but two website-sourced requests
+   existed only in the requests module and four historical requests only in the customer
+   module — so a customer's history disagreed with the request list. Both now hold the same
+   eighteen records with zero conflicts. This is the duplicate-data problem §02 warns about,
+   and in a database-backed system it cannot arise; it arose here because each page is
+   self-contained.
+2. **The dashboard's figures were a third independent copy** — it claimed 34 total requests
+   against a dataset of 18. Every KPI, the status distribution bar, the legend, the navigation
+   badge and the recent-requests list are now computed from the reconciled record set:
+   5 جديد · 3 قيد المراجعة · 2 مؤكد · 7 مكتمل · 1 ملغي, 18 total, 14 unique customers.
+3. **A duplicate `ic-image` symbol** in the intake page's icon sprite — two definitions of the
+   same id, which is invalid and silently ignores the second.
+
+### Cannot be verified, because the layer does not exist
+
+Sections 14 through 25 of the brief concern the backend, the database, API endpoints,
+sessions, caching and server-side authorization. **None of these exist.** Every module holds
+its data in the page. So there is nothing to verify for persistence after refresh, database
+relationships, cache invalidation, endpoint correctness, or server-enforced permissions — and
+no amount of frontend work can establish them.
+
+Two approved modules are also still absent: **المحتوى** and **التقارير**. Sections 07, 11 and 12
+of this brief assume content management exists; it does not, so content-to-website propagation
+could not be tested. Stage 14 (notifications and activity) was paused and is not built, so
+§10 and §11 have nothing to integrate.
+
+The Stage 10 verdict is unchanged: **NOT READY FOR DEPLOYMENT.** What Stage 15 establishes is
+that everything which does exist is now internally consistent and free of contradictions.
