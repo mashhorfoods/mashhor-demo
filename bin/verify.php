@@ -1,7 +1,10 @@
 <?php
 /**
  * RECOVERY 01 — the §30, §31 and §32 test matrices, executed rather than
- * asserted.  Usage:  php bin/verify.php http://127.0.0.1:8088
+ * asserted.  Usage:  php bin/verify.php http://127.0.0.1:8088 [--email= --password=]
+ *
+ * WRITES to the database it is pointed at. Never run it against production
+ * data — see bin/preflight.php for the read-only check.
  *
  * Every case drives the real HTTP endpoints through the real database. It
  * creates its own scratch data and checks what actually landed in the tables,
@@ -14,7 +17,35 @@ if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 define('AUN_APP', true);
 require_once dirname(__DIR__) . '/app/bootstrap.php';
 
-$BASE = rtrim($argv[1] ?? 'http://127.0.0.1:8088', '/');
+$BASE = rtrim(($argv[1] ?? null) && !str_starts_with($argv[1], '--')
+    ? $argv[1] : 'http://127.0.0.1:8088', '/');
+
+function opt(string $name, ?string $default = null): ?string
+{
+    foreach ($GLOBALS['argv'] as $a) {
+        if (str_starts_with($a, "--{$name}=")) return substr($a, strlen($name) + 3);
+    }
+    return $default;
+}
+function flag(string $name): bool { return in_array("--{$name}", $GLOBALS['argv'], true); }
+
+/*
+ * This suite WRITES. It creates customers, requests, content-manager accounts
+ * and it publishes content into index.html. That is the point — §32 asks what
+ * actually landed in the tables — but it means the target database must be one
+ * you are willing to have scratch rows in. Run it against a staging database,
+ * never against one holding real customer records.
+ */
+if (Env::isProduction() && !flag('allow-writes')) {
+    fwrite(STDERR,
+        "\nRefusing to run: APP_ENV is production.\n\n" .
+        "  This suite writes scratch data — test customers, test requests, test\n" .
+        "  accounts — and it publishes content into index.html. Point it at a\n" .
+        "  staging database instead (a second .env with a second DB_NAME), or\n" .
+        "  pass --allow-writes if this database genuinely holds nothing real.\n\n" .
+        "  For a safe check against the live site, use:  php bin/preflight.php\n\n");
+    exit(3);
+}
 
 /* ------------------------------------------------------------------ */
 /* a tiny HTTP client with its own cookie jar, so sessions are real    */
@@ -257,8 +288,10 @@ clearRateBucket();
 /* ================================================================== */
 section('§30  AUTHENTICATION MATRIX');
 /* ================================================================== */
-$EMAIL = 'noura@aunaldrb.com';
-$PW    = 'Recovery-01-Local-Dev';
+/* The account the suite signs in as. Defaults to the local development seed;
+ * on any other machine pass --email= and --password= for an existing admin. */
+$EMAIL = (string) opt('email', 'noura@aunaldrb.com');
+$PW    = (string) opt('password', 'Recovery-01-Local-Dev');
 
 /* invalid login */
 clearRateBucket();

@@ -107,6 +107,9 @@ ErrorDocument 404 /404.html
   # no third-party requests at all
   Header set X-Content-Type-Options "nosniff"
   Header set Referrer-Policy "strict-origin-when-cross-origin"
+  # the admin pages already send this; the public page had no reason to be
+  # framed either, and refusing costs nothing
+  Header set X-Frame-Options "SAMEORIGIN"
 </IfModule>
 
 # --- 5b · never serve configuration or source (RECOVERY 01 §22/§23) ----------

@@ -49,14 +49,30 @@ other one. The goal is not to get files onto the server; it is to run the same
    php bin/seed-content.php   # services, media, settings
    ```
 5. Sign in and **change the seeded Super Admin password immediately**.
-6. Run the suite against the live URL and send me the raw output, failures
-   included — that text is what stage B is built from.
+6. Run the read-only preflight and send me its output. It reads files, reads
+   the database and makes ordinary HTTP requests; it writes nothing, so it is
+   safe against the live site.
    ```sh
-   php bin/verify.php https://aunaldrb.com
+   php bin/preflight.php
    ```
+7. Then the full suite, **against a second, empty database** — not the live
+   one. `bin/verify.php` writes: it creates test customers, test requests and
+   test accounts, and it publishes content into `index.html`. It refuses to
+   run when `APP_ENV=production` for exactly that reason. It is also excluded
+   from the deployment package by design, so upload it by hand and delete it
+   afterwards.
+   ```sh
+   # a second MySQL database in hPanel, and a copy of .env pointing at it
+   php bin/migrate.php
+   php bin/seed.php --admin-email=you@example.com --admin-name="اسمك"
+   php bin/verify.php https://aunaldrb.com --email=you@example.com --password=…
+   ```
+   Send me the raw output, failures included — that text is what stage B is
+   built from.
 
-**Done when** the suite runs to completion against MySQL, on the host, over
-HTTPS. Green or red, a result is the deliverable.
+**Done when** preflight reports no failures against the live database, and the
+293-check suite has run to completion against MySQL on this host. Green or red,
+a result is the deliverable.
 
 ---
 
