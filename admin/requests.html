@@ -62,6 +62,9 @@
 }
 
 *,*::before,*::after{box-sizing:border-box}
+/* [hidden] must win over any component display rule */
+[hidden]{display:none!important}
+
 html{-webkit-text-size-adjust:100%}
 body{
   margin:0;background:var(--soft);color:var(--ink);
@@ -756,6 +759,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
 <symbol id="ic-note" viewBox="0 0 24 24"><path d="M4.6 5.6a2 2 0 0 1 2-2h10.8a2 2 0 0 1 2 2v9.2l-4.6 4.6H6.6a2 2 0 0 1-2-2z"/><path d="M19.4 14.8h-4.6v4.6"/><path d="M8.4 9h7.2M8.4 12.4h4.6"/></symbol>
 <symbol id="ic-list" viewBox="0 0 24 24"><path d="M8.6 6.6h11.8M8.6 12h11.8M8.6 17.4h11.8"/><circle cx="4.6" cy="6.6" r="1.2" fill="currentColor" stroke="none"/><circle cx="4.6" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="4.6" cy="17.4" r="1.2" fill="currentColor" stroke="none"/></symbol>
 <symbol id="ic-image" viewBox="0 0 24 24"><rect x="3.4" y="4.6" width="17.2" height="14.8" rx="2.2"/><circle cx="8.8" cy="9.6" r="1.6"/><path d="m4.4 17.4 4.8-4.4 3.4 3 3-2.6 4 3.6"/></symbol>
+<symbol id="ic-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M3.6 12h16.8"/><path d="M12 3.4a13 13 0 0 1 0 17.2M12 3.4a13 13 0 0 0 0 17.2"/></symbol>
 </defs></svg>
 
 <a class="skip" href="#main">تخطَّ إلى المحتوى</a>
@@ -857,6 +861,8 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
             <p class="page__d">تُسجَّل الطلبات الواردة عبر الهاتف والواتساب هنا، وتُتابع حتى اكتمال الرحلة.</p>
           </div>
           <div class="page__a">
+            <a class="btn btn--secondary" href="intake.html">
+              <svg class="i i--sm" aria-hidden="true"><use href="#ic-globe"/></svg>نموذج الموقع</a>
             <button class="btn btn--primary modonly"><svg class="i i--sm" aria-hidden="true"><use href="#ic-plus"/></svg>تسجيل طلب</button>
           </div>
         </div>
@@ -891,7 +897,17 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
                   <option value="month">هذا الشهر</option>
                 </select></span>
               </div>
-              <div class="tb__f" style="flex:1 1 14rem">
+              <div class="tb__f">
+                <label for="fsource">المصدر</label>
+                <span class="tb__sel"><svg class="i i--sm" aria-hidden="true"><use href="#ic-chevron"/></svg>
+                <select id="fsource">
+                  <option value="">كل المصادر</option>
+                  <option value="الموقع">الموقع الإلكتروني</option>
+                  <option value="واتساب">واتساب</option>
+                  <option value="هاتف">هاتف</option>
+                </select></span>
+              </div>
+              <div class="tb__f" style="flex:1 1 12rem">
                 <label for="fservice">الخدمة</label>
                 <span class="tb__sel"><svg class="i i--sm" aria-hidden="true"><use href="#ic-chevron"/></svg>
                 <select id="fservice"><option value="">كل الخدمات</option></select></span>
@@ -1208,6 +1224,16 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
       from:"حي الوادي، الرياض", to:"حي الملز، الرياض", date:"2026-09-08", time:"16:20",
       status:"done", created:"2026-09-03 13:15", source:"هاتف", notes:[],
       hist:[{to:"new",w:"النظام",d:"2026-09-03 13:15"},{to:"done",w:"سارة القحطاني",d:"2026-09-08 17:40"}] },
+    { id:"REQ-2026-0150", name:"أمل الصاعدي", phone:"0501239876", service:SERVICES[1],
+      from:"حي الربيع، الرياض", to:"مركز التأهيل الشامل", date:"2026-09-18", time:"09:30",
+      status:"new", created:"2026-09-14 07:22", source:"الموقع", notes:[],
+      hist:[{to:"new",w:"نموذج الموقع",d:"2026-09-14 07:22"}] },
+    { id:"REQ-2026-0149", name:"تركي الشهراني", phone:"0553219876", service:SERVICES[4],
+      from:"حي النخيل، الرياض", to:"مستشفى الملك خالد الجامعي", date:"2026-09-16", time:null,
+      status:"review", created:"2026-09-13 22:48", source:"الموقع",
+      notes:[{t:"وصل الطلب من نموذج الموقع بدون تحديد وقت — يلزم الاتصال لتأكيده.",w:"نورة العتيبي",d:"2026-09-14 08:05"}],
+      hist:[{to:"new",w:"نموذج الموقع",d:"2026-09-13 22:48"},
+            {to:"review",w:"نورة العتيبي",d:"2026-09-14 08:05"}] },
     { id:"REQ-2026-0137", name:"ريم الشمري", phone:"0533300221", service:SERVICES[6],
       from:"حي حطين، الرياض", to:"استراحة العائلة، الدرعية", date:"2026-09-20", time:null,
       status:"new", created:"2026-09-12 20:30", source:"واتساب", notes:[],
@@ -1215,7 +1241,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   ];
 
   var PER_PAGE = 5;
-  var state = { q:"", status:"", date:"", service:"", page:1 };
+  var state = { q:"", status:"", date:"", service:"", source:"", page:1 };
   var current = null, canModify = true;
 
   /* ---------- helpers --------------------------------------------------- */
@@ -1246,6 +1272,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   function match(r){
     if (state.status && r.status!==state.status) return false;
     if (state.service && r.service!==state.service) return false;
+    if (state.source && r.source!==state.source) return false;
     if (state.date && !inPeriod(r,state.date)) return false;
     var q = state.q.trim();
     if (!q) return true;
@@ -1383,6 +1410,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
     if (state.status)  items.push({k:"status",  t:"الحالة: "+ST[state.status].label});
     if (state.date)    items.push({k:"date",    t:"الفترة: "+({today:"اليوم",week:"هذا الأسبوع",month:"هذا الشهر"})[state.date]});
     if (state.service) items.push({k:"service", t:"الخدمة: "+state.service});
+    if (state.source)  items.push({k:"source",  t:"المصدر: "+state.source});
     wrap.hidden = !items.length;
     items.forEach(function(it){
       var c = el("span","chip");
@@ -1396,6 +1424,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
         if (it.k==="status") $("fstatus").value = "";
         if (it.k==="date") $("fdate").value = "";
         if (it.k==="service") $("fservice").value = "";
+        if (it.k==="source") $("fsource").value = "";
         state.page = 1; render();
       });
       c.appendChild(x);
@@ -1404,8 +1433,8 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   }
 
   function resetAll(){
-    state.q=""; state.status=""; state.date=""; state.service=""; state.page=1;
-    $("q").value=""; $("fstatus").value=""; $("fdate").value=""; $("fservice").value="";
+    state.q=""; state.status=""; state.date=""; state.service=""; state.source=""; state.page=1;
+    $("q").value=""; $("fstatus").value=""; $("fdate").value=""; $("fservice").value=""; $("fsource").value="";
     render();
   }
 
@@ -1677,6 +1706,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   $("fstatus").addEventListener("change", function(){ state.status=this.value; state.page=1; render(); });
   $("fdate").addEventListener("change", function(){ state.date=this.value; state.page=1; render(); });
   $("fservice").addEventListener("change", function(){ state.service=this.value; state.page=1; render(); });
+  $("fsource").addEventListener("change", function(){ state.source=this.value; state.page=1; render(); });
   $("reset").addEventListener("click", resetAll);
   $("emptyReset").addEventListener("click", resetAll);
   $("back").addEventListener("click", function(e){ e.preventDefault(); back(); });

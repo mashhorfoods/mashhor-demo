@@ -1,4 +1,4 @@
-<title>Aoun Al-Darb Customers Module</title>
+<title>Aoun Al-Darb Website Intake</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
@@ -586,10 +586,8 @@ table.tbl td:first-child{white-space:nowrap}
 
 /* row click target */
 tr.rowlink{cursor:pointer}
-.rowbtn{background:none;border:none;font:inherit;color:var(--ink);font-weight:600;
-  cursor:pointer;text-align:start;
-  /* WCAG 2.5.8 target size — text alone gave an 18px-tall control */
-  display:inline-flex;align-items:center;min-height:24px;padding:.15rem 0}
+.rowbtn{background:none;border:none;padding:0;font:inherit;color:var(--ink);font-weight:600;
+  cursor:pointer;text-align:start}
 .rowbtn:hover{text-decoration:underline}
 .rowbtn:focus-visible{outline:none;box-shadow:var(--sh-focus);border-radius:var(--r-xs)}
 
@@ -751,6 +749,265 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
 .sortbar{display:flex;flex-wrap:wrap;gap:var(--s3);align-items:flex-end}
 #profileview:focus{outline:none}
 .f__v.muted{color:var(--gray);font-family:var(--f-ar-body)}
+
+/* === SERVICES MODULE · Stage 08 ======================================== */
+.svc{display:flex;align-items:center;gap:var(--s4);padding:var(--s4) var(--s5);
+  border-bottom:1px solid var(--divider);min-width:0}
+.svc:last-child{border-bottom:none}
+.svc:hover{background:var(--row-hover)}
+.svc.is-off{background:var(--soft)}
+.svc.is-off .svc__thumb{opacity:.5}
+.svc.is-off .svc__n{color:var(--slate)}
+
+.svc__ord{display:flex;flex-direction:column;align-items:center;gap:2px;flex:0 0 auto}
+.svc__num{font-family:var(--f-mono);font-size:12px;color:var(--slate);
+  font-variant-numeric:tabular-nums;min-width:1.6rem;text-align:center}
+.ordbtn{width:30px;height:26px;display:grid;place-items:center;border:1px solid var(--divider);
+  background:var(--white);color:var(--slate);border-radius:var(--r-xs);cursor:pointer;padding:0}
+.ordbtn:hover:not(:disabled){border-color:var(--control-border);color:var(--navy);background:var(--mist)}
+.ordbtn:focus-visible{outline:none;box-shadow:var(--sh-focus)}
+.ordbtn:disabled{color:#C3CAD4;cursor:not-allowed;background:var(--disabled-surface)}
+.ordbtn svg{transform:rotate(-90deg)}
+.ordbtn.down svg{transform:rotate(90deg)}
+
+.svc__thumb{width:84px;height:60px;border-radius:var(--r-control);object-fit:cover;
+  background:var(--mist);flex:0 0 auto;display:block}
+.svc__b{min-width:0;flex:1 1 auto;display:flex;flex-direction:column;gap:.2rem}
+.svc__n{font-weight:600;font-size:var(--fs-body);color:var(--ink)}
+.svc__d{font-family:var(--f-ar-body);font-size:var(--fs-caption);color:var(--slate);
+  line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.svc__m{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2) var(--s4);margin-top:.25rem}
+.svc__u{font-family:var(--f-ar-body);font-size:var(--fs-caption);color:var(--slate)}
+.svc__a{display:flex;align-items:center;gap:var(--s2);flex:0 0 auto}
+
+.badge--on{background:var(--st-done-bg);color:var(--st-done-ink);border-color:rgba(37,107,85,.22)}
+.badge--off{background:var(--st-cancel-bg);color:var(--st-cancel-ink);border-color:rgba(71,82,95,.2)}
+
+/* editor */
+.imgbox{display:flex;flex-direction:column;gap:var(--s3)}
+.imgprev{position:relative;border:1px solid var(--divider);border-radius:var(--r-card);
+  overflow:hidden;background:var(--mist);aspect-ratio:16/10}
+.imgprev img{width:100%;height:100%;object-fit:cover;display:block}
+.imgmeta{display:flex;flex-wrap:wrap;gap:.2rem var(--s4);font-family:var(--f-mono);
+  font-size:var(--fs-caption);color:var(--slate)}
+.drop{border:1px dashed var(--control-border);border-radius:var(--r-card);background:var(--soft);
+  padding:var(--s5);display:flex;flex-direction:column;align-items:center;gap:var(--s2);text-align:center}
+.drop strong{font-size:var(--fs-sec);color:var(--ink);font-weight:600}
+.drop span{font-family:var(--f-ar-body);font-size:var(--fs-caption);color:var(--slate)}
+.drop input[type=file]{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.upbar{height:4px;background:var(--sky);border-radius:var(--r-pill);overflow:hidden}
+.upbar__f{height:100%;width:0;background:var(--blue);transition:width 120ms linear}
+
+.pubrow{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s4);justify-content:space-between}
+.toggle{display:flex;align-items:center;gap:var(--s3);min-height:var(--tap);cursor:pointer;
+  background:none;border:none;padding:0;font-family:var(--f-ar);font-size:var(--fs-body);color:var(--ink)}
+.toggle__t{width:46px;height:26px;border-radius:var(--r-pill);background:var(--gray);
+  position:relative;flex:0 0 auto;transition:background var(--dur) var(--ease)}
+.toggle__t::after{content:"";position:absolute;top:3px;width:20px;height:20px;border-radius:50%;
+  background:var(--white);box-shadow:var(--sh-card);inset-inline-start:3px;
+  transition:inset-inline-start var(--dur) var(--ease)}
+.toggle[aria-pressed="true"] .toggle__t{background:var(--success)}
+.toggle[aria-pressed="true"] .toggle__t::after{inset-inline-start:23px}
+.toggle:focus-visible .toggle__t{box-shadow:var(--sh-focus)}
+
+#editview:focus{outline:none}
+.dirty{display:flex;align-items:center;gap:var(--s2);font-size:var(--fs-caption);
+  font-weight:600;color:var(--warning-ink)}
+.dirty[hidden]{display:none}
+
+.charc{font-family:var(--f-mono);font-size:var(--fs-caption);color:var(--slate);text-align:start}
+.charc.over{color:var(--error-ink);font-weight:500}
+
+.savebar{position:sticky;bottom:0;background:var(--white);border-top:1px solid var(--divider);
+  padding:var(--s3) var(--s5);display:flex;flex-wrap:wrap;gap:var(--s3);align-items:center;
+  border-radius:0 0 var(--r-card) var(--r-card);z-index:5}
+.savebar .btn{flex:0 0 auto}
+.savebar__n{font-family:var(--f-ar-body);font-size:var(--fs-caption);color:var(--slate);
+  margin-inline-start:auto;min-width:0}
+
+@media (max-width:767px){
+  .svc{flex-wrap:wrap;gap:var(--s3);padding:var(--s4)}
+  .svc__thumb{width:64px;height:48px}
+  .svc__b{flex:1 1 60%}
+  .svc__a{width:100%;justify-content:flex-start}
+  .svc__a .btn{flex:1 1 0}
+  .savebar__n{width:100%;margin-inline-start:0}
+  .savebar .btn{flex:1 1 0}
+}
+
+/* === SETTINGS & ADMINISTRATION · Stage 09 ============================== */
+#settingsview:focus,#usersview:focus,#userview:focus{outline:none}
+
+.catnav{display:flex;flex-direction:column;gap:2px}
+.catnav__i{display:flex;align-items:center;gap:var(--s3);min-height:var(--tap);
+  padding:0 var(--s3);border-radius:var(--r-control);background:none;border:1px solid transparent;
+  color:var(--ink);font-family:var(--f-ar);font-size:var(--fs-sec);font-weight:500;
+  cursor:pointer;text-align:start;width:100%}
+.catnav__i:hover{background:var(--row-hover)}
+.catnav__i:focus-visible{outline:none;box-shadow:var(--sh-focus)}
+.catnav__i[aria-current="true"]{background:var(--mist);color:var(--navy);font-weight:600;
+  border-color:rgba(44,76,130,.18)}
+.catnav__i .i:first-child{color:var(--slate)}
+.catnav__i[aria-current="true"] .i:first-child{color:var(--navy)}
+.catnav__d{width:8px;height:8px;border-radius:50%;background:var(--warning);
+  margin-inline-start:auto;flex:0 0 auto}
+.catnav__d[hidden]{display:none}
+
+.panel[hidden]{display:none}
+.pgrid{display:grid;gap:var(--s5);grid-template-columns:minmax(0,1fr)}
+@media (min-width:720px){.pgrid--2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.logo-row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s4)}
+.logo-box{width:120px;height:78px;border:1px solid var(--divider);border-radius:var(--r-card);
+  background:var(--white);display:grid;place-items:center;padding:var(--s3);flex:0 0 auto}
+.logo-box img{max-width:100%;max-height:100%;display:block}
+
+.warn{display:flex;gap:var(--s3);align-items:flex-start;background:var(--warning-bg);
+  border:1px solid rgba(143,96,20,.22);border-radius:var(--r-card);padding:var(--s3) var(--s4);
+  color:var(--warning-ink)}
+.warn p{font-family:var(--f-ar-body);font-size:var(--fs-caption);line-height:1.65}
+.warn b{font-weight:600}
+
+.optrow{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s3);padding:var(--s4) 0;
+  border-bottom:1px solid var(--divider)}
+.optrow:last-child{border-bottom:none}
+.optrow__b{min-width:0;flex:1 1 16rem}
+.optrow__t{display:block;font-size:var(--fs-body);font-weight:500;color:var(--ink)}
+.optrow__d{display:block;font-family:var(--f-ar-body);font-size:var(--fs-caption);
+  color:var(--slate);margin-top:.15rem;line-height:1.6}
+.optrow .toggle{margin-inline-start:auto}
+
+.langrow{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s3);padding:var(--s4);
+  border:1px solid var(--divider);border-radius:var(--r-card);background:var(--white)}
+.langrow + .langrow{margin-top:var(--s3)}
+.langrow__f{width:34px;height:34px;border-radius:var(--r-control);background:var(--mist);
+  color:var(--navy);display:grid;place-items:center;font-weight:700;font-size:12px;flex:0 0 auto}
+
+/* users */
+.urow{display:flex;align-items:center;gap:var(--s4);padding:var(--s4) var(--s5);
+  border-bottom:1px solid var(--divider);min-width:0}
+.urow:last-child{border-bottom:none}
+.urow:hover{background:var(--row-hover)}
+.urow.is-off{background:var(--soft)}
+.urow.is-off .urow__n{color:var(--slate)}
+.urow__b{min-width:0;flex:1 1 auto;display:flex;flex-direction:column;gap:.15rem}
+.urow__n{font-weight:600;font-size:var(--fs-body);color:var(--ink)}
+.urow__e{font-family:var(--f-mono);font-size:var(--fs-caption);color:var(--slate);
+  direction:ltr;text-align:start}
+.urow__m{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2) var(--s4);margin-top:.25rem}
+.urow__last{font-family:var(--f-ar-body);font-size:var(--fs-caption);color:var(--slate)}
+.urow__a{display:flex;align-items:center;gap:var(--s2);flex:0 0 auto}
+
+.badge--role{background:var(--mist);color:var(--navy);border-color:rgba(44,76,130,.18)}
+.badge--su{background:var(--sky);color:var(--st-confirmed-ink);border-color:rgba(34,64,111,.22)}
+
+.perm{width:100%;border-collapse:collapse;font-size:var(--fs-sec)}
+.perm th,.perm td{padding:var(--s3) var(--s4);text-align:start;border-bottom:1px solid var(--divider)}
+.perm thead th{font-size:var(--fs-caption);font-weight:600;color:var(--slate);background:var(--soft);
+  white-space:nowrap}
+.perm tbody tr:last-child td{border-bottom:none}
+.perm td.c{text-align:center;width:6.5rem}
+.perm__m{font-weight:500;color:var(--ink)}
+.perm__lock{font-family:var(--f-ar-body);font-size:var(--fs-caption);color:var(--slate)}
+
+.check{width:24px;height:24px;border:1px solid var(--control-border);border-radius:var(--r-xs);
+  background:var(--white);display:grid;place-items:center;color:var(--white);cursor:pointer;
+  padding:0;margin:0 auto}
+.check[aria-checked="true"]{background:var(--blue);border-color:var(--blue)}
+.check:focus-visible{outline:none;box-shadow:var(--sh-focus)}
+.check:disabled{background:var(--disabled-surface);border-color:var(--divider);cursor:not-allowed}
+.check:disabled[aria-checked="true"]{background:var(--gray);border-color:var(--gray)}
+.check svg{opacity:0}
+.check[aria-checked="true"] svg{opacity:1}
+
+.review{background:var(--soft);border:1px solid var(--divider);border-radius:var(--r-card);
+  padding:var(--s4) var(--s5)}
+.review__t{font-size:var(--fs-sec);font-weight:600;color:var(--ink);margin-bottom:var(--s3)}
+.review dl{display:grid;gap:var(--s2) var(--s4);grid-template-columns:8rem minmax(0,1fr);
+  font-size:var(--fs-sec);margin:0}
+.review dt{color:var(--slate);font-size:var(--fs-label)}
+.review dd{margin:0;color:var(--ink)}
+
+@media (max-width:767px){
+  .urow{flex-wrap:wrap;gap:var(--s3);padding:var(--s4)}
+  .urow__a{width:100%}
+  .urow__a .btn{flex:1 1 0}
+  .perm th,.perm td{padding:var(--s3) var(--s2)}
+  .perm td.c{width:4.4rem}
+  .review dl{grid-template-columns:minmax(0,1fr);gap:.1rem var(--s4)}
+  .review dt{margin-top:var(--s2)}
+}
+
+/* === WEBSITE INTAKE · Stage 13 ========================================= */
+#intakeview:focus{outline:none}
+.split{display:grid;gap:var(--s5);align-items:start}
+@media (min-width:1100px){.split{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+
+/* the public form, rendered with the site's own tokens — not the admin's */
+.site{background:var(--white);border:1px solid var(--divider);border-radius:var(--r-card);overflow:hidden}
+.site__bar{display:flex;align-items:center;gap:var(--s2);padding:.5rem var(--s4);
+  background:var(--navy);color:#B9C9E4;font-family:var(--f-mono);font-size:11px}
+.site__bar b{color:var(--white);font-weight:500}
+.site__b{padding:clamp(1rem,3vw,1.75rem)}
+.site__h{font-size:1.35rem;font-weight:700;color:var(--ink);margin-bottom:.4rem}
+.site__s{font-family:var(--f-ar-body);font-size:var(--fs-sec);color:var(--slate);
+  line-height:1.75;margin-bottom:var(--s5)}
+.fgrid{display:grid;gap:var(--s4);grid-template-columns:minmax(0,1fr)}
+@media (min-width:620px){.fgrid--2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.btn--site{background:var(--blue);color:var(--white);border-color:var(--blue);
+  min-height:var(--tap);width:100%;font-size:var(--fs-body)}
+.btn--site:hover{background:var(--blue-hover);border-color:var(--blue-hover)}
+.btn--site:disabled{background:var(--disabled-surface);color:var(--disabled-ink);border-color:var(--divider)}
+.spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.45);
+  border-top-color:#fff;animation:sp .8s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+.result{border-radius:var(--r-card);padding:var(--s5);display:flex;flex-direction:column;
+  align-items:center;text-align:center;gap:var(--s3)}
+.result--ok{background:var(--success-bg);border:1px solid rgba(37,107,85,.22);color:var(--success-ink)}
+.result--bad{background:var(--error-bg);border:1px solid rgba(165,53,46,.22);color:var(--error-ink)}
+.result__ic{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:var(--white)}
+.result__t{font-size:var(--fs-card);font-weight:600}
+.result__b{font-family:var(--f-ar-body);font-size:var(--fs-sec);line-height:1.75;color:var(--slate);max-width:40ch}
+.result__id{font-family:var(--f-mono);font-size:var(--fs-body);font-weight:500;direction:ltr;
+  background:var(--white);border-radius:var(--r-control);padding:.4rem .8rem;border:1px solid currentColor}
+
+/* pipeline trace */
+.trace{display:flex;flex-direction:column}
+.trace__s{display:flex;gap:var(--s3);align-items:flex-start;padding:var(--s3) 0;
+  border-bottom:1px solid var(--divider)}
+.trace__s:last-child{border-bottom:none}
+.trace__d{width:22px;height:22px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;
+  background:var(--disabled-surface);color:var(--disabled-ink);margin-top:1px}
+.trace__s.ok .trace__d{background:var(--success-bg);color:var(--success-ink)}
+.trace__s.bad .trace__d{background:var(--error-bg);color:var(--error-ink)}
+.trace__s.skip{opacity:.45}
+.trace__b{min-width:0;flex:1 1 auto}
+.trace__t{display:block;font-size:var(--fs-sec);color:var(--ink);font-weight:500}
+.trace__m{display:block;font-family:var(--f-ar-body);font-size:var(--fs-caption);color:var(--slate);
+  margin-top:.15rem;line-height:1.6}
+.trace__m code{font-family:var(--f-mono);font-size:11.5px;direction:ltr;unicode-bidi:isolate;
+  display:inline-block;background:var(--soft);border:1px solid var(--divider);
+  padding:.05em .3em;border-radius:3px;color:var(--navy)}
+
+.sim{display:flex;flex-wrap:wrap;gap:var(--s2);align-items:center}
+.sim__l{font-size:var(--fs-label);font-weight:500;color:var(--ink);margin-inline-end:var(--s2)}
+.simsw{display:inline-flex;border:1px solid var(--divider);border-radius:var(--r-control);overflow:hidden}
+.simsw button{font-family:var(--f-ar);font-size:var(--fs-caption);font-weight:600;padding:.4rem .7rem;
+  min-height:36px;background:var(--white);color:var(--slate);border:none;cursor:pointer}
+.simsw button[aria-pressed="true"]{background:var(--navy);color:var(--white)}
+.simsw button:focus-visible{outline:none;box-shadow:inset var(--sh-focus)}
+
+.contract{width:100%;border-collapse:collapse;font-size:var(--fs-sec)}
+.contract th,.contract td{padding:var(--s3) var(--s4);text-align:start;border-bottom:1px solid var(--divider);
+  vertical-align:top}
+.contract thead th{font-size:var(--fs-caption);font-weight:600;color:var(--slate);background:var(--soft);
+  white-space:nowrap}
+.contract tbody tr:last-child td{border-bottom:none}
+.contract code{font-family:var(--f-mono);font-size:11.5px;direction:ltr;unicode-bidi:isolate;
+  display:inline-block;color:var(--navy)}
+.contract td b{color:var(--ink);font-weight:600}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
 <symbol id="ic-home" viewBox="0 0 24 24"><path d="M3.5 10.6 12 3.8l8.5 6.8"/><path d="M5.6 9.6V19a1.2 1.2 0 0 0 1.2 1.2h3V15h4.4v5.2h3A1.2 1.2 0 0 0 18.4 19V9.6"/></symbol>
@@ -791,7 +1048,13 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
 <symbol id="ic-calendar" viewBox="0 0 24 24"><rect x="3.6" y="5.2" width="16.8" height="15.2" rx="2.2"/><path d="M3.6 10h16.8M8.4 3.4v3.4M15.6 3.4v3.4"/></symbol>
 <symbol id="ic-note" viewBox="0 0 24 24"><path d="M4.6 5.6a2 2 0 0 1 2-2h10.8a2 2 0 0 1 2 2v9.2l-4.6 4.6H6.6a2 2 0 0 1-2-2z"/><path d="M19.4 14.8h-4.6v4.6"/><path d="M8.4 9h7.2M8.4 12.4h4.6"/></symbol>
 <symbol id="ic-list" viewBox="0 0 24 24"><path d="M8.6 6.6h11.8M8.6 12h11.8M8.6 17.4h11.8"/><circle cx="4.6" cy="6.6" r="1.2" fill="currentColor" stroke="none"/><circle cx="4.6" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="4.6" cy="17.4" r="1.2" fill="currentColor" stroke="none"/></symbol>
+<symbol id="ic-upload" viewBox="0 0 24 24"><path d="M12 15.6V4.4"/><path d="m7.6 8.8 4.4-4.4 4.4 4.4"/><path d="M4.4 15.2v3.2a2 2 0 0 0 2 2h11.2a2 2 0 0 0 2-2v-3.2"/></symbol>
+<symbol id="ic-check" viewBox="0 0 24 24"><path d="m4.8 12.6 4.6 4.6L19.2 7.4"/></symbol>
+<symbol id="ic-trash" viewBox="0 0 24 24"><path d="M4.6 6.6h14.8"/><path d="M9.4 6.6V4.8a1.4 1.4 0 0 1 1.4-1.4h2.4a1.4 1.4 0 0 1 1.4 1.4v1.8"/><path d="M6.6 6.6 7.5 19a1.6 1.6 0 0 0 1.6 1.5h5.8a1.6 1.6 0 0 0 1.6-1.5l.9-12.4"/><path d="M10.4 10.4v6M13.6 10.4v6"/></symbol>
 <symbol id="ic-image" viewBox="0 0 24 24"><rect x="3.4" y="4.6" width="17.2" height="14.8" rx="2.2"/><circle cx="8.8" cy="9.6" r="1.6"/><path d="m4.4 17.4 4.8-4.4 3.4 3 3-2.6 4 3.6"/></symbol>
+<symbol id="ic-image" viewBox="0 0 24 24"><rect x="3.4" y="4.6" width="17.2" height="14.8" rx="2.2"/><circle cx="8.8" cy="9.6" r="1.6"/><path d="m4.4 17.4 4.8-4.4 3.4 3 3-2.6 4 3.6"/></symbol>
+<symbol id="ic-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M3.6 12h16.8"/><path d="M12 3.4a13 13 0 0 1 0 17.2M12 3.4a13 13 0 0 0 0 17.2"/></symbol>
+<symbol id="ic-send" viewBox="0 0 24 24"><path d="M20.6 3.4 10.8 13.2"/><path d="M20.6 3.4 14.4 20.6l-3.6-7.4-7.4-3.6z"/></symbol>
 </defs></svg>
 
 <a class="skip" href="#main">تخطَّ إلى المحتوى</a>
@@ -799,19 +1062,17 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
 
 <div class="app" id="app">
   <aside class="side" id="side">
-    <div class="side__brand">
-      <span class="side__mark" aria-hidden="true">ع</span>
-      <span class="side__name">عون الدرب<span>لوحة التحكم</span></span>
-    </div>
+    <div class="side__brand"><span class="side__mark" aria-hidden="true">ع</span>
+      <span class="side__name">عون الدرب<span>لوحة التحكم</span></span></div>
     <nav aria-label="التنقل الرئيسي" style="display:contents">
       <p class="side__grp">العمل اليومي</p>
       <a class="navitem" href="dashboard.html"><svg class="i" aria-hidden="true"><use href="#ic-home"/></svg><span class="navitem__lbl">الرئيسية</span></a>
-      <a class="navitem" href="requests.html"><svg class="i" aria-hidden="true"><use href="#ic-request"/></svg><span class="navitem__lbl">طلبات النقل</span></a>
-      <a class="navitem" href="#" aria-current="page"><svg class="i" aria-hidden="true"><use href="#ic-users"/></svg><span class="navitem__lbl">العملاء</span></a>
+      <a class="navitem" href="requests.html" data-nav="requests"><svg class="i" aria-hidden="true"><use href="#ic-request"/></svg><span class="navitem__lbl">طلبات النقل</span></a>
+      <a class="navitem" href="customers.html"><svg class="i" aria-hidden="true"><use href="#ic-users"/></svg><span class="navitem__lbl">العملاء</span></a>
       <p class="side__grp">الموقع الإلكتروني</p>
       <a class="navitem" href="services.html"><svg class="i" aria-hidden="true"><use href="#ic-service"/></svg><span class="navitem__lbl">الخدمات</span></a>
       <a class="navitem is-pending" href="#" aria-disabled="true" title="قيد الإنشاء — لم تُبنَ هذه الوحدة بعد"><svg class="i" aria-hidden="true"><use href="#ic-content"/></svg><span class="navitem__lbl">المحتوى</span></a>
-      <a class="navitem" href="media.html" data-nav="media"><svg class="i" aria-hidden="true"><use href="#ic-image"/></svg><span class="navitem__lbl">الوسائط والأصول</span></a>
+      <a class="navitem" href="media.html"><svg class="i" aria-hidden="true"><use href="#ic-image"/></svg><span class="navitem__lbl">الوسائط والأصول</span></a>
       <p class="side__grp">النظام</p>
       <a class="navitem is-pending" href="#" aria-disabled="true" title="قيد الإنشاء — لم تُبنَ هذه الوحدة بعد"><svg class="i" aria-hidden="true"><use href="#ic-report"/></svg><span class="navitem__lbl">التقارير</span></a>
       <a class="navitem" href="users.html"><svg class="i" aria-hidden="true"><use href="#ic-shield"/></svg><span class="navitem__lbl">المستخدمون والصلاحيات</span></a>
@@ -819,233 +1080,224 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
     </nav>
     <div class="side__foot">
       <button class="side__toggle" id="collapse" aria-expanded="true" aria-controls="side">
-        <svg class="i" aria-hidden="true"><use href="#ic-collapse"/></svg><span>تصغير القائمة</span>
-      </button>
+        <svg class="i" aria-hidden="true"><use href="#ic-collapse"/></svg><span>تصغير القائمة</span></button>
     </div>
   </aside>
-
   <div class="main">
     <div class="offline" id="offline" hidden role="status">
       <svg class="i i--sm" aria-hidden="true"><use href="#ic-offline"/></svg>
-      لا يوجد اتصال بالإنترنت — آخر تحديث قبل قليل
-    </div>
-
+      لا يوجد اتصال بالإنترنت — لن تُحفظ التعديلات حتى يعود الاتصال</div>
     <header class="hdr">
       <button class="iconbtn hdr__menu" id="menubtn" aria-label="فتح القائمة" aria-expanded="false" aria-controls="drawer">
-        <svg class="i" aria-hidden="true"><use href="#ic-menu"/></svg>
-      </button>
-      <p class="hdr__ctx">العملاء<span>عون الدرب للنقل المتخصص</span></p>
+        <svg class="i" aria-hidden="true"><use href="#ic-menu"/></svg></button>
+      <p class="hdr__ctx" id="hdrctx"></p>
       <div class="hdr__search">
         <svg class="i" aria-hidden="true"><use href="#ic-search"/></svg>
-        <label class="sr" for="gsearch">بحث في الطلبات والعملاء</label>
-        <input id="gsearch" type="search" placeholder="ابحث بالاسم أو رقم الجوال أو رقم الطلب">
-      </div>
+        <label class="sr" for="gsearch">بحث</label>
+        <input id="gsearch" type="search" placeholder="ابحث بالاسم أو رقم الجوال أو رقم الطلب"></div>
       <div class="hdr__acts">
         <span class="wrap-rel">
           <button class="iconbtn" id="bell" aria-label="التنبيهات" aria-expanded="false" aria-controls="notifpop">
-            <svg class="i" aria-hidden="true"><use href="#ic-bell"/></svg><span class="bell__d"></span>
-          </button>
+            <svg class="i" aria-hidden="true"><use href="#ic-bell"/></svg><span class="bell__d"></span></button>
           <div class="pop" id="notifpop" hidden role="dialog" aria-label="التنبيهات">
             <div class="pop__h"><span class="pop__t">التنبيهات</span></div>
             <div class="pop__list">
               <button class="notif"><span class="notif__unread" aria-hidden="true"></span>
                 <span class="notif__i notif__i--warn"><svg class="i i--sm" aria-hidden="true"><use href="#ic-clock"/></svg></span>
                 <span class="notif__b"><span class="notif__t">3 طلبات في «قيد المراجعة» منذ أكثر من يوم</span>
-                <span class="notif__m">08:15</span></span></button>
-            </div>
-          </div>
+                <span class="notif__m">08:15</span></span></button></div></div>
         </span>
         <span class="wrap-rel">
           <button class="who" id="whobtn" aria-expanded="false" aria-controls="whopop">
             <span class="who__av" aria-hidden="true">ن ع</span>
-            <span class="who__n">نورة العتيبي<span id="whorole">مدير النظام</span></span>
-          </button>
+            <span class="who__n">نورة العتيبي<span id="whorole">مدير النظام</span></span></button>
           <div class="pop" id="whopop" hidden role="menu" aria-label="حساب المستخدم" style="width:min(17rem,calc(100vw - 2rem))">
             <div class="menu__id"><span class="who__av" aria-hidden="true">ن ع</span>
               <span><b>نورة العتيبي</b><span id="whorole2">مدير النظام</span></span></div>
             <button class="menu__i" role="menuitem"><svg class="i i--sm" aria-hidden="true"><use href="#ic-user"/></svg>معلومات الحساب</button>
+            <button class="menu__i" role="menuitem"><svg class="i i--sm" aria-hidden="true"><use href="#ic-shield"/></svg>تغيير كلمة المرور</button>
             <span class="menu__sep"></span>
-            <button class="menu__i menu__i--danger" role="menuitem"><svg class="i i--sm" aria-hidden="true"><use href="#ic-logout"/></svg>تسجيل الخروج</button>
-          </div>
+            <button class="menu__i menu__i--danger" role="menuitem"><svg class="i i--sm" aria-hidden="true"><use href="#ic-logout"/></svg>تسجيل الخروج</button></div>
         </span>
       </div>
     </header>
-
     <main class="content" id="main">
-
-      <div class="alert alert--info demobar">
-        <svg class="i alert__i" aria-hidden="true"><use href="#ic-info"/></svg>
-        <span><span class="alert__t">بيانات تجريبية للعرض</span>
-          <span class="alert__b">سجلات العملاء أدناه مُشتقّة من طلبات النقل نفسها — عدد الطلبات وآخر نشاط محسوبان من السجلات، وليست أرقاماً مُدخلة. البحث والتصفية والتعديل تعمل فعلياً.</span></span>
-        <span class="roles">
-          <span class="roles__sw" role="group" aria-label="معاينة الصلاحيات">
-            <button id="roleFull" aria-pressed="true">صلاحية كاملة</button>
-            <button id="roleView" aria-pressed="false">عرض فقط</button>
-          </span>
-        </span>
+      <div class="alert alert--warning demobar">
+        <svg class="i alert__i" aria-hidden="true"><use href="#ic-alert"/></svg>
+        <span><span class="alert__t">الموقع لا يحتوي على نموذج طلب حتى الآن</span>
+          <span class="alert__b">فُحصت الصفحة المنشورة: لا يوجد بها أي حقل إدخال أو نموذج — وسيلتا التواصل الوحيدتان هما الهاتف والواتساب. ما يلي هو التكامل جاهزاً للتشغيل: النموذج كما سيظهر، وقواعد التحقق، ومسار إنشاء الطلب — دون أي تعديل على الموقع المنشور.</span></span>
       </div>
 
-      <!-- ============ LIST ============ -->
-      <section id="listview">
+      <section id="intakeview" tabindex="-1">
         <div class="page" style="margin-bottom:var(--s6)">
           <div class="page__t">
-            <h1 class="page__h">العملاء</h1>
-            <p class="page__d">يُنشأ سجل العميل تلقائياً عند تسجيل أول طلب برقم جواله، ويجمع كل طلباته في مكان واحد.</p>
+            <h1 class="page__h">تكامل نموذج الموقع</h1>
+            <p class="page__d">مسار واحد من الموقع إلى «طلبات النقل»: إرسال ← تحقق ← إنشاء طلب ← ربط العميل ← ظهور في اللوحة.</p>
           </div>
-        </div>
-
-        <div class="card">
-          <div class="card__h" style="display:block;padding-block:var(--s5)">
-            <div class="toolbar">
-              <div class="tb__search">
-                <svg class="i" aria-hidden="true"><use href="#ic-search"/></svg>
-                <label class="sr" for="q">ابحث في العملاء</label>
-                <input id="q" type="search" placeholder="اسم العميل أو رقم الجوال">
-              </div>
-              <div class="tb__f">
-                <label for="factive">النشاط</label>
-                <span class="tb__sel"><svg class="i i--sm" aria-hidden="true"><use href="#ic-chevron"/></svg>
-                <select id="factive">
-                  <option value="">كل العملاء</option>
-                  <option value="open">لديه طلب نشط</option>
-                  <option value="none">بدون طلبات نشطة</option>
-                </select></span>
-              </div>
-              <div class="tb__f">
-                <label for="fsort">الترتيب</label>
-                <span class="tb__sel"><svg class="i i--sm" aria-hidden="true"><use href="#ic-chevron"/></svg>
-                <select id="fsort">
-                  <option value="recent">الأحدث نشاطاً</option>
-                  <option value="most">الأكثر طلباً</option>
-                  <option value="name">الاسم</option>
-                </select></span>
-              </div>
-            </div>
-            <div class="applied" id="applied" hidden style="margin-top:var(--s4)">
-              <span>التصفية المطبّقة:</span>
-              <span id="chips" style="display:contents"></span>
-              <button class="btn btn--ghost btn--sm" id="reset">إعادة تعيين الكل</button>
-            </div>
-            <p class="count" id="count" style="margin-top:var(--s4)"></p>
-          </div>
-
-          <div id="results" data-state="ready">
-            <div class="state state--ready">
-              <div class="tbl-wrap"><table class="tbl">
-                <caption class="sr">قائمة العملاء</caption>
-                <thead><tr>
-                  <th scope="col">العميل</th><th scope="col">رقم الجوال</th>
-                  <th scope="col">عدد الطلبات</th><th scope="col">آخر طلب</th>
-                  <th scope="col">حالة آخر طلب</th><th scope="col"><span class="sr">إجراءات</span></th>
-                </tr></thead>
-                <tbody id="rows"></tbody>
-              </table></div>
-              <div class="reclist" id="cards"></div>
-              <div class="pager" id="pager"></div>
-            </div>
-
-            <div class="state state--loading">
-              <div class="skelrow"><span class="skel skel--line" style="width:22%"></span><span class="skel skel--line" style="width:18%"></span><span class="skel skel--line" style="width:26%"></span></div>
-              <div class="skelrow"><span class="skel skel--line" style="width:22%"></span><span class="skel skel--line" style="width:18%"></span><span class="skel skel--line" style="width:26%"></span></div>
-              <div class="skelrow"><span class="skel skel--line" style="width:22%"></span><span class="skel skel--line" style="width:18%"></span><span class="skel skel--line" style="width:26%"></span></div>
-              <div class="skelrow"><span class="skel skel--line" style="width:22%"></span><span class="skel skel--line" style="width:18%"></span><span class="skel skel--line" style="width:26%"></span></div>
-            </div>
-
-            <div class="state state--empty"><div class="empty">
-              <span class="empty__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-search"/></svg></span>
-              <span class="empty__t" id="emptyT">لا توجد نتائج مطابقة</span>
-              <span class="empty__b" id="emptyB">لا يوجد عميل يطابق البحث الحالي.</span>
-              <button class="btn btn--secondary" id="emptyReset">إعادة تعيين البحث</button>
-            </div></div>
-
-            <div class="state state--error"><div class="errbox">
-              <span class="empty__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-alert"/></svg></span>
-              <span class="empty__t">تعذّر تحميل العملاء</span>
-              <span class="empty__b">انقطع الاتصال أثناء جلب السجلات. أعد المحاولة.</span>
-              <button class="btn btn--secondary" id="retry"><svg class="i i--sm" aria-hidden="true"><use href="#ic-refresh"/></svg>إعادة المحاولة</button>
-            </div></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============ PROFILE ============ -->
-      <section id="profileview" class="detail hidden" tabindex="-1">
-        <div><p class="page__crumb"><a href="#" id="back"><svg class="i i--sm" aria-hidden="true"><use href="#ic-arrow"/></svg> العودة إلى العملاء</a></p></div>
-
-        <div class="dhead">
-          <div class="dhead__t">
-            <span class="dhead__row">
-              <span class="avatar avatar--lg" id="pAv" aria-hidden="true"></span>
-              <span style="min-width:0">
-                <h1 class="dhead__n" id="pName"></h1>
-                <span class="page__d" id="pSince" style="display:block"></span>
+          <div class="page__a">
+            <span class="sim">
+              <span class="sim__l" id="simlbl">محاكاة الاستجابة</span>
+              <span class="simsw" role="group" aria-labelledby="simlbl">
+                <button id="simOk" aria-pressed="true">ناجحة</button>
+                <button id="simNet" aria-pressed="false">انقطاع الشبكة</button>
+                <button id="simSrv" aria-pressed="false">فشل الخادم</button>
               </span>
             </span>
           </div>
-          <div class="dhead__a">
-            <button class="btn btn--secondary modonly" id="editbtn"><svg class="i i--sm" aria-hidden="true"><use href="#ic-edit"/></svg>تعديل البيانات</button>
-          </div>
         </div>
 
-        <div class="stats" id="pStats"></div>
-
-        <div class="dgrid">
+        <div class="split">
+          <!-- ============ the public form ============ -->
           <div style="display:flex;flex-direction:column;gap:var(--s5);min-width:0">
-            <section class="card" aria-labelledby="hist-h">
-              <div class="card__h"><h2 class="card__t" id="hist-h">سجل الطلبات</h2>
-                <span class="count" id="histCount"></span></div>
-              <div class="card__b card__b--flush" id="histList"></div>
-            </section>
-          </div>
+            <div class="site">
+              <div class="site__bar"><svg class="i i--sm" aria-hidden="true"><use href="#ic-globe"/></svg>
+                <span>aunaldrb.com</span><b style="margin-inline-start:auto">معاينة — غير منشور</b></div>
+              <div class="site__b">
+                <h2 class="site__h">اطلب رحلة</h2>
+                <p class="site__s">اترك بياناتك وسنتواصل معك لتأكيد الرحلة. الحقول المطلوبة فقط هي ما يحتاجه فريق عون الدرب لترتيب النقل.</p>
 
-          <div style="display:flex;flex-direction:column;gap:var(--s5);min-width:0">
-            <section class="card" aria-labelledby="info-h">
-              <div class="card__h"><h2 class="card__t" id="info-h">بيانات العميل</h2>
-                <span class="count" id="editHint" hidden>وضع التعديل</span></div>
+                <form id="pform" novalidate>
+                  <div class="fgrid fgrid--2">
+                    <div class="field">
+                      <label class="field__label" for="fName">الاسم <span class="field__req">(مطلوب)</span></label>
+                      <input class="ctl" id="fName" type="text" autocomplete="name">
+                      <span class="field__err" id="e-fName" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
+                    </div>
+                    <div class="field">
+                      <label class="field__label" for="fPhone">رقم الجوال <span class="field__req">(مطلوب)</span></label>
+                      <input class="ctl ltr" id="fPhone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="05XXXXXXXX">
+                      <span class="field__err" id="e-fPhone" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
+                    </div>
+                  </div>
 
-              <div class="card__b" id="infoView">
-                <div class="dl dl--one">
-                  <div class="f"><span class="f__k">الاسم</span><span class="f__v" id="iName"></span></div>
-                  <div class="f"><span class="f__k">رقم الجوال</span><span class="f__v ltr" id="iPhone"></span></div>
-                  <div class="f"><span class="f__k">أول طلب</span><span class="f__v ltr" id="iFirst"></span></div>
-                  <div class="f"><span class="f__k">مصدر أول طلب</span><span class="f__v" id="iSource"></span></div>
-                  <div class="f"><span class="f__k">ملاحظات</span><span class="f__v" id="iNotes"></span></div>
+                  <div class="fgrid" style="margin-top:var(--s4)">
+                    <div class="field">
+                      <label class="field__label" for="fService">الخدمة المطلوبة <span class="field__req">(مطلوب)</span></label>
+                      <span class="selwrap"><svg class="i i--sm" aria-hidden="true"><use href="#ic-chevron"/></svg>
+                      <select class="ctl" id="fService"><option value="">اختر الخدمة</option></select></span>
+                      <span class="field__help" id="svcNote"></span>
+                      <span class="field__err" id="e-fService" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
+                    </div>
+                  </div>
+
+                  <div class="fgrid fgrid--2" style="margin-top:var(--s4)">
+                    <div class="field">
+                      <label class="field__label" for="fFrom">مكان الانطلاق <span class="field__req">(مطلوب)</span></label>
+                      <input class="ctl" id="fFrom" type="text">
+                      <span class="field__err" id="e-fFrom" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
+                    </div>
+                    <div class="field">
+                      <label class="field__label" for="fTo">الوجهة <span class="field__req">(مطلوب)</span></label>
+                      <input class="ctl" id="fTo" type="text">
+                      <span class="field__err" id="e-fTo" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
+                    </div>
+                    <div class="field">
+                      <label class="field__label" for="fDate">تاريخ الرحلة <span class="field__req">(مطلوب)</span></label>
+                      <input class="ctl ltr" id="fDate" type="text" inputmode="numeric" placeholder="YYYY-MM-DD">
+                      <span class="field__err" id="e-fDate" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
+                    </div>
+                    <div class="field">
+                      <label class="field__label" for="fTime">وقت الرحلة</label>
+                      <input class="ctl ltr" id="fTime" type="text" inputmode="numeric" placeholder="HH:MM">
+                      <span class="field__help">اختياري — سنتصل لتأكيده إن لم يُحدَّد.</span>
+                      <span class="field__err" id="e-fTime" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
+                    </div>
+                  </div>
+
+                  <div class="fgrid" style="margin-top:var(--s4)">
+                    <div class="field">
+                      <label class="field__label" for="fNotes">ملاحظات</label>
+                      <textarea class="ctl" id="fNotes" rows="3" maxlength="500"
+                        style="min-height:88px;font-family:var(--f-ar-body);line-height:1.8"
+                        placeholder="أي معلومة تساعد الفريق على ترتيب الرحلة."></textarea>
+                      <span class="field__help">اختياري · <span id="notesCount">0 / 500</span></span>
+                    </div>
+                  </div>
+
+                  <div style="margin-top:var(--s5)">
+                    <button class="btn btn--site" type="submit" id="send">
+                      <span id="sendLbl">إرسال الطلب</span></button>
+                    <p class="field__help" style="margin-top:var(--s3);text-align:center">
+                      أو تواصل مباشرة: <span class="ltr" style="font-family:var(--f-mono)">+966 53 554 4352</span></p>
+                  </div>
+                </form>
+
+                <div id="ok" class="result result--ok" hidden>
+                  <span class="result__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-checkcircle"/></svg></span>
+                  <span class="result__t">وصل طلبك</span>
+                  <span class="result__b">سيتواصل معك فريق عون الدرب لتأكيد الرحلة. احتفظ برقم الطلب للرجوع إليه.</span>
+                  <span class="result__id" id="okId"></span>
+                  <button class="btn btn--ghost btn--sm" id="again">إرسال طلب آخر</button>
                 </div>
-                <div class="contact" style="margin-top:var(--s5)">
-                  <a class="btn btn--secondary" id="cCall"><svg class="i i--sm" aria-hidden="true"><use href="#ic-phone"/></svg>اتصال</a>
-                  <a class="btn btn--secondary" id="cWa" target="_blank" rel="noopener"><svg class="i i--sm" aria-hidden="true"><use href="#ic-chat"/></svg>واتساب</a>
-                  <button class="btn btn--ghost" id="cCopy"><svg class="i i--sm" aria-hidden="true"><use href="#ic-copy"/></svg>نسخ الرقم</button>
+
+                <div id="bad" class="result result--bad" hidden>
+                  <span class="result__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-alert"/></svg></span>
+                  <span class="result__t" id="badT"></span>
+                  <span class="result__b" id="badB"></span>
+                  <button class="btn btn--secondary" id="retry2">إعادة المحاولة</button>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <form class="card__b" id="infoEdit" hidden novalidate>
-                <div class="editgrid" style="grid-template-columns:minmax(0,1fr)">
-                  <div class="field">
-                    <label class="field__label" for="eName">الاسم <span class="field__req">(مطلوب)</span></label>
-                    <input class="ctl" id="eName" type="text">
-                    <span class="field__err" id="errName" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
-                  </div>
-                  <div class="field">
-                    <label class="field__label" for="ePhone">رقم الجوال <span class="field__req">(مطلوب)</span></label>
-                    <input class="ctl ltr" id="ePhone" type="text" inputmode="numeric">
-                    <span class="field__help">رقم الجوال هو هوية العميل — تغييره ينقل كل طلباته إلى الرقم الجديد.</span>
-                    <span class="field__err" id="errPhone" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
-                  </div>
-                  <div class="field">
-                    <label class="field__label" for="eNotes">ملاحظات</label>
-                    <textarea class="ctl" id="eNotes" rows="3" style="min-height:84px;font-family:var(--f-ar-body);line-height:1.7"></textarea>
-                    <span class="field__help">ملاحظة داخلية عن العميل — لا تظهر له.</span>
-                  </div>
+          <!-- ============ what the system did ============ -->
+          <div style="display:flex;flex-direction:column;gap:var(--s5);min-width:0">
+            <section class="card" aria-labelledby="tr-h">
+              <div class="card__h"><h2 class="card__t" id="tr-h">مسار المعالجة</h2>
+                <span class="count" id="trState">بانتظار الإرسال</span></div>
+              <div class="card__b"><div class="trace" id="trace"></div></div>
+            </section>
+
+            <section class="card" aria-labelledby="rec-h" id="recCard" hidden>
+              <div class="card__h"><h2 class="card__t" id="rec-h">السجل الناتج في «طلبات النقل»</h2>
+                <span id="recBadge"></span></div>
+              <div class="card__b">
+                <div class="dl">
+                  <div class="f"><span class="f__k">رقم الطلب</span><span class="f__v ltr" id="rId"></span></div>
+                  <div class="f"><span class="f__k">الحالة</span><span id="rStatus"></span></div>
+                  <div class="f"><span class="f__k">العميل</span><span class="f__v" id="rName"></span></div>
+                  <div class="f"><span class="f__k">رقم الجوال</span><span class="f__v ltr" id="rPhone"></span></div>
+                  <div class="f"><span class="f__k">الخدمة</span><span class="f__v" id="rService"></span></div>
+                  <div class="f"><span class="f__k">موعد الرحلة</span><span class="f__v ltr" id="rWhen"></span></div>
+                  <div class="f"><span class="f__k">مكان الانطلاق</span><span class="f__v" id="rFrom"></span></div>
+                  <div class="f"><span class="f__k">الوجهة</span><span class="f__v" id="rTo"></span></div>
+                  <div class="f"><span class="f__k">المصدر</span><span class="f__v" id="rSource"></span></div>
+                  <div class="f"><span class="f__k">العميل في السجل</span><span class="f__v" id="rCust"></span></div>
                 </div>
-                <div class="readonly" style="margin-top:var(--s5)">
-                  <svg class="i i--sm" aria-hidden="true"><use href="#ic-info"/></svg>
-                  <p>عدد الطلبات وتاريخ أول طلب وآخر نشاط تُحسب من سجل الطلبات ولا تُعدَّل يدوياً.</p>
+                <div class="dl dl--one" style="margin-top:var(--s5)">
+                  <div class="f"><span class="f__k">ملاحظات العميل</span><span class="f__v" id="rNotes"></span></div>
                 </div>
-                <div class="contact" style="margin-top:var(--s5)">
-                  <button class="btn btn--primary" type="submit">حفظ التغييرات</button>
-                  <button class="btn btn--ghost" type="button" id="cancelEdit">تراجع</button>
+                <div style="margin-top:var(--s5);display:flex;gap:var(--s2);flex-wrap:wrap">
+                  <a class="btn btn--secondary" id="openReq" href="requests.html">
+                    <svg class="i i--sm" aria-hidden="true"><use href="#ic-request"/></svg>فتح في طلبات النقل</a>
                 </div>
-              </form>
+              </div>
+            </section>
+
+            <section class="card" aria-labelledby="ct-h">
+              <div class="card__h"><h2 class="card__t" id="ct-h">عقد التكامل — ما يجب أن يفرضه الخادم</h2></div>
+              <div class="card__b card__b--flush">
+                <div class="tbl-wrap"><table class="contract">
+                  <thead><tr><th>الحقل</th><th>القاعدة على الخادم</th></tr></thead>
+                  <tbody>
+                    <tr><td><b>الاسم</b> <code>name</code></td><td>مطلوب · 2–80 حرفاً · يُخزَّن كما أُدخل</td></tr>
+                    <tr><td><b>رقم الجوال</b> <code>phone</code></td><td>مطلوب · <code>^05\d{8}$</code> بعد إزالة المسافات · هو مفتاح ربط العميل</td></tr>
+                    <tr><td><b>الخدمة</b> <code>service</code></td><td>مطلوب · يجب أن تطابق خدمة <b>مفعّلة</b> في وحدة الخدمات — لا نص حر</td></tr>
+                    <tr><td><b>الانطلاق</b> <code>from</code></td><td>مطلوب · 3–160 حرفاً</td></tr>
+                    <tr><td><b>الوجهة</b> <code>to</code></td><td>مطلوب · 3–160 حرفاً</td></tr>
+                    <tr><td><b>التاريخ</b> <code>date</code></td><td>مطلوب · <code>YYYY-MM-DD</code> · ليس في الماضي · ضمن 12 شهراً</td></tr>
+                    <tr><td><b>الوقت</b> <code>time</code></td><td>اختياري · <code>HH:MM</code> 24 ساعة · فارغ = غير محدد</td></tr>
+                    <tr><td><b>ملاحظات</b> <code>notes</code></td><td>اختياري · حتى 500 حرف · تُخزَّن نصاً كما هي</td></tr>
+                    <tr><td colspan="2" style="background:var(--soft)"><b>يضبطها النظام لا المُرسِل</b></td></tr>
+                    <tr><td><b>رقم الطلب</b></td><td><code>REQ-YYYY-NNNN</code> — من العدّاد نفسه المستخدم في اللوحة</td></tr>
+                    <tr><td><b>الحالة</b></td><td><span class="ar">جديد</span> دائماً — لا يرسلها النموذج</td></tr>
+                    <tr><td><b>المصدر</b></td><td><span class="ar">الموقع</span> — يُشتق من نقطة الاستقبال</td></tr>
+                    <tr><td><b>العميل</b></td><td>مطابقة برقم الجوال: موجود ← يُربط · غير موجود ← يُنشأ</td></tr>
+                    <tr><td><b>التكرار</b></td><td>نفس الجوال + الخدمة + التاريخ خلال 10 دقائق ← يُعلَّم تكراراً محتملاً، ولا يُدمج تلقائياً ولا يُحذف الأصل</td></tr>
+                    <tr><td><b>الحماية</b></td><td>حد معدّل بالعنوان · حقل مصيدة مخفي · رمز CSRF · رفض أي حقل خارج هذه القائمة</td></tr>
+                  </tbody>
+                </table></div>
+              </div>
             </section>
           </div>
         </div>
@@ -1059,459 +1311,76 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   <div class="drawer__h">
     <span class="side__brand" style="padding:0"><span class="side__mark" aria-hidden="true">ع</span>
       <span class="side__name">عون الدرب<span>لوحة التحكم</span></span></span>
-    <button class="iconbtn" id="drawerclose" aria-label="إغلاق القائمة"><svg class="i" aria-hidden="true"><use href="#ic-x"/></svg></button>
-  </div>
+    <button class="iconbtn" id="drawerclose" aria-label="إغلاق القائمة"><svg class="i" aria-hidden="true"><use href="#ic-x"/></svg></button></div>
   <p class="side__grp">العمل اليومي</p>
   <a class="navitem" href="dashboard.html"><svg class="i" aria-hidden="true"><use href="#ic-home"/></svg><span class="navitem__lbl">الرئيسية</span></a>
-  <a class="navitem" href="requests.html"><svg class="i" aria-hidden="true"><use href="#ic-request"/></svg><span class="navitem__lbl">طلبات النقل</span></a>
-  <a class="navitem" href="#" aria-current="page"><svg class="i" aria-hidden="true"><use href="#ic-users"/></svg><span class="navitem__lbl">العملاء</span></a>
+  <a class="navitem" href="requests.html" data-nav="requests"><svg class="i" aria-hidden="true"><use href="#ic-request"/></svg><span class="navitem__lbl">طلبات النقل</span></a>
+  <a class="navitem" href="customers.html"><svg class="i" aria-hidden="true"><use href="#ic-users"/></svg><span class="navitem__lbl">العملاء</span></a>
   <p class="side__grp">الموقع الإلكتروني</p>
   <a class="navitem" href="services.html"><svg class="i" aria-hidden="true"><use href="#ic-service"/></svg><span class="navitem__lbl">الخدمات</span></a>
   <a class="navitem is-pending" href="#" aria-disabled="true" title="قيد الإنشاء — لم تُبنَ هذه الوحدة بعد"><svg class="i" aria-hidden="true"><use href="#ic-content"/></svg><span class="navitem__lbl">المحتوى</span></a>
-  <a class="navitem" href="media.html" data-nav="media"><svg class="i" aria-hidden="true"><use href="#ic-image"/></svg><span class="navitem__lbl">الوسائط والأصول</span></a>
+  <a class="navitem" href="media.html"><svg class="i" aria-hidden="true"><use href="#ic-image"/></svg><span class="navitem__lbl">الوسائط والأصول</span></a>
   <p class="side__grp">النظام</p>
   <a class="navitem is-pending" href="#" aria-disabled="true" title="قيد الإنشاء — لم تُبنَ هذه الوحدة بعد"><svg class="i" aria-hidden="true"><use href="#ic-report"/></svg><span class="navitem__lbl">التقارير</span></a>
   <a class="navitem" href="users.html"><svg class="i" aria-hidden="true"><use href="#ic-shield"/></svg><span class="navitem__lbl">المستخدمون والصلاحيات</span></a>
   <a class="navitem" href="settings.html"><svg class="i" aria-hidden="true"><use href="#ic-settings"/></svg><span class="navitem__lbl">الإعدادات</span></a>
 </nav>
 
+<div class="modalwrap" id="confirm" hidden role="dialog" aria-modal="true" aria-labelledby="confT">
+  <div class="modal">
+    <div class="modal__h"><span class="modal__ic" id="confIc"><svg class="i i--lg" aria-hidden="true"><use href="#ic-alert"/></svg></span>
+      <div><h2 class="modal__t" id="confT"></h2><p class="modal__b" id="confB"></p></div></div>
+    <div class="modal__f"><button class="btn btn--danger" id="confOk"></button>
+      <button class="btn btn--ghost" id="confNo">تراجع</button></div></div>
+</div>
 <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
 
 <script>
-(function(){
+/* Shell behaviour shared by every module page. Exposes only the two helpers
+   the modules need — a toast and a confirmation — and keeps the rest private. */
+window.AunShell = (function(){
   "use strict";
-  var $ = function(id){ return document.getElementById(id); };
-  var el = function(t,c){ var n=document.createElement(t); if(c) n.className=c; return n; };
+  var $=function(id){return document.getElementById(id);};
+  var el=function(t,c){var n=document.createElement(t); if(c)n.className=c; return n;};
 
-  var SERVICES = [
-    "النقل بواسطة الكرسي المتحرك","النقل بواسطة الكرسي الكهربائي","النقل بواسطة السرير الطبي",
-    "خدمة مساعد السائق","النقل اليومي","النقل إلى المستشفيات والمراكز الطبية","التنقل للمناسبات الاجتماعية"
-  ];
-  var ST = {
-    "new":{label:"جديد",cls:"new",icon:"ic-newdot"},
-    "review":{label:"قيد المراجعة",cls:"review",icon:"ic-clock"},
-    "confirmed":{label:"مؤكد",cls:"confirmed",icon:"ic-checkcircle"},
-    "done":{label:"مكتمل",cls:"done",icon:"ic-checks"},
-    "cancel":{label:"ملغي",cls:"cancel",icon:"ic-xcircle"}
-  };
-  var OPEN = { "new":1, "review":1, "confirmed":1 };
-
-  /* ---------- the request records — the same demo set as طلبات النقل ----
-     Customers are DERIVED from these, keyed by phone number. Nothing about a
-     customer is typed in twice: the request count, the first and last
-     activity and the status mix are all computed, never stored. That is what
-     keeps one customer to one record however many times they call.        */
-  var REQUESTS = [
-    {id:"REQ-2026-0148",phone:"0535544352",name:"عبدالله الشهري",service:SERVICES[5],from:"حي السليمانية، الرياض",to:"مستشفى الملك فيصل التخصصي",date:"2026-09-14",time:"08:30",status:"new",created:"2026-09-13 19:42",source:"واتساب"},
-    {id:"REQ-2026-0131",phone:"0535544352",name:"عبدالله الشهري",service:SERVICES[5],from:"حي السليمانية، الرياض",to:"مستشفى الملك فيصل التخصصي",date:"2026-08-30",time:"09:00",status:"done",created:"2026-08-27 10:12",source:"واتساب"},
-    {id:"REQ-2026-0119",phone:"0535544352",name:"عبدالله الشهري",service:SERVICES[0],from:"حي السليمانية، الرياض",to:"مركز التأهيل الشامل",date:"2026-08-11",time:null,status:"done",created:"2026-08-08 14:05",source:"هاتف"},
-    {id:"REQ-2026-0147",phone:"0501122334",name:"منيرة الدوسري",service:SERVICES[0],from:"حي الملقا، الرياض",to:"مركز الأمير سلطان للرعاية",date:"2026-09-14",time:"10:00",status:"confirmed",created:"2026-09-12 11:05",source:"هاتف"},
-    {id:"REQ-2026-0128",phone:"0501122334",name:"منيرة الدوسري",service:SERVICES[0],from:"حي الملقا، الرياض",to:"مركز الأمير سلطان للرعاية",date:"2026-08-24",time:"10:00",status:"done",created:"2026-08-21 09:30",source:"هاتف"},
-    {id:"REQ-2026-0146",phone:"0559988776",name:"فهد العنزي",service:SERVICES[3],from:"حي النرجس، الرياض",to:"حي العليا، الرياض",date:"2026-09-13",time:null,status:"review",created:"2026-09-11 09:14",source:"واتساب"},
-    {id:"REQ-2026-0145",phone:"0533344556",name:"سارة القحطاني",service:SERVICES[4],from:"حي الياسمين، الرياض",to:"جامعة الأميرة نورة",date:"2026-09-12",time:"07:15",status:"done",created:"2026-09-08 16:40",source:"هاتف"},
-    {id:"REQ-2026-0136",phone:"0533344556",name:"سارة القحطاني",service:SERVICES[4],from:"حي الياسمين، الرياض",to:"جامعة الأميرة نورة",date:"2026-09-05",time:"07:15",status:"done",created:"2026-09-01 08:20",source:"هاتف"},
-    {id:"REQ-2026-0144",phone:"0544455667",name:"خالد المطيري",service:SERVICES[6],from:"حي الروضة، الرياض",to:"قاعة المناسبات، طريق الملك عبدالله",date:"2026-09-11",time:"18:00",status:"cancel",created:"2026-09-07 12:30",source:"واتساب"},
-    {id:"REQ-2026-0143",phone:"0566677889",name:"هند الزهراني",service:SERVICES[1],from:"حي قرطبة، الرياض",to:"مستشفى الحبيب، الريان",date:"2026-09-14",time:"14:30",status:"new",created:"2026-09-13 21:10",source:"واتساب"},
-    {id:"REQ-2026-0142",phone:"0512233445",name:"ماجد الحربي",service:SERVICES[2],from:"حي الشفا، الرياض",to:"مستشفى الملك سعود الطبي",date:"2026-09-15",time:"09:00",status:"review",created:"2026-09-12 15:25",source:"هاتف"},
-    {id:"REQ-2026-0141",phone:"0577788990",name:"لطيفة السبيعي",service:SERVICES[0],from:"حي الازدهار، الرياض",to:"مركز التأهيل الشامل",date:"2026-09-16",time:"11:00",status:"confirmed",created:"2026-09-10 10:00",source:"هاتف"},
-    {id:"REQ-2026-0140",phone:"0588899001",name:"سعد الغامدي",service:SERVICES[5],from:"حي المروج، الرياض",to:"مستشفى قوى الأمن",date:"2026-09-09",time:"07:45",status:"done",created:"2026-09-05 08:20",source:"واتساب"},
-    {id:"REQ-2026-0139",phone:"0522211334",name:"نوف العتيبي",service:SERVICES[4],from:"حي الصحافة، الرياض",to:"مركز رعاية نهارية",date:"2026-09-17",time:"06:50",status:"new",created:"2026-09-13 07:05",source:"هاتف"},
-    {id:"REQ-2026-0138",phone:"0599900112",name:"بدر الدوسري",service:SERVICES[3],from:"حي الوادي، الرياض",to:"حي الملز، الرياض",date:"2026-09-08",time:"16:20",status:"done",created:"2026-09-03 13:15",source:"هاتف"},
-    {id:"REQ-2026-0137",phone:"0533300221",name:"ريم الشمري",service:SERVICES[6],from:"حي حطين، الرياض",to:"استراحة العائلة، الدرعية",date:"2026-09-20",time:null,status:"new",created:"2026-09-12 20:30",source:"واتساب"}
-  ];
-
-  /* Administrative notes live on the customer, not on a request. Only some
-     customers have one — the profile states the absence rather than blanking. */
-  var CUST_NOTES = { "0535544352":"يفضّل التواصل عبر الواتساب قبل الساعة 8 مساءً." };
-
-  var digits = function(p){ return String(p||"").replace(/[^0-9]/g,""); };
-  var intl = function(p){ var d=digits(p); return d.indexOf("0")===0 ? "966"+d.slice(1) : d; };
-  var orNull = function(v){ return (v===null||v===undefined||v==="") ? null : v; };
-
-  /* ---------- derive the customer records ------------------------------- */
-  function buildCustomers(){
-    var map = {}, order = [];
-    REQUESTS.forEach(function(r){
-      var k = digits(r.phone);
-      if (!map[k]){ map[k] = { key:k, phone:r.phone, name:r.name, reqs:[] }; order.push(k); }
-      map[k].reqs.push(r);
-    });
-    return order.map(function(k){
-      var c = map[k];
-      c.reqs.sort(function(a,b){ return (b.date||"").localeCompare(a.date||""); });
-      c.count = c.reqs.length;
-      c.last = c.reqs[0];
-      c.done = c.reqs.filter(function(r){ return r.status==="done"; }).length;
-      c.cancelled = c.reqs.filter(function(r){ return r.status==="cancel"; }).length;
-      c.hasOpen = c.reqs.some(function(r){ return OPEN[r.status]; });
-      /* earliest creation across their requests — the relationship's start */
-      c.first = c.reqs.map(function(r){ return r.created; }).sort()[0];
-      /* latest activity = the most recently created request, not the furthest
-         future trip date — a booking for next month is not recent activity */
-      c.lastActivity = c.reqs.map(function(r){ return r.created; }).sort().slice(-1)[0];
-      c.source = c.reqs.slice().sort(function(a,b){ return a.created.localeCompare(b.created); })[0].source;
-      c.notes = CUST_NOTES[k] || null;
-      return c;
-    });
-  }
-  var CUSTOMERS = buildCustomers();
-
-  var PER = 6;
-  var state = { q:"", active:"", sort:"recent", page:1 };
-  var current = null, canModify = true;
-
-  function badge(s){
-    var d = ST[s], n = el("span","badge badge--"+d.cls);
-    n.innerHTML = '<svg class="i" aria-hidden="true"><use href="#'+d.icon+'"/></svg>';
-    n.appendChild(document.createTextNode(d.label));
-    return n;
-  }
-  function initials(name){
-    var p = String(name||"").trim().split(/\s+/);
-    return (p[0]||"").charAt(0) + " " + (p[1]||"").charAt(0);
-  }
-  function whenText(r){
-    if (!r || !orNull(r.date)) return "غير محدد";
-    return orNull(r.time) ? (r.date + " · " + r.time) : r.date;
-  }
   function toast(msg,bad){
-    var t = el("div","toast");
-    t.innerHTML = '<span class="toast__i'+(bad?" toast__i--err":"")+'">'+
-      '<svg class="i i--sm" aria-hidden="true"><use href="#'+(bad?"ic-x":"ic-check")+'"/></svg></span><span class="toast__t"></span>';
-    t.querySelector(".toast__t").textContent = msg;
+    var t=el("div","toast");
+    t.innerHTML='<span class="toast__i'+(bad?" toast__i--err":"")+'">'+
+      '<svg class="i i--sm" aria-hidden="true"><use href="#'+(bad?"ic-x":"ic-check")+'"/></svg></span>'+
+      '<span class="toast__t"></span>';
+    t.querySelector(".toast__t").textContent=msg;
     $("toasts").appendChild(t);
     window.setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); },4200);
   }
 
-  function match(c){
-    if (state.active==="open" && !c.hasOpen) return false;
-    if (state.active==="none" && c.hasOpen) return false;
-    var q = state.q.trim();
-    if (!q) return true;
-    var qd = digits(q);
-    return c.name.indexOf(q)>-1 || (qd.length>2 && digits(c.phone).indexOf(qd)>-1);
+  var cb=null, lastFocus=null;
+  function ask(title,body,okLabel,fn,danger){
+    $("confT").textContent=title;
+    $("confB").textContent=body;
+    $("confOk").textContent=okLabel;
+    $("confOk").className="btn "+(danger===false?"btn--primary":"btn--danger");
+    cb=fn; lastFocus=document.activeElement;
+    $("confirm").hidden=false; $("confOk").focus();
   }
-  function sorted(list){
-    var a = list.slice();
-    if (state.sort==="most") a.sort(function(x,y){ return y.count-x.count; });
-    else if (state.sort==="name") a.sort(function(x,y){ return x.name.localeCompare(y.name,"ar"); });
-    else a.sort(function(x,y){ return (y.lastActivity||"").localeCompare(x.lastActivity||""); });
-    return a;
-  }
-  var anyFilter = function(){ return !!(state.q || state.active); };
-
-  /* ---------- list ------------------------------------------------------ */
-  function render(){
-    var all = sorted(CUSTOMERS.filter(match));
-    var pages = Math.max(1, Math.ceil(all.length/PER));
-    if (state.page > pages) state.page = pages;
-    var slice = all.slice((state.page-1)*PER, state.page*PER);
-
-    var box = $("results");
-    if (!all.length){
-      box.setAttribute("data-state","empty");
-      var noData = !anyFilter();
-      $("emptyT").textContent = noData ? "لا يوجد عملاء بعد" : "لا توجد نتائج مطابقة";
-      $("emptyB").textContent = noData
-        ? "يُنشأ سجل العميل تلقائياً عند تسجيل أول طلب برقم جواله."
-        : "لا يوجد عميل يطابق البحث أو التصفية الحالية.";
-      $("emptyReset").hidden = noData;
-    } else {
-      box.setAttribute("data-state","ready");
-    }
-
-    $("count").innerHTML = all.length
-      ? ('عرض <b>'+((state.page-1)*PER+1)+'–'+Math.min(state.page*PER,all.length)+'</b> من <b>'+all.length+'</b> عميلاً')
-      : "";
-
-    var tb = $("rows"), cd = $("cards");
-    tb.textContent = ""; cd.textContent = "";
-
-    slice.forEach(function(c){
-      var tr = el("tr","rowlink");
-      tr.innerHTML =
-        '<td><span class="cust-name"><span class="avatar" aria-hidden="true"></span>'+
-          '<button class="rowbtn"></button></span></td>'+
-        '<td><span class="cell-date phone"></span></td>'+
-        '<td><span class="cell-date cnt"></span></td>'+
-        '<td><span class="cell-date lastd"></span><span class="cell-sub svc"></span></td>'+
-        '<td class="stcell"></td>'+
-        '<td><span class="cell-act"></span></td>';
-      tr.querySelector(".avatar").textContent = initials(c.name);
-      var nb = tr.querySelector(".rowbtn");
-      nb.textContent = c.name;
-      nb.addEventListener("click", function(e){ e.stopPropagation(); openC(c.key); });
-      tr.querySelector(".phone").textContent = c.phone;
-      tr.querySelector(".cnt").textContent = c.count;
-      tr.querySelector(".lastd").textContent = c.last.date || "غير محدد";
-      tr.querySelector(".svc").textContent = c.last.service;
-      tr.querySelector(".stcell").appendChild(badge(c.last.status));
-      var go = el("button","iconbtn");
-      go.setAttribute("aria-label","فتح ملف العميل "+c.name);
-      go.innerHTML = '<svg class="i i--flip" aria-hidden="true"><use href="#ic-chevron"/></svg>';
-      go.addEventListener("click", function(e){ e.stopPropagation(); openC(c.key); });
-      tr.querySelector(".cell-act").appendChild(go);
-      tr.addEventListener("click", function(){ openC(c.key); });
-      tb.appendChild(tr);
-
-      /* mobile card — name, contact, request count, primary action */
-      var a = el("a","reccard"); a.href = "#";
-      a.innerHTML =
-        '<span class="reccard__top"><span class="cust-name"><span class="avatar" aria-hidden="true"></span>'+
-        '<span style="min-width:0"><span class="reccard__n"></span><span class="reccard__s ltrp"></span></span></span>'+
-        '<span class="bslot"></span></span>'+
-        '<span class="reccard__meta"><span>الطلبات <b class="cnt"></b></span>'+
-        '<span>آخر طلب <b class="lastd"></b></span></span>';
-      a.querySelector(".avatar").textContent = initials(c.name);
-      a.querySelector(".reccard__n").textContent = c.name;
-      a.querySelector(".ltrp").textContent = c.phone;
-      a.querySelector(".bslot").appendChild(badge(c.last.status));
-      a.querySelector(".cnt").textContent = c.count;
-      a.querySelector(".lastd").textContent = c.last.date || "غير محدد";
-      a.addEventListener("click", function(e){ e.preventDefault(); openC(c.key); });
-      cd.appendChild(a);
-    });
-
-    var p = $("pager"); p.textContent = "";
-    if (all.length > PER){
-      var info = el("span","pager__c");
-      info.textContent = "صفحة " + state.page + " من " + pages;
-      var nav = el("span","pager__n");
-      var prev = el("button","pager__b");
-      prev.setAttribute("aria-label","الصفحة السابقة");
-      prev.innerHTML = '<svg class="i i--sm" aria-hidden="true"><use href="#ic-chevron"/></svg>';
-      prev.disabled = state.page===1;
-      prev.addEventListener("click", function(){ state.page--; render(); });
-      nav.appendChild(prev);
-      for (var i=1;i<=pages;i++) (function(n){
-        var b = el("button","pager__b"); b.textContent = n;
-        if (n===state.page) b.setAttribute("aria-current","page");
-        b.addEventListener("click", function(){ state.page=n; render(); });
-        nav.appendChild(b);
-      })(i);
-      var next = el("button","pager__b");
-      next.setAttribute("aria-label","الصفحة التالية");
-      next.innerHTML = '<svg class="i i--sm i--flip" aria-hidden="true"><use href="#ic-chevron"/></svg>';
-      next.disabled = state.page===pages;
-      next.addEventListener("click", function(){ state.page++; render(); });
-      nav.appendChild(next);
-      p.appendChild(info); p.appendChild(nav);
-    }
-    chips();
-  }
-
-  function chips(){
-    var wrap = $("applied"), box = $("chips");
-    box.textContent = "";
-    var items = [];
-    if (state.q) items.push({k:"q",t:'بحث: "'+state.q+'"'});
-    if (state.active) items.push({k:"active",t:(state.active==="open"?"لديه طلب نشط":"بدون طلبات نشطة")});
-    wrap.hidden = !items.length;
-    items.forEach(function(it){
-      var c = el("span","chip");
-      c.appendChild(document.createTextNode(it.t));
-      var x = el("button");
-      x.setAttribute("aria-label","إزالة — "+it.t);
-      x.innerHTML = '<svg class="i i--sm" aria-hidden="true"><use href="#ic-x"/></svg>';
-      x.addEventListener("click", function(){
-        state[it.k]="";
-        if (it.k==="q") $("q").value="";
-        if (it.k==="active") $("factive").value="";
-        state.page=1; render();
-      });
-      c.appendChild(x); box.appendChild(c);
-    });
-  }
-  function resetAll(){
-    state.q=""; state.active=""; state.page=1;
-    $("q").value=""; $("factive").value="";
-    render();
-  }
-
-  /* ---------- profile ---------------------------------------------------- */
-  function findC(k){ for (var i=0;i<CUSTOMERS.length;i++) if (CUSTOMERS[i].key===k) return CUSTOMERS[i]; return null; }
-
-  function openC(k){
-    current = findC(k);
-    if (!current) return;
-    $("listview").classList.add("hidden");
-    $("profileview").classList.remove("hidden");
-    paint();
-    $("profileview").focus();
-    window.scrollTo(0,0);
-  }
-  function back(){
-    $("profileview").classList.add("hidden");
-    $("listview").classList.remove("hidden");
-    exitEdit();
-    render();               /* search, filter and page are still in state */
-    window.scrollTo(0,0);
-  }
-
-  function stat(label,icon,value,small){
-    var s = el("div","stat");
-    s.innerHTML = '<span class="stat__l"><svg class="i i--sm" aria-hidden="true"><use href="#'+icon+'"/></svg>'+
-      '<span class="lbl"></span></span><span class="stat__n'+(small?" sm":"")+'"></span>';
-    s.querySelector(".lbl").textContent = label;
-    s.querySelector(".stat__n").textContent = value;
-    return s;
-  }
-
-  function paint(){
-    var c = current;
-    $("pAv").textContent = initials(c.name);
-    $("pName").textContent = c.name;
-    $("pSince").textContent = "عميل منذ " + c.first.slice(0,10) + " · " + c.count + " طلباً";
-
-    var st = $("pStats"); st.textContent = "";
-    st.appendChild(stat("إجمالي الطلبات","ic-request",c.count));
-    st.appendChild(stat("مكتملة","ic-checks",c.done));
-    st.appendChild(stat("ملغاة","ic-xcircle",c.cancelled));
-    st.appendChild(stat("آخر طلب","ic-calendar",c.last.date || "غير محدد", true));
-
-    $("iName").textContent = c.name;
-    $("iPhone").textContent = c.phone || "غير متوفر";
-    $("iFirst").textContent = c.first;
-    $("iSource").textContent = c.source || "غير محدد";
-    $("iNotes").textContent = c.notes || "لا توجد ملاحظات على هذا العميل.";
-    if (!c.notes) $("iNotes").classList.add("muted"); else $("iNotes").classList.remove("muted");
-
-    $("cCall").href = c.phone ? "tel:+"+intl(c.phone) : "#";
-    $("cWa").href   = c.phone ? "https://wa.me/"+intl(c.phone) : "#";
-
-    /* request history — a summary that hands off to طلبات النقل, never a
-       second copy of that module */
-    $("histCount").textContent = c.count + " طلباً";
-    var hl = $("histList"); hl.textContent = "";
-    if (!c.reqs.length){
-      var e = el("div","empty");
-      e.innerHTML = '<span class="empty__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-inbox"/></svg></span>'+
-        '<span class="empty__t">لا توجد طلبات لهذا العميل</span>'+
-        '<span class="empty__b">سيظهر هنا كل طلب يُسجَّل برقم جواله.</span>';
-      hl.appendChild(e);
-      return;
-    }
-    c.reqs.forEach(function(r){
-      var a = el("a","histrow");
-      a.href = "requests.html#" + encodeURIComponent(r.id);
-      a.innerHTML =
-        '<span class="histrow__b">'+
-          '<span class="histrow__t"><span class="histrow__s"></span><span class="bslot"></span></span>'+
-          '<span class="histrow__m"><span class="cell-id"></span>'+
-          '<span class="wq"></span><span class="rt"></span></span>'+
-        '</span><svg class="i histrow__go i--flip" aria-hidden="true"><use href="#ic-chevron"/></svg>';
-      a.querySelector(".histrow__s").textContent = r.service;
-      a.querySelector(".bslot").appendChild(badge(r.status));
-      a.querySelector(".cell-id").textContent = r.id;
-      a.querySelector(".wq").textContent = whenText(r);
-      a.querySelector(".rt").textContent = (r.from||"غير محدد") + " ← " + (r.to||"غير محدد");
-      hl.appendChild(a);
-    });
-  }
-
-  /* ---------- edit: view → edit → save → confirmation -------------------- */
-  function enterEdit(){
-    $("eName").value = current.name;
-    $("ePhone").value = current.phone;
-    $("eNotes").value = current.notes || "";
-    $("infoView").hidden = true; $("infoEdit").hidden = false;
-    $("editHint").hidden = false; $("editbtn").hidden = true;
-    $("eName").focus();
-  }
-  function exitEdit(){
-    $("infoEdit").hidden = true; $("infoView").hidden = false;
-    $("editHint").hidden = true; $("editbtn").hidden = !canModify;
-    $("errName").hidden = true; $("errPhone").hidden = true;
-    $("eName").classList.remove("is-error"); $("ePhone").classList.remove("is-error");
-  }
-  function showErr(id,ctl,msg){
-    $(id).hidden = false; $(id).querySelector("span").textContent = msg;
-    $(ctl).classList.add("is-error");
-  }
-  $("editbtn").addEventListener("click", enterEdit);
-  $("cancelEdit").addEventListener("click", exitEdit);
-  $("infoEdit").addEventListener("submit", function(e){
-    e.preventDefault();
-    $("errName").hidden = true; $("errPhone").hidden = true;
-    $("eName").classList.remove("is-error"); $("ePhone").classList.remove("is-error");
-    var n = $("eName").value.trim(), p = digits($("ePhone").value);
-    var ok = true, first = null;
-    if (!n){ showErr("errName","eName","اسم العميل مطلوب."); ok=false; first=$("eName"); }
-    if (!/^05\d{8}$/.test(p)){ showErr("errPhone","ePhone","أدخل رقم جوال صحيح يبدأ بـ 05 ويتكوّن من 10 أرقام."); ok=false; first=first||$("ePhone"); }
-    /* the phone is the identity — refuse a merge into an existing record */
-    if (ok && p!==current.key){
-      var clash = findC(p);
-      if (clash){ showErr("errPhone","ePhone","هذا الرقم مسجّل باسم "+clash.name+" — لا يمكن دمج السجلين من هنا."); ok=false; first=$("ePhone"); }
-    }
-    if (!ok){ first.focus(); toast("تحقّق من الحقول المميّزة",true); return; }
-
-    current.name = n;
-    current.notes = $("eNotes").value.trim() || null;
-    CUST_NOTES[current.key] = current.notes;
-    if (p !== current.key){
-      /* moving the identity moves the whole history with it */
-      current.reqs.forEach(function(r){ r.phone = p; r.name = n; });
-      current.key = p; current.phone = p;
-    } else {
-      current.reqs.forEach(function(r){ r.name = n; });
-    }
-    exitEdit(); paint(); toast("تم حفظ بيانات العميل");
+  function askClose(){ $("confirm").hidden=true; cb=null; if(lastFocus) lastFocus.focus(); }
+  $("confOk").addEventListener("click", function(){ var f=cb; askClose(); if(f) f(); });
+  $("confNo").addEventListener("click", askClose);
+  $("confirm").addEventListener("click", function(e){ if(e.target===$("confirm")) askClose(); });
+  $("confirm").addEventListener("keydown", function(e){
+    if (e.key!=="Tab") return;
+    var f=[$("confOk"),$("confNo")];
+    if (e.shiftKey && document.activeElement===f[0]){ e.preventDefault(); f[1].focus(); }
+    else if (!e.shiftKey && document.activeElement===f[1]){ e.preventDefault(); f[0].focus(); }
   });
 
-  $("cCopy").addEventListener("click", function(){
-    var p = current && current.phone;
-    if (!p){ toast("لا يوجد رقم لنسخه",true); return; }
-    var done = function(){ toast("نُسخ رقم الجوال"); };
-    if (navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(p).then(done, function(){ toast("تعذّر النسخ",true); });
-    } else {
-      var ta = el("textarea"); ta.value = p; document.body.appendChild(ta); ta.select();
-      try { document.execCommand("copy"); done(); } catch(e){ toast("تعذّر النسخ",true); }
-      document.body.removeChild(ta);
-    }
-  });
-
-  /* ---------- permissions ------------------------------------------------ */
-  function applyPerms(){
-    Array.prototype.forEach.call(document.querySelectorAll(".modonly"), function(n){
-      n.classList.toggle("hidden", !canModify);
-    });
-    if (!canModify){ $("infoEdit").hidden = true; $("infoView").hidden = false; $("editHint").hidden = true; }
-  }
-  function setRole(full){
-    canModify = full;
-    $("roleFull").setAttribute("aria-pressed", full?"true":"false");
-    $("roleView").setAttribute("aria-pressed", full?"false":"true");
-    $("whorole").textContent = full ? "مدير النظام" : "عرض فقط";
-    $("whorole2").textContent = full ? "مدير النظام" : "عرض فقط";
-    applyPerms();
-  }
-  $("roleFull").addEventListener("click", function(){ setRole(true); });
-  $("roleView").addEventListener("click", function(){ setRole(false); });
-
-  /* ---------- wiring ----------------------------------------------------- */
-  var qt = null;
-  $("q").addEventListener("input", function(){
-    var v = this.value;
-    window.clearTimeout(qt);
-    qt = window.setTimeout(function(){ state.q=v; state.page=1; render(); },200);
-  });
-  $("factive").addEventListener("change", function(){ state.active=this.value; state.page=1; render(); });
-  $("fsort").addEventListener("change", function(){ state.sort=this.value; state.page=1; render(); });
-  $("reset").addEventListener("click", resetAll);
-  $("emptyReset").addEventListener("click", resetAll);
-  $("back").addEventListener("click", function(e){ e.preventDefault(); back(); });
-  $("retry").addEventListener("click", function(){ $("results").setAttribute("data-state","ready"); render(); });
-
-  /* ---------- shell ------------------------------------------------------ */
   var app=$("app"), collapse=$("collapse");
   function setCollapsed(on){
     app.classList.toggle("is-collapsed",on);
     collapse.setAttribute("aria-expanded",on?"false":"true");
-    collapse.querySelector("span").textContent = on?"توسيع القائمة":"تصغير القائمة";
+    collapse.querySelector("span").textContent=on?"توسيع القائمة":"تصغير القائمة";
     try{ localStorage.setItem("aun-admin-collapsed",on?"1":"0"); }catch(e){}
   }
-  try{ if (localStorage.getItem("aun-admin-collapsed")==="1") setCollapsed(true); }catch(e){}
+  try{ if(localStorage.getItem("aun-admin-collapsed")==="1") setCollapsed(true); }catch(e){}
   collapse.addEventListener("click", function(){ setCollapsed(!app.classList.contains("is-collapsed")); });
 
   var pops=[{btn:$("bell"),pop:$("notifpop")},{btn:$("whobtn"),pop:$("whopop")}];
@@ -1538,7 +1407,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
     drawer.classList.remove("is-open"); menubtn.setAttribute("aria-expanded","false");
     document.body.style.overflow=""; scrim.hidden=true;
     window.setTimeout(function(){ drawer.hidden=true; },220);
-    if (lastF) lastF.focus();
+    if(lastF) lastF.focus();
   }
   menubtn.addEventListener("click", openDrawer);
   dclose.addEventListener("click", closeDrawer);
@@ -1546,7 +1415,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   drawer.addEventListener("keydown", function(e){
     if (e.key!=="Tab") return;
     var f=drawer.querySelectorAll("a[href], button:not([disabled])");
-    if (!f.length) return;
+    if(!f.length) return;
     var a=f[0], b=f[f.length-1];
     if (e.shiftKey && document.activeElement===a){ e.preventDefault(); b.focus(); }
     else if (!e.shiftKey && document.activeElement===b){ e.preventDefault(); a.focus(); }
@@ -1554,13 +1423,257 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   document.addEventListener("keydown", function(e){
     if (e.key!=="Escape") return;
     if (!drawer.hidden){ closeDrawer(); return; }
+    if (!$("confirm").hidden){ askClose(); return; }
     closePops();
   });
 
   var offline=$("offline");
-  function net(){ offline.hidden = navigator.onLine; }
+  function net(){ offline.hidden=navigator.onLine; }
   window.addEventListener("online",net); window.addEventListener("offline",net); net();
 
-  render();
+  return { toast:toast, ask:ask };
+})();
+</script>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  var el=function(t,c){var n=document.createElement(t); if(c)n.className=c; return n;};
+  var toast=window.AunShell.toast;
+  $("hdrctx").innerHTML='تكامل نموذج الموقع<span>عون الدرب للنقل المتخصص</span>';
+  Array.prototype.forEach.call(document.querySelectorAll('[data-nav="requests"]'),function(n){
+    n.setAttribute("aria-current","page"); });
+
+  /* The seven approved services, with their live visibility. §19 — the form
+     offers what the Services module currently publishes, never a second list. */
+  var SERVICES = [
+    { t:"النقل بواسطة الكرسي المتحرك", on:true },
+    { t:"النقل بواسطة الكرسي الكهربائي", on:true },
+    { t:"النقل بواسطة السرير الطبي", on:true },
+    { t:"خدمة مساعد السائق", on:true },
+    { t:"النقل اليومي", on:true },
+    { t:"النقل إلى المستشفيات والمراكز الطبية", on:true },
+    { t:"التنقل للمناسبات الاجتماعية", on:false }   /* hidden in الخدمات → absent here */
+  ];
+  /* Existing customers, keyed by phone exactly as Stage 07 does. */
+  var CUSTOMERS = { "0535544352":"عبدالله الشهري", "0501122334":"منيرة الدوسري",
+                    "0559988776":"فهد العنزي", "0533344556":"سارة القحطاني" };
+  var LAST = { n:150 };                 /* the shared request counter */
+  var RECENT = [];                      /* for duplicate detection */
+  var TODAY = "2026-09-14";
+  var sim = "ok", busy = false;
+
+  var sel=$("fService");
+  var live=SERVICES.filter(function(s){ return s.on; });
+  live.forEach(function(s){ var o=el("option"); o.value=s.t; o.textContent=s.t; sel.appendChild(o); });
+  $("svcNote").textContent = "الخدمات المتاحة الآن: "+live.length+" من "+SERVICES.length+
+    " — الخدمة المخفية في لوحة التحكم لا تظهر هنا.";
+
+  $("fNotes").addEventListener("input", function(){
+    $("notesCount").textContent = this.value.length+" / 500";
+  });
+
+  /* ---------- the trace, so the flow is visible rather than asserted ----- */
+  var STEPS = [
+    {k:"client", t:"تحقق في المتصفح", m:"الحقول المطلوبة وصيغة الجوال والتاريخ."},
+    {k:"post",   t:"إرسال إلى الخادم", m:"طلب واحد فقط — الزر يُقفل حتى تعود الاستجابة."},
+    {k:"server", t:"تحقق على الخادم", m:"القواعد نفسها تُعاد كاملة: المتصفح لا يُوثق به."},
+    {k:"dupe",   t:"فحص التكرار", m:"نفس الجوال والخدمة والتاريخ خلال 10 دقائق."},
+    {k:"create", t:"إنشاء الطلب وتخصيص رقمه", m:"الحالة «جديد» والمصدر «الموقع» يضبطهما النظام."},
+    {k:"cust",   t:"ربط العميل", m:"مطابقة برقم الجوال — لا يُنشأ سجل مكرر."},
+    {k:"store",  t:"حفظ وإظهار في اللوحة", m:"يظهر في الرئيسية وطلبات النقل والعملاء."}
+  ];
+  function drawTrace(states){
+    var box=$("trace"); box.textContent="";
+    STEPS.forEach(function(s){
+      var st=states[s.k] || "idle";
+      var d=el("div","trace__s "+(st==="ok"?"ok":st==="bad"?"bad":st==="skip"?"skip":""));
+      var icon = st==="ok" ? "ic-check" : st==="bad" ? "ic-x" : "ic-newdot";
+      d.innerHTML='<span class="trace__d"><svg class="i i--sm" aria-hidden="true"><use href="#'+icon+'"/></svg></span>'+
+        '<span class="trace__b"><span class="trace__t"></span><span class="trace__m"></span></span>';
+      d.querySelector(".trace__t").textContent=s.t;
+      d.querySelector(".trace__m").innerHTML = (states[s.k+"_m"] || s.m);
+      box.appendChild(d);
+    });
+  }
+  drawTrace({});
+
+  /* ---------- validation, written once and run on both sides ------------- */
+  var FIELDS=["fName","fPhone","fService","fFrom","fTo","fDate","fTime"];
+  function clearErrs(){
+    FIELDS.forEach(function(id){
+      var e=$("e-"+id); if(e) e.hidden=true;
+      $(id).classList.remove("is-error");
+      $(id).removeAttribute("aria-invalid");
+    });
+  }
+  function fail(id,msg){
+    var e=$("e-"+id);
+    if(e){ e.hidden=false; e.querySelector("span").textContent=msg; }
+    $(id).classList.add("is-error");
+    $(id).setAttribute("aria-invalid","true");
+  }
+  var digits=function(v){ return String(v||"").replace(/[^0-9]/g,""); };
+
+  function validate(){
+    clearErrs();
+    var v={ name:$("fName").value.trim(), phone:digits($("fPhone").value),
+            service:$("fService").value, from:$("fFrom").value.trim(),
+            to:$("fTo").value.trim(), date:$("fDate").value.trim(),
+            time:$("fTime").value.trim(), notes:$("fNotes").value.trim() };
+    var first=null, add=function(id,m){ fail(id,m); first=first||id; };
+
+    if (v.name.length<2) add("fName","اكتب الاسم كاملاً.");
+    else if (v.name.length>80) add("fName","الاسم أطول من 80 حرفاً.");
+    if (!/^05\d{8}$/.test(v.phone)) add("fPhone","أدخل رقم جوال سعودي يبدأ بـ 05 ويتكوّن من 10 أرقام.");
+    if (!v.service) add("fService","اختر الخدمة المطلوبة.");
+    else if (!live.some(function(s){ return s.t===v.service; }))
+      add("fService","هذه الخدمة غير متاحة حالياً.");
+    if (v.from.length<3) add("fFrom","اكتب مكان الانطلاق.");
+    if (v.to.length<3) add("fTo","اكتب الوجهة.");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(v.date)) add("fDate","أدخل التاريخ بالصيغة YYYY-MM-DD.");
+    else if (v.date < TODAY) add("fDate","لا يمكن طلب رحلة في تاريخ مضى.");
+    if (v.time && !/^([01]\d|2[0-3]):[0-5]\d$/.test(v.time)) add("fTime","أدخل الوقت بالصيغة HH:MM أو اتركه فارغاً.");
+    if (v.notes.length>500) add("fNotes","الملاحظات أطول من 500 حرف.");
+
+    return { ok:!first, first:first, v:v };
+  }
+
+  function setBusy(on){
+    busy=on;
+    $("send").disabled=on;                       /* §17 — no second submission */
+    $("sendLbl").innerHTML = on
+      ? '<span class="spin" aria-hidden="true"></span> جارٍ الإرسال…'
+      : 'إرسال الطلب';
+    $("send").setAttribute("aria-busy", on?"true":"false");
+  }
+  function showBad(t,b){
+    $("bad").hidden=false; $("badT").textContent=t; $("badB").textContent=b;
+    $("pform").hidden=true;
+  }
+  function reset(keep){
+    $("ok").hidden=true; $("bad").hidden=true; $("pform").hidden=false;
+    if (!keep){
+      ["fName","fPhone","fService","fFrom","fTo","fDate","fTime","fNotes"].forEach(function(id){ $(id).value=""; });
+      $("notesCount").textContent="0 / 500";
+    }
+    clearErrs(); setBusy(false);
+  }
+  $("again").addEventListener("click", function(){ reset(false); drawTrace({}); $("trState").textContent="بانتظار الإرسال"; $("recCard").hidden=true; });
+  /* §04 — a failed submission keeps every value the visitor typed */
+  $("retry2").addEventListener("click", function(){ reset(true); $("fName").focus(); });
+
+  ["simOk","simNet","simSrv"].forEach(function(id){
+    $(id).addEventListener("click", function(){
+      sim = id==="simOk" ? "ok" : id==="simNet" ? "net" : "srv";
+      ["simOk","simNet","simSrv"].forEach(function(o){
+        $(o).setAttribute("aria-pressed", o===id ? "true":"false"); });
+    });
+  });
+
+  function statusBadge(){
+    var n=el("span","badge badge--new");
+    n.innerHTML='<svg class="i" aria-hidden="true"><use href="#ic-newdot"/></svg>';
+    n.appendChild(document.createTextNode("جديد")); return n;
+  }
+
+  $("pform").addEventListener("submit", function(e){
+    e.preventDefault();
+    if (busy) return;
+
+    var r=validate();
+    if (!r.ok){
+      drawTrace({ client:"bad", client_m:"رُفض الإرسال قبل مغادرة المتصفح — لم يُنشأ أي سجل ناقص.",
+                  post:"skip", server:"skip", dupe:"skip", create:"skip", cust:"skip", store:"skip" });
+      $("trState").textContent="توقف عند التحقق";
+      $(r.first).focus();
+      toast("تحقّق من الحقول المميّزة", true);
+      return;
+    }
+
+    setBusy(true);
+    $("trState").textContent="جارٍ المعالجة…";
+    drawTrace({ client:"ok" });
+
+    window.setTimeout(function(){
+      /* §09 + §21 — a transport or server failure never reports success */
+      if (sim==="net"){
+        drawTrace({ client:"ok", post:"bad",
+          post_m:"لم تصل الاستجابة. لم يُنشأ طلب، ولم تُفقد بيانات الزائر.",
+          server:"skip", dupe:"skip", create:"skip", cust:"skip", store:"skip" });
+        $("trState").textContent="فشل الإرسال";
+        setBusy(false);
+        showBad("تعذّر إرسال الطلب","انقطع الاتصال قبل وصول الطلب. بياناتك محفوظة كما أدخلتها — أعد المحاولة، أو اتصل بنا مباشرة على 4352 554 53 966+.");
+        return;
+      }
+      if (sim==="srv"){
+        drawTrace({ client:"ok", post:"ok", server:"bad",
+          server_m:"سُجّل الخطأ بمعرّف داخلي للفريق الفني. لم يُنشأ سجل جزئي، ولم يُعرض أي تفصيل تقني للزائر.",
+          dupe:"skip", create:"skip", cust:"skip", store:"skip" });
+        $("trState").textContent="فشل على الخادم";
+        setBusy(false);
+        showBad("تعذّر استقبال الطلب","حدث خلل مؤقت لدينا ولم يُسجَّل الطلب. أعد المحاولة بعد قليل، أو اتصل بنا مباشرة.");
+        return;
+      }
+
+      var v=r.v;
+      /* §08 — duplicate detection: preserved, flagged, never merged silently */
+      var dup=RECENT.filter(function(x){
+        return x.phone===v.phone && x.service===v.service && x.date===v.date;
+      })[0];
+
+      var known=CUSTOMERS[v.phone];
+      LAST.n += 1;
+      var id="REQ-2026-0"+LAST.n;
+
+      drawTrace({
+        client:"ok", post:"ok", server:"ok",
+        server_m:"أُعيد تنفيذ القواعد نفسها على الخادم؛ ورُفض أي حقل خارج العقد.",
+        dupe:"ok",
+        dupe_m: dup
+          ? ('طابق الطلب <code>'+dup.id+'</code> — حُفظ الجديد و<b>عُلّم تكراراً محتملاً</b>. لم يُدمج ولم يُحذف الأصل.')
+          : "لا يوجد طلب مطابق خلال آخر 10 دقائق.",
+        create:"ok",
+        create_m:'أُنشئ <code>'+id+'</code> · الحالة «جديد» · المصدر «الموقع».',
+        cust:"ok",
+        cust_m: known
+          ? ('رقم الجوال مسجّل باسم <b>'+known+'</b> — رُبط الطلب بالسجل القائم دون إنشاء عميل جديد.')
+          : "رقم جديد — أُنشئ سجل عميل وربط به الطلب.",
+        store:"ok",
+        store_m:"يظهر الآن في «طلبات النقل» وفي عدّاد الطلبات الجديدة على الرئيسية."
+      });
+      $("trState").textContent = dup ? "تم — مع تنبيه تكرار" : "تم";
+
+      RECENT.push({ id:id, phone:v.phone, service:v.service, date:v.date });
+
+      $("rId").textContent=id;
+      $("rStatus").textContent=""; $("rStatus").appendChild(statusBadge());
+      $("rName").textContent=v.name;
+      $("rPhone").textContent=v.phone;
+      $("rService").textContent=v.service;
+      $("rWhen").textContent = v.time ? (v.date+" · "+v.time) : (v.date+" — الوقت غير محدد");
+      $("rFrom").textContent=v.from;
+      $("rTo").textContent=v.to;
+      $("rSource").textContent="الموقع الإلكتروني";
+      $("rCust").textContent = known ? (known+" — سجل قائم") : (v.name+" — سجل جديد");
+      $("rNotes").textContent = v.notes || "لا توجد ملاحظات.";
+      $("rNotes").classList.toggle("muted", !v.notes);
+      $("recBadge").textContent="";
+      if (dup){
+        var w=el("span","badge badge--review");
+        w.innerHTML='<svg class="i" aria-hidden="true"><use href="#ic-alert"/></svg>';
+        w.appendChild(document.createTextNode("تكرار محتمل"));
+        $("recBadge").appendChild(w);
+      }
+      $("openReq").href="requests.html#"+encodeURIComponent(id);
+      $("recCard").hidden=false;
+
+      setBusy(false);
+      $("okId").textContent=id;
+      $("pform").hidden=true; $("ok").hidden=false;
+      toast("أُنشئ الطلب "+id);
+    }, 900);
+  });
 })();
 </script>

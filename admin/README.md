@@ -14,6 +14,7 @@ Separate track from `ux/`, which covers the public site.
 | `settings.html` | **Stage 09 — الإعدادات.** Six settings categories carrying the site's real company, contact and search-listing values. |
 | `users.html` | **Stage 09 — المستخدمون والصلاحيات.** Administrators, the three approved roles, and a per-module view/edit permission matrix. |
 | `media.html` | **Stage 12 — الوسائط والأصول.** The website's real image library, with usage tracking that protects published assets from deletion. |
+| `intake.html` | **Stage 13 — تكامل نموذج الموقع.** The website-to-request pipeline: the form as it would appear, both validation layers, and the record it produces. |
 | `QA-REPORT.md` · `stage-10-qa-report.html` | **Stage 10 — production readiness audit.** |
 
 The built site (`../index.html`) is the source of truth for services, content areas,
@@ -339,3 +340,52 @@ integration is demonstrated against the services editor instead. The Stage 10 ve
 unchanged: **NOT READY FOR DEPLOYMENT** until المحتوى and التقارير exist and a backend provides
 authentication, persistence and server-side authorization — including for media operations,
 which §22 rightly treats as high-privilege.
+
+## Stage 13 — website request intake
+
+**The premise had to be checked first, and it does not hold.** The published site carries
+**zero** forms, inputs, textareas, selects, submit buttons and endpoints — re-verified against
+`index.html` at this stage, not assumed from Stage 02. The only contact affordances are
+`tel:+966535544352` and `wa.me/966535544352`. There is no existing form to connect.
+
+Stage 02 recorded this as open decision **D1** ("is a request form being added to the website,
+or do requests stay phone and WhatsApp only?"). It is still open, and Stage 13's own rules
+forbid resolving it unilaterally: §22 and §28 say do not redesign the public website or
+introduce unapproved public content. **So `index.html` was not touched.**
+
+Everything that does not depend on that decision was built:
+
+**Admin-side integration (§06, §10, §11, §12).** `requests.html` gains the مصدر filter Stage 02
+specified — الموقع / واتساب / هاتف — plus two genuinely website-sourced records, so a website
+request is visible and filterable in the existing module. No second dashboard, no second detail
+view, no second status system: website requests are ordinary requests with a different source.
+
+**`intake.html` — the pipeline, working.** The form exactly as it would appear on the site,
+wired through the complete flow: client validation → submit → server validation → duplicate
+check → request creation with an ID from the shared counter → customer association by phone →
+storage → the resulting admin record. Submit it and every step reports what it did.
+
+- **§19 is real, not described:** the service list is filtered by the Services module's
+  visibility, so the one hidden service does not appear in the public form.
+- **§07 reuses Stage 07's rule:** phone is the customer identity. A known number attaches to the
+  existing customer; an unknown one creates a record. No duplicate customers.
+- **§08 duplicates** are flagged, never merged: the original is preserved and the new record
+  carries a تكرار محتمل badge.
+- **§09 and §21:** the response simulator exercises network and server failure. Neither reports
+  success, neither creates a partial record, and both keep every value the visitor typed.
+- **§03:** the same rules run in the browser and again on the server. The page states plainly
+  that the browser layer is convenience and the server layer is the one that counts.
+- **§17:** the submit button locks and shows a spinner for the duration — one request per submit.
+
+**The integration contract** is on the page as a table: every field, its server rule, what the
+system sets rather than the sender (ID, status `جديد`, source `الموقع`), the customer-matching
+rule, the duplicate window, and the required protections — rate limit, honeypot, CSRF, and
+rejecting any field outside the contract. A backend developer can implement against it directly.
+
+**One defect fixed across all eight pages.** A component class setting `display` outranks the
+UA rule for `[hidden]`, so an error panel rendered alongside the success panel. A single
+`[hidden]{display:none!important}` guard now removes that whole bug class everywhere.
+
+**The decision still needed:** whether the request form goes onto the public site. Until it
+does, this stage delivers the intake path complete and ready to wire, and website-sourced
+requests remain something the admin can represent but the visitor cannot yet create.
