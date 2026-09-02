@@ -1,0 +1,465 @@
+<title>Aoun Al-Darb Final QA Gate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+
+<style>
+/* ==========================================================================
+   AOUN AL-DARB — ADMIN STAGE 02 · UX ARCHITECTURE & USER FLOWS
+   Continues the document system established by ux/stage-01-ux-architecture.html.
+   Same tokens, same faces, same shell. Added here: the flow rail, the module
+   dossier, the lifecycle track, and the pattern matrix.
+   ========================================================================== */
+:root{
+  --ground:#F1F3F6;
+  --surface:#FFFFFF;
+  --surface-2:#E7EBF0;
+  --ink:#141C25;
+  --ink-2:#4C5866;
+  --ink-3:#77828F;
+  --rule:#D6DCE3;
+  --rule-soft:#E5E9EE;
+  --accent:#2C4C82;
+  --accent-2:#4975BA;
+  --accent-soft:rgba(44,76,130,.07);
+  --pass:#256B55;   --pass-bg:rgba(46,125,100,.12);
+  --warn:#8F6014;   --warn-bg:rgba(176,121,28,.14);
+  --fail:#A5352E;   --fail-bg:rgba(192,67,59,.12);
+
+  --f-display:"Archivo",ui-sans-serif,system-ui,"Segoe UI",sans-serif;
+  --f-body:"Source Serif 4",ui-serif,Georgia,"Times New Roman",serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --f-ar:"IBM Plex Sans Arabic",ui-sans-serif,system-ui,"Segoe UI","Noto Sans Arabic",sans-serif;
+
+  --measure:68ch;
+  --pad:clamp(1.15rem,4vw,2.75rem);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F151C;
+    --surface:#161E27;
+    --surface-2:#1E2831;
+    --ink:#E3E8EF;
+    --ink-2:#9DA8B5;
+    --ink-3:#6E7A88;
+    --rule:#2A343F;
+    --rule-soft:#222C36;
+    --accent:#93B3E0;
+    --accent-2:#5C86C6;
+    --accent-soft:rgba(147,179,224,.11);
+    --pass:#63C3A2;  --pass-bg:rgba(99,195,162,.14);
+    --warn:#DDA946;  --warn-bg:rgba(221,169,70,.14);
+    --fail:#EB8078;  --fail-bg:rgba(235,128,120,.14);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0F151C;
+  --surface:#161E27;
+  --surface-2:#1E2831;
+  --ink:#E3E8EF;
+  --ink-2:#9DA8B5;
+  --ink-3:#6E7A88;
+  --rule:#2A343F;
+  --rule-soft:#222C36;
+  --accent:#93B3E0;
+  --accent-2:#5C86C6;
+  --accent-soft:rgba(147,179,224,.11);
+  --pass:#63C3A2;  --pass-bg:rgba(99,195,162,.14);
+  --warn:#DDA946;  --warn-bg:rgba(221,169,70,.14);
+  --fail:#EB8078;  --fail-bg:rgba(235,128,120,.14);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:var(--f-body);
+  font-size:17px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ---------- shell ---------------------------------------------------- */
+.wrap{max-width:1260px;margin:0 auto;padding:0 var(--pad)}
+.layout{display:grid;gap:clamp(2rem,4vw,3.5rem);align-items:start}
+@media (min-width:1080px){ .layout{grid-template-columns:236px minmax(0,1fr)} }
+
+/* ---------- masthead -------------------------------------------------- */
+.mast{border-bottom:1px solid var(--rule);padding-block:clamp(2.5rem,6vw,4.5rem) clamp(1.75rem,4vw,2.75rem);margin-bottom:clamp(2rem,5vw,3.5rem)}
+.mast__eyebrow{
+  font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--accent);margin:0 0 1.1rem
+}
+.mast__title{
+  font-family:var(--f-display);font-weight:700;font-size:clamp(2.1rem,1.2rem + 3.6vw,3.65rem);
+  line-height:1.04;letter-spacing:-.022em;margin:0;text-wrap:balance;max-width:19ch
+}
+.mast__sub{
+  margin:1.4rem 0 0;max-width:64ch;font-size:clamp(1.05rem,1rem + .3vw,1.2rem);
+  line-height:1.6;color:var(--ink-2)
+}
+.mast__meta{
+  display:flex;flex-wrap:wrap;gap:.5rem 1.6rem;margin-top:2rem;
+  font-family:var(--f-mono);font-size:12.5px;color:var(--ink-3)
+}
+.mast__meta b{font-weight:500;color:var(--ink-2)}
+
+/* ---------- table of contents ---------------------------------------- */
+.toc{font-family:var(--f-display);font-size:13.5px;line-height:1.45}
+@media (min-width:1080px){ .toc{position:sticky;top:1.75rem;max-height:calc(100vh - 3.5rem);overflow-y:auto} }
+.toc__title{
+  font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 .9rem;padding-bottom:.7rem;border-bottom:1px solid var(--rule)
+}
+.toc ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.15rem}
+.toc a{
+  display:flex;gap:.65rem;text-decoration:none;color:var(--ink-2);
+  padding:.4rem .5rem;border-radius:4px;transition:background .15s,color .15s
+}
+.toc a:hover{background:var(--accent-soft);color:var(--ink)}
+.toc a span{font-family:var(--f-mono);font-size:11px;color:var(--ink-3);padding-top:.15em;flex:0 0 auto}
+
+/* ---------- sections -------------------------------------------------- */
+.sec{margin-bottom:clamp(3rem,7vw,5rem);scroll-margin-top:1.5rem}
+.sec__head{display:flex;gap:1rem;align-items:baseline;margin-bottom:1.4rem;padding-bottom:.85rem;border-bottom:1px solid var(--rule)}
+.sec__num{
+  font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.1em;
+  color:var(--accent);flex:0 0 auto;padding-top:.35em
+}
+.sec__title{
+  font-family:var(--f-display);font-weight:600;font-size:clamp(1.32rem,1.15rem + .7vw,1.75rem);
+  letter-spacing:-.014em;margin:0;line-height:1.2;text-wrap:balance
+}
+h3{font-family:var(--f-display);font-weight:600;font-size:1.06rem;letter-spacing:-.008em;margin:2rem 0 .7rem;line-height:1.3}
+h4{font-family:var(--f-display);font-weight:600;font-size:.95rem;margin:1.5rem 0 .5rem}
+p{margin:0 0 1.05rem;max-width:var(--measure)}
+.lede{font-size:1.09rem;color:var(--ink-2)}
+a{color:var(--accent)}
+b,strong{font-weight:600}
+code{font-family:var(--f-mono);font-size:.85em;background:var(--surface-2);padding:.1em .38em;border-radius:3px;color:var(--ink)}
+
+/* Arabic inline term */
+.ar{font-family:var(--f-ar);font-size:.95em;font-weight:500;font-feature-settings:"kern"}
+.ar--h{font-weight:600}
+
+ul.list{margin:0 0 1.05rem;padding:0;list-style:none;max-width:var(--measure);display:flex;flex-direction:column;gap:.5rem}
+ul.list li{position:relative;padding-left:1.15rem;color:var(--ink-2)}
+ul.list li::before{content:"—";position:absolute;left:0;color:var(--ink-3)}
+ul.list li b{color:var(--ink)}
+
+.note{
+  background:var(--accent-soft);border-left:3px solid var(--accent-2);
+  padding:1rem 1.15rem;margin:1.5rem 0;border-radius:0 6px 6px 0;max-width:var(--measure)
+}
+.note h4{margin-top:0}
+.note p:last-child{margin-bottom:0}
+
+/* RTL run — Arabic sets that would otherwise reorder inside an LTR sentence */
+.rtl{
+  direction:rtl;text-align:right;font-family:var(--f-ar);font-weight:500;
+  background:var(--surface);border:1px solid var(--rule);border-radius:6px;
+  padding:.75rem .9rem;margin:.75rem 0;font-size:.97rem;line-height:1.9;color:var(--ink)
+}
+.rtl b{font-weight:600}
+.rtl__c{
+  direction:rtl;display:grid;gap:.15rem .9rem;grid-template-columns:repeat(auto-fill,minmax(13.5rem,1fr));
+  margin:0;padding:0;list-style:none
+}
+.rtl__c li{position:relative;padding-right:.95rem}
+.rtl__c li::before{content:"·";position:absolute;right:.15rem;color:var(--ink-3)}
+
+/* ---------- flow rail ------------------------------------------------- */
+.flow{
+  display:flex;flex-wrap:wrap;align-items:center;gap:.4rem .1rem;
+  margin:1.2rem 0 1.6rem;padding:.95rem 1.1rem;
+  background:var(--surface);border:1px solid var(--rule);border-radius:8px;
+  font-family:var(--f-mono);font-size:12.5px;line-height:1.5
+}
+.flow__step{
+  background:var(--surface-2);color:var(--ink);border-radius:4px;
+  padding:.3rem .55rem;white-space:nowrap
+}
+.flow__step .ar{font-size:12.5px}
+.flow__step--start{background:var(--accent);color:var(--surface)}
+.flow__step--end{background:var(--pass-bg);color:var(--pass);font-weight:500}
+.flow__arw{color:var(--ink-3);padding:0 .42rem;flex:0 0 auto}
+.flow__lbl{
+  font-family:var(--f-mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-3);width:100%;margin-bottom:.15rem
+}
+
+/* ---------- lifecycle track ------------------------------------------- */
+.life{margin:1.6rem 0 1.2rem;padding:1.3rem 1.2rem;background:var(--surface);border:1px solid var(--rule);border-radius:8px}
+.life__row{display:flex;flex-wrap:wrap;align-items:stretch;gap:.35rem}
+.life__node{
+  flex:1 1 8.5rem;border:1px solid var(--rule);border-radius:6px;background:var(--ground);
+  padding:.7rem .75rem;display:flex;flex-direction:column;gap:.25rem;min-width:0
+}
+.life__node b{font-family:var(--f-ar);font-weight:600;font-size:1rem;color:var(--ink)}
+.life__node span{font-family:var(--f-mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.06em}
+.life__node--term{border-style:solid;border-color:var(--pass);background:var(--pass-bg)}
+.life__node--term b{color:var(--pass)}
+.life__arw{display:flex;align-items:center;color:var(--ink-3);font-family:var(--f-mono);font-size:15px;flex:0 0 auto}
+.life__branch{
+  margin-top:.85rem;padding-top:.85rem;border-top:1px dashed var(--rule);
+  display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;font-size:14.5px;color:var(--ink-2)
+}
+.life__cancel{
+  border:1px solid var(--fail);background:var(--fail-bg);color:var(--fail);
+  border-radius:6px;padding:.5rem .75rem;font-family:var(--f-ar);font-weight:600;font-size:.98rem
+}
+
+/* ---------- tables ---------------------------------------------------- */
+.tw{overflow-x:auto;margin:1.4rem 0;border:1px solid var(--rule);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:34rem}
+th,td{text-align:left;padding:.68rem .85rem;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+thead th{
+  font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);background:var(--surface-2);border-bottom:1px solid var(--rule);white-space:nowrap
+}
+tbody tr:last-child td{border-bottom:none}
+td b{color:var(--ink);font-weight:600}
+td{color:var(--ink-2)}
+.num{font-family:var(--f-mono);font-size:12px;color:var(--ink-3);white-space:nowrap;font-variant-numeric:tabular-nums}
+.yes{color:var(--pass);font-weight:600}
+.no{color:var(--ink-3)}
+.part{color:var(--warn);font-weight:600}
+
+.chip{
+  display:inline-block;font-family:var(--f-mono);font-size:10.5px;font-weight:500;letter-spacing:.08em;
+  text-transform:uppercase;padding:.16rem .45rem;border-radius:3px;white-space:nowrap
+}
+.chip--pass{background:var(--pass-bg);color:var(--pass)}
+.chip--warn{background:var(--warn-bg);color:var(--warn)}
+.chip--fail{background:var(--fail-bg);color:var(--fail)}
+.chip--n{background:var(--accent-soft);color:var(--accent)}
+
+/* ---------- findings -------------------------------------------------- */
+.find{
+  position:relative;background:var(--surface);border:1px solid var(--rule);border-radius:8px;
+  padding:1.1rem 1.25rem 1.15rem 1.5rem;margin-bottom:1rem;overflow:hidden
+}
+.find::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ink-3)}
+.find--p1::before{background:var(--fail)}
+.find--p2::before{background:var(--warn)}
+.find--p3::before{background:var(--accent-2)}
+.find__head{display:flex;flex-wrap:wrap;gap:.55rem .85rem;align-items:baseline;margin-bottom:.6rem}
+.find__id{font-family:var(--f-mono);font-size:12px;font-weight:500;color:var(--ink-3)}
+.find__title{font-family:var(--f-display);font-weight:600;font-size:1rem;margin:0;flex:1 1 16rem;line-height:1.35}
+.find dl{margin:0;display:grid;gap:.45rem .9rem;grid-template-columns:auto minmax(0,1fr);font-size:14.5px}
+.find dt{
+  font-family:var(--f-mono);font-size:10.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);padding-top:.35em;white-space:nowrap
+}
+.find dd{margin:0;color:var(--ink-2);line-height:1.55;max-width:66ch}
+.find dd b{color:var(--ink);font-weight:600}
+@media (max-width:620px){
+  .find dl{grid-template-columns:minmax(0,1fr);gap:.15rem .9rem}
+  .find dt{padding-top:.6em}
+}
+
+/* ---------- module dossier -------------------------------------------- */
+.mod{
+  background:var(--surface);border:1px solid var(--rule);border-radius:8px;
+  padding:1.25rem 1.35rem 1.35rem;margin-bottom:1.15rem
+}
+.mod__head{display:flex;flex-wrap:wrap;gap:.5rem .9rem;align-items:baseline;padding-bottom:.8rem;margin-bottom:.9rem;border-bottom:1px solid var(--rule-soft)}
+.mod__num{font-family:var(--f-mono);font-size:12px;font-weight:500;color:var(--accent);flex:0 0 auto}
+.mod__name{font-family:var(--f-ar);font-weight:700;font-size:1.25rem;margin:0;color:var(--ink);line-height:1.3}
+.mod__en{font-family:var(--f-display);font-weight:500;font-size:.86rem;color:var(--ink-3);letter-spacing:.01em}
+.mod dl{margin:0;display:grid;gap:.5rem .95rem;grid-template-columns:7.4rem minmax(0,1fr);font-size:14.5px}
+.mod dt{
+  font-family:var(--f-mono);font-size:10.5px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);padding-top:.4em
+}
+.mod dd{margin:0;color:var(--ink-2);line-height:1.55}
+.mod dd b{color:var(--ink);font-weight:600}
+.mod dd .ar{color:var(--ink)}
+@media (max-width:620px){
+  .mod dl{grid-template-columns:minmax(0,1fr);gap:.12rem .9rem}
+  .mod dt{padding-top:.75em}
+}
+
+/* ---------- pattern cards --------------------------------------------- */
+.pats{display:grid;gap:.8rem;grid-template-columns:repeat(auto-fill,minmax(15.5rem,1fr));margin:1.4rem 0}
+.pat{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:.95rem 1.05rem;display:flex;flex-direction:column;gap:.3rem}
+.pat__id{font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.09em;color:var(--accent)}
+.pat__name{font-family:var(--f-ar);font-weight:600;font-size:1rem;color:var(--ink);margin:0}
+.pat__en{font-family:var(--f-display);font-size:.8rem;color:var(--ink-3);margin:0}
+.pat__body{font-size:14px;color:var(--ink-2);margin:.3rem 0 0;line-height:1.5}
+
+/* ---------- handoff / foot -------------------------------------------- */
+.handoff{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:clamp(1.3rem,3vw,2rem)}
+.handoff ol{margin:0;padding-left:1.3rem;display:flex;flex-direction:column;gap:.6rem;max-width:var(--measure)}
+.handoff li{padding-left:.3rem;color:var(--ink-2)}
+.handoff li b{color:var(--ink)}
+.foot{
+  border-top:1px solid var(--rule);margin-top:clamp(2.5rem,6vw,4rem);padding-block:1.6rem 3rem;
+  font-family:var(--f-mono);font-size:12px;color:var(--ink-3);display:flex;flex-wrap:wrap;gap:.4rem 1.5rem
+}
+
+/* --- report-specific ------------------------------------------------- */
+.verdict{
+  border:1px solid var(--fail);background:var(--fail-bg);border-radius:10px;
+  padding:clamp(1.1rem,3vw,1.6rem);margin:1.6rem 0
+}
+.verdict__k{
+  font-family:var(--f-mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--fail);margin:0 0 .5rem
+}
+.verdict__v{font-family:var(--f-display);font-weight:700;font-size:clamp(1.3rem,1.1rem + 1vw,1.8rem);
+  color:var(--fail);margin:0;letter-spacing:-.01em}
+.verdict p{margin:.8rem 0 0;color:var(--ink-2);max-width:64ch}
+.big{display:grid;gap:.7rem;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));margin:1.4rem 0}
+.big__i{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:.85rem 1rem}
+.big__n{font-family:var(--f-display);font-weight:700;font-size:1.6rem;line-height:1;color:var(--pass);
+  font-variant-numeric:tabular-nums}
+.big__n.warn{color:var(--warn)}
+.big__l{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.06em;color:var(--ink-3);
+  margin-top:.4rem;line-height:1.4}
+ol.blk{margin:0 0 1rem;padding-left:1.3rem;display:flex;flex-direction:column;gap:.6rem;max-width:var(--measure)}
+ol.blk li{color:var(--ink-2)} ol.blk li b{color:var(--ink)}
+
+/* --- verdict table ---------------------------------------------------- */
+.vt{width:100%;border-collapse:collapse;font-size:14.5px}
+.vt th,.vt td{padding:.7rem .85rem;border-bottom:1px solid var(--rule-soft);text-align:left;vertical-align:top}
+.vt thead th{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);background:var(--surface-2);white-space:nowrap}
+.vt tbody tr:last-child td{border-bottom:none}
+.vt td b{color:var(--ink);font-weight:600}
+.vt td{color:var(--ink-2)}
+.v{font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.08em;
+  padding:.2rem .5rem;border-radius:3px;white-space:nowrap;display:inline-block}
+.v--pass{background:var(--pass-bg);color:var(--pass)}
+.v--fail{background:var(--fail-bg);color:var(--fail)}
+.v--part{background:var(--warn-bg);color:var(--warn)}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <p class="mast__eyebrow">Final gate · Stage 16</p>
+    <h1 class="mast__title">Final QA &amp; Production Readiness</h1>
+    <p class="mast__sub">The complete <span class="ar">عون الدرب للنقل المتخصص</span> system, audited by
+      measurement against the working files rather than against the stage briefs. Every figure below came
+      from a run performed during this stage.</p>
+    <div class="mast__meta">
+      <span>Pages audited · <b>10</b></span>
+      <span>Overflow measurements · <b>126</b></span>
+      <span>Modules present · <b>8 of 12</b></span>
+      <span>Runtime errors · <b>0</b></span>
+    </div>
+  </header>
+
+  <main>
+    <section class="sec">
+      <div class="verdict">
+        <p class="verdict__k">Overall status</p>
+        <p class="verdict__v">NOT READY FOR PRODUCTION</p>
+        <p>The front end is in good order — it passed every test that can be run against it, and nothing in
+          it is known to be broken. The system cannot be released because the layers a production deployment
+          actually consists of do not exist: <b>authentication, authorization, persistence and the request
+          endpoint</b>. Four approved modules are also absent.</p>
+      </div>
+
+      <div class="big">
+        <div class="big__i"><p class="big__n">0</p><p class="big__l">runtime errors<br>10 of 10 pages</p></div>
+        <div class="big__i"><p class="big__n">0</p><p class="big__l">overflow failures<br>126 measurements</p></div>
+        <div class="big__i"><p class="big__n">0</p><p class="big__l">a11y violations<br>9 pages</p></div>
+        <div class="big__i"><p class="big__n">0</p><p class="big__l">prohibited terms<br>whole system</p></div>
+        <div class="big__i"><p class="big__n warn">4</p><p class="big__l">modules absent<br>of 12</p></div>
+        <div class="big__i"><p class="big__n warn">6</p><p class="big__l">production blockers</p></div>
+      </div>
+    </section>
+
+    <section class="sec" id="verdicts">
+      <div class="sec__head"><span class="sec__num">01</span><h2 class="sec__title">Verdicts</h2></div>
+      <div class="tw"><table class="vt">
+        <thead><tr><th>Area</th><th>Verdict</th><th>Basis</th></tr></thead>
+        <tbody>
+          <tr><td><b>Security</b></td><td><span class="v v--fail">FAIL</span></td>
+            <td>No authentication layer exists. All permission control is frontend-only — which §04 and §28 forbid as the sole layer.</td></tr>
+          <tr><td><b>Data integrity</b></td><td><span class="v v--fail">FAIL</span></td>
+            <td>Internal consistency passes: 18 records identical across modules, zero conflicts, all ids well-formed. But §13 requires data to survive refresh and re-login, and nothing persists — there is no database.</td></tr>
+          <tr><td><b>Responsive</b></td><td><span class="v v--pass">PASS</span></td>
+            <td>Zero horizontal overflow across 9 pages × the 14 required widths — <b>126 measurements</b>.</td></tr>
+          <tr><td><b>Accessibility</b></td><td><span class="v v--pass">PASS</span></td>
+            <td>Zero missing alt text, unlabelled controls, unnamed links, duplicate ids or undersized targets; <code>dir=rtl</code> throughout. <b>Limit:</b> automated checks only — no assistive-technology testing was performed.</td></tr>
+          <tr><td><b>Performance</b></td><td><span class="v v--pass">PASS</span></td>
+            <td>No blocking issue. Two documented costs, both fixable at deployment.</td></tr>
+          <tr><td><b>Integration</b></td><td><span class="v v--fail">FAIL</span></td>
+            <td>Front-end integration points verified consistent. The backend and database layer does not exist, and four modules are absent so their integrations cannot.</td></tr>
+          <tr><td><b>Deployment</b></td><td><span class="v v--part">PARTIAL</span></td>
+            <td>The <b>public site</b> builds and deploys — <code>node build.js</code> succeeds, 62 assets resolve, zero missing references. The <b>admin</b> has no build, no configuration and no server, so Hostinger compatibility is unverifiable.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section class="sec" id="verified">
+      <div class="sec__head"><span class="sec__num">02</span><h2 class="sec__title">Verified</h2></div>
+      <ul class="list">
+        <li><b>Eight modules load with zero runtime errors</b> — <span class="ar">الرئيسية · طلبات النقل · العملاء · الخدمات · الإعدادات · المستخدمون والصلاحيات · الوسائط والأصول · تكامل نموذج الموقع</span> — as do the public site and the built output.</li>
+        <li><b>Request workflow</b> — list, search, four filters, pagination, detail, status changes across the approved five only, notes, contact actions, cancellation.</li>
+        <li><b>Customers</b> derived from requests by phone: no duplicate records, history consistent with the request list.</li>
+        <li><b>Media</b> — 18 real assets, usage computed from the page itself, used assets protected from deletion, validation by actual decode, thumbnails never masters.</li>
+        <li><b>Consistency</b> — seven service names byte-identical across six copies; one phone number across site, settings and intake; five statuses and no sixth anywhere; every cross-page link resolves.</li>
+        <li><b>Public website regression</b> — all nine sections intact in source and build, approved copy and imagery unchanged, zero external stylesheets, fonts self-hosted.</li>
+        <li><b>Cleanup</b> — no <code>console.*</code>, no <code>debugger</code>, no TODO, no secrets, no unresolved references in any shipped page.</li>
+        <li><b>Terminology</b> — <span class="ar">ذوي الاحتياجات الخاصة</span> only; zero prohibited terms in any rendered copy, across the public site, the built page and every admin page.</li>
+      </ul>
+    </section>
+
+    <section class="sec" id="blockers">
+      <div class="sec__head"><span class="sec__num">03</span><h2 class="sec__title">Production blockers</h2></div>
+      <ol class="blk">
+        <li><b>No authentication.</b> No login, no session, no protected route. Anyone reaching the admin pages has full access.</li>
+        <li><b>No server-side authorization.</b> Roles and permissions are demonstrated in the interface; nothing enforces them.</li>
+        <li><b>No persistence.</b> All data lives in the page and resets on refresh.</li>
+        <li><b>The public request form has no endpoint.</b> It posts to <code>/api/requests</code>, which does not exist, so a visitor's request cannot yet be created.</li>
+        <li><b>Four approved modules are absent</b> — <span class="ar">المحتوى، التقارير، الإشعارات، سجل النشاط</span>. Content synchronisation, reporting, notifications and activity traceability cannot work without them.</li>
+        <li><b>Hostinger deployment unverified.</b> There is no backend to deploy, and no hosting environment was reachable from this session.</li>
+      </ol>
+    </section>
+
+    <section class="sec" id="minor">
+      <div class="sec__head"><span class="sec__num">04</span><h2 class="sec__title">Non-critical</h2></div>
+      <ol class="blk">
+        <li><code>media.html</code> is 517KB and <code>services.html</code> 283KB because thumbnails are embedded to keep each page self-contained. In production they should be files.</li>
+        <li>The admin loads fonts from <code>fonts.googleapis.com</code>. The public site already self-hosts its faces; the admin should too.</li>
+        <li>The admin has no build step — each page is standalone HTML, so the shared shell CSS is duplicated per page rather than extracted.</li>
+        <li>Browser testing covered <b>Chromium only</b>. Edge shares its engine; Firefox and Safari were unavailable here and remain untested.</li>
+      </ol>
+      <div class="note">
+        <h4>Fixed during this stage</h4>
+        <p>The demo request-id builder produced a five-digit tail past 999. It is now zero-padded to four.</p>
+      </div>
+    </section>
+
+    <section class="sec" id="rec">
+      <div class="sec__head"><span class="sec__num">05</span><h2 class="sec__title">Final recommendation</h2></div>
+      <div class="handoff">
+        <p style="margin-bottom:1.1rem"><b>Do not release.</b> The interface is complete enough to demonstrate
+          and to build against, and no defect in it is left standing. What separates this from production is
+          not polish — it is the entire server side.</p>
+        <ol>
+          <li>Build the server: <b>authentication, sessions, a database, and server-side authorization</b>
+            mirroring every role and permission the interface already shows.</li>
+          <li>Implement <code>POST /api/requests</code> against the contract already published in
+            <span class="ar">تكامل نموذج الموقع</span>, so the public form can create a request.</li>
+          <li>Build the four remaining modules: <span class="ar">المحتوى، التقارير، الإشعارات، سجل النشاط</span>.</li>
+          <li>Move the embedded thumbnails to files and self-host the admin fonts.</li>
+          <li>Re-run this audit <b>against the deployed system</b>, then smoke-test every critical path
+            and confirm <code>aunaldrb.com</code> still serves correctly.</li>
+        </ol>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span>Aoun Al-Darb · Final QA gate</span>
+    <span>Stage 16</span>
+    <span>Status: NOT READY FOR PRODUCTION</span>
+  </footer>
+</div>

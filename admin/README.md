@@ -16,6 +16,7 @@ Separate track from `ux/`, which covers the public site.
 | `media.html` | **Stage 12 — الوسائط والأصول.** The website's real image library, with usage tracking that protects published assets from deletion. |
 | `intake.html` | **Stage 13 — تكامل نموذج الموقع.** The website-to-request pipeline: the form as it would appear, both validation layers, and the record it produces. |
 | `QA-REPORT.md` · `stage-10-qa-report.html` | **Stage 10 — production readiness audit.** |
+| `FINAL-QA.md` · `stage-16-final-qa.html` | **Stage 16 — the final QA gate and its verdict.** |
 
 The built site (`../index.html`) is the source of truth for services, content areas,
 contact details and terminology. Nothing in this track invents business features.
@@ -445,3 +446,33 @@ could not be tested. Stage 14 (notifications and activity) was paused and is not
 
 The Stage 10 verdict is unchanged: **NOT READY FOR DEPLOYMENT.** What Stage 15 establishes is
 that everything which does exist is now internally consistent and free of contradictions.
+
+## Stage 16 — final QA gate
+
+Re-verified from scratch rather than trusting earlier stages, as §01 requires.
+
+**Verdict: NOT READY FOR PRODUCTION.**
+
+| Area | Verdict |
+| --- | --- |
+| Security | **FAIL** — no authentication layer exists; permission control is frontend-only |
+| Data integrity | **FAIL** — internally consistent, but nothing persists across a refresh |
+| Responsive | **PASS** — 126 measurements, zero overflow |
+| Accessibility | **PASS** — zero violations on automated checks across 9 pages |
+| Performance | **PASS** — no blocking issue; two documented costs |
+| Integration | **FAIL** — no backend layer; four modules absent |
+| Deployment | **PARTIAL** — the public site builds and deploys; the admin has no server |
+
+Six production blockers: no authentication, no server-side authorization, no persistence, no
+endpoint behind the public form, four absent modules (المحتوى، التقارير، الإشعارات، سجل النشاط),
+and unverifiable Hostinger deployment.
+
+Verified clean: 10 of 10 pages load with zero runtime errors; zero prohibited terminology
+anywhere; every cross-page link resolves; the public site's nine sections, approved copy and
+imagery are intact in both source and build; no `console.*`, `debugger`, TODO, secrets or
+unresolved references in any shipped page.
+
+One defect fixed here: the demo request-id builder produced a five-digit tail past 999.
+
+The honest summary is that the interface is finished and the system is not. Nothing in the
+front end is known to be broken; what remains is the entire server side plus four modules.

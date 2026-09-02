@@ -1624,7 +1624,8 @@ window.AunShell = (function(){
 
       var known=CUSTOMERS[v.phone];
       LAST.n += 1;
-      var id="REQ-2026-0"+LAST.n;
+      /* the id keeps its four-digit tail past 999 */
+      var id="REQ-2026-"+String(LAST.n).padStart(4,"0");
 
       drawTrace({
         client:"ok", post:"ok", server:"ok",
