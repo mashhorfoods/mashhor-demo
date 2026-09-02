@@ -451,6 +451,10 @@ table.tbl tbody tr:focus-within{background:var(--row-hover)}
 .qa__i:focus-visible{outline:none;box-shadow:var(--sh-focus)}
 .qa__i .i:first-child{color:var(--navy)}
 .qa__i .i:last-child{margin-inline-start:auto;color:var(--slate)}
+/* an action whose module does not exist yet — shown, but honestly disabled */
+.qa__i.is-pending{color:var(--disabled-ink);background:var(--disabled-surface);cursor:not-allowed}
+.qa__i.is-pending:hover{background:var(--disabled-surface);border-color:var(--divider)}
+.qa__i.is-pending .i{color:var(--gray)}
 
 /* === DASHBOARD · per-block states ====================================== */
 [data-state] > .state{display:none}
@@ -574,6 +578,7 @@ table.tbl tbody tr:focus-within{background:var(--row-hover)}
       <a class="navitem is-pending" href="#" aria-disabled="true" title="قيد الإنشاء — لم تُبنَ هذه الوحدة بعد"><svg class="i" aria-hidden="true"><use href="#ic-content"/></svg><span class="navitem__lbl">المحتوى</span></a>
       <a class="navitem" href="media.html" data-nav="media"><svg class="i" aria-hidden="true"><use href="#ic-image"/></svg><span class="navitem__lbl">الوسائط والأصول</span></a>
       <p class="side__grp">النظام</p>
+      <a class="navitem" href="activity.html" data-nav="activity"><svg class="i" aria-hidden="true"><use href="#ic-bell"/></svg><span class="navitem__lbl">الإشعارات والنشاط</span><span class="navitem__count" data-navcount="activity" hidden></span></a>
       <a class="navitem is-pending" href="#" aria-disabled="true" title="قيد الإنشاء — لم تُبنَ هذه الوحدة بعد"><svg class="i" aria-hidden="true"><use href="#ic-report"/></svg><span class="navitem__lbl">التقارير</span></a>
       <a class="navitem" href="users.html"><svg class="i" aria-hidden="true"><use href="#ic-shield"/></svg><span class="navitem__lbl">المستخدمون والصلاحيات</span></a>
       <a class="navitem" href="settings.html"><svg class="i" aria-hidden="true"><use href="#ic-settings"/></svg><span class="navitem__lbl">الإعدادات</span></a>
@@ -606,31 +611,40 @@ table.tbl tbody tr:focus-within{background:var(--row-hover)}
 
       <div class="hdr__acts">
         <span class="wrap-rel">
-          <button class="iconbtn" id="bell" aria-label="التنبيهات — 3 غير مقروءة" aria-expanded="false" aria-controls="notifpop">
-            <svg class="i" aria-hidden="true"><use href="#ic-bell"/></svg><span class="bell__d" id="belldot"></span>
+          <button class="iconbtn" id="bell" aria-label="التنبيهات" aria-expanded="false" aria-controls="notifpop">
+            <svg class="i" aria-hidden="true"><use href="#ic-bell"/></svg><span class="bell__d" id="belldot" hidden></span>
           </button>
           <div class="pop" id="notifpop" hidden role="dialog" aria-label="التنبيهات">
             <div class="pop__h"><span class="pop__t">التنبيهات</span>
               <button class="btn btn--ghost btn--sm" id="readall">تعليم الكل كمقروء</button></div>
             <div class="pop__list" id="notiflist">
-              <button class="notif"><span class="notif__unread" aria-hidden="true"></span>
-                <span class="notif__i notif__i--new"><svg class="i i--sm" aria-hidden="true"><use href="#ic-newdot"/></svg></span>
-                <span class="notif__b"><span class="notif__t">طلب جديد من عبدالله الشهري</span>
-                <span class="notif__m">09:42</span></span></button>
-              <button class="notif"><span class="notif__unread" aria-hidden="true"></span>
+              <a class="notif" href="requests.html" data-nid="stale">
+                <span class="notif__unread" aria-hidden="true"></span>
                 <span class="notif__i notif__i--warn"><svg class="i i--sm" aria-hidden="true"><use href="#ic-clock"/></svg></span>
-                <span class="notif__b"><span class="notif__t">3 طلبات في «قيد المراجعة» منذ أكثر من يوم</span>
-                <span class="notif__m">08:15</span></span></button>
-              <button class="notif"><span class="notif__unread" aria-hidden="true"></span>
+                <span class="notif__b"><span class="notif__t">طلبان في «قيد المراجعة» منذ أكثر من يوم</span>
+                <span class="notif__m" data-when="الآن">الآن</span></span></a>
+              <a class="notif" href="requests.html#REQ-2026-0150" data-nid="new:REQ-2026-0150">
+                <span class="notif__unread" aria-hidden="true"></span>
+                <span class="notif__i notif__i--new"><svg class="i i--sm" aria-hidden="true"><use href="#ic-newdot"/></svg></span>
+                <span class="notif__b"><span class="notif__t">طلب جديد من أمل الصاعدي — النقل بواسطة الكرسي الكهربائي</span>
+                <span class="notif__m" data-when="قبل ساعتين">قبل ساعتين</span></span></a>
+              <a class="notif" href="requests.html#REQ-2026-0143" data-nid="new:REQ-2026-0143">
+                <span class="notif__unread" aria-hidden="true"></span>
+                <span class="notif__i notif__i--new"><svg class="i i--sm" aria-hidden="true"><use href="#ic-newdot"/></svg></span>
+                <span class="notif__b"><span class="notif__t">طلب جديد من هند الزهراني — النقل بواسطة الكرسي الكهربائي</span>
+                <span class="notif__m" data-when="قبل 12 ساعة">قبل 12 ساعة</span></span></a>
+              <a class="notif" href="requests.html#REQ-2026-0148" data-nid="new:REQ-2026-0148">
+                <span class="notif__unread" aria-hidden="true"></span>
+                <span class="notif__i notif__i--new"><svg class="i i--sm" aria-hidden="true"><use href="#ic-newdot"/></svg></span>
+                <span class="notif__b"><span class="notif__t">طلب جديد من عبدالله الشهري — النقل إلى المستشفيات والمراكز الطبية</span>
+                <span class="notif__m" data-when="قبل 14 ساعة">قبل 14 ساعة</span></span></a>
+              <a class="notif" href="requests.html#REQ-2026-0147" data-nid="st:REQ-2026-0147:confirmed">
+                <span class="notif__unread" aria-hidden="true"></span>
                 <span class="notif__i notif__i--ok"><svg class="i i--sm" aria-hidden="true"><use href="#ic-checkcircle"/></svg></span>
-                <span class="notif__b"><span class="notif__t">تم تأكيد الطلب REQ-2026-0147</span>
-                <span class="notif__m">أمس · 17:30</span></span></button>
-              <button class="notif is-read"><span class="notif__unread" aria-hidden="true"></span>
-                <span class="notif__i"><svg class="i i--sm" aria-hidden="true"><use href="#ic-edit"/></svg></span>
-                <span class="notif__b"><span class="notif__t">تم تحديث محتوى «من نحن»</span>
-                <span class="notif__m">أمس · 14:05</span></span></button>
+                <span class="notif__b"><span class="notif__t">الطلب REQ-2026-0147 أصبح «مؤكد» — منيرة الدوسري</span>
+                <span class="notif__m" data-when="قبل 16 ساعة">قبل 16 ساعة</span></span></a>
             </div>
-            <div class="pop__f"><a class="btn btn--ghost btn--sm" href="#" style="width:100%">عرض كل التنبيهات</a></div>
+            <div class="pop__f"><a class="btn btn--ghost btn--sm" href="activity.html" style="width:100%">عرض كل التنبيهات (5 من 9)</a></div>
           </div>
         </span>
 
@@ -677,19 +691,19 @@ table.tbl tbody tr:focus-within{background:var(--row-hover)}
         <h2 class="sr" id="kpis-h">المؤشرات الرئيسية</h2>
         <div class="kpis" id="kpis" data-state="ready">
           <div class="state state--ready">
-            <a class="kpi kpi--attention" href="#">
+            <a class="kpi kpi--attention" href="requests.html?status=new">
               <span class="kpi__l"><svg class="i i--sm" aria-hidden="true"><use href="#ic-newdot"/></svg>الطلبات الجديدة</span>
               <span class="kpi__n">5</span><span class="kpi__m">بانتظار المراجعة</span></a>
-            <a class="kpi" href="#">
+            <a class="kpi" href="requests.html?status=review">
               <span class="kpi__l"><svg class="i i--sm" aria-hidden="true"><use href="#ic-clock"/></svg>قيد المراجعة</span>
               <span class="kpi__n">3</span><span class="kpi__m"><b>2</b> تجاوزت يوماً</span></a>
-            <a class="kpi" href="#">
+            <a class="kpi" href="requests.html?status=confirmed">
               <span class="kpi__l"><svg class="i i--sm" aria-hidden="true"><use href="#ic-checkcircle"/></svg>الطلبات المؤكدة</span>
               <span class="kpi__n">2</span><span class="kpi__m"><b>1</b> رحلة اليوم</span></a>
-            <a class="kpi" href="#">
+            <a class="kpi" href="requests.html?status=done">
               <span class="kpi__l"><svg class="i i--sm" aria-hidden="true"><use href="#ic-checks"/></svg>الطلبات المكتملة</span>
               <span class="kpi__n">7</span><span class="kpi__m"><b>4</b> هذا الشهر</span></a>
-            <a class="kpi" href="#">
+            <a class="kpi" href="requests.html">
               <span class="kpi__l"><svg class="i i--sm" aria-hidden="true"><use href="#ic-request"/></svg>إجمالي الطلبات</span>
               <span class="kpi__n">18</span><span class="kpi__m">في السجل</span></a>
           </div>
@@ -729,7 +743,7 @@ table.tbl tbody tr:focus-within{background:var(--row-hover)}
           <!-- requests overview -->
           <section class="card" aria-labelledby="dist-h" data-state="ready" id="distblock">
             <div class="card__h"><h2 class="card__t" id="dist-h">توزيع الطلبات حسب الحالة</h2>
-              <a class="btn btn--ghost btn--sm" href="#">عرض كل الطلبات<svg class="i i--sm i--flip" aria-hidden="true"><use href="#ic-chevron"/></svg></a></div>
+              <a class="btn btn--ghost btn--sm" href="requests.html">عرض كل الطلبات<svg class="i i--sm i--flip" aria-hidden="true"><use href="#ic-chevron"/></svg></a></div>
             <div class="state state--ready">
               <div class="card__b">
                 <div class="dist" role="img" aria-label="توزيع 18 طلباً: جديد 5، قيد المراجعة 3، مؤكد 2، مكتمل 7، ملغي 1">
@@ -740,11 +754,11 @@ table.tbl tbody tr:focus-within{background:var(--row-hover)}
                   <span class="dist__seg dist__seg--cancel" style="width:5.6%"></span>
                 </div>
                 <div class="legend">
-                  <a class="legend__r" href="#"><span class="badge badge--new"><svg class="i" aria-hidden="true"><use href="#ic-newdot"/></svg>جديد</span><span class="legend__n">5</span><span class="legend__p">28%</span></a>
-                  <a class="legend__r" href="#"><span class="badge badge--review"><svg class="i" aria-hidden="true"><use href="#ic-clock"/></svg>قيد المراجعة</span><span class="legend__n">3</span><span class="legend__p">17%</span></a>
-                  <a class="legend__r" href="#"><span class="badge badge--confirmed"><svg class="i" aria-hidden="true"><use href="#ic-checkcircle"/></svg>مؤكد</span><span class="legend__n">2</span><span class="legend__p">11%</span></a>
-                  <a class="legend__r" href="#"><span class="badge badge--done"><svg class="i" aria-hidden="true"><use href="#ic-checks"/></svg>مكتمل</span><span class="legend__n">7</span><span class="legend__p">39%</span></a>
-                  <a class="legend__r" href="#"><span class="badge badge--cancel"><svg class="i" aria-hidden="true"><use href="#ic-xcircle"/></svg>ملغي</span><span class="legend__n">1</span><span class="legend__p">6%</span></a>
+                  <a class="legend__r" href="requests.html?status=new"><span class="badge badge--new"><svg class="i" aria-hidden="true"><use href="#ic-newdot"/></svg>جديد</span><span class="legend__n">5</span><span class="legend__p">28%</span></a>
+                  <a class="legend__r" href="requests.html?status=review"><span class="badge badge--review"><svg class="i" aria-hidden="true"><use href="#ic-clock"/></svg>قيد المراجعة</span><span class="legend__n">3</span><span class="legend__p">17%</span></a>
+                  <a class="legend__r" href="requests.html?status=confirmed"><span class="badge badge--confirmed"><svg class="i" aria-hidden="true"><use href="#ic-checkcircle"/></svg>مؤكد</span><span class="legend__n">2</span><span class="legend__p">11%</span></a>
+                  <a class="legend__r" href="requests.html?status=done"><span class="badge badge--done"><svg class="i" aria-hidden="true"><use href="#ic-checks"/></svg>مكتمل</span><span class="legend__n">7</span><span class="legend__p">39%</span></a>
+                  <a class="legend__r" href="requests.html?status=cancel"><span class="badge badge--cancel"><svg class="i" aria-hidden="true"><use href="#ic-xcircle"/></svg>ملغي</span><span class="legend__n">1</span><span class="legend__p">6%</span></a>
                 </div>
               </div>
             </div>
@@ -770,7 +784,7 @@ table.tbl tbody tr:focus-within{background:var(--row-hover)}
           <!-- recent requests -->
           <section class="card" aria-labelledby="recent-h" data-state="ready" id="recentblock">
             <div class="card__h"><h2 class="card__t" id="recent-h">أحدث الطلبات</h2>
-              <a class="btn btn--ghost btn--sm" href="#">عرض كل الطلبات<svg class="i i--sm i--flip" aria-hidden="true"><use href="#ic-chevron"/></svg></a></div>
+              <a class="btn btn--ghost btn--sm" href="requests.html">عرض كل الطلبات<svg class="i i--sm i--flip" aria-hidden="true"><use href="#ic-chevron"/></svg></a></div>
             <div class="state state--ready">
               <div class="card__b card__b--flush">
                 <div class="tbl-wrap"><table class="tbl">
@@ -778,33 +792,33 @@ table.tbl tbody tr:focus-within{background:var(--row-hover)}
                   <thead><tr><th scope="col">رقم الطلب</th><th scope="col">العميل</th><th scope="col">الخدمة</th><th scope="col">تاريخ الرحلة</th><th scope="col">الحالة</th></tr></thead>
                   <tbody>
                     <tr><td><span class="cell-id">REQ-2026-0150</span></td>
-                      <td><a class="cell-name" href="#">أمل الصاعدي</a><span class="cell-sub">0501239876</span></td>
+                      <td><a class="cell-name" href="requests.html#REQ-2026-0150">أمل الصاعدي</a><span class="cell-sub">0501239876</span></td>
                       <td>النقل بواسطة الكرسي الكهربائي</td><td><span class="cell-date">2026-09-18</span></td>
                       <td><span class="badge badge--new"><svg class="i" aria-hidden="true"><use href="#ic-newdot"/></svg>جديد</span></td></tr>
                     <tr><td><span class="cell-id">REQ-2026-0149</span></td>
-                      <td><a class="cell-name" href="#">تركي الشهراني</a><span class="cell-sub">0553219876</span></td>
+                      <td><a class="cell-name" href="requests.html#REQ-2026-0149">تركي الشهراني</a><span class="cell-sub">0553219876</span></td>
                       <td>النقل اليومي</td><td><span class="cell-date">2026-09-16</span></td>
                       <td><span class="badge badge--review"><svg class="i" aria-hidden="true"><use href="#ic-clock"/></svg>قيد المراجعة</span></td></tr>
                     <tr><td><span class="cell-id">REQ-2026-0143</span></td>
-                      <td><a class="cell-name" href="#">هند الزهراني</a><span class="cell-sub">0566677889</span></td>
+                      <td><a class="cell-name" href="requests.html#REQ-2026-0143">هند الزهراني</a><span class="cell-sub">0566677889</span></td>
                       <td>النقل بواسطة الكرسي الكهربائي</td><td><span class="cell-date">2026-09-14</span></td>
                       <td><span class="badge badge--new"><svg class="i" aria-hidden="true"><use href="#ic-newdot"/></svg>جديد</span></td></tr>
                     <tr><td><span class="cell-id">REQ-2026-0148</span></td>
-                      <td><a class="cell-name" href="#">عبدالله الشهري</a><span class="cell-sub">0535544352</span></td>
+                      <td><a class="cell-name" href="requests.html#REQ-2026-0148">عبدالله الشهري</a><span class="cell-sub">0535544352</span></td>
                       <td>النقل إلى المستشفيات والمراكز الطبية</td><td><span class="cell-date">2026-09-14</span></td>
                       <td><span class="badge badge--new"><svg class="i" aria-hidden="true"><use href="#ic-newdot"/></svg>جديد</span></td></tr>
                     <tr><td><span class="cell-id">REQ-2026-0139</span></td>
-                      <td><a class="cell-name" href="#">نوف العتيبي</a><span class="cell-sub">0522211334</span></td>
+                      <td><a class="cell-name" href="requests.html#REQ-2026-0139">نوف العتيبي</a><span class="cell-sub">0522211334</span></td>
                       <td>النقل اليومي</td><td><span class="cell-date">2026-09-17</span></td>
                       <td><span class="badge badge--new"><svg class="i" aria-hidden="true"><use href="#ic-newdot"/></svg>جديد</span></td></tr>
                   </tbody>
                 </table></div>
                 <div class="reclist">
-                  <a class="reccard" href="#"><span class="reccard__top"><span><span class="reccard__n">أمل الصاعدي</span><span class="reccard__s">النقل بواسطة الكرسي الكهربائي</span></span><span class="badge badge--new"><svg class="i" aria-hidden="true"><use href="#ic-newdot"/></svg>جديد</span></span><span class="reccard__meta"><span>تاريخ الرحلة <b><span class="cell-date">2026-09-18</span></b></span><span class="cell-id">REQ-2026-0150</span></span></a>
-                  <a class="reccard" href="#"><span class="reccard__top"><span><span class="reccard__n">تركي الشهراني</span><span class="reccard__s">النقل اليومي</span></span><span class="badge badge--review"><svg class="i" aria-hidden="true"><use href="#ic-clock"/></svg>قيد المراجعة</span></span><span class="reccard__meta"><span>تاريخ الرحلة <b><span class="cell-date">2026-09-16</span></b></span><span class="cell-id">REQ-2026-0149</span></span></a>
-                  <a class="reccard" href="#"><span class="reccard__top"><span><span class="reccard__n">هند الزهراني</span><span class="reccard__s">النقل بواسطة الكرسي الكهربائي</span></span><span class="badge badge--new"><svg class="i" aria-hidden="true"><use href="#ic-newdot"/></svg>جديد</span></span><span class="reccard__meta"><span>تاريخ الرحلة <b><span class="cell-date">2026-09-14</span></b></span><span class="cell-id">REQ-2026-0143</span></span></a>
-                  <a class="reccard" href="#"><span class="reccard__top"><span><span class="reccard__n">عبدالله الشهري</span><span class="reccard__s">النقل إلى المستشفيات والمراكز الطبية</span></span><span class="badge badge--new"><svg class="i" aria-hidden="true"><use href="#ic-newdot"/></svg>جديد</span></span><span class="reccard__meta"><span>تاريخ الرحلة <b><span class="cell-date">2026-09-14</span></b></span><span class="cell-id">REQ-2026-0148</span></span></a>
-                  <a class="reccard" href="#"><span class="reccard__top"><span><span class="reccard__n">نوف العتيبي</span><span class="reccard__s">النقل اليومي</span></span><span class="badge badge--new"><svg class="i" aria-hidden="true"><use href="#ic-newdot"/></svg>جديد</span></span><span class="reccard__meta"><span>تاريخ الرحلة <b><span class="cell-date">2026-09-17</span></b></span><span class="cell-id">REQ-2026-0139</span></span></a>
+                  <a class="reccard" href="requests.html#REQ-2026-0150"><span class="reccard__top"><span><span class="reccard__n">أمل الصاعدي</span><span class="reccard__s">النقل بواسطة الكرسي الكهربائي</span></span><span class="badge badge--new"><svg class="i" aria-hidden="true"><use href="#ic-newdot"/></svg>جديد</span></span><span class="reccard__meta"><span>تاريخ الرحلة <b><span class="cell-date">2026-09-18</span></b></span><span class="cell-id">REQ-2026-0150</span></span></a>
+                  <a class="reccard" href="requests.html#REQ-2026-0149"><span class="reccard__top"><span><span class="reccard__n">تركي الشهراني</span><span class="reccard__s">النقل اليومي</span></span><span class="badge badge--review"><svg class="i" aria-hidden="true"><use href="#ic-clock"/></svg>قيد المراجعة</span></span><span class="reccard__meta"><span>تاريخ الرحلة <b><span class="cell-date">2026-09-16</span></b></span><span class="cell-id">REQ-2026-0149</span></span></a>
+                  <a class="reccard" href="requests.html#REQ-2026-0143"><span class="reccard__top"><span><span class="reccard__n">هند الزهراني</span><span class="reccard__s">النقل بواسطة الكرسي الكهربائي</span></span><span class="badge badge--new"><svg class="i" aria-hidden="true"><use href="#ic-newdot"/></svg>جديد</span></span><span class="reccard__meta"><span>تاريخ الرحلة <b><span class="cell-date">2026-09-14</span></b></span><span class="cell-id">REQ-2026-0143</span></span></a>
+                  <a class="reccard" href="requests.html#REQ-2026-0148"><span class="reccard__top"><span><span class="reccard__n">عبدالله الشهري</span><span class="reccard__s">النقل إلى المستشفيات والمراكز الطبية</span></span><span class="badge badge--new"><svg class="i" aria-hidden="true"><use href="#ic-newdot"/></svg>جديد</span></span><span class="reccard__meta"><span>تاريخ الرحلة <b><span class="cell-date">2026-09-14</span></b></span><span class="cell-id">REQ-2026-0148</span></span></a>
+                  <a class="reccard" href="requests.html#REQ-2026-0139"><span class="reccard__top"><span><span class="reccard__n">نوف العتيبي</span><span class="reccard__s">النقل اليومي</span></span><span class="badge badge--new"><svg class="i" aria-hidden="true"><use href="#ic-newdot"/></svg>جديد</span></span><span class="reccard__meta"><span>تاريخ الرحلة <b><span class="cell-date">2026-09-17</span></b></span><span class="cell-id">REQ-2026-0139</span></span></a>
                                 </div>
               </div>
             </div>
@@ -834,14 +848,17 @@ table.tbl tbody tr:focus-within{background:var(--row-hover)}
           <section class="card" aria-labelledby="act-h" data-state="ready" id="actblock">
             <div class="card__h"><h2 class="card__t" id="act-h">آخر النشاطات</h2></div>
             <div class="state state--ready"><div class="card__b">
+              <div class="act"><span class="act__i"><svg class="i i--sm" aria-hidden="true"><use href="#ic-user"/></svg></span>
+                <span><span class="act__t">دخول <b>نورة العتيبي</b> إلى لوحة التحكم</span><span class="act__m">اليوم · 09:12</span></span></div>
+              <div class="act"><span class="act__i act__i--ok"><svg class="i i--sm" aria-hidden="true"><use href="#ic-checks"/></svg></span>
+                <span><span class="act__t">الطلب <b>REQ-2026-0149</b> إلى «قيد المراجعة» — نورة العتيبي</span><span class="act__m">اليوم · 08:05</span></span></div>
               <div class="act"><span class="act__i act__i--new"><svg class="i i--sm" aria-hidden="true"><use href="#ic-newdot"/></svg></span>
-                <span><span class="act__t">طلب جديد من <b>عبدالله الشهري</b></span><span class="act__m">09:42</span></span></div>
-              <div class="act"><span class="act__i act__i--ok"><svg class="i i--sm" aria-hidden="true"><use href="#ic-checkcircle"/></svg></span>
-                <span><span class="act__t">تأكيد الطلب <b>REQ-2026-0147</b> — نورة العتيبي</span><span class="act__m">أمس · 17:30</span></span></div>
-              <div class="act"><span class="act__i"><svg class="i i--sm" aria-hidden="true"><use href="#ic-edit"/></svg></span>
-                <span><span class="act__t">تحديث محتوى <b>«من نحن»</b> — سارة القحطاني</span><span class="act__m">أمس · 14:05</span></span></div>
-              <div class="act"><span class="act__i"><svg class="i i--sm" aria-hidden="true"><use href="#ic-service"/></svg></span>
-                <span><span class="act__t">إخفاء خدمة <b>«التنقل للمناسبات الاجتماعية»</b> مؤقتاً</span><span class="act__m">أمس · 11:20</span></span></div>
+                <span><span class="act__t">طلب جديد من <b>أمل الصاعدي</b> عبر نموذج الموقع</span><span class="act__m">اليوم · 07:22</span></span></div>
+              <div class="act"><span class="act__i act__i--new"><svg class="i i--sm" aria-hidden="true"><use href="#ic-newdot"/></svg></span>
+                <span><span class="act__t">طلب جديد من <b>تركي الشهراني</b> عبر نموذج الموقع</span><span class="act__m">أمس · 22:48</span></span></div>
+            </div>
+            <div class="card__f" style="padding:var(--s3) var(--s5)">
+              <a class="btn btn--ghost btn--sm" href="activity.html#log" style="width:100%">عرض سجل النشاط كاملاً</a>
             </div></div>
             <div class="state state--loading"><div class="card__b" style="display:flex;flex-direction:column;gap:var(--s5)">
               <span class="skel skel--line" style="width:85%"></span><span class="skel skel--line" style="width:70%"></span>
@@ -863,11 +880,11 @@ table.tbl tbody tr:focus-within{background:var(--row-hover)}
           <section class="card" aria-labelledby="qa-h">
             <div class="card__h"><h2 class="card__t" id="qa-h">إجراءات سريعة</h2></div>
             <div class="card__b"><div class="qa">
-              <a class="qa__i" href="#"><svg class="i" aria-hidden="true"><use href="#ic-request"/></svg>عرض الطلبات الجديدة
+              <a class="qa__i" href="requests.html?status=new"><svg class="i" aria-hidden="true"><use href="#ic-request"/></svg>عرض الطلبات الجديدة
                 <svg class="i i--sm i--flip" aria-hidden="true"><use href="#ic-chevron"/></svg></a>
-              <a class="qa__i" href="#"><svg class="i" aria-hidden="true"><use href="#ic-service"/></svg>إدارة الخدمات
+              <a class="qa__i" href="services.html"><svg class="i" aria-hidden="true"><use href="#ic-service"/></svg>إدارة الخدمات
                 <svg class="i i--sm i--flip" aria-hidden="true"><use href="#ic-chevron"/></svg></a>
-              <a class="qa__i" href="#"><svg class="i" aria-hidden="true"><use href="#ic-content"/></svg>تعديل محتوى الموقع
+              <a class="qa__i is-pending" href="#" aria-disabled="true" title="قيد الإنشاء — لم تُبنَ هذه الوحدة بعد"><svg class="i" aria-hidden="true"><use href="#ic-content"/></svg>تعديل محتوى الموقع
                 <svg class="i i--sm i--flip" aria-hidden="true"><use href="#ic-chevron"/></svg></a>
             </div></div>
           </section>
@@ -894,6 +911,7 @@ table.tbl tbody tr:focus-within{background:var(--row-hover)}
   <a class="navitem is-pending" href="#" aria-disabled="true" title="قيد الإنشاء — لم تُبنَ هذه الوحدة بعد"><svg class="i" aria-hidden="true"><use href="#ic-content"/></svg><span class="navitem__lbl">المحتوى</span></a>
   <a class="navitem" href="media.html" data-nav="media"><svg class="i" aria-hidden="true"><use href="#ic-image"/></svg><span class="navitem__lbl">الوسائط والأصول</span></a>
   <p class="side__grp">النظام</p>
+  <a class="navitem" href="activity.html" data-nav="activity"><svg class="i" aria-hidden="true"><use href="#ic-bell"/></svg><span class="navitem__lbl">الإشعارات والنشاط</span></a>
   <a class="navitem is-pending" href="#" aria-disabled="true" title="قيد الإنشاء — لم تُبنَ هذه الوحدة بعد"><svg class="i" aria-hidden="true"><use href="#ic-report"/></svg><span class="navitem__lbl">التقارير</span></a>
   <a class="navitem" href="users.html"><svg class="i" aria-hidden="true"><use href="#ic-shield"/></svg><span class="navitem__lbl">المستخدمون والصلاحيات</span></a>
   <a class="navitem" href="settings.html"><svg class="i" aria-hidden="true"><use href="#ic-settings"/></svg><span class="navitem__lbl">الإعدادات</span></a>
@@ -955,22 +973,8 @@ table.tbl tbody tr:focus-within{background:var(--row-hover)}
   });
   document.addEventListener("click", function(){ closePops(null); });
 
-  /* --- notifications: read / unread ------------------------------------ */
-  var list = $("notiflist"), belldot = $("belldot"), bell = $("bell");
-  function refreshUnread(){
-    var n = list.querySelectorAll(".notif:not(.is-read)").length;
-    belldot.style.display = n ? "" : "none";
-    bell.setAttribute("aria-label", n ? ("التنبيهات — " + n + " غير مقروءة") : "التنبيهات — لا جديد");
-  }
-  list.addEventListener("click", function(e){
-    var item = e.target.closest(".notif");
-    if (item){ item.classList.add("is-read"); refreshUnread(); }
-  });
-  $("readall").addEventListener("click", function(){
-    Array.prototype.forEach.call(list.querySelectorAll(".notif"), function(n){ n.classList.add("is-read"); });
-    refreshUnread();
-  });
-  refreshUnread();
+  /* Notifications are painted by the shared Stage 14 block at the foot of
+     this file — one source, one read state, shared across every page. */
 
   /* --- mobile drawer: focus trapped, Esc closes, scrim closes ---------- */
   var drawer = $("drawer"), scrim = $("scrim"), menubtn = $("menubtn"), drawerclose = $("drawerclose");
@@ -1047,5 +1051,63 @@ table.tbl tbody tr:focus-within{background:var(--row-hover)}
     loadbar.hidden = m.key !== "loading";
     this.textContent = "الحالة: " + m.label;
   });
+})();
+
+/* --- header notifications (Stage 14) -------------------------------------
+   The bell shows the five newest of the nine notifications الإشعارات وسجل
+   النشاط derives; activity.html is the full list. Read state is shared
+   through one localStorage key so marking something read in one place is
+   read everywhere — the nearest a static build gets to a per-account
+   inbox. A real system reads and writes this on the server. */
+(function(){
+  var KEY = "aun-admin-notif-read";
+  var TOTAL = 9, TOTAL_UNREAD = 7;
+  var list = document.getElementById("notiflist");
+  var bell = document.getElementById("bell");
+  var dot  = document.getElementById("belldot");
+  var nav  = document.querySelector('[data-navcount="activity"]');
+  var all  = document.getElementById("readall");
+  if (!list || !bell) return;
+
+  function load(){
+    var raw = null;
+    try { raw = localStorage.getItem(KEY); } catch(e){}
+    if (!raw) return {};
+    try { var o = JSON.parse(raw); return (o && typeof o === "object") ? o : {}; } catch(e){ return {}; }
+  }
+  function save(m){ try { localStorage.setItem(KEY, JSON.stringify(m)); } catch(e){} }
+
+  function paint(){
+    var m = load(), shownUnread = 0, readShown = 0;
+    Array.prototype.forEach.call(list.querySelectorAll(".notif"), function(a){
+      var id = a.getAttribute("data-nid");
+      var read = !!m[id];
+      a.classList.toggle("is-read", read);
+      var meta = a.querySelector(".notif__m");
+      var when = meta.getAttribute("data-when");
+      meta.textContent = read ? when : (when + " · غير مقروء");
+      if (read) readShown++; else shownUnread++;
+    });
+    /* the five on show are the newest, so every one marked read here comes
+       off the derived unread total; never let the count go negative */
+    var n = Math.max(0, TOTAL_UNREAD - readShown);
+    if (dot) dot.hidden = (n === 0);
+    bell.setAttribute("aria-label", n ? ("التنبيهات — " + n + " غير مقروءة") : "التنبيهات — لا جديد");
+    if (nav){ nav.hidden = (n === 0); nav.textContent = n ? String(n) : ""; }
+    if (all) all.disabled = (shownUnread === 0);
+  }
+
+  list.addEventListener("click", function(e){
+    var a = e.target.closest ? e.target.closest(".notif") : null;
+    if (!a) return;
+    var m = load(); m[a.getAttribute("data-nid")] = true; save(m); paint();
+  });
+  if (all) all.addEventListener("click", function(e){
+    e.stopPropagation();
+    var m = load();
+    Array.prototype.forEach.call(list.querySelectorAll(".notif"), function(a){ m[a.getAttribute("data-nid")] = true; });
+    save(m); paint();
+  });
+  paint();
 })();
 </script>

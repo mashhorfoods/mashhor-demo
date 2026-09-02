@@ -83,3 +83,25 @@ nothing in it is known to be broken. What stands between this and production is 
 is the entire server side: authentication, authorization, a database, the request endpoint, and
 the four missing modules. Building those, then re-running this audit against the deployed
 system, is the path to a genuine READY verdict.
+
+---
+
+## Addendum — Stage 14 landed after this audit
+
+`admin/activity.html` (الإشعارات وسجل النشاط) was built after this report was written. Two of
+the four modules listed above as absent now exist; **المحتوى** and **التقارير** still do not.
+
+The verdict does not change. Stage 14 adds a derived view over data the other modules already
+hold — it does not add persistence, authentication, authorization, or a request endpoint, and
+a log reconstructed from current state is not the same thing as a log the server writes as
+changes happen. All six production blockers stand, with the module count corrected from four
+to two.
+
+Re-verified after Stage 14, across all nine admin pages at 1024 / 768 / 390 px and the new
+module additionally at 1440 px: `scrollWidth === clientWidth` everywhere, zero console errors,
+zero undersized controls, zero unnamed controls, zero dead links, zero prohibited terminology,
+exactly the five approved statuses and three approved roles.
+
+Three defects this stage found and fixed in already-audited pages, which this audit had
+missed: the dashboard's activity card contradicted `services.html`; 20 dashboard links pointed
+at `#`; and `initials()` returned the definite article, rendering «نورة العتيبي» as `ن ا`.

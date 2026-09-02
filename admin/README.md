@@ -476,3 +476,90 @@ One defect fixed here: the demo request-id builder produced a five-digit tail pa
 
 The honest summary is that the interface is finished and the system is not. Nothing in the
 front end is known to be broken; what remains is the entire server side plus four modules.
+
+---
+
+## Stage 14 — الإشعارات وسجل النشاط
+
+`admin/activity.html`. One page, two views: التنبيهات is a working queue with read/unread
+state; سجل النشاط is an append-only record with no edit or delete path anywhere in the UI.
+
+### Nothing here is invented
+
+Both views are **derived** from records the other modules already hold, in the same way
+customers are derived from requests and media usage is computed from `index.html`:
+
+| Source | What it yields |
+| --- | --- |
+| `requests.html` — each request's `hist[]` | request created, every status change (actor + timestamp) |
+| `requests.html` — each request's `notes[]` | note added (actor + timestamp) |
+| `services.html` — each service's `updated` | service edited |
+| `media.html` — each asset's upload date | asset uploaded |
+| `users.html` — each account's `added` / `last` | account created, last sign-in |
+
+74 events in total, newest first, 20 per page.
+
+Two deliberate refusals, both visible on the page:
+
+- **`غير مسجّل` instead of a guessed name.** The services, media and settings modules record
+  *what* changed but not *who* changed it. Filling that in with a plausible administrator
+  would put a false attribution into an audit record, which is worse than an honest gap.
+- **`التاريخ فقط` instead of a fabricated time.** Where a source stores a date and no time,
+  the time cell says so rather than showing `00:00`. Those rows sort at the end of their day,
+  so an undated change never jumps ahead of a timed one that preceded it.
+
+`النظام` and `نموذج الموقع` are recorded actors but not people, so they get a neutral marker
+rather than initials.
+
+### Notifications
+
+Nine notifications from three rules, each pointing at a real record:
+
+- every request still in «جديد» — not yet triaged (5)
+- a request left in «قيد المراجعة» for more than a day — stalled (1, naming both request ids)
+- a request that reached a settled status within 72 hours — news the team may not have seen (3)
+
+Seven are unread. Unread is never signalled by colour alone: bold weight, a dot, **and** the
+word «غير مقروء». Read state is seeded by age (older than 48 hours is assumed seen), then
+overridden by `localStorage`, shared under one key so marking something read in the header
+popover is read on the module page too. On a real system this belongs to the signed-in
+account, on the server.
+
+### Shell changes across all nine pages
+
+- New nav item «الإشعارات والنشاط» in the النظام group, sidebar and drawer, with the unread
+  count as a badge.
+- The header bell popover was three different shapes across the eight existing pages. It is
+  now one shape everywhere, showing the same five newest notifications the module derives,
+  with a footer link to the full list.
+
+### Defects found and fixed while building this
+
+- **The dashboard's «آخر النشاطات» card contradicted the real modules.** It claimed
+  «إخفاء خدمة «التنقل للمناسبات الاجتماعية» مؤقتاً» while `services.html` has all seven
+  services published, and «تحديث محتوى «من نحن»» from a المحتوى module that does not exist.
+  Replaced with the four newest real events, plus a link to the full log.
+- **20 dead `href="#"` links on the dashboard** — KPI cards, the distribution legend, the five
+  newest requests, and the quick actions. Stage 16's sweep only covered nav links. All now
+  resolve, which needed one small addition: `requests.html?status=review` pre-selects the
+  status filter, so a KPI card lands on the list it counts instead of an unfiltered page.
+  «تعديل محتوى الموقع» is marked pending like the nav item, because that module is not built.
+- **`initials()` returned the definite article.** «نورة العتيبي» rendered as `ن ا`, not `ن ع`.
+  Fixed in `activity.html`, `customers.html` and `users.html` together.
+- **Arabic number agreement.** «2 طلبات» reads as a translation error; the dual is «طلبان»,
+  and «قبل 2 ساعتين» is redundant. Both fixed with a `plural()` helper.
+
+### Verified
+
+9 pages × 3 widths + the module at 4 widths: `scrollWidth === clientWidth` everywhere, zero
+console errors, zero undersized controls, zero unnamed controls, zero dead links. The bell
+reads «التنبيهات — 7 غير مقروءة» and the nav badge reads `7` on all nine pages, from one
+derivation.
+
+### Still absent
+
+This stage does not create the thing it reports on. A real activity log is written by the
+server as changes happen; this one is reconstructed from the current state of static data, so
+it can only show changes the modules happen to record. Deletions, failed sign-ins, permission
+changes and settings edits leave no trace to derive from. That does not move the Stage 16
+verdict.
