@@ -1,0 +1,827 @@
+<title>Notifications &amp; Activity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+
+<style>
+/* ==========================================================================
+   AOUN AL-DARB — ADMIN STAGE 14 · NOTIFICATIONS & ACTIVITY
+   Continues the document system established by the earlier stage reports.
+   Same tokens, same faces, same shell. Added here: the derivation ledger,
+   the refusal pair, and the notification rule list.
+   ========================================================================== */
+:root{
+  --ground:#F1F3F6;
+  --surface:#FFFFFF;
+  --surface-2:#E7EBF0;
+  --ink:#141C25;
+  --ink-2:#4C5866;
+  --ink-3:#77828F;
+  --rule:#D6DCE3;
+  --rule-soft:#E5E9EE;
+  --accent:#2C4C82;
+  --accent-2:#4975BA;
+  --accent-soft:rgba(44,76,130,.07);
+  --pass:#256B55;   --pass-bg:rgba(46,125,100,.12);
+  --warn:#8F6014;   --warn-bg:rgba(176,121,28,.14);
+  --fail:#A5352E;   --fail-bg:rgba(192,67,59,.12);
+
+  --f-display:"Archivo",ui-sans-serif,system-ui,"Segoe UI",sans-serif;
+  --f-body:"Source Serif 4",ui-serif,Georgia,"Times New Roman",serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --f-ar:"IBM Plex Sans Arabic",ui-sans-serif,system-ui,"Segoe UI","Noto Sans Arabic",sans-serif;
+
+  --measure:68ch;
+  --pad:clamp(1.15rem,4vw,2.75rem);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F151C;
+    --surface:#161E27;
+    --surface-2:#1E2831;
+    --ink:#E3E8EF;
+    --ink-2:#9DA8B5;
+    --ink-3:#6E7A88;
+    --rule:#2A343F;
+    --rule-soft:#222C36;
+    --accent:#93B3E0;
+    --accent-2:#5C86C6;
+    --accent-soft:rgba(147,179,224,.11);
+    --pass:#63C3A2;  --pass-bg:rgba(99,195,162,.14);
+    --warn:#DDA946;  --warn-bg:rgba(221,169,70,.14);
+    --fail:#EB8078;  --fail-bg:rgba(235,128,120,.14);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0F151C;
+  --surface:#161E27;
+  --surface-2:#1E2831;
+  --ink:#E3E8EF;
+  --ink-2:#9DA8B5;
+  --ink-3:#6E7A88;
+  --rule:#2A343F;
+  --rule-soft:#222C36;
+  --accent:#93B3E0;
+  --accent-2:#5C86C6;
+  --accent-soft:rgba(147,179,224,.11);
+  --pass:#63C3A2;  --pass-bg:rgba(99,195,162,.14);
+  --warn:#DDA946;  --warn-bg:rgba(221,169,70,.14);
+  --fail:#EB8078;  --fail-bg:rgba(235,128,120,.14);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:var(--f-body);
+  font-size:17px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ---------- shell ---------------------------------------------------- */
+.wrap{max-width:1260px;margin:0 auto;padding:0 var(--pad)}
+.layout{display:grid;gap:clamp(2rem,4vw,3.5rem);align-items:start}
+@media (min-width:1080px){ .layout{grid-template-columns:236px minmax(0,1fr)} }
+
+/* ---------- masthead -------------------------------------------------- */
+.mast{border-bottom:1px solid var(--rule);padding-block:clamp(2.5rem,6vw,4.5rem) clamp(1.75rem,4vw,2.75rem);margin-bottom:clamp(2rem,5vw,3.5rem)}
+.mast__eyebrow{
+  font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--accent);margin:0 0 1.1rem
+}
+.mast__title{
+  font-family:var(--f-display);font-weight:700;font-size:clamp(2.1rem,1.2rem + 3.6vw,3.65rem);
+  line-height:1.04;letter-spacing:-.022em;margin:0;text-wrap:balance;max-width:19ch
+}
+.mast__sub{
+  margin:1.4rem 0 0;max-width:64ch;font-size:clamp(1.05rem,1rem + .3vw,1.2rem);
+  line-height:1.6;color:var(--ink-2)
+}
+.mast__meta{
+  display:flex;flex-wrap:wrap;gap:.5rem 1.6rem;margin-top:2rem;
+  font-family:var(--f-mono);font-size:12.5px;color:var(--ink-3)
+}
+.mast__meta b{font-weight:500;color:var(--ink-2)}
+
+/* ---------- table of contents ---------------------------------------- */
+.toc{font-family:var(--f-display);font-size:13.5px;line-height:1.45}
+@media (min-width:1080px){ .toc{position:sticky;top:1.75rem;max-height:calc(100vh - 3.5rem);overflow-y:auto} }
+.toc__title{
+  font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 .9rem;padding-bottom:.7rem;border-bottom:1px solid var(--rule)
+}
+.toc ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.15rem}
+.toc a{
+  display:flex;gap:.65rem;text-decoration:none;color:var(--ink-2);
+  padding:.4rem .5rem;border-radius:4px;transition:background .15s,color .15s
+}
+.toc a:hover{background:var(--accent-soft);color:var(--ink)}
+.toc a span{font-family:var(--f-mono);font-size:11px;color:var(--ink-3);padding-top:.15em;flex:0 0 auto}
+
+/* ---------- sections -------------------------------------------------- */
+.sec{margin-bottom:clamp(3rem,7vw,5rem);scroll-margin-top:1.5rem}
+.sec__head{display:flex;gap:1rem;align-items:baseline;margin-bottom:1.4rem;padding-bottom:.85rem;border-bottom:1px solid var(--rule)}
+.sec__num{
+  font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.1em;
+  color:var(--accent);flex:0 0 auto;padding-top:.35em
+}
+.sec__title{
+  font-family:var(--f-display);font-weight:600;font-size:clamp(1.32rem,1.15rem + .7vw,1.75rem);
+  letter-spacing:-.014em;margin:0;line-height:1.2;text-wrap:balance
+}
+h3{font-family:var(--f-display);font-weight:600;font-size:1.06rem;letter-spacing:-.008em;margin:2rem 0 .7rem;line-height:1.3}
+h4{font-family:var(--f-display);font-weight:600;font-size:.95rem;margin:1.5rem 0 .5rem}
+p{margin:0 0 1.05rem;max-width:var(--measure)}
+.lede{font-size:1.09rem;color:var(--ink-2)}
+a{color:var(--accent)}
+b,strong{font-weight:600}
+code{font-family:var(--f-mono);font-size:.85em;background:var(--surface-2);padding:.1em .38em;border-radius:3px;color:var(--ink)}
+
+/* Arabic inline term */
+.ar{font-family:var(--f-ar);font-size:.95em;font-weight:500;font-feature-settings:"kern"}
+.ar--h{font-weight:600}
+
+ul.list{margin:0 0 1.05rem;padding:0;list-style:none;max-width:var(--measure);display:flex;flex-direction:column;gap:.5rem}
+ul.list li{position:relative;padding-left:1.15rem;color:var(--ink-2)}
+ul.list li::before{content:"—";position:absolute;left:0;color:var(--ink-3)}
+ul.list li b{color:var(--ink)}
+
+.note{
+  background:var(--accent-soft);border-left:3px solid var(--accent-2);
+  padding:1rem 1.15rem;margin:1.5rem 0;border-radius:0 6px 6px 0;max-width:var(--measure)
+}
+.note h4{margin-top:0}
+.note p:last-child{margin-bottom:0}
+
+/* RTL run — Arabic sets that would otherwise reorder inside an LTR sentence */
+.rtl{
+  direction:rtl;text-align:right;font-family:var(--f-ar);font-weight:500;
+  background:var(--surface);border:1px solid var(--rule);border-radius:6px;
+  padding:.75rem .9rem;margin:.75rem 0;font-size:.97rem;line-height:1.9;color:var(--ink)
+}
+.rtl b{font-weight:600}
+.rtl__c{
+  direction:rtl;display:grid;gap:.15rem .9rem;grid-template-columns:repeat(auto-fill,minmax(13.5rem,1fr));
+  margin:0;padding:0;list-style:none
+}
+.rtl__c li{position:relative;padding-right:.95rem}
+.rtl__c li::before{content:"·";position:absolute;right:.15rem;color:var(--ink-3)}
+
+/* ---------- flow rail ------------------------------------------------- */
+.flow{
+  display:flex;flex-wrap:wrap;align-items:center;gap:.4rem .1rem;
+  margin:1.2rem 0 1.6rem;padding:.95rem 1.1rem;
+  background:var(--surface);border:1px solid var(--rule);border-radius:8px;
+  font-family:var(--f-mono);font-size:12.5px;line-height:1.5
+}
+.flow__step{
+  background:var(--surface-2);color:var(--ink);border-radius:4px;
+  padding:.3rem .55rem;white-space:nowrap
+}
+.flow__step .ar{font-size:12.5px}
+.flow__step--start{background:var(--accent);color:var(--surface)}
+.flow__step--end{background:var(--pass-bg);color:var(--pass);font-weight:500}
+.flow__arw{color:var(--ink-3);padding:0 .42rem;flex:0 0 auto}
+.flow__lbl{
+  font-family:var(--f-mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-3);width:100%;margin-bottom:.15rem
+}
+
+/* ---------- lifecycle track ------------------------------------------- */
+.life{margin:1.6rem 0 1.2rem;padding:1.3rem 1.2rem;background:var(--surface);border:1px solid var(--rule);border-radius:8px}
+.life__row{display:flex;flex-wrap:wrap;align-items:stretch;gap:.35rem}
+.life__node{
+  flex:1 1 8.5rem;border:1px solid var(--rule);border-radius:6px;background:var(--ground);
+  padding:.7rem .75rem;display:flex;flex-direction:column;gap:.25rem;min-width:0
+}
+.life__node b{font-family:var(--f-ar);font-weight:600;font-size:1rem;color:var(--ink)}
+.life__node span{font-family:var(--f-mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.06em}
+.life__node--term{border-style:solid;border-color:var(--pass);background:var(--pass-bg)}
+.life__node--term b{color:var(--pass)}
+.life__arw{display:flex;align-items:center;color:var(--ink-3);font-family:var(--f-mono);font-size:15px;flex:0 0 auto}
+.life__branch{
+  margin-top:.85rem;padding-top:.85rem;border-top:1px dashed var(--rule);
+  display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;font-size:14.5px;color:var(--ink-2)
+}
+.life__cancel{
+  border:1px solid var(--fail);background:var(--fail-bg);color:var(--fail);
+  border-radius:6px;padding:.5rem .75rem;font-family:var(--f-ar);font-weight:600;font-size:.98rem
+}
+
+/* ---------- tables ---------------------------------------------------- */
+.tw{overflow-x:auto;margin:1.4rem 0;border:1px solid var(--rule);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:34rem}
+th,td{text-align:left;padding:.68rem .85rem;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+thead th{
+  font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);background:var(--surface-2);border-bottom:1px solid var(--rule);white-space:nowrap
+}
+tbody tr:last-child td{border-bottom:none}
+td b{color:var(--ink);font-weight:600}
+td{color:var(--ink-2)}
+.num{font-family:var(--f-mono);font-size:12px;color:var(--ink-3);white-space:nowrap;font-variant-numeric:tabular-nums}
+.yes{color:var(--pass);font-weight:600}
+.no{color:var(--ink-3)}
+.part{color:var(--warn);font-weight:600}
+
+.chip{
+  display:inline-block;font-family:var(--f-mono);font-size:10.5px;font-weight:500;letter-spacing:.08em;
+  text-transform:uppercase;padding:.16rem .45rem;border-radius:3px;white-space:nowrap
+}
+.chip--pass{background:var(--pass-bg);color:var(--pass)}
+.chip--warn{background:var(--warn-bg);color:var(--warn)}
+.chip--fail{background:var(--fail-bg);color:var(--fail)}
+.chip--n{background:var(--accent-soft);color:var(--accent)}
+
+/* ---------- findings -------------------------------------------------- */
+.find{
+  position:relative;background:var(--surface);border:1px solid var(--rule);border-radius:8px;
+  padding:1.1rem 1.25rem 1.15rem 1.5rem;margin-bottom:1rem;overflow:hidden
+}
+.find::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ink-3)}
+.find--p1::before{background:var(--fail)}
+.find--p2::before{background:var(--warn)}
+.find--p3::before{background:var(--accent-2)}
+.find__head{display:flex;flex-wrap:wrap;gap:.55rem .85rem;align-items:baseline;margin-bottom:.6rem}
+.find__id{font-family:var(--f-mono);font-size:12px;font-weight:500;color:var(--ink-3)}
+.find__title{font-family:var(--f-display);font-weight:600;font-size:1rem;margin:0;flex:1 1 16rem;line-height:1.35}
+.find dl{margin:0;display:grid;gap:.45rem .9rem;grid-template-columns:auto minmax(0,1fr);font-size:14.5px}
+.find dt{
+  font-family:var(--f-mono);font-size:10.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);padding-top:.35em;white-space:nowrap
+}
+.find dd{margin:0;color:var(--ink-2);line-height:1.55;max-width:66ch}
+.find dd b{color:var(--ink);font-weight:600}
+@media (max-width:620px){
+  .find dl{grid-template-columns:minmax(0,1fr);gap:.15rem .9rem}
+  .find dt{padding-top:.6em}
+}
+
+/* ---------- module dossier -------------------------------------------- */
+.mod{
+  background:var(--surface);border:1px solid var(--rule);border-radius:8px;
+  padding:1.25rem 1.35rem 1.35rem;margin-bottom:1.15rem
+}
+.mod__head{display:flex;flex-wrap:wrap;gap:.5rem .9rem;align-items:baseline;padding-bottom:.8rem;margin-bottom:.9rem;border-bottom:1px solid var(--rule-soft)}
+.mod__num{font-family:var(--f-mono);font-size:12px;font-weight:500;color:var(--accent);flex:0 0 auto}
+.mod__name{font-family:var(--f-ar);font-weight:700;font-size:1.25rem;margin:0;color:var(--ink);line-height:1.3}
+.mod__en{font-family:var(--f-display);font-weight:500;font-size:.86rem;color:var(--ink-3);letter-spacing:.01em}
+.mod dl{margin:0;display:grid;gap:.5rem .95rem;grid-template-columns:7.4rem minmax(0,1fr);font-size:14.5px}
+.mod dt{
+  font-family:var(--f-mono);font-size:10.5px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);padding-top:.4em
+}
+.mod dd{margin:0;color:var(--ink-2);line-height:1.55}
+.mod dd b{color:var(--ink);font-weight:600}
+.mod dd .ar{color:var(--ink)}
+@media (max-width:620px){
+  .mod dl{grid-template-columns:minmax(0,1fr);gap:.12rem .9rem}
+  .mod dt{padding-top:.75em}
+}
+
+/* ---------- pattern cards --------------------------------------------- */
+.pats{display:grid;gap:.8rem;grid-template-columns:repeat(auto-fill,minmax(15.5rem,1fr));margin:1.4rem 0}
+.pat{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:.95rem 1.05rem;display:flex;flex-direction:column;gap:.3rem}
+.pat__id{font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.09em;color:var(--accent)}
+.pat__name{font-family:var(--f-ar);font-weight:600;font-size:1rem;color:var(--ink);margin:0}
+.pat__en{font-family:var(--f-display);font-size:.8rem;color:var(--ink-3);margin:0}
+.pat__body{font-size:14px;color:var(--ink-2);margin:.3rem 0 0;line-height:1.5}
+
+/* ---------- handoff / foot -------------------------------------------- */
+.handoff{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:clamp(1.3rem,3vw,2rem)}
+.handoff ol{margin:0;padding-left:1.3rem;display:flex;flex-direction:column;gap:.6rem;max-width:var(--measure)}
+.handoff li{padding-left:.3rem;color:var(--ink-2)}
+.handoff li b{color:var(--ink)}
+.foot{
+  border-top:1px solid var(--rule);margin-top:clamp(2.5rem,6vw,4rem);padding-block:1.6rem 3rem;
+  font-family:var(--f-mono);font-size:12px;color:var(--ink-3);display:flex;flex-wrap:wrap;gap:.4rem 1.5rem
+}
+
+.big{display:grid;gap:.7rem;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));margin:1.4rem 0}
+.big__i{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:.85rem 1rem}
+.big__n{font-family:var(--f-display);font-weight:700;font-size:1.6rem;line-height:1;color:var(--ink);
+  font-variant-numeric:tabular-nums}
+.big__n.warn{color:var(--warn)}
+/* green is reserved for a figure that is itself a verdict, not for any number */
+.big__n.pass{color:var(--pass)}
+.big__l{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.06em;color:var(--ink-3);
+  margin-top:.4rem;line-height:1.4}
+ol.blk{margin:0 0 1rem;padding-left:1.3rem;display:flex;flex-direction:column;gap:.6rem;max-width:var(--measure)}
+ol.blk li{color:var(--ink-2)} ol.blk li b{color:var(--ink)}
+
+/* --- verdict table ---------------------------------------------------- */
+.vt{width:100%;border-collapse:collapse;font-size:14.5px}
+.vt th,.vt td{padding:.7rem .85rem;border-bottom:1px solid var(--rule-soft);text-align:left;vertical-align:top}
+.vt thead th{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);background:var(--surface-2);white-space:nowrap}
+.vt tbody tr:last-child td{border-bottom:none}
+.vt td b{color:var(--ink);font-weight:600}
+.vt td{color:var(--ink-2)}
+.v{font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.08em;
+  padding:.2rem .5rem;border-radius:3px;white-space:nowrap;display:inline-block}
+.v--pass{background:var(--pass-bg);color:var(--pass)}
+.v--fail{background:var(--fail-bg);color:var(--fail)}
+.v--part{background:var(--warn-bg);color:var(--warn)}
+
+/* --- Stage 14: the derivation ledger ----------------------------------
+   The argument of this stage is that every row on the page traces back to
+   a record another module already holds. The ledger is that claim, laid
+   out as source → derived, so it can be checked rather than believed. */
+.led{display:flex;flex-direction:column;gap:.55rem;margin:1.5rem 0}
+.led__r{
+  display:grid;gap:.35rem .9rem;align-items:start;
+  grid-template-columns:minmax(0,1fr) 1.6rem minmax(0,1.15fr);
+  background:var(--surface);border:1px solid var(--rule);border-radius:8px;
+  padding:.85rem 1rem
+}
+.led__src,.led__out{display:flex;flex-direction:column;gap:.2rem;min-width:0}
+.led__k{
+  font-family:var(--f-mono);font-size:10.5px;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3)
+}
+.led__f{font-family:var(--f-mono);font-size:12.5px;color:var(--ink);word-break:break-word}
+.led__d{font-size:14px;color:var(--ink-2);line-height:1.5}
+.led__d .ar{color:var(--ink)}
+.led__arw{
+  align-self:center;font-family:var(--f-mono);font-size:15px;color:var(--accent-2);
+  text-align:center;padding-top:.9rem
+}
+.led__n{
+  font-family:var(--f-mono);font-size:11px;color:var(--ink-3);
+  font-variant-numeric:tabular-nums;white-space:nowrap
+}
+.led__t{
+  display:flex;justify-content:space-between;align-items:baseline;gap:1rem;
+  padding:.7rem 1rem;background:var(--accent-soft);border:1px solid var(--rule);
+  border-radius:8px;font-family:var(--f-mono);font-size:12.5px;color:var(--accent)
+}
+.led__t b{font-weight:500;font-variant-numeric:tabular-nums}
+@media (max-width:700px){
+  .led__r{grid-template-columns:minmax(0,1fr)}
+  .led__arw{padding-top:0;text-align:start;transform:rotate(90deg);width:1rem}
+}
+
+/* --- the two refusals -------------------------------------------------
+   Given equal weight because they are the design decision, not a caveat. */
+.ref{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fit,minmax(19rem,1fr));margin:1.5rem 0}
+.ref__i{
+  background:var(--surface);border:1px solid var(--rule);border-top:3px solid var(--warn);
+  border-radius:8px;padding:1.05rem 1.15rem;display:flex;flex-direction:column;gap:.5rem
+}
+.ref__k{
+  font-family:var(--f-mono);font-size:10.5px;font-weight:500;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--warn);margin:0
+}
+.ref__v{
+  font-family:var(--f-ar);font-weight:600;font-size:1.18rem;color:var(--ink);margin:0;
+  direction:rtl;text-align:right;line-height:1.4
+}
+.ref__b{font-size:14.5px;color:var(--ink-2);line-height:1.6;margin:0;max-width:none}
+.ref__b b{color:var(--ink);font-weight:600}
+
+/* --- notification rules ----------------------------------------------- */
+.rules{display:flex;flex-direction:column;gap:.55rem;margin:1.4rem 0}
+.rule{
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:.5rem .9rem;
+  background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:.8rem 1rem
+}
+.rule__n{
+  font-family:var(--f-mono);font-size:11px;font-weight:500;color:var(--accent);
+  flex:0 0 auto;letter-spacing:.08em
+}
+.rule__t{flex:1 1 20rem;font-size:14.5px;color:var(--ink-2);line-height:1.5;min-width:0}
+.rule__t b{color:var(--ink);font-weight:600}
+.rule__c{
+  font-family:var(--f-mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;
+  padding:.18rem .5rem;border-radius:3px;white-space:nowrap;
+  background:var(--accent-soft);color:var(--accent);font-variant-numeric:tabular-nums
+}
+.rule__c--warn{background:var(--warn-bg);color:var(--warn)}
+.rule__c--pass{background:var(--pass-bg);color:var(--pass)}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <p class="mast__eyebrow">Module · Stage 14</p>
+    <h1 class="mast__title">Notifications &amp; Activity</h1>
+    <p class="mast__sub"><span class="ar">الإشعارات وسجل النشاط</span> — one page, two views. A working queue
+      with read/unread state, and an append-only record with no edit or delete path. Every row on it is
+      derived from a record another module already holds; nothing on it was written for the dashboard.</p>
+    <div class="mast__meta">
+      <span>Activity events · <b>74</b></span>
+      <span>Notifications · <b>9</b>, 7 unread</span>
+      <span>Source modules · <b>4</b></span>
+      <span>Pages touched · <b>9</b></span>
+      <span>Runtime errors · <b>0</b></span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Contents">
+      <p class="toc__title">Contents</p>
+      <ol>
+        <li><a href="#s1"><span>01</span>What was built</a></li>
+        <li><a href="#s2"><span>02</span>The derivation ledger</a></li>
+        <li><a href="#s3"><span>03</span>Two refusals</a></li>
+        <li><a href="#s4"><span>04</span>Notification rules</a></li>
+        <li><a href="#s5"><span>05</span>Read state</a></li>
+        <li><a href="#s6"><span>06</span>Shell changes</a></li>
+        <li><a href="#s7"><span>07</span>Defects fixed</a></li>
+        <li><a href="#s8"><span>08</span>Verification</a></li>
+        <li><a href="#s9"><span>09</span>What this still isn't</a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <section class="sec" id="s1">
+        <div class="sec__head"><span class="sec__num">01</span>
+          <h2 class="sec__title">What was built</h2></div>
+
+        <p class="lede"><code>admin/activity.html</code> holds both views behind a tab pair.
+          <span class="ar">التنبيهات</span> is a queue an operator works through and marks off.
+          <span class="ar">سجل النشاط</span> is a record: filterable, paginated, and read-only by
+          construction — there is no edit or delete control anywhere in the module, and none was written
+          and then hidden.</p>
+
+        <div class="big">
+          <div class="big__i"><p class="big__n">74</p><p class="big__l">activity events<br>20 per page</p></div>
+          <div class="big__i"><p class="big__n">9</p><p class="big__l">notifications<br>7 unread</p></div>
+          <div class="big__i"><p class="big__n">4</p><p class="big__l">source modules<br>0 new records</p></div>
+          <div class="big__i"><p class="big__n">5</p><p class="big__l">log filters<br>plus free-text search</p></div>
+          <div class="big__i"><p class="big__n pass">0</p><p class="big__l">runtime errors<br>9 pages × 3 widths</p></div>
+        </div>
+
+        <div class="note">
+          <h4>The design constraint</h4>
+          <p>There is no server here, so there is no event stream to read. A log can therefore only be
+            reconstructed from the current state of the other modules' data. That reconstruction is the
+            whole design of this stage, and its limits are printed on the page rather than papered over.</p>
+        </div>
+      </section>
+
+      <section class="sec" id="s2">
+        <div class="sec__head"><span class="sec__num">02</span>
+          <h2 class="sec__title">The derivation ledger</h2></div>
+
+        <p>Customers were already derived from requests, and media usage already computed from
+          <code>index.html</code> rather than stored. The activity log follows the same rule: each row
+          traces to a field that exists, so the claim can be checked rather than believed.</p>
+
+        <div class="led">
+          <div class="led__r">
+            <div class="led__src">
+              <span class="led__k">Source</span>
+              <span class="led__f">requests.html → hist[]</span>
+              <span class="led__d">Each request's status history: <span class="ar">جديد</span> →
+                <span class="ar">قيد المراجعة</span> → <span class="ar">مؤكد</span>, with actor and timestamp.</span>
+            </div>
+            <div class="led__arw" aria-hidden="true">→</div>
+            <div class="led__out">
+              <span class="led__k">Derived</span>
+              <span class="led__d"><b>Request logged</b> for the first entry; <b>status changed</b> for
+                every entry after it. Actor and timestamp carried through verbatim.</span>
+              <span class="led__n">41 events, with notes[]</span>
+            </div>
+          </div>
+
+          <div class="led__r">
+            <div class="led__src">
+              <span class="led__k">Source</span>
+              <span class="led__f">requests.html → notes[]</span>
+              <span class="led__d">Operator notes attached to a request, each already carrying who wrote
+                it and when.</span>
+            </div>
+            <div class="led__arw" aria-hidden="true">→</div>
+            <div class="led__out">
+              <span class="led__k">Derived</span>
+              <span class="led__d"><b>Note added</b>, linked to the request it belongs to.</span>
+              <span class="led__n">counted above</span>
+            </div>
+          </div>
+
+          <div class="led__r">
+            <div class="led__src">
+              <span class="led__k">Source</span>
+              <span class="led__f">services.html → updated</span>
+              <span class="led__d">The seven approved services, all published, each with the one
+                timestamp the services module records.</span>
+            </div>
+            <div class="led__arw" aria-hidden="true">→</div>
+            <div class="led__out">
+              <span class="led__k">Derived</span>
+              <span class="led__d"><b>Service edited</b> — but with no actor, because the services module
+                does not record one.</span>
+              <span class="led__n">7 events</span>
+            </div>
+          </div>
+
+          <div class="led__r">
+            <div class="led__src">
+              <span class="led__k">Source</span>
+              <span class="led__f">media.html → ASSETS[].d</span>
+              <span class="led__d">Every asset the media library lists, with its upload date. No upload
+                time is stored.</span>
+            </div>
+            <div class="led__arw" aria-hidden="true">→</div>
+            <div class="led__out">
+              <span class="led__k">Derived</span>
+              <span class="led__d"><b>Asset uploaded</b>, date only, actor unrecorded.</span>
+              <span class="led__n">18 events</span>
+            </div>
+          </div>
+
+          <div class="led__r">
+            <div class="led__src">
+              <span class="led__k">Source</span>
+              <span class="led__f">users.html → added, last</span>
+              <span class="led__d">The four accounts, when each was created, and when each last signed
+                in.</span>
+            </div>
+            <div class="led__arw" aria-hidden="true">→</div>
+            <div class="led__out">
+              <span class="led__k">Derived</span>
+              <span class="led__d"><b>Account created</b> (date only) and <b>signed in</b> (timestamped,
+                and the one non-request event that knows its actor).</span>
+              <span class="led__n">8 events</span>
+            </div>
+          </div>
+
+          <div class="led__t"><span>Total, newest first</span><b>74 events</b></div>
+        </div>
+
+        <p>Two modules contribute nothing. <span class="ar">الإعدادات</span> stores no timestamps at all,
+          and the intake pipeline's records are the same requests already counted above. Inventing rows
+          for either would have made the log longer and less true.</p>
+      </section>
+
+      <section class="sec" id="s3">
+        <div class="sec__head"><span class="sec__num">03</span>
+          <h2 class="sec__title">Two refusals</h2></div>
+
+        <p>Both are visible on the page rather than buried in a comment, because an operator reading an
+          audit record needs to know which parts of it the system actually witnessed.</p>
+
+        <div class="ref">
+          <div class="ref__i">
+            <p class="ref__k">Unknown actor</p>
+            <p class="ref__v">غير مسجّل</p>
+            <p class="ref__b">The services, media and settings modules record <b>what</b> changed but not
+              <b>who</b> changed it. Filling that in with a plausible administrator would put a false
+              attribution into an audit record — worse than an honest gap, and undetectable once written.
+              25 of the 74 rows say so.</p>
+          </div>
+          <div class="ref__i">
+            <p class="ref__k">Unknown time</p>
+            <p class="ref__v">التاريخ فقط</p>
+            <p class="ref__b">Where a source stores a date and no time, the cell says so rather than
+              showing <code>00:00</code>. Those rows sort at the <b>end</b> of their day, so an undated
+              change never jumps ahead of a timed one that preceded it.</p>
+          </div>
+        </div>
+
+        <p>A third, smaller one: <span class="ar">النظام</span> and <span class="ar">نموذج الموقع</span>
+          are recorded actors but not people, so they get a neutral marker instead of initials in the
+          actor column. The filter is labelled <span class="ar">المنفِّذ</span> — the performer — not
+          <span class="ar">المستخدم</span>, because two of its values are not users.</p>
+      </section>
+
+      <section class="sec" id="s4">
+        <div class="sec__head"><span class="sec__num">04</span>
+          <h2 class="sec__title">Notification rules</h2></div>
+
+        <p>Three rules, each tied to something an operator has to do about it. No notification exists that
+          does not point at a real record, and none is generated for its own sake.</p>
+
+        <div class="rules">
+          <div class="rule">
+            <span class="rule__n">R1</span>
+            <span class="rule__t">A request still sitting in <span class="ar">جديد</span> — <b>not yet
+              triaged</b>. Links straight to the request.</span>
+            <span class="rule__c">5 notifications</span>
+          </div>
+          <div class="rule">
+            <span class="rule__n">R2</span>
+            <span class="rule__t">A request left in <span class="ar">قيد المراجعة</span> for more than a
+              day — <b>stalled</b>. One notification naming both request ids, and it never auto-reads.</span>
+            <span class="rule__c rule__c--warn">1 notification</span>
+          </div>
+          <div class="rule">
+            <span class="rule__n">R3</span>
+            <span class="rule__t">A request that reached <span class="ar">مؤكد</span>,
+              <span class="ar">مكتمل</span> or <span class="ar">ملغي</span> within 72 hours — <b>news the
+              team may not have seen</b>.</span>
+            <span class="rule__c rule__c--pass">3 notifications</span>
+          </div>
+        </div>
+
+        <p>Unread is never signalled by colour alone, per WCAG 1.4.1: an unread row carries bold weight,
+          a dot, <b>and</b> the word <span class="ar">غير مقروء</span>. The row is a link with its own
+          separate mark-read button beside it — never a control nested inside a control.</p>
+      </section>
+
+      <section class="sec" id="s5">
+        <div class="sec__head"><span class="sec__num">05</span>
+          <h2 class="sec__title">Read state</h2></div>
+
+        <p>Seeded by age — anything older than 48 hours is assumed already seen — then overridden by
+          whatever this browser has stored, under a single key shared by every page. Marking a
+          notification read in the header popover marks it read on the module page, and the count in the
+          header, the sidebar badge and the tab all move together because they read the same number.</p>
+
+        <div class="note">
+          <h4>What this is not</h4>
+          <p><code>localStorage</code> is per-browser, not per-account. Two administrators on the same
+            machine share a read state; one administrator on two machines has two. On a real system this
+            belongs to the signed-in account, on the server. It is the nearest a static build gets to an
+            inbox, and it is labelled as such in the demo banner at the top of the module.</p>
+        </div>
+      </section>
+
+      <section class="sec" id="s6">
+        <div class="sec__head"><span class="sec__num">06</span>
+          <h2 class="sec__title">Shell changes</h2></div>
+
+        <p>Adding a module means touching every page, so both changes were made once and applied
+          uniformly rather than page by page.</p>
+
+        <ul class="list">
+          <li><b>Nav item</b> — <span class="ar">الإشعارات والنشاط</span> joins the
+            <span class="ar">النظام</span> group in both the sidebar and the mobile drawer, carrying the
+            unread count as a badge.</li>
+          <li><b>Header bell</b> — the popover was <b>three different shapes</b> across the eight existing
+            pages: one with a mark-all button and a footer link, one with four hard-coded items, six with
+            a single item and no footer. It is now one shape everywhere, showing the same five newest
+            notifications the module derives, with a footer link to the full list.</li>
+        </ul>
+
+        <p>The <span class="ar">الرئيسية</span> activity card now shows the four newest real events and
+          links to the full log, which is also how the first of the defects below came to light.</p>
+      </section>
+
+      <section class="sec" id="s7">
+        <div class="sec__head"><span class="sec__num">07</span>
+          <h2 class="sec__title">Defects fixed</h2></div>
+
+        <p>All four are in pages earlier stages had already signed off. Building a view <em>over</em> the
+          other modules is what exposed them: a claim on one page is checkable once another page derives
+          the same fact.</p>
+
+        <div class="find find--p1">
+          <div class="find__head"><span class="find__id">S14-01</span>
+            <h3 class="find__title">The dashboard's activity card contradicted the real modules</h3></div>
+          <dl>
+            <dt>Claimed</dt>
+            <dd><span class="ar">إخفاء خدمة «التنقل للمناسبات الاجتماعية» مؤقتاً</span> — a hidden service,
+              while <code>services.html</code> has all seven published (<code>on:true</code>). And
+              <span class="ar">تحديث محتوى «من نحن»</span> — an edit in a
+              <span class="ar">المحتوى</span> module that does not exist.</dd>
+            <dt>Impact</dt>
+            <dd>The first screen an operator sees stated two things the system could disprove.</dd>
+            <dt>Fix</dt>
+            <dd>Replaced with the four newest events the log derives, plus a link to the full log.</dd>
+          </dl>
+        </div>
+
+        <div class="find find--p2">
+          <div class="find__head"><span class="find__id">S14-02</span>
+            <h3 class="find__title">20 dead links on the dashboard</h3></div>
+          <dl>
+            <dt>Found</dt>
+            <dd>Five KPI cards, five distribution legend rows, two &ldquo;view all&rdquo; buttons, the five
+              newest requests in both table and card form, and three quick actions — all
+              <code>href="#"</code>. Stage 16's sweep only covered nav links.</dd>
+            <dt>Fix</dt>
+            <dd>All now resolve, which needed one small addition: <code>requests.html?status=review</code>
+              pre-selects the status filter, so a KPI card lands on the list it counts instead of an
+              unfiltered page. <span class="ar">تعديل محتوى الموقع</span> is marked pending like the nav
+              item, because that module is not built — a disabled control is honest, a dead link is not.</dd>
+          </dl>
+        </div>
+
+        <div class="find find--p3">
+          <div class="find__head"><span class="find__id">S14-03</span>
+            <h3 class="find__title"><code>initials()</code> returned the definite article</h3></div>
+          <dl>
+            <dt>Found</dt>
+            <dd><span class="ar">نورة العتيبي</span> rendered as <code>ن ا</code> — the alef of
+              <span class="ar">ال</span> — where the shell's own hard-coded avatar reads <code>ن ع</code>.
+              Latent in <code>customers.html</code> and <code>users.html</code>; visible the moment the log
+              rendered an actor column.</dd>
+            <dt>Fix</dt>
+            <dd>Strip a leading <span class="ar">ال</span> before taking the letter. Applied to all three
+              pages together so they cannot drift apart again.</dd>
+          </dl>
+        </div>
+
+        <div class="find find--p3">
+          <div class="find__head"><span class="find__id">S14-04</span>
+            <h3 class="find__title">Arabic number agreement</h3></div>
+          <dl>
+            <dt>Found</dt>
+            <dd><span class="ar">2 طلبات</span> — plural where Arabic takes the dual. And
+              <span class="ar">قبل 2 ساعتين</span>, where the dual already carries the count.</dd>
+            <dt>Fix</dt>
+            <dd>A <code>plural()</code> helper covering all four cases: 1 singular, 2 dual, 3–10 plural,
+              11+ singular accusative. The stale alert now reads <span class="ar">طلبان</span>, and
+              relative times read <span class="ar">قبل ساعتين</span>.</dd>
+          </dl>
+        </div>
+      </section>
+
+      <section class="sec" id="s8">
+        <div class="sec__head"><span class="sec__num">08</span>
+          <h2 class="sec__title">Verification</h2></div>
+
+        <p>Measured in a headless browser against the working files, not asserted. Nine pages at
+          1024 / 768 / 390&nbsp;px, plus the new module at 1440&nbsp;px.</p>
+
+        <div class="tw">
+          <table>
+            <thead><tr>
+              <th scope="col">Check</th><th scope="col">Method</th><th scope="col">Result</th>
+            </tr></thead>
+            <tbody>
+              <tr><td><b>Horizontal overflow</b></td>
+                <td><code>scrollWidth === clientWidth</code>, document root</td>
+                <td><span class="chip chip--pass">0 failures</span> <span class="num">28 measurements</span></td></tr>
+              <tr><td><b>Runtime errors</b></td>
+                <td>Console and <code>error</code> listener per page</td>
+                <td><span class="chip chip--pass">0</span> <span class="num">9 pages</span></td></tr>
+              <tr><td><b>Target size</b> (WCAG 2.5.8)</td>
+                <td>Every visible link, button, select and input measured</td>
+                <td><span class="chip chip--pass">0 under 24px</span></td></tr>
+              <tr><td><b>Accessible name</b></td>
+                <td>Visible controls with no text, <code>aria-label</code> or <code>title</code></td>
+                <td><span class="chip chip--pass">0 unnamed</span></td></tr>
+              <tr><td><b>Dead links</b></td>
+                <td><code>href="#"</code> with no handler and no <code>aria-disabled</code></td>
+                <td><span class="chip chip--pass">0</span> <span class="num">was 20</span></td></tr>
+              <tr><td><b>Icon references</b></td>
+                <td>Every <code>use href="#ic-…"</code> against the page's sprite</td>
+                <td><span class="chip chip--pass">0 missing</span> <span class="num">10 dead symbols removed</span></td></tr>
+              <tr><td><b>Terminology</b></td>
+                <td>Banned-term scan across the module and the public site</td>
+                <td><span class="chip chip--pass">0 occurrences</span></td></tr>
+              <tr><td><b>Statuses &amp; roles</b></td>
+                <td>Distinct values present in the new module</td>
+                <td><span class="chip chip--pass">exactly 5 and 3</span></td></tr>
+              <tr><td><b>Count consistency</b></td>
+                <td>Bell label, sidebar badge and tab badge on all nine pages</td>
+                <td><span class="chip chip--pass">7 everywhere</span></td></tr>
+              <tr><td><b>Public site</b></td>
+                <td><code>git status</code> on <code>index.html</code>, <code>build.js</code>, <code>dist/</code></td>
+                <td><span class="chip chip--pass">untouched</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>One flagged item is a false positive, recorded rather than quietly dropped: the settings page's
+          <code>#logoFile</code> input measures 1×1&nbsp;px because it is deliberately hidden behind a
+          styled <code>&lt;label&gt;</code> — the standard accessible file-input pattern, and the label
+          itself is a full-size target.</p>
+      </section>
+
+      <section class="sec" id="s9">
+        <div class="sec__head"><span class="sec__num">09</span>
+          <h2 class="sec__title">What this still isn't</h2></div>
+
+        <p>Stage 16's verdict does not move. Two of the four absent modules now exist —
+          <span class="ar">المحتوى</span> and <span class="ar">التقارير</span> still do not — and that is
+          the only line of the audit this stage changes.</p>
+
+        <ul class="list">
+          <li><b>A log the server writes.</b> This one is reconstructed from current state, so it can only
+            show changes the modules happen to record. Deletions leave nothing behind. Failed sign-ins,
+            permission changes and settings edits are never written down, so they cannot be read back.</li>
+          <li><b>An audit trail.</b> An audit trail is append-only <em>at the storage layer</em>. This one
+            is read-only in the interface, which is a different and much weaker guarantee — anyone who can
+            change the underlying data changes the log with it.</li>
+          <li><b>A notification system.</b> Nothing is delivered anywhere. The settings page already says
+            the system sends no email or SMS, and that remains true.</li>
+        </ul>
+
+        <div class="handoff">
+          <h3 style="margin-top:0">What the backend has to provide</h3>
+          <ol>
+            <li><b>An events table</b> written on every mutation — actor, module, action, target,
+              timestamp — so the two refusals above stop being necessary.</li>
+            <li><b>Per-account read state</b>, replacing the shared <code>localStorage</code> key.</li>
+            <li><b>Server-side authorization on the log itself.</b> An activity record that a
+              <span class="ar">مدير المحتوى</span> can read in full is an information leak, and no
+              frontend check prevents it.</li>
+          </ol>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="foot">
+    <span>Aoun Al-Darb · Notifications &amp; Activity</span>
+    <span>Stage 14</span>
+    <span>74 events · 9 notifications · 0 fabricated</span>
+  </footer>
+</div>
