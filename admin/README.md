@@ -8,6 +8,7 @@ Separate track from `ux/`, which covers the public site.
 | `stage-02-admin-ux.html` | **Stage 02 — UX architecture & user flows.** Ten behavioural patterns, eight module dossiers, the context contract, and six open decisions. |
 | `stage-03-design-system.html` | **Stage 03 — design system & UI components.** Tokens, eighteen component families rendered live in Arabic RTL, a measured contrast ledger, and per-component responsive contracts. |
 | `dashboard.html` | **Stages 04 + 05 — the admin shell and الرئيسية.** A working, self-contained page: sidebar, header, account area, notifications, mobile drawer, page-header pattern, and the dashboard built inside it. |
+| `requests.html` | **Stage 06 — طلبات النقل.** The full request workflow: list with working search, filters and pagination, and a detail view with status changes, editing, notes and contact actions. |
 
 The built site (`../index.html`) is the source of truth for services, content areas,
 contact details and terminology. Nothing in this track invents business features.
@@ -114,3 +115,43 @@ never have toggled; and the flex text spans had the default `min-width:auto`, wh
 390px viewport is the classic cause of a page wider than its own viewport. The mobile
 layout that looked broken in the first captures was a screenshot artifact of RTL scroll
 origin — `scrollWidth` measured exactly 390 with zero overflowing elements.
+
+## Stage 06 — طلبات النقل
+
+`requests.html` is a working module, not a mockup. The search box, the three filters, the
+pagination and every status change operate on a real in-page dataset of twelve demo
+records, so the whole loop — **Find → Review → Understand → Act → Update → Confirm** — can
+actually be walked.
+
+**List.** Seven columns: request number (with its creation date beneath), customer (name and
+phone), service, route, trip date and time, status, and a row action. Search matches request
+number, customer name, or phone digits, debounced to one pass rather than one per keystroke.
+Filters cover status, trip period and service; each applied filter appears as a removable chip
+with one reset for all of them. Pagination is five per page, and moving between pages never
+disturbs the search or filters.
+
+**Detail.** Grouped as customer → transportation → notes, with request metadata and the full
+status history alongside. Contact actions are `tel:` and `wa.me` links plus copy-to-clipboard —
+the dashboard never becomes a messaging client. Editing covers only what the workflow permits
+(service, date, time, pickup, destination); the customer's identity belongs to their own record
+and the request number and creation date are never editable. Validation is inline, and nothing
+typed is lost on a failed save.
+
+**Status.** The approved five, with the moves the lifecycle allows: forward along
+جديد → قيد المراجعة → مؤكد → مكتمل, cancel from any non-final state, and an audited backward
+correction. Final states cannot be left. Consequential moves confirm first, naming the record
+and the consequence; the change then updates in place, records who and when, and leaves the
+administrator exactly where they were.
+
+**Cancellation is not deletion, and no delete control exists.** Stage 06 §11 allows deletion
+"if technically required" — it is not. Stage 02 ruled it out because erasing a request silently
+rewrites the customer's history and the report counts, and §20 forbids changing that decision.
+
+**Permissions** are demonstrated rather than described: the view-only switch strips every
+modification control — the record button, status change, edit, and the note composer — leaving
+the record fully readable.
+
+Two defects fixed here, the second of which also applied to `dashboard.html` and was corrected
+in both so the pages stay identical: single values were breaking mid-token in table cells, and
+Arabic author names were rendering glyph-by-glyph because the metadata lines used the mono
+face, which carries no Arabic.
