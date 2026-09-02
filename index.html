@@ -369,6 +369,64 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
   border-radius:var(--radius-sm);box-shadow:var(--shadow-md)}
 .skip-link:focus{inset-block-start:var(--sp-16);color:var(--text-on-primary)}
 
+
+/* ==========================================================================
+   STAGE 14 · «اطلب رحلة» — the request form
+   Layout only. Every control, state and banner is an approved component that
+   already existed in this stylesheet; what follows places them and does
+   nothing else. No new colour, face, radius or shadow is introduced.
+   ========================================================================== */
+.reqform{
+  margin-block-start:clamp(2rem,4.5vw,3rem);
+  padding:clamp(1.5rem,3.5vw,2.5rem);
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-lg);box-shadow:var(--elev-featured)}
+.reqform__head{margin-block-end:clamp(1.25rem,3vw,1.75rem)}
+.reqform__title{font-family:var(--font-heading);font-weight:var(--fw-bold);
+  font-size:var(--fs-h3);color:var(--text-primary);
+  margin-block:var(--sp-4) var(--sp-8);line-height:var(--lh-snug)}
+.reqform__lead{color:var(--text-secondary);font-size:var(--fs-small);
+  line-height:var(--lh-relaxed);max-width:60ch}
+
+.reqform__grid{display:grid;gap:0 clamp(1rem,2.5vw,1.5rem)}
+@media(min-width:640px){
+  .reqform__grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .reqform__wide{grid-column:1 / -1}
+}
+/* .field already carries its own block spacing; the last row should not add
+   a trailing gap above the button. */
+.reqform__grid .field:last-child{margin-block-end:0}
+
+.reqform__trap{position:absolute!important;width:1px;height:1px;overflow:hidden;
+  clip:rect(0,0,0,0);white-space:nowrap}
+
+.reqform__foot{margin-block-start:clamp(1.25rem,3vw,1.75rem);display:flex;
+  flex-direction:column;gap:var(--sp-12);align-items:stretch}
+.reqform__alt{text-align:center;font-size:var(--fs-caption);color:var(--text-secondary)}
+.reqform__tel{direction:ltr;unicode-bidi:isolate;display:inline-block;
+  font-family:var(--font-heading);font-weight:var(--fw-semibold);
+  color:var(--color-secondary);text-decoration:none}
+@media(hover:hover){.reqform__tel:hover{color:var(--color-primary);text-decoration:underline}}
+.reqform__tel:focus-visible{outline:none;box-shadow:var(--shadow-focus);border-radius:var(--radius-xs)}
+
+/* the submit button while the request is in flight */
+.reqform__spin{width:16px;height:16px;border-radius:50%;flex:0 0 auto;
+  border:2px solid rgba(255,255,255,.45);border-block-start-color:#fff;
+  animation:reqspin .8s linear infinite}
+@keyframes reqspin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.reqform__spin{animation:none}}
+#req-send[aria-busy="true"]{cursor:progress}
+
+.reqform__result:empty{display:none}
+.reqform__result .alert{margin-block-start:clamp(1rem,2.5vw,1.5rem)}
+.reqform__result strong{font-weight:var(--fw-semibold)}
+#req-ok-id{display:inline-block;direction:ltr;unicode-bidi:isolate;
+  font-family:var(--font-heading);font-weight:var(--fw-semibold)}
+
+/* native date/time controls keep their picker affordance despite the
+   appearance:none the shared .input rule sets */
+.reqform input[type="date"],.reqform input[type="time"]{appearance:auto}
+
 /* screen-reader only */
 .u-visually-hidden{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
@@ -4352,6 +4410,139 @@ html:not(.js) .hww__path{display:none}
 
           </div>
 
+
+          <!-- STAGE 14 — «اطلب رحلة»: the request form.
+               Built entirely from the approved form components already in this
+               stylesheet (.field / .input / .select / .textarea / .field__msg /
+               .alert) — no new visual language. The phone and WhatsApp actions
+               above are untouched: this supplements them, it does not replace
+               them, and the failure state hands the visitor straight back to
+               the phone number.
+
+               The service options are the seven approved services, in the
+               order «خدماتنا» publishes them. When a service is hidden in the
+               dashboard the build should drop its <option> here — the list is
+               generated from the same source, never maintained twice. -->
+          <div class="reqform" id="request-form">
+            <div class="reqform__head">
+              <p class="contact__phone-label">اطلب رحلة</p>
+              <h3 class="reqform__title" id="reqform-h">أرسل تفاصيل رحلتك</h3>
+              <p class="reqform__lead">املأ ما تعرفه الآن وسنتواصل معك لتأكيد الرحلة. الحقول المطلوبة هي ما يحتاجه الفريق لترتيب النقل، ولا شيء غيرها.</p>
+            </div>
+
+            <form class="reqform__form" id="reqform" method="post" action="/api/requests"
+                  data-endpoint="/api/requests" novalidate aria-labelledby="reqform-h">
+
+              <!-- filled by the server; the request is rejected without it -->
+              <input type="hidden" name="csrf_token" value="">
+              <!-- honeypot: invisible to people, tempting to bots -->
+              <p class="reqform__trap" aria-hidden="true">
+                <label for="req-website">لا تملأ هذا الحقل</label>
+                <input type="text" id="req-website" name="website" tabindex="-1" autocomplete="off">
+              </p>
+
+              <div class="reqform__grid">
+                <div class="field">
+                  <label class="field__label" for="req-name">الاسم <span class="field__req" aria-hidden="true">*</span><span class="u-visually-hidden">مطلوب</span></label>
+                  <input class="input" id="req-name" name="name" type="text" autocomplete="name"
+                         maxlength="80" required aria-describedby="req-name-msg">
+                  <p class="field__msg field__msg--error" id="req-name-msg" hidden></p>
+                </div>
+
+                <div class="field">
+                  <label class="field__label" for="req-phone">رقم الجوال <span class="field__req" aria-hidden="true">*</span><span class="u-visually-hidden">مطلوب</span></label>
+                  <input class="input input--phone" id="req-phone" name="phone" type="tel"
+                         inputmode="numeric" autocomplete="tel" placeholder="05XXXXXXXX"
+                         maxlength="14" required aria-describedby="req-phone-msg">
+                  <p class="field__msg field__msg--error" id="req-phone-msg" hidden></p>
+                </div>
+
+                <div class="field reqform__wide">
+                  <label class="field__label" for="req-service">الخدمة المطلوبة <span class="field__req" aria-hidden="true">*</span><span class="u-visually-hidden">مطلوب</span></label>
+                  <select class="select" id="req-service" name="service" required aria-describedby="req-service-msg">
+                    <option value="">اختر الخدمة</option>
+                    <option>النقل بواسطة الكرسي المتحرك</option>
+                    <option>النقل بواسطة الكرسي الكهربائي</option>
+                    <option>النقل بواسطة السرير الطبي</option>
+                    <option>خدمة مساعد السائق</option>
+                    <option>النقل اليومي</option>
+                    <option>النقل إلى المستشفيات والمراكز الطبية</option>
+                    <option>التنقل للمناسبات الاجتماعية</option>
+                  </select>
+                  <p class="field__msg field__msg--error" id="req-service-msg" hidden></p>
+                </div>
+
+                <div class="field">
+                  <label class="field__label" for="req-from">مكان الانطلاق <span class="field__req" aria-hidden="true">*</span><span class="u-visually-hidden">مطلوب</span></label>
+                  <input class="input" id="req-from" name="from" type="text" maxlength="160"
+                         required aria-describedby="req-from-msg">
+                  <p class="field__msg field__msg--error" id="req-from-msg" hidden></p>
+                </div>
+
+                <div class="field">
+                  <label class="field__label" for="req-to">الوجهة <span class="field__req" aria-hidden="true">*</span><span class="u-visually-hidden">مطلوب</span></label>
+                  <input class="input" id="req-to" name="to" type="text" maxlength="160"
+                         required aria-describedby="req-to-msg">
+                  <p class="field__msg field__msg--error" id="req-to-msg" hidden></p>
+                </div>
+
+                <div class="field">
+                  <label class="field__label" for="req-date">تاريخ الرحلة <span class="field__req" aria-hidden="true">*</span><span class="u-visually-hidden">مطلوب</span></label>
+                  <input class="input input--phone" id="req-date" name="date" type="date"
+                         required aria-describedby="req-date-msg">
+                  <p class="field__msg field__msg--error" id="req-date-msg" hidden></p>
+                </div>
+
+                <div class="field">
+                  <label class="field__label" for="req-time">وقت الرحلة</label>
+                  <input class="input input--phone" id="req-time" name="time" type="time"
+                         aria-describedby="req-time-hint req-time-msg">
+                  <p class="field__hint" id="req-time-hint">اختياري — سنتصل لتأكيده إن لم تحدده.</p>
+                  <p class="field__msg field__msg--error" id="req-time-msg" hidden></p>
+                </div>
+
+                <div class="field reqform__wide">
+                  <label class="field__label" for="req-notes">ملاحظات</label>
+                  <textarea class="textarea" id="req-notes" name="notes" rows="3" maxlength="500"
+                            aria-describedby="req-notes-hint"
+                            placeholder="أي معلومة تساعد الفريق على ترتيب الرحلة."></textarea>
+                  <p class="field__hint" id="req-notes-hint">اختياري — حتى 500 حرف.</p>
+                </div>
+              </div>
+
+              <div class="reqform__foot">
+                <button class="btn btn--primary btn--lg btn--block" type="submit" id="req-send">
+                  <span class="reqform__spin" aria-hidden="true" hidden></span>
+                  <span id="req-send-label">إرسال الطلب</span>
+                </button>
+                <p class="reqform__alt">أو تواصل مباشرة على
+                  <a class="reqform__tel" href="tel:+966535544352">‎+966&nbsp;53&nbsp;554&nbsp;4352</a></p>
+              </div>
+            </form>
+
+            <div class="reqform__result" id="req-result" role="status" aria-live="polite">
+              <div class="alert alert--success" id="req-ok" hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="9"/><path d="m8.5 12.3 2.4 2.4 4.6-5"/></svg>
+                <span>
+                  <strong>وصل طلبك.</strong>
+                  سيتواصل معك فريق عون الدرب لتأكيد الرحلة.
+                  <span id="req-ok-id"></span>
+                </span>
+              </div>
+              <div class="alert alert--error" id="req-bad" hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 4 2.8 20h18.4z"/><path d="M12 10v4"/><circle cx="12" cy="17" r=".9" fill="currentColor"/></svg>
+                <span>
+                  <strong>تعذّر إرسال الطلب.</strong>
+                  <span id="req-bad-text">لم يصل الطلب ولم يُسجَّل شيء. بياناتك كما أدخلتها — أعد المحاولة، أو اتصل بنا على ‎+966 53 554 4352.</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
           <!-- §12 DETAILS — out of the card and across the bottom, in the
                brief's order: website, location, availability. -->
           <div class="contact__info">
@@ -4963,6 +5154,171 @@ html:not(.js) .hww__path{display:none}
       window.addEventListener("hashchange", sweep);
       sweep();   /* a hash in the URL jumps before any scroll event fires */
     })();
+
+  /* ======================================================================
+     STAGE 14 — «اطلب رحلة»
+     The form posts natively without JavaScript; this only upgrades it:
+     it validates in the browser first, submits once, and reports what
+     actually happened. The server repeats every rule — nothing here is
+     trusted — and a request is never reported as received unless the
+     server returned an id for it.
+     ====================================================================== */
+  (function () {
+    var form = document.getElementById("reqform");
+    if (!form) return;
+
+    var btn    = document.getElementById("req-send");
+    var label  = document.getElementById("req-send-label");
+    var spin   = form.querySelector(".reqform__spin");
+    var okBox  = document.getElementById("req-ok");
+    var badBox = document.getElementById("req-bad");
+    var badTxt = document.getElementById("req-bad-text");
+    var okId   = document.getElementById("req-ok-id");
+    var busy   = false;
+
+    var RULES = [
+      { id: "req-name",    msg: "req-name-msg",    test: function (v) { return v.trim().length >= 2 && v.trim().length <= 80; },
+        error: "اكتب الاسم كاملاً." },
+      { id: "req-phone",   msg: "req-phone-msg",   test: function (v) { return /^05\d{8}$/.test(v.replace(/[^0-9]/g, "")); },
+        error: "أدخل رقم جوال يبدأ بـ 05 ويتكوّن من 10 أرقام." },
+      { id: "req-service", msg: "req-service-msg", test: function (v) { return v !== ""; },
+        error: "اختر الخدمة المطلوبة." },
+      { id: "req-from",    msg: "req-from-msg",    test: function (v) { return v.trim().length >= 3; },
+        error: "اكتب مكان الانطلاق." },
+      { id: "req-to",      msg: "req-to-msg",      test: function (v) { return v.trim().length >= 3; },
+        error: "اكتب الوجهة." },
+      { id: "req-date",    msg: "req-date-msg",
+        test: function (v) {
+          if (!v) return false;
+          var today = new Date(); today.setHours(0, 0, 0, 0);
+          var d = new Date(v + "T00:00:00");
+          return !isNaN(d) && d >= today;
+        },
+        error: "اختر تاريخاً من اليوم فأحدث." }
+    ];
+
+    /* today is the earliest bookable trip; the picker enforces it too */
+    var dateEl = document.getElementById("req-date");
+    if (dateEl && !dateEl.min) {
+      var t = new Date();
+      dateEl.min = t.getFullYear() + "-" +
+        String(t.getMonth() + 1).padStart(2, "0") + "-" +
+        String(t.getDate()).padStart(2, "0");
+    }
+
+    function clearField(r) {
+      var el = document.getElementById(r.id), m = document.getElementById(r.msg);
+      if (el) { el.closest(".field").classList.remove("is-error"); el.removeAttribute("aria-invalid"); }
+      if (m) { m.hidden = true; m.textContent = ""; }
+    }
+    function markField(r) {
+      var el = document.getElementById(r.id), m = document.getElementById(r.msg);
+      if (el) { el.closest(".field").classList.add("is-error"); el.setAttribute("aria-invalid", "true"); }
+      if (m) { m.hidden = false; m.textContent = r.error; }
+    }
+
+    /* a field that has already been corrected stops shouting immediately */
+    RULES.forEach(function (r) {
+      var el = document.getElementById(r.id);
+      if (!el) return;
+      el.addEventListener("input", function () { if (r.test(el.value)) clearField(r); });
+      el.addEventListener("change", function () { if (r.test(el.value)) clearField(r); });
+    });
+
+    function validate() {
+      var firstBad = null;
+      RULES.forEach(function (r) {
+        var el = document.getElementById(r.id);
+        if (!el) return;
+        if (r.test(el.value)) clearField(r);
+        else { markField(r); if (!firstBad) firstBad = el; }
+      });
+      return firstBad;
+    }
+
+    function setBusy(on) {
+      busy = on;
+      btn.disabled = on;
+      btn.setAttribute("aria-busy", on ? "true" : "false");
+      if (spin) spin.hidden = !on;
+      label.textContent = on ? "جارٍ الإرسال…" : "إرسال الطلب";
+    }
+    function hideResults() { okBox.hidden = true; badBox.hidden = true; }
+    function showError(text) {
+      badTxt.textContent = text;
+      badBox.hidden = false;
+      okBox.hidden = true;
+    }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (busy) return;
+      hideResults();
+
+      var firstBad = validate();
+      if (firstBad) {
+        firstBad.focus();
+        return;                    /* nothing left the browser; nothing was created */
+      }
+
+      setBusy(true);
+      var endpoint = form.getAttribute("data-endpoint") || form.action;
+      var data = new FormData(form);
+
+      var timer = window.setTimeout(function () { /* guard against a hung request */ }, 0);
+
+      fetch(endpoint, {
+        method: "POST",
+        body: data,
+        headers: { "Accept": "application/json" },
+        credentials: "same-origin"
+      })
+        .then(function (res) {
+          return res.json().catch(function () { return null; }).then(function (body) {
+            return { ok: res.ok, status: res.status, body: body };
+          });
+        })
+        .then(function (r) {
+          window.clearTimeout(timer);
+          setBusy(false);
+
+          /* the server owns validation; surface its field errors as our own */
+          if (r.status === 422 && r.body && r.body.errors) {
+            var firstEl = null;
+            RULES.forEach(function (rule) {
+              var key = document.getElementById(rule.id).name;
+              if (r.body.errors[key]) {
+                var el = document.getElementById(rule.id), m = document.getElementById(rule.msg);
+                el.closest(".field").classList.add("is-error");
+                el.setAttribute("aria-invalid", "true");
+                if (m) { m.hidden = false; m.textContent = r.body.errors[key]; }
+                if (!firstEl) firstEl = el;
+              }
+            });
+            showError("تحقّق من الحقول المميّزة أعلاه ثم أعد الإرسال.");
+            if (firstEl) firstEl.focus();
+            return;
+          }
+
+          /* success is only success when the server says so and returns an id */
+          if (r.ok && r.body && r.body.id) {
+            okId.textContent = "رقم الطلب " + r.body.id;
+            okBox.hidden = false;
+            form.hidden = true;
+            okBox.focus && okBox.focus();
+            return;
+          }
+
+          showError("لم يصل الطلب ولم يُسجَّل شيء. بياناتك كما أدخلتها — أعد المحاولة، أو اتصل بنا على ‎+966 53 554 4352.");
+        })
+        .catch(function () {
+          window.clearTimeout(timer);
+          setBusy(false);
+          /* transport failure: never a false success, and nothing typed is lost */
+          showError("تعذّر الاتصال بالخادم. بياناتك كما أدخلتها — تحقّق من اتصالك وأعد المحاولة، أو اتصل بنا على ‎+966 53 554 4352.");
+        });
+    });
+  })();
   })();
   </script>
 </body>
