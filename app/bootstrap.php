@@ -29,6 +29,8 @@ require_once __DIR__ . '/Repo/Customers.php';
 require_once __DIR__ . '/Repo/Requests.php';
 require_once __DIR__ . '/Repo/Content.php';
 require_once __DIR__ . '/Repo/Activity.php';
+require_once __DIR__ . '/Repo/Cms.php';
+require_once __DIR__ . '/Publisher.php';
 require_once __DIR__ . '/Routes.php';
 
 Env::load();

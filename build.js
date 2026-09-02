@@ -75,8 +75,15 @@ const SHIP = [
    in admin/, which are working documents rather than part of the app. */
 const SHIP_TREES = [
   { dir: 'api',   skip: () => false },
-  { dir: 'app',   skip: (rel) => rel.startsWith('storage/') && !rel.endsWith('.htaccess') },
-  { dir: 'admin', skip: (rel) => rel.endsWith('.md') || /^stage-\d/.test(rel) },
+  /* storage/ is runtime state and does not ship — except the .htaccess that
+     denies it, and the content seed bin/seed-content.php reads on first run. */
+  { dir: 'app',   skip: (rel) => rel.startsWith('storage/')
+                                 && !rel.endsWith('.htaccess')
+                                 && rel !== 'storage/cms-seed.json' },
+  /* the design logs, QA reports and stage/recovery write-ups are working
+     documents, not part of the application */
+  { dir: 'admin', skip: (rel) => rel.endsWith('.md')
+                                 || /^(stage-\d|recovery-\d)/.test(rel) },
   { dir: 'bin',   skip: (rel) => rel === 'verify.php' },
 ];
 
@@ -221,7 +228,13 @@ function build() {
   const parts = html.split(/(<script[\s\S]*?<\/script>|<style>[\s\S]*?<\/style>)/);
   const htmlBefore = Buffer.byteLength(html);
   html = parts.map(p =>
-    (p.startsWith('<script') || p.startsWith('<style')) ? p : p.replace(/<!--[\s\S]*?-->/g, '')
+    (p.startsWith('<script') || p.startsWith('<style'))
+      ? p
+      /* RECOVERY 02 — every HTML comment goes except the content markers.
+         They are how the publisher finds the region it is allowed to rewrite,
+         so stripping them from the shipped file would leave the admin editing
+         a page it can no longer reach. 25 of them, about 1.2KB. */
+      : p.replace(/<!--(?!\/?aun:)[\s\S]*?-->/g, '')
   ).join('').replace(/\n{3,}/g, '\n\n');
   console.log(`  html comments      : ${((htmlBefore - Buffer.byteLength(html))/1024).toFixed(1)}KB removed`);
 

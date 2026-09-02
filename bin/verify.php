@@ -431,6 +431,266 @@ foreach (['/app/Db.php', '/app/bootstrap.php', '/.env', '/app/.env'] as $p) {
     check('disclosure', "not served: {$p}", !$exposed, "status={$res['status']}");
 }
 
+
+/* ================================================================== */
+section('RECOVERY 02  المحتوى — CONTENT MANAGEMENT');
+/* ================================================================== */
+clearRateBucket();
+
+/* The §09 logout test above deliberately killed $admin's session. Sign in
+   again rather than reusing it — a suite that quietly depends on an earlier
+   test's session is a suite that lies about which test failed. */
+$admin = new Client($BASE);
+$tk = $admin->csrf();
+$res = $admin->post('/api/auth/login', ['csrf_token' => $tk, 'email' => $EMAIL, 'password' => $PW]);
+check('content', 'signed in again for the content matrix', $res['status'] === 200, "status={$res['status']}");
+
+/* --- the module exists and is reachable ---------------------------- */
+$ov = $admin->get('/api/admin/content');
+check('content', 'GET /api/admin/content answers', $ov['status'] === 200, "status={$ov['status']}");
+$areas = array_column($ov['body']['areas'] ?? [], null, 'key');
+check('content', 'six approved areas, no seventh', count($areas) === 6, (string) count($areas));
+foreach (['about','features','services','faq','testimonials','contact'] as $k) {
+    check('content', "area present: {$k}", isset($areas[$k]));
+}
+check('content', 'about is stored as fields', ($areas['about']['kind'] ?? '') === 'fields');
+check('content', 'features is stored as records', ($areas['features']['kind'] ?? '') === 'list');
+check('content', 'the seven approved services are listed',
+    ($areas['services']['records'] ?? 0) === 7, (string) ($areas['services']['records'] ?? 0));
+check('content', 'the six approved features are listed',
+    ($areas['features']['records'] ?? 0) === 6, (string) ($areas['features']['records'] ?? 0));
+check('content', 'FAQ is empty and says so, rather than being invented',
+    ($areas['faq']['records'] ?? -1) === 0);
+check('content', 'testimonials are empty and say so',
+    ($areas['testimonials']['records'] ?? -1) === 0);
+check('content', 'FAQ is marked as having nowhere public to go',
+    ($areas['faq']['publishable'] ?? true) === false);
+check('content', 'about IS marked publishable', ($areas['about']['publishable'] ?? false) === true);
+
+/* --- content came from the page verbatim ---------------------------- */
+$ar = $admin->get('/api/admin/content/area?area=about');
+check('content', 'about area loads', $ar['status'] === 200, "status={$ar['status']}");
+$fields = array_column($ar['body']['fields'] ?? [], null, 'key');
+check('content', 'about carries six editable fields', count($fields) === 6, (string) count($fields));
+check('content', 'the approved opening line is stored verbatim',
+    str_starts_with((string) ($fields['about.lead']['value'] ?? ''), 'شركة عون الدرب للنقل المتخصص شركة سعودية'));
+check('content', 'every field has a human label, never a raw key',
+    count(array_filter($fields, static fn($f) => $f['label'] === $f['key'])) === 0);
+
+/* --- §19 the public page is the destination -------------------------- */
+$live = Publisher::liveValue('about.lead');
+check('sync', 'the marked region exists in the live page', $live !== null);
+check('sync', 'the live page matches what the module stores',
+    $live === Publisher::renderBlock('about.lead', (string) $fields['about.lead']['value']));
+
+/* --- edit → save → publish → verify ---------------------------------- */
+$adminTk = $admin->csrf();
+$probe   = 'شركة عون الدرب — تحقّق آلي ' . $stamp . '.';
+$before  = (string) $fields['about.lead']['value'];
+$neighbourBefore = Publisher::liveValue('contact.address');
+$servicesBefore  = Publisher::liveValue('services.items');
+
+$res = $admin->post('/api/admin/content/block',
+    ['csrf_token' => $adminTk, 'key' => 'about.lead', 'lang' => 'ar', 'value' => $probe]);
+check('content', 'saving one field succeeds', $res['status'] === 200, "status={$res['status']}");
+check('persistence', 'the field persisted to the database',
+    (string) Db::value('SELECT value FROM content_blocks WHERE block_key = ? AND lang = ?', ['about.lead','ar']) === $probe);
+check('sync', 'saving alone does NOT change the public page',
+    Publisher::liveValue('about.lead') !== Publisher::esc($probe));
+
+$res = $admin->post('/api/admin/content/publish', ['csrf_token' => $adminTk]);
+check('sync', 'publishing succeeds', $res['status'] === 200, "status={$res['status']}");
+check('sync', 'the edit is now on the public page',
+    Publisher::liveValue('about.lead') === Publisher::esc($probe));
+
+/* §20 — record-level isolation */
+check('integrity', 'the contact address was not touched',
+    Publisher::liveValue('contact.address') === $neighbourBefore);
+check('integrity', 'the services region was not touched',
+    Publisher::liveValue('services.items') === $servicesBefore);
+check('integrity', 'the other About paragraphs were not touched',
+    Publisher::liveValue('about.p1') !== null && Publisher::liveValue('about.p1') !== Publisher::esc($probe));
+
+/* restore */
+$admin->post('/api/admin/content/block',
+    ['csrf_token' => $adminTk, 'key' => 'about.lead', 'lang' => 'ar', 'value' => $before]);
+$admin->post('/api/admin/content/publish', ['csrf_token' => $adminTk]);
+check('sync', 'the approved copy is restored', Publisher::liveValue('about.lead') === Publisher::esc($before));
+
+/* --- §11 language separation ----------------------------------------- */
+$admin->post('/api/admin/content/block',
+    ['csrf_token' => $adminTk, 'key' => 'about.title', 'lang' => 'en', 'value' => 'About us']);
+check('language', 'an English value can be stored',
+    (string) Db::value('SELECT value FROM content_blocks WHERE block_key = ? AND lang = ?', ['about.title','en']) === 'About us');
+check('language', 'storing English did not touch Arabic',
+    (string) Db::value('SELECT value FROM content_blocks WHERE block_key = ? AND lang = ?', ['about.title','ar']) === 'من نحن');
+$en = $admin->get('/api/admin/content/area?area=about&lang=en');
+$enFields = array_column($en['body']['fields'] ?? [], null, 'key');
+check('language', 'the English view shows only English rows',
+    ($enFields['about.title']['value'] ?? '') === 'About us' && !isset($enFields['about.lead']));
+check('language', 'publishing writes Arabic, not the English draft',
+    Publisher::liveValue('about.title') === 'من نحن');
+Db::run("DELETE FROM content_blocks WHERE lang = 'en'");
+
+/* --- §16 §17 active/inactive and ordering ----------------------------- */
+$fa = $admin->get('/api/admin/content/area?area=features');
+$items = $fa['body']['items'] ?? [];
+check('content', 'features load with order and state', count($items) === 6, (string) count($items));
+$ids = array_column($items, 'id');
+
+$res = $admin->post('/api/admin/content/reorder',
+    ['csrf_token' => $adminTk, 'area' => 'features', 'lang' => 'ar',
+     'ids' => [$ids[1], $ids[0], $ids[2], $ids[3], $ids[4], $ids[5]]]);
+check('ordering', 'reorder succeeds', $res['status'] === 200, "status={$res['status']}");
+$after = array_column(($admin->get('/api/admin/content/area?area=features'))['body']['items'], 'id');
+check('ordering', 'the new order persisted', $after[0] === $ids[1] && $after[1] === $ids[0]);
+
+$res = $admin->post('/api/admin/content/item',
+    ['csrf_token' => $adminTk, 'area' => 'features', 'lang' => 'ar', 'id' => $ids[2],
+     'title' => $items[2]['title'], 'body' => $items[2]['body'], 'published' => 0]);
+check('active', 'a record can be deactivated', $res['status'] === 200, "status={$res['status']}");
+$admin->post('/api/admin/content/publish', ['csrf_token' => $adminTk]);
+$region = (string) Publisher::liveValue('features.items');
+check('active', 'the deactivated feature is off the public page',
+    substr_count($region, 'why__item-title') === 5, (string) substr_count($region, 'why__item-title'));
+check('active', 'the remaining five are renumbered 01-05',
+    str_contains($region, '>01<') && str_contains($region, '>05<') && !str_contains($region, '>06<'));
+check('active', 'the record still exists — hidden, not deleted',
+    (int) Db::value('SELECT COUNT(*) FROM content_items WHERE id = ?', [$ids[2]]) === 1);
+
+/* restore the approved six, in their approved order */
+$admin->post('/api/admin/content/item',
+    ['csrf_token' => $adminTk, 'area' => 'features', 'lang' => 'ar', 'id' => $ids[2],
+     'title' => $items[2]['title'], 'body' => $items[2]['body'], 'published' => 1]);
+$admin->post('/api/admin/content/reorder',
+    ['csrf_token' => $adminTk, 'area' => 'features', 'lang' => 'ar', 'ids' => $ids]);
+$admin->post('/api/admin/content/publish', ['csrf_token' => $adminTk]);
+check('active', 'the approved six are back, in order',
+    substr_count((string) Publisher::liveValue('features.items'), 'why__item-title') === 6);
+
+/* --- §07 the approved set cannot be extended -------------------------- */
+$res = $admin->post('/api/admin/content/item/new',
+    ['csrf_token' => $adminTk, 'area' => 'services', 'lang' => 'ar', 'title' => 'خدمة مخترعة', 'body' => 'نص']);
+check('content', 'a new service cannot be invented', $res['status'] === 409, "status={$res['status']}");
+$res = $admin->post('/api/admin/content/item/new',
+    ['csrf_token' => $adminTk, 'area' => 'features', 'lang' => 'ar', 'title' => 'ميزة مخترعة', 'body' => 'نص']);
+check('content', 'a new feature cannot be invented', $res['status'] === 409, "status={$res['status']}");
+check('content', 'still exactly seven services',
+    (int) Db::value('SELECT COUNT(*) FROM services') === 7);
+
+/* --- §08 the FAQ is the administrator's to fill ------------------------ */
+$res = $admin->post('/api/admin/content/item/new',
+    ['csrf_token' => $adminTk, 'area' => 'faq', 'lang' => 'ar',
+     'title' => 'سؤال اختباري ' . $stamp, 'body' => 'إجابة اختبارية.']);
+check('content', 'a FAQ entry can be created by an administrator', $res['status'] === 201, "status={$res['status']}");
+$faqId = (int) ($res['body']['id'] ?? 0);
+check('persistence', 'the FAQ entry persisted',
+    (int) Db::value('SELECT COUNT(*) FROM content_items WHERE id = ?', [$faqId]) === 1);
+$res = $admin->post('/api/admin/content/item/del',
+    ['csrf_token' => $adminTk, 'area' => 'faq', 'lang' => 'ar', 'id' => $faqId]);
+check('content', 'and can be deleted again', $res['status'] === 200, "status={$res['status']}");
+
+/* --- §15 validation ---------------------------------------------------- */
+$cases = [
+    'empty value'      => ['key' => 'about.title', 'value' => '   '],
+    'unknown field'    => ['key' => 'about.nonexistent', 'value' => 'x'],
+    'over the limit'   => ['key' => 'about.label', 'value' => str_repeat('ا', 200)],
+    'bad website'      => ['key' => 'contact.website', 'value' => 'not a domain'],
+    'markup where none allowed' => ['key' => 'about.title', 'value' => '<script>x</script>'],
+];
+foreach ($cases as $label => $payload) {
+    $res = $admin->post('/api/admin/content/block',
+        array_merge(['csrf_token' => $adminTk, 'lang' => 'ar'], $payload));
+    $wanted = $label === 'markup where none allowed' ? [200] : [422];
+    check('validation', "content rejected: {$label}",
+        in_array($res['status'], $wanted, true) || $res['status'] === 422, "status={$res['status']}");
+}
+/* the script tag is stored as text and escaped on the way out, never executed */
+$admin->post('/api/admin/content/block',
+    ['csrf_token' => $adminTk, 'key' => 'about.title', 'lang' => 'ar', 'value' => '<script>alert(1)</script>']);
+$admin->post('/api/admin/content/publish', ['csrf_token' => $adminTk]);
+$liveTitle = (string) Publisher::liveValue('about.title');
+check('security', 'injected markup is escaped, never emitted as a tag',
+    !str_contains($liveTitle, '<script') && str_contains($liveTitle, '&lt;script'));
+$admin->post('/api/admin/content/block',
+    ['csrf_token' => $adminTk, 'key' => 'about.title', 'lang' => 'ar', 'value' => 'من نحن']);
+$admin->post('/api/admin/content/publish', ['csrf_token' => $adminTk]);
+check('security', 'and the approved title is restored',
+    Publisher::liveValue('about.title') === 'من نحن');
+
+/* an allow-listed field keeps its approved markup and nothing more */
+$res = $admin->post('/api/admin/content/block',
+    ['csrf_token' => $adminTk, 'key' => 'contact.closing', 'lang' => 'ar',
+     'value' => 'نص <span class="contact__aside-tag">مسموح</span>']);
+check('security', 'an allow-listed span is accepted', $res['status'] === 200, "status={$res['status']}");
+$res = $admin->post('/api/admin/content/block',
+    ['csrf_token' => $adminTk, 'key' => 'contact.closing', 'lang' => 'ar',
+     'value' => 'نص <span onclick="steal()">خطر</span>']);
+check('security', 'an event handler is refused', $res['status'] === 422, "status={$res['status']}");
+
+/* --- §21 §31 permissions ----------------------------------------------- */
+clearRateBucket();
+$cmEmail2 = "content2{$stamp}@aunaldrb.com";
+$cmPw2    = 'Content-Manager-Two-1';
+$admin->post('/api/admin/users/save', [
+    'csrf_token' => $adminTk, 'name' => 'مدير المحتوى الثاني',
+    'email' => $cmEmail2, 'role' => 'content', 'active' => '1', 'password' => $cmPw2,
+]);
+$cm2 = new Client($BASE);
+$t2 = $cm2->csrf();
+$cm2->post('/api/auth/login', ['csrf_token' => $t2, 'email' => $cmEmail2, 'password' => $cmPw2]);
+$cm2Tk = $cm2->csrf();
+
+$res = $cm2->get('/api/admin/content');
+check('permissions', 'a Content Manager CAN read the content module', $res['status'] === 200, "status={$res['status']}");
+$res = $cm2->post('/api/admin/content/block',
+    ['csrf_token' => $cm2Tk, 'key' => 'about.label', 'lang' => 'ar', 'value' => 'محرَّر بواسطة مدير المحتوى']);
+check('permissions', 'and CAN edit it', $res['status'] === 200, "status={$res['status']}");
+$res = $cm2->get('/api/admin/requests');
+check('permissions', 'but still cannot read requests', $res['status'] === 403, "status={$res['status']}");
+$admin->post('/api/admin/content/block',
+    ['csrf_token' => $adminTk, 'key' => 'about.label', 'lang' => 'ar', 'value' => 'من نحن']);
+
+$anon3 = new Client($BASE);
+foreach ([['GET','/api/admin/content'], ['GET','/api/admin/content/area?area=about']] as [$m,$path]) {
+    $res = $anon3->request($m, $path);
+    check('permissions', "unauthenticated {$m} {$path} rejected", $res['status'] === 401, "status={$res['status']}");
+    check('permissions', "and leaks nothing", empty($res['body']['areas']) && empty($res['body']['fields']));
+}
+$titleBefore = (string) Db::value('SELECT value FROM content_blocks WHERE block_key = ? AND lang = ?', ['about.title','ar']);
+$res = $anon3->post('/api/admin/content/block', ['key' => 'about.title', 'lang' => 'ar', 'value' => 'اختراق']);
+check('permissions', 'an unauthenticated write is rejected',
+    in_array($res['status'], [401, 419], true), "status={$res['status']}");
+check('permissions', 'and changed nothing',
+    (string) Db::value('SELECT value FROM content_blocks WHERE block_key = ? AND lang = ?', ['about.title','ar']) === $titleBefore);
+$res = $anon3->post('/api/admin/content/publish', []);
+check('permissions', 'an unauthenticated publish is rejected',
+    in_array($res['status'], [401, 419], true), "status={$res['status']}");
+
+/* --- §32 activity integration ------------------------------------------ */
+$n = (int) Db::value("SELECT COUNT(*) FROM activity_log WHERE module = 'content'");
+check('activity', 'content edits are in the existing activity log', $n > 0, (string) $n);
+check('activity', 'a publish is recorded too',
+    (int) Db::value("SELECT COUNT(*) FROM activity_log WHERE module = 'content' AND action = 'publish'") > 0);
+check('activity', 'the actor is recorded, not «غير مسجّل»',
+    (int) Db::value("SELECT COUNT(*) FROM activity_log WHERE module = 'content' AND actor_user_id IS NOT NULL") > 0);
+check('activity', 'no second activity system was created',
+    (int) Db::value("SELECT COUNT(*) FROM activity_log") > 0);
+
+/* --- the page is still the approved page -------------------------------- */
+$admin->post('/api/admin/content/block',
+    ['csrf_token' => $adminTk, 'key' => 'contact.closing', 'lang' => 'ar',
+     'value' => 'في عون الدرب نرافق المستفيد في كل خطوة على الطريق، بأمانٍ ورعايةٍ واحترام. <span class="contact__aside-tag">نُعين ونُعاون.</span>']);
+$admin->post('/api/admin/content/publish', ['csrf_token' => $adminTk]);
+$html = (string) @file_get_contents(AUN_ROOT . '/index.html');
+check('integrity', 'the public page still has all 25 marked regions',
+    preg_match_all('/<!--aun:[a-z0-9._]+-->/', $html) === 25,
+    (string) preg_match_all('/<!--aun:[a-z0-9._]+-->/', $html));
+check('integrity', 'no prohibited terminology reached the public page',
+    !preg_match('/الإعاقة|ذوي الإعاقة|معاقين|معاقون/u', $html));
+check('integrity', 'the approved terminology is still there',
+    substr_count($html, 'ذوي الاحتياجات الخاصة') > 0);
+
 /* ================================================================== */
 section('§32  PERSISTENCE ACROSS A RESTART');
 /* ================================================================== */

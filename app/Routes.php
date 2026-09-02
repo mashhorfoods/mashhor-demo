@@ -50,6 +50,18 @@ final class Routes
             ['GET',  '/api/admin/activity',       ['home', 'view'],      'listActivity'],
             ['GET',  '/api/admin/notifications',  ['home', 'view'],      'listNotifications'],
             ['POST', '/api/admin/notifications/read', ['home', 'view'],  'readNotification'],
+            /* المحتوى — RECOVERY 02. Every one of these is gated on the
+               `content` module, which the approved matrix grants to Super
+               Admin and Content Manager, and to an Admin unless narrowed. */
+            ['GET',  '/api/admin/content',          ['content', 'view'], 'contentOverview'],
+            ['GET',  '/api/admin/content/area',     ['content', 'view'], 'contentArea'],
+            ['POST', '/api/admin/content/block',    ['content', 'edit'], 'saveBlock'],
+            ['POST', '/api/admin/content/item',     ['content', 'edit'], 'saveItem'],
+            ['POST', '/api/admin/content/item/new', ['content', 'edit'], 'createItem'],
+            ['POST', '/api/admin/content/item/del', ['content', 'edit'], 'deleteItem'],
+            ['POST', '/api/admin/content/reorder',  ['content', 'edit'], 'reorderItems'],
+            ['POST', '/api/admin/content/publish',  ['content', 'edit'], 'publishContent'],
+
             ['GET',  '/api/admin/settings',       ['settings', 'view'],  'listSettings'],
             ['POST', '/api/admin/settings/save',  ['settings', 'edit'],  'saveSettings'],
         ];
@@ -474,6 +486,328 @@ final class Routes
                   : Repo_Activity::markUnread((int) $u['id'], $id);
         }
         Http::ok(['unread' => Repo_Activity::unreadCount((int) $u['id'])]);
+    }
+
+
+    /* =================================================================== */
+    /* المحتوى — RECOVERY 02                                                */
+    /* =================================================================== */
+
+    /** The language a request is about. Arabic unless English is asked for. */
+    private static function lang(): string
+    {
+        $l = strtolower((string) (Http::query('lang') ?? (Http::input()['lang'] ?? 'ar')));
+        return in_array($l, Schema::LANGS, true) ? $l : 'ar';
+    }
+
+    private static function contentOverview(?array $u): void
+    {
+        $lang = self::lang();
+        $last = Publisher::lastPublish();
+        Http::ok([
+            'lang'   => $lang,
+            'areas'  => Repo_Cms::overview($lang),
+            'canEdit'=> Authz::can($u, 'content', 'edit'),
+            'publish'=> [
+                'target'    => Publisher::target() === null ? null : basename((string) Publisher::target()),
+                'writable'  => Publisher::writable(),
+                'lastAt'    => $last['created_at'] ?? null,
+                'lastBy'    => $last['actor_label'] ?? null,
+                'lastOk'    => $last === null ? null : (bool) (int) $last['ok'],
+                'lastNote'  => $last['note'] ?? null,
+            ],
+        ]);
+    }
+
+    /**
+     * One content area, with everything the editor needs to draw itself: the
+     * text fields with their labels and limits, and the records with their
+     * order and published state.
+     */
+    private static function contentArea(?array $u): void
+    {
+        $area = (string) (Http::query('area') ?? '');
+        if (!isset(Schema::CONTENT_AREAS[$area])) Http::notFound();
+        $lang = self::lang();
+
+        $fields = [];
+        foreach (Repo_Cms::blocks($lang, $area) as $key => $row) {
+            $fields[] = [
+                'key'       => $key,
+                'label'     => Repo_Cms::FIELD_LABELS[$key] ?? $key,
+                'value'     => (string) $row['value'],
+                'max'       => Repo_Cms::FIELD_MAX[$key] ?? 500,
+                'multiline' => isset(Repo_Cms::FIELD_MULTILINE[$key]),
+                'html'      => isset(Repo_Cms::FIELD_HTML[$key]),
+                'updatedAt' => $row['updated_at'],
+            ];
+        }
+
+        $items = [];
+        if ($area === 'services') {
+            /* the service records themselves live in `services` from
+               RECOVERY 01 and are not duplicated (§38) */
+            $tmpl = [];
+            foreach (Repo_Cms::items('services', $lang) as $t) $tmpl[(string) $t['item_key']] = $t;
+            foreach (Repo_Content::services() as $svc) {
+                $t = $tmpl[(string) $svc['slug']] ?? null;
+                $items[] = [
+                    'id'        => (int) $svc['id'],
+                    'key'       => (string) $svc['slug'],
+                    'title'     => (string) $svc['title'],
+                    'body'      => (string) $svc['description'],
+                    'image'     => $svc['image_path'],
+                    'order'     => (int) $svc['sort_order'],
+                    'published' => (bool) (int) $svc['is_published'],
+                    'updatedAt' => $svc['updated_at'],
+                    'syncs'     => $t !== null,
+                ];
+            }
+        } elseif (in_array($area, ['features', 'faq', 'testimonials'], true)) {
+            foreach (Repo_Cms::items($area, $lang) as $r) {
+                $items[] = [
+                    'id'        => (int) $r['id'],
+                    'key'       => $r['item_key'],
+                    'title'     => (string) ($r['title'] ?? ''),
+                    'body'      => (string) ($r['body'] ?? ''),
+                    'attribution' => $r['attribution'],
+                    'image'     => $r['image_path'],
+                    'order'     => (int) $r['sort_order'],
+                    'published' => (bool) (int) $r['is_published'],
+                    'updatedAt' => $r['updated_at'],
+                    'syncs'     => $r['markup'] !== null && $r['markup'] !== '',
+                ];
+            }
+        }
+
+        Http::ok([
+            'area'   => $area,
+            'label'  => Schema::CONTENT_AREAS[$area],
+            'lang'   => $lang,
+            'fields' => $fields,
+            'items'  => $items,
+            'canEdit'=> Authz::can($u, 'content', 'edit'),
+            /* whether the public page has a region for this area at all */
+            'publishable' => in_array($area, ['about', 'features', 'services', 'contact'], true),
+            'canCreate'   => in_array($area, ['faq', 'testimonials'], true),
+        ]);
+    }
+
+    /** One field, one language, one row — §11 and §20 in one call. */
+    private static function saveBlock(?array $u): void
+    {
+        $in = Http::input();
+        $v = new Validator($in);
+        $v->rejectUnknown(['csrf_token', 'key', 'lang', 'value']);
+        $key  = Validator::tidy((string) ($in['key'] ?? ''));
+        $lang = self::lang();
+
+        if (!isset(Repo_Cms::FIELD_LABELS[$key])) Http::invalid(['key' => 'حقل غير معروف.']);
+        $max = Repo_Cms::FIELD_MAX[$key] ?? 500;
+        $raw = $in['value'] ?? '';
+        if (!is_string($raw)) Http::invalid(['value' => 'قيمة غير صالحة.']);
+
+        $value = isset(Repo_Cms::FIELD_MULTILINE[$key]) || isset(Repo_Cms::FIELD_HTML[$key])
+            ? Validator::tidyMultiline($raw)
+            : Validator::tidy($raw);
+
+        if ($value === '')            Http::invalid(['value' => 'لا يمكن ترك هذا الحقل فارغاً.']);
+        if (mb_strlen($value) > $max) Http::invalid(['value' => "النص أطول من الحد المسموح ({$max} حرفاً)."]);
+
+        /* an inline-markup field must survive the allow-list unchanged, or the
+           administrator has typed markup the page will not carry */
+        if (isset(Repo_Cms::FIELD_HTML[$key])) {
+            $rendered = Publisher::inline($value);
+            if (str_contains($rendered, '&lt;')) {
+                Http::invalid(['value' => 'يُسمح فقط بـ <br> و <b> و <em> و <span class="…">.']);
+            }
+        }
+        if ($key === 'contact.website'
+            && !preg_match('/^[a-z0-9.-]+\.[a-z]{2,}$/i', $value)) {
+            Http::invalid(['value' => 'أدخل نطاقاً صحيحاً مثل aunaldrb.com']);
+        }
+
+        $before = Repo_Cms::block($key, $lang);
+        if ($before !== null && (string) $before['value'] === $value) {
+            Http::ok(['key' => $key, 'lang' => $lang, 'changed' => false]);
+        }
+
+        Repo_Cms::saveBlock($key, $lang, $value, $u);
+        Repo_Activity::record($u, 'content', 'edit', 'content_block', $key,
+            Repo_Cms::FIELD_LABELS[$key] ?? $key,
+            'تحديث محتوى «' . (Schema::CONTENT_AREAS[explode('.', $key)[0]] ?? $key) . '»');
+        Http::ok(['key' => $key, 'lang' => $lang, 'changed' => true]);
+    }
+
+    /** One record. Services are updated in their own table, not copied here. */
+    private static function saveItem(?array $u): void
+    {
+        $in = Http::input();
+        $v = new Validator($in);
+        $v->rejectUnknown(['csrf_token', 'area', 'lang', 'id', 'title', 'body',
+                           'attribution', 'image', 'published']);
+        $area = Validator::tidy((string) ($in['area'] ?? ''));
+        $lang = self::lang();
+        $id   = (int) ($in['id'] ?? 0);
+        if (!isset(Schema::CONTENT_AREAS[$area]) || $id <= 0) Http::invalid(['id' => 'السجل غير محدد.']);
+
+        $title = $v->text('title', $area !== 'testimonials', 2, 200, 'العنوان');
+        $body  = $v->multiline('body', 1200, 'النص');
+        if ($area === 'testimonials' && ($body === null || $body === '')) {
+            $v->error('body', 'نص الرأي مطلوب.');
+        }
+        if ($area === 'faq' && ($body === null || $body === '')) {
+            $v->error('body', 'نص الإجابة مطلوب.');
+        }
+        $image = Validator::tidy((string) ($in['image'] ?? ''));
+        if ($image !== '' && !preg_match('#^(img|brand)/[A-Za-z0-9._-]+$#', $image)) {
+            $v->error('image', 'مرجع صورة غير صالح.');
+        }
+        if ($image !== '' && Db::value('SELECT 1 FROM media_assets WHERE path = ?', [$image]) === null) {
+            $v->error('image', 'هذه الصورة غير موجودة في مكتبة الوسائط.');
+        }
+        if (!$v->passed()) Http::invalid($v->errors());
+
+        $published = $v->bool('published', true);
+
+        if ($area === 'services') {
+            $svc = Db::one('SELECT * FROM services WHERE id = ?', [$id]);
+            if ($svc === null) Http::notFound();
+            Repo_Content::updateService($id, [
+                'title'        => $title,
+                'description'  => $body ?? '',
+                'is_published' => $published ? 1 : 0,
+                'image_path'   => $image !== '' ? $image : $svc['image_path'],
+            ], $u);
+            /* keep the publishing template's copy in step with the record */
+            $t = Db::one('SELECT id FROM content_items WHERE collection = ? AND lang = ? AND item_key = ?',
+                ['services', $lang, (string) $svc['slug']]);
+            if ($t !== null) {
+                Repo_Cms::updateItem((int) $t['id'], [
+                    'title' => $title, 'body' => $body ?? '',
+                    'is_published' => $published ? 1 : 0,
+                ], $u);
+            }
+            Http::ok(['id' => $id]);
+        }
+
+        $row = Repo_Cms::item($id);
+        if ($row === null || (string) $row['collection'] !== $area || (string) $row['lang'] !== $lang) {
+            Http::notFound();
+        }
+        Repo_Cms::updateItem($id, [
+            'title'       => $title,
+            'body'        => $body ?? '',
+            'attribution' => Validator::tidy((string) ($in['attribution'] ?? '')) ?: null,
+            'image_path'  => $image !== '' ? $image : null,
+            'is_published'=> $published ? 1 : 0,
+        ], $u);
+        Repo_Activity::record($u, 'content', 'edit', $area, (string) $id,
+            (string) ($title ?? $row['title']),
+            'تحديث سجل في «' . Schema::CONTENT_AREAS[$area] . '»');
+        Http::ok(['id' => $id]);
+    }
+
+    /**
+     * §08/§09 — new records are accepted only where the site has no approved
+     * set to protect. The six features and seven services are the approved
+     * content and cannot be added to; the FAQ and the testimonials are empty
+     * and are the administrator's to fill.
+     */
+    private static function createItem(?array $u): void
+    {
+        $in = Http::input();
+        $v = new Validator($in);
+        $v->rejectUnknown(['csrf_token', 'area', 'lang', 'title', 'body', 'attribution']);
+        $area = Validator::tidy((string) ($in['area'] ?? ''));
+        if (!in_array($area, ['faq', 'testimonials'], true)) {
+            Http::fail(409, 'not_extensible',
+                'لا يمكن إضافة سجل جديد إلى هذا القسم — محتواه معتمد ومحدد.');
+        }
+        $lang  = self::lang();
+        $title = $v->text('title', $area === 'faq', 2, 200, $area === 'faq' ? 'السؤال' : 'الاسم');
+        $body  = $v->multiline('body', 1200, $area === 'faq' ? 'الإجابة' : 'نص الرأي');
+        if ($body === null || $body === '') $v->error('body', 'النص مطلوب.');
+        if (!$v->passed()) Http::invalid($v->errors());
+
+        $id = Repo_Cms::createItem($area, $lang, [
+            'title' => $title,
+            'body'  => $body,
+            'attribution' => Validator::tidy((string) ($in['attribution'] ?? '')) ?: null,
+            'is_published' => 1,
+        ], $u);
+        Repo_Activity::record($u, 'content', 'create', $area, (string) $id, (string) $title,
+            'إضافة سجل إلى «' . Schema::CONTENT_AREAS[$area] . '»');
+        Http::ok(['id' => $id], 201);
+    }
+
+    private static function deleteItem(?array $u): void
+    {
+        $in = Http::input();
+        $v = new Validator($in);
+        $v->rejectUnknown(['csrf_token', 'area', 'lang', 'id']);
+        $area = Validator::tidy((string) ($in['area'] ?? ''));
+        $id   = (int) ($in['id'] ?? 0);
+        if (!in_array($area, ['faq', 'testimonials'], true)) {
+            Http::fail(409, 'not_deletable',
+                'لا يمكن حذف سجل من هذا القسم — استخدم «غير نشط» لإخفائه.');
+        }
+        $row = Repo_Cms::item($id);
+        if ($row === null || (string) $row['collection'] !== $area) Http::notFound();
+        Repo_Cms::deleteItem($id);
+        Repo_Activity::record($u, 'content', 'edit', $area, (string) $id,
+            (string) ($row['title'] ?? ''), 'حذف سجل من «' . Schema::CONTENT_AREAS[$area] . '»');
+        Http::ok(['id' => $id]);
+    }
+
+    private static function reorderItems(?array $u): void
+    {
+        $in = Http::input();
+        $v = new Validator($in);
+        $v->rejectUnknown(['csrf_token', 'area', 'lang', 'ids']);
+        $area = Validator::tidy((string) ($in['area'] ?? ''));
+        $ids  = $in['ids'] ?? null;
+        if (!isset(Schema::CONTENT_AREAS[$area]) || !is_array($ids) || $ids === []) {
+            Http::invalid(['ids' => 'ترتيب غير صالح.']);
+        }
+        $lang = self::lang();
+
+        if ($area === 'services') {
+            $n = Db::transaction(static function () use ($ids, $u, $lang): int {
+                $i = 0;
+                foreach (array_values($ids) as $id) {
+                    $svc = Db::one('SELECT id, slug FROM services WHERE id = ?', [(int) $id]);
+                    if ($svc === null) continue;
+                    $i++;
+                    Db::run('UPDATE services SET sort_order = ?, updated_at = ? WHERE id = ?',
+                        [$i, Db::now(), (int) $svc['id']]);
+                    $t = Db::one('SELECT id FROM content_items WHERE collection = ? AND lang = ? AND item_key = ?',
+                        ['services', $lang, (string) $svc['slug']]);
+                    if ($t !== null) Repo_Cms::updateItem((int) $t['id'], ['sort_order' => $i], $u);
+                }
+                return $i;
+            });
+        } else {
+            $n = Repo_Cms::reorder($area, $lang, $ids, $u);
+        }
+
+        Repo_Activity::record($u, 'content', 'edit', $area, null, Schema::CONTENT_AREAS[$area],
+            'تغيير ترتيب «' . Schema::CONTENT_AREAS[$area] . '»');
+        Http::ok(['reordered' => $n]);
+    }
+
+    /** §19 — write the stored content back into the live page. */
+    private static function publishContent(?array $u): void
+    {
+        $r = Publisher::publish($u);
+        if (!$r['ok']) {
+            Log::write('warn', 'content publish failed', ['note' => $r['note']]);
+            Http::fail(500, 'publish_failed',
+                $r['note'] ?? 'تعذّر تحديث صفحة الموقع. حاول مرة أخرى.');
+        }
+        Repo_Activity::record($u, 'content', 'publish', 'site', $r['target'], $r['target'],
+            'نشر المحتوى إلى صفحة الموقع (' . $r['regions'] . ' منطقة)');
+        Http::ok($r);
     }
 
     private static function listSettings(?array $u): void

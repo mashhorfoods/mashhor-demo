@@ -142,7 +142,18 @@ the reason is in `app/storage/logs/`, not in the response.
 After signing in you land on الرئيسية. Open `https://aunaldrb.com/admin/requests.html`
 in a private window to confirm it redirects instead of showing the page.
 
-**f. Submit a real request.** Fill in «اطلب رحلة» on the public site. You
+**f. Load the website content.** Still from `public_html`:
+
+```sh
+php bin/seed-content.php
+```
+
+This reads the current copy out of `index.html` — the approved text, verbatim —
+and loads it into the database so المحتوى has something to show. It prints the
+publish target and whether it is writable; you want **writable**. Re-running it
+is safe and never overwrites an edit an administrator has made.
+
+**g. Submit a real request.** Fill in «اطلب رحلة» on the public site. You
 should get a رقم الطلب back, and it should appear in طلبات النقل as **جديد**.
 That is the whole flow: form → API → database → dashboard.
 
@@ -156,6 +167,9 @@ That is the whole flow: form → API → database → dashboard.
 | The admin pages show raw HTML without a login | `admin/.htaccess` did not upload — **take the site down until it does**; the pages are readable by anyone until then |
 | PHP source appears in the browser | the host is not executing PHP; contact support, and do not leave it in that state |
 | Login says the form expired | the clock is far off, or cookies are blocked; `SESSION_COOKIE_SECURE=true` on an `http://` URL will also do it |
+| المحتوى says publishing is unavailable | `index.html` is not writable by PHP — set it to 644 owned by the site user, and make sure `public_html` itself is writable |
+| المحتوى is empty | `php bin/seed-content.php` has not been run |
+| An edit saves but the site does not change | saving and publishing are separate — press **نشر إلى الموقع** |
 
 ---
 

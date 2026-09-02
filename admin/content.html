@@ -1,4 +1,4 @@
-<title>Aoun Al-Darb Customers Module</title>
+<title>Aoun Al-Darb Content</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
@@ -593,73 +593,32 @@ tr.rowlink{cursor:pointer}
 .rowbtn:hover{text-decoration:underline}
 .rowbtn:focus-visible{outline:none;box-shadow:var(--sh-focus);border-radius:var(--r-xs)}
 
-/* === detail view ======================================================= */
-.detail{display:flex;flex-direction:column;gap:var(--s5)}
-.dhead{display:flex;flex-wrap:wrap;align-items:flex-start;gap:var(--s4);row-gap:var(--s3)}
-.dhead__t{flex:1 1 min(20rem,100%);min-width:0;display:flex;flex-direction:column;gap:.35rem}
-.dhead__id{font-family:var(--f-mono);font-size:var(--fs-caption);color:var(--slate);direction:ltr;
-  text-align:start;white-space:nowrap}
-.dhead__row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s3)}
-.dhead__n{font-size:var(--fs-page);font-weight:600;color:var(--ink);line-height:1.25}
-.dhead__a{display:flex;flex-wrap:wrap;gap:var(--s2);align-items:center}
+/* toast */
+.toasts{position:fixed;inset-block-end:var(--s5);inset-inline-start:var(--s5);z-index:85;
+  display:flex;flex-direction:column;gap:var(--s2);pointer-events:none}
+.toast{display:flex;gap:var(--s3);align-items:center;background:var(--white);
+  border:1px solid var(--divider);border-radius:var(--r-card);box-shadow:var(--sh-dropdown);
+  padding:var(--s3) var(--s4);max-width:min(24rem,calc(100vw - 2rem));pointer-events:auto;
+  animation:rise var(--dur-mid) var(--ease)}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.toast__i{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;
+  background:var(--success-bg);color:var(--success-ink)}
+.toast__i--err{background:var(--error-bg);color:var(--error-ink)}
+.toast__t{font-weight:600;font-size:var(--fs-sec);color:var(--ink);flex:1 1 auto;min-width:0}
+@media (max-width:767px){
+  .toasts{inset-inline:var(--s4);inset-block-end:var(--s4)}
+  .toast{max-width:none}
+}
 
-.dgrid{display:grid;gap:var(--s5);align-items:start}
-@media (min-width:1024px){.dgrid{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr)}}
+/* view-only preview switch */
+.roles{display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap}
+.roles__sw{display:inline-flex;border:1px solid var(--divider);border-radius:var(--r-control);overflow:hidden}
+.roles__sw button{font-family:var(--f-ar);font-size:var(--fs-caption);font-weight:600;
+  padding:.4rem .7rem;min-height:36px;background:var(--white);color:var(--slate);border:none;cursor:pointer}
+.roles__sw button[aria-pressed="true"]{background:var(--navy);color:var(--white)}
+.roles__sw button:focus-visible{outline:none;box-shadow:inset var(--sh-focus)}
 
-.dl{display:grid;gap:var(--s4) var(--s5);grid-template-columns:minmax(0,1fr)}
-@media (min-width:600px){.dl{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.dl--one{grid-template-columns:minmax(0,1fr)}
-.f{display:flex;flex-direction:column;gap:.25rem;min-width:0}
-.f__k{font-size:var(--fs-label);font-weight:500;color:var(--slate)}
-.f__v{font-size:var(--fs-body);color:var(--ink);line-height:1.6;word-break:break-word}
-.f__v.ltr{font-family:var(--f-mono);font-size:var(--fs-sec);direction:ltr;text-align:start}
-
-/* contact actions */
-.contact{display:flex;flex-wrap:wrap;gap:var(--s2)}
-.contact .btn{flex:1 1 auto}
-
-/* notes */
-.note{display:flex;gap:var(--s3);padding:var(--s3) 0;border-bottom:1px solid var(--divider);align-items:flex-start}
-.note:last-child{border-bottom:none;padding-bottom:0}
-.note:first-child{padding-top:0}
-.note__i{width:30px;height:30px;border-radius:50%;background:var(--mist);color:var(--navy);
-  display:grid;place-items:center;flex:0 0 auto}
-.note__b{min-width:0;flex:1 1 auto}
-.note__t{display:block;font-family:var(--f-ar-body);font-size:var(--fs-sec);color:var(--ink);line-height:1.65}
-.note__m{display:block;font-family:var(--f-ar-body);font-size:var(--fs-caption);color:var(--slate);
-  margin-top:.15rem}
-.notearea{display:flex;flex-direction:column;gap:var(--s2)}
-.notearea textarea{
-  width:100%;min-height:80px;resize:vertical;padding:.6rem var(--s3);line-height:1.7;
-  font-family:var(--f-ar-body);font-size:var(--fs-sec);color:var(--ink);
-  background:var(--white);border:1px solid var(--control-border);border-radius:var(--r-control)}
-.notearea textarea::placeholder{color:var(--placeholder)}
-.notearea textarea:focus{outline:none;border-color:var(--blue);box-shadow:var(--sh-focus)}
-
-/* status history */
-.hist{display:flex;flex-direction:column;gap:0}
-.hist__r{display:flex;gap:var(--s3);align-items:flex-start;padding:var(--s3) 0;
-  border-bottom:1px solid var(--divider)}
-.hist__r:last-child{border-bottom:none;padding-bottom:0}
-.hist__r:first-child{padding-top:0}
-.hist__d{width:9px;height:9px;border-radius:50%;background:var(--blue);flex:0 0 auto;margin-top:.45rem}
-.hist__b{min-width:0;flex:1 1 auto}
-.hist__t{display:block;font-size:var(--fs-sec);color:var(--ink)}
-.hist__m{display:block;font-family:var(--f-ar-body);font-size:var(--fs-caption);color:var(--slate);
-  margin-top:.15rem}
-
-/* status change menu */
-.stmenu{width:min(19rem,calc(100vw - 2rem))}
-.stmenu__i{display:flex;align-items:center;gap:var(--s3);width:100%;min-height:var(--tap);
-  padding:0 var(--s4);background:none;border:none;color:var(--ink);font-family:var(--f-ar);
-  font-size:var(--fs-sec);cursor:pointer;text-align:start}
-.stmenu__i:hover{background:var(--row-hover)}
-.stmenu__i:focus-visible{outline:none;box-shadow:inset var(--sh-focus)}
-.stmenu__i:disabled{color:var(--disabled-ink);cursor:not-allowed;background:var(--white)}
-.stmenu__h{padding:var(--s3) var(--s4);border-bottom:1px solid var(--divider);
-  font-size:var(--fs-caption);color:var(--slate);font-family:var(--f-ar-body)}
-.stmenu__back{border-top:1px solid var(--divider);margin-top:var(--s1)}
-
+.hidden{display:none!important}
 /* edit form */
 .editgrid{display:grid;gap:var(--s5);grid-template-columns:minmax(0,1fr)}
 @media (min-width:600px){.editgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -708,49 +667,134 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
 .roles__sw button:focus-visible{outline:none;box-shadow:inset var(--sh-focus)}
 
 .hidden{display:none!important}
-#detailview:focus{outline:none}
+
+/* === CONTENT MODULE · RECOVERY 02 ====================================== */
+/* Six approved content areas, two shapes. A section of fixed fields (من نحن،
+   معلومات التواصل) is a form; a section of repeatable records (ما يميزنا،
+   الخدمات، الأسئلة الشائعة، آراء العملاء) is an ordered list. Everything
+   below reuses the toolbar, card, table, badge, field and toast rules already
+   defined above — only the two shapes are new. */
+
+/* the overview grid */
+.areas{display:grid;gap:var(--s4);grid-template-columns:repeat(auto-fill,minmax(17rem,1fr));margin-bottom:var(--s6)}
+.area{
+  display:flex;flex-direction:column;gap:var(--s3);text-align:start;width:100%;
+  background:var(--white);border:1px solid var(--divider);border-radius:var(--r-card);
+  box-shadow:var(--sh-card);padding:var(--s5);cursor:pointer;
+  transition:border-color var(--dur) var(--ease),box-shadow var(--dur) var(--ease)}
+.area:hover{border-color:var(--control-border);box-shadow:var(--sh-dropdown)}
+.area:focus-visible{outline:none;box-shadow:var(--sh-focus)}
+.area__top{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s3)}
+.area__ic{width:38px;height:38px;border-radius:var(--r-control);display:grid;place-items:center;
+  flex:0 0 auto;background:var(--mist);color:var(--navy)}
+.area__n{font-family:var(--f-ar);font-size:var(--fs-card);font-weight:600;color:var(--ink);line-height:1.35}
+.area__m{display:flex;flex-wrap:wrap;gap:.25rem var(--s4);font-family:var(--f-ar-body);
+  font-size:var(--fs-caption);color:var(--slate)}
+.area__m b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.area__m .ts{font-family:var(--f-mono);font-size:11.5px;direction:ltr;unicode-bidi:isolate;display:inline-block}
+.area__f{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);
+  padding-top:var(--s3);border-top:1px solid var(--divider);
+  font-size:var(--fs-sec);font-weight:600;color:var(--navy)}
+
+/* the publish bar — the one control that reaches the public site */
+.pub{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s3) var(--s5);
+  background:var(--white);border:1px solid var(--divider);border-radius:var(--r-card);
+  padding:var(--s4) var(--s5);margin-bottom:var(--s6)}
+.pub__b{flex:1 1 18rem;min-width:0;display:flex;flex-direction:column;gap:.2rem}
+.pub__t{font-size:var(--fs-sec);font-weight:600;color:var(--ink)}
+.pub__d{font-family:var(--f-ar-body);font-size:var(--fs-caption);color:var(--slate);line-height:1.6}
+.pub__d .ts{font-family:var(--f-mono);font-size:11.5px;direction:ltr;unicode-bidi:isolate;display:inline-block}
+.pub__a{display:flex;gap:var(--s2);flex-wrap:wrap}
+.pub.is-dirty{border-color:var(--warning);background:var(--warning-bg)}
+.pub.is-dirty .pub__t{color:var(--warning-ink)}
+
+/* the field editor */
+.fields{display:flex;flex-direction:column;gap:var(--s5)}
+.fld{display:flex;flex-direction:column;gap:var(--s2);min-width:0}
+.fld__h{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:.3rem var(--s3)}
+.fld__l{font-size:var(--fs-label);font-weight:500;color:var(--ink)}
+.fld__c{font-family:var(--f-mono);font-size:11px;color:var(--slate);font-variant-numeric:tabular-nums}
+.fld__c.is-over{color:var(--error-ink);font-weight:500}
+.fld__k{font-family:var(--f-mono);font-size:10.5px;color:var(--gray);direction:ltr;unicode-bidi:isolate}
+.fld textarea.ctl{min-height:5.5rem;resize:vertical;line-height:1.7;font-family:var(--f-ar-body)}
+.fld.is-changed .ctl{border-color:var(--warning);background:var(--warning-bg)}
+.fld__hint{font-family:var(--f-ar-body);font-size:var(--fs-caption);color:var(--slate)}
+
+/* the record editor */
+.recs{display:flex;flex-direction:column;gap:var(--s3)}
+.rec{background:var(--white);border:1px solid var(--divider);border-radius:var(--r-card);
+  padding:var(--s4) var(--s5)}
+.rec.is-off{background:var(--soft);border-style:dashed}
+.rec__h{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s3);justify-content:space-between}
+.rec__ord{display:flex;align-items:center;gap:.15rem;flex:0 0 auto}
+.rec__num{font-family:var(--f-mono);font-size:12px;color:var(--slate);
+  min-width:2ch;text-align:center;font-variant-numeric:tabular-nums}
+.rec__mv{width:28px;height:28px;display:grid;place-items:center;border-radius:var(--r-xs);
+  border:1px solid var(--divider);background:var(--white);color:var(--slate);cursor:pointer}
+.rec__mv:hover:not(:disabled){border-color:var(--navy);color:var(--navy)}
+.rec__mv:disabled{color:var(--disabled-ink);cursor:not-allowed;background:var(--disabled-surface)}
+.rec__mv:focus-visible{outline:none;box-shadow:var(--sh-focus)}
+.rec__t{flex:1 1 12rem;min-width:0;font-size:var(--fs-body);font-weight:600;color:var(--ink);line-height:1.4}
+.rec.is-off .rec__t{color:var(--slate)}
+.rec__a{display:flex;align-items:center;gap:var(--s2);flex:0 0 auto;flex-wrap:wrap}
+.rec__b{padding-top:var(--s4);margin-top:var(--s4);border-top:1px solid var(--divider);
+  display:flex;flex-direction:column;gap:var(--s4)}
+.rec__b[hidden]{display:none}
+.rec__preview{font-family:var(--f-ar-body);font-size:var(--fs-sec);color:var(--slate);
+  line-height:1.75;margin-top:.35rem}
+.rec__media{display:flex;align-items:center;gap:var(--s4);flex-wrap:wrap}
+.rec__thumb{width:88px;height:66px;border-radius:var(--r-xs);object-fit:cover;flex:0 0 auto;
+  background:var(--mist);border:1px solid var(--divider)}
+.rec__thumb--empty{display:grid;place-items:center;color:var(--gray)}
+.rec__mediab{display:flex;flex-direction:column;gap:.25rem;min-width:0;flex:1 1 12rem}
+.rec__mediap{font-family:var(--f-mono);font-size:11.5px;color:var(--slate);
+  direction:ltr;unicode-bidi:isolate;word-break:break-all}
+
+/* the toggle, reused from الإعدادات */
+.toggle{position:relative;width:46px;height:26px;border-radius:var(--r-pill);border:1px solid var(--divider);
+  background:var(--disabled-surface);cursor:pointer;flex:0 0 auto;padding:0}
+.toggle[aria-pressed="true"]{background:var(--navy);border-color:var(--navy)}
+.toggle__t{position:absolute;inset:0}
+.toggle__t::after{content:"";position:absolute;top:2px;width:20px;height:20px;border-radius:50%;
+  background:var(--white);inset-inline-start:2px;transition:inset-inline-start var(--dur) var(--ease);
+  box-shadow:0 1px 2px rgba(20,28,38,.25)}
+.toggle[aria-pressed="true"] .toggle__t::after{inset-inline-start:22px}
+.toggle:focus-visible{outline:none;box-shadow:var(--sh-focus)}
+/* never colour alone: the state is also written beside the switch */
+.stateword{font-family:var(--f-ar-body);font-size:var(--fs-caption);font-weight:600;
+  color:var(--slate);white-space:nowrap}
+.stateword.is-on{color:var(--success-ink)}
+
+/* language switch */
+.langs{display:inline-flex;border:1px solid var(--divider);border-radius:var(--r-control);overflow:hidden}
+.langs button{font-family:var(--f-ar);font-size:var(--fs-caption);font-weight:600;
+  padding:.4rem .85rem;min-height:var(--tap);background:var(--white);color:var(--slate);
+  border:none;cursor:pointer;white-space:nowrap}
+.langs button[aria-pressed="true"]{background:var(--navy);color:var(--white)}
+.langs button:disabled{color:var(--disabled-ink);cursor:not-allowed;background:var(--disabled-surface)}
+.langs button:focus-visible{outline:none;box-shadow:inset var(--sh-focus)}
+
+/* the read-only notice pattern from سجل النشاط */
+.readonly{display:flex;gap:var(--s3);align-items:flex-start;background:var(--soft);
+  border:1px solid var(--divider);border-radius:var(--r-card);padding:var(--s4)}
+.readonly .i{color:var(--slate);flex:0 0 auto;margin-top:.1rem}
+.readonly p{font-family:var(--f-ar-body);font-size:var(--fs-sec);color:var(--slate);line-height:1.7}
+
+.crumb{margin-bottom:var(--s5)}
+.crumb a{display:inline-flex;align-items:center;gap:var(--s2);min-height:var(--tap);
+  color:var(--navy);font-size:var(--fs-sec);font-weight:600;text-decoration:none}
+.crumb a:hover{text-decoration:underline}
+.crumb a:focus-visible{outline:none;box-shadow:var(--sh-focus);border-radius:var(--r-xs)}
 
 @media (max-width:767px){
   .toolbar{gap:var(--s3)}
-  .tb__f{flex:1 1 100%}
-  .tb__search{flex:1 1 100%}
-  .contact .btn{flex:1 1 100%}
-  .dhead__a{width:100%}
-  .dhead__a .btn{flex:1 1 0}
+  .tb__f,.tb__search{flex:1 1 100%}
+  .areas{grid-template-columns:minmax(0,1fr)}
+  .rec__h{gap:var(--s2)}
+  .rec__a{width:100%;justify-content:space-between}
+  .pub__a{width:100%}
+  .pub__a .btn{flex:1 1 0}
 }
-
-/* === CUSTOMERS MODULE · Stage 07 ======================================= */
-.cust-name{display:flex;align-items:center;gap:var(--s3);min-width:0}
-.avatar{width:36px;height:36px;border-radius:50%;background:var(--sky);color:var(--navy);
-  display:grid;place-items:center;font-weight:600;font-size:13px;flex:0 0 auto}
-.avatar--lg{width:52px;height:52px;font-size:17px}
-
-.stats{display:grid;gap:var(--s3);grid-template-columns:repeat(auto-fit,minmax(9rem,1fr))}
-.stat{background:var(--white);border:1px solid var(--divider);border-radius:var(--r-card);
-  box-shadow:var(--sh-card);padding:var(--s4);display:flex;flex-direction:column;gap:.3rem}
-.stat__l{display:flex;align-items:center;gap:.4rem;font-size:var(--fs-label);font-weight:500;color:var(--slate)}
-.stat__n{font-size:1.65rem;font-weight:700;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
-.stat__n.sm{font-size:1.05rem;font-family:var(--f-mono);font-weight:500}
-
-.readonly{background:var(--soft);border:1px dashed var(--divider);border-radius:var(--r-control);
-  padding:var(--s3) var(--s4);display:flex;gap:var(--s3);align-items:flex-start}
-.readonly p{font-family:var(--f-ar-body);font-size:var(--fs-caption);color:var(--slate);line-height:1.6}
-.readonly .i{color:var(--slate);flex:0 0 auto;margin-top:2px}
-
-.histrow{display:flex;align-items:center;gap:var(--s3);padding:var(--s4) var(--s5);
-  border-bottom:1px solid var(--divider);text-decoration:none;color:inherit;min-width:0}
-.histrow:last-child{border-bottom:none}
-.histrow:hover{background:var(--row-hover)}
-.histrow:focus-visible{outline:none;box-shadow:inset var(--sh-focus)}
-.histrow__b{min-width:0;flex:1 1 auto;display:flex;flex-direction:column;gap:.2rem}
-.histrow__t{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2) var(--s3)}
-.histrow__s{font-weight:600;font-size:var(--fs-sec);color:var(--ink)}
-.histrow__m{display:flex;flex-wrap:wrap;gap:.2rem var(--s4);font-size:var(--fs-caption);color:var(--slate)}
-.histrow__go{color:var(--slate);flex:0 0 auto}
-
-.sortbar{display:flex;flex-wrap:wrap;gap:var(--s3);align-items:flex-end}
-#profileview:focus{outline:none}
-.f__v.muted{color:var(--gray);font-family:var(--f-ar-body)}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
 <symbol id="ic-home" viewBox="0 0 24 24"><path d="M3.5 10.6 12 3.8l8.5 6.8"/><path d="M5.6 9.6V19a1.2 1.2 0 0 0 1.2 1.2h3V15h4.4v5.2h3A1.2 1.2 0 0 0 18.4 19V9.6"/></symbol>
@@ -792,6 +836,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
 <symbol id="ic-note" viewBox="0 0 24 24"><path d="M4.6 5.6a2 2 0 0 1 2-2h10.8a2 2 0 0 1 2 2v9.2l-4.6 4.6H6.6a2 2 0 0 1-2-2z"/><path d="M19.4 14.8h-4.6v4.6"/><path d="M8.4 9h7.2M8.4 12.4h4.6"/></symbol>
 <symbol id="ic-list" viewBox="0 0 24 24"><path d="M8.6 6.6h11.8M8.6 12h11.8M8.6 17.4h11.8"/><circle cx="4.6" cy="6.6" r="1.2" fill="currentColor" stroke="none"/><circle cx="4.6" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="4.6" cy="17.4" r="1.2" fill="currentColor" stroke="none"/></symbol>
 <symbol id="ic-image" viewBox="0 0 24 24"><rect x="3.4" y="4.6" width="17.2" height="14.8" rx="2.2"/><circle cx="8.8" cy="9.6" r="1.6"/><path d="m4.4 17.4 4.8-4.4 3.4 3 3-2.6 4 3.6"/></symbol>
+<symbol id="ic-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M3.6 12h16.8"/><path d="M12 3.4a13 13 0 0 1 0 17.2M12 3.4a13 13 0 0 0 0 17.2"/></symbol>
 </defs></svg>
 
 <a class="skip" href="#main">تخطَّ إلى المحتوى</a>
@@ -806,11 +851,11 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
     <nav aria-label="التنقل الرئيسي" style="display:contents">
       <p class="side__grp">العمل اليومي</p>
       <a class="navitem" href="dashboard.html"><svg class="i" aria-hidden="true"><use href="#ic-home"/></svg><span class="navitem__lbl">الرئيسية</span></a>
-      <a class="navitem" href="requests.html"><svg class="i" aria-hidden="true"><use href="#ic-request"/></svg><span class="navitem__lbl">طلبات النقل</span></a>
-      <a class="navitem" href="#" aria-current="page"><svg class="i" aria-hidden="true"><use href="#ic-users"/></svg><span class="navitem__lbl">العملاء</span></a>
+      <a class="navitem" href="requests.html"><svg class="i" aria-hidden="true"><use href="#ic-request"/></svg><span class="navitem__lbl">طلبات النقل</span><span class="navitem__count">5</span></a>
+      <a class="navitem" href="customers.html"><svg class="i" aria-hidden="true"><use href="#ic-users"/></svg><span class="navitem__lbl">العملاء</span></a>
       <p class="side__grp">الموقع الإلكتروني</p>
       <a class="navitem" href="services.html"><svg class="i" aria-hidden="true"><use href="#ic-service"/></svg><span class="navitem__lbl">الخدمات</span></a>
-      <a class="navitem" href="content.html" data-nav="content"><svg class="i" aria-hidden="true"><use href="#ic-content"/></svg><span class="navitem__lbl">المحتوى</span></a>
+      <a class="navitem" href="#" aria-current="page" data-nav="content"><svg class="i" aria-hidden="true"><use href="#ic-content"/></svg><span class="navitem__lbl">المحتوى</span></a>
       <a class="navitem" href="media.html" data-nav="media"><svg class="i" aria-hidden="true"><use href="#ic-image"/></svg><span class="navitem__lbl">الوسائط والأصول</span></a>
       <p class="side__grp">النظام</p>
       <a class="navitem" href="activity.html" data-nav="activity"><svg class="i" aria-hidden="true"><use href="#ic-bell"/></svg><span class="navitem__lbl">الإشعارات والنشاط</span><span class="navitem__count" data-navcount="activity" hidden></span></a>
@@ -835,7 +880,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
       <button class="iconbtn hdr__menu" id="menubtn" aria-label="فتح القائمة" aria-expanded="false" aria-controls="drawer">
         <svg class="i" aria-hidden="true"><use href="#ic-menu"/></svg>
       </button>
-      <p class="hdr__ctx">العملاء<span>عون الدرب للنقل المتخصص</span></p>
+      <p class="hdr__ctx">المحتوى<span>عون الدرب للنقل المتخصص</span></p>
       <div class="hdr__search">
         <svg class="i" aria-hidden="true"><use href="#ic-search"/></svg>
         <label class="sr" for="gsearch">بحث في الطلبات والعملاء</label>
@@ -849,44 +894,18 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
           <div class="pop" id="notifpop" hidden role="dialog" aria-label="التنبيهات">
             <div class="pop__h"><span class="pop__t">التنبيهات</span>
               <button class="btn btn--ghost btn--sm" id="readall">تعليم الكل كمقروء</button></div>
-            <div class="pop__list" id="notiflist">
-              <a class="notif" href="requests.html" data-nid="stale">
-                <span class="notif__unread" aria-hidden="true"></span>
-                <span class="notif__i notif__i--warn"><svg class="i i--sm" aria-hidden="true"><use href="#ic-clock"/></svg></span>
-                <span class="notif__b"><span class="notif__t">طلبان في «قيد المراجعة» منذ أكثر من يوم</span>
-                <span class="notif__m" data-when="الآن">الآن</span></span></a>
-              <a class="notif" href="requests.html#REQ-2026-0150" data-nid="new:REQ-2026-0150">
-                <span class="notif__unread" aria-hidden="true"></span>
-                <span class="notif__i notif__i--new"><svg class="i i--sm" aria-hidden="true"><use href="#ic-newdot"/></svg></span>
-                <span class="notif__b"><span class="notif__t">طلب جديد من أمل الصاعدي — النقل بواسطة الكرسي الكهربائي</span>
-                <span class="notif__m" data-when="قبل ساعتين">قبل ساعتين</span></span></a>
-              <a class="notif" href="requests.html#REQ-2026-0143" data-nid="new:REQ-2026-0143">
-                <span class="notif__unread" aria-hidden="true"></span>
-                <span class="notif__i notif__i--new"><svg class="i i--sm" aria-hidden="true"><use href="#ic-newdot"/></svg></span>
-                <span class="notif__b"><span class="notif__t">طلب جديد من هند الزهراني — النقل بواسطة الكرسي الكهربائي</span>
-                <span class="notif__m" data-when="قبل 12 ساعة">قبل 12 ساعة</span></span></a>
-              <a class="notif" href="requests.html#REQ-2026-0148" data-nid="new:REQ-2026-0148">
-                <span class="notif__unread" aria-hidden="true"></span>
-                <span class="notif__i notif__i--new"><svg class="i i--sm" aria-hidden="true"><use href="#ic-newdot"/></svg></span>
-                <span class="notif__b"><span class="notif__t">طلب جديد من عبدالله الشهري — النقل إلى المستشفيات والمراكز الطبية</span>
-                <span class="notif__m" data-when="قبل 14 ساعة">قبل 14 ساعة</span></span></a>
-              <a class="notif" href="requests.html#REQ-2026-0147" data-nid="st:REQ-2026-0147:confirmed">
-                <span class="notif__unread" aria-hidden="true"></span>
-                <span class="notif__i notif__i--ok"><svg class="i i--sm" aria-hidden="true"><use href="#ic-checkcircle"/></svg></span>
-                <span class="notif__b"><span class="notif__t">الطلب REQ-2026-0147 أصبح «مؤكد» — منيرة الدوسري</span>
-                <span class="notif__m" data-when="قبل 16 ساعة">قبل 16 ساعة</span></span></a>
-            </div>
-            <div class="pop__f"><a class="btn btn--ghost btn--sm" href="activity.html" style="width:100%">عرض كل التنبيهات (5 من 9)</a></div>
+            <div class="pop__list" id="notiflist"></div>
+            <div class="pop__f"><a class="btn btn--ghost btn--sm" href="activity.html" style="width:100%">عرض كل التنبيهات</a></div>
           </div>
         </span>
         <span class="wrap-rel">
           <button class="who" id="whobtn" aria-expanded="false" aria-controls="whopop">
-            <span class="who__av" aria-hidden="true">ن ع</span>
-            <span class="who__n">نورة العتيبي<span id="whorole">مدير النظام</span></span>
+            <span class="who__av" aria-hidden="true">ع د</span>
+            <span class="who__n" id="whoname">—<span id="whorole"></span></span>
           </button>
           <div class="pop" id="whopop" hidden role="menu" aria-label="حساب المستخدم" style="width:min(17rem,calc(100vw - 2rem))">
-            <div class="menu__id"><span class="who__av" aria-hidden="true">ن ع</span>
-              <span><b>نورة العتيبي</b><span id="whorole2">مدير النظام</span></span></div>
+            <div class="menu__id"><span class="who__av" aria-hidden="true">ع د</span>
+              <span><b id="whoname2">—</b><span id="whorole2"></span></span></div>
             <button class="menu__i" role="menuitem"><svg class="i i--sm" aria-hidden="true"><use href="#ic-user"/></svg>معلومات الحساب</button>
             <span class="menu__sep"></span>
             <button class="menu__i menu__i--danger" role="menuitem"><svg class="i i--sm" aria-hidden="true"><use href="#ic-logout"/></svg>تسجيل الخروج</button>
@@ -897,183 +916,126 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
 
     <main class="content" id="main">
 
-      <div class="alert alert--info demobar">
-        <svg class="i alert__i" aria-hidden="true"><use href="#ic-info"/></svg>
-        <span><span class="alert__t">بيانات تجريبية للعرض</span>
-          <span class="alert__b">سجلات العملاء أدناه مُشتقّة من طلبات النقل نفسها — عدد الطلبات وآخر نشاط محسوبان من السجلات، وليست أرقاماً مُدخلة. البحث والتصفية والتعديل تعمل فعلياً.</span></span>
-        <span class="roles">
-          <span class="roles__sw" role="group" aria-label="معاينة الصلاحيات">
-            <button id="roleFull" aria-pressed="true">صلاحية كاملة</button>
-            <button id="roleView" aria-pressed="false">عرض فقط</button>
-          </span>
-        </span>
-      </div>
-
-      <!-- ============ LIST ============ -->
-      <section id="listview">
+      <!-- ============ OVERVIEW ============ -->
+      <section id="overview">
         <div class="page" style="margin-bottom:var(--s6)">
           <div class="page__t">
-            <h1 class="page__h">العملاء</h1>
-            <p class="page__d">يُنشأ سجل العميل تلقائياً عند تسجيل أول طلب برقم جواله، ويجمع كل طلباته في مكان واحد.</p>
+            <h1 class="page__h">المحتوى</h1>
+            <p class="page__d">المحتوى المنشور على الموقع الإلكتروني. اختر قسماً لتعديله، ثم انشر التغييرات إلى الموقع.</p>
           </div>
-        </div>
-
-        <div class="card">
-          <div class="card__h" style="display:block;padding-block:var(--s5)">
-            <div class="toolbar">
-              <div class="tb__search">
-                <svg class="i" aria-hidden="true"><use href="#ic-search"/></svg>
-                <label class="sr" for="q">ابحث في العملاء</label>
-                <input id="q" type="search" placeholder="اسم العميل أو رقم الجوال">
-              </div>
-              <div class="tb__f">
-                <label for="factive">النشاط</label>
-                <span class="tb__sel"><svg class="i i--sm" aria-hidden="true"><use href="#ic-chevron"/></svg>
-                <select id="factive">
-                  <option value="">كل العملاء</option>
-                  <option value="open">لديه طلب نشط</option>
-                  <option value="none">بدون طلبات نشطة</option>
-                </select></span>
-              </div>
-              <div class="tb__f">
-                <label for="fsort">الترتيب</label>
-                <span class="tb__sel"><svg class="i i--sm" aria-hidden="true"><use href="#ic-chevron"/></svg>
-                <select id="fsort">
-                  <option value="recent">الأحدث نشاطاً</option>
-                  <option value="most">الأكثر طلباً</option>
-                  <option value="name">الاسم</option>
-                </select></span>
-              </div>
-            </div>
-            <div class="applied" id="applied" hidden style="margin-top:var(--s4)">
-              <span>التصفية المطبّقة:</span>
-              <span id="chips" style="display:contents"></span>
-              <button class="btn btn--ghost btn--sm" id="reset">إعادة تعيين الكل</button>
-            </div>
-            <p class="count" id="count" style="margin-top:var(--s4)"></p>
-          </div>
-
-          <div id="results" data-state="ready">
-            <div class="state state--ready">
-              <div class="tbl-wrap"><table class="tbl">
-                <caption class="sr">قائمة العملاء</caption>
-                <thead><tr>
-                  <th scope="col">العميل</th><th scope="col">رقم الجوال</th>
-                  <th scope="col">عدد الطلبات</th><th scope="col">آخر طلب</th>
-                  <th scope="col">حالة آخر طلب</th><th scope="col"><span class="sr">إجراءات</span></th>
-                </tr></thead>
-                <tbody id="rows"></tbody>
-              </table></div>
-              <div class="reclist" id="cards"></div>
-              <div class="pager" id="pager"></div>
-            </div>
-
-            <div class="state state--loading">
-              <div class="skelrow"><span class="skel skel--line" style="width:22%"></span><span class="skel skel--line" style="width:18%"></span><span class="skel skel--line" style="width:26%"></span></div>
-              <div class="skelrow"><span class="skel skel--line" style="width:22%"></span><span class="skel skel--line" style="width:18%"></span><span class="skel skel--line" style="width:26%"></span></div>
-              <div class="skelrow"><span class="skel skel--line" style="width:22%"></span><span class="skel skel--line" style="width:18%"></span><span class="skel skel--line" style="width:26%"></span></div>
-              <div class="skelrow"><span class="skel skel--line" style="width:22%"></span><span class="skel skel--line" style="width:18%"></span><span class="skel skel--line" style="width:26%"></span></div>
-            </div>
-
-            <div class="state state--empty"><div class="empty">
-              <span class="empty__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-search"/></svg></span>
-              <span class="empty__t" id="emptyT">لا توجد نتائج مطابقة</span>
-              <span class="empty__b" id="emptyB">لا يوجد عميل يطابق البحث الحالي.</span>
-              <button class="btn btn--secondary" id="emptyReset">إعادة تعيين البحث</button>
-            </div></div>
-
-            <div class="state state--error"><div class="errbox">
-              <span class="empty__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-alert"/></svg></span>
-              <span class="empty__t">تعذّر تحميل العملاء</span>
-              <span class="empty__b">انقطع الاتصال أثناء جلب السجلات. أعد المحاولة.</span>
-              <button class="btn btn--secondary" id="retry"><svg class="i i--sm" aria-hidden="true"><use href="#ic-refresh"/></svg>إعادة المحاولة</button>
-            </div></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============ PROFILE ============ -->
-      <section id="profileview" class="detail hidden" tabindex="-1">
-        <div><p class="page__crumb"><a href="#" id="back"><svg class="i i--sm" aria-hidden="true"><use href="#ic-arrow"/></svg> العودة إلى العملاء</a></p></div>
-
-        <div class="dhead">
-          <div class="dhead__t">
-            <span class="dhead__row">
-              <span class="avatar avatar--lg" id="pAv" aria-hidden="true"></span>
-              <span style="min-width:0">
-                <h1 class="dhead__n" id="pName"></h1>
-                <span class="page__d" id="pSince" style="display:block"></span>
-              </span>
+          <div class="page__a">
+            <span class="langs" role="group" aria-label="لغة المحتوى">
+              <button type="button" id="langAr" aria-pressed="true">العربية</button>
+              <button type="button" id="langEn" aria-pressed="false" disabled
+                      title="لا يوجد محتوى إنجليزي على الموقع حالياً">English</button>
             </span>
           </div>
-          <div class="dhead__a">
-            <button class="btn btn--secondary modonly" id="editbtn"><svg class="i i--sm" aria-hidden="true"><use href="#ic-edit"/></svg>تعديل البيانات</button>
-          </div>
         </div>
 
-        <div class="stats" id="pStats"></div>
+        <div class="pub" id="pubbar">
+          <span class="pub__b">
+            <span class="pub__t" id="pubT">الموقع محدَّث</span>
+            <span class="pub__d" id="pubD"></span>
+          </span>
+          <span class="pub__a">
+            <button class="btn btn--primary" id="publish">
+              <svg class="i i--sm" aria-hidden="true"><use href="#ic-globe"/></svg>نشر إلى الموقع</button>
+          </span>
+        </div>
 
-        <div class="dgrid">
-          <div style="display:flex;flex-direction:column;gap:var(--s5);min-width:0">
-            <section class="card" aria-labelledby="hist-h">
-              <div class="card__h"><h2 class="card__t" id="hist-h">سجل الطلبات</h2>
-                <span class="count" id="histCount"></span></div>
-              <div class="card__b card__b--flush" id="histList"></div>
-            </section>
+        <div id="areasBox" data-state="loading">
+          <div class="state state--ready"><div class="areas" id="areas"></div></div>
+          <div class="state state--loading">
+            <div class="areas">
+              <div class="area"><span class="skel skel--line" style="width:50%"></span><span class="skel skel--line" style="width:80%"></span></div>
+              <div class="area"><span class="skel skel--line" style="width:50%"></span><span class="skel skel--line" style="width:80%"></span></div>
+              <div class="area"><span class="skel skel--line" style="width:50%"></span><span class="skel skel--line" style="width:80%"></span></div>
+              <div class="area"><span class="skel skel--line" style="width:50%"></span><span class="skel skel--line" style="width:80%"></span></div>
+              <div class="area"><span class="skel skel--line" style="width:50%"></span><span class="skel skel--line" style="width:80%"></span></div>
+              <div class="area"><span class="skel skel--line" style="width:50%"></span><span class="skel skel--line" style="width:80%"></span></div>
+            </div>
           </div>
-
-          <div style="display:flex;flex-direction:column;gap:var(--s5);min-width:0">
-            <section class="card" aria-labelledby="info-h">
-              <div class="card__h"><h2 class="card__t" id="info-h">بيانات العميل</h2>
-                <span class="count" id="editHint" hidden>وضع التعديل</span></div>
-
-              <div class="card__b" id="infoView">
-                <div class="dl dl--one">
-                  <div class="f"><span class="f__k">الاسم</span><span class="f__v" id="iName"></span></div>
-                  <div class="f"><span class="f__k">رقم الجوال</span><span class="f__v ltr" id="iPhone"></span></div>
-                  <div class="f"><span class="f__k">أول طلب</span><span class="f__v ltr" id="iFirst"></span></div>
-                  <div class="f"><span class="f__k">مصدر أول طلب</span><span class="f__v" id="iSource"></span></div>
-                  <div class="f"><span class="f__k">ملاحظات</span><span class="f__v" id="iNotes"></span></div>
-                </div>
-                <div class="contact" style="margin-top:var(--s5)">
-                  <a class="btn btn--secondary" id="cCall"><svg class="i i--sm" aria-hidden="true"><use href="#ic-phone"/></svg>اتصال</a>
-                  <a class="btn btn--secondary" id="cWa" target="_blank" rel="noopener"><svg class="i i--sm" aria-hidden="true"><use href="#ic-chat"/></svg>واتساب</a>
-                  <button class="btn btn--ghost" id="cCopy"><svg class="i i--sm" aria-hidden="true"><use href="#ic-copy"/></svg>نسخ الرقم</button>
-                </div>
-              </div>
-
-              <form class="card__b" id="infoEdit" hidden novalidate>
-                <div class="editgrid" style="grid-template-columns:minmax(0,1fr)">
-                  <div class="field">
-                    <label class="field__label" for="eName">الاسم <span class="field__req">(مطلوب)</span></label>
-                    <input class="ctl" id="eName" type="text">
-                    <span class="field__err" id="errName" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
-                  </div>
-                  <div class="field">
-                    <label class="field__label" for="ePhone">رقم الجوال <span class="field__req">(مطلوب)</span></label>
-                    <input class="ctl ltr" id="ePhone" type="text" inputmode="numeric">
-                    <span class="field__help">رقم الجوال هو هوية العميل — تغييره ينقل كل طلباته إلى الرقم الجديد.</span>
-                    <span class="field__err" id="errPhone" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
-                  </div>
-                  <div class="field">
-                    <label class="field__label" for="eNotes">ملاحظات</label>
-                    <textarea class="ctl" id="eNotes" rows="3" style="min-height:84px;font-family:var(--f-ar-body);line-height:1.7"></textarea>
-                    <span class="field__help">ملاحظة داخلية عن العميل — لا تظهر له.</span>
-                  </div>
-                </div>
-                <div class="readonly" style="margin-top:var(--s5)">
-                  <svg class="i i--sm" aria-hidden="true"><use href="#ic-info"/></svg>
-                  <p>عدد الطلبات وتاريخ أول طلب وآخر نشاط تُحسب من سجل الطلبات ولا تُعدَّل يدوياً.</p>
-                </div>
-                <div class="contact" style="margin-top:var(--s5)">
-                  <button class="btn btn--primary" type="submit">حفظ التغييرات</button>
-                  <button class="btn btn--ghost" type="button" id="cancelEdit">تراجع</button>
-                </div>
-              </form>
-            </section>
-          </div>
+          <div class="state state--error"><div class="errbox">
+            <span class="empty__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-alert"/></svg></span>
+            <span class="empty__t">تعذّر تحميل المحتوى</span>
+            <span class="empty__b">انقطع الاتصال أثناء جلب أقسام المحتوى. لم يُفقد أي شيء — أعد المحاولة.</span>
+            <button class="btn btn--secondary" id="retryOverview"><svg class="i i--sm" aria-hidden="true"><use href="#ic-refresh"/></svg>إعادة المحاولة</button>
+          </div></div>
         </div>
       </section>
+
+      <!-- ============ EDITOR ============ -->
+      <section id="editor" class="hidden" tabindex="-1">
+        <p class="crumb"><a href="#" id="back">
+          <svg class="i i--sm" aria-hidden="true"><use href="#ic-arrow"/></svg>العودة إلى المحتوى</a></p>
+
+        <div class="page" style="margin-bottom:var(--s6)">
+          <div class="page__t">
+            <h1 class="page__h" id="edTitle"></h1>
+            <p class="page__d" id="edDesc"></p>
+          </div>
+          <div class="page__a">
+            <button class="btn btn--secondary" id="edCancel">تراجع عن التغييرات</button>
+            <button class="btn btn--primary modonly" id="edSave">
+              <svg class="i i--sm" aria-hidden="true"><use href="#ic-checks"/></svg>حفظ</button>
+          </div>
+        </div>
+
+        <div class="readonly" id="edNotice" hidden style="margin-bottom:var(--s5)">
+          <svg class="i i--sm" aria-hidden="true"><use href="#ic-info"/></svg>
+          <p id="edNoticeT"></p>
+        </div>
+
+        <div id="edBox" data-state="loading">
+          <div class="state state--ready">
+
+            <!-- fixed fields -->
+            <div class="card" id="fieldsCard" hidden>
+              <div class="card__h"><h2 class="card__t">نصوص القسم</h2></div>
+              <div class="card__b"><div class="fields" id="fields"></div></div>
+            </div>
+
+            <!-- repeatable records -->
+            <div id="recsWrap" hidden style="margin-top:var(--s6)">
+              <div class="card">
+                <div class="card__h" style="display:block;padding-block:var(--s5)">
+                  <div class="toolbar" style="justify-content:space-between">
+                    <div class="tb__search">
+                      <svg class="i" aria-hidden="true"><use href="#ic-search"/></svg>
+                      <label class="sr" for="recq">ابحث في السجلات</label>
+                      <input id="recq" type="search" placeholder="ابحث في العناوين والنصوص">
+                    </div>
+                    <button class="btn btn--secondary btn--sm modonly" id="recAdd" hidden>
+                      <svg class="i i--sm" aria-hidden="true"><use href="#ic-plus"/></svg>إضافة سجل</button>
+                  </div>
+                  <p class="count" id="recCount" style="margin-top:var(--s4)"></p>
+                </div>
+                <div class="card__b">
+                  <div class="recs" id="recs"></div>
+                  <div class="empty" id="recEmpty" hidden>
+                    <span class="empty__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-content"/></svg></span>
+                    <span class="empty__t" id="recEmptyT"></span>
+                    <span class="empty__b" id="recEmptyB"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div class="state state--loading">
+            <div class="skelrow"><span class="skel skel--line" style="width:22%"></span><span class="skel skel--line" style="width:60%"></span></div>
+            <div class="skelrow"><span class="skel skel--line" style="width:22%"></span><span class="skel skel--line" style="width:60%"></span></div>
+            <div class="skelrow"><span class="skel skel--line" style="width:22%"></span><span class="skel skel--line" style="width:60%"></span></div>
+          </div>
+          <div class="state state--error"><div class="errbox">
+            <span class="empty__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-alert"/></svg></span>
+            <span class="empty__t">تعذّر تحميل هذا القسم</span>
+            <span class="empty__b">لم يُفقد أي شيء — أعد المحاولة.</span>
+            <button class="btn btn--secondary" id="retryArea"><svg class="i i--sm" aria-hidden="true"><use href="#ic-refresh"/></svg>إعادة المحاولة</button>
+          </div></div>
+        </div>
+      </section>
+
     </main>
   </div>
 </div>
@@ -1088,10 +1050,10 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   <p class="side__grp">العمل اليومي</p>
   <a class="navitem" href="dashboard.html"><svg class="i" aria-hidden="true"><use href="#ic-home"/></svg><span class="navitem__lbl">الرئيسية</span></a>
   <a class="navitem" href="requests.html"><svg class="i" aria-hidden="true"><use href="#ic-request"/></svg><span class="navitem__lbl">طلبات النقل</span></a>
-  <a class="navitem" href="#" aria-current="page"><svg class="i" aria-hidden="true"><use href="#ic-users"/></svg><span class="navitem__lbl">العملاء</span></a>
+  <a class="navitem" href="customers.html"><svg class="i" aria-hidden="true"><use href="#ic-users"/></svg><span class="navitem__lbl">العملاء</span></a>
   <p class="side__grp">الموقع الإلكتروني</p>
   <a class="navitem" href="services.html"><svg class="i" aria-hidden="true"><use href="#ic-service"/></svg><span class="navitem__lbl">الخدمات</span></a>
-  <a class="navitem" href="content.html" data-nav="content"><svg class="i" aria-hidden="true"><use href="#ic-content"/></svg><span class="navitem__lbl">المحتوى</span></a>
+  <a class="navitem" href="#" aria-current="page" data-nav="content"><svg class="i" aria-hidden="true"><use href="#ic-content"/></svg><span class="navitem__lbl">المحتوى</span></a>
   <a class="navitem" href="media.html" data-nav="media"><svg class="i" aria-hidden="true"><use href="#ic-image"/></svg><span class="navitem__lbl">الوسائط والأصول</span></a>
   <p class="side__grp">النظام</p>
   <a class="navitem" href="activity.html" data-nav="activity"><svg class="i" aria-hidden="true"><use href="#ic-bell"/></svg><span class="navitem__lbl">الإشعارات والنشاط</span></a>
@@ -1099,6 +1061,15 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   <a class="navitem" href="users.html"><svg class="i" aria-hidden="true"><use href="#ic-shield"/></svg><span class="navitem__lbl">المستخدمون والصلاحيات</span></a>
   <a class="navitem" href="settings.html"><svg class="i" aria-hidden="true"><use href="#ic-settings"/></svg><span class="navitem__lbl">الإعدادات</span></a>
 </nav>
+
+<div class="modalwrap" id="confirm" hidden role="dialog" aria-modal="true" aria-labelledby="confT">
+  <div class="modal">
+    <div class="modal__h"><span class="modal__ic" id="confIc"><svg class="i i--lg" aria-hidden="true"><use href="#ic-alert"/></svg></span>
+      <div><h2 class="modal__t" id="confT"></h2><p class="modal__b" id="confB"></p></div></div>
+    <div class="modal__f"><button class="btn btn--primary" id="confOk"></button>
+      <button class="btn btn--ghost" id="confNo">تراجع</button></div>
+  </div>
+</div>
 
 <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
 
@@ -1109,468 +1080,812 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   var $ = function(id){ return document.getElementById(id); };
   var el = function(t,c){ var n=document.createElement(t); if(c) n.className=c; return n; };
 
-  var SERVICES = [
-    "النقل بواسطة الكرسي المتحرك","النقل بواسطة الكرسي الكهربائي","النقل بواسطة السرير الطبي",
-    "خدمة مساعد السائق","النقل اليومي","النقل إلى المستشفيات والمراكز الطبية","التنقل للمناسبات الاجتماعية"
-  ];
-  var ST = {
-    "new":{label:"جديد",cls:"new",icon:"ic-newdot"},
-    "review":{label:"قيد المراجعة",cls:"review",icon:"ic-clock"},
-    "confirmed":{label:"مؤكد",cls:"confirmed",icon:"ic-checkcircle"},
-    "done":{label:"مكتمل",cls:"done",icon:"ic-checks"},
-    "cancel":{label:"ملغي",cls:"cancel",icon:"ic-xcircle"}
+  /* ======================================================================
+     المحتوى — RECOVERY 02
+
+     Six approved content areas, two shapes:
+
+       fields  من نحن، معلومات التواصل   — a fixed set of text regions
+       list    ما يميزنا، الخدمات،        — records with an order and a
+               الأسئلة الشائعة، آراء العملاء   published flag
+
+     Everything a save touches is one record: one field key in one language,
+     or one row. There is no "save section" call, so editing the About lead
+     cannot disturb a service and editing Arabic cannot reach English (§20).
+
+     The public site is a static page. Saving stores; publishing writes the
+     stored content back into the page's marked regions. The two are separate
+     buttons on purpose — an administrator can draft several edits and put
+     them live in one deliberate act.
+     ====================================================================== */
+
+  var AREA_ICON = {
+    about:"ic-content", features:"ic-checks", services:"ic-service",
+    faq:"ic-info", testimonials:"ic-chat", contact:"ic-phone"
   };
-  var OPEN = { "new":1, "review":1, "confirmed":1 };
+  var AREA_DESC = {
+    about:"الفقرات المنشورة في قسم «من نحن» على الصفحة الرئيسية.",
+    features:"العناصر الستة المنشورة في قسم «ما يميزنا»، بترتيبها على الصفحة.",
+    services:"الخدمات السبع المعتمدة كما تظهر في قسم «خدماتنا».",
+    faq:"الأسئلة الشائعة. لا يوجد قسم للأسئلة على الموقع حالياً.",
+    testimonials:"آراء العملاء. لا يوجد قسم للآراء على الموقع حالياً.",
+    contact:"بيانات التواصل المنشورة في قسم «تواصل معنا»."
+  };
 
-  /* ---------- the request records — the same demo set as طلبات النقل ----
-     Customers are DERIVED from these, keyed by phone number. Nothing about a
-     customer is typed in twice: the request count, the first and last
-     activity and the status mix are all computed, never stored. That is what
-     keeps one customer to one record however many times they call.        */
-  /* Customers come from the database now (RECOVERY 01 §29). The eighteen
-     literals that used to sit here were a copy of requests.html's array, kept
-     in step by hand; the server derives the same grouping from the real rows,
-     so the two modules cannot drift apart again. */
-  var REQUESTS = [];
+  var state = {
+    lang: "ar",
+    area: null,          /* the open area, or null on the overview */
+    data: null,          /* what the server last sent for that area */
+    dirty: {},           /* field key -> new value, not yet saved */
+    recDirty: {},        /* record id -> {title, body, …} */
+    saving: false,
+    media: []            /* the media library, loaded once, for image pickers */
+  };
 
-  /* Administrative notes live on the customer, not on a request. Only some
-     customers have one — the profile states the absence rather than blanking. */
-  var CUST_NOTES = { "0535544352":"يفضّل التواصل عبر الواتساب قبل الساعة 8 مساءً." };
-
-  var digits = function(p){ return String(p||"").replace(/[^0-9]/g,""); };
-  var intl = function(p){ var d=digits(p); return d.indexOf("0")===0 ? "966"+d.slice(1) : d; };
-  var orNull = function(v){ return (v===null||v===undefined||v==="") ? null : v; };
-
-  /* ---------- derive the customer records ------------------------------- */
-  function buildCustomers(){
-    var map = {}, order = [];
-    REQUESTS.forEach(function(r){
-      var k = digits(r.phone);
-      if (!map[k]){ map[k] = { key:k, phone:r.phone, name:r.name, reqs:[] }; order.push(k); }
-      map[k].reqs.push(r);
-    });
-    return order.map(function(k){
-      var c = map[k];
-      c.reqs.sort(function(a,b){ return (b.date||"").localeCompare(a.date||""); });
-      c.count = c.reqs.length;
-      c.last = c.reqs[0];
-      c.done = c.reqs.filter(function(r){ return r.status==="done"; }).length;
-      c.cancelled = c.reqs.filter(function(r){ return r.status==="cancel"; }).length;
-      c.hasOpen = c.reqs.some(function(r){ return OPEN[r.status]; });
-      /* earliest creation across their requests — the relationship's start */
-      c.first = c.reqs.map(function(r){ return r.created; }).sort()[0];
-      /* latest activity = the most recently created request, not the furthest
-         future trip date — a booking for next month is not recent activity */
-      c.lastActivity = c.reqs.map(function(r){ return r.created; }).sort().slice(-1)[0];
-      c.source = c.reqs.slice().sort(function(a,b){ return a.created.localeCompare(b.created); })[0].source;
-      c.notes = CUST_NOTES[k] || null;
-      return c;
-    });
-  }
-  /* Rows arrive already grouped by phone — the same derivation, done once on
-     the server against the real requests instead of twice in two pages. The
-     request list for a profile is fetched when that profile opens, because a
-     customer index does not need every trip every customer ever took. */
-  function fromApi(row){
-    return {
-      key: digits(row.phone), id: row.id, phone: row.phone, name: row.name,
-      reqs: null,                         /* loaded on demand */
-      count: row.requestCount || 0,
-      done:  row.doneCount || 0,
-      last:  { status: row.lastStatus || "new", date: row.lastTripDate,
-               created: row.lastActivity, service: row.lastService || "—" },
-      first: row.firstActivity,
-      lastActivity: row.lastActivity,
-      source: row.firstSource || "—",
-      notes: CUST_NOTES[digits(row.phone)] || null
-    };
-  }
-  var CUSTOMERS = [];
-
-  var PER = 6;
-  var state = { q:"", active:"", sort:"recent", page:1 };
-  var current = null, canModify = true;
-
-  function badge(s){
-    var d = ST[s], n = el("span","badge badge--"+d.cls);
-    n.innerHTML = '<svg class="i" aria-hidden="true"><use href="#'+d.icon+'"/></svg>';
-    n.appendChild(document.createTextNode(d.label));
-    return n;
-  }
-  function initials(name){
-    /* the definite article is not part of a name — "نورة العتيبي" is ن ع */
-    var p = String(name||"").trim().split(/\s+/).map(function(w){
-      return (w.length > 2 && w.slice(0,2) === "ال") ? w.slice(2) : w;
-    });
-    return (p[0]||"").charAt(0) + " " + (p[1]||"").charAt(0);
-  }
-  function whenText(r){
-    if (!r || !orNull(r.date)) return "غير محدد";
-    return orNull(r.time) ? (r.date + " · " + r.time) : r.date;
-  }
+  /* ---------- toast + confirm, the shell's own ------------------------- */
   function toast(msg,bad){
     var t = el("div","toast");
     t.innerHTML = '<span class="toast__i'+(bad?" toast__i--err":"")+'">'+
-      '<svg class="i i--sm" aria-hidden="true"><use href="#'+(bad?"ic-x":"ic-check")+'"/></svg></span><span class="toast__t"></span>';
+      '<svg class="i i--sm" aria-hidden="true"><use href="#'+(bad?"ic-x":"ic-check")+'"/></svg></span>'+
+      '<span class="toast__t"></span>';
     t.querySelector(".toast__t").textContent = msg;
     $("toasts").appendChild(t);
-    window.setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); },4200);
+    window.setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 4200);
   }
 
-  function match(c){
-    if (state.active==="open" && !c.hasOpen) return false;
-    if (state.active==="none" && c.hasOpen) return false;
-    var q = state.q.trim();
-    if (!q) return true;
-    var qd = digits(q);
-    return c.name.indexOf(q)>-1 || (qd.length>2 && digits(c.phone).indexOf(qd)>-1);
+  var confirmCb = null, lastFocusM = null;
+  function ask(title,body,okLabel,cb,danger){
+    $("confT").textContent = title;
+    $("confB").textContent = body;
+    $("confOk").textContent = okLabel;
+    $("confOk").className = "btn " + (danger ? "btn--danger" : "btn--primary");
+    confirmCb = cb;
+    lastFocusM = document.activeElement;
+    $("confirm").hidden = false;
+    $("confOk").focus();
   }
-  function sorted(list){
-    var a = list.slice();
-    if (state.sort==="most") a.sort(function(x,y){ return y.count-x.count; });
-    else if (state.sort==="name") a.sort(function(x,y){ return x.name.localeCompare(y.name,"ar"); });
-    else a.sort(function(x,y){ return (y.lastActivity||"").localeCompare(x.lastActivity||""); });
-    return a;
+  function askClose(){
+    $("confirm").hidden = true;
+    confirmCb = null;
+    if (lastFocusM) lastFocusM.focus();
   }
-  var anyFilter = function(){ return !!(state.q || state.active); };
+  $("confOk").addEventListener("click", function(){ var f=confirmCb; askClose(); if(f) f(); });
+  $("confNo").addEventListener("click", askClose);
+  $("confirm").addEventListener("click", function(e){ if (e.target === $("confirm")) askClose(); });
 
-  /* ---------- list ------------------------------------------------------ */
-  function render(){
-    var all = sorted(CUSTOMERS.filter(match));
-    var pages = Math.max(1, Math.ceil(all.length/PER));
-    if (state.page > pages) state.page = pages;
-    var slice = all.slice((state.page-1)*PER, state.page*PER);
+  /* ---------- unsaved changes (§14) -------------------------------------
+     One source of truth for "is there anything unsaved", used by the leave
+     guard, the browser's own beforeunload, and the publish button. */
+  function dirtyCount(){
+    return Object.keys(state.dirty).length + Object.keys(state.recDirty).length;
+  }
+  function guard(action){
+    var n = dirtyCount();
+    if (!n){ action(); return; }
+    ask("لديك تغييرات غير محفوظة",
+        "سيؤدي الخروج إلى فقدان " + n + (n === 1 ? " تغيير" : " تغييراً") + " لم تُحفظ بعد.",
+        "تجاهل التغييرات", function(){ state.dirty = {}; state.recDirty = {}; action(); }, true);
+  }
+  window.addEventListener("beforeunload", function(e){
+    if (!dirtyCount()) return;
+    e.preventDefault();
+    e.returnValue = "";
+  });
 
-    var box = $("results");
-    if (!all.length){
-      box.setAttribute("data-state","empty");
-      var noData = !anyFilter();
-      $("emptyT").textContent = noData ? "لا يوجد عملاء بعد" : "لا توجد نتائج مطابقة";
-      $("emptyB").textContent = noData
-        ? "يُنشأ سجل العميل تلقائياً عند تسجيل أول طلب برقم جواله."
-        : "لا يوجد عميل يطابق البحث أو التصفية الحالية.";
-      $("emptyReset").hidden = noData;
-    } else {
-      box.setAttribute("data-state","ready");
-    }
-
-    $("count").innerHTML = all.length
-      ? ('عرض <b>'+((state.page-1)*PER+1)+'–'+Math.min(state.page*PER,all.length)+'</b> من <b>'+all.length+'</b> عميلاً')
-      : "";
-
-    var tb = $("rows"), cd = $("cards");
-    tb.textContent = ""; cd.textContent = "";
-
-    slice.forEach(function(c){
-      var tr = el("tr","rowlink");
-      tr.innerHTML =
-        '<td><span class="cust-name"><span class="avatar" aria-hidden="true"></span>'+
-          '<button class="rowbtn"></button></span></td>'+
-        '<td><span class="cell-date phone"></span></td>'+
-        '<td><span class="cell-date cnt"></span></td>'+
-        '<td><span class="cell-date lastd"></span><span class="cell-sub svc"></span></td>'+
-        '<td class="stcell"></td>'+
-        '<td><span class="cell-act"></span></td>';
-      tr.querySelector(".avatar").textContent = initials(c.name);
-      var nb = tr.querySelector(".rowbtn");
-      nb.textContent = c.name;
-      nb.addEventListener("click", function(e){ e.stopPropagation(); openC(c.key); });
-      tr.querySelector(".phone").textContent = c.phone;
-      tr.querySelector(".cnt").textContent = c.count;
-      tr.querySelector(".lastd").textContent = c.last.date || "غير محدد";
-      tr.querySelector(".svc").textContent = c.last.service;
-      tr.querySelector(".stcell").appendChild(badge(c.last.status));
-      var go = el("button","iconbtn");
-      go.setAttribute("aria-label","فتح ملف العميل "+c.name);
-      go.innerHTML = '<svg class="i i--flip" aria-hidden="true"><use href="#ic-chevron"/></svg>';
-      go.addEventListener("click", function(e){ e.stopPropagation(); openC(c.key); });
-      tr.querySelector(".cell-act").appendChild(go);
-      tr.addEventListener("click", function(){ openC(c.key); });
-      tb.appendChild(tr);
-
-      /* mobile card — name, contact, request count, primary action */
-      var a = el("a","reccard"); a.href = "#";
-      a.innerHTML =
-        '<span class="reccard__top"><span class="cust-name"><span class="avatar" aria-hidden="true"></span>'+
-        '<span style="min-width:0"><span class="reccard__n"></span><span class="reccard__s ltrp"></span></span></span>'+
-        '<span class="bslot"></span></span>'+
-        '<span class="reccard__meta"><span>الطلبات <b class="cnt"></b></span>'+
-        '<span>آخر طلب <b class="lastd"></b></span></span>';
-      a.querySelector(".avatar").textContent = initials(c.name);
-      a.querySelector(".reccard__n").textContent = c.name;
-      a.querySelector(".ltrp").textContent = c.phone;
-      a.querySelector(".bslot").appendChild(badge(c.last.status));
-      a.querySelector(".cnt").textContent = c.count;
-      a.querySelector(".lastd").textContent = c.last.date || "غير محدد";
-      a.addEventListener("click", function(e){ e.preventDefault(); openC(c.key); });
-      cd.appendChild(a);
-    });
-
-    var p = $("pager"); p.textContent = "";
-    if (all.length > PER){
-      var info = el("span","pager__c");
-      info.textContent = "صفحة " + state.page + " من " + pages;
-      var nav = el("span","pager__n");
-      var prev = el("button","pager__b");
-      prev.setAttribute("aria-label","الصفحة السابقة");
-      prev.innerHTML = '<svg class="i i--sm" aria-hidden="true"><use href="#ic-chevron"/></svg>';
-      prev.disabled = state.page===1;
-      prev.addEventListener("click", function(){ state.page--; render(); });
-      nav.appendChild(prev);
-      for (var i=1;i<=pages;i++) (function(n){
-        var b = el("button","pager__b"); b.textContent = n;
-        if (n===state.page) b.setAttribute("aria-current","page");
-        b.addEventListener("click", function(){ state.page=n; render(); });
-        nav.appendChild(b);
-      })(i);
-      var next = el("button","pager__b");
-      next.setAttribute("aria-label","الصفحة التالية");
-      next.innerHTML = '<svg class="i i--sm i--flip" aria-hidden="true"><use href="#ic-chevron"/></svg>';
-      next.disabled = state.page===pages;
-      next.addEventListener("click", function(){ state.page++; render(); });
-      nav.appendChild(next);
-      p.appendChild(info); p.appendChild(nav);
-    }
-    chips();
+  /* ---------- overview -------------------------------------------------- */
+  function fmtWhen(s){
+    if (!s) return "لم يُحدَّث بعد";
+    return String(s).slice(0,16).replace(" ", " · ");
   }
 
-  function chips(){
-    var wrap = $("applied"), box = $("chips");
+  function renderOverview(res){
+    state.overview = res;
+    var box = $("areas");
     box.textContent = "";
-    var items = [];
-    if (state.q) items.push({k:"q",t:'بحث: "'+state.q+'"'});
-    if (state.active) items.push({k:"active",t:(state.active==="open"?"لديه طلب نشط":"بدون طلبات نشطة")});
-    wrap.hidden = !items.length;
-    items.forEach(function(it){
-      var c = el("span","chip");
-      c.appendChild(document.createTextNode(it.t));
-      var x = el("button");
-      x.setAttribute("aria-label","إزالة — "+it.t);
-      x.innerHTML = '<svg class="i i--sm" aria-hidden="true"><use href="#ic-x"/></svg>';
-      x.addEventListener("click", function(){
-        state[it.k]="";
-        if (it.k==="q") $("q").value="";
-        if (it.k==="active") $("factive").value="";
-        state.page=1; render();
+    (res.areas || []).forEach(function(a){
+      var card = el("button","area");
+      card.type = "button";
+      card.setAttribute("data-area", a.key);
+
+      var top = el("span","area__top");
+      var ic = el("span","area__ic");
+      ic.innerHTML = '<svg class="i" aria-hidden="true"><use href="#'+(AREA_ICON[a.key]||"ic-content")+'"/></svg>';
+      var nm = el("span","area__n"); nm.textContent = a.label;
+      top.appendChild(nm); top.appendChild(ic);
+      card.appendChild(top);
+
+      var d = el("span","area__m");
+      var seg = el("span");
+      if (a.kind === "list"){
+        seg.innerHTML = "";
+        seg.appendChild(document.createTextNode("السجلات "));
+        var b1 = el("b"); b1.textContent = String(a.records); seg.appendChild(b1);
+        if (a.records) {
+          seg.appendChild(document.createTextNode(" · نشط "));
+          var b2 = el("b"); b2.textContent = String(a.active); seg.appendChild(b2);
+        }
+      } else {
+        seg.appendChild(document.createTextNode("الحقول "));
+        var b3 = el("b"); b3.textContent = String(a.records); seg.appendChild(b3);
+      }
+      d.appendChild(seg);
+      var w = el("span");
+      w.appendChild(document.createTextNode("آخر تحديث "));
+      var ts = el("span","ts"); ts.textContent = fmtWhen(a.updated); w.appendChild(ts);
+      d.appendChild(w);
+      card.appendChild(d);
+
+      var f = el("span","area__f");
+      var act = el("span");
+      act.textContent = res.canEdit ? "تعديل" : "عرض";
+      f.appendChild(act);
+      if (!a.publishable){
+        var badge = el("span","badge badge--cancel");
+        badge.innerHTML = '<svg class="i" aria-hidden="true"><use href="#ic-info"/></svg>';
+        badge.appendChild(document.createTextNode("لا يظهر على الموقع"));
+        f.appendChild(badge);
+      } else {
+        var ch = el("span");
+        ch.innerHTML = '<svg class="i i--sm i--flip" aria-hidden="true"><use href="#ic-chevron"/></svg>';
+        f.appendChild(ch);
+      }
+      card.appendChild(f);
+
+      card.addEventListener("click", function(){ openArea(a.key); });
+      box.appendChild(card);
+    });
+
+    /* the publish bar */
+    var p = res.publish || {};
+    var bar = $("pubbar");
+    if (!p.target){
+      $("pubT").textContent = "النشر غير متاح";
+      $("pubD").textContent = "لم يُعثر على صفحة الموقع على الخادم.";
+      $("publish").disabled = true;
+    } else if (!p.writable){
+      $("pubT").textContent = "النشر غير متاح";
+      $("pubD").textContent = "صفحة الموقع غير قابلة للكتابة على الخادم. تحقّق من صلاحيات الملفات.";
+      $("publish").disabled = true;
+    } else {
+      $("pubT").textContent = "نشر المحتوى إلى الموقع";
+      $("pubD").innerHTML = "";
+      $("pubD").appendChild(document.createTextNode(
+        p.lastAt ? "آخر نشر " : "لم يُنشر من لوحة التحكم بعد."));
+      if (p.lastAt){
+        var t = el("span","ts"); t.textContent = fmtWhen(p.lastAt);
+        $("pubD").appendChild(t);
+        $("pubD").appendChild(document.createTextNode(" — " + (p.lastBy || "")));
+      }
+      $("publish").disabled = !res.canEdit;
+    }
+    bar.classList.remove("is-dirty");
+    $("areasBox").setAttribute("data-state","ready");
+  }
+
+  function loadOverview(){
+    $("areasBox").setAttribute("data-state","loading");
+    return AunAPI.get("/admin/content", { lang: state.lang }).then(renderOverview)
+      .catch(function(err){
+        if (err.status === 401) return;
+        $("areasBox").setAttribute("data-state","error");
+        toast(err.message || "تعذّر تحميل المحتوى", true);
       });
-      c.appendChild(x); box.appendChild(c);
-    });
   }
-  function resetAll(){
-    state.q=""; state.active=""; state.page=1;
-    $("q").value=""; $("factive").value="";
-    render();
-  }
+  $("retryOverview").addEventListener("click", loadOverview);
 
-  /* ---------- profile ---------------------------------------------------- */
-  function findC(k){ for (var i=0;i<CUSTOMERS.length;i++) if (CUSTOMERS[i].key===k) return CUSTOMERS[i]; return null; }
-
-  function openC(k){
-    var c = findC(k);
-    if (!c) return;
-    var show = function(){
-      current = c;
-      $("listview").classList.add("hidden");
-      $("profileview").classList.remove("hidden");
-      paint();
-      $("profileview").focus();
+  /* ---------- the editor ------------------------------------------------ */
+  function openArea(key){
+    guard(function(){
+      state.area = key;
+      state.dirty = {}; state.recDirty = {};
+      $("overview").classList.add("hidden");
+      $("editor").classList.remove("hidden");
+      $("edBox").setAttribute("data-state","loading");
+      $("edTitle").textContent = "";
+      $("edDesc").textContent = AREA_DESC[key] || "";
+      loadArea();
       window.scrollTo(0,0);
-    };
-    /* the index does not carry every trip; the profile does, so load it once */
-    if (c.reqs !== null) { show(); return; }
-    AunAPI.requests({ customer: c.id, per: 100 }).then(function(res){
-      c.reqs = res.rows || [];
-      c.cancelled = c.reqs.filter(function(r){ return r.status === "cancel"; }).length;
-      c.hasOpen   = c.reqs.some(function(r){ return OPEN[r.status]; });
-      show();
-    }).catch(function(err){
-      if (err.status === 401) return;
-      c.reqs = [];
-      show();               /* the profile still opens, with an empty history */
-      toast(err.message || "تعذّر تحميل طلبات هذا العميل", true);
+      $("editor").focus();
+      try { history.replaceState(null, "", "#" + key); } catch(e){}
     });
   }
-  function back(){
-    $("profileview").classList.add("hidden");
-    $("listview").classList.remove("hidden");
-    exitEdit();
-    render();               /* search, filter and page are still in state */
-    window.scrollTo(0,0);
+
+  function backToOverview(){
+    guard(function(){
+      state.area = null;
+      $("editor").classList.add("hidden");
+      $("overview").classList.remove("hidden");
+      try { history.replaceState(null, "", location.pathname); } catch(e){}
+      loadOverview();
+      window.scrollTo(0,0);
+    });
+  }
+  $("back").addEventListener("click", function(e){ e.preventDefault(); backToOverview(); });
+
+  function loadArea(){
+    return AunAPI.get("/admin/content/area", { area: state.area, lang: state.lang })
+      .then(function(res){
+        state.data = res;
+        renderArea(res);
+      })
+      .catch(function(err){
+        if (err.status === 401) return;
+        $("edBox").setAttribute("data-state","error");
+        toast(err.message || "تعذّر تحميل القسم", true);
+      });
+  }
+  $("retryArea").addEventListener("click", loadArea);
+
+  function renderArea(res){
+    $("edTitle").textContent = res.label;
+    document.body.classList.toggle("view-only", !res.canEdit);
+
+    /* the honest notice: where this content does and does not go */
+    var notice = null;
+    if (!res.publishable){
+      notice = "لا يوجد لهذا القسم مكان على الموقع الحالي، فالصفحة المنشورة لا تحتوي عليه. "
+             + "ما يُحفظ هنا يُخزَّن في قاعدة البيانات ويظهر في لوحة التحكم، ولا يظهر للزوار "
+             + "حتى يُعتمد قسم له على الموقع.";
+    } else if (!res.canEdit){
+      notice = "لديك صلاحية عرض هذا القسم دون تعديله.";
+    }
+    $("edNotice").hidden = notice === null;
+    $("edNoticeT").textContent = notice || "";
+
+    renderFields(res);
+    renderRecords(res);
+    $("edBox").setAttribute("data-state","ready");
+    paintSave();
   }
 
-  function stat(label,icon,value,small){
-    var s = el("div","stat");
-    s.innerHTML = '<span class="stat__l"><svg class="i i--sm" aria-hidden="true"><use href="#'+icon+'"/></svg>'+
-      '<span class="lbl"></span></span><span class="stat__n'+(small?" sm":"")+'"></span>';
-    s.querySelector(".lbl").textContent = label;
-    s.querySelector(".stat__n").textContent = value;
-    return s;
+  /* ---------- fixed fields ---------------------------------------------- */
+  function renderFields(res){
+    var wrap = $("fieldsCard"), box = $("fields");
+    box.textContent = "";
+    if (!res.fields.length){ wrap.hidden = true; return; }
+    wrap.hidden = false;
+
+    res.fields.forEach(function(f){
+      var g = el("div","fld");
+      g.setAttribute("data-key", f.key);
+
+      var h = el("div","fld__h");
+      var l = el("label","fld__l");
+      l.setAttribute("for","f-"+f.key);
+      l.textContent = f.label;
+      var c = el("span","fld__c");
+      h.appendChild(l); h.appendChild(c);
+      g.appendChild(h);
+
+      var input;
+      if (f.multiline || f.html){
+        input = el("textarea","ctl");
+        input.rows = f.max > 400 ? 5 : 3;
+      } else {
+        input = el("input","ctl");
+        input.type = "text";
+      }
+      input.id = "f-"+f.key;
+      input.value = f.value;
+      input.maxLength = f.max + 40;      /* the counter is the real limit */
+      input.disabled = !res.canEdit;
+      input.setAttribute("aria-describedby", "e-"+f.key);
+      g.appendChild(input);
+
+      var err = el("p","field__err");
+      err.id = "e-"+f.key;
+      err.hidden = true;
+      g.appendChild(err);
+
+      if (f.html){
+        var hint = el("p","fld__hint");
+        hint.textContent = "يُسمح في هذا الحقل بـ <br> و <b> و <em> و <span class=\"…\"> فقط.";
+        g.appendChild(hint);
+      }
+
+      function count(){
+        var n = input.value.length;
+        c.textContent = n + " / " + f.max;
+        c.classList.toggle("is-over", n > f.max);
+        var changed = input.value !== f.value;
+        g.classList.toggle("is-changed", changed);
+        if (changed) state.dirty[f.key] = input.value; else delete state.dirty[f.key];
+        paintSave();
+      }
+      input.addEventListener("input", count);
+      count();
+
+      box.appendChild(g);
+    });
   }
 
-  function paint(){
-    var c = current;
-    $("pAv").textContent = initials(c.name);
-    $("pName").textContent = c.name;
-    $("pSince").textContent = "عميل منذ " + c.first.slice(0,10) + " · " + c.count + " طلباً";
+  /* ---------- repeatable records ---------------------------------------- */
+  function renderRecords(res){
+    var wrap = $("recsWrap"), box = $("recs");
+    box.textContent = "";
+    if (!res.items.length && !res.canCreate){ wrap.hidden = true; return; }
+    wrap.hidden = false;
 
-    var st = $("pStats"); st.textContent = "";
-    st.appendChild(stat("إجمالي الطلبات","ic-request",c.count));
-    st.appendChild(stat("مكتملة","ic-checks",c.done));
-    st.appendChild(stat("ملغاة","ic-xcircle",c.cancelled));
-    st.appendChild(stat("آخر طلب","ic-calendar",c.last.date || "غير محدد", true));
+    $("recAdd").hidden = !(res.canCreate && res.canEdit);
+    $("recAdd").textContent = "";
+    $("recAdd").innerHTML = '<svg class="i i--sm" aria-hidden="true"><use href="#ic-plus"/></svg>';
+    $("recAdd").appendChild(document.createTextNode(
+      res.area === "faq" ? "إضافة سؤال" : "إضافة رأي"));
 
-    $("iName").textContent = c.name;
-    $("iPhone").textContent = c.phone || "غير متوفر";
-    $("iFirst").textContent = c.first;
-    $("iSource").textContent = c.source || "غير محدد";
-    $("iNotes").textContent = c.notes || "لا توجد ملاحظات على هذا العميل.";
-    if (!c.notes) $("iNotes").classList.add("muted"); else $("iNotes").classList.remove("muted");
+    var q = ($("recq").value || "").trim();
+    var list = res.items.filter(function(r){
+      if (!q) return true;
+      return (r.title + " " + r.body + " " + (r.attribution||"")).indexOf(q) > -1;
+    });
 
-    $("cCall").href = c.phone ? "tel:+"+intl(c.phone) : "#";
-    $("cWa").href   = c.phone ? "https://wa.me/"+intl(c.phone) : "#";
+    $("recCount").innerHTML = "";
+    if (res.items.length){
+      var s = el("span");
+      s.appendChild(document.createTextNode("عرض "));
+      var a = el("b"); a.textContent = String(list.length); s.appendChild(a);
+      s.appendChild(document.createTextNode(" من "));
+      var b = el("b"); b.textContent = String(res.items.length); s.appendChild(b);
+      s.appendChild(document.createTextNode(" سجلاً · نشط "));
+      var c = el("b");
+      c.textContent = String(res.items.filter(function(r){ return r.published; }).length);
+      s.appendChild(c);
+      $("recCount").appendChild(s);
+    }
 
-    /* request history — a summary that hands off to طلبات النقل, never a
-       second copy of that module */
-    $("histCount").textContent = c.count + " طلباً";
-    var hl = $("histList"); hl.textContent = "";
-    if (!c.reqs.length){
-      var e = el("div","empty");
-      e.innerHTML = '<span class="empty__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-inbox"/></svg></span>'+
-        '<span class="empty__t">لا توجد طلبات لهذا العميل</span>'+
-        '<span class="empty__b">سيظهر هنا كل طلب يُسجَّل برقم جواله.</span>';
-      hl.appendChild(e);
+    if (!list.length){
+      $("recEmpty").hidden = false;
+      var none = res.items.length === 0;
+      $("recEmptyT").textContent = none
+        ? (res.area === "faq" ? "لا توجد أسئلة شائعة" : "لا توجد آراء عملاء")
+        : "لا توجد نتائج مطابقة";
+      $("recEmptyB").textContent = none
+        ? "لا يحتوي الموقع على محتوى معتمد لهذا القسم، ولم يُضَف شيء من هنا بعد."
+        : "لا يوجد سجل يطابق البحث الحالي.";
       return;
     }
-    c.reqs.forEach(function(r){
-      var a = el("a","histrow");
-      a.href = "requests.html#" + encodeURIComponent(r.id);
-      a.innerHTML =
-        '<span class="histrow__b">'+
-          '<span class="histrow__t"><span class="histrow__s"></span><span class="bslot"></span></span>'+
-          '<span class="histrow__m"><span class="cell-id"></span>'+
-          '<span class="wq"></span><span class="rt"></span></span>'+
-        '</span><svg class="i histrow__go i--flip" aria-hidden="true"><use href="#ic-chevron"/></svg>';
-      a.querySelector(".histrow__s").textContent = r.service;
-      a.querySelector(".bslot").appendChild(badge(r.status));
-      a.querySelector(".cell-id").textContent = r.id;
-      a.querySelector(".wq").textContent = whenText(r);
-      a.querySelector(".rt").textContent = (r.from||"غير محدد") + " ← " + (r.to||"غير محدد");
-      hl.appendChild(a);
+    $("recEmpty").hidden = true;
+
+    list.forEach(function(r, i){
+      box.appendChild(recordRow(res, r, i, list.length));
     });
   }
 
-  /* ---------- edit: view → edit → save → confirmation -------------------- */
-  function enterEdit(){
-    $("eName").value = current.name;
-    $("ePhone").value = current.phone;
-    $("eNotes").value = current.notes || "";
-    $("infoView").hidden = true; $("infoEdit").hidden = false;
-    $("editHint").hidden = false; $("editbtn").hidden = true;
-    $("eName").focus();
-  }
-  function exitEdit(){
-    $("infoEdit").hidden = true; $("infoView").hidden = false;
-    $("editHint").hidden = true; $("editbtn").hidden = !canModify;
-    $("errName").hidden = true; $("errPhone").hidden = true;
-    $("eName").classList.remove("is-error"); $("ePhone").classList.remove("is-error");
-  }
-  function showErr(id,ctl,msg){
-    $(id).hidden = false; $(id).querySelector("span").textContent = msg;
-    $(ctl).classList.add("is-error");
-  }
-  $("editbtn").addEventListener("click", enterEdit);
-  $("cancelEdit").addEventListener("click", exitEdit);
-  $("infoEdit").addEventListener("submit", function(e){
-    e.preventDefault();
-    $("errName").hidden = true; $("errPhone").hidden = true;
-    $("eName").classList.remove("is-error"); $("ePhone").classList.remove("is-error");
-    var n = $("eName").value.trim(), p = digits($("ePhone").value);
-    var ok = true, first = null;
-    if (!n){ showErr("errName","eName","اسم العميل مطلوب."); ok=false; first=$("eName"); }
-    if (!/^05\d{8}$/.test(p)){ showErr("errPhone","ePhone","أدخل رقم جوال صحيح يبدأ بـ 05 ويتكوّن من 10 أرقام."); ok=false; first=first||$("ePhone"); }
-    /* the phone is the identity — refuse a merge into an existing record */
-    if (ok && p!==current.key){
-      var clash = findC(p);
-      if (clash){ showErr("errPhone","ePhone","هذا الرقم مسجّل باسم "+clash.name+" — لا يمكن دمج السجلين من هنا."); ok=false; first=$("ePhone"); }
-    }
-    if (!ok){ first.focus(); toast("تحقّق من الحقول المميّزة",true); return; }
+  function recordRow(res, r, i, total){
+    var card = el("div","rec" + (r.published ? "" : " is-off"));
+    card.setAttribute("data-id", String(r.id));
 
-    current.name = n;
-    current.notes = $("eNotes").value.trim() || null;
-    CUST_NOTES[current.key] = current.notes;
-    if (p !== current.key){
-      /* moving the identity moves the whole history with it */
-      current.reqs.forEach(function(r){ r.phone = p; r.name = n; });
-      current.key = p; current.phone = p;
-    } else {
-      current.reqs.forEach(function(r){ r.name = n; });
-    }
-    exitEdit(); paint(); toast("تم حفظ بيانات العميل");
-  });
+    /* ---- header: order, title, state, expand ---- */
+    var h = el("div","rec__h");
 
-  $("cCopy").addEventListener("click", function(){
-    var p = current && current.phone;
-    if (!p){ toast("لا يوجد رقم لنسخه",true); return; }
-    var done = function(){ toast("نُسخ رقم الجوال"); };
-    if (navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(p).then(done, function(){ toast("تعذّر النسخ",true); });
-    } else {
-      var ta = el("textarea"); ta.value = p; document.body.appendChild(ta); ta.select();
-      try { document.execCommand("copy"); done(); } catch(e){ toast("تعذّر النسخ",true); }
-      document.body.removeChild(ta);
-    }
-  });
+    var ord = el("span","rec__ord");
+    var up = el("button","rec__mv"); up.type="button";
+    up.innerHTML = '<svg class="i i--sm" aria-hidden="true" style="transform:rotate(-90deg)"><use href="#ic-chevron"/></svg>';
+    up.setAttribute("aria-label","نقل «"+ (r.title||"السجل") +"» للأعلى");
+    up.disabled = i === 0 || !res.canEdit;
+    up.addEventListener("click", function(){ move(r.id, -1); });
+    var num = el("span","rec__num"); num.textContent = String(i+1);
+    var dn = el("button","rec__mv"); dn.type="button";
+    dn.innerHTML = '<svg class="i i--sm" aria-hidden="true" style="transform:rotate(90deg)"><use href="#ic-chevron"/></svg>';
+    dn.setAttribute("aria-label","نقل «"+ (r.title||"السجل") +"» للأسفل");
+    dn.disabled = i === total-1 || !res.canEdit;
+    dn.addEventListener("click", function(){ move(r.id, 1); });
+    ord.appendChild(up); ord.appendChild(num); ord.appendChild(dn);
+    h.appendChild(ord);
 
-  /* ---------- permissions ------------------------------------------------ */
-  function applyPerms(){
-    Array.prototype.forEach.call(document.querySelectorAll(".modonly"), function(n){
-      n.classList.toggle("hidden", !canModify);
+    var t = el("span","rec__t");
+    t.textContent = r.title || r.attribution || "بدون عنوان";
+    h.appendChild(t);
+
+    var acts = el("span","rec__a");
+
+    var word = el("span","stateword" + (r.published ? " is-on" : ""));
+    word.textContent = r.published ? "نشط" : "غير نشط";
+    var tog = el("button","toggle");
+    tog.type = "button";
+    tog.setAttribute("aria-pressed", r.published ? "true" : "false");
+    tog.setAttribute("aria-label", (r.published ? "إخفاء" : "إظهار") + " «" + (r.title||"السجل") + "»");
+    tog.innerHTML = '<span class="toggle__t" aria-hidden="true"></span>';
+    tog.disabled = !res.canEdit;
+    tog.addEventListener("click", function(){ togglePublished(r); });
+    acts.appendChild(word); acts.appendChild(tog);
+
+    var ed = el("button","btn btn--ghost btn--sm"); ed.type="button";
+    ed.setAttribute("aria-expanded","false");
+    ed.textContent = "تعديل";
+    acts.appendChild(ed);
+    h.appendChild(acts);
+    card.appendChild(h);
+
+    var prev = el("p","rec__preview");
+    prev.textContent = (r.body || "").slice(0, 160) + ((r.body||"").length > 160 ? "…" : "");
+    card.appendChild(prev);
+
+    /* ---- body: the editor, collapsed until asked for ---- */
+    var body = el("div","rec__b");
+    body.hidden = true;
+    var bodyId = "recb-" + r.id;
+    body.id = bodyId;
+    ed.setAttribute("aria-controls", bodyId);
+
+    function field(label, value, multiline, key, max){
+      var g = el("div","fld");
+      var hh = el("div","fld__h");
+      var l = el("label","fld__l"); l.setAttribute("for", "r"+r.id+"-"+key); l.textContent = label;
+      var c = el("span","fld__c");
+      hh.appendChild(l); hh.appendChild(c); g.appendChild(hh);
+      var inp = multiline ? el("textarea","ctl") : el("input","ctl");
+      if (!multiline) inp.type = "text"; else inp.rows = 4;
+      inp.id = "r"+r.id+"-"+key;
+      inp.value = value || "";
+      inp.disabled = !res.canEdit;
+      g.appendChild(inp);
+      function count(){
+        c.textContent = inp.value.length + " / " + max;
+        c.classList.toggle("is-over", inp.value.length > max);
+        var d = state.recDirty[r.id] || {};
+        if (inp.value !== (value||"")) d[key] = inp.value; else delete d[key];
+        if (Object.keys(d).length) state.recDirty[r.id] = d; else delete state.recDirty[r.id];
+        g.classList.toggle("is-changed", inp.value !== (value||""));
+        paintSave();
+      }
+      inp.addEventListener("input", count);
+      count();
+      return g;
+    }
+
+    var isFaq = res.area === "faq", isT = res.area === "testimonials";
+    body.appendChild(field(isFaq ? "السؤال" : (isT ? "اسم صاحب الرأي" : "العنوان"),
+                           r.title, false, "title", 200));
+    body.appendChild(field(isFaq ? "الإجابة" : (isT ? "نص الرأي" : "الوصف"),
+                           r.body, true, "body", 1200));
+
+    /* media — the central library, never a second one (§18) */
+    if (res.area === "services" || res.area === "features"){
+      body.appendChild(mediaRow(res, r));
+    }
+
+    if (res.canCreate && res.canEdit){
+      var del = el("button","btn btn--ghost btn--sm"); del.type = "button";
+      del.style.color = "var(--error-ink)";
+      del.textContent = "حذف هذا السجل";
+      del.addEventListener("click", function(){
+        ask("حذف السجل؟", "لا يمكن التراجع عن الحذف. لإخفائه دون حذفه استخدم «غير نشط».",
+            "حذف", function(){ removeRecord(r.id); }, true);
+      });
+      var row = el("div"); row.appendChild(del);
+      body.appendChild(row);
+    }
+
+    card.appendChild(body);
+    ed.addEventListener("click", function(){
+      var open = body.hidden;
+      body.hidden = !open;
+      ed.setAttribute("aria-expanded", open ? "true" : "false");
+      ed.textContent = open ? "طيّ" : "تعديل";
+      if (open) body.querySelector(".ctl").focus();
     });
-    if (!canModify){ $("infoEdit").hidden = true; $("infoView").hidden = false; $("editHint").hidden = true; }
+    return card;
   }
-  function setRole(full){
-    canModify = full;
-    $("roleFull").setAttribute("aria-pressed", full?"true":"false");
-    $("roleView").setAttribute("aria-pressed", full?"false":"true");
-    $("whorole").textContent = full ? "مدير النظام" : "عرض فقط";
-    $("whorole2").textContent = full ? "مدير النظام" : "عرض فقط";
-    applyPerms();
-  }
-  $("roleFull").addEventListener("click", function(){ setRole(true); });
-  $("roleView").addEventListener("click", function(){ setRole(false); });
 
-  /* ---------- wiring ----------------------------------------------------- */
-  var qt = null;
-  $("q").addEventListener("input", function(){
-    var v = this.value;
-    window.clearTimeout(qt);
-    qt = window.setTimeout(function(){ state.q=v; state.page=1; render(); },200);
+  function mediaRow(res, r){
+    var g = el("div","fld");
+    var l = el("span","fld__l"); l.textContent = "الصورة المرتبطة";
+    g.appendChild(l);
+
+    var row = el("div","rec__media");
+    var img;
+    if (r.image){
+      img = el("img","rec__thumb");
+      img.src = "../" + r.image;
+      img.alt = "";
+      img.loading = "lazy";
+    } else {
+      img = el("span","rec__thumb rec__thumb--empty");
+      img.innerHTML = '<svg class="i" aria-hidden="true"><use href="#ic-image"/></svg>';
+    }
+    row.appendChild(img);
+
+    var b = el("span","rec__mediab");
+    var p = el("span","rec__mediap");
+    p.textContent = r.image || "لا توجد صورة مرتبطة";
+    b.appendChild(p);
+
+    var acts = el("span","rec__a");
+    var pick = el("button","btn btn--secondary btn--sm"); pick.type="button";
+    pick.innerHTML = '<svg class="i i--sm" aria-hidden="true"><use href="#ic-image"/></svg>';
+    pick.appendChild(document.createTextNode(r.image ? "استبدال" : "اختيار من المكتبة"));
+    pick.disabled = !res.canEdit;
+    pick.addEventListener("click", function(){ pickMedia(r); });
+    acts.appendChild(pick);
+    if (r.image && res.canEdit){
+      var rm = el("button","btn btn--ghost btn--sm"); rm.type="button";
+      rm.textContent = "إزالة";
+      rm.addEventListener("click", function(){
+        var d = state.recDirty[r.id] || {}; d.image = ""; state.recDirty[r.id] = d;
+        p.textContent = "ستُزال الصورة عند الحفظ";
+        paintSave();
+      });
+      acts.appendChild(rm);
+    }
+    b.appendChild(acts);
+    row.appendChild(b);
+    g.appendChild(row);
+
+    /* the picker is a list of what the media module already holds — this
+       module does not upload, does not store and does not index (§18) */
+    var sel = el("div");
+    sel.hidden = true;
+    sel.style.cssText = "margin-top:var(--s3);max-height:14rem;overflow:auto;border:1px solid var(--divider);border-radius:var(--r-control)";
+    g.appendChild(sel);
+
+    function pickMedia(){
+      if (!sel.hidden){ sel.hidden = true; return; }
+      sel.hidden = false;
+      if (sel.childNodes.length){ return; }
+      var loading = el("p"); loading.style.cssText="padding:var(--s4);color:var(--slate);font-size:var(--fs-sec)";
+      loading.textContent = "جارٍ تحميل مكتبة الوسائط…";
+      sel.appendChild(loading);
+      var got = state.media.length ? Promise.resolve({rows:state.media}) : AunAPI.media();
+      got.then(function(m){
+        state.media = m.rows || state.media;
+        sel.textContent = "";
+        state.media.filter(function(a){ return /\.(webp|png|jpg|jpeg|avif|svg)$/i.test(a.path); })
+          .forEach(function(a){
+            var b2 = el("button","menu__i"); b2.type="button";
+            b2.style.width = "100%";
+            b2.textContent = a.path;
+            b2.addEventListener("click", function(){
+              var d = state.recDirty[r.id] || {}; d.image = a.path; state.recDirty[r.id] = d;
+              p.textContent = a.path + " — ستُحفظ عند الضغط على «حفظ»";
+              sel.hidden = true;
+              paintSave();
+            });
+            sel.appendChild(b2);
+          });
+        if (!sel.childNodes.length){
+          var e = el("p"); e.style.cssText="padding:var(--s4);color:var(--slate)";
+          e.textContent = "لا توجد صور في المكتبة.";
+          sel.appendChild(e);
+        }
+      }).catch(function(err){
+        sel.textContent = "";
+        var e = el("p"); e.style.cssText="padding:var(--s4);color:var(--error-ink)";
+        e.textContent = err.message || "تعذّر تحميل المكتبة";
+        sel.appendChild(e);
+      });
+    }
+    return g;
+  }
+
+  /* ---------- save (§13, §24, §25) ---------------------------------------
+     Each dirty field and each dirty record is one request. A failure leaves
+     the edit in the box and reports what went wrong; it never reports a
+     success it did not get, and a second click while a save is running is
+     ignored rather than queued. */
+  function paintSave(){
+    var n = dirtyCount();
+    var b = $("edSave");
+    if (!b) return;
+    b.disabled = state.saving || n === 0 || !(state.data && state.data.canEdit);
+    b.textContent = "";
+    b.innerHTML = '<svg class="i i--sm" aria-hidden="true"><use href="#ic-checks"/></svg>';
+    b.appendChild(document.createTextNode(
+      state.saving ? "جارٍ الحفظ…" : (n ? "حفظ (" + n + ")" : "حفظ")));
+    $("edCancel").disabled = state.saving || n === 0;
+  }
+
+  function fieldError(key, msg){
+    var e = $("e-"+key), i = $("f-"+key);
+    if (e){ e.textContent = msg; e.hidden = false; }
+    if (i){ i.classList.add("is-error"); i.setAttribute("aria-invalid","true"); }
+  }
+  function clearFieldErrors(){
+    (state.data && state.data.fields || []).forEach(function(f){
+      var e = $("e-"+f.key), i = $("f-"+f.key);
+      if (e){ e.hidden = true; e.textContent = ""; }
+      if (i){ i.classList.remove("is-error"); i.removeAttribute("aria-invalid"); }
+    });
+  }
+
+  function saveAll(){
+    if (state.saving) return;
+    var fieldKeys = Object.keys(state.dirty);
+    var recIds = Object.keys(state.recDirty);
+    if (!fieldKeys.length && !recIds.length) return;
+
+    clearFieldErrors();
+    state.saving = true; paintSave();
+    $("loadbar").hidden = false;
+
+    var failures = [], saved = 0, firstBad = null;
+
+    var jobs = fieldKeys.map(function(k){
+      return function(){
+        return AunAPI.post("/admin/content/block",
+            { key: k, lang: state.lang, value: state.dirty[k] })
+          .then(function(){ saved++; delete state.dirty[k]; })
+          .catch(function(err){
+            failures.push(k);
+            var msg = (err.errors && err.errors.value) || err.message;
+            fieldError(k, msg);
+            if (!firstBad) firstBad = $("f-"+k);
+          });
+      };
+    }).concat(recIds.map(function(id){
+      return function(){
+        var d = state.recDirty[id];
+        var payload = { area: state.area, lang: state.lang, id: Number(id) };
+        var cur = (state.data.items || []).filter(function(x){ return String(x.id) === String(id); })[0] || {};
+        payload.title = ("title" in d) ? d.title : (cur.title || "");
+        payload.body  = ("body"  in d) ? d.body  : (cur.body  || "");
+        payload.image = ("image" in d) ? d.image : (cur.image || "");
+        payload.published = (("published" in d) ? d.published : cur.published) ? 1 : 0;
+        if (state.area === "testimonials") payload.attribution = cur.attribution || "";
+        return AunAPI.post("/admin/content/item", payload)
+          .then(function(){ saved++; delete state.recDirty[id]; })
+          .catch(function(err){
+            failures.push(id);
+            toast(err.message || "تعذّر حفظ السجل", true);
+          });
+      };
+    }));
+
+    /* one at a time: a failed write must not race a successful one into the
+       same activity log, and the count the operator sees must be true */
+    jobs.reduce(function(p, job){ return p.then(job); }, Promise.resolve())
+      .then(function(){
+        state.saving = false;
+        $("loadbar").hidden = true;
+        return loadArea();
+      })
+      .then(function(){
+        if (failures.length){
+          toast(saved
+            ? ("حُفظ " + saved + " ولم يُحفظ " + failures.length + ". راجع الحقول المميّزة.")
+            : "لم يُحفظ شيء. راجع الحقول المميّزة.", true);
+          if (firstBad) firstBad.focus();
+          return;
+        }
+        toast("حُفظت التغييرات. اضغط «نشر إلى الموقع» لتظهر للزوار.");
+      })
+      .catch(function(){
+        state.saving = false;
+        $("loadbar").hidden = true;
+        paintSave();
+        toast("تعذّر إتمام الحفظ. تغييراتك كما أدخلتها — أعد المحاولة.", true);
+      });
+  }
+  $("edSave").addEventListener("click", saveAll);
+
+  $("edCancel").addEventListener("click", function(){
+    if (!dirtyCount()) return;
+    ask("التراجع عن التغييرات؟",
+        "ستعود الحقول إلى آخر نسخة محفوظة. لا يمكن استرجاع ما كتبته بعد ذلك.",
+        "تراجع عن التغييرات", function(){
+          state.dirty = {}; state.recDirty = {};
+          renderArea(state.data);
+          toast("عادت الحقول إلى آخر نسخة محفوظة");
+        }, true);
   });
-  $("factive").addEventListener("change", function(){ state.active=this.value; state.page=1; render(); });
-  $("fsort").addEventListener("change", function(){ state.sort=this.value; state.page=1; render(); });
-  $("reset").addEventListener("click", resetAll);
-  $("emptyReset").addEventListener("click", resetAll);
-  $("back").addEventListener("click", function(e){ e.preventDefault(); back(); });
-  $("retry").addEventListener("click", function(){ $("results").setAttribute("data-state","ready"); render(); });
 
-  /* ---------- shell ------------------------------------------------------ */
-  var app=$("app"), collapse=$("collapse");
+  /* ---------- active / inactive and ordering (§16, §17) ------------------
+     Both are immediate writes rather than pending edits: they are one-click
+     acts with a visible result, and holding them as unsaved state would make
+     the order on screen disagree with the order in the database. */
+  function togglePublished(r){
+    if (state.saving) return;
+    var next = !r.published;
+    AunAPI.post("/admin/content/item", {
+      area: state.area, lang: state.lang, id: r.id,
+      title: r.title || "", body: r.body || "",
+      image: r.image || "", published: next ? 1 : 0,
+      attribution: state.area === "testimonials" ? (r.attribution || "") : undefined
+    }).then(function(){
+      toast(next ? "أصبح السجل نشطاً" : "أصبح السجل غير نشط");
+      return loadArea();
+    }).catch(function(err){
+      toast(err.message || "تعذّر تغيير الحالة", true);
+    });
+  }
+
+  function move(id, delta){
+    if (state.saving) return;
+    var ids = (state.data.items || []).map(function(r){ return r.id; });
+    var i = ids.indexOf(id);
+    var j = i + delta;
+    if (i < 0 || j < 0 || j >= ids.length) return;
+    ids.splice(j, 0, ids.splice(i, 1)[0]);
+    AunAPI.post("/admin/content/reorder", { area: state.area, lang: state.lang, ids: ids })
+      .then(function(){ return loadArea(); })
+      .then(function(){
+        toast("تغيّر الترتيب");
+        /* keep the keyboard on the record that moved */
+        var card = document.querySelector('.rec[data-id="' + id + '"]');
+        var btn = card && card.querySelector(".rec__mv:not(:disabled)");
+        if (btn) btn.focus();
+      })
+      .catch(function(err){ toast(err.message || "تعذّر تغيير الترتيب", true); });
+  }
+
+  function removeRecord(id){
+    AunAPI.post("/admin/content/item/del", { area: state.area, lang: state.lang, id: id })
+      .then(function(){ delete state.recDirty[id]; toast("حُذف السجل"); return loadArea(); })
+      .catch(function(err){ toast(err.message || "تعذّر الحذف", true); });
+  }
+
+  $("recAdd").addEventListener("click", function(){
+    var isFaq = state.area === "faq";
+    AunAPI.post("/admin/content/item/new", {
+      area: state.area, lang: state.lang,
+      title: isFaq ? "سؤال جديد" : "اسم صاحب الرأي",
+      body: isFaq ? "اكتب الإجابة هنا." : "اكتب نص الرأي هنا."
+    }).then(function(){
+      toast("أُضيف سجل — عدّله ثم احفظ");
+      return loadArea();
+    }).catch(function(err){ toast(err.message || "تعذّرت الإضافة", true); });
+  });
+
+  var recqTimer = null;
+  $("recq").addEventListener("input", function(){
+    window.clearTimeout(recqTimer);
+    recqTimer = window.setTimeout(function(){ if (state.data) renderRecords(state.data); }, 180);
+  });
+
+  /* ---------- publish (§19) --------------------------------------------- */
+  $("publish").addEventListener("click", function(){
+    ask("نشر المحتوى إلى الموقع؟",
+        "ستُكتب النصوص المحفوظة في صفحة الموقع المنشورة، وسيراها الزوار فوراً.",
+        "نشر الآن", function(){
+      $("publish").disabled = true;
+      $("loadbar").hidden = false;
+      AunAPI.post("/admin/content/publish", {}).then(function(r){
+        $("loadbar").hidden = true;
+        toast(r.regions ? ("نُشر المحتوى — " + r.regions + " منطقة محدَّثة")
+                        : (r.note || "لا تغييرات — الموقع محدَّث بالفعل"));
+        loadOverview();
+      }).catch(function(err){
+        $("loadbar").hidden = true;
+        $("publish").disabled = false;
+        toast(err.message || "تعذّر النشر. لم يتغيّر شيء على الموقع.", true);
+      });
+    });
+  });
+
+  /* ---------- language (§11) ---------------------------------------------
+     Arabic is the only language the site has copy in — index.html carries no
+     English at all — so the English switch is present and disabled rather
+     than hidden: an operator should be able to see that the separation exists
+     and that there is simply nothing on the other side of it yet. */
+  $("langAr").addEventListener("click", function(){ setLang("ar"); });
+  $("langEn").addEventListener("click", function(){ setLang("en"); });
+  function setLang(l){
+    if (l === state.lang) return;
+    guard(function(){
+      state.lang = l;
+      $("langAr").setAttribute("aria-pressed", l === "ar" ? "true" : "false");
+      $("langEn").setAttribute("aria-pressed", l === "en" ? "true" : "false");
+      if (state.area) loadArea(); else loadOverview();
+    });
+  }
+
+  /* ---------- shell (Stage 04) ------------------------------------------ */
+  var app = $("app"), collapse = $("collapse");
   function setCollapsed(on){
-    app.classList.toggle("is-collapsed",on);
-    collapse.setAttribute("aria-expanded",on?"false":"true");
-    collapse.querySelector("span").textContent = on?"توسيع القائمة":"تصغير القائمة";
-    try{ localStorage.setItem("aun-admin-collapsed",on?"1":"0"); }catch(e){}
+    app.classList.toggle("is-collapsed", on);
+    collapse.setAttribute("aria-expanded", on?"false":"true");
+    collapse.querySelector("span").textContent = on ? "توسيع القائمة" : "تصغير القائمة";
+    try { localStorage.setItem("aun-admin-collapsed", on?"1":"0"); } catch(e){}
   }
-  try{ if (localStorage.getItem("aun-admin-collapsed")==="1") setCollapsed(true); }catch(e){}
+  try { if (localStorage.getItem("aun-admin-collapsed")==="1") setCollapsed(true); } catch(e){}
   collapse.addEventListener("click", function(){ setCollapsed(!app.classList.contains("is-collapsed")); });
 
-  var pops=[{btn:$("bell"),pop:$("notifpop")},{btn:$("whobtn"),pop:$("whopop")}];
+  var pops = [{btn:$("bell"),pop:$("notifpop")},{btn:$("whobtn"),pop:$("whopop")}];
   function closePops(){ pops.forEach(function(p){ p.pop.hidden=true; p.btn.setAttribute("aria-expanded","false"); }); }
   pops.forEach(function(p){
     p.btn.addEventListener("click", function(e){
       e.stopPropagation();
-      var open=p.pop.hidden; closePops();
-      p.pop.hidden=!open; p.btn.setAttribute("aria-expanded",open?"true":"false");
+      var open = p.pop.hidden; closePops();
+      p.pop.hidden = !open; p.btn.setAttribute("aria-expanded", open?"true":"false");
     });
     p.pop.addEventListener("click", function(e){ e.stopPropagation(); });
   });
@@ -1578,7 +1893,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
 
   var drawer=$("drawer"), scrim=$("scrim"), menubtn=$("menubtn"), dclose=$("drawerclose"), lastF=null;
   function openDrawer(){
-    lastF=document.activeElement;
+    lastF = document.activeElement;
     drawer.hidden=false; scrim.hidden=false;
     requestAnimationFrame(function(){ drawer.classList.add("is-open"); });
     menubtn.setAttribute("aria-expanded","true");
@@ -1595,98 +1910,30 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   scrim.addEventListener("click", closeDrawer);
   drawer.addEventListener("keydown", function(e){
     if (e.key!=="Tab") return;
-    var f=drawer.querySelectorAll("a[href], button:not([disabled])");
+    var f = drawer.querySelectorAll("a[href], button:not([disabled])");
     if (!f.length) return;
     var a=f[0], b=f[f.length-1];
     if (e.shiftKey && document.activeElement===a){ e.preventDefault(); b.focus(); }
     else if (!e.shiftKey && document.activeElement===b){ e.preventDefault(); a.focus(); }
   });
+
   document.addEventListener("keydown", function(e){
     if (e.key!=="Escape") return;
+    if (!$("confirm").hidden){ askClose(); return; }
     if (!drawer.hidden){ closeDrawer(); return; }
     closePops();
   });
 
-  var offline=$("offline");
+  var offline = $("offline");
   function net(){ offline.hidden = navigator.onLine; }
-  window.addEventListener("online",net); window.addEventListener("offline",net); net();
+  window.addEventListener("online", net);
+  window.addEventListener("offline", net);
+  net();
 
-  /* ---------- load (RECOVERY 01 §28) --------------------------------------
-     The list used to come from a local copy of the requests array. It comes
-     from GET /api/admin/customers now — the same grouping by phone, derived
-     once on the server against the real rows. */
-  function boot(){
-    var box = $("results");
-    if (box) box.setAttribute("data-state", "loading");
-    return AunAPI.customers("").then(function(res){
-      CUSTOMERS = (res.rows || []).map(fromApi);
-      render();
-      var k = decodeURIComponent(String(window.location.hash || "").replace(/^#/, "")).trim();
-      if (k) openC(digits(k));
-    }).catch(function(err){
-      if (err.status === 401) return;     /* app.js is already redirecting */
-      if (box) box.setAttribute("data-state", "error");
-      toast(err.message || "تعذّر تحميل العملاء", true);
-    });
-  }
-  boot();
-})();
-
-/* --- header notifications (Stage 14) -------------------------------------
-   The bell shows the five newest of the nine notifications الإشعارات وسجل
-   النشاط derives; activity.html is the full list. Read state is shared
-   through one localStorage key so marking something read in one place is
-   read everywhere — the nearest a static build gets to a per-account
-   inbox. A real system reads and writes this on the server. */
-(function(){
-  var KEY = "aun-admin-notif-read";
-  var TOTAL = 9, TOTAL_UNREAD = 7;
-  var list = document.getElementById("notiflist");
-  var bell = document.getElementById("bell");
-  var dot  = document.getElementById("belldot");
-  var nav  = document.querySelector('[data-navcount="activity"]');
-  var all  = document.getElementById("readall");
-  if (!list || !bell) return;
-
-  function load(){
-    var raw = null;
-    try { raw = localStorage.getItem(KEY); } catch(e){}
-    if (!raw) return {};
-    try { var o = JSON.parse(raw); return (o && typeof o === "object") ? o : {}; } catch(e){ return {}; }
-  }
-  function save(m){ try { localStorage.setItem(KEY, JSON.stringify(m)); } catch(e){} }
-
-  function paint(){
-    var m = load(), shownUnread = 0, readShown = 0;
-    Array.prototype.forEach.call(list.querySelectorAll(".notif"), function(a){
-      var id = a.getAttribute("data-nid");
-      var read = !!m[id];
-      a.classList.toggle("is-read", read);
-      var meta = a.querySelector(".notif__m");
-      var when = meta.getAttribute("data-when");
-      meta.textContent = read ? when : (when + " · غير مقروء");
-      if (read) readShown++; else shownUnread++;
-    });
-    /* the five on show are the newest, so every one marked read here comes
-       off the derived unread total; never let the count go negative */
-    var n = Math.max(0, TOTAL_UNREAD - readShown);
-    if (dot) dot.hidden = (n === 0);
-    bell.setAttribute("aria-label", n ? ("التنبيهات — " + n + " غير مقروءة") : "التنبيهات — لا جديد");
-    if (nav){ nav.hidden = (n === 0); nav.textContent = n ? String(n) : ""; }
-    if (all) all.disabled = (shownUnread === 0);
-  }
-
-  list.addEventListener("click", function(e){
-    var a = e.target.closest ? e.target.closest(".notif") : null;
-    if (!a) return;
-    var m = load(); m[a.getAttribute("data-nid")] = true; save(m); paint();
+  /* ---------- first paint ------------------------------------------------ */
+  loadOverview().then(function(){
+    var h = String(window.location.hash||"").replace(/^#/,"");
+    if (h && AREA_DESC[h]) openArea(h);
   });
-  if (all) all.addEventListener("click", function(e){
-    e.stopPropagation();
-    var m = load();
-    Array.prototype.forEach.call(list.querySelectorAll(".notif"), function(a){ m[a.getAttribute("data-nid")] = true; });
-    save(m); paint();
-  });
-  paint();
 })();
 </script>

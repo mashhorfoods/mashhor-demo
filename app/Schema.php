@@ -45,7 +45,8 @@ final class Schema
     public static function migrations(): array
     {
         return [
-            '0001_core' => [self::class, 'm0001'],
+            '0001_core'    => [self::class, 'm0001'],
+            '0002_content' => [self::class, 'm0002'],
         ];
     }
 
@@ -381,6 +382,92 @@ final class Schema
         ){$S}");
     }
 
+    /**
+     * RECOVERY 02 — المحتوى.
+     *
+     * Two tables, because the site's editable content has exactly two shapes.
+     * A heading or a paragraph appears once and is addressed by key, so it is
+     * a row in `content_blocks`. A feature, a service, a question or a
+     * testimonial is one of many and needs an order and a published flag, so
+     * it is a row in `content_items`.
+     *
+     * `lang` is on both. The site is Arabic-only today — there is no English
+     * copy anywhere in index.html, and §05 forbids inventing any — so every
+     * seeded row is `ar`. The column exists so that adding English later is a
+     * new row rather than a migration, and so §11's rule (editing one language
+     * must never touch the other) is enforced by the primary key rather than
+     * by remembering.
+     *
+     * Services already live in `services` from RECOVERY 01 and are NOT
+     * duplicated here: §38 says reuse what exists. `content_items` carries the
+     * publishing template for each service, keyed by slug.
+     */
+    public static function m0002(): void
+    {
+        $pdo = Db::pdo();
+        $S   = self::suffix();
+
+        /* one row per addressable text region on the public page */
+        $pdo->exec("CREATE TABLE IF NOT EXISTS content_blocks (
+            block_key " . self::str(80) . " NOT NULL,
+            lang " . self::str(5) . " NOT NULL DEFAULT 'ar',
+            value " . self::txt() . " NOT NULL,
+            updated_at " . self::dt() . " NOT NULL,
+            updated_by " . self::fk() . " NULL,
+            PRIMARY KEY (block_key, lang),
+            FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
+        ){$S}");
+
+        /* one row per repeatable record: features, faq, testimonials, and the
+           publishing template for each service */
+        $pdo->exec("CREATE TABLE IF NOT EXISTS content_items (
+            id " . self::pk() . ",
+            collection " . self::str(24) . " NOT NULL,
+            item_key " . self::str(80) . " NULL,
+            lang " . self::str(5) . " NOT NULL DEFAULT 'ar',
+            sort_order INTEGER NOT NULL DEFAULT 0,
+            is_published " . self::bool_() . " NOT NULL DEFAULT 1,
+            title " . self::str(200) . " NULL,
+            body " . self::txt() . " NULL,
+            attribution " . self::str(120) . " NULL,
+            image_path " . self::str(190) . " NULL,
+            markup " . self::txt() . " NULL,
+            created_at " . self::dt() . " NOT NULL,
+            updated_at " . self::dt() . " NOT NULL,
+            updated_by " . self::fk() . " NULL,
+            FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
+        ){$S}");
+        self::index('content_items', 'ix_ci_collection', 'collection, lang, sort_order');
+        self::index('content_items', 'ux_ci_key', 'collection, lang, item_key', true);
+
+        /* what the publisher wrote, and whether it stuck */
+        $pdo->exec("CREATE TABLE IF NOT EXISTS content_publishes (
+            id " . self::pk() . ",
+            actor_user_id " . self::fk() . " NULL,
+            actor_label " . self::str(120) . " NOT NULL,
+            regions INTEGER NOT NULL DEFAULT 0,
+            target " . self::str(190) . " NOT NULL,
+            ok " . self::bool_() . " NOT NULL DEFAULT 0,
+            note " . self::str(255) . " NULL,
+            created_at " . self::dt() . " NOT NULL,
+            FOREIGN KEY (actor_user_id) REFERENCES users(id) ON DELETE SET NULL
+        ){$S}");
+        self::index('content_publishes', 'ix_cp_created', 'created_at');
+    }
+
+    /** The six approved content areas — no seventh, per §02. */
+    public const CONTENT_AREAS = [
+        'about'        => 'من نحن',
+        'features'     => 'ما يميزنا',
+        'services'     => 'الخدمات',
+        'faq'          => 'الأسئلة الشائعة',
+        'testimonials' => 'آراء العملاء',
+        'contact'      => 'معلومات التواصل',
+    ];
+
+    /** Languages the content layer accepts. Arabic is the only one with copy. */
+    public const LANGS = ['ar', 'en'];
+
     /** Which tables the health endpoint expects to find. */
     public static function tables(): array
     {
@@ -389,6 +476,7 @@ final class Schema
             'requests', 'request_status_history', 'request_notes', 'id_sequences',
             'request_submissions', 'rate_hits', 'media_assets', 'activity_log',
             'notifications', 'notification_reads', 'settings',
+            'content_blocks', 'content_items', 'content_publishes',
         ];
     }
 

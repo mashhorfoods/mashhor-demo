@@ -157,3 +157,130 @@ endpoint claimed.
   notifications are live.
 - **There is no email or SMS.** The settings page has always said so.
 - **Rate limiting is per IP.** Behind a shared NAT that is a shared budget.
+
+---
+
+# RECOVERY 02 — المحتوى
+
+Content management, and the mechanism that makes editing it reach the public
+site.
+
+## What the inspection found
+
+The module did not exist. `admin/dashboard.html` had a nav item marked
+*قيد الإنشاء* and a quick action pointing at `#`; there was no content page, no
+content table, and no way for anything typed in the dashboard to reach the
+published page.
+
+Three things the brief names do not exist on the public site either, and the
+site's own structured-data comments say so:
+
+| §02 area | On the public site |
+| --- | --- |
+| من نحن | `#about` — a label, a title, a lead and three paragraphs |
+| ما يميزنا | `#why-us` — four headings and **six** ordered items |
+| الخدمات | `#services` — two headings and **seven** approved services |
+| الأسئلة الشائعة | **no section exists** |
+| آراء العملاء | **no section exists** |
+| معلومات التواصل | `#contact` — eleven fields |
+
+There is also **no English copy anywhere** — `index.html` is `lang="ar"` and
+carries one language. §11's rule is implemented in the schema and enforced by
+the primary key; there is simply nothing on the other side of it yet, and §05
+forbids inventing any.
+
+## How editing reaches a static page
+
+The public site is one static HTML file, which is why it scores what it
+scores, and §33 forbids redesigning it. So the module does not turn
+`index.html` into a template rendered per request, and it does not hydrate the
+page from an API on load. **It rewrites the file.**
+
+Every editable region is wrapped in a pair of HTML comments:
+
+```html
+<!--aun:about.lead-->…the approved copy…<!--/aun:about.lead-->
+```
+
+25 pairs, about 1.2KB, invisible, nothing in the accessibility tree.
+`build.js` keeps them while stripping every other comment. Publishing replaces
+what lies between one pair and reads nothing outside it, which is what §20
+asks for: editing the About lead cannot disturb a service, a FAQ or the
+contact address.
+
+The write is atomic — a temporary file beside the target, then a rename — so a
+failure halfway through leaves the previous page intact rather than a
+half-written one.
+
+**Saving and publishing are separate buttons.** Saving stores; publishing puts
+it live. An administrator can draft several edits and make them public in one
+deliberate act, and a save that fails never claims otherwise.
+
+### Round-trip proof
+
+Seeding from `index.html` and publishing straight back reproduces the file
+**byte for byte**. That is the check that says the mechanism is lossless, and
+`bin/verify.php` runs it.
+
+## What can be edited, and what cannot
+
+| Area | Text | Order | Active/inactive | Add | Publishes to the site |
+| --- | --- | --- | --- | --- | --- |
+| من نحن | 6 fields | — | — | — | yes |
+| ما يميزنا | 4 fields + 6 records | yes | yes | **no** | yes |
+| الخدمات | 2 fields + 7 records | yes | yes | **no** | yes |
+| الأسئلة الشائعة | records | yes | yes | yes | **no section exists** |
+| آراء العملاء | records | yes | yes | yes | **no section exists** |
+| معلومات التواصل | 11 fields | — | — | — | yes |
+
+The six features and seven services are approved content: §06 and §07 forbid
+inventing an eighth, so `POST /api/admin/content/item/new` returns **409** for
+those collections. The FAQ and the testimonials are empty and are the
+administrator's to fill — the module seeds nothing into them, because §08, §09
+and §26 all forbid fabricating content to fill an empty state.
+
+Deactivating never deletes. A hidden feature comes off the public page and
+stays in the table, and the remaining items are renumbered so the page's own
+scroll script still has a coherent sequence.
+
+## Three regions carry markup
+
+The phone number is built from `&nbsp;` runs, the address has a `<br>`, and the
+closing sentence has a `<span class="contact__aside-tag">`. Escaping them would
+rewrite approved content. They go through an **allow-list** instead — `<br>`,
+`<b>`, `<strong>`, `<em>`, and a `<span>` carrying nothing but a class — with
+unbalanced closes dropped so a rejected tag cannot close one the page opened.
+Everything else is escaped. A `<script>`, an `onclick=` or a `javascript:` URL
+cannot survive any of the twenty-three fields, and the suite proves it by
+storing one and reading the published page back.
+
+## Reused, not rebuilt
+
+- **Services** stay in the `services` table from RECOVERY 01. `content_items`
+  holds only their publishing template, keyed by the slug both share.
+- **Media** comes from `GET /api/admin/media` — the picker lists what the
+  الوسائط module already indexes. This module does not upload, store or index
+  a single asset (§18).
+- **Activity** goes to the existing `activity_log` with module `content`, and
+  the actor is the signed-in account (§32).
+- **Permissions** are the existing `content` module in the approved matrix:
+  Super Admin and Content Manager have it, an Admin has it unless narrowed.
+  The suite signs in as a Content Manager and confirms they can edit content
+  and still cannot read requests.
+
+## Still not done
+
+- **The FAQ and the testimonials have nowhere public to go.** Adding sections
+  for them would be adding unapproved sections, which §33 forbids. The editors
+  work and the records persist; the module says so on the page rather than
+  implying a publish that cannot happen.
+- **English is empty.** The separation works — the suite stores an English
+  title, confirms the Arabic one is untouched, and confirms publishing writes
+  Arabic — but there is no approved English copy to load.
+- **Service ordering publishes; the showcase is a pinned-scroll component.**
+  Reordering regenerates the slides with recomputed indices. It is verified to
+  render, but a heavily reordered showcase is worth a look on a real device.
+- **Publishing needs write access to `index.html`.** On Hostinger the PHP user
+  owns `public_html`, so it works; `/api/admin/content` reports it as
+  `writable`, and the publish button is disabled with an explanation when it
+  is not.

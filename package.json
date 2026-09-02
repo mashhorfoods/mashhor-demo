@@ -13,7 +13,8 @@
     "serve": "php -S 127.0.0.1:8088 -t . router-dev.php",
     "migrate": "php bin/migrate.php",
     "seed": "php bin/seed.php",
-    "verify": "php bin/verify.php http://127.0.0.1:8088"
+    "verify": "php bin/verify.php http://127.0.0.1:8088",
+    "seed:content": "php bin/seed-content.php"
   },
   "devDependencies": {
     "sharp": "^0.35.4"
