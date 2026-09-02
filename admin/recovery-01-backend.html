@@ -1,0 +1,832 @@
+<title>Backend Foundation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+
+<style>
+/* ==========================================================================
+   AOUN AL-DARB — RECOVERY 01 · BACKEND FOUNDATION
+   Continues the document system established by the earlier stage reports.
+   Same tokens, same faces, same shell. Added here: the priority ladder and
+   the request-path diagram.
+   ========================================================================== */
+:root{
+  --ground:#F1F3F6;
+  --surface:#FFFFFF;
+  --surface-2:#E7EBF0;
+  --ink:#141C25;
+  --ink-2:#4C5866;
+  --ink-3:#77828F;
+  --rule:#D6DCE3;
+  --rule-soft:#E5E9EE;
+  --accent:#2C4C82;
+  --accent-2:#4975BA;
+  --accent-soft:rgba(44,76,130,.07);
+  --pass:#256B55;   --pass-bg:rgba(46,125,100,.12);
+  --warn:#8F6014;   --warn-bg:rgba(176,121,28,.14);
+  --fail:#A5352E;   --fail-bg:rgba(192,67,59,.12);
+
+  --f-display:"Archivo",ui-sans-serif,system-ui,"Segoe UI",sans-serif;
+  --f-body:"Source Serif 4",ui-serif,Georgia,"Times New Roman",serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --f-ar:"IBM Plex Sans Arabic",ui-sans-serif,system-ui,"Segoe UI","Noto Sans Arabic",sans-serif;
+
+  --measure:68ch;
+  --pad:clamp(1.15rem,4vw,2.75rem);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F151C;
+    --surface:#161E27;
+    --surface-2:#1E2831;
+    --ink:#E3E8EF;
+    --ink-2:#9DA8B5;
+    --ink-3:#6E7A88;
+    --rule:#2A343F;
+    --rule-soft:#222C36;
+    --accent:#93B3E0;
+    --accent-2:#5C86C6;
+    --accent-soft:rgba(147,179,224,.11);
+    --pass:#63C3A2;  --pass-bg:rgba(99,195,162,.14);
+    --warn:#DDA946;  --warn-bg:rgba(221,169,70,.14);
+    --fail:#EB8078;  --fail-bg:rgba(235,128,120,.14);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0F151C;
+  --surface:#161E27;
+  --surface-2:#1E2831;
+  --ink:#E3E8EF;
+  --ink-2:#9DA8B5;
+  --ink-3:#6E7A88;
+  --rule:#2A343F;
+  --rule-soft:#222C36;
+  --accent:#93B3E0;
+  --accent-2:#5C86C6;
+  --accent-soft:rgba(147,179,224,.11);
+  --pass:#63C3A2;  --pass-bg:rgba(99,195,162,.14);
+  --warn:#DDA946;  --warn-bg:rgba(221,169,70,.14);
+  --fail:#EB8078;  --fail-bg:rgba(235,128,120,.14);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:var(--f-body);
+  font-size:17px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ---------- shell ---------------------------------------------------- */
+.wrap{max-width:1260px;margin:0 auto;padding:0 var(--pad)}
+.layout{display:grid;gap:clamp(2rem,4vw,3.5rem);align-items:start}
+@media (min-width:1080px){ .layout{grid-template-columns:236px minmax(0,1fr)} }
+
+/* ---------- masthead -------------------------------------------------- */
+.mast{border-bottom:1px solid var(--rule);padding-block:clamp(2.5rem,6vw,4.5rem) clamp(1.75rem,4vw,2.75rem);margin-bottom:clamp(2rem,5vw,3.5rem)}
+.mast__eyebrow{
+  font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--accent);margin:0 0 1.1rem
+}
+.mast__title{
+  font-family:var(--f-display);font-weight:700;font-size:clamp(2.1rem,1.2rem + 3.6vw,3.65rem);
+  line-height:1.04;letter-spacing:-.022em;margin:0;text-wrap:balance;max-width:19ch
+}
+.mast__sub{
+  margin:1.4rem 0 0;max-width:64ch;font-size:clamp(1.05rem,1rem + .3vw,1.2rem);
+  line-height:1.6;color:var(--ink-2)
+}
+.mast__meta{
+  display:flex;flex-wrap:wrap;gap:.5rem 1.6rem;margin-top:2rem;
+  font-family:var(--f-mono);font-size:12.5px;color:var(--ink-3)
+}
+.mast__meta b{font-weight:500;color:var(--ink-2)}
+
+/* ---------- table of contents ---------------------------------------- */
+.toc{font-family:var(--f-display);font-size:13.5px;line-height:1.45}
+@media (min-width:1080px){ .toc{position:sticky;top:1.75rem;max-height:calc(100vh - 3.5rem);overflow-y:auto} }
+.toc__title{
+  font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 .9rem;padding-bottom:.7rem;border-bottom:1px solid var(--rule)
+}
+.toc ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.15rem}
+.toc a{
+  display:flex;gap:.65rem;text-decoration:none;color:var(--ink-2);
+  padding:.4rem .5rem;border-radius:4px;transition:background .15s,color .15s
+}
+.toc a:hover{background:var(--accent-soft);color:var(--ink)}
+.toc a span{font-family:var(--f-mono);font-size:11px;color:var(--ink-3);padding-top:.15em;flex:0 0 auto}
+
+/* ---------- sections -------------------------------------------------- */
+.sec{margin-bottom:clamp(3rem,7vw,5rem);scroll-margin-top:1.5rem}
+.sec__head{display:flex;gap:1rem;align-items:baseline;margin-bottom:1.4rem;padding-bottom:.85rem;border-bottom:1px solid var(--rule)}
+.sec__num{
+  font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.1em;
+  color:var(--accent);flex:0 0 auto;padding-top:.35em
+}
+.sec__title{
+  font-family:var(--f-display);font-weight:600;font-size:clamp(1.32rem,1.15rem + .7vw,1.75rem);
+  letter-spacing:-.014em;margin:0;line-height:1.2;text-wrap:balance
+}
+h3{font-family:var(--f-display);font-weight:600;font-size:1.06rem;letter-spacing:-.008em;margin:2rem 0 .7rem;line-height:1.3}
+h4{font-family:var(--f-display);font-weight:600;font-size:.95rem;margin:1.5rem 0 .5rem}
+p{margin:0 0 1.05rem;max-width:var(--measure)}
+.lede{font-size:1.09rem;color:var(--ink-2)}
+a{color:var(--accent)}
+b,strong{font-weight:600}
+code{font-family:var(--f-mono);font-size:.85em;background:var(--surface-2);padding:.1em .38em;border-radius:3px;color:var(--ink)}
+
+/* Arabic inline term */
+.ar{font-family:var(--f-ar);font-size:.95em;font-weight:500;font-feature-settings:"kern"}
+.ar--h{font-weight:600}
+
+ul.list{margin:0 0 1.05rem;padding:0;list-style:none;max-width:var(--measure);display:flex;flex-direction:column;gap:.5rem}
+ul.list li{position:relative;padding-left:1.15rem;color:var(--ink-2)}
+ul.list li::before{content:"—";position:absolute;left:0;color:var(--ink-3)}
+ul.list li b{color:var(--ink)}
+
+.note{
+  background:var(--accent-soft);border-left:3px solid var(--accent-2);
+  padding:1rem 1.15rem;margin:1.5rem 0;border-radius:0 6px 6px 0;max-width:var(--measure)
+}
+.note h4{margin-top:0}
+.note p:last-child{margin-bottom:0}
+
+/* RTL run — Arabic sets that would otherwise reorder inside an LTR sentence */
+.rtl{
+  direction:rtl;text-align:right;font-family:var(--f-ar);font-weight:500;
+  background:var(--surface);border:1px solid var(--rule);border-radius:6px;
+  padding:.75rem .9rem;margin:.75rem 0;font-size:.97rem;line-height:1.9;color:var(--ink)
+}
+.rtl b{font-weight:600}
+.rtl__c{
+  direction:rtl;display:grid;gap:.15rem .9rem;grid-template-columns:repeat(auto-fill,minmax(13.5rem,1fr));
+  margin:0;padding:0;list-style:none
+}
+.rtl__c li{position:relative;padding-right:.95rem}
+.rtl__c li::before{content:"·";position:absolute;right:.15rem;color:var(--ink-3)}
+
+/* ---------- flow rail ------------------------------------------------- */
+.flow{
+  display:flex;flex-wrap:wrap;align-items:center;gap:.4rem .1rem;
+  margin:1.2rem 0 1.6rem;padding:.95rem 1.1rem;
+  background:var(--surface);border:1px solid var(--rule);border-radius:8px;
+  font-family:var(--f-mono);font-size:12.5px;line-height:1.5
+}
+.flow__step{
+  background:var(--surface-2);color:var(--ink);border-radius:4px;
+  padding:.3rem .55rem;white-space:nowrap
+}
+.flow__step .ar{font-size:12.5px}
+.flow__step--start{background:var(--accent);color:var(--surface)}
+.flow__step--end{background:var(--pass-bg);color:var(--pass);font-weight:500}
+.flow__arw{color:var(--ink-3);padding:0 .42rem;flex:0 0 auto}
+.flow__lbl{
+  font-family:var(--f-mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-3);width:100%;margin-bottom:.15rem
+}
+
+/* ---------- lifecycle track ------------------------------------------- */
+.life{margin:1.6rem 0 1.2rem;padding:1.3rem 1.2rem;background:var(--surface);border:1px solid var(--rule);border-radius:8px}
+.life__row{display:flex;flex-wrap:wrap;align-items:stretch;gap:.35rem}
+.life__node{
+  flex:1 1 8.5rem;border:1px solid var(--rule);border-radius:6px;background:var(--ground);
+  padding:.7rem .75rem;display:flex;flex-direction:column;gap:.25rem;min-width:0
+}
+.life__node b{font-family:var(--f-ar);font-weight:600;font-size:1rem;color:var(--ink)}
+.life__node span{font-family:var(--f-mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.06em}
+.life__node--term{border-style:solid;border-color:var(--pass);background:var(--pass-bg)}
+.life__node--term b{color:var(--pass)}
+.life__arw{display:flex;align-items:center;color:var(--ink-3);font-family:var(--f-mono);font-size:15px;flex:0 0 auto}
+.life__branch{
+  margin-top:.85rem;padding-top:.85rem;border-top:1px dashed var(--rule);
+  display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;font-size:14.5px;color:var(--ink-2)
+}
+.life__cancel{
+  border:1px solid var(--fail);background:var(--fail-bg);color:var(--fail);
+  border-radius:6px;padding:.5rem .75rem;font-family:var(--f-ar);font-weight:600;font-size:.98rem
+}
+
+/* ---------- tables ---------------------------------------------------- */
+.tw{overflow-x:auto;margin:1.4rem 0;border:1px solid var(--rule);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:34rem}
+th,td{text-align:left;padding:.68rem .85rem;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+thead th{
+  font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);background:var(--surface-2);border-bottom:1px solid var(--rule);white-space:nowrap
+}
+tbody tr:last-child td{border-bottom:none}
+td b{color:var(--ink);font-weight:600}
+td{color:var(--ink-2)}
+.num{font-family:var(--f-mono);font-size:12px;color:var(--ink-3);white-space:nowrap;font-variant-numeric:tabular-nums}
+.yes{color:var(--pass);font-weight:600}
+.no{color:var(--ink-3)}
+.part{color:var(--warn);font-weight:600}
+
+.chip{
+  display:inline-block;font-family:var(--f-mono);font-size:10.5px;font-weight:500;letter-spacing:.08em;
+  text-transform:uppercase;padding:.16rem .45rem;border-radius:3px;white-space:nowrap
+}
+.chip--pass{background:var(--pass-bg);color:var(--pass)}
+.chip--warn{background:var(--warn-bg);color:var(--warn)}
+.chip--fail{background:var(--fail-bg);color:var(--fail)}
+.chip--n{background:var(--accent-soft);color:var(--accent)}
+
+/* ---------- findings -------------------------------------------------- */
+.find{
+  position:relative;background:var(--surface);border:1px solid var(--rule);border-radius:8px;
+  padding:1.1rem 1.25rem 1.15rem 1.5rem;margin-bottom:1rem;overflow:hidden
+}
+.find::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ink-3)}
+.find--p1::before{background:var(--fail)}
+.find--p2::before{background:var(--warn)}
+.find--p3::before{background:var(--accent-2)}
+.find__head{display:flex;flex-wrap:wrap;gap:.55rem .85rem;align-items:baseline;margin-bottom:.6rem}
+.find__id{font-family:var(--f-mono);font-size:12px;font-weight:500;color:var(--ink-3)}
+.find__title{font-family:var(--f-display);font-weight:600;font-size:1rem;margin:0;flex:1 1 16rem;line-height:1.35}
+.find dl{margin:0;display:grid;gap:.45rem .9rem;grid-template-columns:auto minmax(0,1fr);font-size:14.5px}
+.find dt{
+  font-family:var(--f-mono);font-size:10.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);padding-top:.35em;white-space:nowrap
+}
+.find dd{margin:0;color:var(--ink-2);line-height:1.55;max-width:66ch}
+.find dd b{color:var(--ink);font-weight:600}
+@media (max-width:620px){
+  .find dl{grid-template-columns:minmax(0,1fr);gap:.15rem .9rem}
+  .find dt{padding-top:.6em}
+}
+
+/* ---------- module dossier -------------------------------------------- */
+.mod{
+  background:var(--surface);border:1px solid var(--rule);border-radius:8px;
+  padding:1.25rem 1.35rem 1.35rem;margin-bottom:1.15rem
+}
+.mod__head{display:flex;flex-wrap:wrap;gap:.5rem .9rem;align-items:baseline;padding-bottom:.8rem;margin-bottom:.9rem;border-bottom:1px solid var(--rule-soft)}
+.mod__num{font-family:var(--f-mono);font-size:12px;font-weight:500;color:var(--accent);flex:0 0 auto}
+.mod__name{font-family:var(--f-ar);font-weight:700;font-size:1.25rem;margin:0;color:var(--ink);line-height:1.3}
+.mod__en{font-family:var(--f-display);font-weight:500;font-size:.86rem;color:var(--ink-3);letter-spacing:.01em}
+.mod dl{margin:0;display:grid;gap:.5rem .95rem;grid-template-columns:7.4rem minmax(0,1fr);font-size:14.5px}
+.mod dt{
+  font-family:var(--f-mono);font-size:10.5px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);padding-top:.4em
+}
+.mod dd{margin:0;color:var(--ink-2);line-height:1.55}
+.mod dd b{color:var(--ink);font-weight:600}
+.mod dd .ar{color:var(--ink)}
+@media (max-width:620px){
+  .mod dl{grid-template-columns:minmax(0,1fr);gap:.12rem .9rem}
+  .mod dt{padding-top:.75em}
+}
+
+/* ---------- pattern cards --------------------------------------------- */
+.pats{display:grid;gap:.8rem;grid-template-columns:repeat(auto-fill,minmax(15.5rem,1fr));margin:1.4rem 0}
+.pat{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:.95rem 1.05rem;display:flex;flex-direction:column;gap:.3rem}
+.pat__id{font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.09em;color:var(--accent)}
+.pat__name{font-family:var(--f-ar);font-weight:600;font-size:1rem;color:var(--ink);margin:0}
+.pat__en{font-family:var(--f-display);font-size:.8rem;color:var(--ink-3);margin:0}
+.pat__body{font-size:14px;color:var(--ink-2);margin:.3rem 0 0;line-height:1.5}
+
+/* ---------- handoff / foot -------------------------------------------- */
+.handoff{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:clamp(1.3rem,3vw,2rem)}
+.handoff ol{margin:0;padding-left:1.3rem;display:flex;flex-direction:column;gap:.6rem;max-width:var(--measure)}
+.handoff li{padding-left:.3rem;color:var(--ink-2)}
+.handoff li b{color:var(--ink)}
+.foot{
+  border-top:1px solid var(--rule);margin-top:clamp(2.5rem,6vw,4rem);padding-block:1.6rem 3rem;
+  font-family:var(--f-mono);font-size:12px;color:var(--ink-3);display:flex;flex-wrap:wrap;gap:.4rem 1.5rem
+}
+
+.big{display:grid;gap:.7rem;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));margin:1.4rem 0}
+.big__i{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:.85rem 1rem}
+.big__n{font-family:var(--f-display);font-weight:700;font-size:1.6rem;line-height:1;color:var(--ink);
+  font-variant-numeric:tabular-nums}
+.big__n.warn{color:var(--warn)}
+/* green is reserved for a figure that is itself a verdict, not for any number */
+.big__n.pass{color:var(--pass)}
+.big__l{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.06em;color:var(--ink-3);
+  margin-top:.4rem;line-height:1.4}
+ol.blk{margin:0 0 1rem;padding-left:1.3rem;display:flex;flex-direction:column;gap:.6rem;max-width:var(--measure)}
+ol.blk li{color:var(--ink-2)} ol.blk li b{color:var(--ink)}
+
+/* --- verdict table ---------------------------------------------------- */
+.vt{width:100%;border-collapse:collapse;font-size:14.5px}
+.vt th,.vt td{padding:.7rem .85rem;border-bottom:1px solid var(--rule-soft);text-align:left;vertical-align:top}
+.vt thead th{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);background:var(--surface-2);white-space:nowrap}
+.vt tbody tr:last-child td{border-bottom:none}
+.vt td b{color:var(--ink);font-weight:600}
+.vt td{color:var(--ink-2)}
+.v{font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.08em;
+  padding:.2rem .5rem;border-radius:3px;white-space:nowrap;display:inline-block}
+.v--pass{background:var(--pass-bg);color:var(--pass)}
+.v--fail{background:var(--fail-bg);color:var(--fail)}
+.v--part{background:var(--warn-bg);color:var(--warn)}
+
+/* --- Stage 14: the derivation ledger ----------------------------------
+   The argument of this stage is that every row on the page traces back to
+   a record another module already holds. The ledger is that claim, laid
+   out as source → derived, so it can be checked rather than believed. */
+.led{display:flex;flex-direction:column;gap:.55rem;margin:1.5rem 0}
+.led__r{
+  display:grid;gap:.35rem .9rem;align-items:start;
+  grid-template-columns:minmax(0,1fr) 1.6rem minmax(0,1.15fr);
+  background:var(--surface);border:1px solid var(--rule);border-radius:8px;
+  padding:.85rem 1rem
+}
+.led__src,.led__out{display:flex;flex-direction:column;gap:.2rem;min-width:0}
+.led__k{
+  font-family:var(--f-mono);font-size:10.5px;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3)
+}
+.led__f{font-family:var(--f-mono);font-size:12.5px;color:var(--ink);word-break:break-word}
+.led__d{font-size:14px;color:var(--ink-2);line-height:1.5}
+.led__d .ar{color:var(--ink)}
+.led__arw{
+  align-self:center;font-family:var(--f-mono);font-size:15px;color:var(--accent-2);
+  text-align:center;padding-top:.9rem
+}
+.led__n{
+  font-family:var(--f-mono);font-size:11px;color:var(--ink-3);
+  font-variant-numeric:tabular-nums;white-space:nowrap
+}
+.led__t{
+  display:flex;justify-content:space-between;align-items:baseline;gap:1rem;
+  padding:.7rem 1rem;background:var(--accent-soft);border:1px solid var(--rule);
+  border-radius:8px;font-family:var(--f-mono);font-size:12.5px;color:var(--accent)
+}
+.led__t b{font-weight:500;font-variant-numeric:tabular-nums}
+@media (max-width:700px){
+  .led__r{grid-template-columns:minmax(0,1fr)}
+  .led__arw{padding-top:0;text-align:start;transform:rotate(90deg);width:1rem}
+}
+
+/* --- the two refusals -------------------------------------------------
+   Given equal weight because they are the design decision, not a caveat. */
+.ref{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fit,minmax(19rem,1fr));margin:1.5rem 0}
+.ref__i{
+  background:var(--surface);border:1px solid var(--rule);border-top:3px solid var(--warn);
+  border-radius:8px;padding:1.05rem 1.15rem;display:flex;flex-direction:column;gap:.5rem
+}
+.ref__k{
+  font-family:var(--f-mono);font-size:10.5px;font-weight:500;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--warn);margin:0
+}
+.ref__v{
+  font-family:var(--f-ar);font-weight:600;font-size:1.18rem;color:var(--ink);margin:0;
+  direction:rtl;text-align:right;line-height:1.4
+}
+.ref__b{font-size:14.5px;color:var(--ink-2);line-height:1.6;margin:0;max-width:none}
+.ref__b b{color:var(--ink);font-weight:600}
+
+/* --- notification rules ----------------------------------------------- */
+.rules{display:flex;flex-direction:column;gap:.55rem;margin:1.4rem 0}
+.rule{
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:.5rem .9rem;
+  background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:.8rem 1rem
+}
+.rule__n{
+  font-family:var(--f-mono);font-size:11px;font-weight:500;color:var(--accent);
+  flex:0 0 auto;letter-spacing:.08em
+}
+.rule__t{flex:1 1 20rem;font-size:14.5px;color:var(--ink-2);line-height:1.5;min-width:0}
+.rule__t b{color:var(--ink);font-weight:600}
+.rule__c{
+  font-family:var(--f-mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;
+  padding:.18rem .5rem;border-radius:3px;white-space:nowrap;
+  background:var(--accent-soft);color:var(--accent);font-variant-numeric:tabular-nums
+}
+.rule__c--warn{background:var(--warn-bg);color:var(--warn)}
+.rule__c--pass{background:var(--pass-bg);color:var(--pass)}
+
+/* --- RECOVERY 01: the priority ladder ---------------------------------
+   §36 fixes an execution order and forbids moving on while a dependency is
+   broken. The ladder is that order, with what each rung actually landed. */
+.lad{display:flex;flex-direction:column;gap:.4rem;margin:1.5rem 0}
+.lad__r{
+  display:grid;gap:.3rem .9rem;align-items:baseline;
+  grid-template-columns:2.6rem minmax(0,15rem) minmax(0,1fr) auto;
+  background:var(--surface);border:1px solid var(--rule);border-radius:8px;
+  padding:.7rem .9rem
+}
+.lad__n{
+  font-family:var(--f-mono);font-size:11px;font-weight:500;color:var(--accent);
+  letter-spacing:.06em;font-variant-numeric:tabular-nums
+}
+.lad__t{font-family:var(--f-display);font-weight:600;font-size:.94rem;color:var(--ink);line-height:1.35}
+.lad__b{font-size:14px;color:var(--ink-2);line-height:1.5;min-width:0}
+.lad__b code{font-size:.84em}
+@media (max-width:820px){
+  .lad__r{grid-template-columns:2.6rem minmax(0,1fr)}
+  .lad__b{grid-column:2}
+  .lad__v{grid-column:2;justify-self:start}
+}
+
+/* --- request path ------------------------------------------------------ */
+.path{
+  display:flex;flex-wrap:wrap;align-items:center;gap:.35rem .1rem;
+  margin:1.4rem 0;padding:1rem 1.1rem;
+  background:var(--surface);border:1px solid var(--rule);border-radius:8px;
+  font-family:var(--f-mono);font-size:12.5px;line-height:1.6
+}
+.path__s{background:var(--surface-2);color:var(--ink);border-radius:4px;padding:.3rem .55rem;white-space:nowrap}
+.path__s--in{background:var(--accent);color:var(--surface)}
+.path__s--gate{background:var(--warn-bg);color:var(--warn);font-weight:500}
+.path__s--out{background:var(--pass-bg);color:var(--pass);font-weight:500}
+.path__a{color:var(--ink-3);padding:0 .4rem;flex:0 0 auto}
+.path__l{
+  font-family:var(--f-mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-3);width:100%;margin-bottom:.2rem
+}
+
+/* --- the two locks ----------------------------------------------------- */
+.locks{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fit,minmax(17rem,1fr));margin:1.4rem 0}
+.lock{
+  background:var(--surface);border:1px solid var(--rule);border-top:3px solid var(--accent-2);
+  border-radius:8px;padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.45rem
+}
+.lock__k{
+  font-family:var(--f-mono);font-size:10.5px;font-weight:500;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--accent);margin:0
+}
+.lock__t{font-family:var(--f-display);font-weight:600;font-size:.98rem;color:var(--ink);margin:0;line-height:1.35}
+.lock__b{font-size:14px;color:var(--ink-2);line-height:1.6;margin:0;max-width:none}
+.lock__b code{font-size:.85em}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <p class="mast__eyebrow">Recovery 01</p>
+    <h1 class="mast__title">Backend Foundation</h1>
+    <p class="mast__sub">The inspection §01 asks for found no backend at all — no runtime, no database,
+      no authentication, no sessions, no authorization, no <code>/api/requests</code>. Nothing was
+      replaced, because there was nothing to replace. This is what was built, and what it still is not.</p>
+    <div class="mast__meta">
+      <span>Priorities complete · <b>12 of 12</b></span>
+      <span>Checks executed · <b>108</b>, 0 failed</span>
+      <span>Tables · <b>17</b></span>
+      <span>Endpoints · <b>21</b>, 18 protected</span>
+      <span>Stack · <b>PHP 8 + MySQL</b></span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Contents">
+      <p class="toc__title">Contents</p>
+      <ol>
+        <li><a href="#s1"><span>01</span>What the inspection found</a></li>
+        <li><a href="#s2"><span>02</span>Why PHP, not Node</a></li>
+        <li><a href="#s3"><span>03</span>The priority ladder</a></li>
+        <li><a href="#s4"><span>04</span>The request path</a></li>
+        <li><a href="#s5"><span>05</span>Guards only a server can hold</a></li>
+        <li><a href="#s6"><span>06</span>POST /api/requests</a></li>
+        <li><a href="#s7"><span>07</span>The test matrices</a></li>
+        <li><a href="#s8"><span>08</span>Deployment</a></li>
+        <li><a href="#s9"><span>09</span>What this still is not</a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <section class="sec" id="s1">
+        <div class="sec__head"><span class="sec__num">01</span>
+          <h2 class="sec__title">What the inspection found</h2></div>
+
+        <p class="lede">§01 says not to assume anything is missing, and to reuse what works. The honest
+          answer after looking is that <b>nothing existed</b>. Two prior QA gates had already recorded
+          this, so it was not a surprise — it is the reason this stage exists.</p>
+
+        <div class="tw">
+          <table>
+            <thead><tr><th scope="col">Component §01 asks about</th><th scope="col">Found</th></tr></thead>
+            <tbody>
+              <tr><td><b>Frontend framework</b></td><td>None. <code>index.html</code> <em>is</em> the site; the admin is nine self-contained pages.</td></tr>
+              <tr><td><b>Backend / runtime</b></td><td><span class="chip chip--fail">absent</span> No server-side code of any kind.</td></tr>
+              <tr><td><b>API structure</b></td><td><span class="chip chip--fail">absent</span> The form posted to <code>/api/requests</code>, which returned the 404 page.</td></tr>
+              <tr><td><b>Database</b></td><td><span class="chip chip--fail">absent</span> Every module held a literal array in its own <code>&lt;script&gt;</code>.</td></tr>
+              <tr><td><b>Authentication</b></td><td><span class="chip chip--fail">absent</span> No login page, no credentials, no accounts.</td></tr>
+              <tr><td><b>Sessions</b></td><td><span class="chip chip--fail">absent</span></td></tr>
+              <tr><td><b>Authorization</b></td><td><span class="chip chip--warn">frontend only</span> A permission matrix that hid buttons.</td></tr>
+              <tr><td><b>Protected routes</b></td><td><span class="chip chip--fail">absent</span> Every admin page was a static file anyone with the URL could read.</td></tr>
+              <tr><td><b>Migrations / seed</b></td><td><span class="chip chip--fail">absent</span></td></tr>
+              <tr><td><b>Environment config</b></td><td><span class="chip chip--fail">absent</span> No <code>.env</code>, and nothing that needed one.</td></tr>
+              <tr><td><b>Deployment config</b></td><td><span class="chip chip--pass">present</span> <code>.htaccess</code>, <code>build.js</code>, <code>HOSTINGER.md</code> — all static-only.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>The one thing that <em>was</em> there mattered: the deployment configuration. It named the
+          hosting, and the hosting decided the stack.</p>
+      </section>
+
+      <section class="sec" id="s2">
+        <div class="sec__head"><span class="sec__num">02</span>
+          <h2 class="sec__title">Why PHP, not Node</h2></div>
+
+        <p><code>HOSTINGER.md</code> documents the actual deployment: a zip extracted into
+          <code>public_html</code> on Hostinger shared hosting, served by LiteSpeed. That environment
+          runs PHP and MySQL natively. It does not run Node.</p>
+
+        <div class="note">
+          <h4>§33, in the brief's own words</h4>
+          <p><em>Do not introduce infrastructure that cannot realistically run in the existing hosting
+            environment.</em> A Node backend would have meant a Hostinger VPS or their separate Node.js
+            product — a different plan, a different deployment procedure, and a process manager to keep
+            alive. That is a real option, but it is a change of hosting, not a backend recovery, and it
+            would have made the deployment document wrong.</p>
+        </div>
+
+        <p>So the API ships inside the same zip, and the upload procedure is unchanged: the operator
+          extracts one archive and runs two commands. Everything the backend needs — PDO, Argon2id,
+          MySQL — is already on the plan.</p>
+
+        <div class="big">
+          <div class="big__i"><p class="big__n">0</p><p class="big__l">new services to buy<br>same plan, same upload</p></div>
+          <div class="big__i"><p class="big__n">17</p><p class="big__l">tables<br>one re-runnable migration</p></div>
+          <div class="big__i"><p class="big__n">21</p><p class="big__l">endpoints<br>18 behind the session</p></div>
+          <div class="big__i"><p class="big__n pass">108</p><p class="big__l">checks executed<br>0 failed</p></div>
+        </div>
+      </section>
+
+      <section class="sec" id="s3">
+        <div class="sec__head"><span class="sec__num">03</span>
+          <h2 class="sec__title">The priority ladder</h2></div>
+
+        <p>§36 fixes the order and forbids moving on while a dependency is broken. Each rung was
+          working before the next was started.</p>
+
+        <div class="lad">
+          <div class="lad__r"><span class="lad__n">01</span>
+            <span class="lad__t">Database connectivity</span>
+            <span class="lad__b">PDO, credentials from <code>.env</code>, a five-second connect timeout, and a connection failure that logs the detail and raises a generic error.</span>
+            <span class="lad__v chip chip--pass">done</span></div>
+          <div class="lad__r"><span class="lad__n">02</span>
+            <span class="lad__t">Schema &amp; persistence</span>
+            <span class="lad__b">17 tables, one migration, re-runnable. Nothing drops or rewrites a table that holds data.</span>
+            <span class="lad__v chip chip--pass">done</span></div>
+          <div class="lad__r"><span class="lad__n">03</span>
+            <span class="lad__t">Authentication</span>
+            <span class="lad__b">Argon2id with a bcrypt fallback, rehashed on login when the cost moves. One failure message for every failure mode.</span>
+            <span class="lad__v chip chip--pass">done</span></div>
+          <div class="lad__r"><span class="lad__n">04</span>
+            <span class="lad__t">Sessions</span>
+            <span class="lad__b">Database rows, token stored hashed. <code>HttpOnly</code>, <code>Secure</code>, <code>SameSite=Lax</code>, idle and absolute expiry.</span>
+            <span class="lad__v chip chip--pass">done</span></div>
+          <div class="lad__r"><span class="lad__n">05</span>
+            <span class="lad__t">Server-side authorization</span>
+            <span class="lad__b">The matrix from <code>users.html</code>, enforced by the dispatcher from the route table rather than by each handler.</span>
+            <span class="lad__v chip chip--pass">done</span></div>
+          <div class="lad__r"><span class="lad__n">06</span>
+            <span class="lad__t">Protected admin routes</span>
+            <span class="lad__b"><code>guard.php</code> checks the session <em>before</em> reading the page file. Unauthenticated: 302, zero bytes.</span>
+            <span class="lad__v chip chip--pass">done</span></div>
+          <div class="lad__r"><span class="lad__n">07</span>
+            <span class="lad__t">Protected admin APIs</span>
+            <span class="lad__b">18 endpoints, each declaring its module and ability in the table. Unauthenticated 401, wrong role 403, no data either way.</span>
+            <span class="lad__v chip chip--pass">done</span></div>
+          <div class="lad__r"><span class="lad__n">08</span>
+            <span class="lad__t">POST /api/requests</span>
+            <span class="lad__b">Public, narrow, transactional. Status <span class="ar">جديد</span> always; no parameter lets a caller choose otherwise.</span>
+            <span class="lad__v chip chip--pass">done</span></div>
+          <div class="lad__r"><span class="lad__n">09</span>
+            <span class="lad__t">Persistence &amp; customer association</span>
+            <span class="lad__b">Phone is the customer identity, as the <span class="ar">العملاء</span> module already treated it — now a unique index rather than a convention.</span>
+            <span class="lad__v chip chip--pass">done</span></div>
+          <div class="lad__r"><span class="lad__n">10</span>
+            <span class="lad__t">Errors &amp; security</span>
+            <span class="lad__b">One generic body, one shape. No SQL, no trace, no path, no credential — verified by probing for each.</span>
+            <span class="lad__v chip chip--pass">done</span></div>
+          <div class="lad__r"><span class="lad__n">11</span>
+            <span class="lad__t">Frontend integration</span>
+            <span class="lad__b">Requests, customers, users, activity and notifications read from the database. Services, media and settings do not yet — §09.</span>
+            <span class="lad__v chip chip--warn">partial</span></div>
+          <div class="lad__r"><span class="lad__n">12</span>
+            <span class="lad__t">End-to-end verification</span>
+            <span class="lad__b">108 checks against real endpoints and a real database, plus four admin pages driven in a browser against a live session.</span>
+            <span class="lad__v chip chip--pass">done</span></div>
+        </div>
+      </section>
+
+      <section class="sec" id="s4">
+        <div class="sec__head"><span class="sec__num">04</span>
+          <h2 class="sec__title">The request path</h2></div>
+
+        <p>Every <code>/api/*</code> URL arrives at one front controller. The gates run before the
+          handler, driven by the route table, so a handler cannot forget a check it never had to
+          remember.</p>
+
+        <div class="path">
+          <span class="path__l">Protected admin call</span>
+          <span class="path__s path__s--in">browser</span><span class="path__a">→</span>
+          <span class="path__s">api/index.php</span><span class="path__a">→</span>
+          <span class="path__s path__s--gate">CSRF</span><span class="path__a">→</span>
+          <span class="path__s path__s--gate">Auth</span><span class="path__a">→</span>
+          <span class="path__s path__s--gate">Authz</span><span class="path__a">→</span>
+          <span class="path__s">handler</span><span class="path__a">→</span>
+          <span class="path__s">Repo</span><span class="path__a">→</span>
+          <span class="path__s path__s--out">MySQL</span>
+        </div>
+
+        <div class="path">
+          <span class="path__l">Public submission</span>
+          <span class="path__s path__s--in">form</span><span class="path__a">→</span>
+          <span class="path__s path__s--gate">rate limit</span><span class="path__a">→</span>
+          <span class="path__s path__s--gate">CSRF</span><span class="path__a">→</span>
+          <span class="path__s path__s--gate">honeypot</span><span class="path__a">→</span>
+          <span class="path__s path__s--gate">validate</span><span class="path__a">→</span>
+          <span class="path__s path__s--gate">fingerprint</span><span class="path__a">→</span>
+          <span class="path__s">transaction</span><span class="path__a">→</span>
+          <span class="path__s path__s--out">REQ-YYYY-NNNN</span>
+        </div>
+
+        <p>The application itself lives in <code>app/</code>, which is denied to the web twice over: its
+          own <code>.htaccess</code>, and a guard constant in every file so a host that ignored the
+          first would still return nothing rather than source.</p>
+      </section>
+
+      <section class="sec" id="s5">
+        <div class="sec__head"><span class="sec__num">05</span>
+          <h2 class="sec__title">Guards only a server can hold</h2></div>
+
+        <p>§10 is the heart of this stage: authentication alone is not enough, and a hidden button is
+          not a permission. Two rules in particular were one HTTP request away from being broken,
+          whatever the interface showed.</p>
+
+        <div class="locks">
+          <div class="lock">
+            <p class="lock__k">Self-escalation</p>
+            <p class="lock__t">An operator cannot raise their own role</p>
+            <p class="lock__b">The users module already refused to draw the control. That refusal lives
+              in the browser, and the browser is the attacker's. The server now returns <code>409</code>
+              and changes nothing — verified by making the call directly and re-reading the row.</p>
+          </div>
+          <div class="lock">
+            <p class="lock__k">Lockout</p>
+            <p class="lock__t">The last active Super Admin cannot be removed</p>
+            <p class="lock__b">Demoting or disabling the only remaining Super Admin would leave the
+              system with nobody who can manage accounts. Counted server-side, on every save, against
+              the live table rather than the page's copy of it.</p>
+          </div>
+        </div>
+
+        <p>A third holds the session itself: disabling an account revokes its live sessions, so an
+          operator who is switched off is signed out rather than remaining signed in until their cookie
+          happens to expire.</p>
+      </section>
+
+      <section class="sec" id="s6">
+        <div class="sec__head"><span class="sec__num">06</span>
+          <h2 class="sec__title">POST /api/requests</h2></div>
+
+        <p>The endpoint the public form has been posting to since the day the form was added. It
+          accepts exactly the fields the approved form has and nothing else — a submission carrying an
+          extra key is rejected as a malformed payload rather than trimmed, because the alternative is
+          guessing which caller sent it.</p>
+
+        <ul class="list">
+          <li><b>Status is <span class="ar">جديد</span>, always.</b> There is no parameter that lets a
+            public caller pick a status, a source or a customer. §15 asks for it; the absence of the
+            parameter is what enforces it.</li>
+          <li><b>One transaction.</b> Customer, request, opening history row, reference number,
+            fingerprint and notification, all or none. The states §18 names as unacceptable — a
+            customer with no request, a request with no customer — cannot occur.</li>
+          <li><b>The reference is allocated under a row lock.</b> Two simultaneous submissions cannot
+            take the same number, and the four-digit tail widens rather than truncating past 9999 —
+            the defect Stage 16 found in the demo id builder, fixed at the source.</li>
+          <li><b>Duplicates are answered, not merged.</b> A fingerprint of what makes a trip that trip
+            catches a double click, a browser retry or a refresh inside a ten-minute window and returns
+            the id it already has. Change the destination and it is a different trip with its own
+            record — §19 is explicit that genuinely separate requests must not be merged.</li>
+          <li><b>The honeypot answers with a success.</b> A bot that filled the invisible field gets a
+            plausible reply and no database row, so it does not learn to avoid the field.</li>
+        </ul>
+      </section>
+
+      <section class="sec" id="s7">
+        <div class="sec__head"><span class="sec__num">07</span>
+          <h2 class="sec__title">The test matrices</h2></div>
+
+        <p><code>bin/verify.php</code> drives the real endpoints against a real database and then reads
+          the tables. &ldquo;The endpoint returned 201&rdquo; and &ldquo;a row exists&rdquo; are
+          different claims, and §32 asks for the second one.</p>
+
+        <div class="tw">
+          <table>
+            <thead><tr><th scope="col">Matrix</th><th scope="col">Cases</th><th scope="col">Result</th></tr></thead>
+            <tbody>
+              <tr><td><b>§30 authentication</b></td>
+                <td>valid login · invalid password · unknown account · no session · expired session · forged token · logout · a previously valid cookie after logout · disabled account</td>
+                <td><span class="chip chip--pass">all pass</span></td></tr>
+              <tr><td><b>§30 authorization</b></td>
+                <td>unauthenticated read · unauthenticated write · authenticated-but-unauthorized read · authenticated-but-unauthorized write · self-role-change · authorized operation</td>
+                <td><span class="chip chip--pass">all pass</span></td></tr>
+              <tr><td><b>§31 request API</b></td>
+                <td>valid submission · 8 invalid-field cases · unexpected field · wrong data type · missing CSRF · honeypot · duplicate · different-trip · throttle</td>
+                <td><span class="chip chip--pass">all pass</span></td></tr>
+              <tr><td><b>§32 persistence</b></td>
+                <td>row exists · status stored · source stored · notes verbatim · time preserved · customer linked · phone canonical · history written · activity written · notification written · survives a fresh connection</td>
+                <td><span class="chip chip--pass">all pass</span></td></tr>
+              <tr><td><b>§20 §26 disclosure</b></td>
+                <td>4 probes for <code>SQLSTATE</code>, <code>PDOException</code>, stack traces, absolute paths, hashes, <code>DB_PASS</code>; injected filters; <code>app/</code> and <code>.env</code> over HTTP</td>
+                <td><span class="chip chip--pass">nothing leaked</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Two checks are worth naming because they are the ones a frontend-only system always fails.
+          <b>A previously valid cookie is dead after logout</b> — the session is a row, so revoking it
+          is a write, not a hope. And <b>no record was created by any rejected submission</b>, counted
+          across all twelve validation cases by comparing the table before and after.</p>
+
+        <p>Four admin pages were then driven in a real browser against a live session:
+          <span class="ar">الرئيسية</span> shows counts computed from the database,
+          <span class="ar">طلبات النقل</span> lists the request the public form submitted,
+          <span class="ar">العملاء</span> shows the customer it created, and
+          <span class="ar">المستخدمون والصلاحيات</span> shows the real accounts with the signed-in one
+          marked <span class="ar">(أنت)</span>. Zero console errors, zero horizontal overflow.</p>
+      </section>
+
+      <section class="sec" id="s8">
+        <div class="sec__head"><span class="sec__num">08</span>
+          <h2 class="sec__title">Deployment</h2></div>
+
+        <p>Unchanged from before: one zip, extracted into <code>public_html</code>. Two commands and one
+          file are new.</p>
+
+        <ol class="blk">
+          <li><b>Create a MySQL database</b> in hPanel and note the three values.</li>
+          <li><b>Write <code>.env</code> one level above <code>public_html</code></b>, from the shipped
+            <code>.env.example</code>. Above the web root is the point: nothing there is reachable over
+            HTTP under any misconfiguration. Inside <code>app/</code> also works and is denied by
+            <code>.htaccess</code>, but it is the weaker of the two.</li>
+          <li><b><code>php bin/migrate.php</code></b> — creates the tables, safe to re-run.</li>
+          <li><b><code>php bin/seed.php --admin-email=…</code></b> — loads the seven approved services
+            and the media index, and prints a generated password once. It is never written to the log
+            or the database; only its hash is stored.</li>
+          <li><b>Open <code>/api/health</code></b>. It reports which settings are <em>present</em>,
+            never their values, so it is safe to open in a browser.</li>
+        </ol>
+
+        <div class="note">
+          <h4>The failure mode that matters</h4>
+          <p>If <code>admin/.htaccess</code> does not upload — it is a dotfile, and file managers hide
+            those — the admin pages are served as plain static files and are readable by anyone with the
+            URL. <code>HOSTINGER.md</code> lists this with the instruction to <b>take the site down
+            until it is fixed</b>, because it is the one deployment mistake that silently undoes this
+            entire stage.</p>
+        </div>
+      </section>
+
+      <section class="sec" id="s9">
+        <div class="sec__head"><span class="sec__num">09</span>
+          <h2 class="sec__title">What this still is not</h2></div>
+
+        <p>Recorded here rather than left for the next audit to find.</p>
+
+        <ul class="list">
+          <li><b>Three modules still render seeded data in the browser.</b>
+            <span class="ar">الخدمات</span>، <span class="ar">الوسائط والأصول</span> and
+            <span class="ar">الإعدادات</span> have protected read and write endpoints, and those
+            endpoints work — the pages have not been switched over to them.
+            <span class="ar">طلبات النقل</span>، <span class="ar">العملاء</span>،
+            <span class="ar">المستخدمون والصلاحيات</span>، <span class="ar">سجل النشاط</span> and the
+            notifications are live.</li>
+          <li><b><span class="ar">المحتوى</span> and <span class="ar">التقارير</span> remain unbuilt.</b>
+            Their permissions exist in the matrix; the modules do not.</li>
+          <li><b>No email, no SMS.</b> The settings page has always said so, and it is still true.</li>
+          <li><b>Rate limiting is per IP address.</b> Behind a shared NAT — an office, a mobile carrier —
+            that is a shared budget, and a legitimate second visitor can be throttled by the first.</li>
+          <li><b>Roles gate modules, not rows.</b> An operator who can see <span class="ar">طلبات
+            النقل</span> can see every request in it. That matches the approved design; it is worth
+            knowing it is the design.</li>
+          <li><b>Verified against SQLite locally, targeted at MySQL.</b> The SQL is kept to the portable
+            subset both accept and the per-driver differences are isolated, but the 108 checks ran
+            against SQLite. The first run of <code>migrate.php</code> on the real host is the
+            confirmation, and <code>/api/health</code> is how you read it.</li>
+        </ul>
+
+        <div class="handoff">
+          <h3 style="margin-top:0">Sensible next steps</h3>
+          <ol>
+            <li><b>Deploy and run the two commands</b>, then open <code>/api/health</code> and submit one
+              real request through the public form.</li>
+            <li><b>Switch the three remaining modules</b> to their endpoints — the work is per page and
+              the APIs are already protected and tested.</li>
+            <li><b>Re-run the QA gate</b> against the deployed system. The Stage 16 verdict was
+              <em>NOT READY</em> on six blockers; five of them are now addressed, and the sixth —
+              verifiable Hostinger deployment — can only be closed on the host itself.</li>
+          </ol>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="foot">
+    <span>Aoun Al-Darb · Backend foundation</span>
+    <span>Recovery 01</span>
+    <span>108 checks · 0 failed · 17 tables · 21 endpoints</span>
+  </footer>
+</div>
