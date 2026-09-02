@@ -11,6 +11,8 @@ Separate track from `ux/`, which covers the public site.
 | `requests.html` | **Stage 06 — طلبات النقل.** The full request workflow: list with working search, filters and pagination, and a detail view with status changes, editing, notes and contact actions. |
 | `customers.html` | **Stage 07 — العملاء.** Customer list and profile, with every customer figure derived from the request records rather than stored. |
 | `services.html` | **Stage 08 — الخدمات.** The seven approved services with their real copy and photographs: edit, reorder, show/hide, and replace images. |
+| `settings.html` | **Stage 09 — الإعدادات.** Six settings categories carrying the site's real company, contact and search-listing values. |
+| `users.html` | **Stage 09 — المستخدمون والصلاحيات.** Administrators, the three approved roles, and a per-module view/edit permission matrix. |
 
 The built site (`../index.html`) is the source of truth for services, content areas,
 contact details and terminology. Nothing in this track invents business features.
@@ -224,3 +226,60 @@ That is true of a database-backed site; this site is a **static build** (`build.
 so an immediate-publishing model requires saving to trigger a rebuild and deploy. If the
 deployment cannot do that, the wording must change to describe the real model rather than the
 intended one.
+
+## Stage 09 — الإعدادات and المستخدمون والصلاحيات
+
+Two modules, one shell. The shell behaviour (sidebar, popovers, drawer, offline, toast,
+confirmation) is now a single shared `window.AunShell` block rather than being copied into each
+page again — the earlier module pages each carried their own copy, and a third and fourth
+would have made drift inevitable.
+
+### الإعدادات
+
+Six categories, each saved on its own — no page-wide save button that commits five unrelated
+things. Every value shown is what the site carries today: the company name, tagline, the
+`og:description`, the Riyadh address, `+966 53 554 4352`, `https://aunaldrb.com/`, and the real
+search title and meta description from `index.html`. The logo panel shows the actual
+`brand/aun-aldrb-logo.svg`.
+
+Three places where the honest answer was "nothing":
+
+- **No email address exists** on the site, so the field ships empty with a note explaining it
+  only appears to visitors once filled — rather than inventing an address.
+- **No social accounts are linked.** Both fields read `غير مرتبط`.
+- **English is not published.** §5 asks for a bilingual structure; the site is Arabic-only, so
+  the language panel shows Arabic as published and English as not, and states that a language
+  cannot be enabled before its content exists — the guard that stops an empty page going live
+  or Arabic being overwritten by mistake.
+
+Contact settings carry a standing warning that these values are what customers dial. Search
+title and description have character counts against the lengths that actually get truncated.
+A save is refused while the browser reports no connection, and each category tracks its own
+unsaved state — the category list shows a dot, and switching away asks first.
+
+### المستخدمون والصلاحيات
+
+The three approved roles, and a permission matrix with one row per **real dashboard module** —
+no permission exists without a module behind it. View and edit are separate, and edit implies
+view, enforced in the interaction rather than left to the administrator.
+
+**Super Admin and Content Manager have fixed permission shapes; only مدير is adjustable.** A
+role that can be edited into anything is not a role. Changing a user's role resets the matrix to
+that role's shape rather than leaving a stale mixture behind.
+
+Two guards are stated in the interface **before** they are needed, not as a failure afterwards:
+you cannot change your own role or disable your own account, and the last active Super Admin
+cannot be disabled, demoted or removed. Both disable the controls and explain why.
+
+Adding a user runs معلومات → الدور/الصلاحيات → مراجعة → حفظ as one screen with three sections and
+a live review panel, per Stage 02's rule against unnecessary multi-step forms. Duplicate email
+addresses are refused and name the existing account.
+
+Passwords are never shown or stored readably. Reset marks the account so the user must set a new
+password at next sign-in and ends their current sessions. Deactivation is offered as the
+reversible action; removal is the destructive one, confirmed, and it says outright that
+deactivation is the reversible alternative.
+
+**These are frontend controls only.** Every rule above — role, permission, guard — must be
+enforced again server-side, per §12 and §19. The interface hiding a control is a convenience,
+never the security boundary.
