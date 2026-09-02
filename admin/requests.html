@@ -782,7 +782,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
       <a class="navitem" href="media.html" data-nav="media"><svg class="i" aria-hidden="true"><use href="#ic-image"/></svg><span class="navitem__lbl">الوسائط والأصول</span></a>
       <p class="side__grp">النظام</p>
       <a class="navitem" href="activity.html" data-nav="activity"><svg class="i" aria-hidden="true"><use href="#ic-bell"/></svg><span class="navitem__lbl">الإشعارات والنشاط</span><span class="navitem__count" data-navcount="activity" hidden></span></a>
-      <a class="navitem is-pending" href="#" aria-disabled="true" title="قيد الإنشاء — لم تُبنَ هذه الوحدة بعد"><svg class="i" aria-hidden="true"><use href="#ic-report"/></svg><span class="navitem__lbl">التقارير</span></a>
+      <a class="navitem" href="reports.html" data-nav="reports"><svg class="i" aria-hidden="true"><use href="#ic-report"/></svg><span class="navitem__lbl">التقارير</span></a>
       <a class="navitem" href="users.html"><svg class="i" aria-hidden="true"><use href="#ic-shield"/></svg><span class="navitem__lbl">المستخدمون والصلاحيات</span></a>
       <a class="navitem" href="settings.html"><svg class="i" aria-hidden="true"><use href="#ic-settings"/></svg><span class="navitem__lbl">الإعدادات</span></a>
     </nav>
@@ -1135,7 +1135,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   <a class="navitem" href="media.html" data-nav="media"><svg class="i" aria-hidden="true"><use href="#ic-image"/></svg><span class="navitem__lbl">الوسائط والأصول</span></a>
   <p class="side__grp">النظام</p>
   <a class="navitem" href="activity.html" data-nav="activity"><svg class="i" aria-hidden="true"><use href="#ic-bell"/></svg><span class="navitem__lbl">الإشعارات والنشاط</span></a>
-  <a class="navitem is-pending" href="#" aria-disabled="true" title="قيد الإنشاء — لم تُبنَ هذه الوحدة بعد"><svg class="i" aria-hidden="true"><use href="#ic-report"/></svg><span class="navitem__lbl">التقارير</span></a>
+  <a class="navitem" href="reports.html" data-nav="reports"><svg class="i" aria-hidden="true"><use href="#ic-report"/></svg><span class="navitem__lbl">التقارير</span></a>
   <a class="navitem" href="users.html"><svg class="i" aria-hidden="true"><use href="#ic-shield"/></svg><span class="navitem__lbl">المستخدمون والصلاحيات</span></a>
   <a class="navitem" href="settings.html"><svg class="i" aria-hidden="true"><use href="#ic-settings"/></svg><span class="navitem__lbl">الإعدادات</span></a>
 </nav>
@@ -1204,7 +1204,9 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   var DATA = [];
 
   var PER_PAGE = 5;
-  var state = { q:"", status:"", date:"", service:"", source:"", page:1 };
+  var state = { q:"", status:"", date:"", service:"", source:"", page:1,
+                /* RECOVERY 03 — set only when التقارير links here */
+                range:null, customer:"" };
   var current = null, canModify = true;
 
   /* ---------- helpers --------------------------------------------------- */
@@ -1237,6 +1239,15 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
     if (state.service && r.service!==state.service) return false;
     if (state.source && r.source!==state.source) return false;
     if (state.date && !inPeriod(r,state.date)) return false;
+    /* RECOVERY 03 — an explicit range, as التقارير links it: the same period
+       the report counted, on the same date it counted, so the list a figure
+       opens holds exactly the records behind that figure. */
+    if (state.range){
+      var d = state.range.by === "trip" ? (r.date || "") : String(r.created || "").slice(0,10);
+      if (!d) return false;
+      if (d < state.range.from || d > state.range.to) return false;
+    }
+    if (state.customer && String(r.customerId) !== String(state.customer)) return false;
     var q = state.q.trim();
     if (!q) return true;
     var qd = digits(q);
@@ -1244,8 +1255,15 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
            (r.name.indexOf(q)>-1) ||
            (qd.length>2 && digits(r.phone).indexOf(qd)>-1);
   }
+  /* Arabic number agreement: 1 singular, 2 dual, 3-10 plural, 11+ singular
+     accusative. «9 طلباً» reads as a translation error to an Arabic operator. */
+  function reqWord(n){
+    if (n === 1) return "طلب";
+    if (n === 2) return "طلبين";
+    return n <= 10 ? "طلبات" : "طلباً";
+  }
   function filtered(){ return DATA.filter(match); }
-  function anyFilter(){ return !!(state.q||state.status||state.date||state.service); }
+  function anyFilter(){ return !!(state.q||state.status||state.date||state.service||state.range||state.customer); }
 
   function toast(msg,bad){
     var t = el("div","toast");
@@ -1278,7 +1296,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
 
     $("count").innerHTML = all.length
       ? ('عرض <b>'+((state.page-1)*PER_PAGE+1)+'–'+Math.min(state.page*PER_PAGE,all.length)+
-         '</b> من <b>'+all.length+'</b> طلباً')
+         '</b> من <b>'+all.length+'</b> ' + reqWord(all.length))
       : "";
 
     var tb = $("rows"), cd = $("cards");
@@ -1372,6 +1390,12 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
     if (state.q)       items.push({k:"q",       t:'بحث: "'+state.q+'"'});
     if (state.status)  items.push({k:"status",  t:"الحالة: "+ST[state.status].label});
     if (state.date)    items.push({k:"date",    t:"الفترة: "+({today:"اليوم",week:"هذا الأسبوع",month:"هذا الشهر"})[state.date]});
+    if (state.range)   items.push({k:"range",   t:"الفترة: "+state.range.from+" — "+state.range.to
+                                    +(state.range.by==="trip"?" (تاريخ الرحلة)":"")});
+    if (state.customer && DATA.length){
+      var c = DATA.filter(function(r){ return String(r.customerId)===String(state.customer); })[0];
+      items.push({k:"customer", t:"العميل: "+(c?c.name:state.customer)});
+    }
     if (state.service) items.push({k:"service", t:"الخدمة: "+state.service});
     if (state.source)  items.push({k:"source",  t:"المصدر: "+state.source});
     wrap.hidden = !items.length;
@@ -1382,7 +1406,8 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
       x.setAttribute("aria-label","إزالة — "+it.t);
       x.innerHTML = '<svg class="i i--sm" aria-hidden="true"><use href="#ic-x"/></svg>';
       x.addEventListener("click", function(){
-        state[it.k] = "";
+        /* the range is an object, not a string — clearing it means null */
+        state[it.k] = (it.k === "range") ? null : "";
         if (it.k==="q") $("q").value = "";
         if (it.k==="status") $("fstatus").value = "";
         if (it.k==="date") $("fdate").value = "";
@@ -1396,7 +1421,8 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   }
 
   function resetAll(){
-    state.q=""; state.status=""; state.date=""; state.service=""; state.source=""; state.page=1;
+    state.q=""; state.status=""; state.date=""; state.service=""; state.source="";
+    state.range=null; state.customer=""; state.page=1;
     $("q").value=""; $("fstatus").value=""; $("fdate").value=""; $("fservice").value=""; $("fsource").value="";
     render();
   }
@@ -1774,11 +1800,33 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
      goes somewhere real instead of dropping the operator on an unfiltered
      page and making them re-pick the filter they just clicked. */
   (function fromQuery(){
-    var m = /[?&]status=([a-z]+)/.exec(String(window.location.search||""));
-    if (!m || !ST[m[1]]) return;
-    state.status = m[1];
-    var sel = $("fstatus");
-    if (sel) sel.value = m[1];
+    var q = new URLSearchParams(String(window.location.search||""));
+
+    var st = q.get("status");
+    if (st && ST[st]){
+      state.status = st;
+      var sel = $("fstatus");
+      if (sel) sel.value = st;
+    }
+
+    var sv = q.get("service");
+    if (sv){
+      state.service = sv;
+      var ssel = $("fservice");
+      if (ssel) ssel.value = sv;      /* set again after the options are built */
+    }
+
+    /* RECOVERY 03 — التقارير opens a figure here as "the records behind it".
+       Both dates must be present and well formed, or the range is ignored
+       rather than half-applied. */
+    var from = q.get("from"), to = q.get("to");
+    var ok = /^\d{4}-\d{2}-\d{2}$/;
+    if (from && to && ok.test(from) && ok.test(to) && from <= to){
+      state.range = { from: from, to: to, by: q.get("dateby") === "trip" ? "trip" : "created" };
+    }
+
+    var cust = q.get("customer");
+    if (cust && /^\d+$/.test(cust)) state.customer = cust;
   })();
 
   /* ---------- load (RECOVERY 01 §28) -------------------------------------
@@ -1790,6 +1838,10 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
     return AunAPI.requests({ per: 100 }).then(function(res){
       DATA = res.rows || [];
       render();
+      if (state.service){
+        var ssel = $("fservice");
+        if (ssel) ssel.value = state.service;
+      }
       var nav = $("navcount");
       if (nav){
         var n = DATA.filter(function(r){ return r.status === "new"; }).length;

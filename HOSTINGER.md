@@ -170,6 +170,7 @@ That is the whole flow: form → API → database → dashboard.
 | المحتوى says publishing is unavailable | `index.html` is not writable by PHP — set it to 644 owned by the site user, and make sure `public_html` itself is writable |
 | المحتوى is empty | `php bin/seed-content.php` has not been run |
 | An edit saves but the site does not change | saving and publishing are separate — press **نشر إلى الموقع** |
+| التقارير shows no data | check the period — an empty period offers a wider one; the report counts the date basis you selected |
 
 ---
 

@@ -284,3 +284,106 @@ storing one and reading the published page back.
   owns `public_html`, so it works; `/api/admin/content` reports it as
   `writable`, and the publish button is disabled with an explanation when it
   is not.
+
+---
+
+# RECOVERY 03 — التقارير
+
+Reports, built from the approved specification rather than from what a
+transport company "normally" reports.
+
+## The specification, found not assumed
+
+§03 says to inspect the approved specification before implementing anything.
+It is `admin/stage-02-admin-ux.html`, module 08, and it is precise:
+
+> **Scope** — "Basic request and customer counts over a period"
+> **Main flow** — Pick a report and a period → read the answer in words, then
+> the breakdown → open any figure as a filtered request list.
+> **Primary** — Select report · select period.
+> **Secondary** — Drill into the requests behind a figure · change the period
+> without losing the report.
+> **States** — Loading · error with retry · an empty period that offers a wider
+> one instead of a row of zeroes.
+> **Exit** — Drilling out goes to طلبات النقل; returning comes back to the same
+> report and period.
+> **Access** — Super Admin · Admin.
+> **Patterns** — P01 list, P02 search & filter, P09 states, P10 return.
+
+That is the whole scope, and it is the whole implementation.
+
+**Two reports**, because "request and customer counts" names two:
+`طلبات النقل خلال الفترة` and `العملاء خلال الفترة`. Asking for a third
+returns 404.
+
+## What is deliberately absent
+
+| Not built | Why |
+| --- | --- |
+| **Export** | §18 — only if explicitly approved. The specification names none. |
+| **Charts** | §16 — only where part of the approved specification. It names none. The share bars beside each count are a second reading of a number that is always printed, which is the dashboard's own existing treatment. |
+| **Rates, averages, trends, forecasts** | §29 lists them by name. None appears in the specification, and the existence of the data is not approval. |
+| **A reporting table** | §02 — every figure is a `COUNT` over the live operational rows. The suite asserts no table containing `report`, `metric`, `analytic`, `aggregate` or `snapshot` exists. |
+
+## The date basis is chosen, not assumed
+
+A request carries two dates: `created_at`, when it was logged, and `trip_date`,
+when the trip is. The specification says only "a period". Picking one silently
+would be exactly the undocumented assumption §12 forbids, so the basis is a
+labelled control — **تاريخ تسجيل الطلب** or **تاريخ الرحلة** — and the answer
+line always names which one it used.
+
+Ranges are validated rather than repaired: an end before a start is an error,
+not something to quietly swap. A same-day range is valid. A span beyond ten
+years is refused.
+
+## Read-only, structurally
+
+`Repo_Reports` has no `INSERT`, `UPDATE` or `DELETE`, and every statement it
+runs passes `assertReadOnly()` first — a report that tried to write would throw
+rather than succeed. The route table exposes `GET /api/admin/reports` and
+nothing else; there is no POST to a reporting endpoint at all.
+
+§27 says reading a report must not generate activity noise, so it writes no
+activity rows either. The suite runs sixteen reports and asserts that the
+request count, the customer count, the service count, the exact status
+sequence and the activity-log count are all unchanged.
+
+## Drilling out and back
+
+"Open any figure as a filtered request list" is a real link. Every non-zero
+figure and every breakdown row links to `requests.html` carrying the period as
+`from`/`to`, the basis as `dateby`, and the status or service it represents.
+`requests.html` gained that range filter in this stage — it is how the list
+shows exactly the records behind the figure, which is also how §12's accuracy
+requirement is checkable by clicking.
+
+The report and the period live in the address, so the browser's own Back button
+returns to the same report and the same period, which is what P10 asks for.
+
+## Data minimisation
+
+The customer report shows a name, a request count and a date. No phone number,
+no email, no origin, no destination. The suite greps the response for a Saudi
+mobile pattern, for `@aunaldrb.com`, and for a known trip origin, and asserts a
+customer row carries exactly `id`, `name`, `count`, `lastAt`.
+
+## Verified
+
+**241 checks, 0 failed** — 57 new. Every figure is reproduced from a direct
+`COUNT` against the records; the breakdowns are asserted to sum to the total;
+the all-time report is asserted to equal the dashboard's own counts and the
+requests module's own status counts. A Content Manager gets 403, an
+unauthenticated caller gets 401, and adding parameters does not widen either.
+
+## Still not done
+
+- **No English.** Reports render Arabic labels over data stored in Arabic;
+  §22's LTR half has nothing to show until the system has English content.
+- **Aggregation is per request.** At the current data volume that is correct
+  and simple. If the request table grows into six figures, the status and
+  service breakdowns are the queries to look at first — they are already
+  indexed on `status` and `created_at`.
+- **The customer report paginates at ten rows** and has no search. The
+  specification's P02 covers the report's own filters; a searchable customer
+  list already exists in العملاء.

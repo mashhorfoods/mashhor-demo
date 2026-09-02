@@ -691,6 +691,205 @@ check('integrity', 'no prohibited terminology reached the public page',
 check('integrity', 'the approved terminology is still there',
     substr_count($html, 'ذوي الاحتياجات الخاصة') > 0);
 
+
+/* ================================================================== */
+section('RECOVERY 03  التقارير — REPORTS');
+/* ================================================================== */
+clearRateBucket();
+
+/* --- the module exists, and only the approved scope ----------------- */
+$rq = $admin->get('/api/admin/reports?report=requests&period=year');
+check('reports', 'GET /api/admin/reports answers', $rq['status'] === 200, "status={$rq['status']}");
+check('reports', 'exactly the two approved reports exist',
+    count(Repo_Reports::REPORTS) === 2 && isset(Repo_Reports::REPORTS['requests'])
+    && isset(Repo_Reports::REPORTS['customers']), (string) count(Repo_Reports::REPORTS));
+$bad = $admin->get('/api/admin/reports?report=revenue');
+check('reports', 'an unspecified report is not served', $bad['status'] === 404, "status={$bad['status']}");
+
+/* §29 — none of the metrics a transport company "normally" reports */
+$body = strtolower($rq['raw']);
+$forbidden = ['revenue','profit','conversion','retention','forecast','growth_rate',
+              'utilisation','utilization','completion_rate','cancellation_rate','avg_response'];
+$found = [];
+foreach ($forbidden as $needle) if (str_contains($body, $needle)) $found[] = $needle;
+check('reports', 'no unapproved business metric is present', $found === [], implode(',', $found));
+check('reports', 'no export endpoint exists',
+    $admin->get('/api/admin/reports/export')['status'] === 404);
+
+/* --- §12 accuracy: every figure reproducible from the records -------- */
+$period = Repo_Reports::resolvePeriod('year', null, null);
+$data = $rq['body']['data'];
+$dbTotal = (int) Db::value(
+    'SELECT COUNT(*) FROM requests WHERE created_at >= ? AND created_at < ?',
+    [$period['from'], gmdate('Y-m-d', strtotime($period['to'] . ' +1 day'))]);
+check('accuracy', 'the total matches a direct count of the records',
+    $data['total'] === $dbTotal, "report={$data['total']} db={$dbTotal}");
+check('accuracy', 'the status breakdown sums to the total',
+    array_sum($data['byStatus']) === $data['total'],
+    array_sum($data['byStatus']) . ' vs ' . $data['total']);
+check('accuracy', 'the source breakdown sums to the total',
+    array_sum(array_column($data['bySource'], 'n')) === $data['total']);
+check('accuracy', 'the service breakdown sums to the total',
+    array_sum(array_column($data['byService'], 'n')) === $data['total']);
+check('accuracy', 'all five approved statuses are present, zeros included',
+    count($data['byStatus']) === 5 && array_keys($data['byStatus']) === Schema::STATUSES);
+foreach (Schema::STATUSES as $st) {
+    $n = (int) Db::value(
+        'SELECT COUNT(*) FROM requests WHERE status = ? AND created_at >= ? AND created_at < ?',
+        [$st, $period['from'], gmdate('Y-m-d', strtotime($period['to'] . ' +1 day'))]);
+    check('accuracy', "status «{$st}» matches the records", $data['byStatus'][$st] === $n,
+        "report={$data['byStatus'][$st]} db={$n}");
+}
+
+/* --- §26 cross-module consistency ------------------------------------ */
+$counts = Repo_Requests::counts();
+$all = $admin->get('/api/admin/reports?report=requests&period=custom&from=2020-01-01&to=' . gmdate('Y-m-d'));
+check('consistency', 'an all-time report matches the dashboard total',
+    $all['body']['data']['total'] === $counts['total'],
+    "report={$all['body']['data']['total']} dashboard={$counts['total']}");
+foreach (Schema::STATUSES as $st) {
+    check('consistency', "all-time «{$st}» matches the requests module",
+        $all['body']['data']['byStatus'][$st] === $counts[$st]);
+}
+$cu = $admin->get('/api/admin/reports?report=customers&period=custom&from=2020-01-01&to=' . gmdate('Y-m-d'));
+check('consistency', 'all-time active customers matches the customers module',
+    $cu['body']['data']['active'] === (int) Db::value('SELECT COUNT(*) FROM customers'),
+    "report={$cu['body']['data']['active']}");
+check('accuracy', 'new plus returning equals active, by construction',
+    $cu['body']['data']['new'] + $cu['body']['data']['returning'] === $cu['body']['data']['active']);
+
+/* --- §05 §06 filters and dates ---------------------------------------- */
+$one = $admin->get('/api/admin/reports?report=requests&period=year&status=new');
+check('filters', 'a status filter narrows the result',
+    $one['body']['data']['total'] === $data['byStatus']['new'],
+    "filtered={$one['body']['data']['total']} breakdown={$data['byStatus']['new']}");
+check('filters', 'the filter is echoed back so the page can preserve it',
+    ($one['body']['filters']['status'] ?? '') === 'new');
+
+$svc = Repo_Reports::serviceOptions()[0];
+$sr = $admin->get('/api/admin/reports?report=requests&period=year&service=' . rawurlencode($svc));
+$svcExpected = 0;
+foreach ($data['byService'] as $row) if ($row['k'] === $svc) $svcExpected = (int) $row['n'];
+check('filters', 'a service filter matches its own breakdown row',
+    $sr['body']['data']['total'] === $svcExpected,
+    "filtered={$sr['body']['data']['total']} breakdown={$svcExpected}");
+check('filters', 'the service list is the existing records, not a copy',
+    count($rq['body']['services']) === (int) Db::value('SELECT COUNT(*) FROM services'));
+
+foreach ([
+    'end before start'  => 'period=custom&from=2026-09-10&to=2026-09-01',
+    'impossible date'   => 'period=custom&from=2026-02-30&to=2026-03-01',
+    'missing dates'     => 'period=custom',
+    'unknown period'    => 'period=nonsense',
+    'unknown status'    => 'period=year&status=bogus',
+    'unknown service'   => 'period=year&service=' . rawurlencode('خدمة غير معتمدة'),
+] as $label => $q) {
+    $res = $admin->get('/api/admin/reports?report=requests&' . $q);
+    check('dates', "rejected: {$label}", $res['status'] === 422, "status={$res['status']}");
+}
+$same = $admin->get('/api/admin/reports?report=requests&period=custom&from=' . gmdate('Y-m-d') . '&to=' . gmdate('Y-m-d'));
+check('dates', 'a same-day range is valid', $same['status'] === 200 && $same['body']['period']['days'] === 1,
+    "days=" . ($same['body']['period']['days'] ?? '?'));
+check('dates', 'the date basis is named in the answer, never assumed',
+    ($rq['body']['basis']['label'] ?? '') !== '');
+$trip = $admin->get('/api/admin/reports?report=requests&period=year&basis=trip');
+check('dates', 'the trip-date basis is a distinct calculation',
+    $trip['status'] === 200 && ($trip['body']['basis']['key'] ?? '') === 'trip');
+
+/* --- §13 the empty period offers a wider one -------------------------- */
+$none = $admin->get('/api/admin/reports?report=requests&period=custom&from=2001-01-01&to=2001-01-31');
+check('empty', 'an empty period is reported as empty', ($none['body']['empty'] ?? false) === true);
+check('empty', 'and offers a wider period instead of a row of zeroes',
+    !empty($none['body']['suggest']['label']), json_encode($none['body']['suggest'] ?? null));
+check('empty', 'the suggested period actually contains records',
+    (int) ($none['body']['suggest']['count'] ?? 0) > 0);
+
+/* --- §19 §28 permissions ---------------------------------------------- */
+clearRateBucket();
+$cmEmail3 = "content3{$stamp}@aunaldrb.com";
+$cmPw3    = 'Content-Manager-Three-1';
+$admin->post('/api/admin/users/save', [
+    'csrf_token' => $adminTk, 'name' => 'مدير المحتوى الثالث',
+    'email' => $cmEmail3, 'role' => 'content', 'active' => '1', 'password' => $cmPw3,
+]);
+$cm3 = new Client($BASE);
+$t3 = $cm3->csrf();
+$cm3->post('/api/auth/login', ['csrf_token' => $t3, 'email' => $cmEmail3, 'password' => $cmPw3]);
+$res = $cm3->get('/api/admin/reports?report=requests&period=year');
+check('permissions', 'a Content Manager cannot read reports', $res['status'] === 403, "status={$res['status']}");
+check('permissions', 'and no figures leak in the refusal', empty($res['body']['data']));
+
+$anon4 = new Client($BASE);
+$res = $anon4->get('/api/admin/reports?report=requests&period=year');
+check('permissions', 'an unauthenticated report request is rejected', $res['status'] === 401, "status={$res['status']}");
+check('permissions', 'and leaks nothing', empty($res['body']['data']));
+$res = $anon4->get('/api/admin/reports?report=customers&period=year');
+check('permissions', 'the customer report is protected too', $res['status'] === 401, "status={$res['status']}");
+
+/* parameter manipulation must not widen access */
+$res = $cm3->get('/api/admin/reports?report=customers&period=year&basis=trip&status=new');
+check('security', 'extra parameters do not bypass the permission', $res['status'] === 403, "status={$res['status']}");
+
+/* --- §09 §20 data minimisation ---------------------------------------- */
+$cust = $admin->get('/api/admin/reports?report=customers&period=year');
+$raw = $cust['raw'];
+check('privacy', 'the customer report carries no phone numbers',
+    !preg_match('/05\d{8}/', $raw));
+check('privacy', 'no email addresses either', !str_contains($raw, '@aunaldrb.com'));
+check('privacy', 'no trip origins or destinations', !str_contains($raw, 'حي الملقا'));
+$rowKeys = array_keys(($cust['body']['data']['rows'][0] ?? ['x' => 1]));
+sort($rowKeys);
+check('privacy', 'a customer row carries only id, name, count and last activity',
+    $rowKeys === ['count', 'id', 'lastAt', 'name'], implode(',', $rowKeys));
+
+/* --- §25 reports never write ------------------------------------------ */
+$before = [
+    'requests'  => (int) Db::value('SELECT COUNT(*) FROM requests'),
+    'customers' => (int) Db::value('SELECT COUNT(*) FROM customers'),
+    'services'  => (int) Db::value('SELECT COUNT(*) FROM services'),
+    'statuses'  => (string) Db::value('SELECT GROUP_CONCAT(status) FROM (SELECT status FROM requests ORDER BY id) t'),
+    'activity'  => (int) Db::value('SELECT COUNT(*) FROM activity_log'),
+];
+foreach (['requests', 'customers'] as $r) {
+    foreach (['today', 'week', 'month', 'year'] as $p) {
+        $admin->get("/api/admin/reports?report={$r}&period={$p}");
+        $admin->get("/api/admin/reports?report={$r}&period={$p}&basis=trip");
+    }
+}
+$after = [
+    'requests'  => (int) Db::value('SELECT COUNT(*) FROM requests'),
+    'customers' => (int) Db::value('SELECT COUNT(*) FROM customers'),
+    'services'  => (int) Db::value('SELECT COUNT(*) FROM services'),
+    'statuses'  => (string) Db::value('SELECT GROUP_CONCAT(status) FROM (SELECT status FROM requests ORDER BY id) t'),
+    'activity'  => (int) Db::value('SELECT COUNT(*) FROM activity_log'),
+];
+check('readonly', '16 report runs changed no request', $before['requests'] === $after['requests']);
+check('readonly', 'changed no customer', $before['customers'] === $after['customers']);
+check('readonly', 'changed no service', $before['services'] === $after['services']);
+check('readonly', 'changed no status', $before['statuses'] === $after['statuses']);
+/* §27 — reading a report must not generate activity noise */
+check('readonly', 'and wrote no activity rows', $before['activity'] === $after['activity'],
+    "{$before['activity']} -> {$after['activity']}");
+check('readonly', 'the repository refuses a write statement outright', (static function (): bool {
+    $m = new ReflectionMethod('Repo_Reports', 'assertReadOnly');
+    $m->setAccessible(true);
+    try { $m->invoke(null, 'DELETE FROM requests'); return false; }
+    catch (Throwable $e) { return true; }
+})());
+
+/* --- §02 no duplicate data system ------------------------------------- */
+$tables = array_column(Db::all(
+    Db::isMysql()
+      ? "SELECT table_name AS name FROM information_schema.tables WHERE table_schema = DATABASE()"
+      : "SELECT name FROM sqlite_master WHERE type='table'"), 'name');
+$reportish = array_filter($tables, static fn(string $t): bool =>
+    str_contains($t, 'report') || str_contains($t, 'metric') || str_contains($t, 'analytic')
+    || str_contains($t, 'aggregate') || str_contains($t, 'snapshot'));
+check('architecture', 'no reporting tables were created', $reportish === [],
+    implode(',', $reportish));
+check('architecture', 'the schema is still the 20 tables the modules share',
+    count(Schema::missingTables()) === 0);
+
 /* ================================================================== */
 section('§32  PERSISTENCE ACROSS A RESTART');
 /* ================================================================== */

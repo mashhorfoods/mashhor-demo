@@ -62,6 +62,12 @@ final class Routes
             ['POST', '/api/admin/content/reorder',  ['content', 'edit'], 'reorderItems'],
             ['POST', '/api/admin/content/publish',  ['content', 'edit'], 'publishContent'],
 
+            /* التقارير — RECOVERY 03. One endpoint, GET only, gated on the
+               `reports` module that the approved matrix grants to Super Admin
+               and Admin and withholds from Content Manager. There is no POST
+               here: a report cannot change anything (§25). */
+            ['GET',  '/api/admin/reports',        ['reports', 'view'],   'report'],
+
             ['GET',  '/api/admin/settings',       ['settings', 'view'],  'listSettings'],
             ['POST', '/api/admin/settings/save',  ['settings', 'edit'],  'saveSettings'],
         ];
@@ -808,6 +814,90 @@ final class Routes
         Repo_Activity::record($u, 'content', 'publish', 'site', $r['target'], $r['target'],
             'نشر المحتوى إلى صفحة الموقع (' . $r['regions'] . ' منطقة)');
         Http::ok($r);
+    }
+
+
+    /* =================================================================== */
+    /* التقارير — RECOVERY 03                                               */
+    /* =================================================================== */
+
+    /**
+     * The approved scope is "basic request and customer counts over a period".
+     * This answers exactly that, for one of the two approved reports, over one
+     * period, on one explicitly named date basis.
+     *
+     * GET only. It selects and it returns; there is no branch in it that
+     * writes, and no activity row is recorded — §27 is explicit that reading a
+     * report should not generate activity noise.
+     */
+    private static function report(?array $u): void
+    {
+        $report = (string) (Http::query('report') ?? 'requests');
+        if (!isset(Repo_Reports::REPORTS[$report])) Http::notFound();
+
+        $basis = (string) (Http::query('basis') ?? 'created');
+        if (!isset(Repo_Reports::BASES[$basis])) $basis = 'created';
+
+        $err = null;
+        $period = Repo_Reports::resolvePeriod(
+            (string) (Http::query('period') ?? 'month'),
+            Http::query('from'), Http::query('to'), $err
+        );
+        if ($period === null) Http::invalid(['period' => $err ?? 'فترة غير صالحة.']);
+
+        /* filters are only the ones the spec's own dimensions allow (§05):
+           the five approved statuses and the existing service records */
+        $filters = [];
+        $status = (string) (Http::query('status') ?? '');
+        if ($status !== '') {
+            if (!in_array($status, Schema::STATUSES, true)) Http::invalid(['status' => 'حالة غير معروفة.']);
+            $filters['status'] = $status;
+        }
+        $service = (string) (Http::query('service') ?? '');
+        if ($service !== '') {
+            if (!in_array($service, Repo_Reports::serviceOptions(), true)) {
+                Http::invalid(['service' => 'خدمة غير معروفة.']);
+            }
+            $filters['service'] = $service;
+        }
+
+        $out = [
+            'report'  => $report,
+            'title'   => Repo_Reports::REPORTS[$report],
+            'basis'   => ['key' => $basis, 'label' => Repo_Reports::BASES[$basis]['label']],
+            'period'  => $period,
+            'filters' => ['status' => $filters['status'] ?? '', 'service' => $filters['service'] ?? ''],
+            'services'=> Repo_Reports::serviceOptions(),
+            'statuses'=> Schema::STATUS_LABEL,
+            'sources' => Schema::SOURCE_LABEL,
+        ];
+
+        if ($report === 'requests') {
+            $out['data'] = Repo_Reports::requests($basis, $period, $filters);
+            $empty = $out['data']['total'] === 0;
+        } else {
+            $out['data'] = Repo_Reports::customers($basis, $period);
+            $page = max(1, (int) (Http::query('page') ?? '1'));
+            $per  = 10;
+            $list = Repo_Reports::customerRows($basis, $period, $per, ($page - 1) * $per);
+            $out['data']['rows']  = array_map(static fn(array $r): array => [
+                /* §09 §20 — the name, the count and the date. Nothing else. */
+                'id'     => (int) $r['id'],
+                'name'   => (string) $r['name'],
+                'count'  => (int) $r['n'],
+                'lastAt' => $r['last_at'],
+            ], $list['rows']);
+            $out['data']['rowsTotal'] = $list['total'];
+            $out['data']['page'] = $page;
+            $out['data']['per']  = $per;
+            $empty = $out['data']['active'] === 0;
+        }
+
+        /* §13 — an empty period offers a wider one instead of a row of zeroes */
+        $out['empty'] = $empty;
+        if ($empty) $out['suggest'] = Repo_Reports::suggestWider($basis, $period);
+
+        Http::ok($out);
     }
 
     private static function listSettings(?array $u): void
