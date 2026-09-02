@@ -117,6 +117,8 @@ a{color:var(--navy)}
   transition:background var(--dur) var(--ease),color var(--dur) var(--ease)
 }
 .navitem:hover{background:rgba(255,255,255,.08);color:var(--white)}
+.navitem.is-pending{opacity:.55;cursor:not-allowed}
+.navitem.is-pending:hover{background:transparent;color:#B9C9E4}
 .navitem[aria-current="page"]{background:var(--white);color:var(--navy);font-weight:600}
 .navitem[aria-current="page"]::before{
   content:"";position:absolute;inset-inline-start:0;top:50%;transform:translateY(-50%);
@@ -991,10 +993,10 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
       <a class="navitem" href="customers.html"><svg class="i" aria-hidden="true"><use href="#ic-users"/></svg><span class="navitem__lbl">العملاء</span></a>
       <p class="side__grp">الموقع الإلكتروني</p>
       <a class="navitem" href="services.html"><svg class="i" aria-hidden="true"><use href="#ic-service"/></svg><span class="navitem__lbl">الخدمات</span></a>
-      <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-content"/></svg><span class="navitem__lbl">المحتوى</span></a>
+      <a class="navitem is-pending" href="#" aria-disabled="true" title="قيد الإنشاء — لم تُبنَ هذه الوحدة بعد"><svg class="i" aria-hidden="true"><use href="#ic-content"/></svg><span class="navitem__lbl">المحتوى</span></a>
       <p class="side__grp">النظام</p>
-      <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-report"/></svg><span class="navitem__lbl">التقارير</span></a>
-      <a class="navitem" href="users.html" data-nav="users"><svg class="i" aria-hidden="true"><use href="#ic-shield"/></svg><span class="navitem__lbl">المستخدمون والصلاحيات</span></a>
+      <a class="navitem is-pending" href="#" aria-disabled="true" title="قيد الإنشاء — لم تُبنَ هذه الوحدة بعد"><svg class="i" aria-hidden="true"><use href="#ic-report"/></svg><span class="navitem__lbl">التقارير</span></a>
+      <a class="navitem" href="#" aria-current="page" data-nav="users"><svg class="i" aria-hidden="true"><use href="#ic-shield"/></svg><span class="navitem__lbl">المستخدمون والصلاحيات</span></a>
       <a class="navitem" href="settings.html" data-nav="settings"><svg class="i" aria-hidden="true"><use href="#ic-settings"/></svg><span class="navitem__lbl">الإعدادات</span></a>
     </nav>
     <div class="side__foot">
@@ -1214,10 +1216,10 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   <a class="navitem" href="customers.html"><svg class="i" aria-hidden="true"><use href="#ic-users"/></svg><span class="navitem__lbl">العملاء</span></a>
   <p class="side__grp">الموقع الإلكتروني</p>
   <a class="navitem" href="services.html"><svg class="i" aria-hidden="true"><use href="#ic-service"/></svg><span class="navitem__lbl">الخدمات</span></a>
-  <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-content"/></svg><span class="navitem__lbl">المحتوى</span></a>
+  <a class="navitem is-pending" href="#" aria-disabled="true" title="قيد الإنشاء — لم تُبنَ هذه الوحدة بعد"><svg class="i" aria-hidden="true"><use href="#ic-content"/></svg><span class="navitem__lbl">المحتوى</span></a>
   <p class="side__grp">النظام</p>
-  <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-report"/></svg><span class="navitem__lbl">التقارير</span></a>
-  <a class="navitem" href="users.html" data-nav="users"><svg class="i" aria-hidden="true"><use href="#ic-shield"/></svg><span class="navitem__lbl">المستخدمون والصلاحيات</span></a>
+  <a class="navitem is-pending" href="#" aria-disabled="true" title="قيد الإنشاء — لم تُبنَ هذه الوحدة بعد"><svg class="i" aria-hidden="true"><use href="#ic-report"/></svg><span class="navitem__lbl">التقارير</span></a>
+  <a class="navitem" href="#" aria-current="page" data-nav="users"><svg class="i" aria-hidden="true"><use href="#ic-shield"/></svg><span class="navitem__lbl">المستخدمون والصلاحيات</span></a>
   <a class="navitem" href="settings.html" data-nav="settings"><svg class="i" aria-hidden="true"><use href="#ic-settings"/></svg><span class="navitem__lbl">الإعدادات</span></a>
 </nav>
 

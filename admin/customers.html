@@ -117,6 +117,8 @@ a{color:var(--navy)}
   transition:background var(--dur) var(--ease),color var(--dur) var(--ease)
 }
 .navitem:hover{background:rgba(255,255,255,.08);color:var(--white)}
+.navitem.is-pending{opacity:.55;cursor:not-allowed}
+.navitem.is-pending:hover{background:transparent;color:#B9C9E4}
 .navitem[aria-current="page"]{background:var(--white);color:var(--navy);font-weight:600}
 .navitem[aria-current="page"]::before{
   content:"";position:absolute;inset-inline-start:0;top:50%;transform:translateY(-50%);
@@ -581,8 +583,10 @@ table.tbl td:first-child{white-space:nowrap}
 
 /* row click target */
 tr.rowlink{cursor:pointer}
-.rowbtn{background:none;border:none;padding:0;font:inherit;color:var(--ink);font-weight:600;
-  cursor:pointer;text-align:start}
+.rowbtn{background:none;border:none;font:inherit;color:var(--ink);font-weight:600;
+  cursor:pointer;text-align:start;
+  /* WCAG 2.5.8 target size — text alone gave an 18px-tall control */
+  display:inline-flex;align-items:center;min-height:24px;padding:.15rem 0}
 .rowbtn:hover{text-decoration:underline}
 .rowbtn:focus-visible{outline:none;box-shadow:var(--sh-focus);border-radius:var(--r-xs)}
 
@@ -801,12 +805,12 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
       <a class="navitem" href="requests.html"><svg class="i" aria-hidden="true"><use href="#ic-request"/></svg><span class="navitem__lbl">طلبات النقل</span></a>
       <a class="navitem" href="#" aria-current="page"><svg class="i" aria-hidden="true"><use href="#ic-users"/></svg><span class="navitem__lbl">العملاء</span></a>
       <p class="side__grp">الموقع الإلكتروني</p>
-      <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-service"/></svg><span class="navitem__lbl">الخدمات</span></a>
-      <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-content"/></svg><span class="navitem__lbl">المحتوى</span></a>
+      <a class="navitem" href="services.html"><svg class="i" aria-hidden="true"><use href="#ic-service"/></svg><span class="navitem__lbl">الخدمات</span></a>
+      <a class="navitem is-pending" href="#" aria-disabled="true" title="قيد الإنشاء — لم تُبنَ هذه الوحدة بعد"><svg class="i" aria-hidden="true"><use href="#ic-content"/></svg><span class="navitem__lbl">المحتوى</span></a>
       <p class="side__grp">النظام</p>
-      <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-report"/></svg><span class="navitem__lbl">التقارير</span></a>
-      <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-shield"/></svg><span class="navitem__lbl">المستخدمون والصلاحيات</span></a>
-      <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-settings"/></svg><span class="navitem__lbl">الإعدادات</span></a>
+      <a class="navitem is-pending" href="#" aria-disabled="true" title="قيد الإنشاء — لم تُبنَ هذه الوحدة بعد"><svg class="i" aria-hidden="true"><use href="#ic-report"/></svg><span class="navitem__lbl">التقارير</span></a>
+      <a class="navitem" href="users.html"><svg class="i" aria-hidden="true"><use href="#ic-shield"/></svg><span class="navitem__lbl">المستخدمون والصلاحيات</span></a>
+      <a class="navitem" href="settings.html"><svg class="i" aria-hidden="true"><use href="#ic-settings"/></svg><span class="navitem__lbl">الإعدادات</span></a>
     </nav>
     <div class="side__foot">
       <button class="side__toggle" id="collapse" aria-expanded="true" aria-controls="side">
@@ -1057,12 +1061,12 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   <a class="navitem" href="requests.html"><svg class="i" aria-hidden="true"><use href="#ic-request"/></svg><span class="navitem__lbl">طلبات النقل</span></a>
   <a class="navitem" href="#" aria-current="page"><svg class="i" aria-hidden="true"><use href="#ic-users"/></svg><span class="navitem__lbl">العملاء</span></a>
   <p class="side__grp">الموقع الإلكتروني</p>
-  <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-service"/></svg><span class="navitem__lbl">الخدمات</span></a>
-  <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-content"/></svg><span class="navitem__lbl">المحتوى</span></a>
+  <a class="navitem" href="services.html"><svg class="i" aria-hidden="true"><use href="#ic-service"/></svg><span class="navitem__lbl">الخدمات</span></a>
+  <a class="navitem is-pending" href="#" aria-disabled="true" title="قيد الإنشاء — لم تُبنَ هذه الوحدة بعد"><svg class="i" aria-hidden="true"><use href="#ic-content"/></svg><span class="navitem__lbl">المحتوى</span></a>
   <p class="side__grp">النظام</p>
-  <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-report"/></svg><span class="navitem__lbl">التقارير</span></a>
-  <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-shield"/></svg><span class="navitem__lbl">المستخدمون والصلاحيات</span></a>
-  <a class="navitem" href="#"><svg class="i" aria-hidden="true"><use href="#ic-settings"/></svg><span class="navitem__lbl">الإعدادات</span></a>
+  <a class="navitem is-pending" href="#" aria-disabled="true" title="قيد الإنشاء — لم تُبنَ هذه الوحدة بعد"><svg class="i" aria-hidden="true"><use href="#ic-report"/></svg><span class="navitem__lbl">التقارير</span></a>
+  <a class="navitem" href="users.html"><svg class="i" aria-hidden="true"><use href="#ic-shield"/></svg><span class="navitem__lbl">المستخدمون والصلاحيات</span></a>
+  <a class="navitem" href="settings.html"><svg class="i" aria-hidden="true"><use href="#ic-settings"/></svg><span class="navitem__lbl">الإعدادات</span></a>
 </nav>
 
 <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
