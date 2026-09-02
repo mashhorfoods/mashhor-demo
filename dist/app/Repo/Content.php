@@ -54,13 +54,63 @@ final class Repo_Content
         $set[] = 'updated_at = ?';
         $params[] = Db::now();
         $params[] = $id;
-        Db::transaction(static function () use ($set, $params, $id, $actor): void {
+        Db::transaction(static function () use ($set, $params, $id, $actor, $fields): void {
             Db::run('UPDATE services SET ' . implode(', ', $set) . ' WHERE id = ?', $params);
-            $s = Db::one('SELECT slug, title FROM services WHERE id = ?', [$id]);
+            $s = Db::one('SELECT slug, title, description, is_published, sort_order FROM services WHERE id = ?', [$id]);
+            if ($s !== null) {
+                /* the public page renders from the template, so it follows the
+                   record rather than being written separately by each caller */
+                self::syncServiceTemplate((string) $s['slug'], [
+                    'title'        => (string) $s['title'],
+                    'body'         => (string) $s['description'],
+                    'is_published' => (int) $s['is_published'],
+                    'sort_order'   => (int) $s['sort_order'],
+                ], $actor);
+            }
             Repo_Activity::record($actor, 'services', 'edit', 'service',
                 (string) ($s['slug'] ?? $id), (string) ($s['title'] ?? ''),
                 'تحديث بيانات الخدمة المنشورة على الموقع');
         });
+    }
+
+    /**
+     * Reordering the seven approved services. One transaction, so a partial
+     * order cannot survive a failure, and only ids that are actually services
+     * are touched — a crafted payload cannot pull a row out of another table.
+     *
+     * The RECOVERY 02 publishing template is kept in step by the same call,
+     * because the public page renders from that template and an order that
+     * lived only in `services` would never reach the site.
+     */
+    public static function reorderServices(array $ids, array $actor): int
+    {
+        return Db::transaction(static function () use ($ids, $actor): int {
+            $i = 0;
+            foreach (array_values($ids) as $id) {
+                $svc = Db::one('SELECT id, slug FROM services WHERE id = ?', [(int) $id]);
+                if ($svc === null) continue;
+                $i++;
+                Db::run('UPDATE services SET sort_order = ?, updated_at = ? WHERE id = ?',
+                    [$i, Db::now(), (int) $svc['id']]);
+                self::syncServiceTemplate((string) $svc['slug'], ['sort_order' => $i], $actor);
+            }
+            Repo_Activity::record($actor, 'services', 'edit', 'services', null, 'الخدمات',
+                'تغيير ترتيب الخدمات على الموقع');
+            return $i;
+        });
+    }
+
+    /**
+     * One place that keeps a service's publishing template in step with its
+     * record. Both the الخدمات module and المحتوى write services, and a
+     * template that drifted from the record would publish stale copy.
+     */
+    public static function syncServiceTemplate(string $slug, array $fields, ?array $actor): void
+    {
+        $t = Db::one('SELECT id FROM content_items WHERE collection = ? AND lang = ? AND item_key = ?',
+            ['services', 'ar', $slug]);
+        if ($t === null) return;
+        Repo_Cms::updateItem((int) $t['id'], $fields, $actor);
     }
 
     public static function publicService(array $s): array
@@ -103,6 +153,96 @@ final class Repo_Content
         );
     }
 
+    /**
+     * Which parts of the public page reference each asset.
+     *
+     * Computed from index.html, not stored — the same decision Stage 12 made,
+     * and for the same reason: a stored usage list is a second copy of a fact
+     * the page already states, and the two drift the moment someone edits the
+     * page. The section an asset appears in is found by walking back to the
+     * nearest heading, so the answer stays true when a section moves.
+     */
+    public static function mediaUsage(): array
+    {
+        $target = Publisher::target();
+        if ($target === null) return [];
+        $html = @file_get_contents($target);
+        if ($html === false) return [];
+        /* a commented-out <img> is not a use. Comments are replaced with
+           spaces of the same length so every later offset still points at the
+           right section. */
+        $html = preg_replace_callback('/<!--(?!\/?aun:).*?-->/s',
+            static fn(array $m): string => str_repeat(' ', strlen($m[0])), $html) ?? $html;
+
+        /* every section's heading, by the offset it starts at */
+        $marks = [];
+        if (preg_match_all('/<h2[^>]*>(.*?)<\/h2>/s', $html, $m, PREG_OFFSET_CAPTURE)) {
+            foreach ($m[1] as $hit) {
+                $text = trim(strip_tags((string) $hit[0]));
+                if ($text !== '') $marks[] = ['at' => (int) $hit[1], 'label' => $text];
+            }
+        }
+        $sectionAt = static function (int $offset) use ($marks): string {
+            $label = 'الصفحة الرئيسية';
+            foreach ($marks as $mk) {
+                if ($mk['at'] > $offset) break;
+                $label = $mk['label'];
+            }
+            return $label;
+        };
+
+        /* the asset paths that actually exist, so a variant is only collapsed
+           onto a master that is really there — brand/favicon-32.png is a
+           master whose name merely looks like a variant */
+        $known = [];
+        foreach (Db::all('SELECT path FROM media_assets') as $r) $known[(string) $r['path']] = true;
+
+        $usage = [];
+        $add = function (string $url, int $offset) use (&$usage, $known, $sectionAt): void {
+            /* an absolute URL in a meta tag points at the same file */
+            $url = preg_replace('#^https?://[^/]+/#', '', $url) ?? $url;
+            $url = ltrim($url, './');
+            if (!preg_match('#^(img|brand)/#', $url)) return;
+            $path = isset($known[$url]) ? $url : self::basePath($url, $known);
+            if (!isset($known[$path])) return;
+            $usage[$path][$sectionAt($offset)] = true;
+        };
+
+        /* src, href and content alike — a logo named in a <link> or an
+           Open Graph tag is in use just as much as one in an <img> */
+        if (preg_match_all('/(?:src|href|content)="([^"]+)"/', $html, $m, PREG_OFFSET_CAPTURE)) {
+            foreach ($m[1] as $hit) $add((string) $hit[0], (int) $hit[1]);
+        }
+        if (preg_match_all('/srcset="([^"]+)"/', $html, $m, PREG_OFFSET_CAPTURE)) {
+            foreach ($m[1] as $hit) {
+                foreach (explode(',', (string) $hit[0]) as $candidate) {
+                    $url = trim(explode(' ', trim($candidate))[0]);
+                    if ($url !== '') $add($url, (int) $hit[1]);
+                }
+            }
+        }
+        /* structured data names the logo as a JSON string, not an attribute */
+        if (preg_match_all('#"(?:logo|image|url)"\s*:\s*"([^"]+)"#', $html, $m, PREG_OFFSET_CAPTURE)) {
+            foreach ($m[1] as $hit) $add((string) $hit[0], (int) $hit[1]);
+        }
+
+        $out = [];
+        foreach ($usage as $path => $sections) $out[$path] = array_keys($sections);
+        return $out;
+    }
+
+    /**
+     * A responsive variant belongs to its master — wheelchair-360.webp is
+     * wheelchair.webp. The suffix is only stripped when the result is an asset
+     * that actually exists, because a master may legitimately end in a number.
+     */
+    private static function basePath(string $path, array $known = []): string
+    {
+        $base = preg_replace('/-\d+(\.(?:webp|avif|png|jpg|jpeg))$/i', '$1', $path) ?? $path;
+        if ($base === $path) return $path;
+        return ($known === [] || isset($known[$base])) ? $base : $path;
+    }
+
     public static function publicMedia(array $m): array
     {
         return [
@@ -119,6 +259,13 @@ final class Repo_Content
 
     /* ---- settings ------------------------------------------------------- */
 
+    /**
+     * Settings carry mixed types — a toggle is a boolean, a select is an index,
+     * a name is a string — and a TEXT column would flatten all three into
+     * strings. Each value is therefore stored JSON-encoded and decoded here,
+     * so what the interface saved is exactly what it loads back. A string
+     * "123" survives as the string "123", which a bare numeric cast would not.
+     */
     public static function settings(?string $category = null): array
     {
         $sql = 'SELECT category, name, value, updated_at FROM settings';
@@ -126,9 +273,23 @@ final class Repo_Content
         if ($category !== null) { $sql .= ' WHERE category = ?'; $params[] = $category; }
         $out = [];
         foreach (Db::all($sql . ' ORDER BY category, name', $params) as $r) {
-            $out[(string) $r['category']][(string) $r['name']] = $r['value'];
+            $out[(string) $r['category']][(string) $r['name']] = self::decode($r['value']);
         }
         return $out;
+    }
+
+    private static function decode($raw)
+    {
+        if ($raw === null) return null;
+        $v = json_decode((string) $raw, true);
+        /* a value that is not valid JSON predates the encoding; return it as
+           the string it is rather than losing it */
+        return json_last_error() === JSON_ERROR_NONE ? $v : $raw;
+    }
+
+    public static function encode($value): string
+    {
+        return (string) json_encode($value, JSON_UNESCAPED_UNICODE);
     }
 
     public static function saveSettings(string $category, array $values, array $actor): void
@@ -136,6 +297,7 @@ final class Repo_Content
         Db::transaction(static function () use ($category, $values, $actor): void {
             $now = Db::now();
             foreach ($values as $name => $value) {
+                $value = self::encode($value);
                 $exists = Db::value('SELECT 1 FROM settings WHERE category = ? AND name = ?',
                     [$category, (string) $name]);
                 if ($exists) {

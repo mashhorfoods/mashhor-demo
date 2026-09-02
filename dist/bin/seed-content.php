@@ -101,6 +101,53 @@ try {
     fwrite(STDOUT, "testimonials: " . count(Repo_Cms::items('testimonials', 'ar'))
         . " (no testimonials section exists on the public site — nothing seeded)\n");
 
+    /* ---- الإعدادات ------------------------------------------------------
+       The values the settings module has always shown. They are the real
+       company details from the public site, not placeholders, and they are
+       written once so the module has something to load instead of a literal
+       map in its own script. Re-running never overwrites an edited value. */
+    $SETTINGS = [
+        'company' => [
+            'cName' => 'شركة عون الدرب للنقل المتخصص',
+            'cTag'  => 'نُعين ونُعاون',
+            'cDesc' => 'نقل متخصص في الرياض لكبار السن وذوي الاحتياجات الخاصة والمرضى، بمركبات مجهزة وطاقم مدرب، في بيئة تحترم الإنسانية.',
+            'cAddr' => 'الرياض · شارع ابن كثير · حي السليمانية · 12233',
+        ],
+        'contact' => [
+            'cPhone' => '+966 53 554 4352',
+            'cWa'    => '+966 53 554 4352',
+            'cEmail' => '',
+            'cSite'  => 'https://aunaldrb.com/',
+            'sTw'    => '',
+            'sIg'    => '',
+        ],
+        'site' => [
+            'siteLive' => true,
+            'sTitle'   => 'عون الدرب للنقل المتخصص | نقل كبار السن وذوي الاحتياجات الخاصة بالرياض',
+            'sDesc'    => 'نقل متخصص في الرياض لكبار السن وذوي الاحتياجات الخاصة والمرضى: مركبات مجهزة للكراسي المتحركة والسرير الطبي، وطاقم مدرب، ومساندة عند الحاجة — على مدار الساعة.',
+            'sUrl'     => 'https://aunaldrb.com/',
+        ],
+        'notif'  => ['nNew' => true, 'nStale' => true, 'nStatus' => false, 'nContent' => true],
+        'system' => ['tz' => 0, 'sess' => '60', 'digits' => 0],
+    ];
+    $wrote = 0; $left = 0;
+    foreach ($SETTINGS as $cat => $fields) {
+        foreach ($fields as $name => $value) {
+            $exists = Db::value('SELECT 1 FROM settings WHERE category = ? AND name = ?', [$cat, $name]);
+            if ($exists && !$force) { $left++; continue; }
+            $now = Db::now();
+            if ($exists) {
+                Db::run('UPDATE settings SET value = ?, updated_at = ? WHERE category = ? AND name = ?',
+                    [Repo_Content::encode($value), $now, $cat, $name]);
+            } else {
+                Db::run('INSERT INTO settings (category, name, value, updated_at) VALUES (?,?,?,?)',
+                    [$cat, $name, Repo_Content::encode($value), $now]);
+            }
+            $wrote++;
+        }
+    }
+    fwrite(STDOUT, "settings: {$wrote} written, {$left} left as they were\n");
+
     $t = Publisher::target();
     fwrite(STDOUT, "\npublish target: " . ($t === null ? 'NOT FOUND' : $t)
         . ($t !== null && is_writable($t) ? " (writable)" : " (NOT writable)") . "\n");

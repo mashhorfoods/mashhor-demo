@@ -1202,30 +1202,21 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
      Titles, descriptions and images are lifted verbatim from the built
      site's «خدماتنا» section. Nothing here was written for the dashboard,
      and no eighth service exists — the approved set is the source of truth. */
-  var SERVICES = [
-    { slug:"wheelchair-transport", order:1, on:true, updated:"2026-09-02 11:35",
-      title:"النقل بواسطة الكرسي المتحرك",
-      desc:"خدمة نقل آمنة ومريحة لمستخدمي الكراسي المتحركة، مع تجهيز المركبة بما يسهّل عملية الصعود والنزول." },
-    { slug:"power-wheelchair-transport", order:2, on:true, updated:"2026-09-02 11:35",
-      title:"النقل بواسطة الكرسي الكهربائي",
-      desc:"مركبات مجهزة لاستيعاب الكراسي الكهربائية، مع مراعاة الأمان والثبات أثناء التنقل." },
-    { slug:"medical-bed-transport", order:3, on:true, updated:"2026-09-02 11:35",
-      title:"النقل بواسطة السرير الطبي",
-      desc:"خدمة مخصصة للحالات التي تتطلب بقاء المستفيد على السرير طوال الرحلة، باستخدام وسائل نقل مناسبة." },
-    { slug:"driver-assistant-escort", order:4, on:true, updated:"2026-09-02 11:35",
-      title:"خدمة مساعد السائق",
-      desc:"إمكانية توفير مساعد أو أكثر لمرافقة المستفيد ومساعدته أثناء النقل، وفقًا لحالته واحتياجاته الخاصة." },
-    { slug:"daily-transport-elderly", order:5, on:true, updated:"2026-09-02 11:35",
-      title:"النقل اليومي",
-      desc:"خدمات نقل يومية لكبار السن وذوي الاحتياجات الخاصة، بما يوفر لهم تنقلًا آمنًا ومريحًا." },
-    { slug:"hospital-medical-centre", order:6, on:true, updated:"2026-09-02 11:35",
-      title:"النقل إلى المستشفيات والمراكز الطبية",
-      desc:"التوصيل إلى المستشفيات والمراكز الطبية، مع تقديم المساعدة وفقًا لاحتياجات المستفيد." },
-    { slug:"riyadh-social-mobility", order:7, on:true, updated:"2026-09-02 11:35",
-      title:"التنقل للمناسبات الاجتماعية",
-      desc:"توفير وسائل نقل مناسبة ومريحة للتنقل إلى المناسبات والزيارات الاجتماعية." }
-  ];
-  SERVICES.forEach(function(s){ s.img = IMG[s.slug]; s.imgName = s.slug + ".webp"; s.imgSize = "—"; });
+  /* Services come from the database (RECOVERY 01, wired here). The seven
+     literals that used to sit here were a second copy of the services table;
+     boot() fills this from GET /api/admin/services, which is behind the
+     session and the services-module permission. Every render path below is
+     unchanged — only where the rows come from. */
+  var SERVICES = [];
+  /* the preview images stay inline: they are the same seven pictures the
+     public page shows, and re-fetching them per row would cost more than the
+     data URIs already in this file */
+  function decorate(s){
+    s.img = IMG[s.slug] || null;
+    s.imgName = s.imgPath ? s.imgPath.split("/").pop() : (s.slug + ".webp");
+    s.imgSize = "—";
+    return s;
+  }
 
   /* Terminology guard. The approved wording is ذوي الاحتياجات الخاصة; these
      are the forms that must never reach the website through this form. */
@@ -1335,19 +1326,46 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   }
 
   function move(s,dir){
+    if (busy) return;
     var list = byOrder(), i = list.indexOf(s), j = i + dir;
     if (j < 0 || j >= list.length) return;
-    var other = list[j], a = s.order;
-    s.order = other.order; other.order = a;
-    render();
-    toast("أصبح ترتيب «" + s.title + "» رقم " + s.order);
+    var ids = list.map(function(x){ return x.id; });
+    ids.splice(j, 0, ids.splice(i, 1)[0]);
+    setBusy(true);
+    AunAPI.post("/admin/services/reorder", { ids: ids }).then(function(){
+      return reload();
+    }).then(function(){
+      var now = find(s.slug);
+      toast("أصبح ترتيب «" + s.title + "» رقم " + (now ? now.order : "—"));
+    }).catch(function(err){
+      toast(err.message || "تعذّر تغيير الترتيب", true);
+    }).then(function(){ setBusy(false); });
   }
+  /* The server owns the change: it writes the record, keeps the publishing
+     template in step and records who did it. This page redraws from the
+     answer, so what it shows is what was stored. */
   function toggle(s){
-    s.on = !s.on;
-    s.updated = "2026-09-14 09:50";
-    render();
-    toast(s.on ? ("«"+s.title+"» ظاهرة الآن على الموقع") : ("«"+s.title+"» أُخفيت عن الموقع"));
+    if (busy) return;
+    setBusy(true);
+    AunAPI.post("/admin/services/save", {
+      id: s.id, title: s.title, description: s.desc,
+      published: s.on ? 0 : 1
+    }).then(function(){
+      return reload();
+    }).then(function(){
+      var now = find(s.slug);
+      toast(now && now.on ? ("«"+s.title+"» ظاهرة الآن على الموقع")
+                          : ("«"+s.title+"» أُخفيت عن الموقع"));
+    }).catch(function(err){
+      toast(err.message || "تعذّر تغيير الحالة", true);
+    }).then(function(){ setBusy(false); });
   }
+  function find(slug){
+    for (var i=0;i<SERVICES.length;i++) if (SERVICES[i].slug === slug) return SERVICES[i];
+    return null;
+  }
+  var busy = false;
+  function setBusy(on){ busy = on; $("loadbar").hidden = !on; }
 
   function chips(){
     var wrap = $("applied"), box = $("chips");
@@ -1540,6 +1558,8 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
     $("fOrder").value = d.order; setVis(d.on);
     if (picked){
       var slug2 = picked.split("/").pop().replace(/\.[a-z]+$/,"");
+      /* the path is what the server stores; the preview is a local nicety */
+      draft.imgPath = picked;
       draft.imgName = picked.split("/").pop();
       draft.imgSize = "—";
       if (IMG[slug2]) draft.img = IMG[slug2];
@@ -1578,27 +1598,42 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
       return;                       /* never report a save that did not happen */
     }
 
-    /* reordering through the editor keeps the other six consistent */
-    var newOrder = parseInt($("fOrder").value,10);
-    if (newOrder !== current.order){
-      var list = byOrder(), from = current.order;
-      list.forEach(function(s){
-        if (s === current) return;
-        if (from < newOrder && s.order > from && s.order <= newOrder) s.order--;
-        else if (from > newOrder && s.order >= newOrder && s.order < from) s.order++;
-      });
-      current.order = newOrder;
-    }
-    current.title = t; current.desc = d; current.on = draft.on;
-    current.img = draft.img; current.imgName = draft.imgName; current.imgSize = draft.imgSize;
-    current.updated = "2026-09-14 09:50";
+    /* One request. The server re-checks the terminology, re-sequences the
+       other six if the order moved, keeps the publishing template in step and
+       records who saved it — then this page redraws from what it stored, so a
+       failed save can never look like a successful one. */
+    if (busy) return;
+    var slug = current.slug;
+    var payload = {
+      id: current.id, title: t, description: d,
+      published: draft.on ? 1 : 0,
+      order: parseInt($("fOrder").value, 10)
+    };
+    if (draft.imgPath) payload.image = draft.imgPath;
 
-    draft.title = t; draft.desc = d; draft.order = current.order;
-    setDirty(false);
-    $("eTitle").textContent = current.title;
-    $("eBadge").textContent = ""; $("eBadge").appendChild(visBadge(current.on));
-    $("fUpdated").textContent = current.updated;
-    toast("حُفظت التعديلات ونُشرت على الموقع");
+    setBusy(true);
+    AunAPI.post("/admin/services/save", payload).then(function(){
+      return reload();
+    }).then(function(){
+      var now = find(slug);
+      if (!now){ toast("حُفظت التعديلات"); return; }
+      current = now;
+      draft.title = now.title; draft.desc = now.desc;
+      draft.order = now.order; draft.on = now.on;
+      setDirty(false);
+      $("eTitle").textContent = now.title;
+      $("eBadge").textContent = ""; $("eBadge").appendChild(visBadge(now.on));
+      $("fUpdated").textContent = now.updated;
+      toast("حُفظت التعديلات ونُشرت على الموقع");
+    }).catch(function(err){
+      /* the server's own field errors, shown where the browser shows its own */
+      if (err.errors){
+        if (err.errors.title) fieldErr("errTitle","fTitle", err.errors.title);
+        if (err.errors.description) fieldErr("errDesc","fDesc", err.errors.description);
+        if (err.errors.image) toast(err.errors.image, true);
+      }
+      toast(err.message || "تعذّر حفظ التعديلات", true);
+    }).then(function(){ setBusy(false); });
   });
   function fieldErr(id,ctl,msg){
     $(id).hidden = false; $(id).querySelector("span").textContent = msg;
@@ -1735,7 +1770,32 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   function net(){ offline.hidden = navigator.onLine; }
   window.addEventListener("online",net); window.addEventListener("offline",net); net();
 
-  render();
+  /* ---------- load ------------------------------------------------------
+     The services table is the source of truth; this page reads it and writes
+     back to it. `reload()` is used after every mutation so the screen always
+     shows what was stored rather than what was intended. */
+  function reload(){
+    return AunAPI.services().then(function(res){
+      SERVICES = (res.rows || []).map(function(r){
+        return decorate({
+          id: r.id, slug: r.slug, order: r.order, on: r.published,
+          updated: (r.updatedAt || "").slice(0, 16),
+          title: r.title, desc: r.description, imgPath: r.image
+        });
+      });
+      render();
+    });
+  }
+  function boot(){
+    var box = $("results");
+    if (box) box.setAttribute("data-state", "loading");
+    return reload().catch(function(err){
+      if (err.status === 401) return;      /* app.js is already redirecting */
+      if (box) box.setAttribute("data-state", "error");
+      toast(err.message || "تعذّر تحميل الخدمات", true);
+    });
+  }
+  boot();
   resumeFromPick();
 })();
 

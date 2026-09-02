@@ -890,6 +890,191 @@ check('architecture', 'no reporting tables were created', $reportish === [],
 check('architecture', 'the schema is still the 20 tables the modules share',
     count(Schema::missingTables()) === 0);
 
+
+/* ================================================================== */
+section('THREE MODULES ON THEIR ENDPOINTS — الخدمات · الوسائط · الإعدادات');
+/* ================================================================== */
+clearRateBucket();
+$admin = new Client($BASE);
+$tk = $admin->csrf();
+$admin->post('/api/auth/login', ['csrf_token' => $tk, 'email' => $EMAIL, 'password' => $PW]);
+$adminTk = $admin->csrf();
+
+/* ---- الخدمات ------------------------------------------------------- */
+$sv = $admin->get('/api/admin/services');
+check('services', 'the services list is served', $sv['status'] === 200, "status={$sv['status']}");
+check('services', 'seven approved services, from the table',
+    count($sv['body']['rows']) === (int) Db::value('SELECT COUNT(*) FROM services'));
+$first = $sv['body']['rows'][0];
+
+/* the terminology guard has to hold against a direct call, not just the form */
+$res = $admin->post('/api/admin/services/save', [
+    'csrf_token' => $adminTk, 'id' => $first['id'],
+    'title' => $first['title'], 'description' => 'نقل ذوي الإعاقة', 'published' => 1,
+]);
+check('services', 'a prohibited term is refused by the server', $res['status'] === 422, "status={$res['status']}");
+check('services', 'and the description was not changed',
+    (string) Db::value('SELECT description FROM services WHERE id = ?', [$first['id']]) === $first['description']);
+$res = $admin->post('/api/admin/services/save', [
+    'csrf_token' => $adminTk, 'id' => $first['id'],
+    'title' => 'خدمة معاقين', 'description' => $first['description'], 'published' => 1,
+]);
+check('services', 'a prohibited term in the title is refused too', $res['status'] === 422, "status={$res['status']}");
+check('services', 'the approved title still stands',
+    (string) Db::value('SELECT title FROM services WHERE id = ?', [$first['id']]) === $first['title']);
+
+/* an image reference must exist in the media library */
+$res = $admin->post('/api/admin/services/save', [
+    'csrf_token' => $adminTk, 'id' => $first['id'],
+    'title' => $first['title'], 'description' => $first['description'],
+    'published' => 1, 'image' => 'img/does-not-exist.webp',
+]);
+check('services', 'an unknown image reference is refused', $res['status'] === 422, "status={$res['status']}");
+$res = $admin->post('/api/admin/services/save', [
+    'csrf_token' => $adminTk, 'id' => $first['id'],
+    'title' => $first['title'], 'description' => $first['description'],
+    'published' => 1, 'image' => '../../etc/passwd',
+]);
+check('services', 'a traversal attempt is refused', $res['status'] === 422, "status={$res['status']}");
+
+/* hide → the publishing template follows → the public page loses it */
+$res = $admin->post('/api/admin/services/save', [
+    'csrf_token' => $adminTk, 'id' => $first['id'],
+    'title' => $first['title'], 'description' => $first['description'], 'published' => 0,
+]);
+check('services', 'a service can be hidden', $res['status'] === 200, "status={$res['status']}");
+check('services', 'the publishing template followed the record',
+    (int) Db::value('SELECT is_published FROM content_items WHERE collection = ? AND item_key = ?',
+        ['services', $first['slug']]) === 0);
+$admin->post('/api/admin/content/publish', ['csrf_token' => $adminTk]);
+$region = (string) Publisher::liveValue('services.items');
+check('services', 'and it left the public page',
+    substr_count($region, 'service__title') === 6, (string) substr_count($region, 'service__title'));
+check('services', 'the remaining six are renumbered',
+    str_contains($region, '>06<') && !str_contains($region, '>07<'));
+check('services', 'the record still exists — hidden, not deleted',
+    (int) Db::value('SELECT COUNT(*) FROM services WHERE id = ?', [$first['id']]) === 1);
+
+/* reorder */
+$ids = array_column($sv['body']['rows'], 'id');
+$res = $admin->post('/api/admin/services/reorder', ['csrf_token' => $adminTk, 'ids' => array_reverse($ids)]);
+check('services', 'services can be reordered', $res['status'] === 200, "status={$res['status']}");
+$after = array_column($admin->get('/api/admin/services')['body']['rows'], 'id');
+check('services', 'the new order persisted', $after === array_reverse($ids));
+check('services', 'and no two services share a position',
+    count(array_unique(array_column($admin->get('/api/admin/services')['body']['rows'], 'order'))) === count($ids));
+
+/* restore */
+$admin->post('/api/admin/services/reorder', ['csrf_token' => $adminTk, 'ids' => $ids]);
+$admin->post('/api/admin/services/save', [
+    'csrf_token' => $adminTk, 'id' => $first['id'],
+    'title' => $first['title'], 'description' => $first['description'], 'published' => 1,
+]);
+$admin->post('/api/admin/content/publish', ['csrf_token' => $adminTk]);
+check('services', 'the approved seven are back, in order',
+    substr_count((string) Publisher::liveValue('services.items'), 'service__title') === 7);
+
+/* ---- الوسائط والأصول ------------------------------------------------ */
+$md = $admin->get('/api/admin/media');
+check('media', 'the media library is served', $md['status'] === 200, "status={$md['status']}");
+check('media', 'every indexed asset is listed',
+    count($md['body']['rows']) === (int) Db::value('SELECT COUNT(*) FROM media_assets'));
+$withUsage = array_filter($md['body']['rows'], static fn(array $r): bool => ($r['usedIn'] ?? []) !== []);
+check('media', 'usage is computed, not stored', count($withUsage) > 0, count($withUsage) . ' assets in use');
+check('media', 'no usage column exists in the table',
+    !in_array('used_in', array_column(Db::all(
+        Db::isMysql() ? "SHOW COLUMNS FROM media_assets" : "PRAGMA table_info(media_assets)"), 'name'), true));
+
+/* usage must follow the page, not a stored list */
+$svcAsset = null;
+foreach ($md['body']['rows'] as $r) if ($r['path'] === 'img/wheelchair-transport.webp') $svcAsset = $r;
+check('media', 'a service photograph is reported as used',
+    $svcAsset !== null && ($svcAsset['usedIn'] ?? []) !== [], json_encode($svcAsset['usedIn'] ?? null, JSON_UNESCAPED_UNICODE));
+$logo = null;
+foreach ($md['body']['rows'] as $r) if ($r['path'] === 'brand/aun-aldrb-logo.png') $logo = $r;
+check('media', 'an unreferenced file is reported as unused',
+    $logo !== null && ($logo['usedIn'] ?? []) === []);
+check('media', 'a responsive variant counts towards its master, not itself',
+    (int) Db::value("SELECT COUNT(*) FROM media_assets WHERE path LIKE '%-360.webp'") === 0);
+
+/* ---- الإعدادات ------------------------------------------------------- */
+$st = $admin->get('/api/admin/settings');
+check('settings', 'settings are served', $st['status'] === 200, "status={$st['status']}");
+$set = $st['body']['settings'];
+check('settings', 'the approved categories are present',
+    isset($set['company'], $set['contact'], $set['site'], $set['notif'], $set['system']));
+check('settings', 'the real company name is stored, not a placeholder',
+    ($set['company']['cName'] ?? '') === 'شركة عون الدرب للنقل المتخصص');
+/* the reason values are JSON-encoded: types must survive the round trip */
+check('settings', 'a toggle round-trips as a boolean', is_bool($set['site']['siteLive'] ?? null),
+    gettype($set['site']['siteLive'] ?? null));
+check('settings', 'a select index round-trips as a number', is_int($set['system']['tz'] ?? null),
+    gettype($set['system']['tz'] ?? null));
+check('settings', 'a numeric string round-trips as a string', is_string($set['system']['sess'] ?? null),
+    gettype($set['system']['sess'] ?? null));
+
+$res = $admin->post('/api/admin/settings/save', [
+    'csrf_token' => $adminTk, 'category' => 'company',
+    'values' => ['cTag' => 'تحقّق آلي ' . $stamp],
+]);
+check('settings', 'a category saves', $res['status'] === 200, "status={$res['status']}");
+check('settings', 'the value persisted',
+    ($admin->get('/api/admin/settings')['body']['settings']['company']['cTag'] ?? '') === 'تحقّق آلي ' . $stamp);
+check('settings', 'and no sibling field was touched',
+    ($admin->get('/api/admin/settings')['body']['settings']['company']['cName'] ?? '')
+      === 'شركة عون الدرب للنقل المتخصص');
+$admin->post('/api/admin/settings/save', [
+    'csrf_token' => $adminTk, 'category' => 'company', 'values' => ['cTag' => 'نُعين ونُعاون'],
+]);
+check('settings', 'the approved tagline is restored',
+    ($admin->get('/api/admin/settings')['body']['settings']['company']['cTag'] ?? '') === 'نُعين ونُعاون');
+
+/* ---- permissions across all three ----------------------------------- */
+clearRateBucket();
+$anon5 = new Client($BASE);
+foreach (['/api/admin/services', '/api/admin/media', '/api/admin/settings'] as $path) {
+    $res = $anon5->get($path);
+    check('permissions', "unauthenticated GET {$path} rejected", $res['status'] === 401, "status={$res['status']}");
+    check('permissions', "and leaks nothing", empty($res['body']['rows']) && empty($res['body']['settings']));
+}
+$res = $anon5->post('/api/admin/services/save', ['id' => $first['id'], 'title' => 'اختراق', 'description' => 'x']);
+check('permissions', 'an unauthenticated service write is rejected',
+    in_array($res['status'], [401, 419], true), "status={$res['status']}");
+check('permissions', 'and changed nothing',
+    (string) Db::value('SELECT title FROM services WHERE id = ?', [$first['id']]) === $first['title']);
+$res = $anon5->post('/api/admin/settings/save', ['category' => 'company', 'values' => ['cName' => 'اختراق']]);
+check('permissions', 'an unauthenticated settings write is rejected',
+    in_array($res['status'], [401, 419], true), "status={$res['status']}");
+
+/* a Content Manager has services but not settings, per the approved matrix */
+$cm4 = new Client($BASE);
+$t4 = $cm4->csrf();
+$cmEmail4 = "content4{$stamp}@aunaldrb.com";
+$admin->post('/api/admin/users/save', [
+    'csrf_token' => $adminTk, 'name' => 'مدير المحتوى الرابع',
+    'email' => $cmEmail4, 'role' => 'content', 'active' => '1', 'password' => 'Content-Four-Test-1',
+]);
+$cm4->post('/api/auth/login', ['csrf_token' => $t4, 'email' => $cmEmail4, 'password' => 'Content-Four-Test-1']);
+check('permissions', 'a Content Manager CAN read services',
+    $cm4->get('/api/admin/services')['status'] === 200);
+check('permissions', 'and the media library',
+    $cm4->get('/api/admin/media')['status'] === 200);
+check('permissions', 'but NOT settings',
+    $cm4->get('/api/admin/settings')['status'] === 403);
+
+/* ---- no page still carries its own copy of the data ------------------ */
+foreach ([
+    'admin/services.html' => '/var SERVICES = \[\s*\{/',
+    'admin/media.html'    => '/var ASSETS = \[\s*\{/',
+    'admin/settings.html' => '/var SAVED = \{\s*company:/',
+] as $file => $pattern) {
+    $src = (string) @file_get_contents(AUN_ROOT . '/' . $file);
+    check('architecture', "no literal dataset left in {$file}",
+        preg_match($pattern, $src) === 0);
+    check('architecture', "{$file} loads from the API",
+        str_contains($src, 'AunAPI.'));
+}
+
 /* ================================================================== */
 section('§32  PERSISTENCE ACROSS A RESTART');
 /* ================================================================== */

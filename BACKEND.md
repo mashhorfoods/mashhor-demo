@@ -151,10 +151,9 @@ endpoint claimed.
 
 - **The admin is not a multi-tenant system.** Roles gate modules, not rows.
 - **`المحتوى` and `التقارير` still do not exist.** Their permissions do.
-- **`services`, `media` and `settings` still render seeded data in the
-  browser.** Their read and write endpoints exist and are protected; the pages
-  have not been switched over. `requests`, `customers`, `users`, `activity` and
-  notifications are live.
+- ~~**`services`, `media` and `settings` still render seeded data in the
+  browser.**~~ Closed — see *The last three modules on their endpoints* below.
+  Every admin module now reads and writes through the API.
 - **There is no email or SMS.** The settings page has always said so.
 - **Rate limiting is per IP.** Behind a shared NAT that is a shared budget.
 
@@ -387,3 +386,81 @@ unauthenticated caller gets 401, and adding parameters does not widen either.
 - **The customer report paginates at ten rows** and has no search. The
   specification's P02 covers the report's own filters; a searchable customer
   list already exists in العملاء.
+
+---
+
+# The last three modules on their endpoints
+
+`الخدمات`, `الوسائط والأصول` and `الإعدادات` were the three pages still
+rendering literal data in the browser after RECOVERY 03. They now read and
+write through the API like every other module. Three gaps had to be closed
+first.
+
+## Services: the endpoint could not do what the page could
+
+`POST /api/admin/services/save` accepted a title, a description and a
+published flag. The page also offers reordering and image replacement, so the
+endpoint gained `order` and `image`, and `POST /api/admin/services/reorder`
+was added under the same `services:edit` permission.
+
+Two things moved to the server with them:
+
+- **The terminology guard.** `الخدمات` has always refused
+  `ذوي الإعاقة`, `معاق` and their variants in the browser. That refusal is now
+  also in the endpoint, so it holds against a direct API call — which is the
+  only place it was ever going to matter.
+- **Template synchronisation.** The public page renders services from the
+  RECOVERY 02 publishing template. `updateService()` and `reorderServices()`
+  keep that template in step, so hiding or reordering a service through
+  `الخدمات` reaches the site on the next publish. Verified: hide one, publish,
+  and the page carries six services renumbered 01–06; restore, and the
+  approved seven come back in order with the file byte-identical.
+
+An `order` given to `save` re-sequences the whole set rather than writing one
+number, so two services can never share a position.
+
+## Media: usage is computed, not described
+
+The literal `ASSETS` array carried a hand-written `u:` list per asset —
+`["ترويسة الموقع","التذييل"]` for the logo, and so on. Those were descriptions,
+and two of them were already wrong: the header logo is a base64 data URI in
+the source page, so the file was not referenced at all.
+
+`GET /api/admin/media` now computes usage from the published page, the way
+Stage 12 said it should be:
+
+- `src`, `href`, `content`, `srcset` and JSON-LD strings are all scanned.
+- An absolute URL resolves to the same file as a relative one.
+- A responsive variant counts towards its master — but only when the master
+  actually exists, because `brand/favicon-32.png` is a master whose name merely
+  looks like a variant.
+- HTML comments are blanked first (preserving offsets), so a commented-out
+  `<img>` is not a use.
+- The section an asset belongs to is the nearest preceding `<h2>`, so the
+  answer stays true when a section moves.
+
+The answer legitimately differs between the source page and the built one:
+`build.js` externalises the inlined logos, so the logo SVGs are unused in
+source and used in `dist/`. Whichever page is deployed is the one measured.
+
+## Settings: types had to survive the round trip
+
+A settings value can be a boolean (`siteLive`), a select index (`tz`) or a
+string that looks numeric (`sess: "60"`). A `TEXT` column flattens all three.
+Each value is therefore stored JSON-encoded and decoded on read, so what the
+interface saved is exactly what it loads — and `"60"` survives as a string,
+which a numeric cast would not.
+
+The real company values were seeded from the module's own former defaults;
+`bin/seed-content.php` writes them once and never overwrites an edited value.
+
+## Verified
+
+**293 checks, 0 failed** — 52 new. Among them: a prohibited term refused by the
+endpoint in both the title and the description with the record unchanged; a
+path-traversal image reference refused; a hidden service leaving the public
+page and coming back; no two services sharing a position after a reorder;
+usage computed rather than stored, with a `used_in` column asserted not to
+exist; each of the three value types round-tripping; a saved field not
+disturbing its siblings; and a grep asserting that none of the three pages
+still contains a literal dataset.

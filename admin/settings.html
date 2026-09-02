@@ -1467,18 +1467,12 @@ window.AunShell = (function(){
   Array.prototype.forEach.call(nav,function(n){ n.setAttribute("aria-current","page"); });
 
   /* ---------- the values the website carries today ---------------------- */
-  var SAVED = {
-    company:{ cName:"شركة عون الدرب للنقل المتخصص", cTag:"نُعين ونُعاون",
-      cDesc:"نقل متخصص في الرياض لكبار السن وذوي الاحتياجات الخاصة والمرضى، بمركبات مجهزة وطاقم مدرب، في بيئة تحترم الإنسانية.",
-      cAddr:"الرياض · شارع ابن كثير · حي السليمانية · 12233" },
-    contact:{ cPhone:"+966 53 554 4352", cWa:"+966 53 554 4352", cEmail:"",
-      cSite:"https://aunaldrb.com/", sTw:"", sIg:"" },
-    site:{ siteLive:true, sTitle:"عون الدرب للنقل المتخصص | نقل كبار السن وذوي الاحتياجات الخاصة بالرياض",
-      sDesc:"نقل متخصص في الرياض لكبار السن وذوي الاحتياجات الخاصة والمرضى: مركبات مجهزة للكراسي المتحركة والسرير الطبي، وطاقم مدرب، ومساندة عند الحاجة — على مدار الساعة.",
-      sUrl:"https://aunaldrb.com/" },
-    notif:{ nNew:true, nStale:true, nStatus:false, nContent:true },
-    system:{ tz:0, sess:"60", digits:0 }
-  };
+  /* Settings come from the database (RECOVERY 01, wired here). The literal
+     map that used to sit here held the real company values and was the only
+     record of them; the settings table is that record now. Values keep their
+     type across the round trip — a toggle stays a boolean and a select index
+     stays a number — because each is stored JSON-encoded. */
+  var SAVED = {};
   var CATS = [
     { k:"company", t:"معلومات الشركة", i:"ic-content" },
     { k:"contact", t:"معلومات التواصل", i:"ic-phone" },
@@ -1616,12 +1610,39 @@ window.AunShell = (function(){
     var bad=validate(k);
     if (bad){ $(bad).focus(); toast("تحقّق من الحقول المميّزة",true); return; }
     if (!navigator.onLine){ toast("لا يوجد اتصال — لم تُحفظ التعديلات",true); return; }
-    var d=SAVED[k];
+    if (saving) return;
+    var d=SAVED[k], values={};
     for (var id in d) if (Object.prototype.hasOwnProperty.call(d,id)){
-      d[id] = (typeof d[id]==="number") ? $(id).selectedIndex : get(id);
+      values[id] = (typeof d[id]==="number") ? $(id).selectedIndex : get(id);
     }
-    refreshDirty();
-    toast("حُفظت " + label(k));
+
+    /* the server is the record; this page redraws from what it stored, so a
+       failed save never leaves the interface claiming success */
+    saving = true;
+    setSaving(k, true);
+    AunAPI.post("/admin/settings/save", { category:k, values:values }).then(function(){
+      return AunAPI.settings();
+    }).then(function(res){
+      applyLoaded(res.settings || {});
+      loadCat(cur);
+      refreshDirty();
+      toast("حُفظت " + label(k));
+    }).catch(function(err){
+      /* nothing typed is lost: the fields keep exactly what the operator wrote */
+      toast(err.message || "تعذّر الحفظ — تعديلاتك كما أدخلتها", true);
+    }).then(function(){
+      saving = false;
+      setSaving(k, false);
+    });
+  }
+  var saving = false;
+  function setSaving(k, on){
+    $("loadbar").hidden = !on;
+    Array.prototype.forEach.call(document.querySelectorAll("[data-save]"),function(b){
+      if (b.getAttribute("data-save") !== k) return;
+      b.disabled = on;
+      b.textContent = on ? "جارٍ الحفظ…" : ("حفظ " + label(k));
+    });
   }
   Array.prototype.forEach.call(document.querySelectorAll("[data-save]"),function(b){
     b.addEventListener("click", function(){ save(b.getAttribute("data-save")); });
@@ -1687,11 +1708,36 @@ window.AunShell = (function(){
   $("roleFull").addEventListener("click", function(){ setRole(true); });
   $("roleView").addEventListener("click", function(){ setRole(false); });
 
+  /* ---------- load ------------------------------------------------------ */
+  function applyLoaded(fromServer){
+    /* only the categories the server actually holds; a category it does not
+       know about stays absent rather than being invented empty */
+    SAVED = {};
+    Object.keys(fromServer).forEach(function(cat){
+      SAVED[cat] = fromServer[cat];
+    });
+  }
+  function boot(){
+    return AunAPI.settings().then(function(res){
+      applyLoaded(res.settings || {});
+      CATS.forEach(function(c){ if (SAVED[c.k]) loadCat(c.k); });
+      loadCat(cur);
+      counts();
+      refreshDirty();
+    }).catch(function(err){
+      if (err.status === 401) return;      /* app.js is already redirecting */
+      toast(err.message || "تعذّر تحميل الإعدادات", true);
+    });
+  }
+
   buildNav();
-  CATS.forEach(function(c){ if (SAVED[c.k]) loadCat(c.k); });
   syncToggle("siteLive");
   show("company");
   applyPerms();
+  /* the fields are filled once the server answers; until then they hold the
+     empty values the markup ships with, and the save buttons have nothing to
+     compare against, so nothing can be saved by accident */
+  boot().then(function(){ syncToggle("siteLive"); });
 })();
 
 /* --- header notifications (Stage 14) -------------------------------------

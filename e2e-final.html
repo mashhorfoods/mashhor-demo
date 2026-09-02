@@ -1,0 +1,42 @@
+<!doctype html><html><body><pre id="out">pending</pre>
+<script>
+var R=[]; function log(o){R.push(o);document.getElementById("out").textContent=JSON.stringify(R,null,1);}
+function csrf(){return fetch("/api/csrf",{credentials:"same-origin"}).then(r=>r.json()).then(b=>b.token);}
+function wait(ms){return new Promise(r=>setTimeout(r,ms));}
+var q=new URLSearchParams(location.search);
+var PAGES=(q.get("p")||"").split(","), W=Number(q.get("w")||1440);
+csrf().then(function(t){
+  return fetch("/api/auth/login",{method:"POST",credentials:"same-origin",
+    headers:{"Content-Type":"application/json","X-CSRF-Token":t},
+    body:JSON.stringify({csrf_token:t,email:"noura@aunaldrb.com",password:"Recovery-01-Local-Dev"})});
+}).then(function(){
+  return PAGES.reduce(function(p,name){
+    return p.then(function(){
+      return new Promise(function(res){
+        var f=document.createElement("iframe"); f.style.cssText="width:"+W+"px;height:900px;border:0";
+        var errs=[]; f.src="/admin/"+name+".html"; document.body.appendChild(f);
+        f.onload=function(){
+          f.contentWindow.addEventListener("error",e=>errs.push(String(e.message)));
+          wait(1600).then(function(){
+            var d=f.contentDocument,o={p:name,w:W};
+            try{
+              o.ok=d.documentElement.scrollWidth===d.documentElement.clientWidth;
+              o.small=[].slice.call(d.querySelectorAll("a[href],button:not([disabled]),select,input,textarea"))
+                .filter(function(e){var b=e.getBoundingClientRect();return b.width>0&&(b.height<24||b.width<24)})
+                .map(e=>e.id||e.className).slice(0,4);
+              o.unnamed=[].slice.call(d.querySelectorAll("button,a[href]"))
+                .filter(e=>e.offsetParent!==null&&!e.textContent.trim()&&!e.getAttribute("aria-label")&&!e.getAttribute("title"))
+                .map(e=>e.id||e.className).slice(0,4);
+              o.dead=[].slice.call(d.querySelectorAll('a[href="#"]'))
+                .filter(a=>!a.getAttribute("aria-disabled")&&a.offsetParent!==null&&!a.getAttribute("aria-current")).length;
+              o.title=(d.querySelector(".page__h")||{}).textContent||null;
+              o.errs=errs;
+            }catch(e){o.fail=e.message;}
+            f.remove(); log(o); res();
+          });
+        };
+      });
+    });
+  }, Promise.resolve());
+}).then(()=>log({done:true})).catch(e=>log({harnessError:String(e)}));
+</script></body></html>

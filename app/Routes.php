@@ -44,6 +44,7 @@ final class Routes
             ['GET',  '/api/admin/customers',      ['customers', 'view'], 'listCustomers'],
             ['GET',  '/api/admin/services',       ['services', 'view'],  'listServices'],
             ['POST', '/api/admin/services/save',  ['services', 'edit'],  'saveService'],
+            ['POST', '/api/admin/services/reorder', ['services', 'edit'], 'reorderServices'],
             ['GET',  '/api/admin/media',          ['services', 'view'],  'listMedia'],
             ['GET',  '/api/admin/users',          ['users', 'view'],     'listUsers'],
             ['POST', '/api/admin/users/save',     ['users', 'edit'],     'saveUser'],
@@ -348,29 +349,100 @@ final class Routes
         Http::ok(['rows' => array_map([Repo_Content::class, 'publicService'], Repo_Content::services())]);
     }
 
+    /**
+     * The approved terminology, enforced where it can actually be enforced.
+     * الخدمات has always refused these forms in the browser; refusing them
+     * here too is what makes the rule hold against a direct API call.
+     */
+    private const BANNED_TERMS = [
+        'ذوي الإعاقة', 'ذوى الإعاقة', 'الإعاقة', 'إعاقة',
+        'معاق', 'معاقين', 'معاقون', 'المعاقين',
+    ];
+
+    private static function bannedTerm(?string $text): ?string
+    {
+        if ($text === null || $text === '') return null;
+        foreach (self::BANNED_TERMS as $t) {
+            if (mb_strpos($text, $t) !== false) return $t;
+        }
+        return null;
+    }
+
     private static function saveService(?array $u): void
     {
         $in = Http::input();
         $v = new Validator($in);
-        $v->rejectUnknown(['csrf_token', 'id', 'title', 'description', 'published', 'order']);
+        $v->rejectUnknown(['csrf_token', 'id', 'title', 'description', 'published', 'order', 'image']);
         $id = (int) ($in['id'] ?? 0);
         if ($id <= 0) $v->error('id', 'الخدمة غير محددة.');
         $title = $v->text('title', true, 2, 160, 'عنوان الخدمة');
         $desc  = $v->multiline('description', 1000, 'وصف الخدمة');
-        if (!$v->passed()) Http::invalid($v->errors());
-        if (Db::one('SELECT id FROM services WHERE id = ?', [$id]) === null) Http::notFound();
 
-        Repo_Content::updateService($id, [
+        $bad = self::bannedTerm($title);
+        if ($bad !== null) {
+            $v->error('title', 'المصطلح «' . $bad . '» غير معتمد. استخدم «ذوي الاحتياجات الخاصة».');
+        }
+        $bad = self::bannedTerm($desc);
+        if ($bad !== null) {
+            $v->error('description', 'المصطلح «' . $bad . '» غير معتمد. استخدم «ذوي الاحتياجات الخاصة».');
+        }
+
+        $image = Validator::tidy((string) ($in['image'] ?? ''));
+        if ($image !== '') {
+            if (!preg_match('#^(img|brand)/[A-Za-z0-9._-]+$#', $image)) {
+                $v->error('image', 'مرجع صورة غير صالح.');
+            } elseif (Db::value('SELECT 1 FROM media_assets WHERE path = ?', [$image]) === null) {
+                $v->error('image', 'هذه الصورة غير موجودة في مكتبة الوسائط.');
+            }
+        }
+
+        if (!$v->passed()) Http::invalid($v->errors());
+        $svc = Db::one('SELECT * FROM services WHERE id = ?', [$id]);
+        if ($svc === null) Http::notFound();
+
+        $fields = [
             'title'        => $title,
             'description'  => $desc ?? '',
             'is_published' => $v->bool('published', true) ? 1 : 0,
-        ], $u);
+        ];
+        if ($image !== '') $fields['image_path'] = $image;
+
+        /* an order given here re-sequences the whole set, so two services can
+           never share a position */
+        if (isset($in['order'])) {
+            $target = max(1, min(99, (int) $in['order']));
+            $ids = array_map(static fn(array $r): int => (int) $r['id'],
+                Db::all('SELECT id FROM services ORDER BY sort_order ASC, id ASC'));
+            $ids = array_values(array_filter($ids, static fn(int $x): bool => $x !== $id));
+            array_splice($ids, min($target - 1, count($ids)), 0, [$id]);
+            Repo_Content::reorderServices($ids, $u);
+        }
+
+        Repo_Content::updateService($id, $fields, $u);
         Http::ok(['id' => $id]);
+    }
+
+    private static function reorderServices(?array $u): void
+    {
+        $in = Http::input();
+        $v = new Validator($in);
+        $v->rejectUnknown(['csrf_token', 'ids']);
+        $ids = $in['ids'] ?? null;
+        if (!is_array($ids) || $ids === []) Http::invalid(['ids' => 'ترتيب غير صالح.']);
+        Http::ok(['reordered' => Repo_Content::reorderServices($ids, $u)]);
     }
 
     private static function listMedia(?array $u): void
     {
-        Http::ok(['rows' => array_map([Repo_Content::class, 'publicMedia'], Repo_Content::media())]);
+        /* usage is computed from the live page, never stored — §12 of the
+           media module's own design, preserved */
+        $usage = Repo_Content::mediaUsage();
+        $rows = array_map(static function (array $m) use ($usage): array {
+            $row = Repo_Content::publicMedia($m);
+            $row['usedIn'] = $usage[$row['path']] ?? [];
+            return $row;
+        }, Repo_Content::media());
+        Http::ok(['rows' => $rows]);
     }
 
     private static function listUsers(?array $u): void

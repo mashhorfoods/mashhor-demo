@@ -1,0 +1,56 @@
+<!doctype html><html><body><pre id="out">pending</pre>
+<script>
+var R=[]; function log(o){R.push(o);document.getElementById("out").textContent=JSON.stringify(R,null,1);}
+function csrf(){return fetch("/api/csrf",{credentials:"same-origin"}).then(r=>r.json()).then(b=>b.token);}
+function wait(ms){return new Promise(r=>setTimeout(r,ms));}
+function frame(page,ms){
+  return new Promise(function(res){
+    var f=document.createElement("iframe"); f.style.cssText="width:1440px;height:900px;border:0";
+    var errs=[]; f.src="/admin/"+page; document.body.appendChild(f);
+    f.onload=function(){ f.contentWindow.addEventListener("error",e=>errs.push(String(e.message)));
+      wait(ms||1600).then(function(){ res({d:f.contentDocument,w:f.contentWindow,f:f,errs:errs}); }); };
+  });
+}
+csrf().then(function(t){
+  return fetch("/api/auth/login",{method:"POST",credentials:"same-origin",
+    headers:{"Content-Type":"application/json","X-CSRF-Token":t},
+    body:JSON.stringify({csrf_token:t,email:"noura@aunaldrb.com",password:"Recovery-01-Local-Dev"})});
+}).then(function(){ return frame("services.html"); })
+.then(function(c){
+  var d=c.d;
+  log({page:"services",
+    rows:d.querySelectorAll("#rows .svc, #rows tr, .svc").length,
+    titles:[].slice.call(d.querySelectorAll(".svc__t, .svc__title, .rowbtn")).slice(0,3).map(e=>e.textContent),
+    state:(d.getElementById("results")||{}).getAttribute?d.getElementById("results").getAttribute("data-state"):null,
+    count:(d.getElementById("count")||{}).textContent,
+    ok:d.documentElement.scrollWidth===d.documentElement.clientWidth,
+    errs:c.errs});
+  c.f.remove();
+  return frame("media.html", 2000);
+}).then(function(c){
+  var d=c.d;
+  var used=[].slice.call(d.querySelectorAll(".tile, .mrow")).length;
+  log({page:"media",
+    tiles:used,
+    count:(d.getElementById("count")||{}).textContent,
+    state:(d.getElementById("results")||{}).getAttribute?d.getElementById("results").getAttribute("data-state"):null,
+    firstUsage:(d.querySelector(".tile__u, .badge")||{}).textContent,
+    ok:d.documentElement.scrollWidth===d.documentElement.clientWidth,
+    errs:c.errs});
+  c.f.remove();
+  return frame("settings.html", 2000);
+}).then(function(c){
+  var d=c.d;
+  log({page:"settings",
+    cName:(d.getElementById("cName")||{}).value,
+    cPhone:(d.getElementById("cPhone")||{}).value,
+    sTitle:((d.getElementById("sTitle")||{}).value||"").slice(0,40),
+    siteLive:(d.getElementById("siteLive")||{}).getAttribute?d.getElementById("siteLive").getAttribute("aria-pressed"):null,
+    nStatus:(d.getElementById("nStatus")||{}).getAttribute?d.getElementById("nStatus").getAttribute("aria-pressed"):null,
+    sess:(d.getElementById("sess")||{}).value,
+    dirty:!d.getElementById("dirty").hidden,
+    ok:d.documentElement.scrollWidth===d.documentElement.clientWidth,
+    errs:c.errs});
+  log({done:true});
+}).catch(e=>log({harnessError:String(e)}));
+</script></body></html>
