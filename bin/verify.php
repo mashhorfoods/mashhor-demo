@@ -2428,6 +2428,63 @@ check('gate', 'no debugging leftovers in any shipped page',
     $dirt === [], implode(', ', array_slice($dirt, 0, 5)));
 
 /* ================================================================== */
+section('THE ACCOUNT MENU — THE SAME THREE ITEMS, WIRED, ON EVERY PAGE');
+/* ================================================================== */
+/* Two of the three items did nothing. «معلومات الحساب» was on all eleven
+   pages and inert; «تغيير كلمة المرور» was wired to nothing on the five pages
+   that offered it and absent from the other six. The menu looked complete and
+   only logout worked. bin/qa-browser.js clicks them; these checks keep the
+   markup and the wiring from drifting apart again. */
+$menuPages = array_values(array_filter(scandir(AUN_ROOT . '/admin') ?: [], static function ($f) {
+    return str_ends_with($f, '.html') && $f !== 'login.html'
+        && !preg_match('/^(stage-\d|recovery-\d)/', $f);
+}));
+check('menu', 'every module page was found', count($menuPages) === 11, count($menuPages) . ' pages');
+
+foreach ($menuPages as $f) {
+    $html = (string) @file_get_contents(AUN_ROOT . '/admin/' . $f);
+    foreach (['info', 'password', 'logout'] as $item) {
+        check('menu', "{$f}: offers data-acct=\"{$item}\"",
+            substr_count($html, 'data-acct="' . $item . '"') === 1,
+            substr_count($html, 'data-acct="' . $item . '"') . ' found');
+    }
+    /* an item with no hook is an item that does nothing */
+    $items = preg_match_all('/<button[^>]*class="[^"]*\bmenu__i\b[^"]*"[^>]*>/', $html, $m);
+    $hooked = 0;
+    foreach ($m[0] as $tag) { if (str_contains($tag, 'data-acct=')) $hooked++; }
+    check('menu', "{$f}: no menu item without a hook", $items === $hooked,
+        "{$hooked}/{$items} hooked");
+}
+
+$js = (string) @file_get_contents(AUN_ROOT . '/admin/app.js');
+check('menu', 'the shared client wires every hook, not just logout',
+    str_contains($js, '[data-acct]') && str_contains($js, 'openPasswordDialog')
+    && str_contains($js, 'openAccountInfo'));
+check('menu', 'and no longer wires the danger class alone',
+    !str_contains($js, 'querySelectorAll(".menu__i--danger")'));
+check('menu', 'the password dialog posts to the endpoint that already refuses a wrong one',
+    str_contains($js, 'AunAPI.changePassword('));
+check('menu', 'the account dialog reads the account from the server',
+    str_contains($js, 'AunAPI.me()'));
+/* the dialogs carry their own styles because two pages define no form classes */
+check('menu', 'the dialogs do not depend on classes some pages lack',
+    str_contains($js, 'aun-acct-style') && str_contains($js, '.aun-fld input{'));
+check('menu', 'and every colour they use has a fallback',
+    (static function () use ($js): bool {
+        if (!preg_match('/var CSS =\s*(.*?);\n\n/s', $js, $m)) return false;
+        preg_match_all('/var\(\s*(--[A-Za-z0-9_-]+)\s*(,)?/', $m[1], $v);
+        foreach ($v[1] as $i => $tok) { if (($v[2][$i] ?? '') !== ',') return false; }
+        return $v[1] !== [];
+    })());
+/* nothing about a password may be logged or echoed */
+check('menu', 'the dialog never puts a password into the DOM it builds',
+    !preg_match('/textContent\s*=\s*[^;]*\.value/', $js)
+    && !str_contains($js, 'console.log'));
+check('menu', 'and every field masks what is typed',
+    substr_count($js, 'i.type = "password"') >= 1
+    && !preg_match('/type\s*=\s*"text".*password/i', $js));
+
+/* ================================================================== */
 foreach ($lines as $l) fwrite(STDOUT, $l . "\n");
 fwrite(STDOUT, "\n" . str_repeat('=', 78) . "\n");
 fwrite(STDOUT, sprintf("  %d passed, %d failed, %d total\n", $pass, $fail, $pass + $fail));

@@ -1123,10 +1123,11 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
           <div class="pop" id="whopop" hidden role="menu" aria-label="حساب المستخدم" style="width:min(17rem,calc(100vw - 2rem))">
             <div class="menu__id"><span class="who__av" aria-hidden="true">ن ع</span>
               <span><b id="whoname2">—</b><span id="whorole2"></span></span></div>
-            <button class="menu__i" role="menuitem"><svg class="i i--sm" aria-hidden="true"><use href="#ic-user"/></svg>معلومات الحساب</button>
-            <button class="menu__i" role="menuitem"><svg class="i i--sm" aria-hidden="true"><use href="#ic-shield"/></svg>تغيير كلمة المرور</button>
+            <button class="menu__i" role="menuitem" data-acct="info"><svg class="i i--sm" aria-hidden="true"><use href="#ic-user"/></svg>معلومات الحساب</button>
+            <button class="menu__i" role="menuitem" data-acct="password"><svg class="i i--sm" aria-hidden="true"><use href="#ic-shield"/></svg>تغيير كلمة المرور</button>
             <span class="menu__sep"></span>
-            <button class="menu__i menu__i--danger" role="menuitem"><svg class="i i--sm" aria-hidden="true"><use href="#ic-logout"/></svg>تسجيل الخروج</button></div>
+            <button class="menu__i menu__i--danger" role="menuitem" data-acct="logout"><svg class="i i--sm" aria-hidden="true"><use href="#ic-logout"/></svg>تسجيل الخروج</button>
+          </div>
         </span>
       </div>
     </header>

@@ -218,12 +218,25 @@
   }
 
   function wireShell() {
-    var buttons = document.querySelectorAll(".menu__i--danger");
-    Array.prototype.forEach.call(buttons, function (b) {
+    /* The account menu, wired here so all eleven module pages get one
+       implementation. Two of its three items used to do nothing at all —
+       «معلومات الحساب» on every page, and «تغيير كلمة المرور» on the five
+       pages that had it (six pages did not offer it) — so the menu looked
+       complete and only logout worked. Every item is hooked by data-acct now,
+       and the menu is the same three items everywhere. */
+    Array.prototype.forEach.call(document.querySelectorAll("[data-acct]"), function (b) {
       b.addEventListener("click", function (e) {
         e.preventDefault();
         e.stopPropagation();
-        AunAPI.logout().catch(function () { location.href = "login.html"; });
+        closeMenus();
+        var what = b.getAttribute("data-acct");
+        if (what === "logout") {
+          AunAPI.logout().catch(function () { location.href = "login.html"; });
+        } else if (what === "info") {
+          openAccountInfo();
+        } else if (what === "password") {
+          openPasswordDialog();
+        }
       });
     });
 
@@ -249,6 +262,281 @@
       waiting.length = 0;
       document.dispatchEvent(new CustomEvent("aun:user", { detail: u }));
     }).catch(function () { /* handle() already redirected on 401 */ });
+  }
+
+
+  /* ------------------------------------------------------------------ */
+  /* the account menu's two dialogs                                      */
+  /* ------------------------------------------------------------------ */
+
+  /* Built here rather than in each page's markup, because the menu is in the
+     shared header and its items have to work wherever you happen to be. Two
+     pages (dashboard, activity) do not define the form classes the others do,
+     so these carry their own styles — every colour and measure through a
+     var() with a fallback, so nothing depends on a token a page may not have. */
+  var STYLE_ID = "aun-acct-style";
+  var CSS =
+    '.aun-dlg{position:fixed;inset:0;z-index:120;display:grid;place-items:center;' +
+      'padding:1rem;background:rgba(15,23,34,.45)}' +
+    '.aun-dlg[hidden]{display:none}' +
+    '.aun-dlg__box{background:var(--white,#fff);color:var(--ink,#1E2733);' +
+      'border-radius:var(--r-modal,16px);box-shadow:0 12px 28px rgba(20,32,50,.14),0 32px 64px rgba(20,32,50,.16);' +
+      'padding:1.5rem;width:min(28rem,100%);max-height:calc(100vh - 2rem);overflow:auto;' +
+      'font-family:var(--f-ar,inherit)}' +
+    '.aun-dlg__h{display:flex;align-items:flex-start;gap:.75rem;margin-bottom:.25rem}' +
+    '.aun-dlg__ic{inline-size:40px;block-size:40px;border-radius:50%;display:grid;place-items:center;' +
+      'flex:0 0 auto;background:var(--mist,#EEF3FA);color:var(--navy,#22406F)}' +
+    '.aun-dlg__t{font-size:1.0625rem;font-weight:600;line-height:1.35}' +
+    '.aun-dlg__d{font-family:var(--f-ar-body,inherit);font-size:.875rem;color:var(--slate,#5A6675);' +
+      'line-height:1.7;margin:.35rem 0 0}' +
+    '.aun-dlg__b{margin-top:1.25rem;display:flex;flex-direction:column;gap:.9rem}' +
+    '.aun-dlg__f{margin-top:1.5rem;display:flex;gap:.5rem;flex-wrap:wrap}' +
+    '.aun-fld{display:flex;flex-direction:column;gap:.35rem}' +
+    '.aun-fld > span{font-size:.8125rem;font-weight:600;color:var(--ink,#1E2733)}' +
+    '.aun-fld input{font:inherit;font-size:.9375rem;color:var(--ink,#1E2733);' +
+      'background:var(--white,#fff);border:1px solid var(--control-border,#8B95A3);' +
+      'border-radius:var(--r-control,8px);min-height:44px;padding:.5rem .75rem;' +
+      'direction:ltr;text-align:left;font-family:var(--f-mono,ui-monospace,monospace)}' +
+    '.aun-fld input:focus{outline:2px solid var(--blue,#4975BA);outline-offset:1px}' +
+    '.aun-fld input.is-bad{border-color:var(--error,#C0433B)}' +
+    '.aun-fld em{font-style:normal;font-size:.8125rem;color:var(--slate,#5A6675);' +
+      'font-family:var(--f-ar-body,inherit)}' +
+    '.aun-err{font-size:.8125rem;color:var(--error,#C0433B);font-family:var(--f-ar-body,inherit)}' +
+    '.aun-err[hidden]{display:none}' +
+    '.aun-btn{font:inherit;font-weight:600;font-size:.9375rem;min-height:44px;padding:0 1.1rem;' +
+      'border-radius:var(--r-control,8px);border:1px solid transparent;cursor:pointer;' +
+      'background:var(--navy,#22406F);color:#fff}' +
+    '.aun-btn:hover{background:var(--blue-pressed,#1A3358)}' +
+    '.aun-btn:disabled{opacity:.6;cursor:default}' +
+    '.aun-btn--ghost{background:var(--white,#fff);color:var(--navy,#22406F);' +
+      'border-color:var(--control-border,#CBD4E1)}' +
+    '.aun-btn--ghost:hover{background:var(--mist,#EEF3FA)}' +
+    '.aun-dl{display:grid;gap:.65rem;margin:0}' +
+    '.aun-dl > div{display:flex;justify-content:space-between;gap:1rem;' +
+      'border-bottom:1px solid var(--divider,#E4E9F0);padding-bottom:.55rem}' +
+    '.aun-dl > div:last-child{border-bottom:0;padding-bottom:0}' +
+    '.aun-dl dt{font-size:.8125rem;color:var(--slate,#5A6675);font-family:var(--f-ar-body,inherit)}' +
+    '.aun-dl dd{margin:0;font-size:.875rem;font-weight:600;text-align:left;direction:ltr;min-width:0;' +
+      'overflow-wrap:anywhere}';
+
+  function ensureStyle() {
+    if (document.getElementById(STYLE_ID)) return;
+    var st = document.createElement("style");
+    st.id = STYLE_ID;
+    st.textContent = CSS;
+    document.head.appendChild(st);
+  }
+
+  /* Close the header popovers the way the pages' own shell does: they are
+     plain [hidden] toggles with an aria-expanded button beside them. */
+  function closeMenus() {
+    Array.prototype.forEach.call(document.querySelectorAll("#whopop, #notifpop"), function (p) {
+      p.hidden = true;
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("#whobtn, #bell"), function (b) {
+      b.setAttribute("aria-expanded", "false");
+    });
+  }
+
+  var openDialog = null;
+
+  function buildDialog(title, description, icon, kind) {
+    ensureStyle();
+    if (openDialog) { openDialog.remove(); openDialog = null; }
+    var wrap = document.createElement("div");
+    wrap.className = "aun-dlg";
+    /* Named so the three can be told apart — by a person reading the DOM and
+       by the gate, which otherwise reads the success confirmation as the form
+       it replaced and reports a working change as a failure. */
+    wrap.setAttribute("data-dlg", kind || "message");
+    wrap.setAttribute("role", "dialog");
+    wrap.setAttribute("aria-modal", "true");
+    var box = document.createElement("div");
+    box.className = "aun-dlg__box";
+    var head = document.createElement("div");
+    head.className = "aun-dlg__h";
+    head.innerHTML =
+      '<span class="aun-dlg__ic" aria-hidden="true"><svg class="i" width="20" height="20" ' +
+      'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" ' +
+      'stroke-linecap="round" stroke-linejoin="round"><use href="#' + icon + '"/></svg></span>' +
+      '<div><h2 class="aun-dlg__t"></h2><p class="aun-dlg__d"></p></div>';
+    head.querySelector(".aun-dlg__t").textContent = title;
+    head.querySelector(".aun-dlg__d").textContent = description;
+    var body = document.createElement("div");
+    body.className = "aun-dlg__b";
+    var foot = document.createElement("div");
+    foot.className = "aun-dlg__f";
+    box.appendChild(head); box.appendChild(body); box.appendChild(foot);
+    wrap.appendChild(box);
+    document.body.appendChild(wrap);
+
+    var restore = document.activeElement;
+    function close() {
+      wrap.remove();
+      openDialog = null;
+      document.removeEventListener("keydown", onKey);
+      if (restore && restore.focus) restore.focus();
+    }
+    function onKey(e) {
+      if (e.key === "Escape") { close(); return; }
+      /* keep the tab ring inside the dialog while it is open */
+      if (e.key !== "Tab") return;
+      var f = wrap.querySelectorAll("input,button,select,textarea,a[href]");
+      if (!f.length) return;
+      var first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+    wrap.addEventListener("click", function (e) { if (e.target === wrap) close(); });
+    document.addEventListener("keydown", onKey);
+    openDialog = wrap;
+
+    var titleId = "aun-dlg-t-" + Date.now();
+    head.querySelector(".aun-dlg__t").id = titleId;
+    wrap.setAttribute("aria-labelledby", titleId);
+    return { wrap: wrap, body: body, foot: foot, close: close };
+  }
+
+  function labelled(labelText, help) {
+    var l = document.createElement("label");
+    l.className = "aun-fld";
+    var s = document.createElement("span");
+    s.textContent = labelText;
+    var i = document.createElement("input");
+    i.type = "password";
+    i.autocomplete = "new-password";
+    l.appendChild(s); l.appendChild(i);
+    if (help) { var em = document.createElement("em"); em.textContent = help; l.appendChild(em); }
+    var err = document.createElement("span");
+    err.className = "aun-err"; err.hidden = true;
+    l.appendChild(err);
+    return { label: l, input: i, err: err };
+  }
+
+  /* ---- معلومات الحساب — read-only, from /auth/me ---------------------- */
+  function openAccountInfo() {
+    var d = buildDialog("معلومات الحساب",
+      "ما يعرفه النظام عن حسابك. لا يمكن تعديله من هنا — الاسم والبريد والدور يغيّرها مدير النظام من صفحة المستخدمين.",
+      "ic-user", "account");
+    var dl = document.createElement("dl");
+    dl.className = "aun-dl";
+    dl.innerHTML = '<div><dt>جارٍ التحميل…</dt><dd></dd></div>';
+    d.body.appendChild(dl);
+
+    var ok = document.createElement("button");
+    ok.type = "button"; ok.className = "aun-btn"; ok.textContent = "إغلاق";
+    ok.addEventListener("click", d.close);
+    d.foot.appendChild(ok);
+    ok.focus();
+
+    AunAPI.me().then(function (r) {
+      var u = r.user || {};
+      var mods = u.permissions || {};
+      var can = Object.keys(mods).filter(function (m) { return mods[m] && mods[m].view; }).length;
+      var rows = [
+        ["الاسم", u.name || "—"],
+        ["البريد الإلكتروني", u.email || "—"],
+        ["الدور", u.roleLabel || u.role || "—"],
+        ["الأقسام المتاحة", String(can) + " من " + String(Object.keys(mods).length)]
+      ];
+      dl.textContent = "";
+      rows.forEach(function (row) {
+        var div = document.createElement("div");
+        var dt = document.createElement("dt"); dt.textContent = row[0];
+        var dd = document.createElement("dd"); dd.textContent = row[1];
+        /* the name and the role read right-to-left; the address does not */
+        if (row[0] !== "البريد الإلكتروني") { dd.style.direction = "rtl"; dd.style.textAlign = "right"; }
+        div.appendChild(dt); div.appendChild(dd); dl.appendChild(div);
+      });
+    }).catch(function () {
+      dl.textContent = "";
+      var div = document.createElement("div");
+      div.innerHTML = '<dt>تعذّر تحميل بيانات الحساب.</dt><dd></dd>';
+      dl.appendChild(div);
+    });
+  }
+
+  /* ---- تغيير كلمة المرور --------------------------------------------- */
+  var PASSWORD_MIN = 12;
+
+  function openPasswordDialog() {
+    var d = buildDialog("تغيير كلمة المرور",
+      "يتطلب كلمة المرور الحالية. سيُنهي التغيير جلساتك المفتوحة على الأجهزة الأخرى، وتبقى هذه الجلسة كما هي.",
+      "ic-shield", "password");
+
+    var cur = labelled("كلمة المرور الحالية");
+    cur.input.autocomplete = "current-password";
+    var nw = labelled("كلمة المرور الجديدة", PASSWORD_MIN + " حرفاً على الأقل، ولا تحتوي على بريدك أو اسمك.");
+    nw.input.minLength = PASSWORD_MIN;
+    var rp = labelled("تأكيد كلمة المرور الجديدة");
+    [cur, nw, rp].forEach(function (f) { d.body.appendChild(f.label); });
+
+    var save = document.createElement("button");
+    save.type = "button"; save.className = "aun-btn"; save.textContent = "تغيير كلمة المرور";
+    var cancel = document.createElement("button");
+    cancel.type = "button"; cancel.className = "aun-btn aun-btn--ghost"; cancel.textContent = "تراجع";
+    cancel.addEventListener("click", d.close);
+    d.foot.appendChild(save); d.foot.appendChild(cancel);
+    cur.input.focus();
+
+    function clear() {
+      [cur, nw, rp].forEach(function (f) { f.err.hidden = true; f.input.classList.remove("is-bad"); });
+    }
+    function bad(f, msg) {
+      f.err.hidden = false; f.err.textContent = msg;
+      f.input.classList.add("is-bad"); f.input.focus();
+    }
+
+    var busy = false;
+    function submit() {
+      if (busy) return;
+      clear();
+      if (!cur.input.value) return bad(cur, "أدخل كلمة المرور الحالية.");
+      if (nw.input.value.length < PASSWORD_MIN) {
+        return bad(nw, "كلمة المرور يجب ألا تقل عن " + PASSWORD_MIN + " حرفاً.");
+      }
+      if (nw.input.value !== rp.input.value) return bad(rp, "الكلمتان غير متطابقتين.");
+      if (nw.input.value === cur.input.value) {
+        return bad(nw, "كلمة المرور الجديدة مطابقة للحالية.");
+      }
+
+      busy = true; save.disabled = true; cancel.disabled = true;
+      save.textContent = "جارٍ التغيير…";
+      AunAPI.changePassword(cur.input.value, nw.input.value).then(function () {
+        d.close();
+        say("غُيّرت كلمة المرور. أُنهيت جلساتك على الأجهزة الأخرى.");
+      }).catch(function (e) {
+        var shown = false;
+        if (e && e.errors) {
+          if (e.errors.current) { bad(cur, e.errors.current); shown = true; }
+          else if (e.errors.password) { bad(nw, e.errors.password); shown = true; }
+        }
+        if (!shown) bad(nw, (e && e.message) ? e.message : "تعذّر تغيير كلمة المرور.");
+      }).then(function () {
+        busy = false; save.disabled = false; cancel.disabled = false;
+        save.textContent = "تغيير كلمة المرور";
+      });
+    }
+    save.addEventListener("click", submit);
+    [cur, nw, rp].forEach(function (f) {
+      f.input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { e.preventDefault(); submit(); }
+      });
+    });
+  }
+
+  /* A confirmation the operator actually sees. Every page defines its own
+     toast helper on window.AunShell; when one is there it is used, so the
+     message looks like the page it appeared on. */
+  function say(message) {
+    if (global.AunShell && typeof global.AunShell.toast === "function") {
+      try { global.AunShell.toast(message); return; } catch (e) { /* fall through */ }
+    }
+    var d = buildDialog("تم", message, "ic-checkcircle", "done");
+    var ok = document.createElement("button");
+    ok.type = "button"; ok.className = "aun-btn"; ok.textContent = "حسناً";
+    ok.addEventListener("click", d.close);
+    d.foot.appendChild(ok); ok.focus();
   }
 
   /* ------------------------------------------------------------------ */

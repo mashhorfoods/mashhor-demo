@@ -510,6 +510,365 @@ async function main() {
     }
   }
 
+  /* ---- the account menu, exercised rather than inspected -------------- */
+  section('THE ACCOUNT MENU — CLICKED, NOT READ');
+  /* Every item in this menu but logout used to do nothing, on every page. A
+     check that reads the markup would have passed then too, so this one
+     clicks. It runs on two pages: one that exports its own toast helper and
+     one that does not, because the two take different paths out. */
+  await resize(1440, 900);
+  for (const page of ['dashboard.html', 'users.html']) {
+    await goto(`${BASE}/admin/${page}`);
+
+    const hooks = await browser.send('Runtime.evaluate', {
+      expression: `JSON.stringify(Array.prototype.map.call(
+        document.querySelectorAll('[data-acct]'), function(b){ return b.getAttribute('data-acct'); }))`,
+      returnByValue: true,
+    });
+    const found = JSON.parse(hooks.result.value || '[]');
+    check(page, 'the menu offers info, password and logout',
+      ['info', 'password', 'logout'].every((k) => found.includes(k)), found.join(', '));
+
+    /* معلومات الحساب — must open and must fill in from /auth/me */
+    const info = await browser.send('Runtime.evaluate', {
+      expression: `(async () => {
+        document.querySelector('[data-acct="info"]').click();
+        for (let i = 0; i < 40; i++) {
+          await new Promise(r => setTimeout(r, 100));
+          const dl = document.querySelector('.aun-dlg .aun-dl');
+          if (dl && !dl.textContent.includes('جارٍ التحميل')) break;
+        }
+        const box = document.querySelector('.aun-dlg');
+        const txt = box ? box.innerText : '';
+        const close = box && box.querySelector('.aun-btn');
+        if (close) close.click();
+        return JSON.stringify({ opened: !!box, txt: txt, gone: !document.querySelector('.aun-dlg') });
+      })()`,
+      returnByValue: true, awaitPromise: true,
+    });
+    const i = JSON.parse(info.result.value);
+    check(page, 'معلومات الحساب opens a dialog', i.opened === true);
+    check(page, 'and it carries the real account, not a placeholder',
+      i.txt.includes('نورة العتيبي') && i.txt.includes('@'), i.txt.replace(/\s+/g, ' ').slice(0, 70));
+    check(page, 'and it closes again', i.gone === true);
+
+    /* تغيير كلمة المرور — must open, must validate, must reach the server */
+    const pw = await browser.send('Runtime.evaluate', {
+      expression: `(async () => {
+        const wait = (ms) => new Promise(r => setTimeout(r, ms));
+        document.querySelector('[data-acct="password"]').click();
+        await wait(200);
+        const box = document.querySelector('.aun-dlg');
+        if (!box) return JSON.stringify({ opened: false });
+        const inputs = box.querySelectorAll('input');
+        const save = box.querySelector('.aun-btn');
+
+        /* empty current password — refused before anything is sent */
+        save.click(); await wait(150);
+        const emptyMsg = box.querySelector('.aun-err:not([hidden])');
+        const guardedEmpty = !!emptyMsg;
+
+        /* mismatch — refused locally too */
+        inputs[0].value = 'whatever-current';
+        inputs[1].value = 'Aaaa-Bbbb-Cccc-1';
+        inputs[2].value = 'Aaaa-Bbbb-Cccc-2';
+        save.click(); await wait(150);
+        const mismatch = !!box.querySelector('.aun-err:not([hidden])');
+
+        /* a wrong current password must be refused by the SERVER, and the
+           message must land on the field it belongs to */
+        inputs[2].value = 'Aaaa-Bbbb-Cccc-1';
+        save.click();
+        let serverMsg = '';
+        for (let k = 0; k < 60; k++) {
+          await wait(150);
+          const e = box.querySelector('.aun-err:not([hidden])');
+          if (e && e.textContent.indexOf('الحالية') > -1) { serverMsg = e.textContent; break; }
+        }
+        const onCurrentField = !!(serverMsg && inputs[0].classList.contains('is-bad'));
+        const passwordNotEchoed = !box.innerText.includes('Aaaa-Bbbb-Cccc-1');
+        const typeIsPassword = Array.prototype.every.call(inputs, function(n){ return n.type === 'password'; });
+
+        box.querySelectorAll('.aun-btn')[1].click();
+        await wait(150);
+        return JSON.stringify({ opened: true, fields: inputs.length, guardedEmpty, mismatch,
+          serverMsg, onCurrentField, passwordNotEchoed, typeIsPassword,
+          closed: !document.querySelector('.aun-dlg') });
+      })()`,
+      returnByValue: true, awaitPromise: true,
+    });
+    const r = JSON.parse(pw.result.value);
+    check(page, 'تغيير كلمة المرور opens a dialog', r.opened === true);
+    check(page, 'with current, new and confirm', r.fields === 3, `${r.fields} fields`);
+    check(page, 'an empty current password is refused before anything is sent', r.guardedEmpty === true);
+    check(page, 'a mismatched confirmation is refused', r.mismatch === true);
+    check(page, 'a wrong current password is refused BY THE SERVER',
+      !!r.serverMsg, (r.serverMsg || '').slice(0, 50));
+    check(page, 'and the message lands on the field it belongs to', r.onCurrentField === true);
+    check(page, 'every field masks what is typed', r.typeIsPassword === true);
+    check(page, 'and no password is echoed back into the page', r.passwordNotEchoed === true);
+    check(page, 'the dialog closes on تراجع', r.closed === true);
+  }
+
+  /* One change carried all the way through, on a throwaway account, so the
+     dialog is proved to do the thing and not merely to reach the endpoint:
+     the new password signs in afterwards and the old one does not. */
+  const scratchEmail = 'uipw' + Date.now().toString().slice(-6) + '@aunaldrb.com';
+  const oldPw = 'Ui-Dialog-Old-Pass-1';
+  const newPw = 'Ui-Dialog-New-Pass-2';
+
+  const made = await browser.send('Runtime.evaluate', {
+    expression: `(async () => {
+      const t = await fetch('${BASE}/api/csrf', {credentials:'same-origin'}).then(r => r.json());
+      const r = await fetch('${BASE}/api/admin/users/save', {method:'POST', credentials:'same-origin',
+        headers:{'Content-Type':'application/json','X-CSRF-Token':t.token},
+        body: JSON.stringify({csrf_token:t.token, name:'حساب اختبار الحوار',
+          email:${JSON.stringify(scratchEmail)}, role:'admin', active:'1', password:${JSON.stringify(oldPw)}})});
+      return String(r.status);
+    })()`, returnByValue: true, awaitPromise: true,
+  });
+  check('menu', 'a throwaway account is created for the round trip',
+    made.result.value === '201', 'status=' + made.result.value);
+
+  /* become that account */
+  await browser.send('Runtime.evaluate', {
+    expression: `(async () => {
+      await fetch('${BASE}/api/auth/logout', {method:'POST', credentials:'same-origin',
+        headers:{'Content-Type':'application/json','X-CSRF-Token':
+          (await fetch('${BASE}/api/csrf',{credentials:'same-origin'}).then(r=>r.json())).token},
+        body: JSON.stringify({})}).catch(()=>null);
+      const t = await fetch('${BASE}/api/csrf', {credentials:'same-origin'}).then(r => r.json());
+      return String((await fetch('${BASE}/api/auth/login', {method:'POST', credentials:'same-origin',
+        headers:{'Content-Type':'application/json','X-CSRF-Token':t.token},
+        body: JSON.stringify({csrf_token:t.token, email:${JSON.stringify(scratchEmail)},
+          password:${JSON.stringify(oldPw)}})})).status);
+    })()`, returnByValue: true, awaitPromise: true,
+  });
+
+  await goto(`${BASE}/admin/dashboard.html`);
+  const changed = await browser.send('Runtime.evaluate', {
+    expression: `(async () => {
+      const wait = (ms) => new Promise(r => setTimeout(r, ms));
+      document.querySelector('[data-acct="password"]').click();
+      await wait(250);
+      const box = document.querySelector('.aun-dlg');
+      if (!box) return JSON.stringify({ opened:false });
+      const inp = box.querySelectorAll('input');
+      inp[0].value = ${JSON.stringify(oldPw)};
+      inp[1].value = ${JSON.stringify(newPw)};
+      inp[2].value = ${JSON.stringify(newPw)};
+      box.querySelector('.aun-btn').click();
+      /* On success the form closes and a confirmation takes its place, so the
+         thing to wait for is the form going away — not every dialog going
+         away, which is what made a working change read as a failure. */
+      let closed = false, told = false;
+      for (let k = 0; k < 80; k++) {
+        await wait(150);
+        if (!document.querySelector('[data-dlg="password"]')) { closed = true; break; }
+      }
+      await wait(300);
+      const done = document.querySelector('[data-dlg="done"]');
+      const toast = document.querySelector('.toasts .toast, #toasts .toast');
+      told = !!(done || toast);
+      const shown = done ? done.innerText : (toast ? toast.innerText : '');
+      const leaked = shown.indexOf(${JSON.stringify(newPw)}) > -1;
+      const stillIn = (await fetch('${BASE}/api/auth/me', {credentials:'same-origin'})).status;
+      return JSON.stringify({ opened:true, closed, told, leaked, shown: shown.slice(0,60), stillIn });
+    })()`, returnByValue: true, awaitPromise: true,
+  });
+  const c = JSON.parse(changed.result.value);
+  check('menu', 'a real change closes the form on success', c.closed === true);
+  check('menu', 'and says so, rather than closing silently', c.told === true,
+    (c.shown || '').replace(/\s+/g, ' '));
+  check('menu', 'without repeating the password back', c.leaked === false);
+  check('menu', 'and does NOT sign the operator out of the session that made it',
+    c.stillIn === 200, 'me=' + c.stillIn);
+
+  const proof = await browser.send('Runtime.evaluate', {
+    expression: `(async () => {
+      const attempt = async (pw) => {
+        await fetch('${BASE}/api/auth/logout', {method:'POST', credentials:'same-origin',
+          headers:{'Content-Type':'application/json','X-CSRF-Token':
+            (await fetch('${BASE}/api/csrf',{credentials:'same-origin'}).then(r=>r.json())).token},
+          body: JSON.stringify({})}).catch(()=>null);
+        const t = await fetch('${BASE}/api/csrf', {credentials:'same-origin'}).then(r => r.json());
+        return (await fetch('${BASE}/api/auth/login', {method:'POST', credentials:'same-origin',
+          headers:{'Content-Type':'application/json','X-CSRF-Token':t.token},
+          body: JSON.stringify({csrf_token:t.token, email:${JSON.stringify(scratchEmail)}, password:pw})})).status;
+      };
+      const withOld = await attempt(${JSON.stringify(oldPw)});
+      const withNew = await attempt(${JSON.stringify(newPw)});
+      return JSON.stringify({ withOld, withNew });
+    })()`, returnByValue: true, awaitPromise: true,
+  });
+  const pr = JSON.parse(proof.result.value);
+  check('menu', 'the old password no longer signs in', pr.withOld === 401, 'status=' + pr.withOld);
+  check('menu', 'and the one typed into the dialog does', pr.withNew === 200, 'status=' + pr.withNew);
+
+  /* back to the account the rest of the run uses */
+  await browser.send('Runtime.evaluate', {
+    expression: `(async () => {
+      await fetch('${BASE}/api/auth/logout', {method:'POST', credentials:'same-origin',
+        headers:{'Content-Type':'application/json','X-CSRF-Token':
+          (await fetch('${BASE}/api/csrf',{credentials:'same-origin'}).then(r=>r.json())).token},
+        body: JSON.stringify({})}).catch(()=>null);
+      const t = await fetch('${BASE}/api/csrf', {credentials:'same-origin'}).then(r => r.json());
+      return String((await fetch('${BASE}/api/auth/login', {method:'POST', credentials:'same-origin',
+        headers:{'Content-Type':'application/json','X-CSRF-Token':t.token},
+        body: JSON.stringify({csrf_token:t.token, email:${JSON.stringify(EMAIL)},
+          password:${JSON.stringify(PASSWORD)}})})).status);
+    })()`, returnByValue: true, awaitPromise: true,
+  });
+
+  /* Logout is the one item that always worked; assert it still does. The
+     click navigates, so nothing may be awaited inside the page across it —
+     doing that destroys the execution context mid-promise and takes the whole
+     run down with it. Click, then wait and ask from out here. */
+  await goto(`${BASE}/admin/dashboard.html`);
+  await browser.send('Runtime.evaluate', {
+    expression: `document.querySelector('[data-acct="logout"]').click(); true;`,
+    returnByValue: true,
+  }).catch(() => null);
+
+  let landedOn = '', meStatus = 0;
+  for (let i = 0; i < 40; i++) {
+    await sleep(250);
+    const r = await browser.send('Runtime.evaluate', {
+      expression: `location.pathname`, returnByValue: true,
+    }).catch(() => null);
+    landedOn = (r && r.result && r.result.value) || landedOn;
+    if (landedOn.includes('login')) break;
+  }
+  const meCheck = await browser.send('Runtime.evaluate', {
+    expression: `fetch('${BASE}/api/auth/me',{credentials:'same-origin'}).then(r=>String(r.status))`,
+    returnByValue: true, awaitPromise: true,
+  }).catch(() => null);
+  meStatus = Number((meCheck && meCheck.result && meCheck.result.value) || 0);
+  check('dashboard.html', 'تسجيل الخروج still ends the session', meStatus === 401, `me=${meStatus}`);
+  check('dashboard.html', 'and lands on the sign-in page', landedOn.includes('login'), landedOn);
+
+  /* sign back in for whatever follows */
+  await goto(`${BASE}/admin/login.html`);
+  await browser.send('Runtime.evaluate', {
+    expression: `(async () => {
+      const t = await fetch('${BASE}/api/csrf', {credentials:'same-origin'}).then(r => r.json());
+      return (await fetch('${BASE}/api/auth/login', {method:'POST', credentials:'same-origin',
+        headers:{'Content-Type':'application/json','X-CSRF-Token':t.token},
+        body: JSON.stringify({csrf_token:t.token, email:${JSON.stringify(EMAIL)}, password:${JSON.stringify(PASSWORD)}})})).status;
+    })()`, returnByValue: true, awaitPromise: true,
+  });
+
+  /* ---- the account menu, driven the way a person drives it ------------ */
+  section('THE ACCOUNT MENU');
+  /* Two of its three items did nothing at all for the life of this project:
+     the menu looked complete and only logout worked. Clicking them is the
+     only check that catches that — the markup was always there. */
+  for (const file of ['dashboard.html', 'requests.html', 'settings.html', 'activity.html']) {
+    await resize(1440, 950);
+    await goto(`${BASE}/admin/${file}`);
+
+    const opened = await browser.send('Runtime.evaluate', {
+      expression: `(()=>{const b=document.getElementById('whobtn'); if(!b) return 'no button';
+        b.click(); return document.getElementById('whopop').hidden ? 'stayed shut' : 'open';})()`,
+      returnByValue: true,
+    });
+    check(file, 'the account menu opens', opened.result.value === 'open', String(opened.result.value));
+
+    /* معلومات الحساب — must show THIS account, read from the server */
+    const info = await browser.send('Runtime.evaluate', {
+      expression: `(async()=>{
+        document.querySelector('[data-acct="info"]').click();
+        for (let i=0;i<40;i++){ await new Promise(r=>setTimeout(r,150));
+          const d=document.querySelector('[data-dlg="account"]');
+          if (d && !/جارٍ التحميل/.test(d.innerText)) break; }
+        const d=document.querySelector('[data-dlg="account"]');
+        return JSON.stringify({open:!!d, text:d?d.innerText.replace(/\\s+/g,' '):''});})()`,
+      returnByValue: true, awaitPromise: true,
+    });
+    const iv = JSON.parse(info.result.value);
+    check(file, 'معلومات الحساب opens', iv.open === true);
+    check(file, 'and shows the signed-in account, not a placeholder',
+      iv.text.includes(EMAIL), iv.text.slice(-90));
+    await browser.send('Runtime.evaluate', {
+      expression: `document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape'}))`, returnByValue: true });
+    await sleep(300);
+    const closed = await browser.send('Runtime.evaluate', {
+      expression: `!document.querySelector('[data-dlg="account"]')`, returnByValue: true });
+    check(file, 'and Escape closes it', closed.result.value === true);
+
+    /* تغيير كلمة المرور — a real form, and every field masked */
+    const pw = await browser.send('Runtime.evaluate', {
+      expression: `(()=>{document.getElementById('whobtn').click();
+        document.querySelector('[data-acct="password"]').click();
+        const d=document.querySelector('[data-dlg="password"]');
+        if(!d) return JSON.stringify({open:false});
+        const i=d.querySelectorAll('input');
+        return JSON.stringify({open:true, fields:i.length,
+          masked:Array.prototype.every.call(i,x=>x.type==='password'),
+          buttons:d.querySelectorAll('.aun-dlg__f button').length});})()`,
+      returnByValue: true,
+    });
+    const pv = JSON.parse(pw.result.value);
+    check(file, 'تغيير كلمة المرور opens a real form', pv.open === true && pv.fields === 3,
+      'fields=' + pv.fields);
+    check(file, 'and every field masks what is typed', pv.masked === true);
+    check(file, 'and it offers a save and a cancel', pv.buttons === 2, 'buttons=' + pv.buttons);
+    await browser.send('Runtime.evaluate', {
+      expression: `document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape'}))`, returnByValue: true });
+    check(file, 'the menu raised no console error', consoleErrors.length === 0,
+      consoleErrors.slice(0, 1).join('').slice(0, 80));
+  }
+
+  /* And it changes a password — the wrong current one refused first, in the
+     dialog, which is where the person typing it is looking. Run on a throwaway
+     account so the credentials this gate signs in with are untouched. */
+  await goto(`${BASE}/admin/dashboard.html`);
+  /* Built by concatenation, not by nesting one template literal inside
+     another: the nested form put the literal text "${JSON.stringify(curPw)}"
+     into the page, where that name does not exist, and the whole call returned
+     undefined. */
+  async function attempt(curPw, newPw) {
+    const expr = '(async()=>{\n'
+      + "  document.getElementById('whobtn').click();\n"
+      + '  document.querySelector(\'[data-acct="password"]\').click();\n'
+      + '  await new Promise(r=>setTimeout(r,400));\n'
+      + '  const d=document.querySelector(\'[data-dlg="password"]\');\n'
+      + '  if (!d) return JSON.stringify({stillOpen:false,refused:false,confirmed:false,note:"dialog never opened"});\n'
+      + '  const i=d.querySelectorAll("input");\n'
+      + '  i[0].value=' + JSON.stringify(curPw) + ';\n'
+      + '  i[1].value=' + JSON.stringify(newPw) + ';\n'
+      + '  i[2].value=' + JSON.stringify(newPw) + ';\n'
+      + "  d.querySelector('.aun-dlg__f button').click();\n"
+      + '  for (let k=0;k<50;k++){ await new Promise(r=>setTimeout(r,150));\n'
+      + '    const s=document.querySelector(\'[data-dlg="password"]\');\n'
+      + '    if (!s || /' + 'غير صحيحة|أقل من|مطابقة|شائعة' + '/.test(s.innerText)) break; }\n'
+      + '  const s=document.querySelector(\'[data-dlg="password"]\');\n'
+      + '  return JSON.stringify({stillOpen:!!s,\n'
+      + '    refused: s ? /' + 'غير صحيحة' + '/.test(s.innerText) : false,\n'
+      + '    confirmed: document.body.innerText.indexOf("' + 'غُيّرت كلمة المرور' + '") > -1});})()';
+    const r = await browser.send('Runtime.evaluate',
+      { expression: expr, returnByValue: true, awaitPromise: true });
+    if (r.exceptionDetails) return { error: r.exceptionDetails.text };
+    try { return JSON.parse(r.result.value); }
+    catch (e) { return { error: 'unparseable: ' + String(r.result.value).slice(0, 80) }; }
+  }
+  /* The signed-in account here IS the suite's account, so the change is made
+     and then made back — the password it started with is the password it ends
+     with, and the endpoint is still exercised for real. */
+  const wrong = await attempt('not-the-current-password', PASSWORD + '-x');
+  check('menu', 'a wrong current password is refused in the dialog',
+    wrong.stillOpen === true && wrong.refused === true, JSON.stringify(wrong));
+  await browser.send('Runtime.evaluate', {
+    expression: `document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape'}))`, returnByValue: true });
+  await sleep(300);
+  const right = await attempt(PASSWORD, PASSWORD + '-Rotated1');
+  check('menu', 'the right one changes it and says so',
+    right.stillOpen === false && right.confirmed === true, JSON.stringify(right));
+  await goto(`${BASE}/admin/dashboard.html`);
+  const back = await attempt(PASSWORD + '-Rotated1', PASSWORD);
+  check('menu', 'and it changes back, so the account ends as it started',
+    back.stillOpen === false && back.confirmed === true, JSON.stringify(back));
+
   /* ---- the third-party dependency, read from the markup --------------- */
   section('THIRD-PARTY DEPENDENCIES');
   const adminSrc = adminPages.map((f) => fs.readFileSync(path.join(__dirname, '..', 'admin', f), 'utf8'));
