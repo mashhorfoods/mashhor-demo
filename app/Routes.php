@@ -62,6 +62,15 @@ final class Routes
             ['POST', '/api/admin/content/item/del', ['content', 'edit'], 'deleteItem'],
             ['POST', '/api/admin/content/reorder',  ['content', 'edit'], 'reorderItems'],
             ['POST', '/api/admin/content/publish',  ['content', 'edit'], 'publishContent'],
+            /* What is saved but not yet on the website. Gated on `home` view
+               because every module that edits site content shows the count,
+               and every role that can sign in has that. */
+            ['GET',  '/api/admin/content/pending',  ['home', 'view'],    'contentPending'],
+            /* The page as it would look, rendered in memory and returned as
+               HTML to a signed-in administrator. Nothing is written, so there
+               is no preview file to leak, to serve by accident, or to forget
+               to delete. */
+            ['GET',  '/api/admin/content/preview',  ['content', 'view'], 'contentPreview'],
 
             /* التقارير — RECOVERY 03. One endpoint, GET only, gated on the
                `reports` module that the approved matrix grants to Super Admin
@@ -576,6 +585,40 @@ final class Routes
     {
         $l = strtolower((string) (Http::query('lang') ?? (Http::input()['lang'] ?? 'ar')));
         return in_array($l, Schema::LANGS, true) ? $l : 'ar';
+    }
+
+    private static function contentPending(?array $u): void
+    {
+        Http::ok(['pending' => Publisher::pending()]);
+    }
+
+    /**
+     * The published page with every pending change applied, for one look
+     * before it goes live.
+     *
+     * Two things are injected and nothing else is: a <base> so the page's
+     * relative links to images and fonts still resolve while it is served
+     * from an /api path, and a robots directive, belt and braces, in case a
+     * crawler ever reaches a URL that already requires a session.
+     */
+    private static function contentPreview(?array $u): void
+    {
+        $html = Publisher::previewHtml();
+        if ($html === null) {
+            Http::ok(['error' => ['message' => 'تعذّر تجهيز المعاينة.']], 503);
+            return;
+        }
+        $inject = '<base href="/">' . "\n" . '<meta name="robots" content="noindex,nofollow">';
+        $html = preg_replace('~(<head[^>]*>)~i', '$1' . "\n" . $inject, $html, 1) ?? $html;
+
+        if (!headers_sent()) {
+            header('Content-Type: text/html; charset=utf-8');
+            header('Cache-Control: no-store, private');
+            header('X-Robots-Tag: noindex, nofollow');
+            header('X-Content-Type-Options: nosniff');
+            header('Referrer-Policy: no-referrer');
+        }
+        echo $html;
     }
 
     private static function contentOverview(?array $u): void

@@ -292,29 +292,60 @@ SHAPE;
      * and never throws for an ordinary failure: the caller reports it to the
      * administrator, whose edits are already safe in the database either way.
      */
-    public static function publish(?array $actor = null): array
+    /**
+     * Which screen an administrator would go to in order to change a region.
+     * A region can be reachable from two, and both should show it as pending.
+     */
+    private static function editedIn(string $key): array
+    {
+        if ($key === 'services.items') return ['services'];
+        foreach (Repo_Content::SETTINGS_ALIAS as $_path => $blockKey) {
+            if ($blockKey === $key) return ['content', 'settings'];
+        }
+        return ['content'];
+    }
+
+    /**
+     * What a publish would do, computed without doing it.
+     *
+     * One function answers three questions that must never disagree: what does
+     * the page look like after publishing (preview), which regions differ from
+     * what is live (the pending badge), and what should be written (publish).
+     * They were three answers waiting to drift; now they are one.
+     *
+     * @return array{ok: bool, note: string, html: ?string, changed: array<int, array>, missing: string[]}
+     */
+    public static function plan(): array
     {
         $target = self::target();
         if ($target === null) {
-            return self::record($actor, 0, '—', false,
-                'لم يُعثر على صفحة الموقع المعلَّمة على الخادم.');
+            return ['ok' => false, 'note' => 'لم يُعثر على صفحة الموقع المعلَّمة على الخادم.',
+                    'html' => null, 'changed' => [], 'missing' => []];
         }
-
         $html = @file_get_contents($target);
         if ($html === false) {
-            return self::record($actor, 0, $target, false, 'تعذّرت قراءة صفحة الموقع.');
+            return ['ok' => false, 'note' => 'تعذّرت قراءة صفحة الموقع.',
+                    'html' => null, 'changed' => [], 'missing' => []];
         }
-        $before = $html;
 
-        $written = 0;
+        $changed = [];
         $missing = [];
+
+        /** Apply one region and note whether it moved. */
+        $apply = static function (string $key, string $rendered, string $label)
+                 use (&$html, &$changed, &$missing): void {
+            $next = self::replaceRegion($html, $key, $rendered);
+            if ($next === null) { $missing[] = $key; return; }
+            if ($next !== $html) {
+                $changed[] = ['key' => $key, 'label' => $label, 'modules' => self::editedIn($key)];
+            }
+            $html = $next;
+        };
 
         /* --- singleton text blocks -------------------------------------- */
         foreach (Repo_Cms::blocks('ar') as $key => $row) {
-            $next = self::replaceRegion($html, $key, self::renderBlock($key, (string) $row['value']));
-            if ($next === null) { $missing[] = $key; continue; }
-            if ($next !== $html) $written++;
-            $html = $next;
+            $apply($key, self::renderBlock($key, (string) $row['value']),
+                Repo_Cms::FIELD_LABELS[$key] ?? $key);
         }
 
         /* --- the services region, rendered from the service records ------
@@ -322,19 +353,11 @@ SHAPE;
            proved against the live page by verifyServices(), so this is a
            change of source, not of output. */
         $rendered = self::renderServices(Repo_Content::services());
-        if ($rendered === '') {
-            $missing[] = 'services.items (no published service)';
-        } else {
-            $next = self::replaceRegion($html, 'services.items', $rendered);
-            if ($next === null) { $missing[] = 'services.items'; }
-            else {
-                if ($next !== $html) $written++;
-                $html = $next;
-            }
-        }
+        if ($rendered === '') $missing[] = 'services.items (no published service)';
+        else                  $apply('services.items', $rendered, 'قائمة الخدمات');
 
         /* --- repeatable collections that have a region on the page ------- */
-        foreach (['features'] as $collection) {
+        foreach (['features' => 'ما يميزنا'] as $collection => $label) {
             $rows = Repo_Cms::items($collection, 'ar');
             $rendered = self::renderCollection($collection, $rows);
             if ($rendered === '') {
@@ -343,11 +366,63 @@ SHAPE;
                 $missing[] = $collection . '.items (empty)';
                 continue;
             }
-            $next = self::replaceRegion($html, $collection . '.items', $rendered);
-            if ($next === null) { $missing[] = $collection . '.items'; continue; }
-            if ($next !== $html) $written++;
-            $html = $next;
+            $apply($collection . '.items', $rendered, $label);
         }
+
+        return ['ok' => true, 'note' => '', 'html' => $html,
+                'changed' => $changed, 'missing' => $missing];
+    }
+
+    /**
+     * The regions that are saved but not yet on the website.
+     *
+     * Nothing is stored to answer this: the page is read and compared with
+     * what the records would render. A count that cannot drift from reality,
+     * because it is measured against reality every time it is asked for.
+     */
+    public static function pending(): array
+    {
+        $plan = self::plan();
+        $byModule = [];
+        foreach ($plan['changed'] as $c) {
+            foreach ($c['modules'] as $m) $byModule[$m] = ($byModule[$m] ?? 0) + 1;
+        }
+        return [
+            'ok'      => $plan['ok'],
+            'count'   => count($plan['changed']),
+            'regions' => $plan['changed'],
+            'modules' => $byModule,
+            'missing' => $plan['missing'],
+        ];
+    }
+
+    /** The page as it would look once published. Never written to disk. */
+    public static function previewHtml(): ?string
+    {
+        $plan = self::plan();
+        return $plan['html'];
+    }
+
+    public static function publish(?array $actor = null): array
+    {
+        $target = self::target();
+        if ($target === null) {
+            return self::record($actor, 0, '—', false,
+                'لم يُعثر على صفحة الموقع المعلَّمة على الخادم.');
+        }
+
+        $before = @file_get_contents($target);
+        if ($before === false) {
+            return self::record($actor, 0, $target, false, 'تعذّرت قراءة صفحة الموقع.');
+        }
+
+        $plan = self::plan();
+        if (!$plan['ok'] || $plan['html'] === null) {
+            return self::record($actor, 0, $target, false, $plan['note']);
+        }
+        $html    = $plan['html'];
+        $written = count($plan['changed']);
+        $missing = $plan['missing'];
 
         if ($missing !== []) {
             Log::write('warn', 'publish: regions missing from the page', ['keys' => $missing]);

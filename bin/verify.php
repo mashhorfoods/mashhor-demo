@@ -1116,6 +1116,92 @@ foreach ([
 }
 
 /* ================================================================== */
+section('THE PUBLISHING LOOP — SAVED, PENDING, PREVIEWED, LIVE');
+/* ================================================================== */
+/* Stage 2. A save used to be confirmed and change nothing a visitor could
+   see, with nothing to say the two had diverged. */
+
+$admin->post('/api/admin/content/publish', ['csrf_token' => $adminTk]);
+$res = $admin->get('/api/admin/content/pending');
+check('loop', 'nothing is pending right after a publish',
+    ($res['body']['pending']['count'] ?? -1) === 0, json_encode($res['body']['pending']['count'] ?? null));
+
+/* an edit that has not been published yet */
+$titleWas = (string) (Repo_Cms::block('about.title', 'ar')['value'] ?? '');
+$res = $admin->post('/api/admin/content/block', [
+    'csrf_token' => $adminTk, 'key' => 'about.title', 'lang' => 'ar',
+    'value' => $titleWas . ' ✎',
+]);
+check('loop', 'a content edit saves', $res['status'] === 200, "status={$res['status']}");
+
+$res = $admin->get('/api/admin/content/pending');
+$pending = $res['body']['pending'] ?? [];
+check('loop', 'and is reported as not yet on the website',
+    ($pending['count'] ?? 0) === 1, json_encode($pending['count'] ?? null));
+check('loop', 'named by the region it belongs to',
+    ($pending['regions'][0]['key'] ?? '') === 'about.title', $pending['regions'][0]['key'] ?? '(none)');
+check('loop', 'and attributed to the screen that edits it',
+    in_array('content', $pending['regions'][0]['modules'] ?? [], true));
+check('loop', 'the live page still shows the published text',
+    !str_contains((string) Publisher::liveValue('about.title'), '✎'));
+
+/* preview shows it before anyone else sees it */
+$res = $admin->get('/api/admin/content/preview');
+check('loop', 'preview answers with the page itself', $res['status'] === 200, "status={$res['status']}");
+check('loop', 'and it carries the unpublished change', str_contains($res['raw'], '✎'));
+check('loop', 'with a base so its images still resolve', str_contains($res['raw'], '<base href="/">'));
+check('loop', 'and a robots directive', str_contains($res['raw'], 'noindex,nofollow'));
+check('loop', 'the live page is still untouched',
+    !str_contains((string) @file_get_contents(AUN_ROOT . '/index.html'), '✎'));
+
+/* preview is not public */
+$anonPrev = new Client($BASE);
+$res = $anonPrev->get('/api/admin/content/preview');
+check('loop', 'preview refuses a visitor with no session', $res['status'] === 401, "status={$res['status']}");
+check('loop', 'and shows them no part of the page', !str_contains($res['raw'], '<base href'));
+
+/* a role without content view cannot preview either */
+$res = $cm4->get('/api/admin/content/pending');
+check('loop', 'a content manager may see what is pending', $res['status'] === 200, "status={$res['status']}");
+
+/* publishing closes it */
+$res = $admin->post('/api/admin/content/publish', ['csrf_token' => $adminTk]);
+check('loop', 'publishing succeeds', $res['status'] === 200, "status={$res['status']}");
+check('loop', 'the change is now live', str_contains((string) Publisher::liveValue('about.title'), '✎'));
+$res = $admin->get('/api/admin/content/pending');
+check('loop', 'and nothing is pending any more',
+    ($res['body']['pending']['count'] ?? -1) === 0, json_encode($res['body']['pending']['count'] ?? null));
+
+/* put it back */
+$admin->post('/api/admin/content/block', [
+    'csrf_token' => $adminTk, 'key' => 'about.title', 'lang' => 'ar', 'value' => $titleWas,
+]);
+$admin->post('/api/admin/content/publish', ['csrf_token' => $adminTk]);
+check('loop', 'restoring the text restores the page',
+    (string) Publisher::liveValue('about.title') === Publisher::renderBlock('about.title', $titleWas));
+
+/* the count is measured, never stored */
+check('loop', 'the pending count is computed from the page, not remembered',
+    !str_contains((string) @file_get_contents(AUN_ROOT . '/app/Schema.php'), 'pending_count'));
+
+/* every module that edits site content can publish it, and none of them
+   claims a save already did */
+foreach (['content', 'services', 'settings'] as $page) {
+    $src = (string) @file_get_contents(AUN_ROOT . '/admin/' . $page . '.html');
+    check('loop', "{$page}: offers a preview", str_contains($src, 'id="previewbtn"'));
+    check('loop', "{$page}: offers a publish",
+        str_contains($src, 'id="publishbtn"') || str_contains($src, 'id="publish"'));
+    check('loop', "{$page}: does not claim a save publishes",
+        !str_contains($src, 'فور الحفظ'));
+}
+check('loop', 'the count refreshes from the shared client, not per call site',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/admin/app.js'), 'CHANGES_SITE'));
+
+/* one computation answers publish, pending and preview */
+check('loop', 'publish and pending cannot disagree — they share plan()',
+    substr_count((string) @file_get_contents(AUN_ROOT . '/app/Publisher.php'), 'self::plan()') >= 3);
+
+/* ================================================================== */
 section('ONE RECORD PER FACT');
 /* ================================================================== */
 /* Stage 1. A fact the website shows must be writable from exactly one place.

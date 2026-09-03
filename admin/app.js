@@ -103,10 +103,20 @@
             .then(function (r) { post._retried = false; return r; });
         }
         post._retried = false;
-        return handle(res);
+        return handle(res).then(function (body) {
+          /* Anything that changes what the website could show moves the
+             "not published yet" count. Hooked here rather than at each call
+             site, so a new endpoint cannot forget to do it. */
+          if (CHANGES_SITE.test(path)) refreshPending();
+          return body;
+        });
       });
     });
   }
+
+  /* endpoints whose success can change what a publish would write */
+  var CHANGES_SITE =
+    /^\/admin\/(content\/(block|item|item\/new|item\/del|reorder)|services\/(save|reorder)|settings\/save)$/;
 
   global.AunAPI = {
     get: get,
@@ -116,6 +126,7 @@
 
     me: function () { return get("/auth/me"); },
     onUser: function (fn) { return onUser(fn); },
+    refreshPending: function () { return refreshPending(); },
     can: function (m, a) { return can(m, a); },
     logout: function () {
       return post("/auth/logout", {}).then(function () { location.href = "login.html"; });
@@ -131,6 +142,9 @@
     media:         function ()      { return get("/admin/media"); },
     users:         function ()      { return get("/admin/users"); },
     activity:      function (f)     { return get("/admin/activity", f); },
+    pending:       function ()      { return get("/admin/content/pending"); },
+    publish:       function ()      { return post("/admin/content/publish", {}); },
+    previewUrl:    function ()      { return BASE + "/admin/content/preview"; },
     notifications: function ()      { return get("/admin/notifications"); },
     readNotification: function (id, read) {
       return post("/admin/notifications/read", id === null ? { all: 1 } : { id: id, read: read ? 1 : 0 });
@@ -308,7 +322,54 @@
     });
   }
 
-  function boot() { wireShell(); wireNotifications(); }
+  /**
+   * How many saved changes are not on the website yet.
+   *
+   * Every module that edits site content shows the same number, because a
+   * save used to be confirmed and change nothing a visitor could see, with
+   * nothing anywhere to say the two had diverged. The number is computed by
+   * comparing the records with the published page each time it is asked for,
+   * so it cannot be stale in the way a stored counter can.
+   */
+  function wirePending() {
+    var host = document.querySelector(".hdr__acts");
+    if (!host) return;
+
+    var chip = document.getElementById("pendingchip");
+    if (!chip) {
+      chip = document.createElement("a");
+      chip.id = "pendingchip";
+      chip.href = "content.html#publish";
+      chip.hidden = true;
+      chip.style.cssText =
+        "display:inline-flex;align-items:center;gap:.4rem;min-height:2.25rem;padding:0 .7rem;" +
+        "border-radius:999px;background:var(--amber-bg,#FBF3E4);color:var(--amber,#8F6410);" +
+        "border:1px solid currentColor;font-size:.8125rem;font-weight:600;text-decoration:none;" +
+        "font-family:var(--f-ar-body);white-space:nowrap";
+      host.insertBefore(chip, host.firstChild);
+    }
+
+    refreshPending();
+  }
+
+  function refreshPending() {
+    var chip = document.getElementById("pendingchip");
+    if (!chip) return Promise.resolve();
+    return AunAPI.pending().then(function (r) {
+      var n = (r.pending && r.pending.count) || 0;
+      chip.hidden = n === 0;
+      chip.textContent = n === 1
+        ? "تغيير واحد غير منشور"
+        : (n === 2 ? "تغييران غير منشورين"
+          : (n <= 10 ? n + " تغييرات غير منشورة" : n + " تغييراً غير منشور"));
+      chip.setAttribute("title", "محفوظ في النظام ولم يظهر على الموقع بعد — افتح المحتوى للنشر");
+      global.AunPending = n;
+      document.dispatchEvent(new CustomEvent("aun:pending", { detail: n }));
+      return n;
+    }).catch(function () { /* a badge is never worth an error message */ });
+  }
+
+  function boot() { wireShell(); wireNotifications(); wirePending(); }
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", boot);

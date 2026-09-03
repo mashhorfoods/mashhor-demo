@@ -861,6 +861,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
 <symbol id="ic-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4"/><path d="M12 11.4v4.8"/><circle cx="12" cy="8.2" r="1" fill="currentColor" stroke="none"/></symbol>
 <symbol id="ic-inbox" viewBox="0 0 24 24"><path d="M3.4 13.4h4.2l1.4 2.6h6l1.4-2.6h4.2"/><path d="M5.6 4.6h12.8l2.2 8.8v4.2a2.2 2.2 0 0 1-2.2 2.2H5.6a2.2 2.2 0 0 1-2.2-2.2v-4.2z"/></symbol>
 <symbol id="ic-logout" viewBox="0 0 24 24"><path d="M9.4 20.2H6.2a2 2 0 0 1-2-2V5.8a2 2 0 0 1 2-2h3.2"/><path d="M15.4 15.8 19.6 12l-4.2-3.8"/><path d="M19.6 12H9.4"/></symbol>
+<symbol id="ic-eye" viewBox="0 0 24 24"><path d="M2.6 12S6 5.6 12 5.6 21.4 12 21.4 12 18 18.4 12 18.4 2.6 12 2.6 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
 <symbol id="ic-refresh" viewBox="0 0 24 24"><path d="M20 11.4a8 8 0 1 1-2.4-5.2"/><path d="M20 4.2v5.2h-5.2"/></symbol>
 <symbol id="ic-collapse" viewBox="0 0 24 24"><path d="M14.4 5.6 8 12l6.4 6.4"/><path d="M19.6 4.4v15.2"/></symbol>
 <symbol id="ic-offline" viewBox="0 0 24 24"><path d="M3.2 3.2 20.8 20.8"/><path d="M8.2 15.4a5.4 5.4 0 0 1 7.6 0"/><path d="M5 12.2a9.8 9.8 0 0 1 3.2-2.1M18.9 12.2a9.8 9.8 0 0 0-5.6-2.6"/><circle cx="12" cy="18.6" r="1" fill="currentColor" stroke="none"/></symbol>
@@ -1100,7 +1101,13 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
               <div class="savebar">
                 <button class="btn btn--primary" type="submit" id="save">حفظ التغييرات</button>
                 <button class="btn btn--ghost" type="button" id="discard">تراجع</button>
-                <span class="savebar__n">تُنشر التعديلات على الموقع فور الحفظ.</span>
+                <span class="savebar__n" id="pubnote">—</span>
+                <span style="margin-inline-start:auto;display:flex;gap:var(--s2)">
+                  <a class="btn btn--ghost" id="previewbtn" href="#" target="_blank" rel="noopener">
+                    <svg class="i i--sm" aria-hidden="true"><use href="#ic-eye"/></svg>معاينة</a>
+                  <button class="btn btn--secondary modonly" type="button" id="publishbtn">
+                    <svg class="i i--sm" aria-hidden="true"><use href="#ic-upload"/></svg>نشر على الموقع</button>
+                </span>
               </div>
             </section>
           </div>
@@ -1661,6 +1668,38 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
     canModify = AunAPI.can('services', "edit");
     applyPerms(); render();
   });
+
+
+  /* ---------- publish bar (stage 2) --------------------------------------
+     A save writes to the database. Publishing is what puts it on the website,
+     and until now this page claimed the two were the same act. The note below
+     says which of them has happened. */
+  (function(){
+    var note = $("pubnote"), pub = $("publishbtn"), prev = $("previewbtn");
+    if (!note || !window.AunAPI) return;
+    if (prev) prev.href = AunAPI.previewUrl();
+
+    function paint(n){
+      if (n === 0){ note.textContent = "كل التغييرات منشورة على الموقع."; }
+      else if (n === 1){ note.textContent = "تغيير واحد محفوظ ولم يُنشر بعد."; }
+      else if (n === 2){ note.textContent = "تغييران محفوظان ولم يُنشرا بعد."; }
+      else { note.textContent = n + (n <= 10 ? " تغييرات محفوظة" : " تغييراً محفوظاً") + " ولم تُنشر بعد."; }
+      if (pub) pub.disabled = n === 0;
+    }
+    document.addEventListener("aun:pending", function(e){ paint(e.detail); });
+    if (typeof window.AunPending === "number") paint(window.AunPending);
+
+    if (pub) pub.addEventListener("click", function(){
+      pub.disabled = true;
+      AunAPI.publish().then(function(r){
+        toast((r.publish && r.publish.note) ? r.publish.note : "نُشرت التغييرات على الموقع.");
+        return AunAPI.refreshPending();
+      }).catch(function(err){
+        toast(err && err.message ? err.message : "تعذّر النشر.", true);
+        pub.disabled = false;
+      });
+    });
+  })();
 
   /* ---------- wiring ------------------------------------------------------ */
   var qt = null;
