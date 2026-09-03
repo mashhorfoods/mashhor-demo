@@ -1,3 +1,8 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Aoun Al-Darb Media Library</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -395,7 +400,10 @@ a.kpi:focus-visible{outline:none;box-shadow:var(--sh-focus)}
   font-variant-numeric:tabular-nums;width:3.2rem;text-align:end}
 
 /* === DASHBOARD · recent requests ======================================= */
-.tbl-wrap{overflow-x:auto}
+.tbl-wrap{overflow-x:auto;position:relative}  /* position:relative is not decoration: without a containing block of
+     its own, an RTL scroll container's content still counts toward the
+     document's scrollable width, so the whole PAGE scrolled sideways
+     next to a table that was already scrolling correctly inside it. */
 table.tbl{border-collapse:collapse;width:100%;min-width:38rem;font-size:var(--fs-sec)}
 table.tbl th,table.tbl td{text-align:start;padding:var(--s3) var(--s5);vertical-align:middle}
 table.tbl thead th{font-weight:600;font-size:var(--fs-caption);color:var(--slate);
@@ -575,7 +583,8 @@ table.tbl td:first-child{white-space:nowrap}
   padding:var(--s3) var(--s5);border-top:1px solid var(--divider);background:var(--white);
   border-radius:0 0 var(--r-card) var(--r-card)}
 .pager__c{font-family:var(--f-ar-body);font-size:var(--fs-caption);color:var(--slate)}
-.pager__n{display:flex;gap:.25rem;align-items:center}
+.pager__n{display:flex;flex-wrap:wrap;gap:.25rem;align-items:center;justify-content:flex-end;min-width:0}
+.pager__gap{display:grid;place-items:center;min-width:20px;height:36px;color:var(--slate);font-family:var(--f-mono)}
 .pager__b{min-width:36px;height:36px;padding:0 .5rem;display:grid;place-items:center;
   border-radius:var(--r-control);border:1px solid var(--divider);background:var(--white);
   color:var(--slate);cursor:pointer;font-family:var(--f-mono);font-size:12.5px;font-variant-numeric:tabular-nums}
@@ -1048,6 +1057,8 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   .sheet__f .btn{flex:1 1 100%}
 }
 </style>
+</head>
+<body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
 <symbol id="ic-home" viewBox="0 0 24 24"><path d="M3.5 10.6 12 3.8l8.5 6.8"/><path d="M5.6 9.6V19a1.2 1.2 0 0 0 1.2 1.2h3V15h4.4v5.2h3A1.2 1.2 0 0 0 18.4 19V9.6"/></symbol>
 <symbol id="ic-request" viewBox="0 0 24 24"><rect x="4.2" y="3.2" width="15.6" height="17.6" rx="2.2"/><path d="M8.2 8.4h7.6M8.2 12h7.6M8.2 15.6h4.6"/></symbol>
@@ -1588,15 +1599,42 @@ window.AunShell = (function(){
       var prev=el("button","pager__b");
       prev.setAttribute("aria-label","الصفحة السابقة");
       prev.innerHTML='<svg class="i i--sm" aria-hidden="true"><use href="#ic-chevron"/></svg>';
+
+  /* الصفحات المعروضة: الأولى والأخيرة ودائماً جارتا الحالية، وما بينها «…».
+     العدد ثابت مهما بلغ عدد الصفحات، فلا يتمدّد الشريط مع البيانات. */
+  function pageWindow(cur, total){
+    if (total <= 7){ var all=[]; for (var i=1;i<=total;i++) all.push(i); return all; }
+    var out=[1], from=Math.max(2, cur-1), to=Math.min(total-1, cur+1);
+    if (cur <= 3){ from=2; to=4; }
+    if (cur >= total-2){ from=total-3; to=total-1; }
+    if (from > 2) out.push("…");
+    for (var j=from;j<=to;j++) out.push(j);
+    if (to < total-1) out.push("…");
+    out.push(total);
+    return out;
+  }
       prev.disabled=state.page===1;
       prev.addEventListener("click",function(){ state.page--; render(); });
       nav.appendChild(prev);
-      for (var i=1;i<=pages;i++) (function(n){
-        var b=el("button","pager__b"); b.textContent=n;
-        if(n===state.page) b.setAttribute("aria-current","page");
-        b.addEventListener("click",function(){ state.page=n; render(); });
-        nav.appendChild(b);
-      })(i);
+      /* المرحلة النهائية — نافذة حول الصفحة الحالية بدل زر لكل صفحة.
+         زر لكل صفحة يكبر بلا حدّ مع البيانات: 522 طلباً عند 20 في الصفحة
+         تعني 27 زراً في صفّ واحد عرضه 876 بكسل — أوسع من شاشة الهاتف كلها،
+         فتُدفع الصفحة خارج حدودها وتظهر فارغة. */
+      var win = pageWindow(state.page, pages);
+      win.forEach(function(n){
+        if (n === "…"){
+          var gap = el("span","pager__gap"); gap.textContent = "…";
+          gap.setAttribute("aria-hidden","true");
+          nav.appendChild(gap); return;
+        }
+        (function(k){
+          var b = el("button","pager__b"); b.type = "button"; b.textContent = k;
+          if (k===state.page) b.setAttribute("aria-current","page");
+          b.setAttribute("aria-label","الصفحة " + k);
+          b.addEventListener("click", function(){ state.page=k; render(); });
+          nav.appendChild(b);
+        })(n);
+      });
       var next=el("button","pager__b");
       next.setAttribute("aria-label","الصفحة التالية");
       next.innerHTML='<svg class="i i--sm i--flip" aria-hidden="true"><use href="#ic-chevron"/></svg>';
@@ -1959,3 +1997,5 @@ window.AunShell = (function(){
 })();
 
 </script>
+</body>
+</html>

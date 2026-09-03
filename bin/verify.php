@@ -2140,13 +2140,18 @@ check('retention', 'and the newest publish — the only one anything reads — s
 /* --- where it runs, and what it costs -------------------------------- */
 check('retention', 'the sweep is wired into sign-in, not onto a public page',
     str_contains((string) @file_get_contents(AUN_ROOT . '/app/Routes.php'), 'Retention::sweep();'));
-check('retention', 'signing in leaves the marker set',
-    (static function () use ($BASE, $EMAIL, $PW, $marker): bool {
-        @unlink($marker);
-        $c = new Client($BASE);
-        $c->post('/api/auth/login', ['csrf_token' => $c->csrf(), 'email' => $EMAIL, 'password' => $PW]);
-        return trim((string) @file_get_contents($marker)) === gmdate('Y-m-d');
-    })());
+/* Two assertions, not one: a login that never succeeded cannot leave a marker,
+   and reporting that as "the sweep did not run" sends the reader after the
+   wrong thing. The login is checked first and named separately. */
+@unlink($marker);
+$sweeper = new Client($BASE);
+$sweepLogin = $sweeper->post('/api/auth/login',
+    ['csrf_token' => $sweeper->csrf(), 'email' => $EMAIL, 'password' => $PW]);
+check('retention', 'the sign-in used to trigger the sweep succeeded',
+    $sweepLogin['status'] === 200, "status={$sweepLogin['status']}"
+    . ($sweepLogin['status'] === 429 ? ' — rate limited, is another run in progress?' : ''));
+check('retention', 'and signing in leaves the marker set',
+    $sweepLogin['status'] !== 200 || trim((string) @file_get_contents($marker)) === gmdate('Y-m-d'));
 check('retention', 'deletes are batched rather than done in one statement',
     str_contains((string) @file_get_contents(AUN_ROOT . '/app/Retention.php'), 'deleteInBatches'));
 check('retention', 'and each driver gets a statement it actually supports',
@@ -2318,6 +2323,109 @@ check('retention', 'and the activity log is inside its cap',
 check('retention', 'the publish ledger no longer outweighs the content it records',
     (int) ($trimmed['counts']['content_publishes'] ?? 0) < 700,
     'was 678 before this stage, cap is now ' . Retention::publishKeepRows());
+
+/* ================================================================== */
+section('FINAL QA GATE — WHAT THE PAGES DECLARE ABOUT THEMSELVES');
+/* ================================================================== */
+/* Four things every page must say before a browser can lay it out
+   correctly. Their absence is invisible in source and invisible in a
+   screenshot; it shows up only when something is measured, which is why it
+   survived four audits. */
+$adminPages = array_values(array_filter(scandir(AUN_ROOT . '/admin') ?: [], static function ($f) {
+    return str_ends_with($f, '.html') && !preg_match('/^(stage-\d|recovery-\d)/', $f);
+}));
+check('gate', 'the admin pages were found', count($adminPages) >= 10, count($adminPages) . ' pages');
+
+foreach ($adminPages as $f) {
+    $html = (string) @file_get_contents(AUN_ROOT . '/admin/' . $f);
+    $head = substr($html, 0, 1024);
+    check('gate', "{$f}: declares a doctype", stripos(ltrim($html), '<!doctype html') === 0,
+        stripos(ltrim($html), '<!doctype html') === 0 ? '' : 'quirks mode');
+    check('gate', "{$f}: declares Arabic and RTL",
+        (bool) preg_match('/<html[^>]*\blang="ar"/i', $head)
+        && (bool) preg_match('/<html[^>]*\bdir="rtl"/i', $head));
+    check('gate', "{$f}: declares its character set in the first 1024 bytes",
+        (bool) preg_match('/<meta[^>]*charset=/i', $head));
+    check('gate', "{$f}: declares a viewport, so a phone gets the phone layout",
+        (bool) preg_match('/<meta[^>]*name="viewport"/i', $head));
+}
+$pub = (string) @file_get_contents(AUN_ROOT . '/index.html');
+check('gate', 'and the public page still declares all four',
+    stripos(ltrim($pub), '<!doctype html') === 0
+    && (bool) preg_match('/<html[^>]*lang="ar"[^>]*dir="rtl"/i', $pub)
+    && (bool) preg_match('/<meta[^>]*charset=/i', substr($pub, 0, 1024))
+    && (bool) preg_match('/<meta[^>]*name="viewport"/i', substr($pub, 0, 1024)));
+
+/* A var() naming a token nobody defined is not an error anywhere: the
+   declaration is simply dropped, and the element falls back to its initial
+   value. That is how the sign-in button spent this project 20px tall. */
+$tokenTrouble = [];
+foreach (array_merge(array_map(static fn($f) => 'admin/' . $f, $adminPages), ['index.html']) as $rel) {
+    $html = (string) @file_get_contents(AUN_ROOT . '/' . $rel);
+    preg_match_all('/<style[^>]*>(.*?)<\/style>/s', $html, $m);
+    $css = implode("\n", $m[1]);
+    preg_match_all('/(--[A-Za-z0-9_-]+)\s*:/', $css, $d);
+    $defined = array_flip($d[1]);
+    /* a var() with a fallback is fine — it says what to do when the token is
+       absent, which is the whole point of the second argument */
+    preg_match_all('/var\(\s*(--[A-Za-z0-9_-]+)\s*\)/', $css, $u);
+    preg_match_all('/style="([^"]*)"/', $html, $a);
+    preg_match_all('/var\(\s*(--[A-Za-z0-9_-]+)\s*\)/', implode(' ', $a[1]), $ua);
+    foreach (array_unique(array_merge($u[1], $ua[1])) as $tok) {
+        if (!isset($defined[$tok])) $tokenTrouble[] = basename($rel) . ' → ' . $tok;
+    }
+}
+check('gate', 'no page uses a design token nothing defines',
+    $tokenTrouble === [], implode(', ', array_slice($tokenTrouble, 0, 6)));
+
+/* The five statuses and three roles, from the server rather than the markup */
+check('gate', 'the server knows exactly five statuses',
+    count(Schema::STATUSES) === 5, implode("، ", array_values(Schema::STATUS_LABEL)));
+check('gate', 'and exactly three roles',
+    count(Schema::ROLES) === 3, implode('، ', array_values(Schema::ROLE_LABEL)));
+
+/* Terminology, in everything that ships — markup and server strings alike */
+$forbidden = ['ذوي الإعاقة', 'ذوي الاعاقة', 'معاقين', 'معاقون', 'المعاقين', 'شخص معاق'];
+$hits = [];
+foreach (array_merge(
+    glob(AUN_ROOT . '/admin/*.html') ?: [],
+    glob(AUN_ROOT . '/app/*.php') ?: [],
+    glob(AUN_ROOT . '/app/Repo/*.php') ?: [],
+    [AUN_ROOT . '/index.html', AUN_ROOT . '/404.html', AUN_ROOT . '/llms.txt']
+) as $file) {
+    if (preg_match('/(stage-\d|recovery-\d)/', basename($file))) continue;
+    $t = (string) @file_get_contents($file);
+    /* Two files carry the list of rejected words: services.html so the editor
+       refuses them as they are typed, and Routes.php so the server refuses
+       them on a direct API call. A guard naming what it forbids is the rule
+       being enforced, not broken — so the declaration is skipped, and every
+       other line in both files is still checked. */
+    $t = preg_replace('/BANNED[A-Z_]*\s*=\s*\[.*?\]/su', 'BANNED', $t) ?? $t;
+    foreach ($forbidden as $bad) {
+        if (str_contains($t, $bad)) $hits[] = basename($file) . ': ' . $bad;
+    }
+}
+check('gate', 'the editor still refuses those words as they are typed',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/admin/services.html'), 'var BANNED = ['));
+check('gate', 'and the server refuses them on a direct API call',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/app/Routes.php'), 'BANNED_TERMS'));
+check('gate', 'the approved terminology is the only terminology',
+    $hits === [], implode(', ', array_slice($hits, 0, 4)));
+check('gate', 'and the approved wording is actually used',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/index.html'), 'ذوي الاحتياجات الخاصة'));
+
+/* Nothing that should not ship */
+$dirt = [];
+foreach (array_merge(glob(AUN_ROOT . '/admin/*.html') ?: [], [AUN_ROOT . '/index.html']) as $file) {
+    if (preg_match('/(stage-\d|recovery-\d)/', basename($file))) continue;
+    $t = (string) @file_get_contents($file);
+    foreach (['console.log(' => 'console.log', 'debugger;' => 'debugger',
+              'TODO' => 'TODO', 'FIXME' => 'FIXME'] as $needle => $label) {
+        if (str_contains($t, $needle)) $dirt[] = basename($file) . ': ' . $label;
+    }
+}
+check('gate', 'no debugging leftovers in any shipped page',
+    $dirt === [], implode(', ', array_slice($dirt, 0, 5)));
 
 /* ================================================================== */
 foreach ($lines as $l) fwrite(STDOUT, $l . "\n");
