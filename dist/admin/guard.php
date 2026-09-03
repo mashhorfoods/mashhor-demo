@@ -101,23 +101,20 @@ header('Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
  *                has nowhere to send to.
  *   frame-ancestors  'self', matching X-Frame-Options for older browsers.
  *
- * The two Google font hosts are named because every admin page links its
- * typefaces from fonts.googleapis.com — measured, not assumed: with them
- * absent from this policy the browser refuses the stylesheet and the whole
- * dashboard falls back to system fonts. That dependency is worth removing on
- * its own terms — it tells Google who is signing in and when, and it means the
- * dashboard looks broken whenever Google is unreachable — but removing it
- * means shipping Cairo 600, IBM Plex Sans Arabic 400 and all of IBM Plex Mono
- * locally, which this project does not have yet. Naming them here keeps the
- * pages working; it does not pretend the dependency is fine.
+ * No third-party host is named here any more, and that is the point: the
+ * admin pages used to link their typefaces from fonts.googleapis.com, which
+ * told Google when each of the operator's staff signed in and left the
+ * dashboard without its typography whenever Google was unreachable. The
+ * twelve faces are served from /fonts now, so 'self' is the whole list and
+ * anything reaching outward is refused rather than allowed.
  */
 $nonce = base64_encode(random_bytes(16));
 header(
     "Content-Security-Policy: default-src 'self'; "
     . "script-src 'nonce-{$nonce}'; "
-    . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+    . "style-src 'self' 'unsafe-inline'; "
     . "img-src 'self' data:; "
-    . "font-src 'self' https://fonts.gstatic.com; "
+    . "font-src 'self'; "
     . "connect-src 'self'; "
     . "form-action 'self'; "
     . "base-uri 'none'; "

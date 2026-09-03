@@ -2485,6 +2485,178 @@ check('menu', 'and every field masks what is typed',
     && !preg_match('/type\s*=\s*"text".*password/i', $js));
 
 /* ================================================================== */
+section('THE SHELL ENDPOINTS — A 403 THAT CAN BE READ AROUND IS NOT A 403');
+/* ================================================================== */
+/* Three endpoints are gated on `home:view`, which every role that can sign in
+   has: the dashboard summary, the activity log and the notification bell. The
+   gate is right — they are the shell's own. What was wrong is that they
+   answered with everything, so the Content Manager refused /api/admin/requests
+   with a 403 could read the same requests through them. */
+/* This section signs in a fresh account, and by now the suite has spent the
+   limiter's budget from this address several times over. Clearing it is what
+   the helper exists for; the limiter gets a test of its own elsewhere. */
+clearRateBucket();
+$leakEmail = "shell{$stamp}@aunaldrb.com";
+$leakPw    = 'Shell-Leak-Check-1';
+$res = $admin->post('/api/admin/users/save', [
+    'csrf_token' => $admin->csrf(), 'name' => 'مدير محتوى لفحص القنوات',
+    'email' => $leakEmail, 'role' => 'content', 'active' => '1', 'password' => $leakPw,
+]);
+check('shell', 'a content manager is created for the check', $res['status'] === 201, "status={$res['status']}");
+$leak = new Client($BASE);
+$res = $leak->post('/api/auth/login', ['csrf_token' => $leak->csrf(), 'email' => $leakEmail, 'password' => $leakPw]);
+check('shell', 'and can sign in', $res['status'] === 200, "status={$res['status']}");
+
+/* the front doors are shut — this is the premise the rest depends on */
+foreach (['/api/admin/requests', '/api/admin/customers'] as $p) {
+    check('shell', "the front door {$p} is 403", $leak->get($p)['status'] === 403);
+}
+
+/* …and so are the side channels */
+$sum = $leak->get('/api/admin/summary');
+check('shell', 'the summary answers a content manager', $sum['status'] === 200, "status={$sum['status']}");
+check('shell', 'and carries no request counts', !isset($sum['body']['counts']));
+check('shell', 'and no recent request list', !isset($sum['body']['recent']));
+check('shell', 'and no customer count', !isset($sum['body']['customers']));
+check('shell', 'and not one phone number anywhere in it',
+    preg_match('/"0\d{9}"/', $sum['raw']) === 0);
+check('shell', 'and no beneficiary name either',
+    !str_contains($sum['raw'], 'مستفيد') && !str_contains($sum['raw'], 'REQ-'));
+check('shell', 'it says which sections it withheld, so the page hides them',
+    ($sum['body']['visible']['requests'] ?? true) === false
+    && ($sum['body']['visible']['customers'] ?? true) === false);
+check('shell', 'the activity it does carry is only from modules it may view',
+    (static function () use ($sum): bool {
+        foreach ($sum['body']['activity'] ?? [] as $r) {
+            if (in_array($r['module'], ['requests', 'customers', 'users', 'reports'], true)) return false;
+        }
+        return true;
+    })());
+
+$act = $leak->get('/api/admin/activity?per=200');
+check('shell', 'the activity log answers', $act['status'] === 200);
+check('shell', 'and returns no entry from a module it may not view',
+    (static function () use ($act): bool {
+        foreach ($act['body']['rows'] ?? [] as $r) {
+            if (in_array($r['module'], ['requests', 'customers', 'users', 'reports'], true)) return false;
+        }
+        return true;
+    })(), 'total=' . ($act['body']['total'] ?? '?'));
+$asked = $leak->get('/api/admin/activity?module=requests');
+check('shell', 'and asking for one of those modules by name returns nothing',
+    (int) ($asked['body']['total'] ?? -1) === 0, 'total=' . ($asked['body']['total'] ?? '?'));
+check('shell', 'a filter in the query can narrow but never widen',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/app/Routes.php'),
+        "'modules' => Authz::visibleModules(\$u)"));
+
+$bell = $leak->get('/api/admin/notifications');
+check('shell', 'the bell answers', $bell['status'] === 200);
+check('shell', 'and is empty for a role that may not see requests',
+    ($bell['body']['rows'] ?? ['x']) === [] && (int) ($bell['body']['unread'] ?? -1) === 0,
+    'rows=' . count($bell['body']['rows'] ?? []) . ' unread=' . ($bell['body']['unread'] ?? '?'));
+check('shell', 'and it leaks no name through a title', !str_contains($bell['raw'], 'طلب جديد من'));
+
+/* an id it cannot be shown is an id it cannot act on */
+$anyNotif = (int) Db::value('SELECT id FROM notifications ORDER BY id DESC LIMIT 1');
+if ($anyNotif > 0) {
+    $res = $leak->post('/api/admin/notifications/read',
+        ['csrf_token' => $leak->csrf(), 'id' => $anyNotif]);
+    check('shell', 'marking a notification it may not see is a 404, not a success',
+        $res['status'] === 404, "status={$res['status']}");
+    check('shell', 'and it did not mark it',
+        (int) Db::value('SELECT COUNT(*) FROM notification_reads WHERE notification_id = ? AND user_id = ?',
+            [$anyNotif, (int) Repo_Users::findByEmail($leakEmail)['id']]) === 0);
+}
+
+/* and none of it costs the Super Admin anything */
+$sum2 = $admin->get('/api/admin/summary');
+check('shell', 'a Super Admin still gets the counts', isset($sum2['body']['counts']['total']));
+check('shell', 'still gets the recent list', count($sum2['body']['recent'] ?? []) > 0);
+check('shell', 'still gets the customer count', isset($sum2['body']['customers']));
+check('shell', 'and still sees request history in the log',
+    (int) ($admin->get('/api/admin/activity?module=requests')['body']['total'] ?? 0) > 0);
+check('shell', 'and still has a bell with something in it',
+    count($admin->get('/api/admin/notifications')['body']['rows'] ?? []) > 0);
+
+/* the rule, stated once and applied in each place */
+check('shell', 'the visibility rule lives in Authz, not copied per handler',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/app/Authz.php'), 'function visibleModules')
+    && str_contains((string) @file_get_contents(AUN_ROOT . '/app/Authz.php'), 'function canSeeRecord'));
+check('shell', 'and the dashboard hides a section it was not sent rather than drawing it zero',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/admin/dashboard.html'), 'res.visible'));
+
+/* ================================================================== */
+section('NOTHING THE DASHBOARD NEEDS COMES FROM SOMEONE ELSE');
+/* ================================================================== */
+$adminHtml = array_values(array_filter(glob(AUN_ROOT . '/admin/*.html') ?: [],
+    static fn($f) => !preg_match('/(stage-\d|recovery-\d)/', basename($f))));
+
+$linked = [];
+foreach ($adminHtml as $f) {
+    $t = (string) @file_get_contents($f);
+    if (preg_match('/<link[^>]+rel="stylesheet"[^>]+href="https?:/i', $t)) $linked[] = basename($f);
+}
+check('fonts', 'no admin page links a stylesheet from another origin',
+    $linked === [], implode(', ', $linked));
+check('fonts', 'nor does the public page',
+    !preg_match('/<link[^>]+rel="stylesheet"[^>]+href="https?:/i',
+        (string) @file_get_contents(AUN_ROOT . '/index.html')));
+
+/* the faces the admin declares must be on disk, or the dashboard loses its
+   typography the first time someone opens it */
+$missingFaces = [];
+$declared = 0;
+foreach ($adminHtml as $f) {
+    $t = (string) @file_get_contents($f);
+    preg_match_all('/@font-face\{[^}]*url\(([^)]+)\)/', $t, $m);
+    foreach ($m[1] as $u) {
+        $declared++;
+        $rel = ltrim(trim($u, '"\' '), '/');
+        if (!is_file(AUN_ROOT . '/' . $rel)) $missingFaces[] = basename($f) . ' → ' . $rel;
+    }
+}
+check('fonts', 'every face the admin declares is a file that exists',
+    $missingFaces === [], $missingFaces === [] ? "{$declared} declarations" : implode(', ', array_slice($missingFaces, 0, 3)));
+check('fonts', 'and the admin declares the four weights it uses',
+    (static function () use ($adminHtml): bool {
+        $t = (string) @file_get_contents($adminHtml[0]);
+        foreach ([400, 500, 600, 700] as $w) {
+            if (!preg_match('/@font-face\{[^}]*font-weight:' . $w . ';/', $t)) return false;
+        }
+        return true;
+    })());
+check('fonts', 'including the monospace face the tables set numbers in',
+    str_contains((string) @file_get_contents($adminHtml[0]), "font-family:'IBM Plex Mono'"));
+/* Read from the header the server actually sends, not from the source: the
+   first version of this check searched guard.php for the host name and found
+   it in the comment explaining why it is no longer there. */
+$cspHdr = (string) ($anon->get('/admin/login.html')['headers']['content-security-policy'] ?? '');
+check('fonts', 'the admin policy no longer admits a third-party host',
+    $cspHdr !== '' && !str_contains($cspHdr, 'fonts.gstatic.com')
+    && !str_contains($cspHdr, 'fonts.googleapis.com'),
+    $cspHdr === '' ? 'no policy sent' : 'policy sent, no external host in it');
+check('fonts', 'and it allows fonts only from this origin',
+    (bool) preg_match("/font-src 'self'\s*;/", $cspHdr),
+    (preg_match('/font-src[^;]*/', $cspHdr, $mm) ? $mm[0] : '—'));
+check('fonts', 'and styles only from this origin',
+    (bool) preg_match("/style-src 'self' 'unsafe-inline'\s*;/", $cspHdr),
+    (preg_match('/style-src[^;]*/', $cspHdr, $mm2) ? $mm2[0] : '—'));
+check('fonts', 'and the build refuses a page that reaches out for one',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/build.js'), 'links an external stylesheet'));
+
+/* the pages that used to carry copies of pictures that already ship */
+foreach (['media.html' => 260, 'services.html' => 200] as $page => $capKb) {
+    $bytes = (int) @filesize(AUN_ROOT . '/admin/' . $page);
+    check('weight', "{$page} is under {$capKb} KB", $bytes < $capKb * 1024,
+        round($bytes / 1024) . ' KB');
+    $t = (string) @file_get_contents(AUN_ROOT . '/admin/' . $page);
+    check('weight', "{$page} embeds no picture that already ships as a file",
+        substr_count($t, 'data:image/') <= 1, substr_count($t, 'data:image/') . ' data URIs');
+}
+check('weight', 'and the media page still knows how to preview an upload',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/admin/media.html'), 'THUMBS[a.path] = pending.data'));
+
+/* ================================================================== */
 foreach ($lines as $l) fwrite(STDOUT, $l . "\n");
 fwrite(STDOUT, "\n" . str_repeat('=', 78) . "\n");
 fwrite(STDOUT, sprintf("  %d passed, %d failed, %d total\n", $pass, $fail, $pass + $fail));

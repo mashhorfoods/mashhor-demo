@@ -284,6 +284,20 @@ function build() {
   for (const m of html.matchAll(new RegExp(SITE.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[^"\\s]+', 'g')))
     note(m[0]);
 
+  /* The admin pages serve their own typefaces now, and the faces they name
+     have to reach the server with them. They are read the same way the public
+     page's are — out of the @font-face rules — so a weight that stops being
+     declared stops being uploaded, and the build fails loudly if a page names
+     a file that is not there. */
+  for (const f of fs.readdirSync(path.join(ROOT, 'admin'))) {
+    if (!f.endsWith('.html') || /^(stage-\d|recovery-\d)/.test(f)) continue;
+    const page = fs.readFileSync(path.join(ROOT, 'admin', f), 'utf8');
+    for (const m of page.matchAll(/url\(([^)"']+)\)/g)) note(m[1]);
+    /* §26 again, for the admin: no page may reach off-origin for a stylesheet */
+    if (/<link[^>]+rel="stylesheet"[^>]+href="https?:/.test(page))
+      throw new Error('admin/' + f + ' links an external stylesheet');
+  }
+
   /* 404.html ships too, and it has its own logo, icons and @font-face rules */
   {
     const nf = fs.readFileSync(path.join(ROOT, '404.html'), 'utf8');

@@ -112,6 +112,53 @@ final class Authz
         return $u;
     }
 
+    /**
+     * Which modules this account may read.
+     *
+     * Needed because three endpoints are gated on `home:view` — the dashboard
+     * summary, the activity log and the notification bell — and every role
+     * that can sign in has that. The gate is right: all three are part of the
+     * shell. What was wrong is that they answered with everything, so a
+     * Content Manager who is refused /api/admin/requests with a 403 could read
+     * the same requests through them: beneficiary names and phone numbers in
+     * the summary's recent list, 220 request entries in the log, and 440
+     * notifications titled with the beneficiary's name.
+     *
+     * A module gate on the route is not enough when the route's payload spans
+     * modules. The payload has to be filtered too, and this is what filters
+     * it.
+     */
+    public static function visibleModules(?array $user): array
+    {
+        $out = [];
+        foreach (self::MODULES as $m) if (self::can($user, $m, 'view')) $out[] = $m;
+        return $out;
+    }
+
+    /**
+     * The module an activity entry or a notification belongs to.
+     *
+     * activity_log.module and Authz::MODULES agree on every value but one:
+     * `media` is its own module in the log and lives under `services` in the
+     * permission matrix, because that is how the routes gate it.
+     */
+    public const RECORD_MODULE = [
+        'media' => 'services',
+    ];
+
+    public static function moduleOf(string $recordModule): string
+    {
+        return self::RECORD_MODULE[$recordModule] ?? $recordModule;
+    }
+
+    /** Whether this account may read a record belonging to that module. */
+    public static function canSeeRecord(?array $user, string $recordModule): bool
+    {
+        $m = self::moduleOf($recordModule);
+        if (!in_array($m, self::MODULES, true)) return false;
+        return self::can($user, $m, 'view');
+    }
+
     public static function isSuper(?array $user): bool
     {
         return $user !== null && (string) $user['role'] === 'super';

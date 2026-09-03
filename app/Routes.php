@@ -302,18 +302,49 @@ final class Routes
     /* admin                                                               */
     /* =================================================================== */
 
+    /**
+     * The dashboard's opening figures — each part only for an account allowed
+     * to know it.
+     *
+     * The route is gated on `home:view`, which every role that can sign in
+     * has, and that is right: this is the shell's own endpoint. What was wrong
+     * is that it answered with everything regardless of role. A Content
+     * Manager — refused /api/admin/requests and /api/admin/customers with a
+     * 403 — was handed the request counts, the customer count, and a `recent`
+     * list carrying each beneficiary's name, PHONE NUMBER, pickup address and
+     * destination. A module gate on the route means nothing when the payload
+     * spans modules.
+     *
+     * Absent rather than zero, deliberately: a tile that reads 0 is a claim
+     * about the business, and «لا توجد طلبات» is a different statement from
+     * «لا ترى الطلبات». The dashboard hides what it is not sent.
+     */
     private static function summary(?array $u): void
     {
-        $counts = Repo_Requests::counts();
-        $recent = Repo_Requests::search(['per' => 5, 'page' => 1]);
-        Http::ok([
-            'counts'    => $counts,
-            'customers' => (int) Db::value('SELECT COUNT(*) FROM customers'),
-            'recent'    => array_map([Repo_Requests::class, 'publicRow'], $recent['rows']),
-            'activity'  => array_map([Repo_Activity::class, 'publicRow'],
-                              Repo_Activity::search(['per' => 4])['rows']),
-            'unread'    => Repo_Activity::unreadCount((int) $u['id']),
-        ]);
+        $body = [];
+
+        if (Authz::can($u, 'requests', 'view')) {
+            $body['counts'] = Repo_Requests::counts();
+            $body['recent'] = array_map([Repo_Requests::class, 'publicRow'],
+                Repo_Requests::search(['per' => 5, 'page' => 1])['rows']);
+        }
+        if (Authz::can($u, 'customers', 'view')) {
+            $body['customers'] = (int) Db::value('SELECT COUNT(*) FROM customers');
+        }
+
+        /* the log and the bell are filtered the same way they are filtered on
+           their own endpoints — one rule, applied everywhere it applies */
+        $body['activity'] = array_map([Repo_Activity::class, 'publicRow'],
+            Repo_Activity::search(['per' => 4, 'modules' => Authz::visibleModules($u)])['rows']);
+        $body['unread'] = Repo_Activity::unreadCount((int) $u['id'], Repo_Activity::visibleKinds($u));
+
+        /* so the page knows what it was NOT sent, and hides those tiles rather
+           than drawing them empty */
+        $body['visible'] = [
+            'requests'  => Authz::can($u, 'requests', 'view'),
+            'customers' => Authz::can($u, 'customers', 'view'),
+        ];
+        Http::ok($body);
     }
 
     private static function createService(?array $u): void
@@ -820,6 +851,9 @@ final class Routes
     private static function listActivity(?array $u): void
     {
         $r = Repo_Activity::search([
+            /* the reader's own modules, always — a module named in the query
+               can only narrow this, never widen it */
+            'modules' => Authz::visibleModules($u),
             'q'      => Http::query('q', ''),
             'module' => Http::query('module', ''),
             'action' => Http::query('action', ''),
@@ -842,10 +876,15 @@ final class Routes
 
     private static function listNotifications(?array $u): void
     {
-        $rows = Repo_Activity::notifications((int) $u['id']);
+        /* Every notification this system raises is about a transport request
+           and its title carries the beneficiary's name, so the bell shows only
+           what the account may read. For a Content Manager that is nothing,
+           and an empty bell is the correct answer rather than a leak. */
+        $kinds = Repo_Activity::visibleKinds($u);
+        $rows  = Repo_Activity::notifications((int) $u['id'], 50, $kinds);
         Http::ok([
             'rows'   => array_map([Repo_Activity::class, 'publicNotification'], $rows),
-            'unread' => Repo_Activity::unreadCount((int) $u['id']),
+            'unread' => Repo_Activity::unreadCount((int) $u['id'], $kinds),
         ]);
     }
 
@@ -856,16 +895,21 @@ final class Routes
         $v->rejectUnknown(['csrf_token', 'id', 'all', 'read']);
         if (!$v->passed()) Http::invalid($v->errors());
 
+        $kinds = Repo_Activity::visibleKinds($u);
         if (!empty($in['all'])) {
-            Repo_Activity::markRead((int) $u['id'], null);
+            Repo_Activity::markRead((int) $u['id'], null, $kinds);
         } else {
             $id = (int) ($in['id'] ?? 0);
             if ($id <= 0) Http::invalid(['id' => 'التنبيه غير محدد.']);
+            /* An account that cannot be shown a notification cannot mark it
+               either — otherwise the id alone tells it the notification exists
+               and lets it change state it may not read. */
+            if (!Repo_Activity::mayRead($u, $id)) Http::notFound();
             $read = !isset($in['read']) || !in_array(strtolower((string) $in['read']), ['0', 'false', 'no'], true);
             $read ? Repo_Activity::markRead((int) $u['id'], $id)
                   : Repo_Activity::markUnread((int) $u['id'], $id);
         }
-        Http::ok(['unread' => Repo_Activity::unreadCount((int) $u['id'])]);
+        Http::ok(['unread' => Repo_Activity::unreadCount((int) $u['id'], $kinds)]);
     }
 
 

@@ -44,6 +44,28 @@ final class Repo_Activity
     {
         $where = [];
         $params = [];
+        /* Which modules the reader may see. The log spans every module and the
+           endpoint is gated on `home:view`, which every role has — so without
+           this a Content Manager reads the request history they are refused a
+           403 for at /api/admin/requests. Absent means unrestricted, which is
+           what the terminal and the tests want; a request always passes it. */
+        if (isset($f['modules']) && is_array($f['modules'])) {
+            if ($f['modules'] === []) {
+                /* nothing visible is not the same as no filter */
+                return ['rows' => [], 'total' => 0, 'page' => 1, 'per' => 20];
+            }
+            $recordModules = [];
+            foreach ($f['modules'] as $m) {
+                $recordModules[] = $m;
+                /* the log records media under its own name */
+                foreach (Authz::RECORD_MODULE as $record => $module) {
+                    if ($module === $m) $recordModules[] = $record;
+                }
+            }
+            $recordModules = array_values(array_unique($recordModules));
+            $where[] = 'module IN (' . implode(',', array_fill(0, count($recordModules), '?')) . ')';
+            foreach ($recordModules as $m) $params[] = $m;
+        }
         if (!empty($f['module'])) { $where[] = 'module = ?'; $params[] = $f['module']; }
         if (!empty($f['action'])) { $where[] = 'action = ?'; $params[] = $f['action']; }
         if (!empty($f['actor']))  { $where[] = 'actor_label = ?'; $params[] = $f['actor']; }
@@ -101,41 +123,101 @@ final class Repo_Activity
         }
     }
 
-    /** Per-account read state — what localStorage could not do. */
-    public static function notifications(int $userId, int $limit = 50): array
+    /**
+     * What each notification is about, so the bell can be filtered by what the
+     * reader is allowed to know. Every notification this system raises is
+     * about a transport request — a new one, or one going stale — and the
+     * title carries the beneficiary's name.
+     */
+    public const KIND_MODULE = [
+        'new_request' => 'requests',
+        'stale'       => 'requests',
+    ];
+
+    /** The kinds a given account may be shown. */
+    public static function visibleKinds(?array $user): array
     {
+        $out = [];
+        foreach (self::KIND_MODULE as $kind => $module) {
+            if (Authz::can($user, $module, 'view')) $out[] = $kind;
+        }
+        return $out;
+    }
+
+    /**
+     * Per-account read state — what localStorage could not do.
+     *
+     * $kinds restricts what is returned. The bell is on every page and its
+     * endpoint is gated on `home:view`, which a Content Manager has; without
+     * the restriction they were shown 440 notifications each titled
+     * «طلب جديد من ‹اسم المستفيد›» while /api/admin/requests refused them.
+     */
+    public static function notifications(int $userId, int $limit = 50, ?array $kinds = null): array
+    {
+        $params = [$userId];
+        $filter = '';
+        if ($kinds !== null) {
+            if ($kinds === []) return [];
+            $filter = ' WHERE n.kind IN (' . implode(',', array_fill(0, count($kinds), '?')) . ')';
+            foreach ($kinds as $k) $params[] = $k;
+        }
         return Db::all(
             'SELECT n.*, r.ref AS request_ref,
                     CASE WHEN nr.notification_id IS NULL THEN 0 ELSE 1 END AS is_read
                FROM notifications n
                LEFT JOIN requests r ON r.id = n.request_id
                LEFT JOIN notification_reads nr
-                      ON nr.notification_id = n.id AND nr.user_id = ?
-              ORDER BY n.created_at DESC, n.id DESC
+                      ON nr.notification_id = n.id AND nr.user_id = ?'
+            . $filter .
+            ' ORDER BY n.created_at DESC, n.id DESC
               LIMIT ' . max(1, min(200, $limit)),
-            [$userId]
+            $params
         );
     }
 
-    public static function unreadCount(int $userId): int
+    public static function unreadCount(int $userId, ?array $kinds = null): int
     {
+        $params = [$userId];
+        $filter = '';
+        if ($kinds !== null) {
+            if ($kinds === []) return 0;
+            $filter = ' AND n.kind IN (' . implode(',', array_fill(0, count($kinds), '?')) . ')';
+            foreach ($kinds as $k) $params[] = $k;
+        }
         return (int) Db::value(
             'SELECT COUNT(*) FROM notifications n
               LEFT JOIN notification_reads nr ON nr.notification_id = n.id AND nr.user_id = ?
-             WHERE nr.notification_id IS NULL',
-            [$userId]
+             WHERE nr.notification_id IS NULL' . $filter,
+            $params
         );
     }
 
-    public static function markRead(int $userId, ?int $notificationId): void
+    /** Is this notification one the account may act on? */
+    public static function mayRead(?array $user, int $notificationId): bool
+    {
+        $kind = Db::value('SELECT kind FROM notifications WHERE id = ?', [$notificationId]);
+        if ($kind === null) return false;
+        $module = self::KIND_MODULE[(string) $kind] ?? null;
+        return $module !== null && Authz::can($user, $module, 'view');
+    }
+
+    /** $kinds restricts "mark all" to what the account may actually see. */
+    public static function markRead(int $userId, ?int $notificationId, ?array $kinds = null): void
     {
         $now = Db::now();
         if ($notificationId === null) {
+            $params = [$userId];
+            $filter = '';
+            if ($kinds !== null) {
+                if ($kinds === []) return;
+                $filter = ' AND n.kind IN (' . implode(',', array_fill(0, count($kinds), '?')) . ')';
+                foreach ($kinds as $k) $params[] = $k;
+            }
             $rows = Db::all(
                 'SELECT n.id FROM notifications n
                   LEFT JOIN notification_reads nr ON nr.notification_id = n.id AND nr.user_id = ?
-                 WHERE nr.notification_id IS NULL',
-                [$userId]
+                 WHERE nr.notification_id IS NULL' . $filter,
+                $params
             );
             foreach ($rows as $r) {
                 Db::run('INSERT INTO notification_reads (notification_id, user_id, read_at) VALUES (?,?,?)',

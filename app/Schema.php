@@ -75,6 +75,10 @@ final class Schema
         return $applied;
     }
 
+    /** Public as ensureLedger() so bin/qa-migrate.php can build the state a
+        half-migrated database is in without reaching into private methods. */
+    public static function ensureLedger(): void { self::ensureMigrationsTable(); }
+
     private static function ensureMigrationsTable(): void
     {
         $sql = Db::isMysql()
@@ -589,9 +593,39 @@ final class Schema
             }
         }
 
-        foreach (Repo_Content::SETTINGS_ALIAS as $path => $_blockKey) {
+        /* Each of these facts used to live in two places — a settings row and a
+           content block — and this migration makes the block the only one.
+           It MOVES the value before deleting the row.
+           
+           It did not, until the migration convergence check built a database
+           holding real settings and ran the upgrade against it. On a fresh
+           install there is nothing in `settings` to lose, so the delete looked
+           harmless; on the client's database, an operator's edited phone
+           number, address, tagline or website would have been deleted and the
+           block left holding whatever the seed wrote. Worse, `site.sTitle` and
+           `site.sDesc` are in this same map, so this delete ran BEFORE m0006 —
+           the migration written to move them — and left it nothing to move.
+
+           The move is conditional so re-running is still safe: a block that
+           already holds something is never overwritten by a settings row. */
+        foreach (Repo_Content::SETTINGS_ALIAS as $path => $blockKey) {
             [$cat, $name] = explode('.', $path, 2);
-            Db::run('DELETE FROM settings WHERE category = ? AND name = ?', [$cat, $name]);
+            $row = Db::one('SELECT value FROM settings WHERE category = ? AND name = ?', [$cat, $name]);
+            if ($row !== null) {
+                $existing = Repo_Cms::block($blockKey, 'ar');
+                $blockEmpty = $existing === null || trim((string) $existing['value']) === '';
+                if ($blockEmpty) {
+                    /* settings values are stored JSON-encoded; a plain string
+                       that failed to encode is taken as-is rather than lost */
+                    $decoded = json_decode((string) $row['value'], true);
+                    $value = is_string($decoded) ? $decoded
+                        : (is_scalar($decoded) ? (string) $decoded : (string) $row['value']);
+                    if (trim($value) !== '') {
+                        Repo_Cms::saveBlock($blockKey, 'ar', $value, null);
+                    }
+                }
+                Db::run('DELETE FROM settings WHERE category = ? AND name = ?', [$cat, $name]);
+            }
         }
     }
 
@@ -617,6 +651,11 @@ final class Schema
      */
     public static function m0006(): void
     {
+        /* m0004 moves these two now, along with the other four aliases, so on
+           any database migrating from 0003 onwards this finds nothing left to
+           do. It stays because a database that applied m0004 before that fix
+           has the rows deleted and this recorded as pending — and because a
+           migration that has run must not be rewritten into one that has not. */
         foreach (['seo.title' => ['site', 'sTitle'], 'seo.description' => ['site', 'sDesc']] as $block => [$cat, $name]) {
             $row = Db::one('SELECT value FROM settings WHERE category = ? AND name = ?', [$cat, $name]);
             if ($row !== null && Repo_Cms::block($block, 'ar') === null) {
