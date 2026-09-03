@@ -516,13 +516,19 @@ table.tbl tbody tr:focus-within{background:var(--row-hover)}
   :root{--content-max:1560px}
 }
 @media (max-width:1023px){
+  /* هذه القواعد تُحوّل الشريط الجانبي إلى شريط أيقونات، ولذلك كلٌّ منها
+     مقيَّدة بـ .side. كانت غير مقيَّدة، والدرج (nav.drawer) يستعمل نفس
+     الأصناف — side__name وnavitem__lbl وside__grp — فكان يفقد كل نصوصه:
+     يفتح على الجوال فلا يظهر إلا صفٌّ من الأيقونات بعرض 48 بكسل داخل لوحة
+     عرضها 19rem، والباقي فراغ أزرق. */
   .app,.app.is-collapsed{grid-template-columns:var(--rail-w) minmax(0,1fr)}
-  .side__name,.navitem__lbl,.navitem__count,.side__grp,.side__toggle span{display:none}
+  .side .side__name,.side .navitem__lbl,.side .navitem__count,
+  .side .side__grp,.side .side__toggle span{display:none}
   .side{padding-inline:var(--s2);align-items:center}
-  .side__brand{padding:var(--s2) 0 var(--s5);justify-content:center}
-  .navitem,.side__toggle{width:48px;justify-content:center;padding:0}
-  .navitem[aria-current="page"]::before{display:none}
-  .side__foot{display:none}
+  .side .side__brand{padding:var(--s2) 0 var(--s5);justify-content:center}
+  .side .navitem,.side .side__toggle{width:48px;justify-content:center;padding:0}
+  .side .navitem[aria-current="page"]::before{display:none}
+  .side .side__foot{display:none}
 }
 @media (max-width:767px){
   .app,.app.is-collapsed{grid-template-columns:minmax(0,1fr)}

@@ -111,7 +111,61 @@ final class Repo_Content
 
     public static function media(): array
     {
+        self::healMedia();
         return Db::all('SELECT * FROM media_assets ORDER BY uploaded_at DESC, id DESC');
+    }
+
+    /**
+     * Fill in what could not be read when the row was written.
+     *
+     * Setup::media() reads each file's dimensions, type and size off disk at
+     * install time — and records nulls for a file that is not there. Twelve of
+     * the eighteen were not there, because the package shipped only the sized
+     * variants and the library registers the masters. So the library ended up
+     * holding rows that knew a path and nothing else, and the service form's
+     * picker offered «medical-bed-transport.webp (null×null)».
+     *
+     * The package carries those files now, so the missing facts are readable.
+     * They are read here rather than in a migration because this hosting plan
+     * has no terminal to run one from: the listing repairs what it can, once,
+     * and a row that has its dimensions is never touched again. A file that is
+     * still absent stays null and stays visible as absent — the point is to
+     * stop guessing, not to invent.
+     */
+    private static function healMedia(): void
+    {
+        $rows = Db::all('SELECT id, path FROM media_assets
+                          WHERE width IS NULL OR height IS NULL OR bytes IS NULL');
+        foreach ($rows as $r) {
+            $abs = AUN_ROOT . '/' . $r['path'];
+            if (!is_file($abs)) continue;
+            $dim = function_exists('getimagesize') ? @getimagesize($abs) : false;
+            $w = $dim ? (int) $dim[0] : null;
+            $h = $dim ? (int) $dim[1] : null;
+            $mime = $dim ? ($dim['mime'] ?? null) : null;
+
+            /* getimagesize() cannot read an SVG — it is markup, not a raster —
+               so the two logos stayed dimensionless and were re-read on every
+               listing. Their size is written on the root element. */
+            if ($w === null && strtolower(pathinfo($abs, PATHINFO_EXTENSION)) === 'svg') {
+                $head = (string) @file_get_contents($abs, false, null, 0, 2048);
+                $mime = 'image/svg+xml';
+                if (preg_match('/<svg[^>]*\bwidth="([\d.]+)[a-z%]*"[^>]*\bheight="([\d.]+)[a-z%]*"/i', $head, $m)) {
+                    $w = (int) round((float) $m[1]);
+                    $h = (int) round((float) $m[2]);
+                } elseif (preg_match('/<svg[^>]*\bviewBox="[\d.\-]+\s+[\d.\-]+\s+([\d.]+)\s+([\d.]+)"/i', $head, $m)) {
+                    $w = (int) round((float) $m[1]);
+                    $h = (int) round((float) $m[2]);
+                }
+            }
+
+            Db::run('UPDATE media_assets SET mime = ?, width = ?, height = ?, bytes = ? WHERE id = ?', [
+                $mime, $w, $h, (int) filesize($abs), (int) $r['id'],
+            ]);
+        }
+        if ($rows !== []) {
+            Log::write('info', 'media rows completed from disk', ['rows' => count($rows)]);
+        }
     }
 
     public static function upsertMedia(array $a, ?array $actor = null): void

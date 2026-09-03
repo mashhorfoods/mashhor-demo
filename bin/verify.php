@@ -2731,6 +2731,91 @@ if (is_dir($dist)) {
     check('media', 'dist/ exists to check the package against', false, 'run node build.js first');
 }
 
+
+/* ================================================================== */
+section('WHAT THE SCREENSHOTS SHOWED — A DIMENSION THAT WAS NULL, A MENU WITH NO WORDS');
+/* ================================================================== */
+/* Two defects the operator photographed on the deployed copy, and the checks
+   that would have caught each of them here instead. */
+
+/* --- 1 · nothing on a screen reads "null" ---------------------------- */
+/* The library completes its own rows from the file on disk, so a row that
+   arrived without a width does not stay without one. */
+$blank = Db::all('SELECT id, path FROM media_assets WHERE width IS NULL OR height IS NULL OR bytes IS NULL');
+$onDisk = array_values(array_filter($blank, fn($r) => is_file(AUN_ROOT . '/' . $r['path'])));
+check('media', 'no library row is missing a dimension the file could give it',
+    $onDisk === [], $onDisk === [] ? count(Db::all('SELECT id FROM media_assets')) . ' rows complete'
+                                   : implode(', ', array_column(array_slice($onDisk, 0, 4), 'path')));
+check('media', 'and the library completes them itself rather than waiting for a re-upload',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/app/Repo/Content.php'), 'healMedia'));
+check('media', 'including an SVG, which getimagesize() cannot read',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/app/Repo/Content.php'), 'viewBox'));
+
+/* And every screen that prints a dimension guards the pair, so a row that
+   genuinely has none reads as a dash rather than as "null×null". */
+foreach ($adminHtml as $file) {
+    $name = basename($file);
+    $src  = (string) @file_get_contents($file);
+    /* a line that joins a width to a height around the multiplication sign */
+    $bad = [];
+    foreach (explode("\n", $src) as $n => $line) {
+        if (!preg_match('/(\.w(idth)?|\.h(eight)?)\b[^\n]{0,20}×|×[^\n]{0,20}(\.w(idth)?|\.h(eight)?)\b/u', $line)) continue;
+        if (preg_match('/\b(dims\(|w && h|a\.width && a\.height)/', $line)) continue;
+        $bad[] = ($n + 1) . ': ' . trim($line);
+    }
+    check('media', "{$name} never prints a dimension it has not checked",
+        $bad === [], implode(' | ', array_slice($bad, 0, 2)));
+}
+
+/* --- 2 · the drawer on a phone keeps its words ----------------------- */
+/* The rail that collapses to icons is a desktop affordance. On a phone the
+   same panel slides out as nav.drawer, and it reuses the rail's classes, so
+   every rule that hides one of those labels must name .side — otherwise the
+   drawer opens as a column of unlabelled icons inside a 19rem panel. */
+$labelClasses = ['side__name', 'navitem__lbl', 'navitem__count', 'side__grp', 'side__foot'];
+foreach ($adminHtml as $file) {
+    $name = basename($file);
+    $src  = (string) @file_get_contents($file);
+    if (!str_contains($src, 'side__brand')) continue;   /* login carries no rail */
+
+    /* the phone breakpoint, with its comments removed so prose cannot fail it */
+    $pos = strpos($src, '@media (max-width:1023px){');
+    if ($pos === false) {
+        check('layout', "{$name} has a phone breakpoint to check", false);
+        continue;
+    }
+    $depth = 0; $block = ''; $i = $pos + strlen('@media (max-width:1023px)');
+    for ($len = strlen($src); $i < $len; $i++) {
+        $c = $src[$i];
+        if ($c === '{') { $depth++; if ($depth === 1) continue; }
+        if ($c === '}') { $depth--; if ($depth === 0) break; }
+        $block .= $c;
+    }
+    $block = preg_replace('#/\*.*?\*/#s', '', $block);
+
+    $unscoped = [];
+    foreach (explode('}', $block) as $rule) {
+        $sels = explode('{', $rule)[0];
+        foreach (explode(',', $sels) as $sel) {
+            foreach ($labelClasses as $cls) {
+                if (str_contains($sel, $cls) && !str_contains($sel, '.side ')) {
+                    $unscoped[] = trim($sel);
+                }
+            }
+        }
+    }
+    check('layout', "{$name} hides a rail label only inside the rail",
+        $unscoped === [], implode(' | ', array_slice(array_unique($unscoped), 0, 3)));
+
+    /* and the drawer it opens instead is a readable panel, not a strip */
+    preg_match('/\.drawer\s*\{([^}]*)\}/', $src, $d);
+    $drawerCss = $d[1] ?? '';
+    check('layout', "{$name} opens that drawer wide enough to read a label",
+        preg_match('/width:\s*(1[5-9]|2\d)rem/', $drawerCss) === 1
+        || preg_match('/width:\s*min\(/', $drawerCss) === 1,
+        trim(explode(';', $drawerCss)[0] ?? ''));
+}
+
 /* ================================================================== */
 foreach ($lines as $l) fwrite(STDOUT, $l . "\n");
 fwrite(STDOUT, "\n" . str_repeat('=', 78) . "\n");

@@ -516,13 +516,19 @@ table.tbl tbody tr:focus-within{background:var(--row-hover)}
   :root{--content-max:1560px}
 }
 @media (max-width:1023px){
+  /* هذه القواعد تُحوّل الشريط الجانبي إلى شريط أيقونات، ولذلك كلٌّ منها
+     مقيَّدة بـ .side. كانت غير مقيَّدة، والدرج (nav.drawer) يستعمل نفس
+     الأصناف — side__name وnavitem__lbl وside__grp — فكان يفقد كل نصوصه:
+     يفتح على الجوال فلا يظهر إلا صفٌّ من الأيقونات بعرض 48 بكسل داخل لوحة
+     عرضها 19rem، والباقي فراغ أزرق. */
   .app,.app.is-collapsed{grid-template-columns:var(--rail-w) minmax(0,1fr)}
-  .side__name,.navitem__lbl,.navitem__count,.side__grp,.side__toggle span{display:none}
+  .side .side__name,.side .navitem__lbl,.side .navitem__count,
+  .side .side__grp,.side .side__toggle span{display:none}
   .side{padding-inline:var(--s2);align-items:center}
-  .side__brand{padding:var(--s2) 0 var(--s5);justify-content:center}
-  .navitem,.side__toggle{width:48px;justify-content:center;padding:0}
-  .navitem[aria-current="page"]::before{display:none}
-  .side__foot{display:none}
+  .side .side__brand{padding:var(--s2) 0 var(--s5);justify-content:center}
+  .side .navitem,.side .side__toggle{width:48px;justify-content:center;padding:0}
+  .side .navitem[aria-current="page"]::before{display:none}
+  .side .side__foot{display:none}
 }
 @media (max-width:767px){
   .app,.app.is-collapsed{grid-template-columns:minmax(0,1fr)}
@@ -1504,6 +1510,10 @@ window.AunShell = (function(){
   var canModify=false, current=null, mode="upload", pending=null;   /* until /auth/me says otherwise */
 
   function kb(b){ return b<1024 ? b+" B" : (b<1048576 ? (b/1024).toFixed(0)+" KB" : (b/1048576).toFixed(1)+" MB"); }
+  /* الأبعاد حين تكون معروفة، و«—» حين لا تكون. كانت تُطبع كما هي فيظهر
+     «null×null» لكل ملف لم يستطع النظام قراءة أبعاده — وهو ما حدث للاثني
+     عشر ملفاً التي لم تكن على الخادم وقت التثبيت. */
+  function dims(w,h){ return (w && h) ? (w+"×"+h) : "—"; }
   function used(a){ return a.u && a.u.length>0; }
   /* المرحلة النهائية — الصور تُقرأ من مسارها الحقيقي بدل نسخة مضمّنة.
      كانت هذه الصفحة تحمل أربع عشرة صورة مطبوعة داخلها بصيغة base64 —
@@ -1547,7 +1557,7 @@ window.AunShell = (function(){
       '<span class="ph-t"></span><span class="ph-d"></span>';
     if (a.w>2000){
       d.querySelector(".ph-t").textContent="بلا مصغّرة";
-      d.querySelector(".ph-d").textContent=a.w+"×"+a.h;
+      d.querySelector(".ph-d").textContent=dims(a.w, a.h);
     } else d.querySelector(".ph-t").textContent=a.t.toUpperCase();
     return d;
   }
@@ -1609,7 +1619,7 @@ window.AunShell = (function(){
         b.innerHTML='<span class="tile__n"></span><span class="tile__m">'+
           '<span class="d"></span><span class="s"></span></span>';
         b.querySelector(".tile__n").textContent=a.n;
-        b.querySelector(".d").textContent=a.w+"×"+a.h;
+        b.querySelector(".d").textContent=dims(a.w, a.h);
         b.querySelector(".s").textContent=kb(a.b);
         b.appendChild(usageBadge(a));
         t.appendChild(f); t.appendChild(b);
@@ -1629,7 +1639,7 @@ window.AunShell = (function(){
           '<span class="t"></span><span class="d"></span><span class="s"></span><span class="p"></span></span>';
         bb.querySelector(".mrow__n").textContent=a.n;
         bb.querySelector(".t").textContent=a.t.toUpperCase();
-        bb.querySelector(".d").textContent=a.w+"×"+a.h;
+        bb.querySelector(".d").textContent=dims(a.w, a.h);
         bb.querySelector(".s").textContent=kb(a.b);
         bb.querySelector(".p").textContent=a.p;
         var ub=el("span","mrow__u"); ub.appendChild(usageBadge(a));
@@ -1744,7 +1754,7 @@ window.AunShell = (function(){
     current=a;
     $("shName").textContent=a.n;
     $("shType").textContent=a.t.toUpperCase();
-    $("shDim").textContent=a.w+" × "+a.h;
+    $("shDim").textContent=dims(a.w,a.h);
     $("shSize").textContent=kb(a.b);
     $("shPath").textContent=a.p;
     $("shDate").textContent=a.d;
@@ -1840,7 +1850,7 @@ window.AunShell = (function(){
       $("upCurImg").src = t || "";
       $("upCurImg").style.visibility = t ? "" : "hidden";
       $("upCurName").textContent = current.n;
-      $("upCurMeta").textContent = current.w+"×"+current.h+" · "+kb(current.b)+
+      $("upCurMeta").textContent = dims(current.w, current.h)+" · "+kb(current.b)+
         (used(current) ? " · مستخدم في "+current.u.join(" و") : " · غير مستخدم");
       $("upCurMeta").className = "upitem__s";
     }
