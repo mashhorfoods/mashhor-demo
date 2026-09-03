@@ -869,6 +869,52 @@ async function main() {
   check('menu', 'and it changes back, so the account ends as it started',
     back.stillOpen === false && back.confirmed === true, JSON.stringify(back));
 
+  /* ---- dialogs on a short screen -------------------------------------- */
+  /* A dialog taller than the window used to spill past both edges of a
+     centred grid item, putting its footer — «إضافة الخدمة» among them — below
+     the bottom of the screen with nothing to scroll. Measured, not read: open
+     each one at a laptop height and at a phone's, and require every button in
+     its footer to sit inside the viewport. */
+  section('DIALOGS FIT THE WINDOW THEY OPEN IN');
+  const DIALOGS = [
+    { file: 'services.html', open: 'newbtn',    wrap: 'newwrap',  label: 'خدمة جديدة' },
+    { file: 'media.html',    open: 'upbtn',    wrap: 'upwrap',   label: 'رفع ملف' },
+  ];
+  for (const [w, h] of [[1366, 768], [390, 740]]) {
+    await resize(w, h);
+    for (const d of DIALOGS) {
+      await goto(`${BASE}/admin/${d.file}`);
+      const r = await browser.send('Runtime.evaluate', {
+        expression: `(() => {
+          const b = document.getElementById(${JSON.stringify(d.open)});
+          if (!b) return {skip:'no opener'};
+          b.click();
+          const wrap = document.getElementById(${JSON.stringify(d.wrap)});
+          if (!wrap || wrap.hidden) return {skip:'did not open'};
+          const f = wrap.querySelector('.modal__f'), hd = wrap.querySelector('.modal__h');
+          if (!f || !hd) return {skip:'no header or footer'};
+          const out = [];
+          for (const el of f.querySelectorAll('button,a')) {
+            const q = el.getBoundingClientRect();
+            if (q.width === 0 && q.height === 0) continue;
+            if (q.bottom > innerHeight + 1 || q.top < -1) {
+              out.push((el.textContent || '').trim().slice(0, 24) + ' @' + Math.round(q.top));
+            }
+          }
+          const hr = hd.getBoundingClientRect();
+          return {offscreen: out, headerCut: hr.top < -1, height: Math.round(innerHeight)};
+        })()`, returnByValue: true, awaitPromise: true,
+      });
+      const v = r.result.value || {};
+      if (v.skip) { check(d.file, `${d.label} @${w}×${h} — dialog reachable`, false, v.skip); continue; }
+      check(d.file, `${d.label} @${w}×${h} — every button in it can be pressed`,
+        (v.offscreen || []).length === 0, (v.offscreen || []).join(', '));
+      check(d.file, `${d.label} @${w}×${h} — and its title is still on screen`,
+        v.headerCut === false);
+    }
+  }
+  await resize(1440, 900);
+
   /* ---- the third-party dependency, read from the markup --------------- */
   section('THIRD-PARTY DEPENDENCIES');
   const adminSrc = adminPages.map((f) => fs.readFileSync(path.join(__dirname, '..', 'admin', f), 'utf8'));

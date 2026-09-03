@@ -500,7 +500,15 @@ table.tbl tbody tr:focus-within{background:var(--row-hover)}
 .offline[hidden]{display:none}
 
 .modal{background:var(--white);border-radius:var(--r-modal);box-shadow:var(--sh-modal);
-  width:min(100%,26rem);padding:var(--s6);display:flex;flex-direction:column;gap:var(--s4)}
+  width:min(100%,26rem);padding:var(--s6);display:flex;flex-direction:column;gap:var(--s4);
+  /* A dialog taller than the window used to overflow it. .modalwrap centres
+     with place-items, and a centred grid item that is too tall spills past
+     BOTH edges — the footer, with «إضافة الخدمة» and «إلغاء» in it, sat below
+     the bottom of the screen with nothing to scroll. Bound the dialog to the
+     window and let its middle scroll, so the title and the buttons stay put. */
+  max-height:calc(100vh - var(--s8));max-height:calc(100dvh - var(--s8))}
+.modal__h,.modal__f{flex:0 0 auto}
+.modal > :not(.modal__h):not(.modal__f){overflow-y:auto;min-height:0;overscroll-behavior:contain}
 .modalwrap{position:fixed;inset:0;z-index:75;display:grid;place-items:center;padding:var(--s4);
   background:rgba(30,39,51,.42)}
 .modalwrap[hidden]{display:none}

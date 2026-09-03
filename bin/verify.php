@@ -2816,6 +2816,37 @@ foreach ($adminHtml as $file) {
         trim(explode(';', $drawerCss)[0] ?? ''));
 }
 
+/* --- 3 · a dialog never grows past the window ------------------------ */
+/* .modalwrap centres its dialog with place-items, and a centred grid item
+   taller than its container spills past both edges with nothing to scroll —
+   which put «إضافة الخدمة» below the bottom of a 768px screen. */
+foreach ($adminHtml as $file) {
+    $name = basename($file);
+    $src  = (string) @file_get_contents($file);
+    if (!str_contains($src, 'class="modalwrap"')) continue;
+
+    preg_match('/\.modal\{([^}]*)\}/', $src, $m);
+    $css = $m[1] ?? '';
+    check('layout', "{$name} bounds a dialog to the window",
+        str_contains($css, 'max-height:calc(100dvh'), trim(explode(';', $css)[0] ?? ''));
+    check('layout', "{$name} keeps a dialog's buttons where they can be pressed",
+        str_contains($src, '.modal__h,.modal__f{flex:0 0 auto}')
+        && str_contains($src, '.modal > :not(.modal__h):not(.modal__f){overflow-y:auto'));
+
+    /* every dialog on the page opens with its header and ends with its
+       footer, which is what the two rules above rely on — read in document
+       order they must alternate h,f,h,f with nothing out of place */
+    preg_match_all('/class="(modal__h|modal__f)"/', $src, $k);
+    $order = $k[1];
+    $alternates = $order !== [] && count($order) % 2 === 0;
+    foreach ($order as $i => $cls) {
+        if ($cls !== ($i % 2 === 0 ? 'modal__h' : 'modal__f')) { $alternates = false; break; }
+    }
+    check('layout', "{$name} — each of its " . (count($order) / 2) .
+        ' dialog(s) opens with a title and ends with buttons',
+        $alternates, implode(' → ', $order));
+}
+
 /* ================================================================== */
 foreach ($lines as $l) fwrite(STDOUT, $l . "\n");
 fwrite(STDOUT, "\n" . str_repeat('=', 78) . "\n");
