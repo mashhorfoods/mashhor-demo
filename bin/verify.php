@@ -1819,15 +1819,21 @@ if ($dumpBytes > $uploadCap) {
     check('backup', 'and does not pretend no file was chosen',
         !str_contains((string) ($res['body']['errors']['file'] ?? ''), 'اختر ملف النسخة الاحتياطية أولاً'));
 } else {
-    $tk = $admin->csrf();
-    $res = $admin->post('/api/admin/restore', $mkBody('استعادة', json_encode($dump), $tk), $hdr + ['X-CSRF-Token' => $tk]);
+    /* A backup of the state as it is RIGHT NOW, so restoring it through the
+       upload path exercises that path end to end without disturbing what the
+       checks after this one are about to assert. Restoring $dump here would
+       remove the added record early and quietly invalidate them — which is
+       exactly what it did before this was written this way. */
+    $nowDump = json_decode($admin->get('/api/admin/backup')['raw'], true);
+    $tk  = $admin->csrf();
+    $res = $admin->post('/api/admin/restore', $mkBody('استعادة', json_encode($nowDump), $tk),
+        $hdr + ['X-CSRF-Token' => $tk]);
     check('backup', 'an upload within the limit is accepted', $res['status'] === 200, "status={$res['status']}");
-    check('backup', 'and the data is unchanged by it', $ghostRows() === 0);
+    check('backup', 'and restoring the current state changes nothing', $ghostRows() === 1);
 }
-check('backup', 'the added record survived every refused attempt', $ghostRows() >= 0);
+check('backup', 'the added record survived every refused attempt', $ghostRows() === 1);
 
 /* and the real thing, the way the dashboard sends it */
-$snapsBefore = count(glob(Backup::dir() . '/*.json') ?: []);
 $res = $admin->post('/api/admin/restore',
     ['csrf_token' => $admin->csrf(), 'confirm' => 'استعادة', 'backup' => $dump]);
 check('backup', 'a Super Admin can restore', $res['status'] === 200,
@@ -1838,10 +1844,26 @@ foreach (Backup::TABLES as $t) {
     if ((int) Db::value("SELECT COUNT(*) FROM {$t}") !== $before[$t]) { $restoredOk = false; break; }
 }
 check('backup', 'every covered table is back to what the backup held', $restoredOk);
+/* Counting the folder would not prove this — pruneSnapshots() caps it at ten,
+   so once it is full a new snapshot leaves the count unchanged, and two
+   snapshots in the same second share a name. The response names the file it
+   wrote, so that is what is checked: it must be on disk, and it must be a
+   readable backup of what was there a moment ago. */
+$snapName = (string) ($res['body']['snapshot'] ?? '');
+$snapPath = Backup::dir() . '/' . $snapName;
 check('backup', 'a snapshot of the pre-restore data was written first',
-    count(glob(Backup::dir() . '/*.json') ?: []) > $snapsBefore);
-check('backup', 'and it is named for what it is',
-    (bool) glob(Backup::dir() . '/before-restore-*.json'));
+    $snapName !== '' && is_file($snapPath), $snapName);
+check('backup', 'and it is named for what it is', str_starts_with($snapName, 'before-restore-'));
+check('backup', 'and it is a backup that could itself be restored',
+    Backup::problem(json_decode((string) @file_get_contents($snapPath), true)) === null);
+check('backup', 'holding the state from BEFORE the restore, not after',
+    (static function () use ($snapPath, $ghostTitle): bool {
+        $snap = json_decode((string) @file_get_contents($snapPath), true);
+        foreach ($snap['tables']['content_items'] ?? [] as $r) {
+            if (($r['title'] ?? '') === $ghostTitle) return true;
+        }
+        return false;
+    })());
 check('backup', 'the reply says the website has not changed yet',
     str_contains((string) ($res['body']['note'] ?? ''), 'انشره'));
 
@@ -2021,6 +2043,164 @@ check('logs', 'and never raises an error of its own',
     substr_count((string) @file_get_contents(AUN_ROOT . '/app/Log.php'), 'throw') === 0);
 check('logs', 'the log directory is still not servable',
     in_array($anon->get('/app/storage/logs/app-' . $today . '.log')['status'], [403, 404], true));
+
+/* ================================================================== */
+section('STAGE 6E  TWO LEDGERS THAT GREW WITH USE AND NEVER SHRANK');
+/* ================================================================== */
+$marker = AUN_ROOT . '/app/storage/.last-prune';
+
+/* --- the activity log: an audit trail, so pruned carefully ----------- */
+$oldStamp = gmdate('Y-m-d H:i:s', time() - (Retention::activityKeepDays() + 40) * 86400);
+$oldTag   = 'سجل قديم للفحص ' . $stamp;
+for ($i = 0; $i < 6; $i++) {
+    Db::run('INSERT INTO activity_log (actor_label, module, action, target_type, summary, created_at)
+             VALUES (?,?,?,?,?,?)',
+        ['الفحص', 'settings', 'edit', 'verify', $oldTag . ' #' . $i, $oldStamp]);
+}
+$freshTag = 'سجل حديث للفحص ' . $stamp;
+Db::run('INSERT INTO activity_log (actor_label, module, action, target_type, summary, created_at)
+         VALUES (?,?,?,?,?,?)',
+    ['الفحص', 'settings', 'edit', 'verify', $freshTag, Db::now()]);
+check('retention', 'old entries are seeded to be pruned',
+    (int) Db::value('SELECT COUNT(*) FROM activity_log WHERE summary LIKE ?', [$oldTag . '%']) === 6);
+
+@unlink($marker);
+$swept = Retention::sweep();
+check('retention', 'the sweep runs', is_array($swept));
+check('retention', 'entries past the retention window are gone',
+    (int) Db::value('SELECT COUNT(*) FROM activity_log WHERE summary LIKE ?', [$oldTag . '%']) === 0);
+check('retention', 'entries inside it are not',
+    (int) Db::value('SELECT COUNT(*) FROM activity_log WHERE summary = ?', [$freshTag]) === 1);
+check('retention', 'and the count it reports is the count it removed',
+    ($swept['activity']['byAge'] ?? 0) >= 6, 'byAge=' . ($swept['activity']['byAge'] ?? -1));
+
+/* §3 — a gap in an audit trail with nothing explaining it is
+   indistinguishable from tampering */
+$selfRow = Db::one("SELECT * FROM activity_log WHERE target_type = 'retention' ORDER BY id DESC LIMIT 1");
+check('retention', 'the deletion is itself written to the log', $selfRow !== null);
+check('retention', 'it says how many went and how old they were',
+    $selfRow !== null && str_contains((string) $selfRow['summary'], 'سجل النشاط')
+    && str_contains((string) $selfRow['summary'], (string) Retention::activityKeepDays()),
+    (string) ($selfRow['summary'] ?? ''));
+check('retention', 'and is attributed to maintenance, not to a person',
+    $selfRow !== null && (string) $selfRow['actor_label'] === 'الصيانة التلقائية'
+    && $selfRow['actor_user_id'] === null);
+
+/* the once-a-day guard */
+check('retention', 'a marker records the day it ran',
+    trim((string) @file_get_contents($marker)) === gmdate('Y-m-d'));
+Db::run('INSERT INTO activity_log (actor_label, module, action, target_type, summary, created_at)
+         VALUES (?,?,?,?,?,?)',
+    ['الفحص', 'settings', 'edit', 'verify', $oldTag . ' second', $oldStamp]);
+check('retention', 'a second call the same day does nothing', Retention::sweep() === null);
+check('retention', 'so the new old entry is still there',
+    (int) Db::value('SELECT COUNT(*) FROM activity_log WHERE summary = ?', [$oldTag . ' second']) === 1);
+Retention::sweep(true);
+check('retention', 'and --run ignores the guard',
+    (int) Db::value('SELECT COUNT(*) FROM activity_log WHERE summary = ?', [$oldTag . ' second']) === 0);
+
+/* the window cannot be set to something useless */
+check('retention', 'a retention window under a month is refused',
+    (static function (): bool {
+        putenv('ACTIVITY_KEEP_DAYS=3');
+        $got = Retention::activityKeepDays();
+        putenv('ACTIVITY_KEEP_DAYS');
+        return $got === Retention::ACTIVITY_KEEP_DAYS_MIN;
+    })(), 'floor=' . Retention::ACTIVITY_KEEP_DAYS_MIN . ' days');
+
+/* the row cap: the emergency brake, and it keeps the NEWEST rows */
+$rowsNow = (int) Db::value('SELECT COUNT(*) FROM activity_log');
+$cap     = max(1000, $rowsNow - 25);
+putenv('ACTIVITY_MAX_ROWS=' . $cap);
+$newestBefore = (int) Db::value('SELECT MAX(id) FROM activity_log');
+$capped = Retention::sweep(true);
+putenv('ACTIVITY_MAX_ROWS');
+check('retention', 'the row cap trims a table over its limit',
+    (int) Db::value('SELECT COUNT(*) FROM activity_log') <= $cap + 2,
+    $rowsNow . ' → ' . Db::value('SELECT COUNT(*) FROM activity_log') . ' (cap ' . $cap . ')');
+check('retention', 'and it keeps the newest, not the oldest',
+    (int) Db::value('SELECT COUNT(*) FROM activity_log WHERE id = ?', [$newestBefore]) === 1);
+
+/* --- the publish ledger: only the newest row is ever read ------------ */
+$keep = Retention::publishKeepRows();
+for ($i = 0; $i < $keep + 12; $i++) {
+    Db::run('INSERT INTO content_publishes (actor_label, regions, target, ok, created_at)
+             VALUES (?,?,?,?,?)', ['الفحص', 1, 'index.html', 1, Db::now()]);
+}
+$before = (int) Db::value('SELECT COUNT(*) FROM content_publishes');
+$newestPub = Db::one('SELECT * FROM content_publishes ORDER BY id DESC LIMIT 1');
+check('retention', 'the publish ledger is over its limit', $before > $keep, "rows={$before}");
+Retention::sweep(true);
+$after = (int) Db::value('SELECT COUNT(*) FROM content_publishes');
+check('retention', 'it is trimmed to the tail that is kept', $after === $keep, "rows={$after}");
+check('retention', 'and the newest publish — the only one anything reads — survived',
+    Publisher::lastPublish() !== null
+    && (int) Publisher::lastPublish()['id'] === (int) $newestPub['id']);
+
+/* --- where it runs, and what it costs -------------------------------- */
+check('retention', 'the sweep is wired into sign-in, not onto a public page',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/app/Routes.php'), 'Retention::sweep();'));
+check('retention', 'signing in leaves the marker set',
+    (static function () use ($BASE, $EMAIL, $PW, $marker): bool {
+        @unlink($marker);
+        $c = new Client($BASE);
+        $c->post('/api/auth/login', ['csrf_token' => $c->csrf(), 'email' => $EMAIL, 'password' => $PW]);
+        return trim((string) @file_get_contents($marker)) === gmdate('Y-m-d');
+    })());
+check('retention', 'deletes are batched rather than done in one statement',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/app/Retention.php'), 'deleteInBatches'));
+check('retention', 'and each driver gets a statement it actually supports',
+    (static function (): bool {
+        $t = (string) @file_get_contents(AUN_ROOT . '/app/Retention.php');
+        return str_contains($t, 'Db::isMysql()') && str_contains($t, 'rowid IN');
+    })());
+check('retention', 'housekeeping never turns into a failed request',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/app/Retention.php'), 'catch (Throwable $e)'));
+
+/* --- what the dashboard says about it -------------------------------- */
+$act = $admin->get('/api/admin/activity?per=1');
+check('retention', 'the activity endpoint reports the window in force',
+    (int) ($act['body']['retention']['keepDays'] ?? 0) === Retention::activityKeepDays(),
+    (string) ($act['body']['retention']['keepDays'] ?? '—'));
+$actPage = (string) @file_get_contents(AUN_ROOT . '/admin/activity.html');
+check('retention', 'and the page says entries age out rather than leaving a gap',
+    str_contains($actPage, 'retnote') && str_contains($actPage, 'تُحفظ السجلات'));
+check('retention', 'the page still says the log cannot be edited from the dashboard',
+    str_contains($actPage, 'سجل النشاط للقراءة فقط'));
+
+/* --- and the terminal has the same operation ------------------------- */
+$prune = (string) @file_get_contents(AUN_ROOT . '/bin/prune.php');
+check('retention', 'bin/prune.php reports without changing anything by default',
+    str_contains($prune, "in_array('--run'") && str_contains($prune, 'لم يُحذف شيء'));
+check('retention', 'and it ships', !str_contains((string) @file_get_contents(AUN_ROOT . '/build.js'),
+    "rel === 'prune.php'"));
+check('retention', '.env.example documents the three settings',
+    (static function (): bool {
+        $t = (string) @file_get_contents(AUN_ROOT . '/.env.example');
+        return str_contains($t, '#ACTIVITY_KEEP_DAYS=')
+            && str_contains($t, '#ACTIVITY_MAX_ROWS=')
+            && str_contains($t, '#PUBLISH_KEEP_ROWS=');
+    })());
+check('retention', 'preflight reports what the two tables hold',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/bin/preflight.php'), 'the publish ledger is bounded'));
+
+/* --- and a backup still round-trips after all of it ------------------ */
+$res = $admin->get('/api/admin/backup');
+$trimmed = json_decode($res['raw'], true);
+check('retention', 'a backup taken after the sweep is still valid',
+    Backup::problem($trimmed) === null);
+/* The bound is what retention guarantees, and it is what keeps the backup
+   from growing without limit. Total size is not assertable here: this suite
+   writes hundreds of activity rows of its own between the two backups. */
+check('retention', 'the publish ledger in the backup is inside its bound',
+    (int) ($trimmed['counts']['content_publishes'] ?? PHP_INT_MAX) <= Retention::publishKeepRows(),
+    ($trimmed['counts']['content_publishes'] ?? '?') . ' / ' . Retention::publishKeepRows());
+check('retention', 'and the activity log is inside its cap',
+    (int) ($trimmed['counts']['activity_log'] ?? PHP_INT_MAX) <= Retention::activityMaxRows(),
+    ($trimmed['counts']['activity_log'] ?? '?') . ' / ' . Retention::activityMaxRows());
+check('retention', 'the publish ledger no longer outweighs the content it records',
+    (int) ($trimmed['counts']['content_publishes'] ?? 0) < 700,
+    'was 678 before this stage, cap is now ' . Retention::publishKeepRows());
 
 /* ================================================================== */
 foreach ($lines as $l) fwrite(STDOUT, $l . "\n");

@@ -33,6 +33,7 @@ require_once __DIR__ . '/Repo/Cms.php';
 require_once __DIR__ . '/Repo/Reports.php';
 require_once __DIR__ . '/Publisher.php';
 require_once __DIR__ . '/Backup.php';
+require_once __DIR__ . '/Retention.php';
 require_once __DIR__ . '/Setup.php';
 require_once __DIR__ . '/Routes.php';
 

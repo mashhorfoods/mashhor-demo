@@ -28,3 +28,5 @@ app/storage/*.sqlite-*
 app/storage/logs/*.log
 app/storage/backups/
 app/storage/recovery-attempts.json
+app/storage/.last-prune
+app/storage/logs/.last-sweep

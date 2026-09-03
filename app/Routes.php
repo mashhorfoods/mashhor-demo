@@ -275,6 +275,11 @@ final class Routes
         Repo_Activity::record($user, 'users', 'login', 'user', (string) $user['id'],
             (string) $user['name'], 'تسجيل دخول إلى لوحة التحكم');
         Auth::pruneExpired();
+        /* STAGE 6E — the two ledgers that grow with use and never shrank.
+           Here for the same reason pruneExpired() is: sign-in is infrequent,
+           always behind a real person, and never on a page the public can
+           reach. It runs at most once a day and never raises. */
+        Retention::sweep();
 
         Http::ok(['user' => Auth::publicUser($user), 'csrf' => Csrf::issue()['token']]);
     }
@@ -826,6 +831,12 @@ final class Routes
         Http::ok([
             'rows'  => array_map([Repo_Activity::class, 'publicRow'], $r['rows']),
             'total' => $r['total'], 'page' => $r['page'], 'per' => $r['per'],
+            /* STAGE 6E — the page says the log cannot be edited or deleted
+               from the dashboard, which is still true; entries do now age out
+               on a schedule, so the page has to say that too rather than let
+               someone find a gap and wonder. Sent from the server so the
+               number on screen is the number in force. */
+            'retention' => ['keepDays' => Retention::activityKeepDays()],
         ]);
     }
 

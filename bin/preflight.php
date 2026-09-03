@@ -181,6 +181,30 @@ check('RECOVERY_TOKEN, if set at all, is long enough to matter',
     $recToken === '' ? true : (strlen($recToken) >= 24 ? null : false),
     $recToken === '' ? '' : 'length=' . strlen($recToken) . ' (minimum 24; shorter is ignored and the page stays 404)');
 
+/* Stage 6E — the two ledgers that grow with use. Reported rather than
+   asserted: there is no correct number here, only a number worth seeing
+   before it becomes the reason a backup stops fitting. */
+if ($dbUp) {
+    try {
+        $ret = Retention::status();
+        check('the activity log is bounded',
+            $ret['activity']['rows'] < $ret['activity']['maxRows'] ? true : false,
+            sprintf('%d rows, kept %d days, cap %d, oldest %s',
+                $ret['activity']['rows'], $ret['activity']['keepDays'],
+                $ret['activity']['maxRows'], (string) ($ret['activity']['oldest'] ?? '—')));
+        check('the publish ledger is bounded',
+            $ret['publishes']['rows'] <= $ret['publishes']['keepRows'] ? true : null,
+            sprintf('%d rows, keeping the newest %d%s',
+                $ret['publishes']['rows'], $ret['publishes']['keepRows'],
+                $ret['publishes']['rows'] > $ret['publishes']['keepRows']
+                    ? ' — the next sign-in will trim it' : ''));
+        check('the retention sweep has run', $ret['lastSweep'] === null ? null : true,
+            $ret['lastSweep'] ?? 'not yet — it runs on the next sign-in, or php bin/prune.php --run');
+    } catch (Throwable $e) {
+        check('retention status', null, 'could not be read');
+    }
+}
+
 /* Stage 6B — a backup is only a backup if it can also be restored. The
    dashboard sends it as the request body, so post_max_size is the limit that
    matters; an operator who chooses the upload instead is bounded by the

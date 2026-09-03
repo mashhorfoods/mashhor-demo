@@ -899,7 +899,7 @@ tr.rowlink{cursor:pointer}
       <section id="pane-log" role="tabpanel" aria-labelledby="tab-log" tabindex="0" hidden>
         <div class="readonly" style="margin-bottom:var(--s5)">
           <svg class="i i--sm" aria-hidden="true"><use href="#ic-info"/></svg>
-          <p>سجل النشاط للقراءة فقط — لا يمكن تعديل أي سطر فيه أو حذفه من لوحة التحكم. السجل مشتقّ من بيانات الوحدات: ما لا تسجّله الوحدة اليوم يظهر «غير مسجّل» بدل تخمينه، والأحداث التي تُسجَّل بالتاريخ دون الوقت تظهر بالتاريخ وحده.</p>
+          <p>سجل النشاط للقراءة فقط — لا يمكن تعديل أي سطر فيه أو حذفه من لوحة التحكم. السجل مشتقّ من بيانات الوحدات: ما لا تسجّله الوحدة اليوم يظهر «غير مسجّل» بدل تخمينه، والأحداث التي تُسجَّل بالتاريخ دون الوقت تظهر بالتاريخ وحده.<span id="retnote"></span></p>
         </div>
 
         <div class="card">
@@ -1699,6 +1699,16 @@ tr.rowlink{cursor:pointer}
     });
 
     var logged = AunAPI.activity({ per: 200 }).then(function(res){
+      /* المرحلة 6 — السجل ينظّف نفسه الآن. الإشعار أعلاه يقول إنه لا يُحذف
+         من اللوحة، وهذا صحيح؛ لكن السطور تنتهي صلاحيتها تلقائياً، فلا بد أن
+         تقوله الصفحة أيضاً بدل أن يجد أحدهم فجوة ويتساءل. المدة تأتي من
+         الخادم، فما يظهر هنا هو المطبَّق فعلاً. */
+      var keep = res.retention && res.retention.keepDays;
+      var note = $("retnote");
+      if (note && keep) {
+        note.textContent = " تُحفظ السجلات " + keep + " يوماً، ثم تُحذف تلقائياً" +
+          " ويُسجَّل الحذف نفسه في السجل.";
+      }
       LOG = (res.rows || []).map(function(a){
         return {
           d: a.at, exact: true, who: a.who,
