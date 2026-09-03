@@ -114,7 +114,7 @@ final class Repo_Content
         return Db::all('SELECT * FROM media_assets ORDER BY uploaded_at DESC, id DESC');
     }
 
-    public static function upsertMedia(array $a): void
+    public static function upsertMedia(array $a, ?array $actor = null): void
     {
         $existing = Db::one('SELECT id FROM media_assets WHERE path = ?', [$a['path']]);
         if ($existing !== null) {
@@ -126,10 +126,11 @@ final class Repo_Content
             return;
         }
         Db::run(
-            'INSERT INTO media_assets (path, filename, mime, width, height, bytes, uploaded_at)
-             VALUES (?,?,?,?,?,?,?)',
+            'INSERT INTO media_assets (path, filename, mime, width, height, bytes, uploaded_at, uploaded_by)
+             VALUES (?,?,?,?,?,?,?,?)',
             [$a['path'], $a['filename'], $a['mime'] ?? null, $a['width'] ?? null,
-             $a['height'] ?? null, $a['bytes'] ?? null, $a['uploaded_at'] ?? Db::now()]
+             $a['height'] ?? null, $a['bytes'] ?? null, $a['uploaded_at'] ?? Db::now(),
+             $actor === null ? null : (int) $actor['id']]
         );
     }
 
@@ -303,6 +304,149 @@ final class Repo_Content
         /* a value that is not valid JSON predates the encoding; return it as
            the string it is rather than losing it */
         return json_last_error() === JSON_ERROR_NONE ? $v : $raw;
+    }
+
+    /**
+     * Create a service.
+     *
+     * Until now this was impossible: the save endpoint refused anything
+     * without an existing id, and a service needed a second record of HTML
+     * that only a developer could write. Since stage 1 a service is one
+     * record, so creating one is creating a row.
+     *
+     * The icon is copied from a service that already exists rather than
+     * invented: the seven on the site are approved artwork, and nothing here
+     * should draw a new one. The picture comes from the media library and is
+     * written as a plain <img> — the responsive ladders on the original seven
+     * were produced by the build's image pipeline, which does not run on the
+     * server, and claiming a srcset that does not exist would be worse than
+     * one honest size.
+     *
+     * @return array{ok: bool, error?: string, id?: int, slug?: string}
+     */
+    public static function createService(array $in, array $actor): array
+    {
+        $title = trim((string) ($in['title'] ?? ''));
+        $desc  = trim((string) ($in['description'] ?? ''));
+        $image = trim((string) ($in['image'] ?? ''));
+        $alt   = trim((string) ($in['alt'] ?? ''));
+        $iconFrom = trim((string) ($in['iconFrom'] ?? ''));
+
+        if (mb_strlen($title) < 2)  return ['ok' => false, 'error' => 'أدخل عنوان الخدمة.'];
+        if (mb_strlen($desc)  < 2)  return ['ok' => false, 'error' => 'أدخل وصف الخدمة.'];
+        if (mb_strlen($alt)   < 5)  return ['ok' => false, 'error' => 'أدخل وصفاً للصورة — يقرؤه من يستخدم قارئ الشاشة.'];
+
+        $asset = Db::one('SELECT * FROM media_assets WHERE path = ?', [$image]);
+        if ($asset === null) return ['ok' => false, 'error' => 'اختر صورة من مكتبة الوسائط.'];
+
+        $source = Db::one('SELECT icon_svg FROM services WHERE slug = ? AND icon_svg IS NOT NULL', [$iconFrom]);
+        if ($source === null) return ['ok' => false, 'error' => 'اختر الأيقونة من إحدى الخدمات الحالية.'];
+
+        if (self::findServiceByTitle($title) !== null) {
+            return ['ok' => false, 'error' => 'توجد خدمة بهذا العنوان بالفعل.'];
+        }
+
+        /* a slug nobody types and nothing collides with */
+        $n = 1;
+        do { $slug = 'service-' . (count(self::services()) + $n); $n++; }
+        while (self::findServiceBySlug($slug) !== null);
+
+        $img = sprintf(
+            '<img src="%s" width="%d" height="%d" loading="lazy" decoding="async" alt="%s">',
+            htmlspecialchars((string) $asset['path'], ENT_QUOTES, 'UTF-8'),
+            (int) $asset['width'], (int) $asset['height'],
+            htmlspecialchars($alt, ENT_QUOTES, 'UTF-8')
+        );
+
+        $now  = Db::now();
+        $next = (int) Db::value('SELECT COALESCE(MAX(sort_order), 0) + 1 FROM services');
+        Db::run(
+            'INSERT INTO services (slug, title, description, sort_order, is_published, image_path,
+                                   icon_svg, image_html, created_at, updated_at)
+             VALUES (?,?,?,?,?,?,?,?,?,?)',
+            [$slug, $title, $desc, $next, 0, (string) $asset['path'],
+             (string) $source['icon_svg'], $img, $now, $now]
+        );
+        $id = (int) Db::lastId();
+
+        Repo_Activity::record($actor, 'services', 'create', 'service', $slug, $title,
+            'إضافة خدمة جديدة — تبدأ مخفية حتى تُراجَع وتُنشر');
+
+        return ['ok' => true, 'id' => $id, 'slug' => $slug];
+    }
+
+    /**
+     * What an uploaded picture is allowed to be.
+     *
+     * The type is decided by reading the file, never by trusting the name or
+     * the browser's Content-Type: both are supplied by whoever is uploading.
+     * The extension is then written by us from what we found.
+     */
+    public const UPLOAD_TYPES = [
+        IMAGETYPE_WEBP => ['webp', 'image/webp'],
+        IMAGETYPE_JPEG => ['jpg',  'image/jpeg'],
+        IMAGETYPE_PNG  => ['png',  'image/png'],
+        IMAGETYPE_AVIF => ['avif', 'image/avif'],
+    ];
+    public const UPLOAD_MAX_BYTES = 4194304;   /* 4 MB */
+
+    /**
+     * Store an uploaded picture and index it.
+     *
+     * The file is renamed by the system, not by whoever sent it: a name is
+     * attacker-controlled input, and the one place it would end up is a URL.
+     *
+     * @param array $file one entry of $_FILES
+     * @return array{ok: bool, error?: string, asset?: array}
+     */
+    public static function storeUpload(array $file, array $actor): array
+    {
+        if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            return ['ok' => false, 'error' => 'تعذّر رفع الملف. حاول مرة أخرى.'];
+        }
+        $tmp = (string) ($file['tmp_name'] ?? '');
+        if ($tmp === '' || !is_uploaded_file($tmp)) {
+            return ['ok' => false, 'error' => 'الملف غير صالح.'];
+        }
+        if ((int) ($file['size'] ?? 0) > self::UPLOAD_MAX_BYTES) {
+            return ['ok' => false, 'error' => 'حجم الصورة أكبر من 4 ميجابايت.'];
+        }
+
+        $info = @getimagesize($tmp);
+        if ($info === false || !isset(self::UPLOAD_TYPES[$info[2]])) {
+            return ['ok' => false, 'error' => 'الملف ليس صورة من الأنواع المسموحة (WebP أو JPEG أو PNG أو AVIF).'];
+        }
+        [$ext, $mime] = self::UPLOAD_TYPES[$info[2]];
+        [$w, $h] = [(int) $info[0], (int) $info[1]];
+        if ($w < 200 || $h < 200) {
+            return ['ok' => false, 'error' => 'الصورة صغيرة جداً — 200 بكسل على الأقل في كل بُعد.'];
+        }
+
+        $dir = AUN_ROOT . '/img';
+        if (!is_dir($dir)) return ['ok' => false, 'error' => 'مجلد الصور غير موجود على الخادم.'];
+        if (!is_writable($dir)) return ['ok' => false, 'error' => 'مجلد الصور غير قابل للكتابة على الخادم.'];
+
+        /* the name is ours: a date for ordering, random bytes so one upload
+           cannot guess or overwrite another, and the extension we determined */
+        $name = 'up-' . gmdate('Ymd') . '-' . bin2hex(random_bytes(5)) . '.' . $ext;
+        $path = 'img/' . $name;
+        if (!@move_uploaded_file($tmp, $dir . '/' . $name)) {
+            return ['ok' => false, 'error' => 'تعذّرت الكتابة على الخادم.'];
+        }
+        @chmod($dir . '/' . $name, 0644);
+
+        self::upsertMedia([
+            'path' => $path, 'filename' => $name, 'mime' => $mime,
+            'width' => $w, 'height' => $h, 'bytes' => (int) filesize($dir . '/' . $name),
+        ], $actor);
+
+        Repo_Activity::record($actor, 'media', 'upload', 'media', $path, $name,
+            'رفع صورة جديدة إلى مكتبة الوسائط');
+
+        return ['ok' => true, 'asset' => [
+            'path' => $path, 'filename' => $name, 'mime' => $mime,
+            'width' => $w, 'height' => $h,
+        ]];
     }
 
     public static function encode($value): string

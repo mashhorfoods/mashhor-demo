@@ -1766,7 +1766,13 @@ window.AunShell = (function(){
   }
   function closeUp(){ $("upwrap").hidden=true; pending=null; }
   $("upbtn").addEventListener("click", function(){ current=null; openUp(false); });
-  $("shReplace").addEventListener("click", function(){ if(canModify) openUp(true); });
+  /* Replacing a file in place would overwrite something the whole site
+     references, with no way back. It was never implemented — the old handler
+     changed this page and nothing else — so it says so rather than looking
+     like it worked. */
+  $("shReplace").addEventListener("click", function(){
+    toast("استبدال ملف قائم غير متاح بعد — ارفعه كملف جديد.", true);
+  });
   $("upNo").addEventListener("click", closeUp);
   $("upwrap").addEventListener("click", function(e){ if(e.target===$("upwrap")) closeUp(); });
 
@@ -1824,7 +1830,7 @@ window.AunShell = (function(){
         st.textContent="جاهز · "+probe.naturalWidth+"×"+probe.naturalHeight+" · "+kb(file.size);
         st.className="upitem__s ok";
         pending={ data:r.result, name:nm, type:TYPES[file.type], size:file.size,
-                  w:probe.naturalWidth||0, h:probe.naturalHeight||0 };
+                  w:probe.naturalWidth||0, h:probe.naturalHeight||0, file:file };
         $("upErr").hidden=true; $("upOk").disabled=false;
       };
       probe.onerror=function(){
@@ -1856,22 +1862,27 @@ window.AunShell = (function(){
     if (!pending || !canModify) return;
     if (!navigator.onLine){ upErr("لا يوجد اتصال — لم يُرفع الملف."); return; }
 
-    if (mode==="replace" && current){
-      /* the path and name stay put, so every reference in the site keeps working */
-      var was=current.n;
-      THUMBS[current.p]=pending.data;
-      current.w=pending.w; current.h=pending.h; current.b=pending.size;
-      current.d="2026-09-14";
-      closeUp(); render();
-      if (!$("sheet").hidden) openSheet(current);
-      toast("استُبدل محتوى «"+was+"» مع الحفاظ على مساره");
+    if (mode==="replace"){
+      upErr("استبدال محتوى ملف قائم غير متاح بعد. ارفع الصورة كملف جديد، ثم اربطها بالخدمة من صفحة الخدمات.");
       return;
     }
-    var a={ p:"img/"+pending.name, n:pending.name, t:pending.type, w:pending.w, h:pending.h,
-            b:pending.size, d:"2026-09-14", u:[], tw:null };
-    ASSETS.push(a); THUMBS[a.p]=pending.data;
-    closeUp(); state.page=1; render();
-    toast("أُضيف «"+a.n+"» إلى المكتبة");
+
+    /* the file itself goes to the server; the library is what the server
+       holds, not what this page remembers */
+    $("upOk").disabled = true;
+    var fd = new FormData();
+    fd.append("file", pending.file);
+    AunAPI.uploadMedia(fd).then(function(res){
+      var a = res.asset || {};
+      THUMBS[a.path] = pending.data;
+      closeUp();
+      state.page = 1;
+      toast("أُضيف «" + (a.filename || pending.name) + "» إلى المكتبة");
+      return boot();          /* re-read the library from the server */
+    }).catch(function(err){
+      $("upOk").disabled = false;
+      upErr(err && err.message ? err.message : "تعذّر رفع الصورة.");
+    });
   });
 
   /* ---------- permissions -------------------------------------------------- */

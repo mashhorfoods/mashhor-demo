@@ -45,7 +45,13 @@ final class Routes
             ['GET',  '/api/admin/services',       ['services', 'view'],  'listServices'],
             ['POST', '/api/admin/services/save',  ['services', 'edit'],  'saveService'],
             ['POST', '/api/admin/services/reorder', ['services', 'edit'], 'reorderServices'],
+            /* Stage 4 — a service can be added. It starts hidden, so nothing
+               reaches the website until someone looks at it and publishes. */
+            ['POST', '/api/admin/services/new',   ['services', 'edit'],  'createService'],
             ['GET',  '/api/admin/media',          ['services', 'view'],  'listMedia'],
+            /* Stage 4 — and a picture can be added to the library, which was
+               read-only and could only ever hold what the deployment shipped. */
+            ['POST', '/api/admin/media/upload',   ['services', 'edit'],  'uploadMedia'],
             ['GET',  '/api/admin/users',          ['users', 'view'],     'listUsers'],
             ['POST', '/api/admin/users/save',     ['users', 'edit'],     'saveUser'],
             ['GET',  '/api/admin/activity',       ['home', 'view'],      'listActivity'],
@@ -287,6 +293,30 @@ final class Routes
                               Repo_Activity::search(['per' => 4])['rows']),
             'unread'    => Repo_Activity::unreadCount((int) $u['id']),
         ]);
+    }
+
+    private static function createService(?array $u): void
+    {
+        $res = Repo_Content::createService(Http::input(), (array) $u);
+        if (!$res['ok']) Http::invalid(['form' => $res['error'] ?? 'تعذّر إنشاء الخدمة.']);
+        Http::ok(['id' => $res['id'], 'slug' => $res['slug']], 201);
+    }
+
+    /**
+     * A picture, uploaded.
+     *
+     * multipart rather than JSON, so the body is read from $_FILES; the CSRF
+     * token travels in the form the same way it does everywhere else, and the
+     * dispatcher has already checked it and the caller's permission before
+     * this runs.
+     */
+    private static function uploadMedia(?array $u): void
+    {
+        $file = $_FILES['file'] ?? null;
+        if (!is_array($file)) Http::invalid(['file' => 'لم يصل أي ملف.']);
+        $res = Repo_Content::storeUpload($file, (array) $u);
+        if (!$res['ok']) Http::invalid(['file' => $res['error'] ?? 'تعذّر رفع الصورة.']);
+        Http::ok(['asset' => $res['asset']], 201);
     }
 
     private static function listRequests(?array $u): void

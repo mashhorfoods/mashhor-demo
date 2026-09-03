@@ -957,6 +957,10 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
             <h1 class="page__h">الخدمات</h1>
             <p class="page__d">الخدمات التي تظهر في صفحة «خدماتنا» على الموقع. ترتيبها هنا هو ترتيبها هناك.</p>
           </div>
+          <div class="page__a">
+            <button class="btn btn--primary modonly" type="button" id="newbtn">
+              <svg class="i i--sm" aria-hidden="true"><use href="#ic-plus"/></svg>خدمة جديدة</button>
+          </div>
         </div>
 
         <div class="card">
@@ -1146,6 +1150,49 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
       <div><h2 class="modal__t" id="confT"></h2><p class="modal__b" id="confB"></p></div></div>
     <div class="modal__f"><button class="btn btn--danger" id="confOk"></button>
       <button class="btn btn--ghost" id="confNo">متابعة التعديل</button></div>
+  </div>
+</div>
+
+<div class="modalwrap" id="newwrap" hidden role="dialog" aria-modal="true" aria-labelledby="newT">
+  <div class="modal" style="max-width:34rem">
+    <div class="modal__h">
+      <span class="modal__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-plus"/></svg></span>
+      <div><h2 class="modal__t" id="newT">خدمة جديدة</h2>
+        <p class="modal__b">تُضاف مخفية. راجعها ثم أظهرها وانشرها لتصل إلى الموقع.</p></div>
+    </div>
+    <div class="modal__b2" style="padding:0 var(--s6) var(--s2);display:flex;flex-direction:column;gap:var(--s4)">
+      <div class="field">
+        <label class="field__label" for="nTitle">عنوان الخدمة</label>
+        <input class="ctl" id="nTitle" type="text" maxlength="160">
+      </div>
+      <div class="field">
+        <label class="field__label" for="nDesc">وصف الخدمة</label>
+        <textarea class="ctl" id="nDesc" rows="3" maxlength="1000"
+                  style="min-height:88px;font-family:var(--f-ar-body);line-height:1.8"></textarea>
+      </div>
+      <div class="field">
+        <label class="field__label" for="nImage">الصورة</label>
+        <span class="selwrap"><svg class="i i--sm" aria-hidden="true"><use href="#ic-chevron"/></svg>
+        <select class="ctl" id="nImage"></select></span>
+        <span class="field__help">من مكتبة الوسائط. ارفع صورة جديدة من صفحة «الوسائط والأصول» إن لم تجدها.</span>
+      </div>
+      <div class="field">
+        <label class="field__label" for="nAlt">وصف الصورة</label>
+        <input class="ctl" id="nAlt" type="text" maxlength="200">
+        <span class="field__help">يقرؤه من يستخدم قارئ شاشة. صف ما في الصورة، لا اسم الملف.</span>
+      </div>
+      <div class="field">
+        <label class="field__label" for="nIcon">الأيقونة</label>
+        <span class="selwrap"><svg class="i i--sm" aria-hidden="true"><use href="#ic-chevron"/></svg>
+        <select class="ctl" id="nIcon"></select></span>
+        <span class="field__help">تُستخدم أيقونة إحدى الخدمات الحالية — الأيقونات جزء من هوية الموقع ولا تُنشأ من هنا.</span>
+      </div>
+      <p class="field__err" id="nErr" hidden style="display:block"></p>
+    </div>
+    <div class="modal__f">
+      <button class="btn btn--primary" id="nOk">إضافة الخدمة</button>
+      <button class="btn btn--ghost" id="nNo">إلغاء</button>
+    </div>
   </div>
 </div>
 
@@ -1669,6 +1716,63 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
     applyPerms(); render();
   });
 
+
+  /* ---------- a service can be added (stage 4) ---------------------------
+     Until now the save endpoint refused anything without an existing id, so
+     the seven installed were the only seven that could ever exist. */
+  (function(){
+    var wrap=$("newwrap"); if (!wrap || !window.AunAPI) return;
+
+    function fill(){
+      var img=$("nImage"), ico=$("nIcon");
+      img.textContent=""; ico.textContent="";
+      AunAPI.media().then(function(res){
+        (res.rows||[]).filter(function(a){ return /^img\//.test(a.path); })
+          .forEach(function(a){
+            var o=document.createElement("option");
+            o.value=a.path; o.textContent=a.name+"  ("+a.width+"×"+a.height+")";
+            img.appendChild(o);
+          });
+        if (!img.options.length){
+          var o=document.createElement("option");
+          o.value=""; o.textContent="لا توجد صور في المكتبة"; img.appendChild(o);
+        }
+      });
+      AunAPI.services().then(function(res){
+        (res.rows||[]).forEach(function(s){
+          var o=document.createElement("option");
+          o.value=s.slug; o.textContent=s.title;
+          ico.appendChild(o);
+        });
+      });
+    }
+
+    function open_(){ $("nErr").hidden=true; $("nTitle").value=""; $("nDesc").value="";
+      $("nAlt").value=""; fill(); wrap.hidden=false; $("nTitle").focus(); }
+    function close_(){ wrap.hidden=true; }
+
+    $("newbtn").addEventListener("click", function(){ if (canModify) open_(); });
+    $("nNo").addEventListener("click", close_);
+    wrap.addEventListener("click", function(e){ if (e.target===wrap) close_(); });
+
+    $("nOk").addEventListener("click", function(){
+      $("nOk").disabled=true; $("nErr").hidden=true;
+      AunAPI.createService({
+        title: $("nTitle").value.trim(),
+        description: $("nDesc").value.trim(),
+        image: $("nImage").value,
+        alt: $("nAlt").value.trim(),
+        iconFrom: $("nIcon").value
+      }).then(function(){
+        close_();
+        toast("أُضيفت الخدمة — مخفية حتى تراجعها وتنشرها");
+        return reload();
+      }).catch(function(err){
+        $("nErr").textContent = (err && err.message) ? err.message : "تعذّرت الإضافة.";
+        $("nErr").hidden=false;
+      }).then(function(){ $("nOk").disabled=false; });
+    });
+  })();
 
   /* ---------- publish bar (stage 2) --------------------------------------
      A save writes to the database. Publishing is what puts it on the website,

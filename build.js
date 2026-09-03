@@ -53,6 +53,10 @@ const SHIP = [
      fonts/font-face.css is source: its rules are already inside the inline
      stylesheets, so shipping it would be a second copy nothing requests. */
   'fonts/OFL.txt',
+  /* Stage 4 — img/ accepts uploads now, and this is what stops anything that
+     lands there from ever being executed. It must ship with the upload
+     feature, not after it. */
+  'img/.htaccess',
   /* RECOVERY 01 — the configuration template, so an operator has the shape to
      fill in on the server. It holds no values; .htaccess denies it over HTTP
      anyway, and the real .env belongs above the web root. */

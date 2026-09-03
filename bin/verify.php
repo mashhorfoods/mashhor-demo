@@ -76,8 +76,14 @@ final class Client
                 $opts['http']['header'][] = 'Content-Type: application/json';
                 $opts['http']['content']  = json_encode($body, JSON_UNESCAPED_UNICODE);
             } else {
-                $opts['http']['header'][] = 'Content-Type: application/x-www-form-urlencoded';
-                $opts['http']['content']  = $body;
+                /* an explicit Content-Type wins — a multipart upload carries
+                   its own boundary and must not be relabelled */
+                $hasType = false;
+                foreach ($opts['http']['header'] as $line) {
+                    if (stripos($line, 'Content-Type:') === 0) { $hasType = true; break; }
+                }
+                if (!$hasType) $opts['http']['header'][] = 'Content-Type: application/x-www-form-urlencoded';
+                $opts['http']['content'] = $body;
             }
         }
         $raw = @file_get_contents($url, false, stream_context_create($opts));
@@ -101,6 +107,24 @@ final class Client
     public function post(string $p, $b, array $h = []): array { return $this->request('POST', $p, $b, $h); }
 
     /** Fetch a CSRF token into this client's jar and return it. */
+    /** A multipart upload, built by hand so the suite exercises the real path. */
+    public function upload(string $path, string $file, string $sendAs, string $token): array
+    {
+        $boundary = '----aun' . bin2hex(random_bytes(8));
+        $body  = "--{$boundary}\r\n";
+        $body .= "Content-Disposition: form-data; name=\"csrf_token\"\r\n\r\n{$token}\r\n";
+        $body .= "--{$boundary}\r\n";
+        $body .= "Content-Disposition: form-data; name=\"file\"; filename=\"{$sendAs}\"\r\n";
+        $body .= "Content-Type: application/octet-stream\r\n\r\n";
+        $body .= (string) file_get_contents($file) . "\r\n";
+        $body .= "--{$boundary}--\r\n";
+
+        return $this->request('POST', $path, $body, [
+            'Content-Type' => 'multipart/form-data; boundary=' . $boundary,
+            'X-CSRF-Token' => $token,
+        ]);
+    }
+
     public function csrf(): string
     {
         $r = $this->get('/api/csrf');
@@ -1130,6 +1154,107 @@ foreach ([
     check('architecture', "{$file} loads from the API",
         str_contains($src, 'AunAPI.'));
 }
+
+/* ================================================================== */
+section('CREATE, RETIRE, UPLOAD');
+/* ================================================================== */
+/* Stage 4. saveService refused anything without an existing id, and there was
+   no create route and no upload route at all: the seven services installed
+   were the only seven that could ever exist, and the media library was a
+   catalogue of what the deployment shipped. */
+
+/* --- upload ------------------------------------------------------------- */
+$png = AUN_ROOT . '/app/storage/upload-test.png';
+$im  = imagecreatetruecolor(320, 240);
+imagefill($im, 0, 0, imagecolorallocate($im, 34, 64, 111));
+imagepng($im, $png);
+imagedestroy($im);
+
+$res = $admin->upload('/api/admin/media/upload', $png, 'shot.png', $adminTk);
+check('stage4', 'a picture can be uploaded', $res['status'] === 201, "status={$res['status']}");
+$uploaded = $res['body']['asset']['path'] ?? '';
+check('stage4', 'and the system named it, not the sender',
+    $uploaded !== '' && !str_contains($uploaded, 'shot'), $uploaded);
+check('stage4', 'it landed in the library',
+    Db::value('SELECT 1 FROM media_assets WHERE path = ?', [$uploaded]) !== false);
+check('stage4', 'with its real dimensions read from the file',
+    (int) Db::value('SELECT width FROM media_assets WHERE path = ?', [$uploaded]) === 320);
+check('stage4', 'and the file is on disk', is_file(AUN_ROOT . '/' . $uploaded));
+
+/* a script is not a picture, whatever it is called */
+$evil = AUN_ROOT . '/app/storage/evil.png';
+file_put_contents($evil, "<?php echo 'pwned'; ?>\n");
+$res = $admin->upload('/api/admin/media/upload', $evil, 'evil.png', $adminTk);
+check('stage4', 'a script named .png is refused', $res['status'] === 422, "status={$res['status']}");
+check('stage4', 'and nothing of it was stored',
+    (int) Db::value('SELECT COUNT(*) FROM media_assets WHERE filename LIKE ?', ['%evil%']) === 0);
+@unlink($evil);
+
+check('stage4', 'the upload directory refuses to execute anything',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/img/.htaccess'), 'php_flag engine off'));
+check('stage4', 'and that rule is scoped to it, not to the application',
+    !str_contains((string) @file_get_contents(AUN_ROOT . '/.htaccess'), 'php_flag engine off'));
+check('stage4', 'the rule ships with the package',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/build.js'), "'img/.htaccess'"));
+
+/* --- create ------------------------------------------------------------- */
+$before = count(Repo_Content::services());
+$res = $admin->post('/api/admin/services/new', [
+    'csrf_token' => $adminTk, 'title' => 'النقل بين المدن',
+    'description' => 'خدمة نقل متخصصة بين المدن لكبار السن وذوي الاحتياجات الخاصة.',
+    'image' => $uploaded, 'alt' => 'مركبة عون الدرب مجهزة للرحلات الطويلة.',
+    'iconFrom' => 'wheelchair-transport',
+]);
+check('stage4', 'a service can be created', $res['status'] === 201, "status={$res['status']}");
+$newSlug = $res['body']['slug'] ?? '';
+check('stage4', 'the catalogue grew', count(Repo_Content::services()) === $before + 1);
+check('stage4', 'it starts hidden, not on the website',
+    (int) Db::value('SELECT is_published FROM services WHERE slug = ?', [$newSlug]) === 0);
+$admin->post('/api/admin/content/publish', ['csrf_token' => $adminTk]);
+check('stage4', 'so publishing does not put it there yet',
+    !str_contains((string) Publisher::liveValue('services.items'), 'النقل بين المدن'));
+
+/* publish it deliberately */
+$row = Db::one('SELECT id FROM services WHERE slug = ?', [$newSlug]);
+$admin->post('/api/admin/services/save', [
+    'csrf_token' => $adminTk, 'id' => (int) $row['id'], 'title' => 'النقل بين المدن',
+    'description' => 'خدمة نقل متخصصة بين المدن لكبار السن وذوي الاحتياجات الخاصة.',
+    'published' => 1,
+]);
+$admin->post('/api/admin/content/publish', ['csrf_token' => $adminTk]);
+check('stage4', 'once published it is on the website',
+    str_contains((string) Publisher::liveValue('services.items'), 'النقل بين المدن'));
+check('stage4', 'carrying the picture that was uploaded',
+    str_contains((string) Publisher::liveValue('services.items'), $uploaded));
+check('stage4', 'and the public form now offers it',
+    in_array('النقل بين المدن', Repo_Content::serviceTitles(true), true));
+
+/* --- retire ------------------------------------------------------------- */
+$admin->post('/api/admin/services/save', [
+    'csrf_token' => $adminTk, 'id' => (int) $row['id'], 'title' => 'النقل بين المدن',
+    'description' => 'خدمة نقل متخصصة بين المدن لكبار السن وذوي الاحتياجات الخاصة.',
+    'published' => 0,
+]);
+$admin->post('/api/admin/content/publish', ['csrf_token' => $adminTk]);
+check('stage4', 'retiring takes it off the website',
+    !str_contains((string) Publisher::liveValue('services.items'), 'النقل بين المدن'));
+check('stage4', 'and out of the public form',
+    !in_array('النقل بين المدن', Repo_Content::serviceTitles(true), true));
+check('stage4', 'while the record itself survives',
+    Db::value('SELECT 1 FROM services WHERE slug = ?', [$newSlug]) !== false);
+
+/* a retired service must never orphan the trips made for it */
+$histBefore = (int) Db::value('SELECT COUNT(*) FROM requests');
+check('stage4', 'no request lost its service', (int) Db::value('SELECT COUNT(*) FROM requests') === $histBefore);
+check('stage4', 'and no endpoint deletes a service outright',
+    !str_contains((string) @file_get_contents(AUN_ROOT . '/app/Routes.php'), "services/delete"));
+
+/* tidy up after ourselves */
+Db::run('DELETE FROM services WHERE slug = ?', [$newSlug]);
+@unlink(AUN_ROOT . '/' . $uploaded);
+Db::run('DELETE FROM media_assets WHERE path = ?', [$uploaded]);
+@unlink($png);
+$admin->post('/api/admin/content/publish', ['csrf_token' => $adminTk]);
 
 /* ================================================================== */
 section('COVERAGE — EVERY SECTION OF THE PAGE IS MANAGEABLE');

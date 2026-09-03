@@ -1,0 +1,47 @@
+# عون الدرب — uploads are data, never code.
+#
+# This directory can be written to from the dashboard. A directory that accepts
+# uploads and can also execute is the single most common way a site of this
+# shape is taken over: it survives one bad validation, one clever extension,
+# one server that guesses a type differently than you expected.
+#
+# The rules below are the backstop that does not depend on any of that being
+# right. Nothing here is handed to an interpreter, whatever it is named and
+# whatever it contains. They are scoped to this directory only — the
+# application itself is PHP and lives elsewhere.
+
+<IfModule mod_php.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+  php_flag engine off
+</IfModule>
+
+# Remove the handler rather than trusting the file name at all. LiteSpeed —
+# which is what Hostinger runs — honours this.
+<IfModule mod_mime.c>
+  RemoveHandler .php .php3 .php4 .php5 .php7 .php8 .phtml .phar .cgi .pl .py .sh
+  RemoveType .php .phtml .phar
+</IfModule>
+
+# And refuse to serve anything executable outright, so a file that slipped past
+# validation is not even downloadable from here.
+<FilesMatch "\.(php|php[0-9]|phtml|phar|cgi|pl|py|sh|htaccess|htpasswd)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# Uploaded pictures are content, not scripts: never let a browser sniff.
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+</IfModule>
+
+Options -ExecCGI -Indexes

@@ -142,6 +142,17 @@
     media:         function ()      { return get("/admin/media"); },
     users:         function ()      { return get("/admin/users"); },
     activity:      function (f)     { return get("/admin/activity", f); },
+    /* multipart: the browser sets the boundary, so no Content-Type here */
+    uploadMedia: function (formData) {
+      return csrf().then(function (token) {
+        formData.append("csrf_token", token);
+        return fetch(BASE + "/admin/media/upload", {
+          method: "POST", credentials: "same-origin", body: formData,
+          headers: { Accept: "application/json", "X-CSRF-Token": token }
+        }).then(handle);
+      });
+    },
+    createService: function (data) { return post("/admin/services/new", data); },
     pending:       function ()      { return get("/admin/content/pending"); },
     publish:       function ()      { return post("/admin/content/publish", {}); },
     previewUrl:    function ()      { return BASE + "/admin/content/preview"; },
