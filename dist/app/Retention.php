@@ -5,11 +5,13 @@ if (!defined('AUN_APP')) { http_response_code(404); exit; }
 /**
  * How long the two ledgers are kept (STAGE 6E).
  *
- * Two tables grow with use and nothing ever removed a row from either:
+ * Three tables grow with use and nothing ever removed a row from any of them:
  *
  *   activity_log        one row per administrative action, forever
  *   content_publishes   one row per publish, forever — and only the newest
  *                       is ever read (Publisher::lastPublish())
+ *   notifications       one row per new request and per status change,
+ *                       forever — while the bell shows fifty
  *
  * Left alone they are a slow version of the same failure the log rotation in
  * Log:: was written for: a shared-hosting disk that fills, a backup that gets
@@ -38,6 +40,20 @@ if (!defined('AUN_APP')) { http_response_code(404); exit; }
  * row, so a bounded tail is kept purely so a person can still see the last
  * few publishes, and the rest goes without comment.
  *
+ * notifications needs none of it either, for a different reason. A
+ * notification is a nudge about a request, not a record of one: the request
+ * itself is in `requests` and is never deleted, so removing the nudge loses
+ * nothing that cannot still be found. Two things follow. The window is short
+ * — ninety days, against the log's year — and the deletion is not written to
+ * the activity log, because there is no gap for anyone to wonder about.
+ *
+ * One consequence worth naming rather than discovering: notify() is made
+ * idempotent by a unique dedupe_key, so deleting an old notification lets the
+ * same key be inserted again. For 'new:REQ-…' that can never happen — a
+ * request is created once. For 'st:REQ-…:confirmed' it can, if a request is
+ * moved back and forward again months later — and then notifying again is
+ * right, because it did just happen again.
+ *
  * The sweep runs at most once a day, on sign-in — infrequent, always behind a
  * real person, and never on a page the public can reach. bin/prune.php runs
  * the same code from a terminal or a cron job for a host that has one.
@@ -49,6 +65,13 @@ final class Retention
     public const ACTIVITY_MAX_ROWS_DEFAULT  = 50000;
     public const PUBLISH_KEEP_ROWS_DEFAULT  = 200;
     public const PUBLISH_KEEP_ROWS_MIN      = 10;
+    public const NOTIFICATION_KEEP_DAYS_DEFAULT = 90;
+    public const NOTIFICATION_KEEP_DAYS_MIN     = 7;
+    /* The bell reads at most 200 rows, so the floor is 200: retention must
+       never be the reason a notification is missing from a list that could
+       still have shown it. */
+    public const NOTIFICATION_MAX_ROWS_DEFAULT  = 500;
+    public const NOTIFICATION_MAX_ROWS_MIN      = 200;
 
     public static function activityKeepDays(): int
     {
@@ -65,6 +88,18 @@ final class Retention
     {
         return max(self::PUBLISH_KEEP_ROWS_MIN,
             Env::int('PUBLISH_KEEP_ROWS', self::PUBLISH_KEEP_ROWS_DEFAULT));
+    }
+
+    public static function notificationKeepDays(): int
+    {
+        return max(self::NOTIFICATION_KEEP_DAYS_MIN,
+            Env::int('NOTIFICATION_KEEP_DAYS', self::NOTIFICATION_KEEP_DAYS_DEFAULT));
+    }
+
+    public static function notificationMaxRows(): int
+    {
+        return max(self::NOTIFICATION_MAX_ROWS_MIN,
+            Env::int('NOTIFICATION_MAX_ROWS', self::NOTIFICATION_MAX_ROWS_DEFAULT));
     }
 
     private static function marker(): string
@@ -99,8 +134,9 @@ final class Retention
     /** The sweep itself, with no once-a-day guard. */
     public static function run(): array
     {
-        $activity  = self::pruneActivity();
-        $publishes = self::prunePublishes();
+        $activity      = self::pruneActivity();
+        $publishes     = self::prunePublishes();
+        $notifications = self::pruneNotifications();
 
         /* §3 — the log records its own pruning, so a gap is never unexplained.
            Written only when something actually went, so a quiet day adds
@@ -122,9 +158,22 @@ final class Retention
             ]);
         }
 
+        /* Deliberately outside the block above: a removed notification is not
+           a gap in anything, so it is written to the application log where an
+           operator can see it and NOT to the activity log, which exists to
+           record what people did. */
+        if ($notifications['removed'] > 0) {
+            Log::write('info', 'retention sweep: notifications', [
+                'removed' => $notifications['removed'],
+                'byAge'   => $notifications['byAge'],
+                'byCount' => $notifications['byCount'],
+            ]);
+        }
+
         return [
-            'activity'  => $activity,
-            'publishes' => $publishes,
+            'activity'      => $activity,
+            'publishes'     => $publishes,
+            'notifications' => $notifications,
         ];
     }
 
@@ -151,6 +200,33 @@ final class Retention
             );
             if ($floor !== null) {
                 $byCount = self::deleteInBatches('activity_log', 'id < ?', [(int) $floor]);
+            }
+        }
+
+        return ['removed' => $byAge + $byCount, 'byAge' => $byAge, 'byCount' => $byCount];
+    }
+
+    /**
+     * The same two limits as the activity log, with a shorter window and no
+     * entry written about it.
+     *
+     * notification_reads is not swept here and does not need to be: its rows
+     * cascade with the notification they belong to, so the per-account read
+     * state goes exactly when the thing it was about does.
+     */
+    public static function pruneNotifications(): array
+    {
+        $cutoff = gmdate('Y-m-d H:i:s', time() - self::notificationKeepDays() * 86400);
+        $byAge  = self::deleteInBatches('notifications', 'created_at < ?', [$cutoff]);
+
+        $byCount = 0;
+        $max     = self::notificationMaxRows();
+        if ((int) Db::value('SELECT COUNT(*) FROM notifications') > $max) {
+            $floor = Db::value(
+                'SELECT id FROM notifications ORDER BY id DESC LIMIT 1 OFFSET ' . ($max - 1)
+            );
+            if ($floor !== null) {
+                $byCount = self::deleteInBatches('notifications', 'id < ?', [(int) $floor]);
             }
         }
 
@@ -216,6 +292,12 @@ final class Retention
                 'rows'     => (int) Db::value('SELECT COUNT(*) FROM content_publishes'),
                 'oldest'   => Db::value('SELECT MIN(created_at) FROM content_publishes'),
                 'keepRows' => self::publishKeepRows(),
+            ],
+            'notifications' => [
+                'rows'     => (int) Db::value('SELECT COUNT(*) FROM notifications'),
+                'oldest'   => Db::value('SELECT MIN(created_at) FROM notifications'),
+                'keepDays' => self::notificationKeepDays(),
+                'maxRows'  => self::notificationMaxRows(),
             ],
             'lastSweep' => is_file(self::marker())
                 ? trim((string) @file_get_contents(self::marker())) : null,

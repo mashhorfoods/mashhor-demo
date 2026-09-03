@@ -198,6 +198,13 @@ if ($dbUp) {
                 $ret['publishes']['rows'], $ret['publishes']['keepRows'],
                 $ret['publishes']['rows'] > $ret['publishes']['keepRows']
                     ? ' — the next sign-in will trim it' : ''));
+        check('the notification list is bounded',
+            $ret['notifications']['rows'] <= $ret['notifications']['maxRows'] ? true : null,
+            sprintf('%d rows, kept %d days, cap %d%s',
+                $ret['notifications']['rows'], $ret['notifications']['keepDays'],
+                $ret['notifications']['maxRows'],
+                $ret['notifications']['rows'] > $ret['notifications']['maxRows']
+                    ? ' — the next sign-in will trim it' : ''));
         check('the retention sweep has run', $ret['lastSweep'] === null ? null : true,
             $ret['lastSweep'] ?? 'not yet — it runs on the next sign-in, or php bin/prune.php --run');
     } catch (Throwable $e) {

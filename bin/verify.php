@@ -2174,15 +2174,132 @@ check('retention', 'bin/prune.php reports without changing anything by default',
     str_contains($prune, "in_array('--run'") && str_contains($prune, 'لم يُحذف شيء'));
 check('retention', 'and it ships', !str_contains((string) @file_get_contents(AUN_ROOT . '/build.js'),
     "rel === 'prune.php'"));
-check('retention', '.env.example documents the three settings',
+check('retention', '.env.example documents every setting the sweep reads',
     (static function (): bool {
         $t = (string) @file_get_contents(AUN_ROOT . '/.env.example');
-        return str_contains($t, '#ACTIVITY_KEEP_DAYS=')
-            && str_contains($t, '#ACTIVITY_MAX_ROWS=')
-            && str_contains($t, '#PUBLISH_KEEP_ROWS=');
+        foreach (['ACTIVITY_KEEP_DAYS', 'ACTIVITY_MAX_ROWS', 'PUBLISH_KEEP_ROWS',
+                  'NOTIFICATION_KEEP_DAYS', 'NOTIFICATION_MAX_ROWS'] as $k) {
+            if (!str_contains($t, '#' . $k . '=')) return false;
+        }
+        return true;
     })());
-check('retention', 'preflight reports what the two tables hold',
-    str_contains((string) @file_get_contents(AUN_ROOT . '/bin/preflight.php'), 'the publish ledger is bounded'));
+check('retention', 'preflight reports what all three tables hold',
+    (static function (): bool {
+        $t = (string) @file_get_contents(AUN_ROOT . '/bin/preflight.php');
+        return str_contains($t, 'the activity log is bounded')
+            && str_contains($t, 'the publish ledger is bounded')
+            && str_contains($t, 'the notification list is bounded');
+    })());
+check('retention', 'and bin/prune.php reports all three too',
+    (static function (): bool {
+        $t = (string) @file_get_contents(AUN_ROOT . '/bin/prune.php');
+        return str_contains($t, 'سجل النشاط') && str_contains($t, 'سجل النشر')
+            && str_contains($t, 'التنبيهات');
+    })());
+
+/* --- notifications: a nudge, not a record ---------------------------- */
+/* Deleted more quietly than the activity log, and for a stated reason: the
+   request a notification points at is still in `requests`, so nothing that
+   can be needed later goes with it. */
+$notifOld = gmdate('Y-m-d H:i:s', time() - (Retention::notificationKeepDays() + 20) * 86400);
+$notifKey = 'verify-old:' . $stamp;
+for ($i = 0; $i < 5; $i++) {
+    Db::run('INSERT INTO notifications (kind, dedupe_key, title, created_at) VALUES (?,?,?,?)',
+        ['new_request', $notifKey . ':' . $i, 'تنبيه قديم للفحص', $notifOld]);
+}
+$freshKey = 'verify-fresh:' . $stamp;
+Db::run('INSERT INTO notifications (kind, dedupe_key, title, created_at) VALUES (?,?,?,?)',
+    ['new_request', $freshKey, 'تنبيه حديث للفحص', Db::now()]);
+
+/* a read mark on one of the old ones, to prove the cascade takes it too */
+$readId = (int) Db::value('SELECT id FROM notifications WHERE dedupe_key = ?', [$notifKey . ':0']);
+Db::run('INSERT INTO notification_reads (notification_id, user_id, read_at) VALUES (?,?,?)',
+    [$readId, (int) Db::value('SELECT id FROM users ORDER BY id LIMIT 1'), Db::now()]);
+check('retention', 'old notifications are seeded to be pruned',
+    (int) Db::value('SELECT COUNT(*) FROM notifications WHERE dedupe_key LIKE ?', [$notifKey . '%']) === 5);
+check('retention', 'and one of them is marked read',
+    (int) Db::value('SELECT COUNT(*) FROM notification_reads WHERE notification_id = ?', [$readId]) === 1);
+
+$nSwept = Retention::sweep(true);
+check('retention', 'notifications past their window are gone',
+    (int) Db::value('SELECT COUNT(*) FROM notifications WHERE dedupe_key LIKE ?', [$notifKey . '%']) === 0);
+check('retention', 'a recent one is not',
+    (int) Db::value('SELECT COUNT(*) FROM notifications WHERE dedupe_key = ?', [$freshKey]) === 1);
+check('retention', 'the read mark went with it, through the cascade',
+    (int) Db::value('SELECT COUNT(*) FROM notification_reads WHERE notification_id = ?', [$readId]) === 0);
+check('retention', 'and the count it reports is the count it removed',
+    ($nSwept['notifications']['byAge'] ?? 0) >= 5, 'byAge=' . ($nSwept['notifications']['byAge'] ?? -1));
+
+/* the window is shorter than the log's, and it is not the log's rule */
+check('retention', 'notifications age out faster than audit entries',
+    Retention::notificationKeepDays() < Retention::activityKeepDays(),
+    Retention::notificationKeepDays() . ' days vs ' . Retention::activityKeepDays());
+check('retention', 'removing one is NOT written to the activity log',
+    (int) Db::value("SELECT COUNT(*) FROM activity_log WHERE target_type = 'retention' AND summary LIKE ?",
+        ['%تنبيه%']) === 0);
+
+/* the cap can never be set below what the bell can show */
+check('retention', 'the notification cap cannot go below what the bell reads',
+    (static function (): bool {
+        putenv('NOTIFICATION_MAX_ROWS=10');
+        $got = Retention::notificationMaxRows();
+        putenv('NOTIFICATION_MAX_ROWS');
+        return $got === Retention::NOTIFICATION_MAX_ROWS_MIN;
+    })(), 'floor=' . Retention::NOTIFICATION_MAX_ROWS_MIN);
+check('retention', 'and that floor is at least the list limit the bell requests',
+    Retention::NOTIFICATION_MAX_ROWS_MIN >= 200);
+check('retention', 'a window under a week is refused',
+    (static function (): bool {
+        putenv('NOTIFICATION_KEEP_DAYS=1');
+        $got = Retention::notificationKeepDays();
+        putenv('NOTIFICATION_KEEP_DAYS');
+        return $got === Retention::NOTIFICATION_KEEP_DAYS_MIN;
+    })(), 'floor=' . Retention::NOTIFICATION_KEEP_DAYS_MIN . ' days');
+
+/* the row cap, keeping the newest */
+$notifNow = (int) Db::value('SELECT COUNT(*) FROM notifications');
+$notifCap = max(Retention::NOTIFICATION_MAX_ROWS_MIN, $notifNow - 15);
+putenv('NOTIFICATION_MAX_ROWS=' . $notifCap);
+$newestNotif = (int) Db::value('SELECT MAX(id) FROM notifications');
+Retention::sweep(true);
+putenv('NOTIFICATION_MAX_ROWS');
+check('retention', 'the notification cap trims a list over its limit',
+    (int) Db::value('SELECT COUNT(*) FROM notifications') <= $notifCap,
+    $notifNow . ' → ' . Db::value('SELECT COUNT(*) FROM notifications') . ' (cap ' . $notifCap . ')');
+check('retention', 'and it keeps the newest notification',
+    (int) Db::value('SELECT COUNT(*) FROM notifications WHERE id = ?', [$newestNotif]) === 1);
+
+/* the bell still works afterwards */
+$bell = $admin->get('/api/admin/notifications');
+check('retention', 'the bell still answers after a sweep', $bell['status'] === 200
+    && isset($bell['body']['rows']), "status={$bell['status']}");
+check('retention', 'and the newest notification is still the first one shown',
+    (int) ($bell['body']['rows'][0]['id'] ?? 0) === $newestNotif);
+
+/* Stage 6E — a restore used to wipe every read mark, because DELETE FROM
+   notifications cascades and the read table was not carried. */
+check('retention', 'the backup carries the per-account read state',
+    in_array('notification_reads', Backup::TABLES, true)
+    && !in_array('notification_reads', Backup::EXCLUDED, true));
+check('retention', 'and it is written after the notifications it points at',
+    array_search('notification_reads', Backup::TABLES, true)
+    > array_search('notifications', Backup::TABLES, true));
+check('retention', 'a read mark survives a backup and restore',
+    (static function () use ($admin): bool {
+        $n = (int) Db::value('SELECT MAX(id) FROM notifications');
+        $u = (int) Db::value('SELECT id FROM users ORDER BY id LIMIT 1');
+        Db::run('DELETE FROM notification_reads WHERE notification_id = ? AND user_id = ?', [$n, $u]);
+        Db::run('INSERT INTO notification_reads (notification_id, user_id, read_at) VALUES (?,?,?)',
+            [$n, $u, Db::now()]);
+        $dump = json_decode($admin->get('/api/admin/backup')['raw'], true);
+        $r = $admin->post('/api/admin/restore',
+            ['csrf_token' => $admin->csrf(), 'confirm' => 'استعادة', 'backup' => $dump]);
+        if ($r['status'] !== 200) return false;
+        return (int) Db::value('SELECT COUNT(*) FROM notification_reads WHERE notification_id = ? AND user_id = ?',
+            [$n, $u]) === 1;
+    })());
+check('retention', 'a read mark naming an account that no longer exists is dropped, not fatal',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/app/Backup.php'), '$knownUsers'));
 
 /* --- and a backup still round-trips after all of it ------------------ */
 $res = $admin->get('/api/admin/backup');

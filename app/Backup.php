@@ -63,6 +63,11 @@ final class Backup
         'id_sequences',
         'activity_log',
         'notifications',
+        /* After notifications, because each row points at one. It is here at
+           all because a restore DELETEs notifications, and that cascades:
+           without carrying the read state, restoring a backup silently marked
+           every notification unread again for everyone. */
+        'notification_reads',
     ];
 
     /**
@@ -71,13 +76,12 @@ final class Backup
      *   users, sessions      — credentials and live logins (§2, §6)
      *   guest_sessions, rate_hits, request_submissions
      *                        — throttling state, seconds old and worthless
-     *   notification_reads   — per-user state for users a restore does not carry
      *   migrations           — the schema ledger; restoring it would let an old
      *                          backup claim a migration ran that did not
      */
     public const EXCLUDED = [
         'users', 'sessions', 'guest_sessions', 'rate_hits', 'request_submissions',
-        'notification_reads', 'migrations',
+        'migrations',
     ];
 
     public static function dir(): string
@@ -219,8 +223,23 @@ final class Backup
                 $rows = $data['tables'][$t] ?? [];
                 if (!is_array($rows) || $rows === []) { $report[$t] = 0; continue; }
                 $cols = Schema::columns($t);
+
+                /* The one table whose rows point at something a restore does
+                   not carry. Accounts are never restored, so after a disaster
+                   in which they were recreated their ids are new, and a read
+                   row naming an old one would fail the foreign key and take
+                   the whole transaction — and the whole restore — down with
+                   it. A read mark is not worth that, so the ones that no
+                   longer refer to anybody are dropped instead. */
+                $knownUsers = null;
+                if ($t === 'notification_reads') {
+                    $knownUsers = [];
+                    foreach (Db::all('SELECT id FROM users') as $u) $knownUsers[(int) $u['id']] = true;
+                }
+
                 $n = 0;
                 foreach ($rows as $row) {
+                    if ($knownUsers !== null && !isset($knownUsers[(int) ($row['user_id'] ?? 0)])) continue;
                     $use = [];
                     foreach ($row as $k => $v) {
                         if (in_array((string) $k, $cols, true) && (is_scalar($v) || $v === null)) {

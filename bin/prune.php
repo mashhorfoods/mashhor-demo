@@ -31,6 +31,12 @@ out(sprintf('  السجلات        %d', $before['publishes']['rows']));
 out(sprintf('  أقدم سجل       %s', (string) ($before['publishes']['oldest'] ?? '—')));
 out(sprintf('  المحفوظ        آخر %d سجل (PUBLISH_KEEP_ROWS)', $before['publishes']['keepRows']));
 out('');
+out('التنبيهات');
+out(sprintf('  السجلات        %d', $before['notifications']['rows']));
+out(sprintf('  أقدم تنبيه     %s', (string) ($before['notifications']['oldest'] ?? '—')));
+out(sprintf('  مدة الحفظ      %d يوماً (NOTIFICATION_KEEP_DAYS)', $before['notifications']['keepDays']));
+out(sprintf('  الحد الأقصى    %d تنبيه (NOTIFICATION_MAX_ROWS)', $before['notifications']['maxRows']));
+out('');
 out('آخر تنظيف: ' . ($before['lastSweep'] ?? 'لم يُنفَّذ بعد'));
 
 if (!in_array('--run', array_slice($argv, 1), true)) {
@@ -45,5 +51,7 @@ out('');
 out(sprintf('حُذف من سجل النشاط: %d (بالعمر %d، بالعدد %d)',
     $r['activity']['removed'], $r['activity']['byAge'], $r['activity']['byCount']));
 out(sprintf('حُذف من سجل النشر : %d', $r['publishes']));
-out(sprintf('المتبقي           : %d سجل نشاط، %d سجل نشر',
-    $after['activity']['rows'], $after['publishes']['rows']));
+out(sprintf('حُذف من التنبيهات : %d (بالعمر %d، بالعدد %d)',
+    $r['notifications']['removed'], $r['notifications']['byAge'], $r['notifications']['byCount']));
+out(sprintf('المتبقي           : %d سجل نشاط، %d سجل نشر، %d تنبيه',
+    $after['activity']['rows'], $after['publishes']['rows'], $after['notifications']['rows']));
