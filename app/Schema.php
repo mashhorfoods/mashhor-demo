@@ -47,6 +47,8 @@ final class Schema
         return [
             '0001_core'    => [self::class, 'm0001'],
             '0002_content' => [self::class, 'm0002'],
+            '0003_service_record' => [self::class, 'm0003'],
+            '0004_one_contact_record' => [self::class, 'm0004'],
         ];
     }
 
@@ -121,6 +123,29 @@ final class Schema
     }
 
     /** Indexes are created separately so both drivers accept the same call. */
+    /** The columns a table actually has, on either driver. */
+    private static function columns(string $table): array
+    {
+        $out = [];
+        if (Db::isMysql()) {
+            foreach (Db::all("SHOW COLUMNS FROM `{$table}`") as $r) $out[] = (string) $r['Field'];
+        } else {
+            foreach (Db::all("PRAGMA table_info({$table})") as $r) $out[] = (string) $r['name'];
+        }
+        return $out;
+    }
+
+    /**
+     * Add a column only if it is missing, so a migration that adds one is as
+     * safe to re-run as the CREATE ... IF NOT EXISTS statements around it.
+     */
+    private static function addColumn(string $table, string $name, string $definition): bool
+    {
+        if (in_array($name, self::columns($table), true)) return false;
+        Db::pdo()->exec("ALTER TABLE {$table} ADD COLUMN {$name} {$definition}");
+        return true;
+    }
+
     private static function index(string $table, string $name, string $cols, bool $unique = false): void
     {
         $u = $unique ? 'UNIQUE ' : '';
@@ -471,6 +496,80 @@ final class Schema
     public const LANGS = ['ar', 'en'];
 
     /** Which tables the health endpoint expects to find. */
+    /**
+     * A service becomes one record.
+     *
+     * Until now a service existed twice: the row in `services` that the
+     * request form offers, and a row in `content_items` carrying the HTML the
+     * publisher rendered. They were kept in step by a copy on every save,
+     * which meant the pair could only ever be edited from one side and could
+     * never be created at all.
+     *
+     * The two per-service parts of that HTML — the icon and the picture, both
+     * produced by the image pipeline rather than typed by anyone — move onto
+     * the service itself. Everything else about the markup is the same for all
+     * seven, and lives in Publisher::SERVICE_SHAPE as presentation belonging
+     * to the code.
+     *
+     * The backfill only fills what is empty, so re-running changes nothing.
+     */
+    public static function m0003(): void
+    {
+        self::addColumn('services', 'icon_svg', self::txt() . ' NULL');
+        self::addColumn('services', 'image_html', self::txt() . ' NULL');
+
+        foreach (Db::all('SELECT id, slug, icon_svg, image_html FROM services') as $svc) {
+            if (($svc['icon_svg'] ?? '') !== '' && ($svc['image_html'] ?? '') !== '') continue;
+            $item = Db::one(
+                'SELECT markup FROM content_items WHERE collection = ? AND lang = ? AND item_key = ?',
+                ['services', 'ar', (string) $svc['slug']]
+            );
+            if ($item === null) continue;
+            $markup = (string) $item['markup'];
+
+            $icon = null; $img = null;
+            if (preg_match('~<svg class="ico"[^>]*>.*?</svg>~s', $markup, $m)) $icon = $m[0];
+            if (preg_match('~<img\b[^>]*>~s', $markup, $m))                  $img  = $m[0];
+            if ($icon === null || $img === null) continue;
+
+            Db::run('UPDATE services SET icon_svg = ?, image_html = ? WHERE id = ?',
+                [$icon, $img, (int) $svc['id']]);
+        }
+    }
+
+    /**
+     * Four contact facts stop being stored twice.
+     *
+     * The phone number, the address, the tagline and the website each existed
+     * as a settings row and as a content block, and only the block reached the
+     * page. The block is the record now and الإعدادات is a window onto it, so
+     * the settings rows are removed rather than left to drift.
+     *
+     * The phone block also held its own presentation — a left-to-right mark
+     * and &nbsp; between the groups — which meant editing it required typing
+     * HTML entities. It is stored as a person would write it and rendered by
+     * Publisher::renderBlock(), which reproduces the published string exactly.
+     */
+    public static function m0004(): void
+    {
+        $row = Db::one("SELECT value FROM content_blocks WHERE block_key = ? AND lang = 'ar'",
+            ['contact.phone_display']);
+        if ($row !== null) {
+            $plain = (string) $row['value'];
+            if (str_contains($plain, '&nbsp;') || str_contains($plain, "\u{200E}")) {
+                $plain = str_replace(["\u{200E}", '&nbsp;'], ['', ' '], $plain);
+                $plain = trim(preg_replace('/\s+/u', ' ', $plain) ?? $plain);
+                Db::run("UPDATE content_blocks SET value = ?, updated_at = ? WHERE block_key = ? AND lang = 'ar'",
+                    [$plain, Db::now(), 'contact.phone_display']);
+            }
+        }
+
+        foreach (Repo_Content::SETTINGS_ALIAS as $path => $_blockKey) {
+            [$cat, $name] = explode('.', $path, 2);
+            Db::run('DELETE FROM settings WHERE category = ? AND name = ?', [$cat, $name]);
+        }
+    }
+
     public static function tables(): array
     {
         return [

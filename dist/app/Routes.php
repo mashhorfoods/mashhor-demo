@@ -625,10 +625,7 @@ final class Routes
         if ($area === 'services') {
             /* the service records themselves live in `services` from
                RECOVERY 01 and are not duplicated (§38) */
-            $tmpl = [];
-            foreach (Repo_Cms::items('services', $lang) as $t) $tmpl[(string) $t['item_key']] = $t;
             foreach (Repo_Content::services() as $svc) {
-                $t = $tmpl[(string) $svc['slug']] ?? null;
                 $items[] = [
                     'id'        => (int) $svc['id'],
                     'key'       => (string) $svc['slug'],
@@ -638,7 +635,8 @@ final class Routes
                     'order'     => (int) $svc['sort_order'],
                     'published' => (bool) (int) $svc['is_published'],
                     'updatedAt' => $svc['updated_at'],
-                    'syncs'     => $t !== null,
+                    /* a service is one record now; it always publishes */
+                    'syncs'     => true,
                 ];
             }
         } elseif (in_array($area, ['features', 'faq', 'testimonials'], true)) {

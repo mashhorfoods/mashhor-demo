@@ -67,6 +67,24 @@ final class Publisher
         return substr($html, 0, $start) . $value . substr($html, $b);
     }
 
+    /**
+     * Does the published page have anywhere to put this area's content?
+     *
+     * Asked of the page itself rather than answered from a list in the code,
+     * so the answer corrects itself: the day a section gains markers, the
+     * editor stops saying its content goes nowhere, with nothing to remember.
+     *
+     * @return bool|null  null when the page cannot be read at all
+     */
+    public static function hasRegionFor(string $area): ?bool
+    {
+        $target = self::target();
+        if ($target === null) return null;
+        $html = @file_get_contents($target);
+        if ($html === false) return null;
+        return str_contains($html, '<!--aun:' . $area . '.');
+    }
+
     public static function readRegion(string $html, string $key): ?string
     {
         $open  = '<!--aun:' . $key . '-->';
@@ -86,6 +104,94 @@ final class Publisher
      * a slide index that no longer matches its position is a broken carousel,
      * not a reordered one.
      */
+    /**
+     * How one service is written into the page.
+     *
+     * Every service used to carry its own copy of this HTML in a second table,
+     * which is why a service could be edited but never created: a new one had
+     * no markup and nothing could write it. All seven copies were the same
+     * shape; only the icon, the picture and the position differed. The shape
+     * is presentation, so it lives here with the rest of the code, and the
+     * three things that differ come from the service record itself.
+     *
+     * It was not written by hand — it was lifted from the published page and
+     * checked against all seven, and Publisher::verifyServices() re-checks
+     * that rendering from it still reproduces the live page byte for byte.
+     */
+    private const SERVICE_SHAPE = <<<'SHAPE'
+            <article data-slide="{{slide}}" class="service{{feature}}{{active}}" data-reveal>
+              <div class="service__head">
+                <span class="service__icon" aria-hidden="true">{{icon}}</span>
+                <span class="service__num" aria-hidden="true">{{num}}</span>
+              </div>
+              <h3 class="service__title">{{title}}</h3>
+              <figure class="service__media">
+                {{img}}
+              </figure>
+              <p class="service__desc">{{body}}</p>
+              <a class="btn btn--secondary service__cta" href="#contact">
+                تواصل معنا
+                <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H6"/><path d="M11.5 6.5 6 12l5.5 5.5"/></svg>
+              </a>
+            </article>
+SHAPE;
+
+    /**
+     * The services region, rendered from the services table itself.
+     *
+     * {{feature}} and {{active}} are position, not content: the first
+     * published service leads the section, exactly as it does today.
+     */
+    public static function renderServices(array $rows): string
+    {
+        $out = '';
+        $n = 0;
+        foreach ($rows as $r) {
+            if (!(int) $r['is_published']) continue;
+            $n++;
+            $out .= "\n\n" . str_replace(
+                ['{{slide}}', '{{feature}}', '{{active}}', '{{num}}',
+                 '{{icon}}', '{{img}}', '{{title}}', '{{body}}'],
+                [
+                    (string) ($n - 1),
+                    $n === 1 ? ' service--feature' : '',
+                    $n === 1 ? ' is-active' : '',
+                    str_pad((string) $n, 2, '0', STR_PAD_LEFT),
+                    (string) ($r['icon_svg'] ?? ''),
+                    (string) ($r['image_html'] ?? ''),
+                    self::esc((string) $r['title']),
+                    self::esc((string) $r['description']),
+                ],
+                self::SERVICE_SHAPE
+            );
+        }
+        return $out;
+    }
+
+    /**
+     * Proof, not assertion: does rendering the services from their records
+     * reproduce what the published page already shows?
+     *
+     * Returns null when they match. Anything else is the reason they do not,
+     * and is treated as a failure — a services region that renders differently
+     * is a visual change nobody asked for.
+     */
+    public static function verifyServices(): ?string
+    {
+        $target = self::target();
+        if ($target === null) return 'the marked page was not found';
+        $html = @file_get_contents($target);
+        if ($html === false) return 'the page could not be read';
+
+        $live = self::readRegion($html, 'services.items');
+        if ($live === null) return 'the page has no services.items region';
+
+        $fresh = self::renderServices(Repo_Content::services());
+        if ($fresh === $live) return null;
+
+        return sprintf('rendered %d bytes, live region is %d bytes', strlen($fresh), strlen($live));
+    }
+
     public static function renderCollection(string $collection, array $rows): string
     {
         $out = '';
@@ -169,6 +275,14 @@ final class Publisher
     /** Which writer a region gets. */
     public static function renderBlock(string $key, string $value): string
     {
+        /* A phone number is stored as a person would type it and rendered as
+           the page needs it: a left-to-right mark so the number reads correctly
+           inside Arabic text, and non-breaking spaces so it never wraps
+           mid-number. Nobody should have to type &nbsp; into a settings field
+           to get that, which is what storing the rendered form required. */
+        if ($key === 'contact.phone_display') {
+            return "\u{200E}" . str_replace(' ', '&nbsp;', self::esc(trim($value)));
+        }
         return isset(Repo_Cms::FIELD_HTML[$key]) ? self::inline($value) : self::esc($value);
     }
 
@@ -203,8 +317,24 @@ final class Publisher
             $html = $next;
         }
 
+        /* --- the services region, rendered from the service records ------
+           Not from a second table of per-service HTML. renderServices() is
+           proved against the live page by verifyServices(), so this is a
+           change of source, not of output. */
+        $rendered = self::renderServices(Repo_Content::services());
+        if ($rendered === '') {
+            $missing[] = 'services.items (no published service)';
+        } else {
+            $next = self::replaceRegion($html, 'services.items', $rendered);
+            if ($next === null) { $missing[] = 'services.items'; }
+            else {
+                if ($next !== $html) $written++;
+                $html = $next;
+            }
+        }
+
         /* --- repeatable collections that have a region on the page ------- */
-        foreach (['features', 'services'] as $collection) {
+        foreach (['features'] as $collection) {
             $rows = Repo_Cms::items($collection, 'ar');
             $rendered = self::renderCollection($collection, $rows);
             if ($rendered === '') {

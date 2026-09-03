@@ -60,12 +60,6 @@ final class Repo_Content
             if ($s !== null) {
                 /* the public page renders from the template, so it follows the
                    record rather than being written separately by each caller */
-                self::syncServiceTemplate((string) $s['slug'], [
-                    'title'        => (string) $s['title'],
-                    'body'         => (string) $s['description'],
-                    'is_published' => (int) $s['is_published'],
-                    'sort_order'   => (int) $s['sort_order'],
-                ], $actor);
             }
             Repo_Activity::record($actor, 'services', 'edit', 'service',
                 (string) ($s['slug'] ?? $id), (string) ($s['title'] ?? ''),
@@ -92,25 +86,11 @@ final class Repo_Content
                 $i++;
                 Db::run('UPDATE services SET sort_order = ?, updated_at = ? WHERE id = ?',
                     [$i, Db::now(), (int) $svc['id']]);
-                self::syncServiceTemplate((string) $svc['slug'], ['sort_order' => $i], $actor);
             }
             Repo_Activity::record($actor, 'services', 'edit', 'services', null, 'الخدمات',
                 'تغيير ترتيب الخدمات على الموقع');
             return $i;
         });
-    }
-
-    /**
-     * One place that keeps a service's publishing template in step with its
-     * record. Both the الخدمات module and المحتوى write services, and a
-     * template that drifted from the record would publish stale copy.
-     */
-    public static function syncServiceTemplate(string $slug, array $fields, ?array $actor): void
-    {
-        $t = Db::one('SELECT id FROM content_items WHERE collection = ? AND lang = ? AND item_key = ?',
-            ['services', 'ar', $slug]);
-        if ($t === null) return;
-        Repo_Cms::updateItem((int) $t['id'], $fields, $actor);
     }
 
     public static function publicService(array $s): array
@@ -266,6 +246,31 @@ final class Repo_Content
      * so what the interface saved is exactly what it loads back. A string
      * "123" survives as the string "123", which a bare numeric cast would not.
      */
+    /**
+     * Settings fields that are not settings at all — they are the published
+     * page, reached from a second screen.
+     *
+     * Each of these held its own copy of a fact the page already stores in a
+     * content block, and the copy an administrator would naturally reach for
+     * was the one that published nowhere. The block is the record now; these
+     * keys are windows onto it. Editing the phone number in الإعدادات changes
+     * the website, which is what everyone already assumed it did.
+     *
+     * settings key => the content block that actually publishes
+     */
+    public const SETTINGS_ALIAS = [
+        'company.cAddr'  => 'contact.address',
+        'company.cTag'   => 'contact.tagline',
+        'contact.cPhone' => 'contact.phone_display',
+        'contact.cSite'  => 'contact.website',
+    ];
+
+    /** The block a settings field is a window onto, or null if it is its own. */
+    public static function aliasOf(string $category, string $name): ?string
+    {
+        return self::SETTINGS_ALIAS[$category . '.' . $name] ?? null;
+    }
+
     public static function settings(?string $category = null): array
     {
         $sql = 'SELECT category, name, value, updated_at FROM settings';
@@ -274,6 +279,15 @@ final class Repo_Content
         $out = [];
         foreach (Db::all($sql . ' ORDER BY category, name', $params) as $r) {
             $out[(string) $r['category']][(string) $r['name']] = self::decode($r['value']);
+        }
+        /* An aliased field answers from the block it is a window onto, so the
+           settings screen shows what the website shows and cannot drift. */
+        foreach (self::SETTINGS_ALIAS as $path => $blockKey) {
+            [$cat, $name] = explode('.', $path, 2);
+            if ($category !== null && $category !== $cat) continue;
+            $block = Repo_Cms::block($blockKey, 'ar');
+            if ($block === null) continue;
+            $out[$cat][$name] = (string) $block['value'];
         }
         return $out;
     }
@@ -297,6 +311,12 @@ final class Repo_Content
         Db::transaction(static function () use ($category, $values, $actor): void {
             $now = Db::now();
             foreach ($values as $name => $value) {
+                $alias = self::aliasOf($category, (string) $name);
+                if ($alias !== null) {
+                    /* not a setting — the published page, edited from here */
+                    Repo_Cms::saveBlock($alias, 'ar', (string) $value, $actor);
+                    continue;
+                }
                 $value = self::encode($value);
                 $exists = Db::value('SELECT 1 FROM settings WHERE category = ? AND name = ?',
                     [$category, (string) $name]);

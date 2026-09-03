@@ -976,10 +976,17 @@ $res = $admin->post('/api/admin/services/save', [
     'title' => $first['title'], 'description' => $first['description'], 'published' => 0,
 ]);
 check('services', 'a service can be hidden', $res['status'] === 200, "status={$res['status']}");
-check('services', 'the publishing template followed the record',
-    (int) Db::value('SELECT is_published FROM content_items WHERE collection = ? AND item_key = ?',
-        ['services', $first['slug']]) === 0);
+/* A service is one record now — there is no template to follow. What replaces
+   that check is stronger: rendering the region from the records alone has to
+   reproduce the published page exactly, or a publish is a silent redesign. */
+check('services', 'no second copy of a service is written any more',
+    !str_contains((string) @file_get_contents(AUN_ROOT . '/app/Repo/Content.php'), 'syncServiceTemplate'));
 $admin->post('/api/admin/content/publish', ['csrf_token' => $adminTk]);
+/* Immediately after a publish the page and the records must agree exactly.
+   Anything else means publishing changed the page in a way the records do not
+   account for — a silent redesign. */
+check('services', 'after publishing, page and records agree byte for byte',
+    Publisher::verifyServices() === null, (string) Publisher::verifyServices());
 $region = (string) Publisher::liveValue('services.items');
 check('services', 'and it left the public page',
     substr_count($region, 'service__title') === 6, (string) substr_count($region, 'service__title'));
@@ -1107,6 +1114,54 @@ foreach ([
     check('architecture', "{$file} loads from the API",
         str_contains($src, 'AunAPI.'));
 }
+
+/* ================================================================== */
+section('ONE RECORD PER FACT');
+/* ================================================================== */
+/* Stage 1. A fact the website shows must be writable from exactly one place.
+   Two used to fail this: a service existed as a row and as a second row of
+   HTML, and four contact facts existed as a settings row and as a block. */
+
+check('one-record', 'a service is rendered from the service record alone',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/app/Publisher.php'), 'renderServices'));
+check('one-record', 'and no second copy is written anywhere',
+    !str_contains((string) @file_get_contents(AUN_ROOT . '/app/Repo/Content.php'), 'syncServiceTemplate'));
+check('one-record', 'every service carries its own icon and picture',
+    (int) Db::value('SELECT COUNT(*) FROM services WHERE icon_svg IS NULL OR image_html IS NULL') === 0,
+    (string) Db::value('SELECT COUNT(*) FROM services WHERE icon_svg IS NULL OR image_html IS NULL') . ' without');
+check('one-record', 'a fresh install can supply them without the old table',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/app/Setup.php'), 'serviceArt'));
+
+foreach (Repo_Content::SETTINGS_ALIAS as $path => $blockKey) {
+    [$cat, $name] = explode('.', $path, 2);
+    $stored = Db::value('SELECT 1 FROM settings WHERE category = ? AND name = ?', [$cat, $name]);
+    check('one-record', "{$path} is not stored a second time", $stored === null || $stored === false);
+    $shown = Repo_Content::settings($cat)[$cat][$name] ?? null;
+    $block = Repo_Cms::block($blockKey, 'ar');
+    check('one-record', "{$path} shows what {$blockKey} publishes",
+        $block !== null && $shown === (string) $block['value']);
+}
+
+/* the end an administrator cares about: edit it here, see it there */
+$phoneWas = (string) (Repo_Cms::block('contact.phone_display', 'ar')['value'] ?? '');
+$actorRow = Repo_Users::findByEmail($EMAIL);
+Repo_Content::saveSettings('contact', ['cPhone' => '+966 55 111 2233'], $actorRow);
+Publisher::publish($actorRow);
+check('one-record', 'editing the phone in الإعدادات changes the published page',
+    Publisher::liveValue('contact.phone_display') === "\u{200E}+966&nbsp;55&nbsp;111&nbsp;2233",
+    json_encode(Publisher::liveValue('contact.phone_display'), JSON_UNESCAPED_UNICODE));
+check('one-record', 'and it is stored as a person would type it',
+    (string) (Repo_Cms::block('contact.phone_display', 'ar')['value'] ?? '') === '+966 55 111 2233');
+Repo_Content::saveSettings('contact', ['cPhone' => $phoneWas], $actorRow);
+Publisher::publish($actorRow);
+check('one-record', 'and restoring it restores the page',
+    Publisher::liveValue('contact.phone_display')
+        === Publisher::renderBlock('contact.phone_display', $phoneWas));
+
+check('one-record', 'the phone is no longer authored as HTML',
+    !isset(Repo_Cms::FIELD_HTML['contact.phone_display']));
+check('one-record', 'a fresh install seeds the same plain value',
+    !str_contains((string) @file_get_contents(AUN_ROOT . '/app/storage/cms-seed.json'), '&nbsp;'));
 
 /* ================================================================== */
 section('NO DEMO DATA REACHES A SIGNED-IN SCREEN');

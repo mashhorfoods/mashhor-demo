@@ -46,19 +46,22 @@ final class Setup
         'brand/aun-aldrb-logo.svg', 'brand/favicon-32.png',
         'brand/logo.png', 'brand/og-image.png',
     ];
-    /** The company details the settings module has always shown. */
+    /**
+     * The company details the settings module has always shown.
+     *
+     * Four fields that used to live here — the address, the tagline, the phone
+     * number and the website — are not settings: they are the published page,
+     * and they are stored once as content blocks. Repo_Content::SETTINGS_ALIAS
+     * is what makes الإعدادات show and edit them.
+     */
     public const SETTINGS = [
         'company' => [
             'cName' => 'شركة عون الدرب للنقل المتخصص',
-            'cTag'  => 'نُعين ونُعاون',
             'cDesc' => 'نقل متخصص في الرياض لكبار السن وذوي الاحتياجات الخاصة والمرضى، بمركبات مجهزة وطاقم مدرب، في بيئة تحترم الإنسانية.',
-            'cAddr' => 'الرياض · شارع ابن كثير · حي السليمانية · 12233',
         ],
         'contact' => [
-            'cPhone' => '+966 53 554 4352',
             'cWa'    => '+966 53 554 4352',
             'cEmail' => '',
-            'cSite'  => 'https://aunaldrb.com/',
             'sTw'    => '',
             'sIg'    => '',
         ],
@@ -108,21 +111,68 @@ final class Setup
         return $lines;
     }
 
+    /**
+     * The icon and the picture a service is drawn with.
+     *
+     * Both are produced by the build's image pipeline rather than typed by
+     * anyone, and both live in app/storage/cms-seed.json, which is already a
+     * transcription of the published page. Reading them from there means a
+     * fresh install and a migrated one end in the same place, and neither has
+     * a second copy of this markup to keep in step.
+     *
+     * @return array{0: ?string, 1: ?string}  [icon svg, img tag]
+     */
+    public static function serviceArt(string $slug): array
+    {
+        static $cache = null;
+        if ($cache === null) {
+            $cache = [];
+            $file = AUN_ROOT . '/app/storage/cms-seed.json';
+            $seed = is_file($file) ? json_decode((string) file_get_contents($file), true) : null;
+            foreach (($seed['items']['services'] ?? []) as $svc) {
+                $markup = (string) ($svc['markup'] ?? '');
+                $icon = preg_match('~<svg class="ico"[^>]*>.*?</svg>~s', $markup, $m) ? $m[0] : null;
+                $img  = preg_match('~<img\b[^>]*>~s', $markup, $m) ? $m[0] : null;
+                /* the seed keys services by title; the slug is what we hold */
+                $cache[(string) ($svc['title'] ?? '')] = [$icon, $img];
+            }
+        }
+        foreach (self::SERVICES as [$s, $title, $_d]) {
+            if ($s === $slug) return $cache[$title] ?? [null, null];
+        }
+        return [null, null];
+    }
+
     /** @return string[] */
     public static function services(): array
     {
-        $added = 0;
+        $added = 0; $art = 0;
         foreach (self::SERVICES as $i => [$slug, $title, $desc]) {
-            if (Repo_Content::findServiceBySlug($slug) !== null) continue;
+            [$icon, $img] = self::serviceArt($slug);
+            $existing = Repo_Content::findServiceBySlug($slug);
+            if ($existing !== null) {
+                /* an install that predates the icon and picture columns gets
+                   them filled without touching anything an editor may have
+                   changed since */
+                if (($existing['icon_svg'] ?? null) === null && $icon !== null) {
+                    Db::run('UPDATE services SET icon_svg = ?, image_html = ? WHERE id = ?',
+                        [$icon, $img, (int) $existing['id']]);
+                    $art++;
+                }
+                continue;
+            }
             $now = Db::now();
             Db::run(
-                'INSERT INTO services (slug, title, description, sort_order, is_published, image_path, created_at, updated_at)
-                 VALUES (?,?,?,?,?,?,?,?)',
-                [$slug, $title, $desc, $i + 1, 1, 'img/' . $slug . '.webp', $now, $now]
+                'INSERT INTO services (slug, title, description, sort_order, is_published, image_path,
+                                       icon_svg, image_html, created_at, updated_at)
+                 VALUES (?,?,?,?,?,?,?,?,?,?)',
+                [$slug, $title, $desc, $i + 1, 1, 'img/' . $slug . '.webp', $icon, $img, $now, $now]
             );
             $added++;
         }
-        return ["services: {$added} added, " . count(Repo_Content::services()) . ' total'];
+        $out = ["services: {$added} added, " . count(Repo_Content::services()) . ' total'];
+        if ($art) $out[] = "services: icon and picture filled in for {$art} existing record(s)";
+        return $out;
     }
 
     /** @return string[] */

@@ -179,9 +179,11 @@ final class Repo_Cms
                 $row['updated'] = Db::value(
                     'SELECT MAX(updated_at) FROM content_items WHERE collection = ? AND lang = ?', [$key, $lang]);
                 $row['kind'] = 'list';
-                /* the public page has a region for features and none for the
-                   other two — see §09 of the report */
-                $row['publishable'] = ($key === 'features');
+                /* Asked of the page, not asserted here. features has a region
+                   today and faq/testimonials do not, but that is a fact about
+                   index.html rather than about this code, and it is read from
+                   index.html so it stays true without being maintained. */
+                $row['publishable'] = Publisher::hasRegionFor($key) ?? ($key === 'features');
             } else {
                 $row['records'] = (int) Db::value(
                     'SELECT COUNT(*) FROM content_blocks WHERE lang = ? AND block_key LIKE ?',
@@ -225,7 +227,7 @@ final class Repo_Cms
         'contact.invite'        => 'نص الدعوة',
         'contact.lead'          => 'الفقرة التعريفية',
         'contact.phone_label'   => 'تسمية وسيلة التواصل',
-        'contact.phone_display' => 'رقم الهاتف كما يظهر',
+        'contact.phone_display' => 'رقم الهاتف',
         'contact.website'       => 'الموقع الإلكتروني',
         'contact.address'       => 'العنوان',
         'contact.hours'         => 'ساعات خدمة العملاء',
@@ -243,8 +245,10 @@ final class Repo_Cms
      * Everything else is plain text and is escaped.
      */
     public const FIELD_HTML = [
-        'contact.phone_display' => true,
-        'contact.closing'       => true,
+        /* contact.phone_display used to be here. It no longer is: the number
+           is stored as a person writes it, and Publisher::renderBlock() adds
+           the left-to-right mark and the non-breaking spaces the page needs. */
+        'contact.closing' => true,
     ];
 
     /** Regions edited as multi-line text whose line breaks become <br>. */
