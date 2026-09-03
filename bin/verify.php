@@ -482,8 +482,11 @@ check('content', 'signed in again for the content matrix', $res['status'] === 20
 $ov = $admin->get('/api/admin/content');
 check('content', 'GET /api/admin/content answers', $ov['status'] === 200, "status={$ov['status']}");
 $areas = array_column($ov['body']['areas'] ?? [], null, 'key');
-check('content', 'six approved areas, no seventh', count($areas) === 6, (string) count($areas));
-foreach (['about','features','services','faq','testimonials','contact'] as $k) {
+/* Stage 3 brought four more sections of the page under management. The guard
+   is the same guard — an exact set, so an area cannot appear that nobody
+   approved — counted against what the page now actually has. */
+check('content', 'eleven approved areas, no twelfth', count($areas) === 11, (string) count($areas));
+foreach (['home','about','features','services','how','vision','values','faq','testimonials','contact','seo'] as $k) {
     check('content', "area present: {$k}", isset($areas[$k]));
 }
 check('content', 'about is stored as fields', ($areas['about']['kind'] ?? '') === 'fields');
@@ -492,6 +495,19 @@ check('content', 'the seven approved services are listed',
     ($areas['services']['records'] ?? 0) === 7, (string) ($areas['services']['records'] ?? 0));
 check('content', 'the six approved features are listed',
     ($areas['features']['records'] ?? 0) === 6, (string) ($areas['features']['records'] ?? 0));
+/* what stage 3 added, counted rather than described */
+check('content', 'الواجهة الرئيسية lists six entries over three text fields',
+    ($areas['home']['records'] ?? 0) === 6 && ($areas['home']['fields'] ?? 0) === 3,
+    ($areas['home']['records'] ?? 0) . ' / ' . ($areas['home']['fields'] ?? 0));
+check('content', 'كيف نعمل lists three stages over three text fields',
+    ($areas['how']['records'] ?? 0) === 3 && ($areas['how']['fields'] ?? 0) === 3,
+    ($areas['how']['records'] ?? 0) . ' / ' . ($areas['how']['fields'] ?? 0));
+check('content', 'قيمنا lists six values over two text fields',
+    ($areas['values']['records'] ?? 0) === 6 && ($areas['values']['fields'] ?? 0) === 2,
+    ($areas['values']['records'] ?? 0) . ' / ' . ($areas['values']['fields'] ?? 0));
+check('content', 'رؤيتنا ورسالتنا is six text fields and no list',
+    ($areas['vision']['kind'] ?? '') === 'fields' && ($areas['vision']['records'] ?? 0) === 6,
+    ($areas['vision']['kind'] ?? '') . ' / ' . ($areas['vision']['records'] ?? 0));
 check('content', 'FAQ is empty and says so, rather than being invented',
     ($areas['faq']['records'] ?? -1) === 0);
 check('content', 'testimonials are empty and say so',
@@ -716,8 +732,8 @@ $admin->post('/api/admin/content/block',
      'value' => 'في عون الدرب نرافق المستفيد في كل خطوة على الطريق، بأمانٍ ورعايةٍ واحترام. <span class="contact__aside-tag">نُعين ونُعاون.</span>']);
 $admin->post('/api/admin/content/publish', ['csrf_token' => $adminTk]);
 $html = (string) @file_get_contents(AUN_ROOT . '/index.html');
-check('integrity', 'the public page still has all 25 marked regions',
-    preg_match_all('/<!--aun:[a-z0-9._]+-->/', $html) === 25,
+check('integrity', 'the public page still has all 49 marked regions',
+    preg_match_all('/<!--aun:[a-z0-9._]+-->/', $html) === 49,
     (string) preg_match_all('/<!--aun:[a-z0-9._]+-->/', $html));
 check('integrity', 'no prohibited terminology reached the public page',
     !preg_match('/الإعاقة|ذوي الإعاقة|معاقين|معاقون/u', $html));
@@ -1113,6 +1129,51 @@ foreach ([
         preg_match($pattern, $src) === 0);
     check('architecture', "{$file} loads from the API",
         str_contains($src, 'AunAPI.'));
+}
+
+/* ================================================================== */
+section('COVERAGE — EVERY SECTION OF THE PAGE IS MANAGEABLE');
+/* ================================================================== */
+/* Stage 3. Four of the page's eight sections had no marked region at all,
+   which meant no screen, field or endpoint could touch a word of them. */
+$page = (string) @file_get_contents(AUN_ROOT . '/index.html');
+preg_match_all('~<section[^>]*id="([^"]+)"[^>]*>(.*?)</section>~s', $page, $secs, PREG_SET_ORDER);
+check('coverage', 'the page still has its eight sections', count($secs) === 8, (string) count($secs));
+foreach ($secs as [$_all, $sid, $body]) {
+    check('coverage', "{$sid} has at least one editable region",
+        str_contains($body, '<!--aun:'));
+}
+check('coverage', 'the page metadata is publishable too',
+    str_contains($page, '<!--aun:seo.title-->') && str_contains($page, '<!--aun:seo.description-->'));
+check('coverage', 'one title fact fills all three places it appears',
+    count(Publisher::renderMeta()) === 6, (string) count(Publisher::renderMeta()));
+
+/* the markers are comments: nothing a browser renders may have moved */
+check('coverage', 'markers add nothing a visitor can see',
+    !str_contains(preg_replace('/<!--.*?-->/s', '', $page) ?? '', 'aun:'));
+
+/* and the records reproduce the page exactly */
+$plan = Publisher::plan();
+check('coverage', 'every region renders back to what is published',
+    $plan['ok'] && $plan['changed'] === [] && $plan['missing'] === [],
+    count($plan['changed']) . ' would change, ' . count($plan['missing']) . ' missing');
+
+/* a section brought under management this stage, edited end to end */
+$vals = Repo_Cms::items('values.items', 'ar');
+check('coverage', 'قيمنا holds its six values', count($vals) === 6, (string) count($vals));
+$firstVal = $vals[0] ?? null;
+if ($firstVal !== null) {
+    $titleWas2 = (string) $firstVal['title'];
+    Repo_Cms::updateItem((int) $firstVal['id'], ['title' => $titleWas2 . ' ✓'], $actorRow ?? null);
+    check('coverage', 'editing one shows as pending', Publisher::pending()['count'] === 1,
+        (string) Publisher::pending()['count']);
+    Publisher::publish($actorRow ?? null);
+    check('coverage', 'and publishing puts it on the page',
+        str_contains((string) Publisher::liveValue('values.items'), $titleWas2 . ' ✓'));
+    Repo_Cms::updateItem((int) $firstVal['id'], ['title' => $titleWas2], $actorRow ?? null);
+    Publisher::publish($actorRow ?? null);
+    check('coverage', 'and restoring it restores the page',
+        !str_contains((string) Publisher::liveValue('values.items'), '✓'));
 }
 
 /* ================================================================== */

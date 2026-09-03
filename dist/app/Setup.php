@@ -67,8 +67,6 @@ final class Setup
         ],
         'site' => [
             'siteLive' => true,
-            'sTitle'   => 'عون الدرب للنقل المتخصص | نقل كبار السن وذوي الاحتياجات الخاصة بالرياض',
-            'sDesc'    => 'نقل متخصص في الرياض لكبار السن وذوي الاحتياجات الخاصة والمرضى: مركبات مجهزة للكراسي المتحركة والسرير الطبي، وطاقم مدرب، ومساندة عند الحاجة — على مدار الساعة.',
             'sUrl'     => 'https://aunaldrb.com/',
         ],
         'notif'  => ['nNew' => true, 'nStale' => true, 'nStatus' => false, 'nContent' => true],
@@ -260,6 +258,32 @@ final class Setup
         }
         $lines[] = "services: {$n} publishing templates added, "
             . count(Repo_Cms::items('services', 'ar')) . ' total';
+
+        /* the four lists stage 3 brought under management, each item with the
+           illustration it is drawn with — transcribed from the page, like
+           everything else here */
+        foreach (($seed['shaped'] ?? []) as $collection => $rows) {
+            $have = count(Repo_Cms::items((string) $collection, 'ar'));
+            if ($have > 0 && !$force) { $lines[] = "{$collection}: {$have} already there"; continue; }
+            $n = 0;
+            foreach ($rows as $r) {
+                $exists = Db::one(
+                    'SELECT id FROM content_items WHERE collection = ? AND lang = ? AND item_key = ?',
+                    [$collection, 'ar', (string) $r['key']]);
+                if ($exists !== null) continue;
+                $id = Repo_Cms::createItem((string) $collection, 'ar', [
+                    'item_key'     => (string) $r['key'],
+                    'title'        => (string) $r['title'],
+                    'body'         => (string) $r['body'],
+                    'is_published' => 1,
+                ], null);
+                if (($r['icon'] ?? null) !== null) {
+                    Db::run('UPDATE content_items SET icon_svg = ? WHERE id = ?', [$r['icon'], (int) $id]);
+                }
+                $n++;
+            }
+            $lines[] = "{$collection}: {$n} added";
+        }
 
         /* الأسئلة الشائعة and آراء العملاء stay empty on purpose: index.html has
            no such section, and inventing entries to fill an editor is forbidden. */

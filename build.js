@@ -88,7 +88,7 @@ const SHIP_TREES = [
      documents, not part of the application */
   { dir: 'admin', skip: (rel) => rel.endsWith('.md')
                                  || /^(stage-\d|recovery-\d)/.test(rel) },
-  { dir: 'bin',   skip: (rel) => rel === 'verify.php' },
+  { dir: 'bin',   skip: (rel) => rel === 'verify.php' || rel === 'extract-content.php' },
 ];
 
 /* Everything else — photographs, faces, logos, the social card, the icons —

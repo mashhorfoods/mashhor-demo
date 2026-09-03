@@ -49,6 +49,8 @@ final class Schema
             '0002_content' => [self::class, 'm0002'],
             '0003_service_record' => [self::class, 'm0003'],
             '0004_one_contact_record' => [self::class, 'm0004'],
+            '0005_item_icon' => [self::class, 'm0005'],
+            '0006_seo_records' => [self::class, 'm0006'],
         ];
     }
 
@@ -484,12 +486,32 @@ final class Schema
 
     /** The six approved content areas — no seventh, per §02. */
     public const CONTENT_AREAS = [
+        'home'         => 'الواجهة الرئيسية',
         'about'        => 'من نحن',
         'features'     => 'ما يميزنا',
         'services'     => 'الخدمات',
+        'how'          => 'كيف نعمل',
+        'vision'       => 'رؤيتنا ورسالتنا',
+        'values'       => 'قيمنا',
         'faq'          => 'الأسئلة الشائعة',
         'testimonials' => 'آراء العملاء',
         'contact'      => 'معلومات التواصل',
+        'seo'          => 'بيانات الصفحة ومحركات البحث',
+    ];
+
+    /**
+     * The repeated lists each area owns.
+     *
+     * An area is its text blocks plus these. Stated once, so the overview, the
+     * editor and the publisher cannot disagree about what an area contains.
+     */
+    public const AREA_COLLECTIONS = [
+        'home'         => ['home.audience', 'home.trust'],
+        'features'     => ['features'],
+        'how'          => ['how.items'],
+        'values'       => ['values.items'],
+        'faq'          => ['faq'],
+        'testimonials' => ['testimonials'],
     ];
 
     /** Languages the content layer accepts. Arabic is the only one with copy. */
@@ -566,6 +588,38 @@ final class Schema
 
         foreach (Repo_Content::SETTINGS_ALIAS as $path => $_blockKey) {
             [$cat, $name] = explode('.', $path, 2);
+            Db::run('DELETE FROM settings WHERE category = ? AND name = ?', [$cat, $name]);
+        }
+    }
+
+    /**
+     * A repeated item can carry its own icon.
+     *
+     * Stage 3 brings four more sections of the page under management, and two
+     * of them draw each item with a small illustration. Following what stage 1
+     * did for services, the shape lives in the code and the thing that differs
+     * per item lives on the item.
+     */
+    public static function m0005(): void
+    {
+        self::addColumn('content_items', 'icon_svg', self::txt() . ' NULL');
+    }
+
+    /**
+     * The page's title and description become records, not settings rows.
+     *
+     * Stage 3 gave them regions in the document head, so الإعدادات is a window
+     * onto the block that publishes — the same arrangement m0004 made for the
+     * contact facts. The settings rows go, so there is nothing left to drift.
+     */
+    public static function m0006(): void
+    {
+        foreach (['seo.title' => ['site', 'sTitle'], 'seo.description' => ['site', 'sDesc']] as $block => [$cat, $name]) {
+            $row = Db::one('SELECT value FROM settings WHERE category = ? AND name = ?', [$cat, $name]);
+            if ($row !== null && Repo_Cms::block($block, 'ar') === null) {
+                $v = json_decode((string) $row['value'], true);
+                Repo_Cms::saveBlock($block, 'ar', is_string($v) ? $v : (string) $row['value'], null);
+            }
             Db::run('DELETE FROM settings WHERE category = ? AND name = ?', [$cat, $name]);
         }
     }

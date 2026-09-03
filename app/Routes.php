@@ -682,8 +682,15 @@ final class Routes
                     'syncs'     => true,
                 ];
             }
-        } elseif (in_array($area, ['features', 'faq', 'testimonials'], true)) {
-            foreach (Repo_Cms::items($area, $lang) as $r) {
+        } elseif (isset(Schema::AREA_COLLECTIONS[$area])) {
+            $rows = [];
+            foreach (Schema::AREA_COLLECTIONS[$area] as $collection) {
+                foreach (Repo_Cms::items($collection, $lang) as $r) {
+                    $r['collection'] = $collection;
+                    $rows[] = $r;
+                }
+            }
+            foreach ($rows as $r) {
                 $items[] = [
                     'id'        => (int) $r['id'],
                     'key'       => $r['item_key'],
@@ -694,7 +701,11 @@ final class Routes
                     'order'     => (int) $r['sort_order'],
                     'published' => (bool) (int) $r['is_published'],
                     'updatedAt' => $r['updated_at'],
-                    'syncs'     => $r['markup'] !== null && $r['markup'] !== '',
+                    'collection'=> $r['collection'] ?? $area,
+                    /* shaped collections publish from the record itself; the
+                       older ones still carry their own markup */
+                    'syncs'     => ($r['markup'] !== null && $r['markup'] !== '')
+                                   || in_array((string) ($r['collection'] ?? ''), Publisher::shapedCollections(), true),
                 ];
             }
         }

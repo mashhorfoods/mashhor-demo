@@ -263,6 +263,10 @@ final class Repo_Content
         'company.cTag'   => 'contact.tagline',
         'contact.cPhone' => 'contact.phone_display',
         'contact.cSite'  => 'contact.website',
+        /* stage 3 — the page's own metadata, shown in الإعدادات since the
+           beginning and until now unable to reach the page at all */
+        'site.sTitle'    => 'seo.title',
+        'site.sDesc'     => 'seo.description',
     ];
 
     /** The block a settings field is a window onto, or null if it is its own. */

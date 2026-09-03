@@ -105,6 +105,134 @@ final class Publisher
      * not a reordered one.
      */
     /**
+     * The page's own metadata — its title and the descriptions search engines
+     * and social cards read.
+     *
+     * These sit in attributes and inside <title>, where an HTML comment is not
+     * a comment at all but literal text, so the marker wraps the whole element
+     * and the publisher rebuilds it. Three facts fill six places, and keeping
+     * them consistent is now the publisher's job rather than something that
+     * has to be remembered in three files.
+     */
+    private const META_REGIONS = [
+        'seo.title' => ['from' => 'seo.title', 'tpl' => '<title>{{v}}</title>'],
+        'seo.description' => ['from' => 'seo.description', 'tpl' => '<meta name="description" content="{{v}}">'],
+        'seo.og_title' => ['from' => 'seo.title', 'tpl' => '<meta property="og:title" content="{{v}}">'],
+        'seo.og_description' => ['from' => 'seo.social_description', 'tpl' => '<meta property="og:description" content="{{v}}">'],
+        'seo.tw_title' => ['from' => 'seo.title', 'tpl' => '<meta name="twitter:title" content="{{v}}">'],
+        'seo.tw_description' => ['from' => 'seo.social_description', 'tpl' => '<meta name="twitter:description" content="{{v}}">'],
+    ];
+
+    /** @return array<string,string> region key => the element to write */
+    public static function renderMeta(): array
+    {
+        $out = [];
+        foreach (self::META_REGIONS as $region => $spec) {
+            $block = Repo_Cms::block($spec['from'], 'ar');
+            if ($block === null) continue;
+            $out[$region] = str_replace('{{v}}',
+                htmlspecialchars((string) $block['value'], ENT_QUOTES, 'UTF-8'), $spec['tpl']);
+        }
+        return $out;
+    }
+
+    /**
+     * The four sections stage 3 brought under management.
+     *
+     * Each is a list whose items are all the same shape — only the words, the
+     * illustration and the position differ. The shapes were lifted from the
+     * published page and checked against every item, exactly as the service
+     * shape was, and verifyRegions() re-checks that rendering from the records
+     * still reproduces the page byte for byte.
+     *
+     * lead is what separates one item from the next in the source, tail what
+     * closes the list. They are whitespace, and they are here because a
+     * publish that reflowed the page would be a change nobody asked for.
+     */
+    private const COLLECTIONS = [
+        'home.audience' => [
+            'lead'  => "\n                ",
+            'tail'  => "\n              ",
+            'shape' => <<<'SHAPE'
+<li class="hero__aud-card">
+                  <span class="hero__aud-icon" aria-hidden="true">{{icon}}</span>
+                  <span class="hero__aud-title">{{title}}</span>
+                  <span class="hero__aud-desc">{{body}}</span>
+                </li>
+SHAPE,
+        ],
+        'home.trust' => [
+            'lead'  => "\n            ",
+            'tail'  => "\n          ",
+            'shape' => <<<'SHAPE'
+<div class="hero__trust">
+              <span class="hero__trust-icon" aria-hidden="true">{{icon}}</span>
+              <div><b>{{title}}</b><span>{{body}}</span></div>
+            </div>
+SHAPE,
+        ],
+        'how.items' => [
+            'lead'  => "\n\n            ",
+            'tail'  => "\n\n          ",
+            'shape' => <<<'SHAPE'
+<li class="hww__stage" data-reveal>
+              <span class="hww__marker">
+                <span class="hww__node" aria-hidden="true">{{icon}}</span>
+                <span class="hww__num" aria-hidden="true">{{num}}</span>
+              </span>
+              <div class="hww__stage-body">
+                <h3 class="hww__stage-title">{{title}}</h3>
+                <p class="hww__stage-desc">{{body}}</p>
+              </div>
+            </li>
+SHAPE,
+        ],
+        'values.items' => [
+            'lead'  => "\n            ",
+            'tail'  => "\n          ",
+            'shape' => <<<'SHAPE'
+<li class="value" data-reveal>
+              <span class="value__num" aria-hidden="true">{{num}}</span>
+              <div class="value__body">
+                <h3 class="value__name">{{title}}</h3>
+                <p class="value__desc">{{body}}</p>
+              </div>
+            </li>
+SHAPE,
+        ],
+    ];
+
+    /** One shaped collection, rendered from its records. */
+    public static function renderShaped(string $key, array $rows): string
+    {
+        $spec = self::COLLECTIONS[$key] ?? null;
+        if ($spec === null) return '';
+        $out = '';
+        $n = 0;
+        foreach ($rows as $r) {
+            if (!(int) ($r['is_published'] ?? 1)) continue;
+            $n++;
+            $out .= $spec['lead'] . str_replace(
+                ['{{num}}', '{{icon}}', '{{title}}', '{{body}}'],
+                [
+                    str_pad((string) $n, 2, '0', STR_PAD_LEFT),
+                    (string) ($r['icon_svg'] ?? ''),
+                    self::esc((string) ($r['title'] ?? '')),
+                    self::esc((string) ($r['body'] ?? '')),
+                ],
+                $spec['shape']
+            );
+        }
+        return $out === '' ? '' : $out . $spec['tail'];
+    }
+
+    /** The collections that render from a shape rather than per-item markup. */
+    public static function shapedCollections(): array
+    {
+        return array_keys(self::COLLECTIONS);
+    }
+
+    /**
      * How one service is written into the page.
      *
      * Every service used to carry its own copy of this HTML in a second table,
@@ -342,8 +470,13 @@ SHAPE;
             $html = $next;
         };
 
-        /* --- singleton text blocks -------------------------------------- */
+        /* --- singleton text blocks --------------------------------------
+           seo.* are sources, not regions: three of them fill six places in the
+           document head, and renderMeta() below is what writes those. Left in
+           this loop they would each try to claim a region of their own, and
+           two of them would write the same place twice. */
         foreach (Repo_Cms::blocks('ar') as $key => $row) {
+            if (str_starts_with($key, 'seo.')) continue;
             $apply($key, self::renderBlock($key, (string) $row['value']),
                 Repo_Cms::FIELD_LABELS[$key] ?? $key);
         }
@@ -355,6 +488,24 @@ SHAPE;
         $rendered = self::renderServices(Repo_Content::services());
         if ($rendered === '') $missing[] = 'services.items (no published service)';
         else                  $apply('services.items', $rendered, 'قائمة الخدمات');
+
+        /* --- the page's metadata, three facts across six places --------- */
+        foreach (self::renderMeta() as $region => $element) {
+            $apply($region, $element, 'بيانات الصفحة');
+        }
+
+        /* --- the shaped collections stage 3 brought under management ----- */
+        $LABELS = [
+            'home.audience' => 'من نخدمهم',
+            'home.trust'    => 'شريط الثقة',
+            'how.items'     => 'مراحل الرحلة',
+            'values.items'  => 'القيم',
+        ];
+        foreach (self::shapedCollections() as $key) {
+            $rendered = self::renderShaped($key, Repo_Cms::items($key, 'ar'));
+            if ($rendered === '') { $missing[] = $key . ' (empty)'; continue; }
+            $apply($key, $rendered, $LABELS[$key] ?? $key);
+        }
 
         /* --- repeatable collections that have a region on the page ------- */
         foreach (['features' => 'ما يميزنا'] as $collection => $label) {

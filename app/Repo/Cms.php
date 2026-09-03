@@ -170,14 +170,25 @@ final class Repo_Cms
                 $row['updated']  = Db::value('SELECT MAX(updated_at) FROM services');
                 $row['kind']     = 'list';
                 $row['publishable'] = true;
-            } elseif (in_array($key, ['features', 'faq', 'testimonials'], true)) {
+            } elseif (isset(Schema::AREA_COLLECTIONS[$key])) {
+                $cols = Schema::AREA_COLLECTIONS[$key];
+                $in   = implode(',', array_fill(0, count($cols), '?'));
+                $args = array_merge($cols, [$lang]);
                 $row['records'] = (int) Db::value(
-                    'SELECT COUNT(*) FROM content_items WHERE collection = ? AND lang = ?', [$key, $lang]);
+                    "SELECT COUNT(*) FROM content_items WHERE collection IN ({$in}) AND lang = ?", $args);
                 $row['active'] = (int) Db::value(
-                    'SELECT COUNT(*) FROM content_items WHERE collection = ? AND lang = ? AND is_published = 1',
-                    [$key, $lang]);
+                    "SELECT COUNT(*) FROM content_items WHERE collection IN ({$in}) AND lang = ? AND is_published = 1",
+                    $args);
                 $row['updated'] = Db::value(
-                    'SELECT MAX(updated_at) FROM content_items WHERE collection = ? AND lang = ?', [$key, $lang]);
+                    "SELECT MAX(updated_at) FROM content_items WHERE collection IN ({$in}) AND lang = ?", $args);
+                /* An area can be a list AND have text above it. `records`
+                   stays what it always meant — how many entries the list has —
+                   and the text fields are counted separately rather than
+                   folded in, which would have made the number mean two
+                   things at once. */
+                $row['fields'] = (int) Db::value(
+                    'SELECT COUNT(*) FROM content_blocks WHERE lang = ? AND block_key LIKE ?',
+                    [$lang, $key . '.%']);
                 $row['kind'] = 'list';
                 /* Asked of the page, not asserted here. features has a region
                    today and faq/testimonials do not, but that is a fact about
@@ -228,6 +239,24 @@ final class Repo_Cms
         'contact.lead'          => 'الفقرة التعريفية',
         'contact.phone_label'   => 'تسمية وسيلة التواصل',
         'contact.phone_display' => 'رقم الهاتف',
+        'seo.title'              => 'عنوان الصفحة في المتصفح ونتائج البحث',
+        'seo.description'        => 'وصف الصفحة في نتائج البحث',
+        'seo.social_description' => 'الوصف في بطاقة المشاركة',
+        /* stage 3 — the four sections that had no editor at all */
+        'home.eyebrow'               => 'السطر التمهيدي',
+        'home.title'                 => 'العنوان الرئيسي',
+        'home.lead'                  => 'الجملة التعريفية',
+        'how.label'                  => 'وسم القسم',
+        'how.title'                  => 'عنوان القسم',
+        'how.lead'                   => 'المقدمة',
+        'vision.label'               => 'وسم القسم',
+        'vision.title'               => 'عنوان القسم',
+        'vision.vision_kicker'       => 'عنوان الرؤية',
+        'vision.vision_text'         => 'نص الرؤية',
+        'vision.mission_kicker'      => 'عنوان الرسالة',
+        'vision.mission_text'        => 'نص الرسالة',
+        'values.label'               => 'وسم القسم',
+        'values.title'               => 'عنوان القسم',
         'contact.website'       => 'الموقع الإلكتروني',
         'contact.address'       => 'العنوان',
         'contact.hours'         => 'ساعات خدمة العملاء',
@@ -249,6 +278,9 @@ final class Repo_Cms
            is stored as a person writes it, and Publisher::renderBlock() adds
            the left-to-right mark and the non-breaking spaces the page needs. */
         'contact.closing' => true,
+        /* the hero headline sets one word in the accent colour — approved
+           markup, and a <span> the inline allow-list already permits */
+        'home.title'      => true,
     ];
 
     /** Regions edited as multi-line text whose line breaks become <br>. */
@@ -257,6 +289,8 @@ final class Repo_Cms
         'about.lead' => true, 'about.p1' => true, 'about.p2' => true, 'about.p3' => true,
         'features.note' => true, 'services.lead' => true,
         'contact.invite' => true, 'contact.lead' => true,
+        'seo.description' => true, 'seo.social_description' => true,
+        'home.lead' => true, 'how.lead' => true, 'vision.vision_text' => true, 'vision.mission_text' => true,
     ];
 
     /** Fields with a stricter rule than "some text". */
@@ -268,6 +302,8 @@ final class Repo_Cms
         'contact.label' => 60, 'contact.tagline' => 60, 'contact.title' => 120,
         'contact.invite' => 400, 'contact.lead' => 400, 'contact.phone_label' => 60,
         'contact.phone_display' => 40, 'contact.website' => 120, 'contact.address' => 200,
+        'seo.title' => 70, 'seo.description' => 170, 'seo.social_description' => 200,
+        'home.eyebrow' => 60, 'home.title' => 80, 'home.lead' => 160, 'how.label' => 40, 'how.title' => 120, 'how.lead' => 240, 'vision.label' => 40, 'vision.title' => 120, 'vision.vision_kicker' => 40, 'vision.vision_text' => 320, 'vision.mission_kicker' => 40, 'vision.mission_text' => 320, 'values.label' => 40, 'values.title' => 120,
         'contact.hours' => 160, 'contact.closing' => 300,
     ];
 }
