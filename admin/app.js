@@ -115,6 +115,8 @@
     toLogin: toLogin,
 
     me: function () { return get("/auth/me"); },
+    onUser: function (fn) { return onUser(fn); },
+    can: function (m, a) { return can(m, a); },
     logout: function () {
       return post("/auth/logout", {}).then(function () { location.href = "login.html"; });
     },
@@ -141,6 +143,32 @@
    * button, and the header's identity. No markup is added — these elements
    * exist on all nine pages already.
    */
+  /* Callbacks queued before /auth/me answered. A page asks "may I edit?" as
+     soon as its script runs, which is usually before the reply is back. */
+  var waiting = [];
+
+  /**
+   * Run fn once the signed-in user is known — immediately if the reply has
+   * already arrived. The single place a page learns who it is serving.
+   */
+  function onUser(fn) {
+    if (global.AunUser) { fn(global.AunUser); return; }
+    waiting.push(fn);
+  }
+
+  /**
+   * What the signed-in user may do in one module, read from the matrix the
+   * server computed. This hides controls; it does not authorize anything.
+   * Every write is checked again in the dispatcher, and the two are allowed
+   * to disagree only in the direction of the server saying no (§10).
+   */
+  function can(module, action) {
+    var u = global.AunUser;
+    if (!u || !u.permissions) return false;
+    var m = u.permissions[module];
+    return !!(m && m[action || "view"]);
+  }
+
   function wireShell() {
     var buttons = document.querySelectorAll(".menu__i--danger");
     Array.prototype.forEach.call(buttons, function (b) {
@@ -163,18 +191,128 @@
       });
       var n = document.getElementById("whoname");
       if (n && n.firstChild) n.firstChild.nodeValue = u.name;
+      var n2 = document.getElementById("whoname2");
+      if (n2) n2.textContent = u.name;
       Array.prototype.forEach.call(document.querySelectorAll("#whorole, #whorole2"), function (el) {
         el.textContent = u.roleLabel || "";
       });
-      /* the role preview switch in the demo bar reflects the real role now */
       global.AunUser = u;
+      waiting.forEach(function (fn) { try { fn(u); } catch (e) {} });
+      waiting.length = 0;
       document.dispatchEvent(new CustomEvent("aun:user", { detail: u }));
     }).catch(function () { /* handle() already redirected on 401 */ });
   }
 
+  /* ------------------------------------------------------------------ */
+  /* the header bell                                                     */
+  /* ------------------------------------------------------------------ */
+
+  var ICON = { new_request: "ic-newdot", stale: "ic-clock" };
+  var TONE = { new_request: "new",       stale: "warn" };
+
+  /** "قبل ساعتين" and friends, from a UTC timestamp the server wrote. */
+  function relative(iso) {
+    var t = Date.parse(String(iso).replace(" ", "T") + "Z");
+    if (isNaN(t)) return "";
+    var m = Math.round((Date.now() - t) / 60000);
+    if (m < 1) return "الآن";
+    if (m < 60) return m === 1 ? "قبل دقيقة" : (m === 2 ? "قبل دقيقتين" : "قبل " + m + (m <= 10 ? " دقائق" : " دقيقة"));
+    var h = Math.round(m / 60);
+    if (h < 24) return h === 1 ? "قبل ساعة" : (h === 2 ? "قبل ساعتين" : "قبل " + h + (h <= 10 ? " ساعات" : " ساعة"));
+    var d = Math.round(h / 24);
+    return d === 1 ? "أمس" : (d === 2 ? "قبل يومين" : "قبل " + d + (d <= 10 ? " أيام" : " يوماً"));
+  }
+
+  /**
+   * Every page has this popup in its header. It used to hold five notices
+   * written into the markup — a fixed cast of names that had nothing to do
+   * with the database. One implementation here replaces eleven copies, and
+   * it shows what الإشعارات وسجل النشاط actually holds, or says there is
+   * nothing rather than inventing something.
+   */
+  function wireNotifications() {
+    var list = document.getElementById("notiflist");
+    var bell = document.getElementById("bell");
+    if (!list || !bell) return;
+    var dot  = document.getElementById("belldot");
+    var nav  = document.querySelector('[data-navcount="activity"]');
+    var all  = document.getElementById("readall");
+    var rows = [];
+
+    function empty(text) {
+      list.textContent = "";
+      var p = document.createElement("p");
+      p.className = "pop__empty";
+      p.style.cssText = "margin:0;padding:1.25rem 1rem;text-align:center;color:var(--slate);font-size:.875rem";
+      p.textContent = text;
+      list.appendChild(p);
+    }
+
+    function paint() {
+      if (!rows.length) { empty("لا توجد تنبيهات."); }
+      else {
+        list.textContent = "";
+        rows.slice(0, 5).forEach(function (n) {
+          var a = document.createElement("a");
+          a.className = "notif" + (n.read ? " is-read" : "");
+          a.href = n.ref ? "requests.html#" + encodeURIComponent(n.ref) : "requests.html";
+          a.setAttribute("data-nid", String(n.id));
+
+          var u = document.createElement("span");
+          u.className = "notif__unread"; u.setAttribute("aria-hidden", "true");
+
+          var ic = document.createElement("span");
+          ic.className = "notif__i notif__i--" + (TONE[n.kind] || "ok");
+          ic.innerHTML = '<svg class="i i--sm" aria-hidden="true"><use href="#'
+                       + (ICON[n.kind] || "ic-checkcircle") + '"/></svg>';
+
+          var b = document.createElement("span"); b.className = "notif__b";
+          var t = document.createElement("span"); t.className = "notif__t"; t.textContent = n.title;
+          var m = document.createElement("span"); m.className = "notif__m";
+          m.textContent = relative(n.at) + (n.read ? "" : " · غير مقروء");
+          b.appendChild(t); b.appendChild(m);
+
+          a.appendChild(u); a.appendChild(ic); a.appendChild(b);
+          list.appendChild(a);
+        });
+      }
+      var unread = rows.filter(function (n) { return !n.read; }).length;
+      if (dot) dot.hidden = unread === 0;
+      bell.setAttribute("aria-label", unread ? "التنبيهات — " + unread + " غير مقروءة" : "التنبيهات — لا جديد");
+      if (nav) { nav.hidden = unread === 0; nav.textContent = unread ? String(unread) : ""; }
+      if (all) all.disabled = unread === 0;
+    }
+
+    list.addEventListener("click", function (e) {
+      var a = e.target.closest ? e.target.closest(".notif") : null;
+      if (!a) return;
+      var id = Number(a.getAttribute("data-nid"));
+      rows.forEach(function (n) { if (n.id === id) n.read = true; });
+      paint();
+      AunAPI.readNotification(id, true).catch(function () {});
+    });
+    if (all) all.addEventListener("click", function (e) {
+      e.stopPropagation();
+      rows.forEach(function (n) { n.read = true; });
+      paint();
+      AunAPI.readNotification(null, true).catch(function () {});
+    });
+
+    empty("…");
+    AunAPI.notifications().then(function (res) {
+      rows = res.rows || [];
+      paint();
+    }).catch(function (err) {
+      if (err && err.status === 401) return;   /* handle() is already redirecting */
+      empty("تعذّر تحميل التنبيهات.");
+    });
+  }
+
+  function boot() { wireShell(); wireNotifications(); }
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", wireShell);
+    document.addEventListener("DOMContentLoaded", boot);
   } else {
-    wireShell();
+    boot();
   }
 })(window);

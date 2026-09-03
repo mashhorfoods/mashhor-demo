@@ -1,0 +1,13 @@
+<!doctype html><meta charset="utf-8"><title>login</title><pre id="o">…</pre>
+<script>
+var q = new URLSearchParams(location.search);
+var email = q.get("e") || "noura@aunaldrb.com";
+var pw    = q.get("p") || "Recovery-01-Local-Dev";
+fetch("/api/csrf",{credentials:"same-origin"}).then(function(r){return r.json();}).then(function(c){
+  return fetch("/api/auth/login",{method:"POST",credentials:"same-origin",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({csrf_token:c.csrf_token||c.token||c.csrf,email:email,password:pw})});
+}).then(function(r){return r.json();}).then(function(r){
+  document.getElementById("o").textContent = r.user ? ("OK " + r.user.name + " / " + r.user.role) : JSON.stringify(r);
+});
+</script>

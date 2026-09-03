@@ -1109,6 +1109,51 @@ foreach ([
 }
 
 /* ================================================================== */
+section('NO DEMO DATA REACHES A SIGNED-IN SCREEN');
+/* ================================================================== */
+$MODULES = ['dashboard', 'requests', 'customers', 'services', 'content',
+            'media', 'activity', 'reports', 'users', 'settings', 'intake'];
+foreach ($MODULES as $page) {
+    $src = (string) @file_get_contents(AUN_ROOT . '/admin/' . $page . '.html');
+    check('no-demo', "{$page}: no demo-data notice",
+        !str_contains($src, 'class="alert alert--info demobar"')
+        && !str_contains($src, 'بيانات تجريبية') && !str_contains($src, 'حسابات تجريبية'));
+    check('no-demo', "{$page}: the header identity is filled from /auth/me",
+        str_contains($src, 'id="whoname"') && str_contains($src, 'id="whorole"')
+        && str_contains($src, 'id="whoname2"') && str_contains($src, 'id="whorole2"'));
+    check('no-demo', "{$page}: no invented customer names",
+        !str_contains($src, 'أمل الصاعدي') && !str_contains($src, 'نوف العتيبي')
+        && !str_contains($src, 'تركي الشهراني'));
+    check('no-demo', "{$page}: no role-preview switch",
+        !str_contains($src, 'id="roleFull"') && !str_contains($src, 'id="roleView"'));
+}
+$dash = (string) @file_get_contents(AUN_ROOT . '/admin/dashboard.html');
+check('no-demo', 'dashboard: no state-cycling preview control', !str_contains($dash, 'id="statebtn"'));
+check('no-demo', 'dashboard: sample rows cannot paint before they are filled',
+    substr_count($dash, '<tr hidden><td><span class="cell-id">') === 5
+    && substr_count($dash, '<a class="reccard" hidden') === 5
+    && substr_count($dash, '<div class="act" hidden>') === 4);
+check('no-demo', 'dashboard: every block opens in its loading state',
+    substr_count($dash, 'data-state="loading" id=') + substr_count($dash, 'id="kpis" data-state="loading"') === 4);
+check('no-demo', 'dashboard: the greeting is written, not typed',
+    str_contains($dash, 'id="greet"') && !str_contains($dash, '5 طلبات جديدة'));
+check('no-demo', 'the shared client exposes the permission matrix',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/admin/app.js'), 'permissions[module]')
+    || str_contains((string) @file_get_contents(AUN_ROOT . '/admin/app.js'), 'u.permissions[module]'));
+
+$res = $admin->get('/api/admin/summary');
+$c = $res['body']['counts'] ?? [];
+check('no-demo', 'summary counts what the tiles state',
+    array_key_exists('overdue', $c) && array_key_exists('confirmedToday', $c)
+    && array_key_exists('doneThisMonth', $c),
+    'overdue/confirmedToday/doneThisMonth');
+check('no-demo', 'and they are numbers, not text',
+    is_int($c['overdue'] ?? null) && is_int($c['confirmedToday'] ?? null) && is_int($c['doneThisMonth'] ?? null));
+check('no-demo', 'the overdue figure never exceeds the review count',
+    (int) ($c['overdue'] ?? 0) <= (int) ($c['review'] ?? 0),
+    'overdue=' . ($c['overdue'] ?? '?') . ' review=' . ($c['review'] ?? '?'));
+
+/* ================================================================== */
 section('INSTALLER — install.php answers nothing without SETUP_TOKEN');
 /* ================================================================== */
 $inst = new Client($BASE);

@@ -826,11 +826,11 @@ tr.rowlink{cursor:pointer}
         <span class="wrap-rel">
           <button class="who" id="whobtn" aria-expanded="false" aria-controls="whopop">
             <span class="who__av" aria-hidden="true">ن ع</span>
-            <span class="who__n">نورة العتيبي<span>مدير النظام</span></span>
+            <span class="who__n" id="whoname">—<span id="whorole"></span></span>
           </button>
           <div class="pop" id="whopop" hidden role="menu" aria-label="حساب المستخدم" style="width:min(17rem,calc(100vw - 2rem))">
             <div class="menu__id"><span class="who__av" aria-hidden="true">ن ع</span>
-              <span><b>نورة العتيبي</b><span>مدير النظام</span></span></div>
+              <span><b id="whoname2">—</b><span id="whorole2"></span></span></div>
             <button class="menu__i" role="menuitem"><svg class="i i--sm" aria-hidden="true"><use href="#ic-user"/></svg>معلومات الحساب</button>
             <span class="menu__sep"></span>
             <button class="menu__i menu__i--danger" role="menuitem"><svg class="i i--sm" aria-hidden="true"><use href="#ic-logout"/></svg>تسجيل الخروج</button>
@@ -841,11 +841,6 @@ tr.rowlink{cursor:pointer}
 
     <main class="content" id="main">
 
-      <div class="alert alert--info demobar">
-        <svg class="i alert__i" aria-hidden="true"><use href="#ic-info"/></svg>
-        <span><span class="alert__t">بيانات تجريبية للعرض</span>
-          <span class="alert__b">التنبيهات وسجل النشاط أدناه مشتقّة من سجلات الوحدات نفسها — الطلبات والخدمات والوسائط والمستخدمين — وليست بيانات مستقلة. حالة «مقروء» تُحفظ في هذا المتصفح فقط، وستنتقل إلى حساب المستخدم عند ربط النظام بقاعدة بيانات.</span></span>
-      </div>
 
       <div class="page" style="margin-bottom:var(--s6)">
         <div class="page__t">
@@ -1043,16 +1038,6 @@ tr.rowlink{cursor:pointer}
 
   var NOW = "2026-09-14 09:30";
 
-  /* ---------- approved services (the site is the source of truth) ------ */
-  var SERVICES = [
-    "النقل بواسطة الكرسي المتحرك",
-    "النقل بواسطة الكرسي الكهربائي",
-    "النقل بواسطة السرير الطبي",
-    "خدمة مساعد السائق",
-    "النقل اليومي",
-    "النقل إلى المستشفيات والمراكز الطبية",
-    "التنقل للمناسبات الاجتماعية"
-  ];
 
   /* ---------- the five approved statuses ------------------------------- */
   var ST = {
@@ -1062,116 +1047,13 @@ tr.rowlink{cursor:pointer}
     "done":      { label:"مكتمل",        cls:"done",      icon:"ic-checks" },
     "cancel":    { label:"ملغي",         cls:"cancel",    icon:"ic-xcircle" }
   };
-  var DATA = [
-    { id:"REQ-2026-0148", name:"عبدالله الشهري", phone:"0535544352", service:SERVICES[5],
-      from:"حي السليمانية، الرياض", to:"مستشفى الملك فيصل التخصصي", date:"2026-09-14", time:"08:30",
-      status:"new", created:"2026-09-13 19:42", source:"واتساب",
-      notes:[{t:"المستفيد يحتاج مساعداً عند النزول من المنزل. المرافق سيكون بصحبته.",w:"نورة العتيبي",d:"2026-09-13 19:45"}],
-      hist:[{to:"new",w:"النظام",d:"2026-09-13 19:42"}] },
-    { id:"REQ-2026-0147", name:"منيرة الدوسري", phone:"0501122334", service:SERVICES[0],
-      from:"حي الملقا، الرياض", to:"مركز الأمير سلطان للرعاية", date:"2026-09-14", time:"10:00",
-      status:"confirmed", created:"2026-09-12 11:05", source:"هاتف", notes:[],
-      hist:[{to:"new",w:"النظام",d:"2026-09-12 11:05"},{to:"review",w:"نورة العتيبي",d:"2026-09-12 12:20"},
-            {to:"confirmed",w:"نورة العتيبي",d:"2026-09-13 17:30"}] },
-    { id:"REQ-2026-0146", name:"فهد العنزي", phone:"0559988776", service:SERVICES[3],
-      from:"حي النرجس، الرياض", to:"حي العليا، الرياض", date:"2026-09-13", time:null,
-      status:"review", created:"2026-09-11 09:14", source:"واتساب",
-      notes:[{t:"بانتظار تأكيد العميل لوقت الرحلة.",w:"نورة العتيبي",d:"2026-09-12 08:10"}],
-      hist:[{to:"new",w:"النظام",d:"2026-09-11 09:14"},{to:"review",w:"نورة العتيبي",d:"2026-09-11 10:02"}] },
-    { id:"REQ-2026-0145", name:"سارة القحطاني", phone:"0533344556", service:SERVICES[4],
-      from:"حي الياسمين، الرياض", to:"جامعة الأميرة نورة", date:"2026-09-12", time:"07:15",
-      status:"done", created:"2026-09-08 16:40", source:"هاتف", notes:[],
-      hist:[{to:"new",w:"النظام",d:"2026-09-08 16:40"},{to:"review",w:"سارة القحطاني",d:"2026-09-09 09:00"},
-            {to:"confirmed",w:"نورة العتيبي",d:"2026-09-10 13:22"},{to:"done",w:"نورة العتيبي",d:"2026-09-12 09:05"}] },
-    { id:"REQ-2026-0144", name:"خالد المطيري", phone:"0544455667", service:SERVICES[6],
-      from:"حي الروضة، الرياض", to:"قاعة المناسبات، طريق الملك عبدالله", date:"2026-09-11", time:"18:00",
-      status:"cancel", created:"2026-09-07 12:30", source:"واتساب",
-      notes:[{t:"أُلغي بناءً على طلب العميل — تأجلت المناسبة.",w:"نورة العتيبي",d:"2026-09-10 20:15"}],
-      hist:[{to:"new",w:"النظام",d:"2026-09-07 12:30"},{to:"review",w:"نورة العتيبي",d:"2026-09-08 08:45"},
-            {to:"cancel",w:"نورة العتيبي",d:"2026-09-10 20:15"}] },
-    { id:"REQ-2026-0143", name:"هند الزهراني", phone:"0566677889", service:SERVICES[1],
-      from:"حي قرطبة، الرياض", to:"مستشفى الحبيب، الريان", date:"2026-09-14", time:"14:30",
-      status:"new", created:"2026-09-13 21:10", source:"واتساب", notes:[],
-      hist:[{to:"new",w:"النظام",d:"2026-09-13 21:10"}] },
-    { id:"REQ-2026-0142", name:"ماجد الحربي", phone:"0512233445", service:SERVICES[2],
-      from:"حي الشفا، الرياض", to:"مستشفى الملك سعود الطبي", date:"2026-09-15", time:"09:00",
-      status:"review", created:"2026-09-12 15:25", source:"هاتف", notes:[],
-      hist:[{to:"new",w:"النظام",d:"2026-09-12 15:25"},{to:"review",w:"سارة القحطاني",d:"2026-09-13 08:30"}] },
-    { id:"REQ-2026-0141", name:"لطيفة السبيعي", phone:"0577788990", service:SERVICES[0],
-      from:"حي الازدهار، الرياض", to:"مركز التأهيل الشامل", date:"2026-09-16", time:"11:00",
-      status:"confirmed", created:"2026-09-10 10:00", source:"هاتف", notes:[],
-      hist:[{to:"new",w:"النظام",d:"2026-09-10 10:00"},{to:"review",w:"نورة العتيبي",d:"2026-09-10 14:12"},
-            {to:"confirmed",w:"نورة العتيبي",d:"2026-09-11 09:40"}] },
-    { id:"REQ-2026-0140", name:"سعد الغامدي", phone:"0588899001", service:SERVICES[5],
-      from:"حي المروج، الرياض", to:"مستشفى قوى الأمن", date:"2026-09-09", time:"07:45",
-      status:"done", created:"2026-09-05 08:20", source:"واتساب", notes:[],
-      hist:[{to:"new",w:"النظام",d:"2026-09-05 08:20"},{to:"confirmed",w:"نورة العتيبي",d:"2026-09-06 11:00"},
-            {to:"done",w:"نورة العتيبي",d:"2026-09-09 09:30"}] },
-    { id:"REQ-2026-0139", name:"نوف العتيبي", phone:"0522211334", service:SERVICES[4],
-      from:"حي الصحافة، الرياض", to:"مركز رعاية نهارية", date:"2026-09-17", time:"06:50",
-      status:"new", created:"2026-09-13 07:05", source:"هاتف", notes:[],
-      hist:[{to:"new",w:"النظام",d:"2026-09-13 07:05"}] },
-    { id:"REQ-2026-0138", name:"بدر الدوسري", phone:"0599900112", service:SERVICES[3],
-      from:"حي الوادي، الرياض", to:"حي الملز، الرياض", date:"2026-09-08", time:"16:20",
-      status:"done", created:"2026-09-03 13:15", source:"هاتف", notes:[],
-      hist:[{to:"new",w:"النظام",d:"2026-09-03 13:15"},{to:"done",w:"سارة القحطاني",d:"2026-09-08 17:40"}] },
-    { id:"REQ-2026-0150", name:"أمل الصاعدي", phone:"0501239876", service:SERVICES[1],
-      from:"حي الربيع، الرياض", to:"مركز التأهيل الشامل", date:"2026-09-18", time:"09:30",
-      status:"new", created:"2026-09-14 07:22", source:"الموقع", notes:[],
-      hist:[{to:"new",w:"نموذج الموقع",d:"2026-09-14 07:22"}] },
-    { id:"REQ-2026-0149", name:"تركي الشهراني", phone:"0553219876", service:SERVICES[4],
-      from:"حي النخيل، الرياض", to:"مستشفى الملك خالد الجامعي", date:"2026-09-16", time:null,
-      status:"review", created:"2026-09-13 22:48", source:"الموقع",
-      notes:[{t:"وصل الطلب من نموذج الموقع بدون تحديد وقت — يلزم الاتصال لتأكيده.",w:"نورة العتيبي",d:"2026-09-14 08:05"}],
-      hist:[{to:"new",w:"نموذج الموقع",d:"2026-09-13 22:48"},
-            {to:"review",w:"نورة العتيبي",d:"2026-09-14 08:05"}] },
-    { id:"REQ-2026-0137", name:"ريم الشمري", phone:"0533300221", service:SERVICES[6],
-      from:"حي حطين، الرياض", to:"استراحة العائلة، الدرعية", date:"2026-09-20", time:null,
-      status:"new", created:"2026-09-12 20:30", source:"واتساب", notes:[],
-      hist:[{to:"new",w:"النظام",d:"2026-09-12 20:30"}] },
-    { id:"REQ-2026-0136", name:"سارة القحطاني", phone:"0533344556", service:SERVICES[4],
-      from:"حي الياسمين، الرياض", to:"جامعة الأميرة نورة", date:"2026-09-05", time:"07:15",
-      status:"done", created:"2026-09-01 08:20", source:"هاتف", notes:[],
-      hist:[{to:"new",w:"النظام",d:"2026-09-01 08:20"},{to:"done",w:"سارة القحطاني",d:"2026-09-05 08:40"}] },
-    { id:"REQ-2026-0131", name:"عبدالله الشهري", phone:"0535544352", service:SERVICES[5],
-      from:"حي السليمانية، الرياض", to:"مستشفى الملك فيصل التخصصي", date:"2026-08-30", time:"09:00",
-      status:"done", created:"2026-08-27 10:12", source:"واتساب", notes:[],
-      hist:[{to:"new",w:"النظام",d:"2026-08-27 10:12"},{to:"done",w:"نورة العتيبي",d:"2026-08-30 10:15"}] },
-    { id:"REQ-2026-0128", name:"منيرة الدوسري", phone:"0501122334", service:SERVICES[0],
-      from:"حي الملقا، الرياض", to:"مركز الأمير سلطان للرعاية", date:"2026-08-24", time:"10:00",
-      status:"done", created:"2026-08-21 09:30", source:"هاتف", notes:[],
-      hist:[{to:"new",w:"النظام",d:"2026-08-21 09:30"},{to:"done",w:"نورة العتيبي",d:"2026-08-24 11:05"}] },
-    { id:"REQ-2026-0119", name:"عبدالله الشهري", phone:"0535544352", service:SERVICES[0],
-      from:"حي السليمانية، الرياض", to:"مركز التأهيل الشامل", date:"2026-08-11", time:null,
-      status:"done", created:"2026-08-08 14:05", source:"هاتف", notes:[],
-      hist:[{to:"new",w:"النظام",d:"2026-08-08 14:05"},{to:"done",w:"سارة القحطاني",d:"2026-08-11 13:20"}] }
-  ];
 
   /* ---------- the other modules' records, as they hold them ------------ */
   /* الخدمات — the seven approved services, all published, one shared
      timestamp because the services module records exactly one. */
   var SVC_UPDATED = "2026-09-02 11:35";
 
-  /* الوسائط والأصول — every asset the media library lists, with the upload
-     date it records. No upload time is stored, so none is shown. */
-  var MEDIA = [
-    "daily-transport-elderly.webp","driver-assistant-escort.webp","equipped-vehicle-fleet.webp",
-    "hospital-medical-centre.webp","medical-bed-transport.webp","power-wheelchair-transport.webp",
-    "riyadh-social-mobility.webp","wheelchair-passenger-vehicle.webp","wheelchair-ramp-boarding.webp",
-    "wheelchair-transport.webp","apple-touch-icon.png","aun-aldrb-logo-white.png",
-    "aun-aldrb-logo-white.svg","aun-aldrb-logo.png","aun-aldrb-logo.svg","favicon-32.png",
-    "logo.png","og-image.png"
-  ];
-  var MEDIA_DATE = "2026-09-02";
 
-  /* المستخدمون والصلاحيات — the four accounts, their creation dates and
-     their last sign-in, exactly as the users module lists them. */
-  var USERS = [
-    { name:"نورة العتيبي",  role:"مدير النظام",  added:"2026-01-08", last:"2026-09-14 09:12" },
-    { name:"سارة القحطاني", role:"مدير المحتوى", added:"2026-03-22", last:"2026-09-13 14:05" },
-    { name:"فيصل الحربي",   role:"مدير",          added:"2026-05-14", last:"2026-09-12 08:40" },
-    { name:"عبير الشمري",   role:"مدير",          added:"2026-04-02", last:"2026-07-30 16:20" }
-  ];
 
   /* ---------- modules and action types --------------------------------- */
   var MOD = {
@@ -1253,71 +1135,6 @@ tr.rowlink{cursor:pointer}
     return (p[0]||"").charAt(0) + " " + (p[1]||"").charAt(0);
   }
 
-  /* ---------- the activity log, derived ---------------------------------
-     Sorted newest first. `exact` is false where the source records a date
-     but no time — those rows say so rather than showing a made-up 00:00. */
-  function buildLog(){
-    var out = [];
-
-    DATA.forEach(function(r){
-      (r.hist||[]).forEach(function(h,i){
-        var first = (i === 0 && h.to === "new");
-        out.push({
-          d:h.d, exact:true, who:h.w, mod:"req", act:first ? "create" : "status",
-          label:r.id, href:"requests.html#" + encodeURIComponent(r.id),
-          text: first ? ("طلب " + r.name + " — " + r.service + " (" + r.source + ")")
-                      : ("تغيير الحالة إلى «" + (ST[h.to] ? ST[h.to].label : h.to) + "» — " + r.name)
-        });
-      });
-      (r.notes||[]).forEach(function(n){
-        out.push({
-          d:n.d, exact:true, who:n.w, mod:"req", act:"note",
-          label:r.id, href:"requests.html#" + encodeURIComponent(r.id),
-          text:"ملاحظة على طلب " + r.name
-        });
-      });
-    });
-
-    SERVICES.forEach(function(t){
-      out.push({
-        d:SVC_UPDATED, exact:true, who:null, mod:"svc", act:"edit",
-        label:t, href:"services.html",
-        text:"تحديث بيانات الخدمة المنشورة على الموقع"
-      });
-    });
-
-    MEDIA.forEach(function(n){
-      out.push({
-        d:MEDIA_DATE, exact:false, who:null, mod:"med", act:"upload",
-        label:n, href:"media.html",
-        text:"رفع أصل إلى مكتبة الوسائط"
-      });
-    });
-
-    USERS.forEach(function(u){
-      out.push({
-        d:u.added, exact:false, who:null, mod:"usr", act:"invite",
-        label:u.name, href:"users.html",
-        text:"إنشاء حساب بدور «" + u.role + "»"
-      });
-      out.push({
-        d:u.last, exact:true, who:u.name, mod:"usr", act:"login",
-        label:u.name, href:"users.html",
-        text:"آخر دخول مسجَّل إلى لوحة التحكم"
-      });
-    });
-
-    out.sort(function(a,b){
-      /* date-only rows sort at the end of their day, not the start of it,
-         so an undated change never jumps ahead of a timed one it preceded */
-      var ka = a.d + (a.exact ? "" : " 23:59");
-      var kb = b.d + (b.exact ? "" : " 23:59");
-      return ka < kb ? 1 : (ka > kb ? -1 : 0);
-    });
-    out.forEach(function(e,i){ e.i = i; });
-    return out;
-  }
-
   /* ---------- notifications, derived ------------------------------------
      Three rules, each tied to something an operator must actually do:
        · a request still sitting in «جديد» has not been triaged
@@ -1326,53 +1143,6 @@ tr.rowlink{cursor:pointer}
          news the team may not have seen yet
      No notification exists that does not point at a real record. */
   var STALE_HOURS = 24, SETTLED_HOURS = 72;
-
-  function buildNotifs(){
-    var out = [], stale = [];
-
-    DATA.forEach(function(r){
-      if (r.status === "new"){
-        out.push({
-          id:"new:" + r.id, tone:"new", icon:"ic-newdot", mod:"req",
-          title:"طلب جديد من " + r.name + " — " + r.service,
-          meta:r.source, d:r.created, exact:true,
-          href:"requests.html#" + encodeURIComponent(r.id)
-        });
-      }
-      if (r.status === "review"){
-        var last = (r.hist && r.hist.length) ? r.hist[r.hist.length-1].d : r.created;
-        if (hoursBetween(last, NOW) > STALE_HOURS) stale.push(r);
-      }
-      var h = (r.hist && r.hist.length) ? r.hist[r.hist.length-1] : null;
-      if (h && (h.to === "confirmed" || h.to === "done" || h.to === "cancel")
-            && hoursBetween(h.d, NOW) <= SETTLED_HOURS){
-        out.push({
-          id:"st:" + r.id + ":" + h.to,
-          tone:(h.to === "cancel" ? "off" : "ok"),
-          icon:ST[h.to].icon, mod:"req",
-          title:"الطلب " + r.id + " أصبح «" + ST[h.to].label + "» — " + r.name,
-          meta:(h.w || UNKNOWN), d:h.d, exact:true,
-          href:"requests.html#" + encodeURIComponent(r.id)
-        });
-      }
-    });
-
-    if (stale.length){
-      out.push({
-        id:"stale", tone:"warn", icon:"ic-clock", mod:"req", sticky:true,
-        title: plural(stale.length, "طلب واحد", "طلبان", "طلبات", "طلباً")
-               + " في «قيد المراجعة» منذ أكثر من يوم",
-        meta:stale.map(function(r){ return r.id; }).join("، "),
-        d:NOW, exact:true, href:"requests.html"
-      });
-    }
-
-    out.sort(function(a,b){
-      if (a.sticky !== b.sticky) return a.sticky ? -1 : 1;
-      return a.d < b.d ? 1 : (a.d > b.d ? -1 : 0);
-    });
-    return out;
-  }
 
   /* ---------- RECOVERY 01 §29 ------------------------------------------
      Stage 14 derived both of these from whatever the other modules happened

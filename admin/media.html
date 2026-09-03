@@ -1142,43 +1142,17 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
           <div class="pop" id="notifpop" hidden role="dialog" aria-label="التنبيهات">
             <div class="pop__h"><span class="pop__t">التنبيهات</span>
               <button class="btn btn--ghost btn--sm" id="readall">تعليم الكل كمقروء</button></div>
-            <div class="pop__list" id="notiflist">
-              <a class="notif" href="requests.html" data-nid="stale">
-                <span class="notif__unread" aria-hidden="true"></span>
-                <span class="notif__i notif__i--warn"><svg class="i i--sm" aria-hidden="true"><use href="#ic-clock"/></svg></span>
-                <span class="notif__b"><span class="notif__t">طلبان في «قيد المراجعة» منذ أكثر من يوم</span>
-                <span class="notif__m" data-when="الآن">الآن</span></span></a>
-              <a class="notif" href="requests.html#REQ-2026-0150" data-nid="new:REQ-2026-0150">
-                <span class="notif__unread" aria-hidden="true"></span>
-                <span class="notif__i notif__i--new"><svg class="i i--sm" aria-hidden="true"><use href="#ic-newdot"/></svg></span>
-                <span class="notif__b"><span class="notif__t">طلب جديد من أمل الصاعدي — النقل بواسطة الكرسي الكهربائي</span>
-                <span class="notif__m" data-when="قبل ساعتين">قبل ساعتين</span></span></a>
-              <a class="notif" href="requests.html#REQ-2026-0143" data-nid="new:REQ-2026-0143">
-                <span class="notif__unread" aria-hidden="true"></span>
-                <span class="notif__i notif__i--new"><svg class="i i--sm" aria-hidden="true"><use href="#ic-newdot"/></svg></span>
-                <span class="notif__b"><span class="notif__t">طلب جديد من هند الزهراني — النقل بواسطة الكرسي الكهربائي</span>
-                <span class="notif__m" data-when="قبل 12 ساعة">قبل 12 ساعة</span></span></a>
-              <a class="notif" href="requests.html#REQ-2026-0148" data-nid="new:REQ-2026-0148">
-                <span class="notif__unread" aria-hidden="true"></span>
-                <span class="notif__i notif__i--new"><svg class="i i--sm" aria-hidden="true"><use href="#ic-newdot"/></svg></span>
-                <span class="notif__b"><span class="notif__t">طلب جديد من عبدالله الشهري — النقل إلى المستشفيات والمراكز الطبية</span>
-                <span class="notif__m" data-when="قبل 14 ساعة">قبل 14 ساعة</span></span></a>
-              <a class="notif" href="requests.html#REQ-2026-0147" data-nid="st:REQ-2026-0147:confirmed">
-                <span class="notif__unread" aria-hidden="true"></span>
-                <span class="notif__i notif__i--ok"><svg class="i i--sm" aria-hidden="true"><use href="#ic-checkcircle"/></svg></span>
-                <span class="notif__b"><span class="notif__t">الطلب REQ-2026-0147 أصبح «مؤكد» — منيرة الدوسري</span>
-                <span class="notif__m" data-when="قبل 16 ساعة">قبل 16 ساعة</span></span></a>
-            </div>
-            <div class="pop__f"><a class="btn btn--ghost btn--sm" href="activity.html" style="width:100%">عرض كل التنبيهات (5 من 9)</a></div>
+            <div class="pop__list" id="notiflist"></div>
+            <div class="pop__f"><a class="btn btn--ghost btn--sm" href="activity.html" style="width:100%">عرض كل التنبيهات</a></div>
           </div>
         </span>
         <span class="wrap-rel">
           <button class="who" id="whobtn" aria-expanded="false" aria-controls="whopop">
             <span class="who__av" aria-hidden="true">ن ع</span>
-            <span class="who__n">نورة العتيبي<span id="whorole">مدير النظام</span></span></button>
+            <span class="who__n" id="whoname">—<span id="whorole"></span></span></button>
           <div class="pop" id="whopop" hidden role="menu" aria-label="حساب المستخدم" style="width:min(17rem,calc(100vw - 2rem))">
             <div class="menu__id"><span class="who__av" aria-hidden="true">ن ع</span>
-              <span><b>نورة العتيبي</b><span id="whorole2">مدير النظام</span></span></div>
+              <span><b id="whoname2">—</b><span id="whorole2"></span></span></div>
             <button class="menu__i" role="menuitem"><svg class="i i--sm" aria-hidden="true"><use href="#ic-user"/></svg>معلومات الحساب</button>
             <button class="menu__i" role="menuitem"><svg class="i i--sm" aria-hidden="true"><use href="#ic-shield"/></svg>تغيير كلمة المرور</button>
             <span class="menu__sep"></span>
@@ -1187,14 +1161,6 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
       </div>
     </header>
     <main class="content" id="main">
-      <div class="alert alert--info demobar">
-        <svg class="i alert__i" aria-hidden="true"><use href="#ic-info"/></svg>
-        <span><span class="alert__t">مكتبة الوسائط الفعلية للموقع</span>
-          <span class="alert__b">الأصول أدناه هي ملفات الموقع الحقيقية بأسمائها وأحجامها وأبعادها، و«الاستخدام» محسوب من الصفحة نفسها. الرفع والاستبدال والحذف تعمل في هذه المعاينة ولا تُحفظ بعد إغلاق الصفحة.</span></span>
-        <span class="roles"><span class="roles__sw" role="group" aria-label="معاينة الصلاحيات">
-          <button id="roleFull" aria-pressed="true">صلاحية كاملة</button>
-          <button id="roleView" aria-pressed="false">عرض فقط</button></span></span>
-      </div>
 
       <section id="libview" tabindex="-1">
         <div class="page" style="margin-bottom:var(--s6)">
@@ -1508,7 +1474,7 @@ window.AunShell = (function(){
   })();
 
   var state={q:"",type:"",use:"",sort:"name",page:1,view:"grid"};
-  var canModify=true, current=null, mode="upload", pending=null;
+  var canModify=false, current=null, mode="upload", pending=null;   /* until /auth/me says otherwise */
 
   function kb(b){ return b<1024 ? b+" B" : (b<1048576 ? (b/1024).toFixed(0)+" KB" : (b/1048576).toFixed(1)+" MB"); }
   function used(a){ return a.u && a.u.length>0; }
@@ -1914,16 +1880,16 @@ window.AunShell = (function(){
       n.classList.toggle("hidden", !canModify); });
     $("shDelete").disabled = !canModify || (current ? used(current) : true);
   }
-  function setRole(full){
-    canModify=full;
-    $("roleFull").setAttribute("aria-pressed", full?"true":"false");
-    $("roleView").setAttribute("aria-pressed", full?"false":"true");
-    $("whorole").textContent = full?"مدير النظام":"عرض فقط";
-    $("whorole2").textContent = full?"مدير النظام":"عرض فقط";
+  /* ---------- what this account may actually do -------------------------
+     canModify used to be a demo switch in the page header. It is the real
+     permission matrix now: /auth/me returns what the server computed, and
+     app.js hands it over as soon as it arrives. Hiding a control is still
+     only courtesy — every write is authorized again in the dispatcher, and
+     the two may disagree only in the direction of the server saying no. */
+  AunAPI.onUser(function(){
+    canModify = AunAPI.can('services', "edit");
     applyPerms();
-  }
-  $("roleFull").addEventListener("click", function(){ setRole(true); });
-  $("roleView").addEventListener("click", function(){ setRole(false); });
+  });
 
   /* ---------- wiring -------------------------------------------------------- */
   var qt=null;
@@ -1981,61 +1947,4 @@ window.AunShell = (function(){
   applyPerms();
 })();
 
-/* --- header notifications (Stage 14) -------------------------------------
-   The bell shows the five newest of the nine notifications الإشعارات وسجل
-   النشاط derives; activity.html is the full list. Read state is shared
-   through one localStorage key so marking something read in one place is
-   read everywhere — the nearest a static build gets to a per-account
-   inbox. A real system reads and writes this on the server. */
-(function(){
-  var KEY = "aun-admin-notif-read";
-  var TOTAL = 9, TOTAL_UNREAD = 7;
-  var list = document.getElementById("notiflist");
-  var bell = document.getElementById("bell");
-  var dot  = document.getElementById("belldot");
-  var nav  = document.querySelector('[data-navcount="activity"]');
-  var all  = document.getElementById("readall");
-  if (!list || !bell) return;
-
-  function load(){
-    var raw = null;
-    try { raw = localStorage.getItem(KEY); } catch(e){}
-    if (!raw) return {};
-    try { var o = JSON.parse(raw); return (o && typeof o === "object") ? o : {}; } catch(e){ return {}; }
-  }
-  function save(m){ try { localStorage.setItem(KEY, JSON.stringify(m)); } catch(e){} }
-
-  function paint(){
-    var m = load(), shownUnread = 0, readShown = 0;
-    Array.prototype.forEach.call(list.querySelectorAll(".notif"), function(a){
-      var id = a.getAttribute("data-nid");
-      var read = !!m[id];
-      a.classList.toggle("is-read", read);
-      var meta = a.querySelector(".notif__m");
-      var when = meta.getAttribute("data-when");
-      meta.textContent = read ? when : (when + " · غير مقروء");
-      if (read) readShown++; else shownUnread++;
-    });
-    /* the five on show are the newest, so every one marked read here comes
-       off the derived unread total; never let the count go negative */
-    var n = Math.max(0, TOTAL_UNREAD - readShown);
-    if (dot) dot.hidden = (n === 0);
-    bell.setAttribute("aria-label", n ? ("التنبيهات — " + n + " غير مقروءة") : "التنبيهات — لا جديد");
-    if (nav){ nav.hidden = (n === 0); nav.textContent = n ? String(n) : ""; }
-    if (all) all.disabled = (shownUnread === 0);
-  }
-
-  list.addEventListener("click", function(e){
-    var a = e.target.closest ? e.target.closest(".notif") : null;
-    if (!a) return;
-    var m = load(); m[a.getAttribute("data-nid")] = true; save(m); paint();
-  });
-  if (all) all.addEventListener("click", function(e){
-    e.stopPropagation();
-    var m = load();
-    Array.prototype.forEach.call(list.querySelectorAll(".notif"), function(a){ m[a.getAttribute("data-nid")] = true; });
-    save(m); paint();
-  });
-  paint();
-})();
 </script>

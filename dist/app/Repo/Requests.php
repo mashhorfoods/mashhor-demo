@@ -285,6 +285,24 @@ final class Repo_Requests
             $out[(string) $r['status']] = (int) $r['n'];
         }
         $out['total'] = array_sum($out);
+        /* Requests sitting in المراجعة for more than a day. The dashboard
+           states this figure next to the قيد المراجعة tile; it was a literal
+           in the markup until now, which meant the page claimed a number it
+           had never counted. */
+        $out['overdue'] = (int) Db::value(
+            "SELECT COUNT(*) FROM requests WHERE status = 'review' AND updated_at < ?",
+            [gmdate('Y-m-d H:i:s', time() - 86400)]
+        );
+        /* The other two figures the tiles state: trips confirmed for today,
+           and requests completed this calendar month. */
+        $out['confirmedToday'] = (int) Db::value(
+            "SELECT COUNT(*) FROM requests WHERE status = 'confirmed' AND trip_date = ?",
+            [gmdate('Y-m-d')]
+        );
+        $out['doneThisMonth'] = (int) Db::value(
+            "SELECT COUNT(*) FROM requests WHERE status = 'done' AND updated_at >= ?",
+            [gmdate('Y-m-01 00:00:00')]
+        );
         return $out;
     }
 
