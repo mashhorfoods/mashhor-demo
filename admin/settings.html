@@ -1288,6 +1288,77 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
               <div class="savebar"><button class="btn btn--primary" data-save="system">حفظ إعدادات النظام</button>
                 <button class="btn btn--ghost" data-reset="system">تراجع</button></div>
             </section>
+
+            <!-- الأمان والنسخ الاحتياطي — المرحلة 6 -->
+            <section class="card panel" id="p-security" aria-labelledby="h-security" hidden>
+              <div class="card__h"><h2 class="card__t" id="h-security">الأمان والنسخ الاحتياطي</h2></div>
+              <div class="card__b">
+
+                <h3 class="t-card" style="margin:0 0 var(--s3);font-size:var(--fs-card);font-weight:600">
+                  تغيير كلمة المرور</h3>
+                <p class="field__help" style="margin-bottom:var(--s4)">
+                  تغيير كلمة المرور ينهي جلساتك المفتوحة على الأجهزة الأخرى. تبقى هذه الجلسة مفتوحة.</p>
+                <div class="pgrid" style="max-width:34rem">
+                  <div class="field">
+                    <label class="field__label" for="pwCur">كلمة المرور الحالية <span class="field__req">(مطلوب)</span></label>
+                    <input class="ctl ltr" id="pwCur" type="password" autocomplete="current-password">
+                    <span class="field__err" id="e-pwCur" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="pwNew">كلمة المرور الجديدة <span class="field__req">(مطلوب)</span></label>
+                    <input class="ctl ltr" id="pwNew" type="password" autocomplete="new-password" minlength="12">
+                    <span class="field__help">12 حرفاً على الأقل، ولا تحتوي على بريدك أو اسمك.</span>
+                    <span class="field__err" id="e-pwNew" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="pwNew2">تأكيد كلمة المرور الجديدة <span class="field__req">(مطلوب)</span></label>
+                    <input class="ctl ltr" id="pwNew2" type="password" autocomplete="new-password">
+                    <span class="field__err" id="e-pwNew2" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
+                  </div>
+                  <div><button class="btn btn--primary" type="button" id="pwSave">تغيير كلمة المرور</button></div>
+                </div>
+
+                <div class="superonly hidden">
+                  <hr style="border:0;border-top:1px solid var(--line);margin:var(--s6) 0">
+
+                  <h3 class="t-card" style="margin:0 0 var(--s3);font-size:var(--fs-card);font-weight:600">
+                    نسخة احتياطية من البيانات</h3>
+                  <p class="field__help" style="margin-bottom:var(--s4)">
+                    ملف واحد يحتوي على الخدمات ومحتوى الموقع والإعدادات والطلبات والعملاء وسجل النشاط.
+                    لا يحتوي على كلمات المرور ولا على بيانات الاتصال بقاعدة البيانات، وتنزيله لا يفتح
+                    الطريق إلى النظام. احفظه خارج الخادم.</p>
+                  <div class="row-actions" style="display:flex;flex-wrap:wrap;gap:var(--s3)">
+                    <a class="btn btn--secondary" id="bkDownload" href="#" download>
+                      <svg class="i i--sm" aria-hidden="true"><use href="#ic-upload"/></svg>تنزيل نسخة احتياطية</a>
+                  </div>
+
+                  <hr style="border:0;border-top:1px solid var(--line);margin:var(--s6) 0">
+
+                  <h3 class="t-card" style="margin:0 0 var(--s3);font-size:var(--fs-card);font-weight:600">
+                    استعادة من نسخة احتياطية</h3>
+                  <div class="warn" style="margin-bottom:var(--s5)">
+                    <svg class="i i--sm" aria-hidden="true" style="margin-top:2px"><use href="#ic-alert"/></svg>
+                    <p><b>الاستعادة تستبدل البيانات الحالية بالكامل.</b> تُحفظ نسخة من الوضع الحالي
+                       تلقائياً قبل الاستبدال، ولا تتأثر الحسابات ولا كلمات المرور. الموقع لا يتغيّر
+                       حتى تنشره من صفحة المحتوى.</p>
+                  </div>
+                  <div class="pgrid" style="max-width:34rem">
+                    <div class="field">
+                      <label class="field__label" for="bkFile">ملف النسخة الاحتياطية</label>
+                      <input class="ctl" id="bkFile" type="file" accept="application/json,.json">
+                      <span class="field__err" id="e-bkFile" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
+                    </div>
+                    <div class="field">
+                      <label class="field__label" for="bkConfirm">اكتب «استعادة» للتأكيد</label>
+                      <input class="ctl" id="bkConfirm" type="text" autocomplete="off" placeholder="استعادة">
+                      <span class="field__err" id="e-bkConfirm" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
+                    </div>
+                    <div><button class="btn btn--danger" type="button" id="bkRestore">استعادة البيانات</button></div>
+                  </div>
+                </div>
+
+              </div>
+            </section>
           </div>
 
         </div>
@@ -1455,7 +1526,11 @@ window.AunShell = (function(){
     { k:"site",    t:"الموقع الإلكتروني", i:"ic-service" },
     { k:"lang",    t:"اللغة", i:"ic-list" },
     { k:"notif",   t:"الإشعارات", i:"ic-bell" },
-    { k:"system",  t:"إعدادات النظام", i:"ic-settings" }
+    { k:"system",  t:"إعدادات النظام", i:"ic-settings" },
+    /* المرحلة 6 — هذا القسم لا يُحفظ مع الإعدادات: لا يوجد له مدخل في SAVED،
+       فلا يُحسب ضمن «تغييرات غير محفوظة» ولا يُرسل مع أي حفظ. كل إجراء فيه
+       يُنفَّذ بنفسه وله رسالته الخاصة. */
+    { k:"security", t:"الأمان والنسخ الاحتياطي", i:"ic-shield" }
   ];
   var TOGGLES = { siteLive:1, nNew:1, nStale:1, nStatus:1, nContent:1 };
   var cur="company", canModify=false, dirtySet={};   /* until /auth/me says otherwise */
@@ -1712,6 +1787,101 @@ window.AunShell = (function(){
       }).catch(function(err){
         toast(err && err.message ? err.message : "تعذّر النشر.", true);
         pub.disabled = false;
+      });
+    });
+  })();
+
+  /* ---------- الأمان والنسخ الاحتياطي (المرحلة 6) ------------------------
+     Three actions that are not settings and are deliberately not wired into
+     the settings save path: each runs on its own, reports its own result, and
+     never joins the "unsaved changes" count. Nothing here ever displays a
+     password — the fields send one and read back only whether it was taken. */
+  (function(){
+    function err(id,msg){
+      var e=$("e-"+id); if(!e) return;
+      e.hidden=false; e.querySelector("span").textContent=msg;
+      var n=$(id); if(n) n.classList.add("is-error");
+    }
+    function clear(ids){
+      ids.forEach(function(id){
+        var e=$("e-"+id); if(e) e.hidden=true;
+        var n=$(id); if(n && n.classList) n.classList.remove("is-error");
+      });
+    }
+    /* the server answers 422 with a map of field -> sentence; show each one
+       against its own field rather than collapsing them into one toast */
+    function showFieldErrors(e, map){
+      var shown=false;
+      if (e && e.errors) Object.keys(e.errors).forEach(function(k){
+        if (map[k]){ err(map[k], e.errors[k]); shown=true; }
+      });
+      return shown;
+    }
+
+    /* --- change my own password --------------------------------------- */
+    var PW=["pwCur","pwNew","pwNew2"], pwBusy=false;
+    var btn=$("pwSave");
+    if (btn) btn.addEventListener("click", function(){
+      if (pwBusy) return;
+      clear(PW);
+      var cur=$("pwCur").value, a=$("pwNew").value, b=$("pwNew2").value;
+      if (!cur){ err("pwCur","أدخل كلمة المرور الحالية."); $("pwCur").focus(); return; }
+      if (a.length<12){ err("pwNew","كلمة المرور يجب ألا تقل عن 12 حرفاً."); $("pwNew").focus(); return; }
+      if (a!==b){ err("pwNew2","الكلمتان غير متطابقتين."); $("pwNew2").focus(); return; }
+
+      pwBusy=true; btn.disabled=true; btn.textContent="جارٍ التغيير…"; $("loadbar").hidden=false;
+      AunAPI.changePassword(cur,a).then(function(){
+        PW.forEach(function(id){ $(id).value=""; });
+        toast("غُيّرت كلمة المرور. أُنهيت جلساتك على الأجهزة الأخرى.");
+      }).catch(function(e){
+        if (!showFieldErrors(e,{current:"pwCur",password:"pwNew"})){
+          toast(e && e.message ? e.message : "تعذّر تغيير كلمة المرور", true);
+        }
+      }).then(function(){
+        pwBusy=false; btn.disabled=false; btn.textContent="تغيير كلمة المرور"; $("loadbar").hidden=true;
+      });
+    });
+
+    /* --- backup and restore, Super Admin only -------------------------- */
+    AunAPI.onUser(function(u){
+      /* Courtesy only: the two endpoints check the role again themselves,
+         and a hidden button is not a permission. */
+      if (!u || u.role !== "super") return;
+      Array.prototype.forEach.call(document.querySelectorAll(".superonly"), function(n){
+        n.classList.remove("hidden");
+      });
+      var dl=$("bkDownload");
+      if (dl) dl.href = AunAPI.backupUrl();
+    });
+
+    var rsBusy=false, rs=$("bkRestore");
+    if (rs) rs.addEventListener("click", function(){
+      if (rsBusy) return;
+      clear(["bkFile","bkConfirm"]);
+      var f=$("bkFile").files && $("bkFile").files[0];
+      if (!f){ err("bkFile","اختر ملف النسخة الاحتياطية أولاً."); return; }
+      if (f.size > 32*1024*1024){ err("bkFile","حجم الملف أكبر من 32 ميجابايت."); return; }
+      if ($("bkConfirm").value.trim() !== "استعادة"){
+        err("bkConfirm","اكتب كلمة «استعادة» للتأكيد."); $("bkConfirm").focus(); return;
+      }
+      ask("استبدال كل البيانات الحالية؟",
+          "ستُستبدل الخدمات والمحتوى والإعدادات والطلبات والعملاء بما في الملف. "+
+          "تُحفظ نسخة من الوضع الحالي تلقائياً قبل الاستبدال، ولا تتأثر الحسابات.",
+          "استعادة البيانات", function(){
+        var fd=new FormData(); fd.append("file", f);
+        fd.append("confirm", "استعادة");
+        rsBusy=true; rs.disabled=true; rs.textContent="جارٍ الاستعادة…"; $("loadbar").hidden=false;
+        AunAPI.restore(fd).then(function(r){
+          $("bkFile").value=""; $("bkConfirm").value="";
+          toast(r.note || ("استُعيد " + r.total + " سجلاً."));
+          return boot();
+        }).catch(function(e){
+          if (!showFieldErrors(e,{file:"bkFile",confirm:"bkConfirm"})){
+            toast(e && e.message ? e.message : "تعذّرت الاستعادة", true);
+          }
+        }).then(function(){
+          rsBusy=false; rs.disabled=false; rs.textContent="استعادة البيانات"; $("loadbar").hidden=true;
+        });
       });
     });
   })();

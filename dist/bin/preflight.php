@@ -166,6 +166,21 @@ check('SETUP_TOKEN has been removed from .env',
     ((string) Env::get('SETUP_TOKEN', '')) === '' ? ''
         : ($setupDone ? 'installation is complete — delete the line' : 'in use for the pending install'));
 
+/* Stage 6 — recover.php is meant to ship closed. It answers 404 to everything
+   unless RECOVERY_TOKEN is set, so its presence is fine and the token's is
+   not: while the line is in .env, anyone holding it can set a Super Admin's
+   password without signing in. That is the point of the page, and the reason
+   the token is supposed to come out again the moment it has been used. */
+$recToken = (string) Env::get('RECOVERY_TOKEN', '');
+check('RECOVERY_TOKEN is NOT set in .env',
+    $recToken === '' ? true : false,
+    $recToken === ''
+        ? 'recover.php answers 404 to everyone'
+        : 'recover.php is OPEN to whoever holds the token — delete the line now that you are back in');
+check('RECOVERY_TOKEN, if set at all, is long enough to matter',
+    $recToken === '' ? true : (strlen($recToken) >= 24 ? null : false),
+    $recToken === '' ? '' : 'length=' . strlen($recToken) . ' (minimum 24; shorter is ignored and the page stays 404)');
+
 /* ================================================================== */
 if ($URL !== '') {
 section('OVER HTTP');

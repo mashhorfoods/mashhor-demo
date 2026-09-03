@@ -77,6 +77,24 @@ final class Repo_Users
         Db::run('UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?', [$hash, Db::now(), $id]);
     }
 
+    /** Clears a temporary lock. Used by a password reset and by recovery. */
+    public static function unlock(int $id): void
+    {
+        Db::run('UPDATE users SET failed_attempts = 0, locked_until = NULL, updated_at = ? WHERE id = ?',
+            [Db::now(), $id]);
+    }
+
+    /**
+     * The accounts that can still administer the system. recover.php lists
+     * these so an operator can see which address to recover — it is behind a
+     * token that only whoever controls the server can set, and it shows a name
+     * and an address, never a hash.
+     */
+    public static function supers(): array
+    {
+        return Db::all('SELECT ' . self::PUBLIC_COLS . " FROM users WHERE role = 'super' ORDER BY id ASC");
+    }
+
     public static function registerFailure(int $id, int $threshold, int $lockMinutes): void
     {
         Db::run('UPDATE users SET failed_attempts = failed_attempts + 1, updated_at = ? WHERE id = ?',

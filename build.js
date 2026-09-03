@@ -65,6 +65,10 @@ const SHIP = [
      Inert without SETUP_TOKEN in .env, refuses once a Super Admin exists, and
      deletes itself after a successful run — see the header of install.php. */
   'install.php',
+  /* Stage 6 — the way back in when nobody can sign in. Inert unless
+     RECOVERY_TOKEN is set in .env, so it ships safe and stays safe; unlike the
+     installer it is not deleted, because the case it answers can recur. */
+  'recover.php',
 ];
 
 /* RECOVERY 01 — the backend and the admin ship as whole directory trees,

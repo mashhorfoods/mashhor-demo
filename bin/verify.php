@@ -1563,6 +1563,280 @@ check('persistence', 'the activity log survived',
     (int) Db::value('SELECT COUNT(*) FROM activity_log WHERE target_id = ?', [$ref]) >= 2);
 
 /* ================================================================== */
+section('STAGE 6A  A WAY BACK IN — PASSWORDS THAT CAN BE CHANGED');
+/* ================================================================== */
+/* A scratch account, so nothing here touches the credentials the rest of the
+   suite signs in with. It is created through the real endpoint. */
+$pwEmail = "pwtest{$stamp}@aunaldrb.com";
+$pwOld   = 'Stage-Six-Old-Pass-1';
+$pwNew   = 'Stage-Six-New-Pass-2';
+$tk = $admin->csrf();
+$res = $admin->post('/api/admin/users/save', [
+    'csrf_token' => $tk, 'name' => 'حساب اختبار كلمة المرور',
+    'email' => $pwEmail, 'role' => 'admin', 'active' => '1', 'password' => $pwOld,
+]);
+check('pw', 'a scratch account is created', $res['status'] === 201, "status={$res['status']}");
+$pwId = (int) ($res['body']['id'] ?? 0);
+
+/* the shared policy is enforced wherever a password is set */
+$res = $admin->post('/api/admin/users/save', [
+    'csrf_token' => $admin->csrf(), 'name' => 'ضعيف', 'email' => "weak{$stamp}@aunaldrb.com",
+    'role' => 'admin', 'active' => '1', 'password' => 'short',
+]);
+check('pw', 'a too-short password is refused at creation', $res['status'] === 422, "status={$res['status']}");
+$res = $admin->post('/api/admin/users/save', [
+    'csrf_token' => $admin->csrf(), 'name' => 'شائع', 'email' => "common{$stamp}@aunaldrb.com",
+    'role' => 'admin', 'active' => '1', 'password' => 'password12345',
+]);
+check('pw', 'an obviously common password is refused too', $res['status'] === 422, "status={$res['status']}");
+
+/* two sessions for that account: one changes the password, the other must die */
+$one = new Client($BASE);
+$res = $one->post('/api/auth/login', ['csrf_token' => $one->csrf(), 'email' => $pwEmail, 'password' => $pwOld]);
+check('pw', 'the scratch account can sign in', $res['status'] === 200, "status={$res['status']}");
+$two = new Client($BASE);
+$res = $two->post('/api/auth/login', ['csrf_token' => $two->csrf(), 'email' => $pwEmail, 'password' => $pwOld]);
+check('pw', 'and can sign in a second time, on another device', $res['status'] === 200, "status={$res['status']}");
+
+$res = $one->post('/api/auth/password',
+    ['csrf_token' => $one->csrf(), 'current' => 'not-the-password', 'password' => $pwNew]);
+check('pw', 'a wrong current password is refused', $res['status'] === 422, "status={$res['status']}");
+check('pw', 'and it says which field was wrong', isset($res['body']['errors']['current']));
+check('pw', 'the password did not change',
+    Auth::verify($pwOld, (string) Repo_Users::findByEmail($pwEmail)['password_hash']));
+
+$res = $one->post('/api/auth/password',
+    ['csrf_token' => $one->csrf(), 'current' => $pwOld, 'password' => 'weak']);
+check('pw', 'a weak new password is refused', $res['status'] === 422, "status={$res['status']}");
+$res = $one->post('/api/auth/password',
+    ['csrf_token' => $one->csrf(), 'current' => $pwOld, 'password' => $pwOld]);
+check('pw', 'reusing the current password is refused', $res['status'] === 422, "status={$res['status']}");
+
+$res = $one->post('/api/auth/password',
+    ['csrf_token' => $one->csrf(), 'current' => $pwOld, 'password' => $pwNew]);
+check('pw', 'the change succeeds with the right current password', $res['status'] === 200, "status={$res['status']}");
+check('pw', 'and the reply never carries the password',
+    !str_contains($res['raw'], $pwNew) && !str_contains($res['raw'], $pwOld));
+check('pw', 'and never a hash', !str_contains($res['raw'], '$argon') && !str_contains($res['raw'], '$2y$'));
+check('pw', 'the stored hash is the new password',
+    Auth::verify($pwNew, (string) Repo_Users::findByEmail($pwEmail)['password_hash']));
+check('pw', 'the session that changed it stays signed in',
+    $one->get('/api/auth/me')['status'] === 200);
+check('pw', 'the OTHER session is signed out',
+    $two->get('/api/auth/me')['status'] === 401);
+
+$dead = new Client($BASE);
+$res = $dead->post('/api/auth/login', ['csrf_token' => $dead->csrf(), 'email' => $pwEmail, 'password' => $pwOld]);
+check('pw', 'the old password no longer signs in', $res['status'] === 401, "status={$res['status']}");
+$live = new Client($BASE);
+$res = $live->post('/api/auth/login', ['csrf_token' => $live->csrf(), 'email' => $pwEmail, 'password' => $pwNew]);
+check('pw', 'the new one does', $res['status'] === 200, "status={$res['status']}");
+
+/* a Super Admin resets someone else's; a non-super may not */
+$res = $live->post('/api/admin/users/password',
+    ['csrf_token' => $live->csrf(), 'id' => $pwId, 'password' => 'Someone-Elses-Pass-9']);
+check('pw', 'an Admin with the users module cannot reset a password', $res['status'] === 403, "status={$res['status']}");
+check('pw', 'and the refusal changed nothing',
+    Auth::verify($pwNew, (string) Repo_Users::findByEmail($pwEmail)['password_hash']));
+
+$reset = 'Super-Reset-This-One-3';
+$res = $admin->post('/api/admin/users/password',
+    ['csrf_token' => $admin->csrf(), 'id' => $pwId, 'password' => $reset]);
+check('pw', 'a Super Admin can reset it', $res['status'] === 200, "status={$res['status']}");
+check('pw', 'the reply carries neither the password nor a hash',
+    !str_contains($res['raw'], $reset) && !str_contains($res['raw'], '$argon') && !str_contains($res['raw'], '$2y$'));
+check('pw', 'the reset ended the account\'s sessions', $live->get('/api/auth/me')['status'] === 401);
+$back = new Client($BASE);
+$res = $back->post('/api/auth/login', ['csrf_token' => $back->csrf(), 'email' => $pwEmail, 'password' => $reset]);
+check('pw', 'and the account signs in with the new password', $res['status'] === 200, "status={$res['status']}");
+check('pw', 'a reset is written to the activity log',
+    (int) Db::value('SELECT COUNT(*) FROM activity_log WHERE target_id = ? AND summary LIKE ?',
+        [(string) $pwId, '%إعادة تعيين كلمة المرور%']) >= 1);
+
+/* the lock, and the way out of it */
+Repo_Users::unlock($pwId);
+Db::run('UPDATE users SET locked_until = ? WHERE id = ?',
+    [gmdate('Y-m-d H:i:s', time() + 900), $pwId]);
+$locked = new Client($BASE);
+$res = $locked->post('/api/auth/login', ['csrf_token' => $locked->csrf(), 'email' => $pwEmail, 'password' => $reset]);
+check('pw', 'a locked account cannot sign in even with the right password',
+    $res['status'] === 401, "status={$res['status']}");
+$res = $back->post('/api/admin/users/unlock', ['csrf_token' => $back->csrf(), 'id' => $pwId]);
+check('pw', 'a non-super cannot clear the lock', $res['status'] === 403, "status={$res['status']}");
+$res = $admin->post('/api/admin/users/unlock', ['csrf_token' => $admin->csrf(), 'id' => $pwId]);
+check('pw', 'a Super Admin can', $res['status'] === 200, "status={$res['status']}");
+$open = new Client($BASE);
+$res = $open->post('/api/auth/login', ['csrf_token' => $open->csrf(), 'email' => $pwEmail, 'password' => $reset]);
+check('pw', 'and the account signs in again', $res['status'] === 200, "status={$res['status']}");
+
+/* the dashboard offers the reset only where it works */
+$usersPage = (string) @file_get_contents(AUN_ROOT . '/admin/users.html');
+check('pw', 'the reset button is wired to the real endpoint',
+    str_contains($usersPage, 'AunAPI.resetUserPassword'));
+check('pw', 'and no longer only shows a message',
+    !str_contains($usersPage, 'سيُطلب من المستخدم تعيين كلمة مرور جديدة'));
+$setPage = (string) @file_get_contents(AUN_ROOT . '/admin/settings.html');
+check('pw', 'a person can change their own password from الإعدادات',
+    str_contains($setPage, 'AunAPI.changePassword'));
+
+/* ================================================================== */
+section('STAGE 6A  RECOVERY — CLOSED UNTIL SOMEONE OPENS IT');
+/* ================================================================== */
+$rec = new Client($BASE);
+check('recover', 'RECOVERY_TOKEN is not set here', (string) Env::get('RECOVERY_TOKEN', '') === '');
+foreach (['', '?t=', '?t=guess', '?t=' . str_repeat('a', 32)] as $q) {
+    $res = $rec->get('/recover.php' . $q);
+    check('recover', "GET /recover.php{$q} is a bare 404", $res['status'] === 404, "status={$res['status']}");
+    check('recover', 'and discloses nothing', strlen($res['raw']) < 200, strlen($res['raw']) . ' bytes');
+}
+$res = $rec->post('/recover.php', 't=guess&action=password&id=1&password=Attacker-Pass-123');
+check('recover', 'a POST without the token is a 404 too', $res['status'] === 404, "status={$res['status']}");
+check('recover', 'and changed no password',
+    Auth::verify($reset, (string) Repo_Users::findByEmail($pwEmail)['password_hash']));
+
+$recSrc = (string) @file_get_contents(AUN_ROOT . '/recover.php');
+check('recover', 'the token is compared in constant time', str_contains($recSrc, 'hash_equals'));
+check('recover', 'a short token is refused outright', str_contains($recSrc, 'strlen($expected) >= 24'));
+check('recover', 'it only ever touches Super Admin accounts',
+    str_contains($recSrc, "\$target['role'] !== 'super'"));
+check('recover', 'it never generates or prints a password',
+    !str_contains($recSrc, 'random_bytes') || !str_contains($recSrc, '$password'));
+check('recover', 'every action it takes is logged as a recovery',
+    substr_count($recSrc, 'RECOVERY_ACTOR') >= 5);
+check('recover', 'it ships in the package', str_contains((string) @file_get_contents(AUN_ROOT . '/build.js'), "'recover.php'"));
+check('recover', 'preflight reports the token while it is set',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/bin/preflight.php'), 'RECOVERY_TOKEN is NOT set'));
+check('recover', '.env.example documents it without holding one',
+    (static function (): bool {
+        $t = (string) @file_get_contents(AUN_ROOT . '/.env.example');
+        return str_contains($t, '#RECOVERY_TOKEN=') && !preg_match('/^RECOVERY_TOKEN=.+/m', $t);
+    })());
+
+/* ================================================================== */
+section('STAGE 6B  A SECOND COPY — BACKUP AND RESTORE');
+/* ================================================================== */
+$res = $back->get('/api/admin/backup');
+check('backup', 'an Admin cannot download the backup', $res['status'] === 403, "status={$res['status']}");
+
+$res = $admin->get('/api/admin/backup');
+check('backup', 'a Super Admin can', $res['status'] === 200, "status={$res['status']}");
+$dump = json_decode($res['raw'], true);
+check('backup', 'it is a backup this system recognises',
+    is_array($dump) && ($dump['aun_backup'] ?? 0) === Backup::FORMAT);
+check('backup', 'it carries the content tables',
+    isset($dump['tables']['content_blocks'], $dump['tables']['services'], $dump['tables']['settings']));
+check('backup', 'and the business tables',
+    isset($dump['tables']['requests'], $dump['tables']['customers']));
+check('backup', 'it holds no password hash',
+    !str_contains($res['raw'], '$argon') && !str_contains($res['raw'], '$2y$')
+    && !str_contains($res['raw'], 'password_hash'));
+check('backup', 'no session or CSRF row is in it',
+    !isset($dump['tables']['sessions']) && !isset($dump['tables']['users'])
+    && !str_contains($res['raw'], 'csrf_hash'));
+check('backup', 'no database credential is in it',
+    !str_contains($res['raw'], (string) Env::get('DB_PASS', '@@none@@'))
+    || (string) Env::get('DB_PASS', '') === '');
+check('backup', 'the accounts are listed for the record, without secrets',
+    isset($dump['accounts'][0]['email']) && !isset($dump['accounts'][0]['password_hash']));
+check('backup', 'and users is on the excluded list, in writing',
+    in_array('users', Backup::EXCLUDED, true));
+
+/* what a restore must put back, and what it must leave alone */
+$before = [];
+foreach (Backup::TABLES as $t) $before[$t] = (int) Db::value("SELECT COUNT(*) FROM {$t}");
+
+/* a record that exists only after the backup was taken, so a restore has
+   something visible to undo */
+$ghostTitle = 'سؤال اختبار الاستعادة ' . $stamp;
+$res = $admin->post('/api/admin/content/item/new', [
+    'csrf_token' => $admin->csrf(), 'area' => 'faq', 'lang' => 'ar',
+    'title' => $ghostTitle, 'body' => 'يُنشأ ليختفي عند الاستعادة.',
+]);
+check('backup', 'a record is added after the backup was taken',
+    in_array($res['status'], [200, 201], true), "status={$res['status']}");
+$ghostRows = static fn(): int => (int) Db::value(
+    'SELECT COUNT(*) FROM content_items WHERE title = ?', [$ghostTitle]);
+check('backup', 'and it is really there', $ghostRows() === 1, 'rows=' . $ghostRows());
+
+/* the guards on the way in */
+$boundary = '----aun' . bin2hex(random_bytes(8));
+$mkBody = static function (string $confirm, string $content, string $token) use ($boundary): string {
+    $b  = "--{$boundary}\r\nContent-Disposition: form-data; name=\"csrf_token\"\r\n\r\n{$token}\r\n";
+    $b .= "--{$boundary}\r\nContent-Disposition: form-data; name=\"confirm\"\r\n\r\n{$confirm}\r\n";
+    $b .= "--{$boundary}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"backup.json\"\r\n";
+    $b .= "Content-Type: application/json\r\n\r\n{$content}\r\n--{$boundary}--\r\n";
+    return $b;
+};
+$hdr = ['Content-Type' => 'multipart/form-data; boundary=' . $boundary];
+
+$tk = $admin->csrf();
+$res = $admin->post('/api/admin/restore', $mkBody('yes', json_encode($dump), $tk), $hdr + ['X-CSRF-Token' => $tk]);
+check('backup', 'a restore without the confirmation word is refused', $res['status'] === 422, "status={$res['status']}");
+
+$tk = $admin->csrf();
+$res = $admin->post('/api/admin/restore', $mkBody('استعادة', '{"hello":"world"}', $tk), $hdr + ['X-CSRF-Token' => $tk]);
+check('backup', 'a file that is not a backup is refused', $res['status'] === 422, "status={$res['status']}");
+
+$tk = $admin->csrf();
+$res = $admin->post('/api/admin/restore',
+    $mkBody('استعادة', json_encode(['aun_backup' => 99, 'tables' => []]), $tk), $hdr + ['X-CSRF-Token' => $tk]);
+check('backup', 'a backup from an unknown format is refused', $res['status'] === 422, "status={$res['status']}");
+
+$tk = $admin->csrf();
+$res = $admin->post('/api/admin/restore',
+    $mkBody('استعادة', json_encode(['aun_backup' => 1, 'tables' => ['users' => []]]), $tk), $hdr + ['X-CSRF-Token' => $tk]);
+check('backup', 'a backup naming a table restore does not cover is refused',
+    $res['status'] === 422, "status={$res['status']}");
+check('backup', 'the added record is still there after every refusal', $ghostRows() === 1);
+
+$tk = $back->csrf();
+$res = $back->post('/api/admin/restore', $mkBody('استعادة', json_encode($dump), $tk), $hdr + ['X-CSRF-Token' => $tk]);
+check('backup', 'an Admin cannot restore', $res['status'] === 403, "status={$res['status']}");
+
+/* and the real thing */
+$snapsBefore = count(glob(Backup::dir() . '/*.json') ?: []);
+$tk = $admin->csrf();
+$res = $admin->post('/api/admin/restore', $mkBody('استعادة', json_encode($dump), $tk), $hdr + ['X-CSRF-Token' => $tk]);
+check('backup', 'a Super Admin can restore', $res['status'] === 200, "status={$res['status']}");
+check('backup', 'the added record is gone', $ghostRows() === 0);
+$restoredOk = true;
+foreach (Backup::TABLES as $t) {
+    if ((int) Db::value("SELECT COUNT(*) FROM {$t}") !== $before[$t]) { $restoredOk = false; break; }
+}
+check('backup', 'every covered table is back to what the backup held', $restoredOk);
+check('backup', 'a snapshot of the pre-restore data was written first',
+    count(glob(Backup::dir() . '/*.json') ?: []) > $snapsBefore);
+check('backup', 'and it is named for what it is',
+    (bool) glob(Backup::dir() . '/before-restore-*.json'));
+check('backup', 'the reply says the website has not changed yet',
+    str_contains((string) ($res['body']['note'] ?? ''), 'انشره'));
+
+/* §6 — accounts and sessions are untouched by a restore */
+check('backup', 'the scratch account survived the restore',
+    Repo_Users::findByEmail($pwEmail) !== null);
+check('backup', 'its password survived too',
+    Auth::verify($reset, (string) Repo_Users::findByEmail($pwEmail)['password_hash']));
+check('backup', 'the Super Admin is still signed in', $admin->get('/api/auth/me')['status'] === 200);
+
+/* the backups themselves must not be servable */
+$snap = basename((string) (glob(Backup::dir() . '/*.json')[0] ?? 'x.json'));
+$res = $anon->get('/app/storage/backups/' . $snap);
+check('backup', 'a written backup is not reachable over HTTP',
+    in_array($res['status'], [403, 404], true), "status={$res['status']}");
+check('backup', 'the download is sent as a file, not as a page',
+    (static function () use ($BASE, $admin): bool {
+        $r = $admin->get('/api/admin/backup');
+        return str_contains(strtolower($r['raw']), '"aun_backup"');
+    })());
+check('backup', 'the terminal has the same two operations',
+    (static function (): bool {
+        $t = (string) @file_get_contents(AUN_ROOT . '/bin/backup.php');
+        return str_contains($t, '--restore') && str_contains($t, 'Backup::writeSnapshot');
+    })());
+check('backup', 'old snapshots are pruned rather than accumulated',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/app/Backup.php'), 'pruneSnapshots'));
+
+/* ================================================================== */
 foreach ($lines as $l) fwrite(STDOUT, $l . "\n");
 fwrite(STDOUT, "\n" . str_repeat('=', 78) . "\n");
 fwrite(STDOUT, sprintf("  %d passed, %d failed, %d total\n", $pass, $fail, $pass + $fail));

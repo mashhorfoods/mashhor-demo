@@ -126,7 +126,10 @@ final class Schema
 
     /** Indexes are created separately so both drivers accept the same call. */
     /** The columns a table actually has, on either driver. */
-    private static function columns(string $table): array
+    /** Public because Backup needs it: a restore may only write columns the
+        table actually has, so a backup taken before a migration cannot inject
+        a stale column name into an INSERT. */
+    public static function columns(string $table): array
     {
         $out = [];
         if (Db::isMysql()) {

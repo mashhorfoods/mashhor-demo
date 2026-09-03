@@ -1229,6 +1229,23 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
     <div class="modal__f"><button class="btn btn--danger" id="confOk"></button>
       <button class="btn btn--ghost" id="confNo">تراجع</button></div></div>
 </div>
+<!-- المرحلة 6 — تعيين كلمة مرور لحساب آخر. لا تُعرض كلمة مرور هنا؛ المدير
+     العام هو من يكتب الجديدة، وهي تُرسل ولا تعود. -->
+<div class="modalwrap" id="pwdlg" hidden role="dialog" aria-modal="true" aria-labelledby="pwT">
+  <div class="modal">
+    <div class="modal__h"><span class="modal__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-shield"/></svg></span>
+      <div><h2 class="modal__t" id="pwT">إعادة تعيين كلمة المرور</h2>
+        <p class="modal__b" id="pwB"></p></div></div>
+    <div class="field" style="margin-top:var(--s4)">
+      <label class="field__label" for="pwVal">كلمة المرور الجديدة</label>
+      <input class="ctl ltr" id="pwVal" type="password" autocomplete="new-password" minlength="12">
+      <span class="field__help">12 حرفاً على الأقل. تُسلَّم للمستخدم بنفسك — لا يرسلها النظام.</span>
+      <span class="field__err" id="e-pwVal" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
+    </div>
+    <div class="modal__f" style="margin-top:var(--s4)">
+      <button class="btn btn--primary" type="button" id="pwOk">تعيين كلمة المرور</button>
+      <button class="btn btn--ghost" type="button" id="pwNo">تراجع</button></div></div>
+</div>
 <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
 
 <script src="app.js"></script>
@@ -1609,11 +1626,53 @@ window.AunShell = (function(){
   window.addEventListener("beforeunload", function(e){ if(dirty){ e.preventDefault(); e.returnValue=""; } });
 
   /* ---------- account actions ---------------------------------------------- */
-  $("pwbtn").addEventListener("click", function(){
-    ask("إعادة تعيين كلمة المرور؟",
-        "سيُطلب من «"+current.name+"» تعيين كلمة مرور جديدة عند محاولته الدخول التالية، وتتوقف جلساته الحالية. لا تُعرض كلمة المرور لأحد.",
-        "إعادة التعيين", function(){ toast("سيُطلب من المستخدم تعيين كلمة مرور جديدة"); }, false);
-  });
+  /* ---------- إعادة تعيين كلمة المرور (المرحلة 6) -------------------------
+     This used to show a confirmation and then a toast, and change nothing:
+     there was no endpoint behind it, so a forgotten password had no answer
+     short of editing the database. It sets a password now. The Super Admin
+     types it — nothing is generated and nothing is displayed — and every
+     session the account had ends, because the password those sessions were
+     opened with no longer opens it. */
+  (function(){
+    var dlg=$("pwdlg"), val=$("pwVal"), ok=$("pwOk"), busy=false, prev=null;
+
+    function close(){
+      dlg.hidden=true; val.value=""; $("e-pwVal").hidden=true; val.classList.remove("is-error");
+      if (prev && prev.focus) prev.focus();
+    }
+    function bad(msg){
+      $("e-pwVal").hidden=false; $("e-pwVal").querySelector("span").textContent=msg;
+      val.classList.add("is-error"); val.focus();
+    }
+    $("pwbtn").addEventListener("click", function(){
+      if (!current) return;
+      prev=document.activeElement;
+      $("pwB").textContent = "اكتب كلمة مرور جديدة لحساب «"+current.name+"». "+
+        "ستنتهي كل جلساته المفتوحة فوراً، وعليك تسليمها له بنفسك.";
+      dlg.hidden=false; val.value=""; $("e-pwVal").hidden=true;
+      val.classList.remove("is-error"); val.focus();
+    });
+    $("pwNo").addEventListener("click", close);
+    dlg.addEventListener("click", function(e){ if (e.target===dlg) close(); });
+    document.addEventListener("keydown", function(e){ if (e.key==="Escape" && !dlg.hidden) close(); });
+    val.addEventListener("keydown", function(e){ if (e.key==="Enter"){ e.preventDefault(); ok.click(); } });
+
+    ok.addEventListener("click", function(){
+      if (busy || !current) return;
+      var v=val.value;
+      if (v.length<12){ bad("كلمة المرور يجب ألا تقل عن 12 حرفاً."); return; }
+      busy=true; ok.disabled=true; ok.textContent="جارٍ التعيين…";
+      AunAPI.resetUserPassword(current.id, v).then(function(){
+        close();
+        toast("غُيّرت كلمة المرور لحساب «"+current.name+"». أُنهيت جلساته المفتوحة.");
+      }).catch(function(e){
+        if (e && e.errors && e.errors.password) bad(e.errors.password);
+        else toast(e && e.message ? e.message : "تعذّرت إعادة التعيين", true);
+      }).then(function(){
+        busy=false; ok.disabled=false; ok.textContent="تعيين كلمة المرور";
+      });
+    });
+  })();
   $("actbtn").addEventListener("click", function(){
     var on=current.on;
     ask(on ? "تعطيل وصول «"+current.name+"»؟" : "تفعيل وصول «"+current.name+"»؟",
@@ -1653,8 +1712,14 @@ window.AunShell = (function(){
      app.js hands it over as soon as it arrives. Hiding a control is still
      only courtesy — every write is authorized again in the dispatcher, and
      the two may disagree only in the direction of the server saying no. */
-  AunAPI.onUser(function(){
+  AunAPI.onUser(function(u){
     canModify = AunAPI.can('users', "edit");
+    /* Setting someone else's password is restricted to a Super Admin beyond
+       the module gate — an Admin with the users module could otherwise take
+       the system over through a Super Admin's account. The endpoint refuses
+       either way; this is so the control is not offered and then refused. */
+    var pw=$("pwbtn");
+    if (pw) pw.hidden = !u || u.role !== "super";
     if (draft) applyPerms(); else {
       Array.prototype.forEach.call(document.querySelectorAll(".modonly"),function(n){
         n.classList.toggle("hidden", !canModify); });

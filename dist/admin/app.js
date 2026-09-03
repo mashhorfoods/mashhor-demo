@@ -160,7 +160,31 @@
     readNotification: function (id, read) {
       return post("/admin/notifications/read", id === null ? { all: 1 } : { id: id, read: read ? 1 : 0 });
     },
-    settings:      function (c)     { return get("/admin/settings", { category: c }); }
+    settings:      function (c)     { return get("/admin/settings", { category: c }); },
+
+    /* Stage 6 — passwords. Nothing here ever returns a password: these send
+       one and read back only whether it was accepted. */
+    changePassword: function (current, next) {
+      return post("/auth/password", { current: current, password: next });
+    },
+    resetUserPassword: function (id, next) {
+      return post("/admin/users/password", { id: id, password: next });
+    },
+    unlockUser:    function (id)    { return post("/admin/users/unlock", { id: id }); },
+
+    /* Stage 6 — backup. The download is a plain navigation rather than a
+       fetch, so the browser saves the file instead of holding the whole
+       database in a JavaScript string. */
+    backupUrl:     function ()      { return BASE + "/admin/backup"; },
+    restore: function (formData) {
+      return csrf().then(function (token) {
+        formData.append("csrf_token", token);
+        return fetch(BASE + "/admin/restore", {
+          method: "POST", credentials: "same-origin", body: formData,
+          headers: { Accept: "application/json", "X-CSRF-Token": token }
+        }).then(handle);
+      });
+    }
   };
 
   /**

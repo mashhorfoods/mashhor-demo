@@ -41,6 +41,77 @@ final class Auth
         return $hash !== '' && password_verify($plain, $hash);
     }
 
+    public const PASSWORD_MIN = 12;
+
+    /**
+     * The one place that decides whether a password is acceptable, so the
+     * installer, the users module and the recovery page cannot drift apart
+     * and let a weaker password in through the least-guarded door.
+     *
+     * Returns an Arabic sentence naming what is wrong, or null when the
+     * password is fine. It never echoes the password back — not into the
+     * message, not into the log.
+     */
+    public static function passwordProblem(string $plain, string $email = '', string $name = ''): ?string
+    {
+        $len = mb_strlen($plain);
+        if ($len < self::PASSWORD_MIN) {
+            return 'كلمة المرور يجب ألا تقل عن ' . self::PASSWORD_MIN . ' حرفاً.';
+        }
+        if ($len > 200) {
+            return 'كلمة المرور طويلة أكثر من اللازم.';
+        }
+        if (trim($plain) === '') {
+            return 'كلمة المرور لا يمكن أن تكون مسافات فقط.';
+        }
+        /* A password made of one repeated character is long without being
+           hard, and so is the local part of the address it protects. */
+        if (preg_match('/^(.)\1+$/u', $plain)) {
+            return 'كلمة المرور لا يمكن أن تكون حرفاً واحداً مكرراً.';
+        }
+        $lower = mb_strtolower($plain);
+        $local = $email === '' ? '' : mb_strtolower(explode('@', $email)[0]);
+        if ($local !== '' && mb_strlen($local) >= 4 && str_contains($lower, $local)) {
+            return 'كلمة المرور لا يمكن أن تحتوي على بريدك الإلكتروني.';
+        }
+        if ($name !== '' && mb_strlen($name) >= 4 && str_contains($lower, mb_strtolower($name))) {
+            return 'كلمة المرور لا يمكن أن تحتوي على اسمك.';
+        }
+        foreach (['password', 'passw0rd', '123456789', 'qwertyuiop', 'aunaldrb', 'admin1234'] as $bad) {
+            if (str_contains($lower, $bad)) {
+                return 'كلمة المرور شائعة جداً — اختر واحدة أصعب.';
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Change a password and make every other session for that account
+     * unusable. A password is changed either because it was forgotten or
+     * because it may be known to someone else; in both cases a session opened
+     * with the old one must not survive the change (§09).
+     *
+     * $keepSessionId is the session doing the changing — a person changing
+     * their own password is not logged out by it.
+     */
+    public static function changePassword(int $userId, string $plain, ?string $keepSessionId = null): void
+    {
+        Repo_Users::setPassword($userId, self::hash($plain));
+        Repo_Users::unlock($userId);
+        $sql = 'UPDATE sessions SET revoked_at = ? WHERE user_id = ? AND revoked_at IS NULL';
+        $par = [Db::now(), $userId];
+        if ($keepSessionId !== null) { $sql .= ' AND id <> ?'; $par[] = $keepSessionId; }
+        Db::run($sql, $par);
+        Log::write('warn', 'password changed', ['user_id' => $userId, 'kept_own_session' => $keepSessionId !== null]);
+    }
+
+    /** The current session's id, for changePassword() to spare. */
+    public static function sessionId(): ?string
+    {
+        $s = self::current();
+        return $s === null ? null : (string) $s['id'];
+    }
+
     /* ---- login (§08) --------------------------------------------------- */
 
     public const LOCK_THRESHOLD = 8;      /* failures before a temporary lock */

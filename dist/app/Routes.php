@@ -34,6 +34,10 @@ final class Routes
             ['POST', '/api/auth/login',  null,      'login'],
             ['POST', '/api/auth/logout', 'session', 'logout'],
             ['GET',  '/api/auth/me',     'session', 'me'],
+            /* Stage 6 — a signed-in person can change their own password. It
+               needs the current one, so a borrowed session cannot lock the
+               owner out of their own account. */
+            ['POST', '/api/auth/password', 'session', 'changeOwnPassword'],
 
             /* ---- admin ------------------------------------------------- */
             ['GET',  '/api/admin/summary',        ['home', 'view'],      'summary'],
@@ -54,6 +58,11 @@ final class Routes
             ['POST', '/api/admin/media/upload',   ['services', 'edit'],  'uploadMedia'],
             ['GET',  '/api/admin/users',          ['users', 'view'],     'listUsers'],
             ['POST', '/api/admin/users/save',     ['users', 'edit'],     'saveUser'],
+            /* Stage 6 — a Super Admin can set another account's password and
+               clear its lock. Until now a forgotten password had no answer
+               short of editing the database by hand. */
+            ['POST', '/api/admin/users/password', ['users', 'edit'],     'resetUserPassword'],
+            ['POST', '/api/admin/users/unlock',   ['users', 'edit'],     'unlockUser'],
             ['GET',  '/api/admin/activity',       ['home', 'view'],      'listActivity'],
             ['GET',  '/api/admin/notifications',  ['home', 'view'],      'listNotifications'],
             ['POST', '/api/admin/notifications/read', ['home', 'view'],  'readNotification'],
@@ -86,6 +95,13 @@ final class Routes
 
             ['GET',  '/api/admin/settings',       ['settings', 'view'],  'listSettings'],
             ['POST', '/api/admin/settings/save',  ['settings', 'edit'],  'saveSettings'],
+
+            /* Stage 6 — النسخ الاحتياطي. Gated on the settings module and
+               narrowed to `super` inside the handlers: a backup is every
+               customer and every request in one file, and a restore replaces
+               all of it. Neither is a day-to-day action. */
+            ['GET',  '/api/admin/backup',        ['settings', 'view'],  'downloadBackup'],
+            ['POST', '/api/admin/restore',       ['settings', 'edit'],  'restoreBackup'],
         ];
     }
 
@@ -547,10 +563,11 @@ final class Routes
             Http::ok(['id' => $id]);
         }
 
-        $pw = $in['password'] ?? '';
-        if (!is_string($pw) || mb_strlen($pw) < 12) {
-            Http::invalid(['password' => 'كلمة المرور يجب ألا تقل عن 12 حرفاً.']);
-        }
+        $pw = is_string($in['password'] ?? null) ? (string) $in['password'] : '';
+        /* One policy, decided in Auth, so the users module, the installer and
+           the recovery page cannot disagree about what is strong enough. */
+        $problem = Auth::passwordProblem($pw, (string) $email, (string) $name);
+        if ($problem !== null) Http::invalid(['password' => $problem]);
         if (Repo_Users::findByEmail((string) $email) !== null) {
             Http::invalid(['email' => 'هذا البريد مستخدم بالفعل.']);
         }
@@ -558,6 +575,218 @@ final class Routes
         Repo_Activity::record($u, 'users', 'invite', 'user', (string) $newId, (string) $name,
             'إنشاء حساب بدور «' . (Schema::ROLE_LABEL[(string) $role] ?? $role) . '»');
         Http::ok(['id' => $newId], 201);
+    }
+
+    /**
+     * Stage 6 — changing your own password.
+     *
+     * The current password is required: a session is a bearer token, and an
+     * unattended browser must not be enough to take an account over. Every
+     * OTHER session for the account is revoked, because the old password may
+     * be the reason it is being changed.
+     */
+    private static function changeOwnPassword(?array $u): void
+    {
+        $in = Http::input();
+        $v  = new Validator($in);
+        $v->rejectUnknown(['csrf_token', 'current', 'password']);
+        if (!$v->passed()) Http::invalid($v->errors());
+
+        $current = is_string($in['current'] ?? null) ? (string) $in['current'] : '';
+        $next    = is_string($in['password'] ?? null) ? (string) $in['password'] : '';
+
+        /* Deliberately rate-limited: this endpoint verifies a password, so it
+           is a password oracle for anyone who reaches a logged-in browser. */
+        RateLimit::enforce('pwchange:' . (int) $u['id'], 10, 600,
+            'محاولات كثيرة لتغيير كلمة المرور. انتظر قليلاً ثم أعد المحاولة.');
+
+        $row = Repo_Users::findByEmail((string) $u['email']);
+        if ($row === null || !Auth::verify($current, (string) $row['password_hash'])) {
+            Log::write('warn', 'password change refused: wrong current password',
+                ['user_id' => $u['id'], 'ip' => Http::ip()]);
+            Http::invalid(['current' => 'كلمة المرور الحالية غير صحيحة.']);
+        }
+        if ($current === $next) {
+            Http::invalid(['password' => 'كلمة المرور الجديدة مطابقة للحالية.']);
+        }
+        $problem = Auth::passwordProblem($next, (string) $u['email'], (string) $u['name']);
+        if ($problem !== null) Http::invalid(['password' => $problem]);
+
+        Auth::changePassword((int) $u['id'], $next, Auth::sessionId());
+        Repo_Activity::record($u, 'users', 'edit', 'user', (string) $u['id'], (string) $u['name'],
+            'تغيير كلمة المرور الخاصة بالحساب');
+        /* The response says it worked. It never carries the password back. */
+        Http::ok(['othersSignedOut' => true]);
+    }
+
+    /**
+     * Stage 6 — a Super Admin sets someone else's password.
+     *
+     * Restricted to `super` beyond the module gate: an Admin with the users
+     * module could otherwise set a Super Admin's password and take the system
+     * over. The new password is typed by the person doing the reset, so it is
+     * never generated and never displayed — §06 forbids showing a password
+     * and there is nothing here to show.
+     */
+    private static function resetUserPassword(?array $u): void
+    {
+        if (!Authz::isSuper($u)) {
+            Log::write('warn', 'password reset denied: not a super admin',
+                ['user_id' => $u['id'], 'role' => $u['role']]);
+            Http::forbidden();
+        }
+        $in = Http::input();
+        $v  = new Validator($in);
+        $v->rejectUnknown(['csrf_token', 'id', 'password']);
+        if (!$v->passed()) Http::invalid($v->errors());
+
+        $id = (int) ($in['id'] ?? 0);
+        $target = $id > 0 ? Repo_Users::find($id) : null;
+        if ($target === null) Http::notFound();
+
+        $next = is_string($in['password'] ?? null) ? (string) $in['password'] : '';
+        $problem = Auth::passwordProblem($next, (string) $target['email'], (string) $target['name']);
+        if ($problem !== null) Http::invalid(['password' => $problem]);
+
+        /* Their sessions all go: whoever held one was relying on a password
+           that no longer opens the account. */
+        Auth::changePassword($id, $next, $id === (int) $u['id'] ? Auth::sessionId() : null);
+        Repo_Activity::record($u, 'users', 'edit', 'user', (string) $id, (string) $target['name'],
+            'إعادة تعيين كلمة المرور');
+        Http::ok(['id' => $id]);
+    }
+
+    /** Stage 6 — clear a lock left by repeated failed logins. */
+    private static function unlockUser(?array $u): void
+    {
+        if (!Authz::isSuper($u)) Http::forbidden();
+        $in = Http::input();
+        $v  = new Validator($in);
+        $v->rejectUnknown(['csrf_token', 'id']);
+        if (!$v->passed()) Http::invalid($v->errors());
+
+        $id = (int) ($in['id'] ?? 0);
+        $target = $id > 0 ? Repo_Users::find($id) : null;
+        if ($target === null) Http::notFound();
+
+        Repo_Users::unlock($id);
+        Repo_Activity::record($u, 'users', 'edit', 'user', (string) $id, (string) $target['name'],
+            'إلغاء قفل الحساب');
+        Http::ok(['id' => $id]);
+    }
+
+    /**
+     * Stage 6 — download everything as one JSON file.
+     *
+     * Not Http::json(): this is a file the browser saves, so it carries a
+     * download disposition and its own content type. It still passes through
+     * the same authorization the rest of the API does, and it still refuses
+     * to be cached.
+     */
+    private static function downloadBackup(?array $u): void
+    {
+        if (!Authz::isSuper($u)) {
+            Log::write('warn', 'backup denied: not a super admin',
+                ['user_id' => $u['id'], 'role' => $u['role']]);
+            Http::forbidden();
+        }
+
+        /* One download a minute is plenty, and it stops a stolen session from
+           quietly pulling the whole customer list over and over. */
+        RateLimit::enforce('backup:' . (int) $u['id'], 6, 600,
+            'طلبات كثيرة لتنزيل النسخة الاحتياطية. انتظر قليلاً ثم أعد المحاولة.');
+
+        $data = Backup::build();
+        $body = Backup::encode($data);
+        $name = Backup::filename();
+
+        Repo_Activity::record($u, 'settings', 'edit', 'backup', null, $name,
+            'تنزيل نسخة احتياطية من البيانات');
+        Log::write('info', 'backup downloaded', ['user_id' => $u['id'], 'bytes' => strlen($body)]);
+
+        if (!headers_sent()) {
+            http_response_code(200);
+            header('Content-Type: application/json; charset=utf-8');
+            header('Content-Disposition: attachment; filename="' . $name . '"');
+            header('Content-Length: ' . strlen($body));
+            header('Cache-Control: no-store, private');
+            header('X-Content-Type-Options: nosniff');
+        }
+        echo $body;
+        exit;
+    }
+
+    /**
+     * Stage 6 — restore from an uploaded backup file.
+     *
+     * Three things stand between a mis-click and losing the live data: only a
+     * Super Admin may call it, the request must carry the exact confirmation
+     * word, and a snapshot of what is there now is written to disk before
+     * anything is deleted. The replacement itself is one transaction.
+     */
+    private const RESTORE_CONFIRM = 'استعادة';
+
+    private static function restoreBackup(?array $u): void
+    {
+        if (!Authz::isSuper($u)) {
+            Log::write('warn', 'restore denied: not a super admin',
+                ['user_id' => $u['id'], 'role' => $u['role']]);
+            Http::forbidden();
+        }
+
+        $confirm = isset($_POST['confirm']) && is_string($_POST['confirm']) ? trim($_POST['confirm']) : '';
+        if ($confirm !== self::RESTORE_CONFIRM) {
+            Http::invalid(['confirm' => 'اكتب كلمة «' . self::RESTORE_CONFIRM . '» للتأكيد.']);
+        }
+
+        $file = $_FILES['file'] ?? null;
+        if (!is_array($file) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK
+            || !is_uploaded_file((string) ($file['tmp_name'] ?? ''))) {
+            Http::invalid(['file' => 'اختر ملف النسخة الاحتياطية أولاً.']);
+        }
+        if ((int) $file['size'] > 32 * 1024 * 1024) {
+            Http::invalid(['file' => 'حجم الملف أكبر من 32 ميجابايت.']);
+        }
+
+        $raw = @file_get_contents((string) $file['tmp_name']);
+        if (!is_string($raw) || $raw === '') Http::invalid(['file' => 'الملف فارغ.']);
+
+        $data = json_decode($raw, true);
+        $problem = Backup::problem($data);
+        if ($problem !== null) Http::invalid(['file' => $problem]);
+
+        try {
+            /* §5 — what is here now, saved before it is replaced. A restore of
+               the wrong file is then itself undoable. */
+            $snapshot = Backup::writeSnapshot('before-restore');
+            $report   = Backup::restore($data);
+        } catch (Throwable $e) {
+            Log::exception($e);
+            Http::fail(500, 'restore_failed',
+                'تعذّرت الاستعادة ولم تتغيّر البيانات. التفاصيل مسجّلة في السجل.');
+        }
+
+        Repo_Activity::record($u, 'settings', 'edit', 'backup', null,
+            (string) ($data['created_at'] ?? ''),
+            'استعادة البيانات من نسخة احتياطية');
+        Log::write('warn', 'data restored from backup', [
+            'user_id' => $u['id'],
+            'from'    => (string) ($data['created_at'] ?? ''),
+            'rows'    => array_sum($report),
+        ]);
+
+        Http::ok([
+            'restored' => $report,
+            'total'    => array_sum($report),
+            'from'     => $data['created_at'] ?? null,
+            /* Named so it can be found again; the path is inside app/storage,
+               which is not servable, so naming it discloses nothing. */
+            'snapshot' => basename($snapshot),
+            /* The website still shows what it showed a moment ago — the
+               restored records reach it through النشر, like every other
+               change. Said plainly so nobody assumes otherwise. */
+            'note'     => 'استُعيدت البيانات. الموقع لم يتغيّر بعد — انشره من صفحة المحتوى ليعكس ما استُعيد.',
+        ]);
     }
 
     private static function listActivity(?array $u): void
