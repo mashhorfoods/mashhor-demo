@@ -1156,6 +1156,55 @@ foreach ([
 }
 
 /* ================================================================== */
+section('KEPT AND LABELLED — THE TWO AREAS WITH NOWHERE TO PUBLISH');
+/* ================================================================== */
+/* Stage 5. الأسئلة الشائعة and آراء العملاء have working editors and no
+   section on the public page to publish into. The decision was to keep them
+   and label them, so what matters is that the label is true, that it is
+   derived rather than asserted, and that nothing they hold ever leaks onto
+   the site. */
+
+$ov2 = $admin->get('/api/admin/content');
+$byKey = array_column($ov2['body']['areas'] ?? [], null, 'key');
+$unpublishable = array_keys(array_filter($byKey, static fn($a) => !($a['publishable'] ?? true)));
+sort($unpublishable);
+check('stage5', 'exactly two areas say they do not reach the website',
+    $unpublishable === ['faq', 'testimonials'], implode(', ', $unpublishable));
+
+foreach (['faq', 'testimonials'] as $area) {
+    check('stage5', "{$area}: the page really has no region for it",
+        Publisher::hasRegionFor($area) === false);
+    $res = $admin->get('/api/admin/content/area?area=' . $area);
+    check('stage5', "{$area}: the editor still opens", $res['status'] === 200, "status={$res['status']}");
+    check('stage5', "{$area}: and says so in the editor too",
+        ($res['body']['publishable'] ?? true) === false);
+}
+
+/* the label is measured, not maintained: it flips by itself for an area that
+   does have a region */
+check('stage5', 'an area with a region is not labelled',
+    ($byKey['values']['publishable'] ?? false) === true);
+check('stage5', 'and the flag is read from the page, not asserted in code',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/app/Repo/Cms.php'), 'Publisher::hasRegionFor($key)')
+    && substr_count((string) @file_get_contents(AUN_ROOT . '/app/Repo/Cms.php'), "'publishable'] = true") === 0);
+
+/* content saved there is kept, and never published */
+$res = $admin->post('/api/admin/content/item/new', [
+    'csrf_token' => $adminTk, 'area' => 'faq', 'lang' => 'ar',
+    'title' => 'سؤال للاختبار', 'body' => 'جواب للاختبار',
+]);
+check('stage5', 'an entry can still be saved there', in_array($res['status'], [200, 201], true), "status={$res['status']}");
+check('stage5', 'and it is stored', (int) Db::value(
+    "SELECT COUNT(*) FROM content_items WHERE collection = 'faq'") === 1);
+$admin->post('/api/admin/content/publish', ['csrf_token' => $adminTk]);
+$live = (string) @file_get_contents(AUN_ROOT . '/index.html');
+check('stage5', 'publishing never puts it on the website',
+    !str_contains($live, 'سؤال للاختبار'));
+check('stage5', 'and it does not count as an unpublished change',
+    Publisher::pending()['count'] === 0, (string) Publisher::pending()['count']);
+Db::run("DELETE FROM content_items WHERE collection = 'faq'");
+
+/* ================================================================== */
 section('CREATE, RETIRE, UPLOAD');
 /* ================================================================== */
 /* Stage 4. saveService refused anything without an existing id, and there was

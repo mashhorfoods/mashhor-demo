@@ -164,12 +164,18 @@ final class Repo_Cms
         foreach (Schema::CONTENT_AREAS as $key => $label) {
             $row = ['key' => $key, 'label' => $label, 'lang' => $lang];
 
+            /* Whether this area has anywhere to publish to is a fact about
+               index.html, so it is read from index.html — once, here, for
+               every kind of area. Asserting it in three branches was how two
+               of them came to say "yes" without ever having checked. */
+            $row['publishable'] = Publisher::hasRegionFor($key)
+                ?? !in_array($key, ['faq', 'testimonials'], true);
+
             if ($key === 'services') {
                 $row['records']  = (int) Db::value('SELECT COUNT(*) FROM services');
                 $row['active']   = (int) Db::value('SELECT COUNT(*) FROM services WHERE is_published = 1');
                 $row['updated']  = Db::value('SELECT MAX(updated_at) FROM services');
                 $row['kind']     = 'list';
-                $row['publishable'] = true;
             } elseif (isset(Schema::AREA_COLLECTIONS[$key])) {
                 $cols = Schema::AREA_COLLECTIONS[$key];
                 $in   = implode(',', array_fill(0, count($cols), '?'));
@@ -190,11 +196,6 @@ final class Repo_Cms
                     'SELECT COUNT(*) FROM content_blocks WHERE lang = ? AND block_key LIKE ?',
                     [$lang, $key . '.%']);
                 $row['kind'] = 'list';
-                /* Asked of the page, not asserted here. features has a region
-                   today and faq/testimonials do not, but that is a fact about
-                   index.html rather than about this code, and it is read from
-                   index.html so it stays true without being maintained. */
-                $row['publishable'] = Publisher::hasRegionFor($key) ?? ($key === 'features');
             } else {
                 $row['records'] = (int) Db::value(
                     'SELECT COUNT(*) FROM content_blocks WHERE lang = ? AND block_key LIKE ?',
@@ -204,7 +205,6 @@ final class Repo_Cms
                     'SELECT MAX(updated_at) FROM content_blocks WHERE lang = ? AND block_key LIKE ?',
                     [$lang, $key . '.%']);
                 $row['kind'] = 'fields';
-                $row['publishable'] = true;
             }
 
             /* a text block also exists for the list areas (their headings) */
