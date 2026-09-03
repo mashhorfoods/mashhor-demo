@@ -284,6 +284,29 @@ function build() {
   for (const m of html.matchAll(new RegExp(SITE.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[^"\\s]+', 'g')))
     note(m[0]);
 
+  /* THE MEDIA LIBRARY'S OWN FILES.
+     app/Setup.php names the assets the dashboard registers in media_assets,
+     and the dashboard shows them, offers them for a service, and lets an
+     operator replace them. Every one of those paths has to exist on the
+     server — and twelve of the eighteen did not, because the rule above ships
+     only what index.html references and index.html references the sized
+     variants, never the masters. The library listed files the package had
+     never sent, so the dashboard showed broken pictures for them.
+     Read from Setup.php rather than repeated here, so a picture added to the
+     library ships without anyone remembering this. */
+  {
+    const setup = fs.readFileSync(path.join(ROOT, 'app', 'Setup.php'), 'utf8');
+    const m = setup.match(/const ASSETS = \[([\s\S]*?)\];/);
+    if (!m) throw new Error('app/Setup.php no longer declares ASSETS — the media library would ship incomplete');
+    const paths = [...m[1].matchAll(/'([^']+)'/g)].map((x) => x[1]);
+    if (paths.length < 5) throw new Error('Setup::ASSETS parsed as ' + paths.length + ' entries — that cannot be right');
+    for (const u of paths) {
+      if (!fs.existsSync(path.join(ROOT, u))) throw new Error('the media library names a missing file: ' + u);
+      note(u);
+    }
+    console.log('  media library      : ' + paths.length + ' files the dashboard registers');
+  }
+
   /* The admin pages serve their own typefaces now, and the faces they name
      have to reach the server with them. They are read the same way the public
      page's are — out of the @font-face rules — so a weight that stops being

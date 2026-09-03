@@ -2657,6 +2657,81 @@ check('weight', 'and the media page still knows how to preview an upload',
     str_contains((string) @file_get_contents(AUN_ROOT . '/admin/media.html'), 'THUMBS[a.path] = pending.data'));
 
 /* ================================================================== */
+section('WHAT THE PAGE SAYS AND WHAT THE PACKAGE CONTAINS');
+/* ================================================================== */
+/* Two defects the operator found on the live site, and the checks that would
+   have caught each before it shipped. */
+
+/* --- 1 · one number, said the same way everywhere -------------------- */
+$page = (string) @file_get_contents(AUN_ROOT . '/index.html');
+
+/* the number the page dials — taken from the links, which are unambiguous */
+preg_match_all('/href="tel:\+?([0-9]+)"/', $page, $tel);
+preg_match_all('#href="https://wa\.me/([0-9]+)"#', $page, $wa);
+$dialled = array_values(array_unique(array_merge($tel[1], $wa[1])));
+check('contact', 'the page dials exactly one number',
+    count($dialled) === 1, implode(', ', $dialled));
+
+/* the number it SHOWS, out of the publishable region */
+preg_match('/<!--aun:contact\.phone_display-->(.*?)<!--\/aun:contact\.phone_display-->/s', $page, $shown);
+$shownDigits = preg_replace('/\D+/', '', html_entity_decode($shown[1] ?? '', ENT_QUOTES, 'UTF-8'));
+check('contact', 'and shows a number in that region', $shownDigits !== '', $shownDigits);
+check('contact', 'and the number it shows is the number it dials',
+    $dialled !== [] && $shownDigits === ltrim($dialled[0], '+'),
+    'shown=' . $shownDigits . ' dialled=' . ($dialled[0] ?? '—'));
+
+/* and the seed agrees, so a fresh install does not reintroduce it */
+$seed = json_decode((string) @file_get_contents(AUN_ROOT . '/app/storage/cms-seed.json'), true);
+$seedDigits = preg_replace('/\D+/', '', (string) ($seed['blocks']['contact.phone_display'] ?? ''));
+check('contact', 'and a fresh install seeds that same number',
+    $seedDigits === $shownDigits, 'seed=' . $seedDigits);
+check('contact', 'no placeholder number survives anywhere that ships',
+    !str_contains($page, '50 000 0000') && !str_contains($page, '50&nbsp;000&nbsp;0000')
+    && !str_contains((string) @file_get_contents(AUN_ROOT . '/app/storage/cms-seed.json'), '50 000 0000'));
+
+/* --- 2 · the library lists nothing the package omits ----------------- */
+$dist = AUN_ROOT . '/dist';
+if (is_dir($dist)) {
+    $missing = [];
+    foreach (Setup::ASSETS as $a) {
+        if (!is_file($dist . '/' . $a)) $missing[] = $a;
+    }
+    check('media', 'every file the media library registers is in the package',
+        $missing === [], $missing === [] ? count(Setup::ASSETS) . ' files' : implode(', ', array_slice($missing, 0, 4)));
+
+    $dbMissing = [];
+    foreach (Db::all('SELECT path FROM media_assets') as $r) {
+        if (!is_file($dist . '/' . $r['path'])) $dbMissing[] = (string) $r['path'];
+    }
+    check('media', 'and so is every file the database rows point at',
+        $dbMissing === [], implode(', ', array_slice($dbMissing, 0, 4)));
+
+    /* the dashboard shows these by path now rather than by an embedded copy,
+       so a path that does not resolve is a broken picture on the screen */
+    check('media', 'the media page reads a picture from its path',
+        str_contains((string) @file_get_contents(AUN_ROOT . '/admin/media.html'), 'function preferSmall'));
+    check('media', 'and falls back to the original when no small variant exists',
+        str_contains((string) @file_get_contents(AUN_ROOT . '/admin/media.html'), 'img.src = path;'));
+
+    /* every picture a service points at, too — that page shows them the same way */
+    $svcMissing = [];
+    foreach (Db::all('SELECT slug, image_path FROM services WHERE image_path IS NOT NULL') as $r) {
+        if ($r['image_path'] !== '' && !is_file($dist . '/' . $r['image_path'])) {
+            $svcMissing[] = $r['slug'];
+        }
+    }
+    check('media', 'and every picture a service points at',
+        $svcMissing === [], implode(', ', $svcMissing));
+
+    /* the build refuses rather than shipping a library with holes in it */
+    check('media', 'the build fails instead of shipping the library incomplete',
+        str_contains((string) @file_get_contents(AUN_ROOT . '/build.js'),
+            'the media library names a missing file'));
+} else {
+    check('media', 'dist/ exists to check the package against', false, 'run node build.js first');
+}
+
+/* ================================================================== */
 foreach ($lines as $l) fwrite(STDOUT, $l . "\n");
 fwrite(STDOUT, "\n" . str_repeat('=', 78) . "\n");
 fwrite(STDOUT, sprintf("  %d passed, %d failed, %d total\n", $pass, $fail, $pass + $fail));
