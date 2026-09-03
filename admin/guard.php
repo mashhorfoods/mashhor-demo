@@ -73,5 +73,66 @@ header('X-Content-Type-Options: nosniff');
    blocking it outright also blocks same-origin tooling for no extra safety. */
 header('X-Frame-Options: SAMEORIGIN');
 header('Referrer-Policy: strict-origin-when-cross-origin');
+header('Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()');
 
-readfile($real);
+/* --- STAGE 6C · content security policy -------------------------------------
+ *
+ * These pages hold the whole administrative surface: every customer, every
+ * request, the session that reaches all of it. If anything ever gets markup
+ * into one of them — a customer's own name rendered unescaped, a note pasted
+ * from a request — script injected that way runs with the operator's full
+ * authority. This is what stops it running at all.
+ *
+ * The nonce is fresh per response and stamped onto the page's own scripts as
+ * it is streamed, which is the one thing the file used to promise it would
+ * never do: "nothing is injected into it". That promise is narrowed rather
+ * than broken — the only change made to the markup is a nonce attribute on
+ * <script>, and nothing else about the page is touched. It has to be done
+ * here, because a nonce that is written into the file is not a nonce.
+ *
+ * Why the policy reads as it does:
+ *   script-src   the nonce alone. No 'self', no 'unsafe-inline': a script the
+ *                server did not stamp does not run, whatever its source.
+ *   style-src    'unsafe-inline' — the stylesheets are inline and so are a
+ *                few layout attributes. A style cannot execute; the injection
+ *                that matters is a script, and that one is closed.
+ *   img-src      'self' and data:, for the inline SVG icons and file previews.
+ *   connect-src  'self' — the API and nothing else. An exfiltration attempt
+ *                has nowhere to send to.
+ *   frame-ancestors  'self', matching X-Frame-Options for older browsers.
+ *
+ * The two Google font hosts are named because every admin page links its
+ * typefaces from fonts.googleapis.com — measured, not assumed: with them
+ * absent from this policy the browser refuses the stylesheet and the whole
+ * dashboard falls back to system fonts. That dependency is worth removing on
+ * its own terms — it tells Google who is signing in and when, and it means the
+ * dashboard looks broken whenever Google is unreachable — but removing it
+ * means shipping Cairo 600, IBM Plex Sans Arabic 400 and all of IBM Plex Mono
+ * locally, which this project does not have yet. Naming them here keeps the
+ * pages working; it does not pretend the dependency is fine.
+ */
+$nonce = base64_encode(random_bytes(16));
+header(
+    "Content-Security-Policy: default-src 'self'; "
+    . "script-src 'nonce-{$nonce}'; "
+    . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+    . "img-src 'self' data:; "
+    . "font-src 'self' https://fonts.gstatic.com; "
+    . "connect-src 'self'; "
+    . "form-action 'self'; "
+    . "base-uri 'none'; "
+    . "frame-ancestors 'self'; "
+    . "frame-src 'none'; "
+    . "object-src 'none'"
+);
+
+$page = (string) file_get_contents($real);
+/* Every <script> on the page, whether it carries a src or is inline. The
+   lookahead is what keeps it from matching a tag it has already stamped. */
+$page = preg_replace(
+    '/<script(?![^>]*\bnonce=)(?=[\s>])/i',
+    '<script nonce="' . htmlspecialchars($nonce, ENT_QUOTES, 'UTF-8') . '"',
+    $page
+) ?? $page;
+
+echo $page;

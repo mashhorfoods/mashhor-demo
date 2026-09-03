@@ -37,6 +37,70 @@ final class Log
         if (!is_dir($dir)) @mkdir($dir, 0750, true);
         $file = $dir . '/app-' . gmdate('Y-m-d') . '.log';
         @file_put_contents($file, $line . PHP_EOL, FILE_APPEND | LOCK_EX);
+        self::rotate($file);
+    }
+
+    /* ---- keeping the log from becoming the problem (STAGE 6D) ---------- */
+
+    /** How long a day's log is kept. A month is long enough to investigate. */
+    public const KEEP_DAYS = 30;
+
+    /** How large one day's file may get before it stops being appended to. */
+    public const MAX_BYTES = 5242880;   /* 5 MB */
+
+    /**
+     * Log rotation, done on the write path because there is nowhere else to
+     * do it: this hosting plan has no working cron and no logrotate, and a log
+     * that is never pruned is a slow outage — a shared-hosting disk quota
+     * filled by a loop that logs a warning per request takes the database down
+     * with it, and every write after that fails silently.
+     *
+     * Two limits, checked cheaply:
+     *
+     *   §1  A single day's file that passes MAX_BYTES is moved aside once, to
+     *       .1, and a fresh one started. The old .1 is dropped. That bounds a
+     *       runaway to twice the limit instead of the whole disk, and it keeps
+     *       the most recent entries — which are the ones that explain what is
+     *       happening — rather than the first ones.
+     *   §2  Files older than KEEP_DAYS go. The sweep runs at most once a day,
+     *       guarded by a marker file, so the cost is one stat() per request
+     *       and a directory listing per day.
+     *
+     * Everything here is best-effort and silent: a log that cannot be pruned
+     * must never become an error of its own, and must never reach a response.
+     */
+    private static function rotate(string $file): void
+    {
+        /* §1 — one oversized file */
+        $size = @filesize($file);
+        if (is_int($size) && $size > self::MAX_BYTES) {
+            @unlink($file . '.1');
+            @rename($file, $file . '.1');
+        }
+
+        /* §2 — at most one sweep a day */
+        $dir    = self::dir();
+        $marker = $dir . '/.last-sweep';
+        $today  = gmdate('Y-m-d');
+        if (@file_get_contents($marker) === $today) return;
+        @file_put_contents($marker, $today, LOCK_EX);
+        self::sweep();
+    }
+
+    /** Delete log files older than KEEP_DAYS. Returns how many went. */
+    public static function sweep(int $keepDays = self::KEEP_DAYS): int
+    {
+        $cutoff = time() - $keepDays * 86400;
+        $gone   = 0;
+        foreach (glob(self::dir() . '/app-*.log*') ?: [] as $f) {
+            /* the date is in the name, so a file whose mtime was touched by a
+               backup or an upload is still judged by the day it belongs to */
+            if (!preg_match('/app-(\d{4}-\d{2}-\d{2})\.log/', basename($f), $m)) continue;
+            $day = strtotime($m[1] . ' 00:00:00 UTC');
+            if ($day !== false && $day >= $cutoff) continue;
+            if (@unlink($f)) $gone++;
+        }
+        return $gone;
     }
 
     public static function exception(Throwable $e): void

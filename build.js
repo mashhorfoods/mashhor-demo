@@ -30,6 +30,7 @@
 */
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const ROOT = __dirname;
 const DIST = path.join(ROOT, 'dist');
@@ -312,6 +313,8 @@ function build() {
     fs.copyFileSync(src, path.join(DIST, f));
   }
 
+  sealCsp();
+
   let treeFiles = 0, treeBytes = 0;
   for (const { dir, skip } of SHIP_TREES) {
     const base = path.join(ROOT, dir);
@@ -344,6 +347,68 @@ function build() {
   console.log(`  dist contents      : ${files.length} files, `
     + `${(files.reduce((a,f)=>a+f[1],0)/1024).toFixed(0)}KB total`);
   files.sort().forEach(([f,s]) => console.log(`      ${f.padEnd(34)} ${(s/1024).toFixed(1)}KB`));
+}
+
+/* ---------------------------------------------------------------------------
+   STAGE 6C — the content security policy, sealed against what actually shipped.
+
+   The policy in .htaccess names each inline script by the SHA-256 of its
+   contents. Those hashes cannot be maintained by hand: an inline script that
+   changes by one character stops matching, and the failure is silent — the
+   browser refuses to run it, no error reaches the page, and the site simply
+   stops working in a way that looks like nothing happened.
+
+   So they are generated here, from the file that ships, and the build fails
+   rather than emitting a policy that would break the page. Three ways it can
+   fail, all deliberate: the token is missing from .htaccess, dist/index.html
+   has no inline script (which would mean the page was rewritten and this needs
+   rethinking), or an external script is loaded from a host the policy does not
+   name. Each is a bug caught here instead of in production.
+--------------------------------------------------------------------------- */
+function sealCsp() {
+  const htaccess = path.join(DIST, '.htaccess');
+  const page     = path.join(DIST, 'index.html');
+  if (!fs.existsSync(htaccess) || !fs.existsSync(page)) return;
+
+  let rules = fs.readFileSync(htaccess, 'utf8');
+  const TOKEN = '__AUN_SCRIPT_HASHES__';
+  if (!rules.includes(TOKEN)) {
+    throw new Error('.htaccess no longer carries ' + TOKEN + ' — the CSP would ship without its hashes');
+  }
+
+  const html = fs.readFileSync(page, 'utf8');
+
+  /* Every inline <script>, whatever its type. application/ld+json is included
+     on purpose: browsers differ on whether script-src applies to a data block,
+     and a hash costs nothing while a blocked structured-data block would cost
+     the search result it exists for. */
+  const hashes = [];
+  const seen = new Set();
+  for (const m of html.matchAll(/<script(?![^>]*\bsrc=)([^>]*)>([\s\S]*?)<\/script>/gi)) {
+    const body = m[2];
+    const h = 'sha256-' + crypto.createHash('sha256').update(body, 'utf8').digest('base64');
+    if (seen.has(h)) continue;
+    seen.add(h);
+    hashes.push("'" + h + "'");
+  }
+  if (hashes.length === 0) {
+    throw new Error('dist/index.html has no inline script — the CSP hashes would be empty');
+  }
+
+  /* Any script loaded from elsewhere has to be a host the policy names, or it
+     will be blocked at run time and nobody will see why. */
+  const allowedHosts = ['https://www.googletagmanager.com'];
+  for (const m of html.matchAll(/<script[^>]*\bsrc=["']([^"']+)["']/gi)) {
+    const src = m[1];
+    if (src.startsWith('/') || !/^https?:/i.test(src)) continue;
+    if (!allowedHosts.some((h) => src.startsWith(h))) {
+      throw new Error('index.html loads a script from ' + src + ', which the CSP does not allow');
+    }
+  }
+
+  rules = rules.replace(TOKEN, hashes.join(' '));
+  fs.writeFileSync(htaccess, rules);
+  console.log('  CSP                : ' + hashes.length + ' inline script hashes sealed into .htaccess');
 }
 
 build();

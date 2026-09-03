@@ -99,6 +99,12 @@ final class Http
             header('Cache-Control: no-store, private');
             header('X-Content-Type-Options: nosniff');
             header('Referrer-Policy: strict-origin-when-cross-origin');
+            /* STAGE 6C — a JSON response has no resources and no reason to be
+               framed. Saying so closes the one way a browser could be talked
+               into treating an API reply as a document: a mis-sniffed body, or
+               this endpoint loaded in a frame to be read across origins. */
+            header("Content-Security-Policy: default-src 'none'; frame-ancestors 'none'; base-uri 'none'; sandbox");
+            header('X-Frame-Options: DENY');
             foreach ($headers as $h) header($h);
         }
         echo json_encode($body, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);

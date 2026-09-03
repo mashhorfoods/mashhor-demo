@@ -134,6 +134,60 @@ ErrorDocument 404 /404.html
   # the admin pages already send this; the public page had no reason to be
   # framed either, and refusing costs nothing
   Header set X-Frame-Options "SAMEORIGIN"
+  # nothing on this page uses a camera, a microphone or a location, and the
+  # analytics script has no business asking for one either
+  Header set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+</IfModule>
+
+# --- 5c · content security policy (STAGE 6C) --------------------------------
+# What this buys: if anything ever manages to write markup into this page — a
+# stored value that reaches the HTML unescaped, a compromised asset — the
+# browser still refuses to run it. Without a policy, injected script runs with
+# the page's full authority; with one, only the exact scripts this build ships
+# are allowed to execute, by hash.
+#
+# THE HASHES ARE GENERATED, NOT MAINTAINED. build.js reads dist/index.html,
+# takes the SHA-256 of every inline script it actually contains, and writes
+# them into the copy of this file that ships. The token below is what it
+# replaces; a build that cannot find it, or that finds a script it has no hash
+# for, fails rather than shipping a policy that would silently break the page.
+# That is deliberate: a CSP failure is invisible — no error, no warning, just
+# a page whose scripts stopped running — so it has to be caught at build time.
+#
+# Why each source is here:
+#   script-src   'self' for nothing today (every script is inline), the
+#                hashes for the four inline blocks, and googletagmanager.com
+#                for the analytics tag the page already loads.
+#   style-src    'unsafe-inline' because the whole stylesheet is inline. A
+#                style injection cannot execute; a script injection can, and
+#                that is the one this policy is written to stop.
+#   img-src      data: for the inlined SVG icons, and Google's two hosts for
+#                the analytics beacon.
+#   connect-src  where the analytics tag reports to, and nowhere else.
+#   frame-src / object-src  'none': this page embeds nothing.
+<IfModule mod_headers.c>
+  <FilesMatch "\.html$">
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' https://www.googletagmanager.com __AUN_SCRIPT_HASHES__; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://www.googletagmanager.com https://www.google-analytics.com; font-src 'self'; connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com; form-action 'self'; base-uri 'self'; frame-ancestors 'self'; frame-src 'none'; object-src 'none'"
+  </FilesMatch>
+</IfModule>
+
+# --- 5d · HSTS, on the real domain only (STAGE 6C) ---------------------------
+# Tells the browser to refuse plain http for this host for a year, so a visitor
+# who types the address is never sent over an interceptable connection at all —
+# the redirect in section 3 only helps after the first request has already
+# travelled in the clear.
+#
+# It reuses section 3b's AUN_CANONICAL_HOST, so it applies to aunaldrb.com and
+# to nothing else. That matters more than it looks: HSTS is remembered by the
+# browser and cannot be withdrawn early, so sending it from a temporary domain
+# would pin a host that is not ours and is not staying.
+#
+# includeSubDomains is set because every subdomain of aunaldrb.com is ours and
+# serves over TLS. `preload` is deliberately NOT set: submitting to the preload
+# list is effectively permanent and is a decision to take on purpose, not a
+# side effect of a deployment.
+<IfModule mod_headers.c>
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" env=AUN_CANONICAL_HOST
 </IfModule>
 
 # --- 5b · never serve configuration or source (RECOVERY 01 §22/§23) ----------

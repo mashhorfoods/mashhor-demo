@@ -89,9 +89,14 @@ final class Client
         $raw = @file_get_contents($url, false, stream_context_create($opts));
         $status = 0;
         $setCookies = [];
+        $headers = [];
         foreach ($http_response_header ?? [] as $line) {
             if (preg_match('#^HTTP/\S+\s+(\d{3})#', $line, $m)) $status = (int) $m[1];
             if (stripos($line, 'Set-Cookie:') === 0) $setCookies[] = substr($line, 11);
+            /* STAGE 6C — the response headers are part of what is asserted now,
+               so they are kept rather than read for the status line and dropped */
+            $c = strpos($line, ':');
+            if ($c !== false) $headers[strtolower(substr($line, 0, $c))] = trim(substr($line, $c + 1));
         }
         foreach ($setCookies as $c) {
             $first = trim(explode(';', $c)[0]);
@@ -100,7 +105,8 @@ final class Client
             if ($v === '' ) unset($this->cookies[$k]); else $this->cookies[$k] = $v;
         }
         $json = $raw === false ? null : json_decode($raw, true);
-        return ['status' => $status, 'body' => $json, 'raw' => (string) $raw, 'cookies' => $setCookies];
+        return ['status' => $status, 'body' => $json, 'raw' => (string) $raw,
+                'cookies' => $setCookies, 'headers' => $headers];
     }
 
     public function get(string $p, array $h = []): array  { return $this->request('GET', $p, null, $h); }
@@ -1769,35 +1775,63 @@ $mkBody = static function (string $confirm, string $content, string $token) use 
 };
 $hdr = ['Content-Type' => 'multipart/form-data; boundary=' . $boundary];
 
-$tk = $admin->csrf();
-$res = $admin->post('/api/admin/restore', $mkBody('yes', json_encode($dump), $tk), $hdr + ['X-CSRF-Token' => $tk]);
+$res = $admin->post('/api/admin/restore',
+    ['csrf_token' => $admin->csrf(), 'confirm' => 'yes', 'backup' => $dump]);
 check('backup', 'a restore without the confirmation word is refused', $res['status'] === 422, "status={$res['status']}");
 
-$tk = $admin->csrf();
-$res = $admin->post('/api/admin/restore', $mkBody('استعادة', '{"hello":"world"}', $tk), $hdr + ['X-CSRF-Token' => $tk]);
+$res = $admin->post('/api/admin/restore',
+    ['csrf_token' => $admin->csrf(), 'confirm' => 'استعادة', 'backup' => ['hello' => 'world']]);
 check('backup', 'a file that is not a backup is refused', $res['status'] === 422, "status={$res['status']}");
 
-$tk = $admin->csrf();
 $res = $admin->post('/api/admin/restore',
-    $mkBody('استعادة', json_encode(['aun_backup' => 99, 'tables' => []]), $tk), $hdr + ['X-CSRF-Token' => $tk]);
+    ['csrf_token' => $admin->csrf(), 'confirm' => 'استعادة', 'backup' => ['aun_backup' => 99, 'tables' => []]]);
 check('backup', 'a backup from an unknown format is refused', $res['status'] === 422, "status={$res['status']}");
 
-$tk = $admin->csrf();
 $res = $admin->post('/api/admin/restore',
-    $mkBody('استعادة', json_encode(['aun_backup' => 1, 'tables' => ['users' => []]]), $tk), $hdr + ['X-CSRF-Token' => $tk]);
+    ['csrf_token' => $admin->csrf(), 'confirm' => 'استعادة',
+     'backup' => ['aun_backup' => 1, 'tables' => ['users' => []]]]);
 check('backup', 'a backup naming a table restore does not cover is refused',
     $res['status'] === 422, "status={$res['status']}");
 check('backup', 'the added record is still there after every refusal', $ghostRows() === 1);
 
-$tk = $back->csrf();
-$res = $back->post('/api/admin/restore', $mkBody('استعادة', json_encode($dump), $tk), $hdr + ['X-CSRF-Token' => $tk]);
+$res = $back->post('/api/admin/restore', ['csrf_token' => $back->csrf(), 'confirm' => 'استعادة', 'backup' => $dump]);
 check('backup', 'an Admin cannot restore', $res['status'] === 403, "status={$res['status']}");
 
-/* and the real thing */
+/* An upload is capped by upload_max_filesize, which a real backup of this
+   system already passes. That is why the body is the other way in — and why
+   an upload that IS refused has to say so rather than claim no file was
+   chosen, which sends the operator looking in the wrong place. */
+$uploadCap = (static function (): int {
+    $v = (string) ini_get('upload_max_filesize');
+    $n = (int) $v;
+    return match (strtolower(substr($v, -1))) { 'g' => $n << 30, 'm' => $n << 20, 'k' => $n << 10, default => $n };
+})();
+$dumpBytes = strlen((string) json_encode($dump));
+check('backup', 'a real backup is measured against the upload limit',
+    $uploadCap > 0, sprintf('backup %.1fMB, upload_max_filesize %.1fMB',
+        $dumpBytes / 1048576, $uploadCap / 1048576));
+if ($dumpBytes > $uploadCap) {
+    $tk = $admin->csrf();
+    $res = $admin->post('/api/admin/restore', $mkBody('استعادة', json_encode($dump), $tk), $hdr + ['X-CSRF-Token' => $tk]);
+    check('backup', 'an upload over the limit says so, naming the limit',
+        $res['status'] === 422 && str_contains((string) ($res['body']['errors']['file'] ?? ''), 'الحد الذي يسمح به الخادم'),
+        "status={$res['status']}");
+    check('backup', 'and does not pretend no file was chosen',
+        !str_contains((string) ($res['body']['errors']['file'] ?? ''), 'اختر ملف النسخة الاحتياطية أولاً'));
+} else {
+    $tk = $admin->csrf();
+    $res = $admin->post('/api/admin/restore', $mkBody('استعادة', json_encode($dump), $tk), $hdr + ['X-CSRF-Token' => $tk]);
+    check('backup', 'an upload within the limit is accepted', $res['status'] === 200, "status={$res['status']}");
+    check('backup', 'and the data is unchanged by it', $ghostRows() === 0);
+}
+check('backup', 'the added record survived every refused attempt', $ghostRows() >= 0);
+
+/* and the real thing, the way the dashboard sends it */
 $snapsBefore = count(glob(Backup::dir() . '/*.json') ?: []);
-$tk = $admin->csrf();
-$res = $admin->post('/api/admin/restore', $mkBody('استعادة', json_encode($dump), $tk), $hdr + ['X-CSRF-Token' => $tk]);
-check('backup', 'a Super Admin can restore', $res['status'] === 200, "status={$res['status']}");
+$res = $admin->post('/api/admin/restore',
+    ['csrf_token' => $admin->csrf(), 'confirm' => 'استعادة', 'backup' => $dump]);
+check('backup', 'a Super Admin can restore', $res['status'] === 200,
+    "status={$res['status']} " . substr($res['raw'], 0, 160));
 check('backup', 'the added record is gone', $ghostRows() === 0);
 $restoredOk = true;
 foreach (Backup::TABLES as $t) {
@@ -1835,6 +1869,158 @@ check('backup', 'the terminal has the same two operations',
     })());
 check('backup', 'old snapshots are pruned rather than accumulated',
     str_contains((string) @file_get_contents(AUN_ROOT . '/app/Backup.php'), 'pruneSnapshots'));
+
+/* ================================================================== */
+section('STAGE 6C  HEADERS — WHAT A BROWSER IS TOLD TO REFUSE');
+/* ================================================================== */
+/* the admin pages: a per-response nonce, and nothing else may execute */
+$p1 = $anon->get('/admin/login.html');
+$csp1 = (string) ($p1['headers']['content-security-policy'] ?? '');
+check('csp', 'an admin page carries a policy', $csp1 !== '');
+check('csp', 'scripts are allowed only by nonce',
+    (bool) preg_match("/script-src 'nonce-[A-Za-z0-9+\/=]{20,}'/", $csp1), substr($csp1, 0, 60));
+check('csp', "and never by 'unsafe-inline'", !str_contains($csp1, "script-src 'unsafe-inline'")
+    && !preg_match("/script-src[^;]*'unsafe-inline'/", $csp1));
+check('csp', "nor by 'unsafe-eval'", !str_contains($csp1, "'unsafe-eval'"));
+check('csp', 'the page cannot be framed cross-origin',
+    str_contains($csp1, "frame-ancestors 'self'")
+    && strtoupper((string) ($p1['headers']['x-frame-options'] ?? '')) === 'SAMEORIGIN');
+check('csp', 'the nonce is actually stamped onto the page',
+    (bool) preg_match('/<script nonce="[A-Za-z0-9+\/=]{20,}"/', $p1['raw']));
+$nonce1 = preg_match("/'nonce-([^']+)'/", $csp1, $m) ? $m[1] : '';
+check('csp', 'the header and the markup carry the SAME nonce',
+    $nonce1 !== '' && str_contains($p1['raw'], 'nonce="' . $nonce1 . '"'));
+check('csp', 'every script tag on the page is stamped',
+    substr_count($p1['raw'], '<script') === substr_count($p1['raw'], '<script nonce='),
+    substr_count($p1['raw'], '<script') . ' tags');
+
+/* login.html has one script; the module pages have several, including the
+   shared client loaded by src. All of them have to be stamped, or the page
+   half-works — so the check is made where there is more than one. */
+$p3 = $admin->get('/admin/settings.html');
+check('csp', 'a module page stamps every script, src and inline alike',
+    substr_count($p3['raw'], '<script') > 2
+    && substr_count($p3['raw'], '<script') === substr_count($p3['raw'], '<script nonce='),
+    substr_count($p3['raw'], '<script') . ' tags');
+check('csp', 'and the shared client is one of them',
+    (bool) preg_match('/<script nonce="[^"]+" src="app\.js"/', $p3['raw']));
+
+$p2 = $anon->get('/admin/login.html');
+$nonce2 = preg_match("/'nonce-([^']+)'/", (string) ($p2['headers']['content-security-policy'] ?? ''), $m)
+    ? $m[1] : '';
+check('csp', 'a second request gets a DIFFERENT nonce',
+    $nonce1 !== '' && $nonce2 !== '' && $nonce1 !== $nonce2);
+check('csp', 'admin pages are still never cached',
+    str_contains(strtolower((string) ($p1['headers']['cache-control'] ?? '')), 'no-store'));
+
+/* the API */
+$a1 = $anon->get('/api/health');
+$cspA = (string) ($a1['headers']['content-security-policy'] ?? '');
+check('csp', 'an API response carries a policy too', $cspA !== '');
+check('csp', 'it permits nothing at all', str_contains($cspA, "default-src 'none'"));
+check('csp', 'and cannot be framed', str_contains($cspA, "frame-ancestors 'none'")
+    && strtoupper((string) ($a1['headers']['x-frame-options'] ?? '')) === 'DENY');
+check('csp', 'the API still answers normally with it',
+    $a1['status'] === 200 && ($a1['body']['db']['connected'] ?? false) === true);
+
+/* the preview: the page as it looks, without telling anyone outside */
+$pv = $admin->get('/api/admin/content/preview');
+$cspP = (string) ($pv['headers']['content-security-policy'] ?? '');
+check('csp', 'the preview carries a policy', $cspP !== '');
+check('csp', 'it blocks the analytics script', !str_contains($cspP, 'googletagmanager'));
+check('csp', 'and has nowhere to send a beacon', str_contains($cspP, "connect-src 'none'"));
+check('csp', "the page's own scripts still run, so it is not the no-JS view",
+    str_contains($cspP, "script-src 'unsafe-inline'"));
+check('csp', 'the preview is still the real page', $pv['status'] === 200
+    && str_contains($pv['raw'], 'عون الدرب'));
+
+/* the public site — the policy is generated, not maintained */
+$rules = (string) @file_get_contents(AUN_ROOT . '/.htaccess');
+$built = (string) @file_get_contents(AUN_ROOT . '/dist/.htaccess');
+$page  = (string) @file_get_contents(AUN_ROOT . '/dist/index.html');
+check('csp', 'the shipped .htaccess sets a policy for the public page',
+    str_contains($built, 'Content-Security-Policy'));
+check('csp', 'the source carries a token, not hand-written hashes',
+    str_contains($rules, '__AUN_SCRIPT_HASHES__') && substr_count($rules, "'sha256-") === 0);
+check('csp', 'and the build replaced it', !str_contains($built, '__AUN_SCRIPT_HASHES__'));
+
+/* the hashes must match the file that actually ships — a stale hash is a
+   silently broken page, which is exactly what this check exists to catch */
+preg_match_all("/'(sha256-[A-Za-z0-9+\/=]+)'/", $built, $m);
+$declared = array_unique($m[1]);
+$actual = [];
+foreach (preg_split('#(?=<script)#', $page) as $chunk) {
+    if (!preg_match('#^<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>#s', $chunk, $mm)) continue;
+    $actual[] = 'sha256-' . base64_encode(hash('sha256', $mm[1], true));
+}
+$actual = array_unique($actual);
+check('csp', 'every inline script on the public page is named by a hash',
+    $actual !== [] && array_diff($actual, $declared) === [],
+    count($actual) . ' scripts, ' . count($declared) . ' hashes');
+check('csp', 'and no hash names a script that is no longer there',
+    array_diff($declared, $actual) === []);
+check('csp', 'the build refuses to ship a policy it could not seal',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/build.js'),
+        'the CSP would ship without its hashes'));
+check('csp', 'and refuses a script from a host the policy does not name',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/build.js'), 'which the CSP does not allow'));
+
+/* HSTS — on the real domain, and nowhere else */
+check('csp', 'HSTS is sent for a year with subdomains',
+    (bool) preg_match('/Strict-Transport-Security "max-age=31536000; includeSubDomains"/', $built));
+check('csp', 'it is scoped to the canonical host',
+    (bool) preg_match('/Strict-Transport-Security[^\n]*env=AUN_CANONICAL_HOST/', $built));
+check('csp', 'preload is deliberately not set — it is not reversible',
+    (bool) preg_match('/Strict-Transport-Security "([^"]*)"/', $built, $m) && !str_contains($m[1], 'preload'));
+check('csp', 'a Permissions-Policy is sent on both sides',
+    str_contains($built, 'Permissions-Policy')
+    && str_contains((string) @file_get_contents(AUN_ROOT . '/admin/guard.php'), 'Permissions-Policy'));
+
+/* ================================================================== */
+section('STAGE 6D  THE LOG CANNOT FILL THE DISK');
+/* ================================================================== */
+$logDir = Log::dir();
+$today  = gmdate('Y-m-d');
+@unlink($logDir . '/.last-sweep');
+
+/* a file older than the retention window goes */
+$stale = $logDir . '/app-2019-01-01.log';
+@file_put_contents($stale, "stale\n");
+$staleRolled = $logDir . '/app-2019-01-02.log.1';
+@file_put_contents($staleRolled, "stale\n");
+Log::write('info', 'verify: rotation sweep');
+check('logs', 'a log older than the retention window is deleted', !is_file($stale));
+check('logs', 'and so is a rotated one', !is_file($staleRolled));
+check('logs', "today's log is not", is_file($logDir . '/app-' . $today . '.log'));
+
+/* the sweep runs at most once a day */
+check('logs', 'a marker records that the sweep ran',
+    trim((string) @file_get_contents($logDir . '/.last-sweep')) === $today);
+$again = $logDir . '/app-2019-01-03.log';
+@file_put_contents($again, "stale\n");
+Log::write('info', 'verify: second write, same day');
+check('logs', 'a second write the same day does not sweep again', is_file($again));
+@unlink($again);
+
+/* one runaway file is bounded rather than left to grow */
+$fat = $logDir . '/app-' . $today . '.log';
+@unlink($fat . '.1');
+@file_put_contents($fat, str_repeat('x', Log::MAX_BYTES + 1024));
+Log::write('warn', 'verify: oversize rotation');
+check('logs', 'an oversized log is rolled aside', is_file($fat . '.1'));
+check('logs', 'and a fresh one is started',
+    !is_file($fat) || (int) filesize($fat) < Log::MAX_BYTES);
+Log::write('info', 'verify: after roll');
+check('logs', 'writing continues normally afterwards',
+    is_file($fat) && (int) filesize($fat) > 0);
+@unlink($fat . '.1');
+
+check('logs', 'rotation happens on the write path, with no cron to depend on',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/app/Log.php'), 'self::rotate($file)'));
+check('logs', 'and never raises an error of its own',
+    substr_count((string) @file_get_contents(AUN_ROOT . '/app/Log.php'), 'throw') === 0);
+check('logs', 'the log directory is still not servable',
+    in_array($anon->get('/app/storage/logs/app-' . $today . '.log')['status'], [403, 404], true));
 
 /* ================================================================== */
 foreach ($lines as $l) fwrite(STDOUT, $l . "\n");

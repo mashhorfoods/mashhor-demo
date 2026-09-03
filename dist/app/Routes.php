@@ -734,24 +734,47 @@ final class Routes
             Http::forbidden();
         }
 
-        $confirm = isset($_POST['confirm']) && is_string($_POST['confirm']) ? trim($_POST['confirm']) : '';
+        $inAll   = Http::input();
+        $confirm = is_string($inAll['confirm'] ?? null) ? trim((string) $inAll['confirm']) : '';
         if ($confirm !== self::RESTORE_CONFIRM) {
             Http::invalid(['confirm' => 'اكتب كلمة «' . self::RESTORE_CONFIRM . '» للتأكيد.']);
         }
 
-        $file = $_FILES['file'] ?? null;
-        if (!is_array($file) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK
-            || !is_uploaded_file((string) ($file['tmp_name'] ?? ''))) {
-            Http::invalid(['file' => 'اختر ملف النسخة الاحتياطية أولاً.']);
+        /* Two ways in, because one of them has a ceiling the operator does not
+           control. A multipart upload is capped by upload_max_filesize, which
+           is 2 MB on a default PHP and smaller than a real backup of this
+           system within the first year — measured, not guessed. So the file
+           may also arrive as the JSON body of the request, which is capped by
+           post_max_size instead, and that is the path the dashboard uses. */
+        $data = null;
+        $in   = Http::input();
+        if (isset($in['backup']) && is_array($in['backup'])) {
+            $data = $in['backup'];
+        } else {
+            $file = $_FILES['file'] ?? null;
+            $err  = is_array($file) ? (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE) : UPLOAD_ERR_NO_FILE;
+            if ($err !== UPLOAD_ERR_OK) {
+                /* Named exactly, because "choose a file first" when the file
+                   WAS chosen and the server dropped it is a message that sends
+                   someone looking in the wrong place for an hour. */
+                Http::invalid(['file' => match ($err) {
+                    UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE =>
+                        'الملف أكبر من الحد الذي يسمح به الخادم للرفع ('
+                        . (string) ini_get('upload_max_filesize') . '). ارفع هذا الحد من إعدادات '
+                        . 'PHP في لوحة الاستضافة، أو استعد من سطر الأوامر عبر bin/backup.php.',
+                    UPLOAD_ERR_PARTIAL   => 'انقطع رفع الملف قبل اكتماله. أعد المحاولة.',
+                    UPLOAD_ERR_NO_TMP_DIR, UPLOAD_ERR_CANT_WRITE =>
+                        'تعذّر على الخادم حفظ الملف المرفوع مؤقتاً.',
+                    default => 'اختر ملف النسخة الاحتياطية أولاً.',
+                }]);
+            }
+            if (!is_uploaded_file((string) ($file['tmp_name'] ?? ''))) {
+                Http::invalid(['file' => 'اختر ملف النسخة الاحتياطية أولاً.']);
+            }
+            $raw = @file_get_contents((string) $file['tmp_name']);
+            if (!is_string($raw) || $raw === '') Http::invalid(['file' => 'الملف فارغ.']);
+            $data = json_decode($raw, true);
         }
-        if ((int) $file['size'] > 32 * 1024 * 1024) {
-            Http::invalid(['file' => 'حجم الملف أكبر من 32 ميجابايت.']);
-        }
-
-        $raw = @file_get_contents((string) $file['tmp_name']);
-        if (!is_string($raw) || $raw === '') Http::invalid(['file' => 'الملف فارغ.']);
-
-        $data = json_decode($raw, true);
         $problem = Backup::problem($data);
         if ($problem !== null) Http::invalid(['file' => $problem]);
 
@@ -876,6 +899,18 @@ final class Routes
             header('X-Robots-Tag: noindex, nofollow');
             header('X-Content-Type-Options: nosniff');
             header('Referrer-Policy: no-referrer');
+            /* STAGE 6C — the preview renders the public page's markup, which
+               carries its analytics tag. A preview is for looking at, so the
+               external script is refused and the beacon has nowhere to go:
+               previewing a change must not register as a visit, and must not
+               tell anyone outside that a change is being considered. The
+               page's own inline scripts still run, so what is shown is what
+               the website would look like rather than its no-JavaScript
+               fallback. */
+            header("Content-Security-Policy: default-src 'self'; "
+                . "script-src 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
+                . "img-src 'self' data:; font-src 'self'; connect-src 'none'; "
+                . "form-action 'none'; base-uri 'none'; frame-ancestors 'self'; object-src 'none'");
         }
         echo $html;
     }

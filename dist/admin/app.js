@@ -116,7 +116,7 @@
 
   /* endpoints whose success can change what a publish would write */
   var CHANGES_SITE =
-    /^\/admin\/(content\/(block|item|item\/new|item\/del|reorder)|services\/(save|reorder)|settings\/save)$/;
+    /^\/admin\/(content\/(block|item|item\/new|item\/del|reorder)|services\/(save|reorder)|settings\/save|restore)$/;
 
   global.AunAPI = {
     get: get,
@@ -176,14 +176,13 @@
        fetch, so the browser saves the file instead of holding the whole
        database in a JavaScript string. */
     backupUrl:     function ()      { return BASE + "/admin/backup"; },
-    restore: function (formData) {
-      return csrf().then(function (token) {
-        formData.append("csrf_token", token);
-        return fetch(BASE + "/admin/restore", {
-          method: "POST", credentials: "same-origin", body: formData,
-          headers: { Accept: "application/json", "X-CSRF-Token": token }
-        }).then(handle);
-      });
+    /* Sent as the request body rather than as a file upload: a real backup
+       of this system passes PHP's default 2 MB upload_max_filesize, which the
+       operator often cannot change, while the body is bounded by the larger
+       post_max_size instead. The endpoint still accepts an upload for
+       whoever prefers one. */
+    restore: function (backup) {
+      return post("/admin/restore", { confirm: "استعادة", backup: backup });
     }
   };
 

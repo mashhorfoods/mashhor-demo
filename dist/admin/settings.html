@@ -1868,20 +1868,30 @@ window.AunShell = (function(){
           "ستُستبدل الخدمات والمحتوى والإعدادات والطلبات والعملاء بما في الملف. "+
           "تُحفظ نسخة من الوضع الحالي تلقائياً قبل الاستبدال، ولا تتأثر الحسابات.",
           "استعادة البيانات", function(){
-        var fd=new FormData(); fd.append("file", f);
-        fd.append("confirm", "استعادة");
-        rsBusy=true; rs.disabled=true; rs.textContent="جارٍ الاستعادة…"; $("loadbar").hidden=false;
-        AunAPI.restore(fd).then(function(r){
-          $("bkFile").value=""; $("bkConfirm").value="";
-          toast(r.note || ("استُعيد " + r.total + " سجلاً."));
-          return boot();
-        }).catch(function(e){
-          if (!showFieldErrors(e,{file:"bkFile",confirm:"bkConfirm"})){
-            toast(e && e.message ? e.message : "تعذّرت الاستعادة", true);
-          }
-        }).then(function(){
-          rsBusy=false; rs.disabled=false; rs.textContent="استعادة البيانات"; $("loadbar").hidden=true;
-        });
+        rsBusy=true; rs.disabled=true; rs.textContent="جارٍ القراءة…"; $("loadbar").hidden=false;
+        function done(){ rsBusy=false; rs.disabled=false; rs.textContent="استعادة البيانات"; $("loadbar").hidden=true; }
+
+        /* Read here rather than uploading: PHP's default upload limit is 2 MB
+           and a real backup passes it within the first year. Sent as the
+           request body, it is bounded by the larger post_max_size instead. */
+        var reader=new FileReader();
+        reader.onerror=function(){ err("bkFile","تعذّرت قراءة الملف."); done(); };
+        reader.onload=function(){
+          var parsed;
+          try { parsed=JSON.parse(reader.result); }
+          catch(e){ err("bkFile","الملف ليس نسخة احتياطية صالحة."); done(); return; }
+          rs.textContent="جارٍ الاستعادة…";
+          AunAPI.restore(parsed).then(function(r){
+            $("bkFile").value=""; $("bkConfirm").value="";
+            toast(r.note || ("استُعيد " + r.total + " سجلاً."));
+            return boot();
+          }).catch(function(e){
+            if (!showFieldErrors(e,{file:"bkFile",confirm:"bkConfirm",backup:"bkFile"})){
+              toast(e && e.message ? e.message : "تعذّرت الاستعادة", true);
+            }
+          }).then(done);
+        };
+        reader.readAsText(f);
       });
     });
   })();

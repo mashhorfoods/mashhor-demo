@@ -181,6 +181,37 @@ check('RECOVERY_TOKEN, if set at all, is long enough to matter',
     $recToken === '' ? true : (strlen($recToken) >= 24 ? null : false),
     $recToken === '' ? '' : 'length=' . strlen($recToken) . ' (minimum 24; shorter is ignored and the page stays 404)');
 
+/* Stage 6B — a backup is only a backup if it can also be restored. The
+   dashboard sends it as the request body, so post_max_size is the limit that
+   matters; an operator who chooses the upload instead is bounded by the
+   smaller upload_max_filesize. Both are reported against the size the backup
+   is TODAY, because that number only grows. */
+$toBytes = static function (string $v): int {
+    $n = (int) $v;
+    return match (strtolower(substr(trim($v), -1))) {
+        'g' => $n << 30, 'm' => $n << 20, 'k' => $n << 10, default => $n,
+    };
+};
+$postCap   = $toBytes((string) ini_get('post_max_size'));
+$uploadCap = $toBytes((string) ini_get('upload_max_filesize'));
+$backupSize = 0;
+if ($dbUp) {
+    try { $backupSize = strlen(Backup::encode(Backup::build())); } catch (Throwable $e) { $backupSize = 0; }
+}
+$mb = static fn(int $b): string => sprintf('%.1f MB', $b / 1048576);
+check('a backup of the current data can be restored through the dashboard',
+    $backupSize === 0 ? null : ($postCap === 0 || $backupSize < $postCap * 0.8),
+    $backupSize === 0
+        ? 'could not measure — database unavailable'
+        : 'backup ' . $mb($backupSize) . ', post_max_size ' . $mb($postCap)
+          . ($backupSize < $postCap * 0.8 ? '' : ' — raise post_max_size in the hosting PHP settings'));
+/* A warning, not a failure: the dashboard does not use the upload path, so a
+   small upload_max_filesize costs nothing until someone reaches for it. */
+check('...and through the file upload as well',
+    $backupSize === 0 || $backupSize >= $uploadCap ? null : true,
+    $backupSize === 0 ? '' : 'upload_max_filesize ' . $mb($uploadCap)
+        . ($backupSize < $uploadCap ? '' : ' — the dashboard sends the body instead, so this is a fallback only'));
+
 /* ================================================================== */
 if ($URL !== '') {
 section('OVER HTTP');
@@ -215,10 +246,21 @@ $why = $local ? 'absent (the dev server ignores .htaccess)' : 'absent';
 check('X-Content-Type-Options set', $hdr(isset($h['x-content-type-options'])), $h['x-content-type-options'] ?? $why);
 check('X-Frame-Options set', $hdr(isset($h['x-frame-options'])), $h['x-frame-options'] ?? $why);
 check('Referrer-Policy set', $hdr(isset($h['referrer-policy'])), $h['referrer-policy'] ?? $why);
-check('Content-Security-Policy set', isset($h['content-security-policy']) ? true : null,
-    $h['content-security-policy'] ?? 'absent — stage C of ROADMAP.md');
+/* Stage 6C shipped both of these in .htaccess. They arrive only where a
+   server applies that file, so their absence is reported as a warning naming
+   the likely reason rather than as a failure — the development server does
+   not read .htaccess at all, and a host with AllowOverride off will not
+   either, which is itself the thing worth knowing. */
+$cspHdr = $h['content-security-policy'] ?? null;
+check('Content-Security-Policy set', $cspHdr === null ? null : true,
+    $cspHdr ?? 'absent — .htaccess section 5c is not being applied by this server');
+check('...and it names the inline scripts by hash, not by unsafe-inline',
+    $cspHdr === null ? null : (str_contains($cspHdr, 'sha256-')
+        && !preg_match("/script-src[^;]*'unsafe-inline'/", $cspHdr)),
+    $cspHdr === null ? '' : (substr_count($cspHdr, 'sha256-') . ' hashes'));
 check('Strict-Transport-Security set', isset($h['strict-transport-security']) ? true : null,
-    $h['strict-transport-security'] ?? 'absent — stage C of ROADMAP.md, deliberately last');
+    $h['strict-transport-security']
+        ?? 'absent — sent only over HTTPS on the canonical host (see .htaccess 5d)');
 check('compression negotiated', isset($h['content-encoding']) ? true : null,
     $h['content-encoding'] ?? 'not applied to HTML');
 
