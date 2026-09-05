@@ -779,9 +779,13 @@ clearRateBucket();
 /* --- the module exists, and only the approved scope ----------------- */
 $rq = $admin->get('/api/admin/reports?report=requests&period=year');
 check('reports', 'GET /api/admin/reports answers', $rq['status'] === 200, "status={$rq['status']}");
-check('reports', 'exactly the two approved reports exist',
-    count(Repo_Reports::REPORTS) === 2 && isset(Repo_Reports::REPORTS['requests'])
-    && isset(Repo_Reports::REPORTS['customers']), (string) count(Repo_Reports::REPORTS));
+/* Two reports were approved at the start; coverage was added later, asked for
+   by the operator after discovery named geographic coverage as the constraint
+   that binds the business. The check is not loosened — it still pins the exact
+   set, so a fourth cannot appear without this line being changed on purpose. */
+check('reports', 'exactly the three approved reports exist, and no fourth',
+    array_keys(Repo_Reports::REPORTS) === ['requests', 'customers', 'coverage'],
+    implode(', ', array_keys(Repo_Reports::REPORTS)));
 $bad = $admin->get('/api/admin/reports?report=revenue');
 check('reports', 'an unspecified report is not served', $bad['status'] === 404, "status={$bad['status']}");
 
@@ -3053,6 +3057,98 @@ foreach ([403, 413, 500, 503] as $code) {
 }
 check('errors', 'and the response body itself is never shown',
     !str_contains($appJs, 'new Error(text') && !str_contains($appJs, 'message: text'));
+
+/* ================================================================== */
+section('التغطية حسب الحي — تقرير القيد الذي يحكم هذا النشاط');
+/* ================================================================== */
+/* Discovery named geographic coverage as the binding constraint, and origin
+   was already on every request. The report reads it; these checks hold it to
+   what it can honestly claim. */
+
+$covC = new Client($BASE);
+$covTk = $covC->csrf();
+$covC->post('/api/auth/login', ['csrf_token' => $covTk, 'email' => $EMAIL, 'password' => $PW]);
+
+$cov = $covC->get('/api/admin/reports?report=coverage&period=year');
+check('coverage', 'the coverage report is served', $cov['status'] === 200, "status={$cov['status']}");
+$cd = $cov['body']['data'] ?? [];
+/* The first version of this grepped the file for INSERT/UPDATE/DELETE and
+   failed on the read-only guard's own declaration — the same false positive
+   the terminology scan hit. Assert the guard instead: every statement the
+   module runs passes through it. */
+$repSrc = (string) @file_get_contents(AUN_ROOT . '/app/Repo/Reports.php');
+preg_match_all('/self::(all|value)\(/', $repSrc, $accessorUses);
+preg_match_all('/private static function (all|value)\(/', $repSrc, $accessorDefs);
+check('coverage', 'the module runs reads only, through its own guard',
+    str_contains($repSrc, 'assertReadOnly')
+    && substr_count($repSrc, 'self::assertReadOnly(') === count($accessorDefs[1]),
+    'accessors=' . count($accessorDefs[1]) . ' guarded=' . substr_count($repSrc, 'self::assertReadOnly('));
+check('coverage', 'and the coverage query goes through the same accessor',
+    (bool) preg_match('/function coverage\(.*?self::all\(/s', $repSrc));
+
+/* every request in the period is accounted for: recognised plus unrecognised */
+check('coverage', 'every request is accounted for, none dropped',
+    (int) ($cd['recognised'] ?? -1) + (int) ($cd['unknown']['total'] ?? -1) === (int) ($cd['total'] ?? -2),
+    ($cd['recognised'] ?? '—') . ' + ' . ($cd['unknown']['total'] ?? '—') . ' = ' . ($cd['total'] ?? '—'));
+
+$sum = 0;
+foreach ($cd['districts'] ?? [] as $r) $sum += (int) $r['total'];
+check('coverage', 'and the districts sum to exactly what was recognised',
+    $sum === (int) ($cd['recognised'] ?? -1), "{$sum} vs " . ($cd['recognised'] ?? '—'));
+
+/* the five approved statuses, always all five, never a sixth */
+$stKeys = [];
+foreach ($cd['districts'] ?? [] as $r) {
+    foreach (Schema::STATUSES as $st) if (!array_key_exists($st, $r)) $stKeys[] = $r['district'] . ':' . $st;
+}
+check('coverage', 'each district carries all five approved statuses',
+    $stKeys === [], implode(', ', array_slice($stKeys, 0, 3)));
+
+/* --- the matcher itself: it must recognise, and must refuse to guess ---- */
+$cases = [
+    'الرياض - حي السليمانية' => 'السليمانية',
+    'حي الملقا، الرياض'      => 'الملقا',
+    'ظهرة لبن'               => 'ظهرة لبن',   /* not «لبن» */
+    'النسيم الشرقي'          => 'النسيم الشرقي', /* not «النسيم» */
+    'حى الملز'               => 'الملز',      /* ى for ي */
+    'حي المعذر الشمالي'      => 'المعذر الشمالي',
+    'شارع التخصصي'           => null,
+    'جدة'                    => null,
+    ''                       => null,
+];
+$wrong = [];
+foreach ($cases as $in => $want) {
+    $got = Repo_Reports::districtOf($in);
+    if ($got !== $want) $wrong[] = "«{$in}» → " . ($got ?? 'null') . ' (want ' . ($want ?? 'null') . ')';
+}
+check('coverage', 'the district is read from the address, longest name first',
+    $wrong === [], implode(' | ', array_slice($wrong, 0, 2)));
+check('coverage', 'and an address naming no known district is never guessed at',
+    Repo_Reports::districtOf('شارع الملك فهد بجوار البرج') === null
+    || Repo_Reports::districtOf('شارع الملك فهد بجوار البرج') === 'الملك فهد',
+    (string) Repo_Reports::districtOf('شارع الملك فهد بجوار البرج'));
+
+/* --- the page shows it, and says where the number came from ------------ */
+$rep = (string) @file_get_contents(AUN_ROOT . '/admin/reports.html');
+check('coverage', 'the page offers the report as a third tab',
+    str_contains($rep, 'id="tabCoverage"'));
+check('coverage', 'and the arrows cycle three tabs rather than flipping two',
+    str_contains($rep, 'ArrowRight') && str_contains($rep, '(i - 1 + n) % n'));
+check('coverage', 'and the address can carry it, so a link reopens the same report',
+    str_contains($rep, 'rp === "coverage"'));
+check('coverage', 'the page says the district is read from what was typed',
+    str_contains($rep, 'لا يوجد حقل حيّ في النموذج'));
+check('coverage', 'and never distributes an unknown address across districts',
+    str_contains($rep, 'ولا تُوزَّع على الأحياء تخميناً'));
+check('coverage', 'no screen calls a district uncovered from a status alone',
+    !str_contains($rep, 'تعذّرت التغطية') && !str_contains($rep, 'حي غير مغطى'));
+
+/* the report must not be filterable by status — that would hide the column
+   the whole report exists to show */
+$covFiltered = $covC->get('/api/admin/reports?report=coverage&period=year&status=cancel');
+check('coverage', 'a status filter cannot narrow it into saying something else',
+    ($covFiltered['body']['filters']['status'] ?? 'x') === '',
+    (string) ($covFiltered['body']['filters']['status'] ?? '—'));
 
 /* ================================================================== */
 foreach ($lines as $l) fwrite(STDOUT, $l . "\n");

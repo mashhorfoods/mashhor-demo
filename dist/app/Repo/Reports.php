@@ -28,10 +28,45 @@ if (!defined('AUN_APP')) { http_response_code(404); exit; }
  */
 final class Repo_Reports
 {
-    /** The two approved reports. There is no third. */
+    /**
+     * The reports. Two were approved originally; the third was asked for by
+     * the operator after discovery named geographic coverage as the binding
+     * constraint on the business — it reads columns that were already being
+     * recorded and adds no new dimension to the specification.
+     */
     public const REPORTS = [
         'requests'  => 'طلبات النقل خلال الفترة',
         'customers' => 'العملاء خلال الفترة',
+        'coverage'  => 'التغطية حسب الحي',
+    ];
+
+    /**
+     * Riyadh districts, for reading a district out of a free-text pickup.
+     *
+     * There is no district field: origin is typed by whoever fills the form,
+     * so a district can only be recognised, never looked up. Longer names are
+     * matched first so «ظهرة لبن» is not read as «لبن», and anything that
+     * matches nothing is counted as غير محدد rather than guessed at — a
+     * coverage map that quietly invents a district is worse than no map.
+     */
+    public const DISTRICTS = [
+        'السليمانية', 'الملز', 'العليا', 'المروج', 'الياسمين', 'النرجس', 'الملقا',
+        'حطين', 'الصحافة', 'الربيع', 'النخيل', 'الورود', 'المرسلات', 'الرحمانية',
+        'أم الحمام', 'السفارات', 'الديرة', 'البطحاء', 'منفوحة', 'شبرا', 'السويدي',
+        'الشفا', 'بدر', 'العزيزية', 'الحزم', 'ظهرة لبن', 'ظهرة البديعة', 'عرقة',
+        'الخزامى', 'المعذر', 'المعذر الشمالي', 'الرائد', 'غرناطة', 'قرطبة',
+        'الروضة', 'الريان', 'الجنادرية', 'المونسية', 'اليرموك', 'إشبيلية',
+        'الحمراء', 'النهضة', 'الخليج', 'النسيم', 'النسيم الشرقي', 'النسيم الغربي',
+        'الرمال', 'قرطبة الشرقية', 'الندى', 'الازدهار', 'الوادي', 'الغدير',
+        'المغرزات', 'التعاون', 'الواحة', 'الفلاح', 'العقيق', 'الصحافة الشمالي',
+        'المهدية', 'عرقة الغربية', 'ديراب', 'نمار', 'الدار البيضاء', 'المنصورة',
+        'الفيصلية', 'الشميسي', 'الوزارات', 'أم سليم', 'الزهراء', 'السلام',
+        'الرفيعة', 'سلطانة', 'الجرادية', 'العريجاء', 'الشرفية', 'طويق',
+        'الحائر', 'المصيف', 'الملك فهد', 'الملك فيصل', 'الملك عبدالله',
+        'الملك عبدالعزيز', 'المربع', 'الفاخرية', 'الناصرية', 'المرقب',
+        'الضباط', 'الوشم', 'صلاح الدين', 'الازدهار الشمالي', 'الاندلس',
+        'المشاعل', 'السلي', 'المنار', 'الرياض الجديدة', 'المصانع', 'الفواز',
+        'لبن', 'العارض', 'القيروان', 'حطين الشمالي', 'بنبان', 'الرابية',
     ];
 
     /**
@@ -185,6 +220,84 @@ final class Repo_Reports
             'byStatus'  => $byStatus,
             'byService' => $byService,
             'bySource'  => $bySource,
+        ];
+    }
+
+    /* ---- report 3 · coverage by district -------------------------------
+       Discovery named geographic coverage as the constraint that binds this
+       business, and origin has been recorded on every request from the start.
+       So this report answers one question and no more: where does the demand
+       come from, and what happened to it there.
+
+       It does not name a district "uncovered". A cancelled trip may have been
+       cancelled by the family; the reason lives in the request's notes, and
+       reading intent out of a status would be exactly the invented metric the
+       specification forbids. The columns say what happened; the operator says
+       why. */
+
+    /** Strip what varies in Arabic typing so two spellings meet: harakat,
+        tatweel, the alef and yaa and taa-marbuta forms, and stray spacing. */
+    private static function normalizeAr(string $s): string
+    {
+        $s = preg_replace('/[\x{064B}-\x{0652}\x{0640}\x{0670}]/u', '', $s);
+        $s = str_replace(['أ', 'إ', 'آ', 'ٱ'], 'ا', $s);
+        $s = str_replace('ة', 'ه', $s);
+        $s = str_replace('ى', 'ي', $s);
+        $s = preg_replace('/\s+/u', ' ', $s);
+        return trim((string) $s);
+    }
+
+    /** The district named in a free-text pickup, or null when none is. */
+    public static function districtOf(?string $origin): ?string
+    {
+        $hay = self::normalizeAr((string) $origin);
+        if ($hay === '') return null;
+
+        /* longest first: «ظهرة لبن» must win over «لبن», and «النسيم الشرقي»
+           over «النسيم» */
+        static $sorted = null;
+        if ($sorted === null) {
+            $sorted = self::DISTRICTS;
+            usort($sorted, static fn($a, $b) => mb_strlen($b) <=> mb_strlen($a));
+        }
+        foreach ($sorted as $d) {
+            if (str_contains($hay, self::normalizeAr($d))) return $d;
+        }
+        return null;
+    }
+
+    public static function coverage(string $basis, array $period): array
+    {
+        [$clause, $params] = self::where($basis, $period);
+        $rows = self::all(
+            "SELECT r.origin AS origin, r.status AS status
+             FROM requests r WHERE {$clause}", $params
+        );
+
+        $by = [];
+        $unknown = ['total' => 0] + array_fill_keys(Schema::STATUSES, 0);
+        foreach ($rows as $r) {
+            $d = self::districtOf($r['origin'] ?? null);
+            $st = (string) $r['status'];
+            if ($d === null) {
+                $unknown['total']++;
+                if (isset($unknown[$st])) $unknown[$st]++;
+                continue;
+            }
+            if (!isset($by[$d])) $by[$d] = ['total' => 0] + array_fill_keys(Schema::STATUSES, 0);
+            $by[$d]['total']++;
+            if (isset($by[$d][$st])) $by[$d][$st]++;
+        }
+
+        $out = [];
+        foreach ($by as $d => $c) $out[] = ['district' => $d] + $c;
+        usort($out, static fn($a, $b) => $b['total'] <=> $a['total'] ?: strcmp($a['district'], $b['district']));
+
+        return [
+            'total'      => count($rows),
+            'districts'  => $out,
+            'unknown'    => $unknown,
+            'recognised' => count($rows) - $unknown['total'],
         ];
     }
 

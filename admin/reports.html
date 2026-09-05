@@ -929,7 +929,7 @@ td.n,th.n{text-align:end;font-variant-numeric:tabular-nums;white-space:nowrap}
       <div class="page" style="margin-bottom:var(--s6)">
         <div class="page__t">
           <h1 class="page__h">التقارير</h1>
-          <p class="page__d">أعداد الطلبات والعملاء خلال فترة. اختر التقرير والفترة، ثم افتح أي رقم لترى السجلات خلفه.</p>
+          <p class="page__d">أعداد الطلبات والعملاء والتغطية حسب الحي خلال فترة. اختر التقرير والفترة، ثم افتح أي رقم لترى السجلات خلفه.</p>
         </div>
       </div>
 
@@ -947,6 +947,9 @@ td.n,th.n{text-align:end;font-variant-numeric:tabular-nums;white-space:nowrap}
         <button class="rpick__b" id="tabCustomers" role="tab" aria-selected="false"
                 aria-controls="reportbody" type="button" tabindex="-1">
           <svg class="i i--sm" aria-hidden="true"><use href="#ic-users"/></svg>العملاء</button>
+        <button class="rpick__b" id="tabCoverage" role="tab" aria-selected="false"
+                aria-controls="reportbody" type="button" tabindex="-1">
+          <svg class="i i--sm" aria-hidden="true"><use href="#ic-pin"/></svg>التغطية</button>
       </div>
 
       <div class="card" style="margin-bottom:var(--s6)">
@@ -1151,7 +1154,8 @@ td.n,th.n{text-align:end;font-variant-numeric:tabular-nums;white-space:nowrap}
   }
   function fromAddress(){
     var p = new URLSearchParams(location.search);
-    if (p.get("report") === "customers") state.report = "customers";
+    var rp = p.get("report");
+    if (rp === "customers" || rp === "coverage") state.report = rp;
     var per = p.get("period");
     if (per && $("fperiod").querySelector('option[value="'+per+'"]')) state.period = per;
     if (p.get("basis") === "trip") state.basis = "trip";
@@ -1184,6 +1188,13 @@ td.n,th.n{text-align:end;font-variant-numeric:tabular-nums;white-space:nowrap}
   function pct(n, total){ return total > 0 ? Math.round(n * 100 / total) : 0; }
 
   /** Arabic number agreement, as elsewhere in the dashboard. */
+  /* plural() prints the number with the word. Where the number is already on
+     the page in its own element, only the word is wanted. */
+  function word(n, one, two, few, many){
+    if (n === 1) return one;
+    if (n === 2) return two;
+    return (n >= 3 && n <= 10) ? few : many;
+  }
   function plural(n, one, two, few, many){
     if (n === 1) return one;
     if (n === 2) return two;
@@ -1218,6 +1229,40 @@ td.n,th.n{text-align:end;font-variant-numeric:tabular-nums;white-space:nowrap}
         a.appendChild(document.createTextNode(" ضمن التصفية المطبّقة"));
       }
       a.appendChild(document.createTextNode("."));
+    } else if (d.report === "coverage"){
+      var tot = d.data.total, rec = d.data.recognised, unk = d.data.unknown.total;
+      a.appendChild(document.createTextNode("خلال "));
+      if (p.key === "custom"){
+        a.appendChild(document.createTextNode("الفترة من "));
+        a.appendChild(ts(p.from));
+        a.appendChild(document.createTextNode(" إلى "));
+        a.appendChild(ts(p.to));
+      } else {
+        a.appendChild(document.createTextNode("«" + p.label + "»"));
+      }
+      a.appendChild(document.createTextNode("، سُجِّل "));
+      if (tot === 1){ a.appendChild(document.createTextNode("طلبٌ واحد")); }
+      else if (tot === 2){ a.appendChild(document.createTextNode("طلبان")); }
+      else {
+        var bc = el("b"); bc.textContent = num(tot); a.appendChild(bc);
+        a.appendChild(document.createTextNode(" " + word(tot,"","","طلبات","طلباً")));
+      }
+      a.appendChild(document.createTextNode("، عُرِف حيُّ "));
+      var br = el("b"); br.textContent = num(rec); a.appendChild(br);
+      /* العربية لا تعدّ الواحد والاثنين برقم: «حيٍّ واحد» لا «1 حي» */
+      var nd = (d.data.districts || []).length;
+      a.appendChild(document.createTextNode(" منها في "));
+      if (nd === 1){ a.appendChild(document.createTextNode("حيٍّ واحد.")); }
+      else if (nd === 2){ a.appendChild(document.createTextNode("حيَّين.")); }
+      else {
+        var bd = el("b"); bd.textContent = num(nd); a.appendChild(bd);
+        a.appendChild(document.createTextNode(" " + word(nd,"","","أحياء","حياً") + "."));
+      }
+      if (unk){
+        a.appendChild(document.createTextNode(" وبقي "));
+        var bu = el("b"); bu.textContent = num(unk); a.appendChild(bu);
+        a.appendChild(document.createTextNode(" بعنوانٍ لم يُذكر فيه حيٌّ معروف."));
+      }
     } else {
       var act = d.data.active, nw = d.data["new"];
       a.appendChild(document.createTextNode("خلال "));
@@ -1266,6 +1311,13 @@ td.n,th.n{text-align:end;font-variant-numeric:tabular-nums;white-space:nowrap}
   function renderFigures(d){
     var box = $("figs");
     box.textContent = "";
+    if (d.report === "coverage"){
+      box.appendChild(figure("إجمالي الطلبات", d.data.total, null, null, "fig--total"));
+      box.appendChild(figure("أحياء معروفة", (d.data.districts||[]).length, null, null));
+      box.appendChild(figure("طلبات عُرِف حيُّها", d.data.recognised, null, null));
+      box.appendChild(figure("عنوان بلا حيّ معروف", d.data.unknown.total, null, null));
+      return;
+    }
     if (d.report === "requests"){
       box.appendChild(figure("إجمالي الطلبات", d.data.total,
         d.data.total ? "افتح السجلات" : null,
@@ -1345,10 +1397,102 @@ td.n,th.n{text-align:end;font-variant-numeric:tabular-nums;white-space:nowrap}
     return wrap;
   }
 
+  /* The coverage table. Six columns rather than one bar, because the question
+     is not "which district is busiest" but "what became of the demand there" —
+     and that is the five approved statuses side by side.
+
+     It does not call any district uncovered. A cancelled trip may have been
+     cancelled by the family; the reason is in the request's notes. The table
+     reports what happened; the operator reads why. */
+  function renderCoverage(d){
+    var wrap = el("section","brk");
+    var h = el("div","brk__h");
+    var t = el("h2","brk__t"); t.textContent = "الطلبات حسب حي الانطلاق"; h.appendChild(t);
+    var note = el("span","brk__d");
+    note.textContent = "الحيّ مقروء من عنوان الانطلاق كما كُتب — لا يوجد حقل حيّ في النموذج.";
+    h.appendChild(note);
+    wrap.appendChild(h);
+
+    var rows = d.data.districts || [];
+    if (!rows.length && !d.data.unknown.total){
+      var none = el("p","brk__d"); none.style.padding = "var(--s5)";
+      none.textContent = "لا طلبات في هذه الفترة.";
+      wrap.appendChild(none); return wrap;
+    }
+
+    var card = el("div","card");
+    var tw = el("div","tbl-wrap");
+    var tbl = el("table","tbl");
+    var KEYS = ["new","review","confirmed","done","cancel"];
+    var head = '<caption class="sr">الطلبات حسب حي الانطلاق</caption><thead><tr>' +
+      '<th scope="col">الحي</th><th scope="col" class="n">الكل</th>';
+    KEYS.forEach(function(k){ head += '<th scope="col" class="n">' + d.statuses[k] + '</th>'; });
+    head += '</tr></thead>';
+    tbl.innerHTML = head;
+
+    var tb = el("tbody");
+    var max = rows.length ? rows[0].total : 0;
+    rows.forEach(function(r){
+      var tr = el("tr");
+      var c1 = el("td");
+      /* a hairline bar behind the name carries the share without a chart */
+      c1.style.position = "relative";
+      var bar = el("span");
+      bar.style.cssText = "position:absolute;inset-block:6px;inset-inline-start:0;z-index:0;"
+        + "background:var(--mist);border-radius:3px;width:" + (max ? (r.total/max*100) : 0) + "%";
+      var nm = el("span");
+      nm.style.cssText = "position:relative;z-index:1;font-weight:500";
+      nm.textContent = r.district;
+      c1.appendChild(bar); c1.appendChild(nm); tr.appendChild(c1);
+
+      var ct = el("td","n"); ct.textContent = num(r.total);
+      ct.style.fontWeight = "600"; tr.appendChild(ct);
+      KEYS.forEach(function(k){
+        var c = el("td","n");
+        c.textContent = r[k] ? num(r[k]) : "—";
+        if (!r[k]) c.style.color = "var(--gray)";
+        tr.appendChild(c);
+      });
+      tb.appendChild(tr);
+    });
+
+    /* the unrecognised addresses, kept visibly apart from the districts */
+    if (d.data.unknown.total){
+      var tru = el("tr");
+      tru.style.background = "var(--soft)";
+      var cu = el("td");
+      var s1 = el("span"); s1.style.cssText = "font-weight:500;color:var(--slate)";
+      s1.textContent = "بلا حيّ معروف";
+      cu.appendChild(s1); tru.appendChild(cu);
+      var cut = el("td","n"); cut.textContent = num(d.data.unknown.total);
+      cut.style.fontWeight = "600"; tru.appendChild(cut);
+      KEYS.forEach(function(k){
+        var c = el("td","n");
+        c.textContent = d.data.unknown[k] ? num(d.data.unknown[k]) : "—";
+        if (!d.data.unknown[k]) c.style.color = "var(--gray)";
+        tru.appendChild(c);
+      });
+      tb.appendChild(tru);
+    }
+
+    tbl.appendChild(tb);
+    tw.appendChild(tbl); card.appendChild(tw); wrap.appendChild(card);
+
+    if (d.data.unknown.total){
+      var foot = el("p","brk__d");
+      foot.style.cssText = "padding:var(--s4) var(--s5) 0;line-height:1.8";
+      foot.textContent = "كلما كُتب اسم الحي في عنوان الانطلاق، صارت هذه الخريطة أدق. "
+        + "العناوين التي لا تذكر حياً معروفاً تُعدّ هنا ولا تُوزَّع على الأحياء تخميناً.";
+      wrap.appendChild(foot);
+    }
+    return wrap;
+  }
+
   function renderBreakdowns(d){
     var box = $("breakdowns");
     box.textContent = "";
 
+    if (d.report === "coverage"){ box.appendChild(renderCoverage(d)); return; }
     if (d.report === "requests"){
       var total = d.data.total;
       var statusRows = ["new","review","confirmed","done","cancel"].map(function(k){
@@ -1564,12 +1708,15 @@ td.n,th.n{text-align:end;font-variant-numeric:tabular-nums;white-space:nowrap}
     Array.prototype.forEach.call(document.querySelectorAll(".reqonly"), function(n){
       n.hidden = state.report !== "requests";
     });
-    $("tabRequests").setAttribute("aria-selected", state.report === "requests" ? "true" : "false");
-    $("tabCustomers").setAttribute("aria-selected", state.report === "customers" ? "true" : "false");
-    $("tabRequests").tabIndex  = state.report === "requests" ? 0 : -1;
-    $("tabCustomers").tabIndex = state.report === "customers" ? 0 : -1;
-    $("reportbody").setAttribute("aria-labelledby",
-      state.report === "requests" ? "tabRequests" : "tabCustomers");
+    var labelledBy = "tabRequests";
+    [["tabRequests","requests"],["tabCustomers","customers"],["tabCoverage","coverage"]]
+      .forEach(function(t){
+        var on = state.report === t[1];
+        $(t[0]).setAttribute("aria-selected", on ? "true" : "false");
+        $(t[0]).tabIndex = on ? 0 : -1;
+        if (on) labelledBy = t[0];
+      });
+    $("reportbody").setAttribute("aria-labelledby", labelledBy);
   }
 
   $("fperiod").addEventListener("change", function(){
@@ -1608,14 +1755,19 @@ td.n,th.n{text-align:end;font-variant-numeric:tabular-nums;white-space:nowrap}
     syncControls();
     load();
   }
-  $("tabRequests").addEventListener("click", function(){ pickReport("requests"); });
-  $("tabCustomers").addEventListener("click", function(){ pickReport("customers"); });
+  var TABS = [["tabRequests","requests"],["tabCustomers","customers"],["tabCoverage","coverage"]];
+  TABS.forEach(function(t){ $(t[0]).addEventListener("click", function(){ pickReport(t[1]); }); });
+  /* Both arrows moved forward when there were two tabs, which was harmless
+     with two and wrong with three. */
   document.querySelector(".rpick").addEventListener("keydown", function(e){
-    var tabs = [$("tabRequests"), $("tabCustomers")];
+    var tabs = TABS.map(function(t){ return $(t[0]); });
     var i = tabs.indexOf(document.activeElement);
     if (i < 0) return;
-    if (e.key === "ArrowLeft"){ e.preventDefault(); tabs[(i+1)%2].focus(); tabs[(i+1)%2].click(); }
-    else if (e.key === "ArrowRight"){ e.preventDefault(); tabs[(i+1)%2].focus(); tabs[(i+1)%2].click(); }
+    var n = tabs.length, j = null;
+    if (e.key === "ArrowLeft")  j = (i + 1) % n;        /* RTL: left is next */
+    else if (e.key === "ArrowRight") j = (i - 1 + n) % n;
+    if (j === null) return;
+    e.preventDefault(); tabs[j].focus(); tabs[j].click();
   });
 
   /* ---------- shell (Stage 04) ------------------------------------------ */

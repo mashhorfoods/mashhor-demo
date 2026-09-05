@@ -1371,6 +1371,13 @@ final class Routes
         if ($report === 'requests') {
             $out['data'] = Repo_Reports::requests($basis, $period, $filters);
             $empty = $out['data']['total'] === 0;
+        } elseif ($report === 'coverage') {
+            /* No status or service filter here: the point of the report is the
+               whole period's demand and what became of it in each district, and
+               filtering by status would hide the very column being read. */
+            $out['data'] = Repo_Reports::coverage($basis, $period);
+            $out['filters'] = ['status' => '', 'service' => ''];
+            $empty = $out['data']['total'] === 0;
         } else {
             $out['data'] = Repo_Reports::customers($basis, $period);
             $page = max(1, (int) (Http::query('page') ?? '1'));
