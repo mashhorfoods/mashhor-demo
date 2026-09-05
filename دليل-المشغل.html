@@ -1,0 +1,495 @@
+<title>دليل مشغّل عون الدرب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+:root{
+  /* لوحة النظام نفسها — الدليل والبرنامج شيء واحد */
+  --navy:#2C4C82; --blue:#4975BA; --blue-deep:#22406F;
+  --sky:#D9E4F3; --mist:#EEF3FA;
+  --ink:#1E2733; --slate:#5A6675; --gray:#8B95A3;
+  --divider:#E4E9F0; --ground:#F6F8FB; --surface:#FFFFFF;
+
+  --warn-ink:#8F6014; --warn-bg:#FBF3E4; --warn-mark:#B0791C;
+  --danger-ink:#A5352E; --danger-bg:#FBEDEC; --danger-mark:#C0433B;
+
+  --st-new-ink:#2C4C82;       --st-new-bg:#EEF3FA;
+  --st-review-ink:#8F6014;    --st-review-bg:#FBF3E4;
+  --st-confirmed-ink:#22406F; --st-confirmed-bg:#D9E4F3;
+  --st-done-ink:#256B55;      --st-done-bg:#EAF5F0;
+  --st-cancel-ink:#47525F;    --st-cancel-bg:#EFF1F4;
+
+  --f-head:"IBM Plex Sans Arabic",ui-sans-serif,system-ui,"Segoe UI","Noto Sans Arabic",sans-serif;
+  --f-body:"Cairo",ui-sans-serif,system-ui,"Segoe UI","Noto Sans Arabic",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+
+  --shadow:0 1px 2px rgba(29,39,51,.05),0 2px 8px rgba(29,39,51,.05);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --navy:#A9C4EA; --blue:#7BA1DC; --blue-deep:#C6D8F2;
+    --sky:#24334A; --mist:#1D2836;
+    --ink:#E7EDF5; --slate:#A3B0C1; --gray:#7A8797;
+    --divider:#2B3745; --ground:#131A23; --surface:#1A222D;
+
+    --warn-ink:#E8C077; --warn-bg:#2C2415; --warn-mark:#D3A24C;
+    --danger-ink:#F0A29A; --danger-bg:#2E1A18; --danger-mark:#D9695F;
+
+    --st-new-ink:#A9C4EA;       --st-new-bg:#1D2836;
+    --st-review-ink:#E8C077;    --st-review-bg:#2C2415;
+    --st-confirmed-ink:#C6D8F2; --st-confirmed-bg:#24334A;
+    --st-done-ink:#8FD3B7;      --st-done-bg:#152A23;
+    --st-cancel-ink:#B3BDC9;    --st-cancel-bg:#232B35;
+
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 2px 8px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --navy:#A9C4EA; --blue:#7BA1DC; --blue-deep:#C6D8F2;
+  --sky:#24334A; --mist:#1D2836;
+  --ink:#E7EDF5; --slate:#A3B0C1; --gray:#7A8797;
+  --divider:#2B3745; --ground:#131A23; --surface:#1A222D;
+
+  --warn-ink:#E8C077; --warn-bg:#2C2415; --warn-mark:#D3A24C;
+  --danger-ink:#F0A29A; --danger-bg:#2E1A18; --danger-mark:#D9695F;
+
+  --st-new-ink:#A9C4EA;       --st-new-bg:#1D2836;
+  --st-review-ink:#E8C077;    --st-review-bg:#2C2415;
+  --st-confirmed-ink:#C6D8F2; --st-confirmed-bg:#24334A;
+  --st-done-ink:#8FD3B7;      --st-done-bg:#152A23;
+  --st-cancel-ink:#B3BDC9;    --st-cancel-bg:#232B35;
+
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 2px 8px rgba(0,0,0,.3);
+}
+
+*{box-sizing:border-box}
+html{direction:rtl}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:var(--f-body); font-size:16px; line-height:1.85;
+  -webkit-font-smoothing:antialiased;
+}
+.page{max-width:50rem;margin:0 auto;padding:0 1.25rem 5rem}
+
+/* ── الترويسة ───────────────────────────────────────────── */
+.mast{padding:3.5rem 0 2rem;border-bottom:2px solid var(--navy)}
+.mast__eyebrow{
+  font-family:var(--f-head);font-weight:600;font-size:.75rem;
+  letter-spacing:.14em;color:var(--blue);margin:0 0 .75rem
+}
+.mast__t{
+  font-family:var(--f-head);font-weight:700;font-size:2.125rem;line-height:1.35;
+  color:var(--navy);margin:0;text-wrap:balance
+}
+.mast__s{margin:.85rem 0 0;color:var(--slate);font-size:1.0625rem;max-width:40rem}
+.mast__m{
+  display:flex;flex-wrap:wrap;gap:.4rem 1.75rem;margin:1.5rem 0 0;
+  font-family:var(--f-mono);font-size:.8125rem;color:var(--gray)
+}
+.mast__m b{color:var(--slate);font-weight:500}
+
+/* ── الفهرس ─────────────────────────────────────────────── */
+.toc{
+  background:var(--surface);border:1px solid var(--divider);border-radius:12px;
+  padding:1.5rem 1.75rem;margin:2rem 0 0;box-shadow:var(--shadow)
+}
+.toc h2{
+  font-family:var(--f-head);font-size:.8125rem;font-weight:600;letter-spacing:.1em;
+  color:var(--gray);margin:0 0 1rem;text-transform:uppercase
+}
+.toc ol{margin:0;padding:0;list-style:none;display:grid;gap:.55rem;
+  grid-template-columns:repeat(auto-fit,minmax(15rem,1fr))}
+.toc a{
+  display:flex;gap:.7rem;align-items:baseline;color:var(--ink);
+  text-decoration:none;font-size:.9375rem;border-radius:6px;padding:.15rem .3rem
+}
+.toc a:hover{color:var(--navy)}
+.toc a:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.toc .n{
+  font-family:var(--f-mono);font-size:.75rem;color:var(--blue);
+  font-variant-numeric:tabular-nums;flex:0 0 auto
+}
+
+/* ── الأقسام ────────────────────────────────────────────── */
+.sec{margin:3.5rem 0 0;scroll-margin-top:1.5rem}
+.sec__h{display:flex;gap:1rem;align-items:baseline;margin:0 0 1.25rem}
+.sec__n{
+  font-family:var(--f-mono);font-weight:500;font-size:.9375rem;color:var(--blue);
+  font-variant-numeric:tabular-nums;flex:0 0 auto;
+  border-inline-end:2px solid var(--sky);padding-inline-end:.85rem;
+  align-self:stretch;display:flex;align-items:center
+}
+.sec__t{
+  font-family:var(--f-head);font-weight:600;font-size:1.375rem;color:var(--navy);
+  margin:0;text-wrap:balance
+}
+.sec p{margin:0 0 1rem}
+.sec > p:last-child{margin-bottom:0}
+
+/* ── خطوات مرقّمة ───────────────────────────────────────── */
+ol.steps{margin:0 0 1.25rem;padding:0;list-style:none;counter-reset:s;
+  display:grid;gap:.9rem}
+ol.steps > li{
+  counter-increment:s;position:relative;padding-inline-start:2.25rem;
+  min-height:1.6rem
+}
+ol.steps > li::before{
+  content:counter(s);position:absolute;inset-inline-start:0;top:.28rem;
+  width:1.6rem;height:1.6rem;border-radius:50%;
+  background:var(--mist);color:var(--navy);
+  font-family:var(--f-mono);font-size:.75rem;font-weight:500;
+  display:grid;place-items:center;font-variant-numeric:tabular-nums
+}
+ul.plain{margin:0 0 1.25rem;padding:0 1.1rem 0 0;display:grid;gap:.5rem}
+ul.plain li::marker{color:var(--blue)}
+
+/* ── أزرار مقتبسة من الواجهة ────────────────────────────── */
+kbd{
+  font-family:var(--f-body);font-size:.875rem;font-weight:600;
+  background:var(--mist);color:var(--blue-deep);
+  border:1px solid var(--sky);border-radius:6px;
+  padding:.1rem .45rem;white-space:nowrap;line-height:1.5
+}
+code{
+  font-family:var(--f-mono);font-size:.8125rem;
+  background:var(--mist);color:var(--navy);
+  border-radius:4px;padding:.1rem .35rem;direction:ltr;
+  display:inline-block;unicode-bidi:isolate
+}
+
+/* ── تنبيهات ────────────────────────────────────────────── */
+.note{
+  border-inline-start:3px solid var(--mark,var(--blue));
+  background:var(--bg,var(--mist));color:var(--fg,var(--ink));
+  border-radius:0 8px 8px 0;padding:.9rem 1.15rem;margin:0 0 1.25rem;
+  font-size:.9375rem;line-height:1.75
+}
+.note.warn{--mark:var(--warn-mark);--bg:var(--warn-bg);--fg:var(--warn-ink)}
+.note.danger{--mark:var(--danger-mark);--bg:var(--danger-bg);--fg:var(--danger-ink)}
+.note b{font-weight:600}
+.note :is(kbd,code){background:rgba(127,127,127,.16);border-color:transparent;color:inherit}
+.note__t{
+  display:block;font-family:var(--f-head);font-weight:600;font-size:.8125rem;
+  letter-spacing:.06em;margin:0 0 .35rem;opacity:.9
+}
+
+/* ── جداول ──────────────────────────────────────────────── */
+.tw{overflow-x:auto;margin:0 0 1.25rem;
+  border:1px solid var(--divider);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.9375rem;min-width:26rem}
+th,td{text-align:start;padding:.7rem .9rem;border-bottom:1px solid var(--divider);
+  vertical-align:top}
+thead th{
+  font-family:var(--f-head);font-weight:600;font-size:.8125rem;color:var(--slate);
+  background:var(--mist);white-space:nowrap
+}
+tbody tr:last-child :is(td,th){border-bottom:0}
+td.who{white-space:nowrap;font-weight:500}
+
+/* ── شارات الحالات، بألوانها الحقيقية ───────────────────── */
+.chip{
+  display:inline-block;border-radius:999px;padding:.12rem .6rem;
+  font-size:.8125rem;font-weight:600;white-space:nowrap;
+  font-family:var(--f-head)
+}
+.chip.new{background:var(--st-new-bg);color:var(--st-new-ink)}
+.chip.review{background:var(--st-review-bg);color:var(--st-review-ink)}
+.chip.confirmed{background:var(--st-confirmed-bg);color:var(--st-confirmed-ink)}
+.chip.done{background:var(--st-done-bg);color:var(--st-done-ink)}
+.chip.cancel{background:var(--st-cancel-bg);color:var(--st-cancel-ink)}
+
+/* ── الخاتمة ────────────────────────────────────────────── */
+.foot{
+  margin:4rem 0 0;padding:1.5rem 0 0;border-top:1px solid var(--divider);
+  color:var(--gray);font-size:.8125rem;font-family:var(--f-mono);line-height:2
+}
+
+@media (max-width:36rem){
+  .mast{padding-top:2.5rem}
+  .mast__t{font-size:1.75rem}
+  .sec__h{gap:.7rem}
+  .toc{padding:1.15rem 1.25rem}
+}
+@media print{
+  body{background:#fff;font-size:11.5pt}
+  .toc{break-inside:avoid}
+  .sec{break-inside:avoid-page;margin-top:1.6rem}
+  .note,.tw{break-inside:avoid}
+  a{color:inherit;text-decoration:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="page">
+
+<header class="mast">
+  <p class="mast__eyebrow">لوحة التحكم · دليل التشغيل</p>
+  <h1 class="mast__t">دليل مشغّل عون الدرب</h1>
+  <p class="mast__s">كل ما يحتاجه من يدير الموقع يومياً: الدخول، تعديل المحتوى ونشره،
+     متابعة الطلبات، الصور، الحسابات، والنسخ الاحتياطي. لا يحتاج قارئُه أي خلفية تقنية.</p>
+  <p class="mast__m">
+    <span><b>الموقع:</b> <code>aunaldrb.com</code></span>
+    <span><b>اللوحة:</b> <code>aunaldrb.com/admin/</code></span>
+    <span><b>النسخة:</b> سبتمبر 2026</span>
+  </p>
+</header>
+
+<nav class="toc" aria-label="محتويات الدليل">
+  <h2>ما يغطّيه هذا الدليل</h2>
+  <ol>
+    <li><a href="#s1"><span class="n">01</span><span>الدخول إلى اللوحة</span></a></li>
+    <li><a href="#s2"><span class="n">02</span><span>القاعدة الذهبية: احفظ ثم انشر</span></a></li>
+    <li><a href="#s3"><span class="n">03</span><span>تعديل نصوص الموقع</span></a></li>
+    <li><a href="#s4"><span class="n">04</span><span>الخدمات</span></a></li>
+    <li><a href="#s5"><span class="n">05</span><span>الصور والوسائط</span></a></li>
+    <li><a href="#s6"><span class="n">06</span><span>الطلبات والعملاء</span></a></li>
+    <li><a href="#s7"><span class="n">07</span><span>الحسابات والصلاحيات</span></a></li>
+    <li><a href="#s8"><span class="n">08</span><span>كلمة المرور</span></a></li>
+    <li><a href="#s9"><span class="n">09</span><span>النسخ الاحتياطي والاستعادة</span></a></li>
+    <li><a href="#s10"><span class="n">10</span><span>حين يقع خطأ</span></a></li>
+    <li><a href="#s11"><span class="n">11</span><span>قواعد لا تُخالَف</span></a></li>
+  </ol>
+</nav>
+
+<!-- 01 -->
+<section class="sec" id="s1">
+  <div class="sec__h"><span class="sec__n">01</span><h2 class="sec__t">الدخول إلى اللوحة</h2></div>
+  <ol class="steps">
+    <li>افتح <code>aunaldrb.com/admin/</code> في المتصفح.</li>
+    <li>أدخل بريدك الإلكتروني وكلمة المرور، ثم <kbd>تسجيل الدخول</kbd>.</li>
+    <li>تفتح <strong>الرئيسية</strong>: ملخّص الطلبات الجديدة والنشاط الأخير.</li>
+  </ol>
+  <p>القائمة على اليمين مقسّمة إلى ثلاث مجموعات:
+     <strong>العمل اليومي</strong> (الرئيسية، طلبات النقل، العملاء)،
+     <strong>الموقع الإلكتروني</strong> (الخدمات، المحتوى، الوسائط والأصول)،
+     <strong>النظام</strong> (الإشعارات والنشاط، التقارير، المستخدمون والصلاحيات، الإعدادات).</p>
+  <p>على الجوال تُطوى القائمة خلف زر ☰ أعلى الصفحة.</p>
+  <div class="note">
+    <span class="note__t">إن أخطأت كلمة المرور عدة مرات</span>
+    يوقف النظام المحاولات مؤقتاً لحماية الحساب. انتظر بضع دقائق وأعد المحاولة —
+    الحساب لم يُغلق.
+  </div>
+</section>
+
+<!-- 02 -->
+<section class="sec" id="s2">
+  <div class="sec__h"><span class="sec__n">02</span><h2 class="sec__t">القاعدة الذهبية: احفظ ثم انشر</h2></div>
+  <p>أي تعديل تجريه على الموقع يمرّ بخطوتين منفصلتين، وهذا مقصود:</p>
+  <ol class="steps">
+    <li><kbd>حفظ التغييرات</kbd> — يحفظ عملك في النظام. <strong>الموقع لم يتغيّر بعد.</strong></li>
+    <li><kbd>نشر على الموقع</kbd> — الآن يراه الزوّار.</li>
+  </ol>
+  <p>بينهما، تظهر شارة صفراء أعلى الصفحة تقول مثلاً «تغييران غير منشورين». وهي عدّاد
+     كل ما هو محفوظ ولم يُنشر، ويختفي عند النشر.</p>
+  <p>زر <kbd>معاينة</kbd> يفتح الموقع بالتعديلات <em>قبل</em> نشرها — استعمله دائماً قبل النشر.</p>
+  <div class="note">
+    <span class="note__t">مهم</span>
+    <kbd>نشر على الموقع</kbd> ينشر <b>كل</b> ما هو محفوظ، لا الصفحة التي تقف عليها فقط.
+    راجع الشارة قبل الضغط لتعرف كم تغييراً سينزل.
+  </div>
+</section>
+
+<!-- 03 -->
+<section class="sec" id="s3">
+  <div class="sec__h"><span class="sec__n">03</span><h2 class="sec__t">تعديل نصوص الموقع</h2></div>
+  <ol class="steps">
+    <li>القائمة ← <strong>المحتوى</strong>.</li>
+    <li>الصفحة مقسّمة إلى أقسام الموقع نفسها. اختر القسم وعدّل النص.</li>
+    <li><kbd>حفظ التغييرات</kbd> ← <kbd>معاينة</kbd> ← <kbd>نشر على الموقع</kbd>.</li>
+  </ol>
+  <p>معلومات الوكالة ورقم الجوال والبريد تُعدَّل من <strong>الإعدادات</strong> ←
+     «معلومات الشركة» و«معلومات التواصل». هي أيضاً تحتاج نشراً حتى تظهر على الموقع.</p>
+</section>
+
+<!-- 04 -->
+<section class="sec" id="s4">
+  <div class="sec__h"><span class="sec__n">04</span><h2 class="sec__t">الخدمات</h2></div>
+  <p>الخدمات التي تظهر في صفحة «خدماتنا». ترتيبها في اللوحة هو ترتيبها على الموقع.</p>
+
+  <p><strong>إضافة خدمة</strong> — ارفع الصورة أولاً من «الوسائط والأصول» إن لم تكن موجودة، ثم:</p>
+  <ol class="steps">
+    <li><kbd>+ خدمة جديدة</kbd>، واملأ: العنوان (حتى 160 حرفاً)، الوصف (حتى 1000 حرف)،
+        الصورة من المكتبة، وصف الصورة، والأيقونة.</li>
+    <li><kbd>إضافة الخدمة</kbd>. تُضاف <strong>مخفية</strong> دائماً.</li>
+    <li><kbd>تعديل</kbd> عندها ← شغّل مفتاح <kbd>ظاهرة على الموقع</kbd> ← اضبط ترتيب الظهور
+        ← <kbd>حفظ التغييرات</kbd>.</li>
+    <li><kbd>نشر على الموقع</kbd>.</li>
+  </ol>
+  <p><strong>إخفاء خدمة</strong> — زر <kbd>إخفاء</kbd> في سطرها. تختفي من الموقع بعد النشر،
+     ولا تُحذف: يمكن إعادة إظهارها متى شئت.</p>
+  <p><strong>إعادة الترتيب</strong> — السهمان ▲▼ في يمين كل سطر. الرقم 1 يظهر أولاً.</p>
+  <div class="note warn">
+    <span class="note__t">المصطلح المعتمد</span>
+    المصطلح الوحيد المعتمد هو <b>ذوي الاحتياجات الخاصة</b>. النموذج يرفض الحفظ تلقائياً
+    إذا احتوى العنوان أو الوصف على «الإعاقة» أو «معاق» أو أي صيغة منها.
+  </div>
+</section>
+
+<!-- 05 -->
+<section class="sec" id="s5">
+  <div class="sec__h"><span class="sec__n">05</span><h2 class="sec__t">الصور والوسائط</h2></div>
+  <ol class="steps">
+    <li>القائمة ← <strong>الوسائط والأصول</strong> ← <kbd>رفع ملف</kbd>.</li>
+    <li>اسحب الصورة أو <kbd>اختيار ملف</kbd>، ثم <kbd>تأكيد الرفع</kbd>.</li>
+  </ol>
+  <div class="tw">
+    <table>
+      <thead><tr><th>الشرط</th><th>القيمة</th></tr></thead>
+      <tbody>
+        <tr><td class="who">الأنواع المقبولة</td><td><code>WebP</code> · <code>JPG</code> · <code>PNG</code> · <code>AVIF</code></td></tr>
+        <tr><td class="who">الحجم الأقصى</td><td>4 ميجابايت</td></tr>
+        <tr><td class="who">أصغر مقاس</td><td>200 × 200 بكسل</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>النظام يعيد تسمية الملف تلقائياً — هذا مقصود ولا يؤثر على شيء. اضغط أي ملف
+     لترى تفاصيله وأين يُستخدم داخل الموقع.</p>
+  <div class="note">
+    <span class="note__t">قبل الرفع</span>
+    الصورة الأخف تعني موقعاً أسرع. اضغط صورك إلى <b>WebP</b> قبل رفعها متى أمكن،
+    ولا ترفع صوراً أكبر بكثير من مساحة عرضها.
+  </div>
+</section>
+
+<!-- 06 -->
+<section class="sec" id="s6">
+  <div class="sec__h"><span class="sec__n">06</span><h2 class="sec__t">الطلبات والعملاء</h2></div>
+  <p>كل طلب نقل يصل من الموقع يظهر في <strong>طلبات النقل</strong> بحالة
+     <span class="chip new">جديد</span>. اضغط الطلب لفتحه، ثم غيّر حالته كلما تقدّم العمل.</p>
+  <div class="tw">
+    <table>
+      <thead><tr><th>الحالة</th><th>متى تُستخدم</th></tr></thead>
+      <tbody>
+        <tr><td><span class="chip new">جديد</span></td><td>وصل ولم يطّلع عليه أحد بعد</td></tr>
+        <tr><td><span class="chip review">قيد المراجعة</span></td><td>جارٍ التواصل مع المستفيد أو التحقق من التفاصيل</td></tr>
+        <tr><td><span class="chip confirmed">مؤكد</span></td><td>اتُّفق على الموعد والخدمة</td></tr>
+        <tr><td><span class="chip done">مكتمل</span></td><td>تمّت الرحلة</td></tr>
+        <tr><td><span class="chip cancel">ملغي</span></td><td>أُلغي الطلب من أي طرف</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>هذه الحالات الخمس هي كل ما يوجد، ولا يمكن إضافة غيرها. كل تغيير حالة يُسجَّل باسم
+     من قام به ووقته — راجعه في <strong>الإشعارات والنشاط</strong>.</p>
+  <p>صفحة <strong>العملاء</strong> تجمع المستفيدين وطلبات كل واحد منهم في مكان واحد.
+     و<strong>التقارير</strong> تعطيك الأعداد حسب الحالة والفترة.</p>
+  <div class="note warn">
+    <span class="note__t">بيانات المستفيدين</span>
+    الأسماء وأرقام الجوال والعناوين بيانات شخصية. لا تُصدَّر ولا تُرسَل خارج النظام،
+    ولا يراها إلا من مُنح صلاحية «العملاء».
+  </div>
+</section>
+
+<!-- 07 -->
+<section class="sec" id="s7">
+  <div class="sec__h"><span class="sec__n">07</span><h2 class="sec__t">الحسابات والصلاحيات</h2></div>
+  <p>القائمة ← <strong>المستخدمون والصلاحيات</strong>. ثلاثة أدوار فقط، ولا يمكن إنشاء رابع:</p>
+  <div class="tw">
+    <table>
+      <thead><tr><th>الدور</th><th>ماذا يرى ويستطيع</th></tr></thead>
+      <tbody>
+        <tr><td class="who">مدير النظام</td><td>كل شيء، بما فيه الحسابات والنسخ الاحتياطي</td></tr>
+        <tr><td class="who">مدير</td><td>الطلبات والعملاء والخدمات والمحتوى والتقارير — حسب ما تمنحه من صلاحيات</td></tr>
+        <tr><td class="who">مدير المحتوى</td><td>الخدمات ومحتوى الموقع فقط. لا يرى الطلبات ولا العملاء إطلاقاً</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>صلاحيات <strong>مدير</strong> وحده قابلة للتضييق يدوياً. صلاحيات الدورين الآخرين ثابتة.
+     لإيقاف موظف ترك العمل: افتح حسابه وأوقف تفعيله — لا تحذفه، فسجل نشاطه يبقى مرتبطاً به.</p>
+  <div class="note danger">
+    <span class="note__t">لا تُشارَك الحسابات</span>
+    لكل شخص حسابه. الحساب المشترك يُفقد معنى سجل النشاط، ويجعل من المستحيل معرفة
+    من غيّر ماذا حين يقع خطأ.
+  </div>
+</section>
+
+<!-- 08 -->
+<section class="sec" id="s8">
+  <div class="sec__h"><span class="sec__n">08</span><h2 class="sec__t">كلمة المرور</h2></div>
+  <ol class="steps">
+    <li>اضغط اسمك أعلى يسار الصفحة ← <kbd>تغيير كلمة المرور</kbd>.</li>
+    <li>أدخل الحالية، ثم الجديدة مرتين. الحد الأدنى <strong>12 حرفاً</strong>،
+        ولا تحتوي على بريدك أو اسمك.</li>
+    <li>تغيير كلمة المرور <strong>ينهي جلساتك على الأجهزة الأخرى</strong>، وتبقى هذه الجلسة مفتوحة.</li>
+  </ol>
+  <p>يمكن الوصول للأمر نفسه من <strong>الإعدادات</strong> ← «الأمان والنسخ الاحتياطي».</p>
+  <p>لإعادة تعيين كلمة مرور موظف آخر: <strong>المستخدمون والصلاحيات</strong> ← افتح حسابه ←
+     <kbd>إعادة تعيين كلمة المرور</kbd>. هذا متاح لمدير النظام فقط.</p>
+</section>
+
+<!-- 09 -->
+<section class="sec" id="s9">
+  <div class="sec__h"><span class="sec__n">09</span><h2 class="sec__t">النسخ الاحتياطي والاستعادة</h2></div>
+  <p><strong>الإعدادات</strong> ← «الأمان والنسخ الاحتياطي». متاح لمدير النظام فقط.</p>
+
+  <p><strong>التنزيل</strong> — <kbd>تنزيل نسخة احتياطية</kbd> يعطيك ملفاً واحداً فيه الخدمات
+     ومحتوى الموقع والإعدادات والطلبات والعملاء وسجل النشاط. لا يحتوي على كلمات المرور
+     ولا على بيانات الاتصال بقاعدة البيانات.</p>
+  <div class="note">
+    <span class="note__t">عادة أسبوعية</span>
+    نزّل نسخة كل أسبوع، و<b>احفظها خارج الخادم</b> — على جهازك أو تخزين سحابي.
+    نسخة احتياطية تعيش على نفس الخادم لا تحميك من فقدان الخادم.
+  </div>
+
+  <p><strong>الاستعادة</strong> — لا تُستعمل إلا عند فقدان بيانات فعلي:</p>
+  <ol class="steps">
+    <li>اختر ملف النسخة الاحتياطية.</li>
+    <li>اكتب كلمة <strong>استعادة</strong> في خانة التأكيد.</li>
+    <li><kbd>استعادة البيانات</kbd>.</li>
+    <li>افتح <strong>المحتوى</strong> واضغط <kbd>نشر على الموقع</kbd> — الموقع لا يتغيّر قبل ذلك.</li>
+  </ol>
+  <div class="note danger">
+    <span class="note__t">الاستعادة تستبدل كل البيانات الحالية</span>
+    يحفظ النظام نسخة من الوضع الحالي تلقائياً قبل الاستبدال، والحسابات وكلمات المرور
+    لا تتأثر. ومع ذلك: <b>لا تضغط هذا الزر للتجربة.</b> جرّبه مرة واحدة بحضور المطوّر
+    لتطمئن أنه يعمل، ثم اتركه.
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="sec" id="s10">
+  <div class="sec__h"><span class="sec__n">10</span><h2 class="sec__t">حين يقع خطأ</h2></div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>ما تراه</th><th>ما تفعله</th></tr></thead>
+      <tbody>
+        <tr><td class="who">«انتهت الجلسة»</td>
+            <td>سجّل الدخول من النافذة نفسها — تعود إلى الصفحة ذاتها ولا تفقد عملك</td></tr>
+        <tr><td class="who">التعديل لا يظهر على الموقع</td>
+            <td>هل ضغطت <kbd>نشر على الموقع</kbd>؟ ثم حدّث الصفحة بـ<code>Ctrl+Shift+R</code></td></tr>
+        <tr><td class="who">رفض رفع الصورة</td>
+            <td>راجع النوع والحجم في القسم 05 — الرسالة تحت الحقل تقول السبب</td></tr>
+        <tr><td class="who">توقّف تسجيل الدخول</td>
+            <td>محاولات كثيرة خاطئة. انتظر بضع دقائق</td></tr>
+        <tr><td class="who">نسيت كلمة المرور</td>
+            <td>اطلب من مدير نظام آخر إعادة تعيينها. وإن كنت مدير النظام الوحيد، تواصل مع المطوّر</td></tr>
+        <tr><td class="who">زر لا يستجيب</td>
+            <td>حدّث الصفحة أولاً. إن تكرّر، صوّر الشاشة وأرسلها للمطوّر</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>عند الإبلاغ عن مشكلة، أرسل ثلاثة أشياء: <strong>صورة الشاشة</strong>،
+     و<strong>اسم الصفحة</strong>، و<strong>ما كنت تفعله بالضبط</strong> قبل ظهورها.</p>
+</section>
+
+<!-- 11 -->
+<section class="sec" id="s11">
+  <div class="sec__h"><span class="sec__n">11</span><h2 class="sec__t">قواعد لا تُخالَف</h2></div>
+  <ul class="plain">
+    <li><strong>لا تعدّل ملفات الموقع مباشرة على الخادم.</strong> كل شيء يُدار من اللوحة؛
+        التعديل اليدوي يضيع مع أول نشر.</li>
+    <li><strong>عايِن قبل أن تنشر.</strong> دائماً.</li>
+    <li><strong>ذوي الاحتياجات الخاصة</strong> هو المصطلح المعتمد وحده.</li>
+    <li><strong>لكل شخص حسابه.</strong> ولا تُكتب كلمة المرور في ورقة أو محادثة.</li>
+    <li><strong>نسخة احتياطية أسبوعياً</strong>، محفوظة خارج الخادم.</li>
+    <li><strong>لا تحذف حساباً</strong> — أوقف تفعيله.</li>
+    <li><strong>الاستعادة ليست للتجربة.</strong></li>
+  </ul>
+</section>
+
+<footer class="foot">
+  دليل مشغّل — وكالة عون الدرب للنقل المتخصص · الرياض<br>
+  يوافق النسخة المنشورة على <code>aunaldrb.com</code> في سبتمبر 2026
+</footer>
+
+</div>
