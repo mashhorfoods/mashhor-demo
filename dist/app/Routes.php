@@ -45,6 +45,12 @@ final class Routes
             ['GET',  '/api/admin/requests/show',  ['requests', 'view'],  'showRequest'],
             ['POST', '/api/admin/requests/status',['requests', 'edit'],  'setStatus'],
             ['POST', '/api/admin/requests/notes', ['requests', 'edit'],  'addNote'],
+            /* A request that arrived by WhatsApp or by telephone, written down
+               by whoever answered. Until this existed the system could only
+               see what the website form sent, so the channel the business
+               actually runs on left no trace and every report was drawn from
+               a fraction of the demand. */
+            ['POST', '/api/admin/requests/new',   ['requests', 'edit'],  'recordRequest'],
             ['GET',  '/api/admin/customers',      ['customers', 'view'], 'listCustomers'],
             ['GET',  '/api/admin/services',       ['services', 'view'],  'listServices'],
             ['POST', '/api/admin/services/save',  ['services', 'edit'],  'saveService'],
@@ -369,6 +375,64 @@ final class Routes
         $res = Repo_Content::storeUpload($file, (array) $u);
         if (!$res['ok']) Http::invalid(['file' => $res['error'] ?? 'تعذّر رفع الصورة.']);
         Http::ok(['asset' => $res['asset']], 201);
+    }
+
+    /**
+     * Record a request that came in off the website.
+     *
+     * The same validator and the same Repo_Requests::create() the public form
+     * uses — one creation path, so a request typed by staff is indistinguishable
+     * from one submitted online except in its source, which is the whole point.
+     * No honeypot here: the sender is a signed-in operator, not the internet.
+     */
+    private static function recordRequest(?array $u): void
+    {
+        $input = Http::input();
+        $v = new Validator($input);
+        $v->rejectUnknown(['csrf_token', 'name', 'phone', 'service',
+                           'from', 'to', 'date', 'time', 'notes', 'source']);
+
+        $v->text('name', true, 2, 80, 'الاسم');
+        $v->phone('phone', true, 'رقم الجوال');
+        $v->choice('service', Repo_Content::serviceTitles(true), true, 'الخدمة المطلوبة');
+        $v->text('from', true, 3, 160, 'مكان الانطلاق');
+        $v->text('to', true, 3, 160, 'الوجهة');
+        /* staff record trips that already happened as well as ones to come, so
+           unlike the public form this date is not required to be in the future */
+        $v->date('date', true, 'تاريخ الرحلة', false);
+        if (($input['time'] ?? '') !== '') $v->time('time', false, 'وقت الرحلة');
+        $v->multiline('notes', 500, 'الملاحظات');
+
+        /* «website» is not a channel anyone can claim in here: a request typed
+           into the dashboard arrived by telephone or by WhatsApp, and letting
+           it be labelled as the website would corrupt the one number this
+           whole exercise exists to produce. */
+        $v->choice('source', ['whatsapp', 'phone'], true, 'كيف وصل الطلب');
+
+        if (!$v->passed()) Http::invalid($v->errors());
+
+        $c = $v->clean();
+        $source = (string) $c['source'];
+        $res = Repo_Requests::create([
+            'name'    => $c['name'],
+            'phone'   => $c['phone'],
+            'service' => $c['service'],
+            'from'    => $c['from'],
+            'to'      => $c['to'],
+            'date'    => $c['date'],
+            'time'    => $c['time'] ?? '',
+            'notes'   => $c['notes'] ?? '',
+        ], $u, $source);
+
+        Repo_Activity::record($u, 'requests', 'edit', 'request',
+            isset($res['id']) ? (string) $res['id'] : null, $res['ref'],
+            'تسجيل طلب وارد عبر ' . (Schema::SOURCE_LABEL[$source] ?? $source));
+        Log::write('info', 'request recorded by staff', [
+            'ref' => $res['ref'], 'source' => $source, 'user_id' => $u['id'] ?? null,
+        ]);
+
+        Http::ok(['ref' => $res['ref'], 'id' => $res['id'] ?? null,
+                  'duplicate' => (bool) ($res['duplicate'] ?? false)], 201);
     }
 
     private static function listRequests(?array $u): void

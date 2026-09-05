@@ -163,6 +163,8 @@
     requests:      function (f)     { return get("/admin/requests", f); },
     request:       function (ref)   { return get("/admin/requests/show", { id: ref }); },
     setStatus:     function (r, s)  { return post("/admin/requests/status", { id: r, status: s }); },
+    /* a request that came in by WhatsApp or by telephone, written down here */
+    recordRequest: function (d)     { return post("/admin/requests/new", d); },
     addNote:       function (r, b)  { return post("/admin/requests/notes", { id: r, body: b }); },
     customers:     function (q)     { return get("/admin/customers", { q: q }); },
     services:      function ()      { return get("/admin/services"); },

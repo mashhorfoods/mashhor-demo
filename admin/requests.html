@@ -705,6 +705,7 @@ tr.rowlink{cursor:pointer}
 .field__label{font-size:var(--fs-label);font-weight:500;color:var(--ink);display:flex;gap:.4rem;align-items:baseline}
 .field__req{font-size:var(--fs-caption);font-weight:400;color:var(--slate)}
 .field__help{font-family:var(--f-ar-body);font-size:var(--fs-caption);color:var(--slate)}
+.field__req{font-size:var(--fs-caption);font-weight:400;color:var(--slate)}
 .field__err{font-size:var(--fs-caption);font-weight:500;color:var(--error-ink);
   display:flex;gap:.35rem;align-items:center}
 .field__err[hidden]{display:none}
@@ -891,7 +892,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
           <div class="page__a">
             <a class="btn btn--secondary" href="intake.html">
               <svg class="i i--sm" aria-hidden="true"><use href="#ic-globe"/></svg>نموذج الموقع</a>
-            <button class="btn btn--primary modonly"><svg class="i i--sm" aria-hidden="true"><use href="#ic-plus"/></svg>تسجيل طلب</button>
+            <button class="btn btn--primary modonly" type="button" id="newreq"><svg class="i i--sm" aria-hidden="true"><use href="#ic-plus"/></svg>تسجيل طلب</button>
           </div>
         </div>
 
@@ -1150,6 +1151,70 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
       <div><h2 class="modal__t" id="confT"></h2><p class="modal__b" id="confB"></p></div></div>
     <div class="modal__f"><button class="btn btn--primary" id="confOk"></button>
       <button class="btn btn--ghost" id="confNo">تراجع</button></div>
+  </div>
+</div>
+
+<!-- === تسجيل طلب وارد ============================================== -->
+<div class="modalwrap" id="nrwrap" hidden role="dialog" aria-modal="true" aria-labelledby="nrT">
+  <div class="modal" style="max-width:36rem">
+    <div class="modal__h">
+      <span class="modal__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-plus"/></svg></span>
+      <div><h2 class="modal__t" id="nrT">تسجيل طلب وارد</h2>
+        <p class="modal__b">طلبٌ وصل عبر الواتساب أو الهاتف. يُسجَّل هنا ليدخل النظام مثل طلبات الموقع تماماً.</p></div>
+    </div>
+    <div class="modal__b2" style="padding:0 var(--s6) var(--s2);display:flex;flex-direction:column;gap:var(--s4)">
+      <div class="field">
+        <label class="field__label" for="nrSource">كيف وصل الطلب <span class="field__req">(مطلوب)</span></label>
+        <span class="selwrap"><svg class="i i--sm" aria-hidden="true"><use href="#ic-chevron"/></svg>
+        <select class="ctl" id="nrSource">
+          <option value="whatsapp">واتساب</option>
+          <option value="phone">هاتف</option>
+        </select></span>
+      </div>
+      <div class="field">
+        <label class="field__label" for="nrName">اسم المستفيد <span class="field__req">(مطلوب)</span></label>
+        <input class="ctl" id="nrName" type="text" maxlength="80" autocomplete="off">
+      </div>
+      <div class="field">
+        <label class="field__label" for="nrPhone">رقم الجوال <span class="field__req">(مطلوب)</span></label>
+        <input class="ctl ltr" id="nrPhone" type="tel" inputmode="tel" maxlength="20" autocomplete="off">
+        <span class="field__help">يبدأ بـ 05. إن كان العميل مسجّلاً من قبل، يُربط الطلب بحسابه.</span>
+      </div>
+      <div class="field">
+        <label class="field__label" for="nrService">الخدمة المطلوبة <span class="field__req">(مطلوب)</span></label>
+        <span class="selwrap"><svg class="i i--sm" aria-hidden="true"><use href="#ic-chevron"/></svg>
+        <select class="ctl" id="nrService"></select></span>
+      </div>
+      <div class="field">
+        <label class="field__label" for="nrFrom">مكان الانطلاق <span class="field__req">(مطلوب)</span></label>
+        <input class="ctl" id="nrFrom" type="text" maxlength="160" autocomplete="off">
+        <span class="field__help">اكتب اسم الحي — منه يُقرأ تقرير التغطية.</span>
+      </div>
+      <div class="field">
+        <label class="field__label" for="nrTo">الوجهة <span class="field__req">(مطلوب)</span></label>
+        <input class="ctl" id="nrTo" type="text" maxlength="160" autocomplete="off">
+      </div>
+      <div style="display:flex;gap:var(--s4);flex-wrap:wrap">
+        <div class="field" style="flex:1 1 10rem">
+          <label class="field__label" for="nrDate">تاريخ الرحلة <span class="field__req">(مطلوب)</span></label>
+          <input class="ctl" id="nrDate" type="date">
+        </div>
+        <div class="field" style="flex:1 1 8rem">
+          <label class="field__label" for="nrTime">الوقت</label>
+          <input class="ctl" id="nrTime" type="time">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field__label" for="nrNotes">ملاحظات</label>
+        <textarea class="ctl" id="nrNotes" rows="2" maxlength="500"
+                  style="min-height:64px;font-family:var(--f-ar-body);line-height:1.8"></textarea>
+      </div>
+      <p class="field__err" id="nrErr" hidden style="display:block"></p>
+    </div>
+    <div class="modal__f">
+      <button class="btn btn--primary" type="button" id="nrOk">تسجيل الطلب</button>
+      <button class="btn btn--ghost" type="button" id="nrNo">إلغاء</button>
+    </div>
   </div>
 </div>
 
@@ -1721,6 +1786,97 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
      app.js hands it over as soon as it arrives. Hiding a control is still
      only courtesy — every write is authorized again in the dispatcher, and
      the two may disagree only in the direction of the server saying no. */
+  /* ---------- تسجيل طلب وارد -------------------------------------------
+     The channel this business actually runs on is WhatsApp, and until now the
+     system could only see what the website form sent — so «المصدر» held one
+     value and every report was drawn from a fraction of the demand. This is
+     the same creation path the public form uses; only the source differs. */
+  (function(){
+    var wrap = $("nrwrap"), btn = $("newreq");
+    if (!wrap || !btn) return;
+    var lastFocus = null, busy = false;
+
+    function err(msg){ var e = $("nrErr"); e.textContent = msg || ""; e.hidden = !msg; }
+    function fields(){
+      return ["nrName","nrPhone","nrFrom","nrTo","nrDate","nrTime","nrNotes"];
+    }
+    function open_(){
+      err("");
+      fields().forEach(function(id){ $(id).value = ""; });
+      $("nrSource").value = "whatsapp";
+      /* the services the site actually offers, read from the server */
+      var sel = $("nrService");
+      if (!sel.options.length){
+        AunAPI.services().then(function(res){
+          (res.rows || []).forEach(function(sv){
+            if (sv.published === false) return;
+            var o = document.createElement("option");
+            o.value = sv.title; o.textContent = sv.title; sel.appendChild(o);
+          });
+        }).catch(function(){ err("تعذّر تحميل قائمة الخدمات. حدّث الصفحة."); });
+      }
+      /* most calls are about a trip today or tomorrow */
+      $("nrDate").value = new Date(Date.now() + 86400000).toISOString().slice(0,10);
+      lastFocus = document.activeElement;
+      wrap.hidden = false;
+      $("nrName").focus();
+    }
+    function close_(){
+      wrap.hidden = true;
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+
+    btn.addEventListener("click", function(){ if (canModify) open_(); });
+    /* the dashboard's «تسجيل طلب» links here rather than carrying a second
+       copy of this form — one place records a request */
+    if (new URLSearchParams(location.search).get("new") === "1"){
+      /* canModify is set by this page's own onUser handler, which is
+         registered after this one — so ask the API rather than reading a
+         variable that has not been filled in yet. */
+      AunAPI.onUser(function(){ if (AunAPI.can("requests", "edit")) open_(); });
+    }
+    $("nrNo").addEventListener("click", close_);
+    wrap.addEventListener("mousedown", function(e){ if (e.target === wrap) close_(); });
+    document.addEventListener("keydown", function(e){
+      if (e.key === "Escape" && !wrap.hidden) close_();
+    });
+
+    $("nrOk").addEventListener("click", function(){
+      if (busy || !canModify) return;
+      err("");
+      var body = {
+        source:  $("nrSource").value,
+        name:    $("nrName").value.trim(),
+        phone:   $("nrPhone").value.trim(),
+        service: $("nrService").value,
+        from:    $("nrFrom").value.trim(),
+        to:      $("nrTo").value.trim(),
+        date:    $("nrDate").value,
+        time:    $("nrTime").value,
+        notes:   $("nrNotes").value.trim()
+      };
+      busy = true; $("nrOk").disabled = true; $("nrOk").textContent = "جارٍ التسجيل…";
+      AunAPI.recordRequest(body).then(function(res){
+        close_();
+        toast(res.duplicate
+          ? "هذا الطلب مسجَّل بالفعل — " + res.ref
+          : "سُجِّل الطلب " + res.ref);
+        state.page = 1;
+        return boot();   /* the list is re-read from the server, not patched */
+      }).catch(function(e){
+        /* the server names the field; show that rather than a general failure */
+        if (e && e.errors){
+          var first = Object.keys(e.errors)[0];
+          err(e.errors[first]);
+        } else {
+          err(e && e.message ? e.message : "تعذّر تسجيل الطلب.");
+        }
+      }).then(function(){
+        busy = false; $("nrOk").disabled = false; $("nrOk").textContent = "تسجيل الطلب";
+      });
+    });
+  })();
+
   AunAPI.onUser(function(){
     canModify = AunAPI.can('requests', "edit");
     applyPerms();

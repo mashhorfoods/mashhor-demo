@@ -3059,6 +3059,111 @@ check('errors', 'and the response body itself is never shown',
     !str_contains($appJs, 'new Error(text') && !str_contains($appJs, 'message: text'));
 
 /* ================================================================== */
+section('تسجيل طلب وارد — القناة التي يعمل عليها النشاط فعلاً');
+/* ================================================================== */
+/* The requests table's `source` column held one value, `website`, because the
+   only way into the system was the public form. WhatsApp — the channel this
+   business actually runs on — left no trace, so every report was drawn from a
+   fraction of the demand. The button that would have fixed it had been on the
+   page all along with nothing behind it. */
+
+$nrC = new Client($BASE);
+$nrTk = $nrC->csrf();
+$nrC->post('/api/auth/login', ['csrf_token' => $nrTk, 'email' => $EMAIL, 'password' => $PW]);
+$nrTk = $nrC->csrf();
+
+$before     = (int) Db::value('SELECT COUNT(*) FROM requests');
+$custBefore = (int) Db::value('SELECT COUNT(*) FROM customers');
+$phone  = '05' . str_pad((string) random_int(0, 99999999), 8, '0', STR_PAD_LEFT);
+$svc    = (string) Db::value('SELECT title FROM services WHERE is_published = 1 ORDER BY sort_order LIMIT 1');
+$body   = [
+    'csrf_token' => $nrTk, 'source' => 'whatsapp', 'name' => 'مستفيد الفحص',
+    'phone' => $phone, 'service' => $svc, 'from' => 'حي الياسمين',
+    'to' => 'مركز غسيل الكلى', 'date' => gmdate('Y-m-d', time() + 86400),
+    'time' => '09:30', 'notes' => 'فحص آلي',
+];
+$made = $nrC->post('/api/admin/requests/new', $body);
+check('intake', 'a request that arrived by WhatsApp can be recorded',
+    $made['status'] === 201, "status={$made['status']} " . substr($made['raw'], 0, 120));
+$ref = (string) ($made['body']['ref'] ?? '');
+check('intake', 'and it is given a reference like any other',
+    (bool) preg_match('/^REQ-\d{4}-\d{4}$/', $ref), $ref);
+
+$row = Db::all('SELECT source, origin, status FROM requests WHERE ref = ?', [$ref])[0] ?? [];
+check('intake', 'and it is stored as WhatsApp, not as the website',
+    ($row['source'] ?? '') === 'whatsapp', (string) ($row['source'] ?? '—'));
+check('intake', 'and it starts in the first approved status, like any other',
+    ($row['status'] ?? '') === 'new', (string) ($row['status'] ?? '—'));
+check('intake', 'and exactly one record was written',
+    (int) Db::value('SELECT COUNT(*) FROM requests') === $before + 1);
+
+/* the district comes through to the report the operator asked for */
+$cv = $nrC->get('/api/admin/reports?report=coverage&period=year');
+$found = null;
+foreach ($cv['body']['data']['districts'] ?? [] as $d) {
+    if ($d['district'] === 'الياسمين') { $found = $d; break; }
+}
+check('intake', 'and its district reaches the coverage report',
+    $found !== null && (int) $found['total'] >= 1, $found ? 'الياسمين=' . $found['total'] : 'not counted');
+
+/* «website» must not be claimable from in here — it is the one number this
+   whole exercise exists to produce */
+$fake = $nrC->post('/api/admin/requests/new', array_merge($body, [
+    'csrf_token' => $nrC->csrf(), 'source' => 'website', 'phone' => '0555000111',
+]));
+check('intake', 'a request typed here cannot claim to have come from the website',
+    $fake['status'] === 422 && isset($fake['body']['errors']['source']),
+    "status={$fake['status']}");
+
+$noSrc = $nrC->post('/api/admin/requests/new', array_merge($body, [
+    'csrf_token' => $nrC->csrf(), 'phone' => '0555000222', 'source' => '',
+]));
+check('intake', 'and it cannot be recorded without saying how it arrived',
+    $noSrc['status'] === 422, "status={$noSrc['status']}");
+
+/* the same validation the public form gets */
+$badPhone = $nrC->post('/api/admin/requests/new', array_merge($body, [
+    'csrf_token' => $nrC->csrf(), 'phone' => '123',
+]));
+check('intake', 'and a bad number is refused with the field named',
+    $badPhone['status'] === 422 && isset($badPhone['body']['errors']['phone']),
+    "status={$badPhone['status']}");
+
+/* an account without the requests module cannot record one — $cm is the
+   Content Manager this suite created earlier, whose matrix withholds it */
+$denied = $cm->post('/api/admin/requests/new', array_merge($body, [
+    'csrf_token' => $cm->csrf(), 'phone' => '0555000333',
+]));
+check('intake', 'and a content account cannot record one at all',
+    in_array($denied['status'], [401, 403], true), "status={$denied['status']}");
+
+/* the button that had nothing behind it */
+$reqSrc = (string) @file_get_contents(AUN_ROOT . '/admin/requests.html');
+check('intake', 'the «تسجيل طلب» button is wired to something',
+    str_contains($reqSrc, 'id="newreq"') && str_contains($reqSrc, 'AunAPI.recordRequest'));
+check('intake', 'and the dashboard sends you here rather than carrying a second form',
+    substr_count((string) @file_get_contents(AUN_ROOT . '/admin/dashboard.html'),
+        'requests.html?new=1') === 3);
+check('intake', 'the form tells the operator the district is what the report reads',
+    str_contains($reqSrc, 'منه يُقرأ تقرير التغطية'));
+
+/* Clean up after itself — the request AND the customer it created. Deleting
+   only the request left an orphan customer behind, which drifted the
+   all-time customer count and failed a consistency check three sections
+   later: a gate that does not tidy up becomes another gate's bug. */
+foreach (Db::all('SELECT id FROM requests WHERE source IN (?,?)', ['whatsapp', 'phone']) as $r) {
+    Db::run('DELETE FROM request_status_history WHERE request_id = ?', [(int) $r['id']]);
+    Db::run('DELETE FROM request_notes WHERE request_id = ?', [(int) $r['id']]);
+    Db::run('DELETE FROM requests WHERE id = ?', [(int) $r['id']]);
+}
+Db::run('DELETE FROM customers WHERE phone = ? AND id NOT IN
+         (SELECT customer_id FROM requests WHERE customer_id IS NOT NULL)', [$phone]);
+$after = (int) Db::value('SELECT COUNT(*) FROM requests');
+check('intake', 'and the gate left nothing behind — request and customer both',
+    $after === $before && (int) Db::value('SELECT COUNT(*) FROM customers WHERE phone = ?', [$phone]) === 0,
+    "requests before={$before} after={$after}");
+
+/* ================================================================== */
 section('التغطية حسب الحي — تقرير القيد الذي يحكم هذا النشاط');
 /* ================================================================== */
 /* Discovery named geographic coverage as the binding constraint, and origin

@@ -81,6 +81,74 @@ function check(page, name, ok, detail = '') {
 function section(t) { lines.push('\n' + t); }
 
 /* ------------------------------------------------------------------ */
+/* ---------------------------------------------------------------------------
+   How much this page changes on its own.
+
+   The verdict below used to be "any mutation inside the watch window means the
+   click did something". These pages poll — a notification count, an
+   unpublished-changes badge — so a window that happens to catch a poll credits
+   the click with the page's own heartbeat. That is how a «تسجيل طلب» button
+   with no handler and no endpoint behind it passed this gate: the sweep
+   watched it, saw the badge tick, and called it alive.
+
+   So measure the heartbeat first, over the same window the click gets, and
+   take the worst of several samples because polling is bursty. A click then
+   has to beat the page's own churn, not merely coincide with it.
+--------------------------------------------------------------------------- */
+/* A click anywhere on these pages runs one document-level handler that closes
+   every open popover — six attribute mutations on notifpop, whopop, stpop and
+   their toggles, on every click, whatever was clicked. That is what made a
+   button with no handler and no endpoint look alive: the sweep watched it, saw
+   six mutations, and called it wired.
+
+   Discounting popovers wholesale would be wrong in the other direction — a
+   control whose whole job is to OPEN one would then look dead. So the
+   direction is what matters: a popover being closed is not evidence, a
+   popover being opened is. */
+/* ---------------------------------------------------------------------------
+   What a click on this page does no matter what was clicked.
+
+   The verdict used to be "any DOM mutation inside the watch window means the
+   click did something". These pages carry one document-level handler that
+   closes every open popover on any click — six attribute mutations on
+   notifpop, whopop, stpop and their toggles, every time, whatever was hit. So
+   a «تسجيل طلب» button with no handler and no endpoint behind it passed this
+   gate twice: the sweep clicked it, saw six mutations, and called it wired.
+
+   Counting the page's idle churn did not fix it either — the churn is
+   event-driven, not periodic, so an idle window measures zero and the click
+   window still sees six.
+
+   The honest baseline is a click that is known to do nothing: click an inert
+   part of the page and remember exactly which nodes move. Those are the page's
+   own reflexes. Anything a real control does beyond them is its own. Taken
+   again after every reload, because a reload clears it.
+--------------------------------------------------------------------------- */
+async function clickReflexes(send, sleep) {
+  const r = await send('Runtime.evaluate', {
+    expression: `(() => new Promise((res) => {
+      window.__aunReflex = new WeakSet();
+      const seen = [];
+      const ob = new MutationObserver((rs) => {
+        for (const m of rs) {
+          const t = m.target && m.target.nodeType === 1 ? m.target
+                  : (m.target && m.target.parentElement) || null;
+          if (t) { window.__aunReflex.add(t); seen.push(t.tagName + (t.id ? '#' + t.id : '')); }
+        }
+      });
+      ob.observe(document.documentElement,
+        { childList: true, subtree: true, attributes: true, characterData: true });
+      /* somewhere inert: the page heading, or the main element itself */
+      const inert = document.querySelector('.page__h, h1') || document.querySelector('main') || document.body;
+      inert.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true, view: window}));
+      setTimeout(() => { ob.disconnect(); res(JSON.stringify(seen.slice(0, 10))); }, 450);
+    }))()`,
+    awaitPromise: true, returnByValue: true,
+  }).catch(() => ({ result: { value: '[]' } }));
+  try { return JSON.parse(r.result.value || '[]'); } catch (e) { return []; }
+}
+
+
 async function main() {
   if (!CHROME) { console.error('no chromium found'); process.exit(2); }
   const userDir = fs.mkdtempSync('/tmp/qa-ctl-');
@@ -248,6 +316,8 @@ async function main() {
       })()`,
       returnByValue: true,
     });
+    /* what a click here does regardless of what was clicked */
+    let reflexes = await clickReflexes(send, sleep);
     const info = JSON.parse(collected.result.value);
     const n = info.n || 0;
 
@@ -300,7 +370,17 @@ async function main() {
              operator reads on the control, so they are what is matched. */
           const risky = /حذف|إلغاء الوصول|إلغاء وصول|نشر|استعادة|رفع|تسجيل الخروج|خروج|أرشفة|إخفاء|استبدال/;
           let skip = '';
-          if (n.getAttribute('data-acct') === 'logout') skip = 'signs out';
+          /* Inert by design, and not the same thing as dead: the nav link to
+             the page you are already on, and the current page's own button in
+             a pager. Both are correct to do nothing when clicked, and both
+             only surfaced once the sweep stopped crediting clicks with the
+             page's reflexes. */
+          if (n.hasAttribute('aria-current')) skip = 'the current page — inert by design';
+          else if (n.disabled) skip = 'disabled';
+          else if (tag === 'A' && n.href && n.href.split('#')[0] === location.href.split('#')[0]) {
+            skip = 'links to this same page';
+          }
+          else if (n.getAttribute('data-acct') === 'logout') skip = 'signs out';
           else if (n.hasAttribute('data-save')) skip = 'saves';
           else if (n.hasAttribute('data-reset')) skip = 'discards edits';
           else if (risky.test(label)) skip = 'destructive: "' + label + '"';
@@ -368,6 +448,10 @@ async function main() {
                 const t = r.target && r.target.nodeType === 1 ? r.target
                         : (r.target && r.target.parentElement) || null;
                 if (t && (t === window.__aunScope || t === window.__aunToggle)) continue;
+                /* a node this page was already changing on its own is not
+                   evidence that the click changed anything */
+                if (t && window.__aunReflex && window.__aunReflex.has(t)) continue;
+                if (window.__aunPopShut && window.__aunPopShut(t, r)) continue;
                 window.__aunFx.mut++;
               }
             });
@@ -412,9 +496,58 @@ async function main() {
           returnByValue: true,
         }).catch(() => ({ result: { value: '{"mut":0,"req":0,"nav":false,"moved":false,"dlg":false}' } }));
         const e = JSON.parse(fx.result.value);
-        const effect = e.mut > 0 || e.req > 0 || e.nav || e.moved || e.dlg;
+        /* A request, a navigation, a dialog or a focus move is unambiguous.
+           Mutations are not: they have to clear what the page does anyway. */
+        const hard = e.req > 0 || e.nav || e.moved || e.dlg;
+        let effect = hard || e.mut > 0;   /* mut now excludes the page's own churn */
+
+        /* Calling a live control dead is the expensive mistake, so a dead
+           verdict is never taken on one sample: re-measure this page's churn
+           and click again, and only agree when both rounds say nothing. */
+        if (!effect) {
+          reflexes = await clickReflexes(send, sleep);   /* the reflex set again */
+          await send('Runtime.evaluate', {
+            expression: `(() => { window.__aunFx = {mut:0,req:0,nav:false,err:0};
+              if (window.__aunObs) window.__aunObs.disconnect();
+              window.__aunObs = new MutationObserver((rs) => {
+                for (const r of rs) {
+                  const t = r.target && r.target.nodeType === 1 ? r.target
+                          : (r.target && r.target.parentElement) || null;
+                  if (t && (t === window.__aunScope || t === window.__aunToggle)) continue;
+                /* a node this page was already changing on its own is not
+                     evidence that the click changed anything */
+                  if (t && window.__aunReflex && window.__aunReflex.has(t)) continue;
+                  window.__aunFx.mut++;
+                }
+              });
+              window.__aunObs.observe(document.documentElement,
+                { childList: true, subtree: true, attributes: true, characterData: true });
+              window.__aunFocusBefore = document.activeElement; return 1;})()`,
+            returnByValue: true,
+          }).catch(() => {});
+          await send('Runtime.callFunctionOn', {
+            objectId, functionDeclaration: 'function(){ this.click(); }', returnByValue: true,
+          }).catch(() => {});
+          await sleep(450);
+          const fx2 = await send('Runtime.evaluate', {
+            expression: `(() => { const f = window.__aunFx || {mut:0,req:0,nav:false};
+              const a = document.activeElement;
+              const moved = a !== window.__aunFocusBefore && a !== window.__aunScope;
+              const dlg = !!document.querySelector('[data-dlg]');
+              if (window.__aunObs) window.__aunObs.disconnect();
+              return JSON.stringify({...f, moved, dlg});})()`,
+            returnByValue: true,
+          }).catch(() => ({ result: { value: '{"mut":0,"req":0,"nav":false,"moved":false,"dlg":false}' } }));
+          const e2 = JSON.parse(fx2.result.value);
+          if (e2.req > 0 || e2.nav || e2.moved || e2.dlg || e2.mut > 0) {
+            effect = true;
+            e.mut = e2.mut; e.req = e2.req; e.nav = e2.nav; e.dlg = e2.dlg;
+          }
+        }
+
         clicked = effect
-          ? `click → ${e.mut} mutations, ${e.req} requests${e.nav ? ', navigated' : ''}${e.dlg ? ', dialog' : ''}`
+          ? `click → ${e.mut} mutations of its own (${reflexes.length} page reflexes ignored), ${e.req} requests`
+            + `${e.nav ? ', navigated' : ''}${e.dlg ? ', dialog' : ''}`
           : '';
         /* anything that redrew the page invalidates what was collected */
         if (e.mut > 4 || e.dlg || e.nav) mustReload = true;
