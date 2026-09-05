@@ -1366,9 +1366,9 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
     <div class="dropzone" id="drop">
       <svg class="i i--lg" aria-hidden="true" style="color:var(--navy)"><use href="#ic-upload"/></svg>
       <strong>اسحب الملف هنا أو اختره</strong>
-      <span>WebP أو PNG أو JPG أو SVG · حتى 3 ميجابايت</span>
+      <span>WebP أو PNG أو JPG أو AVIF · حتى 4 ميجابايت · 200 بكسل على الأقل</span>
       <label class="btn btn--secondary" for="mfile" style="margin-top:var(--s2)">اختيار ملف</label>
-      <input type="file" id="mfile" accept="image/webp,image/png,image/jpeg,image/svg+xml">
+      <input type="file" id="mfile" accept="image/webp,image/png,image/jpeg,image/avif">
     </div>
     <div id="upList"></div>
     <span class="field__err" id="upErr" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
@@ -1500,8 +1500,12 @@ window.AunShell = (function(){
   var THUMBS = {};
 
   /* ---- validation rules, applied before anything enters the library ---- */
-  var MAX_MB = 3;
-  var TYPES = { "image/webp":"webp", "image/png":"png", "image/jpeg":"jpg", "image/svg+xml":"svg" };
+  /* هذه الحدود هي حدود الخادم نفسها (Content::UPLOAD_MAX_BYTES وUPLOAD_TYPES).
+     كانت النافذة تَعِد بـSVG وبثلاث ميجابايت، والخادم يرفض SVG ويسمح بأربع —
+     فمن يرفع SVG يقرأ «مسموح» ثم يُقابَل برفضٍ من الخادم. فحصٌ في مجموعة
+     الاختبارات يمنع افتراقهما مرة أخرى. */
+  var MAX_MB = 4;
+  var TYPES = { "image/webp":"webp", "image/png":"png", "image/jpeg":"jpg", "image/avif":"avif" };
   var PER = 12;
 
   /* Picker mode. A content editor sends the administrator here rather than

@@ -2847,6 +2847,35 @@ foreach ($adminHtml as $file) {
         $alternates, implode(' → ', $order));
 }
 
+/* --- 4 · what the upload dialog promises, the server accepts --------- */
+/* The dialog offered SVG at 3 MB; the server takes WebP, JPEG, PNG and AVIF
+   at 4 MB and refuses SVG outright — so an SVG under the stated limit read as
+   allowed and was then refused. The two must be read from one truth. */
+$mediaSrc = (string) @file_get_contents(AUN_ROOT . '/admin/media.html');
+$serverMb = (int) (Repo_Content::UPLOAD_MAX_BYTES / 1048576);
+preg_match('/var MAX_MB = (\d+);/', $mediaSrc, $mm);
+check('media', 'the upload dialog states the size limit the server enforces',
+    (int) ($mm[1] ?? 0) === $serverMb, 'page=' . ($mm[1] ?? '—') . 'MB server=' . $serverMb . 'MB');
+check('media', 'and says so in the words the operator reads',
+    str_contains($mediaSrc, 'حتى ' . $serverMb . ' ميجابايت'));
+
+$serverMimes = [];
+foreach (Repo_Content::UPLOAD_TYPES as $t) $serverMimes[] = $t[1];
+sort($serverMimes);
+preg_match('/var TYPES = \{([^}]*)\}/', $mediaSrc, $tm);
+preg_match_all('/"(image\/[a-z+]+)"\s*:/', $tm[1] ?? '', $pm);
+$pageMimes = $pm[1] ?? [];
+sort($pageMimes);
+check('media', 'and offers exactly the types the server accepts',
+    $pageMimes === $serverMimes,
+    'page: ' . implode(' ', $pageMimes) . ' | server: ' . implode(' ', $serverMimes));
+
+preg_match('/accept="([^"]*)"[^>]*>/', substr($mediaSrc, strpos($mediaSrc, 'id="mfile"') - 60), $am);
+$accept = array_map('trim', explode(',', $am[1] ?? ''));
+sort($accept);
+check('media', 'and the file picker itself filters to those same types',
+    $accept === $serverMimes, implode(' ', $accept));
+
 /* ================================================================== */
 foreach ($lines as $l) fwrite(STDOUT, $l . "\n");
 fwrite(STDOUT, "\n" . str_repeat('=', 78) . "\n");
