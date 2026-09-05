@@ -84,6 +84,31 @@ final class Backup
         'migrations',
     ];
 
+    /**
+     * The largest backup this server can take back through the dashboard.
+     *
+     * The dashboard does not upload the file — it reads it in the browser and
+     * sends it as the request body, so upload_max_filesize does not apply and
+     * post_max_size does. PHP discards an oversized body *silently*: $_POST is
+     * empty, php://input is empty, and the handler sees a request with no
+     * confirmation word in it. Left alone, the operator is told to type
+     * «استعادة» — which they did — while the real problem is the file's size.
+     */
+    public static function restoreLimitBytes(): int
+    {
+        $v = trim((string) ini_get('post_max_size'));
+        if ($v === '' || $v === '0') return 0;   /* 0 means no limit */
+        $n = (int) $v;
+        $b = match (strtolower(substr($v, -1))) {
+            'g' => $n * 1073741824,
+            'm' => $n * 1048576,
+            'k' => $n * 1024,
+            default => $n,
+        };
+        /* leave room for the JSON envelope the body is wrapped in */
+        return (int) ($b * 0.9);
+    }
+
     public static function dir(): string
     {
         return AUN_ROOT . '/app/storage/backups';

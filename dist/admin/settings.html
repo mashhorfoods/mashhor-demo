@@ -1894,13 +1894,20 @@ window.AunShell = (function(){
       if (dl) dl.href = AunAPI.backupUrl();
     });
 
+    /* What this server will actually accept, reported by the API. The literal
+       that used to sit here said 32 MB while PHP stopped at post_max_size, and
+       a file between the two was refused with a message about the wrong field. */
     var rsBusy=false, rs=$("bkRestore");
     if (rs) rs.addEventListener("click", function(){
       if (rsBusy) return;
       clear(["bkFile","bkConfirm"]);
       var f=$("bkFile").files && $("bkFile").files[0];
       if (!f){ err("bkFile","اختر ملف النسخة الاحتياطية أولاً."); return; }
-      if (f.size > 32*1024*1024){ err("bkFile","حجم الملف أكبر من 32 ميجابايت."); return; }
+      if (RESTORE_MAX && f.size > RESTORE_MAX){
+        err("bkFile","حجم الملف "+(f.size/1048576).toFixed(1)+" ميجابايت، وهذا الخادم يقبل حتى "
+            +(RESTORE_MAX/1048576).toFixed(1)+" ميجابايت. استعد من سطر الأوامر عبر bin/backup.php.");
+        return;
+      }
       if ($("bkConfirm").value.trim() !== "استعادة"){
         err("bkConfirm","اكتب كلمة «استعادة» للتأكيد."); $("bkConfirm").focus(); return;
       }
@@ -1945,8 +1952,10 @@ window.AunShell = (function(){
       SAVED[cat] = fromServer[cat];
     });
   }
+  var RESTORE_MAX = 0;   /* filled from the API on the first load */
   function boot(){
     return AunAPI.settings().then(function(res){
+      if (res.limits && res.limits.restoreMaxBytes) RESTORE_MAX = res.limits.restoreMaxBytes;
       applyLoaded(res.settings || {});
       CATS.forEach(function(c){ if (SAVED[c.k]) loadCat(c.k); });
       loadCat(cur);

@@ -3008,6 +3008,41 @@ if (is_dir(AUN_ROOT . '/dist')) {
         $vm[1] ?? '—');
 }
 
+/* --- the restore ceiling is the server's, not a literal --------------- */
+/* The dashboard does not upload the backup — it sends it as the request body,
+   so post_max_size is the ceiling, and PHP drops an oversized body in silence.
+   The page guarded at a hardcoded 32 MB while this server stops lower, and a
+   file between the two was refused with a message about the confirmation word
+   the operator had already typed. */
+$setRes = $upClient->get('/api/admin/settings');
+$restoreMax = (int) ($setRes['body']['limits']['restoreMaxBytes'] ?? 0);
+check('restore', 'the settings answer reports what a restore can accept',
+    $restoreMax > 0, number_format($restoreMax / 1048576, 1) . 'MB');
+check('restore', 'and it is under post_max_size, not over it',
+    $restoreMax <= Backup::restoreLimitBytes() * 1.0001,
+    'php post_max_size=' . ini_get('post_max_size'));
+
+$setSrc = (string) @file_get_contents(AUN_ROOT . '/admin/settings.html');
+check('restore', 'the restore form guards on that number rather than a literal',
+    str_contains($setSrc, 'RESTORE_MAX') && !str_contains($setSrc, '32*1024*1024'));
+
+/* Whether PHP drops an oversized body or delivers it depends on the SAPI, so
+   both outcomes are asserted, and neither may point at the confirmation word
+   the operator already typed. */
+$phpCap = Backup::restoreLimitBytes();
+$filler = str_repeat('a', (int) ($phpCap * 1.25));
+$oversize = $upClient->request('POST', '/api/admin/restore', json_encode([
+    'csrf_token' => $upClient->csrf(), 'confirm' => 'استعادة', 'backup' => ['x' => $filler],
+]), ['Content-Type' => 'application/json']);
+$msg = (string) ($oversize['body']['errors']['file'] ?? '');
+check('restore', 'an oversized body is refused, by size or by content',
+    $oversize['status'] === 422 && $msg !== '', "status={$oversize['status']} " . substr($msg, 0, 50));
+check('restore', 'and never blames the confirmation word the operator typed',
+    ($oversize['body']['errors']['confirm'] ?? null) === null);
+check('restore', 'and the handler can name the size when the body never arrives',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/app/Routes.php'),
+        'الملف أكبر من الحد الذي يقبله الخادم'));
+
 /* --- a failure the server did not write still says something ---------- */
 $appJs = (string) @file_get_contents(AUN_ROOT . '/admin/app.js');
 check('errors', 'a non-JSON failure is named rather than swallowed',

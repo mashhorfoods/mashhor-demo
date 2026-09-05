@@ -781,7 +781,19 @@ final class Routes
             Http::forbidden();
         }
 
-        $inAll   = Http::input();
+        /* PHP discards a body over post_max_size without a word: $_POST and
+           php://input both come back empty, and the handler below would then
+           tell the operator to type the confirmation word they had already
+           typed. Content-Length still arrives, so the real reason is knowable
+           — say it instead. */
+        $declared = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
+        $ceiling  = Backup::restoreLimitBytes();
+        $inAll    = Http::input();
+        if ($inAll === [] && $ceiling > 0 && $declared > $ceiling) {
+            Http::invalid(['file' => 'الملف أكبر من الحد الذي يقبله الخادم ('
+                . number_format($ceiling / 1048576, 1) . ' ميجابايت). ارفع post_max_size من '
+                . 'إعدادات PHP في لوحة الاستضافة، أو استعد من سطر الأوامر عبر bin/backup.php.']);
+        }
         $confirm = is_string($inAll['confirm'] ?? null) ? trim((string) $inAll['confirm']) : '';
         if ($confirm !== self::RESTORE_CONFIRM) {
             Http::invalid(['confirm' => 'اكتب كلمة «' . self::RESTORE_CONFIRM . '» للتأكيد.']);
@@ -1386,7 +1398,13 @@ final class Routes
 
     private static function listSettings(?array $u): void
     {
-        Http::ok(['settings' => Repo_Content::settings(Http::query('category'))]);
+        /* The restore form needs the real ceiling, not a literal: the browser
+           guarded at 32 MB while this server stops at post_max_size, and a
+           file between the two failed with a message about the wrong field. */
+        Http::ok([
+            'settings' => Repo_Content::settings(Http::query('category')),
+            'limits'   => ['restoreMaxBytes' => Backup::restoreLimitBytes()],
+        ]);
     }
 
     private static function saveSettings(?array $u): void
