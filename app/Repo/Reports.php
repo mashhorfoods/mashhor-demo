@@ -293,11 +293,32 @@ final class Repo_Reports
         foreach ($by as $d => $c) $out[] = ['district' => $d] + $c;
         usort($out, static fn($a, $b) => $b['total'] <=> $a['total'] ?: strcmp($a['district'], $b['district']));
 
+        /* The addresses that named no district anyone here knows.
+           A count alone was useless: it told the operator that something was
+           wrong without letting them see what, and «send me the unmatched
+           addresses» was an instruction with no way to carry it out. Listing
+           them is how the lexicon grows from real data rather than guesswork —
+           and how an operator notices that a district is being typed in a
+           spelling the system does not recognise. */
+        $missed = [];
+        foreach ($rows as $r) {
+            $o = trim((string) ($r['origin'] ?? ''));
+            if ($o === '' || self::districtOf($o) !== null) continue;
+            $missed[$o] = ($missed[$o] ?? 0) + 1;
+        }
+        arsort($missed);
+        $missedOut = [];
+        foreach (array_slice($missed, 0, 60, true) as $text => $n) {
+            $missedOut[] = ['origin' => $text, 'n' => $n];
+        }
+
         return [
             'total'      => count($rows),
             'districts'  => $out,
             'unknown'    => $unknown,
             'recognised' => count($rows) - $unknown['total'],
+            'unmatched'  => $missedOut,
+            'unmatchedDistinct' => count($missed),
         ];
     }
 

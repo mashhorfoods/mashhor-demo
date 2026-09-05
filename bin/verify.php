@@ -3233,6 +3233,29 @@ check('coverage', 'and an address naming no known district is never guessed at',
     || Repo_Reports::districtOf('شارع الملك فهد بجوار البرج') === 'الملك فهد',
     (string) Repo_Reports::districtOf('شارع الملك فهد بجوار البرج'));
 
+/* --- the addresses it could not read, listed rather than only counted -- */
+/* "Send me the unmatched addresses" was an instruction with no way to carry
+   it out: the report gave a count and nothing else. The list is what turns a
+   missing district into a fixable one. */
+check('coverage', 'the unrecognised addresses are listed, not only counted',
+    isset($cd['unmatched']) && is_array($cd['unmatched']));
+$distinct = (int) ($cd['unmatchedDistinct'] ?? -1);
+check('coverage', 'and the listing says how many distinct ones there are',
+    $distinct >= count($cd['unmatched'] ?? []), 'distinct=' . $distinct);
+$sumMissed = 0;
+foreach ($cd['unmatched'] ?? [] as $m) $sumMissed += (int) $m['n'];
+check('coverage', 'and every address listed is one the matcher truly cannot read',
+    array_reduce($cd['unmatched'] ?? [], static fn($ok, $m) =>
+        $ok && Repo_Reports::districtOf($m['origin']) === null, true));
+check('coverage', 'and they add up to no more than the unrecognised total',
+    $sumMissed <= (int) ($cd['unknown']['total'] ?? 0),
+    $sumMissed . ' of ' . ($cd['unknown']['total'] ?? '—'));
+check('coverage', 'the page shows the list and says what to do with it',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/admin/reports.html'),
+        'العناوين التي لم يُعرف حيُّها')
+    && str_contains((string) @file_get_contents(AUN_ROOT . '/admin/reports.html'),
+        'غير معروف للنظام بعد'));
+
 /* --- the page shows it, and says where the number came from ------------ */
 $rep = (string) @file_get_contents(AUN_ROOT . '/admin/reports.html');
 check('coverage', 'the page offers the report as a third tab',

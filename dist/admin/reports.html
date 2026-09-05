@@ -1485,6 +1485,50 @@ td.n,th.n{text-align:end;font-variant-numeric:tabular-nums;white-space:nowrap}
         + "العناوين التي لا تذكر حياً معروفاً تُعدّ هنا ولا تُوزَّع على الأحياء تخميناً.";
       wrap.appendChild(foot);
     }
+
+    /* The addresses themselves, not just how many. A number alone says
+       something is wrong without saying what — and the list is what turns a
+       missing district into a fixable one. */
+    var miss = d.data.unmatched || [];
+    if (miss.length){
+      var det = el("details");
+      det.style.cssText = "margin:var(--s4) var(--s5) 0;border-top:1px solid var(--divider);padding-top:var(--s4)";
+      var sum = el("summary");
+      sum.style.cssText = "cursor:pointer;font-family:var(--f-head);font-weight:600;"
+        + "font-size:var(--fs-sec);color:var(--navy);padding:var(--s2) 0";
+      sum.textContent = "العناوين التي لم يُعرف حيُّها (" + num(d.data.unmatchedDistinct || miss.length) + ")";
+      det.appendChild(sum);
+
+      var hint = el("p","brk__d");
+      hint.style.cssText = "line-height:1.8;margin:var(--s2) 0 var(--s3)";
+      hint.textContent = "إن تكرّر عنوانٌ هنا كثيراً وهو يذكر حياً فعلياً، فاسم الحي "
+        + "غير معروف للنظام بعد. انسخ القائمة وأرسلها لمن يطوّر النظام ليُضيفها.";
+      det.appendChild(hint);
+
+      var box = el("div","tbl-wrap");
+      box.style.maxHeight = "18rem";
+      box.style.overflowY = "auto";
+      var t2 = el("table","tbl");
+      t2.innerHTML = '<caption class="sr">عناوين لم يُعرف حيُّها</caption><thead><tr>'
+        + '<th scope="col">العنوان كما كُتب</th><th scope="col" class="n">عدد الطلبات</th></tr></thead>';
+      var tb2 = el("tbody");
+      miss.forEach(function(m){
+        var tr = el("tr");
+        var c1 = el("td"); c1.textContent = m.origin; tr.appendChild(c1);
+        var c2 = el("td","n"); c2.textContent = num(m.n); tr.appendChild(c2);
+        tb2.appendChild(tr);
+      });
+      t2.appendChild(tb2); box.appendChild(t2); det.appendChild(box);
+
+      if ((d.data.unmatchedDistinct || 0) > miss.length){
+        var more = el("p","brk__d");
+        more.style.cssText = "margin:var(--s3) 0 0";
+        more.textContent = "تُعرض أكثر " + num(miss.length) + " عنواناً تكراراً من "
+          + num(d.data.unmatchedDistinct) + ".";
+        det.appendChild(more);
+      }
+      wrap.appendChild(det);
+    }
     return wrap;
   }
 
