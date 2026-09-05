@@ -375,6 +375,8 @@ function build() {
   }
   console.log('  backend + admin    : ' + treeFiles + ' files, '
     + (treeBytes / 1024).toFixed(0) + 'KB');
+
+  stampAppJs();   /* after the admin tree is in dist/, never before */
   const after = Buffer.byteLength(html);
   console.log(`\n  index.html         : ${(before/1024).toFixed(0)}KB → ${(after/1024).toFixed(0)}KB `
     + `(-${(100 - after/before*100).toFixed(0)}%)`);
@@ -403,6 +405,31 @@ function build() {
    rethinking), or an external script is loaded from a host the policy does not
    name. Each is a bug caught here instead of in production.
 --------------------------------------------------------------------------- */
+/* ---------------------------------------------------------------------------
+   admin/app.js carries a one-year cache (.htaccess §5, ExpiresByType for
+   application/javascript) and every admin page loads it by a bare name. That
+   pair is a trap: ship a fix inside app.js and a returning operator keeps the
+   old file for up to a year, with nothing on screen to say so. Stamp the
+   reference with a hash of the file's own bytes, so the long cache stays
+   correct AND a changed file is a different URL that is fetched at once.
+--------------------------------------------------------------------------- */
+function stampAppJs() {
+  const js = path.join(DIST, 'admin', 'app.js');
+  if (!fs.existsSync(js)) throw new Error('admin/app.js did not reach the package');
+  const v = crypto.createHash('sha256').update(fs.readFileSync(js)).digest('hex').slice(0, 10);
+
+  let stamped = 0;
+  for (const f of fs.readdirSync(path.join(DIST, 'admin'))) {
+    if (!f.endsWith('.html')) continue;
+    const abs = path.join(DIST, 'admin', f);
+    const before = fs.readFileSync(abs, 'utf8');
+    const after = before.replace(/src="app\.js(\?v=[0-9a-f]+)?"/g, 'src="app.js?v=' + v + '"');
+    if (after !== before) { fs.writeFileSync(abs, after); stamped++; }
+  }
+  if (stamped === 0) throw new Error('no admin page loads app.js — the version stamp found nothing');
+  console.log('  app.js version     : ' + v + ' stamped onto ' + stamped + ' pages');
+}
+
 function sealCsp() {
   const htaccess = path.join(DIST, '.htaccess');
   const page     = path.join(DIST, 'index.html');

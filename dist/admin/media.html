@@ -1366,7 +1366,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
     <div class="dropzone" id="drop">
       <svg class="i i--lg" aria-hidden="true" style="color:var(--navy)"><use href="#ic-upload"/></svg>
       <strong>اسحب الملف هنا أو اختره</strong>
-      <span>WebP أو PNG أو JPG أو AVIF · حتى 4 ميجابايت · 200 بكسل على الأقل</span>
+      <span id="upHint">WebP أو PNG أو JPG أو AVIF · حتى 4 ميجابايت · 200 بكسل على الأقل</span>
       <label class="btn btn--secondary" for="mfile" style="margin-top:var(--s2)">اختيار ملف</label>
       <input type="file" id="mfile" accept="image/webp,image/png,image/jpeg,image/avif">
     </div>
@@ -1379,7 +1379,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   </div>
 </div>
 
-<script src="app.js"></script>
+<script src="app.js?v=9796ddc801"></script>
 <script>
 /* Shell behaviour shared by every module page. Exposes only the two helpers
    the modules need — a toast and a confirmation — and keeps the rest private. */
@@ -1505,6 +1505,34 @@ window.AunShell = (function(){
      فمن يرفع SVG يقرأ «مسموح» ثم يُقابَل برفضٍ من الخادم. فحصٌ في مجموعة
      الاختبارات يمنع افتراقهما مرة أخرى. */
   var MAX_MB = 4;
+  var MIN_PX = 200;
+  /* The limits are whatever the server reports on the next list — its own rule
+     and PHP's upload_max_filesize, whichever is smaller. These are only the
+     values shown before that first answer arrives. Two drifts have already
+     been caused by keeping them here as the truth. */
+  var TYPE_LABEL = { webp:"WebP", jpeg:"JPG", jpg:"JPG", png:"PNG", avif:"AVIF", "svg+xml":"SVG" };
+  function typeLabel(mime){
+    var sub = (String(mime).split("/")[1] || "").toLowerCase();
+    return TYPE_LABEL[sub] || sub.toUpperCase();
+  }
+  function applyLimits(l){
+    if (!l) return;
+    if (l.maxMb) MAX_MB = l.maxMb;
+    if (l.minPx) MIN_PX = l.minPx;
+    if (l.types && l.types.length){
+      TYPES = {};
+      for (var i=0;i<l.types.length;i++){
+        TYPES[l.types[i]] = (l.types[i].split("/")[1] || "").replace("jpeg","jpg");
+      }
+      var inp = $("mfile");
+      if (inp) inp.setAttribute("accept", l.types.join(","));
+    }
+    var hint = $("upHint");
+    if (hint){
+      hint.textContent = Object.keys(TYPES).map(typeLabel).join(" أو ")
+        + " · حتى " + MAX_MB + " ميجابايت · " + MIN_PX + " بكسل على الأقل";
+    }
+  }
   var TYPES = { "image/webp":"webp", "image/png":"png", "image/jpeg":"jpg", "image/avif":"avif" };
   var PER = 12;
 
@@ -1902,7 +1930,7 @@ window.AunShell = (function(){
   function accept(file){
     $("upErr").hidden=true;
     var kind=TYPES[file.type];
-    if (!kind){ upErr("نوع الملف غير مدعوم. المسموح: WebP أو PNG أو JPG أو SVG."); return; }
+    if (!kind){ upErr("نوع الملف غير مدعوم. المسموح: " + Object.keys(TYPES).map(typeLabel).join(" أو ") + "."); return; }
     if (file.size > MAX_MB*1024*1024){
       upErr("حجم الملف "+(file.size/1048576).toFixed(1)+" ميجابايت، والحد الأقصى "+MAX_MB+" ميجابايت.");
       return;
@@ -2043,6 +2071,7 @@ window.AunShell = (function(){
     var box = $("results");
     if (box) box.setAttribute("data-state", "loading");
     return AunAPI.media().then(function(res){
+      applyLimits(res.limits);
       ASSETS = (res.rows || []).map(function(r){
         return {
           p: r.path,

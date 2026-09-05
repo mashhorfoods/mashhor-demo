@@ -445,6 +445,35 @@ final class Repo_Content
     public const UPLOAD_MAX_BYTES = 4194304;   /* 4 MB */
 
     /**
+     * What this server can actually take, which is not always what the module
+     * would allow: PHP's upload_max_filesize and post_max_size both cut in
+     * first, and shared hosting sets them low. Advertising 4 MB on a host that
+     * stops at 2 is how an operator ends up staring at a refusal for a file
+     * the dialog told them was fine. The smallest of the three wins, and it is
+     * the number the dashboard is told to display.
+     */
+    public static function uploadLimitBytes(): int
+    {
+        $toBytes = static function (string $v): int {
+            $v = trim($v);
+            if ($v === '') return 0;
+            $n = (int) $v;
+            return match (strtolower(substr($v, -1))) {
+                'g' => $n * 1073741824,
+                'm' => $n * 1048576,
+                'k' => $n * 1024,
+                default => $n,
+            };
+        };
+        $limits = [self::UPLOAD_MAX_BYTES];
+        foreach (['upload_max_filesize', 'post_max_size'] as $key) {
+            $b = $toBytes((string) ini_get($key));
+            if ($b > 0) $limits[] = $key === 'post_max_size' ? (int) ($b * 0.95) : $b;
+        }
+        return min($limits);
+    }
+
+    /**
      * Store an uploaded picture and index it.
      *
      * The file is renamed by the system, not by whoever sent it: a name is
@@ -455,15 +484,33 @@ final class Repo_Content
      */
     public static function storeUpload(array $file, array $actor): array
     {
-        if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-            return ['ok' => false, 'error' => 'تعذّر رفع الملف. حاول مرة أخرى.'];
+        /* PHP refuses a file larger than its own upload_max_filesize before a
+           single byte of it reaches this method, and the old catch-all told
+           the operator «حاول مرة أخرى» for a file that will never succeed no
+           matter how often they try. Each of PHP's own codes now says what
+           actually happened. */
+        $err = (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE);
+        if ($err !== UPLOAD_ERR_OK) {
+            $mb = number_format(self::uploadLimitBytes() / 1048576, 1);
+            return ['ok' => false, 'error' => match ($err) {
+                UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE
+                    => "حجم الصورة أكبر من {$mb} ميجابايت.",
+                UPLOAD_ERR_PARTIAL   => 'انقطع الرفع قبل أن يكتمل. أعد المحاولة.',
+                UPLOAD_ERR_NO_FILE   => 'لم يُختَر أي ملف.',
+                UPLOAD_ERR_NO_TMP_DIR, UPLOAD_ERR_CANT_WRITE
+                    => 'تعذّر على الخادم حفظ الملف مؤقتاً. أبلغ المطوّر.',
+                UPLOAD_ERR_EXTENSION => 'رفض الخادم هذا الملف. أبلغ المطوّر.',
+                default              => 'تعذّر رفع الملف. حاول مرة أخرى.',
+            }];
         }
         $tmp = (string) ($file['tmp_name'] ?? '');
         if ($tmp === '' || !is_uploaded_file($tmp)) {
             return ['ok' => false, 'error' => 'الملف غير صالح.'];
         }
-        if ((int) ($file['size'] ?? 0) > self::UPLOAD_MAX_BYTES) {
-            return ['ok' => false, 'error' => 'حجم الصورة أكبر من 4 ميجابايت.'];
+        $limit = self::uploadLimitBytes();
+        if ((int) ($file['size'] ?? 0) > $limit) {
+            return ['ok' => false, 'error' => 'حجم الصورة أكبر من '
+                . number_format($limit / 1048576, 1) . ' ميجابايت.'];
         }
 
         $info = @getimagesize($tmp);

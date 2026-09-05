@@ -51,6 +51,26 @@
    * `.code` and `.errors` — the caller decides what to show, but it can never
    * mistake a rejection for data.
    */
+  /* What to tell the operator when the server did not send a message of its
+     own. Each line says what happened and what to do, and ends with the code
+     so it can be reported without a console. */
+  function statusText(status) {
+    var m = {
+      400: "الطلب غير مكتمل. حدّث الصفحة وأعد المحاولة.",
+      403: "رفض الخادم هذا الطلب. قد يمنعه جدار الحماية في الاستضافة.",
+      404: "لم يُعثر على هذه الوظيفة على الخادم. تأكّد من رفع الحزمة كاملة.",
+      405: "لم يقبل الخادم هذه العملية.",
+      408: "انتهت مهلة الطلب. أعد المحاولة.",
+      413: "الملف أكبر مما يقبله الخادم.",
+      429: "محاولات كثيرة في وقت قصير. انتظر قليلاً ثم أعد المحاولة.",
+      500: "خطأ في الخادم. أعد المحاولة، وإن تكرّر أبلغ المطوّر.",
+      502: "الخادم لا يستجيب حالياً. أعد المحاولة بعد دقيقة.",
+      503: "الخدمة غير متاحة مؤقتاً. أعد المحاولة بعد دقيقة.",
+      504: "انتهت مهلة الخادم. أعد المحاولة."
+    };
+    return (m[status] || "تعذّر إتمام العملية.") + "  [" + status + "]";
+  }
+
   function handle(res) {
     return res.text().then(function (text) {
       var body = null;
@@ -59,7 +79,14 @@
       if (res.status === 401) { toLogin(); }
       if (res.ok && body && body.ok !== false) return body;
 
-      var err = new Error((body && body.error && body.error.message) || "تعذّر إتمام العملية.");
+      /* A response the server did not write — the host's own 403 page, a
+         gateway timeout, a firewall block on an upload — arrives as HTML, so
+         body is null and every failure used to read «تعذّر إتمام العملية.»
+         with nothing to report. Name what the network said instead: the
+         status in the operator's language, and the number itself so a
+         screenshot is enough to diagnose. The response body is never shown —
+         it can carry server paths. */
+      var err = new Error((body && body.error && body.error.message) || statusText(res.status));
       err.status = res.status;
       err.code = (body && body.error && body.error.code) || "http_" + res.status;
       err.errors = (body && body.errors) || null;

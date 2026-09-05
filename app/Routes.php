@@ -533,7 +533,18 @@ final class Routes
             $row['usedIn'] = $usage[$row['path']] ?? [];
             return $row;
         }, Repo_Content::media());
-        Http::ok(['rows' => $rows]);
+        /* The dashboard used to carry the limits as literals and drifted from
+           the server twice — once from the module's own rules, once from PHP's.
+           They travel with the list now, so the dialog can only say what this
+           server will actually accept. */
+        $mimes = [];
+        foreach (Repo_Content::UPLOAD_TYPES as $t) $mimes[] = $t[1];
+        Http::ok(['rows' => $rows, 'limits' => [
+            'maxBytes' => Repo_Content::uploadLimitBytes(),
+            'maxMb'    => round(Repo_Content::uploadLimitBytes() / 1048576, 1),
+            'minPx'    => 200,
+            'types'    => $mimes,
+        ]]);
     }
 
     private static function listUsers(?array $u): void

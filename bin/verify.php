@@ -2854,10 +2854,10 @@ foreach ($adminHtml as $file) {
 $mediaSrc = (string) @file_get_contents(AUN_ROOT . '/admin/media.html');
 $serverMb = (int) (Repo_Content::UPLOAD_MAX_BYTES / 1048576);
 preg_match('/var MAX_MB = (\d+);/', $mediaSrc, $mm);
-check('media', 'the upload dialog states the size limit the server enforces',
-    (int) ($mm[1] ?? 0) === $serverMb, 'page=' . ($mm[1] ?? '—') . 'MB server=' . $serverMb . 'MB');
-check('media', 'and says so in the words the operator reads',
-    str_contains($mediaSrc, 'حتى ' . $serverMb . ' ميجابايت'));
+check('media', 'the dialog\'s fallback limit is the module\'s own',
+    (int) ($mm[1] ?? 0) === $serverMb, 'page=' . ($mm[1] ?? '—') . 'MB module=' . $serverMb . 'MB');
+check('media', 'and it takes the real limit from the server rather than keeping one',
+    str_contains($mediaSrc, 'function applyLimits') && str_contains($mediaSrc, 'applyLimits(res.limits)'));
 
 $serverMimes = [];
 foreach (Repo_Content::UPLOAD_TYPES as $t) $serverMimes[] = $t[1];
@@ -2875,6 +2875,149 @@ $accept = array_map('trim', explode(',', $am[1] ?? ''));
 sort($accept);
 check('media', 'and the file picker itself filters to those same types',
     $accept === $serverMimes, implode(' ', $accept));
+
+/* ================================================================== */
+section('THE UPLOAD, ACTUALLY PERFORMED — A REAL FILE THROUGH THE REAL ENDPOINT');
+/* ================================================================== */
+/* Every other gate stops short of this one on purpose: it writes a file to
+   disk. So it was the one path nothing had ever exercised, and the operator
+   found that out on a live server. It is exercised here, and cleaned up. */
+
+$upClient = new Client($BASE);
+$upTk = $upClient->csrf();
+$upClient->post('/api/auth/login', ['csrf_token' => $upTk, 'email' => $EMAIL, 'password' => $PW]);
+$upTk = $upClient->csrf();
+
+/** A valid PNG of a given size, built here so the suite carries no fixture. */
+$makePng = static function (int $w, int $h): string {
+    $chunk = static fn(string $t, string $d): string =>
+        pack('N', strlen($d)) . $t . $d . pack('N', crc32($t . $d));
+    $raw = '';
+    for ($y = 0; $y < $h; $y++) {
+        $raw .= "\x00";
+        for ($x = 0; $x < $w; $x++) $raw .= chr($x % 256) . chr($y % 256) . "\x80";
+    }
+    return "\x89PNG\r\n\x1a\n"
+        . $chunk('IHDR', pack('NNCCCCC', $w, $h, 8, 2, 0, 0, 0))
+        . $chunk('IDAT', gzcompress($raw))
+        . $chunk('IEND', '');
+};
+
+/** Wraps bytes as one multipart/form-data body. */
+$multipart = static function (string $bytes, string $name, string $type, string $token): array {
+    $b = '----aun' . bin2hex(random_bytes(8));
+    $body = "--{$b}\r\nContent-Disposition: form-data; name=\"csrf_token\"\r\n\r\n{$token}\r\n"
+          . "--{$b}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"{$name}\"\r\n"
+          . "Content-Type: {$type}\r\n\r\n{$bytes}\r\n--{$b}--\r\n";
+    return [$body, 'multipart/form-data; boundary=' . $b];
+};
+
+$before = (int) Db::value('SELECT COUNT(*) FROM media_assets');
+
+[$body, $ct] = $multipart($makePng(400, 300), 'gate-upload.png', 'image/png', $upTk);
+$up = $upClient->post('/api/admin/media/upload', $body, ['Content-Type' => $ct]);
+check('upload', 'a real picture is accepted', $up['status'] === 201, "status={$up['status']}");
+
+$asset = $up['body']['asset'] ?? [];
+$stored = (string) ($asset['path'] ?? '');
+check('upload', 'and the response names where it was stored', $stored !== '', $stored);
+check('upload', 'and the file is on disk', $stored !== '' && is_file(AUN_ROOT . '/' . $stored));
+check('upload', 'and the row carries the dimensions the picture actually has',
+    (int) ($asset['width'] ?? 0) === 400 && (int) ($asset['height'] ?? 0) === 300,
+    ($asset['width'] ?? '—') . '×' . ($asset['height'] ?? '—'));
+check('upload', 'and the library grew by exactly one',
+    (int) Db::value('SELECT COUNT(*) FROM media_assets') === $before + 1);
+check('upload', 'and the stored name is the system\'s, not the sender\'s',
+    $stored !== '' && str_starts_with(basename($stored), 'up-') && !str_contains($stored, 'gate-upload'),
+    basename($stored));
+
+/* the three refusals, each with the message an operator reads */
+$effective = Repo_Content::uploadLimitBytes();
+[$body, $ct] = $multipart(str_repeat('x', $effective + 4096), 'big.png', 'image/png', $upTk);
+$big = $upClient->post('/api/admin/media/upload', $body, ['Content-Type' => $ct]);
+check('upload', 'a file over the limit is refused', $big['status'] === 422, "status={$big['status']}");
+check('upload', 'and the refusal names the limit',
+    str_contains((string) ($big['body']['errors']['file'] ?? ''), 'ميجابايت'),
+    (string) ($big['body']['errors']['file'] ?? ''));
+
+/* the limit the dashboard shows is the one this server can actually take —
+   PHP's upload_max_filesize cuts in below the module's rule on shared hosting,
+   and the dialog promising more than PHP allows is how a refusal arrives for a
+   file the operator was told was fine */
+$lim = $upClient->get('/api/admin/media');
+$reported = (int) ($lim['body']['limits']['maxBytes'] ?? 0);
+check('upload', 'the library reports the limit this server can actually take',
+    $reported === $effective, 'reported=' . $reported . ' effective=' . $effective);
+check('upload', 'and that is never larger than PHP itself allows',
+    $reported <= (int) (preg_replace('/\D/', '', (string) ini_get('upload_max_filesize')) * 1048576),
+    'php upload_max_filesize=' . ini_get('upload_max_filesize'));
+check('upload', 'and it names the types and the minimum too',
+    ($lim['body']['limits']['types'] ?? []) !== [] && (int) ($lim['body']['limits']['minPx'] ?? 0) === 200);
+
+[$body, $ct] = $multipart('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"></svg>',
+    'vector.svg', 'image/svg+xml', $upTk);
+$svg = $upClient->post('/api/admin/media/upload', $body, ['Content-Type' => $ct]);
+check('upload', 'an SVG is refused, as the dialog now says it will be', $svg['status'] === 422,
+    "status={$svg['status']}");
+
+[$body, $ct] = $multipart($makePng(100, 100), 'tiny.png', 'image/png', $upTk);
+$tiny = $upClient->post('/api/admin/media/upload', $body, ['Content-Type' => $ct]);
+check('upload', 'a picture under 200px is refused', $tiny['status'] === 422, "status={$tiny['status']}");
+check('upload', 'and the refusal says how small is too small',
+    str_contains((string) ($tiny['body']['errors']['file'] ?? ''), '200'),
+    (string) ($tiny['body']['errors']['file'] ?? ''));
+
+/* an upload with no CSRF token is refused before it reaches the disk */
+$b2 = '----aun' . bin2hex(random_bytes(8));
+$noTok = "--{$b2}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"x.png\"\r\n"
+       . "Content-Type: image/png\r\n\r\n" . $makePng(400, 300) . "\r\n--{$b2}--\r\n";
+$noCsrf = $upClient->post('/api/admin/media/upload', $noTok,
+    ['Content-Type' => 'multipart/form-data; boundary=' . $b2]);
+check('upload', 'an upload without a token is refused', $noCsrf['status'] === 419,
+    "status={$noCsrf['status']}");
+
+/* nothing was left behind but the one good file, and that goes too */
+check('upload', 'no refused upload left a file on disk',
+    (int) Db::value('SELECT COUNT(*) FROM media_assets') === $before + 1);
+if ($stored !== '' && is_file(AUN_ROOT . '/' . $stored)) {
+    @unlink(AUN_ROOT . '/' . $stored);
+    Db::run('DELETE FROM media_assets WHERE path = ?', [$stored]);
+}
+check('upload', 'and the gate cleaned up after itself',
+    (int) Db::value('SELECT COUNT(*) FROM media_assets') === $before);
+
+/* --- and the fix inside app.js can actually reach a returning operator -- */
+/* .htaccess caches application/javascript for a year. A bare src="app.js"
+   under that rule means a bug fixed here is invisible to anyone who has
+   opened the dashboard before, for up to a year. */
+if (is_dir(AUN_ROOT . '/dist')) {
+    $unstamped = [];
+    foreach (glob(AUN_ROOT . '/dist/admin/*.html') ?: [] as $f) {
+        $t = (string) @file_get_contents($f);
+        if (!str_contains($t, 'src="app.js')) continue;
+        if (!preg_match('/src="app\.js\?v=[0-9a-f]{6,}"/', $t)) $unstamped[] = basename($f);
+    }
+    check('cache', 'every shipped admin page loads a versioned app.js',
+        $unstamped === [], implode(', ', $unstamped));
+
+    $js = AUN_ROOT . '/dist/admin/app.js';
+    preg_match('/src="app\.js\?v=([0-9a-f]+)"/',
+        (string) @file_get_contents(AUN_ROOT . '/dist/admin/dashboard.html'), $vm);
+    check('cache', 'and the version is the hash of the file that shipped',
+        is_file($js) && ($vm[1] ?? '') === substr(hash_file('sha256', $js), 0, 10),
+        $vm[1] ?? '—');
+}
+
+/* --- a failure the server did not write still says something ---------- */
+$appJs = (string) @file_get_contents(AUN_ROOT . '/admin/app.js');
+check('errors', 'a non-JSON failure is named rather than swallowed',
+    str_contains($appJs, 'function statusText'));
+foreach ([403, 413, 500, 503] as $code) {
+    check('errors', "and {$code} reads as something an operator can act on",
+        (bool) preg_match('/\s' . $code . ': "[^"]{20,}"/', $appJs));
+}
+check('errors', 'and the response body itself is never shown',
+    !str_contains($appJs, 'new Error(text') && !str_contains($appJs, 'message: text'));
 
 /* ================================================================== */
 foreach ($lines as $l) fwrite(STDOUT, $l . "\n");
