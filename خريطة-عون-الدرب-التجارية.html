@@ -1,0 +1,396 @@
+<title>خريطة عون الدرب التجارية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+:root{
+  --navy:#2C4C82; --blue:#4975BA; --blue-deep:#22406F;
+  --sky:#D9E4F3; --mist:#EEF3FA;
+  --ink:#1E2733; --slate:#5A6675; --gray:#8B95A3;
+  --divider:#E4E9F0; --ground:#F6F8FB; --surface:#FFFFFF;
+
+  --fact:#256B55;   --fact-bg:#EAF5F0;   --fact-mark:#2E7D64;
+  --infer:#8F6014;  --infer-bg:#FBF3E4;  --infer-mark:#B0791C;
+  --gap:#A5352E;    --gap-bg:#FBEDEC;    --gap-mark:#C0433B;
+
+  --f-head:"IBM Plex Sans Arabic",ui-sans-serif,system-ui,"Segoe UI","Noto Sans Arabic",sans-serif;
+  --f-body:"Cairo",ui-sans-serif,system-ui,"Segoe UI","Noto Sans Arabic",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --shadow:0 1px 2px rgba(29,39,51,.05),0 2px 8px rgba(29,39,51,.05);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --navy:#A9C4EA; --blue:#7BA1DC; --blue-deep:#C6D8F2;
+    --sky:#24334A; --mist:#1D2836;
+    --ink:#E7EDF5; --slate:#A3B0C1; --gray:#7A8797;
+    --divider:#2B3745; --ground:#131A23; --surface:#1A222D;
+    --fact:#8FD3B7;  --fact-bg:#152A23;  --fact-mark:#4FA383;
+    --infer:#E8C077; --infer-bg:#2C2415; --infer-mark:#D3A24C;
+    --gap:#F0A29A;   --gap-bg:#2E1A18;   --gap-mark:#D9695F;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 2px 8px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --navy:#A9C4EA; --blue:#7BA1DC; --blue-deep:#C6D8F2;
+  --sky:#24334A; --mist:#1D2836;
+  --ink:#E7EDF5; --slate:#A3B0C1; --gray:#7A8797;
+  --divider:#2B3745; --ground:#131A23; --surface:#1A222D;
+  --fact:#8FD3B7;  --fact-bg:#152A23;  --fact-mark:#4FA383;
+  --infer:#E8C077; --infer-bg:#2C2415; --infer-mark:#D3A24C;
+  --gap:#F0A29A;   --gap-bg:#2E1A18;   --gap-mark:#D9695F;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 2px 8px rgba(0,0,0,.3);
+}
+
+*{box-sizing:border-box}
+html{direction:rtl}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--f-body);font-size:16px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.page{max-width:52rem;margin:0 auto;padding:0 1.25rem 5rem}
+
+.mast{padding:3.5rem 0 1.75rem;border-bottom:2px solid var(--navy)}
+.mast__eyebrow{font-family:var(--f-head);font-weight:600;font-size:.75rem;
+  letter-spacing:.14em;color:var(--blue);margin:0 0 .75rem}
+.mast__t{font-family:var(--f-head);font-weight:700;font-size:2.125rem;line-height:1.35;
+  color:var(--navy);margin:0;text-wrap:balance}
+.mast__s{margin:.85rem 0 0;color:var(--slate);font-size:1.0625rem;max-width:42rem}
+
+/* كل ادّعاء موسوم بمصدره — هذا هو هيكل الوثيقة، لا زينتها */
+.key{display:flex;flex-wrap:wrap;gap:.5rem .9rem;margin:1.5rem 0 0}
+.tag{display:inline-flex;align-items:center;gap:.4rem;border-radius:999px;
+  padding:.18rem .7rem;font-family:var(--f-head);font-size:.75rem;font-weight:600;white-space:nowrap}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;flex:0 0 auto}
+.tag.f{background:var(--fact-bg);color:var(--fact)}
+.tag.i{background:var(--infer-bg);color:var(--infer)}
+.tag.g{background:var(--gap-bg);color:var(--gap)}
+
+.sec{margin:3.25rem 0 0;scroll-margin-top:1.5rem}
+.sec__h{display:flex;gap:1rem;align-items:baseline;margin:0 0 .35rem}
+.sec__n{font-family:var(--f-mono);font-weight:500;font-size:.9375rem;color:var(--blue);
+  font-variant-numeric:tabular-nums;flex:0 0 auto;
+  border-inline-end:2px solid var(--sky);padding-inline-end:.85rem;
+  align-self:stretch;display:flex;align-items:center}
+.sec__t{font-family:var(--f-head);font-weight:600;font-size:1.375rem;color:var(--navy);
+  margin:0;text-wrap:balance}
+.sec__sub{margin:0 0 1.5rem;padding-inline-start:3.05rem;color:var(--gray);font-size:.875rem}
+.sec p{margin:0 0 1rem}
+
+h3{font-family:var(--f-head);font-weight:600;font-size:1.0625rem;color:var(--ink);
+  margin:2rem 0 .85rem}
+
+.claim{border-inline-start:3px solid var(--mark);background:var(--bg);
+  border-radius:0 8px 8px 0;padding:.9rem 1.15rem;margin:0 0 1rem;font-size:.9375rem;line-height:1.75}
+.claim.f{--mark:var(--fact-mark);--bg:var(--fact-bg)}
+.claim.i{--mark:var(--infer-mark);--bg:var(--infer-bg)}
+.claim.g{--mark:var(--gap-mark);--bg:var(--gap-bg)}
+.claim__t{display:block;font-family:var(--f-head);font-weight:600;font-size:.75rem;
+  letter-spacing:.06em;margin:0 0 .35rem;opacity:.85}
+.claim.f .claim__t{color:var(--fact)} .claim.i .claim__t{color:var(--infer)}
+.claim.g .claim__t{color:var(--gap)}
+.claim b{font-weight:600}
+
+ul.plain{margin:0 0 1.25rem;padding:0 1.1rem 0 0;display:grid;gap:.5rem}
+ul.plain li::marker{color:var(--blue)}
+ol.steps{margin:0 0 1.25rem;padding:0;list-style:none;counter-reset:s;display:grid;gap:.9rem}
+ol.steps > li{counter-increment:s;position:relative;padding-inline-start:2.25rem}
+ol.steps > li::before{content:counter(s);position:absolute;inset-inline-start:0;top:.28rem;
+  width:1.6rem;height:1.6rem;border-radius:50%;background:var(--mist);color:var(--navy);
+  font-family:var(--f-mono);font-size:.75rem;font-weight:500;display:grid;place-items:center;
+  font-variant-numeric:tabular-nums}
+
+.tw{overflow-x:auto;margin:0 0 1.25rem;border:1px solid var(--divider);
+  border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.9375rem;min-width:30rem}
+th,td{text-align:start;padding:.7rem .9rem;border-bottom:1px solid var(--divider);vertical-align:top}
+thead th{font-family:var(--f-head);font-weight:600;font-size:.8125rem;color:var(--slate);
+  background:var(--mist);white-space:nowrap}
+tbody tr:last-child :is(td,th){border-bottom:0}
+td.who{white-space:nowrap;font-weight:500}
+td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+code{font-family:var(--f-mono);font-size:.8125rem;background:var(--mist);color:var(--navy);
+  border-radius:4px;padding:.1rem .35rem;direction:ltr;display:inline-block;unicode-bidi:isolate}
+a{color:var(--blue);text-underline-offset:3px}
+a:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:3px}
+
+.gate{margin:3.5rem 0 0;border:2px solid var(--navy);border-radius:12px;
+  background:var(--surface);padding:1.75rem;box-shadow:var(--shadow)}
+.gate h2{font-family:var(--f-head);font-weight:700;font-size:1.25rem;color:var(--navy);margin:0 0 .3rem}
+.gate__k{font-family:var(--f-head);font-size:.75rem;letter-spacing:.12em;color:var(--blue);
+  font-weight:600;margin:0 0 .9rem}
+
+.foot{margin:3.5rem 0 0;padding:1.5rem 0 0;border-top:1px solid var(--divider);
+  color:var(--gray);font-size:.8125rem;font-family:var(--f-mono);line-height:2}
+
+@media (max-width:36rem){
+  .mast__t{font-size:1.75rem}
+  .sec__h{gap:.7rem}
+  .sec__sub{padding-inline-start:0}
+}
+@media print{
+  body{background:#fff;font-size:11.5pt}
+  .sec,.claim,.tw,.gate{break-inside:avoid}
+  a{color:inherit;text-decoration:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="page">
+
+<header class="mast">
+  <p class="mast__eyebrow">المراحل 01 – 04 · مخرَج قابل للاعتماد</p>
+  <h1 class="mast__t">خريطة عون الدرب التجارية</h1>
+  <p class="mast__s">اكتشاف، ودراسة منافسين، وتشخيص، ومؤشرات أداء — لشركة عون الدرب
+     للنقل المتخصص بالرياض. كل ادّعاء في هذه الوثيقة موسوم بمصدره، لأن نصف مدخلات
+     هذه المرحلة جاء من إجاباتك ونصفها من النظام والسوق.</p>
+  <div class="key">
+    <span class="tag f">مُثبَت — من النظام أو الموقع أو السوق</span>
+    <span class="tag i">استنتاج — مبني على المُثبَت</span>
+    <span class="tag g">فجوة — يحتاج قراراً أو بياناً</span>
+  </div>
+</header>
+
+<!-- ============ 01 ============ -->
+<section class="sec" id="p1">
+  <div class="sec__h"><span class="sec__n">01</span><h2 class="sec__t">الاكتشاف وتحليل العمل</h2></div>
+  <p class="sec__sub">فهم النشاط قبل الواجهة</p>
+
+  <h3>ما يقوله النشاط عن نفسه</h3>
+  <div class="claim f">
+    <span class="claim__t">مُثبَت — من قاعدة بيانات الموقع</span>
+    <b>العرض:</b> سبع خدمات معتمدة — الكرسي المتحرك، الكرسي الكهربائي، السرير الطبي،
+    مساعد السائق، النقل اليومي، النقل إلى المستشفيات، التنقل للمناسبات الاجتماعية.<br>
+    <b>الجمهور المُعلن:</b> كبار السن، وذوي الاحتياجات الخاصة، والمرضى.<br>
+    <b>النطاق:</b> الرياض — شارع ابن كثير، حي السليمانية. على مدار ٢٤ ساعة.<br>
+    <b>الوعد:</b> «نُعين ونُعاون».
+  </div>
+
+  <div class="claim f">
+    <span class="claim__t">مُثبَت — نص «من نحن»، الفقرة الثانية</span>
+    التمايز الحقيقي المكتوب أصلاً في الموقع: <b>«المساعدة عند الحاجة داخل المنزل،
+    وأثناء النقل، وداخل المستشفى»</b>. هذه ليست خدمة نقل — هذه مرافقة. وهي مدفونة في
+    فقرة تعريفية، لا في العنوان.
+  </div>
+
+  <h3>ما قلتَه أنت</h3>
+  <div class="claim f">
+    <span class="claim__t">مُثبَت — إجاباتك</span>
+    <b>العميل الدافع:</b> الأربعة جميعاً — الأسر، والمستشفيات، والجهات الحكومية والجمعيات، وشركات التأمين.<br>
+    <b>الهدف:</b> الأربعة جميعاً — حجم أكبر، وعقود متكررة، وتوسّع خارج الرياض، وقيمة أعلى للرحلة.<br>
+    <b>القيد الأهم:</b> <b>التغطية الجغرافية</b>.<br>
+    <b>مصدر الطلبات:</b> واتساب مباشرة، وبلا قناة ثابتة.
+  </div>
+
+  <h3>ما يعرفه النظام</h3>
+  <div class="claim f">
+    <span class="claim__t">مُثبَت — جدول الطلبات</span>
+    النظام يسجّل لكل طلب: <code>origin</code> و<code>destination</code> و<code>trip_date</code>
+    و<code>service_id</code> و<code>status</code> و<code>source</code>.
+    أي أن <b>القيد الجغرافي الذي ذكرتَه قابل للقياس من اليوم</b> — نقطة الانطلاق والوجهة
+    مسجّلتان في كل طلب.
+  </div>
+  <div class="claim g">
+    <span class="claim__t">فجوة — قياسية، وهي الأخطر</span>
+    القيمة الوحيدة المسجّلة في حقل <code>source</code> هي <code>website</code>.
+    طلبات الواتساب — وهي <b>القناة الرئيسية بإقرارك</b> — لا تدخل النظام إطلاقاً.
+    فالشركة لا تملك اليوم رقماً واحداً عن حجم طلبها الحقيقي، ولا عن مصدره، ولا عن
+    نسبة ما يُرفض منه.
+  </div>
+</section>
+
+<!-- ============ 02 ============ -->
+<section class="sec" id="p2">
+  <div class="sec__h"><span class="sec__n">02</span><h2 class="sec__t">دراسة المنافسين</h2></div>
+  <p class="sec__sub">ندرسهم ولا ننسخهم</p>
+
+  <p>السوق في الرياض مقسوم إلى طبقتين مختلفتين في الترخيص وفي العميل، ولكل منهما
+     منطق مختلف تماماً:</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>الطبقة</th><th>من فيها</th><th>ما تبيعه</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="who">النقل المتخصص<br><span style="font-weight:400;color:var(--slate)">(موقع عون الدرب نفسه)</span></td>
+          <td>يُسر · مسرى · المستجيب المتفوق · VIP&nbsp;Trans · الطائي</td>
+          <td>رحلة مفردة للأسرة، بمركبة مجهزة. البيع بالهاتف والواتساب.</td>
+        </tr>
+        <tr>
+          <td class="who">النقل الطبي المرخّص</td>
+          <td>نعاون · إسعاف كابيتال · فريق&nbsp;1 · Lifeline</td>
+          <td>عقود مع مستشفيات ومراكز غسيل كلى، ونقل بين المدن. البيع بالعقد.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>ما وجدتُه فعلاً</h3>
+  <div class="claim f">
+    <span class="claim__t">مُثبَت — من مواقع المنافسين</span>
+    <b>كل منافس في الطبقة الأولى يدّعي الشيء نفسه:</b> مركبات مجهزة، طاقم مدرب،
+    أمان وراحة، على مدار ٢٤ ساعة. وهذه بالضبط هي ادّعاءات موقع عون الدرب اليوم.
+  </div>
+  <div class="claim f">
+    <span class="claim__t">مُثبَت — لا موقع منافس ينشر سعراً</span>
+    لم أجد شركة واحدة تنشر سعراً أو باقة أو اشتراكاً شهرياً. الفئة كلها تُغلق البيع
+    بالهاتف. أي أن <b>شفافية السعر خانة فارغة في السوق</b>.
+  </div>
+  <div class="claim f">
+    <span class="claim__t">مُثبَت — تنازع في الاسم</span>
+    توجد شركة قائمة باسم <b>«نعاون» للنقل الطبي الإسعافي</b> (noaawin.sa). وشعار عون
+    الدرب هو <b>«نُعين ونُعاون»</b>. التشابه ليس مصادفة في نظر من يبحث، وهو منافس في
+    الطبقة الثانية — أي في القطاع الذي تريد دخوله.
+  </div>
+  <div class="claim i">
+    <span class="claim__t">استنتاج — من ملف يُسر</span>
+    يُسر هي الأقوى في محركات البحث: صفحات هبوط متعددة لكل صياغة بحث، وحضور على
+    إنستغرام. منافستها على كلمات البحث العامة معركة إنفاق، لا معركة محتوى.
+  </div>
+  <div class="claim g">
+    <span class="claim__t">فجوة — تحتاج تحققاً رسمياً</span>
+    لم أستطع تأكيد ما إذا كان النقل الطبي غير الطارئ يستوجب ترخيصاً من وزارة الصحة
+    في المملكة. هذا سؤال قانوني يُحسم بمراجعة اللائحة التنفيذية أو بالاتصال بالوزارة —
+    ولا أبني عليه توصية قبل التأكد. <b>وهو الذي يحدد إن كان قطاعا المستشفيات والتأمين
+    مفتوحين لكم أصلاً.</b>
+  </div>
+</section>
+
+<!-- ============ 03 ============ -->
+<section class="sec" id="p3">
+  <div class="sec__h"><span class="sec__n">03</span><h2 class="sec__t">المشكلة ← البصيرة ← الحل</h2></div>
+  <p class="sec__sub">تحديد الفرصة الحقيقية</p>
+
+  <h3>التناقض في إجاباتك</h3>
+  <p>قلتَ إن القيد الأهم هو <b>التغطية الجغرافية</b>، وإن الهدف هو <b>كل شيء</b>:
+     حجم أكبر، وعقود، وتوسّع، وقيمة أعلى. هذان لا يجتمعان، وهذه هي البصيرة الأهم في
+     هذه الوثيقة:</p>
+
+  <div class="claim i">
+    <span class="claim__t">استنتاج — وهو محور التوصية</span>
+    شركةٌ قيدُها التغطية الجغرافية، <b>الطلب غير المُوجَّه يضرّها لا ينفعها</b>.
+    الرحلة المفردة تصل من أي حيّ في الرياض في أي ساعة، فترفعُ نسبة ما تعتذر عنه —
+    والاعتذار أسوأ من قلّة الطلب، لأنه يكلّف سمعة.<br><br>
+    أما <b>العقد المتكرر فيحلّ القيد بدل أن يزيده</b>: مريض غسيل الكلى يذهب ثلاث مرات
+    أسبوعياً، من الحي نفسه، إلى المركز نفسه، في الساعة نفسها. عشرة مرضى من مركز واحد
+    = ثلاثون رحلة مضمونة على خط واحد. هذا هو الشكل الوحيد للطلب الذي <b>يُكثّف</b>
+    التغطية بدل أن يبعثرها.
+  </div>
+
+  <div class="claim i">
+    <span class="claim__t">استنتاج</span>
+    والموقع اليوم مبنيٌّ بالكامل للأسر: نموذج طلب رحلة مفردة، ولا صفحة واحدة موجّهة
+    لمدير مركز أو مسؤول مشتريات في مستشفى. أي أن <b>الأصل الرقمي الذي بنيناه يخدم
+    القطاع الذي يضرّ قيدَك، ولا يخدم القطاع الذي يحلّه.</b>
+  </div>
+
+  <h3>ثلاث مشكلات، بأدلّتها</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>الملاحظة</th><th>البصيرة</th><th>الحل المقترح</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>حقل <code>source</code> لا يحمل إلا <code>website</code>، والقناة الحقيقية واتساب</td>
+          <td>الشركة تدير نشاطها بلا رقم واحد يمكن قياسه أو تحسينه</td>
+          <td>كل طلب واتساب يُسجَّل في اللوحة يدوياً بمصدره — بدءاً من الغد، لا بعد التطوير</td>
+        </tr>
+        <tr>
+          <td>كل منافس يدّعي «مجهزة · مدرب · آمن · ٢٤ ساعة»، والموقع يدّعيه أيضاً</td>
+          <td>لا يوجد في الموقع اليوم سببٌ واحد لاختيارك أنت</td>
+          <td>رفع «المرافقة داخل المنزل والمستشفى» من فقرة تعريفية إلى صدر الموقع</td>
+        </tr>
+        <tr>
+          <td>لا منافس ينشر سعراً أو باقة</td>
+          <td>خانة فارغة في السوق، وتخفض عبء المكالمات في آن</td>
+          <td>باقة اشتراك شهري للرحلات الدورية، منشورة بسعرها</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ 04 ============ -->
+<section class="sec" id="p4">
+  <div class="sec__h"><span class="sec__n">04</span><h2 class="sec__t">الاستراتيجية ومؤشرات النجاح</h2></div>
+  <p class="sec__sub">تعريف معنى النجاح</p>
+
+  <h3>التسلسل المقترح</h3>
+  <p>أربعة قطاعات × أربعة أهداف = ستة عشر اتجاهاً. لا تُلاحَق معاً، وقيدُك الجغرافي
+     يرتّبها بنفسه:</p>
+  <ol class="steps">
+    <li><b>أولاً — مراكز غسيل الكلى والتأهيل في نطاق تغطيتك الحالي.</b> طلب متكرر،
+        على خط ثابت، بجدول معلوم. يحلّ القيد ويبني الإيراد المتكرر معاً.</li>
+    <li><b>ثانياً — الأسر، لكن في الأحياء التي تغطّيها فعلاً.</b> لا تسويق لكل الرياض
+        قبل أن تعرف حدودك من بيانات <code>origin</code>.</li>
+    <li><b>ثالثاً — المستشفيات والتأمين</b>، بعد حسم سؤال الترخيص. دورة بيع أطول
+        ومتطلبات تأهيل، فلا تُبدأ قبل أن يثبت التشغيل.</li>
+    <li><b>رابعاً — التوسّع خارج الرياض.</b> آخر شيء، لا أوّله: التوسّع بقيدٍ جغرافي
+        قائم يعني نقل المشكلة إلى مدينة ثانية.</li>
+  </ol>
+
+  <h3>مؤشرات الأداء — بتعريفها لا بأرقامها</h3>
+  <div class="claim g">
+    <span class="claim__t">فجوة — الأهداف الرقمية قرارك أنت</span>
+    لن أضع لك أرقاماً مستهدفة، لأن أي رقم أضعه اليوم سيكون تخميناً: لا يوجد خط أساس
+    بعد. هذه <b>تعريفات</b> المؤشرات وطريقة قياسها — والأرقام تُوضع بعد شهر من القياس.
+  </div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>المؤشر</th><th>كيف يُقاس</th><th>جاهز؟</th></tr></thead>
+      <tbody>
+        <tr><td class="who">الطلب الحقيقي</td>
+            <td>مجموع الطلبات المسجّلة شهرياً، مقسومة حسب <code>source</code></td>
+            <td class="num">يحتاج تسجيل الواتساب</td></tr>
+        <tr><td class="who">نسبة التحويل</td>
+            <td>«مؤكد» ÷ («جديد» + «قيد المراجعة») — من صفحة التقارير</td>
+            <td class="num">جاهز</td></tr>
+        <tr><td class="who">نسبة الاعتذار</td>
+            <td>«ملغي» ÷ الإجمالي، مع سبب الإلغاء في الملاحظات</td>
+            <td class="num">جاهز</td></tr>
+        <tr><td class="who">خريطة التغطية</td>
+            <td>تجميع <code>origin</code> حسب الحي — أين يأتي الطلب وأين تعتذرون</td>
+            <td class="num">البيانات تُجمع، والتقرير يُضاف</td></tr>
+        <tr><td class="who">الإيراد المتكرر</td>
+            <td>نسبة الطلبات من عملاء لهم أكثر من رحلة في الشهر</td>
+            <td class="num">جاهز من جدول العملاء</td></tr>
+        <tr><td class="who">مصدر الزيارة</td>
+            <td>Google Analytics + Search Console — أي كلمة بحث تجلب طلباً</td>
+            <td class="num">جاهز — التحقق تمّ</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>خارج النطاق — صراحةً</h3>
+  <ul class="plain">
+    <li><b>لا تغيير في هوية الموقع ولا في تصميمه</b> — هذه الوثيقة استراتيجية، لا إعادة تصميم.</li>
+    <li><b>لا تغيير في المصطلح المعتمد.</b> المنافسون يستعملون صيغاً أخرى في تسويقهم؛
+        وهذا خيارهم. «ذوي الاحتياجات الخاصة» يبقى مصطلح عون الدرب الوحيد، والفارق
+        في نتائج البحث ثمنٌ مقبول لموقفٍ واضح.</li>
+    <li><b>لا حملات إعلانية مدفوعة قبل القياس.</b> الإنفاق على طلبٍ لا تستطيع تغطيته خسارة مزدوجة.</li>
+    <li><b>لا توسّع خارج الرياض في هذه الدورة.</b></li>
+  </ul>
+</section>
+
+<!-- ============ GATE ============ -->
+<div class="gate">
+  <p class="gate__k">بوابة قرار · قبل المرحلة 05</p>
+  <h2>ثلاثة قرارات، وسؤال واحد يُحسم خارجاً</h2>
+  <ol class="steps" style="margin-top:1.1rem">
+    <li><b>هل نعتمد ترتيب القطاعات أعلاه؟</b> إن كان لديك سبب تجاري لتقديم الأسر —
+        علاقة قائمة، أو التزام — فالترتيب يتغيّر، وأريد أن أعرفه لا أن أخمّنه.</li>
+    <li><b>هل يبدأ تسجيل طلبات الواتساب في اللوحة من هذا الأسبوع؟</b> بلا هذا،
+        المرحلة 20 تبقى تخميناً مهما طال الانتظار.</li>
+    <li><b>هل نضيف تقرير التغطية حسب الحي؟</b> عمل صغير على صفحة التقارير، ويحوّل
+        قيدَك الأهم من انطباع إلى خريطة.</li>
+    <li><b>سؤال الترخيص:</b> يُحسم باتصال بوزارة الصحة أو مراجعة اللائحة التنفيذية.
+        لا أبني عليه توصية قبل جوابه.</li>
+  </ol>
+</div>
+
+<footer class="foot">
+  المراحل 01–04 · وكالة عون الدرب للنقل المتخصص · الرياض<br>
+  مصادر السوق: ysr.sa · msra.sa · mestjep.sa · viptransksa.com · noaawin.sa ·
+  capitalambulance.sa · team1.com.sa · lifeline.sa<br>
+  مصادر النظام: جداول services وcontent_blocks وrequests على النسخة الحيّة
+</footer>
+
+</div>
