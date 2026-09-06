@@ -68,6 +68,12 @@ if (!in_array($requested, $public, true)) {
     }
 }
 
+/* No administrative page belongs in a search index. The sign-in form is the
+   one a crawler could actually read, and a sign-in form in search results is
+   an invitation to try passwords against it. Sent here as well as from
+   .htaccess so the rule holds even where mod_headers is unavailable. */
+header('X-Robots-Tag: noindex, nofollow, noarchive');
+
 /* An admin page must never be cached: a page held in the browser's history
    would otherwise still render after logout (§09). */
 header('Content-Type: text/html; charset=utf-8');

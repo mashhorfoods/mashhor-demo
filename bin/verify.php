@@ -3361,6 +3361,19 @@ check('urls', 'the dev router reproduces both, so the gates test what ships',
     str_contains((string) @file_get_contents(AUN_ROOT . '/router-dev.php'), '301')
     && str_contains((string) @file_get_contents(AUN_ROOT . '/router-dev.php'), "'.html'"));
 
+/* --- no administrative page belongs in a search index ----------------- */
+$robots = $urlC->get('/admin/login');
+check('urls', 'the sign-in page tells crawlers not to index it',
+    str_contains(strtolower((string) ($robots['headers']['x-robots-tag'] ?? '')), 'noindex'),
+    (string) ($robots['headers']['x-robots-tag'] ?? '—'));
+check('urls', 'and the rule is sent by the server as well as by the guard',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/admin/.htaccess'), 'X-Robots-Tag')
+    && str_contains((string) @file_get_contents(AUN_ROOT . '/admin/guard.php'), 'X-Robots-Tag'));
+/* and the public page is NOT told that — it is the one that must be found */
+$pub = new Client($BASE);
+check('urls', 'while the public page carries no such instruction',
+    !str_contains(strtolower((string) ($pub->get('/')['headers']['x-robots-tag'] ?? '')), 'noindex'));
+
 /* the picker's return address is a page name or nothing — it is navigated to */
 check('urls', 'the media picker refuses a return address that is not a page here',
     str_contains((string) @file_get_contents(AUN_ROOT . '/admin/media.html'),

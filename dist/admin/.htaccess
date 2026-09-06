@@ -49,6 +49,15 @@
     Header always set X-Frame-Options "SAMEORIGIN"
     Header always set X-Content-Type-Options "nosniff"
   </FilesMatch>
+
+  # The sign-in page has to stay reachable without a session, so it is the one
+  # admin page a crawler can actually read — and its address is short and
+  # shareable now, which makes it likelier to be pasted somewhere public. An
+  # administrative sign-in form in search results is an invitation to try
+  # passwords against it. A header rather than a robots.txt Disallow: a header
+  # removes a page already indexed and does not publish the path to anyone
+  # reading robots.txt.
+  Header always set X-Robots-Tag "noindex, nofollow, noarchive"
 </IfModule>
 
 # The design logs and QA reports are working documents, not part of the app.
