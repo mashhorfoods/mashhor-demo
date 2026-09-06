@@ -1124,7 +1124,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
               <span class="empty__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-search"/></svg></span>
               <span class="empty__t">لا توجد نتائج مطابقة</span>
               <span class="empty__b">لا يوجد مستخدم يطابق البحث أو التصفية الحالية.</span>
-              <button class="btn btn--secondary" id="emptyReset">إعادة تعيين</button></div></div>
+              <button class="btn btn--secondary" id="emptyReset">إعادة تعيين التصفية</button></div></div>
             <div class="state state--error"><div class="errbox">
               <span class="empty__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-alert"/></svg></span>
               <span class="empty__t">تعذّر تحميل المستخدمين</span>
@@ -1153,11 +1153,11 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
               <div class="card__b"><div class="pgrid pgrid--2">
                 <div class="field">
                   <label class="field__label" for="uName">الاسم <span class="field__req">(مطلوب)</span></label>
-                  <input class="ctl" id="uName" type="text" data-f>
+                  <input class="ctl" id="uName" aria-describedby="e-uName" type="text" data-f>
                   <span class="field__err" id="e-uName" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span></div>
                 <div class="field">
                   <label class="field__label" for="uMail">البريد الإلكتروني <span class="field__req">(مطلوب)</span></label>
-                  <input class="ctl ltr" id="uMail" type="text" inputmode="email" data-f>
+                  <input class="ctl ltr" id="uMail" aria-describedby="e-uMail" type="text" inputmode="email" data-f>
                   <span class="field__help">يُستخدم لتسجيل الدخول.</span>
                   <span class="field__err" id="e-uMail" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span></div>
               </div>
@@ -1278,7 +1278,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
         <p class="modal__b" id="pwB"></p></div></div>
     <div class="field" style="margin-top:var(--s4)">
       <label class="field__label" for="pwVal">كلمة المرور الجديدة</label>
-      <input class="ctl ltr" id="pwVal" type="password" autocomplete="new-password" minlength="12">
+      <input class="ctl ltr" id="pwVal" aria-describedby="e-pwVal" type="password" autocomplete="new-password" minlength="12">
       <span class="field__help">12 حرفاً على الأقل. تُسلَّم للمستخدم بنفسك — لا يرسلها النظام.</span>
       <span class="field__err" id="e-pwVal" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
     </div>
@@ -1295,6 +1295,15 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
 window.AunShell = (function(){
   "use strict";
   var $=function(id){return document.getElementById(id);};
+  /* A field that is drawn red is also announced as invalid: the border is
+     the sighted half of the same statement, aria-invalid is the other. */
+  var unflag = function(id){
+    var n = typeof id === "string" ? $(id) : id;
+    if (!n) return;
+    n.classList.remove("is-error");
+    n.removeAttribute("aria-invalid");
+  };
+
   var el=function(t,c){var n=document.createElement(t); if(c)n.className=c; return n;};
 
   function toast(msg,bad){
@@ -1393,6 +1402,15 @@ window.AunShell = (function(){
 (function(){
   "use strict";
   var $=function(id){return document.getElementById(id);};
+  /* A field that is drawn red is also announced as invalid: the border is
+     the sighted half of the same statement, aria-invalid is the other. */
+  var unflag = function(id){
+    var n = typeof id === "string" ? $(id) : id;
+    if (!n) return;
+    n.classList.remove("is-error");
+    n.removeAttribute("aria-invalid");
+  };
+
   var el=function(t,c){var n=document.createElement(t); if(c)n.className=c; return n;};
   var toast=window.AunShell.toast, ask=window.AunShell.ask;
   $("hdrctx").innerHTML='المستخدمون والصلاحيات<span>عون الدرب للنقل المتخصص</span>';
@@ -1448,6 +1466,8 @@ window.AunShell = (function(){
      table is that record now, and the permission matrix below is enforced by
      the server as well as drawn here. */
   var USERS = [];
+  /* false until the list has come back from the server at least once */
+  var LOADED = false;
 
   var state={q:"",role:"",stat:""}, canModify=false, current=null, draft=null, adding=false, dirty=false;   /* until /auth/me says otherwise */
 
@@ -1478,6 +1498,12 @@ window.AunShell = (function(){
 
   /* ---------- list -------------------------------------------------------- */
   function render(){
+    /* Before the first successful load there is nothing that can be empty.
+       Painting the empty state here states as fact something the page does
+       not know — the operator opened «المستخدمون» after a dropped connection and
+       read that «لا توجد نتائج مطابقة». The error state is what an unknown list looks
+       like, and it carries the button that actually retries. */
+    if (!LOADED){ $("results").setAttribute("data-state","error"); return; }
     var list=USERS.filter(function(u){
       if (state.role && u.role!==state.role) return false;
       if (state.stat==="on" && !u.on) return false;
@@ -1633,11 +1659,11 @@ window.AunShell = (function(){
 
   /* ---------- save --------------------------------------------------------- */
   var MAIL=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-  function fieldErr(id,msg){ $("e-"+id).hidden=false; $("e-"+id).querySelector("span").textContent=msg; $(id).classList.add("is-error"); }
+  function fieldErr(id,msg){ $("e-"+id).hidden=false; $("e-"+id).querySelector("span").textContent=msg; $(id).classList.add("is-error"); $(id).setAttribute("aria-invalid","true"); }
   $("uform").addEventListener("submit", function(e){
     e.preventDefault();
     if (!canModify) return;
-    ["uName","uMail"].forEach(function(id){ $("e-"+id).hidden=true; $(id).classList.remove("is-error"); });
+    ["uName","uMail"].forEach(function(id){ $("e-"+id).hidden=true; unflag(id); });
     var n=$("uName").value.trim(), m=$("uMail").value.trim().toLowerCase(), bad=null;
     if (!n){ fieldErr("uName","اسم المستخدم مطلوب."); bad="uName"; }
     if (!m){ fieldErr("uMail","البريد الإلكتروني مطلوب."); bad=bad||"uMail"; }
@@ -1677,12 +1703,12 @@ window.AunShell = (function(){
     var dlg=$("pwdlg"), val=$("pwVal"), ok=$("pwOk"), busy=false, prev=null;
 
     function close(){
-      dlg.hidden=true; val.value=""; $("e-pwVal").hidden=true; val.classList.remove("is-error");
+      dlg.hidden=true; val.value=""; $("e-pwVal").hidden=true; val.classList.remove("is-error"); val.removeAttribute("aria-invalid");
       if (prev && prev.focus) prev.focus();
     }
     function bad(msg){
       $("e-pwVal").hidden=false; $("e-pwVal").querySelector("span").textContent=msg;
-      val.classList.add("is-error"); val.focus();
+      val.classList.add("is-error"); val.setAttribute("aria-invalid","true"); val.focus();
     }
     $("pwbtn").addEventListener("click", function(){
       if (!current) return;
@@ -1690,7 +1716,7 @@ window.AunShell = (function(){
       $("pwB").textContent = "اكتب كلمة مرور جديدة لحساب «"+current.name+"». "+
         "ستنتهي كل جلساته المفتوحة فوراً، وعليك تسليمها له بنفسك.";
       dlg.hidden=false; val.value=""; $("e-pwVal").hidden=true;
-      val.classList.remove("is-error"); val.focus();
+      val.classList.remove("is-error"); val.removeAttribute("aria-invalid"); val.focus();
     });
     $("pwNo").addEventListener("click", close);
     dlg.addEventListener("click", function(e){ if (e.target===dlg) close(); });
@@ -1778,7 +1804,9 @@ window.AunShell = (function(){
   $("emptyReset").addEventListener("click", function(){
     state={q:"",role:"",stat:""}; $("q").value=""; $("frole").value=""; $("fstat").value=""; render();
   });
-  $("retry").addEventListener("click", function(){ $("results").setAttribute("data-state","ready"); render(); });
+  /* «إعادة المحاولة» has to make the request again. Re-rendering an empty
+     in-memory list looked like a retry and asked the server nothing. */
+  $("retry").addEventListener("click", boot);
   $("addbtn").addEventListener("click", openNew);
 
   /* ---------- load (RECOVERY 01 §28) -------------------------------------
@@ -1795,9 +1823,11 @@ window.AunShell = (function(){
           perms: u.permissions || preset(u.role)
         };
       });
+      LOADED = true;
       render();
     }).catch(function(err){
       if (err.status === 401) return;     /* app.js is already redirecting */
+      $("results").setAttribute("data-state", "error");
       toast(err.message || "تعذّر تحميل المستخدمين", true);
     });
   }

@@ -35,6 +35,7 @@
     var c = readCookie("aun_csrf");
     if (c) { csrfToken = c; return Promise.resolve(c); }
     return fetch(BASE + "/csrf", { credentials: "same-origin", headers: { Accept: "application/json" } })
+      .catch(netFail)
       .then(function (r) { return r.json(); })
       .then(function (b) { csrfToken = (b && b.token) || null; return csrfToken; });
   }
@@ -70,6 +71,25 @@
       504: "انتهت مهلة الخادم. أعد المحاولة."
     };
     return (m[status] || "تعذّر إتمام العملية.") + "  [" + status + "]";
+  }
+
+  /* A request that never reached the server does not go through handle():
+     fetch() rejects with the browser's own TypeError, whose message is
+     "Failed to fetch" — English, technical, and the only thing the operator
+     was shown when the connection dropped mid-shift. Every call site ends in
+     toast(err.message), so this one line was surfacing on ten screens.
+     Turned into a sentence in her language that says what to do, and marked
+     status 0 so a page can tell "the network is down" from "the server said
+     no". */
+  function netFail(e) {
+    if (e && e.status !== undefined) throw e;          /* already ours */
+    var err = new Error(navigator.onLine === false
+      ? "لا يوجد اتصال بالإنترنت. تحقّق من الشبكة ثم أعد المحاولة."
+      : "تعذّر الوصول إلى الخادم. تحقّق من الاتصال ثم أعد المحاولة.");
+    err.status = 0;
+    err.code = "network";
+    err.offline = navigator.onLine === false;
+    throw err;
   }
 
   function handle(res) {
@@ -109,7 +129,7 @@
     return fetch(BASE + path + qs, {
       credentials: "same-origin",
       headers: { Accept: "application/json" }
-    }).then(handle);
+    }).catch(netFail).then(handle);
   }
 
   function post(path, data) {
@@ -122,7 +142,7 @@
         credentials: "same-origin",
         headers: { "Content-Type": "application/json", Accept: "application/json", "X-CSRF-Token": token },
         body: JSON.stringify(payload)
-      }).then(function (res) {
+      }).catch(netFail).then(function (res) {
         /* the token rotated under us — fetch a fresh one and retry once */
         if (res.status === 419 && !post._retried) {
           post._retried = true;
@@ -179,7 +199,7 @@
         return fetch(BASE + "/admin/media/upload", {
           method: "POST", credentials: "same-origin", body: formData,
           headers: { Accept: "application/json", "X-CSRF-Token": token }
-        }).then(handle);
+        }).catch(netFail).then(handle);
       });
     },
     createService: function (data) { return post("/admin/services/new", data); },

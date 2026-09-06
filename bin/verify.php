@@ -3401,6 +3401,121 @@ check('urls', 'the media picker refuses a return address that is not a page here
     str_contains((string) @file_get_contents(AUN_ROOT . '/admin/media.html'),
         'if (!/^[a-z0-9][a-z0-9-]*$/.test(back)) back = "services";'));
 
+section('تجربة المشغّل — ما تفعله الصفحة حين لا يصل شيء');
+
+/* The pages that read a list from the server. dashboard, content and
+   reports read too, but each already answered a failure with its own error
+   card; these five answered it by drawing an empty list. */
+$LISTPAGES = ['requests', 'customers', 'services', 'media', 'users'];
+
+foreach ($LISTPAGES as $pg) {
+    $src = (string) @file_get_contents(AUN_ROOT . "/admin/{$pg}.html");
+
+    /* A failed load and an empty list are different facts. Until the first
+       answer arrives the page knows neither, and «لا توجد خدمات» is a claim
+       it cannot make — the operator read it as "my services are gone". */
+    check('ux', "{$pg}: قائمة لم تصل بعد لا تُرسم كقائمة فارغة",
+        str_contains($src, 'var LOADED = false;')
+        && str_contains($src, 'if (!LOADED){'),
+        'LOADED');
+
+    /* «إعادة المحاولة» has to make the request again. Five modules bound it
+       to a re-render of the same empty array: the click did something, so
+       the dead-control gate passed it, and it answered every failure with
+       «لا توجد نتائج». */
+    check('ux', "{$pg}: «إعادة المحاولة» تعيد الطلب فعلاً لا رسم القائمة",
+        str_contains($src, '$("retry").addEventListener("click", boot);'),
+        'retry → boot');
+}
+
+/* السجل has two panes and each loads on its own */
+$actSrc = (string) @file_get_contents(AUN_ROOT . '/admin/activity.html');
+check('ux', 'activity: كل لوحة تعرف إن كانت وصلت',
+    str_contains($actSrc, 'var NLOADED = false, LLOADED = false;'));
+check('ux', 'activity: زرّا إعادة المحاولة يعيدان الطلب',
+    str_contains($actSrc, '$("nretry").addEventListener("click", boot);')
+    && str_contains($actSrc, '$("lretry").addEventListener("click", boot);'));
+
+/* الإعدادات had no failure state at all: the form was drawn with empty
+   fields, which read as the company's real settings — and a save would have
+   written those blanks over what is stored. */
+$setSrc = (string) @file_get_contents(AUN_ROOT . '/admin/settings.html');
+check('ux', 'settings: نموذج لم تصل قيمه لا يُعرض كأنه القيم المحفوظة',
+    str_contains($setSrc, 'id="setError"')
+    && str_contains($setSrc, '$("setgrid").hidden = true;'));
+check('ux', 'settings: وله زر إعادة محاولة يعيد التحميل',
+    str_contains($setSrc, '$("setRetry").addEventListener("click"'));
+
+/* A request that never reached the server does not go through handle(), so
+   fetch() rejected with the browser's own English "Failed to fetch" and
+   every page toasted it verbatim. The brief forbids showing raw technical
+   errors; this was the most common one in the whole panel. */
+$appJs = (string) @file_get_contents(AUN_ROOT . '/admin/app.js');
+check('ux', 'انقطاع الشبكة يُقال بالعربية لا "Failed to fetch"',
+    str_contains($appJs, 'function netFail(')
+    && str_contains($appJs, 'تعذّر الوصول إلى الخادم')
+    && substr_count($appJs, 'catch(netFail)') >= 4,
+    substr_count($appJs, 'catch(netFail)') . ' call sites');
+check('ux', 'ويميّز انقطاع الاتصال عن رفض الخادم',
+    str_contains($appJs, 'err.code = "network"') && str_contains($appJs, 'err.status = 0;'));
+
+/* Every error message reaches the person it is about: a field's error is
+   pointed at by the field, a form's error announces itself. */
+$errOrphans = [];
+foreach (glob(AUN_ROOT . '/admin/*.html') as $f) {
+    $b = basename($f, '.html');
+    if (str_starts_with($b, 'stage-') || str_starts_with($b, 'recovery-')) continue;
+    $src = (string) @file_get_contents($f);
+    if (!preg_match_all('/<[a-z]+ class="field__err"([^>]*)id="([A-Za-z0-9_-]+)"([^>]*)>/', $src, $m, PREG_SET_ORDER)) continue;
+    foreach ($m as $hit) {
+        $attrs = $hit[1] . $hit[3];
+        $id = $hit[2];
+        if (str_contains($attrs, 'role="alert"')) continue;
+        if (str_contains($src, 'aria-describedby="' . $id . '"')) continue;
+        $errOrphans[] = "{$b}#{$id}";
+    }
+}
+check('ux', 'كل رسالة خطأ إمّا مربوطة بحقلها أو مُعلَنة بنفسها',
+    $errOrphans === [], implode(' ', array_slice($errOrphans, 0, 6)));
+
+/* A <label> cannot take focus. Where one was styled as a button over a file
+   input hidden at 1px, the only thing the keyboard could reach was that
+   invisible input — the focus ring landed on a transparent 1x1 box. */
+$labelPickers = [];
+foreach (['media', 'services', 'settings'] as $pg) {
+    $src = (string) @file_get_contents(AUN_ROOT . "/admin/{$pg}.html");
+    if (preg_match('/<label class="btn[^"]*" for="(mfile|file|logoFile)"/', $src, $m)) {
+        $labelPickers[] = "{$pg}:{$m[1]}";
+    }
+}
+check('ux', 'لا يوجد زر رفع لا تصله لوحة المفاتيح',
+    $labelPickers === [], implode(' ', $labelPickers));
+
+/* And the dialogs keep the same keyboard contract as one another. */
+$svcSrc = (string) @file_get_contents(AUN_ROOT . '/admin/services.html');
+check('ux', 'نافذة «خدمة جديدة» تُغلق بـ Escape كبقية النوافذ',
+    str_contains($svcSrc, 'if (e.key === "Escape" && !wrap.hidden){ e.stopPropagation(); close_(); }'));
+check('ux', 'وتعيد التركيز إلى الزر الذي فتحها',
+    str_contains($svcSrc, 'lastFocus = document.activeElement;'));
+$medSrc = (string) @file_get_contents(AUN_ROOT . '/admin/media.html');
+check('ux', 'ونافذة الرفع تفعل الشيء نفسه',
+    str_contains($medSrc, 'upLast = document.activeElement;')
+    && str_contains($medSrc, 'if (upLast && upLast.focus) upLast.focus();'));
+
+/* One name per action, across the whole panel. */
+$resetLabels = $emptyLabels = [];
+foreach (glob(AUN_ROOT . '/admin/*.html') as $f) {
+    $b = basename($f, '.html');
+    if (str_starts_with($b, 'stage-') || str_starts_with($b, 'recovery-')) continue;
+    $src = (string) @file_get_contents($f);
+    if (preg_match_all('/id="reset">([^<]+)</u', $src, $m)) foreach ($m[1] as $t) $resetLabels[trim($t)] = true;
+    if (preg_match_all('/id="l?emptyReset">([^<]+)</u', $src, $m)) foreach ($m[1] as $t) $emptyLabels[trim($t)] = true;
+}
+check('ux', 'زر تفريغ التصفية يحمل الاسم نفسه في كل وحدة',
+    count($resetLabels) === 1, implode(' | ', array_keys($resetLabels)));
+check('ux', 'وكذلك زر الخروج من نتيجة فارغة',
+    count($emptyLabels) === 1, implode(' | ', array_keys($emptyLabels)));
+
 /* ================================================================== */
 foreach ($lines as $l) fwrite(STDOUT, $l . "\n");
 fwrite(STDOUT, "\n" . str_repeat('=', 78) . "\n");

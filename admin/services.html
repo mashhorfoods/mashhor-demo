@@ -1023,7 +1023,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
             </div>
             <div class="applied" id="applied" hidden style="margin-top:var(--s4)">
               <span>التصفية المطبّقة:</span><span id="chips" style="display:contents"></span>
-              <button class="btn btn--ghost btn--sm" id="reset">إعادة تعيين</button>
+              <button class="btn btn--ghost btn--sm" id="reset">إعادة تعيين الكل</button>
             </div>
             <p class="count" id="count" style="margin-top:var(--s4)"></p>
           </div>
@@ -1039,7 +1039,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
               <span class="empty__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-search"/></svg></span>
               <span class="empty__t" id="emptyT">لا توجد نتائج مطابقة</span>
               <span class="empty__b" id="emptyB">لا توجد خدمة تطابق البحث الحالي.</span>
-              <button class="btn btn--secondary" id="emptyReset">إعادة تعيين</button>
+              <button class="btn btn--secondary" id="emptyReset">إعادة تعيين التصفية</button>
             </div></div>
             <div class="state state--error"><div class="errbox">
               <span class="empty__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-alert"/></svg></span>
@@ -1076,13 +1076,13 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
                 <div class="editgrid" style="grid-template-columns:minmax(0,1fr)">
                   <div class="field">
                     <label class="field__label" for="fTitle">اسم الخدمة <span class="field__req">(مطلوب)</span></label>
-                    <input class="ctl" id="fTitle" type="text" maxlength="80">
+                    <input class="ctl" id="fTitle" aria-describedby="errTitle" type="text" maxlength="80">
                     <span class="charc" id="cTitle"></span>
                     <span class="field__err" id="errTitle" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                   </div>
                   <div class="field">
                     <label class="field__label" for="fDesc">وصف الخدمة <span class="field__req">(مطلوب)</span></label>
-                    <textarea class="ctl" id="fDesc" rows="4" maxlength="260"
+                    <textarea class="ctl" id="fDesc" aria-describedby="errDesc" rows="4" maxlength="260"
                       style="min-height:110px;font-family:var(--f-ar-body);line-height:1.8"></textarea>
                     <span class="charc" id="cDesc"></span>
                     <span class="field__help">هذا النص يظهر للزائر تحت اسم الخدمة مباشرة.</span>
@@ -1110,9 +1110,12 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
                     <span style="display:flex;flex-wrap:wrap;gap:var(--s2);justify-content:center;margin-top:var(--s2)">
                       <a class="btn btn--secondary" id="pickbtn" href="#">
                         <svg class="i i--sm" aria-hidden="true"><use href="#ic-image"/></svg>اختيار من المكتبة</a>
-                      <label class="btn btn--ghost" for="file">رفع صورة جديدة</label>
+                      <button type="button" class="btn btn--ghost" id="filepick">رفع صورة جديدة</button>
                     </span>
-                    <input type="file" id="file" accept="image/webp,image/jpeg,image/png">
+                    <!-- the input is hidden at 1px for styling; a <label> cannot take
+                         focus, so the keyboard used to land on the invisible input -->
+                    <input type="file" id="file" tabindex="-1" aria-label="رفع صورة جديدة"
+                           aria-describedby="errImg" accept="image/webp,image/jpeg,image/png">
                   </div>
                   <span class="field__err" id="errImg" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                 </div>
@@ -1227,7 +1230,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
         <select class="ctl" id="nIcon"></select></span>
         <span class="field__help">تُستخدم أيقونة إحدى الخدمات الحالية — الأيقونات جزء من هوية الموقع ولا تُنشأ من هنا.</span>
       </div>
-      <p class="field__err" id="nErr" hidden style="display:block"></p>
+      <p class="field__err" id="nErr" role="alert" hidden style="display:block"></p>
     </div>
     <div class="modal__f">
       <button class="btn btn--primary" id="nOk">إضافة الخدمة</button>
@@ -1243,6 +1246,15 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
 (function(){
   "use strict";
   var $ = function(id){ return document.getElementById(id); };
+  /* A field that is drawn red is also announced as invalid: the border is
+     the sighted half of the same statement, aria-invalid is the other. */
+  var unflag = function(id){
+    var n = typeof id === "string" ? $(id) : id;
+    if (!n) return;
+    n.classList.remove("is-error");
+    n.removeAttribute("aria-invalid");
+  };
+
   var el = function(t,c){ var n=document.createElement(t); if(c) n.className=c; return n; };
 
   var IMG = {};
@@ -1257,6 +1269,8 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
      session and the services-module permission. Every render path below is
      unchanged — only where the rows come from. */
   var SERVICES = [];
+  /* false until the list has come back from the server at least once */
+  var LOADED = false;
   /* المرحلة النهائية — الصورة من مسارها، لا نسخة مضمّنة.
      كانت هنا سبع صور مطبوعة داخل الصفحة بصيغة base64، فبلغ حجمها 291
      كيلوبايت تُنقل كاملة في كل زيارة. التعليق القديم قال إن جلبها من
@@ -1307,8 +1321,14 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
 
   /* ---------- list ------------------------------------------------------ */
   function render(){
-    var list = byOrder(), shown = list.filter(match);
     var box = $("results");
+    /* Before the first successful load there is nothing that can be empty.
+       Painting the empty state here states as fact something the page does
+       not know — the operator opened «الخدمات» after a dropped connection and
+       read that «لا توجد خدمات». The error state is what an unknown list looks
+       like, and it carries the button that actually retries. */
+    if (!LOADED){ box.setAttribute("data-state","error"); return; }
+    var list = byOrder(), shown = list.filter(match);
     if (!shown.length){
       box.setAttribute("data-state","empty");
       var noFilter = !state.q && !state.vis;
@@ -1532,6 +1552,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   $("vis").addEventListener("click", function(){ setVis(!draft.on); touched(); });
 
   /* ---------- image replacement ------------------------------------------ */
+  $("filepick").addEventListener("click", function(){ $("file").click(); });
   $("file").addEventListener("change", function(){
     var f = this.files && this.files[0];
     $("errImg").hidden = true;
@@ -1629,7 +1650,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
     e.preventDefault();
     if (!canModify) return;
     $("errTitle").hidden = true; $("errDesc").hidden = true;
-    $("fTitle").classList.remove("is-error"); $("fDesc").classList.remove("is-error");
+    ["fTitle","fDesc"].forEach(unflag);
 
     var t = $("fTitle").value.trim(), d = $("fDesc").value.trim();
     var ok = true, first = null;
@@ -1689,7 +1710,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   });
   function fieldErr(id,ctl,msg){
     $(id).hidden = false; $(id).querySelector("span").textContent = msg;
-    $(ctl).classList.add("is-error");
+    $(ctl).classList.add("is-error"); $(ctl).setAttribute("aria-invalid","true");
   }
 
   $("discard").addEventListener("click", function(){
@@ -1787,9 +1808,23 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
       });
     }
 
+    /* Keyboard contract, the same one every other dialog in the panel keeps:
+       remember what had focus, take it, and give it back on close. Without
+       the second half, closing «خدمة جديدة» dropped focus onto <body> and the
+       next Tab started again from the top of the page. */
+    var lastFocus = null;
     function open_(){ $("nErr").hidden=true; $("nTitle").value=""; $("nDesc").value="";
-      $("nAlt").value=""; fill(); wrap.hidden=false; $("nTitle").focus(); }
-    function close_(){ wrap.hidden=true; }
+      $("nAlt").value=""; fill(); lastFocus = document.activeElement;
+      wrap.hidden=false; $("nTitle").focus(); }
+    function close_(){
+      wrap.hidden=true;
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+    /* Escape closed the drawer and the confirmation box but not this one —
+       the only dialog on the page a person types a whole record into. */
+    document.addEventListener("keydown", function(e){
+      if (e.key === "Escape" && !wrap.hidden){ e.stopPropagation(); close_(); }
+    }, true);
 
     $("newbtn").addEventListener("click", function(){ if (canModify) open_(); });
     $("nNo").addEventListener("click", close_);
@@ -1855,7 +1890,10 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   $("fvis").addEventListener("change", function(){ state.vis = this.value; render(); });
   $("reset").addEventListener("click", resetAll);
   $("emptyReset").addEventListener("click", resetAll);
-  $("retry").addEventListener("click", function(){ $("results").setAttribute("data-state","ready"); render(); });
+  /* «إعادة المحاولة» has to make the request again. Re-rendering an empty
+     in-memory list looked like a retry and asked the server nothing, so the
+     button answered every failure with «لا توجد خدمات». */
+  $("retry").addEventListener("click", boot);
 
   /* ---------- shell -------------------------------------------------------- */
   var app=$("app"), collapse=$("collapse");
@@ -1929,6 +1967,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
           title: r.title, desc: r.description, imgPath: r.image
         });
       });
+      LOADED = true;
       render();
     });
   }

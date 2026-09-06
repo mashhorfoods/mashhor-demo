@@ -233,7 +233,7 @@ body{display:block;background:var(--soft)}
   function clearErrors(){
     $("err").hidden = true;
     ["email","password"].forEach(function(k){
-      $(k).classList.remove("is-error");
+      $(k).classList.remove("is-error"); $(k).removeAttribute("aria-invalid");
       $(k).removeAttribute("aria-invalid");
       $(k + "-err").hidden = true;
       $(k + "-err").textContent = "";
@@ -242,7 +242,7 @@ body{display:block;background:var(--soft)}
   function fieldError(k, msg){
     var el = $(k), m = $(k + "-err");
     if (!el) return;
-    el.classList.add("is-error");
+    el.classList.add("is-error"); el.setAttribute("aria-invalid","true");
     el.setAttribute("aria-invalid","true");
     m.textContent = msg; m.hidden = false;
   }

@@ -1107,6 +1107,19 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
         </div>
 
         <div class="dgrid" style="grid-template-columns:minmax(0,1fr)">
+        <!-- Until the saved settings have actually arrived, drawing the form
+             presents its empty fields as the company's real settings — and a
+             save would write those blanks over what is stored. A failed load
+             says so here instead. -->
+        <div class="card" id="setError" hidden>
+          <div class="card__b"><div class="errbox">
+            <span class="empty__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-alert"/></svg></span>
+            <span class="empty__t">تعذّر تحميل الإعدادات</span>
+            <span class="empty__b">انقطع الاتصال قبل أن تصل الإعدادات المحفوظة. لم يتغيّر شيء في النظام — أعد المحاولة.</span>
+            <button class="btn btn--secondary" id="setRetry"><svg class="i i--sm" aria-hidden="true"><use href="#ic-refresh"/></svg>إعادة المحاولة</button>
+          </div></div>
+        </div>
+
         <div class="dgrid" id="setgrid">
           <div style="min-width:0">
             <nav class="card" aria-label="أقسام الإعدادات">
@@ -1128,14 +1141,17 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
                       <span class="optrow__t">شعار الشركة</span>
                       <span class="optrow__d">يظهر في ترويسة الموقع وفي بطاقة المشاركة.</span>
                       <div style="margin-top:var(--s3);position:relative" class="modonly">
-                        <label class="btn btn--secondary btn--sm" for="logoFile">استبدال الشعار</label>
-                        <input type="file" id="logoFile" accept="image/svg+xml,image/png" style="position:absolute;width:1px;height:1px;opacity:0">
+                        <button type="button" class="btn btn--secondary btn--sm" id="logoPick">استبدال الشعار</button>
+                        <!-- hidden at 1px for styling; the button above is what the
+                             keyboard reaches, because a <label> cannot take focus -->
+                        <input type="file" id="logoFile" tabindex="-1" aria-label="استبدال الشعار"
+                               accept="image/svg+xml,image/png" style="position:absolute;width:1px;height:1px;opacity:0">
                       </div>
                     </div>
                   </div>
                   <div class="field">
                     <label class="field__label" for="cName">اسم الشركة <span class="field__req">(مطلوب)</span></label>
-                    <input class="ctl" id="cName" type="text" data-f>
+                    <input class="ctl" id="cName" aria-describedby="e-cName" type="text" data-f>
                     <span class="field__err" id="e-cName" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                   </div>
                   <div class="field">
@@ -1171,17 +1187,17 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
                 <div class="pgrid pgrid--2">
                   <div class="field">
                     <label class="field__label" for="cPhone">رقم الهاتف <span class="field__req">(مطلوب)</span></label>
-                    <input class="ctl ltr" id="cPhone" type="text" inputmode="tel" data-f>
+                    <input class="ctl ltr" id="cPhone" aria-describedby="e-cPhone" type="text" inputmode="tel" data-f>
                     <span class="field__err" id="e-cPhone" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                   </div>
                   <div class="field">
                     <label class="field__label" for="cWa">رقم الواتساب <span class="field__req">(مطلوب)</span></label>
-                    <input class="ctl ltr" id="cWa" type="text" inputmode="tel" data-f>
+                    <input class="ctl ltr" id="cWa" aria-describedby="e-cWa" type="text" inputmode="tel" data-f>
                     <span class="field__err" id="e-cWa" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                   </div>
                   <div class="field">
                     <label class="field__label" for="cEmail">البريد الإلكتروني</label>
-                    <input class="ctl ltr" id="cEmail" type="text" inputmode="email" data-f placeholder="لا يوجد بريد مسجّل">
+                    <input class="ctl ltr" id="cEmail" aria-describedby="e-cEmail" type="text" inputmode="email" data-f placeholder="لا يوجد بريد مسجّل">
                     <span class="field__help">لا يستخدم الموقع بريداً حالياً — يظهر للزائر فقط إذا أُضيف.</span>
                     <span class="field__err" id="e-cEmail" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                   </div>
@@ -1217,14 +1233,14 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
                 <div class="pgrid" style="margin-top:var(--s5)">
                   <div class="field">
                     <label class="field__label" for="sTitle">العنوان في نتائج البحث <span class="field__req">(مطلوب)</span></label>
-                    <input class="ctl" id="sTitle" type="text" maxlength="70" data-f>
+                    <input class="ctl" id="sTitle" aria-describedby="e-sTitle" type="text" maxlength="70" data-f>
                     <span class="charc" id="c-sTitle"></span>
                     <span class="field__help">ما يراه الباحث كعنوان أزرق في نتيجة البحث.</span>
                     <span class="field__err" id="e-sTitle" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                   </div>
                   <div class="field">
                     <label class="field__label" for="sDesc">الوصف في نتائج البحث <span class="field__req">(مطلوب)</span></label>
-                    <textarea class="ctl" id="sDesc" rows="3" maxlength="180" data-f style="min-height:92px;font-family:var(--f-ar-body);line-height:1.8"></textarea>
+                    <textarea class="ctl" id="sDesc" aria-describedby="e-sDesc" rows="3" maxlength="180" data-f style="min-height:92px;font-family:var(--f-ar-body);line-height:1.8"></textarea>
                     <span class="charc" id="c-sDesc"></span>
                     <span class="field__err" id="e-sDesc" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                   </div>
@@ -1341,18 +1357,18 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
                 <div class="pgrid" style="max-width:34rem">
                   <div class="field">
                     <label class="field__label" for="pwCur">كلمة المرور الحالية <span class="field__req">(مطلوب)</span></label>
-                    <input class="ctl ltr" id="pwCur" type="password" autocomplete="current-password">
+                    <input class="ctl ltr" id="pwCur" aria-describedby="e-pwCur" type="password" autocomplete="current-password">
                     <span class="field__err" id="e-pwCur" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                   </div>
                   <div class="field">
                     <label class="field__label" for="pwNew">كلمة المرور الجديدة <span class="field__req">(مطلوب)</span></label>
-                    <input class="ctl ltr" id="pwNew" type="password" autocomplete="new-password" minlength="12">
+                    <input class="ctl ltr" id="pwNew" aria-describedby="e-pwNew" type="password" autocomplete="new-password" minlength="12">
                     <span class="field__help">12 حرفاً على الأقل، ولا تحتوي على بريدك أو اسمك.</span>
                     <span class="field__err" id="e-pwNew" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                   </div>
                   <div class="field">
                     <label class="field__label" for="pwNew2">تأكيد كلمة المرور الجديدة <span class="field__req">(مطلوب)</span></label>
-                    <input class="ctl ltr" id="pwNew2" type="password" autocomplete="new-password">
+                    <input class="ctl ltr" id="pwNew2" aria-describedby="e-pwNew2" type="password" autocomplete="new-password">
                     <span class="field__err" id="e-pwNew2" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                   </div>
                   <div><button class="btn btn--primary" type="button" id="pwSave">تغيير كلمة المرور</button></div>
@@ -1385,12 +1401,12 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
                   <div class="pgrid" style="max-width:34rem">
                     <div class="field">
                       <label class="field__label" for="bkFile">ملف النسخة الاحتياطية</label>
-                      <input class="ctl" id="bkFile" type="file" accept="application/json,.json">
+                      <input class="ctl" id="bkFile" aria-describedby="e-bkFile" type="file" accept="application/json,.json">
                       <span class="field__err" id="e-bkFile" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                     </div>
                     <div class="field">
                       <label class="field__label" for="bkConfirm">اكتب «استعادة» للتأكيد</label>
-                      <input class="ctl" id="bkConfirm" type="text" autocomplete="off" placeholder="استعادة">
+                      <input class="ctl" id="bkConfirm" aria-describedby="e-bkConfirm" type="text" autocomplete="off" placeholder="استعادة">
                       <span class="field__err" id="e-bkConfirm" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                     </div>
                     <div><button class="btn btn--danger" type="button" id="bkRestore">استعادة البيانات</button></div>
@@ -1666,13 +1682,13 @@ window.AunShell = (function(){
   function fieldErr(id,msg){
     var e=$("e-"+id); if(!e) return;
     e.hidden=false; e.querySelector("span").textContent=msg;
-    $(id).classList.add("is-error");
+    $(id).classList.add("is-error"); $(id).setAttribute("aria-invalid","true");
   }
   function clearErrs(k){
     var d=SAVED[k]||{};
     for (var id in d) if (Object.prototype.hasOwnProperty.call(d,id)){
       var e=$("e-"+id); if(e) e.hidden=true;
-      var n=$(id); if(n && n.classList) n.classList.remove("is-error");
+      var n=$(id); if(n && n.classList){ n.classList.remove("is-error"); n.removeAttribute("aria-invalid"); }
     }
   }
   function validate(k){
@@ -1766,6 +1782,7 @@ window.AunShell = (function(){
 
   /* logo replacement — validated, previewed, never silently accepted */
   $("logoImg").src = LOGO;
+  $("logoPick").addEventListener("click", function(){ $("logoFile").click(); });
   $("logoFile").addEventListener("change", function(){
     var f=this.files && this.files[0]; if(!f) return;
     if (["image/svg+xml","image/png"].indexOf(f.type)<0){ toast("اختر ملف SVG أو PNG",true); this.value=""; return; }
@@ -1840,12 +1857,12 @@ window.AunShell = (function(){
     function err(id,msg){
       var e=$("e-"+id); if(!e) return;
       e.hidden=false; e.querySelector("span").textContent=msg;
-      var n=$(id); if(n) n.classList.add("is-error");
+      var n=$(id); if(n){ n.classList.add("is-error"); n.setAttribute("aria-invalid","true"); }
     }
     function clear(ids){
       ids.forEach(function(id){
         var e=$("e-"+id); if(e) e.hidden=true;
-        var n=$(id); if(n && n.classList) n.classList.remove("is-error");
+        var n=$(id); if(n && n.classList){ n.classList.remove("is-error"); n.removeAttribute("aria-invalid"); }
       });
     }
     /* the server answers 422 with a map of field -> sentence; show each one
@@ -1954,6 +1971,8 @@ window.AunShell = (function(){
   }
   var RESTORE_MAX = 0;   /* filled from the API on the first load */
   function boot(){
+    $("setError").hidden = true;
+    $("setgrid").hidden = false;
     return AunAPI.settings().then(function(res){
       if (res.limits && res.limits.restoreMaxBytes) RESTORE_MAX = res.limits.restoreMaxBytes;
       applyLoaded(res.settings || {});
@@ -1963,9 +1982,16 @@ window.AunShell = (function(){
       refreshDirty();
     }).catch(function(err){
       if (err.status === 401) return;      /* app.js is already redirecting */
+      /* the form is taken off the screen rather than left showing blanks that
+         look like the stored values */
+      $("setgrid").hidden = true;
+      $("setError").hidden = false;
       toast(err.message || "تعذّر تحميل الإعدادات", true);
     });
   }
+  $("setRetry").addEventListener("click", function(){
+    boot().then(function(){ syncToggle("siteLive"); });
+  });
 
   buildNav();
   syncToggle("siteLive");

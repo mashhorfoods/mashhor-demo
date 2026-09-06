@@ -1060,23 +1060,23 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
                   </div>
                   <div class="field">
                     <label class="field__label" for="eDate">تاريخ الرحلة <span class="field__req">(مطلوب)</span></label>
-                    <input class="ctl ltr" id="eDate" type="text" inputmode="numeric" placeholder="YYYY-MM-DD">
+                    <input class="ctl ltr" id="eDate" aria-describedby="errDate" type="text" inputmode="numeric" placeholder="YYYY-MM-DD">
                     <span class="field__err" id="errDate" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                   </div>
                   <div class="field">
                     <label class="field__label" for="eTime">وقت الرحلة</label>
-                    <input class="ctl ltr" id="eTime" type="text" inputmode="numeric" placeholder="HH:MM">
+                    <input class="ctl ltr" id="eTime" aria-describedby="errTime" type="text" inputmode="numeric" placeholder="HH:MM">
                     <span class="field__help">اتركه فارغاً إذا لم يُحدَّد بعد.</span>
                     <span class="field__err" id="errTime" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                   </div>
                   <div class="field">
                     <label class="field__label" for="eFrom">مكان الانطلاق <span class="field__req">(مطلوب)</span></label>
-                    <input class="ctl" id="eFrom" type="text">
+                    <input class="ctl" id="eFrom" aria-describedby="errFrom" type="text">
                     <span class="field__err" id="errFrom" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                   </div>
                   <div class="field">
                     <label class="field__label" for="eTo">الوجهة <span class="field__req">(مطلوب)</span></label>
-                    <input class="ctl" id="eTo" type="text">
+                    <input class="ctl" id="eTo" aria-describedby="errTo" type="text">
                     <span class="field__err" id="errTo" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                   </div>
                 </div>
@@ -1209,7 +1209,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
         <textarea class="ctl" id="nrNotes" rows="2" maxlength="500"
                   style="min-height:64px;font-family:var(--f-ar-body);line-height:1.8"></textarea>
       </div>
-      <p class="field__err" id="nrErr" hidden style="display:block"></p>
+      <p class="field__err" id="nrErr" role="alert" hidden style="display:block"></p>
     </div>
     <div class="modal__f">
       <button class="btn btn--primary" type="button" id="nrOk">تسجيل الطلب</button>
@@ -1225,6 +1225,15 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
 (function(){
   "use strict";
   var $ = function(id){ return document.getElementById(id); };
+  /* A field that is drawn red is also announced as invalid: the border is
+     the sighted half of the same statement, aria-invalid is the other. */
+  var unflag = function(id){
+    var n = typeof id === "string" ? $(id) : id;
+    if (!n) return;
+    n.classList.remove("is-error");
+    n.removeAttribute("aria-invalid");
+  };
+
   var el = function(t,c){ var n=document.createElement(t); if(c) n.className=c; return n; };
 
   /* ---------- approved services (the site is the source of truth) ------ */
@@ -1271,6 +1280,8 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
      the session and the requests-module permission. Everything below renders
      exactly what it rendered before — only where the rows come from changed. */
   var DATA = [];
+  /* false until the list has come back from the server at least once */
+  var LOADED = false;
 
   var PER_PAGE = 5;
   var state = { q:"", status:"", date:"", service:"", source:"", page:1,
@@ -1346,11 +1357,16 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
 
   /* ---------- list rendering -------------------------------------------- */
   function render(){
+    var box = $("results");
+    /* Before the first successful load there is nothing that can be empty.
+       Painting the empty state here states as fact something the page does
+       not know — the operator opened «الطلبات» after a dropped connection and
+       read that there are no requests. */
+    if (!LOADED){ box.setAttribute("data-state","error"); return; }
     var all = filtered(), pages = Math.max(1,Math.ceil(all.length/PER_PAGE));
     if (state.page > pages) state.page = pages;
     var slice = all.slice((state.page-1)*PER_PAGE, state.page*PER_PAGE);
 
-    var box = $("results");
     if (!all.length){
       box.setAttribute("data-state","empty");
       var noData = !anyFilter();
@@ -1712,19 +1728,19 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
     $("editHint").hidden = true;
     $("editbtn").hidden = !canModify;
     ["errDate","errTime","errFrom","errTo"].forEach(function(id){ $(id).hidden = true; });
-    ["eDate","eTime","eFrom","eTo"].forEach(function(id){ $(id).classList.remove("is-error"); });
+    ["eDate","eTime","eFrom","eTo"].forEach(unflag);
   }
   function showErr(id,ctl,msg){
     $(id).hidden = false;
     $(id).querySelector("span").textContent = msg;
-    $(ctl).classList.add("is-error");
+    $(ctl).classList.add("is-error"); $(ctl).setAttribute("aria-invalid","true");
   }
   $("editbtn").addEventListener("click", enterEdit);
   $("cancelEdit").addEventListener("click", exitEdit);
   $("tripEdit").addEventListener("submit", function(e){
     e.preventDefault();
     ["errDate","errTime","errFrom","errTo"].forEach(function(id){ $(id).hidden = true; });
-    ["eDate","eTime","eFrom","eTo"].forEach(function(id){ $(id).classList.remove("is-error"); });
+    ["eDate","eTime","eFrom","eTo"].forEach(unflag);
     var ok = true, first = null;
     var d = $("eDate").value.trim(), t = $("eTime").value.trim(),
         f = $("eFrom").value.trim(), to = $("eTo").value.trim();
@@ -1908,7 +1924,10 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   $("reset").addEventListener("click", resetAll);
   $("emptyReset").addEventListener("click", resetAll);
   $("back").addEventListener("click", function(e){ e.preventDefault(); back(); });
-  $("retry").addEventListener("click", function(){ $("results").setAttribute("data-state","ready"); render(); });
+  /* The real handler is next to boot() below: «إعادة المحاولة» makes the
+     request again. A second handler used to sit here that only re-rendered
+     the empty in-memory list — harmless while boot() also ran, misleading
+     the moment anyone removed the other one. */
 
   /* service options, from the approved list only */
   SERVICES.forEach(function(s){
@@ -2021,6 +2040,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
     box.setAttribute("data-state","loading");
     return AunAPI.requests({ per: 100 }).then(function(res){
       DATA = res.rows || [];
+      LOADED = true;
       render();
       if (state.service){
         var ssel = $("fservice");

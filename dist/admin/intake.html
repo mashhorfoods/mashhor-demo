@@ -1199,12 +1199,12 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
                   <div class="fgrid fgrid--2">
                     <div class="field">
                       <label class="field__label" for="fName">الاسم <span class="field__req">(مطلوب)</span></label>
-                      <input class="ctl" id="fName" type="text" autocomplete="name">
+                      <input class="ctl" id="fName" aria-describedby="e-fName" type="text" autocomplete="name">
                       <span class="field__err" id="e-fName" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                     </div>
                     <div class="field">
                       <label class="field__label" for="fPhone">رقم الجوال <span class="field__req">(مطلوب)</span></label>
-                      <input class="ctl ltr" id="fPhone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="05XXXXXXXX">
+                      <input class="ctl ltr" id="fPhone" aria-describedby="e-fPhone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="05XXXXXXXX">
                       <span class="field__err" id="e-fPhone" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                     </div>
                   </div>
@@ -1213,7 +1213,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
                     <div class="field">
                       <label class="field__label" for="fService">الخدمة المطلوبة <span class="field__req">(مطلوب)</span></label>
                       <span class="selwrap"><svg class="i i--sm" aria-hidden="true"><use href="#ic-chevron"/></svg>
-                      <select class="ctl" id="fService"><option value="">اختر الخدمة</option></select></span>
+                      <select class="ctl" id="fService" aria-describedby="e-fService"><option value="">اختر الخدمة</option></select></span>
                       <span class="field__help" id="svcNote"></span>
                       <span class="field__err" id="e-fService" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                     </div>
@@ -1222,22 +1222,22 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
                   <div class="fgrid fgrid--2" style="margin-top:var(--s4)">
                     <div class="field">
                       <label class="field__label" for="fFrom">مكان الانطلاق <span class="field__req">(مطلوب)</span></label>
-                      <input class="ctl" id="fFrom" type="text">
+                      <input class="ctl" id="fFrom" aria-describedby="e-fFrom" type="text">
                       <span class="field__err" id="e-fFrom" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                     </div>
                     <div class="field">
                       <label class="field__label" for="fTo">الوجهة <span class="field__req">(مطلوب)</span></label>
-                      <input class="ctl" id="fTo" type="text">
+                      <input class="ctl" id="fTo" aria-describedby="e-fTo" type="text">
                       <span class="field__err" id="e-fTo" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                     </div>
                     <div class="field">
                       <label class="field__label" for="fDate">تاريخ الرحلة <span class="field__req">(مطلوب)</span></label>
-                      <input class="ctl ltr" id="fDate" type="text" inputmode="numeric" placeholder="YYYY-MM-DD">
+                      <input class="ctl ltr" id="fDate" aria-describedby="e-fDate" type="text" inputmode="numeric" placeholder="YYYY-MM-DD">
                       <span class="field__err" id="e-fDate" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                     </div>
                     <div class="field">
                       <label class="field__label" for="fTime">وقت الرحلة</label>
-                      <input class="ctl ltr" id="fTime" type="text" inputmode="numeric" placeholder="HH:MM">
+                      <input class="ctl ltr" id="fTime" aria-describedby="e-fTime" type="text" inputmode="numeric" placeholder="HH:MM">
                       <span class="field__help">اختياري — سنتصل لتأكيده إن لم يُحدَّد.</span>
                       <span class="field__err" id="e-fTime" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                     </div>
@@ -1375,7 +1375,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
 </div>
 <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
 
-<script src="app.js?v=58f9efd3c5"></script>
+<script src="app.js?v=74d7ad9429"></script>
 <script>
 /* Shell behaviour shared by every module page. Exposes only the two helpers
    the modules need — a toast and a confirmation — and keeps the rest private. */

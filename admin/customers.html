@@ -983,7 +983,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
               <span class="empty__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-search"/></svg></span>
               <span class="empty__t" id="emptyT">لا توجد نتائج مطابقة</span>
               <span class="empty__b" id="emptyB">لا يوجد عميل يطابق البحث الحالي.</span>
-              <button class="btn btn--secondary" id="emptyReset">إعادة تعيين البحث</button>
+              <button class="btn btn--secondary" id="emptyReset">إعادة تعيين التصفية</button>
             </div></div>
 
             <div class="state state--error"><div class="errbox">
@@ -1050,12 +1050,12 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
                 <div class="editgrid" style="grid-template-columns:minmax(0,1fr)">
                   <div class="field">
                     <label class="field__label" for="eName">الاسم <span class="field__req">(مطلوب)</span></label>
-                    <input class="ctl" id="eName" type="text">
+                    <input class="ctl" id="eName" aria-describedby="errName" type="text">
                     <span class="field__err" id="errName" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                   </div>
                   <div class="field">
                     <label class="field__label" for="ePhone">رقم الجوال <span class="field__req">(مطلوب)</span></label>
-                    <input class="ctl ltr" id="ePhone" type="text" inputmode="numeric">
+                    <input class="ctl ltr" id="ePhone" aria-describedby="errPhone" type="text" inputmode="numeric">
                     <span class="field__help">رقم الجوال هو هوية العميل — تغييره ينقل كل طلباته إلى الرقم الجديد.</span>
                     <span class="field__err" id="errPhone" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                   </div>
@@ -1111,6 +1111,15 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
 (function(){
   "use strict";
   var $ = function(id){ return document.getElementById(id); };
+  /* A field that is drawn red is also announced as invalid: the border is
+     the sighted half of the same statement, aria-invalid is the other. */
+  var unflag = function(id){
+    var n = typeof id === "string" ? $(id) : id;
+    if (!n) return;
+    n.classList.remove("is-error");
+    n.removeAttribute("aria-invalid");
+  };
+
   var el = function(t,c){ var n=document.createElement(t); if(c) n.className=c; return n; };
 
   var SERVICES = [
@@ -1190,6 +1199,8 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
     };
   }
   var CUSTOMERS = [];
+  /* false until the list has come back from the server at least once */
+  var LOADED = false;
 
   var PER = 6;
   var state = { q:"", active:"", sort:"recent", page:1 };
@@ -1240,12 +1251,18 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
 
   /* ---------- list ------------------------------------------------------ */
   function render(){
+    var box = $("results");
+    /* Before the first successful load there is nothing that can be empty.
+       Painting the empty state here states as fact something the page does
+       not know — the operator opened «العملاء» after a dropped connection and
+       read that «لا يوجد عملاء بعد». The error state is what an unknown list looks
+       like, and it carries the button that actually retries. */
+    if (!LOADED){ box.setAttribute("data-state","error"); return; }
     var all = sorted(CUSTOMERS.filter(match));
     var pages = Math.max(1, Math.ceil(all.length/PER));
     if (state.page > pages) state.page = pages;
     var slice = all.slice((state.page-1)*PER, state.page*PER);
 
-    var box = $("results");
     if (!all.length){
       box.setAttribute("data-state","empty");
       var noData = !anyFilter();
@@ -1503,18 +1520,18 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
     $("infoEdit").hidden = true; $("infoView").hidden = false;
     $("editHint").hidden = true; $("editbtn").hidden = !canModify;
     $("errName").hidden = true; $("errPhone").hidden = true;
-    $("eName").classList.remove("is-error"); $("ePhone").classList.remove("is-error");
+    ["eName","ePhone"].forEach(unflag);
   }
   function showErr(id,ctl,msg){
     $(id).hidden = false; $(id).querySelector("span").textContent = msg;
-    $(ctl).classList.add("is-error");
+    $(ctl).classList.add("is-error"); $(ctl).setAttribute("aria-invalid","true");
   }
   $("editbtn").addEventListener("click", enterEdit);
   $("cancelEdit").addEventListener("click", exitEdit);
   $("infoEdit").addEventListener("submit", function(e){
     e.preventDefault();
     $("errName").hidden = true; $("errPhone").hidden = true;
-    $("eName").classList.remove("is-error"); $("ePhone").classList.remove("is-error");
+    ["eName","ePhone"].forEach(unflag);
     var n = $("eName").value.trim(), p = digits($("ePhone").value);
     var ok = true, first = null;
     if (!n){ showErr("errName","eName","اسم العميل مطلوب."); ok=false; first=$("eName"); }
@@ -1582,7 +1599,9 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   $("reset").addEventListener("click", resetAll);
   $("emptyReset").addEventListener("click", resetAll);
   $("back").addEventListener("click", function(e){ e.preventDefault(); back(); });
-  $("retry").addEventListener("click", function(){ $("results").setAttribute("data-state","ready"); render(); });
+  /* «إعادة المحاولة» has to make the request again. Re-rendering an empty
+     in-memory list looked like a retry and asked the server nothing. */
+  $("retry").addEventListener("click", boot);
 
   /* ---------- shell ------------------------------------------------------ */
   var app=$("app"), collapse=$("collapse");
@@ -1651,6 +1670,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
     if (box) box.setAttribute("data-state", "loading");
     return AunAPI.customers("").then(function(res){
       CUSTOMERS = (res.rows || []).map(fromApi);
+      LOADED = true;
       render();
       var k = decodeURIComponent(String(window.location.hash || "").replace(/^#/, "")).trim();
       if (k) openC(digits(k));

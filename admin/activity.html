@@ -1194,6 +1194,8 @@ tr.rowlink{cursor:pointer}
      API cannot be reached — it is never silently mixed with real rows. */
   var LOG = [];
   var NOTIFS = [];
+  /* each pane stays "unknown" until its own request has come back once */
+  var NLOADED = false, LLOADED = false;
 
   /* ---------- read state ------------------------------------------------
      Seeded by age — anything older than two days is assumed already seen —
@@ -1285,7 +1287,12 @@ tr.rowlink{cursor:pointer}
   }
 
   function renderNotifs(){
-    var list = visibleNotifs(), box = $("nresults");
+    var box = $("nresults");
+    /* Before the notifications have arrived, "لا شيء يحتاج انتباهك الآن" is
+       a claim the page cannot make. The failure state is what an unknown
+       pane looks like, and it carries the button that retries. */
+    if (!NLOADED){ box.setAttribute("data-state","error"); $("ncount").innerHTML=""; return; }
+    var list = visibleNotifs();
     var u = unreadCount();
 
     $("ncount").innerHTML = "";
@@ -1400,7 +1407,10 @@ tr.rowlink{cursor:pointer}
   });
   $("markAll").addEventListener("click", markAllRead);
   $("popread").addEventListener("click", function(e){ e.stopPropagation(); markAllRead(); });
-  $("nretry").addEventListener("click", function(){ renderNotifs(); });
+  /* «إعادة المحاولة» has to make the request again — re-rendering an empty
+     pane asked the server nothing and answered every failure with
+     «لا توجد تنبيهات». */
+  $("nretry").addEventListener("click", boot);
 
   function setNFilter(unreadOnly){
     nState.unreadOnly = unreadOnly;
@@ -1599,6 +1609,8 @@ tr.rowlink{cursor:pointer}
   }
 
   function renderLog(){
+    var box0 = $("lresults");
+    if (!LLOADED){ box0.setAttribute("data-state","error"); $("lcount").innerHTML=""; return; }
     var all = lFiltered(), pages = Math.max(1, Math.ceil(all.length/PER_PAGE));
     if (lState.page > pages) lState.page = pages;
     var slice = all.slice((lState.page-1)*PER_PAGE, lState.page*PER_PAGE);
@@ -1642,7 +1654,7 @@ tr.rowlink{cursor:pointer}
   }
   $("reset").addEventListener("click", resetLog);
   $("lemptyReset").addEventListener("click", resetLog);
-  $("lretry").addEventListener("click", function(){ renderLog(); });
+  $("lretry").addEventListener("click", boot);
 
   /* ---------- tabs ------------------------------------------------------ */
   var TABS = [
@@ -1758,6 +1770,7 @@ tr.rowlink{cursor:pointer}
       });
       readMap = {};
       (res.rows || []).forEach(function(n){ readMap[String(n.id)] = !!n.read; });
+      NLOADED = true;
       renderNotifs();
     });
 
@@ -1785,6 +1798,7 @@ tr.rowlink{cursor:pointer}
         };
       });
       LOG.forEach(function(e,i){ e.i = i; });
+      LLOADED = true;
       renderLog();
     });
 

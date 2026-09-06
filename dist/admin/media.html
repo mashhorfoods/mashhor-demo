@@ -1251,7 +1251,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
             </div>
             <div class="applied" id="applied" hidden style="margin-top:var(--s4)">
               <span>التصفية المطبّقة:</span><span id="chips" style="display:contents"></span>
-              <button class="btn btn--ghost btn--sm" id="reset">إعادة تعيين</button></div>
+              <button class="btn btn--ghost btn--sm" id="reset">إعادة تعيين الكل</button></div>
             <p class="count" id="count" style="margin-top:var(--s4)"></p>
           </div>
 
@@ -1273,7 +1273,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
               <span class="empty__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-image"/></svg></span>
               <span class="empty__t" id="emptyT">لا توجد نتائج مطابقة</span>
               <span class="empty__b" id="emptyB">لا يوجد ملف يطابق البحث أو التصفية الحالية.</span>
-              <button class="btn btn--secondary" id="emptyReset">إعادة تعيين</button></div></div>
+              <button class="btn btn--secondary" id="emptyReset">إعادة تعيين التصفية</button></div></div>
             <div class="state state--error"><div class="errbox">
               <span class="empty__ic"><svg class="i i--lg" aria-hidden="true"><use href="#ic-alert"/></svg></span>
               <span class="empty__t">تعذّر تحميل المكتبة</span>
@@ -1367,11 +1367,17 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
       <svg class="i i--lg" aria-hidden="true" style="color:var(--navy)"><use href="#ic-upload"/></svg>
       <strong>اسحب الملف هنا أو اختره</strong>
       <span id="upHint">WebP أو PNG أو JPG أو AVIF · حتى 4 ميجابايت · 200 بكسل على الأقل</span>
-      <label class="btn btn--secondary" for="mfile" style="margin-top:var(--s2)">اختيار ملف</label>
-      <input type="file" id="mfile" accept="image/webp,image/png,image/jpeg,image/avif">
+      <!-- The file input is hidden at 1px so the button can carry the
+           design's own styling. A <label> is not focusable, so the only
+           thing the keyboard could reach here was the invisible input — the
+           focus ring landed on a 1x1 transparent box and the operator lost
+           track of where she was. A real button is reachable, visibly
+           focused, and clicks the input for her. -->
+      <button type="button" class="btn btn--secondary" id="mpick" style="margin-top:var(--s2)">اختيار ملف</button>
+      <input type="file" id="mfile" tabindex="-1" aria-label="اختيار ملف للرفع" accept="image/webp,image/png,image/jpeg,image/avif">
     </div>
     <div id="upList"></div>
-    <span class="field__err" id="upErr" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
+    <span class="field__err" id="upErr" role="alert" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
     <div class="modal__f">
       <button class="btn btn--primary" id="upOk" disabled>تأكيد الرفع</button>
       <button class="btn btn--ghost" id="upNo">إلغاء</button>
@@ -1379,7 +1385,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   </div>
 </div>
 
-<script src="app.js?v=58f9efd3c5"></script>
+<script src="app.js?v=74d7ad9429"></script>
 <script>
 /* Shell behaviour shared by every module page. Exposes only the two helpers
    the modules need — a toast and a confirmation — and keeps the rest private. */
@@ -1497,6 +1503,8 @@ window.AunShell = (function(){
      rather than described — the same decision Stage 12 made, now made on the
      server that can actually read the page. */
   var ASSETS = [];
+  /* false until the list has come back from the server at least once */
+  var LOADED = false;
   var THUMBS = {};
 
   /* ---- validation rules, applied before anything enters the library ---- */
@@ -1639,12 +1647,18 @@ window.AunShell = (function(){
 
   /* ---------- library ---------------------------------------------------- */
   function render(){
+    var box=$("results");
+    /* Before the first successful load there is nothing that can be empty.
+       Painting the empty state here states as fact something the page does
+       not know — the operator opened «الوسائط» after a dropped connection and
+       read that «المكتبة فارغة». The error state is what an unknown list looks
+       like, and it carries the button that actually retries. */
+    if (!LOADED){ box.setAttribute("data-state","error"); return; }
     var all=sorted(ASSETS.filter(match));
     var pages=Math.max(1,Math.ceil(all.length/PER));
     if (state.page>pages) state.page=pages;
     var slice=all.slice((state.page-1)*PER, state.page*PER);
 
-    var box=$("results");
     if (!all.length){
       box.setAttribute("data-state","empty");
       var none = !ASSETS.length;
@@ -1916,10 +1930,20 @@ window.AunShell = (function(){
     }
     $("upList").textContent=""; $("upErr").hidden=true; $("upOk").disabled=true;
     $("upOk").textContent = replaceMode ? "تأكيد الاستبدال" : "تأكيد الرفع";
+    upLast = document.activeElement;
     $("upwrap").hidden=false;
-    $("drop").focus && $("drop").focus();
+    /* the dropzone is a <div>; focusing it did nothing, so opening the
+       dialog left focus behind on the page underneath */
+    $("mpick").focus();
   }
-  function closeUp(){ $("upwrap").hidden=true; pending=null; }
+  /* The detail sheet already gives focus back to the row that opened it;
+     this dialog dropped it on <body>, so closing the upload box sent the
+     next Tab back to the top of the page. */
+  var upLast = null;
+  function closeUp(){
+    $("upwrap").hidden=true; pending=null;
+    if (upLast && upLast.focus) upLast.focus();
+  }
   $("upbtn").addEventListener("click", function(){ current=null; openUp(false); });
   /* Replacing a file in place would overwrite something the whole site
      references, with no way back. It was never implemented — the old handler
@@ -2001,6 +2025,7 @@ window.AunShell = (function(){
     if (this.files && this.files[0]) accept(this.files[0]);
     this.value="";
   });
+  $("mpick").addEventListener("click", function(){ $("mfile").click(); });
   var dz=$("drop");
   ["dragenter","dragover"].forEach(function(ev){
     dz.addEventListener(ev,function(e){ e.preventDefault(); dz.classList.add("is-over"); });
@@ -2068,7 +2093,9 @@ window.AunShell = (function(){
   $("fsort").addEventListener("change", function(){ state.sort=this.value; render(); });
   $("reset").addEventListener("click", resetAll);
   $("emptyReset").addEventListener("click", resetAll);
-  $("retry").addEventListener("click", function(){ $("results").setAttribute("data-state","ready"); render(); });
+  /* «إعادة المحاولة» has to make the request again. Re-rendering an empty
+     in-memory list looked like a retry and asked the server nothing. */
+  $("retry").addEventListener("click", boot);
   $("vGrid").addEventListener("click", function(){
     state.view="grid"; this.setAttribute("aria-pressed","true");
     $("vList").setAttribute("aria-pressed","false"); render();
@@ -2105,6 +2132,7 @@ window.AunShell = (function(){
           tw: null
         };
       });
+      LOADED = true;
       render();
     }).catch(function(err){
       if (err.status === 401) return;      /* app.js is already redirecting */
