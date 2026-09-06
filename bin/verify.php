@@ -2716,10 +2716,32 @@ if (is_dir($dist)) {
 
     /* the dashboard shows these by path now rather than by an embedded copy,
        so a path that does not resolve is a broken picture on the screen */
+    $mediaPage = (string) @file_get_contents(AUN_ROOT . '/admin/media.html');
     check('media', 'the media page reads a picture from its path',
-        str_contains((string) @file_get_contents(AUN_ROOT . '/admin/media.html'), 'function preferSmall'));
-    check('media', 'and falls back to the original when no small variant exists',
-        str_contains((string) @file_get_contents(AUN_ROOT . '/admin/media.html'), 'img.src = path;'));
+        str_contains($mediaPage, 'function preferSmall'));
+    /* It used to guess at a thumbnail — «-360», then «-380», then «-400» —
+       and fall back to the master when all three answered 404. Three failed
+       requests per picture on every load, three more for every uploaded file,
+       which has no variants at all. The list of what exists was already
+       generated; it simply was not shipped. */
+    check('media', 'and picks a thumbnail that exists rather than guessing',
+        str_contains($mediaPage, 'img/manifest.json')
+        && !str_contains($mediaPage, '"-380"'));
+    check('media', 'and uses the original when a file has no smaller version',
+        str_contains($mediaPage, 'img.src = small ? path.replace(name, small) : path;'));
+    check('media', 'the manifest of what exists is in the package',
+        is_file($dist . '/img/manifest.json'));
+    /* every variant the manifest names must actually be there, or the page
+       would be pointing at a file that 404s — the very thing this replaced */
+    $man = json_decode((string) @file_get_contents($dist . '/img/manifest.json'), true) ?: [];
+    $ghost = [];
+    foreach ($man as $entry) {
+        foreach (($entry['variants'] ?? []) as $v) {
+            if (!is_file($dist . '/img/' . $v['file'])) $ghost[] = $v['file'];
+        }
+    }
+    check('media', 'and every variant it names actually shipped',
+        $ghost === [], implode(', ', array_slice($ghost, 0, 3)));
 
     /* every picture a service points at, too — that page shows them the same way */
     $svcMissing = [];

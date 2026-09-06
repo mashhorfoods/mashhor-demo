@@ -41,6 +41,14 @@ const DIST = path.join(ROOT, 'dist');
 const SHIP = [
   '404.html', 'robots.txt', 'sitemap.xml',
   'google192f612c4e876e6f.html',
+  /* Which sized variants of each picture actually exist. The media library
+     used to guess — it asked for «-360», then «-380», then «-400» and fell
+     back to the master when all three 404'd, which is three failed requests
+     per thumbnail on every load, and three more for every uploaded file,
+     which has no variants at all. The local dev server used to answer a
+     missing file with the home page and a 200, so none of it was visible.
+     The list already exists; it just was not shipped. */
+  'img/manifest.json',
   /* M13 — the machine-readable summary AI assistants look for at /llms.txt.
      Same facts as the page, plus an explicit list of what the site does NOT
      state, so an assistant has no gap to fill in with an invention. */

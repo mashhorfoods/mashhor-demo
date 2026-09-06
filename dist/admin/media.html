@@ -1568,7 +1568,6 @@ window.AunShell = (function(){
      تُحمَّل كاملة في كل زيارة ولا تُخزَّن في ذاكرة المتصفح. المسار الحقيقي
      يُخزَّن ويُشارَك مع بقية الموقع.
      THUMBS لم يُحذف: الرفع الجديد يضع فيه معاينة قبل أن يصل الملف للخادم. */
-  var SMALL = /\.(webp|jpg|jpeg|png|avif)$/i;
   function thumb(a){
     if (THUMBS[a.p]) return THUMBS[a.p];          /* معاينة رفع لم يُحفظ بعد */
     return a.p ? ("/" + String(a.p).replace(/^\/+/, "")) : null;
@@ -1578,18 +1577,32 @@ window.AunShell = (function(){
      المسار الأصلي يُضبط دائماً في النهاية: النسخة الأولى كانت تعود دون
      ضبط src للملفات التي لا تملك نسخاً مصغّرة — svg وأيقونات العلامة —
      فظهرت صورتان فارغتين من اثنتي عشرة. */
+  /* أي نسخة مصغّرة موجودة فعلاً — من مانيفست الصور، لا بالتخمين.
+     كانت هذه الدالة تجرّب «-360» ثم «-380» ثم «-400» وترتدّ إلى الأصل: ثلاثة
+     طلبات فاشلة لكل صورة في كل تحميل، وثلاثة أخرى لكل ملف مرفوع لا نسخ
+     مصغّرة له أصلاً. خادم التطوير كان يردّ على الملف المفقود بالصفحة
+     الرئيسية ورمز 200، فلم يظهر شيء من ذلك. */
+  var VARIANTS = null;                    /* اسم الأصل ← أصغر نسخة موجودة */
+  function loadManifest(){
+    return fetch("/img/manifest.json", { cache: "force-cache" })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(m){
+        VARIANTS = {};
+        if (!m) return;
+        Object.keys(m).forEach(function(k){
+          var vs = (m[k].variants || []).filter(function(v){ return /\.webp$/.test(v.file); });
+          if (!vs.length) return;
+          vs.sort(function(a, b){ return a.w - b.w; });
+          VARIANTS[m[k].source] = vs[0].file;
+        });
+      })
+      .catch(function(){ VARIANTS = {}; });   /* بلا مانيفست: الأصل، بلا تجريب */
+  }
+
   function preferSmall(img, path){
-    var ext = SMALL.test(path) ? path.match(SMALL)[0] : "";
-    if (!ext) { img.src = path; return; }
-    var base = path.slice(0, path.length - ext.length);
-    var tries = ["-360", "-380", "-400"].map(function(sfx){ return base + sfx + ext; });
-    var i = 0;
-    img.onerror = function(){
-      if (i < tries.length) { img.src = tries[i++]; return; }
-      img.onerror = null;
-      img.src = path;                     /* الأصل، دائماً، كملاذ أخير */
-    };
-    img.src = tries[i++];
+    var name = String(path).split("/").pop();
+    var small = VARIANTS && VARIANTS[name];
+    img.src = small ? path.replace(name, small) : path;
   }
 
   function usageBadge(a){
@@ -2077,7 +2090,9 @@ window.AunShell = (function(){
   function boot(){
     var box = $("results");
     if (box) box.setAttribute("data-state", "loading");
-    return AunAPI.media().then(function(res){
+    return (VARIANTS ? Promise.resolve() : loadManifest()).then(function(){
+      return AunAPI.media();
+    }).then(function(res){
       applyLimits(res.limits);
       ASSETS = (res.rows || []).map(function(r){
         return {

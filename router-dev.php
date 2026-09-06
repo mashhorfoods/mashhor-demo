@@ -50,4 +50,18 @@ if (preg_match('#^/admin/([a-z0-9][a-z0-9-]*)$#', $path, $m)) {
     return true;
 }
 
+/* Everything else is a static file — and when there is no such file the host
+   answers 404 and serves 404.html (root .htaccess, ErrorDocument). PHP's
+   built-in server does not: it fell back to index.html with a 200, so every
+   wrong address looked like the home page. That is a soft 404 — the shape of
+   error a crawler indexes as a duplicate of the home page — and it made the
+   public gate read a pass where production would have failed. */
+$file = __DIR__ . rawurldecode($path);
+if ($path !== '/' && !is_file($file)) {
+    http_response_code(404);
+    header('Content-Type: text/html; charset=utf-8');
+    readfile(__DIR__ . '/404.html');
+    return true;
+}
+
 return false;   /* everything else is a static file */

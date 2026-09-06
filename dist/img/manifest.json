@@ -1,0 +1,360 @@
+{
+  "wheelchair-ramp-boarding": {
+    "source": "wheelchair-ramp-boarding.webp",
+    "srcW": 1024,
+    "srcH": 877,
+    "variants": [
+      {
+        "file": "wheelchair-ramp-boarding-400.webp",
+        "w": 400,
+        "h": 343,
+        "bytes": 29030
+      },
+      {
+        "file": "wheelchair-ramp-boarding-400.avif",
+        "w": 400,
+        "h": 343,
+        "bytes": 19611
+      },
+      {
+        "file": "wheelchair-ramp-boarding-560.webp",
+        "w": 560,
+        "h": 480,
+        "bytes": 50814
+      },
+      {
+        "file": "wheelchair-ramp-boarding-560.avif",
+        "w": 560,
+        "h": 480,
+        "bytes": 31341
+      },
+      {
+        "file": "wheelchair-ramp-boarding-780.webp",
+        "w": 780,
+        "h": 668,
+        "bytes": 88612
+      },
+      {
+        "file": "wheelchair-ramp-boarding-780.avif",
+        "w": 780,
+        "h": 668,
+        "bytes": 47190
+      },
+      {
+        "file": "wheelchair-ramp-boarding-1024.webp",
+        "w": 1024,
+        "h": 877,
+        "bytes": 145332
+      },
+      {
+        "file": "wheelchair-ramp-boarding-1024.avif",
+        "w": 1024,
+        "h": 877,
+        "bytes": 75608
+      }
+    ]
+  },
+  "wheelchair-passenger-vehicle": {
+    "source": "wheelchair-passenger-vehicle.webp",
+    "srcW": 1122,
+    "srcH": 1402,
+    "variants": [
+      {
+        "file": "wheelchair-passenger-vehicle-380.webp",
+        "w": 380,
+        "h": 475,
+        "bytes": 18612
+      },
+      {
+        "file": "wheelchair-passenger-vehicle-600.webp",
+        "w": 600,
+        "h": 750,
+        "bytes": 37898
+      },
+      {
+        "file": "wheelchair-passenger-vehicle-860.webp",
+        "w": 860,
+        "h": 1075,
+        "bytes": 61538
+      },
+      {
+        "file": "wheelchair-passenger-vehicle-1122.webp",
+        "w": 1122,
+        "h": 1402,
+        "bytes": 101702
+      }
+    ]
+  },
+  "equipped-vehicle-fleet": {
+    "source": "equipped-vehicle-fleet.webp",
+    "srcW": 1551,
+    "srcH": 1014,
+    "variants": [
+      {
+        "file": "equipped-vehicle-fleet-360.webp",
+        "w": 360,
+        "h": 235,
+        "bytes": 16714
+      },
+      {
+        "file": "equipped-vehicle-fleet-480.webp",
+        "w": 480,
+        "h": 314,
+        "bytes": 26814
+      },
+      {
+        "file": "equipped-vehicle-fleet-720.webp",
+        "w": 720,
+        "h": 471,
+        "bytes": 55394
+      },
+      {
+        "file": "equipped-vehicle-fleet-950.webp",
+        "w": 950,
+        "h": 621,
+        "bytes": 87646
+      }
+    ]
+  },
+  "wheelchair-transport": {
+    "source": "wheelchair-transport.webp",
+    "srcW": 686,
+    "srcH": 707,
+    "variants": [
+      {
+        "file": "wheelchair-transport-360.webp",
+        "w": 360,
+        "h": 371,
+        "bytes": 31548
+      },
+      {
+        "file": "wheelchair-transport-520.webp",
+        "w": 520,
+        "h": 536,
+        "bytes": 58834
+      },
+      {
+        "file": "wheelchair-transport-686.webp",
+        "w": 686,
+        "h": 707,
+        "bytes": 101364
+      }
+    ]
+  },
+  "power-wheelchair-transport": {
+    "source": "power-wheelchair-transport.webp",
+    "srcW": 1426,
+    "srcH": 1103,
+    "variants": [
+      {
+        "file": "power-wheelchair-transport-360.webp",
+        "w": 360,
+        "h": 278,
+        "bytes": 16692
+      },
+      {
+        "file": "power-wheelchair-transport-520.webp",
+        "w": 520,
+        "h": 402,
+        "bytes": 29290
+      },
+      {
+        "file": "power-wheelchair-transport-690.webp",
+        "w": 690,
+        "h": 534,
+        "bytes": 44698
+      },
+      {
+        "file": "power-wheelchair-transport-1040.webp",
+        "w": 1040,
+        "h": 804,
+        "bytes": 75748
+      },
+      {
+        "file": "power-wheelchair-transport-1378.webp",
+        "w": 1378,
+        "h": 1066,
+        "bytes": 101182
+      }
+    ]
+  },
+  "medical-bed-transport": {
+    "source": "medical-bed-transport.webp",
+    "srcW": 1457,
+    "srcH": 1080,
+    "variants": [
+      {
+        "file": "medical-bed-transport-360.webp",
+        "w": 360,
+        "h": 267,
+        "bytes": 19194
+      },
+      {
+        "file": "medical-bed-transport-520.webp",
+        "w": 520,
+        "h": 385,
+        "bytes": 34516
+      },
+      {
+        "file": "medical-bed-transport-690.webp",
+        "w": 690,
+        "h": 511,
+        "bytes": 55230
+      },
+      {
+        "file": "medical-bed-transport-1040.webp",
+        "w": 1040,
+        "h": 771,
+        "bytes": 110376
+      },
+      {
+        "file": "medical-bed-transport-1378.webp",
+        "w": 1378,
+        "h": 1021,
+        "bytes": 162528
+      }
+    ]
+  },
+  "driver-assistant-escort": {
+    "source": "driver-assistant-escort.webp",
+    "srcW": 1111,
+    "srcH": 949,
+    "variants": [
+      {
+        "file": "driver-assistant-escort-360.webp",
+        "w": 360,
+        "h": 308,
+        "bytes": 14648
+      },
+      {
+        "file": "driver-assistant-escort-520.webp",
+        "w": 520,
+        "h": 444,
+        "bytes": 25312
+      },
+      {
+        "file": "driver-assistant-escort-690.webp",
+        "w": 690,
+        "h": 589,
+        "bytes": 38630
+      },
+      {
+        "file": "driver-assistant-escort-1040.webp",
+        "w": 1040,
+        "h": 888,
+        "bytes": 68354
+      },
+      {
+        "file": "driver-assistant-escort-1111.webp",
+        "w": 1111,
+        "h": 949,
+        "bytes": 87620
+      }
+    ]
+  },
+  "daily-transport-elderly": {
+    "source": "daily-transport-elderly.webp",
+    "srcW": 1448,
+    "srcH": 1086,
+    "variants": [
+      {
+        "file": "daily-transport-elderly-360.webp",
+        "w": 360,
+        "h": 270,
+        "bytes": 18178
+      },
+      {
+        "file": "daily-transport-elderly-520.webp",
+        "w": 520,
+        "h": 390,
+        "bytes": 31794
+      },
+      {
+        "file": "daily-transport-elderly-690.webp",
+        "w": 690,
+        "h": 518,
+        "bytes": 47656
+      },
+      {
+        "file": "daily-transport-elderly-1040.webp",
+        "w": 1040,
+        "h": 780,
+        "bytes": 83846
+      },
+      {
+        "file": "daily-transport-elderly-1378.webp",
+        "w": 1378,
+        "h": 1034,
+        "bytes": 115526
+      }
+    ]
+  },
+  "hospital-medical-centre": {
+    "source": "hospital-medical-centre.webp",
+    "srcW": 1448,
+    "srcH": 1086,
+    "variants": [
+      {
+        "file": "hospital-medical-centre-360.webp",
+        "w": 360,
+        "h": 270,
+        "bytes": 24184
+      },
+      {
+        "file": "hospital-medical-centre-520.webp",
+        "w": 520,
+        "h": 390,
+        "bytes": 47252
+      },
+      {
+        "file": "hospital-medical-centre-690.webp",
+        "w": 690,
+        "h": 518,
+        "bytes": 76820
+      },
+      {
+        "file": "hospital-medical-centre-1040.webp",
+        "w": 1040,
+        "h": 780,
+        "bytes": 144548
+      },
+      {
+        "file": "hospital-medical-centre-1378.webp",
+        "w": 1378,
+        "h": 1034,
+        "bytes": 207358
+      }
+    ]
+  },
+  "riyadh-social-mobility": {
+    "source": "riyadh-social-mobility.webp",
+    "srcW": 1023,
+    "srcH": 872,
+    "variants": [
+      {
+        "file": "riyadh-social-mobility-360.webp",
+        "w": 360,
+        "h": 307,
+        "bytes": 16272
+      },
+      {
+        "file": "riyadh-social-mobility-520.webp",
+        "w": 520,
+        "h": 443,
+        "bytes": 28568
+      },
+      {
+        "file": "riyadh-social-mobility-690.webp",
+        "w": 690,
+        "h": 588,
+        "bytes": 43238
+      },
+      {
+        "file": "riyadh-social-mobility-1023.webp",
+        "w": 1023,
+        "h": 872,
+        "bytes": 78800
+      }
+    ]
+  }
+}
