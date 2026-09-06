@@ -130,7 +130,10 @@ a{color:var(--navy)}
 .side__name{font-weight:600;font-size:var(--fs-sec);line-height:1.25;white-space:nowrap;overflow:hidden}
 .side__name span{display:block;font-family:var(--f-ar-body);font-weight:400;font-size:var(--fs-caption);color:rgba(217,228,243,.8)}
 .side__grp{
-  font-size:var(--fs-caption);font-weight:600;color:rgba(217,228,243,.72);
+  /* .84 not .72 — at .72 this label measured 4.30:1 against the navy
+     rail, just under the 4.5 AA line for text this size. .84 is 5.22:1
+     and the same colour. */
+  font-size:var(--fs-caption);font-weight:600;color:rgba(217,228,243,.84);
   padding:var(--s4) var(--s3) var(--s2);white-space:nowrap
 }
 .navitem{
@@ -1317,7 +1320,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
               <div class="card__h"><h2 class="card__t" id="ct-h">عقد التكامل — ما يجب أن يفرضه الخادم</h2></div>
               <div class="card__b card__b--flush">
                 <div class="tbl-wrap"><table class="contract">
-                  <thead><tr><th>الحقل</th><th>القاعدة على الخادم</th></tr></thead>
+                  <thead><tr><th scope="col">الحقل</th><th scope="col">القاعدة على الخادم</th></tr></thead>
                   <tbody>
                     <tr><td><b>الاسم</b> <code>name</code></td><td>مطلوب · 2–80 حرفاً · يُخزَّن كما أُدخل</td></tr>
                     <tr><td><b>رقم الجوال</b> <code>phone</code></td><td>مطلوب · <code>^05\d{8}$</code> بعد إزالة المسافات · هو مفتاح ربط العميل</td></tr>

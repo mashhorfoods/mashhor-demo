@@ -3516,6 +3516,64 @@ check('ux', 'زر تفريغ التصفية يحمل الاسم نفسه في ك
 check('ux', 'وكذلك زر الخروج من نتيجة فارغة',
     count($emptyLabels) === 1, implode(' | ', array_keys($emptyLabels)));
 
+section('المرحلة 13 — الاستجابة وإمكانية الوصول');
+
+/* Three contrast corrections, each one a measured ratio rather than a
+   preference. They are asserted from the source so a later edit that puts
+   the old value back is caught here as well as in bin/qa-a11y.js. */
+$grpOld = 0; $grpNew = 0;
+foreach (glob(AUN_ROOT . '/admin/*.html') as $f) {
+    $b = basename($f, '.html');
+    if (str_starts_with($b, 'stage-') || str_starts_with($b, 'recovery-')) continue;
+    $src = (string) @file_get_contents($f);
+    if (str_contains($src, 'color:rgba(217,228,243,.72)')) $grpOld++;
+    if (str_contains($src, 'color:rgba(217,228,243,.84)')) $grpNew++;
+}
+check('a11y', 'عنوان مجموعة التنقّل يحقق 4.5:1 على الشريط الكحلي',
+    $grpOld === 0 && $grpNew === 11, "old={$grpOld} new={$grpNew}");
+
+$idx = (string) @file_get_contents(AUN_ROOT . '/index.html');
+check('a11y', 'النص الخافت في الموقع العام لم يعد بالرمادي الفاتح',
+    str_contains($idx, '--text-muted:var(--aun-slate);'), '3.03:1 → 5.85:1');
+check('a11y', 'ورابط التنقّل النشط يحقق النسبة المطلوبة',
+    str_contains($idx, '.site-nav__link.is-active{color:var(--color-secondary)'), '4.35:1 → 8.01:1');
+
+/* Every identity-shaped field declares its purpose. Which declaration is
+   correct depends on whose data it holds: a customer's phone or a
+   colleague's email is not the operator's own, so "off" is the true answer
+   there and a personal token would be the defect. */
+$undeclared = [];
+foreach ([['customers', ['eName', 'ePhone']], ['users', ['uName', 'uMail']],
+          ['settings', ['cName', 'cPhone', 'cWa', 'cEmail']]] as [$pg, $ids]) {
+    $src = (string) @file_get_contents(AUN_ROOT . "/admin/{$pg}.html");
+    foreach ($ids as $id) {
+        if (!preg_match('/<input[^>]*\bid="' . $id . '"[^>]*>/', $src, $m)) { $undeclared[] = "{$pg}#{$id}?"; continue; }
+        if (!str_contains($m[0], 'autocomplete=')) $undeclared[] = "{$pg}#{$id}";
+    }
+}
+check('a11y', 'كل حقل يحمل بيانات طرف آخر يعلن أنه ليس بيانات المستخدم',
+    $undeclared === [], implode(' ', $undeclared));
+
+/* and the operator's own fields keep the personal token, which is the other
+   half of the same rule */
+$log = (string) @file_get_contents(AUN_ROOT . '/admin/login.html');
+check('a11y', 'وحقول المستخدم نفسه تحتفظ بالرمز الشخصي',
+    str_contains($log, 'autocomplete="username"') && str_contains($log, 'autocomplete="current-password"'));
+
+/* a header row that does not say which way it reads is not a header row */
+$noScope = [];
+foreach (glob(AUN_ROOT . '/admin/*.html') as $f) {
+    $b = basename($f, '.html');
+    if (str_starts_with($b, 'stage-') || str_starts_with($b, 'recovery-')) continue;
+    $src = (string) @file_get_contents($f);
+    /* (?=[\s>]) or <thead> matches too, and the check reports seven pages
+       missing a scope they never needed. */
+    if (preg_match_all('/<th(?=[\s>])(?![^>]*scope=)[^>]*>/', $src, $m)) {
+        $noScope[] = $b . '×' . count($m[0]);
+    }
+}
+check('a11y', 'كل رأس عمود يعلن اتجاه قراءته', $noScope === [], implode(' ', $noScope));
+
 /* ================================================================== */
 foreach ($lines as $l) fwrite(STDOUT, $l . "\n");
 fwrite(STDOUT, "\n" . str_repeat('=', 78) . "\n");

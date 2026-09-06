@@ -130,7 +130,10 @@ a{color:var(--navy)}
 .side__name{font-weight:600;font-size:var(--fs-sec);line-height:1.25;white-space:nowrap;overflow:hidden}
 .side__name span{display:block;font-family:var(--f-ar-body);font-weight:400;font-size:var(--fs-caption);color:rgba(217,228,243,.8)}
 .side__grp{
-  font-size:var(--fs-caption);font-weight:600;color:rgba(217,228,243,.72);
+  /* .84 not .72 — at .72 this label measured 4.30:1 against the navy
+     rail, just under the 4.5 AA line for text this size. .84 is 5.22:1
+     and the same colour. */
+  font-size:var(--fs-caption);font-weight:600;color:rgba(217,228,243,.84);
   padding:var(--s4) var(--s3) var(--s2);white-space:nowrap
 }
 .navitem{
@@ -1153,11 +1156,11 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
               <div class="card__b"><div class="pgrid pgrid--2">
                 <div class="field">
                   <label class="field__label" for="uName">الاسم <span class="field__req">(مطلوب)</span></label>
-                  <input class="ctl" id="uName" aria-describedby="e-uName" type="text" data-f>
+                  <input class="ctl" id="uName" aria-describedby="e-uName" type="text" autocomplete="off" data-f>
                   <span class="field__err" id="e-uName" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span></div>
                 <div class="field">
                   <label class="field__label" for="uMail">البريد الإلكتروني <span class="field__req">(مطلوب)</span></label>
-                  <input class="ctl ltr" id="uMail" aria-describedby="e-uMail" type="text" inputmode="email" data-f>
+                  <input class="ctl ltr" id="uMail" aria-describedby="e-uMail" type="text" inputmode="email" autocomplete="off" data-f>
                   <span class="field__help">يُستخدم لتسجيل الدخول.</span>
                   <span class="field__err" id="e-uMail" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span></div>
               </div>

@@ -166,7 +166,7 @@
 
   --text-primary:var(--aun-ink);
   --text-secondary:var(--aun-slate);
-  --text-muted:var(--aun-gray);
+  --text-muted:var(--aun-slate);/* was --aun-gray #8B95A3: 3.03:1 on white, an AA failure at every text size below 24px. --aun-slate is 5.85:1 and is what the admin design system already uses for muted text; the gray stays for dots, borders and icons. */
   --text-on-primary:var(--aun-white);
   --text-on-inverse:rgba(255,255,255,.92);
   --text-on-inverse-muted:rgba(217,228,243,.80);
@@ -737,7 +737,9 @@ button{font-family:inherit;background:none;border:none;cursor:pointer}
    The bar is always in the DOM and only ever scales, so the active state
    can never shift the navigation layout. */
 @media(hover:hover){.site-nav__link:hover{color:var(--color-primary)}}
-.site-nav__link.is-active{color:var(--color-primary);font-weight:var(--fw-semibold)}
+/* navy, not blue: the blue measured 4.35:1 on the header ground, just
+   under AA. The blue underline below still carries the brand mark. */
+.site-nav__link.is-active{color:var(--color-secondary);font-weight:var(--fw-semibold)}
 .site-nav__link::after{content:"";position:absolute;inset-block-end:6px;inset-inline-start:50%;
   width:20px;height:2px;border-radius:var(--radius-pill);background:var(--color-primary);
   transform:translateX(50%) scaleX(0);opacity:0;

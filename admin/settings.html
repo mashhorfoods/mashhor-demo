@@ -130,7 +130,10 @@ a{color:var(--navy)}
 .side__name{font-weight:600;font-size:var(--fs-sec);line-height:1.25;white-space:nowrap;overflow:hidden}
 .side__name span{display:block;font-family:var(--f-ar-body);font-weight:400;font-size:var(--fs-caption);color:rgba(217,228,243,.8)}
 .side__grp{
-  font-size:var(--fs-caption);font-weight:600;color:rgba(217,228,243,.72);
+  /* .84 not .72 — at .72 this label measured 4.30:1 against the navy
+     rail, just under the 4.5 AA line for text this size. .84 is 5.22:1
+     and the same colour. */
+  font-size:var(--fs-caption);font-weight:600;color:rgba(217,228,243,.84);
   padding:var(--s4) var(--s3) var(--s2);white-space:nowrap
 }
 .navitem{
@@ -1151,7 +1154,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
                   </div>
                   <div class="field">
                     <label class="field__label" for="cName">اسم الشركة <span class="field__req">(مطلوب)</span></label>
-                    <input class="ctl" id="cName" aria-describedby="e-cName" type="text" data-f>
+                    <input class="ctl" id="cName" aria-describedby="e-cName" type="text" autocomplete="off" data-f>
                     <span class="field__err" id="e-cName" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                   </div>
                   <div class="field">
@@ -1187,17 +1190,17 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
                 <div class="pgrid pgrid--2">
                   <div class="field">
                     <label class="field__label" for="cPhone">رقم الهاتف <span class="field__req">(مطلوب)</span></label>
-                    <input class="ctl ltr" id="cPhone" aria-describedby="e-cPhone" type="text" inputmode="tel" data-f>
+                    <input class="ctl ltr" id="cPhone" aria-describedby="e-cPhone" type="text" inputmode="tel" autocomplete="off" data-f>
                     <span class="field__err" id="e-cPhone" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                   </div>
                   <div class="field">
                     <label class="field__label" for="cWa">رقم الواتساب <span class="field__req">(مطلوب)</span></label>
-                    <input class="ctl ltr" id="cWa" aria-describedby="e-cWa" type="text" inputmode="tel" data-f>
+                    <input class="ctl ltr" id="cWa" aria-describedby="e-cWa" type="text" inputmode="tel" autocomplete="off" data-f>
                     <span class="field__err" id="e-cWa" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                   </div>
                   <div class="field">
                     <label class="field__label" for="cEmail">البريد الإلكتروني</label>
-                    <input class="ctl ltr" id="cEmail" aria-describedby="e-cEmail" type="text" inputmode="email" data-f placeholder="لا يوجد بريد مسجّل">
+                    <input class="ctl ltr" id="cEmail" aria-describedby="e-cEmail" type="text" inputmode="email" autocomplete="off" data-f placeholder="لا يوجد بريد مسجّل">
                     <span class="field__help">لا يستخدم الموقع بريداً حالياً — يظهر للزائر فقط إذا أُضيف.</span>
                     <span class="field__err" id="e-cEmail" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                   </div>

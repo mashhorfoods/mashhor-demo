@@ -130,7 +130,10 @@ a{color:var(--navy)}
 .side__name{font-weight:600;font-size:var(--fs-sec);line-height:1.25;white-space:nowrap;overflow:hidden}
 .side__name span{display:block;font-family:var(--f-ar-body);font-weight:400;font-size:var(--fs-caption);color:rgba(217,228,243,.8)}
 .side__grp{
-  font-size:var(--fs-caption);font-weight:600;color:rgba(217,228,243,.72);
+  /* .84 not .72 — at .72 this label measured 4.30:1 against the navy
+     rail, just under the 4.5 AA line for text this size. .84 is 5.22:1
+     and the same colour. */
+  font-size:var(--fs-caption);font-weight:600;color:rgba(217,228,243,.84);
   padding:var(--s4) var(--s3) var(--s2);white-space:nowrap
 }
 .navitem{
@@ -1050,12 +1053,12 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
                 <div class="editgrid" style="grid-template-columns:minmax(0,1fr)">
                   <div class="field">
                     <label class="field__label" for="eName">الاسم <span class="field__req">(مطلوب)</span></label>
-                    <input class="ctl" id="eName" aria-describedby="errName" type="text">
+                    <input class="ctl" id="eName" aria-describedby="errName" type="text" autocomplete="off">
                     <span class="field__err" id="errName" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                   </div>
                   <div class="field">
                     <label class="field__label" for="ePhone">رقم الجوال <span class="field__req">(مطلوب)</span></label>
-                    <input class="ctl ltr" id="ePhone" aria-describedby="errPhone" type="text" inputmode="numeric">
+                    <input class="ctl ltr" id="ePhone" aria-describedby="errPhone" type="text" inputmode="numeric" autocomplete="off">
                     <span class="field__help">رقم الجوال هو هوية العميل — تغييره ينقل كل طلباته إلى الرقم الجديد.</span>
                     <span class="field__err" id="errPhone" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span>
                   </div>
