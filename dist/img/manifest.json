@@ -52,7 +52,13 @@
         "h": 877,
         "bytes": 75608
       }
-    ]
+    ],
+    "thumb": {
+      "file": "wheelchair-ramp-boarding-thumb.webp",
+      "w": 200,
+      "h": 171,
+      "bytes": 10094
+    }
   },
   "wheelchair-passenger-vehicle": {
     "source": "wheelchair-passenger-vehicle.webp",
@@ -83,7 +89,13 @@
         "h": 1402,
         "bytes": 101702
       }
-    ]
+    ],
+    "thumb": {
+      "file": "wheelchair-passenger-vehicle-thumb.webp",
+      "w": 200,
+      "h": 250,
+      "bytes": 7298
+    }
   },
   "equipped-vehicle-fleet": {
     "source": "equipped-vehicle-fleet.webp",
@@ -114,7 +126,13 @@
         "h": 621,
         "bytes": 87646
       }
-    ]
+    ],
+    "thumb": {
+      "file": "equipped-vehicle-fleet-thumb.webp",
+      "w": 200,
+      "h": 131,
+      "bytes": 6412
+    }
   },
   "wheelchair-transport": {
     "source": "wheelchair-transport.webp",
@@ -139,7 +157,13 @@
         "h": 707,
         "bytes": 101364
       }
-    ]
+    ],
+    "thumb": {
+      "file": "wheelchair-transport-thumb.webp",
+      "w": 200,
+      "h": 206,
+      "bytes": 10086
+    }
   },
   "power-wheelchair-transport": {
     "source": "power-wheelchair-transport.webp",
@@ -176,7 +200,13 @@
         "h": 1066,
         "bytes": 101182
       }
-    ]
+    ],
+    "thumb": {
+      "file": "power-wheelchair-transport-thumb.webp",
+      "w": 200,
+      "h": 155,
+      "bytes": 6528
+    }
   },
   "medical-bed-transport": {
     "source": "medical-bed-transport.webp",
@@ -213,7 +243,13 @@
         "h": 1021,
         "bytes": 162528
       }
-    ]
+    ],
+    "thumb": {
+      "file": "medical-bed-transport-thumb.webp",
+      "w": 200,
+      "h": 148,
+      "bytes": 7732
+    }
   },
   "driver-assistant-escort": {
     "source": "driver-assistant-escort.webp",
@@ -250,7 +286,13 @@
         "h": 949,
         "bytes": 87620
       }
-    ]
+    ],
+    "thumb": {
+      "file": "driver-assistant-escort-thumb.webp",
+      "w": 200,
+      "h": 171,
+      "bytes": 6114
+    }
   },
   "daily-transport-elderly": {
     "source": "daily-transport-elderly.webp",
@@ -287,7 +329,13 @@
         "h": 1034,
         "bytes": 115526
       }
-    ]
+    ],
+    "thumb": {
+      "file": "daily-transport-elderly-thumb.webp",
+      "w": 200,
+      "h": 150,
+      "bytes": 7506
+    }
   },
   "hospital-medical-centre": {
     "source": "hospital-medical-centre.webp",
@@ -324,7 +372,13 @@
         "h": 1034,
         "bytes": 207358
       }
-    ]
+    ],
+    "thumb": {
+      "file": "hospital-medical-centre-thumb.webp",
+      "w": 200,
+      "h": 150,
+      "bytes": 8572
+    }
   },
   "riyadh-social-mobility": {
     "source": "riyadh-social-mobility.webp",
@@ -355,6 +409,60 @@
         "h": 872,
         "bytes": 78800
       }
-    ]
+    ],
+    "thumb": {
+      "file": "riyadh-social-mobility-thumb.webp",
+      "w": 200,
+      "h": 170,
+      "bytes": 6384
+    }
+  },
+  "aun-aldrb-logo": {
+    "source": "aun-aldrb-logo.png",
+    "srcW": 5041,
+    "srcH": 3577,
+    "variants": [],
+    "thumb": {
+      "file": "aun-aldrb-logo-thumb.webp",
+      "w": 200,
+      "h": 142,
+      "bytes": 2706
+    }
+  },
+  "aun-aldrb-logo-white": {
+    "source": "aun-aldrb-logo-white.png",
+    "srcW": 5041,
+    "srcH": 3577,
+    "variants": [],
+    "thumb": {
+      "file": "aun-aldrb-logo-white-thumb.webp",
+      "w": 200,
+      "h": 142,
+      "bytes": 996
+    }
+  },
+  "logo": {
+    "source": "logo.png",
+    "srcW": 1000,
+    "srcH": 343,
+    "variants": [],
+    "thumb": {
+      "file": "logo-thumb.webp",
+      "w": 200,
+      "h": 69,
+      "bytes": 3186
+    }
+  },
+  "og-image": {
+    "source": "og-image.png",
+    "srcW": 1200,
+    "srcH": 630,
+    "variants": [],
+    "thumb": {
+      "file": "og-image-thumb.webp",
+      "w": 200,
+      "h": 105,
+      "bytes": 1610
+    }
   }
 }

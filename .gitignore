@@ -30,3 +30,4 @@ app/storage/backups/
 app/storage/recovery-attempts.json
 app/storage/.last-prune
 app/storage/logs/.last-sweep
+.build-stamp.json

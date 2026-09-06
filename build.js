@@ -315,6 +315,34 @@ function build() {
     console.log('  media library      : ' + paths.length + ' files the dashboard registers');
   }
 
+  /* THE DASHBOARD'S THUMBNAILS.
+     The rule above ships what index.html references, and index.html never
+     references a 200px thumbnail — it is for «الوسائط» and «الخدمات», which
+     choose it at runtime out of the manifest. Shipping only what the markup
+     names left those two pages with nothing smaller than the master to draw
+     a 202x152 tile with: 1.6MB of service photographs for seven rows, and a
+     5041x3577 logo for a tile. Read from the manifest for the same reason
+     the library is read from Setup.php — a picture added later ships without
+     anyone remembering this line exists. */
+  {
+    const man = JSON.parse(fs.readFileSync(path.join(ROOT, 'img', 'manifest.json'), 'utf8'));
+    let n = 0;
+    for (const key of Object.keys(man)) {
+      const t = man[key].thumb;
+      if (!t) continue;
+      /* the thumbnail lives beside its master, wherever that is */
+      const dir = man[key].source.startsWith('aun-aldrb-') || /^(logo|og-image)\./.test(man[key].source)
+        ? 'brand/' : 'img/';
+      const rel = dir + t.file;
+      if (!fs.existsSync(path.join(ROOT, rel))) {
+        throw new Error('the manifest names a thumbnail that is not on disk: ' + rel
+          + ' — run `node tools-images.js`');
+      }
+      note(rel); n++;
+    }
+    console.log('  dashboard thumbs   : ' + n + ' at 200px, for الوسائط and الخدمات');
+  }
+
   /* The admin pages serve their own typefaces now, and the faces they name
      have to reach the server with them. They are read the same way the public
      page's are — out of the @font-face rules — so a weight that stops being
@@ -484,4 +512,37 @@ function sealCsp() {
   console.log('  CSP                : ' + hashes.length + ' inline script hashes sealed into .htaccess');
 }
 
+/* --- the stamp the release gate reads ------------------------------------
+   "Is this package the current source?" cannot be answered from timestamps:
+   bin/verify.php publishes into index.html as part of its own test and puts
+   the content back, so the file's mtime moves on every run while its content
+   is unchanged. Content is what matters, so the build records what it read. */
+function writeStamp() {
+  const crypto = require('crypto');
+  const sources = {};
+  const add = (rel) => {
+    const abs = path.join(ROOT, rel);
+    if (!fs.existsSync(abs) || !fs.statSync(abs).isFile()) return;
+    sources[rel] = crypto.createHash('sha256')
+      .update(fs.readFileSync(abs)).digest('hex').slice(0, 16);
+  };
+  add('index.html'); add('build.js'); add('.htaccess');
+  for (const dir of ['admin', 'app', 'api', 'img', 'fonts', 'brand']) {
+    (function walk(d) {
+      const abs = path.join(ROOT, d);
+      if (!fs.existsSync(abs)) return;
+      for (const e of fs.readdirSync(abs, { withFileTypes: true })) {
+        const rel = path.join(d, e.name);
+        /* runtime state is not source */
+        if (rel.startsWith('app/storage')) continue;
+        e.isDirectory() ? walk(rel) : add(rel);
+      }
+    })(dir);
+  }
+  fs.writeFileSync(path.join(ROOT, '.build-stamp.json'),
+    JSON.stringify({ builtAt: new Date().toISOString(), sources }, null, 0));
+  console.log('  build stamp        : ' + Object.keys(sources).length + ' source files hashed');
+}
+
 build();
+writeStamp();

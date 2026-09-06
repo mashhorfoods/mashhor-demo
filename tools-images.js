@@ -72,6 +72,26 @@ const SLOTS = {
 const QUALITY = 80;
 const AVIF_QUALITY = 65;
 
+/* The dashboard's own thumbnail.
+   
+   The ladders above are sized for the public page, where the smallest rung is
+   360px because that is the narrowest a service card is ever painted. The
+   dashboard draws the same pictures far smaller — 202x152 in the media grid,
+   84x60 in a services row — and, having nothing smaller to reach for, it was
+   sending the master: 1602KB of service photographs to draw seven 84px rows,
+   and a 5041x3577 logo to draw a 202px tile. One rung at 200px, wide enough
+   for the grid at 1x and for the rows at 2x, is what both pages actually
+   need. It is listed separately from `variants` because the public page
+   chooses from that ladder by width and must never be handed a 200px file. */
+const THUMB_W = 200;
+
+/* The brand rasters the media library lists. They are masters kept so an
+   operator can download the logo at full size; they are not something to
+   draw a tile with. */
+const BRAND_THUMBS = ['aun-aldrb-logo.png', 'aun-aldrb-logo-white.png',
+                      'logo.png', 'og-image.png'];
+const BRAND = path.join(__dirname, 'brand');
+
 (async () => {
   const manifest = {};
   let before = 0, after = 0;
@@ -79,7 +99,10 @@ const AVIF_QUALITY = 65;
   /* start clean: a width that leaves a ladder must not linger in img/ and be
      picked up by the next build */
   for (const f of fs.readdirSync(SRC)) {
-    if (/-\d+\.(webp|avif)$/.test(f)) fs.unlinkSync(path.join(SRC, f));
+    if (/-\d+\.(webp|avif)$/.test(f) || /-thumb\.webp$/.test(f)) fs.unlinkSync(path.join(SRC, f));
+  }
+  for (const f of fs.readdirSync(BRAND)) {
+    if (/-thumb\.webp$/.test(f)) fs.unlinkSync(path.join(BRAND, f));
   }
 
   for (const [stem, spec] of Object.entries(SLOTS)) {
@@ -96,6 +119,18 @@ const AVIF_QUALITY = 65;
 
     manifest[stem] = { source: file, srcW: meta.width, srcH: meta.height, variants: [] };
     const line = [];
+
+    /* the dashboard's rung, written first so it is easy to see in the file */
+    {
+      const tw = Math.min(THUMB_W, meta.width);
+      const buf = await sharp(full).resize({ width: tw, withoutEnlargement: true })
+                        .webp({ quality: QUALITY, effort: 6 }).toBuffer();
+      const name = stem + '-thumb.webp';
+      fs.writeFileSync(path.join(SRC, name), buf);
+      after += buf.length;
+      manifest[stem].thumb = { file: name, w: tw,
+        h: Math.round(meta.height * (tw / meta.width)), bytes: buf.length };
+    }
     for (const w of widths) {
       const opts = { quality: QUALITY, effort: 6 };
       if (spec.alpha) opts.alphaQuality = 90;
@@ -122,6 +157,29 @@ const AVIF_QUALITY = 65;
       + String(meta.width + 'x' + meta.height).padEnd(11)
       + (srcBytes / 1024).toFixed(0).padStart(5) + 'KB  ->  ' + line.join(' , ')
       + (meta.width < Math.max.apply(null, spec.widths) ? '   << source caps at ' + meta.width + 'w' : ''));
+  }
+
+  /* and the same rung for the brand rasters, written next to their masters so
+     the dashboard's filename substitution finds them without knowing where
+     anything lives */
+  for (const file of BRAND_THUMBS) {
+    const full = path.join(BRAND, file);
+    if (!fs.existsSync(full)) { console.warn('  ! missing brand/' + file); continue; }
+    const meta = await sharp(full).metadata();
+    const tw = Math.min(THUMB_W, meta.width);
+    const buf = await sharp(full).resize({ width: tw, withoutEnlargement: true })
+                      .webp({ quality: QUALITY, effort: 6 }).toBuffer();
+    const stem = file.replace(/\.[a-z]+$/i, '');
+    const name = stem + '-thumb.webp';
+    fs.writeFileSync(path.join(BRAND, name), buf);
+    manifest[stem] = {
+      source: file, srcW: meta.width, srcH: meta.height, variants: [],
+      thumb: { file: name, w: tw, h: Math.round(meta.height * (tw / meta.width)), bytes: buf.length },
+    };
+    console.log(('  brand/' + stem).padEnd(30)
+      + String(meta.width + 'x' + meta.height).padEnd(11)
+      + (fs.statSync(full).size / 1024).toFixed(0).padStart(5) + 'KB  ->  thumb '
+      + (buf.length / 1024).toFixed(0) + 'KB');
   }
 
   fs.writeFileSync(path.join(SRC, 'manifest.json'), JSON.stringify(manifest, null, 2));

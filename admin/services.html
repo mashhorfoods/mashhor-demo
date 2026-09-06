@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Aoun Al-Darb Services Module</title>
 
+<!-- The faces the panel paints with, asked for before the parser reaches
+     the @font-face rules. Without this the page paints in the fallback
+     and reflows when the real face lands: on الإعدادات that moved every
+     field up 14px and put the page over the CLS threshold. -->
+<link rel="preload" as="font" type="font/woff2" href="/fonts/ibm-plex-sans-arabic-400-arabic.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/fonts/ibm-plex-sans-arabic-500-arabic.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/fonts/ibm-plex-sans-arabic-600-arabic.woff2" crossorigin>
+
 <style>
 /* الخطوط محلية — لا يُحمَّل أي منها من خادم خارجي. حتى هذه المرحلة كانت
    صفحات اللوحة تطلبها من fonts.googleapis.com، أي أن Google يعرف متى
@@ -1262,6 +1270,29 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
 
   var IMG = {};
 
+  /* النسخة المصغّرة نفسها التي تستعملها «الوسائط» — من المانيفست، بلا تخمين. */
+  var THUMBS = null;
+  function loadThumbs(){
+    return fetch("/img/manifest.json", { cache: "force-cache" })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(m){
+        THUMBS = {};
+        if (!m) return;
+        Object.keys(m).forEach(function(k){
+          var t = m[k].thumb;
+          if (t && /\.webp$/.test(t.file)) THUMBS[m[k].source] = t;
+        });
+      })
+      .catch(function(){ THUMBS = {}; });
+  }
+  function thumbSrc(img, path){
+    if (!path){ img.removeAttribute("src"); return; }
+    var name = String(path).split("/").pop();
+    var t = THUMBS && THUMBS[name];
+    img.src = t ? String(path).replace(name, t.file) : path;
+    if (t && t.w && t.h){ img.width = t.w; img.height = t.h; }
+  }
+
   /* ---------- the seven approved services -----------------------------
      Titles, descriptions and images are lifted verbatim from the built
      site's «خدماتنا» section. Nothing here was written for the dashboard,
@@ -1366,7 +1397,11 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
         '<span class="svc__a"></span>';
       r.querySelector(".svc__num").textContent = s.order;
       var img = r.querySelector(".svc__thumb");
-      img.src = s.img; img.alt = "صورة خدمة " + s.title;
+      /* 84x60 على الشاشة. كان هذا السطر يضع الأصل — 686x707 لواحدة، و1426x1103
+         لأخرى — فوزن الصفحة 1.6 ميجابايت لسبعة صفوف. */
+      thumbSrc(img, s.img);
+      img.alt = "صورة خدمة " + s.title;
+      img.loading = "lazy"; img.decoding = "async";
       r.querySelector(".svc__n").textContent = s.title;
       r.querySelector(".svc__d").textContent = s.desc;
       r.querySelector(".bslot").appendChild(visBadge(s.on));
@@ -1977,7 +2012,9 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
   function boot(){
     var box = $("results");
     if (box) box.setAttribute("data-state", "loading");
-    return reload().catch(function(err){
+    /* the manifest first, so the first paint already uses the small rung
+       rather than swapping the master out afterwards */
+    return (THUMBS ? Promise.resolve() : loadThumbs()).then(reload).catch(function(err){
       if (err.status === 401) return;      /* app.js is already redirecting */
       if (box) box.setAttribute("data-state", "error");
       toast(err.message || "تعذّر تحميل الخدمات", true);

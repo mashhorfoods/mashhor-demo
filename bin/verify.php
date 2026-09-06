@@ -2728,7 +2728,27 @@ if (is_dir($dist)) {
         str_contains($mediaPage, 'img/manifest.json')
         && !str_contains($mediaPage, '"-380"'));
     check('media', 'and uses the original when a file has no smaller version',
-        str_contains($mediaPage, 'img.src = small ? path.replace(name, small) : path;'));
+        str_contains($mediaPage, 'img.src = small ? path.replace(name, small.file) : path;'));
+    /* المرحلة 18 — the smallest rung of the public ladder is 360px, because
+       that is the narrowest a service card is ever painted there. This page
+       draws 202x152 tiles and «الخدمات» draws 84x60 rows, so both were
+       sending the master: 1.6MB of photographs for seven rows, and a
+       5041x3577 logo for one tile. The manifest carries a 200px rung for the
+       dashboard alone now, listed apart from `variants` so the public page
+       can never be handed it. */
+    check('media', 'and prefers the dashboard rung over the public ladder',
+        str_contains($mediaPage, 'var t = m[k].thumb;'));
+    check('media', 'and reserves the tile before the picture lands',
+        str_contains($mediaPage, 'img.width = small.w; img.height = small.h;'));
+    $svcPage = (string) @file_get_contents(AUN_ROOT . '/admin/services.html');
+    check('media', 'and الخدمات draws its rows from the same rung',
+        str_contains($svcPage, 'thumbSrc(img, s.img);')
+        && str_contains($svcPage, 'var t = m[k].thumb;'));
+    $manSrc = json_decode((string) @file_get_contents(AUN_ROOT . '/img/manifest.json'), true) ?: [];
+    $noThumb = [];
+    foreach ($manSrc as $k => $entry) if (empty($entry['thumb'])) $noThumb[] = $k;
+    check('media', 'and every picture in the manifest has one',
+        $noThumb === [], implode(', ', array_slice($noThumb, 0, 4)));
     check('media', 'the manifest of what exists is in the package',
         is_file($dist . '/img/manifest.json'));
     /* every variant the manifest names must actually be there, or the page

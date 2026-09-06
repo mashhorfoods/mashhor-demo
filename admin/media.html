@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Aoun Al-Darb Media Library</title>
 
+<!-- The faces the panel paints with, asked for before the parser reaches
+     the @font-face rules. Without this the page paints in the fallback
+     and reflows when the real face lands: on الإعدادات that moved every
+     field up 14px and put the page over the CLS threshold. -->
+<link rel="preload" as="font" type="font/woff2" href="/fonts/ibm-plex-sans-arabic-400-arabic.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/fonts/ibm-plex-sans-arabic-500-arabic.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/fonts/ibm-plex-sans-arabic-600-arabic.woff2" crossorigin>
+
 <style>
 /* الخطوط محلية — لا يُحمَّل أي منها من خادم خارجي. حتى هذه المرحلة كانت
    صفحات اللوحة تطلبها من fonts.googleapis.com، أي أن Google يعرف متى
@@ -1593,7 +1601,13 @@ window.AunShell = (function(){
      طلبات فاشلة لكل صورة في كل تحميل، وثلاثة أخرى لكل ملف مرفوع لا نسخ
      مصغّرة له أصلاً. خادم التطوير كان يردّ على الملف المفقود بالصفحة
      الرئيسية ورمز 200، فلم يظهر شيء من ذلك. */
-  var VARIANTS = null;                    /* اسم الأصل ← أصغر نسخة موجودة */
+  /* اسم الأصل ← النسخة المصغّرة المخصّصة للوحة، وأبعادها.
+     كانت هذه الخريطة تأخذ أصغر درجة من سلّم الموقع العام، وأصغرها 360 بكسل
+     لأن ذلك أضيق ما تُرسم به بطاقة خدمة هناك. أما هنا فالمربّع 202 بكسل،
+     وما ليس في السلّم أصلاً — شعارا العلامة 5041×3577 — كان يُحمَّل بحجمه
+     الكامل: 384 كيلوبايت لرسم مربّعين. صار في المانيفست درجة واحدة بعرض
+     200 بكسل لهذه الصفحة وحدها. */
+  var VARIANTS = null;
   function loadManifest(){
     return fetch("/img/manifest.json", { cache: "force-cache" })
       .then(function(r){ return r.ok ? r.json() : null; })
@@ -1601,19 +1615,30 @@ window.AunShell = (function(){
         VARIANTS = {};
         if (!m) return;
         Object.keys(m).forEach(function(k){
+          var t = m[k].thumb;
+          if (t && /\.webp$/.test(t.file)) { VARIANTS[m[k].source] = t; return; }
+          /* مانيفست قديم بلا درجة مصغّرة: أصغر ما فيه خير من الأصل */
           var vs = (m[k].variants || []).filter(function(v){ return /\.webp$/.test(v.file); });
           if (!vs.length) return;
           vs.sort(function(a, b){ return a.w - b.w; });
-          VARIANTS[m[k].source] = vs[0].file;
+          VARIANTS[m[k].source] = vs[0];
         });
       })
       .catch(function(){ VARIANTS = {}; });   /* بلا مانيفست: الأصل، بلا تجريب */
   }
 
-  function preferSmall(img, path){
+  /* الأبعاد تُكتب على الوسم لا في CSS وحدها: بدونها لا تحجز الصورة مكانها،
+     فتقفز الشبكة كلما وصل ملف. */
+  function preferSmall(img, path, asset){
     var name = String(path).split("/").pop();
     var small = VARIANTS && VARIANTS[name];
-    img.src = small ? path.replace(name, small) : path;
+    img.src = small ? path.replace(name, small.file) : path;
+    if (small && small.w && small.h){ img.width = small.w; img.height = small.h; }
+    else if (asset && asset.w && asset.h){
+      /* أيقونة صغيرة أصلاً لا نسخة مصغّرة لها — أبعادها معروفة من الجدول،
+         فتحجز مكانها بها بدل أن تُترك بلا مقاس فتقفز الشبكة عند وصولها. */
+      img.width = asset.w; img.height = asset.h;
+    }
   }
 
   function usageBadge(a){
@@ -1689,7 +1714,7 @@ window.AunShell = (function(){
         var src=thumb(a);
         if (src){
           var im=el("img"); im.alt=""; im.loading="lazy"; im.decoding="async";
-          if (THUMBS[a.p]) im.src=src; else preferSmall(im, src);
+          if (THUMBS[a.p]) im.src=src; else preferSmall(im, src, a);
           f.appendChild(im);
         } else f.appendChild(placeholder(a));
         var b=el("span","tile__b");
@@ -1708,7 +1733,7 @@ window.AunShell = (function(){
         var th=el("span","mrow__t");
         var s2=thumb(a);
         if (s2){ var i2=el("img"); i2.alt=""; i2.loading="lazy";
-          if (THUMBS[a.p]) i2.src=s2; else preferSmall(i2, s2);
+          if (THUMBS[a.p]) i2.src=s2; else preferSmall(i2, s2, a);
           th.appendChild(i2); }
         else th.innerHTML='<svg class="i i--sm" aria-hidden="true"><use href="#ic-image"/></svg>';
         var bb=el("span","mrow__b");

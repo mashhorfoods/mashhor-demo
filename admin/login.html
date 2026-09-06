@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Aoun Al-Darb Admin Sign-in</title>
 
+<!-- The faces the panel paints with, asked for before the parser reaches
+     the @font-face rules. Without this the page paints in the fallback
+     and reflows when the real face lands: on الإعدادات that moved every
+     field up 14px and put the page over the CLS threshold. -->
+<link rel="preload" as="font" type="font/woff2" href="/fonts/ibm-plex-sans-arabic-400-arabic.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/fonts/ibm-plex-sans-arabic-500-arabic.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/fonts/ibm-plex-sans-arabic-600-arabic.woff2" crossorigin>
+
 <style>
 /* الخطوط محلية — لا يُحمَّل أي منها من خادم خارجي. حتى هذه المرحلة كانت
    صفحات اللوحة تطلبها من fonts.googleapis.com، أي أن Google يعرف متى
