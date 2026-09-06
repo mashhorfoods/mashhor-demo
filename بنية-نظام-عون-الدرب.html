@@ -1,0 +1,360 @@
+<title>بنية نظام عون الدرب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+:root{
+  --navy:#2C4C82; --blue:#4975BA; --blue-deep:#22406F;
+  --sky:#D9E4F3; --mist:#EEF3FA;
+  --ink:#1E2733; --slate:#5A6675; --gray:#8B95A3;
+  --divider:#E4E9F0; --ground:#F6F8FB; --surface:#FFFFFF;
+
+  --yes:#256B55;  --yes-bg:#EAF5F0;  --yes-mark:#2E7D64;
+  --no:#47525F;   --no-bg:#EFF1F4;   --no-mark:#5A6675;
+  --care:#8F6014; --care-bg:#FBF3E4; --care-mark:#B0791C;
+
+  --f-head:"IBM Plex Sans Arabic",ui-sans-serif,system-ui,"Segoe UI","Noto Sans Arabic",sans-serif;
+  --f-body:"Cairo",ui-sans-serif,system-ui,"Segoe UI","Noto Sans Arabic",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --shadow:0 1px 2px rgba(29,39,51,.05),0 2px 8px rgba(29,39,51,.05);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --navy:#A9C4EA; --blue:#7BA1DC; --blue-deep:#C6D8F2;
+    --sky:#24334A; --mist:#1D2836;
+    --ink:#E7EDF5; --slate:#A3B0C1; --gray:#7A8797;
+    --divider:#2B3745; --ground:#131A23; --surface:#1A222D;
+    --yes:#8FD3B7;  --yes-bg:#152A23;  --yes-mark:#4FA383;
+    --no:#B3BDC9;   --no-bg:#232B35;   --no-mark:#7A8797;
+    --care:#E8C077; --care-bg:#2C2415; --care-mark:#D3A24C;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 2px 8px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --navy:#A9C4EA; --blue:#7BA1DC; --blue-deep:#C6D8F2;
+  --sky:#24334A; --mist:#1D2836;
+  --ink:#E7EDF5; --slate:#A3B0C1; --gray:#7A8797;
+  --divider:#2B3745; --ground:#131A23; --surface:#1A222D;
+  --yes:#8FD3B7;  --yes-bg:#152A23;  --yes-mark:#4FA383;
+  --no:#B3BDC9;   --no-bg:#232B35;   --no-mark:#7A8797;
+  --care:#E8C077; --care-bg:#2C2415; --care-mark:#D3A24C;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 2px 8px rgba(0,0,0,.3);
+}
+
+*{box-sizing:border-box}
+html{direction:rtl}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--f-body);font-size:16px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.page{max-width:53rem;margin:0 auto;padding:0 1.25rem 5rem}
+
+.mast{padding:3.5rem 0 1.75rem;border-bottom:2px solid var(--navy)}
+.mast__eyebrow{font-family:var(--f-head);font-weight:600;font-size:.75rem;
+  letter-spacing:.14em;color:var(--blue);margin:0 0 .75rem}
+.mast__t{font-family:var(--f-head);font-weight:700;font-size:2.125rem;line-height:1.35;
+  color:var(--navy);margin:0;text-wrap:balance}
+.mast__s{margin:.85rem 0 0;color:var(--slate);font-size:1.0625rem;max-width:42rem}
+.mast__m{display:flex;flex-wrap:wrap;gap:.4rem 1.75rem;margin:1.5rem 0 0;
+  font-family:var(--f-mono);font-size:.8125rem;color:var(--gray)}
+.mast__m b{color:var(--slate);font-weight:500}
+
+.sec{margin:3.25rem 0 0;scroll-margin-top:1.5rem}
+.sec__h{display:flex;gap:1rem;align-items:baseline;margin:0 0 .35rem}
+.sec__n{font-family:var(--f-mono);font-weight:500;font-size:.9375rem;color:var(--blue);
+  font-variant-numeric:tabular-nums;flex:0 0 auto;
+  border-inline-end:2px solid var(--sky);padding-inline-end:.85rem;
+  align-self:stretch;display:flex;align-items:center}
+.sec__t{font-family:var(--f-head);font-weight:600;font-size:1.375rem;color:var(--navy);
+  margin:0;text-wrap:balance}
+.sec__sub{margin:0 0 1.5rem;padding-inline-start:3.05rem;color:var(--gray);font-size:.875rem}
+.sec p{margin:0 0 1rem}
+
+h3{font-family:var(--f-head);font-weight:600;font-size:1.0625rem;color:var(--ink);
+  margin:2rem 0 .85rem}
+
+.note{border-inline-start:3px solid var(--mark);background:var(--bg);
+  border-radius:0 8px 8px 0;padding:.9rem 1.15rem;margin:0 0 1.25rem;
+  font-size:.9375rem;line-height:1.75}
+.note.care{--mark:var(--care-mark);--bg:var(--care-bg);color:var(--care)}
+.note.plain{--mark:var(--blue);--bg:var(--mist);color:var(--ink)}
+.note__t{display:block;font-family:var(--f-head);font-weight:600;font-size:.75rem;
+  letter-spacing:.06em;margin:0 0 .35rem;opacity:.9}
+
+.tw{overflow-x:auto;margin:0 0 1.25rem;border:1px solid var(--divider);
+  border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.9375rem;min-width:30rem}
+th,td{text-align:start;padding:.65rem .9rem;border-bottom:1px solid var(--divider);vertical-align:top}
+thead th{font-family:var(--f-head);font-weight:600;font-size:.8125rem;color:var(--slate);
+  background:var(--mist);white-space:nowrap}
+tbody tr:last-child :is(td,th){border-bottom:0}
+td.who{white-space:nowrap;font-weight:500}
+td.n,th.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:start}
+
+.pill{display:inline-block;border-radius:999px;padding:.1rem .55rem;font-size:.8125rem;
+  font-weight:600;font-family:var(--f-head);white-space:nowrap}
+.pill.y{background:var(--yes-bg);color:var(--yes)}
+.pill.n{background:var(--no-bg);color:var(--no)}
+
+code{font-family:var(--f-mono);font-size:.8125rem;background:var(--mist);color:var(--navy);
+  border-radius:4px;padding:.1rem .35rem;direction:ltr;display:inline-block;unicode-bidi:isolate}
+ul.plain{margin:0 0 1.25rem;padding:0 1.1rem 0 0;display:grid;gap:.5rem}
+ul.plain li::marker{color:var(--blue)}
+
+.foot{margin:3.5rem 0 0;padding:1.5rem 0 0;border-top:1px solid var(--divider);
+  color:var(--gray);font-size:.8125rem;font-family:var(--f-mono);line-height:2}
+
+@media (max-width:36rem){
+  .mast__t{font-size:1.75rem}
+  .sec__h{gap:.7rem}
+  .sec__sub{padding-inline-start:0}
+}
+@media print{
+  body{background:#fff;font-size:11pt}
+  .sec,.tw,.note{break-inside:avoid}
+  a{color:inherit;text-decoration:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="page">
+
+<header class="mast">
+  <p class="mast__eyebrow">المرحلتان 05 و 06 · مرجع تقني</p>
+  <h1 class="mast__t">بنية نظام عون الدرب</h1>
+  <p class="mast__s">ما الذي يتكوّن منه الموقع ولوحة التحكم: أقسام الصفحة، وما يُدار
+     منها وما لا يُدار، وجداول البيانات، والمسارات، والصلاحيات. كل رقم هنا مقروء من
+     النظام الحيّ، لا من تصوّر عنه.</p>
+  <p class="mast__m">
+    <span><b>الموقع:</b> <code>aunaldrb.com</code></span>
+    <span><b>المنصة:</b> <code>PHP 8 · MySQL</code></span>
+    <span><b>الحزمة:</b> <code>152 ملفاً · 7.5MB</code></span>
+    <span><b>التاريخ:</b> سبتمبر 2026</span>
+  </p>
+</header>
+
+<!-- ============ 05 ============ -->
+<section class="sec" id="p5">
+  <div class="sec__h"><span class="sec__n">05</span><h2 class="sec__t">المحتوى وهندسة المعلومات</h2></div>
+  <p class="sec__sub">البنية قبل الشكل</p>
+
+  <h3>خريطة الموقع</h3>
+  <p>صفحة واحدة، ثمانية أقسام بترتيبها على الشاشة. لا صفحات داخلية — وهذا قرار
+     تصميمي قائم، لا نقص:</p>
+  <div class="tw">
+    <table>
+      <thead><tr><th>القسم</th><th>المعرّف</th><th>ما فيه</th><th>يُدار من</th></tr></thead>
+      <tbody>
+        <tr><td class="who">الواجهة</td><td class="n">home</td>
+            <td>العنوان، الوعد، الجمهور، دلائل الثقة</td><td>المحتوى</td></tr>
+        <tr><td class="who">من نحن</td><td class="n">about</td>
+            <td>التعريف وثلاث فقرات</td><td>المحتوى</td></tr>
+        <tr><td class="who">ما يميزنا</td><td class="n">why-us</td>
+            <td>ستّ مزايا</td><td>المحتوى</td></tr>
+        <tr><td class="who">خدماتنا</td><td class="n">services</td>
+            <td>سبع خدمات بصورها وأيقوناتها</td><td>الخدمات</td></tr>
+        <tr><td class="who">كيف نعمل</td><td class="n">how-we-work</td>
+            <td>ثلاث مراحل</td><td>المحتوى</td></tr>
+        <tr><td class="who">رؤيتنا ورسالتنا</td><td class="n">vision-mission</td>
+            <td>الرؤية والرسالة</td><td>المحتوى</td></tr>
+        <tr><td class="who">قيمنا</td><td class="n">values</td>
+            <td>ستّ قيم</td><td>المحتوى</td></tr>
+        <tr><td class="who">تواصل معنا</td><td class="n">contact</td>
+            <td>الهاتف، الواتساب، العنوان، ساعات العمل</td><td>الإعدادات</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>جرد المحتوى</h3>
+  <p>كل ما على الصفحة العامة قابل للتحرير، ومصدره واحد من أربعة:</p>
+  <div class="tw">
+    <table>
+      <thead><tr><th>النوع</th><th class="n">العدد</th><th>ما هو</th><th>الصفحة</th></tr></thead>
+      <tbody>
+        <tr><td class="who">كتل نصية</td><td class="n">40</td>
+            <td>عنوان أو فقرة مفردة — <code>about.lead</code> مثلاً</td><td>المحتوى</td></tr>
+        <tr><td class="who">عناصر متكررة</td><td class="n">28</td>
+            <td>قوائم: المزايا 6 · القيم 6 · مراحل العمل 3 · الجمهور 3 · دلائل الثقة 3 · الخدمات 7</td>
+            <td>المحتوى · الخدمات</td></tr>
+        <tr><td class="who">خدمات</td><td class="n">7</td>
+            <td>عنوان ووصف وصورة وأيقونة وترتيب وظهور</td><td>الخدمات</td></tr>
+        <tr><td class="who">إعدادات</td><td class="n">15</td>
+            <td>الشركة 2 · التواصل 4 · الموقع 2 · الإشعارات 4 · النظام 3</td><td>الإعدادات</td></tr>
+        <tr><td class="who">صور</td><td class="n">18</td>
+            <td>مكتبة الوسائط، بمقاساتها ومَن يستخدمها</td><td>الوسائط والأصول</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>مجموع المناطق القابلة للنشر في الصفحة: <b>46 منطقة</b> موسومة في ملف الصفحة نفسه،
+     وهي ما يُستبدل عند «نشر على الموقع».</p>
+
+  <div class="note care">
+    <span class="note__t">ما لا يُدار من اللوحة — وهذا مقصود</span>
+    ترتيب الأقسام على الصفحة · التصميم والألوان والخطوط · أيقونات الخدمات ·
+    عدد القيم والمزايا · نصوص أزرار الموقع. تغييرُ أيٍّ منها عملٌ برمجي، لأن جعلها
+    قابلة للتحرير يحوّل اللوحة إلى أداة بناء صفحات — وهو خارج نطاق هذا المشروع
+    صراحةً.
+  </div>
+
+  <h3>مسار الطلب</h3>
+  <p>مساران يلتقيان في سجلٍّ واحد:</p>
+  <div class="tw">
+    <table>
+      <thead><tr><th>المسار</th><th>يبدأ من</th><th>ينتهي إلى</th></tr></thead>
+      <tbody>
+        <tr><td class="who">الموقع</td>
+            <td>نموذج الطلب في الصفحة العامة</td>
+            <td rowspan="2">جدول <code>requests</code> بحالة «جديد» ← الحالات الخمس ← الاكتمال</td></tr>
+        <tr><td class="who">واتساب أو هاتف</td>
+            <td>الطلبات ← «تسجيل طلب» في اللوحة</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>العميل يُنشأ أو يُطابَق برقم الجوال تلقائياً، والحيّ يُقرأ من «مكان الانطلاق»
+     ليغذّي تقرير التغطية.</p>
+</section>
+
+<!-- ============ 06 ============ -->
+<section class="sec" id="p6">
+  <div class="sec__h"><span class="sec__n">06</span><h2 class="sec__t">المعمارية التقنية والبيانات</h2></div>
+  <p class="sec__sub">ما يجب أن يدعمه النظام</p>
+
+  <h3>جداول البيانات — عشرون جدولاً</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>المجموعة</th><th>الجداول</th><th>الغرض</th></tr></thead>
+      <tbody>
+        <tr><td class="who">العمل</td>
+            <td><code>requests</code> · <code>customers</code> · <code>request_notes</code>
+                · <code>request_status_history</code> · <code>request_submissions</code></td>
+            <td>الطلبات والمستفيدون، وسجل كل تغيير حالة باسم فاعله</td></tr>
+        <tr><td class="who">المحتوى</td>
+            <td><code>content_blocks</code> · <code>content_items</code> · <code>services</code>
+                · <code>media_assets</code> · <code>settings</code></td>
+            <td>كل ما يظهر على الموقع، وهو مصدر الحقيقة لا الملف</td></tr>
+        <tr><td class="who">النشر</td>
+            <td><code>content_publishes</code></td>
+            <td>سجل كل عملية نشر: مَن ومتى وأي مناطق</td></tr>
+        <tr><td class="who">الحسابات</td>
+            <td><code>users</code> · <code>sessions</code> · <code>guest_sessions</code></td>
+            <td>الحسابات بأدوارها، والجلسات في قاعدة البيانات لا في ملفات</td></tr>
+        <tr><td class="who">المتابعة</td>
+            <td><code>activity_log</code> · <code>notifications</code> · <code>notification_reads</code></td>
+            <td>سجل النشاط والتنبيهات، وكلاهما يُقلَّم دورياً</td></tr>
+        <tr><td class="who">النظام</td>
+            <td><code>migrations</code> · <code>id_sequences</code> · <code>rate_hits</code></td>
+            <td>ترقية المخطط، وأرقام الطلبات، وكبح المحاولات</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>واجهة البرمجة — 42 مساراً</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>الفئة</th><th class="n">العدد</th><th>الحماية</th></tr></thead>
+      <tbody>
+        <tr><td class="who">عامة</td><td class="n">4</td>
+            <td>الصحة، رمز الحماية، إرسال طلب، — مع كبح للمحاولات وفخّ للروبوتات</td></tr>
+        <tr><td class="who">جلسة</td><td class="n">3</td>
+            <td>الدخول والخروج ومعلومات الحساب</td></tr>
+        <tr><td class="who">بصلاحية وحدة</td><td class="n">35</td>
+            <td>كلٌّ منها مقيَّد بوحدة وقدرة، والتحقق في الموزِّع قبل تنفيذ المعالج</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note plain">
+    <span class="note__t">لماذا في الموزِّع لا في المعالج</span>
+    المسار يعلن وحدته وقدرته في الجدول، والموزِّع يتحقق قبل أن يُنادي المعالج. فالمعالج
+    لا يستطيع أن ينسى تحققاً لم يُطلب منه إجراؤه أصلاً.
+  </div>
+
+  <h3>الأدوار الثلاثة × الوحدات الثماني</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>الوحدة</th><th>مدير النظام</th><th>مدير</th><th>مدير المحتوى</th></tr></thead>
+      <tbody>
+        <tr><td class="who">الرئيسية</td><td><span class="pill y">قراءة</span></td><td><span class="pill y">قراءة</span></td><td><span class="pill y">قراءة</span></td></tr>
+        <tr><td class="who">طلبات النقل</td><td><span class="pill y">تحرير</span></td><td><span class="pill y">تحرير</span></td><td><span class="pill n">لا</span></td></tr>
+        <tr><td class="who">العملاء</td><td><span class="pill y">تحرير</span></td><td><span class="pill y">تحرير</span></td><td><span class="pill n">لا</span></td></tr>
+        <tr><td class="who">الخدمات</td><td><span class="pill y">تحرير</span></td><td><span class="pill y">تحرير</span></td><td><span class="pill y">تحرير</span></td></tr>
+        <tr><td class="who">المحتوى</td><td><span class="pill y">تحرير</span></td><td><span class="pill y">تحرير</span></td><td><span class="pill y">تحرير</span></td></tr>
+        <tr><td class="who">التقارير</td><td><span class="pill y">قراءة</span></td><td><span class="pill y">قراءة</span></td><td><span class="pill n">لا</span></td></tr>
+        <tr><td class="who">المستخدمون</td><td><span class="pill y">تحرير</span></td><td><span class="pill n">لا</span></td><td><span class="pill n">لا</span></td></tr>
+        <tr><td class="who">الإعدادات</td><td><span class="pill y">تحرير</span></td><td><span class="pill n">لا</span></td><td><span class="pill n">لا</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>صلاحيات <b>مدير</b> وحده قابلة للتضييق يدوياً. الدوران الآخران ثابتان في الكود،
+     ومصفوفتهما المخزَّنة تُتجاهَل عمداً — وإلا صار تعديل صفٍّ في قاعدة البيانات طريقاً
+     لرفع الصلاحية.</p>
+
+  <h3>الأمن — ما هو قائم</h3>
+  <ul class="plain">
+    <li><b>كلمات المرور:</b> Argon2id، بحد أدنى 12 حرفاً، ولا تُعرض ولا تُسجَّل أبداً.</li>
+    <li><b>الجلسات:</b> صفوف في قاعدة البيانات، والرمز مخزَّن مُجزَّأً (SHA-256) لا كما هو.</li>
+    <li><b>CSRF:</b> رمز مزدوج على كل عملية تُغيّر شيئاً، بمقارنة ثابتة الزمن.</li>
+    <li><b>التفويض:</b> في الموزِّع، على الخادم. إخفاء زر في الواجهة مجاملة لا حماية.</li>
+    <li><b>الترويسات:</b> CSP بتجزئات مختومة عند البناء، وHSTS، وحظر الإطارات والاستنشاق.</li>
+    <li><b>الكبح:</b> على الدخول وإرسال الطلبات وتنزيل النسخ الاحتياطية.</li>
+    <li><b>السجلات:</b> تُدوَّر بحجم، ولا تحمل كلمة مرور ولا رمز جلسة.</li>
+    <li><b>الاسترجاع:</b> أداة منفصلة برمز لا يقل عن 24 حرفاً، تردّ 404 بلا رمز صحيح.</li>
+  </ul>
+
+  <h3>ما يحرس هذا كله</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>البوابة</th><th class="n">الفحوص</th><th>ما تختبره</th></tr></thead>
+      <tbody>
+        <tr><td class="who"><code>bin/verify.php</code></td><td class="n">948</td>
+            <td>الواجهة والتفويض والمحتوى والنشر والنسخ والأمن، على SQLite وMySQL</td></tr>
+        <tr><td class="who"><code>bin/qa-browser.js</code></td><td class="n">432</td>
+            <td>متصفح حقيقي على أربعة عروض: التخطيط، الوصولية، الأخطاء</td></tr>
+        <tr><td class="who"><code>bin/qa-controls.js</code></td><td class="n">336</td>
+            <td>كل زر ورابط: هل يفعل شيئاً فعلاً — بالنقر لا بقراءة الكود</td></tr>
+        <tr><td class="who"><code>bin/qa-migrate.php</code></td><td class="n">24</td>
+            <td>ترقية تثبيت قديم بمحتوى حقيقي، ومقارنة 163 عموداً بعدها</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ ما لم يُنتَج ============ -->
+<section class="sec" id="skipped">
+  <div class="sec__h"><span class="sec__n">07 · 08 · 12</span><h2 class="sec__t">ما لم أُنتجه، ولماذا</h2></div>
+  <p class="sec__sub">صراحةً، لا صمتاً</p>
+  <p>ثلاث مراحل في الإطار بقيت بلا مخرَج ورقي. تركُها دون تفسير يجعل الإطار يبدو
+     مكتملاً وهو ليس كذلك:</p>
+  <div class="tw">
+    <table>
+      <thead><tr><th>المرحلة</th><th>الحال</th><th>القرار</th></tr></thead>
+      <tbody>
+        <tr><td class="who">07 · المخططات السلكية</td>
+            <td>نُفِّذت ضمنياً — التخطيط قائم ومنشور</td>
+            <td>رسمها الآن لصفحة مُطلقة توثيقٌ لما هو ظاهر على الشاشة. لا قيمة فيه
+                إلا لمشروع قادم — وحينها تُرسم قبل البناء لا بعده.</td></tr>
+        <tr><td class="who">08 · الموجّه الرئيسي</td>
+            <td>موجود ضمنياً في نظام التصميم: الرموز والألوان والمقاسات والمكوّنات</td>
+            <td>يستحق الكتابة إن أردت مشروعاً ثانياً بنفس الهوية. قل لي وأكتبه.</td></tr>
+        <tr><td class="who">12 · النموذج والتحقق</td>
+            <td>لم تُجرَ مراجعة قابلية استخدام مع مستخدم حقيقي</td>
+            <td><b>هذه وحدها ما زالت ناقصة فعلاً.</b> ولا أستطيع سدّها: تحتاج شخصاً
+                حقيقياً أمام الشاشة. عيبان من عيوب هذا المشروع — نافذة خرجت أزرارها
+                عن الشاشة، وقائمة بلا كلمات — كانا سيظهران في جلسة واحدة مع مشغّل.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note care">
+    <span class="note__t">التوصية الوحيدة هنا</span>
+    اجلس نصف ساعة مع الموظفة التي ستشغّل اللوحة، على جهازها، واطلب منها أن تُنجز
+    خمس مهام دون مساعدة: تسجّل طلباً واتساب، وتغيّر حالته، وتعدّل نصاً وتنشره،
+    وترفع صورة، وتقرأ تقرير التغطية. <b>لا تشرح لها ولا تصحّح.</b> ما تتعثّر فيه هو
+    قائمة عملي التالية.
+  </div>
+</section>
+
+<footer class="foot">
+  المرحلتان 05 و06 · وكالة عون الدرب للنقل المتخصص · الرياض<br>
+  كل رقم في هذه الوثيقة مقروء من النظام الحيّ في سبتمبر 2026<br>
+  وثائق هذا المشروع: دليل المشغّل · خريطة عون الدرب التجارية · بنية النظام
+</footer>
+
+</div>
