@@ -15,8 +15,16 @@
   # /admin/ with no page named
   RewriteRule ^$ guard.php?page=dashboard.html [QSA,L]
 
-  # every .html page goes through the guard
-  RewriteRule ^([a-z0-9][a-z0-9-]*\.html)$ guard.php?page=$1 [QSA,L]
+  # The clean address is the canonical one. A request that still names the file
+  # is answered with a permanent redirect so a bookmark keeps working and only
+  # one address is ever indexed or shared. THE_REQUEST is the original request
+  # line, so the internal rewrite below cannot re-trigger this and loop.
+  RewriteCond %{THE_REQUEST} \s/+admin/([a-z0-9][a-z0-9-]*)\.html[\s?] [NC]
+  RewriteRule ^ /admin/%1 [R=301,L]
+
+  # every page goes through the guard, named cleanly or not
+  RewriteRule ^([a-z0-9][a-z0-9-]*)\.html$ guard.php?page=$1.html [QSA,L]
+  RewriteRule ^([a-z0-9][a-z0-9-]*)$      guard.php?page=$1.html [QSA,L]
 </IfModule>
 
 # If mod_rewrite is unavailable the pages would be served raw, which is worse

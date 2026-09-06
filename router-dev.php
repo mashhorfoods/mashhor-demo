@@ -35,8 +35,17 @@ if ($path === '/admin' || $path === '/admin/') {
     require __DIR__ . '/admin/guard.php';
     return true;
 }
-if (preg_match('#^/admin/([a-z0-9][a-z0-9-]*\.html)$#', $path, $m)) {
-    $_GET['page'] = $m[1];
+/* The address is clean in production — /admin/requests — and a request that
+   still names the file is redirected there permanently. Both are reproduced
+   here so the local server behaves like the host and the gates test what
+   actually ships. */
+if (preg_match('#^/admin/([a-z0-9][a-z0-9-]*)\.html$#', $path, $m)) {
+    $qs = (string) (parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_QUERY) ?? '');
+    header('Location: /admin/' . $m[1] . ($qs !== '' ? '?' . $qs : ''), true, 301);
+    return true;
+}
+if (preg_match('#^/admin/([a-z0-9][a-z0-9-]*)$#', $path, $m)) {
+    $_GET['page'] = $m[1] . '.html';
     require __DIR__ . '/admin/guard.php';
     return true;
 }

@@ -53,6 +53,8 @@ if (Env::isProduction() && !flag('allow-writes')) {
 final class Client
 {
     public array $cookies = [];
+    /** Redirects are followed by default; a check about a redirect must see it. */
+    public bool $follow = true;
     public function __construct(private string $base) {}
 
     public function request(string $method, string $path, $body = null, array $headers = []): array
@@ -66,10 +68,12 @@ final class Client
             $h[] = 'Cookie: ' . implode('; ', $pairs);
         }
         $opts = ['http' => [
-            'method'        => $method,
-            'header'        => $h,
-            'ignore_errors' => true,
-            'timeout'       => 15,
+            'method'         => $method,
+            'header'         => $h,
+            'ignore_errors'  => true,
+            'timeout'        => 15,
+            'follow_location' => $this->follow ? 1 : 0,
+            'max_redirects'  => $this->follow ? 20 : 1,
         ]];
         if ($body !== null) {
             if (is_array($body)) {
@@ -3143,7 +3147,7 @@ check('intake', 'the «تسجيل طلب» button is wired to something',
     str_contains($reqSrc, 'id="newreq"') && str_contains($reqSrc, 'AunAPI.recordRequest'));
 check('intake', 'and the dashboard sends you here rather than carrying a second form',
     substr_count((string) @file_get_contents(AUN_ROOT . '/admin/dashboard.html'),
-        'requests.html?new=1') === 3);
+        'requests?new=1') === 3);
 check('intake', 'the form tells the operator the district is what the report reads',
     str_contains($reqSrc, 'منه يُقرأ تقرير التغطية'));
 
@@ -3277,6 +3281,90 @@ $covFiltered = $covC->get('/api/admin/reports?report=coverage&period=year&status
 check('coverage', 'a status filter cannot narrow it into saying something else',
     ($covFiltered['body']['filters']['status'] ?? 'x') === '',
     (string) ($covFiltered['body']['filters']['status'] ?? '—'));
+
+/* ================================================================== */
+section('عناوين نظيفة — /admin/login لا /admin/login.html');
+/* ================================================================== */
+/* The address an operator types, bookmarks and pastes into a message should
+   not carry the name of a file on a disk. The file is unchanged; only the
+   address is — and the old one still resolves, permanently redirected, so no
+   bookmark breaks. */
+
+$urlC = new Client($BASE);
+$urlC->follow = false;   /* these checks are about the redirects themselves */
+
+/* the old address is answered once, permanently, and points at the clean one */
+$old = $urlC->get('/admin/login.html');
+check('urls', 'a page named with .html is redirected, permanently',
+    $old['status'] === 301, "status={$old['status']}");
+check('urls', 'and it points at the same page without the extension',
+    str_ends_with((string) ($old['headers']['location'] ?? ''), '/admin/login'),
+    (string) ($old['headers']['location'] ?? '—'));
+
+/* the query survives the redirect — a link with ?new=1 must still open the form */
+$q = $urlC->get('/admin/requests.html?new=1');
+check('urls', 'and a query string survives it',
+    str_contains((string) ($q['headers']['location'] ?? ''), '?new=1'),
+    (string) ($q['headers']['location'] ?? '—'));
+
+/* the clean address serves the page */
+$clean = $urlC->get('/admin/login');
+check('urls', 'the clean address serves the page itself',
+    $clean['status'] === 200 && stripos($clean['raw'], '<!doctype html>') !== false,
+    "status={$clean['status']}");
+
+/* and the guard still guards it — a clean address is not an unguarded one */
+$guarded = $urlC->get('/admin/settings');
+check('urls', 'a protected page is still protected at its clean address',
+    $guarded['status'] === 302, "status={$guarded['status']}");
+check('urls', 'and it sends the operator to the clean login, remembering where they were',
+    ($guarded['headers']['location'] ?? '') === '/admin/login?next=settings',
+    (string) ($guarded['headers']['location'] ?? '—'));
+
+check('urls', 'a page that does not exist is still 404, not a redirect loop',
+    $urlC->get('/admin/nope')['status'] === 404);
+
+/* no page still links to a file */
+$linked = [];
+foreach ($adminHtml as $f) {
+    $t = (string) @file_get_contents($f);
+    if (preg_match_all('/href="([a-z0-9][a-z0-9-]*)\.html([^"]*)"/', $t, $m)) {
+        foreach ($m[1] as $name) $linked[] = basename($f) . ' → ' . $name . '.html';
+    }
+}
+check('urls', 'no admin page links to a .html address any more',
+    $linked === [], implode(' | ', array_slice($linked, 0, 3)));
+
+/* nor does the shared script */
+$js = (string) @file_get_contents(AUN_ROOT . '/admin/app.js');
+check('urls', 'and neither does the shared script',
+    !preg_match('/["\'](?:login|dashboard|requests|content)\.html/', $js));
+
+/* the Google verification file is fetched at its literal address — a blanket
+   .html redirect at the root would have broken Search Console, so the rule is
+   scoped to /admin/ and this proves it stayed there */
+$g = glob(AUN_ROOT . '/google*.html');
+if ($g !== []) {
+    $name = basename($g[0]);
+    $ver = $urlC->get('/' . $name);
+    check('urls', 'the Google verification file is still served at its own address',
+        $ver['status'] === 200, "{$name} status={$ver['status']}");
+}
+
+/* the rules that make it work actually ship */
+$adminHt = (string) @file_get_contents(AUN_ROOT . '/admin/.htaccess');
+check('urls', 'the redirect is written against THE_REQUEST, so it cannot loop',
+    str_contains($adminHt, '%{THE_REQUEST}') && str_contains($adminHt, '[R=301,L]'));
+check('urls', 'and a clean address is routed through the guard, not served raw',
+    str_contains($adminHt, 'guard.php?page=$1.html'));
+check('urls', 'the dev router reproduces both, so the gates test what ships',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/router-dev.php'), '301')
+    && str_contains((string) @file_get_contents(AUN_ROOT . '/router-dev.php'), "'.html'"));
+
+/* the picker's return address is a page name or nothing — it is navigated to */
+check('urls', 'the media picker refuses a return address that is not a page here',
+    str_contains((string) @file_get_contents(AUN_ROOT . '/admin/media.html'),
+        'if (!/^[a-z0-9][a-z0-9-]*$/.test(back)) back = "services";'));
 
 /* ================================================================== */
 foreach ($lines as $l) fwrite(STDOUT, $l . "\n");

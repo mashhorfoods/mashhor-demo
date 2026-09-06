@@ -217,7 +217,7 @@ async function main() {
   /* ---- sign in ---------------------------------------------------- */
   await send('Emulation.setDeviceMetricsOverride',
     { width: 1440, height: 950, deviceScaleFactor: 1, mobile: false });
-  await goto(`${BASE}/admin/login.html`);
+  await goto(`${BASE}/admin/login`);
   const login = await send('Runtime.evaluate', {
     expression: `(async () => {
       const t = await fetch('${BASE}/api/csrf', {credentials:'same-origin'}).then(r=>r.json());
@@ -235,7 +235,9 @@ async function main() {
   const pages = fs.readdirSync(path.join(__dirname, '..', 'admin'))
     .filter((f) => f.endsWith('.html') && !/^(stage-\d|recovery-\d)/.test(f))
     .sort()
-    .map((f) => '/admin/' + f)
+    /* the file identifies what is on disk; the address the sweep visits is the
+       clean one an operator actually types */
+    .map((f) => '/admin/' + f.replace(/\.html$/, ''))
     .concat(['/']);
 
   /* Controls the page hides are still controls, and a dead one there is just
@@ -265,7 +267,7 @@ async function main() {
 
   let totalControls = 0;
   for (const rel of pages) {
-    const file = rel === '/' ? 'index.html' : path.basename(rel);
+    const file = rel === '/' ? 'index.html' : path.basename(rel) + '.html';
     section(`CONTROLS · ${file}`);
     await goto(BASE + rel);
 

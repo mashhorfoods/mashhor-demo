@@ -225,8 +225,9 @@ body{display:block;background:var(--soft)}
   /* Only a bare page name is ever followed after login — an open redirect is
      one of the cheapest ways to turn a login page into a phishing hop. */
   function nextPage(){
-    var n = params.get("next") || "dashboard.html";
-    return /^[a-z0-9][a-z0-9-]*\.html$/.test(n) ? n : "dashboard.html";
+    var n = params.get("next") || "dashboard";
+    n = n.replace(/\.html$/, "");          /* an old bookmark may still carry it */
+    return /^[a-z0-9][a-z0-9-]*$/.test(n) ? n : "dashboard";
   }
 
   function clearErrors(){

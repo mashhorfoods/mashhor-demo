@@ -42,8 +42,9 @@
   function toLogin() {
     if (redirecting) return;
     redirecting = true;
-    var here = (location.pathname.split("/").pop() || "dashboard.html");
-    location.href = "login.html?next=" + encodeURIComponent(here) + "&reason=session";
+    /* the address is clean now, so the page name carries no extension */
+    var here = (location.pathname.split("/").pop() || "dashboard").replace(/\.html$/, "");
+    location.href = "login?next=" + encodeURIComponent(here) + "&reason=session";
   }
 
   /**
@@ -156,7 +157,7 @@
     refreshPending: function () { return refreshPending(); },
     can: function (m, a) { return can(m, a); },
     logout: function () {
-      return post("/auth/logout", {}).then(function () { location.href = "login.html"; });
+      return post("/auth/logout", {}).then(function () { location.href = "login"; });
     },
 
     summary:       function ()      { return get("/admin/summary"); },
@@ -260,7 +261,7 @@
         closeMenus();
         var what = b.getAttribute("data-acct");
         if (what === "logout") {
-          AunAPI.logout().catch(function () { location.href = "login.html"; });
+          AunAPI.logout().catch(function () { location.href = "login"; });
         } else if (what === "info") {
           openAccountInfo();
         } else if (what === "password") {
@@ -620,7 +621,7 @@
         rows.slice(0, 5).forEach(function (n) {
           var a = document.createElement("a");
           a.className = "notif" + (n.read ? " is-read" : "");
-          a.href = n.ref ? "requests.html#" + encodeURIComponent(n.ref) : "requests.html";
+          a.href = n.ref ? "requests#" + encodeURIComponent(n.ref) : "requests";
           a.setAttribute("data-nid", String(n.id));
 
           var u = document.createElement("span");
@@ -690,7 +691,7 @@
     if (!chip) {
       chip = document.createElement("a");
       chip.id = "pendingchip";
-      chip.href = "content.html#publish";
+      chip.href = "content#publish";
       chip.hidden = true;
       chip.style.cssText =
         "display:inline-flex;align-items:center;gap:.4rem;min-height:2.25rem;padding:0 .7rem;" +

@@ -401,7 +401,7 @@ async function main() {
   /* ---- sign in ------------------------------------------------------ */
   section('SIGNING IN');
   await resize(1440, 900);
-  await goto(`${BASE}/admin/login.html`);
+  await goto(`${BASE}/admin/login`);
   const loggedIn = await browser.send('Runtime.evaluate', {
     expression: `(async () => {
       const t = await fetch('${BASE}/api/csrf', {credentials:'same-origin'}).then(r => r.json());
@@ -432,7 +432,7 @@ async function main() {
     section(`ADMIN · ${file}`);
     for (const { w, h, label } of WIDTHS) {
       await resize(w, h);
-      await goto(`${BASE}/admin/${file}`, w === 1440 ? 2600 : 1600);
+      await goto(`${BASE}/admin/${file.replace(/\.html$/, "")}`, w === 1440 ? 2600 : 1600);
       let a;
       try { a = await browser.send('Runtime.evaluate', { expression: AUDIT, returnByValue: true, awaitPromise: true }); }
       catch (e) { check(file, `${label}px audit ran`, false, e.message); continue; }
@@ -518,7 +518,7 @@ async function main() {
      one that does not, because the two take different paths out. */
   await resize(1440, 900);
   for (const page of ['dashboard.html', 'users.html']) {
-    await goto(`${BASE}/admin/${page}`);
+    await goto(`${BASE}/admin/${page.replace(/\.html$/, "")}`);
 
     const hooks = await browser.send('Runtime.evaluate', {
       expression: `JSON.stringify(Array.prototype.map.call(
@@ -645,7 +645,7 @@ async function main() {
     })()`, returnByValue: true, awaitPromise: true,
   });
 
-  await goto(`${BASE}/admin/dashboard.html`);
+  await goto(`${BASE}/admin/dashboard`);
   const changed = await browser.send('Runtime.evaluate', {
     expression: `(async () => {
       const wait = (ms) => new Promise(r => setTimeout(r, ms));
@@ -724,7 +724,7 @@ async function main() {
      click navigates, so nothing may be awaited inside the page across it —
      doing that destroys the execution context mid-promise and takes the whole
      run down with it. Click, then wait and ask from out here. */
-  await goto(`${BASE}/admin/dashboard.html`);
+  await goto(`${BASE}/admin/dashboard`);
   await browser.send('Runtime.evaluate', {
     expression: `document.querySelector('[data-acct="logout"]').click(); true;`,
     returnByValue: true,
@@ -748,7 +748,7 @@ async function main() {
   check('dashboard.html', 'and lands on the sign-in page', landedOn.includes('login'), landedOn);
 
   /* sign back in for whatever follows */
-  await goto(`${BASE}/admin/login.html`);
+  await goto(`${BASE}/admin/login`);
   await browser.send('Runtime.evaluate', {
     expression: `(async () => {
       const t = await fetch('${BASE}/api/csrf', {credentials:'same-origin'}).then(r => r.json());
@@ -765,7 +765,7 @@ async function main() {
      only check that catches that — the markup was always there. */
   for (const file of ['dashboard.html', 'requests.html', 'settings.html', 'activity.html']) {
     await resize(1440, 950);
-    await goto(`${BASE}/admin/${file}`);
+    await goto(`${BASE}/admin/${file.replace(/\.html$/, "")}`);
 
     const opened = await browser.send('Runtime.evaluate', {
       expression: `(()=>{const b=document.getElementById('whobtn'); if(!b) return 'no button';
@@ -822,7 +822,7 @@ async function main() {
   /* And it changes a password — the wrong current one refused first, in the
      dialog, which is where the person typing it is looking. Run on a throwaway
      account so the credentials this gate signs in with are untouched. */
-  await goto(`${BASE}/admin/dashboard.html`);
+  await goto(`${BASE}/admin/dashboard`);
   /* Built by concatenation, not by nesting one template literal inside
      another: the nested form put the literal text "${JSON.stringify(curPw)}"
      into the page, where that name does not exist, and the whole call returned
@@ -864,7 +864,7 @@ async function main() {
   const right = await attempt(PASSWORD, PASSWORD + '-Rotated1');
   check('menu', 'the right one changes it and says so',
     right.stillOpen === false && right.confirmed === true, JSON.stringify(right));
-  await goto(`${BASE}/admin/dashboard.html`);
+  await goto(`${BASE}/admin/dashboard`);
   const back = await attempt(PASSWORD + '-Rotated1', PASSWORD);
   check('menu', 'and it changes back, so the account ends as it started',
     back.stillOpen === false && back.confirmed === true, JSON.stringify(back));
@@ -883,7 +883,7 @@ async function main() {
   for (const [w, h] of [[1366, 768], [390, 740]]) {
     await resize(w, h);
     for (const d of DIALOGS) {
-      await goto(`${BASE}/admin/${d.file}`);
+      await goto(`${BASE}/admin/${d.file.replace(/\.html$/, "")}`);
       const r = await browser.send('Runtime.evaluate', {
         expression: `(() => {
           const b = document.getElementById(${JSON.stringify(d.open)});

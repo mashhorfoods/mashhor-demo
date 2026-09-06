@@ -20,10 +20,14 @@ require_once dirname(__DIR__) . '/app/bootstrap.php';
    in .html are servable — no traversal, no arbitrary read. */
 $requested = (string) (Http::query('page') ?? '');
 if ($requested === '') {
-    $path = Http::path();                       /* /admin/requests.html */
+    $path = Http::path();                       /* /admin/requests, or …/requests.html */
     $requested = basename($path);
 }
 if ($requested === '' || $requested === 'admin') $requested = 'dashboard.html';
+/* The address is clean now — /admin/requests, not /admin/requests.html — so a
+   bare page name is the normal case and the extension is added back here. The
+   file on disk is unchanged; only the address the operator sees is. */
+if ($requested !== '' && !str_ends_with($requested, '.html')) $requested .= '.html';
 
 if (!preg_match('/^[a-z0-9][a-z0-9-]{0,60}\.html$/', $requested)) {
     http_response_code(404);
@@ -57,7 +61,8 @@ if (!in_array($requested, $public, true)) {
         /* Where the operator was heading, so login can return them there.
            Only a bare page name survives — never an absolute or foreign URL. */
         $next = preg_match('/^[a-z0-9][a-z0-9-]{0,60}\.html$/', $requested) ? $requested : 'dashboard.html';
-        header('Location: /admin/login.html?next=' . rawurlencode($next), true, 302);
+        /* both sides of this redirect are clean addresses */
+        header('Location: /admin/login?next=' . rawurlencode(substr($next, 0, -5)), true, 302);
         header('Cache-Control: no-store, private');
         exit;
     }
