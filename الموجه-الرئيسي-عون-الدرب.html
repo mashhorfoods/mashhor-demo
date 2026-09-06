@@ -1,0 +1,453 @@
+<title>الموجّه الرئيسي لعون الدرب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+:root{
+  --navy:#2C4C82; --blue:#4975BA; --blue-bright:#5C86C6; --blue-deep:#22406F;
+  --sky:#D9E4F3; --mist:#EEF3FA;
+  --ink:#1E2733; --slate:#5A6675; --gray:#8B95A3;
+  --divider:#E4E9F0; --ground:#F6F8FB; --surface:#FFFFFF;
+  --stop:#A5352E; --stop-bg:#FBEDEC; --stop-mark:#C0433B;
+
+  --f-head:"IBM Plex Sans Arabic",ui-sans-serif,system-ui,"Segoe UI","Noto Sans Arabic",sans-serif;
+  --f-body:"Cairo",ui-sans-serif,system-ui,"Segoe UI","Noto Sans Arabic",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --shadow:0 1px 2px rgba(29,39,51,.05),0 2px 8px rgba(29,39,51,.05);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --navy:#A9C4EA; --blue:#7BA1DC; --blue-bright:#8FB0E4; --blue-deep:#C6D8F2;
+    --sky:#24334A; --mist:#1D2836;
+    --ink:#E7EDF5; --slate:#A3B0C1; --gray:#7A8797;
+    --divider:#2B3745; --ground:#131A23; --surface:#1A222D;
+    --stop:#F0A29A; --stop-bg:#2E1A18; --stop-mark:#D9695F;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 2px 8px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --navy:#A9C4EA; --blue:#7BA1DC; --blue-bright:#8FB0E4; --blue-deep:#C6D8F2;
+  --sky:#24334A; --mist:#1D2836;
+  --ink:#E7EDF5; --slate:#A3B0C1; --gray:#7A8797;
+  --divider:#2B3745; --ground:#131A23; --surface:#1A222D;
+  --stop:#F0A29A; --stop-bg:#2E1A18; --stop-mark:#D9695F;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 2px 8px rgba(0,0,0,.3);
+}
+
+*{box-sizing:border-box}
+html{direction:rtl}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--f-body);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+.page{max-width:52rem;margin:0 auto;padding:0 1.25rem 5rem}
+
+.mast{padding:3.5rem 0 1.5rem;border-bottom:2px solid var(--navy)}
+.mast__eyebrow{font-family:var(--f-head);font-weight:600;font-size:.75rem;
+  letter-spacing:.14em;color:var(--blue);margin:0 0 .75rem}
+.mast__t{font-family:var(--f-head);font-weight:700;font-size:2.125rem;line-height:1.35;
+  color:var(--navy);margin:0;text-wrap:balance}
+.mast__s{margin:.85rem 0 0;color:var(--slate);font-size:1.0625rem;max-width:42rem}
+
+.bar{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;margin:1.5rem 0 0}
+.copy{font-family:var(--f-head);font-weight:600;font-size:.9375rem;
+  background:var(--navy);color:var(--surface);border:1px solid var(--navy);
+  border-radius:10px;padding:.5rem 1.1rem;cursor:pointer;line-height:1.6}
+.copy:hover{background:var(--blue-deep);border-color:var(--blue-deep)}
+.copy:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(73,117,186,.38)}
+.copy[data-done="1"]{background:var(--surface);color:var(--navy)}
+.bar__n{font-size:.8125rem;color:var(--gray)}
+
+.sec{margin:2.75rem 0 0;scroll-margin-top:1.5rem}
+.sec__h{display:flex;gap:.9rem;align-items:baseline;margin:0 0 1rem}
+.sec__n{font-family:var(--f-mono);font-weight:500;font-size:.875rem;color:var(--blue);
+  font-variant-numeric:tabular-nums;flex:0 0 auto;
+  border-inline-end:2px solid var(--sky);padding-inline-end:.8rem;
+  align-self:stretch;display:flex;align-items:center}
+.sec__t{font-family:var(--f-head);font-weight:600;font-size:1.25rem;color:var(--navy);
+  margin:0;text-wrap:balance}
+.sec p{margin:0 0 .85rem}
+.sec > p:last-child{margin-bottom:0}
+
+h3{font-family:var(--f-head);font-weight:600;font-size:1rem;color:var(--ink);margin:1.5rem 0 .6rem}
+
+ul.d{margin:0 0 1rem;padding:0 1.1rem 0 0;display:grid;gap:.45rem}
+ul.d li::marker{color:var(--blue)}
+ul.d.stop li::marker{color:var(--stop-mark)}
+
+.tw{overflow-x:auto;margin:0 0 1rem;border:1px solid var(--divider);
+  border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.9375rem;min-width:28rem}
+th,td{text-align:start;padding:.55rem .85rem;border-bottom:1px solid var(--divider);vertical-align:top}
+thead th{font-family:var(--f-head);font-weight:600;font-size:.8125rem;color:var(--slate);
+  background:var(--mist);white-space:nowrap}
+tbody tr:last-child :is(td,th){border-bottom:0}
+td.k{white-space:nowrap;font-weight:500}
+td.v{font-family:var(--f-mono);font-size:.8125rem;direction:ltr;text-align:start;
+  unicode-bidi:isolate;white-space:nowrap}
+
+.sw{display:inline-block;width:.85rem;height:.85rem;border-radius:3px;
+  border:1px solid rgba(29,39,51,.14);vertical-align:-1px;margin-inline-end:.4rem}
+
+code{font-family:var(--f-mono);font-size:.8125rem;background:var(--mist);color:var(--navy);
+  border-radius:4px;padding:.08rem .35rem;direction:ltr;display:inline-block;unicode-bidi:isolate}
+
+.stopbox{border:2px solid var(--stop-mark);background:var(--stop-bg);color:var(--stop);
+  border-radius:12px;padding:1.25rem 1.5rem;margin:1rem 0 0}
+.stopbox h3{color:var(--stop);margin-top:0}
+
+.foot{margin:3.5rem 0 0;padding:1.5rem 0 0;border-top:1px solid var(--divider);
+  color:var(--gray);font-size:.8125rem;font-family:var(--f-mono);line-height:2}
+
+@media (max-width:36rem){ .mast__t{font-size:1.75rem} .sec__h{gap:.6rem} }
+@media print{
+  body{background:#fff;font-size:10.5pt}
+  .bar{display:none}
+  .sec,.tw,.stopbox{break-inside:avoid}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="page">
+
+<header class="mast">
+  <p class="mast__eyebrow">المرحلة 08 · مجموعة تعليمات على مستوى المشروع</p>
+  <h1 class="mast__t">الموجّه الرئيسي لعون الدرب</h1>
+  <p class="mast__s">كل ما يحتاجه مصمّم أو مطوّر — أو نموذج لغوي — لإنتاج عملٍ جديد
+     بهوية عون الدرب دون أن يسأل عن قرار اتُّخذ من قبل. القيم هنا مقروءة من الموقع
+     المنشور، لا مقترحة.</p>
+  <div class="bar">
+    <button class="copy" id="copyAll" type="button">انسخ الموجّه كاملاً</button>
+    <span class="bar__n" id="copyNote">يُنسخ نصاً عادياً، جاهزاً للّصق في مختصر أو موجّه</span>
+  </div>
+</header>
+
+<div id="prompt">
+
+<section class="sec">
+  <div class="sec__h"><span class="sec__n">01</span><h2 class="sec__t">الهوية والجمهور</h2></div>
+  <p><b>الجهة:</b> شركة عون الدرب للنقل المتخصص — شركة سعودية مقرّها الرياض،
+     تنقل كبار السن وذوي الاحتياجات الخاصة والمرضى بمركبات مجهزة وطاقم مدرب،
+     على مدار الساعة.</p>
+  <p><b>الوعد:</b> «نُعين ونُعاون». ليس شعاراً تسويقياً بل وصفٌ للخدمة: المرافقة
+     تبدأ داخل المنزل، وتستمر أثناء النقل، وتصل إلى داخل المستشفى.</p>
+  <p><b>التمايز الحقيقي — وهو ما يجب أن يتصدّر أي عمل جديد:</b> المنافسون جميعاً
+     يعدون بـ«مركبات مجهزة وطاقم مدرب وأمان و٢٤ ساعة». الذي لا يعدُ به أحد سواكم هو
+     <b>المرافقة داخل المنزل والمستشفى</b>. اجعله في الصدر، لا في فقرة تعريفية.</p>
+  <p><b>لمن نكتب:</b> غالباً ليس المستفيد نفسه، بل ابنٌ أو ابنة يرتّبان رحلة لوالدٍ
+     مُسنّ أو مريض. القارئ قلقٌ ومستعجل ويقرأ على جواله. اكتب له، لا عنه.</p>
+  <p><b>النبرة:</b> هادئة، محترمة، محدَّدة. لا مبالغة عاطفية، ولا لغة طبية، ولا لغة
+     مبيعات. الجملة القصيرة الواضحة أقرب إلى الطمأنينة من الجملة المنمّقة.</p>
+</section>
+
+<section class="sec">
+  <div class="sec__h"><span class="sec__n">02</span><h2 class="sec__t">المصطلح واللغة</h2></div>
+  <ul class="d">
+    <li>المصطلح المعتمد الوحيد: <b>ذوي الاحتياجات الخاصة</b>.</li>
+    <li>العربية أولاً، والاتجاه من اليمين. الأرقام لاتينية داخل عزلٍ اتجاهي
+        (<code>unicode-bidi:isolate</code>) حتى لا ينقلب ترتيبها.</li>
+    <li>لا تعدّ الواحد والاثنين برقم: «حيٌّ واحد» و«حيَّان»، لا «1 حي» و«2 حي».</li>
+    <li>عرض السطر يُقاس بالـ<code>rem</code> لا بالـ<code>ch</code>: وحدة الـch مبنية
+        على الصفر اللاتيني وتزيد نحو ١٫٤ ضعف عن متوسط الحرف العربي. المقاس المعتمد
+        <code>42rem</code> للنص، و<code>34rem</code> للنص الضيّق.</li>
+    <li>الزر يقول ما سيحدث بالضبط: «نشر على الموقع»، ثم إشعارٌ يقول «نُشر».</li>
+    <li>رسالة الخطأ تقول ما وقع وما العمل، ومعها رقم الحالة بين قوسين إن كان الخطأ
+        من الخادم. لا اعتذار، ولا غموض، ولا مسار داخلي.</li>
+  </ul>
+</section>
+
+<section class="sec">
+  <div class="sec__h"><span class="sec__n">03</span><h2 class="sec__t">اللون</h2></div>
+  <h3>الأساس</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>الدور</th><th>القيمة</th><th>الاستعمال</th></tr></thead>
+      <tbody>
+        <tr><td class="k"><span class="sw" style="background:#4975BA"></span>أساسي</td>
+            <td class="v">#4975BA</td><td>الأزرار والروابط والعناصر التفاعلية</td></tr>
+        <tr><td class="k"><span class="sw" style="background:#2C4C82"></span>عميق</td>
+            <td class="v">#2C4C82</td><td>العناوين، الأسطح الداكنة، التذييل</td></tr>
+        <tr><td class="k"><span class="sw" style="background:#5C86C6"></span>مضيء</td>
+            <td class="v">#5C86C6</td><td>التمرير والزخرفة — <b>لا يُستعمل للنص</b></td></tr>
+        <tr><td class="k"><span class="sw" style="background:#22406F"></span>مضغوط</td>
+            <td class="v">#22406F</td><td>حالة الضغط</td></tr>
+        <tr><td class="k"><span class="sw" style="background:#D9E4F3"></span>سماوي</td>
+            <td class="v">#D9E4F3</td><td>خلفيات مساندة، حدود ناعمة</td></tr>
+        <tr><td class="k"><span class="sw" style="background:#EEF3FA"></span>ضبابي</td>
+            <td class="v">#EEF3FA</td><td>أقسام متناوبة</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>المحايد</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>الدور</th><th>القيمة</th><th>ملاحظة</th></tr></thead>
+      <tbody>
+        <tr><td class="k"><span class="sw" style="background:#1E2733"></span>نص أساسي</td>
+            <td class="v">#1E2733</td><td>AAA على الأبيض</td></tr>
+        <tr><td class="k"><span class="sw" style="background:#5A6675"></span>نص ثانوي</td>
+            <td class="v">#5A6675</td><td>AA</td></tr>
+        <tr><td class="k"><span class="sw" style="background:#8B95A3"></span>رمادي</td>
+            <td class="v">#8B95A3</td><td><b>غير نصّي فقط</b> — أو نائب إدخال</td></tr>
+        <tr><td class="k"><span class="sw" style="background:#E4E9F0"></span>فاصل</td>
+            <td class="v">#E4E9F0</td><td>خطوط الفصل</td></tr>
+        <tr><td class="k"><span class="sw" style="background:#F6F8FB"></span>أرضية</td>
+            <td class="v">#F6F8FB</td><td>خلفية الصفحة</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>الوظيفي — للنظام لا للزينة</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>الحالة</th><th>النص</th><th>الخلفية</th></tr></thead>
+      <tbody>
+        <tr><td class="k"><span class="sw" style="background:#2E7D64"></span>نجاح</td><td class="v">#2E7D64</td><td class="v">#EAF5F0</td></tr>
+        <tr><td class="k"><span class="sw" style="background:#B0791C"></span>تنبيه</td><td class="v">#B0791C</td><td class="v">#FBF3E4</td></tr>
+        <tr><td class="k"><span class="sw" style="background:#C0433B"></span>خطأ</td><td class="v">#C0433B</td><td class="v">#FBEDEC</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>لا تستعمل اللون الوظيفي للتزيين، ولا تجعله لون العلامة. الأخضر يعني «تمّ»
+     والأحمر يعني «خطأ» — وحين يعنيان غير ذلك يفقدان معناهما في الموضعين.</p>
+</section>
+
+<section class="sec">
+  <div class="sec__h"><span class="sec__n">04</span><h2 class="sec__t">الخط والمقياس</h2></div>
+  <p><b>العناوين:</b> IBM Plex Sans Arabic — أوزان 500 و600 و700.<br>
+     <b>النص:</b> Cairo — أوزان 400 و500 <b>فقط</b>؛ محورها المتغيّر يقف عند 500،
+     وطلب 600 أو 700 منها يسقط إلى خط النظام بصمت.<br>
+     <b>الأرقام والمسارات:</b> IBM Plex Mono.<br>
+     الخطوط تُستضاف ذاتياً. لا تعتمد على مستضيف خارجي في أي عمل جديد.</p>
+  <div class="tw">
+    <table>
+      <thead><tr><th>الدور</th><th>المقاس</th></tr></thead>
+      <tbody>
+        <tr><td class="k">Display</td><td class="v">clamp(2.50rem, 1.55rem + 2.9vw, 3.50rem)</td></tr>
+        <tr><td class="k">H1</td><td class="v">clamp(2.00rem, 1.45rem + 2.3vw, 3.00rem)</td></tr>
+        <tr><td class="k">H2</td><td class="v">clamp(1.60rem, 1.20rem + 1.7vw, 2.375rem)</td></tr>
+        <tr><td class="k">H3</td><td class="v">clamp(1.25rem, 1.08rem + 0.7vw, 1.50rem)</td></tr>
+        <tr><td class="k">H4</td><td class="v">clamp(1.10rem, 1.02rem + 0.35vw, 1.25rem)</td></tr>
+        <tr><td class="k">نص كبير</td><td class="v">clamp(1.125rem, 1.06rem + 0.28vw, 1.25rem)</td></tr>
+        <tr><td class="k">نص</td><td class="v">1.0625rem (17px)</td></tr>
+        <tr><td class="k">صغير</td><td class="v">0.9375rem (15px)</td></tr>
+        <tr><td class="k">تعليق</td><td class="v">0.8125rem (13px)</td></tr>
+        <tr><td class="k">لصيقة</td><td class="v">0.75rem · تباعد 0.14em</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><b>ارتفاع السطر:</b> ضيّق 1.16 · مريح 1.32 · عادي 1.55 · واسع 1.75.
+     العربية تحتاج ارتفاعاً أكبر من اللاتينية — لا تنزل بالنص تحت 1.55.</p>
+  <p><b>تحذير من عطل وقع فعلاً:</b> في <code>clamp()</code> و<code>calc()</code> يجب أن
+     تُحاط علامة <code>+</code> بمسافتين. بدونهما تسقط القاعدة كلها بصمت، فترتدّ كل
+     العناوين إلى مقاس النص.</p>
+</section>
+
+<section class="sec">
+  <div class="sec__h"><span class="sec__n">05</span><h2 class="sec__t">المسافة والشبكة</h2></div>
+  <p><b>السلّم:</b> أساسه 4px — 2 · 4 · 8 · 12 · 16 · 20 · 24 · 32 · 40 · 48 · 64 · 80 · 96 · 120 · 160.
+     لا تستعمل قيمة خارجه.</p>
+  <div class="tw">
+    <table>
+      <tbody>
+        <tr><td class="k">تباعد الأقسام</td><td class="v">clamp(4rem, 3rem + 5vw, 8.75rem)</td></tr>
+        <tr><td class="k">عنوان ← نص</td><td class="v">16px</td></tr>
+        <tr><td class="k">بين الكتل</td><td class="v">24px</td></tr>
+        <tr><td class="k">الحاوية القياسية</td><td class="v">1200px</td></tr>
+        <tr><td class="k">الحاوية العريضة</td><td class="v">1360px</td></tr>
+        <tr><td class="k">الحاوية الضيّقة</td><td class="v">760px</td></tr>
+        <tr><td class="k">هامش الحاوية</td><td class="v">clamp(1.25rem, 5vw, 4rem)</td></tr>
+        <tr><td class="k">الشبكة</td><td class="v">12 عموداً · فجوة clamp(1rem, 2vw, 1.5rem)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><b>درس مدفوع الثمن:</b> في <code>clamp()</code> اجعل الطرف الأوسط
+     <code>rem + vw</code> لا <code>vw</code> وحدها. القيمة <code>7vw</code> لا تتجاوز
+     أرضيتها البالغة 56px إلا عند عرض 800px تقريباً — فيحصل كل جهاز لوحي على تباعد
+     الجوال دون أن ينتبه أحد.</p>
+  <p>الترتيب بين الأشقاء بـ<code>flex/grid</code> و<code>gap</code>، لا بهوامش فردية
+     تنطبق أو تتضاعف بصمت.</p>
+</section>
+
+<section class="sec">
+  <div class="sec__h"><span class="sec__n">06</span><h2 class="sec__t">الشكل والارتفاع</h2></div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>الخطوة</th><th>القيمة</th><th>لماذا</th></tr></thead>
+      <tbody>
+        <tr><td class="k">xs</td><td class="v">2px</td><td>العلامات والخطوط</td></tr>
+        <tr><td class="k">sm</td><td class="v">12px</td><td>الأدوات: أزرار، حقول، شارات</td></tr>
+        <tr><td class="k">md</td><td class="v">18px</td><td>البطاقات والبلاطات</td></tr>
+        <tr><td class="k">lg</td><td class="v">26px</td><td>إطارات الصور واللوحات</td></tr>
+        <tr><td class="k">xl</td><td class="v">34px</td><td>حاويات الدعوة للإجراء</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><b>الظلال أربع درجات</b> فقط، ولونها <code>rgba(29,39,51,…)</code> لا أسود صافٍ:
+     السطح بلا ظل · البطاقة <code>sm</code> · البطاقة عند التمرير <code>md</code> ·
+     المميّز <code>md</code>. حلقة التركيز <code>0 0 0 3px rgba(73,117,186,.38)</code>.</p>
+  <p><b>الأيقونات:</b> خطّية بسمك 2، بمقاسات 16 · 20 · 24 · 32 · 40.
+     أيقونات الخدمات جزء من الهوية ولا تُنشأ جديدةً من واجهة الإدارة.</p>
+  <p><b>الحدّ الأدنى للمس: 44px.</b> ارتفاعات الأدوات: 40 · 48 · 56.</p>
+  <p>لا تضع حدّاً وتعبئةً وانحناءً وظلاً على كل كتلة. كلٌّ منها يقول «هذا شيء منفصل»،
+     وحين تُوضع جميعاً على كل شيء يستوي كل شيء ويختفي التسلسل.</p>
+</section>
+
+<section class="sec">
+  <div class="sec__h"><span class="sec__n">07</span><h2 class="sec__t">الحركة</h2></div>
+  <div class="tw">
+    <table>
+      <tbody>
+        <tr><td class="k">فوري</td><td class="v">80ms</td></tr>
+        <tr><td class="k">سريع</td><td class="v">150ms</td></tr>
+        <tr><td class="k">عادي</td><td class="v">260ms</td></tr>
+        <tr><td class="k">بطيء</td><td class="v">420ms</td></tr>
+        <tr><td class="k">دخول</td><td class="v">cubic-bezier(.16, 1, .3, 1)</td></tr>
+        <tr><td class="k">ناعم</td><td class="v">cubic-bezier(.22, 1, .36, 1)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>الحركة تخدم الفهم لا الانبهار: تغيّر حالة، أو تُظهر علاقة، أو تؤكّد استجابة.
+     واحترم <code>prefers-reduced-motion</code> دائماً — لا استثناء.</p>
+  <p>ولا تُخفِ محتوىً في انتظار حركة. كل ما يُقرأ يجب أن يكون ظاهراً بمجرد تحميل
+     الصفحة؛ القسم قد يتحرّك، لكن من حالة ظاهرة، لا من <code>opacity:0</code> ينتظر
+     مراقباً قد لا يعمل.</p>
+</section>
+
+<section class="sec">
+  <div class="sec__h"><span class="sec__n">08</span><h2 class="sec__t">الاستجابة</h2></div>
+  <p>نقاط الكسر المستعملة فعلاً: <code>359 · 380 · 479 · 600 · 640 · 700 · 767 · 768 ·
+     899 · 900 · 1023 · 1024</code>. صمّم للجوال أولاً، واختبر عند
+     <b>390 · 768 · 1024 · 1440</b> على الأقل.</p>
+  <ul class="d">
+    <li>الجوال ليس سطح مكتب مصغَّراً. القائمة على الجوال درجٌ بكلماته كاملةً — لا شريط
+        أيقونات صامت.</li>
+    <li>أي محتوى عريض (جدول، رسم، كتلة كود) يُمرَّر داخل حاويته
+        بـ<code>overflow-x:auto</code>؛ جسم الصفحة لا يُمرَّر أفقياً أبداً.</li>
+    <li>في الاتجاه من اليمين، حاوية التمرير تحتاج <code>position:relative</code> وإلا
+        أضافت إلى عرض المستند وأنتجت تمريراً أفقياً وهمياً.</li>
+    <li>النافذة المنبثقة مقيَّدة بارتفاع الشاشة (<code>100dvh</code> مع
+        <code>100vh</code> احتياطاً)، وعنوانها وأزرارها مثبَّتان، ووسطها هو ما يُمرَّر.
+        العنصر المتوسّط في شبكة إذا زاد عن حاويه فاض من الحافتين معاً بلا سبيل إليه.</li>
+  </ul>
+</section>
+
+<section class="sec">
+  <div class="sec__h"><span class="sec__n">09</span><h2 class="sec__t">الوصولية</h2></div>
+  <ul class="d">
+    <li>WCAG 2.2 مستوى AA. تباين النص 4.5:1، والنص الكبير 3:1.</li>
+    <li>كل صفحة: <code>&lt;!doctype html&gt;</code> و<code>lang="ar"</code>
+        و<code>dir="rtl"</code> و<code>charset</code> و<code>viewport</code>.
+        غيابها يُسقط الصفحة إلى وضع التوافق ويُبطل معيار 3.1.1.</li>
+    <li>لكل عنصر تفاعلي حالة تركيز مرئية. لا تُلغِ <code>outline</code> بلا بديل.</li>
+    <li>هدف اللمس 24px حدّاً أدنى للمطابقة، و44px هو المستهدف.</li>
+    <li>لكل صورة وصفٌ يقول ما فيها، لا اسم ملفها.</li>
+    <li>الرمز وحده لا يحمل معنى: الحالة تُقرأ بالنص كما تُقرأ باللون.</li>
+  </ul>
+</section>
+
+<section class="sec">
+  <div class="sec__h"><span class="sec__n">10</span><h2 class="sec__t">الهندسة</h2></div>
+  <ul class="d">
+    <li>الصفحة العامة ملف واحد بأنماطه داخله. لا إطار عمل، ولا حزمة بناء، ولا
+        اعتماد خارجي وقت التشغيل.</li>
+    <li>لا مستضيف خارجي لورقة أنماط ولا لخط. البناء يرفض أي صفحة تفعل ذلك.</li>
+    <li>قاعدة البيانات هي مصدر الحقيقة للمحتوى، والملف نتيجةُ نشرٍ منها — لا العكس.</li>
+    <li>ملفٌ يُخزَّن سنةً في المتصفح يجب أن يحمل بصمة محتواه في رابطه، وإلا لم يصل
+        إصلاحه إلى من فتح الموقع من قبل.</li>
+    <li>التفويض على الخادم، في الموزِّع، قبل نداء المعالج. إخفاء زر في الواجهة
+        مجاملةٌ لا حماية.</li>
+  </ul>
+</section>
+
+<div class="stopbox">
+  <h3>المحظورات</h3>
+  <ul class="d stop">
+    <li><b>لا تُعِد تصميم الموقع المنشور</b> ولا تغيّر هويته البصرية.</li>
+    <li><b>لا تغيّر المحتوى المعتمد</b> دون طلب صريح.</li>
+    <li><b>لا مصطلح غير «ذوي الاحتياجات الخاصة».</b></li>
+    <li><b>لا دور رابع</b> غير: مدير النظام، مدير، مدير المحتوى.</li>
+    <li><b>لا حالة سادسة</b> غير: جديد، قيد المراجعة، مؤكد، مكتمل، ملغي.</li>
+    <li><b>لا أداة بناء صفحات</b> ولا منصة تحليلات.</li>
+    <li><b>لا مقاييس مخترعة</b>، ولا آراء عملاء ملفَّقة، ولا بيانات عملاء مصطنعة.</li>
+    <li><b>لا سرّ في المستودع</b> ولا في أي ملف عام: لا بيانات قاعدة بيانات، ولا مفاتيح،
+        ولا رموز مصادقة.</li>
+    <li><b>لا كلمة مرور تُعرَض</b> ولا تُسجَّل، في أي حال.</li>
+    <li><b>لا خطأ تقني خام للمستخدم:</b> لا أثر استدعاءات، ولا مسار داخلي، ولا نصّ
+        استثناء. اذكر ما حدث وما العمل، ورقم الحالة إن كان من الخادم.</li>
+    <li><b>لا تثق بقيد في الواجهة</b> كطبقة حماية وحيدة.</li>
+    <li><b>لا تفترض</b> أن زراً موصولٌ لأنه موجود. اضغطه.</li>
+  </ul>
+</div>
+
+</div>
+
+<footer class="foot">
+  الموجّه الرئيسي · المرحلة 08 · وكالة عون الدرب للنقل المتخصص · الرياض<br>
+  كل قيمة هنا مقروءة من <code>index.html</code> المنشور في سبتمبر 2026
+</footer>
+
+</div>
+
+<script>
+(function(){
+  var btn = document.getElementById("copyAll");
+  var note = document.getElementById("copyNote");
+  var body = document.getElementById("prompt");
+  if (!btn || !body) return;
+
+  /* The document's job is to be pasted somewhere else, so it hands over plain
+     text rather than asking the reader to select nine sections by hand. */
+  function asText(){
+    var out = ["الموجّه الرئيسي — شركة عون الدرب للنقل المتخصص، الرياض", ""];
+    body.querySelectorAll("section, .stopbox").forEach(function(sec){
+      var h = sec.querySelector(".sec__t, h3");
+      if (h) out.push("## " + h.textContent.trim(), "");
+      sec.querySelectorAll("p, li, h3").forEach(function(n){
+        if (n.classList.contains("sec__t")) return;
+        if (n === h) return;
+        var t = n.innerText.replace(/\s+/g, " ").trim();
+        if (!t) return;
+        out.push(n.tagName === "LI" ? "- " + t : (n.tagName === "H3" ? "### " + t : t));
+      });
+      sec.querySelectorAll("table").forEach(function(tb){
+        tb.querySelectorAll("tr").forEach(function(tr){
+          var cells = Array.prototype.map.call(tr.cells, function(c){
+            return c.innerText.replace(/\s+/g, " ").trim();
+          }).filter(Boolean);
+          if (cells.length) out.push("  " + cells.join("  ·  "));
+        });
+      });
+      out.push("");
+    });
+    return out.join("\n");
+  }
+
+  btn.addEventListener("click", function(){
+    var text = asText();
+    var done = function(ok){
+      btn.textContent = ok ? "نُسخ ✓" : "تعذّر النسخ";
+      btn.setAttribute("data-done", ok ? "1" : "0");
+      if (note) note.textContent = ok
+        ? (text.length.toLocaleString("ar-EG") + " حرفاً في الحافظة")
+        : "حدّد النص وانسخه يدوياً.";
+      window.setTimeout(function(){
+        btn.textContent = "انسخ الموجّه كاملاً";
+        btn.removeAttribute("data-done");
+      }, 2600);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){ done(true); }, function(){ done(false); });
+    } else {
+      /* older browsers, and any context where the clipboard API is refused */
+      try {
+        var ta = document.createElement("textarea");
+        ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        done(document.execCommand("copy"));
+        document.body.removeChild(ta);
+      } catch (e) { done(false); }
+    }
+  });
+})();
+</script>
