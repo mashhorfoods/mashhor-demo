@@ -1,0 +1,450 @@
+<title>ورقة رصد جلسة عون الدرب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+:root{
+  --navy:#2C4C82; --blue:#4975BA; --blue-deep:#22406F;
+  --sky:#D9E4F3; --mist:#EEF3FA;
+  --ink:#1E2733; --slate:#5A6675; --gray:#8B95A3;
+  --divider:#E4E9F0; --ground:#F6F8FB; --surface:#FFFFFF;
+
+  --ok:#256B55;   --ok-bg:#EAF5F0;   --ok-mark:#2E7D64;
+  --hes:#8F6014;  --hes-bg:#FBF3E4;  --hes-mark:#B0791C;
+  --bad:#A5352E;  --bad-bg:#FBEDEC;  --bad-mark:#C0433B;
+
+  --f-head:"IBM Plex Sans Arabic",ui-sans-serif,system-ui,"Segoe UI","Noto Sans Arabic",sans-serif;
+  --f-body:"Cairo",ui-sans-serif,system-ui,"Segoe UI","Noto Sans Arabic",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --shadow:0 1px 2px rgba(29,39,51,.05),0 2px 8px rgba(29,39,51,.05);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --navy:#A9C4EA; --blue:#7BA1DC; --blue-deep:#C6D8F2;
+    --sky:#24334A; --mist:#1D2836;
+    --ink:#E7EDF5; --slate:#A3B0C1; --gray:#7A8797;
+    --divider:#2B3745; --ground:#131A23; --surface:#1A222D;
+    --ok:#8FD3B7;  --ok-bg:#152A23;  --ok-mark:#4FA383;
+    --hes:#E8C077; --hes-bg:#2C2415; --hes-mark:#D3A24C;
+    --bad:#F0A29A; --bad-bg:#2E1A18; --bad-mark:#D9695F;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 2px 8px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --navy:#A9C4EA; --blue:#7BA1DC; --blue-deep:#C6D8F2;
+  --sky:#24334A; --mist:#1D2836;
+  --ink:#E7EDF5; --slate:#A3B0C1; --gray:#7A8797;
+  --divider:#2B3745; --ground:#131A23; --surface:#1A222D;
+  --ok:#8FD3B7;  --ok-bg:#152A23;  --ok-mark:#4FA383;
+  --hes:#E8C077; --hes-bg:#2C2415; --hes-mark:#D3A24C;
+  --bad:#F0A29A; --bad-bg:#2E1A18; --bad-mark:#D9695F;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 2px 8px rgba(0,0,0,.3);
+}
+
+*{box-sizing:border-box}
+html{direction:rtl}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--f-body);font-size:16px;line-height:1.75;-webkit-font-smoothing:antialiased}
+.page{max-width:48rem;margin:0 auto;padding:0 1.25rem 5rem}
+
+.mast{padding:2.75rem 0 1.25rem;border-bottom:2px solid var(--navy)}
+.mast__eyebrow{font-family:var(--f-head);font-weight:600;font-size:.75rem;
+  letter-spacing:.14em;color:var(--blue);margin:0 0 .7rem}
+.mast__t{font-family:var(--f-head);font-weight:700;font-size:1.875rem;line-height:1.35;
+  color:var(--navy);margin:0;text-wrap:balance}
+.mast__s{margin:.75rem 0 0;color:var(--slate);font-size:1rem;max-width:38rem}
+
+/* ── القواعد: تُقرأ مرة قبل الجلسة، وتُطوى أثناءها ─────────── */
+.rules{background:var(--surface);border:1px solid var(--divider);border-radius:12px;
+  padding:1.25rem 1.5rem;margin:1.5rem 0 0;box-shadow:var(--shadow)}
+.rules summary{cursor:pointer;font-family:var(--f-head);font-weight:600;
+  font-size:1rem;color:var(--navy);list-style:none}
+.rules summary::-webkit-details-marker{display:none}
+.rules summary::before{content:"▸";display:inline-block;margin-inline-end:.5rem;
+  color:var(--blue);transition:transform .15s}
+.rules[open] summary::before{transform:rotate(-90deg)}
+.rules ul{margin:1rem 0 0;padding:0 1.1rem 0 0;display:grid;gap:.55rem;font-size:.9375rem}
+.rules li::marker{color:var(--blue)}
+.rules b{font-weight:600}
+
+/* ── هوية الجلسة ─────────────────────────────────────────── */
+.meta{display:flex;flex-wrap:wrap;gap:1rem;margin:1.25rem 0 0}
+.meta label{display:flex;flex-direction:column;gap:.3rem;flex:1 1 12rem}
+.meta span{font-family:var(--f-head);font-size:.8125rem;font-weight:600;color:var(--slate)}
+.meta input{font-family:var(--f-body);font-size:.9375rem;color:var(--ink);
+  background:var(--surface);border:1px solid var(--divider);border-radius:10px;
+  padding:.55rem .75rem;min-height:44px}
+.meta input:focus-visible{outline:none;border-color:var(--blue);
+  box-shadow:0 0 0 3px rgba(73,117,186,.28)}
+.meta__n{flex-basis:100%;font-size:.8125rem;color:var(--gray);margin:0}
+
+/* ── المهمة ──────────────────────────────────────────────── */
+.task{background:var(--surface);border:1px solid var(--divider);border-radius:14px;
+  margin:1.25rem 0 0;box-shadow:var(--shadow);overflow:hidden}
+.task[data-outcome="ok"]{border-color:var(--ok-mark)}
+.task[data-outcome="hes"]{border-color:var(--hes-mark)}
+.task[data-outcome="bad"]{border-color:var(--bad-mark)}
+.task__h{display:flex;gap:.85rem;align-items:flex-start;padding:1.15rem 1.35rem .5rem}
+.task__n{font-family:var(--f-mono);font-size:.8125rem;font-weight:500;color:var(--blue);
+  background:var(--mist);border-radius:50%;width:1.75rem;height:1.75rem;
+  display:grid;place-items:center;flex:0 0 auto;margin-top:.15rem}
+.task__t{font-family:var(--f-head);font-weight:600;font-size:1.0625rem;
+  color:var(--navy);margin:0}
+.task__b{padding:0 1.35rem 1.15rem}
+
+.say{background:var(--mist);border-inline-start:3px solid var(--blue);
+  border-radius:0 8px 8px 0;padding:.75rem 1rem;margin:.6rem 0 .9rem}
+.say__k{display:block;font-family:var(--f-head);font-size:.6875rem;font-weight:600;
+  letter-spacing:.1em;color:var(--blue);margin:0 0 .25rem}
+.say__t{margin:0;font-size:1rem;font-weight:500;color:var(--ink)}
+
+.crit{display:grid;gap:.35rem;margin:0 0 .9rem;font-size:.875rem;color:var(--slate)}
+.crit b{color:var(--ink);font-weight:600}
+
+.outs{display:flex;flex-wrap:wrap;gap:.5rem;margin:0 0 .85rem}
+.out{font-family:var(--f-head);font-weight:600;font-size:.875rem;
+  border:1px solid var(--divider);background:var(--surface);color:var(--slate);
+  border-radius:10px;padding:.5rem .9rem;min-height:44px;cursor:pointer;line-height:1.5}
+.out:hover{border-color:var(--gray)}
+.out:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(73,117,186,.28)}
+.out[aria-pressed="true"][data-v="ok"]{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-mark)}
+.out[aria-pressed="true"][data-v="hes"]{background:var(--hes-bg);color:var(--hes);border-color:var(--hes-mark)}
+.out[aria-pressed="true"][data-v="bad"]{background:var(--bad-bg);color:var(--bad);border-color:var(--bad-mark)}
+
+.note{width:100%;font-family:var(--f-body);font-size:.9375rem;color:var(--ink);
+  background:var(--surface);border:1px solid var(--divider);border-radius:10px;
+  padding:.65rem .8rem;min-height:70px;line-height:1.7;resize:vertical}
+.note:focus-visible{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(73,117,186,.28)}
+.note::placeholder{color:var(--gray)}
+
+/* ── الحصيلة ─────────────────────────────────────────────── */
+.sum{margin:2.5rem 0 0;border:2px solid var(--navy);border-radius:14px;
+  background:var(--surface);padding:1.5rem;box-shadow:var(--shadow)}
+.sum h2{font-family:var(--f-head);font-weight:700;font-size:1.125rem;color:var(--navy);margin:0 0 1rem}
+.tally{display:flex;flex-wrap:wrap;gap:.6rem;margin:0 0 1.15rem}
+.pill{font-family:var(--f-head);font-weight:600;font-size:.875rem;
+  border-radius:999px;padding:.3rem .85rem;white-space:nowrap}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}
+.pill.hes{background:var(--hes-bg);color:var(--hes)}
+.pill.bad{background:var(--bad-bg);color:var(--bad)}
+.pill.left{background:var(--mist);color:var(--slate)}
+
+.acts{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
+.btn{font-family:var(--f-head);font-weight:600;font-size:.9375rem;border-radius:10px;
+  padding:.55rem 1.1rem;min-height:44px;cursor:pointer;line-height:1.6;
+  border:1px solid var(--navy);background:var(--navy);color:var(--surface)}
+.btn:hover{background:var(--blue-deep);border-color:var(--blue-deep)}
+.btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(73,117,186,.38)}
+.btn--ghost{background:var(--surface);color:var(--slate);border-color:var(--divider)}
+.btn--ghost:hover{background:var(--mist);color:var(--navy);border-color:var(--gray)}
+.acts__n{font-size:.8125rem;color:var(--gray);flex-basis:100%;margin:.2rem 0 0}
+
+.foot{margin:3rem 0 0;padding:1.25rem 0 0;border-top:1px solid var(--divider);
+  color:var(--gray);font-size:.8125rem;font-family:var(--f-mono);line-height:2}
+
+@media (max-width:36rem){
+  .mast__t{font-size:1.5rem}
+  .task__h{padding-inline:1rem}
+  .task__b{padding-inline:1rem}
+}
+@media print{
+  body{background:#fff;font-size:11pt}
+  .acts,.rules summary::before{display:none}
+  .rules[open] ul,.rules ul{display:grid!important}
+  .task,.sum{break-inside:avoid;box-shadow:none}
+  .note{min-height:5rem}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="page">
+
+<header class="mast">
+  <p class="mast__eyebrow">المرحلة 12 · النموذج والتحقق</p>
+  <h1 class="mast__t">ورقة رصد جلسة عون الدرب</h1>
+  <p class="mast__s">نصف ساعة مع من ستشغّل اللوحة فعلاً، على جهازها. خمس مهام تُنجزها
+     وحدها. أنت ترصد ولا تساعد.</p>
+</header>
+
+<details class="rules" id="rules" open>
+  <summary>اقرأ هذا قبل أن تبدأ — ثم اطوِه</summary>
+  <ul>
+    <li><b>لا تشرح ولا تصحّح ولا تلمّح.</b> أصعب جزء في هذه الجلسة أن تصمت. الصمت
+        هو ما تدفع ثمنه، فلا تُفسده.</li>
+    <li>إن سألتك «كيف؟» فأعد السؤال إليها: <b>«ماذا كنتِ ستفعلين لو لم أكن هنا؟»</b></li>
+    <li>اطلب منها أن <b>تفكّر بصوت عالٍ</b>: ماذا تتوقّع أن يحدث قبل أن تضغط.</li>
+    <li><b>النظام هو الذي يُختبَر، لا هي.</b> قُلها لها صراحةً في البداية: «أي شيء
+        يصعب عليك هو عيبٌ فينا لا فيك.»</li>
+    <li>كل تردّد يستحق تسجيلاً. التوقّف خمس ثوانٍ أمام الشاشة معلومة، لا لا شيء.</li>
+    <li>اترك المهمة إن تجاوزت <b>ثلاث دقائق</b>. علّمها «لم تكتمل» وانتقل — الإحباط
+        يفسد بقية الجلسة.</li>
+    <li><b>لا تكتب اسمها ولا أي بيان شخصي</b> في هذه الورقة. صفةٌ تكفي: «موظفة
+        الاستقبال»، «المشرفة».</li>
+    <li>جهّزوا حساباً للتجربة إن أمكن، وليس حساب مدير النظام — واعلم أن ما ستُنشئه
+        من طلبات في هذه الجلسة سيبقى في النظام.</li>
+  </ul>
+</details>
+
+<div class="meta">
+  <label><span>صفة المشارِكة</span>
+    <input type="text" id="who" placeholder="موظفة الاستقبال" autocomplete="off"></label>
+  <label><span>التاريخ</span>
+    <input type="date" id="when"></label>
+  <label><span>الجهاز والمتصفح</span>
+    <input type="text" id="dev" placeholder="لابتوب · كروم" autocomplete="off"></label>
+  <p class="meta__n">لا تُكتب أسماء ولا أرقام ولا أي بيان يعرّف بشخص.</p>
+</div>
+
+<div id="tasks"></div>
+
+<section class="sum">
+  <h2>الحصيلة</h2>
+  <div class="tally" id="tally"></div>
+  <div class="acts">
+    <button class="btn" type="button" id="copy">انسخ النتيجة لإرسالها</button>
+    <button class="btn btn--ghost" type="button" id="clear">ابدأ جلسة جديدة</button>
+    <p class="acts__n" id="note">تُحفظ إجاباتك في هذا المتصفح تلقائياً، فلا تضيع إن أُغلقت الصفحة.</p>
+  </div>
+</section>
+
+<footer class="foot">
+  المرحلة 12 · وكالة عون الدرب للنقل المتخصص<br>
+  المهام الخمس مبنية على الوظائف الحقيقية في اللوحة، لا على وصفٍ لها
+</footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* المهام الخمس. كلٌّ منها وظيفة يستعملها المشغّل فعلاً كل أسبوع، ومعها ما
+     يُقال بالحرف حتى لا يختلف نصّ السؤال بين جلسة وأخرى، ومعيار نجاح لا يحتمل
+     التأويل، و«ما ترقبه» — وهي مواضع أخفقت فيها هذه اللوحة فعلاً أثناء بنائها. */
+  var TASKS = [
+    { id:"t1", title:"تسجيل طلب وصل عبر الواتساب",
+      say:"وصلك طلب على الواتساب: أم عبدالله تحتاج نقلاً بكرسي متحرك من حي النرجس إلى مستشفى الملك فيصل، بكرة الساعة تسعة. سجّليه في النظام.",
+      crit:"يظهر الطلب في قائمة «طلبات النقل» ومصدره «واتساب».",
+      watch:"هل وجدت زر «تسجيل طلب»؟ هل انتبهت لحقل «كيف وصل الطلب» أم تركته على الافتراضي؟ هل كتبت اسم الحي في «مكان الانطلاق» أم كتبت وصفاً آخر؟" },
+
+    { id:"t2", title:"تغيير حالة طلب",
+      say:"اتصلتِ بها وتأكّد الموعد. حدّثي حالة الطلب.",
+      crit:"الطلب صار «مؤكد».",
+      watch:"هل فتحت الطلب أم بحثت عن زر في القائمة؟ هل فهمت الفرق بين «قيد المراجعة» و«مؤكد» بلا شرح؟" },
+
+    { id:"t3", title:"تعديل نصّ على الموقع ونشره",
+      say:"الإدارة تريد تعديل جملة في قسم «من نحن» على الموقع. عدّليها واجعليها تظهر للزوّار.",
+      crit:"التعديل ظاهر على الموقع العام بعد إعادة تحميله — أي أنها حفظت ثم نشرت.",
+      watch:"هذه أهم مهمة في الورقة. هل حفظت وظنّت أنها انتهت؟ هل انتبهت للشارة الصفراء «غير منشور»؟ هل استعملت «معاينة» قبل النشر؟" },
+
+    { id:"t4", title:"رفع صورة إلى المكتبة",
+      say:"عندك صورة جديدة لإحدى الخدمات. أضيفيها إلى النظام.",
+      crit:"الصورة ظهرت في «الوسائط والأصول».",
+      watch:"هل قرأت شروط النوع والحجم قبل الاختيار أم بعد الرفض؟ إن رُفض ملفها، هل فهمت السبب من الرسالة وحدها؟" },
+
+    { id:"t5", title:"قراءة تقرير التغطية",
+      say:"مديرك يسأل: من أي الأحياء تأتينا الطلبات أكثر؟ أجيبيه من النظام.",
+      crit:"وصلت إلى التقارير ← التغطية، وقرأت أعلى حي في الجدول.",
+      watch:"هل عرفت أين تبحث؟ هل فهمت صفّ «بلا حيّ معروف» أم ظنّته حياً؟" }
+  ];
+
+  var OUTS = [
+    { v:"ok",  label:"أنجزتها وحدها" },
+    { v:"hes", label:"أنجزتها بتردّد" },
+    { v:"bad", label:"لم تكتمل" }
+  ];
+
+  var KEY = "aun-usability-v1";
+  var $ = function(id){ return document.getElementById(id); };
+  var state = load();
+
+  function load(){
+    /* المتصفح قد يمنع التخزين تماماً؛ الورقة تعمل بدونه، وتفقد الحفظ فقط */
+    try {
+      var raw = window.localStorage.getItem(KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) { /* الخصوصية أو وضع التصفح المتخفي */ }
+    return { who:"", when:"", dev:"", tasks:{} };
+  }
+  function save(){
+    try { window.localStorage.setItem(KEY, JSON.stringify(state)); }
+    catch (e) {
+      var n = $("note");
+      if (n) n.textContent = "تعذّر الحفظ التلقائي في هذا المتصفح — انسخ النتيجة قبل إغلاق الصفحة.";
+    }
+  }
+
+  function el(tag, cls){ var n = document.createElement(tag); if (cls) n.className = cls; return n; }
+
+  function render(){
+    var box = $("tasks");
+    box.textContent = "";
+    TASKS.forEach(function(t, i){
+      var st = state.tasks[t.id] || { outcome:"", note:"" };
+
+      var card = el("section","task");
+      card.setAttribute("data-outcome", st.outcome || "");
+
+      var h = el("div","task__h");
+      var n = el("span","task__n"); n.textContent = String(i + 1); h.appendChild(n);
+      var ttl = el("h2","task__t"); ttl.textContent = t.title; h.appendChild(ttl);
+      card.appendChild(h);
+
+      var b = el("div","task__b");
+
+      var say = el("div","say");
+      var sk = el("span","say__k"); sk.textContent = "اقرأ هذا بالحرف"; say.appendChild(sk);
+      var stx = el("p","say__t"); stx.textContent = "«" + t.say + "»"; say.appendChild(stx);
+      b.appendChild(say);
+
+      var crit = el("div","crit");
+      var c1 = el("p"); c1.style.margin = "0";
+      c1.innerHTML = "<b>تُعدّ ناجحة إذا:</b> ";
+      c1.appendChild(document.createTextNode(t.crit));
+      crit.appendChild(c1);
+      var c2 = el("p"); c2.style.margin = "0";
+      c2.innerHTML = "<b>ارقب:</b> ";
+      c2.appendChild(document.createTextNode(t.watch));
+      crit.appendChild(c2);
+      b.appendChild(crit);
+
+      var outs = el("div","outs");
+      OUTS.forEach(function(o){
+        var btn = el("button","out");
+        btn.type = "button";
+        btn.setAttribute("data-v", o.v);
+        btn.setAttribute("aria-pressed", st.outcome === o.v ? "true" : "false");
+        btn.textContent = o.label;
+        btn.addEventListener("click", function(){
+          var cur = state.tasks[t.id] || { outcome:"", note:"" };
+          cur.outcome = (cur.outcome === o.v) ? "" : o.v;   /* الضغط ثانيةً يلغي */
+          state.tasks[t.id] = cur;
+          save(); render();
+        });
+        outs.appendChild(btn);
+      });
+      b.appendChild(outs);
+
+      var note = el("textarea","note");
+      note.placeholder = "أين تردّدت؟ ماذا قالت بصوت عالٍ؟ كم استغرقت؟";
+      note.value = st.note || "";
+      note.setAttribute("aria-label", "ملاحظات المهمة " + (i + 1));
+      note.addEventListener("input", function(){
+        var cur = state.tasks[t.id] || { outcome:"", note:"" };
+        cur.note = note.value;
+        state.tasks[t.id] = cur;
+        save();
+        tally();      /* الحصيلة فقط — لا نُعيد الرسم كي لا يفقد الحقل التركيز */
+      });
+      b.appendChild(note);
+
+      card.appendChild(b);
+      box.appendChild(card);
+    });
+    tally();
+  }
+
+  function counts(){
+    var c = { ok:0, hes:0, bad:0, left:0 };
+    TASKS.forEach(function(t){
+      var o = (state.tasks[t.id] || {}).outcome;
+      if (o === "ok") c.ok++; else if (o === "hes") c.hes++;
+      else if (o === "bad") c.bad++; else c.left++;
+    });
+    return c;
+  }
+
+  function tally(){
+    var c = counts(), box = $("tally");
+    box.textContent = "";
+    var rows = [
+      ["ok",  c.ok,  "أنجزتها وحدها"],
+      ["hes", c.hes, "بتردّد"],
+      ["bad", c.bad, "لم تكتمل"],
+      ["left",c.left,"لم تُرصد بعد"]
+    ];
+    rows.forEach(function(r){
+      if (!r[1]) return;
+      var p = el("span","pill " + r[0]);
+      p.textContent = r[2] + ": " + r[1];
+      box.appendChild(p);
+    });
+    if (!box.children.length){
+      var p = el("span","pill left");
+      p.textContent = "لم تبدأ الجلسة بعد";
+      box.appendChild(p);
+    }
+  }
+
+  ["who","when","dev"].forEach(function(k){
+    var f = $(k);
+    f.value = state[k] || "";
+    f.addEventListener("input", function(){ state[k] = f.value; save(); });
+  });
+  if (!state.when){
+    $("when").value = new Date().toISOString().slice(0,10);
+    state.when = $("when").value; save();
+  }
+
+  /* النتيجة تُنسخ نصاً عادياً: هذه الورقة تُملأ لتُرسَل، لا لتبقى هنا */
+  function asText(){
+    var c = counts();
+    var out = [
+      "نتيجة جلسة قابلية الاستخدام — عون الدرب",
+      "المشارِكة: " + (state.who || "—"),
+      "التاريخ: " + (state.when || "—"),
+      "الجهاز: " + (state.dev || "—"),
+      "",
+      "الحصيلة: أنجزتها وحدها " + c.ok + " · بتردّد " + c.hes +
+        " · لم تكتمل " + c.bad + " · لم تُرصد " + c.left,
+      ""
+    ];
+    TASKS.forEach(function(t, i){
+      var st = state.tasks[t.id] || {};
+      var lbl = st.outcome === "ok" ? "أنجزتها وحدها"
+              : st.outcome === "hes" ? "بتردّد"
+              : st.outcome === "bad" ? "لم تكتمل" : "لم تُرصد";
+      out.push((i + 1) + ") " + t.title + " — " + lbl);
+      if (st.note && st.note.trim()) out.push("   " + st.note.trim().replace(/\n/g, "\n   "));
+      out.push("");
+    });
+    return out.join("\n");
+  }
+
+  $("copy").addEventListener("click", function(){
+    var text = asText(), btn = $("copy"), note = $("note");
+    function done(ok){
+      btn.textContent = ok ? "نُسخت ✓" : "تعذّر النسخ";
+      if (note) note.textContent = ok
+        ? "الصقها في المحادثة."
+        : "حدّد النص أعلاه وانسخه يدوياً.";
+      window.setTimeout(function(){
+        btn.textContent = "انسخ النتيجة لإرسالها";
+        if (note) note.textContent = "تُحفظ إجاباتك في هذا المتصفح تلقائياً، فلا تضيع إن أُغلقت الصفحة.";
+      }, 2800);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){ done(true); }, function(){ done(false); });
+    } else {
+      try {
+        var ta = document.createElement("textarea");
+        ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        done(document.execCommand("copy"));
+        document.body.removeChild(ta);
+      } catch (e) { done(false); }
+    }
+  });
+
+  $("clear").addEventListener("click", function(){
+    if (!window.confirm("تُمسح كل الملاحظات والنتائج. متأكد؟")) return;
+    state = { who:"", when:new Date().toISOString().slice(0,10), dev:"", tasks:{} };
+    save();
+    ["who","when","dev"].forEach(function(k){ $(k).value = state[k] || ""; });
+    render();
+  });
+
+  render();
+})();
+</script>
