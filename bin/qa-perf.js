@@ -187,7 +187,8 @@ async function main() {
     return new Promise((resolve, reject) => {
       browser.waiting.set(id, { resolve, reject });
       browser.ws.send(JSON.stringify({ id, method, params, sessionId }));
-      setTimeout(() => { if (browser.waiting.has(id)) { browser.waiting.delete(id); reject(new Error(method + ' timed out')); } }, 60000);
+      const limit = method === 'Page.navigate' ? 120000 : 60000;
+      setTimeout(() => { if (browser.waiting.has(id)) { browser.waiting.delete(id); reject(new Error(method + ' timed out')); } }, limit);
     });
   };
   const evaluate = async (expression) => {
@@ -227,9 +228,18 @@ async function main() {
     if (m.method === 'Network.loadingFailed') { inFlight.delete(m.params.requestId); lastActivity = Date.now(); }
   });
 
+  /* A timeout on a navigation is the development server stalling, not the page
+     failing; letting it reject kills the whole gate and the runner reads a
+     failed gate where every check passed. One retry; a second failure is real. */
   const goto = async (url) => {
     ledger = [];
-    await send('Page.navigate', { url });
+    try {
+      await send('Page.navigate', { url });
+    } catch (e) {
+      if (!/timed out/.test(String(e && e.message))) throw e;
+      await sleep(1500);
+      await send('Page.navigate', { url });
+    }
     await sleep(600);
     const started = Date.now();
     while (Date.now() - started < 12000) {

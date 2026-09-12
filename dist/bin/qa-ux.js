@@ -231,8 +231,17 @@ async function main() {
     }
   });
 
+  /* A timeout on a navigation is the development server stalling, not the page
+     failing; letting it reject kills the whole gate and the runner reads a
+     failed gate where every check passed. One retry; a second failure is real. */
   const goto = async (url) => {
-    await send('Page.navigate', { url });
+    try {
+      await send('Page.navigate', { url });
+    } catch (e) {
+      if (!/timed out/.test(String(e && e.message))) throw e;
+      await sleep(1500);
+      await send('Page.navigate', { url });
+    }
     await sleep(500);
     const started = Date.now();
     while (Date.now() - started < 9000) {

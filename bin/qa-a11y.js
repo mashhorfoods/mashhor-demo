@@ -203,7 +203,9 @@ async function main() {
     return new Promise((resolve, reject) => {
       browser.waiting.set(id, { resolve, reject });
       browser.ws.send(JSON.stringify({ id, method, params, sessionId }));
-      setTimeout(() => { if (browser.waiting.has(id)) { browser.waiting.delete(id); reject(new Error(method + ' timed out')); } }, 60000);
+      /* a navigation waits on the server; everything else waits on the page */
+      const limit = method === 'Page.navigate' ? 120000 : 60000;
+      setTimeout(() => { if (browser.waiting.has(id)) { browser.waiting.delete(id); reject(new Error(method + ' timed out')); } }, limit);
     });
   };
   const evaluate = async (expression) => {
@@ -223,8 +225,21 @@ async function main() {
     if (m.method === 'Network.loadingFinished' || m.method === 'Network.loadingFailed') { inFlight.delete(m.params.requestId); lastActivity = Date.now(); }
   });
   const resize = (w, h) => send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 1, mobile: w < 600 });
+  /* One navigation in a run of several hundred occasionally takes longer than
+     the command timeout — the development PHP server has four workers and this
+     gate keeps all of them busy. A timeout there is the fixture stalling, not
+     the page failing, and letting it reject kills the whole gate: the run
+     ended with no tally at all and the release runner read a failed gate
+     where every check had passed. One retry, and only a second failure is
+     real. */
   const goto = async (url) => {
-    await send('Page.navigate', { url });
+    try {
+      await send('Page.navigate', { url });
+    } catch (e) {
+      if (!/timed out/.test(String(e && e.message))) throw e;
+      await sleep(1500);
+      await send('Page.navigate', { url });
+    }
     await sleep(500);
     const started = Date.now();
     while (Date.now() - started < 9000) {

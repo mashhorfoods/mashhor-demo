@@ -965,7 +965,14 @@ async function main() {
 
   browser.close();
   chrome.kill();
-  fs.rmSync(userDir, { recursive: true, force: true });
+  /* The profile directory is deleted while Chromium may still be writing into
+     it: chrome.kill() sends a signal, it does not wait for the process to go.
+     `force: true` only suppresses ENOENT — ENOTEMPTY still throws, main()
+     rejects, and the catch below exits 2 *after* the report has printed
+     "0 failed". Every check passed and the runner read a failed gate.
+     Retries, and a catch, so cleaning up can never decide the verdict. */
+  try { fs.rmSync(userDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 120 }); }
+  catch (e) { /* a leftover temp directory is not a finding */ }
   process.exit(fail === 0 ? 0 : 1);
 }
 
