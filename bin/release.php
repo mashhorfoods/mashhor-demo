@@ -67,11 +67,61 @@ $GATES = [
     ['ux',       'التجربة — الفشل والفراغ ولوحة المفاتيح',      ['node', 'bin/qa-ux.js', $BASE], true],
     ['a11y',     'إمكانية الوصول — التباين والتركيز و320 بكسل', ['node', 'bin/qa-a11y.js', $BASE], true],
     ['perf',     'الأداء — الوزن والرسم والصور',                ['node', 'bin/qa-perf.js', $BASE], true],
+    ['csp',      'سياسة المحتوى — الصفحة تحت الرأس الحقيقي',    ['node', 'bin/qa-csp.js'], true],
 ];
 
 $results = [];
 $totalPass = 0; $totalFail = 0;
 $ran = 0; $skipped = [];
+
+/**
+ * Every gate that exercises the users screen creates accounts, and none of them
+ * removes what it made. They accumulate across runs — 767 of them by the time
+ * this was written — and the users list is not paginated, so the weight the
+ * performance gate measures for that one screen is the weight of every account
+ * any gate ever created. It failed at 886KB against an 879KB budget, which
+ * said nothing about the product and everything about the database.
+ *
+ * The list being unpaginated is a deliberate shape, not an oversight: this is
+ * the staff list, a handful of accounts, and `Repo/Requests.php` paginates
+ * precisely because requests grow with the business while staff do not. What
+ * the budget is meant to measure is that screen at its real size, so the run
+ * has to start from a real staff list.
+ *
+ * The filter is done here in PHP rather than in SQL because the gate runs
+ * against SQLite locally and MySQL on the host, and the pattern syntax differs.
+ * It keeps anything a person would have made and removes only the shapes the
+ * harnesses generate: a digit immediately before the @, or the @invalid domain
+ * the retire test uses. `noura@aunaldrb.com` — the account every gate signs in
+ * with — has neither, so it survives.
+ */
+function pruneHarnessAccounts(): void
+{
+    try {
+        $rows = Db::all('SELECT id, email FROM users');
+    } catch (Throwable $e) {
+        return; /* a target that is not this database */
+    }
+    $doomed = [];
+    foreach ($rows as $r) {
+        $e = (string) ($r['email'] ?? '');
+        if (preg_match('/[0-9]@aunaldrb\.com$/', $e) || str_ends_with($e, '@invalid')) {
+            $doomed[] = (int) $r['id'];
+        }
+    }
+    if ($doomed === []) return;
+    foreach (array_chunk($doomed, 200) as $chunk) {
+        $in = implode(',', array_fill(0, count($chunk), '?'));
+        /* rows that point at the account have to go first, or the delete is
+           refused by the foreign key and the pollution stays */
+        foreach (['sessions', 'activity'] as $t) {
+            try { Db::run("DELETE FROM {$t} WHERE user_id IN ({$in})", $chunk); }
+            catch (Throwable $e) { /* the table may not reference users */ }
+        }
+        try { Db::run("DELETE FROM users WHERE id IN ({$in})", $chunk); }
+        catch (Throwable $e) { /* leave what will not delete rather than abort the run */ }
+    }
+}
 
 function runGate(array $cmd, string $root): array
 {
@@ -86,7 +136,7 @@ function runGate(array $cmd, string $root): array
 }
 
 /* Both harness families end with the same sentence, so one reader serves
-   all ten rather than each gate needing its own parser. */
+   all eleven rather than each gate needing its own parser. */
 function tally(string $out): array
 {
     if (preg_match_all('/(\d+)\s+passed,\s+(\d+)\s+failed/', $out, $m)) {
@@ -118,6 +168,7 @@ foreach ($GATES as [$name, $label, $cmd, $slow]) {
        job; the runner has to stop tripping it. */
     try { Db::run('DELETE FROM rate_hits'); Db::run('UPDATE users SET failed_attempts = 0, locked_until = NULL'); }
     catch (Throwable $e) { /* a target that is not this database */ }
+    pruneHarnessAccounts();
     $r = runGate($cmd, $GLOBALS['ROOT']);
     [$p, $f] = tally($r['out']);
     $totalPass += $p; $totalFail += $f;

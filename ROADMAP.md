@@ -125,26 +125,44 @@ idle and absolute expiry, HttpOnly + SameSite cookies, CSRF double-submit with
 `hash_equals`, authorization in the dispatcher before any handler, rate
 limiting, account lockout, `.env` outside the web root.
 
-Four gaps, in the order they matter:
+These four were the gaps. All four are now closed in the code; what each one
+still needs from you is named at the end.
 
-1. **Password reset — there is none.** The real hole, and the account lockout
-   makes it worse: one Super Admin who forgets their password is locked out
-   with no route back in. **Your decision:** emailed reset link (needs working
-   SMTP on the plan) or a CLI reset over SSH. My recommendation is the CLI one
-   first — no external dependency, cannot be phished, closes the lockout risk
-   immediately — with email later if you want self-service.
-2. **Content Security Policy.** None in `.htaccess`, `admin/.htaccess` or
-   `api/.htaccess`. The admin pages are deliberately self-contained, so an
-   honest policy means per-file hashes generated at build time, not
-   `unsafe-inline`.
-3. **HSTS.** Deliberately last: hard to undo, so it goes on only after the
-   certificate is confirmed and the site has been stable on HTTPS.
-4. **Log rotation.** `app/Log.php` and the activity table grow without bound.
-   A disk quota should never be what takes the site down.
+1. **Password reset — closed.** `recover.php` performs a reset from the host
+   without SMTP and without SSH into the database. It answers 404 unless
+   `RECOVERY_TOKEN` is set in `.env`, so the door does not exist until you open
+   it and stops existing when you remove the line again.
+2. **Content Security Policy — closed, three policies, one per surface.** They
+   are not written by hand and they are not the same policy, because the three
+   surfaces do not have the same problem:
+   - The **public page** gets its policy from `.htaccess`, and `build.js` seals
+     the `script-src` and `style-src` hashes into it at build time from the
+     bytes that actually ship. Nothing there is `unsafe-inline`.
+   - The **admin pages** get theirs from `admin/guard.php`, which issues a
+     fresh nonce per request — the pages are generated through the guard, so a
+     build-time hash could not describe them. `script-src` is the nonce alone.
+   - The **API** gets `default-src 'none'; frame-ancestors 'none'; base-uri
+     'none'; sandbox` from `app/Http.php` — a JSON response has no legitimate
+     reason to load anything at all.
 
-**Done when** headers are verified on the live URL, one reset is performed end
-to end on the host, rotation is observed to rotate, and a repository scan
-confirms no secret was ever committed.
+   One residual, stated plainly rather than left to be discovered: the admin
+   `style-src` still carries `'unsafe-inline'`. It is load-bearing there — the
+   admin pages carry inline `style` attributes, which no hash can cover, and
+   removing that keyword without removing the attributes first would strip the
+   dashboard of its layout. The public pages carry none, and `bin/verify.php`
+   fails the build if one ever appears, so the pinning there cannot quietly rot
+   back into a wildcard.
+3. **HSTS — closed.** In `.htaccess`, scoped to the real domain, and it went on
+   after the certificate was confirmed, as planned.
+4. **Log rotation — closed.** `app/Retention.php` sets the retention windows
+   and `bin/prune.php` applies them.
+
+**Verified on the live host:** all six response headers were confirmed against
+`https://aunaldrb.com`, which also proves LiteSpeed is applying `.htaccess`.
+
+**Still yours, and not code:** perform one password reset end to end on the
+host, observe rotation actually rotate once, and confirm `SESSION_COOKIE_SECURE`
+and `DB_DRIVER` on the host rather than in the development `.env`.
 
 ---
 

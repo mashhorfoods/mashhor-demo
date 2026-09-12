@@ -1975,20 +1975,49 @@ check('csp', 'the source carries a token, not hand-written hashes',
 check('csp', 'and the build replaced it', !str_contains($built, '__AUN_SCRIPT_HASHES__'));
 
 /* the hashes must match the file that actually ships — a stale hash is a
-   silently broken page, which is exactly what this check exists to catch */
-preg_match_all("/'(sha256-[A-Za-z0-9+\/=]+)'/", $built, $m);
-$declared = array_unique($m[1]);
-$actual = [];
-foreach (preg_split('#(?=<script)#', $page) as $chunk) {
-    if (!preg_match('#^<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>#s', $chunk, $mm)) continue;
-    $actual[] = 'sha256-' . base64_encode(hash('sha256', $mm[1], true));
+   silently broken page, which is exactly what this check exists to catch.
+   script-src and style-src each carry their own list, so read each directive
+   separately: one pool of every sha256 in the file would let a style hash
+   satisfy a script check and hide exactly the staleness this looks for.
+   And the policy is attached by <FilesMatch "\.html$">, so it governs every
+   page at the document root, not index.html alone — gather from all of them,
+   as build.js does. */
+$hashesIn = static function (string $directive) use ($built): array {
+    if (!preg_match('/(?:^|;)\s*' . $directive . '\s([^;"]*)/', $built, $d)) return [];
+    preg_match_all("/'(sha256-[A-Za-z0-9+\/=]+)'/", $d[1], $h);
+    return array_values(array_unique($h[1]));
+};
+$rootPages = glob(AUN_ROOT . '/dist/*.html') ?: [];
+$inlineOf = static function (string $tag) use ($rootPages): array {
+    $out = [];
+    foreach ($rootPages as $f) {
+        $body = (string) @file_get_contents($f);
+        if (preg_match_all('#<' . $tag . '(?![^>]*\bsrc=)[^>]*>(.*?)</' . $tag . '>#s', $body, $mm)) {
+            foreach ($mm[1] as $b) $out[] = 'sha256-' . base64_encode(hash('sha256', $b, true));
+        }
+    }
+    return array_values(array_unique($out));
+};
+
+foreach ([['script', 'script-src', 'سكربت'], ['style', 'style-src', 'style']] as [$tag, $dir, $word]) {
+    $declared = $hashesIn($dir);
+    $actual   = $inlineOf($tag);
+    check('csp', "every inline <{$tag}> at the document root is named by a hash",
+        $actual !== [] && array_diff($actual, $declared) === [],
+        count($actual) . " inline {$tag}, " . count($declared) . ' hashes in ' . $dir);
+    check('csp', "and no {$dir} hash names a {$tag} that is no longer there",
+        $declared !== [] && array_diff($declared, $actual) === []);
 }
-$actual = array_unique($actual);
-check('csp', 'every inline script on the public page is named by a hash',
-    $actual !== [] && array_diff($actual, $declared) === [],
-    count($actual) . ' scripts, ' . count($declared) . ' hashes');
-check('csp', 'and no hash names a script that is no longer there',
-    array_diff($declared, $actual) === []);
+/* a style attribute is not covered by any hash: if one appears, style-src
+   would have to reopen to 'unsafe-inline' and the pinning above buys nothing */
+$withStyleAttr = [];
+foreach ($rootPages as $f) {
+    if (preg_match('/<[a-z][^>]*\sstyle=["\']/i', (string) @file_get_contents($f))) {
+        $withStyleAttr[] = basename($f);
+    }
+}
+check('csp', 'and no page at the root carries a style attribute a hash cannot cover',
+    $withStyleAttr === [], $withStyleAttr === [] ? '' : implode(', ', $withStyleAttr));
 check('csp', 'the build refuses to ship a policy it could not seal',
     str_contains((string) @file_get_contents(AUN_ROOT . '/build.js'),
         'the CSP would ship without its hashes'));

@@ -1,10 +1,16 @@
 # Uploading to Hostinger
 
-`aun-aldrb-site.zip` — 70 files, 3.07MB. Build it with:
+`aun-aldrb-site.zip`. Build it with:
 
 ```sh
 node build.js && node tools-package.js
 ```
+
+The packager prints the file count and both sizes for the archive it just
+wrote, and checks that the archive holds exactly what `dist/` holds — nothing
+missing, nothing extra. Read the count off that line rather than from here: a
+number written into this file is right on the day it is typed and wrong after
+the next image or page is added.
 
 The archive holds the **contents** of `dist/` at its root: `index.html` is the
 first entry, not `dist/index.html`. That matters — see step 3.

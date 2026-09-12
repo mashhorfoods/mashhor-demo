@@ -25,8 +25,17 @@ regenerate **derived** assets — the responsive photo variants, the self-hosted
 font subsets, the social card and icons — and their outputs are committed, so a
 clean checkout can build without running them.
 
-`dist/` after a build — **70 files, 3.3MB**, of which a first visit downloads
-about 250KB:
+`dist/` after a build — `node tools-package.js` prints the file count and size
+of the archive it writes, and checks the archive against `dist/` file by file.
+Read the count from there rather than from here; a number typed into a document
+is right the day it is typed.
+
+What a visitor actually pulls is measured, not estimated: `bin/qa-perf.js` puts
+a first visit at **518KB uncompressed over 16 requests**, of which the document
+itself is 202KB — and that 202KB is the part compression works on, while the
+photographs and the font subsets are already compressed formats.
+
+The static half of that, which is what the rest of this document describes:
 
 ```
 index.html                          the site
