@@ -105,8 +105,23 @@ const SHIP_TREES = [
      documents, not part of the application */
   { dir: 'admin', skip: (rel) => rel.endsWith('.md')
                                  || /^(stage-\d|recovery-\d)/.test(rel) },
-  { dir: 'bin',   skip: (rel) => rel === 'verify.php' || rel === 'extract-content.php'
-                                 || rel === 'qa-browser.js' },
+  /* Only the tools an operator or the host actually runs.
+     The QA gates were shipping to production by default — an exclusion list
+     that names three files lets every gate added afterwards ride along, and
+     ten of them did. They are not reachable over the web (the root .htaccess
+     answers 404 for /bin/) and they refuse to run against a production
+     environment, but they do not belong on the server: they are development
+     tooling, and two of them carry a development password as a default
+     argument. An allow list cannot drift the same way — a new gate has to be
+     named here to ship, and no gate ever should be. */
+  { dir: 'bin',   skip: (rel) => ![
+                    'preflight.php',      /* the read-only deployment check */
+                    'migrate.php',        /* schema, run once on install */
+                    'backup.php',         /* the operator's own backup */
+                    'prune.php',          /* log retention */
+                    'seed.php',           /* first-run data */
+                    'seed-content.php',   /* first-run content */
+                  ].includes(rel) },
 ];
 
 /* Everything else — photographs, faces, logos, the social card, the icons —
