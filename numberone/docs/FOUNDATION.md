@@ -19,7 +19,7 @@ numberone/
 ├── docs/FOUNDATION.md      This document
 └── assets/
     ├── brand/              mark.svg · favicon.svg · README.md (the logo slot)
-    ├── fonts/              IBM Plex Sans Arabic + Inter, self-hosted, subset
+    ├── fonts/              IBM Plex Sans Arabic (12) + Inter (4), self-hosted
     ├── icons/sprite.svg    61 icons, one family
     ├── css/
     │   ├── foundation.css  ← the only file a page imports
@@ -130,6 +130,18 @@ states and key highlights. It is not used as a background wash.
 
 Both are SIL OFL, self-hosted, and split by `unicode-range`: an English visitor
 never downloads the Arabic subsets.
+
+**Inter ships without its `latin-ext` subset.** Inter is applied only through
+`--font-data`, which carries digits, IATA codes, flight numbers, booking
+references and currency codes — all ASCII. Its Central/Eastern European glyphs
+were 336KB that no price or airport code could reach.
+
+**IBM Plex keeps its `latin-ext` subset**, and must. Plex is the body face, so a
+destination name like `İstanbul Beşiktaş` or `Łódź` resolves through it —
+Turkish `ş ğ İ ı` are latin-ext, not Latin-1. Verified: injecting Turkish body
+copy fetches `ibm-plex-sans-arabic-latin-ext-400.woff2`. Do not delete it to
+match Inter. If Turkish ever lands in a data context anyway, `--font-data` falls
+through to Plex, which still has the glyphs.
 
 **Scale:** `--text-display` · `h1`–`h4` · `body-lg` · `body` · `body-sm` ·
 `caption` · `button` · `price` · `price-lg` · `number-lg` · `data` · `label` ·
