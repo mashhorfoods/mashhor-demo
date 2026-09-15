@@ -217,6 +217,13 @@
     changePassword: function (current, next) {
       return post("/auth/password", { current: current, password: next });
     },
+    /* Creating or editing a staff account. `data` carries name, email, role,
+       active and — on an edit — the id; permissions only when the role is one
+       whose matrix is editable, because the server intersects a stored matrix
+       with the role preset and a wider one is silently narrowed anyway.
+       A create also carries password: the server requires one, and there is no
+       invite-by-email path on this deployment to defer it to. */
+    saveUser: function (data) { return post("/admin/users/save", data); },
     resetUserPassword: function (id, next) {
       return post("/admin/users/password", { id: id, password: next });
     },

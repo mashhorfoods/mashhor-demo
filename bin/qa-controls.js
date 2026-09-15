@@ -603,6 +603,124 @@ async function main() {
                       : `${pageCount} controls`);
   }
 
+  /* ================================================================
+     A control that is wired is not the same as a control that works.
+
+     Everything above asks whether something listens. That question has a
+     blind spot exactly where it matters most: the controls that save,
+     publish, delete or restore are deliberately never clicked, so for those
+     the gate reads the wiring and stops. A handler that validates the form,
+     mutates a local array and shows «حُفظت التغييرات» satisfies it
+     completely — and that is what the users screen did. Every check here
+     passed while creating an account, editing one and disabling one all did
+     nothing but repaint the page. The operator was told it worked; a reload
+     showed it had not.
+
+     So this section clicks the write controls the sweep refuses to, and asks
+     the only question that settles it: did a request actually leave the
+     browser? window.fetch is wrapped before any page script runs, and the
+     page is then driven the way a person drives it. A success message with no
+     POST behind it is the failure this is looking for.
+
+     It writes real rows into the development database, which is why it runs
+     last and why each entry cleans up after itself where it can.
+     ================================================================ */
+  section('A WRITE THAT REPORTS SUCCESS REACHED THE SERVER');
+
+  await send('Page.addScriptToEvaluateOnNewDocument', {
+    source: `(() => {
+      window.__aunPosts = [];
+      const real = window.fetch;
+      window.fetch = function (u, o) {
+        try {
+          const m = (o && o.method) || (u && u.method) || 'GET';
+          if (/^post$/i.test(m)) window.__aunPosts.push(String((u && u.url) || u));
+        } catch (e) { /* never let the probe break the page */ }
+        return real.apply(this, arguments);
+      };
+    })()`,
+  });
+
+  const stamp = String(Date.now()).slice(-6);
+  const probeMail = 'wireprobe' + stamp + '@aunaldrb.com';
+
+  const evalIn = async (expr) => {
+    const r = await send('Runtime.evaluate',
+      { expression: expr, returnByValue: true, awaitPromise: true });
+    return r && r.result ? r.result.value : null;
+  };
+  const postsSince = async (n) => (await evalIn('window.__aunPosts.length')) - n;
+
+  /* --- creating an account ------------------------------------------- */
+  await goto(BASE + '/admin/users');
+  let before = await evalIn('window.__aunPosts.length');
+  await evalIn(`document.getElementById('addbtn').click()`);
+  await sleep(400);
+  await evalIn(`(() => { const s = (id, v) => { const e = document.getElementById(id);
+      if (!e) return; e.value = v;
+      e.dispatchEvent(new Event('input', { bubbles: true }));
+      e.dispatchEvent(new Event('change', { bubbles: true })); };
+    s('uName', 'فحص الربط ${stamp}'); s('uMail', '${probeMail}');
+    s('uPass', 'Wire-Probe-${stamp}!'); return 1; })()`);
+  await evalIn(`document.getElementById('uform').dispatchEvent(
+    new Event('submit', { cancelable: true, bubbles: true }))`);
+  await sleep(2200);
+  const createPosts = await postsSince(before);
+  const createdOnServer = await evalIn(
+    `fetch('${BASE}/api/admin/users', { credentials: 'same-origin' })
+       .then(r => r.json()).then(b => (b.rows || []).filter(u => u.email === '${probeMail}').length)`);
+  check('users', 'creating an account sends it to the server',
+    createPosts > 0 && createdOnServer === 1,
+    `${createPosts} POST(s), ${createdOnServer} row on the server`);
+
+  /* --- editing one ---------------------------------------------------- */
+  await goto(BASE + '/admin/users');
+  before = await evalIn('window.__aunPosts.length');
+  const openedRow = await evalIn(`(() => { for (const r of document.querySelectorAll('.urow')) {
+      if (r.textContent.includes('${probeMail}')) {
+        const b = r.querySelector('.urow__a button'); if (b) { b.click(); return 1; } } }
+    return 0; })()`);
+  await sleep(700);
+  await evalIn(`(() => { const e = document.getElementById('uName'); if (!e) return 0;
+    e.value = 'فحص معدّل ${stamp}';
+    e.dispatchEvent(new Event('input', { bubbles: true })); return 1; })()`);
+  await evalIn(`document.getElementById('uform').dispatchEvent(
+    new Event('submit', { cancelable: true, bubbles: true }))`);
+  await sleep(2200);
+  const editPosts = await postsSince(before);
+  const editedName = await evalIn(
+    `fetch('${BASE}/api/admin/users', { credentials: 'same-origin' })
+       .then(r => r.json()).then(b => { const u = (b.rows || []).find(u => u.email === '${probeMail}');
+         return u ? u.name : null; })`);
+  check('users', 'editing an account sends it to the server',
+    openedRow === 1 && editPosts > 0 && editedName === 'فحص معدّل ' + stamp,
+    `${editPosts} POST(s), server name «${editedName}»`);
+
+  /* --- disabling one. The control an operator reaches for when an account
+         may be compromised, so a false success here is the worst of the three. */
+  before = await evalIn('window.__aunPosts.length');
+  const activeBefore = await evalIn(
+    `fetch('${BASE}/api/admin/users', { credentials: 'same-origin' })
+       .then(r => r.json()).then(b => { const u = (b.rows || []).find(u => u.email === '${probeMail}');
+         return u ? !!u.active : null; })`);
+  await evalIn(`document.getElementById('actbtn').click()`);
+  await sleep(400);
+  await evalIn(`document.getElementById('confOk').click()`);
+  await sleep(2200);
+  const offPosts = await postsSince(before);
+  const activeAfter = await evalIn(
+    `fetch('${BASE}/api/admin/users', { credentials: 'same-origin' })
+       .then(r => r.json()).then(b => { const u = (b.rows || []).find(u => u.email === '${probeMail}');
+         return u ? !!u.active : null; })`);
+  check('users', 'disabling an account sends it to the server',
+    offPosts > 0 && activeBefore === true && activeAfter === false,
+    `${offPosts} POST(s), active ${activeBefore} → ${activeAfter}`);
+
+  /* --- and the control that never had a server to reach ---------------- */
+  check('users', 'no control offers to delete an account',
+    (await evalIn(`document.getElementById('rmbtn') === null`)) === true,
+    'there is no delete route and no delete in Repo_Users; disabling is the reversible control');
+
   section('SUMMARY');
   check('all', 'no control anywhere is bound to nothing', dead.length === 0,
     `${totalControls} kinds of control examined, ${dead.length} dead, `

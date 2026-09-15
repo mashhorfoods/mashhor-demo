@@ -1029,7 +1029,6 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
 <symbol id="ic-list" viewBox="0 0 24 24"><path d="M8.6 6.6h11.8M8.6 12h11.8M8.6 17.4h11.8"/><circle cx="4.6" cy="6.6" r="1.2" fill="currentColor" stroke="none"/><circle cx="4.6" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="4.6" cy="17.4" r="1.2" fill="currentColor" stroke="none"/></symbol>
 <symbol id="ic-upload" viewBox="0 0 24 24"><path d="M12 15.6V4.4"/><path d="m7.6 8.8 4.4-4.4 4.4 4.4"/><path d="M4.4 15.2v3.2a2 2 0 0 0 2 2h11.2a2 2 0 0 0 2-2v-3.2"/></symbol>
 <symbol id="ic-check" viewBox="0 0 24 24"><path d="m4.8 12.6 4.6 4.6L19.2 7.4"/></symbol>
-<symbol id="ic-trash" viewBox="0 0 24 24"><path d="M4.6 6.6h14.8"/><path d="M9.4 6.6V4.8a1.4 1.4 0 0 1 1.4-1.4h2.4a1.4 1.4 0 0 1 1.4 1.4v1.8"/><path d="M6.6 6.6 7.5 19a1.6 1.6 0 0 0 1.6 1.5h5.8a1.6 1.6 0 0 0 1.6-1.5l.9-12.4"/><path d="M10.4 10.4v6M13.6 10.4v6"/></symbol>
 <symbol id="ic-image" viewBox="0 0 24 24"><rect x="3.4" y="4.6" width="17.2" height="14.8" rx="2.2"/><circle cx="8.8" cy="9.6" r="1.6"/><path d="m4.4 17.4 4.8-4.4 3.4 3 3-2.6 4 3.6"/></symbol>
 </defs></svg>
 
@@ -1172,9 +1171,14 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
                   <span class="field__help">يُستخدم لتسجيل الدخول.</span>
                   <span class="field__err" id="e-uMail" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span></div>
               </div>
+              <div class="field" id="passField" style="margin-top:var(--s5);max-width:26rem" hidden>
+                <label class="field__label" for="uPass">كلمة المرور الأولى <span class="field__req">(مطلوب)</span></label>
+                <input class="ctl ltr" id="uPass" aria-describedby="e-uPass" type="password" autocomplete="new-password" minlength="12">
+                <span class="field__help">12 حرفاً على الأقل. سلّمها للموظف ليغيّرها من حسابه بعد أول دخول.</span>
+                <span class="field__err" id="e-uPass" hidden><svg class="i i--sm" aria-hidden="true"><use href="#ic-alert"/></svg><span></span></span></div>
               <div class="readonly" style="margin-top:var(--s5)">
                 <svg class="i i--sm" aria-hidden="true"><use href="#ic-shield"/></svg>
-                <p>لا تُعرض كلمات المرور ولا تُخزَّن بصيغة قابلة للقراءة. عند إنشاء الحساب يُطلب من المستخدم تعيين كلمة مروره عند أول دخول.</p>
+                <p>لا تُعرض كلمات المرور ولا تُخزَّن بصيغة قابلة للقراءة. تُعيَّن كلمة المرور الأولى هنا عند الإنشاء، ويستطيع صاحب الحساب تغييرها من حسابه بعد الدخول.</p>
               </div></div>
             </section>
 
@@ -1238,8 +1242,13 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
                   <button class="btn btn--secondary" type="button" id="pwbtn">
                     <svg class="i i--sm" aria-hidden="true"><use href="#ic-shield"/></svg>إعادة تعيين كلمة المرور</button>
                   <button class="btn btn--ghost" type="button" id="actbtn"></button>
-                  <button class="btn btn--danger" type="button" id="rmbtn">
-                    <svg class="i i--sm" aria-hidden="true"><use href="#ic-trash"/></svg>إلغاء وصول المستخدم</button>
+                  <!-- There was an «إلغاء وصول المستخدم» button here that deleted the
+                       account. It never reached the server: there is no delete route
+                       and Repo_Users has no delete method, because the activity log
+                       attributes every action to a user id and a deleted row would
+                       orphan that history. Its own dialog already named the right
+                       control — «التعطيل بديل قابل للعكس» — which is the button
+                       above, and that one ends the account's sessions immediately. -->
                 </div>
                 <p class="field__help" id="guardNote" style="margin-top:var(--s4)"></p>
               </div>
@@ -1299,7 +1308,7 @@ select.ctl{appearance:none;padding-inline-end:2.4rem}
 </div>
 <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
 
-<script src="app.js?v=74d7ad9429"></script>
+<script src="app.js?v=ae424b42eb"></script>
 <script>
 /* Shell behaviour shared by every module page. Exposes only the two helpers
    the modules need — a toast and a confirmation — and keeps the rest private. */
@@ -1539,7 +1548,14 @@ window.AunShell = (function(){
       r.querySelector(".urow__e").textContent=u.mail;
       r.querySelector(".rb").appendChild(roleBadge(u.role));
       r.querySelector(".sb").appendChild(statBadge(u.on));
-      r.querySelector(".urow__last").textContent="آخر دخول "+u.last.slice(0,10);
+      /* last_login_at is NULL until the account signs in for the first time.
+         `added` was already guarded against that and this was not, so the
+         first genuinely new account made render() throw mid-loop and the list
+         silently lost every row after it. It stayed hidden while this page
+         could not create anyone: the accounts the test harnesses make all sign
+         in straight away, which fills the column. */
+      r.querySelector(".urow__last").textContent =
+        u.last ? "آخر دخول "+u.last.slice(0,10) : "لم يسجّل دخوله بعد";
       var b=el("button","btn btn--secondary btn--sm"); b.type="button";
       b.innerHTML='<svg class="i i--sm" aria-hidden="true"><use href="#ic-edit"/></svg>';
       b.appendChild(document.createTextNode(canModify?"تعديل":"عرض"));
@@ -1573,8 +1589,15 @@ window.AunShell = (function(){
       : "تعديل المعلومات أو الصلاحيات دون إنشاء حساب جديد.";
     $("uName").value=draft.name; $("uMail").value=draft.mail; $("uRole").value=draft.role;
     $("accCard").hidden = adding;
+    /* The password is set here and only here: the server requires one to
+       create an account, and this deployment has no invite-by-email path to
+       defer it to. On an edit it is not shown at all — changing someone
+       else's password is its own dialog, restricted to a Super Admin. */
+    $("passField").hidden = !adding;
+    $("uPass").value = "";
+    $("e-uPass").hidden = true; unflag("uPass");
     $("saveNote").textContent = adding
-      ? "يُطلب من المستخدم تعيين كلمة مروره عند أول دخول."
+      ? "سلّم كلمة المرور الأولى للموظف؛ يغيّرها من حسابه بعد الدخول."
       : "يسري التغيير على الحساب فوراً.";
     $("save").textContent = adding ? "إضافة المستخدم" : "حفظ التغييرات";
     buildPerms(); fillAcc(); review(); setDirty(false); applyPerms();
@@ -1629,7 +1652,7 @@ window.AunShell = (function(){
   function fillAcc(){
     if (adding) return;
     $("aStat").textContent=""; $("aStat").appendChild(statBadge(current.on));
-    $("aLast").textContent=current.last;
+    $("aLast").textContent=current.last || "لم يسجّل دخوله بعد";
     $("aAdded").textContent=current.added;
     $("actbtn").textContent = current.on ? "تعطيل الوصول" : "تفعيل الوصول";
 
@@ -1640,7 +1663,6 @@ window.AunShell = (function(){
     $("guardNote").textContent = notes.join(" ");
     var locked = current.id===ME || isLastSuper(current);
     $("actbtn").disabled = locked || !canModify;
-    $("rmbtn").disabled  = locked || !canModify;
     $("uRole").disabled  = locked || !canModify;
   }
 
@@ -1674,7 +1696,7 @@ window.AunShell = (function(){
   $("uform").addEventListener("submit", function(e){
     e.preventDefault();
     if (!canModify) return;
-    ["uName","uMail"].forEach(function(id){ $("e-"+id).hidden=true; unflag(id); });
+    ["uName","uMail","uPass"].forEach(function(id){ $("e-"+id).hidden=true; unflag(id); });
     var n=$("uName").value.trim(), m=$("uMail").value.trim().toLowerCase(), bad=null;
     if (!n){ fieldErr("uName","اسم المستخدم مطلوب."); bad="uName"; }
     if (!m){ fieldErr("uMail","البريد الإلكتروني مطلوب."); bad=bad||"uMail"; }
@@ -1683,20 +1705,60 @@ window.AunShell = (function(){
       var clash=USERS.filter(function(u){ return u.mail.toLowerCase()===m && (!current||u.id!==current.id); });
       if (clash.length){ fieldErr("uMail","هذا البريد مستخدم بحساب «"+clash[0].name+"»."); bad=bad||"uMail"; }
     }
+    /* Only a length check here. What counts as strong enough is decided in
+       one place on the server (Auth::passwordProblem), so the users module,
+       the installer and the recovery page cannot drift apart — and whatever
+       it refuses comes back as a field error below. */
+    if (adding && $("uPass").value.length < 12){
+      fieldErr("uPass","كلمة المرور يجب ألا تقل عن 12 حرفاً."); bad=bad||"uPass";
+    }
     if (bad){ $(bad).focus(); toast("تحقّق من الحقول المميّزة",true); return; }
     if (!navigator.onLine){ toast("لا يوجد اتصال — لم يُحفظ",true); return; }
 
-    if (adding){
-      var u={ id:"u"+(USERS.length+1), name:n, mail:m, role:draft.role, on:true,
-              last:"—", added:"2026-09-14", perms:clone(draft.perms) };
-      USERS.push(u);
-      toast("أُضيف المستخدم «"+n+"»");
-      back(); return;
-    }
-    current.name=n; current.mail=m; current.role=draft.role; current.perms=clone(draft.perms);
-    $("uHead").textContent=current.name;
-    setDirty(false); fillAcc(); render();
-    toast("حُفظت التغييرات");
+    /* Everything above this line is courtesy: it catches the common mistakes
+       without a round trip. What decides the outcome is the server, which
+       validates the same fields again and enforces the three rules the page
+       cannot (no changing your own role, no disabling yourself, never remove
+       the last active Super Admin). So nothing below reports success until a
+       response has said so. */
+    var payload = { name:n, email:m, role:draft.role, active: (adding ? true : draft.on) ? 1 : 0 };
+    if (!ROLES[draft.role].fixed) payload.permissions = draft.perms;
+    if (!adding) payload.id = current.id;
+    if (adding) payload.password = $("uPass").value;
+
+    var wasAdding = adding;
+    $("save").disabled = true;
+    var label = $("save").textContent;
+    $("save").textContent = "جارٍ الحفظ…";
+
+    AunAPI.saveUser(payload).then(function(){
+      /* Re-read rather than patch the local copy: the server assigns the id,
+         the created date and the permission matrix it actually stored, and a
+         guessed id here was how this page used to invent accounts. */
+      return boot();
+    }).then(function(){
+      if (wasAdding){ toast("أُضيف المستخدم «"+n+"»"); back(); return; }
+      current = find(current.id) || current;
+      draft.name = current.name; draft.mail = current.mail;
+      $("uHead").textContent = current.name;
+      setDirty(false); fillAcc();
+      toast("حُفظت التغييرات");
+    }).catch(function(e){
+      var errs = e && e.errors;
+      if (errs){
+        if (errs.name)  fieldErr("uName", errs.name);
+        if (errs.email) fieldErr("uMail", errs.email);
+        if (errs.password){ fieldErr("uPass", errs.password); }
+        var first = errs.name ? "uName" : errs.email ? "uMail" : errs.password ? "uPass" : null;
+        if (first && $(first)) $(first).focus();
+        toast("تحقّق من الحقول المميّزة", true);
+        return;
+      }
+      toast(e && e.message ? e.message : "تعذّر الحفظ", true);
+    }).then(function(){
+      $("save").disabled = false; $("save").textContent = label;
+      if (!wasAdding) setDirty(dirty);
+    });
   });
   $("cancel").addEventListener("click", tryBack);
   $("back").addEventListener("click", function(e){ e.preventDefault(); tryBack(); });
@@ -1757,20 +1819,25 @@ window.AunShell = (function(){
            : "سيستعيد الدخول إلى لوحة التحكم بصلاحياته السابقة.",
         on ? "تعطيل الوصول" : "تفعيل الوصول",
         function(){
-          current.on=!on; draft.on=current.on;
-          fillAcc(); review(); render();
-          $("uBadge").textContent=""; $("uBadge").appendChild(statBadge(current.on));
-          toast(current.on ? "فُعّل وصول المستخدم" : "عُطّل وصول المستخدم");
+          /* The server decides, and only then does the page. Disabling an
+             account is the control an operator reaches for when an account
+             may be compromised — reporting it done before the server has
+             said so is the one outcome that must not happen here. The same
+             endpoint carries the whole row, so name, email and role are sent
+             as the server last gave them, not as the unsaved form holds them. */
+          var want = !on;
+          AunAPI.saveUser({
+            id: current.id, name: current.name, email: current.mail,
+            role: current.role, active: want ? 1 : 0
+          }).then(function(){
+            current.on = want; if (draft) draft.on = want;
+            fillAcc(); review(); render();
+            $("uBadge").textContent=""; $("uBadge").appendChild(statBadge(current.on));
+            toast(current.on ? "فُعّل وصول المستخدم" : "عُطّل وصول المستخدم");
+          }).catch(function(e){
+            toast(e && e.message ? e.message : "تعذّر تغيير حالة الوصول", true);
+          });
         }, on ? undefined : false);
-  });
-  $("rmbtn").addEventListener("click", function(){
-    ask("إلغاء وصول «"+current.name+"» نهائياً؟",
-        "سيُحذف الحساب ولن يستطيع الدخول. ما قام به من تغييرات يبقى مسجّلاً باسمه. لا يمكن التراجع — التعطيل بديل قابل للعكس.",
-        "إلغاء الوصول",
-        function(){
-          USERS=USERS.filter(function(u){ return u.id!==current.id; });
-          toast("أُلغي وصول المستخدم"); back();
-        });
   });
 
   /* ---------- permissions of the viewer ------------------------------------ */
@@ -1830,7 +1897,7 @@ window.AunShell = (function(){
       USERS = (r[1].rows || []).map(function(u){
         return {
           id: String(u.id), name: u.name, mail: u.email, role: u.role,
-          on: !!u.active, last: u.lastLoginAt, added: (u.createdAt || "").slice(0, 10),
+          on: !!u.active, last: u.lastLoginAt || "", added: (u.createdAt || "").slice(0, 10),
           perms: u.permissions || preset(u.role)
         };
       });
