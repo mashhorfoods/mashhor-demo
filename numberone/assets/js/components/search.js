@@ -10,7 +10,7 @@
    rendered behind "more options" rather than shown on arrival. §13
    ========================================================================= */
 
-import { el, uid, qsa } from '../core/dom.js';
+import { el, uid } from '../core/dom.js';
 import { t, getLocale } from '../core/i18n.js';
 import { SEARCH_VERTICALS } from '../data/config.js';
 import { icon, stepper, initPopovers } from './ui.js';

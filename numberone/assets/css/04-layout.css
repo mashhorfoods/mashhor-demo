@@ -40,8 +40,13 @@
   /* Span helpers. Mobile-first: on 4 columns everything is full width unless
      told otherwise, which is the correct default for a single-column phone
      layout (§22 — recompose, do not shrink). */
+  /* Mobile default for every span helper: full width. On the 4-column mobile
+     grid this is the same as `span 4`, but expressing it as 1/-1 keeps it
+     correct at 8 and 12 columns too, and stops this rule from silently
+     defeating .l-span-full — both carry specificity (0,1,0), so whichever is
+     written second wins, and this one is written second. */
+  [class*="l-span-"],
   .l-span-full { grid-column: 1 / -1; }
-  [class*="l-span-"] { grid-column: span 4; }
   @media (min-width: 48em) {
     .l-span-4\@md { grid-column: span 4; }
     .l-span-6\@md { grid-column: span 6; }

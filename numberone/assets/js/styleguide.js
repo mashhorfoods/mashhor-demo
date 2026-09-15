@@ -9,10 +9,10 @@
 
 import {
   boot, el, qs, qsa, render, icon, toast, setButtonState,
-  t, getLocale, onLocaleChange, applyTranslations,
+  t, getLocale, applyTranslations,
   SERVICES, NAV_PRIMARY, STATUSES,
   serviceGrid, flightCard, hotelCard, packageCard, supervisorCard, tripCard, statusBadge,
-  searchWidget, stateRegion, stateBlock, skeletonList, skeletonFlight, loadingBlock,
+  searchWidget, stateRegion, skeletonList, skeletonFlight,
 } from './foundation.js';
 
 import { FLIGHTS, HOTELS, PACKAGES, SUPERVISORS, TRIPS } from './data/samples.js';
@@ -154,11 +154,16 @@ function renderComponents() {
 /* ---------------------------------------------------------------------------
    STATE MACHINE DEMO
    ------------------------------------------------------------------------ */
-function wireStates() {
-  const target = qs('#sg-state-region');
-  const region = stateRegion(target, { minHeight: '18rem' });
+let showState = null;
 
-  const show = (which) => {
+/** Binds the demo buttons exactly once. Safe to call again — it will not
+    stack a second set of listeners on a language change. */
+function wireStates() {
+  if (showState) return showState;
+
+  const region = stateRegion(qs('#sg-state-region'), { minHeight: '18rem' });
+
+  showState = (which) => {
     if (which === 'loading') region.loading();
     else if (which === 'skeleton') region.loading(() => skeletonList(2, skeletonFlight));
     else if (which === 'content') region.content(FLIGHTS.slice(0, 1).map(flightCard));
@@ -167,11 +172,11 @@ function wireStates() {
   };
 
   qsa('[data-state-demo]').forEach((button) => {
-    button.addEventListener('click', () => show(button.dataset.stateDemo));
+    button.addEventListener('click', () => showState(button.dataset.stateDemo));
   });
 
-  show('content');
-  return show;
+  showState('content');
+  return showState;
 }
 
 /* ---------------------------------------------------------------------------
@@ -223,8 +228,6 @@ applyTranslations();
 
 /* The style guide is also the place where a regression in the token contract
    should be loud, so check that every required §04 token actually resolves. */
-onLocaleChange(() => applyTranslations());
-
 (() => {
   const styles = getComputedStyle(document.documentElement);
   const missing = SWATCHES.map(([token]) => token).filter((token) => !styles.getPropertyValue(token).trim());
