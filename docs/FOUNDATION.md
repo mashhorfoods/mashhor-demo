@@ -417,7 +417,13 @@ component in this layer. Permission is asked, never assumed.
    travellers where appropriate. Rather than ship stock-looking filler, every
    media slot renders a neutral placeholder that reserves the exact aspect
    ratio, so dropping in the real photograph shifts nothing.
-4. **Production domain**, for canonical URLs, `hreflang` and `og:url`.
+4. ~~**Production domain**~~ — resolved. The site deploys to
+   `https://mashhorfoods.github.io/mashhor-demo/`; canonical and `og:url` are
+   set. Because it is a *project* page served from a subpath, routes are stored
+   without a leading slash and resolved through `route()` (see `data/config.js`),
+   so attaching a custom domain later needs no data changes. Note that
+   `robots.txt` is not honoured at a project-page subpath — see the note in the
+   file itself.
 5. **Legal entity details**, for Organization JSON-LD.
 6. **Raster brand exports**: `apple-touch-icon.png` (180×180) and
    `og-image.png` (1200×630).

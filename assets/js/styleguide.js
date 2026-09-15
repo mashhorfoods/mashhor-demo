@@ -10,7 +10,7 @@
 import {
   boot, el, qs, qsa, render, icon, toast, setButtonState,
   t, getLocale, applyTranslations,
-  SERVICES, NAV_PRIMARY, STATUSES,
+  SERVICES, NAV_PRIMARY, STATUSES, route,
   serviceGrid, flightCard, hotelCard, packageCard, supervisorCard, tripCard, statusBadge,
   searchWidget, stateRegion, skeletonList, skeletonFlight,
 } from './foundation.js';
@@ -131,13 +131,13 @@ function renderComponents() {
 
   render(qs('#sg-nav'), NAV_PRIMARY.map((item, i) => el('li', {}, [
     el('a', {
-      class: 'c-nav__link', href: item.href,
+      class: 'c-nav__link', href: route(item.href),
       ...(i === 0 ? { 'aria-current': 'page' } : {}),
     }, t(item.label)),
   ])));
 
   render(qs('#sg-drawer-nav'), NAV_PRIMARY.map((item) => el('li', {}, [
-    el('a', { class: 'c-nav__link', href: item.href, style: 'inline-size:100%' }, [
+    el('a', { class: 'c-nav__link', href: route(item.href), style: 'inline-size:100%' }, [
       icon(item.icon, { size: 'sm' }), el('span', {}, t(item.label)),
     ]),
   ])));

@@ -10,7 +10,7 @@
 import { el, uid } from '../core/dom.js';
 import { t, getLocale, pick } from '../core/i18n.js';
 import { money, time, duration, dateShort, dayOffset } from '../core/format.js';
-import { STATUSES, SERVICES } from '../data/config.js';
+import { STATUSES, SERVICES, route } from '../data/config.js';
 import { icon } from './ui.js';
 
 /* ---------------------------------------------------------------------------
@@ -37,7 +37,7 @@ export function serviceCard(service) {
     el('div', { class: 'c-card__body' }, [
       el('span', { class: 'c-service-card__icon' }, icon(service.icon, { size: 'lg' })),
       el('h3', { class: 'c-card__title', id: titleId }, [
-        el('a', { class: 'c-card__link', href: service.href }, pick(service, 'title')),
+        el('a', { class: 'c-card__link', href: route(service.href) }, pick(service, 'title')),
       ]),
       el('p', { class: 'c-card__text' }, pick(service, 'desc')),
       el('span', { class: 'c-service-card__cta', 'aria-hidden': 'true' }, [
@@ -182,7 +182,7 @@ export function hotelCard(hotel) {
     el('div', { class: 'c-card__body' }, [
       el('div', { class: 'l-cluster l-cluster--8' }, [stars, el('span', { class: 'c-rating__score' }, String(hotel.score))]),
       el('h3', { class: 'c-card__title', id: titleId }, [
-        el('a', { class: 'c-card__link', href: `/hotels/${hotel.id}/` }, pick(hotel, 'name')),
+        el('a', { class: 'c-card__link', href: route(`hotels/${hotel.id}/`) }, pick(hotel, 'name')),
       ]),
       el('p', { class: 'c-hotel__location' }, [
         icon('no-location', { size: 'sm' }),
@@ -203,7 +203,7 @@ export function hotelCard(hotel) {
         el('p', { class: 't-price' }, money(hotel.price.amount, hotel.price.currency)),
         el('p', { class: 't-caption' }, t('hotel.night')),
       ]),
-      el('a', { class: 'c-btn c-btn--secondary c-btn--sm', href: `/hotels/${hotel.id}/` }, t('hotel.select')),
+      el('a', { class: 'c-btn c-btn--secondary c-btn--sm', href: route(`hotels/${hotel.id}/`) }, t('hotel.select')),
     ]),
   ]);
 }
@@ -224,7 +224,7 @@ export function packageCard(pkg) {
     el('div', { class: 'c-card__body' }, [
       el('p', { class: 't-overline' }, pick(pkg, 'destination')),
       el('h3', { class: 'c-card__title', id: titleId }, [
-        el('a', { class: 'c-card__link', href: `/packages/${pkg.id}/` }, pick(pkg, 'title')),
+        el('a', { class: 'c-card__link', href: route(`packages/${pkg.id}/`) }, pick(pkg, 'title')),
       ]),
       el('ul', { class: 'c-package__includes', role: 'list' },
         pkg.includes.map((item) => el('li', { class: 'c-package__include' }, [
@@ -238,7 +238,7 @@ export function packageCard(pkg) {
         el('p', { class: 't-price' }, money(pkg.price.amount, pkg.price.currency)),
         el('p', { class: 't-caption' }, pick(pkg.price.basis)),
       ]),
-      el('a', { class: 'c-btn c-btn--primary c-btn--sm', href: `/packages/${pkg.id}/` }, t('package.view')),
+      el('a', { class: 'c-btn c-btn--primary c-btn--sm', href: route(`packages/${pkg.id}/`) }, t('package.view')),
     ]),
   ]);
 }
@@ -276,7 +276,7 @@ export function supervisorCard(supervisor) {
     el('ul', { class: 'c-supervisor__services', role: 'list' },
       services.map((s) => el('li', {}, el('span', { class: 'c-badge c-badge--outline' }, pick(s, 'title'))))),
 
-    el('a', { class: 'c-btn c-btn--secondary-brand c-btn--sm', href: `/supervisors/${supervisor.id}/` }, [
+    el('a', { class: 'c-btn c-btn--secondary-brand c-btn--sm', href: route(`supervisors/${supervisor.id}/`) }, [
       icon('no-chat', { size: 'sm' }),
       el('span', {}, t('supervisor.contact')),
     ]),
@@ -298,7 +298,7 @@ export function tripCard(trip) {
         el('div', {}, [
           el('p', { class: 'c-trip__ref u-data' }, trip.reference),
           el('h3', { class: 'c-trip__route', id: titleId }, [
-            el('a', { class: 'c-card__link', href: `/trips/${trip.id}/` }, pick(trip, 'title')),
+            el('a', { class: 'c-card__link', href: route(`trips/${trip.id}/`) }, pick(trip, 'title')),
           ]),
         ]),
         statusBadge(trip.status),

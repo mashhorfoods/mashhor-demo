@@ -15,8 +15,12 @@
 <meta property="og:description" content="أساس التصميم والواجهة — المرحلة 10.1.">
 <meta property="og:locale" content="ar_SD">
 <meta property="og:locale:alternate" content="en_GB">
-<!-- TODO (§31): og:url, canonical, hreflang and og:image are blocked on a
-     production domain and a raster export of the mark. See docs/FOUNDATION.md. -->
+<meta property="og:url" content="https://mashhorfoods.github.io/mashhor-demo/">
+<link rel="canonical" href="https://mashhorfoods.github.io/mashhor-demo/">
+<!-- The site serves one document in both languages, switched client-side, so
+     there is a single canonical URL and no per-language alternate to declare
+     yet. When Stage 11 adds real per-language routes, add hreflang here.
+     TODO (§31): og:image (1200x630) still needs a raster export of the mark. -->
 
 <link rel="icon" href="assets/brand/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="assets/fonts/ibm-plex-sans-arabic-arabic-400.woff2" as="font" type="font/woff2" crossorigin>
@@ -175,22 +179,22 @@
 <script type="module">
   import {
     boot, el, qs, render, icon, t,
-    NAV_PRIMARY, NAV_BOTTOM, NAV_FOOTER, SERVICES,
+    NAV_PRIMARY, NAV_BOTTOM, NAV_FOOTER, SERVICES, route,
     serviceGrid, searchWidget, toast, getLocale, pick,
   } from './assets/js/foundation.js';
 
   function paint() {
     render(qs('#main-nav'), NAV_PRIMARY.map((item) =>
-      el('li', {}, el('a', { class: 'c-nav__link', href: item.href }, t(item.label)))));
+      el('li', {}, el('a', { class: 'c-nav__link', href: route(item.href) }, t(item.label)))));
 
     render(qs('#drawer-nav'), NAV_PRIMARY.map((item) =>
-      el('li', {}, el('a', { class: 'c-nav__link', href: item.href, style: 'inline-size:100%' }, [
+      el('li', {}, el('a', { class: 'c-nav__link', href: route(item.href), style: 'inline-size:100%' }, [
         icon(item.icon, { size: 'sm' }), el('span', {}, t(item.label)),
       ]))));
 
     render(qs('#bottom-nav'), NAV_BOTTOM.map((item, i) =>
       el('a', {
-        class: 'c-bottom-nav__item', href: item.href,
+        class: 'c-bottom-nav__item', href: route(item.href),
         ...(i === 0 ? { 'aria-current': 'page' } : {}),
       }, [icon(item.icon, { size: 'sm' }), el('span', {}, t(item.label))])));
 
@@ -198,7 +202,7 @@
       el('div', {}, [
         el('h3', { class: 't-h4 t-inverse', style: 'margin-block-end:var(--space-12)' }, pick(group, 'title')),
         el('ul', { class: 'l-stack l-stack--8', role: 'list' }, group.links.map((link) =>
-          el('li', {}, el('a', { class: 't-body-sm', href: link.href, style: 'opacity:.75' }, pick(link, 'label'))))),
+          el('li', {}, el('a', { class: 't-body-sm', href: route(link.href), style: 'opacity:.75' }, pick(link, 'label'))))),
       ])));
 
     render(qs('#services-mount'), serviceGrid(SERVICES));

@@ -1,0 +1,18 @@
+# Number One Travel & Tourism — نمبرون للسفر و السياحة
+#
+# NOTE ON PLACEMENT: this site is a GitHub Pages PROJECT site, served from
+# https://mashhorfoods.github.io/mashhor-demo/. Crawlers only read robots.txt at
+# the DOMAIN root (mashhorfoods.github.io/robots.txt), which belongs to the
+# organisation's own Pages repo, not to this one. So while this file is correct,
+# it is not being honoured at the current URL. It starts working the moment a
+# custom domain is attached to this repo. Until then, control indexing with the
+# per-page <meta name="robots"> tags, which DO work — styleguide.html carries
+# noindex already.
+
+User-agent: *
+Allow: /
+
+# The design-system reference is for the team, not for search results.
+Disallow: /styleguide.html
+
+Sitemap: https://mashhorfoods.github.io/mashhor-demo/sitemap.xml
