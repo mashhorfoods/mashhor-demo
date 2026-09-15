@@ -14,6 +14,8 @@
     "migrate": "php bin/migrate.php",
     "seed": "php bin/seed.php",
     "verify": "php bin/verify.php http://127.0.0.1:8088",
+    "release": "php bin/release.php",
+    "smoke": "php bin/release.php --quick",
     "seed:content": "php bin/seed-content.php"
   },
   "devDependencies": {

@@ -2421,7 +2421,18 @@ check('gate', 'the server knows exactly five statuses',
 check('gate', 'and exactly three roles',
     count(Schema::ROLES) === 3, implode('، ', array_values(Schema::ROLE_LABEL)));
 
-/* Terminology, in everything that ships — markup and server strings alike */
+/* Terminology, in everything under admin/ and app/ — markup and server strings
+   alike. The stage and recovery design logs used to be skipped here by
+   filename because they do not ship. They are still the record the shipped
+   code was written from — BACKEND.md cites stage-02 as the authority for a
+   module's behaviour — so a banned word surviving in one of them is a banned
+   word in the reasoning. All eight were clean when this exclusion was removed;
+   keeping them in the scan costs nothing and means a later edit cannot
+   reintroduce the wording unnoticed.
+
+   The two other exclusions nearby stay: the $adminPages filter above scopes
+   structural checks to pages that actually ship, and the debugging-leftover
+   scan below says «shipped page» and means it. */
 $forbidden = ['ذوي الإعاقة', 'ذوي الاعاقة', 'معاقين', 'معاقون', 'المعاقين', 'شخص معاق'];
 $hits = [];
 foreach (array_merge(
@@ -2430,7 +2441,6 @@ foreach (array_merge(
     glob(AUN_ROOT . '/app/Repo/*.php') ?: [],
     [AUN_ROOT . '/index.html', AUN_ROOT . '/404.html', AUN_ROOT . '/llms.txt']
 ) as $file) {
-    if (preg_match('/(stage-\d|recovery-\d)/', basename($file))) continue;
     $t = (string) @file_get_contents($file);
     /* Two files carry the list of rejected words: services.html so the editor
        refuses them as they are typed, and Routes.php so the server refuses

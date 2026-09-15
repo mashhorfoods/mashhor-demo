@@ -38,7 +38,7 @@ function section(t) { lines.push('\n' + t); }
     '--headless=new', '--disable-gpu', '--no-sandbox', '--no-first-run',
     '--disable-dev-shm-usage', '--hide-scrollbars',
     `--remote-debugging-port=${port}`, `--user-data-dir=${userDir}`, 'about:blank',
-  ], { stdio: ['ignore', 'ignore', 'pipe'] });
+  ], { stdio: ['ignore', 'ignore', 'pipe'], detached: true });
 
   let list = null;
   for (let i = 0; i < 60 && !list; i++) {
@@ -297,7 +297,15 @@ function section(t) { lines.push('\n' + t); }
   console.log(`  ${pass} passed, ${fail} failed, ${pass + fail} total`);
   console.log('='.repeat(78));
   if (failed.length) { console.log('\nFailures:'); failed.forEach((f) => console.log('  - ' + f)); }
-  chrome.kill();
-  try { fs.rmSync(userDir, { recursive: true, force: true }); } catch (e) { /* the profile can linger */ }
+  /* Chromium's own process exits within about 15 ms of kill(), so waiting for
+     it buys nothing — the renderer it forked is what keeps writing into the
+     profile, and it is orphaned by killing the parent alone. Removing the
+     directory then loses a race it cannot win: measured here, rmSync retried
+     for 52 seconds and still ended on ENOTEMPTY. Killing the whole process
+     group instead ends the renderers too, and the removal takes 6 ms. The
+     retries below are belt-and-braces, not the mechanism. */
+  try { process.kill(-chrome.pid, 'SIGKILL'); } catch (e) { chrome.kill(); }
+  await new Promise((r) => setTimeout(r, 150));
+  try { fs.rmSync(userDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 }); } catch (e) { /* the profile can linger */ }
   process.exit(fail === 0 ? 0 : 1);
 })().catch((e) => { console.error(e); process.exit(1); });

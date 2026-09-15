@@ -156,7 +156,7 @@ async function main() {
   const chrome = spawn(CHROME, ['--headless=new', '--disable-gpu', '--no-sandbox',
     '--no-first-run', '--disable-dev-shm-usage', '--hide-scrollbars',
     `--remote-debugging-port=${port}`, `--user-data-dir=${userDir}`, 'about:blank'],
-    { stdio: 'ignore' });
+    { stdio: 'ignore', detached: true });
 
   let wsUrl = null;
   for (let i = 0; i < 60 && !wsUrl; i++) {
@@ -628,14 +628,22 @@ async function main() {
     });
   }
   try { sock.close(); } catch (e) { /* gone */ }
-  chrome.kill();
+  /* Chromium's own process exits within about 15 ms of kill(), so waiting for
+     it buys nothing — the renderer it forked is what keeps writing into the
+     profile, and it is orphaned by killing the parent alone. Removing the
+     directory then loses a race it cannot win: measured here, rmSync retried
+     for 52 seconds and still ended on ENOTEMPTY. Killing the whole process
+     group instead ends the renderers too, and the removal takes 6 ms. The
+     retries below are belt-and-braces, not the mechanism. */
+  try { process.kill(-chrome.pid, 'SIGKILL'); } catch (e) { chrome.kill(); }
+  await new Promise((r) => setTimeout(r, 150));
   /* The profile directory is deleted while Chromium may still be writing into
      it: chrome.kill() sends a signal, it does not wait for the process to go.
      `force: true` only suppresses ENOENT — ENOTEMPTY still throws, main()
      rejects, and the catch below exits 2 *after* the report has printed
      "0 failed". Every check passed and the runner read a failed gate.
      Retries, and a catch, so cleaning up can never decide the verdict. */
-  try { fs.rmSync(userDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 120 }); }
+  try { fs.rmSync(userDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 }); }
   catch (e) { /* a leftover temp directory is not a finding */ }
   process.exit(fail === 0 ? 0 : 1);
 }
