@@ -1,0 +1,203 @@
+/* ============================================================================
+   08 — PRODUCT COMPONENTS  §14 §26 §28
+   Travel-specific compositions. They are built FROM the card and primitive
+   layers — they never invent a second visual language, and they carry no
+   booking logic, only presentation of data passed in. §34
+   ========================================================================= */
+
+@layer components {
+  /* ======================================================================
+     SERVICE CARD — icon · title · description · CTA
+     ==================================================================== */
+  .c-service-card { position: relative; }
+  .c-service-card__icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    inline-size: 48px; block-size: 48px;
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface-brand);
+    color: var(--color-primary);
+    margin-block-end: var(--space-8);
+  }
+  .c-service-card__cta { margin-block-start: auto; padding-block-start: var(--space-8);
+                         display: inline-flex; align-items: center; gap: var(--space-8);
+                         font-size: var(--text-body-sm); font-weight: var(--weight-semibold);
+                         color: var(--color-text-brand); }
+  .c-service-card--interactive:hover .c-service-card__cta .c-icon { translate: 4px 0; }
+  [dir="rtl"] .c-service-card--interactive:hover .c-service-card__cta .c-icon { translate: -4px 0; }
+  .c-service-card__cta .c-icon { transition: translate var(--duration-fast) var(--ease-standard); }
+
+  /* ======================================================================
+     FLIGHT CARD — §14
+     Airline · times · duration · stops · baggage · price · fare · CTA.
+     Baggage and fare type are NOT optional extras in this layout: §19 says
+     the customer must be able to compare on the true terms, not just price.
+     ==================================================================== */
+  .c-flight { padding: var(--space-16); }
+  @media (min-width: 48em) { .c-flight { padding: var(--space-24); } }
+
+  .c-flight__grid { display: grid; gap: var(--space-16); }
+  @media (min-width: 64em) {
+    /* Itinerary takes the room; the price rail is fixed and sits at the end */
+    .c-flight__grid { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-32); }
+  }
+
+  .c-flight__airline { display: flex; align-items: center; gap: var(--space-12); }
+  .c-flight__airline-logo {
+    inline-size: 36px; block-size: 36px; flex: none;
+    display: grid; place-items: center;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-gray-100);
+    font-family: var(--font-data); font-size: var(--text-caption); font-weight: var(--weight-bold);
+    color: var(--color-gray-700);
+  }
+  .c-flight__airline-name { font-size: var(--text-body-sm); font-weight: var(--weight-medium); }
+  .c-flight__flight-no { font-size: var(--text-caption); color: var(--color-text-secondary); }
+
+  /* The leg: time — route line — time. The route line IS the graphic
+     language of §16: a journey drawn as a path, not an aeroplane clipart. */
+  .c-leg { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--space-12); }
+  .c-leg + .c-leg { margin-block-start: var(--space-16); padding-block-start: var(--space-16); border-block-start: var(--border-hairline); }
+  .c-leg__point { display: flex; flex-direction: column; gap: var(--space-4); }
+  .c-leg__point--end { text-align: end; }
+  .c-leg__time { font-family: var(--font-data); font-size: var(--text-h4); font-weight: var(--weight-bold);
+                 font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .c-leg__code { font-family: var(--font-data); font-size: var(--text-caption); font-weight: var(--weight-semibold);
+                 color: var(--color-text-secondary); letter-spacing: 0.04em; }
+  .c-leg__city { font-size: var(--text-caption); color: var(--color-text-secondary); }
+
+  .c-leg__path { display: flex; flex-direction: column; align-items: center; gap: var(--space-4); min-inline-size: 5rem; }
+  .c-leg__duration { font-family: var(--font-data); font-size: var(--text-caption); color: var(--color-text-secondary); }
+  .c-leg__line {
+    position: relative; inline-size: 100%; block-size: 2px;
+    background: linear-gradient(to inline-end, var(--color-gray-300), var(--color-primary));
+    border-radius: var(--radius-pill);
+  }
+  .c-leg__line::before, .c-leg__line::after {
+    content: ""; position: absolute; inset-block-start: 50%; translate: 0 -50%;
+    inline-size: 6px; block-size: 6px; border-radius: var(--radius-circle);
+  }
+  .c-leg__line::before { inset-inline-start: 0; background-color: var(--color-gray-400); }
+  .c-leg__line::after  { inset-inline-end: 0;  background-color: var(--color-primary); }
+  /* A stop is drawn on the line, so "1 stop" is visible, not just stated. */
+  .c-leg__stop {
+    position: absolute; inset-block-start: 50%; translate: -50% -50%;
+    inline-size: 8px; block-size: 8px;
+    border-radius: var(--radius-circle);
+    background-color: var(--color-white);
+    border: 2px solid var(--color-gray-500);
+  }
+  [dir="rtl"] .c-leg__stop { translate: 50% -50%; }
+  .c-leg__stops { font-size: var(--text-caption); font-weight: var(--weight-medium); color: var(--color-text-secondary); }
+  .c-leg__stops[data-direct="true"] { color: var(--color-success-fg); }
+  .c-leg__next-day {
+    font-size: var(--text-overline); font-weight: var(--weight-bold);
+    color: var(--color-warning-fg); vertical-align: super;
+  }
+
+  .c-flight__meta { display: flex; flex-wrap: wrap; gap: var(--space-8) var(--space-16); margin-block-start: var(--space-16); }
+  .c-flight__meta-item { display: inline-flex; align-items: center; gap: var(--space-4);
+                         font-size: var(--text-caption); color: var(--color-text-secondary); }
+
+  .c-flight__price-rail {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-16);
+    padding-block-start: var(--space-16);
+    border-block-start: var(--border-hairline);
+  }
+  @media (min-width: 64em) {
+    .c-flight__price-rail {
+      flex-direction: column; align-items: stretch; justify-content: center;
+      text-align: end; min-inline-size: 12rem;
+      padding-block-start: 0; padding-inline-start: var(--space-32);
+      border-block-start: none; border-inline-start: var(--border-hairline);
+    }
+  }
+  .c-flight__price { color: var(--color-text); }
+  .c-flight__price-note { font-size: var(--text-caption); color: var(--color-text-secondary); }
+
+  /* ======================================================================
+     HOTEL CARD
+     ==================================================================== */
+  .c-hotel__location { display: flex; align-items: center; gap: var(--space-4);
+                       font-size: var(--text-caption); color: var(--color-text-secondary); }
+  .c-rating { display: inline-flex; align-items: center; gap: var(--space-4); }
+  .c-rating__stars { display: inline-flex; gap: 1px; color: var(--_warning-accent); }
+  .c-rating__score {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-inline-size: 2.5rem; padding-inline: var(--space-8); padding-block: var(--space-4);
+    font-family: var(--font-data); font-size: var(--text-caption); font-weight: var(--weight-bold);
+    background-color: var(--color-info-bg); color: var(--color-info-fg);
+    border-radius: var(--radius-sm);
+  }
+  .c-rating__count { font-size: var(--text-caption); color: var(--color-text-secondary); }
+
+  /* ======================================================================
+     PACKAGE CARD
+     ==================================================================== */
+  .c-package__includes { display: flex; flex-direction: column; gap: var(--space-4); }
+  .c-package__include { display: flex; align-items: center; gap: var(--space-8); font-size: var(--text-caption); }
+  .c-package__include .c-icon { color: var(--color-success); --icon-size: var(--icon-sm); }
+
+  /* ======================================================================
+     SUPERVISOR CARD — §29
+     A Number One person, presented in the Number One system. The only
+     personal elements are the photo, the name, the bio and the contact.
+     No personal colour, no personal logo, no personal type.
+     ==================================================================== */
+  .c-supervisor { align-items: center; text-align: center; padding: var(--space-24); }
+  .c-supervisor__photo {
+    inline-size: 88px; block-size: 88px;
+    border-radius: var(--radius-circle);
+    object-fit: cover;
+    background-color: var(--color-gray-100);
+    /* The one brand flourish allowed on a person: the Number One red ring. */
+    box-shadow: 0 0 0 3px var(--color-surface), 0 0 0 5px var(--color-primary);
+  }
+  .c-supervisor__name { font-size: var(--text-h4); font-weight: var(--weight-semibold); }
+  .c-supervisor__role { font-size: var(--text-caption); color: var(--color-text-brand); font-weight: var(--weight-semibold); }
+  .c-supervisor__services { display: flex; flex-wrap: wrap; gap: var(--space-4); justify-content: center; }
+  .c-supervisor__verified { display: inline-flex; align-items: center; gap: var(--space-4);
+                            font-size: var(--text-caption); color: var(--color-success-fg); }
+
+  /* ======================================================================
+     TRIP CARD — Stage 12 lives on this. §28
+     ==================================================================== */
+  .c-trip__head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-16); }
+  .c-trip__ref { font-family: var(--font-data); font-size: var(--text-caption);
+                 color: var(--color-text-secondary); letter-spacing: 0.04em; }
+  .c-trip__route { display: flex; align-items: center; gap: var(--space-8);
+                   font-size: var(--text-h4); font-weight: var(--weight-semibold); }
+
+  /* ======================================================================
+     BOOKING SUMMARY — the persistent context of §18.9
+     ==================================================================== */
+  .c-summary { position: relative; }
+  .c-summary__head { padding: var(--space-16) var(--space-24); border-block-end: var(--border-hairline); }
+  .c-summary__body { padding: var(--space-24); display: flex; flex-direction: column; gap: var(--space-16); }
+  .c-summary__foot { padding: var(--space-24); border-block-start: var(--border-hairline); background-color: var(--color-bg-subtle); }
+
+  /* ======================================================================
+     HELP-ME-CHOOSE — §18.5. The component that makes the strategic promise
+     visible: we do not just list options, we mark the right one and say why.
+     ==================================================================== */
+  .c-recommend {
+    display: flex; align-items: center; gap: var(--space-8);
+    padding: var(--space-8) var(--space-16);
+    background-color: var(--color-surface-brand);
+    border-block-end: var(--border-width) solid var(--color-primary);
+    font-size: var(--text-caption); font-weight: var(--weight-semibold);
+    color: var(--color-text-brand);
+  }
+  .c-recommend .c-icon { --icon-size: var(--icon-sm); }
+
+  /* Human expertise, offered inline rather than hidden in a contact page. §18.8 */
+  .c-assist {
+    display: flex; align-items: center; gap: var(--space-16);
+    padding: var(--space-16);
+    background-color: var(--color-bg-subtle);
+    border: var(--border-hairline);
+    border-radius: var(--radius-lg);
+  }
+  .c-assist__photo { inline-size: 48px; block-size: 48px; border-radius: var(--radius-circle);
+                     object-fit: cover; flex: none; background-color: var(--color-gray-200); }
+  .c-assist__body { flex: 1; min-inline-size: 0; }
+}

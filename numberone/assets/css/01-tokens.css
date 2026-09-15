@@ -1,0 +1,302 @@
+/* ============================================================================
+   01 — TOKENS
+   Number One Travel & Tourism — Website Master Foundation (Stage 10.1)
+
+   Everything downstream reads from this file. Components never hard-code a
+   colour, a size, a duration or a radius; they consume a token. That is what
+   makes §33 (design consistency) enforceable rather than aspirational.
+
+   Two tiers:
+
+     RAW      --_name    private. The literal values. Never used by a component.
+     SEMANTIC --name     public. What the value MEANS. Components use only these.
+
+   Swapping the brand red is therefore a one-line edit in the BRAND SLOT below,
+   and every button, link, focus ring, active tab and price accent follows.
+   ========================================================================= */
+
+@layer tokens {
+  :root {
+    /* ======================================================================
+       BRAND SLOT — §04
+       ----------------------------------------------------------------------
+       PENDING SIGN-OFF. These are the production placeholders. The brief says
+       the exact HEX must come from the approved identity sheet, and that sheet
+       is not in this repository. Replace the five values in this block with the
+       approved values and the entire system re-colours. Change nothing else.
+
+       --_red-600 is the brand red itself. The rest of the ramp is derived from
+       it and should be re-derived if it moves. See docs/FOUNDATION.md §Colour.
+       ==================================================================== */
+    --_red-50:  #FDF2F4;
+    --_red-100: #FBE0E4;
+    --_red-200: #F5BCC4;
+    --_red-300: #EC8A98;
+    --_red-400: #DE4A61;
+    --_red-500: #D4193A;
+    --_red-600: #C8102E; /* ◀ BRAND RED — primary. 5.89:1 on white. */
+    --_red-700: #A50D26;
+    --_red-800: #820A1E;
+    --_red-900: #5E0715;
+    /* ==================== END BRAND SLOT ================================= */
+
+    /* ---- RAW neutrals --------------------------------------------------- */
+    --_black:     #0B0D0F;
+    --_charcoal:  #1F2429;
+    --_white:     #FFFFFF;
+
+    --_gray-50:   #F8F9FA;
+    --_gray-100:  #F1F3F5;
+    --_gray-200:  #E7EAEE;
+    --_gray-300:  #D5DAE0;
+    --_gray-400:  #AEB6BF;
+    --_gray-500:  #7F8994;
+    --_gray-600:  #5E6874;
+    --_gray-700:  #454E58;
+    --_gray-800:  #2E353D;
+    --_gray-900:  #1B2026;
+
+    /* ---- RAW semantic hues ----------------------------------------------
+       Error is deliberately a cooler, deeper red than the brand red so the two
+       never read as the same signal. They are still adjacent hues, which is
+       exactly why §12 and §20 forbid colour-only meaning: every error and every
+       status in this system carries an icon and a word as well. ------------ */
+    --_success-600: #0F7A43;  --_success-700: #0A5C32;  --_success-50: #E7F6ED;
+    --_warning-600: #9A5B00;  --_warning-700: #7A4700;  --_warning-50: #FDF4E3;
+    --_warning-accent: #E08A00;
+    --_error-600:   #B3261E;  --_error-700:   #8C1C16;  --_error-50:   #FCECEA;
+    --_info-600:    #0B5FBF;  --_info-700:    #08488F;  --_info-50:    #E8F1FC;
+
+    /* ======================================================================
+       PUBLIC COLOUR CONTRACT — the exact token names required by §04.
+       ==================================================================== */
+    --color-primary:        var(--_red-600);
+    --color-primary-dark:   var(--_red-700);
+    --color-primary-light:  var(--_red-400);
+
+    --color-black:     var(--_black);
+    --color-charcoal:  var(--_charcoal);
+    --color-white:     var(--_white);
+
+    --color-gray-50:   var(--_gray-50);
+    --color-gray-100:  var(--_gray-100);
+    --color-gray-200:  var(--_gray-200);
+    --color-gray-300:  var(--_gray-300);
+    --color-gray-400:  var(--_gray-400);
+    --color-gray-500:  var(--_gray-500);
+    --color-gray-600:  var(--_gray-600);
+    --color-gray-700:  var(--_gray-700);
+    --color-gray-800:  var(--_gray-800);
+    --color-gray-900:  var(--_gray-900);
+
+    --color-success:   var(--_success-600);
+    --color-warning:   var(--_warning-600);
+    --color-error:     var(--_error-600);
+    --color-info:      var(--_info-600);
+
+    /* ---- Applied roles ---------------------------------------------------
+       Components consume THESE, not the contract above, so a later theme (a
+       dark supervisor dashboard, a print stylesheet) can remap roles without
+       touching the brand contract. --------------------------------------- */
+    --color-bg:            var(--_white);
+    --color-bg-subtle:     var(--_gray-50);
+    --color-bg-sunken:     var(--_gray-100);
+    --color-bg-inverse:    var(--_black);
+    --color-surface:       var(--_white);
+    --color-surface-hover: var(--_gray-50);
+    --color-surface-active:var(--_gray-100);
+    --color-surface-brand: var(--_red-50);
+
+    --color-text:           var(--_charcoal);
+    --color-text-secondary: var(--_gray-600);   /* 5.66:1 on white */
+    --color-text-muted:     var(--_gray-600);
+    --color-text-placeholder: var(--_gray-600); /* labels always persist, §12 */
+    --color-text-disabled:  var(--_gray-400);
+    --color-text-inverse:   var(--_white);
+    --color-text-on-primary:var(--_white);
+    --color-text-brand:     var(--_red-700);    /* red text needs the darker step */
+    --color-text-link:      var(--_red-700);
+
+    --color-border:        var(--_gray-200);
+    --color-border-strong: var(--_gray-300);
+    --color-border-input:  var(--_gray-400);    /* 3:1 non-text contrast */
+    --color-border-brand:  var(--color-primary);
+
+    --color-focus:         var(--_info-600);    /* not the brand red: a focus
+                                                   ring must stay visible ON a
+                                                   red button. §23 */
+    --color-focus-inverse: var(--_white);
+    --color-overlay:       rgb(11 13 15 / 0.60);
+    --color-skeleton:      var(--_gray-200);
+    --color-skeleton-sheen:var(--_gray-100);
+
+    --color-success-bg: var(--_success-50); --color-success-fg: var(--_success-700);
+    --color-warning-bg: var(--_warning-50); --color-warning-fg: var(--_warning-700);
+    --color-error-bg:   var(--_error-50);   --color-error-fg:   var(--_error-700);
+    --color-info-bg:    var(--_info-50);    --color-info-fg:    var(--_info-700);
+
+    /* ======================================================================
+       TYPOGRAPHY — §05
+       Arabic leads. IBM Plex Sans Arabic carries both scripts so a mixed
+       Arabic/English line keeps one vertical rhythm. Inter is reserved for
+       booking data, where tabular figures matter more than script harmony.
+       ==================================================================== */
+    --font-sans:    'IBM Plex Sans Arabic', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --font-display: var(--font-sans);
+    --font-body:    var(--font-sans);
+    --font-data:    'Inter', 'IBM Plex Sans Arabic', system-ui, sans-serif;
+
+    /* Fluid scale. min is the mobile size, max the desktop size; the page
+       never needs a font-size media query. */
+    --text-display:   clamp(2.5rem,  1.75rem + 3.2vw, 4.5rem);
+    --text-h1:        clamp(2rem,    1.55rem + 1.9vw, 3.25rem);
+    --text-h2:        clamp(1.625rem,1.35rem + 1.15vw, 2.5rem);
+    --text-h3:        clamp(1.3125rem,1.16rem + 0.65vw, 1.75rem);
+    --text-h4:        clamp(1.125rem,1.07rem + 0.24vw, 1.3125rem);
+    --text-body-lg:   1.125rem;
+    --text-body:      1rem;
+    --text-body-sm:   0.9375rem;
+    --text-caption:   0.8125rem;
+    --text-button:    1rem;
+    --text-button-sm: 0.9375rem;
+    --text-price:     clamp(1.5rem, 1.3rem + 0.85vw, 2rem);
+    --text-price-lg:  clamp(2rem, 1.65rem + 1.5vw, 3rem);
+    --text-number-lg: clamp(2.5rem, 1.9rem + 2.6vw, 4rem);
+    --text-data:      0.9375rem;
+    --text-label:     0.875rem;
+    --text-overline:  0.75rem;
+
+    --leading-display: 1.08;
+    --leading-heading: 1.2;
+    --leading-snug:    1.4;
+    --leading-body:    1.65;  /* Arabic needs the extra room; §05 */
+    --leading-data:    1.35;
+
+    --weight-regular:  400;
+    --weight-medium:   500;
+    --weight-semibold: 600;
+    --weight-bold:     700;
+
+    /* Arabic must not receive negative tracking — it breaks joins. The base
+       layer switches tracking off for [lang="ar"]. */
+    --tracking-display: -0.02em;
+    --tracking-heading: -0.01em;
+    --tracking-normal:  0;
+    --tracking-overline: 0.08em;
+
+    --measure:       68ch;  /* comfortable reading width, §07 */
+    --measure-short: 46ch;
+
+    /* ======================================================================
+       SPACING — §08. Named by px so the value is legible in review.
+       ==================================================================== */
+    --space-0:  0;
+    --space-4:  0.25rem;
+    --space-8:  0.5rem;
+    --space-12: 0.75rem;
+    --space-16: 1rem;
+    --space-24: 1.5rem;
+    --space-32: 2rem;
+    --space-40: 2.5rem;
+    --space-48: 3rem;
+    --space-64: 4rem;
+    --space-80: 5rem;
+    --space-96: 6rem;
+
+    /* Section rhythm scales with the viewport so mobile is not wasteful and
+       desktop is not cramped. */
+    --section-space:       clamp(3rem, 2rem + 4.5vw, 6rem);
+    --section-space-tight: clamp(2rem, 1.5rem + 2.4vw, 3.5rem);
+    --section-space-loose: clamp(4rem, 2.6rem + 6.5vw, 8rem);
+
+    /* ======================================================================
+       GRID — §07. 4 / 8 / 12 columns. --grid-columns is read by .l-grid and
+       re-declared at the breakpoints in 04-layout.css.
+       ==================================================================== */
+    --grid-columns: 4;
+    --grid-gutter:  var(--space-16);
+    --container-max:        1280px;
+    --container-max-narrow: 840px;
+    --container-max-wide:   1440px;
+    --container-gutter:     var(--space-16);
+
+    /* ======================================================================
+       RADIUS — §09. Controlled. Pill is for tags and toggles only, never for
+       cards or primary buttons.
+       ==================================================================== */
+    --radius-sm:   6px;
+    --radius-md:   10px;
+    --radius-lg:   16px;
+    --radius-pill: 999px;
+    --radius-circle: 50%;
+
+    /* ======================================================================
+       SHADOWS — §10. Four steps, all low-opacity neutral. No glow, no colour.
+       ==================================================================== */
+    --shadow-none: none;
+    --shadow-xs: 0 1px 2px rgb(11 13 15 / 0.04);
+    --shadow-sm: 0 1px 3px rgb(11 13 15 / 0.06), 0 1px 2px rgb(11 13 15 / 0.04);
+    --shadow-md: 0 4px 12px -2px rgb(11 13 15 / 0.08), 0 2px 4px -2px rgb(11 13 15 / 0.04);
+    --shadow-lg: 0 12px 28px -8px rgb(11 13 15 / 0.12), 0 4px 10px -6px rgb(11 13 15 / 0.06);
+    --shadow-overlay: 0 24px 56px -16px rgb(11 13 15 / 0.24);
+
+    /* ======================================================================
+       BORDERS / CONTROLS
+       ==================================================================== */
+    --border-width: 1px;
+    --border-width-strong: 2px;
+    --border-hairline: var(--border-width) solid var(--color-border);
+    --border-defined:  var(--border-width) solid var(--color-border-strong);
+    --border-input:    var(--border-width) solid var(--color-border-input);
+
+    --focus-ring-width:  2px;
+    --focus-ring-offset: 2px;
+    --focus-ring: var(--focus-ring-width) solid var(--color-focus);
+
+    --touch-target: 44px;          /* §23 — never smaller on touch */
+    --control-height-sm: 36px;
+    --control-height:    48px;
+    --control-height-lg: 56px;
+    --header-height:         72px;
+    --header-height-compact: 60px;
+    --bottom-nav-height:     64px;
+
+    --icon-xs: 14px; --icon-sm: 16px; --icon-md: 20px; --icon-lg: 24px; --icon-xl: 32px;
+    --icon-stroke: 1.75;
+
+    /* ======================================================================
+       MOTION — §24. Short, purposeful. Every transition in the system uses
+       one of these four durations.
+       ==================================================================== */
+    --duration-instant: 100ms;
+    --duration-fast:    160ms;
+    --duration-base:    240ms;
+    --duration-slow:    400ms;
+    --ease-standard: cubic-bezier(0.2, 0.6, 0.2, 1);
+    --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in:       cubic-bezier(0.7, 0, 0.84, 0);
+    --transition-interactive:
+      color var(--duration-fast) var(--ease-standard),
+      background-color var(--duration-fast) var(--ease-standard),
+      border-color var(--duration-fast) var(--ease-standard),
+      box-shadow var(--duration-fast) var(--ease-standard);
+
+    /* ======================================================================
+       ELEVATION ORDER
+       ==================================================================== */
+    --z-base: 0;      --z-raised: 10;   --z-sticky: 100;  --z-bottom-nav: 150;
+    --z-header: 200;  --z-overlay: 300; --z-drawer: 400;  --z-modal: 500;
+    --z-toast: 600;   --z-skip-link: 700;
+  }
+
+  /* Reduced motion is a token-level concern, not a per-component one: zero the
+     durations once and every transition in the system obeys. §23 / §24 */
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --duration-instant: 1ms;
+      --duration-fast:    1ms;
+      --duration-base:    1ms;
+      --duration-slow:    1ms;
+    }
+  }
+}

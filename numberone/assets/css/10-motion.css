@@ -1,0 +1,73 @@
+/* ============================================================================
+   10 — MOTION & GRAPHIC LANGUAGE  §16 §24
+
+   Motion is used for state changes, arrival, disclosure and feedback. It is
+   never decorative, never continuous, and never blocks a task. All of it is
+   already reduced to 1ms by the token layer under prefers-reduced-motion.
+   ========================================================================= */
+
+@layer motion {
+  /* Content arriving on scroll. The class is added by JS only when
+     IntersectionObserver is available; without JS everything is visible,
+     so content is never trapped behind an animation. */
+  .js .u-reveal { opacity: 0; translate: 0 var(--space-16); }
+  .js .u-reveal.is-visible {
+    opacity: 1; translate: none;
+    transition: opacity var(--duration-slow) var(--ease-standard),
+                translate var(--duration-slow) var(--ease-out);
+    transition-delay: calc(var(--reveal-delay, 0) * 60ms);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .js .u-reveal { opacity: 1; translate: none; }
+  }
+
+  /* ======================================================================
+     GRAPHIC LANGUAGE — §16
+     Derived from the numeral 1: a single decisive stroke, and the route it
+     implies. These are rules and paths, not illustrations, so they cost
+     almost nothing and never compete with content.
+     ==================================================================== */
+
+  /* The "one stroke": a short vertical/leading rule that marks a section the
+     way the numeral marks the brand. */
+  .u-mark {
+    position: relative;
+    padding-inline-start: var(--space-16);
+  }
+  .u-mark::before {
+    content: ""; position: absolute;
+    inset-inline-start: 0; inset-block: 0.15em 0.15em;
+    inline-size: 3px;
+    background-color: var(--color-primary);
+    border-radius: var(--radius-pill);
+  }
+
+  /* A route: the dotted path between two points, used as a section divider
+     and inside itineraries. */
+  .u-route {
+    block-size: 1px;
+    background-image: linear-gradient(to right, var(--color-border-strong) 50%, transparent 50%);
+    background-size: 8px 1px;
+    background-repeat: repeat-x;
+  }
+
+  /* A directional curve for section transitions. Subtle, single colour. */
+  .u-arc {
+    position: absolute; inset-inline-end: 0; inset-block-start: 0;
+    inline-size: min(40vw, 380px); aspect-ratio: 1;
+    border-inline-end: 1px solid var(--color-border);
+    border-start-end-radius: 100%;
+    pointer-events: none;
+    opacity: 0.8;
+  }
+
+  /* The numeral used as a watermark. Deliberately low contrast: it is
+     texture, not information. */
+  .u-numeral-watermark {
+    position: absolute; inset-block-start: -0.25em; inset-inline-end: 0;
+    font-family: var(--font-display); font-size: 16rem; font-weight: var(--weight-bold);
+    line-height: 1; color: var(--color-gray-100);
+    pointer-events: none; user-select: none;
+    z-index: var(--z-base);
+  }
+}

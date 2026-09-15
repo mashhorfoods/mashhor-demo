@@ -1,0 +1,463 @@
+/* ============================================================================
+   07 — COMPONENTS  §13 §14 §19 §20 §25
+   ========================================================================= */
+
+@layer components {
+  /* ======================================================================
+     HEADER / NAVIGATION — §25
+     Desktop: logo · services · destinations · offers · support · search ·
+              account · Book Now (the single dominant CTA).
+     Mobile:  logo · search · account · menu — the rest moves into the drawer
+              and the bottom nav. Recomposed, not shrunk. §22
+     ==================================================================== */
+  .c-header {
+    position: sticky; inset-block-start: 0; z-index: var(--z-header);
+    background-color: var(--color-surface);
+    border-block-end: var(--border-hairline);
+  }
+  .c-header__inner {
+    display: flex; align-items: center; gap: var(--space-16);
+    min-block-size: var(--header-height-compact);
+  }
+  @media (min-width: 64em) { .c-header__inner { min-block-size: var(--header-height); gap: var(--space-24); } }
+
+  .c-header__brand { margin-inline-end: auto; }
+  .c-header__nav { display: none; }
+  @media (min-width: 64em) { .c-header__nav { display: block; } }
+  .c-header__actions { display: flex; align-items: center; gap: var(--space-4); }
+  .c-header__cta { display: none; }
+  @media (min-width: 48em) { .c-header__cta { display: inline-flex; } }
+  .c-header__burger { display: inline-flex; }
+  @media (min-width: 64em) { .c-header__burger { display: none; } }
+
+  /* Wraps rather than overflowing. The header hides this nav below 64em, but
+     the component must not depend on where it happens to be used. */
+  .c-nav__list { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); }
+  .c-nav__link {
+    position: relative;
+    display: inline-flex; align-items: center; gap: var(--space-4);
+    padding-inline: var(--space-12); padding-block: var(--space-8);
+    min-block-size: var(--touch-target);
+    font-size: var(--text-body-sm); font-weight: var(--weight-medium);
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-sm);
+    transition: var(--transition-interactive);
+  }
+  .c-nav__link:hover { color: var(--color-text); background-color: var(--color-surface-hover); }
+  /* Active state carries a rule as well as colour, so it survives greyscale
+     and colour-blindness. §20/§23 */
+  .c-nav__link[aria-current="page"] { color: var(--color-text-brand); font-weight: var(--weight-semibold); }
+  .c-nav__link[aria-current="page"]::after {
+    content: ""; position: absolute;
+    inset-block-end: 2px; inset-inline: var(--space-12);
+    block-size: 2px; background-color: var(--color-primary); border-radius: var(--radius-pill);
+  }
+
+  /* Mobile bottom navigation — thumb-reachable, max five destinations. §22 */
+  .c-bottom-nav {
+    position: fixed; inset-block-end: 0; inset-inline: 0; z-index: var(--z-bottom-nav);
+    display: flex;
+    background-color: var(--color-surface);
+    border-block-start: var(--border-hairline);
+    padding-block-end: env(safe-area-inset-bottom, 0px);
+  }
+  @media (min-width: 48em) { .c-bottom-nav { display: none; } }
+  .c-bottom-nav__item {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: var(--space-4);
+    min-block-size: var(--bottom-nav-height);
+    padding-block: var(--space-8);
+    font-size: var(--text-overline); font-weight: var(--weight-medium);
+    color: var(--color-text-secondary);
+  }
+  .c-bottom-nav__item[aria-current="page"] { color: var(--color-text-brand); font-weight: var(--weight-semibold); }
+
+  /* ======================================================================
+     DRAWER — mobile menu, filters, any off-canvas panel
+     ==================================================================== */
+  .c-drawer {
+    position: fixed; inset: 0; z-index: var(--z-drawer);
+    display: grid;
+    pointer-events: none;
+  }
+  .c-drawer[hidden] { display: none; }
+  .c-drawer__scrim {
+    position: absolute; inset: 0;
+    background-color: var(--color-overlay);
+    opacity: 0;
+    transition: opacity var(--duration-base) var(--ease-standard);
+  }
+  .c-drawer__panel {
+    position: relative;
+    justify-self: end;
+    inline-size: min(22rem, 88vw);
+    block-size: 100%;
+    display: flex; flex-direction: column;
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-overlay);
+    translate: 100% 0;
+    transition: translate var(--duration-base) var(--ease-out);
+    overflow-y: auto; overscroll-behavior: contain;
+  }
+  /* In Arabic the panel slides in from the left, because "end" is the left. */
+  [dir="rtl"] .c-drawer__panel { translate: -100% 0; }
+  .c-drawer--start .c-drawer__panel { justify-self: start; translate: -100% 0; }
+  [dir="rtl"] .c-drawer--start .c-drawer__panel { translate: 100% 0; }
+  .c-drawer[data-open="true"] { pointer-events: auto; }
+  .c-drawer[data-open="true"] .c-drawer__scrim { opacity: 1; }
+  .c-drawer[data-open="true"] .c-drawer__panel { translate: 0 0; }
+
+  .c-drawer__head {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-16);
+    padding: var(--space-16); border-block-end: var(--border-hairline);
+    position: sticky; inset-block-start: 0; background-color: var(--color-surface); z-index: 1;
+  }
+  .c-drawer__body { padding: var(--space-16); flex: 1; }
+  .c-drawer__foot { padding: var(--space-16); border-block-start: var(--border-hairline);
+                    position: sticky; inset-block-end: 0; background-color: var(--color-surface); }
+
+  /* ======================================================================
+     MODAL — built on <dialog> so focus trapping, Esc and inertness are the
+     platform's job rather than ours. §23
+     ==================================================================== */
+  .c-modal {
+    inline-size: min(34rem, calc(100vw - var(--space-32)));
+    max-block-size: min(90svb, 44rem);
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-lg);
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: var(--shadow-overlay);
+    overflow: hidden;
+  }
+  .c-modal::backdrop { background-color: var(--color-overlay); }
+  .c-modal--lg { inline-size: min(52rem, calc(100vw - var(--space-32))); }
+  .c-modal__form { display: flex; flex-direction: column; max-block-size: inherit; }
+  .c-modal__head {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-16);
+    padding: var(--space-24); padding-block-end: var(--space-16);
+  }
+  .c-modal__body { padding-inline: var(--space-24); padding-block-end: var(--space-24); overflow-y: auto; }
+  .c-modal__foot {
+    display: flex; flex-wrap: wrap; gap: var(--space-12); justify-content: flex-end;
+    padding: var(--space-16) var(--space-24);
+    border-block-start: var(--border-hairline);
+    background-color: var(--color-bg-subtle);
+  }
+  @media (max-width: 47.999em) {
+    /* On a phone a modal becomes a sheet: it arrives from the bottom and its
+       actions sit where the thumb is. §22 */
+    .c-modal {
+      inline-size: 100vw; max-inline-size: 100vw;
+      margin: 0; margin-block-start: auto;
+      max-block-size: 92svb;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+    .c-modal__foot > .c-btn { flex: 1; }
+  }
+
+  /* ======================================================================
+     TABS
+     ==================================================================== */
+  .c-tabs__list {
+    display: flex; gap: var(--space-4);
+    border-block-end: var(--border-hairline);
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .c-tabs__list::-webkit-scrollbar { display: none; }
+  .c-tabs__tab {
+    position: relative;
+    display: inline-flex; align-items: center; gap: var(--space-8);
+    padding-inline: var(--space-16); padding-block: var(--space-12);
+    min-block-size: var(--touch-target);
+    white-space: nowrap;
+    font-size: var(--text-body-sm); font-weight: var(--weight-medium);
+    color: var(--color-text-secondary);
+    border-block-end: var(--border-width-strong) solid transparent;
+    margin-block-end: -1px;
+    transition: var(--transition-interactive);
+  }
+  .c-tabs__tab:hover { color: var(--color-text); }
+  .c-tabs__tab[aria-selected="true"] {
+    color: var(--color-text-brand);
+    font-weight: var(--weight-semibold);
+    border-block-end-color: var(--color-primary);
+  }
+  .c-tabs__panel { padding-block-start: var(--space-24); }
+  .c-tabs__panel[hidden] { display: none; }
+
+  /* ======================================================================
+     ACCORDION — the disclosure used for fare rules, baggage, FAQ. §19
+     ==================================================================== */
+  .c-accordion { border-block-start: var(--border-hairline); }
+  .c-accordion__item { border-block-end: var(--border-hairline); }
+  .c-accordion__trigger {
+    inline-size: 100%;
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-16);
+    min-block-size: var(--touch-target);
+    padding-block: var(--space-16);
+    text-align: start;
+    font-size: var(--text-body); font-weight: var(--weight-semibold);
+    transition: var(--transition-interactive);
+  }
+  .c-accordion__trigger:hover { color: var(--color-text-brand); }
+  .c-accordion__chevron { transition: rotate var(--duration-fast) var(--ease-standard); color: var(--color-text-secondary); }
+  .c-accordion__trigger[aria-expanded="true"] .c-accordion__chevron { rotate: 180deg; }
+  /* grid-template-rows 1fr→0fr animates to auto height without JS measuring */
+  .c-accordion__panel { display: grid; grid-template-rows: 1fr; transition: grid-template-rows var(--duration-base) var(--ease-out); }
+  .c-accordion__panel[data-collapsed="true"] { grid-template-rows: 0fr; }
+  .c-accordion__inner { overflow: hidden; min-block-size: 0; }
+  .c-accordion__content { padding-block-end: var(--space-24); color: var(--color-text-secondary); max-inline-size: var(--measure); }
+
+  /* ======================================================================
+     TOAST — §21 feedback
+     ==================================================================== */
+  .c-toast-region {
+    position: fixed; z-index: var(--z-toast);
+    inset-block-end: var(--space-16); inset-inline-end: var(--space-16);
+    display: flex; flex-direction: column; gap: var(--space-8);
+    inline-size: min(24rem, calc(100vw - var(--space-32)));
+    pointer-events: none;
+  }
+  @media (max-width: 47.999em) {
+    .c-toast-region { inset-block-end: calc(var(--bottom-nav-height) + var(--space-16)); inset-inline: var(--space-16); inline-size: auto; }
+  }
+  .c-toast {
+    pointer-events: auto;
+    display: flex; align-items: flex-start; gap: var(--space-12);
+    padding: var(--space-16);
+    background-color: var(--color-surface);
+    border: var(--border-hairline);
+    border-inline-start: 4px solid var(--toast-accent, var(--color-info));
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    animation: no-toast-in var(--duration-base) var(--ease-out);
+  }
+  @keyframes no-toast-in { from { opacity: 0; translate: 0 var(--space-16); } }
+  .c-toast--success { --toast-accent: var(--color-success); }
+  .c-toast--warning { --toast-accent: var(--color-warning); }
+  .c-toast--error   { --toast-accent: var(--color-error); }
+  .c-toast--info    { --toast-accent: var(--color-info); }
+  .c-toast__icon { color: var(--toast-accent); }
+  .c-toast__body { flex: 1; min-inline-size: 0; }
+  .c-toast__title { font-size: var(--text-body-sm); font-weight: var(--weight-semibold); }
+  .c-toast__text  { font-size: var(--text-caption); color: var(--color-text-secondary); }
+
+  /* ======================================================================
+     SEARCH — §13
+     One architecture, many verticals. The tabs pick the vertical; the panel
+     renders only the fields that vertical declares. Everything beyond the
+     essentials hides behind "more options" (progressive disclosure).
+     ==================================================================== */
+  .c-search {
+    background-color: var(--color-surface);
+    border: var(--border-hairline);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+  }
+  .c-search__tabs { display: flex; gap: var(--space-4); padding: var(--space-8);
+                    background-color: var(--color-bg-subtle); border-block-end: var(--border-hairline);
+                    overflow-x: auto; scrollbar-width: none; }
+  .c-search__tabs::-webkit-scrollbar { display: none; }
+  .c-search__tab {
+    display: inline-flex; align-items: center; gap: var(--space-8);
+    padding-inline: var(--space-16); padding-block: var(--space-8);
+    min-block-size: var(--touch-target);
+    white-space: nowrap;
+    font-size: var(--text-body-sm); font-weight: var(--weight-medium);
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-sm);
+    transition: var(--transition-interactive);
+  }
+  .c-search__tab:hover { background-color: var(--color-surface-hover); color: var(--color-text); }
+  .c-search__tab[aria-selected="true"] {
+    background-color: var(--color-surface); color: var(--color-text-brand);
+    font-weight: var(--weight-semibold); box-shadow: var(--shadow-xs);
+  }
+  .c-search__panel { padding: var(--space-16); }
+  @media (min-width: 64em) { .c-search__panel { padding: var(--space-24); } }
+  .c-search__fields { display: grid; gap: var(--space-16); grid-template-columns: 1fr; }
+  @media (min-width: 48em) {
+    .c-search__fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .c-search__fields > .is-wide { grid-column: 1 / -1; }
+  }
+  @media (min-width: 64em) {
+    .c-search__fields { grid-template-columns: repeat(var(--search-cols, 4), minmax(0, 1fr)); align-items: end; }
+    .c-search__fields > .is-wide { grid-column: auto; }
+    .c-search__fields > .is-full { grid-column: 1 / -1; }
+  }
+  .c-search__submit { margin-block-start: var(--space-16); }
+  @media (min-width: 64em) { .c-search__submit { margin-block-start: var(--space-24); } }
+  .c-search__more { margin-block-start: var(--space-16); }
+  .c-search__advanced { display: grid; grid-template-rows: 1fr; transition: grid-template-rows var(--duration-base) var(--ease-out); }
+  .c-search__advanced[data-collapsed="true"] { grid-template-rows: 0fr; }
+  .c-search__advanced-inner { overflow: hidden; min-block-size: 0; }
+
+  /* Swap-direction control for a return trip. Flips with the document. */
+  .c-search__swap { align-self: center; justify-self: center; }
+
+  /* The passenger/occupancy popover */
+  .c-stepper-row {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-16);
+    padding-block: var(--space-12);
+  }
+  .c-stepper-row + .c-stepper-row { border-block-start: var(--border-hairline); }
+  .c-stepper { display: flex; align-items: center; gap: var(--space-8); }
+  .c-stepper__value { min-inline-size: 2ch; text-align: center; font-family: var(--font-data);
+                      font-weight: var(--weight-semibold); font-variant-numeric: tabular-nums; }
+  .c-popover {
+    position: absolute; z-index: var(--z-overlay);
+    inset-block-start: calc(100% + var(--space-4)); inset-inline-start: 0;
+    inline-size: min(20rem, calc(100vw - var(--space-32)));
+    padding: var(--space-16);
+    background-color: var(--color-surface);
+    border: var(--border-hairline); border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+  }
+  .c-popover[hidden] { display: none; }
+  .c-popover-host { position: relative; }
+
+  /* ======================================================================
+     CARD — §14. One card language. Variants change content, not style.
+     ==================================================================== */
+  .c-card {
+    display: flex; flex-direction: column;
+    background-color: var(--color-surface);
+    border: var(--border-hairline);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: var(--transition-interactive), translate var(--duration-base) var(--ease-standard);
+  }
+  .c-card--interactive:hover { border-color: var(--color-border-strong); box-shadow: var(--shadow-md); }
+  @media (prefers-reduced-motion: no-preference) {
+    .c-card--interactive:hover { translate: 0 -2px; }
+  }
+  .c-card--interactive:has(:focus-visible) { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
+  .c-card--flat { box-shadow: none; }
+  .c-card--raised { box-shadow: var(--shadow-sm); }
+  .c-card--brand { border-color: var(--color-primary); }
+  .c-card__media { position: relative; aspect-ratio: 16 / 10; background-color: var(--color-gray-100); }
+  .c-card__media img { inline-size: 100%; block-size: 100%; object-fit: cover; }
+  .c-card__badges { position: absolute; inset-block-start: var(--space-12); inset-inline-start: var(--space-12);
+                    display: flex; flex-wrap: wrap; gap: var(--space-4); }
+  .c-card__body { display: flex; flex-direction: column; gap: var(--space-8); padding: var(--space-16); flex: 1; }
+  @media (min-width: 48em) { .c-card__body { padding: var(--space-24); } }
+  .c-card__title { font-size: var(--text-h4); font-weight: var(--weight-semibold); }
+  .c-card__text { font-size: var(--text-body-sm); color: var(--color-text-secondary); }
+  .c-card__foot {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-16);
+    padding: var(--space-16); border-block-start: var(--border-hairline);
+    background-color: var(--color-bg-subtle);
+  }
+  @media (min-width: 48em) { .c-card__foot { padding-inline: var(--space-24); } }
+  /* The whole card is clickable but only the title is a link, so the
+     accessible name stays meaningful and text remains selectable. §23 */
+  .c-card__link::after { content: ""; position: absolute; inset: 0; }
+  .c-card { position: relative; }
+
+  /* ======================================================================
+     STATUS — §20. Icon + word + tint. Never colour alone.
+     ==================================================================== */
+  .c-status {
+    display: inline-flex; align-items: center; gap: var(--space-8);
+    padding-inline: var(--space-12); padding-block: var(--space-4);
+    font-size: var(--text-caption); font-weight: var(--weight-semibold);
+    line-height: 1.4;
+    border-radius: var(--radius-pill);
+    background-color: var(--status-bg, var(--color-gray-100));
+    color: var(--status-fg, var(--color-text));
+    white-space: nowrap;
+  }
+  .c-status .c-icon { --icon-size: var(--icon-sm); }
+  .c-status[data-status="pending"]    { --status-bg: var(--color-warning-bg); --status-fg: var(--color-warning-fg); }
+  .c-status[data-status="processing"] { --status-bg: var(--color-info-bg);    --status-fg: var(--color-info-fg); }
+  .c-status[data-status="confirmed"]  { --status-bg: var(--color-success-bg); --status-fg: var(--color-success-fg); }
+  .c-status[data-status="completed"]  { --status-bg: var(--color-gray-100);   --status-fg: var(--color-gray-800); }
+  .c-status[data-status="cancelled"]  { --status-bg: var(--color-gray-100);   --status-fg: var(--color-gray-700); }
+  .c-status[data-status="failed"]     { --status-bg: var(--color-error-bg);   --status-fg: var(--color-error-fg); }
+  .c-status[data-status="expired"]    { --status-bg: var(--color-gray-100);   --status-fg: var(--color-gray-700); }
+  /* Cancelled and expired share a tint deliberately — the icon and the word
+     carry the difference, which is the rule the brief sets. */
+
+  /* ======================================================================
+     TRUST — §19. Pricing, baggage, rules, support: visible, not buried.
+     ==================================================================== */
+  .c-trust-list { display: flex; flex-wrap: wrap; gap: var(--space-16) var(--space-24); }
+  .c-trust-item { display: flex; align-items: center; gap: var(--space-8);
+                  font-size: var(--text-body-sm); color: var(--color-text-secondary); }
+  .c-trust-item .c-icon { color: var(--color-success); }
+
+  .c-note {
+    display: flex; gap: var(--space-12);
+    padding: var(--space-16);
+    border-radius: var(--radius-md);
+    background-color: var(--note-bg, var(--color-info-bg));
+    color: var(--note-fg, var(--color-info-fg));
+    border-inline-start: 4px solid var(--note-accent, var(--color-info));
+  }
+  .c-note--success { --note-bg: var(--color-success-bg); --note-fg: var(--color-success-fg); --note-accent: var(--color-success); }
+  .c-note--warning { --note-bg: var(--color-warning-bg); --note-fg: var(--color-warning-fg); --note-accent: var(--color-warning); }
+  .c-note--error   { --note-bg: var(--color-error-bg);   --note-fg: var(--color-error-fg);   --note-accent: var(--color-error); }
+  .c-note__title { font-weight: var(--weight-semibold); font-size: var(--text-body-sm); }
+  .c-note__text  { font-size: var(--text-body-sm); }
+
+  /* Price breakdown — §18 transparent pricing, §19 never hide a fee */
+  .c-price-rows { display: flex; flex-direction: column; gap: var(--space-8); }
+  .c-price-row { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-16);
+                 font-size: var(--text-body-sm); }
+  .c-price-row__label { color: var(--color-text-secondary); }
+  .c-price-row__value { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+  .c-price-row--total {
+    margin-block-start: var(--space-8); padding-block-start: var(--space-12);
+    border-block-start: var(--border-defined);
+    font-size: var(--text-body); font-weight: var(--weight-bold);
+  }
+  .c-price-row--total .c-price-row__label { color: var(--color-text); }
+
+  /* ======================================================================
+     FILTERS
+     ==================================================================== */
+  .c-filters { display: flex; flex-direction: column; gap: var(--space-24); }
+  .c-filter-group { display: flex; flex-direction: column; gap: var(--space-8); }
+  .c-filter-group__title { font-size: var(--text-label); font-weight: var(--weight-semibold); }
+  .c-chip {
+    display: inline-flex; align-items: center; gap: var(--space-8);
+    padding-inline: var(--space-16); padding-block: var(--space-8);
+    min-block-size: var(--touch-target);
+    font-size: var(--text-body-sm); font-weight: var(--weight-medium);
+    background-color: var(--color-surface);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-pill);
+    color: var(--color-text-secondary);
+    transition: var(--transition-interactive);
+  }
+  .c-chip:hover { border-color: var(--color-gray-500); color: var(--color-text); }
+  .c-chip[aria-pressed="true"], .c-chip[data-selected="true"] {
+    background-color: var(--color-surface-brand);
+    border-color: var(--color-primary);
+    color: var(--color-text-brand);
+    font-weight: var(--weight-semibold);
+  }
+
+  /* ======================================================================
+     BREADCRUMB / PAGINATION / PROGRESS — §18 "customer always knows the
+     next step"
+     ==================================================================== */
+  .c-breadcrumb__list { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-8);
+                        font-size: var(--text-caption); color: var(--color-text-secondary); }
+  .c-breadcrumb__sep { color: var(--color-gray-400); }
+  .c-breadcrumb__link:hover { color: var(--color-text-brand); text-decoration: underline; }
+
+  .c-steps { display: flex; gap: var(--space-8); counter-reset: step; }
+  .c-steps__item { flex: 1; display: flex; flex-direction: column; gap: var(--space-8); }
+  .c-steps__bar { block-size: 4px; border-radius: var(--radius-pill); background-color: var(--color-gray-200); }
+  .c-steps__item[data-state="done"] .c-steps__bar,
+  .c-steps__item[data-state="current"] .c-steps__bar { background-color: var(--color-primary); }
+  .c-steps__label { display: flex; align-items: center; gap: var(--space-4);
+                    font-size: var(--text-caption); color: var(--color-text-secondary); }
+  .c-steps__item[data-state="current"] .c-steps__label { color: var(--color-text-brand); font-weight: var(--weight-semibold); }
+  .c-steps__item[data-state="done"] .c-steps__label { color: var(--color-text); }
+}

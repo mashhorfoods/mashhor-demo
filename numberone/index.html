@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="ar" dir="rtl" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>نمبرون للسفر و السياحة — أساس الموقع</title>
+<meta name="description" content="أساس التصميم والواجهة لموقع نمبرون للسفر و السياحة — المرحلة 10.1. نقطة الدخول لنظام التصميم والمكونات.">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#C8102E">
+<meta name="robots" content="noindex">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Number One Travel &amp; Tourism">
+<meta property="og:title" content="نمبرون للسفر و السياحة — أساس الموقع">
+<meta property="og:description" content="أساس التصميم والواجهة — المرحلة 10.1.">
+<meta property="og:locale" content="ar_SD">
+<meta property="og:locale:alternate" content="en_GB">
+<!-- TODO (§31): og:url, canonical, hreflang and og:image are blocked on a
+     production domain and a raster export of the mark. See docs/FOUNDATION.md. -->
+
+<link rel="icon" href="assets/brand/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/ibm-plex-sans-arabic-arabic-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/ibm-plex-sans-arabic-arabic-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/foundation.css">
+</head>
+
+<body>
+<a class="c-skip-link" href="#main">تخطَّ إلى المحتوى</a>
+
+<div class="l-page">
+  <!-- ==================================================================
+       HEADER — the §25 navigation, built from NAV_PRIMARY data.
+       This is the foundation's header component, not a designed homepage
+       header. Stage 11+ composes pages from it; it does not re-make it.
+       ================================================================== -->
+  <header class="c-header">
+    <div class="l-container">
+      <div class="c-header__inner">
+        <a class="c-logo c-header__brand" href="./" aria-label="نمبرون للسفر و السياحة — الصفحة الرئيسية">
+          <img class="c-logo__img" src="assets/brand/mark.svg" alt="" width="40" height="40">
+          <span style="display:flex;flex-direction:column;line-height:1.15">
+            <strong data-i18n="brand.name">نمبرون</strong>
+            <span class="t-caption" data-i18n="brand.tagline">للسفر و السياحة</span>
+          </span>
+        </a>
+
+        <nav class="c-header__nav" aria-label="التنقل الرئيسي">
+          <ul class="c-nav__list" role="list" id="main-nav"></ul>
+        </nav>
+
+        <div class="c-header__actions">
+          <button type="button" class="c-btn c-btn--utility" data-lang-switch aria-label="تغيير اللغة">
+            <svg class="c-icon" aria-hidden="true"><use href="#no-language"></use></svg>
+          </button>
+          <button type="button" class="c-btn c-btn--utility" aria-label="بحث">
+            <svg class="c-icon" aria-hidden="true"><use href="#no-search"></use></svg>
+          </button>
+          <button type="button" class="c-btn c-btn--utility" aria-label="حسابي">
+            <svg class="c-icon" aria-hidden="true"><use href="#no-customer"></use></svg>
+          </button>
+          <a class="c-btn c-btn--primary c-header__cta" href="#search" data-i18n="nav.book">احجز الآن</a>
+          <button type="button" class="c-btn c-btn--utility c-header__burger"
+                  aria-controls="main-drawer" aria-label="القائمة">
+            <svg class="c-icon" aria-hidden="true"><use href="#no-menu"></use></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="l-page__main">
+    <!-- ============================================================
+         Foundation entry. Deliberately NOT a marketing homepage: §01
+         forbids designing pages at this stage. What it does show is the
+         header, the search architecture, the service data and the
+         footer working together, so the next stage starts from a
+         running system rather than a specification.
+         ============================================================ -->
+    <section class="l-section">
+      <div class="l-container">
+        <p class="t-overline">Stage 10.1</p>
+        <h1 class="t-display u-mark">أساس الموقع</h1>
+        <p class="t-body-lg t-muted l-prose" style="margin-block-start:var(--space-16)">
+          هذه نقطة دخول النظام وليست الصفحة الرئيسية. كل ما يُبنى في المراحل القادمة
+          يرث من هذا الأساس: الألوان، الخطوط، المسافات، الشبكة، والمكونات.
+        </p>
+        <div class="l-cluster l-cluster--16" style="margin-block-start:var(--space-32)">
+          <a class="c-btn c-btn--primary c-btn--lg" href="styleguide.html">افتح دليل النظام</a>
+          <a class="c-btn c-btn--secondary c-btn--lg" href="docs/FOUNDATION.md">وثيقة الأساس</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="l-section l-section--tight l-section--subtle" id="search">
+      <div class="l-container">
+        <div class="l-section-head">
+          <h2 class="t-h2">ابحث واختر</h2>
+          <p class="t-body t-muted">معمارية بحث واحدة لكل الخدمات.</p>
+        </div>
+        <div id="search-mount"></div>
+      </div>
+    </section>
+
+    <section class="l-section">
+      <div class="l-container">
+        <div class="l-section-head">
+          <h2 class="t-h2">خدماتنا</h2>
+          <p class="t-body t-muted">مولّدة من بيانات الخدمات، لا من قوالب مكرّرة.</p>
+        </div>
+        <div id="services-mount"></div>
+      </div>
+    </section>
+
+    <section class="l-section l-section--tight l-section--subtle">
+      <div class="l-container">
+        <ul class="c-trust-list" role="list">
+          <li class="c-trust-item"><svg class="c-icon c-icon--sm" aria-hidden="true"><use href="#no-shield"></use></svg><span data-i18n="trust.securePayment">دفع آمن</span></li>
+          <li class="c-trust-item"><svg class="c-icon c-icon--sm" aria-hidden="true"><use href="#no-price-tag"></use></svg><span data-i18n="trust.clearPrice">السعر نهائي وشامل</span></li>
+          <li class="c-trust-item"><svg class="c-icon c-icon--sm" aria-hidden="true"><use href="#no-supervisor"></use></svg><span data-i18n="trust.humanHelp">مختص يساعدك</span></li>
+          <li class="c-trust-item"><svg class="c-icon c-icon--sm" aria-hidden="true"><use href="#no-support"></use></svg><span data-i18n="trust.support">دعم على مدار الساعة</span></li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================================================================
+       FOOTER — built from NAV_FOOTER data.
+       ================================================================== -->
+  <footer class="l-section l-section--tight l-section--inverse">
+    <div class="l-container">
+      <div class="l-grid">
+        <div class="l-span-full l-span-4\@lg">
+          <span class="c-logo">
+            <img class="c-logo__img" src="assets/brand/mark.svg" alt="" width="40" height="40">
+            <span style="display:flex;flex-direction:column;line-height:1.15">
+              <strong data-i18n="brand.name">نمبرون</strong>
+              <span class="t-caption t-inverse" style="opacity:.7" data-i18n="brand.tagline">للسفر و السياحة</span>
+            </span>
+          </span>
+          <p class="t-body-sm l-prose--short" style="margin-block-start:var(--space-16);opacity:.75">
+            نساعدك على اختيار الخيار الأنسب لك ولعائلتك — لا على البحث وحدك.
+          </p>
+        </div>
+        <nav class="l-span-full l-span-8\@lg" aria-label="روابط الموقع">
+          <div class="l-auto-grid" style="--min-col:12rem" id="footer-nav"></div>
+        </nav>
+      </div>
+      <p class="t-caption t-inverse" style="margin-block-start:var(--space-48);opacity:.6">
+        © <span id="year">2026</span> نمبرون للسفر و السياحة — Number One Travel &amp; Tourism.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Mobile bottom navigation — §22 -->
+  <nav class="c-bottom-nav" aria-label="التنقل السريع"><div id="bottom-nav" style="display:contents"></div></nav>
+</div>
+
+<!-- Mobile menu -->
+<div class="c-drawer" id="main-drawer" data-drawer hidden>
+  <div class="c-drawer__scrim"></div>
+  <div class="c-drawer__panel" role="dialog" aria-modal="true" aria-label="القائمة">
+    <div class="c-drawer__head">
+      <strong data-i18n="nav.menu">القائمة</strong>
+      <button type="button" class="c-btn c-btn--utility" data-drawer-close aria-label="إغلاق">
+        <svg class="c-icon" aria-hidden="true"><use href="#no-close"></use></svg>
+      </button>
+    </div>
+    <div class="c-drawer__body"><ul class="l-stack l-stack--4" role="list" id="drawer-nav"></ul></div>
+    <div class="c-drawer__foot">
+      <a class="c-btn c-btn--primary c-btn--block" href="#search" data-i18n="nav.book">احجز الآن</a>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import {
+    boot, el, qs, render, icon, t,
+    NAV_PRIMARY, NAV_BOTTOM, NAV_FOOTER, SERVICES,
+    serviceGrid, searchWidget, toast, getLocale,
+  } from './assets/js/foundation.js';
+
+  const pick = (o, base) => getLocale() === 'ar' ? o[`${base}Ar`] : o[`${base}En`];
+
+  function paint() {
+    render(qs('#main-nav'), NAV_PRIMARY.map((item) =>
+      el('li', {}, el('a', { class: 'c-nav__link', href: item.href }, t(item.label)))));
+
+    render(qs('#drawer-nav'), NAV_PRIMARY.map((item) =>
+      el('li', {}, el('a', { class: 'c-nav__link', href: item.href, style: 'inline-size:100%' }, [
+        icon(item.icon, { size: 'sm' }), el('span', {}, t(item.label)),
+      ]))));
+
+    render(qs('#bottom-nav'), NAV_BOTTOM.map((item, i) =>
+      el('a', {
+        class: 'c-bottom-nav__item', href: item.href,
+        ...(i === 0 ? { 'aria-current': 'page' } : {}),
+      }, [icon(item.icon, { size: 'sm' }), el('span', {}, t(item.label))])));
+
+    render(qs('#footer-nav'), NAV_FOOTER.map((group) =>
+      el('div', {}, [
+        el('h3', { class: 't-h4 t-inverse', style: 'margin-block-end:var(--space-12)' }, pick(group, 'title')),
+        el('ul', { class: 'l-stack l-stack--8', role: 'list' }, group.links.map((link) =>
+          el('li', {}, el('a', { class: 't-body-sm', href: link.href, style: 'opacity:.75' }, pick(link, 'label'))))),
+      ])));
+
+    render(qs('#services-mount'), serviceGrid(SERVICES));
+    render(qs('#search-mount'), searchWidget({
+      onSubmit: (vertical) => toast({
+        variant: 'info',
+        title: getLocale() === 'ar' ? 'البحث جاهز للربط' : 'Search ready to connect',
+        text: getLocale() === 'ar'
+          ? `سيتم توصيل «${vertical}» بمحرك الحجز في المرحلة 11.`
+          : `"${vertical}" connects to the booking engine in Stage 11.`,
+      }),
+    }));
+  }
+
+  boot({ sprite: 'assets/icons/sprite.svg', onLocale: paint });
+  paint();
+  qs('#year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>

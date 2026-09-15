@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="ar" dir="rtl" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>دليل النظام — نمبرون للسفر و السياحة</title>
+<meta name="description" content="دليل نظام التصميم لموقع نمبرون للسفر و السياحة — المرحلة 10.1: الألوان، الخطوط، المسافات، الشبكة، والمكونات.">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#C8102E">
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/brand/favicon.svg" type="image/svg+xml">
+
+<!-- The two faces the first screen needs, fetched before the CSS asks. §30 -->
+<link rel="preload" href="assets/fonts/ibm-plex-sans-arabic-arabic-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/ibm-plex-sans-arabic-arabic-700.woff2" as="font" type="font/woff2" crossorigin>
+
+<link rel="stylesheet" href="assets/css/foundation.css">
+
+<style>
+  /* Style-guide chrome only. Nothing here belongs to the product. */
+  .sg-nav { position: sticky; inset-block-start: 0; z-index: var(--z-header);
+            background: var(--color-surface); border-block-end: var(--border-hairline); }
+  .sg-nav__inner { display: flex; align-items: center; gap: var(--space-16);
+                   min-block-size: var(--header-height-compact); flex-wrap: wrap; }
+  .sg-toc { display: flex; gap: var(--space-4); overflow-x: auto; scrollbar-width: none; flex: 1;
+             /* A flex child defaults to min-width:auto, which refuses to shrink
+                below its content — the scroll container then pushes the page
+                wider instead of scrolling. This is the fix, everywhere. */
+             min-inline-size: 0; }
+  .sg-toc::-webkit-scrollbar { display: none; }
+  .sg-toc a { padding: var(--space-8) var(--space-12); font-size: var(--text-caption);
+              white-space: nowrap; border-radius: var(--radius-sm); color: var(--color-text-secondary); }
+  .sg-toc a:hover { background: var(--color-surface-hover); color: var(--color-text); }
+  .sg-section { padding-block: var(--section-space-tight); border-block-start: var(--border-hairline); }
+  .sg-section__head { margin-block-end: var(--space-32); }
+  .sg-ref { display: inline-block; direction: ltr; font-size: var(--text-overline); font-weight: var(--weight-bold);
+            letter-spacing: var(--tracking-overline); color: var(--color-text-brand);
+            background: var(--color-surface-brand); padding: 2px var(--space-8);
+            border-radius: var(--radius-sm); margin-block-end: var(--space-8); }
+  .sg-demo { padding: var(--space-24); border: var(--border-hairline); border-radius: var(--radius-lg);
+             background: var(--color-surface); }
+  .sg-demo + .sg-demo { margin-block-start: var(--space-16); }
+  .sg-demo__label { font-size: var(--text-caption); color: var(--color-text-secondary);
+                    margin-block-end: var(--space-16); font-family: var(--font-data);
+                    /* English annotation inside an Arabic page: give it its own
+                       direction or the trailing punctuation jumps to the front. */
+                    direction: ltr; text-align: start; }
+  .sg-swatches { display: grid; gap: var(--space-12);
+                 grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); }
+  .sg-swatch__chip { block-size: 64px; border-radius: var(--radius-md); border: var(--border-hairline); }
+  .sg-swatch__name { font-family: var(--font-data); font-size: var(--text-overline); margin-block-start: var(--space-8); display: block; }
+  .sg-swatch__hex { font-family: var(--font-data); font-size: var(--text-overline); color: var(--color-text-secondary); }
+  .sg-swatch__ratio { font-family: var(--font-data); font-size: var(--text-overline); }
+  .sg-grid-demo > * { background: var(--color-surface-brand); border: 1px dashed var(--color-primary);
+                      border-radius: var(--radius-sm); padding: var(--space-8); text-align: center;
+                      font-family: var(--font-data); font-size: var(--text-overline); }
+  .sg-space-row { display: flex; align-items: center; gap: var(--space-16); }
+  .sg-space-bar { block-size: 16px; background: var(--color-primary); border-radius: var(--radius-sm); }
+  .sg-icons { display: grid; gap: var(--space-8); grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr)); }
+  .sg-icon-cell { display: flex; flex-direction: column; align-items: center; gap: var(--space-8);
+                  padding: var(--space-12); border: var(--border-hairline); border-radius: var(--radius-md); text-align: center; }
+  .sg-icon-cell code { font-size: 10px; color: var(--color-text-secondary); word-break: break-all; }
+  .sg-radius-box { block-size: 72px; background: var(--color-gray-100); border: var(--border-hairline);
+                   display: grid; place-items: center; font-family: var(--font-data); font-size: var(--text-overline); }
+  .sg-shadow-box { block-size: 72px; background: var(--color-surface); border-radius: var(--radius-md);
+                   display: grid; place-items: center; font-family: var(--font-data); font-size: var(--text-overline); }
+  .sg-note { font-size: var(--text-body-sm); color: var(--color-text-secondary); max-inline-size: var(--measure); }
+</style>
+</head>
+
+<body>
+<a class="c-skip-link" href="#main" data-i18n="a11y.skip">تخطَّ إلى المحتوى</a>
+
+<header class="sg-nav">
+  <div class="l-container">
+    <div class="sg-nav__inner">
+      <span class="c-logo">
+        <img class="c-logo__img c-logo--sm" src="assets/brand/mark.svg" alt="" width="40" height="40" style="block-size:32px">
+        <span style="display:flex;flex-direction:column;line-height:1.1">
+          <strong style="font-size:var(--text-body-sm)" data-i18n="brand.name">نمبرون</strong>
+          <span class="t-caption" style="font-size:11px" data-i18n="brand.tagline">للسفر و السياحة</span>
+        </span>
+      </span>
+
+      <nav class="sg-toc" aria-label="أقسام الدليل">
+        <a href="#brand">الهوية</a>
+        <a href="#color">الألوان</a>
+        <a href="#type">الخطوط</a>
+        <a href="#space">المسافات</a>
+        <a href="#grid">الشبكة</a>
+        <a href="#shape">الحواف والظلال</a>
+        <a href="#buttons">الأزرار</a>
+        <a href="#forms">النماذج</a>
+        <a href="#search">البحث</a>
+        <a href="#cards">البطاقات</a>
+        <a href="#icons">الأيقونات</a>
+        <a href="#status">الحالات</a>
+        <a href="#states">التحميل والأخطاء</a>
+        <a href="#nav">التنقل</a>
+        <a href="#trust">الثقة</a>
+      </nav>
+
+      <button type="button" class="c-btn c-btn--secondary c-btn--sm" data-lang-switch>
+        <svg class="c-icon c-icon--sm" aria-hidden="true"><use href="#no-language"></use></svg>
+        <span data-lang-label>English</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="l-container">
+
+  <section class="l-section l-section--tight">
+    <p class="t-overline">Stage 10.1</p>
+    <h1 class="t-display">نظام التصميم<br>Design Foundation</h1>
+    <p class="t-body-lg t-muted l-prose" style="margin-block-start:var(--space-16)">
+      هذه الصفحة هي المرجع الحي لكل ما يُبنى لاحقاً. كل صفحة وكل ميزة في المراحل القادمة
+      ترث من هذا النظام ولا تعيد تعريفه.
+    </p>
+    <p class="sg-note" lang="en" dir="ltr" style="margin-block-start:var(--space-12)">
+      This page is the living reference. Every later stage inherits from it. Switch the
+      language above to verify RTL and LTR side by side — the layout is identical code.
+    </p>
+  </section>
+
+  <!-- ==================== BRAND ==================== -->
+  <section class="sg-section" id="brand">
+    <div class="sg-section__head">
+      <span class="sg-ref">§02 · §29</span>
+      <h2 class="t-h2 u-mark">الهوية — Brand</h2>
+    </div>
+
+    <div class="sg-demo">
+      <p class="sg-demo__label">.c-logo — one component, every surface</p>
+      <div class="l-cluster l-cluster--24">
+        <span class="c-logo">
+          <img class="c-logo__img" src="assets/brand/mark.svg" alt="" width="40" height="40">
+          <span style="display:flex;flex-direction:column;line-height:1.15">
+            <strong data-i18n="brand.name">نمبرون</strong>
+            <span class="t-caption" data-i18n="brand.tagline">للسفر و السياحة</span>
+          </span>
+        </span>
+        <span class="c-logo c-logo--lg">
+          <img class="c-logo__img" src="assets/brand/mark.svg" alt="نمبرون" width="56" height="56">
+        </span>
+      </div>
+      <p class="sg-note" style="margin-block-start:var(--space-16)">
+        الشعار أصل مورَّد وليس تصميماً جديداً. الملف الحالي عنصر نائب موثّق في
+        <code>assets/brand/README.md</code> — استبدله بالملف المعتمد ولن يتغير أي شيء آخر.
+      </p>
+    </div>
+
+    <div class="sg-demo">
+      <p class="sg-demo__label">§16 — graphic language derived from the numeral 1</p>
+      <div class="l-stack l-stack--24">
+        <p class="u-mark t-body">علامة الرقم واحد كخط واحد حاسم — <code>.u-mark</code></p>
+        <div><p class="t-caption">مسار الرحلة — <code>.u-route</code></p><div class="u-route" style="margin-block-start:var(--space-8)"></div></div>
+        <div class="u-relative" style="min-block-size:120px;overflow:hidden">
+          <span class="u-numeral-watermark" aria-hidden="true">1</span>
+          <p class="t-body" style="position:relative">العلامة المائية — <code>.u-numeral-watermark</code></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== COLOUR ==================== -->
+  <section class="sg-section" id="color">
+    <div class="sg-section__head">
+      <span class="sg-ref">§04</span>
+      <h2 class="t-h2 u-mark">الألوان — Colour</h2>
+      <p class="sg-note" style="margin-block-start:var(--space-8)">
+        النسبة المعروضة هي تباين اللون مع الأبيض. الحد الأدنى للنص العادي 4.5:1 والنص الكبير 3:1.
+      </p>
+    </div>
+    <div class="sg-demo"><p class="sg-demo__label">Brand + neutrals + semantic — contrast measured against white</p>
+      <div class="sg-swatches" id="sg-swatches"></div>
+    </div>
+  </section>
+
+  <!-- ==================== TYPE ==================== -->
+  <section class="sg-section" id="type">
+    <div class="sg-section__head">
+      <span class="sg-ref">§05</span>
+      <h2 class="t-h2 u-mark">الخطوط — Typography</h2>
+    </div>
+
+    <div class="sg-demo">
+      <p class="sg-demo__label">Scale — IBM Plex Sans Arabic (Arabic + Latin) · Inter (booking data)</p>
+      <div class="l-stack l-stack--24">
+        <div><p class="t-caption">Display</p><p class="t-display">نمبرون للسفر</p></div>
+        <div><p class="t-caption">H1</p><p class="t-h1">اختر الرحلة الأنسب لعائلتك</p></div>
+        <div><p class="t-caption">H2</p><p class="t-h2">خدماتنا في مكان واحد</p></div>
+        <div><p class="t-caption">H3</p><p class="t-h3">حجز الطيران والفنادق</p></div>
+        <div><p class="t-caption">H4</p><p class="t-h4">تفاصيل الرحلة</p></div>
+        <div><p class="t-caption">Body Large</p><p class="t-body-lg l-prose">نساعدك على المقارنة والاختيار، لا على البحث فقط. We help you choose, not just search.</p></div>
+        <div><p class="t-caption">Body</p><p class="t-body l-prose">نص أساسي يعرض تفاصيل الخدمة وشروط الحجز بوضوح كامل دون إخفاء أي معلومة مهمة.</p></div>
+        <div><p class="t-caption">Body Small</p><p class="t-body-sm l-prose">نص ثانوي للملاحظات والشروط.</p></div>
+        <div><p class="t-caption">Caption</p><p class="t-caption">شامل الضرائب والرسوم</p></div>
+        <div><p class="t-caption">Overline</p><p class="t-overline">العروض</p></div>
+        <div><p class="t-caption">Button</p><button type="button" class="c-btn c-btn--primary">احجز الآن</button></div>
+        <div><p class="t-caption">Price · Price Large</p>
+          <p class="t-price">385,000 ج.س</p><p class="t-price-lg">1,450,000 ج.س</p></div>
+        <div><p class="t-caption">Large Number</p><p class="t-number-lg">12</p></div>
+        <div><p class="t-caption">Booking Data — tabular figures, always LTR</p>
+          <p class="t-data">NO-4471-KRT · MS 852 · 08:40 → 11:05</p>
+          <p class="t-data">NO-0390-IST · TK 678 · 22:15 → 07:50</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== SPACE ==================== -->
+  <section class="sg-section" id="space">
+    <div class="sg-section__head">
+      <span class="sg-ref">§08</span>
+      <h2 class="t-h2 u-mark">المسافات — Spacing</h2>
+    </div>
+    <div class="sg-demo"><div class="l-stack l-stack--8" id="sg-space"></div></div>
+  </section>
+
+  <!-- ==================== GRID ==================== -->
+  <section class="sg-section" id="grid">
+    <div class="sg-section__head">
+      <span class="sg-ref">§07 · §22</span>
+      <h2 class="t-h2 u-mark">الشبكة — Grid</h2>
+      <p class="sg-note" style="margin-block-start:var(--space-8)">
+        4 أعمدة على الجوال · 8 على اللوحي · 12 على سطح المكتب. غيّر عرض النافذة لترى التحول.
+      </p>
+    </div>
+    <div class="sg-demo">
+      <p class="sg-demo__label">.l-grid — current columns: <output id="sg-cols">4</output></p>
+      <div class="l-grid sg-grid-demo" id="sg-grid"></div>
+    </div>
+    <div class="sg-demo">
+      <p class="sg-demo__label">Spans — full / 6@md / 4@lg</p>
+      <div class="l-grid sg-grid-demo">
+        <div class="l-span-full">l-span-full</div>
+        <div class="l-span-6\@md l-span-4\@lg">6@md · 4@lg</div>
+        <div class="l-span-6\@md l-span-4\@lg">6@md · 4@lg</div>
+        <div class="l-span-full l-span-4\@lg">full · 4@lg</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== SHAPE ==================== -->
+  <section class="sg-section" id="shape">
+    <div class="sg-section__head">
+      <span class="sg-ref">§09 · §10</span>
+      <h2 class="t-h2 u-mark">الحواف والظلال — Radius & Shadow</h2>
+    </div>
+    <div class="sg-demo">
+      <p class="sg-demo__label">Radius — pill is for tags and toggles only, never cards or primary buttons</p>
+      <div class="l-auto-grid" style="--min-col:8rem">
+        <div class="sg-radius-box" style="border-radius:var(--radius-sm)">sm · 6px</div>
+        <div class="sg-radius-box" style="border-radius:var(--radius-md)">md · 10px</div>
+        <div class="sg-radius-box" style="border-radius:var(--radius-lg)">lg · 16px</div>
+        <div class="sg-radius-box" style="border-radius:var(--radius-pill)">pill</div>
+      </div>
+    </div>
+    <div class="sg-demo u-bg-subtle">
+      <p class="sg-demo__label">Shadow — four steps, neutral, no glow</p>
+      <div class="l-auto-grid" style="--min-col:8rem">
+        <div class="sg-shadow-box" style="box-shadow:var(--shadow-xs)">xs</div>
+        <div class="sg-shadow-box" style="box-shadow:var(--shadow-sm)">sm</div>
+        <div class="sg-shadow-box" style="box-shadow:var(--shadow-md)">md</div>
+        <div class="sg-shadow-box" style="box-shadow:var(--shadow-lg)">lg</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== BUTTONS ==================== -->
+  <section class="sg-section" id="buttons">
+    <div class="sg-section__head">
+      <span class="sg-ref">§11</span>
+      <h2 class="t-h2 u-mark">الأزرار — Buttons</h2>
+    </div>
+
+    <div class="sg-demo">
+      <p class="sg-demo__label">Variants — one dominant primary per page</p>
+      <div class="l-cluster l-cluster--16">
+        <button type="button" class="c-btn c-btn--primary"><span class="c-btn__label">احجز الآن</span><span class="c-btn__spinner" aria-hidden="true"></span></button>
+        <button type="button" class="c-btn c-btn--secondary">تفاصيل الرحلة</button>
+        <button type="button" class="c-btn c-btn--secondary-brand">تحدث مع مختص</button>
+        <button type="button" class="c-btn c-btn--tertiary">تعديل البحث</button>
+        <button type="button" class="c-btn c-btn--utility" aria-label="تصفية">
+          <svg class="c-icon" aria-hidden="true"><use href="#no-filter"></use></svg>
+        </button>
+        <button type="button" class="c-btn c-btn--danger">إلغاء الحجز</button>
+      </div>
+    </div>
+
+    <div class="sg-demo">
+      <p class="sg-demo__label">Sizes</p>
+      <div class="l-cluster l-cluster--16">
+        <button type="button" class="c-btn c-btn--primary c-btn--sm">صغير</button>
+        <button type="button" class="c-btn c-btn--primary">عادي</button>
+        <button type="button" class="c-btn c-btn--primary c-btn--lg">كبير</button>
+      </div>
+    </div>
+
+    <div class="sg-demo">
+      <p class="sg-demo__label">All eight states — default · hover · pressed · focus · disabled · loading · success · error</p>
+      <div class="l-cluster l-cluster--16" id="sg-btn-states">
+        <button type="button" class="c-btn c-btn--primary"><span class="c-btn__label">افتراضي</span><span class="c-btn__spinner" aria-hidden="true"></span></button>
+        <button type="button" class="c-btn c-btn--primary" disabled><span class="c-btn__label">معطّل</span></button>
+        <button type="button" class="c-btn c-btn--primary" data-state="loading" aria-busy="true">
+          <span class="c-btn__label">جارٍ الحجز</span><span class="c-btn__spinner" aria-hidden="true"></span></button>
+        <button type="button" class="c-btn c-btn--primary" data-state="success">
+          <span class="c-btn__label">تم التأكيد</span>
+          <svg class="c-icon c-btn__state-icon" aria-hidden="true"><use href="#no-check"></use></svg></button>
+        <button type="button" class="c-btn c-btn--primary" data-state="error">
+          <span class="c-btn__label">فشل</span>
+          <svg class="c-icon c-btn__state-icon" aria-hidden="true"><use href="#no-close"></use></svg></button>
+        <button type="button" class="c-btn c-btn--secondary" id="sg-btn-demo">جرّب الدورة الكاملة</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FORMS ==================== -->
+  <section class="sg-section" id="forms">
+    <div class="sg-section__head">
+      <span class="sg-ref">§12</span>
+      <h2 class="t-h2 u-mark">النماذج — Forms</h2>
+      <p class="sg-note" style="margin-block-start:var(--space-8)">
+        كل حقل له تسمية ظاهرة دائماً. الخطأ لا يُعبَّر عنه باللون وحده أبداً — أيقونة وجملة تشرح ما العمل.
+      </p>
+    </div>
+
+    <div class="sg-demo">
+      <div class="c-form-grid">
+        <div class="c-field">
+          <label class="c-field__label" for="sg-name">الاسم كما في الجواز <span class="c-field__required" aria-hidden="true">*</span></label>
+          <input class="c-field__control" id="sg-name" type="text" required>
+          <p class="c-field__help">اكتب الاسم بالحروف اللاتينية تماماً كما يظهر في الجواز.</p>
+        </div>
+
+        <div class="c-field" data-state="error">
+          <label class="c-field__label" for="sg-email">البريد الإلكتروني</label>
+          <div class="c-field__wrap">
+            <span class="c-field__addon c-field__addon--start"><svg class="c-icon c-icon--sm" aria-hidden="true"><use href="#no-mail"></use></svg></span>
+            <input class="c-field__control" id="sg-email" type="email" aria-invalid="true" aria-describedby="sg-email-err" value="ahmed@">
+          </div>
+          <p class="c-field__error" id="sg-email-err">
+            <svg class="c-icon c-icon--sm" aria-hidden="true"><use href="#no-alert"></use></svg>
+            <span>البريد غير مكتمل. أضف ما بعد علامة @ — مثال: ahmed@example.com</span>
+          </p>
+        </div>
+
+        <div class="c-field" data-state="success">
+          <label class="c-field__label" for="sg-ref">رقم الحجز</label>
+          <input class="c-field__control u-data" id="sg-ref" type="text" value="NO-4471-KRT" dir="ltr">
+          <p class="c-field__success">
+            <svg class="c-icon c-icon--sm" aria-hidden="true"><use href="#no-check-circle"></use></svg>
+            <span>تم العثور على الحجز.</span>
+          </p>
+        </div>
+
+        <div class="c-field">
+          <label class="c-field__label" for="sg-cabin">درجة السفر</label>
+          <select class="c-field__control" id="sg-cabin">
+            <option>الاقتصادية</option><option>الاقتصادية المميزة</option><option>رجال الأعمال</option>
+          </select>
+        </div>
+
+        <div class="c-field is-full">
+          <label class="c-field__label" for="sg-phone">رقم الهاتف</label>
+          <div class="c-phone">
+            <select class="c-field__control" id="sg-phone-code" aria-label="مفتاح الدولة"><option>+249</option><option>+966</option><option>+971</option></select>
+            <input class="c-field__control c-phone__number" id="sg-phone" type="tel" inputmode="tel" placeholder="9XX XXX XXX">
+          </div>
+        </div>
+
+        <div class="c-field">
+          <label class="c-field__label" for="sg-disabled">حقل معطّل</label>
+          <input class="c-field__control" id="sg-disabled" type="text" value="غير متاح الآن" disabled>
+        </div>
+
+        <div class="c-field">
+          <label class="c-field__label" for="sg-textarea">ملاحظات</label>
+          <textarea class="c-field__control" id="sg-textarea" rows="3" placeholder="أخبرنا بأي احتياج خاص"></textarea>
+        </div>
+
+        <fieldset class="c-fieldset is-full">
+          <legend class="c-fieldset__legend">نوع التذكرة</legend>
+          <label class="c-choice c-choice--boxed">
+            <input class="c-choice__input" type="radio" name="sg-fare" checked>
+            <span class="c-choice__text">تذكرة مرنة
+              <span class="c-choice__desc">قابلة للتعديل والاسترداد · +45,000 ج.س</span></span>
+          </label>
+          <label class="c-choice c-choice--boxed">
+            <input class="c-choice__input" type="radio" name="sg-fare">
+            <span class="c-choice__text">تذكرة موفّرة
+              <span class="c-choice__desc">تعديل برسوم، غير قابلة للاسترداد</span></span>
+          </label>
+        </fieldset>
+
+        <div class="is-full l-stack l-stack--8">
+          <label class="c-choice">
+            <input class="c-choice__input" type="checkbox" checked>
+            <span class="c-choice__text">أوافق على شروط الحجز وسياسة الإلغاء</span>
+          </label>
+          <label class="c-toggle">
+            <input class="c-toggle__input" type="checkbox" checked>
+            <span class="c-toggle__track"><span class="c-toggle__thumb"></span></span>
+            <span class="c-choice__text">أرسل لي تنبيهات الرحلة على واتساب</span>
+          </label>
+        </div>
+
+        <div class="c-field is-full" data-otp>
+          <span class="c-field__label" id="sg-otp-label">رمز التحقق</span>
+          <div class="c-otp" role="group" aria-labelledby="sg-otp-label">
+            <input class="c-otp__input" type="text" aria-label="الرقم 1">
+            <input class="c-otp__input" type="text" aria-label="الرقم 2">
+            <input class="c-otp__input" type="text" aria-label="الرقم 3">
+            <input class="c-otp__input" type="text" aria-label="الرقم 4">
+            <input class="c-otp__input" type="text" aria-label="الرقم 5">
+            <input class="c-otp__input" type="text" aria-label="الرقم 6">
+            <input type="hidden" name="otp">
+          </div>
+          <p class="c-field__help">أرسلنا رمزاً من ستة أرقام إلى هاتفك. الصقه دفعة واحدة إن أردت.</p>
+        </div>
+
+        <div class="is-full l-stack l-stack--12">
+          <label class="c-upload" data-upload>
+            <input class="c-upload__input" type="file" multiple accept="image/*,.pdf">
+            <span class="c-upload__icon"><svg class="c-icon c-icon--xl" aria-hidden="true"><use href="#no-documents"></use></svg></span>
+            <span class="t-body-sm" style="font-weight:var(--weight-semibold)">ارفع صورة الجواز</span>
+            <span class="c-upload__hint">PDF أو صورة · حتى 5 ميغابايت لكل ملف</span>
+          </label>
+          <div class="c-upload-list"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== SEARCH ==================== -->
+  <section class="sg-section" id="search">
+    <div class="sg-section__head">
+      <span class="sg-ref">§13</span>
+      <h2 class="t-h2 u-mark">البحث — Search</h2>
+      <p class="sg-note" style="margin-block-start:var(--space-8)">
+        معمارية واحدة لكل الخدمات. الحقول تُولَّد من بيانات كل خدمة، والخيارات الإضافية مخفية حتى يطلبها المستخدم.
+      </p>
+    </div>
+    <div id="sg-search"></div>
+  </section>
+
+  <!-- ==================== CARDS ==================== -->
+  <section class="sg-section" id="cards">
+    <div class="sg-section__head">
+      <span class="sg-ref">§14</span>
+      <h2 class="t-h2 u-mark">البطاقات — Cards</h2>
+    </div>
+
+    <div class="sg-demo"><p class="sg-demo__label">Service cards — generated from SERVICES data</p><div id="sg-services"></div></div>
+    <div class="sg-demo"><p class="sg-demo__label">Flight cards — recommendation, baggage, fare rules and stops are on the card, not hidden</p><div class="l-stack l-stack--16" id="sg-flights"></div></div>
+    <div class="sg-demo"><p class="sg-demo__label">Hotel · Package · Supervisor · Trip</p>
+      <div class="l-auto-grid" style="--min-col:18rem" id="sg-mixed"></div></div>
+  </section>
+
+  <!-- ==================== ICONS ==================== -->
+  <section class="sg-section" id="icons">
+    <div class="sg-section__head">
+      <span class="sg-ref">§15</span>
+      <h2 class="t-h2 u-mark">الأيقونات — Icons</h2>
+    </div>
+    <div class="sg-demo"><div class="sg-icons" id="sg-icons"></div></div>
+  </section>
+
+  <!-- ==================== STATUS ==================== -->
+  <section class="sg-section" id="status">
+    <div class="sg-section__head">
+      <span class="sg-ref">§20</span>
+      <h2 class="t-h2 u-mark">حالات الحجز — Status</h2>
+      <p class="sg-note" style="margin-block-start:var(--space-8)">
+        أيقونة + كلمة + لون. الحالة لا تُعبَّر عنها باللون وحده أبداً — جرّب عرض الصفحة بتدرج رمادي.
+      </p>
+    </div>
+    <div class="sg-demo"><div class="l-cluster l-cluster--16" id="sg-status"></div></div>
+  </section>
+
+  <!-- ==================== STATES ==================== -->
+  <section class="sg-section" id="states">
+    <div class="sg-section__head">
+      <span class="sg-ref">§21</span>
+      <h2 class="t-h2 u-mark">التحميل والفراغ والخطأ — States</h2>
+    </div>
+
+    <div class="sg-demo">
+      <p class="sg-demo__label">Live state machine — the same region, five states</p>
+      <div class="l-cluster l-cluster--8" style="margin-block-end:var(--space-16)">
+        <button type="button" class="c-btn c-btn--secondary c-btn--sm" data-state-demo="loading">جارٍ التحميل</button>
+        <button type="button" class="c-btn c-btn--secondary c-btn--sm" data-state-demo="skeleton">هيكل</button>
+        <button type="button" class="c-btn c-btn--secondary c-btn--sm" data-state-demo="content">نتائج</button>
+        <button type="button" class="c-btn c-btn--secondary c-btn--sm" data-state-demo="empty">لا نتائج</button>
+        <button type="button" class="c-btn c-btn--secondary c-btn--sm" data-state-demo="error">خطأ</button>
+      </div>
+      <div id="sg-state-region"></div>
+    </div>
+
+    <div class="sg-demo">
+      <p class="sg-demo__label">Inline notices &amp; toast</p>
+      <div class="l-stack l-stack--12">
+        <div class="c-note c-note--warning">
+          <svg class="c-icon" aria-hidden="true"><use href="#no-alert"></use></svg>
+          <div><p class="c-note__title">تغيّر سعر التذكرة</p>
+            <p class="c-note__text">ارتفع السعر 12,000 ج.س منذ بدء الحجز. يمكنك المتابعة بالسعر الجديد أو العودة للنتائج لاختيار بديل.</p></div>
+        </div>
+        <div class="c-note c-note--error">
+          <svg class="c-icon" aria-hidden="true"><use href="#no-error"></use></svg>
+          <div><p class="c-note__title">فشلت عملية الدفع</p>
+            <p class="c-note__text">لم يُخصم أي مبلغ. جرّب بطاقة أخرى أو اطلب من مختص إتمام الحجز نيابة عنك.</p></div>
+        </div>
+        <div class="l-cluster l-cluster--8">
+          <button type="button" class="c-btn c-btn--secondary c-btn--sm" data-toast="success">إشعار نجاح</button>
+          <button type="button" class="c-btn c-btn--secondary c-btn--sm" data-toast="error">إشعار خطأ</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== NAV ==================== -->
+  <section class="sg-section" id="nav">
+    <div class="sg-section__head">
+      <span class="sg-ref">§25 · §22</span>
+      <h2 class="t-h2 u-mark">التنقل — Navigation</h2>
+    </div>
+    <div class="sg-demo">
+      <p class="sg-demo__label">Desktop nav · overlays</p>
+      <nav class="c-nav" aria-label="عرض توضيحي"><ul class="c-nav__list" role="list" id="sg-nav"></ul></nav>
+      <div class="l-cluster l-cluster--12" style="margin-block-start:var(--space-24)">
+        <button type="button" class="c-btn c-btn--secondary" aria-controls="sg-drawer">افتح القائمة الجانبية</button>
+        <button type="button" class="c-btn c-btn--secondary" data-modal-open="sg-modal">افتح نافذة حوارية</button>
+      </div>
+      <div class="c-breadcrumb" style="margin-block-start:var(--space-24)">
+        <ol class="c-breadcrumb__list" role="list">
+          <li><a class="c-breadcrumb__link" href="#">الرئيسية</a></li>
+          <li class="c-breadcrumb__sep" aria-hidden="true">/</li>
+          <li><a class="c-breadcrumb__link" href="#">الطيران</a></li>
+          <li class="c-breadcrumb__sep" aria-hidden="true">/</li>
+          <li aria-current="page">الخرطوم → جدة</li>
+        </ol>
+      </div>
+      <div class="c-steps" style="margin-block-start:var(--space-24)">
+        <div class="c-steps__item" data-state="done"><span class="c-steps__bar"></span><span class="c-steps__label">1 · الاختيار</span></div>
+        <div class="c-steps__item" data-state="current"><span class="c-steps__bar"></span><span class="c-steps__label">2 · بيانات المسافرين</span></div>
+        <div class="c-steps__item"><span class="c-steps__bar"></span><span class="c-steps__label">3 · الدفع</span></div>
+        <div class="c-steps__item"><span class="c-steps__bar"></span><span class="c-steps__label">4 · التأكيد</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== TRUST ==================== -->
+  <section class="sg-section" id="trust">
+    <div class="sg-section__head">
+      <span class="sg-ref">§19 · §18</span>
+      <h2 class="t-h2 u-mark">الثقة والشفافية — Trust</h2>
+    </div>
+    <div class="sg-demo">
+      <ul class="c-trust-list" role="list">
+        <li class="c-trust-item"><svg class="c-icon c-icon--sm" aria-hidden="true"><use href="#no-shield"></use></svg><span data-i18n="trust.securePayment">دفع آمن</span></li>
+        <li class="c-trust-item"><svg class="c-icon c-icon--sm" aria-hidden="true"><use href="#no-price-tag"></use></svg><span data-i18n="trust.clearPrice">السعر نهائي وشامل</span></li>
+        <li class="c-trust-item"><svg class="c-icon c-icon--sm" aria-hidden="true"><use href="#no-supervisor"></use></svg><span data-i18n="trust.humanHelp">مختص يساعدك</span></li>
+        <li class="c-trust-item"><svg class="c-icon c-icon--sm" aria-hidden="true"><use href="#no-support"></use></svg><span data-i18n="trust.support">دعم على مدار الساعة</span></li>
+      </ul>
+
+      <div class="c-price-rows" style="margin-block-start:var(--space-24);max-inline-size:26rem">
+        <div class="c-price-row"><span class="c-price-row__label">تذكرة بالغ × 2</span><span class="c-price-row__value">770,000 ج.س</span></div>
+        <div class="c-price-row"><span class="c-price-row__label">تذكرة طفل × 1</span><span class="c-price-row__value">289,000 ج.س</span></div>
+        <div class="c-price-row"><span class="c-price-row__label">الضرائب ورسوم المطار</span><span class="c-price-row__value">96,000 ج.س</span></div>
+        <div class="c-price-row"><span class="c-price-row__label">رسوم خدمة نمبرون</span><span class="c-price-row__value">0 ج.س</span></div>
+        <div class="c-price-row c-price-row--total"><span class="c-price-row__label">الإجمالي</span><span class="c-price-row__value">1,155,000 ج.س</span></div>
+      </div>
+
+      <div class="c-accordion" data-accordion="single" style="margin-block-start:var(--space-32);max-inline-size:var(--measure)">
+        <div class="c-accordion__item">
+          <button type="button" class="c-accordion__trigger" aria-expanded="true">
+            <span>الأمتعة المسموح بها</span>
+            <svg class="c-icon c-accordion__chevron" aria-hidden="true"><use href="#no-chevron-down"></use></svg>
+          </button>
+          <div class="c-accordion__panel"><div class="c-accordion__inner">
+            <div class="c-accordion__content"><p>30 كجم أمتعة مسجلة + 7 كجم أمتعة يد لكل مسافر بالغ. الأطفال الرضّع: 10 كجم.</p></div>
+          </div></div>
+        </div>
+        <div class="c-accordion__item">
+          <button type="button" class="c-accordion__trigger" aria-expanded="false">
+            <span>شروط التعديل والإلغاء</span>
+            <svg class="c-icon c-accordion__chevron" aria-hidden="true"><use href="#no-chevron-down"></use></svg>
+          </button>
+          <div class="c-accordion__panel"><div class="c-accordion__inner">
+            <div class="c-accordion__content"><p>التعديل متاح حتى 24 ساعة قبل الإقلاع برسوم 45,000 ج.س. الاسترداد الكامل متاح خلال 24 ساعة من الحجز.</p></div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="c-assist" style="margin-block-start:var(--space-32);max-inline-size:32rem">
+        <span class="c-assist__photo" aria-hidden="true" style="display:grid;place-items:center;color:var(--color-gray-500)">
+          <svg class="c-icon c-icon--lg" aria-hidden="true"><use href="#no-customer"></use></svg>
+        </span>
+        <div class="c-assist__body">
+          <p class="t-body-sm" style="font-weight:var(--weight-semibold)">لست متأكداً من الخيار الأنسب؟</p>
+          <p class="t-caption">أحمد من نمبرون يقارن لك الخيارات ويرشّح الأنسب لعائلتك وميزانيتك.</p>
+        </div>
+        <a class="c-btn c-btn--secondary-brand c-btn--sm" href="#">تحدث معه</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="sg-section">
+    <p class="t-caption">
+      نمبرون للسفر و السياحة — Stage 10.1 Website Master Foundation.
+      المرجع الكامل في <code>docs/FOUNDATION.md</code>.
+    </p>
+  </section>
+</main>
+
+<!-- ==================== OVERLAYS ==================== -->
+<div class="c-drawer" id="sg-drawer" data-drawer hidden>
+  <div class="c-drawer__scrim"></div>
+  <div class="c-drawer__panel" role="dialog" aria-modal="true" aria-label="القائمة">
+    <div class="c-drawer__head">
+      <strong>القائمة</strong>
+      <button type="button" class="c-btn c-btn--utility" data-drawer-close aria-label="إغلاق">
+        <svg class="c-icon" aria-hidden="true"><use href="#no-close"></use></svg>
+      </button>
+    </div>
+    <div class="c-drawer__body"><ul class="l-stack l-stack--4" role="list" id="sg-drawer-nav"></ul></div>
+    <div class="c-drawer__foot"><button type="button" class="c-btn c-btn--primary c-btn--block">احجز الآن</button></div>
+  </div>
+</div>
+
+<dialog class="c-modal" id="sg-modal" aria-labelledby="sg-modal-title">
+  <form method="dialog" class="c-modal__form">
+    <div class="c-modal__head">
+      <h2 class="t-h3" id="sg-modal-title">تأكيد إلغاء الحجز</h2>
+      <button type="button" class="c-btn c-btn--utility" data-modal-close aria-label="إغلاق">
+        <svg class="c-icon" aria-hidden="true"><use href="#no-close"></use></svg>
+      </button>
+    </div>
+    <div class="c-modal__body">
+      <p class="t-body">سيتم إلغاء الحجز <span class="u-data" dir="ltr">NO-4471-KRT</span> نهائياً.</p>
+      <div class="c-note c-note--warning" style="margin-block-start:var(--space-16)">
+        <svg class="c-icon" aria-hidden="true"><use href="#no-alert"></use></svg>
+        <div><p class="c-note__text">هذه التذكرة غير قابلة للاسترداد. سيُعاد إليك 0 ج.س.</p></div>
+      </div>
+    </div>
+    <div class="c-modal__foot">
+      <button type="button" class="c-btn c-btn--secondary" data-modal-close>تراجع</button>
+      <button type="submit" class="c-btn c-btn--danger">نعم، ألغِ الحجز</button>
+    </div>
+  </form>
+</dialog>
+
+<script type="module" src="assets/js/styleguide.js"></script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+/* ============================================================================
+   11 — UTILITIES
+   A deliberately short list. Utilities exist for one-off adjustments that do
+   not justify a component; anything that repeats belongs in a component. §33
+   ========================================================================= */
+
+@layer utilities {
+  .u-flow > * + * { margin-block-start: var(--flow-space, var(--space-16)); }
+
+  .u-text-start  { text-align: start; }
+  .u-text-center { text-align: center; }
+  .u-text-end    { text-align: end; }
+
+  .u-mis-auto { margin-inline-start: auto; }
+  .u-mie-auto { margin-inline-end: auto; }
+  .u-mbs-auto { margin-block-start: auto; }
+
+  .u-full { inline-size: 100%; }
+  .u-relative { position: relative; }
+  .u-clip { overflow: hidden; }
+  .u-no-wrap { white-space: nowrap; }
+
+  .u-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-inline-size: 0; }
+  .u-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .u-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+  .u-hide { display: none !important; }
+  @media (max-width: 47.999em)  { .u-hide\@sm-down { display: none !important; } }
+  @media (min-width: 48em)      { .u-hide\@md-up   { display: none !important; } }
+  @media (max-width: 63.999em)  { .u-hide\@lg-down { display: none !important; } }
+  @media (min-width: 64em)      { .u-hide\@lg-up   { display: none !important; } }
+
+  .u-divider { block-size: 1px; background-color: var(--color-border); border: none; }
+
+  /* Images: reserve the box before the file arrives so nothing shifts. §30 */
+  .u-img-cover { inline-size: 100%; block-size: 100%; object-fit: cover; }
+  .u-ratio-16-10 { aspect-ratio: 16 / 10; }
+  .u-ratio-4-3   { aspect-ratio: 4 / 3; }
+  .u-ratio-1-1   { aspect-ratio: 1; }
+
+  .u-bg-subtle { background-color: var(--color-bg-subtle); }
+  .u-bg-brand-subtle { background-color: var(--color-surface-brand); }
+}
