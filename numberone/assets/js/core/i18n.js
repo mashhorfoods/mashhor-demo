@@ -19,7 +19,6 @@ const STORAGE_KEY = 'no.locale';
 export const STRINGS = {
   ar: {
     'brand.name': 'نمبرون',
-    'brand.full': 'نمبرون للسفر و السياحة',
     'brand.tagline': 'للسفر و السياحة',
     'nav.services': 'خدماتنا',
     'nav.destinations': 'الوجهات',
@@ -45,11 +44,9 @@ export const STRINGS = {
     'search.checkout': 'تاريخ المغادرة',
     'search.destination': 'الوجهة',
     'search.guests': 'النزلاء',
-    'search.rooms': 'الغرف',
     'search.nationality': 'الجنسية',
     'search.country': 'الدولة',
     'search.submit': 'ابحث',
-    'search.swap': 'عكس الاتجاه',
     'search.more': 'خيارات أكثر',
     'search.less': 'خيارات أقل',
     'search.cabin': 'درجة السفر',
@@ -71,14 +68,11 @@ export const STRINGS = {
     'status.expired': 'منتهي',
     'flight.direct': 'مباشر',
     'flight.stops': (n) => (n === 1 ? 'توقف واحد' : `${n} توقفات`),
-    'flight.duration': 'مدة الرحلة',
     'flight.baggage': 'وزن الأمتعة',
     'flight.select': 'اختر',
-    'flight.details': 'تفاصيل الرحلة',
     'flight.perPerson': 'للفرد الواحد شامل الضرائب',
     'flight.recommended': 'الأنسب لعائلتك',
     'hotel.night': 'لليلة الواحدة',
-    'hotel.reviews': (n) => `${n} تقييم`,
     'hotel.select': 'عرض الغرف',
     'package.nights': (n) => `${n} ليالٍ`,
     'package.from': 'يبدأ من',
@@ -114,7 +108,6 @@ export const STRINGS = {
   },
   en: {
     'brand.name': 'Number One',
-    'brand.full': 'Number One Travel & Tourism',
     'brand.tagline': 'Travel & Tourism',
     'nav.services': 'Services',
     'nav.destinations': 'Destinations',
@@ -140,11 +133,9 @@ export const STRINGS = {
     'search.checkout': 'Check-out',
     'search.destination': 'Destination',
     'search.guests': 'Guests',
-    'search.rooms': 'Rooms',
     'search.nationality': 'Nationality',
     'search.country': 'Country',
     'search.submit': 'Search',
-    'search.swap': 'Swap direction',
     'search.more': 'More options',
     'search.less': 'Fewer options',
     'search.cabin': 'Cabin',
@@ -166,14 +157,11 @@ export const STRINGS = {
     'status.expired': 'Expired',
     'flight.direct': 'Direct',
     'flight.stops': (n) => (n === 1 ? '1 stop' : `${n} stops`),
-    'flight.duration': 'Duration',
     'flight.baggage': 'Baggage',
     'flight.select': 'Select',
-    'flight.details': 'Flight details',
     'flight.perPerson': 'Per person, taxes included',
     'flight.recommended': 'Best fit for your family',
     'hotel.night': 'per night',
-    'hotel.reviews': (n) => `${n} reviews`,
     'hotel.select': 'View rooms',
     'package.nights': (n) => `${n} nights`,
     'package.from': 'From',
@@ -218,6 +206,28 @@ export function t(key, ...args) {
   const value = table[key] ?? STRINGS.ar[key] ?? key;
   return typeof value === 'function' ? value(...args) : value;
 }
+
+/**
+ * Pick the right field for the current language out of a DATA record.
+ *
+ * `t()` is for interface strings the system owns; this is for content a
+ * booking engine or an admin supplies, where the two languages sit on one
+ * object. It accepts both shapes we use:
+ *
+ *   pick(hotel, 'name')   ->  hotel.nameAr   | hotel.nameEn
+ *   pick(pkg.imageAlt)    ->  imageAlt.ar    | imageAlt.en
+ *
+ * It falls back rather than rendering `undefined`: a record that has only
+ * been translated one way still shows something. §27
+ */
+export const pick = (obj, base) => {
+  const isAr = current === 'ar';
+  if (obj == null) return '';
+  if (typeof obj === 'object' && !base) return obj[isAr ? 'ar' : 'en'] ?? obj.ar ?? '';
+  return isAr
+    ? (obj[`${base}Ar`] ?? obj[base] ?? '')
+    : (obj[`${base}En`] ?? obj[base] ?? obj[`${base}Ar`] ?? '');
+};
 
 export const getLocale = () => current;
 export const getDir = () => LOCALES[current].dir;

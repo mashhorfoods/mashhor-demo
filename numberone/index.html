@@ -176,10 +176,8 @@
   import {
     boot, el, qs, render, icon, t,
     NAV_PRIMARY, NAV_BOTTOM, NAV_FOOTER, SERVICES,
-    serviceGrid, searchWidget, toast, getLocale,
+    serviceGrid, searchWidget, toast, getLocale, pick,
   } from './assets/js/foundation.js';
-
-  const pick = (o, base) => getLocale() === 'ar' ? o[`${base}Ar`] : o[`${base}En`];
 
   function paint() {
     render(qs('#main-nav'), NAV_PRIMARY.map((item) =>

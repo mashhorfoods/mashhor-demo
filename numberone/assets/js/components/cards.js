@@ -8,18 +8,10 @@
    ========================================================================= */
 
 import { el, uid } from '../core/dom.js';
-import { t, getLocale } from '../core/i18n.js';
+import { t, getLocale, pick } from '../core/i18n.js';
 import { money, time, duration, dateShort, dayOffset } from '../core/format.js';
 import { STATUSES, SERVICES } from '../data/config.js';
 import { icon } from './ui.js';
-
-/** Pick the field for the current language: name / nameEn, titleAr / titleEn. */
-const pick = (obj, base) => {
-  const isAr = getLocale() === 'ar';
-  if (obj == null) return '';
-  if (typeof obj === 'object' && !base) return obj[isAr ? 'ar' : 'en'] ?? obj.ar ?? '';
-  return isAr ? (obj[`${base}Ar`] ?? obj[base] ?? '') : (obj[`${base}En`] ?? obj[base] ?? obj[`${base}Ar`] ?? '');
-};
 
 /* ---------------------------------------------------------------------------
    STATUS — §20. Icon + word, always. There is no way to call this and get

@@ -10,6 +10,11 @@ export const qsa = (sel, root = document) => Array.from(root.querySelectorAll(se
  * Create an element. Attributes starting with "on" are bound as listeners,
  * `class` accepts a string or an array, `dataset` takes an object, and
  * children may be nodes, strings, or nested arrays.
+ *
+ * There is deliberately no way to pass raw HTML. Children always become text
+ * nodes (see `append`), so a passenger name, a hotel description or anything
+ * else arriving from an API or typed by a customer cannot become markup. Do
+ * not add an `html:` option — build nodes, or use a template element.
  */
 export function el(tag, attrs = {}, children = []) {
   const node = document.createElement(tag);
@@ -21,8 +26,6 @@ export function el(tag, attrs = {}, children = []) {
       node.className = Array.isArray(value) ? value.filter(Boolean).join(' ') : value;
     } else if (key === 'dataset') {
       Object.assign(node.dataset, value);
-    } else if (key === 'html') {
-      node.innerHTML = value;
     } else if (key.startsWith('on') && typeof value === 'function') {
       node.addEventListener(key.slice(2).toLowerCase(), value);
     } else if (value === true) {
@@ -43,13 +46,6 @@ export function append(parent, children) {
     parent.append(child instanceof Node ? child : document.createTextNode(String(child)));
   }
   return parent;
-}
-
-/** Escape text destined for an innerHTML string. */
-export function esc(value) {
-  return String(value ?? '').replace(/[&<>"']/g, (c) => (
-    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
-  ));
 }
 
 /** Replace the contents of a node in one operation. */

@@ -110,7 +110,7 @@ export const SEARCH_VERTICALS = [
     id: 'flights', label: 'search.flights', icon: 'no-flight', columns: 4,
     fields: [
       { id: 'from',      type: 'place',   label: 'search.from',   icon: 'no-flight',   required: true },
-      { id: 'to',        type: 'place',   label: 'search.to',     icon: 'no-location', required: true, swapWith: 'from' },
+      { id: 'to',        type: 'place',   label: 'search.to',     icon: 'no-location', required: true },
       { id: 'depart',    type: 'date',    label: 'search.depart', required: true },
       { id: 'return',    type: 'date',    label: 'search.return' },
       { id: 'pax',       type: 'pax',     label: 'search.travellers', full: true },

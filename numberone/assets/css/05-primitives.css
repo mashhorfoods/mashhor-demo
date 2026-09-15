@@ -217,18 +217,36 @@
   [dir="rtl"] .c-btn__spinner, [dir="rtl"] .c-btn__state-icon { translate: 50% -50%; }
   .c-btn[data-state="loading"] .c-btn__spinner { display: block; }
 
+  /* ---- Spinner ----------------------------------------------------------
+     One implementation, two uses. The standalone spinner (.c-spinner, used by
+     loading blocks) and the one inside a button differ only in size, stroke
+     weight and which half of the ring is drawn — so they are three custom
+     properties, not two components. Keeping them separate meant two
+     reduced-motion rules that had to be remembered together. */
+  .c-spinner,
   .c-btn__spinner {
-    inline-size: var(--icon-md); block-size: var(--icon-md);
-    border: 2px solid currentColor; border-top-color: transparent;
+    inline-size: var(--spinner-size, 24px);
+    block-size:  var(--spinner-size, 24px);
+    border: var(--spinner-weight, 2.5px) solid var(--spinner-track, var(--color-gray-200));
+    border-top-color: var(--spinner-head, var(--color-primary));
     border-radius: var(--radius-circle);
-    opacity: 0.9;
     animation: no-spin 700ms linear infinite;
+  }
+  .c-spinner--lg { --spinner-size: 40px; }
+  .c-btn__spinner {
+    /* On a filled button the ring inherits the label colour, and the gap is
+       what reads as motion. */
+    --spinner-size: var(--icon-md);
+    --spinner-weight: 2px;
+    --spinner-track: currentColor;
+    --spinner-head: transparent;
+    opacity: 0.9;
   }
   @keyframes no-spin { to { rotate: 360deg; } }
   @media (prefers-reduced-motion: reduce) {
     /* A spinner that cannot spin must still say something, so it pulses
        gently instead of freezing into a meaningless ring. §23 */
-    .c-btn__spinner { animation: no-pulse 1.4s ease-in-out infinite; }
+    .c-spinner, .c-btn__spinner { animation: no-pulse 1.4s ease-in-out infinite; }
   }
   @keyframes no-pulse { 0%,100% { opacity: 0.35; } 50% { opacity: 1; } }
 

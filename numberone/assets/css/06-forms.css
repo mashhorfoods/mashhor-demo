@@ -25,8 +25,7 @@
   .c-field__required { color: var(--color-error); }
   .c-field__optional { color: var(--color-text-secondary); font-weight: var(--weight-regular); }
 
-  .c-field__control,
-  .c-input {
+  .c-field__control {
     inline-size: 100%;
     min-block-size: var(--control-height);
     padding-inline: var(--space-16);

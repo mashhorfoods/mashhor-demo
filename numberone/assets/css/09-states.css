@@ -35,16 +35,8 @@
   .c-skeleton--circle { border-radius: var(--radius-circle); }
   .c-skeleton--media { aspect-ratio: 16 / 10; border-radius: 0; }
 
-  /* ---- Spinner ---------------------------------------------------------- */
-  .c-spinner {
-    inline-size: var(--spinner-size, 24px); block-size: var(--spinner-size, 24px);
-    border: 2.5px solid var(--color-gray-200);
-    border-top-color: var(--color-primary);
-    border-radius: var(--radius-circle);
-    animation: no-spin 700ms linear infinite;
-  }
-  .c-spinner--lg { --spinner-size: 40px; }
-  @media (prefers-reduced-motion: reduce) { .c-spinner { animation: no-pulse 1.4s ease-in-out infinite; } }
+  /* .c-spinner lives in 05-primitives.css, alongside the button spinner it
+     shares an implementation with. */
 
   .c-loading-block {
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-16);
