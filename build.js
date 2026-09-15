@@ -24,7 +24,7 @@
 
    Nothing is minified beyond that: no selector rewriting, no property
    reordering, no JavaScript touched. The output must be byte-for-byte
-   equivalent in behaviour, and the harnesses in ux/ are run against it.
+   equivalent in behaviour, and the gates in bin/ are run against it.
 
    Usage:  node build.js          →  dist/
 */
@@ -36,8 +36,9 @@ const ROOT = __dirname;
 const DIST = path.join(ROOT, 'dist');
 
 /* Files that make up the deployable site. Everything else in the repo —
-   ux/ (verification harnesses), brand/*.md and the design-system pages,
-   build.js itself, node_modules — is development material and is not copied. */
+   bin/ beyond the six operational scripts below, brand/*.md and the
+   design-system pages, build.js itself, node_modules — is development
+   material and is not copied. */
 const SHIP = [
   '404.html', 'robots.txt', 'sitemap.xml',
   'google192f612c4e876e6f.html',
@@ -193,8 +194,8 @@ function stripCssComments(css) {
    tracked too, since `${...}` can nest quotes inside them.
 
    Nothing else is touched. No renaming, no whitespace games, no reordering:
-   the output must run identically, and the harnesses in ux/ are run against
-   it to prove that it does. */
+   the output must run identically, and the gates in bin/ are run against it
+   to prove that it does. */
 function stripJsComments(js) {
   let out = '', i = 0, prev = '';
   const opensRegex = () => !prev || '(,=:[!&|?{};+-*%~^<>'.includes(prev)

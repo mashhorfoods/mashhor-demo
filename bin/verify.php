@@ -2439,6 +2439,11 @@ foreach (array_merge(
     glob(AUN_ROOT . '/admin/*.html') ?: [],
     glob(AUN_ROOT . '/app/*.php') ?: [],
     glob(AUN_ROOT . '/app/Repo/*.php') ?: [],
+    /* seo/KEYWORDS.md is the keyword research, and it states that this scan
+       covers it. That was not true — it was never in this list — so it is
+       now, and the claim it makes about itself holds. It was clean when it
+       was added. */
+    glob(AUN_ROOT . '/seo/*.md') ?: [],
     [AUN_ROOT . '/index.html', AUN_ROOT . '/404.html', AUN_ROOT . '/llms.txt']
 ) as $file) {
     $t = (string) @file_get_contents($file);
@@ -2592,9 +2597,17 @@ check('shell', 'and returns no entry from a module it may not view',
 $asked = $leak->get('/api/admin/activity?module=requests');
 check('shell', 'and asking for one of those modules by name returns nothing',
     (int) ($asked['body']['total'] ?? -1) === 0, 'total=' . ($asked['body']['total'] ?? '?'));
+/* Asked rather than read. A content manager naming the one module it is
+   refused everywhere else still gets nothing: a filter in the query narrows
+   what this account may see and can never widen it. This was a str_contains
+   over Routes.php looking for the text of the call — which a handler that
+   passed the wrong argument would satisfy just as well. */
+$asked = $leak->get('/api/admin/activity?module=requests');
 check('shell', 'a filter in the query can narrow but never widen',
-    str_contains((string) @file_get_contents(AUN_ROOT . '/app/Routes.php'),
-        "'modules' => Authz::visibleModules(\$u)"));
+    $asked['status'] === 200 && (int) ($asked['body']['total'] ?? -1) === 0,
+    "status={$asked['status']} total=" . ($asked['body']['total'] ?? '?'));
+check('shell', 'and naming it leaks no reference or number through the log',
+    !str_contains($asked['raw'], 'REQ-') && preg_match('/"0\d{9}"/', $asked['raw']) === 0);
 
 $bell = $leak->get('/api/admin/notifications');
 check('shell', 'the bell answers', $bell['status'] === 200);
@@ -2625,10 +2638,25 @@ check('shell', 'and still sees request history in the log',
 check('shell', 'and still has a bell with something in it',
     count($admin->get('/api/admin/notifications')['body']['rows'] ?? []) > 0);
 
-/* the rule, stated once and applied in each place */
-check('shell', 'the visibility rule lives in Authz, not copied per handler',
-    str_contains((string) @file_get_contents(AUN_ROOT . '/app/Authz.php'), 'function visibleModules')
-    && str_contains((string) @file_get_contents(AUN_ROOT . '/app/Authz.php'), 'function canSeeRecord'));
+/* The rule, applied in each place rather than named once in a file.
+
+   This used to assert that Authz.php contained the strings «function
+   visibleModules» and «function canSeeRecord», under the label «the
+   visibility rule lives in Authz, not copied per handler». It could not
+   detect a copy, and it would have passed had either body been replaced with
+   `return true`. It also kept canSeeRecord() alive: nothing in the
+   application called it, because the log is narrowed in SQL over the whole
+   set instead of asked row by row — which is the better design. So the
+   function is gone and the question is put to the three surfaces that would
+   each have to get it right independently. */
+$sameAccountEverywhere = [
+    'the activity log'  => (int) ($leak->get('/api/admin/activity?module=requests')['body']['total'] ?? -1) === 0,
+    'the notification bell' => ($leak->get('/api/admin/notifications')['body']['rows'] ?? ['x']) === [],
+    'the dashboard summary' => !isset($leak->get('/api/admin/summary')['body']['counts']),
+];
+$leaky = array_keys(array_filter($sameAccountEverywhere, static fn($ok) => !$ok));
+check('shell', 'one account is refused requests identically on every surface',
+    $leaky === [], $leaky === [] ? '3 surfaces agree' : 'disagreed: ' . implode(', ', $leaky));
 check('shell', 'and the dashboard hides a section it was not sent rather than drawing it zero',
     str_contains((string) @file_get_contents(AUN_ROOT . '/admin/dashboard.html'), 'res.visible'));
 

@@ -55,8 +55,8 @@ brand/apple-touch-icon.png          iOS home screen
 brand/favicon-32.png                PNG favicon fallback
 ```
 
-Nothing else. In particular **do not upload** `ux/` (the verification
-harnesses), `seo/`, `build.js`, `tools-*.js`, `package.json`, `brand/*.md`,
+Nothing else. In particular **do not upload** `seo/`, `bin/` (beyond the six
+scripts the package carries), `build.js`, `tools-*.js`, `package.json`, `brand/*.md`,
 `brand/design-system.html`, `brand/index.html`, `brand/tokens.css`,
 `brand/system.css`, the image masters in `img/*.webp` (they are several times
 larger than any variant), or `node_modules/`.
@@ -125,22 +125,33 @@ not versioned and must revalidate, or an update never reaches anyone.
 
 ## Before you upload
 
-The site is verified by the harnesses in `ux/`. They run against the source by
-default, or against what actually ships:
+One command, which runs every gate and then asks the questions a green test
+suite does not answer — is debug off, is the installer shut, is the package
+built from the source in front of you:
 
 ```sh
-export CHROMIUM_PATH=<path to chrome>
-export SITE_URL="http://127.0.0.1:8080/"
-node tools-serve.js &            # serves dist/ the way the host should
-for f in ux/verify-*.js; do node "$f"; done
+npm run serve &                  # the development server the gates drive
+npm run release                  # every gate, then the release conditions
 ```
 
-`tools-serve.js` is not a convenience: it applies the same gzip, the same cache
-headers and the same 404 handler the real host is asked for above, so what is
+It ends in one of three verdicts: GO, GO WITH ACTIONS, or NO-GO. Read the
+count off that run rather than from here; a number written into a document is
+right on the day it is typed.
+
+`npm run smoke` is the same runner with `--quick`, which skips the four slowest
+browser gates. It is a smoke run, not a gate — never upload on its word alone.
+
+To see what the host will actually serve, `npm run preview` serves `dist/` with
+the same gzip, cache headers and 404 handler asked for above, so what is
 measured locally is what a visitor gets. `GZIP=0 node tools-serve.js` shows
 what an unconfigured host costs.
 
-All ten harnesses pass against the production build — 1,231 assertions.
+> The harnesses that used to live in `ux/` were what this section named for a
+> long time. They required `playwright-core`, which is not a dependency of this
+> project and was never installed, so every one of them failed on its first
+> line — while this page still told you to run them. They were removed once
+> the gates covered what they measured; the last gap, `robots.txt` and
+> `sitemap.xml`, moved into `bin/qa-public.js` first.
 
 ## Being found — search engines and AI assistants
 
@@ -160,10 +171,11 @@ Three surfaces do this work, and all three ship:
   assistant with a gap tends to fill it; this closes the gaps.
 
 The thing that matters most is not a file. **Every word of the page is in the
-first HTTP response** — 5,477 characters of text, 32 headings, no JavaScript
-required. Most AI crawlers do not execute JavaScript at all, and a site whose
-content only appears after a script runs is, to them, an empty page. Verify it
-stays that way with `ux/verify-crawlability.js`.
+first HTTP response** — no JavaScript required. Most AI crawlers do not execute
+JavaScript at all, and a site whose content only appears after a script runs
+is, to them, an empty page. `bin/qa-public.js` fetches the page as Googlebot,
+GPTBot and ClaudeBot in turn and fails if what comes back is not already the
+text, so this cannot quietly stop being true.
 
 ## Search Console, after the first deploy
 

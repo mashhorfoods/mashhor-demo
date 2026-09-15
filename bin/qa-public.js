@@ -143,6 +143,114 @@ function section(t) { lines.push('\n' + t); }
     H.dialled.length === 1 && H.bizPhone === H.dialled[0],
     `structured=${H.bizPhone} dialled=${H.dialled.join(', ')}`);
 
+  /* =================================================================
+     The three files no visitor ever opens and every crawler does.
+
+     These came from ux/verify-crawlability.js, which could no longer run:
+     it required playwright-core, a package that is not in package.json and
+     not installed, so all eleven harnesses in ux/ died on their first line
+     while DEPLOY.md still named them as the pre-upload check. Nothing in the
+     eleven gates had ever fetched robots.txt or sitemap.xml. They were all
+     correct when this was ported — this is here so they stay that way.
+
+     Fetched over plain HTTP with a crawler's User-Agent rather than through
+     the browser, because that is how a crawler fetches them, and because the
+     agent string is the whole point of two of these checks.
+     ================================================================= */
+  section('THE THREE FILES ONLY A CRAWLER READS');
+
+  const fetchAs = async (p, ua) => {
+    const r = await fetch(BASE + p, { headers: { 'User-Agent': ua } });
+    return { status: r.status, type: r.headers.get('content-type') || '', body: await r.text() };
+  };
+
+  /* Reading robots.txt is not the same as knowing what it permits. Naming an
+     agent gives it its OWN group, and it then stops reading the wildcard one
+     entirely — so a file that looks generous can quietly starve the crawler
+     it just named. Longest match wins, per the RFC. Kept from the harness
+     this replaces, because the rule is subtle and the file names 22 agents. */
+  const allowed = (robots, ua, p) => {
+    const rows = robots.split('\n').map((l) => l.replace(/#.*/, '').trim()).filter(Boolean);
+    const groups = []; let cur = null;
+    for (const l of rows) {
+      const m = /^([A-Za-z-]+)\s*:\s*(.*)$/.exec(l); if (!m) continue;
+      const k = m[1].toLowerCase(), v = m[2].trim();
+      if (k === 'user-agent') {
+        if (!cur || cur.rules.length) { cur = { agents: [], rules: [] }; groups.push(cur); }
+        cur.agents.push(v.toLowerCase());
+      } else if ((k === 'allow' || k === 'disallow') && cur) {
+        cur.rules.push({ allow: k === 'allow', path: v });
+      }
+    }
+    const lower = ua.toLowerCase();
+    const g = groups.find((x) => x.agents.some((a) => a !== '*' && lower.includes(a)))
+           || groups.find((x) => x.agents.includes('*'));
+    if (!g) return true;
+    let best = null;
+    for (const r of g.rules) {
+      if (!r.path) continue;
+      if (p.startsWith(r.path) && (!best || r.path.length > best.path.length)) best = r;
+    }
+    return best ? best.allow : true;
+  };
+
+  /* the search engines this business's customers use, and the assistants that
+     now answer «من ينقل كبار السن في الرياض؟» */
+  const AGENTS = [
+    'Googlebot', 'Googlebot-Image', 'Bingbot', 'Applebot', 'DuckDuckBot', 'YandexBot', 'Slurp',
+    'Google-Extended', 'Applebot-Extended', 'GPTBot', 'OAI-SearchBot', 'ChatGPT-User',
+    'ClaudeBot', 'Claude-SearchBot', 'Claude-User', 'PerplexityBot', 'Perplexity-User',
+    'meta-externalagent', 'Amazonbot', 'MistralAI-User', 'cohere-ai', 'CCBot',
+  ];
+
+  const rb = await fetchAs('/robots.txt', 'Googlebot');
+  check('crawl', 'robots.txt is served as plain text', rb.status === 200 && /text\/plain/.test(rb.type),
+    `HTTP ${rb.status} ${rb.type}`);
+  check('crawl', 'and nothing is blanket-disallowed',
+    !/^\s*Disallow:\s*\/\s*$/m.test(rb.body));
+  /* the unnamed agent is the important one: it proves the wildcard group still
+     works after twenty-two named groups were put in front of it */
+  const probes = AGENTS.concat(['SomeCrawlerNobodyHasHeardOf/2.0']);
+  const blocked = probes.filter((a) => !allowed(rb.body, a, '/'));
+  check('crawl', 'every agent may fetch /, including one nobody named',
+    blocked.length === 0, blocked.length ? 'blocked: ' + blocked.join(', ') : `${probes.length} agents`);
+  const named = AGENTS.filter((a) => new RegExp('^User-agent:\\s*' + a + '\\s*$', 'mi').test(rb.body));
+  check('crawl', 'and each one is named rather than left to inherit the wildcard',
+    named.length === AGENTS.length, `${named.length}/${AGENTS.length}`);
+  check('crawl', 'robots.txt declares the sitemap, absolute and https',
+    /^Sitemap:\s*https:\/\/aunaldrb\.com\/sitemap\.xml$/m.test(rb.body));
+
+  const sm = await fetchAs('/sitemap.xml', 'Googlebot');
+  check('crawl', 'sitemap.xml serves and names the canonical address',
+    sm.status === 200 && /<loc>https:\/\/aunaldrb\.com\/<\/loc>/.test(sm.body), `HTTP ${sm.status}`);
+  check('crawl', 'and carries a lastmod a crawler can read',
+    /<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/.test(sm.body),
+    (sm.body.match(/<lastmod>([^<]*)</) || [, '—'])[1]);
+
+  const lt = await fetchAs('/llms.txt', 'GPTBot');
+  check('crawl', 'llms.txt is served as plain text',
+    lt.status === 200 && /text\/plain/.test(lt.type), `HTTP ${lt.status} ${lt.type}`);
+  check('crawl', 'and names the canonical address and the approved terminology',
+    /aunaldrb\.com/.test(lt.body) && /ذوي الاحتياجات الخاصة/.test(lt.body));
+  check('crawl', 'and states what must not be inferred about this business',
+    /What this site does not state|لا يقدّمه/.test(lt.body));
+
+  /* A crawler that gets an empty shell indexes an empty shell. This page is
+     static, so the first response has to carry the text already. */
+  for (const ua of [
+    'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+    'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko); compatible; GPTBot/1.1; +https://openai.com/gptbot',
+    'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko); compatible; ClaudeBot/1.0; +claudebot@anthropic.com',
+  ]) {
+    const r = await fetchAs('/', ua);
+    const text = r.body.replace(/<script[\s\S]*?<\/script>/g, ' ')
+      .replace(/<style[\s\S]*?<\/style>/g, ' ')
+      .replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;/g, ' ').replace(/\s+/g, ' ').trim();
+    const nameM = /compatible; ([A-Za-z-]+)/.exec(ua);
+    check('crawl', `${(nameM ? nameM[1] : 'crawler')} receives the text in the first response`,
+      r.status === 200 && text.length > 4000, `HTTP ${r.status}, ${text.length} chars`);
+  }
+
   /* ================================================================= */
   section('THE REQUEST FORM — FILLED IN AND SENT, NOT READ');
   /* ================================================================= */

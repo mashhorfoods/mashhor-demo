@@ -1,7 +1,7 @@
 # عون الدرب — admin dashboard stages
 
 The private management system for the website and the company's incoming requests.
-Separate track from `ux/`, which covers the public site.
+Separate track from the public site, which the gates in `bin/` cover.
 
 | Path | What it is |
 | --- | --- |

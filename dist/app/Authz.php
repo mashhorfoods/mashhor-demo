@@ -142,22 +142,15 @@ final class Authz
      * `media` is its own module in the log and lives under `services` in the
      * permission matrix, because that is how the routes gate it.
      */
+    /* Read by Repo_Activity, which inverts it to expand the permission modules
+       an account may see into the record modules the log actually stores. It
+       used to have a forward helper here too, moduleOf()/canSeeRecord(), for
+       asking the question one row at a time; nothing called it, because
+       narrowing the query over the whole set is both cheaper and harder to
+       get wrong. */
     public const RECORD_MODULE = [
         'media' => 'services',
     ];
-
-    public static function moduleOf(string $recordModule): string
-    {
-        return self::RECORD_MODULE[$recordModule] ?? $recordModule;
-    }
-
-    /** Whether this account may read a record belonging to that module. */
-    public static function canSeeRecord(?array $user, string $recordModule): bool
-    {
-        $m = self::moduleOf($recordModule);
-        if (!in_array($m, self::MODULES, true)) return false;
-        return self::can($user, $m, 'view');
-    }
 
     public static function isSuper(?array $user): bool
     {
