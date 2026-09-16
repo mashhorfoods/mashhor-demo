@@ -78,8 +78,10 @@ export function mountPage({ handle = 'page', header = {}, footer = {}, bottom = 
   const repaint = () => {
     const nav = qs('#bottom-nav');
     if (nav) render(nav, bottomNav(bottom));
-    api.current = paint(api) ?? null;
-    window.no = { ...(window.no ?? {}), [handle]: api.current };
+    // An async paint (a screen that must fetch first) exposes its handle once it resolves.
+    const expose = (value) => { api.current = value ?? null; window.no = { ...(window.no ?? {}), [handle]: api.current }; };
+    const painted = paint(api);
+    if (painted?.then) { expose(null); painted.then(expose); } else expose(painted);
   };
   api.repaint = repaint;
   boot({ onLocale: () => { chrome(); repaint(); } }).then(() => { chrome(); repaint(); });

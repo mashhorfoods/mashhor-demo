@@ -476,6 +476,16 @@ component in this layer. Permission is asked, never assumed.
    with freely licensed stand-ins from Wikimedia Commons (credits written to
    `assets/images/CREDITS.md`) on a machine with internet access — the build
    sandbox's egress policy blocks every image host.
+3b. **Supplier, payment and airport data (Stage 11).** The booking journey
+   runs on `assets/js/booking/adapters/dev-flights.js` (fictional carriers,
+   generated fares) and `DEV_PAYMENT` (a simulated provider), both labelled on
+   every screen. Needed: a flight supplier adapter behind a server-side proxy
+   (credentials never reach the client), a payment provider with hosted
+   fields or a redirect plus its webhook, the airport / city registry the
+   supplier serves (`booking/locations.js` is the dev stand-in), fare-rule
+   texts, service-fee amounts, the booking terms, and confirmation delivery
+   (e-mail / SMS). Each is one registration in `adapters/installed.js` or
+   `payment.js`; the screens do not change.
 4. ~~**Production domain**~~ — resolved. The site deploys to
    `https://mashhorfoods.github.io/mashhor-demo/`; canonical and `og:url` are
    set. Because it is a *project* page served from a subpath, routes are stored

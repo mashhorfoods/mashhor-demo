@@ -2,7 +2,7 @@
 // types + legs, travellers, validation, loading/success/error/empty states,
 // help-me-choose, deep links, context persistence, a11y, three widths, both
 // directions. Exits 1 on any ✗.
-import './env.mjs';
+import { shot } from './env.mjs';
 import { chromium } from 'playwright';
 const ORIGIN = process.env.TEST_ORIGIN + '';
 const PAGE = '/mashhor-demo/book/';
@@ -23,7 +23,7 @@ async function open(url = PAGE, width = 1440, height = 1000, locale = 'ar') {
   return p;
 }
 const F = '.c-search__form:not([hidden])';
-const fill = (p, name, value) => p.evaluate(([n, v]) => { const c = document.querySelector(`.c-search__form:not([hidden]) [name="${n}"]:not([type=hidden])`); c.value = v; c.dispatchEvent(new Event('input', { bubbles: true })); c.dispatchEvent(new Event('change', { bubbles: true })); }, [name, value]);
+const fill = (p, name, value) => p.evaluate(([n, v]) => { const c = document.querySelector(`.c-search__form:not([hidden]) [name="${n}"]:not([type=hidden])`); c.value = v; c.dispatchEvent(new Event('input', { bubbles: true })); c.dispatchEvent(new Event('change', { bubbles: true })); /* a typed place opens the combobox list; a user leaves it */ if (c.getAttribute('role') === 'combobox') c.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); }, [name, value]);
 const submit = async (p) => { await p.click(`${F} button[type=submit]`); await p.waitForTimeout(300); };
 const errors = (p) => p.evaluate(() => Array.from(document.querySelectorAll('.c-search__form:not([hidden]) .c-field__error')).map((e) => e.textContent.trim()));
 
@@ -97,7 +97,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
     ok(`${T} bottom nav marks book current`, r.bottomVisible ? r.bottomCurrent === (loc === 'ar' ? 'احجز' : 'Book') : true, `${r.bottomCurrent}`);
     ok(`${T} skip link + canonical`, r.skip && r.canonical.endsWith('/mashhor-demo/book/'));
     ok(`${T} no physical CSS in booking rules`, r.logical);
-    await p.screenshot({ path: `book-${tag}-${loc}.png`, fullPage: true });
+    await p.screenshot({ path: shot(`book-${tag}-${loc}.png`), fullPage: true });
     await p.close();
   }
 }

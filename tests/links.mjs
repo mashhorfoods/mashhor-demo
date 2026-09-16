@@ -12,7 +12,7 @@ const PAGES = ['index.html', '404.html', 'styleguide.html', 'services/index.html
   ...readdirSync(ROOT + 'offers', { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => `offers/${d.name}/index.html`),
   ...readdirSync(ROOT + 'supervisor', { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => `supervisor/${d.name}/index.html`)];
 // Routes that later stages own: they 404 today by design (the 404 page explains and routes back).
-const PLANNED = /^\/mashhor-demo\/(search|help|trips|account|supervisors|destinations\/[a-z-]+|hotels\/[A-Z0-9-]+|packages\/[A-Z0-9-]+|legal|about|careers|partners|privacy|terms|cookies|faq|contact|offers\/categories)(\/|$)/;
+const PLANNED = /^\/mashhor-demo\/(help|trips|account|supervisors|destinations\/[a-z-]+|hotels\/[A-Z0-9-]+|packages\/[A-Z0-9-]+|legal|about|careers|partners|privacy|terms|cookies|faq|contact|offers\/categories)(\/|$)/;
 const head = (path) => new Promise((res) => http.request({ host: new URL(process.env.TEST_ORIGIN).hostname, port: new URL(process.env.TEST_ORIGIN).port, path, method: 'HEAD' }, (r) => res(r.statusCode)).on('error', () => res(0)).end());
 const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
 const seen = new Map(); const dead = []; const external = new Set(); const heads = []; const planned = new Set();

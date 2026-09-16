@@ -24,18 +24,21 @@ import { el, uid } from '../core/dom.js';
 import { t, getLocale } from '../core/i18n.js';
 import { SEARCH_VERTICALS } from '../data/config.js';
 import { icon, stepper, initPopovers, initTabs } from './ui.js';
+import { locationField } from '../booking/ui/location-field.js';
 
 /* ---------------------------------------------------------------------------
    FIELD FACTORIES — one per field type declared by a vertical.
    ------------------------------------------------------------------------ */
-const placeInput = (field, id, name = field.id) => el('div', { class: 'c-field__wrap' }, [
-  field.icon ? el('span', { class: 'c-field__addon c-field__addon--start' }, icon(field.icon, { size: 'sm' })) : null,
-  el('input', {
-    class: 'c-field__control', id, name, type: 'text',
-    autocomplete: 'off', required: field.required,
-    placeholder: field.placeholder ? t(field.placeholder) : (getLocale() === 'ar' ? 'المدينة أو المطار' : 'City or airport'),
-  }),
-]);
+/* A place is the airport / city combobox of Stage 11 (booking/ui/location-field.js):
+   free text the customer can type, suggestions from the location registry, a
+   hidden `<name>Code` beside it. A filter form (`plain`) keeps a plain input. */
+const placeInput = (field, id, name = field.id) => (field.plain
+  ? el('div', { class: 'c-field__wrap' }, [
+      field.icon ? el('span', { class: 'c-field__addon c-field__addon--start' }, icon(field.icon, { size: 'sm' })) : null,
+      el('input', { class: 'c-field__control', id, name, type: 'text', autocomplete: 'off', required: field.required,
+                    placeholder: field.placeholder ? t(field.placeholder) : t('bk.loc.placeholder') }),
+    ])
+  : locationField({ id, name, iconName: field.icon, required: field.required, placeholder: field.placeholder ? t(field.placeholder) : null }));
 
 const FIELD_BUILDERS = {
   place: (field) => { const id = uid('f'); return fieldShell(field, id, placeInput(field, id)); },

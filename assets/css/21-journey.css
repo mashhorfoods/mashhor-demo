@@ -1,0 +1,251 @@
+/* ============================================================================
+   21 — BOOKING JOURNEY  Stage 11
+
+   Search results, compare, flight details, traveller forms, extras, review,
+   payment and confirmation. Built from the tokens and the existing
+   primitives (.c-card, .c-btn, .c-field, .c-badge, .c-chip, .c-modal,
+   .c-note, .c-state, .c-skeleton …). The flight card, price rows and
+   progress steps return here from the 10.1 preview now that a stage uses
+   them. Logical properties only.
+   ========================================================================= */
+
+@layer components {
+  /* ======================================================================
+     FLIGHT CARD — §14
+     Airline · times · duration · stops · baggage · price · fare · CTA.
+     Baggage and fare type are NOT optional extras in this layout: §19 says
+     the customer must be able to compare on the true terms, not just price.
+     ==================================================================== */
+  .c-flight { padding: var(--space-16); }
+  @media (min-width: 48em) { .c-flight { padding: var(--space-24); } }
+
+  .c-flight__grid { display: grid; gap: var(--space-16); }
+  @media (min-width: 64em) {
+    /* Itinerary takes the room; the price rail is fixed and sits at the end */
+    .c-flight__grid { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-32); }
+  }
+
+  .c-flight__airline { display: flex; align-items: center; gap: var(--space-12); }
+  .c-flight__airline-logo {
+    inline-size: 36px; block-size: 36px; flex: none;
+    display: grid; place-items: center;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-gray-100);
+    font-family: var(--font-data); font-size: var(--text-caption); font-weight: var(--weight-bold);
+    color: var(--color-gray-700);
+  }
+  .c-flight__airline-name { font-size: var(--text-body-sm); font-weight: var(--weight-medium); }
+  .c-flight__flight-no { font-size: var(--text-caption); color: var(--color-text-secondary); }
+
+  /* The leg: time — route line — time. The route line IS the graphic
+     language of §16: a journey drawn as a path, not an aeroplane clipart. */
+  .c-leg { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--space-12); }
+  .c-leg + .c-leg { margin-block-start: var(--space-16); padding-block-start: var(--space-16); border-block-start: var(--border-hairline); }
+  .c-leg__point { display: flex; flex-direction: column; gap: var(--space-4); }
+  .c-leg__point--end { text-align: end; }
+  .c-leg__time { font-family: var(--font-data); font-size: var(--text-h4); font-weight: var(--weight-bold);
+                 font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .c-leg__code { font-family: var(--font-data); font-size: var(--text-caption); font-weight: var(--weight-semibold);
+                 color: var(--color-text-secondary); letter-spacing: 0.04em; }
+  .c-leg__city { font-size: var(--text-caption); color: var(--color-text-secondary); }
+
+  .c-leg__path { display: flex; flex-direction: column; align-items: center; gap: var(--space-4); min-inline-size: 5rem; }
+  .c-leg__duration { font-family: var(--font-data); font-size: var(--text-caption); color: var(--color-text-secondary); }
+  .c-leg__line {
+    position: relative; inline-size: 100%; block-size: 2px;
+    background: linear-gradient(to inline-end, var(--color-gray-300), var(--color-primary));
+    border-radius: var(--radius-pill);
+  }
+  .c-leg__line::before, .c-leg__line::after {
+    content: ""; position: absolute; inset-block-start: 50%; translate: 0 -50%;
+    inline-size: 6px; block-size: 6px; border-radius: var(--radius-circle);
+  }
+  .c-leg__line::before { inset-inline-start: 0; background-color: var(--color-gray-400); }
+  .c-leg__line::after  { inset-inline-end: 0;  background-color: var(--color-primary); }
+  /* A stop is drawn on the line, so "1 stop" is visible, not just stated. */
+  .c-leg__stop {
+    position: absolute; inset-block-start: 50%; translate: -50% -50%;
+    inline-size: 8px; block-size: 8px;
+    border-radius: var(--radius-circle);
+    background-color: var(--color-white);
+    border: 2px solid var(--color-gray-500);
+  }
+  [dir="rtl"] .c-leg__stop { translate: 50% -50%; }
+  .c-leg__stops { font-size: var(--text-caption); font-weight: var(--weight-medium); color: var(--color-text-secondary); }
+  .c-leg__stops[data-direct="true"] { color: var(--color-success-fg); }
+  .c-leg__next-day {
+    font-size: var(--text-overline); font-weight: var(--weight-bold);
+    color: var(--color-warning-fg); vertical-align: super;
+  }
+
+  .c-flight__meta { display: flex; flex-wrap: wrap; gap: var(--space-8) var(--space-16); margin-block-start: var(--space-16); }
+  .c-flight__meta-item { display: inline-flex; align-items: center; gap: var(--space-4);
+                         font-size: var(--text-caption); color: var(--color-text-secondary); }
+
+  .c-flight__price-rail {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-16);
+    padding-block-start: var(--space-16);
+    border-block-start: var(--border-hairline);
+  }
+  @media (min-width: 64em) {
+    .c-flight__price-rail {
+      flex-direction: column; align-items: stretch; justify-content: center;
+      text-align: end; min-inline-size: 12rem;
+      padding-block-start: 0; padding-inline-start: var(--space-32);
+      border-block-start: none; border-inline-start: var(--border-hairline);
+    }
+  }
+  .c-flight__price { color: var(--color-text); }
+  .c-flight__price-note { font-size: var(--text-caption); color: var(--color-text-secondary); }
+
+  /* Price breakdown — §18 transparent pricing, §19 never hide a fee */
+  .c-price-rows { display: flex; flex-direction: column; gap: var(--space-8); }
+  .c-price-row { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-16);
+                 font-size: var(--text-body-sm); }
+  .c-price-row__label { color: var(--color-text-secondary); }
+  .c-price-row__value { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+  .c-price-row--total {
+    margin-block-start: var(--space-8); padding-block-start: var(--space-12);
+    border-block-start: var(--border-defined);
+    font-size: var(--text-body); font-weight: var(--weight-bold);
+  }
+  .c-price-row--total .c-price-row__label { color: var(--color-text); }
+
+  .c-steps { display: flex; gap: var(--space-8); counter-reset: step; }
+  .c-steps__item { flex: 1; display: flex; flex-direction: column; gap: var(--space-8); }
+  .c-steps__bar { block-size: 4px; border-radius: var(--radius-pill); background-color: var(--color-gray-200); }
+  .c-steps__item[data-state="done"] .c-steps__bar,
+  .c-steps__item[data-state="current"] .c-steps__bar { background-color: var(--color-primary); }
+  .c-steps__label { display: flex; align-items: center; gap: var(--space-4);
+                    font-size: var(--text-caption); color: var(--color-text-secondary); }
+  .c-steps__item[data-state="current"] .c-steps__label { color: var(--color-text-brand); font-weight: var(--weight-semibold); }
+  .c-steps__item[data-state="done"] .c-steps__label { color: var(--color-text); }
+
+  /* ---- Page layout: content + sticky summary ------------------------------ */
+  .c-journey { display: grid; gap: var(--space-24); align-items: start; }
+  @media (min-width: 64em) { .c-journey { grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); gap: var(--space-48); } .c-journey--wide { grid-template-columns: minmax(0, 3fr) minmax(0, 9fr); } }
+  .c-journey__main { display: grid; gap: var(--space-24); min-inline-size: 0; }
+  .c-journey__aside { display: grid; gap: var(--space-16); min-inline-size: 0; }
+  @media (min-width: 64em) { .c-journey__aside { position: sticky; inset-block-start: calc(var(--header-height) + var(--space-16)); } }
+  .c-journey__actions { display: flex; flex-wrap: wrap; gap: var(--space-12); align-items: center; justify-content: space-between; }
+
+  /* ---- Progress steps (c-steps) get labels and a current marker ----------- */
+  .c-steps { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-block: var(--space-4); }
+  .c-steps::-webkit-scrollbar { display: none; }
+  .c-steps__item { min-inline-size: 5.5rem; }
+  .c-steps__label { white-space: nowrap; }
+  @media (max-width: 47.999em) {
+    .c-steps { overflow: visible; }
+    .c-steps__item { min-inline-size: 0; }
+    .c-steps__item[data-state="current"] { flex: 0 0 auto; }
+    .c-steps__item:not([data-state="current"]) .c-steps__label { display: none; }   /* the <li> keeps its aria-label */
+  }
+
+  /* ---- Summary card ------------------------------------------------------- */
+  .c-tripcard { display: grid; gap: var(--space-12); padding: var(--space-24); border: var(--border-hairline); border-radius: var(--radius-lg); background-color: var(--color-surface); }
+  .c-tripcard__title { font-size: var(--text-h4); font-weight: var(--weight-semibold); display: flex; align-items: center; justify-content: space-between; gap: var(--space-8); }
+  .c-tripcard__rows { display: grid; gap: var(--space-8); margin: 0; }
+  .c-tripcard__row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); gap: var(--space-8); font-size: var(--text-body-sm); }
+  .c-tripcard__row dt { color: var(--color-text-secondary); } .c-tripcard__row dd { margin: 0; font-weight: var(--weight-medium); overflow-wrap: anywhere; }
+  .c-tripcard__total { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-8); padding-block-start: var(--space-12); border-block-start: var(--border-defined); font-weight: var(--weight-bold); }
+  .c-tripcard__total .t-price { font-size: var(--text-h3); }
+  .c-route { display: inline-flex; align-items: center; gap: var(--space-4); font-family: var(--font-data); font-weight: var(--weight-semibold); }
+  .c-route .c-icon { color: var(--color-primary); }
+
+  /* ---- Results toolbar --------------------------------------------------- */
+  .c-results-bar { display: flex; flex-wrap: wrap; gap: var(--space-12); align-items: center; justify-content: space-between; }
+  .c-results-bar__count { font-weight: var(--weight-semibold); }
+  .c-results-bar__sort { display: inline-flex; align-items: center; gap: var(--space-8); }
+  .c-results-bar__sort .c-field__control { min-inline-size: 11rem; }
+  .c-results { display: grid; gap: var(--space-16); }
+  .c-priority { display: flex; flex-wrap: wrap; gap: var(--space-8); }
+
+  /* ---- Filters: a panel from tablet up, a sheet on phones ----------------- */
+  .c-filters-panel { display: grid; gap: var(--space-24); padding: var(--space-24); border: var(--border-hairline); border-radius: var(--radius-lg); background-color: var(--color-surface); }
+  .c-filters-panel__head { display: flex; justify-content: space-between; align-items: center; gap: var(--space-8); }
+  .c-filters-panel__group { display: grid; gap: var(--space-8); }
+  .c-range { inline-size: 100%; accent-color: var(--color-primary); margin: 0; min-block-size: var(--control-height-sm); cursor: pointer; }
+  .c-range:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus); outline-offset: var(--focus-ring-offset); }
+  .c-route-pair { display: inline-flex; align-items: center; gap: var(--space-4); }
+  .c-route-pair .c-icon { flex: none; }
+  .c-filters-panel__group > legend, .c-filters-panel__label { font-size: var(--text-body-sm); font-weight: var(--weight-semibold); padding: 0; margin-block-end: var(--space-4); }
+  .c-filters-panel fieldset { border: 0; padding: 0; margin: 0; min-inline-size: 0; }
+  .c-filters-panel .c-choice { min-block-size: var(--control-height-sm); }
+  .c-filters-panel output { font-family: var(--font-data); font-size: var(--text-body-sm); }
+  .c-filters-open { display: inline-flex; }
+  @media (min-width: 64em) { .c-filters-open { display: none; } .c-filters-sheet .c-filters-panel { border: 0; padding: 0; } }
+  @media (max-width: 63.999em) { .c-journey__aside--filters { display: none; } }
+
+  /* ---- Result card additions ---------------------------------------------- */
+  .c-flight__labels { display: flex; flex-wrap: wrap; gap: var(--space-8); margin-block-end: var(--space-12); }
+  .c-flight__labels--why { display: grid; gap: var(--space-8); list-style: none; margin: 0; padding: 0; }
+  .c-flight__labels--why .c-flight__why { margin-block-start: 0; }
+  .c-flight__why { display: flex; gap: var(--space-8); align-items: flex-start; margin-block-start: var(--space-12); padding: var(--space-8) var(--space-12); border-radius: var(--radius-md); background-color: var(--color-surface-brand); font-size: var(--text-caption); color: var(--color-text); }
+  .c-flight__why .c-icon { color: var(--color-primary); flex: none; }
+  .c-flight__legname { font-size: var(--text-overline); text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-secondary); margin-block-end: var(--space-4); }
+  .c-flight__actions { display: flex; flex-wrap: wrap; gap: var(--space-8); align-items: center; }
+  .c-flight__price-rail .c-choice { font-size: var(--text-caption); min-block-size: var(--control-height-sm); }
+  .c-flight--selected { border-color: var(--color-primary); box-shadow: 0 0 0 1px var(--color-primary); }
+
+  /* ---- Compare ----------------------------------------------------------- */
+  .c-compare-tray { position: sticky; inset-block-end: calc(var(--bottom-nav-height) + var(--space-8)); z-index: 2; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-12); padding: var(--space-12) var(--space-16); border-radius: var(--radius-lg); background-color: var(--color-ink, var(--color-black)); color: var(--color-text-inverse); box-shadow: var(--shadow-lg); }
+  @media (min-width: 48em) { .c-compare-tray { inset-block-end: var(--space-16); } }
+  .c-compare-tray[hidden] { display: none; }
+  .c-compare-table { inline-size: 100%; border-collapse: collapse; font-size: var(--text-body-sm); }
+  .c-compare-table th, .c-compare-table td { padding: var(--space-8) var(--space-12); border-block-end: var(--border-hairline); text-align: start; vertical-align: top; }
+  .c-compare-table th[scope="row"] { color: var(--color-text-secondary); font-weight: var(--weight-medium); white-space: nowrap; }
+  .c-compare-table thead th { font-weight: var(--weight-semibold); }
+  .c-compare-scroll { overflow-x: auto; }
+  .c-modal--wide { inline-size: min(60rem, calc(100vw - var(--space-32))); }
+
+  /* ---- Details ----------------------------------------------------------- */
+  .c-segment { display: grid; gap: var(--space-12); padding: var(--space-16); border: var(--border-hairline); border-radius: var(--radius-md); background-color: var(--color-surface); }
+  .c-segment__head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-8); font-size: var(--text-body-sm); color: var(--color-text-secondary); }
+  .c-layover { display: flex; align-items: center; gap: var(--space-8); padding: var(--space-8) var(--space-16); font-size: var(--text-caption); color: var(--color-text-secondary); }
+  .c-layover::before { content: ""; inline-size: 2px; block-size: 1.5rem; background-color: var(--color-gray-300); border-radius: var(--radius-pill); }
+  .c-rules { display: grid; gap: var(--space-8); }
+  .c-rules__row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-8); padding: var(--space-8) 0; border-block-end: var(--border-hairline); font-size: var(--text-body-sm); }
+  .c-rules__row dt { color: var(--color-text-secondary); } .c-rules__row dd { margin: 0; font-weight: var(--weight-medium); }
+
+  /* ---- Traveller forms ---------------------------------------------------- */
+  .c-traveller { display: grid; gap: var(--space-16); padding: var(--space-24); border: var(--border-hairline); border-radius: var(--radius-lg); background-color: var(--color-surface); }
+  .c-traveller__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-8); flex-wrap: wrap; }
+  .c-traveller__title { font-size: var(--text-h4); font-weight: var(--weight-semibold); }
+  .c-traveller__grid { display: grid; gap: var(--space-16); }
+  @media (min-width: 48em) { .c-traveller__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .c-traveller__grid > .is-full { grid-column: 1 / -1; } }
+
+  /* ---- Extras ------------------------------------------------------------ */
+  .c-extra { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-12); align-items: center; padding: var(--space-16); border: var(--border-hairline); border-radius: var(--radius-md); background-color: var(--color-surface); }
+  .c-extra__label { font-weight: var(--weight-semibold); }
+  .c-extra__meta { display: flex; flex-wrap: wrap; gap: var(--space-8); align-items: center; font-size: var(--text-caption); color: var(--color-text-secondary); margin-block-start: var(--space-4); }
+
+  /* ---- Review & payment --------------------------------------------------- */
+  .c-review-block { display: grid; gap: var(--space-12); padding: var(--space-24); border: var(--border-hairline); border-radius: var(--radius-lg); background-color: var(--color-surface); }
+  .c-review-block__head { display: flex; justify-content: space-between; align-items: center; gap: var(--space-8); }
+  .c-review-block__title { font-size: var(--text-h4); font-weight: var(--weight-semibold); }
+  .c-pay-method { display: grid; gap: var(--space-8); }
+  .c-pay-method .c-choice { padding: var(--space-12) var(--space-16); border: var(--border-hairline); border-radius: var(--radius-md); }
+  .c-pay-method .c-choice:has(:checked) { border-color: var(--color-primary); background-color: var(--color-surface-brand); }
+  .c-pay-amount { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-8); padding: var(--space-16) var(--space-24); border-radius: var(--radius-lg); background-color: var(--color-bg-subtle); }
+  .c-pay-amount .t-price { font-size: var(--text-h2); }
+
+  /* ---- Confirmation ------------------------------------------------------- */
+  .c-confirm { display: grid; gap: var(--space-24); }
+  .c-confirm__head { display: flex; gap: var(--space-16); align-items: flex-start; }
+  .c-confirm__icon { display: inline-flex; padding: var(--space-12); border-radius: var(--radius-circle); background-color: var(--color-success-bg); color: var(--color-success-fg); flex: none; }
+  .c-confirm__ref { font-family: var(--font-data); font-size: var(--text-h2); font-weight: var(--weight-bold); letter-spacing: 0.04em; }
+  @media print { .c-gh, .c-gf, .c-bottom-nav, .c-journey__aside, .c-confirm__actions, .c-steps { display: none !important; } }
+
+  /* ---- Location combobox -------------------------------------------------- */
+  .c-loc { position: relative; }
+  .c-loc__list { position: absolute; inset-inline: 0; inset-block-start: calc(100% + var(--space-4)); z-index: var(--z-popover, 20); max-block-size: 18rem; overflow-y: auto; margin: 0; padding: var(--space-4); list-style: none; border: var(--border-hairline); border-radius: var(--radius-md); background-color: var(--color-surface); box-shadow: var(--shadow-lg); }
+  .c-loc__list[hidden] { display: none; }
+  .c-loc__option { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-12); align-items: center; padding: var(--space-8) var(--space-12); min-block-size: var(--control-height-sm); border-radius: var(--radius-sm); cursor: pointer; }
+  .c-loc__option[aria-selected="true"], .c-loc__option:hover { background-color: var(--color-surface-brand); }
+  .c-loc__code { font-family: var(--font-data); font-weight: var(--weight-bold); font-size: var(--text-caption); inline-size: 2.6rem; text-align: center; padding-block: 2px; border-radius: var(--radius-sm); background-color: var(--color-gray-100); }
+  .c-loc__city { font-weight: var(--weight-medium); } .c-loc__airport { display: block; font-size: var(--text-caption); color: var(--color-text-secondary); }
+  .c-loc__option mark { background: none; color: var(--color-text-brand); font-weight: var(--weight-bold); }
+  .c-loc__status { padding: var(--space-12); font-size: var(--text-body-sm); color: var(--color-text-secondary); }
+  .c-loc__clear { position: absolute; inset-block-start: 50%; inset-inline-end: var(--space-8); translate: 0 -50%; }
+  .c-loc:has(.c-loc__clear:not([hidden])) .c-field__control { padding-inline-end: var(--space-48); }
+}

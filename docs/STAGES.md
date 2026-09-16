@@ -1155,3 +1155,129 @@ no clipped content, no console errors; keyboard, focus, Escape and focus
 return on every overlay; touch targets, headings, landmarks, names, labels,
 contrast and reduced motion at zero findings; every earlier suite green and
 the language audit at 0 untranslated across all 28 pages.
+
+## 11 — Booking experience / booking engine
+
+The journey from the Stage 10.9 booking context to a confirmed booking:
+search → results → compare / filter → flight details → select → traveller
+details → extras → review → payment → confirmation. One context system (the
+10.9 context, extended with airport codes and attribution), one journey record
+in the session, and a strict split between the screens, the booking domain and
+the supplier adapters. Everything dynamic reaches the page through a clearly
+labelled **development adapter**: fictional carriers, generated fares, a
+simulated payment provider. No real inventory, no real prices, no real
+provider — and every screen that shows such data says so.
+
+```
+search/index.html                      results (URL context or the saved one)
+booking/details/index.html             one flight: segments, layovers, rules, price
+booking/travellers/index.html          one form per traveller + contact
+booking/extras/index.html              included and optional extras
+booking/review/index.html              re-quote, price change, terms
+booking/payment/index.html             provider boundary, failure recovery
+booking/confirmation/index.html        reference, status, next steps
+
+assets/js/booking/
+  journey.js        the session record (no.journey): context, search, selection,
+                    travellers, contact, extras, quote, payment, booking, draft;
+                    STEPS, guard(step) → recovery reason + where to go back
+  search.js         toSearchRequest(ctx) — resolves places, builds legs; runSearch
+  locations.js      dev airport/city registry + searchLocations(query) (replaceable)
+  rank.js           sorts, priorities, labels (cheapest / fastest / fewest stops /
+                    best for family / balanced) with the rule each one prints; filters
+  pricing.js        breakdown(offer, travellers, extras, price) — base, taxes, fees,
+                    extras, total, one currency
+  travellers.js     slots per traveller type, data-driven fields per service and mode,
+                    validation (ages at travel date, passport, expiry, contact)
+  payment.js        provider registry; DEV_PAYMENT (dev-success / dev-failure)
+  adapters/index.js adapter contract + normalized Offer shape; request-mode fallback
+  adapters/dev-flights.js   the development supplier (search, offer, extras, quote, book)
+  adapters/installed.js     the adapters this build registers — a real supplier is one line here
+  ui/               location-field (combobox), results, result-card, details,
+                    travellers, extras, review, payment, confirmation, shared
+assets/css/21-journey.css   every journey component (the flight card, price rows and
+                    progress steps moved here from the 10.1 preview)
+tests/journey.mjs   the Stage 11 suite (512 checks)
+```
+
+### Architecture
+
+* **UI → domain → adapter.** Screens call the domain (`journey`, `search`,
+  `pricing`, `rank`, `travellers`); the domain calls `adapterFor(service)`.
+  An adapter returns the normalized shape documented in `adapters/index.js`
+  (offer, carrier, legs, segments, stops, fare, baggage, rules, price per
+  traveller type, taxes, fees, availability, extras) and nothing else. The
+  screens never see supplier fields.
+* **Search vs request.** A service with a search adapter (flights, in
+  development mode) gets the full journey. Every other service is a
+  **request**: the results screen explains that a specialist comes back with
+  options and a price, the traveller form asks for names only, the review
+  submits a request and the confirmation shows a *received* status with
+  nothing charged. This is the honest state for services without inventory.
+* **Session, not URL.** The journey record lives in `sessionStorage`; the
+  URL carries only what a shared link needs (the search parameters, a flight
+  id). Every screen runs `guard()` first and renders a recovery state
+  (continue, back to results, edit search) instead of a blank page when the
+  step's prerequisites are missing, and points at the confirmation once a
+  booking exists so nothing can be charged twice.
+* **Search freshness.** Results expire after 20 minutes; a refresh or a step
+  back reuses fresh results instead of searching again.
+
+### Screens
+
+* **Results.** Search summary with edit; "help me choose" priorities (lowest
+  price, fewest stops, shortest time, family friendly) that re-sort and print
+  *why* on every card from the data itself; labels for cheapest, fastest,
+  fewest stops, family and a balanced pick whose rule is shown — never
+  "objectively best"; sort; filters (price, stops, times, duration, carrier,
+  baggage, airports) as a panel on desktop and a sheet on phones; compare up
+  to three on price, duration, stops, departure, arrival, baggage and fare
+  rules, usable at 390px; loading skeletons at once, empty, error with retry,
+  expired, unknown-place and filtered-empty states.
+* **Details.** Segments with aircraft where the adapter has it, layovers,
+  baggage, fare / change / cancel rules, what is included, the price
+  breakdown, and one CTA: اختيار الرحلة.
+* **Travellers.** One form per traveller (adult / child / infant) from the
+  context's composition, fields per service and mode, validation tied to
+  each control, ages checked at the travel date, a draft that survives a
+  language switch or refresh.
+* **Extras.** Included extras marked, optional ones priced per traveller with
+  a stepper; the running total updates live; unavailable extras are not shown.
+* **Review.** Trip, travellers, price (base, taxes, fees, extras, total),
+  contact, supervisor when present — every block editable. The price is
+  re-quoted on arrival: a change is shown with the old and new totals and the
+  CTA re-labelled; an unavailable flight blocks and sends the customer back
+  to the results.
+* **Payment.** Amount, methods from the provider, the provider boundary (no
+  card fields on this site, no secrets in the client), a clearly labelled
+  development provider; processing feedback at once; failure keeps
+  everything and offers retry, another method, or back to review; a
+  supplier failure after a successful payment is its own warning state.
+* **Confirmation.** Status (confirmed / received / processing), reference,
+  customer, service, trip, date, payment status, total, ticket status
+  (pending until the supplier confirms — never "issued"), next steps, view
+  trip (planned route), print, support, new booking. Attribution to the
+  supervisor is carried from the entry link through every step to here.
+
+### Acceptance
+
+`npm test` — the twelve earlier suites, the journey suite (512 checks: search
+building for round trip, one way, multi-city, invalid dates, travellers and
+places; results labels, sort, priorities, filters, compare, loading, empty,
+error, expired; family forms and validation; extras; review re-quote, price
+change, unavailable; payment processing, failure, retry, change method,
+booking failure; confirmation; request-mode journey; the combobox; back and
+refresh persistence; language switch mid-form; 390 / 834 / 1440 × ar / en on
+every screen with no overflow, one h1, ≤ 1 dominant CTA, labelled controls,
+zero Arabic left in English), the link check, the language audit (0
+untranslated across 35 pages) and the accessibility audit (0 findings) all
+green, with zero console errors.
+
+### Business data still needed
+
+A supplier adapter (GDS / NDC / aggregator) with credentials and a server-side
+proxy; a payment provider (hosted fields or redirect) and its webhook; the
+airport / city registry the supplier serves; fare-rule texts, baggage
+policies and service-fee amounts; the terms the review step links to; e-mail
+or SMS confirmation delivery. Until these exist the journey runs on the
+development adapter and says so on every screen.

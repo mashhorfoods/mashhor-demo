@@ -42,7 +42,7 @@ export function buildContext(vertical, formData, extras = {}) {
   // Every leg row the form holds, empty ones included, so validation can
   // point at the row the customer left blank.
   const legs = tripType === 'multi'
-    ? all('legFrom').map((from, i) => ({ from, to: all('legTo')[i] ?? '', date: all('legDate')[i] ?? '' }))
+    ? all('legFrom').map((from, i) => ({ from, to: all('legTo')[i] ?? '', date: all('legDate')[i] ?? '', fromCode: all('legFromCode')[i] ?? '', toCode: all('legToCode')[i] ?? '' }))
     : [];
   return {
     version: CONTEXT_VERSION,
@@ -50,6 +50,10 @@ export function buildContext(vertical, formData, extras = {}) {
     tripType,
     origin: get('from'),
     destination: get('to') || get('destination'),
+    // Stage 11 — the codes the location field selected (empty when the
+    // customer typed a name; the search resolves the text then).
+    originCode: get('fromCode'),
+    destinationCode: get('toCode') || get('destinationCode'),
     legs,
     dates: { depart: get('depart'), return: tripType === 'oneway' ? '' : get('return'), checkin: get('checkin'), checkout: get('checkout') },
     travellers: { adults: num(get('adults'), 1), children: num(get('children')), infants: num(get('infants')) },
@@ -156,8 +160,8 @@ export function contextToParams(ctx) {
   const p = new URLSearchParams();
   const set = (k, v) => { if (v !== '' && v != null && v !== false && v !== 0) p.set(k, String(v)); };
   set('vertical', ctx.service); set('tripType', ctx.tripType);
-  set('from', ctx.origin); set('to', ctx.destination);
-  ctx.legs.forEach((l, i) => { set(`leg${i + 1}From`, l.from); set(`leg${i + 1}To`, l.to); set(`leg${i + 1}Date`, l.date); });
+  set('from', ctx.origin); set('to', ctx.destination); set('fromCode', ctx.originCode); set('toCode', ctx.destinationCode);
+  ctx.legs.forEach((l, i) => { set(`leg${i + 1}From`, l.from); set(`leg${i + 1}To`, l.to); set(`leg${i + 1}Date`, l.date); set(`leg${i + 1}FromCode`, l.fromCode); set(`leg${i + 1}ToCode`, l.toCode); });
   set('depart', ctx.dates.depart); set('return', ctx.dates.return); set('checkin', ctx.dates.checkin); set('checkout', ctx.dates.checkout);
   set('adults', ctx.travellers.adults); set('children', ctx.travellers.children); set('infants', ctx.travellers.infants);
   set('rooms', ctx.rooms); set('cabin', ctx.cabin);
@@ -167,6 +171,25 @@ export function contextToParams(ctx) {
   set('locale', ctx.locale);
   return p;
 }
+/** The reverse of contextToParams(): a context from a search URL (Stage 11). */
+export function contextFromParams(params) {
+  const g = (k) => str(params.get(k));
+  const n = (k, d = 0) => num(g(k), d);
+  if (!g('vertical')) return null;
+  const legs = [];
+  for (let i = 1; i <= 6; i++) { if (!g(`leg${i}From`) && !g(`leg${i}To`)) break; legs.push({ from: g(`leg${i}From`), to: g(`leg${i}To`), date: g(`leg${i}Date`), fromCode: g(`leg${i}FromCode`), toCode: g(`leg${i}ToCode`) }); }
+  return {
+    version: CONTEXT_VERSION, service: g('vertical'), tripType: g('tripType') || (g('vertical') === 'flights' ? 'return' : ''),
+    origin: g('from'), destination: g('to'), originCode: g('fromCode'), destinationCode: g('toCode'), legs,
+    dates: { depart: g('depart'), return: g('return'), checkin: g('checkin'), checkout: g('checkout') },
+    travellers: { adults: n('adults', 1), children: n('children'), infants: n('infants') },
+    rooms: n('rooms'), cabin: g('cabin'),
+    options: { direct: g('direct') === '1', sort: g('sort'), offer: g('offer'), nights: g('nights'), country: g('country'), nationality: g('nationality'), service: g('service'), notes: g('notes') },
+    attribution: { supervisor: g('supervisor'), source: g('supervisor') ? 'link' : '' },
+    locale: g('locale') || getLocale(), createdAt: new Date().toISOString(),
+  };
+}
+
 /** Where "continue" goes: the Stage 11 search/results route. */
 export const continueUrl = (ctx) => `${route('search/')}?${contextToParams(ctx).toString()}`;
 /** Where every "book / request" door on the site goes: the booking entry. */

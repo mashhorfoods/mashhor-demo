@@ -197,7 +197,7 @@ export const SEARCH_VERTICALS = [
     id: 'destinations', label: 'search.destinations', icon: 'no-location', columns: 4, standalone: true,
     filters: true, submitVariant: 'secondary-brand',
     fields: [
-      { id: 'destination', type: 'place',  label: 'search.destination', icon: 'no-location', placeholder: 'search.destinationPlaceholder' },
+      { id: 'destination', type: 'place',  label: 'search.destination', icon: 'no-location', placeholder: 'search.destinationPlaceholder', plain: true },
       { id: 'region',      type: 'select', label: 'search.region', blank: 'search.anyRegion',
         options: DESTINATION_REGIONS.map((r) => ({ value: r.id, labelAr: r.labelAr, labelEn: r.labelEn })) },
       { id: 'purpose',     type: 'select', label: 'search.purpose', blank: 'search.anyPurpose',

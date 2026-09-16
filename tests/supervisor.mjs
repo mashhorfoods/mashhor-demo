@@ -2,7 +2,7 @@
 // attribution hand-off into the booking entry and the homepage, contact
 // actions, states (skeleton, unknown, inactive, error, empty, full record),
 // a11y, three widths, both directions. Exits 1 on any ✗.
-import './env.mjs';
+import { shot } from './env.mjs';
 import { chromium } from 'playwright';
 const ORIGIN = process.env.TEST_ORIGIN + '';
 const PAGE = '/mashhor-demo/supervisor/supervisor-1/';
@@ -103,7 +103,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
     ok(`${T} no placeholder contacts, no invented claims`, r.placeholders === 0 && !r.claims);
     ok(`${T} chrome: marketing header, footer CTA off, bottom nav neutral, skip link`, r.headerVariant === 'default' && r.footerPrimary === 0 && r.bottomCurrent === 0 && r.skip, JSON.stringify([r.headerVariant, r.footerPrimary, r.bottomCurrent]));
     ok(`${T} images have alt, logical CSS only`, r.imgsNoAlt === 0 && r.physical);
-    await p.screenshot({ path: `sup-${tag}-${loc}.png`, fullPage: true });
+    await p.screenshot({ path: shot(`sup-${tag}-${loc}.png`), fullPage: true });
     await p.close();
   }
 }

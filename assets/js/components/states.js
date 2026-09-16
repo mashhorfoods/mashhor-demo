@@ -63,6 +63,7 @@ export function stateBlock({
   text = '',
   next = '',
   actions = [],
+  headingLevel = 3,   // 2 when the block follows the page's h1 directly
 } = {}) {
   const DEFAULT_ICONS = {
     empty: 'no-empty-box', error: 'no-error', success: 'no-check-circle',
@@ -81,7 +82,7 @@ export function stateBlock({
     'aria-labelledby': titleId,
   }, [
     el('span', { class: 'c-state__icon' }, icon(iconName ?? DEFAULT_ICONS[variant] ?? 'no-info', { size: 'xl' })),
-    el('h3', { class: 'c-state__title', id: titleId }, title),
+    el(`h${headingLevel}`, { class: 'c-state__title', id: titleId }, title),
     text ? el('p', { class: 'c-state__text' }, text) : null,
     actions.length
       ? el('div', { class: 'c-state__actions' }, actions.map((action) =>
@@ -89,6 +90,7 @@ export function stateBlock({
             class: `c-btn ${action.variant ?? 'c-btn--secondary'}`,
             ...(action.href ? { href: action.href } : { type: 'button' }),
             ...(action.onClick ? { onclick: action.onClick } : {}),
+            ...(action.id ? { dataset: { action: action.id } } : {}),
           }, action.label)))
       : null,
     next ? el('p', { class: 'c-state__next' }, next) : null,
