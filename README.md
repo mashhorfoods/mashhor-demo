@@ -14,6 +14,7 @@ inherits it.
 | **Living style guide** | `styleguide.html` — every token, component and state, in RTL and LTR |
 | **Homepage** | `index.html` — the production homepage (Stage 10.4) |
 | **Brand assets** | [`assets/brand/README.md`](assets/brand/README.md) |
+| **Programme report (PDF)** | [`docs/PROJECT-REPORT-2026-09-16.pdf`](docs/PROJECT-REPORT-2026-09-16.pdf) — the full Stage 10 report: scope, architecture, verification, cleanup, performance, remaining inputs, next stages |
 | **Status report** | [`docs/STATUS-REPORT-2026-09-16.pdf`](docs/STATUS-REPORT-2026-09-16.pdf) — what is built, how it was verified, what is still needed |
 
 ## Run it
