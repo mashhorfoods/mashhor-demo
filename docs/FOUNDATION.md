@@ -495,6 +495,9 @@ component in this layer. Permission is asked, never assumed.
 9. **Destination photography.** Every `data/destinations.js` record carries
    `image.src: null`; the destinations page and the homepage render the neutral
    slot at the card's ratio until the approved photographs arrive.
+10. **Real offers.** The three `data/offers.js` records are placeholders:
+   no price, nights, inclusions, programme, terms or FAQ until the business
+   approves them; the pages say so and hide what they cannot show.
 ---
 
 ## 15. Working rules

@@ -30,7 +30,7 @@ home.scrollToSearch();               // what "Start booking" and the header sear
 | 03 | Why Number One | `valueList` | `HOME_VALUES` |
 | 04 | Help me choose | `chooseModule` | `HOME_PRIORITIES` |
 | 05 | Destinations | `destinationGrid` → `destinationCard` | `HOME_DESTINATIONS` = registry records flagged `home` (10.7) |
-| 06 | Offers & packages | `offerGrid` → `offerCard` | `HOME_OFFERS` |
+| 06 | Offers & packages | `offerGrid` → `offerCard` | `HOME_OFFERS` = the first three registry records (10.8) |
 | 07 | How we help | `journeySteps` | `HOME_JOURNEY` |
 | 08 | Human support | `supportPanels` | `HOME_SUPPORT` + `liveChannels()` |
 | 09 | Final CTA | markup, `data-home-action="book"` | — |

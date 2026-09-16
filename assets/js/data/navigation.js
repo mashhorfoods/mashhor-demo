@@ -81,20 +81,17 @@ export const MENU_DESTINATIONS = {
 /* --------------------------------------------------------------------------
    OFFERS — §07. Kept visually simple on purpose.
    ----------------------------------------------------------------------- */
+import { OFFER_CATEGORIES, offersIn } from './offers.js';
+
+/* The offers menu lists the data-driven categories (data/offers.js); each
+   item opens the listing filtered on that category. */
 export const MENU_OFFERS = {
   id: 'offers',
   type: 'panel',
   titleAr: 'العروض والباقات', titleEn: 'Offers & packages',
   columns: [
-    { id: 'now', titleAr: 'متاح الآن', titleEn: 'Available now', items: [
-      { id: 'current',  icon: 'no-price-tag', href: 'offers/current/',  labelAr: 'العروض الحالية', labelEn: 'Current offers' },
-      { id: 'seasonal', icon: 'no-calendar',  href: 'offers/seasonal/', labelAr: 'عروض موسمية',   labelEn: 'Seasonal offers' },
-      { id: 'featured', icon: 'no-sparkle',   href: 'offers/featured/', labelAr: 'رحلات مختارة',   labelEn: 'Featured trips' },
-    ]},
-    { id: 'packages', titleAr: 'الباقات', titleEn: 'Packages', items: [
-      { id: 'travel', icon: 'no-tourism', href: 'offers/packages/',        labelAr: 'باقات السفر',   labelEn: 'Travel packages' },
-      { id: 'family', icon: 'no-users',   href: 'offers/family-packages/', labelAr: 'باقات العائلة', labelEn: 'Family packages' },
-    ]},
+    { id: 'categories', titleAr: 'حسب النوع', titleEn: 'By type',
+      items: OFFER_CATEGORIES.map((c) => ({ id: c.id, icon: c.icon, href: `offers/?category=${c.id}`, labelAr: c.labelAr, labelEn: c.labelEn })) },
   ],
   footer: { linkAr: 'كل العروض', linkEn: 'All offers', href: 'offers/' },
 };

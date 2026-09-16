@@ -1,0 +1,67 @@
+/* ============================================================================
+   18 — OFFERS COMPOSITIONS  Stage 10.8
+
+   Reuses .c-hero, .c-choose, .c-cta-band, .c-disclose (14-home), .c-catnav,
+   .c-help (15-services), .c-detail__points / .c-detail__lead (16-service-
+   detail), .c-featured (17-destinations), the card, badge, chip, field and
+   modal primitives. New here: the offer card's parts (price block, meta,
+   inclusion list), the filter bar, the itinerary and the phone filter sheet.
+   ========================================================================= */
+
+@layer components {
+  /* ---- Card parts ------------------------------------------------------- */
+  .c-offer__badges { display: flex; flex-wrap: wrap; gap: var(--space-4); }
+  .c-offer__meta { display: flex; flex-wrap: wrap; gap: var(--space-8) var(--space-16);
+                   font-size: var(--text-caption); color: var(--color-text-secondary); }
+  .c-offer__meta-item { display: inline-flex; align-items: center; gap: var(--space-4); }
+  .c-offer__meta-item .c-icon { --icon-size: var(--icon-xs); }
+
+  .c-price { display: flex; flex-direction: column; gap: 2px; }
+  .c-price__label { font-size: var(--text-caption); color: var(--color-text-secondary); }
+  .c-price__value { font-family: var(--font-data); font-size: var(--text-price); font-weight: var(--weight-bold); line-height: 1.1; color: var(--color-text); font-variant-numeric: tabular-nums; }
+  .c-price__basis { font-size: var(--text-caption); color: var(--color-text-secondary); }
+  .c-price--request .c-price__value { font-family: var(--font-body); font-size: var(--text-h4); font-weight: var(--weight-semibold); color: var(--color-text-brand); }
+  .c-price--large .c-price__value { font-size: var(--text-price-lg); }
+  .c-price--large.c-price--request .c-price__value { font-size: var(--text-h3); }
+
+  .c-inclusions { display: grid; gap: var(--space-8); }
+  @media (min-width: 48em) { .c-inclusions--grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-12); } }
+  .c-inclusions__item { display: flex; align-items: flex-start; gap: var(--space-8); font-size: var(--text-body-sm); }
+  .c-inclusions__item .c-icon { color: var(--color-success); flex: none; margin-block-start: 2px; }
+  .c-inclusions--muted .c-inclusions__item { color: var(--color-text-secondary); }
+  .c-inclusions--muted .c-inclusions__item .c-icon { color: var(--color-gray-500); }
+  .c-inclusions--compact .c-inclusions__item { font-size: var(--text-caption); }
+
+  .c-offer .c-card__body { gap: var(--space-8); }
+  .c-offer__foot { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-12); margin-block-start: auto; padding-block-start: var(--space-12); }
+  .c-offer--large .c-card__media { aspect-ratio: 16 / 9; }
+  @media (min-width: 64em) {
+    .c-offer--large { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); }
+    .c-offer--large .c-card__media { aspect-ratio: auto; min-block-size: 20rem; }
+    .c-offer--large .c-card__body { padding: var(--space-32); }
+    .c-offer--large .c-card__title { font-size: var(--text-h2); }
+  }
+
+  /* ---- Filters: inline bar from tablet up, sheet on phones -------------- */
+  .c-filters { display: grid; gap: var(--space-16); }
+  @media (min-width: 48em) {
+    .c-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; padding: var(--space-16);
+                 background-color: var(--color-surface); border: var(--border-hairline); border-radius: var(--radius-lg); }
+  }
+  @media (min-width: 64em) { .c-filters { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .c-filters__actions { display: flex; flex-wrap: wrap; gap: var(--space-8); align-items: center; }
+  @media (min-width: 48em) { .c-filters__apply { display: none; } }   /* live on desktop; the sheet's own button on phones */
+  .c-filters__open { inline-size: 100%; }
+  @media (min-width: 48em) { .c-filters__open { display: none; } }
+  .c-filters__sheet .c-modal__body { padding-block-start: var(--space-8); }
+  .c-offers-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-12); margin-block: var(--space-24); }
+  .c-offers-toolbar__count { font-size: var(--text-body-sm); color: var(--color-text-secondary); }
+
+  /* ---- Itinerary ------------------------------------------------------- */
+  .c-itinerary { display: grid; gap: var(--space-24); max-inline-size: var(--measure); }
+  .c-itinerary__day { display: grid; grid-template-columns: auto 1fr; gap: var(--space-16); align-items: start;
+                      padding-block-start: var(--space-16); border-block-start: var(--border-hairline); }
+  .c-itinerary__num { font-family: var(--font-data); font-size: var(--text-h2); font-weight: var(--weight-bold); line-height: 1; color: var(--color-primary); }
+  .c-itinerary__title { font-size: var(--text-h4); font-weight: var(--weight-semibold); }
+  .c-itinerary__text { font-size: var(--text-body-sm); color: var(--color-text-secondary); }
+}

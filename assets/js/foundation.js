@@ -20,6 +20,7 @@ export * from './data/config.js';
 export * from './data/services.js';
 export * from './data/service-details.js';
 export * from './data/destinations.js';
+export * from './data/offers.js';
 export * from './data/navigation.js';
 export * from './data/footer.js';
 export * from './data/home.js';
@@ -33,6 +34,7 @@ export * from './components/home.js';
 export * from './components/services.js';
 export * from './components/service-detail.js';
 export * from './components/destinations.js';
+export * from './components/offers.js';
 
 import { ready } from './core/dom.js';
 import { initLocale, setLocale, applyTranslations, onLocaleChange } from './core/i18n.js';

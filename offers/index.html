@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ar" dir="rtl" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- One level down: <base> points every relative URL at the site root.
+     In-page moves go through script, never href="#…". -->
+<base href="../">
+<title data-i18n="page.offers.title">العروض والباقات — نمبرون للسفر و السياحة</title>
+<meta name="description" data-i18n-content="page.offers.description" content="عروض وباقات سفر من نمبرون: باقات عائلية وعمرة وسياحة، تُبنى حول أيامك وميزانيتك. البرنامج والسعر يُرسلان لك قبل أي التزام.">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#FE0002">
+<meta name="robots" content="noindex">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Number One Travel &amp; Tourism">
+<meta property="og:title" content="العروض والباقات — نمبرون للسفر و السياحة">
+<meta property="og:description" content="عروض وباقات تُبنى حول أيامك وميزانيتك.">
+<meta property="og:locale" content="ar_SD">
+<meta property="og:locale:alternate" content="en_GB">
+<meta property="og:url" content="https://mashhorfoods.github.io/mashhor-demo/offers/">
+<link rel="canonical" href="https://mashhorfoods.github.io/mashhor-demo/offers/">
+<meta property="og:image" content="https://mashhorfoods.github.io/mashhor-demo/assets/brand/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Number One Travel &amp; Tourism">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="assets/brand/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/ibm-plex-sans-arabic-arabic-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/ibm-plex-sans-arabic-arabic-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/foundation.css">
+</head>
+
+<body>
+<a class="c-skip-link" href="#main" data-i18n="a11y.skip" data-skip>تخطَّ إلى المحتوى</a>
+
+<div class="l-page">
+  <!-- Global header: mounted by the script below. Stage 10.2 -->
+
+  <main id="main" class="l-page__main">
+
+    <!-- HERO ================================================================ -->
+    <section class="l-section c-hero" aria-labelledby="offers-title">
+      <div class="l-container"><div class="c-hero__grid" data-offers="hero"></div></div>
+    </section>
+
+    <!-- FEATURED ============================================================ -->
+    <section class="l-section l-section--tight l-section--subtle" aria-labelledby="featured-title" id="featured">
+      <div class="l-container">
+        <div class="l-section-head">
+          <p class="t-overline" data-i18n="offers.featured.overline">اختيارنا</p>
+          <h2 class="t-h2 u-mark" id="featured-title" data-i18n="offers.featured.title">عرض نرشّحه</h2>
+          <p class="t-body t-muted" data-i18n="offers.featured.text">اختيار فريقنا، لا ترتيب ولا إحصاء.</p>
+        </div>
+        <div data-offers="featured"></div>
+      </div>
+    </section>
+
+    <!-- OFFERS + FILTERS ==================================================== -->
+    <section class="l-section" aria-labelledby="offers-list-title" id="offers">
+      <div class="l-container">
+        <div class="l-section-head">
+          <p class="t-overline" data-i18n="offers.list.overline">العروض</p>
+          <h2 class="t-h2 u-mark" id="offers-list-title" data-i18n="offers.list.title">كل العروض والباقات</h2>
+          <p class="t-body t-muted" data-i18n="offers.list.text">صفِّ حسب الفئة أو الوجهة أو الخدمة، ورتّب كما يناسبك.</p>
+        </div>
+        <div data-offers="categories"></div>
+        <div data-offers="filters-open"></div>
+        <div data-offers="filters"></div>
+        <div class="c-offers-toolbar">
+          <p class="c-offers-toolbar__count" data-offers-count aria-live="polite"></p>
+        </div>
+        <div data-offers="grid"></div>
+      </div>
+    </section>
+
+    <!-- HELP ME CHOOSE ====================================================== -->
+    <section class="l-section l-section--tight l-section--subtle" aria-labelledby="help-title" id="help">
+      <div class="l-container">
+        <div class="c-choose c-choose--band">
+          <div class="l-stack l-stack--12">
+            <p class="t-overline" data-i18n="home.choose.overline">ساعدني في الاختيار</p>
+            <h2 class="t-h2" id="help-title" data-i18n="offers.help.title">عن ماذا تبحث؟</h2>
+            <p class="t-body t-muted" data-i18n="offers.help.text">اختر ما يشبه رحلتك وسنصفّي العروض على أساسه.</p>
+          </div>
+          <div data-offers="help"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FINAL CTA =========================================================== -->
+    <section class="l-section l-section--inverse c-cta-band" aria-labelledby="cta-title">
+      <span class="u-numeral-watermark" aria-hidden="true">1</span>
+      <div class="l-container">
+        <div class="c-cta-band__inner">
+          <div class="l-stack l-stack--12">
+            <h2 class="t-h1 c-cta-band__title" id="cta-title" data-i18n="offers.final.title">لم تجد ما يناسبك؟ نبني لك باقة.</h2>
+            <p class="t-body-lg c-cta-band__text" data-i18n="offers.final.text">أخبرنا بوجهتك وأيامك وميزانيتك، ويعود إليك مختص بالخيارات والسعر.</p>
+          </div>
+          <div class="c-cta-band__actions">
+            <a class="c-btn c-btn--primary c-btn--lg" href="" data-route="" data-query="vertical=packages" data-hash="booking" data-i18n="offers.final.primary">اطلب باقة</a>
+            <a class="c-btn c-btn--inverse c-btn--lg" href="help/contact/" data-route="help/contact/" data-i18n="offers.cta.expert">تحدث مع خبير</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Global footer: mounted by the script below. Stage 10.3 -->
+
+  <nav class="c-bottom-nav" aria-label="التنقل السريع" data-i18n-label="nav.quick"><div id="bottom-nav" style="display:contents"></div></nav>
+</div>
+
+<script type="module">
+  import {
+    boot, el, qs, qsa, render, icon, route, pick,
+    mountHeader, mountFooter, mountOffers, NAV_BOTTOM,
+  } from './assets/js/foundation.js';
+
+  qs('[data-skip]')?.addEventListener('click', (e) => { e.preventDefault(); const m = qs('#main'); m.tabIndex = -1; m.focus(); m.scrollIntoView(); });
+  qsa('[data-route]').forEach((a) => { a.href = route(a.dataset.route) + (a.dataset.query ? `?${a.dataset.query}` : '') + (a.dataset.hash ? `#${a.dataset.hash}` : ''); });
+
+  let offers = null;
+  // ?category=… (from the header menu or a shared link) opens the listing on that category.
+  const requested = new URLSearchParams(location.search);
+
+  function paint() {
+    render(qs('#bottom-nav'), NAV_BOTTOM.map((item) =>
+      el('a', { class: 'c-bottom-nav__item', href: route(item.href) },
+        [icon(item.icon, { size: 'sm' }), el('span', {}, pick(item, 'label'))])));
+    offers?.destroy();
+    offers = mountOffers({ initial: { category: requested.get('category') ?? '' } });
+    window.no = { ...(window.no ?? {}), offers };   // QA handle: no.offers.regions.grid.error()
+  }
+
+  function mountChrome() {
+    mountFooter({ target: qs('.l-page'), variant: 'marketing', cta: false });
+    mountHeader({ target: qs('.l-page'), current: 'offers',
+      onSearch: () => { window.location.assign(route('') + '#booking'); } });
+  }
+
+  boot({ sprite: 'assets/icons/sprite.svg', onLocale: () => { mountChrome(); paint(); } });
+  mountChrome();
+  paint();
+</script>
+</body>
+</html>

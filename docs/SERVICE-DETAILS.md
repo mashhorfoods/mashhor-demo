@@ -7,7 +7,7 @@ registry. Nothing here redefines a token or a component.
 
 ```
 services/<slug>/index.html            GENERATED route shells — one per service
-tools/build-service-pages.mjs         writes the shells + sitemap from the registry
+tools/build-routes.mjs         writes the shells + sitemap from the registry
 assets/js/data/service-details.js     page content per service (+ shared benefits)
 assets/js/components/service-detail.js  the template: sections, CTA logic, states
 assets/css/16-service-detail.css      overview points · feature card · requirements
@@ -36,12 +36,12 @@ module. The shells are content, not code: after adding, renaming or retiring
 a service run
 
 ```bash
-node tools/build-service-pages.mjs
+node tools/build-routes.mjs
 ```
 
-and commit the result. It also removes a directory the registry no longer
-names and refreshes the service block in `sitemap.xml`. Do not edit a shell by
-hand.
+and commit the result. The same tool generates the offer routes (10.8); it
+removes a directory a registry no longer names and refreshes each block in
+`sitemap.xml`. Do not edit a shell by hand.
 
 An unknown path (`/services/anything-else/`) is a real 404: GitHub Pages
 serves the branded `404.html`, which resolves the site root through `<base>`

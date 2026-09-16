@@ -196,7 +196,7 @@
         ...(i === 0 ? { 'aria-current': 'page' } : {}),
       }, [icon(item.icon, { size: 'sm' }), el('span', {}, pick(item, 'label'))])));
 
-    home = mountHome();
+    home = mountHome({ onSearchSubmit: (vertical, params) => { if (offerSlug) params.set('offer', offerSlug); } });
     window.no = { ...(window.no ?? {}), home };   // QA handle: no.home.regions.offers.error()
     openRequestedService();
   }
@@ -205,6 +205,7 @@
   // (data/services.js serviceEntry): open that tab, preselect the option and
   // land on the booking entry. Read once; a language change keeps the tab.
   let requested = new URLSearchParams(location.search);
+  let offerSlug = null;
   function openRequestedService() {
     const vertical = requested.get('vertical');
     if (!vertical || !home.search.no.select(vertical)) return;
@@ -212,7 +213,13 @@
     if (option) { const sel = qs('.c-search__form:not([hidden]) select[name="service"]'); if (sel) sel.value = option; }
     // ?to=<destination slug> prefills the destination in the traveller's language.
     const to = requested.get('to');
-    if (to) { const dest = destinationById(to); const input = qs('.c-search__form:not([hidden]) input[name="to"]'); if (dest && input) input.value = pick(dest, 'name'); }
+    if (to) {
+      const dest = destinationById(to);
+      const input = qs('.c-search__form:not([hidden]) input[name="to"], .c-search__form:not([hidden]) input[name="destination"]');
+      if (dest && input) input.value = pick(dest, 'name');
+    }
+    // ?offer=<slug> — the request is about that offer; it travels with the search.
+    offerSlug = requested.get('offer');
     if (location.hash === '#booking') home.scrollToSearch();
     requested = new URLSearchParams();
   }

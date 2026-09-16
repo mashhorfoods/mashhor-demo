@@ -12,6 +12,8 @@ import { t, getLocale, pick } from '../core/i18n.js';
 import { money, time, duration, dateShort, dayOffset } from '../core/format.js';
 import { STATUSES, SERVICES, route } from '../data/config.js';
 import { SERVICE_REGISTRY } from '../data/services.js';
+import { destinationById } from '../data/destinations.js';
+import { OFFER_STATUSES, OFFER_CATEGORIES } from '../data/offers.js';
 import { icon } from './ui.js';
 
 /* ---------------------------------------------------------------------------
@@ -320,40 +322,79 @@ export function destinationCard(dest, { country = false, services = false, entry
 }
 
 /* ---------------------------------------------------------------------------
-   OFFER CARD — image · destination · title · text · [price] · [validity] · CTA
-   10.4 §09. Price and validity rows render ONLY when the record carries a
-   value. A card with neither is the honest state of an offer the business
-   has not priced yet — not a defect to paper over.
+   OFFER CARD PARTS — 10.8 §8. Small, reusable, and the only place an offer's
+   price, status or meta is drawn, so every surface agrees.
    ------------------------------------------------------------------------ */
-export function offerCard(offer) {
-  const titleId = uid('offer');
-  const href = route(offer.href ?? `offers/${offer.id}/`);
-  const price = offer.price?.amount != null ? offer.price : null;
-  const valid = offer.validUntil ? dateShort(offer.validUntil) : '';
+/** Status/category badge: icon + word, never colour alone. */
+export function offerBadge(status) {
+  if (!status) return null;
+  return el('span', { class: `c-badge ${status.badge ?? 'c-badge--outline'}` }, [icon(status.icon, { size: 'xs' }), el('span', {}, pick(status, 'label'))]);
+}
 
-  return el('article', { class: 'c-card c-card--interactive c-offer', 'aria-labelledby': titleId }, [
-    el('div', { class: 'c-card__media' }, mediaPlaceholder(offer.image?.src, pick(offer.image ?? {}, 'alt'))),
-    el('div', { class: 'c-card__body' }, [
-      el('p', { class: 't-overline' }, pick(offer, 'destination')),
-      el('h3', { class: 'c-card__title', id: titleId }, [
-        el('a', { class: 'c-card__link', href }, pick(offer, 'title')),
-      ]),
-      offer.descAr || offer.descEn ? el('p', { class: 'c-card__text' }, pick(offer, 'desc')) : null,
-      valid ? el('p', { class: 'c-offer__meta' }, [
-        el('span', { class: 'c-offer__meta-item' }, [icon('no-calendar', { size: 'sm' }), el('span', {}, t('home.offers.validUntil', valid))]),
-      ]) : null,
+/** Price when the record carries one; "request price" otherwise. Never a guess. */
+export function priceBlock(offer, { large = false } = {}) {
+  const price = offer.price?.amount != null ? offer.price : null;
+  return el('div', { class: ['c-price', price ? '' : 'c-price--request', large ? 'c-price--large' : ''] }, price
+    ? [
+        el('span', { class: 'c-price__label' }, price.type === 'from' ? t('package.from') : t('offers.price.label')),
+        el('span', { class: 'c-price__value' }, money(price.amount, price.currency)),
+        price.basisAr || price.basisEn ? el('span', { class: 'c-price__basis' }, pick(price, 'basis')) : null,
+      ]
+    : [
+        el('span', { class: 'c-price__label' }, t('offers.price.label')),
+        el('span', { class: 'c-price__value' }, t('offers.price.request')),
+        el('span', { class: 'c-price__basis' }, t('offers.price.requestHint')),
+      ]);
+}
+
+/** Destination · duration · travel period — each only when known. */
+export function offerMeta(offer, { destination = true, duration = true, period = true } = {}) {
+  const dest = offer.destinationRecord ?? destinationById(offer.destination);
+  const items = [
+    destination && dest ? [icon('no-location', { size: 'xs' }), el('span', {}, `${pick(dest, 'name')}${dest.countryAr ? ` · ${pick(dest, 'country')}` : ''}`)] : null,
+    duration ? [icon('no-calendar', { size: 'xs' }), el('span', {}, offer.duration?.nights != null ? t('package.nights', offer.duration.nights) : t('offers.duration.flexible'))] : null,
+    period && offer.travelPeriod ? [icon('no-pending', { size: 'xs' }), el('span', {}, `${dateShort(offer.travelPeriod.from)} – ${dateShort(offer.travelPeriod.to)}`)] : null,
+  ].filter(Boolean);
+  return el('p', { class: 'c-offer__meta' }, items.map((i) => el('span', { class: 'c-offer__meta-item' }, i)));
+}
+
+/** A list of { ar, en, icon? } items with one icon. */
+export function inclusionList(items, { iconName = 'no-check', muted = false, compact = false, grid = true } = {}) {
+  return el('ul', { class: ['c-inclusions', grid ? 'c-inclusions--grid' : '', muted ? 'c-inclusions--muted' : '', compact ? 'c-inclusions--compact' : ''], role: 'list' },
+    items.map((i) => el('li', { class: 'c-inclusions__item' }, [icon(i.icon ?? iconName, { size: 'sm' }), el('span', {}, pick(i))])));
+}
+
+/* ---------------------------------------------------------------------------
+   OFFER CARD — image · badges · destination · title · text · meta ·
+   key inclusions · price block · CTA. 10.4 §09 / 10.8 §2
+   Price and validity rows render ONLY when the record carries a value.
+   `large` is the featured form; `entry` the href of the CTA.
+   ------------------------------------------------------------------------ */
+export function offerCard(offer, { entry = null, large = false } = {}) {
+  const titleId = uid('offer');
+  const href = route(offer.href ?? `offers/${offer.slug ?? offer.id}/`);
+  const status = offer.statusRecord ?? OFFER_STATUSES[offer.status] ?? null;
+  const category = OFFER_CATEGORIES.find((c) => c.id === offer.category);
+  const keyItems = offer.inclusions?.length
+    ? offer.inclusions.slice(0, 3)
+    : (offer.services ?? []).slice(0, 3).map((id) => SERVICE_REGISTRY.find((s) => s.id === id)).filter(Boolean).map((s) => ({ ar: s.titleAr, en: s.titleEn }));
+  const ctaLabel = offer.status === 'ended' ? t('offers.cta.browse') : offer.bookingMode === 'online' ? t('offers.cta.book') : t('offers.cta.request');
+
+  return el('article', { class: ['c-card c-card--interactive c-offer', large ? 'c-offer--large' : ''], 'aria-labelledby': titleId }, [
+    el('div', { class: 'c-card__media' }, [
+      mediaPlaceholder(offer.image?.src, pick(offer.image ?? {}, 'alt')),
+      status || category ? el('div', { class: 'c-card__badges c-offer__badges' }, [offerBadge(status), category ? el('span', { class: 'c-badge c-badge--solid' }, pick(category, 'label')) : null]) : null,
     ]),
-    el('div', { class: 'c-card__foot' }, [
-      price
-        ? el('div', {}, [
-            el('p', { class: 't-caption' }, price.from ? t('package.from') : ''),
-            el('p', { class: 't-price' }, money(price.amount, price.currency)),
-            price.basisAr || price.basisEn ? el('p', { class: 't-caption' }, pick(price, 'basis')) : null,
-          ])
-        : el('span', { class: 'c-service-card__cta', 'aria-hidden': 'true' }, [
-            t('home.offers.cta'), icon('no-arrow-end', { size: 'sm', flip: true }),
-          ]),
-      price ? el('a', { class: 'c-btn c-btn--secondary-brand c-btn--sm', href }, t('home.offers.cta')) : null,
+    el('div', { class: 'c-card__body' }, [
+      el('h3', { class: 'c-card__title', id: titleId }, [el('a', { class: 'c-card__link', href }, pick(offer, 'title'))]),
+      offerMeta(offer),
+      el('p', { class: 'c-card__text' }, pick(offer, large ? 'desc' : 'short')),
+      keyItems.length ? inclusionList(keyItems, { compact: true, grid: false }) : null,
+      el('div', { class: 'c-offer__foot' }, [
+        priceBlock(offer),
+        entry ? el('a', { class: 'c-btn c-btn--secondary-brand c-card__action', href: entry }, [el('span', {}, ctaLabel), icon('no-arrow-end', { size: 'sm', flip: true })])
+              : el('a', { class: 'c-service-card__details c-card__action', href }, t('offers.cta.explore')),
+      ]),
     ]),
   ]);
 }

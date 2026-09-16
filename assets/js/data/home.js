@@ -100,38 +100,12 @@ import { homeDestinations } from './destinations.js';
 export const HOME_DESTINATIONS = homeDestinations().map((d) => ({ ...d, href: `destinations/${d.slug}/` }));
 
 /* --------------------------------------------------------------------------
-   OFFERS & PACKAGES — §09. Neutral records until the business publishes
-   real ones. `price`, `validUntil` and `includes` are null/empty on purpose:
-   offerCard() renders a row only when its value exists, so no price, date
-   or inclusion can appear on the site that nobody approved.
-
-   A real offer looks like:
-     price: { amount: 1450000, currency: 'SDG', from: true, basisAr: 'لشخصين', basisEn: 'for two' },
-     validUntil: '2026-12-31',
+   OFFERS & PACKAGES — §09. The homepage strip reads the one registry
+   (data/offers.js, Stage 10.8). A price or date appears only when the record
+   carries one — nothing is invented.
    ----------------------------------------------------------------------- */
-export const HOME_OFFERS = [
-  { id: 'istanbul-family', href: 'offers/istanbul-family/',
-    destinationAr: 'إسطنبول', destinationEn: 'Istanbul',
-    titleAr: 'باقة إسطنبول العائلية',     titleEn: 'Istanbul family package',
-    descAr: 'برنامج عائلي يُصمَّم حسب عدد الأيام والميزانية.',
-    descEn: 'A family programme shaped around your days and your budget.',
-    image: { src: null, altAr: 'إسطنبول', altEn: 'Istanbul' },
-    price: null, validUntil: null },
-  { id: 'umrah', href: 'offers/umrah/',
-    destinationAr: 'مكة المكرمة', destinationEn: 'Makkah',
-    titleAr: 'باقة العمرة',                titleEn: 'Umrah package',
-    descAr: 'برامج عمرة بحسب الموسم والمدة التي تناسبك.',
-    descEn: 'Umrah programmes by season and by the length of stay that suits you.',
-    image: { src: null, altAr: 'مكة المكرمة', altEn: 'Makkah' },
-    price: null, validUntil: null },
-  { id: 'dubai-break', href: 'offers/dubai-break/',
-    destinationAr: 'دبي', destinationEn: 'Dubai',
-    titleAr: 'عطلة قصيرة في دبي',          titleEn: 'Dubai short break',
-    descAr: 'لأيام قليلة أو لعطلة نهاية أسبوع طويلة.',
-    descEn: 'For a few days or a long weekend.',
-    image: { src: null, altAr: 'دبي', altEn: 'Dubai' },
-    price: null, validUntil: null },
-];
+import { homeOffers } from './offers.js';
+export const HOME_OFFERS = homeOffers();
 
 /* --------------------------------------------------------------------------
    HOW WE HELP — §10. The four-step journey. Order carries meaning here, so

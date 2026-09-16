@@ -7,20 +7,20 @@
      down, so <base> points every relative URL at the site root; in-page
      moves go through script, never href="#…". -->
 <base href="../../">
-<title>السياحة والباقات — نمبرون للسفر و السياحة</title>
-<meta name="description" content="برامج سياحية تُصمَّم حسب عدد الأيام والميزانية، للعائلة أو للمجموعة.">
+<title>باقة العمرة — نمبرون للسفر و السياحة</title>
+<meta name="description" content="برامج عمرة بحسب الموسم والمدة التي تناسبك.">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#FE0002">
 <meta name="robots" content="noindex">
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Number One Travel &amp; Tourism">
-<meta property="og:title" content="السياحة والباقات — نمبرون للسفر و السياحة">
-<meta property="og:description" content="برامج تُصمَّم حسب أيامك وميزانيتك">
+<meta property="og:title" content="باقة العمرة — نمبرون للسفر و السياحة">
+<meta property="og:description" content="برامج عمرة بحسب الموسم والمدة التي تناسبك.">
 <meta property="og:locale" content="ar_SD">
 <meta property="og:locale:alternate" content="en_GB">
-<meta property="og:url" content="https://mashhorfoods.github.io/mashhor-demo/services/packages/">
-<link rel="canonical" href="https://mashhorfoods.github.io/mashhor-demo/services/packages/">
+<meta property="og:url" content="https://mashhorfoods.github.io/mashhor-demo/offers/umrah/">
+<link rel="canonical" href="https://mashhorfoods.github.io/mashhor-demo/offers/umrah/">
 <meta property="og:image" content="https://mashhorfoods.github.io/mashhor-demo/assets/brand/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -41,19 +41,22 @@
   <!-- Global header: mounted by the script below. Stage 10.2 -->
 
   <main id="main" class="l-page__main">
-    <section class="l-section c-hero" aria-labelledby="service-title">
-      <div class="l-container"><div class="c-hero__grid" data-detail="hero"></div></div>
+    <section class="l-section c-hero" aria-labelledby="offer-title">
+      <div class="l-container"><div class="c-hero__grid" data-offer="hero"></div></div>
     </section>
-    <section class="l-section l-section--subtle" data-detail="overview" aria-labelledby="overview-title" hidden><div class="l-container" data-detail-body></div></section>
-    <section class="l-section" data-detail="features" aria-labelledby="features-title" hidden><div class="l-container" data-detail-body></div></section>
-    <section class="l-section l-section--subtle" data-detail="benefits" aria-labelledby="benefits-title" hidden><div class="l-container" data-detail-body></div></section>
-    <section class="l-section" data-detail="steps" aria-labelledby="steps-title" hidden><div class="l-container" data-detail-body></div></section>
-    <section class="l-section l-section--subtle" data-detail="requirements" aria-labelledby="requirements-title" hidden><div class="l-container" data-detail-body></div></section>
-    <section class="l-section" data-detail="related" aria-labelledby="related-title" hidden><div class="l-container" data-detail-body></div></section>
-    <section class="l-section l-section--subtle" data-detail="support" aria-labelledby="support-title" id="support" hidden><div class="l-container" data-detail-body></div></section>
-    <section class="l-section l-section--inverse c-cta-band" data-detail="cta" aria-labelledby="cta-title" hidden>
+    <section class="l-section l-section--subtle" data-offer="overview" aria-labelledby="overview-title" hidden><div class="l-container" data-offer-body></div></section>
+    <section class="l-section" data-offer="included" aria-labelledby="included-title" hidden><div class="l-container" data-offer-body></div></section>
+    <section class="l-section l-section--subtle" data-offer="excluded" aria-labelledby="excluded-title" hidden><div class="l-container" data-offer-body></div></section>
+    <section class="l-section" data-offer="itinerary" aria-labelledby="itinerary-title" hidden><div class="l-container" data-offer-body></div></section>
+    <section class="l-section l-section--subtle" data-offer="important" aria-labelledby="important-title" hidden><div class="l-container" data-offer-body></div></section>
+    <section class="l-section" data-offer="terms" aria-labelledby="terms-title" hidden><div class="l-container" data-offer-body></div></section>
+    <section class="l-section l-section--subtle" data-offer="faq" aria-labelledby="faq-title" hidden><div class="l-container" data-offer-body></div></section>
+    <section class="l-section" data-offer="flow" aria-labelledby="flow-title" hidden><div class="l-container" data-offer-body></div></section>
+    <section class="l-section l-section--subtle" data-offer="related" aria-labelledby="related-title" hidden><div class="l-container" data-offer-body></div></section>
+    <section class="l-section" data-offer="support" aria-labelledby="support-title" id="support" hidden><div class="l-container" data-offer-body></div></section>
+    <section class="l-section l-section--inverse c-cta-band" data-offer="cta" aria-labelledby="cta-title" hidden>
       <span class="u-numeral-watermark" aria-hidden="true">1</span>
-      <div class="l-container" data-detail-body></div>
+      <div class="l-container" data-offer-body></div>
     </section>
   </main>
 
@@ -63,24 +66,24 @@
 </div>
 
 <script type="module">
-  import { boot, el, qs, render, icon, route, pick, mountHeader, mountFooter, mountServiceDetail, NAV_BOTTOM }
+  import { boot, el, qs, render, icon, route, pick, mountHeader, mountFooter, mountOfferDetail, NAV_BOTTOM }
     from './assets/js/foundation.js';
 
   // <base> would send href="#main" to the homepage; the skip link scrolls here.
   qs('[data-skip]')?.addEventListener('click', (e) => { e.preventDefault(); const m = qs('#main'); m.tabIndex = -1; m.focus(); m.scrollIntoView(); });
 
-  let detail = null;
+  let offer = null;
   function paint() {
     render(qs('#bottom-nav'), NAV_BOTTOM.map((item) =>
       el('a', { class: 'c-bottom-nav__item', href: route(item.href) },
         [icon(item.icon, { size: 'sm' }), el('span', {}, pick(item, 'label'))])));
-    detail = mountServiceDetail({ slug: "packages" });
-    window.no = { ...(window.no ?? {}), detail };   // QA handle: no.detail.render('unknown')
+    offer = mountOfferDetail({ slug: "umrah" });
+    window.no = { ...(window.no ?? {}), offer };   // QA handle: no.offer.render('unknown')
   }
   function mountChrome() {
     // The page carries its own final CTA, so the footer's is switched off.
     mountFooter({ target: qs('.l-page'), variant: 'marketing', cta: false });
-    mountHeader({ target: qs('.l-page'), current: "services",
+    mountHeader({ target: qs('.l-page'), current: "offers",
       onSearch: () => { window.location.assign(route('') + '#booking'); } });
   }
   boot({ sprite: 'assets/icons/sprite.svg', onLocale: () => { mountChrome(); paint(); } });

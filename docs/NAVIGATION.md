@@ -51,6 +51,9 @@ regions that contain something and its items are `data/destinations.js`
 records. The former "most popular" column is gone: the registry has no such
 field, so the menu cannot claim it.
 
+**The offers menu lists the data-driven categories (since 10.8)** from
+`data/offers.js`; each item opens the listing filtered on that category.
+
 ## Decisions worth knowing
 
 **Click, never hover (§22).** Menus open on click only. A cursor crossing the
