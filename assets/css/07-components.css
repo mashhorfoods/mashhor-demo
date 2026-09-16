@@ -295,11 +295,8 @@
   .c-price-row--total .c-price-row__label { color: var(--color-text); }
 
   /* ======================================================================
-     FILTERS
+     CHIP — used by the 404 service links and the global search scopes
      ==================================================================== */
-  .c-filters { display: flex; flex-direction: column; gap: var(--space-24); }
-  .c-filter-group { display: flex; flex-direction: column; gap: var(--space-8); }
-  .c-filter-group__title { font-size: var(--text-label); font-weight: var(--weight-semibold); }
   .c-chip {
     display: inline-flex; align-items: center; gap: var(--space-8);
     padding-inline: var(--space-16); padding-block: var(--space-8);

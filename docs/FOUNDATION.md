@@ -361,7 +361,7 @@ What is already expressible without any later-stage code existing:
 
 | Stage | What the foundation already provides |
 | --- | --- |
-| **11 — Booking** | Search verticals, flight/hotel/package cards, fare and baggage display, price breakdown, passenger forms, OTP, upload, steps, booking summary, sticky rail |
+| **11 — Booking** | Search verticals, flight/hotel/package cards, fare and baggage display, price breakdown, passenger forms, OTP, upload, steps, sticky rail. (Booking-summary and filter-panel CSS were sketched in 10.1 and removed unused in the second maintainability pass — Stage 11 designs them against real requirements.) |
 | **12 — Customer account** | `tripCard`, status registry, next-step notices, trip reference formatting, empty/error states |
 | **13 — Supervisor** | `supervisorCard`, the `supervisorId` link on every trip, the inline `.c-assist` human-help component |
 | **14 — Admin / operations** | `ROLES` + `can()` permission check, the same status registry, the same data shapes |
