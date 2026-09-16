@@ -266,30 +266,6 @@
                              border-block-start: var(--border-hairline); border-radius: 0; }
   .c-gh__menu-head { padding: var(--space-8) var(--space-12) var(--space-16); }
 
-  /* ======================================================================
-     GLOBAL SEARCH — §09. A focused sheet, not a permanent field.
-     ==================================================================== */
-  .c-gh__search {
-    position: absolute; inset-inline: 0; inset-block-start: calc(100% + 1px);
-    z-index: 1;
-    background-color: var(--color-surface);
-    border-block-end: var(--border-hairline);
-    box-shadow: var(--shadow-lg);
-    padding-block: var(--space-24);
-  }
-  .c-gh__search[hidden] { display: none; }
-  .c-gh__search-field { display: flex; align-items: center; gap: var(--space-12);
-                        border: var(--border-width-strong) solid var(--color-text);
-                        border-radius: var(--radius-md); padding-inline: var(--space-16); }
-  .c-gh__search-field:focus-within { border-color: var(--color-focus); outline: var(--focus-ring); outline-offset: 2px; }
-  .c-gh__search-input {
-    flex: 1; min-inline-size: 0;
-    border: none; outline: none; background: none;
-    min-block-size: var(--control-height-lg);
-    font-size: var(--text-body-lg);
-  }
-  .c-gh__scopes { display: flex; flex-wrap: wrap; gap: var(--space-8); margin-block-start: var(--space-16); }
-
   /* Scrim behind any open overlay, so the page reads as inert.
 
      z-index is local: the scrim is a child of the header, which already sits at

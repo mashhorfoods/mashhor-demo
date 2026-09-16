@@ -21,13 +21,10 @@ for (const reduce of [false, true]) {
   await p.keyboard.press('Escape'); await p.waitForTimeout(300);
   r = await p.evaluate(() => ({ open: document.querySelector('.c-gh__drawer')?.dataset.open, focused: document.activeElement.className, unlocked: getComputedStyle(document.body).overflow !== 'hidden' }));
   ok(`${T} Escape closes the drawer and returns focus to the burger`, r.open !== 'true' && /c-gh__mobile-only|c-gh__action/.test(r.focused) && r.unlocked, JSON.stringify(r));
-  // header search overlay
-  await p.click('header .c-gh__action[aria-label="بحث"]'); await p.waitForTimeout(300);
-  r = await p.evaluate(() => ({ expanded: document.querySelector('header .c-gh__action[aria-label="بحث"]').getAttribute('aria-expanded'), focusedTag: document.activeElement.tagName, inSearch: !!document.activeElement.closest('.c-gh__search') }));
-  ok(`${T} header search opens and focuses its input`, r.expanded === 'true' && r.focusedTag === 'INPUT' && r.inSearch, JSON.stringify(r));
-  await p.keyboard.press('Escape'); await p.waitForTimeout(250);
-  r = await p.evaluate(() => ({ expanded: document.querySelector('header .c-gh__action[aria-label="بحث"]').getAttribute('aria-expanded'), focused: document.activeElement.getAttribute('aria-label') }));
-  ok(`${T} Escape closes the search and returns focus`, r.expanded === 'false' && r.focused === 'بحث', JSON.stringify(r));
+  // header search: a door straight to the page's own form
+  await p.click('header .c-gh__action[aria-label="بحث"]'); await p.waitForTimeout(700);
+  r = await p.evaluate(() => ({ focused: document.activeElement.name, expanded: document.querySelector('header .c-gh__action[aria-label="بحث"]').hasAttribute('aria-expanded') }));
+  ok(`${T} header search lands in the booking form`, r.focused === 'from' && !r.expanded, JSON.stringify(r));
   // footer accordion on mobile
   const acc = await p.evaluate(() => { const t = document.querySelector('.c-gf__acc-trigger'); if (!t) return null; t.focus(); return t.getAttribute('aria-expanded'); });
   if (acc !== null) {

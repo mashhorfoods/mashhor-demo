@@ -156,17 +156,6 @@ export const ACCOUNT_CUSTOMER = [
 ];
 
 /* --------------------------------------------------------------------------
-   GLOBAL SEARCH — §09. Scopes the focused search interface offers.
-   ----------------------------------------------------------------------- */
-export const SEARCH_SCOPES = [
-  { id: 'flights',      icon: 'no-flight',   labelAr: 'رحلات',   labelEn: 'Flights' },
-  { id: 'hotels',       icon: 'no-hotel',    labelAr: 'فنادق',   labelEn: 'Hotels' },
-  { id: 'destinations', icon: 'no-location', labelAr: 'وجهات',   labelEn: 'Destinations' },
-  { id: 'offers',       icon: 'no-price-tag',labelAr: 'عروض',    labelEn: 'Offers' },
-  { id: 'help',         icon: 'no-support',  labelAr: 'مساعدة',  labelEn: 'Help' },
-];
-
-/* --------------------------------------------------------------------------
    BOOK NOW — §11. One red action in the header, and only one.
    ----------------------------------------------------------------------- */
 export const BOOK_CTA = { id: 'book', href: 'book/', labelAr: 'احجز الآن', labelEn: 'Book now' };

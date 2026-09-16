@@ -49,9 +49,11 @@ const run = async (label, file, extra = {}) => {
   const out = r.out;
   const summary = out.split('\n').filter((l) => /passed|untranslated strings|unique findings|problems$/.test(l)).pop() ?? out.trim().split('\n').pop();
   const bad = out.split('\n').filter((l) => /✗|pageerror|Error:/.test(l)).slice(0, 8);
-  if (r.status !== 0) failed++;
-  rows.push(`${r.status === 0 ? '✓' : '✗'} ${label.padEnd(12)} ${String(Math.round((Date.now() - t) / 1000) + 's').padStart(5)}  ${summary?.trim() ?? ''}`);
-  if (r.status !== 0) rows.push(...bad.map((l) => '    ' + l.trim()));
+  // A suite fails on a non-zero exit OR on any ✗ line (the older suites only print).
+  const ok = r.status === 0 && !bad.some((l) => l.includes('✗'));
+  if (!ok) failed++;
+  rows.push(`${ok ? '✓' : '✗'} ${label.padEnd(12)} ${String(Math.round((Date.now() - t) / 1000) + 's').padStart(5)}  ${summary?.trim() ?? ''}`);
+  if (!ok) rows.push(...bad.map((l) => '    ' + l.trim()));
 };
 for (const s of suites) await run(s, join(ROOT, 'tests', `${s}.mjs`));
 if (audits) {

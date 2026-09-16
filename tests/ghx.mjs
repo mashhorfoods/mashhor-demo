@@ -39,10 +39,9 @@ await p.keyboard.press('Escape');
 // search
 const st = p.locator('.c-gh__action[aria-label="بحث"], .c-gh__action[aria-label="Search"]').first();
 await st.click(); await p.waitForTimeout(350);
-ok('search opens', await p.evaluate(()=>!document.querySelector('.c-gh__search').hidden));
-ok('search autofocuses', await p.evaluate(()=>document.activeElement?.classList.contains('c-gh__search-input')));
-ok('search scopes', await p.locator('.c-gh__scopes .c-chip').count()===5);
-await p.keyboard.press('Escape'); await p.waitForTimeout(200);
+ok('search is a plain action (no sheet, no aria-expanded)', await p.evaluate(()=>!document.querySelector('.c-gh__search') && !document.querySelector('.c-gh__action[aria-label="بحث"], .c-gh__action[aria-label="Search"]').hasAttribute('aria-expanded')));
+ok('search hands over to the page (index → hero form)', await p.evaluate(()=>document.activeElement?.name==='from'));
+await p.waitForTimeout(900); await p.evaluate(()=>{ document.activeElement?.blur(); window.scrollTo({ top: 0, behavior: 'instant' }); }); await p.waitForTimeout(400);
 
 // account guest -> authenticated
 const acc = p.locator('.c-gh__action[aria-label="حسابي"], .c-gh__action[aria-label="My account"]').first();

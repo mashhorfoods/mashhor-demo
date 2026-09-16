@@ -183,15 +183,10 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
   r = await p.evaluate(() => ({ focused: document.activeElement?.name }));
   ok('final CTA scrolls to booking entry', r.focused === 'from' && await inView(), JSON.stringify(r));
 
-  // header search sheet routes to the booking entry
+  // the header's search action lands on the hero form
   await p.evaluate(() => window.scrollTo(0, 3000));
-  await p.click('.c-gh [data-gh-search], .c-gh button[aria-controls*="search"]').catch(() => {});
-  await p.waitForTimeout(300);
-  const searchOpen = await p.evaluate(() => !!document.querySelector('.c-gh__search-panel:not([hidden]), .c-gh [data-panel="search"]:not([hidden])'));
-  if (searchOpen) {
-    await p.keyboard.type('جدة'); await p.keyboard.press('Enter'); await p.waitForTimeout(1200);
-    ok('header search hands off to booking entry', (await p.evaluate(() => document.activeElement?.name)) === 'from' && await inView());
-  }
+  await p.click('.c-gh__action[aria-label="بحث"]'); await p.waitForTimeout(900);
+  ok('header search hands off to the booking entry', (await p.evaluate(() => document.activeElement?.name)) === 'from' && await inView());
 
   // locale switch keeps everything painted (no duplicate sections/headers)
   await p.evaluate(async () => { const m = await import('./assets/js/foundation.js'); await m.setLocale('en'); });

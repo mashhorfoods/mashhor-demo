@@ -72,7 +72,8 @@ export function mountPage({ handle = 'page', header = {}, footer = {}, bottom = 
 
   const chrome = () => {
     mountFooter({ target, variant: 'marketing', ...footer });
-    mountHeader({ target, ...header, onSearch: () => header.onSearch?.(api.current) });
+    // The handle may have been re-mounted from the console (the suites do); read the live one.
+    mountHeader({ target, ...header, onSearch: () => header.onSearch?.(window.no?.[handle] ?? api.current) });
   };
   const repaint = () => {
     const nav = qs('#bottom-nav');

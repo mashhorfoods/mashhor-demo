@@ -352,7 +352,6 @@ for (const loc of ['ar', 'en']) {
   ok('service cards are one Tab stop (roving tabindex)', seen.filter((s) => s.name === 'c-card').length === 1, seen.map((s) => s.name).join(','));
   // header search → the page's own form
   await p.click('header .c-gh__action[aria-label="بحث"]'); await p.waitForTimeout(300);
-  await p.keyboard.press('Enter'); await p.waitForTimeout(300);
   const hs = await p.evaluate(() => ({ focused: document.activeElement.name, inForm: !!document.activeElement.closest('.c-search__form') }));
   ok('header search hands over to the booking form', hs.inForm && hs.focused === 'from', JSON.stringify(hs));
   await p.close();

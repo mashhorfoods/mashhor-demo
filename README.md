@@ -7,16 +7,8 @@ inherits it.
 | | |
 | --- | --- |
 | **Full documentation** | [`docs/FOUNDATION.md`](docs/FOUNDATION.md) — Stage 10.1 foundation |
-| **Header & navigation** | [`docs/NAVIGATION.md`](docs/NAVIGATION.md) — Stage 10.2 |
-| **Footer** | [`docs/FOOTER.md`](docs/FOOTER.md) — Stage 10.3 |
-| **Homepage build** | [`docs/HOMEPAGE.md`](docs/HOMEPAGE.md) — Stage 10.4 |
-| **Services** | [`docs/SERVICES.md`](docs/SERVICES.md) — Stage 10.5 · `services/` |
-| **Service details** | [`docs/SERVICE-DETAILS.md`](docs/SERVICE-DETAILS.md) — Stage 10.6 · `services/<slug>/` |
-| **Destinations** | [`docs/DESTINATIONS.md`](docs/DESTINATIONS.md) — Stage 10.7 · `destinations/` |
-| **Offers & packages** | [`docs/OFFERS.md`](docs/OFFERS.md) — Stage 10.8 · `offers/`, `offers/<slug>/` |
-| **Booking entry** | [`docs/BOOKING.md`](docs/BOOKING.md) — Stage 10.9 · `book/` |
-| **Supervisor profile** | [`docs/SUPERVISOR.md`](docs/SUPERVISOR.md) — Stage 10.10 · `supervisor/<slug>/` |
-| **Responsive & accessibility refinement** | [`docs/REFINEMENT.md`](docs/REFINEMENT.md) — Stage 10.11 · `tools/a11y-audit.mjs` |
+| **Stages 10.2 – 10.11** | [`docs/STAGES.md`](docs/STAGES.md) — header & navigation, footer, homepage, services, service details, destinations, offers, booking entry, supervisor profile, refinement |
+| **Code-quality cleanup** | [`docs/CLEANUP.md`](docs/CLEANUP.md) — what was removed, merged and split; `npm test` |
 | **Stage 10 final QA** | [`docs/STAGE-10-QA.md`](docs/STAGE-10-QA.md) — Stage 10.12 · **STAGE 10 — COMPLETE / BUILT + VERIFIED** |
 | **Photography** | `tools/images.manifest.json` + `node tools/fetch-images.mjs` → `assets/images/`, `assets/images/CREDITS.md` |
 | **Living style guide** | `styleguide.html` — every token, component and state, in RTL and LTR |

@@ -23,7 +23,7 @@
 import { el, qsa, uid } from '../core/dom.js';
 import { getLocale, pick } from '../core/i18n.js';
 import { route } from '../data/config.js';
-import { NAV_PRIMARY, MENUS, SEARCH_SCOPES } from '../data/navigation.js';
+import { NAV_PRIMARY, MENUS } from '../data/navigation.js';
 import { icon } from './ui.js';
 import { session, sessionListeners, initials, setSession } from './session.js';
 import { logo, languageButton, bookNowButton } from './brand.js';
@@ -31,44 +31,6 @@ import { createMenuController, menuPanel, accountPanel } from './menus.js';
 import { mobileDrawer } from './drawer.js';
 export { logo, languageButton, bookNowButton } from './brand.js';
 export { setSession, getSession } from './session.js';
-
-/* ---------------------------------------------------------------------------
-   GLOBAL SEARCH — §09. A focused sheet; the header keeps no standing field.
-   ------------------------------------------------------------------------ */
-export function searchPanel({ onSubmit } = {}) {
-  const isAr = getLocale() === 'ar';
-  const inputId = uid('gh-search');
-
-  const input = el('input', {
-    class: 'c-gh__search-input', id: inputId, type: 'search',
-    name: 'q', autocomplete: 'off',
-    placeholder: isAr ? 'ابحث عن رحلة، فندق، وجهة أو خدمة' : 'Search flights, hotels, destinations or services',
-  });
-
-  const panel = el('div', { class: 'c-gh__search', hidden: true }, [
-    el('div', { class: 'l-container' }, [
-      el('form', {
-        role: 'search',
-        onsubmit: (e) => { e.preventDefault(); onSubmit?.(input.value); },
-      }, [
-        el('label', { class: 'u-visually-hidden', for: inputId }, isAr ? 'بحث' : 'Search'),
-        el('div', { class: 'c-gh__search-field' }, [
-          icon('no-search', { size: 'lg' }),
-          input,
-          el('button', { type: 'submit', class: 'c-btn c-btn--primary c-btn--sm' }, isAr ? 'ابحث' : 'Search'),
-        ]),
-        el('div', { class: 'c-gh__scopes' }, SEARCH_SCOPES.map((s) =>
-          el('a', { class: 'c-chip', href: route(`search/?scope=${s.id}`) }, [
-            icon(s.icon, { size: 'sm' }), el('span', {}, pick(s, 'label')),
-          ]))),
-      ]),
-    ]),
-  ]);
-
-  panel.no = { focus: () => input.focus(), input };
-  return panel;
-}
-
 
 /* ---------------------------------------------------------------------------
    GLOBAL HEADER — the assembly. §27
@@ -128,17 +90,15 @@ export function globalHeader({ current = null, variant = 'default', onSearch = n
   });
 
   /* ---- actions ---- */
-  const search = searchPanel({ onSubmit: onSearch });
+  // Search is a door, not a sheet: the page decides where it leads — the
+  // homepage and the booking entry focus their own form, every other page
+  // opens the booking entry. (The interim search sheet of 10.2 duplicated
+  // the booking entry and was removed in the 10.12 cleanup.)
   const searchTrigger = el('button', {
     type: 'button', class: 'c-gh__action',
     'aria-label': isAr ? 'بحث' : 'Search',
+    onclick: () => { menus.close(); onSearch?.(); },
   }, [icon('no-search'), el('span', { class: 'c-gh__action-label' }, isAr ? 'بحث' : 'Search')]);
-  menus.register(searchTrigger, search);
-  searchTrigger.addEventListener('click', () => {
-    if (searchTrigger.getAttribute('aria-expanded') === 'true') {
-      requestAnimationFrame(() => search.no.focus());
-    }
-  });
 
   // The Support action opens the SAME help panel the primary nav built — the
   // page used to carry two byte-identical copies of it, 41 nodes each.
@@ -215,7 +175,6 @@ export function globalHeader({ current = null, variant = 'default', onSearch = n
         ]),
       ]),
       ...megaPanels,
-      search,
     ]),
   ]);
 
