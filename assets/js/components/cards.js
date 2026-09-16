@@ -244,6 +244,68 @@ export function packageCard(pkg) {
 }
 
 /* ---------------------------------------------------------------------------
+   DESTINATION CARD — image · name · descriptor · arrow. 10.4 §08
+   The descriptor says what the place is FOR; there is no slot for a rank,
+   a count or a price, so none can be invented.
+   ------------------------------------------------------------------------ */
+export function destinationCard(dest) {
+  const titleId = uid('dest');
+  return el('article', { class: 'c-card c-card--interactive c-dest', 'aria-labelledby': titleId }, [
+    el('div', { class: 'c-card__media' }, mediaPlaceholder(dest.image?.src, pick(dest.image ?? {}, 'alt'))),
+    el('div', { class: 'c-card__body' }, [
+      el('div', { class: 'c-dest__body' }, [
+        el('div', {}, [
+          el('h3', { class: 'c-dest__name', id: titleId }, [
+            el('a', { class: 'c-card__link', href: route(dest.href) }, pick(dest, 'name')),
+          ]),
+          el('p', { class: 'c-dest__desc' }, pick(dest, 'desc')),
+        ]),
+        el('span', { class: 'c-dest__arrow', 'aria-hidden': 'true' }, icon('no-arrow-end', { size: 'md', flip: true })),
+      ]),
+    ]),
+  ]);
+}
+
+/* ---------------------------------------------------------------------------
+   OFFER CARD — image · destination · title · text · [price] · [validity] · CTA
+   10.4 §09. Price and validity rows render ONLY when the record carries a
+   value. A card with neither is the honest state of an offer the business
+   has not priced yet — not a defect to paper over.
+   ------------------------------------------------------------------------ */
+export function offerCard(offer) {
+  const titleId = uid('offer');
+  const href = route(offer.href ?? `offers/${offer.id}/`);
+  const price = offer.price?.amount != null ? offer.price : null;
+  const valid = offer.validUntil ? dateShort(offer.validUntil) : '';
+
+  return el('article', { class: 'c-card c-card--interactive c-offer', 'aria-labelledby': titleId }, [
+    el('div', { class: 'c-card__media' }, mediaPlaceholder(offer.image?.src, pick(offer.image ?? {}, 'alt'))),
+    el('div', { class: 'c-card__body' }, [
+      el('p', { class: 't-overline' }, pick(offer, 'destination')),
+      el('h3', { class: 'c-card__title', id: titleId }, [
+        el('a', { class: 'c-card__link', href }, pick(offer, 'title')),
+      ]),
+      offer.descAr || offer.descEn ? el('p', { class: 'c-card__text' }, pick(offer, 'desc')) : null,
+      valid ? el('p', { class: 'c-offer__meta' }, [
+        el('span', { class: 'c-offer__meta-item' }, [icon('no-calendar', { size: 'sm' }), el('span', {}, t('home.offers.validUntil', valid))]),
+      ]) : null,
+    ]),
+    el('div', { class: 'c-card__foot' }, [
+      price
+        ? el('div', {}, [
+            el('p', { class: 't-caption' }, price.from ? t('package.from') : ''),
+            el('p', { class: 't-price' }, money(price.amount, price.currency)),
+            price.basisAr || price.basisEn ? el('p', { class: 't-caption' }, pick(price, 'basis')) : null,
+          ])
+        : el('span', { class: 'c-service-card__cta', 'aria-hidden': 'true' }, [
+            t('home.offers.cta'), icon('no-arrow-end', { size: 'sm', flip: true }),
+          ]),
+      price ? el('a', { class: 'c-btn c-btn--secondary-brand c-btn--sm', href }, t('home.offers.cta')) : null,
+    ]),
+  ]);
+}
+
+/* ---------------------------------------------------------------------------
    SUPERVISOR CARD — §29
    The Number One system, with a person inside it. No personal branding.
    ------------------------------------------------------------------------ */

@@ -73,7 +73,8 @@ export const FOOTER_COLUMNS = [
       { href: 'help/contact/',  labelAr: 'تواصل معنا',      labelEn: 'Contact us' },
       { href: 'trips/',         labelAr: 'إدارة حجزي',      labelEn: 'Manage my booking' },
       // The two live channels reuse the header's config — one source, §10.2.
-      ...SUPPORT_CHANNELS.map((c) => ({
+      // A channel with no href is not yet supplied and is not listed.
+      ...SUPPORT_CHANNELS.filter((c) => !!c.href).map((c) => ({
         href: c.href, external: true, icon: c.icon,
         labelAr: c.id === 'whatsapp' ? 'الدعم عبر واتساب' : 'اتصل بنا',
         labelEn: c.id === 'whatsapp' ? 'Support on WhatsApp' : 'Call us',

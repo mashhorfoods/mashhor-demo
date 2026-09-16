@@ -261,4 +261,38 @@
     .c-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-24); }
     .c-form-grid > .is-full { grid-column: 1 / -1; }
   }
+
+  /* ======================================================================
+     SEGMENTED — a radio group presented as one bar (trip type, sort).
+     The inputs stay real radios: arrow keys move, the group has one tab
+     stop, and the checked state is the platform's. Added in 10.4.
+     ==================================================================== */
+  .c-segmented-field { border: 0; padding: 0; margin: 0; min-inline-size: 0; }
+  .c-segmented {
+    display: inline-flex; flex-wrap: wrap; gap: var(--space-4);
+    inline-size: fit-content; max-inline-size: 100%;
+    padding: var(--space-4);
+    background-color: var(--color-bg-sunken);
+    border-radius: var(--radius-md);
+  }
+  .c-segmented__option {
+    position: relative; display: inline-flex; align-items: center; justify-content: center;
+    min-block-size: calc(var(--touch-target) - var(--space-8));
+    padding-inline: var(--space-16);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-body-sm); font-weight: var(--weight-medium);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: var(--transition-interactive);
+  }
+  .c-segmented__input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+  .c-segmented__option:hover { color: var(--color-text); }
+  .c-segmented__option:has(.c-segmented__input:checked) {
+    background-color: var(--color-surface); color: var(--color-text-brand);
+    font-weight: var(--weight-semibold); box-shadow: var(--shadow-xs);
+  }
+  .c-segmented__option:has(.c-segmented__input:focus-visible) {
+    outline: var(--focus-ring); outline-offset: var(--focus-ring-offset);
+  }
+  textarea.c-field__control { block-size: auto; min-block-size: calc(var(--control-height) * 1.6); padding-block: var(--space-12); resize: vertical; }
 }

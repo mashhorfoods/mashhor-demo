@@ -13,7 +13,7 @@
 import { el, uid } from '../core/dom.js';
 import { t, getLocale } from '../core/i18n.js';
 import { SEARCH_VERTICALS } from '../data/config.js';
-import { icon, stepper, initPopovers } from './ui.js';
+import { icon, stepper, initPopovers, initTabs } from './ui.js';
 
 /* ---------------------------------------------------------------------------
    FIELD FACTORIES — one per field type declared by a vertical.
@@ -47,6 +47,31 @@ const FIELD_BUILDERS = {
     return fieldShell(field, id, el('select', { class: 'c-field__control', id, name: field.id },
       (field.options ?? []).map((option) =>
         el('option', { value: option.value }, isAr ? option.labelAr : option.labelEn))));
+  },
+
+  /* Segmented control — a radio group that reads as one bar (trip type). */
+  segmented: (field) => {
+    const name = uid('seg');
+    const isAr = getLocale() === 'ar';
+    return el('fieldset', { class: 'c-field c-segmented-field' }, [
+      el('legend', { class: 'c-field__label' }, t(field.label)),
+      el('div', { class: 'c-segmented' }, (field.options ?? []).map((option, i) => {
+        const id = `${name}-${i}`;
+        return el('label', { class: 'c-segmented__option', for: id }, [
+          el('input', { class: 'c-segmented__input', type: 'radio', id, name: field.id,
+                        value: option.value, checked: option.value === field.value }),
+          el('span', { class: 'c-segmented__label' }, isAr ? option.labelAr : option.labelEn),
+        ]);
+      })),
+    ]);
+  },
+
+  textarea: (field) => {
+    const id = uid('f');
+    return fieldShell(field, id, el('textarea', {
+      class: 'c-field__control', id, name: field.id, rows: 3, required: field.required,
+      placeholder: getLocale() === 'ar' ? 'أخبرنا بما تحتاجه باختصار' : 'Tell us briefly what you need',
+    }));
   },
 
   checkbox: (field) => {
@@ -161,8 +186,8 @@ function verticalPanel(vertical) {
     advancedBlock,
     el('div', { class: 'c-search__submit' }, [
       el('button', { type: 'submit', class: 'c-btn c-btn--primary c-btn--lg c-btn--block@sm' }, [
-        icon('no-search', { size: 'sm', className: 'c-btn__icon' }),
-        el('span', { class: 'c-btn__label' }, t('search.submit')),
+        icon(vertical.submit ? 'no-arrow-end' : 'no-search', { size: 'sm', className: 'c-btn__icon', flip: !!vertical.submit }),
+        el('span', { class: 'c-btn__label' }, t(vertical.submit ?? 'search.submit')),
         el('span', { class: 'c-btn__spinner', 'aria-hidden': 'true' }),
       ]),
     ]),
@@ -173,7 +198,10 @@ function verticalPanel(vertical) {
    SEARCH — the public builder.
    @param {object} options
    @param {string[]} options.verticals  ids to include, in order
-   @param {function} options.onSubmit   receives (verticalId, FormData)
+   @param {function} options.onSubmit   receives (verticalId, FormData, form)
+   Returns the widget; `widget.no.select(id)` switches vertical and
+   `widget.no.focus()` puts the caret in the first field of the active one,
+   so a page can route a "start booking" action into the search. §13
    ------------------------------------------------------------------------ */
 export function searchWidget({ verticals = null, onSubmit = null } = {}) {
   const list = (verticals
@@ -201,7 +229,7 @@ export function searchWidget({ verticals = null, onSubmit = null } = {}) {
       novalidate: true,
       onsubmit: (event) => {
         event.preventDefault();
-        onSubmit?.(vertical.id, new FormData(event.currentTarget));
+        onSubmit?.(vertical.id, new FormData(event.currentTarget), event.currentTarget);
       },
     }, verticalPanel(vertical));
 
@@ -213,8 +241,26 @@ export function searchWidget({ verticals = null, onSubmit = null } = {}) {
     ...panels,
   ]);
 
-  // The popovers live inside the panels we just built, so wire them now.
-  queueMicrotask(() => initPopovers(widget));
+  // The tabs and popovers live inside what we just built, so wire them now.
+  // boot() also sweeps the document once, but a widget rebuilt after a
+  // locale change would otherwise have dead tabs; both inits are idempotent.
+  queueMicrotask(() => { initTabs(widget); initPopovers(widget); });
+
+  widget.no = {
+    select(id) {
+      const tab = tabs.find((b) => b.dataset.tabId === id);
+      if (!tab) return false;
+      tab.click();   // one code path for selection: initTabs' own handler
+      return true;
+    },
+    focus({ preventScroll = false } = {}) {
+      const panel = panels.find((p) => !p.hidden);
+      panel?.querySelector('input:not([type="radio"]):not([type="checkbox"]), select, textarea')?.focus({ preventScroll });
+    },
+    current() {
+      return tabs.find((b) => b.getAttribute('aria-selected') === 'true')?.dataset.tabId ?? null;
+    },
+  };
 
   return widget;
 }

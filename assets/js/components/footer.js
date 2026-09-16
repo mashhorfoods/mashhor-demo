@@ -174,7 +174,10 @@ export function footerCopyright() {
    GlobalFooter — §23 §24
    @param {'marketing'|'booking'|'app'} variant
    ------------------------------------------------------------------------ */
-export function globalFooter({ variant = 'marketing', collapsible = null } = {}) {
+/** `cta: false` drops the footer's own call to action — for a page that
+    carries its own final CTA directly above the footer (the homepage), two
+    red actions in a row would break the one-primary-action rule. §11 */
+export function globalFooter({ variant = 'marketing', collapsible = null, cta = true } = {}) {
   const isAr = getLocale() === 'ar';
   const full = variant === 'marketing';
   // Decided once per render; mountFooter re-renders when the breakpoint moves.
@@ -198,7 +201,7 @@ export function globalFooter({ variant = 'marketing', collapsible = null } = {})
     variant === 'app' ? null : el('span', { class: 'c-gf__route', 'aria-hidden': 'true' }),
 
     el('div', { class: 'l-container' }, [
-      full ? footerCta() : null,
+      full && cta ? footerCta() : null,
 
       el('div', { class: 'c-gf__main' }, [
         full

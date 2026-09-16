@@ -26,11 +26,15 @@ it there:
 | A social link | its `url` is set |
 | A legal link | its `exists` is `true` |
 
-Today that means the footer ships with **two contact rows** (WhatsApp and Call,
-carrying the same placeholders Stage 10.2 flagged), **no social links** and **no
-legal links**. That is the honest state of the business information we have, and
-it is visible in the build rather than papered over with plausible-looking
-fakes.
+Today that means the footer ships with **no contact rows** (WhatsApp and Call
+are `href: null` in `data/navigation.js` since Stage 10.4 — the placeholders are
+gone), **no social links** and **no legal links**. That is the honest state of
+the business information we have, and it is visible in the build rather than
+papered over with plausible-looking fakes.
+
+`mountFooter({ cta: false })` drops the footer's own call to action for a page
+that carries its own final CTA directly above it (the homepage); the default is
+on.
 
 **To turn each on:** set the value in `data/footer.js`. Phone and WhatsApp live
 in `data/navigation.js` (`SUPPORT_CHANNELS`) so the header and footer can never

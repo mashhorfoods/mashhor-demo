@@ -87,14 +87,23 @@ export const STATUSES = {
    ------------------------------------------------------------------------ */
 export const SEARCH_VERTICALS = [
   {
+    /* Flights carry the strongest priority on the homepage (10.4 §04): the
+       trip type is a segmented control above the fields, and cabin sits in
+       the main row rather than behind "more options". */
     id: 'flights', label: 'search.flights', icon: 'no-flight', columns: 4,
     fields: [
+      { id: 'tripType',  type: 'segmented', label: 'search.tripType', full: true, value: 'return',
+        options: [
+          { value: 'return',  labelAr: 'ذهاب وعودة',  labelEn: 'Return' },
+          { value: 'oneway',  labelAr: 'ذهاب فقط',    labelEn: 'One way' },
+          { value: 'multi',   labelAr: 'وجهات متعددة', labelEn: 'Multi-city' },
+        ] },
       { id: 'from',      type: 'place',   label: 'search.from',   icon: 'no-flight',   required: true },
       { id: 'to',        type: 'place',   label: 'search.to',     icon: 'no-location', required: true },
       { id: 'depart',    type: 'date',    label: 'search.depart', required: true },
       { id: 'return',    type: 'date',    label: 'search.return' },
-      { id: 'pax',       type: 'pax',     label: 'search.travellers', full: true },
-      { id: 'cabin',     type: 'select',  label: 'search.cabin', advanced: true,
+      { id: 'pax',       type: 'pax',     label: 'search.travellers' },
+      { id: 'cabin',     type: 'select',  label: 'search.cabin',
         options: [
           { value: 'economy',  labelAr: 'الاقتصادية',        labelEn: 'Economy' },
           { value: 'premium',  labelAr: 'الاقتصادية المميزة', labelEn: 'Premium economy' },
@@ -121,7 +130,7 @@ export const SEARCH_VERTICALS = [
     ],
   },
   {
-    id: 'visa', label: 'search.visa', icon: 'no-visa', columns: 3,
+    id: 'visa', label: 'search.visa', icon: 'no-visa', columns: 3, submit: 'search.request',
     fields: [
       { id: 'nationality', type: 'select', label: 'search.nationality', options: [
           { value: 'sd', labelAr: 'السودان', labelEn: 'Sudan' },
@@ -134,6 +143,57 @@ export const SEARCH_VERTICALS = [
           { value: 'sa', labelAr: 'السعودية', labelEn: 'Saudi Arabia' },
         ] },
       { id: 'depart',      type: 'date',   label: 'search.depart' },
+    ],
+  },
+  /* The four verticals below were added for the homepage (10.4 §04). They
+     are requests rather than searches — the CTA says so — and land on the
+     same Stage 11 entry as the rest. */
+  {
+    id: 'umrah', label: 'search.umrah', icon: 'no-umrah', columns: 3, submit: 'search.request',
+    fields: [
+      { id: 'depart', type: 'date', label: 'search.depart' },
+      { id: 'nights', type: 'select', label: 'search.nights', options: [
+          { value: '7',  labelAr: '7 ليالٍ',  labelEn: '7 nights' },
+          { value: '10', labelAr: '10 ليالٍ', labelEn: '10 nights' },
+          { value: '14', labelAr: '14 ليلة',  labelEn: '14 nights' },
+        ] },
+      { id: 'pax',    type: 'pax',  label: 'search.travellers' },
+    ],
+  },
+  {
+    id: 'medical', label: 'search.medical', icon: 'no-medical', columns: 3, submit: 'search.request',
+    fields: [
+      { id: 'country', type: 'select', label: 'search.country', options: [
+          { value: 'eg', labelAr: 'مصر',   labelEn: 'Egypt' },
+          { value: 'in', labelAr: 'الهند', labelEn: 'India' },
+          { value: 'tr', labelAr: 'تركيا', labelEn: 'Türkiye' },
+          { value: 'jo', labelAr: 'الأردن', labelEn: 'Jordan' },
+        ] },
+      { id: 'depart',  type: 'date', label: 'search.depart' },
+      { id: 'pax',     type: 'pax',  label: 'search.travellers' },
+    ],
+  },
+  {
+    id: 'transport', label: 'search.transport', icon: 'no-transport', columns: 4,
+    fields: [
+      { id: 'from',   type: 'place', label: 'search.from', icon: 'no-location', required: true },
+      { id: 'to',     type: 'place', label: 'search.to',   icon: 'no-location', required: true },
+      { id: 'depart', type: 'date',  label: 'search.depart', required: true },
+      { id: 'pax',    type: 'pax',   label: 'search.travellers' },
+    ],
+  },
+  {
+    id: 'other', label: 'search.other', icon: 'no-documents', columns: 2, submit: 'search.request',
+    fields: [
+      { id: 'service', type: 'select', label: 'search.service', options: [
+          { value: 'study',  labelAr: 'سفر للدراسة',        labelEn: 'Study travel' },
+          { value: 'work',   labelAr: 'سفر للعمل',          labelEn: 'Work travel' },
+          { value: 'groups', labelAr: 'رحلات جماعية',       labelEn: 'Group trips' },
+          { value: 'change', labelAr: 'تعديل أو إلغاء تذكرة', labelEn: 'Change or cancel a ticket' },
+          { value: 'issue',  labelAr: 'إصدار تذكرة',        labelEn: 'Ticket issuing' },
+        ] },
+      { id: 'depart',  type: 'date',     label: 'search.depart' },
+      { id: 'notes',   type: 'textarea', label: 'search.notes', full: true },
     ],
   },
 ];

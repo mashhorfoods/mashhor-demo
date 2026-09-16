@@ -24,7 +24,7 @@ import { el, qs, qsa, uid, lockScroll, unlockScroll, trapFocus } from '../core/d
 import { getLocale, setLocale, pick } from '../core/i18n.js';
 import { route } from '../data/config.js';
 import {
-  NAV_PRIMARY, MENUS, SUPPORT_CHANNELS, ACCOUNT_GUEST, ACCOUNT_CUSTOMER,
+  NAV_PRIMARY, MENUS, SUPPORT_CHANNELS, liveChannels, ACCOUNT_GUEST, ACCOUNT_CUSTOMER,
   SEARCH_SCOPES, BOOK_CTA,
 } from '../data/navigation.js';
 import { icon } from './ui.js';
@@ -214,7 +214,8 @@ function menuColumn(column, { plain = false } = {}) {
     own container. Returning an element and reading .children gave a live
     HTMLCollection, which el() cannot append. */
 function supportChannelLinks(channels = SUPPORT_CHANNELS) {
-  return channels.map((c) =>
+  // A channel without an href is one the business has not supplied yet. §27
+  return liveChannels(channels).map((c) =>
     el('a', { class: 'c-gh__channel', href: c.href, target: '_blank', rel: 'noopener' }, [
       icon(c.icon, { size: 'lg' }),
       el('span', {}, [

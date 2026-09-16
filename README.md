@@ -9,8 +9,9 @@ inherits it.
 | **Full documentation** | [`docs/FOUNDATION.md`](docs/FOUNDATION.md) — Stage 10.1 foundation |
 | **Header & navigation** | [`docs/NAVIGATION.md`](docs/NAVIGATION.md) — Stage 10.2 |
 | **Footer** | [`docs/FOOTER.md`](docs/FOOTER.md) — Stage 10.3 |
+| **Homepage build** | [`docs/HOMEPAGE.md`](docs/HOMEPAGE.md) — Stage 10.4 |
 | **Living style guide** | `styleguide.html` — every token, component and state, in RTL and LTR |
-| **Entry point** | `index.html` — the system running, not a designed homepage |
+| **Homepage** | `index.html` — the production homepage (Stage 10.4) |
 | **Brand assets** | [`assets/brand/README.md`](assets/brand/README.md) |
 | **Status report** | [`docs/STATUS-REPORT-2026-09-16.pdf`](docs/STATUS-REPORT-2026-09-16.pdf) — what is built, how it was verified, what is still needed |
 

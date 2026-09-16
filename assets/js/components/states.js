@@ -44,6 +44,18 @@ export function skeletonFlight() {
   ]);
 }
 
+/** Stands in for a service card: icon tile, title, two lines. */
+export function skeletonService() {
+  return el('div', { class: 'c-card', 'aria-hidden': 'true' }, [
+    el('div', { class: 'c-card__body' }, [
+      el('div', { class: 'c-skeleton', style: 'inline-size:48px;block-size:48px;border-radius:var(--radius-md)' }),
+      el('div', { class: 'c-skeleton c-skeleton--title' }),
+      el('div', { class: 'c-skeleton c-skeleton--text c-skeleton--line-md' }),
+      el('div', { class: 'c-skeleton c-skeleton--text c-skeleton--line-sm' }),
+    ]),
+  ]);
+}
+
 export const skeletonList = (count = 3, factory = skeletonCard) =>
   el('div', { class: 'l-stack l-stack--16' }, Array.from({ length: count }, factory));
 

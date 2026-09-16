@@ -148,12 +148,20 @@ export const MENU_OFFERS = {
    HELP / SUPPORT — §08. Human assistance one click from every page.
    `channel: true` marks the two that must read instantly.
    ----------------------------------------------------------------------- */
+/* `href: null` means the business has not supplied the number yet. Every
+   surface (header panels, drawer, footer, homepage support) renders a channel
+   only when its href is set, so a placeholder can never reach a customer.
+   Set the real values here — once — and all of them appear:
+     href: 'https://wa.me/2499XXXXXXXX'   href: 'tel:+2499XXXXXXXX'          */
 export const SUPPORT_CHANNELS = [
-  { id: 'whatsapp', icon: 'no-whatsapp', href: 'https://wa.me/', external: true, channel: true,
+  { id: 'whatsapp', icon: 'no-whatsapp', href: null, external: true, channel: true,
     labelAr: 'واتساب', labelEn: 'WhatsApp', metaAr: 'رد سريع', metaEn: 'Fast reply' },
-  { id: 'call', icon: 'no-phone', href: 'tel:+249000000000', external: true, channel: true,
+  { id: 'call', icon: 'no-phone', href: null, external: true, channel: true,
     labelAr: 'اتصال', labelEn: 'Call us', metaAr: 'من 8ص إلى 10م', metaEn: '8am - 10pm' },
 ];
+
+/** The channels that can actually be used — the only list a surface renders. */
+export const liveChannels = (channels = SUPPORT_CHANNELS) => channels.filter((c) => !!c.href);
 
 export const MENU_HELP = {
   id: 'help',

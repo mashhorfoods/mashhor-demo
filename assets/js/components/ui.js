@@ -105,7 +105,10 @@ export function setButtonState(button, state, { announce = true } = {}) {
     button.removeAttribute('aria-busy');
   } else {
     button.dataset.state = state;
-    button.toggleAttribute('aria-busy', state === 'loading');
+    // aria-busy is a true/false token; a bare attribute (toggleAttribute) is
+    // an empty string, which assistive technology does not read as busy.
+    if (state === 'loading') button.setAttribute('aria-busy', 'true');
+    else button.removeAttribute('aria-busy');
   }
 
   if (announce && state === 'loading') {
@@ -155,7 +158,15 @@ export function initAccordions(root = document) {
    direction rather than the physical key. §06 / §23
    ------------------------------------------------------------------------ */
 export function initTabs(root = document) {
-  qsa('[data-tabs]', root).forEach((group) => {
+  // The root may itself be the tab group (a component initialising what it
+  // just built), so it is included alongside any descendants.
+  const groups = root instanceof Element && root.matches('[data-tabs]') ? [root, ...qsa('[data-tabs]', root)] : qsa('[data-tabs]', root);
+  groups.forEach((group) => {
+    // Idempotent: a component that builds its own tab group (the search
+    // widget) initialises it on creation, and boot() sweeps the document
+    // once — neither may bind a second set of listeners.
+    if (group.dataset.tabsInit) return;
+    group.dataset.tabsInit = 'true';
     const tabs = qsa('[role="tab"]', group);
     if (tabs.length === 0) return;
 

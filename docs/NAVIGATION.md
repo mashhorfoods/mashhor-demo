@@ -119,7 +119,10 @@ Verified in-browser at 390 / 834 / 1440 in both directions:
 
 ### Open
 
-- Support channel URLs are placeholders (`wa.me/`, `tel:+249…`) pending the real
-  numbers.
+- Support channels carry `href: null` until the business supplies the numbers
+  (Stage 10.4 removed the `wa.me/` and `tel:+249…` placeholders). The header
+  renders only channels with an href — `liveChannels()` in `data/navigation.js`
+  — so the help panel and drawer show none today and both the moment the
+  values are set.
 - Destination and offer routes point at pages later stages build; until then
   they land on the 404, which is branded and offers a way back.
