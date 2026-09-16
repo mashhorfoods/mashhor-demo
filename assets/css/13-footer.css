@@ -1,0 +1,231 @@
+/* ============================================================================
+   13 — GLOBAL FOOTER   Stage 10.3
+
+   Dark surface, calm hierarchy, generous space. The footer completes the
+   navigation system rather than repeating it: columns are quiet, the single
+   CTA and the support channels are the only things that raise their voice.
+   ========================================================================= */
+
+@layer components {
+  .c-gf {
+    position: relative;
+    background-color: var(--color-bg-inverse);
+    color: var(--color-text-inverse);
+    overflow: hidden;   /* contains the route graphic */
+  }
+
+  /* §19 — the route, drawn once, at the top edge. A single hairline that fades
+     in from the start of the line: the journey continuing, not decoration.
+     It carries no content and never sits under text. */
+  .c-gf__route {
+    position: absolute;
+    inset-block-start: 0; inset-inline: 0;
+    block-size: 2px;
+    background: linear-gradient(to inline-end,
+      transparent, var(--color-brand-red) 18%, var(--color-brand-red) 46%, transparent 78%);
+    opacity: 0.85;
+    pointer-events: none;
+  }
+
+  .c-gf__main { padding-block: var(--section-space); }
+  .c-gf__grid { display: grid; gap: var(--space-40) var(--space-32); }
+
+  /* §15 — brand takes a wider column; the link groups share the rest. */
+  @media (min-width: 48em) {
+    .c-gf__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (min-width: 64em) {
+    /* Six tracks: brand (wide) · contact · services (two) · explore · help.
+       Services carries eleven links — §05 lists them all — so it runs two
+       abreast rather than becoming a tall wall beside a short contact column.
+       §15 asks for structure, not density. */
+    .c-gf__grid { grid-template-columns: 1.5fr repeat(5, minmax(0, 1fr));
+                  gap: var(--space-48) var(--space-32); }
+    .c-gf__group[data-col="services"] { grid-column: span 2; }
+    .c-gf__group[data-col="services"] .c-gf__links {
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--space-24);
+    }
+  }
+
+  /* ---- brand block — §04 --------------------------------------------- */
+  .c-gf__brand { display: flex; flex-direction: column; gap: var(--space-16); align-items: start; }
+  .c-gf__statement { font-size: var(--text-body); line-height: var(--leading-body);
+                     max-inline-size: 34ch; color: rgb(255 255 255 / 0.78); }
+  .c-gf__support-line { display: flex; align-items: center; gap: var(--space-8);
+                        font-size: var(--text-body-sm); color: rgb(255 255 255 / 0.62); }
+  .c-gf__support-line .c-icon { color: var(--color-brand-red); }
+
+  /* ---- columns — §05 §06 §07 ------------------------------------------ */
+  .c-gf__col-title {
+    font-size: var(--text-label);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-inverse);
+    margin-block-end: var(--space-16);
+  }
+  .c-gf__links { display: flex; flex-direction: column; gap: var(--space-2, 2px); }
+  .c-gf__link {
+    display: inline-flex; align-items: center; gap: var(--space-8);
+    min-block-size: var(--touch-target);
+    padding-block: var(--space-4);
+    font-size: var(--text-body-sm);
+    line-height: var(--leading-snug);
+    color: rgb(255 255 255 / 0.70);
+    transition: color var(--duration-fast) var(--ease-standard),
+                translate var(--duration-fast) var(--ease-standard);
+  }
+  .c-gf__link:hover { color: var(--color-text-inverse); }
+  /* A 2px nudge toward the reading direction — logical, so it mirrors. §26 */
+  @media (prefers-reduced-motion: no-preference) {
+    .c-gf__link:hover { translate: 2px 0; }
+    [dir="rtl"] .c-gf__link:hover { translate: -2px 0; }
+  }
+  .c-gf__link .c-icon { color: var(--color-brand-red); flex: none; }
+
+  /* ---- contact — §08 --------------------------------------------------- */
+  .c-gf__contact { display: flex; flex-direction: column; gap: var(--space-8); }
+  .c-gf__contact-row {
+    display: grid; grid-template-columns: auto 1fr; align-items: center;
+    gap: var(--space-12);
+    min-block-size: var(--touch-target);
+    padding-block: var(--space-4);
+    color: rgb(255 255 255 / 0.78);
+    transition: color var(--duration-fast) var(--ease-standard);
+  }
+  .c-gf__contact-row:hover { color: var(--color-text-inverse); }
+  .c-gf__contact-icon {
+    display: grid; place-items: center;
+    inline-size: 34px; block-size: 34px;
+    border-radius: var(--radius-sm);
+    background-color: rgb(255 255 255 / 0.08);
+    color: var(--color-brand-red);
+  }
+  .c-gf__contact-label { font-size: var(--text-caption); color: rgb(255 255 255 / 0.5); display: block; }
+  .c-gf__contact-value { font-size: var(--text-body-sm); font-weight: var(--weight-medium); }
+
+  /* ---- social — §09 ---------------------------------------------------- */
+  .c-gf__social { display: flex; flex-wrap: wrap; gap: var(--space-8); }
+  .c-gf__social-link {
+    display: grid; place-items: center;
+    inline-size: var(--touch-target); block-size: var(--touch-target);
+    border: var(--border-width) solid rgb(255 255 255 / 0.18);
+    border-radius: var(--radius-md);
+    color: rgb(255 255 255 / 0.78);
+    transition: var(--transition-interactive);
+  }
+  .c-gf__social-link:hover { border-color: var(--color-brand-red); color: var(--color-text-inverse);
+                             background-color: rgb(254 0 2 / 0.12); }
+
+  /* ---- CTA band — §10. One action, above the columns. ------------------ */
+  .c-gf__cta {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: var(--space-24);
+    padding-block: var(--space-32);
+    border-block-end: var(--border-width) solid rgb(255 255 255 / 0.10);
+  }
+  .c-gf__cta-title { font-size: var(--text-h3); font-weight: var(--weight-bold); }
+  .c-gf__cta-text { font-size: var(--text-body-sm); color: rgb(255 255 255 / 0.68);
+                    max-inline-size: 46ch; margin-block-start: var(--space-4); }
+
+  /* ---- trust strip — §11 ---------------------------------------------- */
+  .c-gf__trust {
+    display: flex; flex-wrap: wrap; gap: var(--space-16) var(--space-32);
+    padding-block: var(--space-24);
+    border-block-start: var(--border-width) solid rgb(255 255 255 / 0.10);
+  }
+  .c-gf__trust-item { display: flex; align-items: center; gap: var(--space-8);
+                      font-size: var(--text-body-sm); color: rgb(255 255 255 / 0.72); }
+  .c-gf__trust-item .c-icon { color: var(--color-brand-red); }
+
+  /* ---- legal bar — §13 §14 -------------------------------------------- */
+  .c-gf__bottom {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: var(--space-16);
+    padding-block: var(--space-24);
+    border-block-start: var(--border-width) solid rgb(255 255 255 / 0.10);
+  }
+  .c-gf__legal { display: flex; flex-wrap: wrap; gap: var(--space-8) var(--space-24); }
+  .c-gf__legal a { font-size: var(--text-caption); color: rgb(255 255 255 / 0.62);
+                   min-block-size: var(--touch-target); display: inline-flex; align-items: center;
+                   transition: color var(--duration-fast) var(--ease-standard); }
+  .c-gf__legal a:hover { color: var(--color-text-inverse); text-decoration: underline;
+                         text-underline-offset: 0.2em; }
+  .c-gf__copy { font-size: var(--text-caption); color: rgb(255 255 255 / 0.5); }
+
+  /* Focus has to clear a dark surface, so it gets the white ring. §20 */
+  .c-gf :focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-inverse);
+                         outline-offset: 2px; border-radius: var(--radius-sm); }
+
+  /* ======================================================================
+     MOBILE — §16 §17. Columns become accordions, collapsed by default.
+     The desktop grid renders the same markup; only the trigger changes role.
+     ==================================================================== */
+  .c-gf__acc-trigger {
+    inline-size: 100%;
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-16);
+    min-block-size: 56px;
+    padding-block: var(--space-12);
+    text-align: start;
+    font-size: var(--text-body-lg);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-inverse);
+  }
+  .c-gf__acc-trigger .c-icon { transition: rotate var(--duration-fast) var(--ease-standard);
+                               color: rgb(255 255 255 / 0.6); }
+  .c-gf__acc-trigger[aria-expanded="true"] .c-icon { rotate: 180deg; }
+  .c-gf__acc-panel { display: grid; grid-template-rows: 1fr;
+                     transition: grid-template-rows var(--duration-base) var(--ease-out); }
+  .c-gf__acc-panel[data-collapsed="true"] { grid-template-rows: 0fr; }
+  .c-gf__acc-inner { overflow: hidden; min-block-size: 0; }
+
+  @media (max-width: 47.999em) {
+    /* §16 order: logo, statement, CTA, contact, then the accordions.
+       The CTA is a sibling of .c-gf__main in the DOM — correct for desktop,
+       where it is a full-width band above the columns. On a phone the wrapper
+       levels are flattened with `display: contents` so brand, CTA, contact and
+       the groups become siblings in one flex column and `order` can place them
+       as the brief lists them. No second DOM, no duplicated CTA. */
+    .c-gf > .l-container { display: flex; flex-direction: column;
+                           padding-block: var(--section-space-tight); }
+    .c-gf__main  { display: contents; }
+    .c-gf__grid  { display: contents; }
+
+    .c-gf__brand         { order: 1; margin-block-end: var(--space-24); }
+    .c-gf__cta           { order: 2; border-block-end: none; padding-block-start: 0; }
+    .c-gf__contact-block { order: 3; margin-block: var(--space-24); }
+    .c-gf__group         { order: 4; border-block-end: var(--border-width) solid rgb(255 255 255 / 0.10); }
+    .c-gf__trust         { order: 5; }
+    .c-gf__bottom        { order: 6; }
+
+    .c-gf__cta { flex-direction: column; align-items: stretch; text-align: start; }
+    .c-gf__cta .c-btn { inline-size: 100%; }
+    .c-gf__bottom { flex-direction: column; align-items: start; }
+  }
+
+  /* No desktop override: above 48em the component renders a heading instead of
+     a button, so there is nothing to switch off. See footer.js footerColumn(). */
+
+  /* ======================================================================
+     VARIANTS — §24. One component, three shapes.
+     ==================================================================== */
+  /* The variants are BUILT differently (see footer.js) rather than hidden, so
+     there is no display:none list here — only what the compact shapes need. */
+  .c-gf[data-variant="booking"] .c-gf__main,
+  .c-gf[data-variant="app"] .c-gf__main { padding-block: var(--space-24); }
+
+  /* booking: logo beside the live support channels. */
+  .c-gf__compact {
+    display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-24) var(--space-32);
+  }
+  .c-gf__compact .c-gf__contact-block { margin: 0; }
+  .c-gf__compact .c-gf__contact { flex-direction: row; flex-wrap: wrap; gap: var(--space-24); }
+  .c-gf__compact .c-gf__col-title { display: none; }
+
+  /* app: a rule, a line of legal, and the way back to help. Nothing else. */
+  .c-gf[data-variant="app"] { background-color: var(--color-bg-subtle); color: var(--color-text); }
+  .c-gf[data-variant="app"] .c-gf__route { display: none; }
+  .c-gf[data-variant="app"] .c-gf__bottom { border-block-start: none; }
+  .c-gf[data-variant="app"] .c-gf__legal a { color: var(--color-text-secondary); }
+  .c-gf[data-variant="app"] .c-gf__legal a:hover { color: var(--color-text); }
+  .c-gf[data-variant="app"] .c-gf__copy { color: var(--color-text-secondary); }
+  .c-gf[data-variant="app"] :focus-visible { outline-color: var(--color-focus); }
+}

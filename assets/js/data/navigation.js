@@ -226,21 +226,6 @@ export const NAV_BOTTOM = [
   { id: 'account', href: 'account/',  icon: 'no-customer', labelAr: 'حسابي',    labelEn: 'Account' },
 ];
 
-export const NAV_FOOTER = [
-  { id: 'company', titleAr: 'نمبرون', titleEn: 'Number One', links: [
-    { labelAr: 'من نحن', labelEn: 'About us', href: 'about/' },
-    { labelAr: 'مشرفو السفر', labelEn: 'Travel supervisors', href: 'supervisors/' },
-    { labelAr: 'وظائف', labelEn: 'Careers', href: 'careers/' },
-    { labelAr: 'تواصل معنا', labelEn: 'Contact', href: 'help/contact/' },
-  ]},
-  { id: 'services', titleAr: 'الخدمات', titleEn: 'Services',
-    links: MENU_SERVICES.columns.flatMap((c) => c.items).slice(0, 6)
-      .map((i) => ({ labelAr: i.labelAr, labelEn: i.labelEn, href: i.href })) },
-  { id: 'help', titleAr: 'المساعدة', titleEn: 'Help', links: [
-    { labelAr: 'إدارة حجزي', labelEn: 'Manage my booking', href: 'trips/' },
-    { labelAr: 'الأسئلة الشائعة', labelEn: 'FAQ', href: 'help/faq/' },
-    { labelAr: 'سياسة الإلغاء والتعديل', labelEn: 'Cancellation & changes', href: 'policies/changes/' },
-    { labelAr: 'شروط الاستخدام', labelEn: 'Terms of use', href: 'policies/terms/' },
-    { labelAr: 'سياسة الخصوصية', labelEn: 'Privacy policy', href: 'policies/privacy/' },
-  ]},
-];
+/* NAV_FOOTER moved to data/footer.js as FOOTER_COLUMNS in Stage 10.3, where it
+   derives its service list from MENU_SERVICES above — so the header menu and
+   the footer column can never disagree about what we sell. */

@@ -8,6 +8,7 @@ inherits it.
 | --- | --- |
 | **Full documentation** | [`docs/FOUNDATION.md`](docs/FOUNDATION.md) — Stage 10.1 foundation |
 | **Header & navigation** | [`docs/NAVIGATION.md`](docs/NAVIGATION.md) — Stage 10.2 |
+| **Footer** | [`docs/FOOTER.md`](docs/FOOTER.md) — Stage 10.3 |
 | **Living style guide** | `styleguide.html` — every token, component and state, in RTL and LTR |
 | **Entry point** | `index.html` — the system running, not a designed homepage |
 | **Brand assets** | [`assets/brand/README.md`](assets/brand/README.md) |

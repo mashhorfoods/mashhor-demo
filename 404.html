@@ -93,18 +93,13 @@
     </div>
   </main>
 
-  <footer class="l-section l-section--tight l-section--inverse">
-    <div class="l-container">
-      <p class="t-caption t-inverse" style="opacity:.7">
-        © <span id="year">2026</span> نمبرون للسفر و السياحة — <bdi>Number One Travel &amp; Tourism</bdi>
-      </p>
-    </div>
-  </footer>
+  <!-- Global footer mounted below. A 404 uses the compact variant:
+       the page is an apology, not a place to browse a link wall. -->
 
 </div>
 
 <script type="module">
-  import { boot, el, qs, render, route, t, SERVICES, pick, mountHeader }
+  import { boot, el, qs, render, route, t, SERVICES, pick, mountHeader, mountFooter }
     from './assets/js/foundation.js';
 
   let header = null;
@@ -117,11 +112,11 @@
     // No `current`: a 404 is not one of the navigation destinations, so no item
     // is marked active. §19
     header = mountHeader({ target: qs('.l-page') });
+    mountFooter({ target: qs('.l-page'), variant: 'booking' });
   }
 
   boot({ sprite: 'assets/icons/sprite.svg', onLocale: paint });
   paint();
-  qs('#year').textContent = new Date().getFullYear();
 </script>
 </body>
 </html>

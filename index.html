@@ -97,33 +97,7 @@
     </section>
   </main>
 
-  <!-- ==================================================================
-       FOOTER — built from NAV_FOOTER data.
-       ================================================================== -->
-  <footer class="l-section l-section--tight l-section--inverse">
-    <div class="l-container">
-      <div class="l-grid">
-        <div class="l-span-full l-span-4@lg">
-          <span class="c-logo c-logo--lg">
-            <img class="c-logo__img c-logo__img--light" src="assets/brand/logo-lockup.png"
-                 alt="نمبرون للسفر و السياحة — Number One Travel &amp; Tourism"
-                 width="640" height="498">
-            <img class="c-logo__img c-logo__img--inverse" src="assets/brand/logo-lockup-inverse.png"
-                 alt="" aria-hidden="true" width="640" height="498">
-          </span>
-          <p class="t-body-sm l-prose--short" style="margin-block-start:var(--space-16);opacity:.75">
-            نساعدك على اختيار الخيار الأنسب لك ولعائلتك — لا على البحث وحدك.
-          </p>
-        </div>
-        <nav class="l-span-full l-span-8@lg" aria-label="روابط الموقع">
-          <div class="l-auto-grid" style="--min-col:12rem" id="footer-nav"></div>
-        </nav>
-      </div>
-      <p class="t-caption t-inverse" style="margin-block-start:var(--space-48);opacity:.6">
-        © <span id="year">2026</span> نمبرون للسفر و السياحة — <bdi>Number One Travel &amp; Tourism</bdi>
-      </p>
-    </div>
-  </footer>
+  <!-- The global footer is a component, mounted by the script below. 10.3 -->
 
   <!-- Mobile bottom navigation — §22 -->
   <nav class="c-bottom-nav" aria-label="التنقل السريع"><div id="bottom-nav" style="display:contents"></div></nav>
@@ -132,7 +106,7 @@
 <script type="module">
   import {
     boot, el, qs, render, icon, route, getLocale, pick, toast,
-    mountHeader, NAV_BOTTOM, NAV_FOOTER, SERVICES,
+    mountHeader, mountFooter, NAV_BOTTOM, SERVICES,
     serviceGrid, searchWidget,
   } from './assets/js/foundation.js';
 
@@ -144,13 +118,6 @@
         class: 'c-bottom-nav__item', href: route(item.href),
         ...(i === 0 ? { 'aria-current': 'page' } : {}),
       }, [icon(item.icon, { size: 'sm' }), el('span', {}, pick(item, 'label'))])));
-
-    render(qs('#footer-nav'), NAV_FOOTER.map((group) =>
-      el('div', {}, [
-        el('h3', { class: 't-h4 t-inverse', style: 'margin-block-end:var(--space-12)' }, pick(group, 'title')),
-        el('ul', { class: 'l-stack l-stack--8', role: 'list' }, group.links.map((link) =>
-          el('li', {}, el('a', { class: 't-body-sm', href: route(link.href), style: 'opacity:.75' }, pick(link, 'label'))))),
-      ])));
 
     render(qs('#services-mount'), serviceGrid(SERVICES));
     render(qs('#search-mount'), searchWidget({
@@ -166,8 +133,9 @@
 
   // The header is rebuilt on a language change because its labels come from
   // data, not from data-i18n attributes.
-  function mountGlobalHeader() {
+  function mountChrome() {
     header?.remove();
+    mountFooter({ target: qs('.l-page'), variant: 'marketing' });
     header = mountHeader({
       target: qs('.l-page'),
       current: 'home',
@@ -179,10 +147,9 @@
     });
   }
 
-  boot({ sprite: 'assets/icons/sprite.svg', onLocale: () => { mountGlobalHeader(); paint(); } });
-  mountGlobalHeader();
+  boot({ sprite: 'assets/icons/sprite.svg', onLocale: () => { mountChrome(); paint(); } });
+  mountChrome();
   paint();
-  qs('#year').textContent = new Date().getFullYear();
 </script>
 </body>
 </html>

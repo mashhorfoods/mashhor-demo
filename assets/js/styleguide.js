@@ -11,7 +11,7 @@ import {
   boot, el, qs, qsa, render, icon, toast, setButtonState,
   t, getLocale, applyTranslations,
   SERVICES, STATUSES, route,
-  globalHeader, initHeaderScrollState, setSession, getSession,
+  globalHeader, initHeaderScrollState, setSession, getSession, globalFooter,
   serviceGrid, flightCard, hotelCard, packageCard, supervisorCard, tripCard, statusBadge,
   searchWidget, stateRegion, skeletonList, skeletonFlight,
 } from './foundation.js';
@@ -163,6 +163,16 @@ function mountHeaders() {
   booking.append(b);
 }
 
+function mountFooters() {
+  for (const [sel, variant] of [['#sg-footer', 'marketing'],
+                                ['#sg-footer-booking', 'booking'],
+                                ['#sg-footer-app', 'app']]) {
+    const host = qs(sel);
+    if (!host) continue;
+    host.replaceChildren(globalFooter({ variant }));
+  }
+}
+
 function wireAuthToggle() {
   qs('#sg-auth')?.addEventListener('click', () => {
     const on = getSession().authenticated;
@@ -227,12 +237,14 @@ boot({
   sprite: 'assets/icons/sprite.svg',
   onLocale: () => {
     mountHeaders();
+    mountFooters();
     renderComponents();
     wireStates()('content');
   },
 });
 
 mountHeaders();
+mountFooters();
 wireAuthToggle();
 renderSwatches();
 renderSpacing();
