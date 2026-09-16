@@ -17,7 +17,7 @@
    block with a way forward. Exposed as `window.no.supervisor` for QA.
    ========================================================================= */
 
-import { el, qs, qsa, render, scrollTo as scrollIntoView } from '../core/dom.js';
+import { el, qs, qsa, render, scrollTo as scrollIntoView, setPageHead } from '../core/dom.js';
 import { t, pick, getLocale } from '../core/i18n.js';
 import { route } from '../data/config.js';
 import { SERVICE_KINDS, serviceEntry } from '../data/services.js';
@@ -28,9 +28,9 @@ import {
   SUPERVISOR_STATUSES, supervisorBySlug, supervisorServices, supervisorLanguages, supervisorSpecialties,
   supervisorChannels, supervisorHasDetails, supervisorUrl, supervisorEntry, supervisorContactUrl, attributed,
 } from '../data/supervisors.js';
-import { icon, toast } from './ui.js';
+import { icon, toast, sectionHead } from './ui.js';
 import { serviceCard, destinationCard, offerCard } from './cards.js';
-import { stateRegion, stateBlock } from './states.js';
+import { stateRegion, stateBlock, notFoundState } from './states.js';
 import { logo } from './header.js';
 
 /* ---------------------------------------------------------------------------
@@ -73,11 +73,6 @@ export function profileHero(sup, { onContact = null } = {}) {
 /* ---------------------------------------------------------------------------
    SECTIONS — each returns null when it has nothing to say.
    ------------------------------------------------------------------------ */
-const head = (id, overlineKey, title, text = null) => el('div', { class: 'l-section-head' }, [
-  el('p', { class: 't-overline' }, t(overlineKey)),
-  el('h2', { class: 't-h2 u-mark', id }, title),
-  text ? el('p', { class: 't-body t-muted' }, text) : null,
-]);
 const chips = (items, iconOf = () => null) => el('ul', { class: 'c-facts__chips', role: 'list' }, items.map((i) =>
   el('li', {}, el('span', { class: 'c-badge c-badge--outline' }, [iconOf(i) ? icon(iconOf(i), { size: 'xs' }) : null, el('span', {}, pick(i, 'label'))]))));
 
@@ -97,7 +92,7 @@ export function aboutSection(sup) {
   } }, [icon('no-documents', { size: 'sm' }), el('span', {}, t('sup.about.copy'))]);
 
   return [
-    head('about-title', 'sup.about.overline', t('sup.about.title')),
+    sectionHead({ id: 'about-title', overline: t('sup.about.overline'), title: t('sup.about.title') }),
     supervisorHasDetails(sup) ? null : stateBlock({ variant: 'info', iconName: 'no-info', title: t('sup.about.empty.title'), text: t('sup.about.empty.text'),
       actions: [{ label: t('sup.cta.book'), href: route(supervisorEntry(sup)), variant: 'c-btn--secondary-brand' }] }),
     el('dl', { class: 'c-facts' }, [
@@ -114,7 +109,7 @@ export function servicesSection(sup) {
   const services = supervisorServices(sup);
   if (!services.length) return null;
   return [
-    head('services-title', 'sup.services.overline', t('sup.services.title', supervisorName(sup)), t('sup.services.text')),
+    sectionHead({ id: 'services-title', overline: t('sup.services.overline'), title: t('sup.services.title', supervisorName(sup)), text: t('sup.services.text') }),
     el('div', { class: 'l-grid' }, services.map((s) =>
       el('div', { class: 'l-span-4@md l-span-4@lg' }, serviceCard(s, { kind: SERVICE_KINDS[s.kind], entry: route(attributed(serviceEntry(s), sup)) })))),
   ];
@@ -127,7 +122,7 @@ export function trustSection() {
     ['no-booking', 'sup.trust.journey'], ['no-check-circle', 'sup.trust.choose'],
   ];
   return [
-    head('trust-title', 'sup.trust.overline', t('sup.trust.title'), t('sup.trust.text')),
+    sectionHead({ id: 'trust-title', overline: t('sup.trust.overline'), title: t('sup.trust.title'), text: t('sup.trust.text') }),
     el('ul', { class: 'c-trust-list c-trust-list--stack', role: 'list' }, items.map(([i, k]) =>
       el('li', { class: 'c-trust-item' }, [icon(i, { size: 'sm' }), el('span', {}, t(k))]))),
   ];
@@ -138,7 +133,7 @@ export function contactSection(sup) {
   const channels = supervisorChannels(sup);
   const name = supervisorName(sup);
   return [
-    head('contact-title', 'sup.contact.overline', t('sup.contact.title', name), t('sup.contact.text')),
+    sectionHead({ id: 'contact-title', overline: t('sup.contact.overline'), title: t('sup.contact.title', name), text: t('sup.contact.text') }),
     el('div', { class: 'c-contact' }, [
       channels.length
         ? el('div', { class: 'c-channels' }, channels.map((c) =>
@@ -167,7 +162,7 @@ export function discoverySection(sup) {
     el('div', { class: 'l-grid' }, cards.map((c) => el('div', { class: 'l-span-4@md l-span-4@lg' }, c))),
   ]) : null;
   return [
-    head('discovery-title', 'sup.discovery.overline', t('sup.discovery.title'), t('sup.discovery.text')),
+    sectionHead({ id: 'discovery-title', overline: t('sup.discovery.overline'), title: t('sup.discovery.title'), text: t('sup.discovery.text') }),
     el('div', { class: 'c-discovery' }, [
       row('sup.discovery.destinations', route('destinations/'), destinations.map((d) => destinationCard(d, { country: true, entry: route(attributed(destinationEntry(d), sup)) }))),
       row('sup.discovery.offers', route('offers/'), offers.map((o) => offerCard(o, { entry: route(attributed(offerEntry(o), sup)) }))),
@@ -191,8 +186,8 @@ export function ctaBand(sup) {
 /* ---------------------------------------------------------------------------
    STATES — unknown slug, inactive, error. §12
    ------------------------------------------------------------------------ */
-const unknownState = () => stateBlock({
-  variant: 'empty', iconName: 'no-empty-box', title: t('sup.unknown.title'), text: t('sup.unknown.text'),
+const unknownState = () => notFoundState({
+  title: t('sup.unknown.title'), text: t('sup.unknown.text'),
   actions: [{ label: t('sup.cta.book'), href: route('book/'), variant: 'c-btn--primary' }, { label: t('detail.cta.expert'), href: route('help/contact/') }],
 });
 const inactiveState = () => stateBlock({
@@ -200,15 +195,7 @@ const inactiveState = () => stateBlock({
   actions: [{ label: t('sup.cta.book'), href: route('book/'), variant: 'c-btn--primary' }, { label: t('detail.cta.expert'), href: route('help/contact/') }],
 });
 
-function applyHead(sup) {
-  const brand = t('brand.name');
-  const name = supervisorName(sup);
-  const desc = pick(sup, 'bio') || t('sup.lead');
-  document.title = `${name} — ${brand}`;
-  qs('meta[name="description"]')?.setAttribute('content', desc);
-  qs('meta[property="og:title"]')?.setAttribute('content', document.title);
-  qs('meta[property="og:description"]')?.setAttribute('content', desc);
-}
+const applyHead = (sup) => setPageHead({ title: `${supervisorName(sup)} — ${t('brand.name')}`, description: pick(sup, 'bio') || t('sup.lead') });
 
 /* ---------------------------------------------------------------------------
    MOUNT

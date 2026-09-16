@@ -110,35 +110,21 @@
 </div>
 
 <script type="module">
-  import {
-    boot, el, qs, render, icon, route, pick,
-    mountHeader, mountFooter, mountServices, supportPanels, NAV_BOTTOM,
-  } from './assets/js/foundation.js';
+  import { mountPage } from './assets/js/page.js';
+  import { qs, render } from './assets/js/core/dom.js';
+  import { route } from './assets/js/data/config.js';
+  import { mountServices } from './assets/js/components/services.js';
+  import { supportPanels } from './assets/js/components/home.js';
 
-  // <base> would send href="#main" to the homepage; the skip link scrolls here.
-  qs('[data-skip]').addEventListener('click', (e) => { e.preventDefault(); const m = qs('#main'); m.tabIndex = -1; m.focus(); m.scrollIntoView(); });
-
-  let services = null;
-
-  function paint() {
-    render(qs('#bottom-nav'), NAV_BOTTOM.map((item) =>
-      el('a', { class: 'c-bottom-nav__item', href: route(item.href) },
-        [icon(item.icon, { size: 'sm' }), el('span', {}, pick(item, 'label'))])));
-
-    services = mountServices();
-    render(qs('[data-services="support"]'), supportPanels());
-    window.no = { ...(window.no ?? {}), services };   // QA handle: no.services.regions.core.error()
-  }
-
-  function mountChrome() {
-    mountFooter({ target: qs('.l-page'), variant: 'marketing' });
-    mountHeader({ target: qs('.l-page'), current: 'services',
-      onSearch: () => { window.location.assign(route('book/')); } });
-  }
-
-  boot({ sprite: 'assets/icons/sprite.svg', onLocale: () => { mountChrome(); paint(); } });
-  mountChrome();
-  paint();
+  mountPage({
+    handle: 'services',
+    header: { current: 'services', onSearch: () => location.assign(route('book/')) },
+    paint: () => {
+      const services = mountServices();   // QA handle: no.services.regions.core.error()
+      render(qs('[data-services="support"]'), supportPanels());
+      return services;
+    },
+  });
 </script>
 </body>
 </html>

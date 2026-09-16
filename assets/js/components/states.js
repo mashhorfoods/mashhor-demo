@@ -172,3 +172,6 @@ export function stateRegion(target, {
 
   return api;
 }
+
+/** A route the registry does not know: the empty state with a way back. */
+export const notFoundState = ({ title, text, actions }) => stateBlock({ variant: 'empty', iconName: 'no-empty-box', title, text, actions });

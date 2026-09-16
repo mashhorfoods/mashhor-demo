@@ -26,6 +26,7 @@
 
 /* Structural regions. All six exist so an admin can file a destination
    anywhere; a surface shows a region only for what it contains. §7 */
+import { bookingEntry } from './config.js';
 import { imageSrc } from './images.js';
 
 export const DESTINATION_REGIONS = [
@@ -133,7 +134,7 @@ export const regionsWithDestinations = () => DESTINATION_REGIONS.filter((r) => d
  * to the localised name). The detail page (destinations/<slug>/) is a later
  * stage. Returned without the site root — pass through route().
  */
-export const destinationEntry = (dest) => `book/?vertical=flights&to=${encodeURIComponent(dest.slug)}`;
+export const destinationEntry = (dest) => bookingEntry({ vertical: 'flights', to: dest.slug });
 
 /**
  * Filter the registry by the destination search fields. Pure and

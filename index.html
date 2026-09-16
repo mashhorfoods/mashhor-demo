@@ -179,55 +179,25 @@
 </div>
 
 <script type="module">
-  import {
-    boot, el, qs, qsa, render, icon, route, pick,
-    mountHeader, mountFooter, mountHome, NAV_BOTTOM,
-  } from './assets/js/foundation.js';
+  import { mountPage } from './assets/js/page.js';
+  import { mountHome } from './assets/js/components/home.js';
 
-  // Static links in the markup are written relative; resolve them through
-  // route() so they follow the site root like every data-driven link.
-  qsa('[data-route]').forEach((a) => { a.href = route(a.dataset.route); });
-
-  let home = null;
-
-  function paint() {
-    render(qs('#bottom-nav'), NAV_BOTTOM.map((item, i) =>
-      el('a', {
-        class: 'c-bottom-nav__item', href: route(item.href),
-        ...(i === 0 ? { 'aria-current': 'page' } : {}),
-      }, [icon(item.icon, { size: 'sm' }), el('span', {}, pick(item, 'label'))])));
-
-    home = mountHome();
-    window.no = { ...(window.no ?? {}), home };   // QA handle: no.home.regions.offers.error()
-    openRequestedService();
-  }
-
-  // A door elsewhere on the site may still arrive here with ?vertical=…&to=…
-  // (the dedicated entry is /book/, Stage 10.9). Open the widget on it once.
+  // A door elsewhere on the site may still arrive with ?vertical=…&to=… (the
+  // dedicated entry is /book/); ?supervisor=… alone stores the attribution.
   let requested = new URLSearchParams(location.search);
-  function openRequestedService() {
-    // ?supervisor=… alone (a profile's plain link) still stores the attribution.
-    if (!requested.get('vertical') && !requested.get('supervisor')) return;
-    if (home.applyParams(requested) && location.hash === '#booking') home.scrollToSearch();
-    requested = new URLSearchParams();
-  }
-
-  // Header and footer labels come from data, so both are rebuilt on a
-  // language change; mountHeader/mountFooter destroy the previous instance.
-  function mountChrome() {
-    // The homepage carries its own final CTA, so the footer's is switched off.
-    mountFooter({ target: qs('.l-page'), variant: 'marketing', cta: false });
-    mountHeader({
-      target: qs('.l-page'),
-      current: 'home',
-      // The header's search sheet hands its query to the booking entry.
-      onSearch: () => home?.scrollToSearch(),
-    });
-  }
-
-  boot({ sprite: 'assets/icons/sprite.svg', onLocale: () => { mountChrome(); paint(); } });
-  mountChrome();
-  paint();
+  mountPage({
+    handle: 'home', bottom: 'home',
+    header: { current: 'home', onSearch: (home) => home?.scrollToSearch() },
+    footer: { cta: false },   // the homepage carries its own final CTA
+    paint: () => {
+      const home = mountHome();
+      if (requested.get('vertical') || requested.get('supervisor')) {
+        if (home.applyParams(requested) && location.hash === '#booking') home.scrollToSearch();
+        requested = new URLSearchParams();
+      }
+      return home;   // QA handle: no.home.regions.offers.error()
+    },
+  });
 </script>
 </body>
 </html>

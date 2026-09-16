@@ -64,29 +64,16 @@
 </div>
 
 <script type="module">
-  import { boot, el, qs, render, icon, route, pick, mountHeader, mountFooter, mountServiceDetail, NAV_BOTTOM }
-    from './assets/js/foundation.js';
+  import { mountPage } from './assets/js/page.js';
+  import { route } from './assets/js/data/config.js';
+  import { mountServiceDetail } from './assets/js/components/service-detail.js';
 
-  // <base> would send href="#main" to the homepage; the skip link scrolls here.
-  qs('[data-skip]')?.addEventListener('click', (e) => { e.preventDefault(); const m = qs('#main'); m.tabIndex = -1; m.focus(); m.scrollIntoView(); });
-
-  let detail = null;
-  function paint() {
-    render(qs('#bottom-nav'), NAV_BOTTOM.map((item) =>
-      el('a', { class: 'c-bottom-nav__item', href: route(item.href) },
-        [icon(item.icon, { size: 'sm' }), el('span', {}, pick(item, 'label'))])));
-    detail = mountServiceDetail({ slug: "ticket-cancel" });
-    window.no = { ...(window.no ?? {}), detail };   // QA handle: no.detail.render('unknown')
-  }
-  function mountChrome() {
-    // The page carries its own final CTA, so the footer's is switched off.
-    mountFooter({ target: qs('.l-page'), variant: 'marketing', cta: false });
-    mountHeader({ target: qs('.l-page'), current: "services",
-      onSearch: () => { window.location.assign(route("book/")); } });
-  }
-  boot({ sprite: 'assets/icons/sprite.svg', onLocale: () => { mountChrome(); paint(); } });
-  mountChrome();
-  paint();
+  mountPage({
+    handle: "detail",
+    header: { current: "services", onSearch: () => location.assign(route("book/")) },
+    footer: { cta: false },   // the page carries its own final CTA
+    paint: () => mountServiceDetail({ slug: "ticket-cancel" }),   // QA handle: no.detail.render('unknown')
+  });
 </script>
 </body>
 </html>

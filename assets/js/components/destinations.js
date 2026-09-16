@@ -15,7 +15,7 @@ import {
   destinationEntry, searchDestinations, destinationById,
 } from '../data/destinations.js';
 import { serviceById } from '../data/services.js';
-import { icon } from './ui.js';
+import { icon, routeGraphic } from './ui.js';
 import { destinationCard, mediaPlaceholder } from './cards.js';
 import { searchWidget } from './search.js';
 import { stateRegion, stateBlock, skeletonCard } from './states.js';
@@ -37,25 +37,11 @@ export function destinationsHero({ onExplore = null, onHelp = null } = {}) {
   ]);
   const media = el('div', { class: 'c-hero__media', dataset: { mediaSlot: 'destinations-hero' } }, [
     mediaPlaceholder(null, t('dest.hero.alt')),
-    routeGraphic(),
+    routeGraphic({ d: 'M 40 430 C 120 300, 90 200, 200 180 S 320 140, 356 60', start: [40, 430], end: [356, 60] }),
   ]);
   return [copy, media];
 }
 
-function routeGraphic() {
-  const ns = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(ns, 'svg');
-  svg.setAttribute('class', 'c-hero__route'); svg.setAttribute('viewBox', '0 0 400 500');
-  svg.setAttribute('preserveAspectRatio', 'none'); svg.setAttribute('aria-hidden', 'true');
-  const path = document.createElementNS(ns, 'path');
-  path.setAttribute('d', 'M 40 430 C 120 300, 90 200, 200 180 S 320 140, 356 60');
-  path.setAttribute('vector-effect', 'non-scaling-stroke');
-  const a = document.createElementNS(ns, 'circle'); a.setAttribute('cx', '40'); a.setAttribute('cy', '430'); a.setAttribute('r', '4');
-  const m = document.createElementNS(ns, 'circle'); m.setAttribute('cx', '200'); m.setAttribute('cy', '180'); m.setAttribute('r', '3');
-  const b = document.createElementNS(ns, 'circle'); b.setAttribute('cx', '356'); b.setAttribute('cy', '60'); b.setAttribute('r', '5');
-  svg.append(path, a, m, b);
-  return svg;
-}
 
 /* ---------------------------------------------------------------------------
    SEARCH — the shared search widget on its own vertical. §4

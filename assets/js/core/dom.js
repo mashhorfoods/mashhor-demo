@@ -129,3 +129,12 @@ export function unlockScroll() {
   document.body.style.overflow = '';
   document.body.style.paddingInlineEnd = '';
 }
+
+/** The document head a dynamic page owns: title, description and their OG twins. */
+export function setPageHead({ title, description = '' } = {}) {
+  document.title = title;
+  const set = (sel, value) => document.querySelector(sel)?.setAttribute('content', value);
+  set('meta[name="description"]', description);
+  set('meta[property="og:title"]', title);
+  set('meta[property="og:description"]', description);
+}

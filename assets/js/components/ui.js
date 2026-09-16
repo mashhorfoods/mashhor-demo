@@ -440,3 +440,28 @@ export function initUploads(root = document) {
     });
   });
 }
+
+/* ---------------------------------------------------------------------------
+   HERO ROUTE GRAPHIC — the dashed route with its two stops, drawn over a
+   hero's media slot. Every hero draws the same graphic with its own curve.
+   ------------------------------------------------------------------------ */
+export function routeGraphic({ d = 'M 40 450 C 90 330, 200 330, 240 220 S 330 110, 356 60', start = [40, 450], end = [356, 60] } = {}) {
+  const ns = 'http://www.w3.org/2000/svg';
+  const node = (tag, attrs) => { const n = document.createElementNS(ns, tag); for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v); return n; };
+  const svg = node('svg', { class: 'c-hero__route', viewBox: '0 0 400 500', preserveAspectRatio: 'none', 'aria-hidden': 'true' });
+  const path = node('path', { d, 'vector-effect': 'non-scaling-stroke' });
+  svg.append(path, node('circle', { cx: start[0], cy: start[1], r: 4 }), node('circle', { cx: end[0], cy: end[1], r: 5 }));
+  return svg;
+}
+
+/* ---------------------------------------------------------------------------
+   SECTION HEAD — overline · h2 (with the mark) · optional lead. One builder
+   for every section on every page; pass translated strings.
+   ------------------------------------------------------------------------ */
+export function sectionHead({ id, overline = '', title, text = '', mark = true } = {}) {
+  return el('div', { class: 'l-section-head' }, [
+    overline ? el('p', { class: 't-overline' }, overline) : null,
+    el('h2', { class: mark ? 't-h2 u-mark' : 't-h2', id }, title),
+    text ? el('p', { class: 't-body t-muted' }, text) : null,
+  ]);
+}

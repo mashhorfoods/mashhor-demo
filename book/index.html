@@ -81,37 +81,22 @@
 </div>
 
 <script type="module">
-  import {
-    boot, el, qs, render, icon, route, pick,
-    mountHeader, mountFooter, mountBooking, NAV_BOTTOM,
-  } from './assets/js/foundation.js';
+  import { mountPage } from './assets/js/page.js';
+  import { mountBooking } from './assets/js/components/booking.js';
 
-  qs('[data-skip]')?.addEventListener('click', (e) => { e.preventDefault(); const m = qs('#main'); m.tabIndex = -1; m.focus(); m.scrollIntoView(); });
-
-  let booking = null;
-  // ?vertical=…&to=…&service=…&offer=… from any "book / request" door on the site. Read once.
+  // ?vertical=…&to=…&service=…&offer=…&supervisor=… from any door on the site. Read once;
+  // a language change keeps the chosen service but not the URL prefills.
   let requested = new URLSearchParams(location.search);
-
-  function paint() {
-    render(qs('#bottom-nav'), NAV_BOTTOM.map((item) =>
-      el('a', { class: 'c-bottom-nav__item', href: route(item.href), ...(item.id === 'search' ? { 'aria-current': 'page' } : {}) },
-        [icon(item.icon, { size: 'sm' }), el('span', {}, pick(item, 'label'))])));
-    booking = mountBooking({ params: requested });
-    // A language change keeps the chosen service but not the URL prefills.
-    requested = new URLSearchParams(`vertical=${booking.widget.no.current() ?? 'flights'}`);
-    window.no = { ...(window.no ?? {}), booking };   // QA handle: no.booking.region.error()
-  }
-
-  function mountChrome() {
-    // The page is the booking entry itself; no second CTA in the footer.
-    mountFooter({ target: qs('.l-page'), variant: 'booking' });
-    mountHeader({ target: qs('.l-page'), variant: 'booking', current: null,
-      onSearch: () => { booking?.widget.no.focus(); } });
-  }
-
-  boot({ sprite: 'assets/icons/sprite.svg', onLocale: () => { mountChrome(); paint(); } });
-  mountChrome();
-  paint();
+  mountPage({
+    handle: 'booking', bottom: 'search',
+    header: { variant: 'booking', current: null, onSearch: (booking) => booking?.widget.no.focus() },
+    footer: { variant: 'booking' },   // the page is the booking entry itself
+    paint: () => {
+      const booking = mountBooking({ params: requested });   // QA handle: no.booking.region.error()
+      requested = new URLSearchParams(`vertical=${booking.widget.no.current() ?? 'flights'}`);
+      return booking;
+    },
+  });
 </script>
 </body>
 </html>

@@ -8,7 +8,7 @@
    mountOffers() → window.no.offers · mountOfferDetail() → window.no.offer
    ========================================================================= */
 
-import { el, qs, qsa, render, scrollTo as scrollIntoView } from '../core/dom.js';
+import { el, qs, qsa, render, scrollTo as scrollIntoView, setPageHead } from '../core/dom.js';
 import { t, pick, getLocale } from '../core/i18n.js';
 import { dateShort } from '../core/format.js';
 import { route } from '../data/config.js';
@@ -19,7 +19,7 @@ import {
 import { destinationById, DESTINATION_REGISTRY } from '../data/destinations.js';
 import { SERVICE_REGISTRY, serviceById } from '../data/services.js';
 import { liveChannels } from '../data/navigation.js';
-import { icon, initModals, initAccordions } from './ui.js';
+import { icon, initModals, initAccordions, routeGraphic, sectionHead } from './ui.js';
 import { offerCard, offerBadge, priceBlock, offerMeta, inclusionList, mediaPlaceholder } from './cards.js';
 import { stateRegion, stateBlock, skeletonCard } from './states.js';
 import { supportPanels, journeySteps } from './home.js';
@@ -41,19 +41,6 @@ export function offersHero({ onBrowse = null, onHelp = null } = {}) {
   ]);
   const media = el('div', { class: 'c-hero__media', dataset: { mediaSlot: 'offers-hero' } }, [mediaPlaceholder(null, t('offers.hero.alt')), routeGraphic()]);
   return [copy, media];
-}
-function routeGraphic() {
-  const ns = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(ns, 'svg');
-  svg.setAttribute('class', 'c-hero__route'); svg.setAttribute('viewBox', '0 0 400 500');
-  svg.setAttribute('preserveAspectRatio', 'none'); svg.setAttribute('aria-hidden', 'true');
-  const path = document.createElementNS(ns, 'path');
-  path.setAttribute('d', 'M 40 460 C 60 320, 180 300, 210 210 S 300 100, 356 60');
-  path.setAttribute('vector-effect', 'non-scaling-stroke');
-  const a = document.createElementNS(ns, 'circle'); a.setAttribute('cx', '40'); a.setAttribute('cy', '460'); a.setAttribute('r', '4');
-  const b = document.createElementNS(ns, 'circle'); b.setAttribute('cx', '356'); b.setAttribute('cy', '60'); b.setAttribute('r', '5');
-  svg.append(path, a, b);
-  return svg;
 }
 
 /* ---------------------------------------------------------------------------
@@ -291,21 +278,17 @@ export function offerHero(record) {
   ]);
   const media = el('div', { class: 'c-hero__media', dataset: { mediaSlot: `offer-${record.id}` } }, [
     record.image?.src ? el('img', { src: record.image.src, alt: pick(record.image, 'alt'), class: 'u-img-cover', fetchpriority: 'high', decoding: 'async' }) : mediaPlaceholder(null, pick(record.image ?? {}, 'alt')),
-    routeGraphic(),
+    routeGraphic({ d: 'M 40 460 C 60 320, 180 300, 210 210 S 300 100, 356 60', start: [40, 460], end: [356, 60] }),
   ]);
   return [copy, media];
 }
 
-const head = (id, overlineKey, titleKey) => el('div', { class: 'l-section-head' }, [
-  el('p', { class: 't-overline' }, t(overlineKey)),
-  el('h2', { class: 't-h2 u-mark', id }, t(titleKey)),
-]);
 const list = (items, iconName, cls = '') => el('ul', { class: `c-detail__points ${cls}`, role: 'list' }, items.map((i) =>
   el('li', { class: 'c-detail__point' }, [icon(iconName, { size: 'sm' }), el('span', {}, pick(i))])));
 
 export function overviewSection(record) {
   return [
-    head('overview-title', 'detail.overview.overline', 'offers.overview.title'),
+    sectionHead({ id: 'overview-title', overline: t('detail.overview.overline'), title: t('offers.overview.title') }),
     el('div', { class: 'l-grid' }, [
       el('p', { class: 't-body-lg l-span-8@md l-span-7@lg c-detail__lead' }, pick(record, 'desc')),
       record.placeholder
@@ -315,23 +298,23 @@ export function overviewSection(record) {
   ];
 }
 export function inclusionsSection(record) {
-  if (record.inclusions?.length) return [head('included-title', 'offers.included.overline', 'offers.included.title'), inclusionList(record.inclusions, { iconName: 'no-check' })];
+  if (record.inclusions?.length) return [sectionHead({ id: 'included-title', overline: t('offers.included.overline'), title: t('offers.included.title') }), inclusionList(record.inclusions, { iconName: 'no-check' })];
   // Not yet approved: show what the package is built around, and say so.
   const services = record.services.map(serviceById).filter(Boolean);
   if (!services.length) return null;
   return [
-    head('included-title', 'offers.included.overline', 'offers.builtAround.title'),
+    sectionHead({ id: 'included-title', overline: t('offers.included.overline'), title: t('offers.builtAround.title') }),
     el('p', { class: 't-body t-muted', style: 'margin-block-end:var(--space-24)' }, t('offers.builtAround.text')),
     inclusionList(services.map((s) => ({ ar: s.titleAr, en: s.titleEn, icon: s.icon })), { iconName: 'no-check' }),
   ];
 }
 export function exclusionsSection(record) {
   if (!record.exclusions?.length) return null;
-  return [head('excluded-title', 'offers.excluded.overline', 'offers.excluded.title'), inclusionList(record.exclusions, { iconName: 'no-minus', muted: true })];
+  return [sectionHead({ id: 'excluded-title', overline: t('offers.excluded.overline'), title: t('offers.excluded.title') }), inclusionList(record.exclusions, { iconName: 'no-minus', muted: true })];
 }
 export function itinerarySection(record) {
   if (!record.itinerary?.length) return null;
-  return [head('itinerary-title', 'offers.itinerary.overline', 'offers.itinerary.title'),
+  return [sectionHead({ id: 'itinerary-title', overline: t('offers.itinerary.overline'), title: t('offers.itinerary.title') }),
     el('ol', { class: 'c-itinerary', role: 'list' }, record.itinerary.map((d, i) => el('li', { class: 'c-itinerary__day' }, [
       el('span', { class: 'c-itinerary__num', 'aria-hidden': 'true' }, String(i + 1).padStart(2, '0')),
       el('div', { class: 'c-itinerary__body' }, [
@@ -343,7 +326,7 @@ export function itinerarySection(record) {
 }
 export function importantSection(record) {
   if (!record.important?.length) return null;
-  return [head('important-title', 'offers.important.overline', 'offers.important.title'), list(record.important, 'no-info')];
+  return [sectionHead({ id: 'important-title', overline: t('offers.important.overline'), title: t('offers.important.title') }), list(record.important, 'no-info')];
 }
 function accordion(id, items, labelKey) {
   const node = el('div', { class: 'c-accordion', dataset: { accordion: '' } }, items.map((item, i) => el('div', { class: 'c-accordion__item' }, [
@@ -356,25 +339,25 @@ function accordion(id, items, labelKey) {
 }
 export function termsSection(record) {
   if (!record.terms?.length) return null;
-  return [head('terms-title', 'offers.terms.overline', 'offers.terms.title'), list(record.terms, 'no-documents')];
+  return [sectionHead({ id: 'terms-title', overline: t('offers.terms.overline'), title: t('offers.terms.title') }), list(record.terms, 'no-documents')];
 }
 export function faqSection(record) {
   if (!record.faq?.length) return null;
-  return [head('faq-title', 'offers.faq.overline', 'offers.faq.title'), accordion('faq', record.faq.map((f) => ({ q: pick(f, 'q'), a: pick(f, 'a') })))];
+  return [sectionHead({ id: 'faq-title', overline: t('offers.faq.overline'), title: t('offers.faq.title') }), accordion('faq', record.faq.map((f) => ({ q: pick(f, 'q'), a: pick(f, 'a') })))];
 }
 export function flowSection(record) {
   const steps = record.bookingMode === 'online'
     ? ['offers.flow.book1', 'offers.flow.book2', 'offers.flow.book3', 'offers.flow.book4', 'offers.flow.book5']
     : ['offers.flow.req1', 'offers.flow.req2', 'offers.flow.req3', 'offers.flow.req4'];
   return [
-    head('flow-title', 'offers.flow.overline', 'offers.flow.title'),
+    sectionHead({ id: 'flow-title', overline: t('offers.flow.overline'), title: t('offers.flow.title') }),
     journeySteps(steps.map((k) => ({ titleAr: t(k), titleEn: t(k), textAr: t(`${k}.text`), textEn: t(`${k}.text`) }))),
   ];
 }
 export function relatedSection(record) {
   const list = OFFER_REGISTRY.filter((o) => o.id !== record.id).slice(0, 3);
   if (!list.length) return null;
-  return [head('related-title', 'offers.related.overline', 'offers.related.title'), offerDeck(list)];
+  return [sectionHead({ id: 'related-title', overline: t('offers.related.overline'), title: t('offers.related.title') }), offerDeck(list)];
 }
 export function supportSection() {
   return [
@@ -400,13 +383,7 @@ export function ctaBand(record) {
   ]);
 }
 
-function applyHead(record) {
-  const brand = t('brand.name');
-  document.title = `${pick(record, 'title')} — ${brand}`;
-  qs('meta[name="description"]')?.setAttribute('content', pick(record, 'short'));
-  qs('meta[property="og:title"]')?.setAttribute('content', document.title);
-  qs('meta[property="og:description"]')?.setAttribute('content', pick(record, 'short'));
-}
+const applyHead = (record) => setPageHead({ title: `${pick(record, 'title')} — ${t('brand.name')}`, description: pick(record, 'short') });
 
 export function mountOfferDetail({ slug, root = document, load = async (s) => getOffer(s) } = {}) {
   const mount = (name) => qs(`[data-offer="${name}"]`, root);

@@ -21,7 +21,7 @@ import {
   HOME_HERO, HOME_SERVICES, HOME_VALUES, HOME_PRIORITIES,
   HOME_DESTINATIONS, HOME_OFFERS, HOME_JOURNEY, HOME_SUPPORT,
 } from '../data/home.js';
-import { icon, setButtonState } from './ui.js';
+import { icon, setButtonState, routeGraphic } from './ui.js';
 import { buildContext, validate, saveContext, continueUrl, applyEntryParams } from '../core/booking.js';
 import { serviceCard, destinationCard, offerCard, mediaPlaceholder } from './cards.js';
 import { searchWidget } from './search.js';
@@ -41,22 +41,6 @@ export function heroCopy(hero = HOME_HERO) {
 }
 
 /** The §16 route graphic: one dashed path from the near corner to a point. */
-function routeGraphic() {
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('class', 'c-hero__route');
-  svg.setAttribute('viewBox', '0 0 400 500');
-  svg.setAttribute('preserveAspectRatio', 'none');
-  svg.setAttribute('aria-hidden', 'true');
-  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  path.setAttribute('d', 'M 40 460 C 120 380, 140 220, 250 170 S 340 90, 356 60');
-  path.setAttribute('vector-effect', 'non-scaling-stroke');
-  const a = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  a.setAttribute('cx', '40'); a.setAttribute('cy', '460'); a.setAttribute('r', '4');
-  const b = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  b.setAttribute('cx', '356'); b.setAttribute('cy', '60'); b.setAttribute('r', '5');
-  svg.append(path, a, b);
-  return svg;
-}
 
 export function heroMedia(hero = HOME_HERO) {
   const media = el('div', {
@@ -67,7 +51,7 @@ export function heroMedia(hero = HOME_HERO) {
       ? el('img', { src: hero.media.src, alt: pick(hero.media, 'alt'), class: 'u-img-cover',
                     fetchpriority: 'high', decoding: 'async' })
       : mediaPlaceholder(null, pick(hero.media, 'alt')),
-    routeGraphic(),
+    routeGraphic({ d: 'M 40 460 C 120 380, 140 220, 250 170 S 340 90, 356 60', start: [40, 460], end: [356, 60] }),
   ]);
   return media;
 }

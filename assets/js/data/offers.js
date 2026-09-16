@@ -41,6 +41,7 @@
    every surface shows them.
    ========================================================================= */
 
+import { bookingEntry } from './config.js';
 import { imageSrc } from './images.js';
 
 export const OFFER_CATEGORIES = [
@@ -144,7 +145,7 @@ export const offersHave = (field) => OFFER_REGISTRY.some((o) => {
  * booking engine's own route without touching the pages. Pass through route().
  */
 export const offerEntry = (offer) =>
-  `book/?vertical=${offer.categories.includes('umrah') ? 'umrah' : 'packages'}&offer=${encodeURIComponent(offer.slug)}&to=${encodeURIComponent(offer.destination)}`;
+  bookingEntry({ vertical: offer.categories.includes('umrah') ? 'umrah' : 'packages', offer: offer.slug, to: offer.destination });
 
 /**
  * Filter + sort the registry. Pure and synchronous today; the same signature

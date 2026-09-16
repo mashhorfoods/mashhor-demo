@@ -12,7 +12,7 @@
    Exposed as `window.no.detail` for QA.
    ========================================================================= */
 
-import { el, qs, qsa, render } from '../core/dom.js';
+import { el, qs, qsa, render, setPageHead } from '../core/dom.js';
 import { t, pick, getLocale } from '../core/i18n.js';
 import { route } from '../data/config.js';
 import { liveChannels } from '../data/navigation.js';
@@ -20,9 +20,9 @@ import {
   SERVICE_REGISTRY, SERVICE_CATEGORIES, SERVICE_KINDS, serviceById, serviceEntry,
 } from '../data/services.js';
 import { SERVICE_DETAILS, SERVICE_BENEFITS } from '../data/service-details.js';
-import { icon } from './ui.js';
+import { icon, routeGraphic, sectionHead } from './ui.js';
 import { serviceCard, mediaPlaceholder } from './cards.js';
-import { stateRegion, stateBlock, skeletonService } from './states.js';
+import { stateRegion, stateBlock, skeletonService, notFoundState } from './states.js';
 import { supportPanels, journeySteps } from './home.js';
 
 /* ---------------------------------------------------------------------------
@@ -97,33 +97,15 @@ export function detailHero(record) {
   ]);
   const media = el('div', { class: 'c-hero__media', dataset: { mediaSlot: `service-${record.id}` } }, [
     mediaPlaceholder(record.image?.src, pick(record.image ?? {}, 'alt')),
-    routeGraphic(),
+    routeGraphic({ d: 'M 40 450 C 90 330, 200 330, 240 220 S 330 110, 356 60', start: [40, 450], end: [356, 60] }),
   ]);
   return [copy, media];
 }
 
-function routeGraphic() {
-  const ns = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(ns, 'svg');
-  svg.setAttribute('class', 'c-hero__route'); svg.setAttribute('viewBox', '0 0 400 500');
-  svg.setAttribute('preserveAspectRatio', 'none'); svg.setAttribute('aria-hidden', 'true');
-  const path = document.createElementNS(ns, 'path');
-  path.setAttribute('d', 'M 40 450 C 90 330, 200 330, 240 220 S 330 110, 356 60');
-  path.setAttribute('vector-effect', 'non-scaling-stroke');
-  const a = document.createElementNS(ns, 'circle'); a.setAttribute('cx', '40'); a.setAttribute('cy', '450'); a.setAttribute('r', '4');
-  const b = document.createElementNS(ns, 'circle'); b.setAttribute('cx', '356'); b.setAttribute('cy', '60'); b.setAttribute('r', '5');
-  svg.append(path, a, b);
-  return svg;
-}
 
 /* ---------------------------------------------------------------------------
    SECTIONS — each returns null when it has nothing to say. §4
    ------------------------------------------------------------------------ */
-const head = (id, overlineKey, titleKey, textKey = null) => el('div', { class: 'l-section-head' }, [
-  el('p', { class: 't-overline' }, t(overlineKey)),
-  el('h2', { class: 't-h2 u-mark', id }, t(titleKey)),
-  textKey ? el('p', { class: 't-body t-muted' }, t(textKey)) : null,
-]);
 
 export function overviewSection(record) {
   const d = record.detail;
@@ -147,7 +129,7 @@ export function featuresSection(record) {
   const list = record.detail?.features;
   if (!list?.length) return null;
   return [
-    head('features-title', 'detail.features.overline', 'detail.features.title'),
+    sectionHead({ id: 'features-title', overline: t('detail.features.overline'), title: t('detail.features.title') }),
     el('div', { class: 'l-grid' }, list.map((f) =>
       el('div', { class: 'l-span-4@md l-span-3@lg' }, el('article', { class: 'c-card c-card--flat c-feature' }, [
         el('div', { class: 'c-card__body' }, [
@@ -164,7 +146,7 @@ export function benefitsSection(record) {
   if (!ids?.length) return null;
   const list = ids.map((id) => SERVICE_BENEFITS[id]).filter(Boolean);
   return [
-    head('benefits-title', 'detail.benefits.overline', 'detail.benefits.title'),
+    sectionHead({ id: 'benefits-title', overline: t('detail.benefits.overline'), title: t('detail.benefits.title') }),
     el('ul', { class: 'l-grid', role: 'list' }, list.map((b) =>
       el('li', { class: 'c-value l-span-4@md l-span-3@lg' }, [
         el('span', { class: 'c-value__icon' }, icon(b.icon, { size: 'lg' })),
@@ -178,7 +160,7 @@ export function stepsSection(record) {
   const steps = record.detail?.steps;
   if (!steps?.length) return null;
   return [
-    head('steps-title', 'detail.steps.overline', 'detail.steps.title'),
+    sectionHead({ id: 'steps-title', overline: t('detail.steps.overline'), title: t('detail.steps.title') }),
     journeySteps(steps),
   ];
 }
@@ -188,7 +170,7 @@ export function requirementsSection(record) {
   if (!req) return null;
   const items = req.items ?? [];
   return [
-    head('requirements-title', 'detail.requirements.overline', 'detail.requirements.title', 'detail.requirements.text'),
+    sectionHead({ id: 'requirements-title', overline: t('detail.requirements.overline'), title: t('detail.requirements.title'), text: t('detail.requirements.text') }),
     items.length
       ? el('ul', { class: 'c-req', role: 'list' }, items.map((i) =>
           el('li', { class: 'c-req__item' }, [icon(i.icon, { size: 'md' }), el('span', {}, pick(i, 'text'))])))
@@ -208,7 +190,7 @@ export function relatedSection(record) {
   const list = ids.map(serviceById).filter(Boolean).slice(0, 3);
   if (!list.length) return null;
   return [
-    head('related-title', 'detail.related.overline', 'detail.related.title'),
+    sectionHead({ id: 'related-title', overline: t('detail.related.overline'), title: t('detail.related.title') }),
     el('div', { class: 'l-grid' }, list.map((s) =>
       el('div', { class: 'l-span-4@md l-span-4@lg' }, serviceCard(s)))),
   ];
@@ -242,16 +224,13 @@ export function ctaBand(record) {
 /* ---------------------------------------------------------------------------
    STATES — unknown slug, missing content, unavailable. §18
    ------------------------------------------------------------------------ */
-function unknownState() {
-  return stateBlock({
-    variant: 'empty', iconName: 'no-empty-box',
-    title: t('detail.unknown.title'), text: t('detail.unknown.text'),
-    actions: [
-      { label: t('detail.crumb.services'), href: route('services/'), variant: 'c-btn--primary' },
-      { label: t('detail.cta.expert'), href: route('help/contact/') },
-    ],
-  });
-}
+const unknownState = () => notFoundState({
+  title: t('detail.unknown.title'), text: t('detail.unknown.text'),
+  actions: [
+    { label: t('detail.crumb.services'), href: route('services/'), variant: 'c-btn--primary' },
+    { label: t('detail.cta.expert'), href: route('help/contact/') },
+  ],
+});
 
 function missingContentNote() {
   return el('p', { class: 'c-note', role: 'note' }, [icon('no-info', { size: 'sm' }), el('span', { class: 'c-note__text' }, t('detail.missing.text'))]);
@@ -261,13 +240,7 @@ function missingContentNote() {
    HEAD — title, description and canonical follow the service and the
    language, so each route is unique for search engines. §21
    ------------------------------------------------------------------------ */
-function applyHead(record) {
-  const brand = t('brand.name');
-  document.title = `${pick(record, 'title')} — ${brand}`;
-  qs('meta[name="description"]')?.setAttribute('content', pick(record, 'desc'));
-  qs('meta[property="og:title"]')?.setAttribute('content', document.title);
-  qs('meta[property="og:description"]')?.setAttribute('content', pick(record, 'desc'));
-}
+const applyHead = (record) => setPageHead({ title: `${pick(record, 'title')} — ${t('brand.name')}`, description: pick(record, 'desc') });
 
 /* ---------------------------------------------------------------------------
    MOUNT

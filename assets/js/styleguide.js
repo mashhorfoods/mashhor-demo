@@ -10,7 +10,7 @@
 import {
   boot, el, qs, qsa, render, icon, toast, setButtonState,
   t, getLocale, applyTranslations,
-  SERVICES, STATUSES,
+  STATUSES, featuredServices,
   mountHeader, setSession, getSession, globalFooter,
   serviceGrid, flightCard, hotelCard, packageCard, supervisorCard, tripCard, statusBadge,
   searchWidget, stateRegion, skeletonList, skeletonFlight,
@@ -120,7 +120,7 @@ async function renderIcons() {
    COMPONENT DEMOS
    ------------------------------------------------------------------------ */
 function renderComponents() {
-  render(qs('#sg-services'), serviceGrid(SERVICES));
+  render(qs('#sg-services'), serviceGrid(featuredServices()));
   render(qs('#sg-flights'), FLIGHTS.map(flightCard));
   render(qs('#sg-mixed'), [
     hotelCard(HOTELS[0]),

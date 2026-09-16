@@ -27,6 +27,8 @@ export const BASE = (() => {
   // '/mashhor-demo/services/flights/' as the site root and every link and asset
   // would resolve one or more levels too deep. 404.html declares the real root
   // with <base>, and this reads it.
+  // Outside a browser (the route generator imports this data) the root is '/'.
+  if (typeof document === 'undefined') return '/';
   const path = new URL(document.baseURI).pathname;
   return path.endsWith('/') ? path : path.replace(/[^/]*$/, '');
 })();
@@ -34,14 +36,7 @@ export const BASE = (() => {
 /** Join a stored route to the site root. route('services/') -> '/mashhor-demo/services/' */
 export const route = (path = '') => BASE + String(path).replace(/^\//, '');
 
-/* ---------------------------------------------------------------------------
-   SERVICES — the featured six, read from the one registry (data/services.js,
-   Stage 10.5). Kept under this name because the style guide, the 404 and
-   the supervisor card consume it; the registry is the source.
-   ------------------------------------------------------------------------ */
-import { featuredServices } from './services.js';
 import { DESTINATION_REGIONS, TRAVEL_PURPOSES } from './destinations.js';
-export const SERVICES = featuredServices();
 
 /* Navigation moved to data/navigation.js in Stage 10.2 — the full IA, the mega
    menus and the account menus now live together in one module. */
@@ -211,3 +206,13 @@ export const SEARCH_VERTICALS = [
     ],
   },
 ];
+
+/**
+ * The booking entry (book/, Stage 10.9) with a service and prefills as a
+ * query string — the one builder every "book / request" door uses. Returned
+ * without the site root: pass through route().
+ */
+export function bookingEntry(params = {}) {
+  const query = new URLSearchParams(Object.fromEntries(Object.entries(params).filter(([, v]) => v != null && v !== ''))).toString();
+  return query ? `book/?${query}` : 'book/';
+}

@@ -10,8 +10,8 @@
 import { el, uid } from '../core/dom.js';
 import { t, getLocale, pick } from '../core/i18n.js';
 import { money, time, duration, dateShort, dayOffset } from '../core/format.js';
-import { STATUSES, SERVICES, route } from '../data/config.js';
-import { SERVICE_REGISTRY } from '../data/services.js';
+import { STATUSES, route } from '../data/config.js';
+import { SERVICE_REGISTRY, featuredServices } from '../data/services.js';
 import { destinationById } from '../data/destinations.js';
 import { OFFER_STATUSES, OFFER_CATEGORIES } from '../data/offers.js';
 import { icon } from './ui.js';
@@ -77,7 +77,7 @@ export function serviceCard(service, { media = false, kind = null, entry = null 
   ]);
 }
 
-export const serviceGrid = (services = SERVICES) =>
+export const serviceGrid = (services = featuredServices()) =>
   el('div', { class: 'l-auto-grid', style: '--min-col:18rem' }, services.map(serviceCard));
 
 /* ---------------------------------------------------------------------------
@@ -406,7 +406,7 @@ export function offerCard(offer, { entry = null, large = false } = {}) {
 export function supervisorCard(supervisor) {
   const titleId = uid('sup');
   const services = supervisor.services
-    .map((id) => SERVICES.find((s) => s.id === id))
+    .map((id) => SERVICE_REGISTRY.find((s) => s.id === id))
     .filter(Boolean);
 
   return el('article', { class: 'c-card c-supervisor', 'aria-labelledby': titleId }, [

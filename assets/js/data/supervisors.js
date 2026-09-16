@@ -28,6 +28,7 @@
    so, and the page shows their neutral structure until real data arrives.
    ========================================================================= */
 
+import { bookingEntry } from './config.js';
 import { SERVICE_REGISTRY } from './services.js';
 import { TRAVEL_PURPOSES } from './destinations.js';
 
@@ -116,6 +117,6 @@ export function attributed(path, sup) {
   return `${base}?${params.toString()}`;
 }
 /** The booking entry, attributed, optionally on a vertical and prefill. */
-export const supervisorEntry = (sup, params = {}) => attributed(`book/?${new URLSearchParams(params).toString()}`, sup);
+export const supervisorEntry = (sup, params = {}) => attributed(bookingEntry(params), sup);
 /** The request-assistance door, attributed. */
 export const supervisorContactUrl = (sup) => attributed('help/contact/', sup);

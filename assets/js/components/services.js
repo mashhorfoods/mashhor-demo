@@ -14,7 +14,7 @@ import {
   SERVICE_REGISTRY, SERVICE_CATEGORIES, SERVICE_KINDS, SERVICE_HELP_OPTIONS,
   serviceById, serviceEntry,
 } from '../data/services.js';
-import { icon } from './ui.js';
+import { icon, routeGraphic } from './ui.js';
 import { serviceCard, mediaPlaceholder } from './cards.js';
 import { stateRegion, stateBlock, skeletonService } from './states.js';
 
@@ -32,24 +32,11 @@ export function servicesHero({ onStart = null } = {}) {
   ]);
   const media = el('div', { class: 'c-hero__media', dataset: { mediaSlot: 'services-hero' } }, [
     mediaPlaceholder(null, t('services.hero.alt')),
-    routeGraphic(),
+    routeGraphic({ d: 'M 40 440 C 150 420, 120 250, 220 200 S 330 120, 356 60', start: [40, 440], end: [356, 60] }),
   ]);
   return [copy, media];
 }
 
-function routeGraphic() {
-  const ns = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(ns, 'svg');
-  svg.setAttribute('class', 'c-hero__route'); svg.setAttribute('viewBox', '0 0 400 500');
-  svg.setAttribute('preserveAspectRatio', 'none'); svg.setAttribute('aria-hidden', 'true');
-  const path = document.createElementNS(ns, 'path');
-  path.setAttribute('d', 'M 40 440 C 150 420, 120 250, 220 200 S 330 120, 356 60');
-  path.setAttribute('vector-effect', 'non-scaling-stroke');
-  const a = document.createElementNS(ns, 'circle'); a.setAttribute('cx', '40'); a.setAttribute('cy', '440'); a.setAttribute('r', '4');
-  const b = document.createElementNS(ns, 'circle'); b.setAttribute('cx', '356'); b.setAttribute('cy', '60'); b.setAttribute('r', '5');
-  svg.append(path, a, b);
-  return svg;
-}
 
 /* ---------------------------------------------------------------------------
    CATEGORY NAVIGATION — "all" + one chip per category. §B

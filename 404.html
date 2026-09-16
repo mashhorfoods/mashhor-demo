@@ -100,26 +100,22 @@
 </div>
 
 <script type="module">
-  import { boot, el, qs, render, route, t, SERVICES, pick, mountHeader, mountFooter }
-    from './assets/js/foundation.js';
+  import { mountPage } from './assets/js/page.js';
+  import { el, qs, render } from './assets/js/core/dom.js';
+  import { t, pick } from './assets/js/core/i18n.js';
+  import { route } from './assets/js/data/config.js';
+  import { featuredServices } from './assets/js/data/services.js';
 
-  // <base> would send href="#main" to the homepage; the skip link scrolls here.
-  qs('[data-skip]')?.addEventListener('click', (e) => { e.preventDefault(); const m = qs('#main'); m.tabIndex = -1; m.focus(); m.scrollIntoView(); });
-
-  let header = null;
-
-  function paint() {
-    render(qs('#service-links'), SERVICES.map((service) =>
-      el('li', {}, el('a', { class: 'c-chip', href: route(service.href) }, pick(service, 'title')))));
-    qs('#svc-heading').textContent = t('nav.services');
-    // No `current`: a 404 is not one of the navigation destinations, so no item
-    // is marked active. §19  (mountHeader destroys the previous instance.)
-    header = mountHeader({ target: qs('.l-page') });
-    mountFooter({ target: qs('.l-page'), variant: 'booking' });
-  }
-
-  boot({ sprite: 'assets/icons/sprite.svg', onLocale: paint });
-  paint();
+  // No `current`: a 404 is not one of the navigation destinations. §19
+  mountPage({
+    handle: 'notFound',
+    footer: { variant: 'booking' },
+    paint: () => {
+      render(qs('#service-links'), featuredServices().map((service) =>
+        el('li', {}, el('a', { class: 'c-chip', href: route(service.href) }, pick(service, 'title')))));
+      qs('#svc-heading').textContent = t('nav.services');
+    },
+  });
 </script>
 </body>
 </html>

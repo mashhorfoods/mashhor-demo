@@ -115,36 +115,18 @@
 </div>
 
 <script type="module">
-  import {
-    boot, el, qs, qsa, render, icon, route, pick,
-    mountHeader, mountFooter, mountOffers, NAV_BOTTOM,
-  } from './assets/js/foundation.js';
+  import { mountPage } from './assets/js/page.js';
+  import { route } from './assets/js/data/config.js';
+  import { mountOffers } from './assets/js/components/offers.js';
 
-  qs('[data-skip]')?.addEventListener('click', (e) => { e.preventDefault(); const m = qs('#main'); m.tabIndex = -1; m.focus(); m.scrollIntoView(); });
-  qsa('[data-route]').forEach((a) => { a.href = route(a.dataset.route) + (a.dataset.query ? `?${a.dataset.query}` : '') + (a.dataset.hash ? `#${a.dataset.hash}` : ''); });
-
-  let offers = null;
   // ?category=… (from the header menu or a shared link) opens the listing on that category.
   const requested = new URLSearchParams(location.search);
-
-  function paint() {
-    render(qs('#bottom-nav'), NAV_BOTTOM.map((item) =>
-      el('a', { class: 'c-bottom-nav__item', href: route(item.href) },
-        [icon(item.icon, { size: 'sm' }), el('span', {}, pick(item, 'label'))])));
-    offers?.destroy();
-    offers = mountOffers({ initial: { category: requested.get('category') ?? '' } });
-    window.no = { ...(window.no ?? {}), offers };   // QA handle: no.offers.regions.grid.error()
-  }
-
-  function mountChrome() {
-    mountFooter({ target: qs('.l-page'), variant: 'marketing', cta: false });
-    mountHeader({ target: qs('.l-page'), current: 'offers',
-      onSearch: () => { window.location.assign(route('book/')); } });
-  }
-
-  boot({ sprite: 'assets/icons/sprite.svg', onLocale: () => { mountChrome(); paint(); } });
-  mountChrome();
-  paint();
+  mountPage({
+    handle: 'offers',
+    header: { current: 'offers', onSearch: () => location.assign(route('book/')) },
+    footer: { cta: false },
+    paint: (page) => { page.current?.destroy(); return mountOffers({ initial: { category: requested.get('category') ?? '' } }); },
+  });
 </script>
 </body>
 </html>

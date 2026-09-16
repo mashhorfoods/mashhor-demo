@@ -144,48 +144,24 @@
 </div>
 
 <script type="module">
-  import {
-    boot, el, qs, qsa, render, icon, route, pick,
-    mountHeader, mountFooter, mountDestinations, NAV_BOTTOM,
-  } from './assets/js/foundation.js';
+  import { mountPage } from './assets/js/page.js';
+  import { mountDestinations } from './assets/js/components/destinations.js';
 
-  // <base> would send href="#main" to the homepage; the skip link scrolls here.
-  qs('[data-skip]')?.addEventListener('click', (e) => { e.preventDefault(); const m = qs('#main'); m.tabIndex = -1; m.focus(); m.scrollIntoView(); });
-  // Static links resolve through route(); a data-hash lands on that anchor of the target page.
-  qsa('[data-route]').forEach((a) => { a.href = route(a.dataset.route) + (a.dataset.hash ? `#${a.dataset.hash}` : ''); });
-
-  let destinations = null;
-
-  function paint() {
-    render(qs('#bottom-nav'), NAV_BOTTOM.map((item) =>
-      el('a', { class: 'c-bottom-nav__item', href: route(item.href) },
-        [icon(item.icon, { size: 'sm' }), el('span', {}, pick(item, 'label'))])));
-    destinations = mountDestinations();
-    window.no = { ...(window.no ?? {}), destinations };   // QA handle: no.destinations.regions.popular.error()
-    openRequested();
-  }
-
-  // ?purpose=… (from a purpose tile elsewhere, or a shared link) runs that
-  // search on arrival; ?region=… selects that region. Read once.
+  // ?purpose=… runs that search on arrival; ?region=… selects that region. Read once.
   let requested = new URLSearchParams(location.search);
-  function openRequested() {
-    const purpose = requested.get('purpose');
-    const region = requested.get('region');
-    if (purpose) destinations.searchPurpose(purpose);
-    if (region) { destinations.filterRegion(region); destinations.scrollTo('regions'); }
-    requested = new URLSearchParams();
-  }
-
-  function mountChrome() {
-    // The page carries its own final CTA, so the footer's is switched off.
-    mountFooter({ target: qs('.l-page'), variant: 'marketing', cta: false });
-    mountHeader({ target: qs('.l-page'), current: 'destinations',
-      onSearch: () => { destinations?.scrollTo('search'); destinations?.widget.no.focus({ preventScroll: true }); } });
-  }
-
-  boot({ sprite: 'assets/icons/sprite.svg', onLocale: () => { mountChrome(); paint(); } });
-  mountChrome();
-  paint();
+  mountPage({
+    handle: 'destinations',
+    header: { current: 'destinations', onSearch: (d) => { d?.scrollTo('search'); d?.widget.no.focus({ preventScroll: true }); } },
+    footer: { cta: false },
+    paint: () => {
+      const destinations = mountDestinations();   // QA handle: no.destinations.regions.popular.error()
+      const purpose = requested.get('purpose'); const region = requested.get('region');
+      if (purpose) destinations.searchPurpose(purpose);
+      if (region) { destinations.filterRegion(region); destinations.scrollTo('regions'); }
+      requested = new URLSearchParams();
+      return destinations;
+    },
+  });
 </script>
 </body>
 </html>

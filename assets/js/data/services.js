@@ -28,6 +28,7 @@
      ctaAr/En   optional override of the kind's default CTA label
    ========================================================================= */
 
+import { bookingEntry } from './config.js';
 import { imageSrc } from './images.js';
 
 export const SERVICE_CATEGORIES = [
@@ -188,9 +189,7 @@ export const featuredServices = () => SERVICE_REGISTRY.filter((s) => s.featured)
  * route().
  */
 export function serviceEntry(service) {
-  const params = new URLSearchParams({ vertical: service.vertical ?? 'other' });
-  if (service.option) params.set('service', service.option);
-  return `book/?${params.toString()}`;
+  return bookingEntry({ vertical: service.vertical ?? 'other', service: service.option });
 }
 
 /* --------------------------------------------------------------------------

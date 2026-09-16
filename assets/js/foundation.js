@@ -2,12 +2,10 @@
    NUMBER ONE — FOUNDATION ENTRY POINT
    نمبرون للسفر و السياحة — Stage 10.1
 
-   The single module a page imports. It re-exports every public part of the
-   system and provides `boot()`, which wires the behaviours present on the
-   page and nothing else.
-
-     import { boot } from './assets/js/foundation.js';
-     boot({ sprite: 'assets/icons/sprite.svg' });
+   The barrel: every public part of the system from one place, for the
+   style guide, the browser suites and the QA console. A PAGE imports
+   `page.js` and its own component module instead, so it loads only what
+   it draws (Stage 10.12 cleanup).
 
    Deliberately NOT here: routing, data fetching, booking logic. Stage 11
    onwards adds those around this layer, not inside it. §26 / §28 / §34
@@ -40,45 +38,4 @@ export * from './components/booking.js';
 export * from './components/supervisor.js';
 export * from './data/supervisors.js';
 
-import { ready } from './core/dom.js';
-import { initLocale, setLocale, applyTranslations, onLocaleChange } from './core/i18n.js';
-import {
-  setSpritePath, ensureSprite, initAccordions, initTabs, initModals,
-  initOtp, initPopovers, initUploads,
-} from './components/ui.js';
-
-/**
- * Wire the page.
- * @param {object} options
- * @param {string} options.sprite      path to the icon sprite from this page
- * @param {boolean} options.locale     set false to manage language yourself
- * @param {function} options.onLocale  called after every language change, so a
- *                                     page can re-render its dynamic regions
- */
-export function boot({ sprite = 'assets/icons/sprite.svg', locale = true, onLocale = null } = {}) {
-  setSpritePath(sprite);
-  // Start the sprite request immediately rather than waiting for DOMContentLoaded:
-  // it is the one asset every component on the page depends on.
-  ensureSprite(sprite);
-
-  ready(() => {
-    document.documentElement.classList.remove('no-js');
-    document.documentElement.classList.add('js');
-
-    if (locale) {
-      initLocale();
-      applyTranslations();
-      onLocaleChange(() => {
-        applyTranslations();
-        onLocale?.();
-      });
-    }
-
-    initAccordions();
-    initTabs();
-    initModals();
-    initOtp();
-    initPopovers();
-    initUploads();
-  });
-}
+export { boot, mountPage, bottomNav } from './page.js';

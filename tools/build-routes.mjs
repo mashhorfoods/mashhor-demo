@@ -29,12 +29,12 @@ const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').repl
    fills; a section without content is hidden by the template. */
 const COLLECTIONS = [
   {
-    dir: 'services', records: SERVICE_REGISTRY, attr: 'detail', mount: 'mountServiceDetail', handle: 'detail',
+    dir: 'services', records: SERVICE_REGISTRY, attr: 'detail', mount: 'mountServiceDetail', module: 'service-detail', handle: 'detail',
     title: (s) => s.titleAr, description: (s) => s.descAr, og: (s) => s.shortAr, heroLabel: 'service-title', current: 'services',
     sections: ['overview', 'features', 'benefits', 'steps', 'requirements', 'related', 'support'],
   },
   {
-    dir: 'offers', records: OFFER_REGISTRY, attr: 'offer', mount: 'mountOfferDetail', handle: 'offer',
+    dir: 'offers', records: OFFER_REGISTRY, attr: 'offer', mount: 'mountOfferDetail', module: 'offers', handle: 'offer',
     title: (o) => o.titleAr, description: (o) => o.shortAr, og: (o) => o.shortAr, heroLabel: 'offer-title', current: 'offers',
     sections: ['overview', 'included', 'excluded', 'itinerary', 'important', 'terms', 'faq', 'flow', 'related', 'support'],
   },
@@ -42,7 +42,7 @@ const COLLECTIONS = [
     // Stage 10.10 — one public profile per supervisor. The static title is
     // neutral until the business supplies the name; the template sets the
     // real one at runtime. Every door on the page carries ?supervisor=<slug>.
-    dir: 'supervisor', records: SUPERVISOR_REGISTRY, attr: 'profile', mount: 'mountSupervisor', handle: 'supervisor',
+    dir: 'supervisor', records: SUPERVISOR_REGISTRY, attr: 'profile', mount: 'mountSupervisor', module: 'supervisor', handle: 'supervisor',
     title: (s) => s.nameAr ?? 'مشرف نمبرون', description: (s) => s.bioAr ?? 'مشرف من نمبرون للسفر و السياحة يساعدك على اختيار الخيار المناسب ويتابع حجزك مع فريق نمبرون.',
     og: (s) => s.bioAr ?? 'مشرف من نمبرون للسفر و السياحة.', heroLabel: 'profile-title', current: null,
     search: (s) => `book/?supervisor=${s.slug}`,
@@ -110,29 +110,16 @@ ${c.sections.map((s, i) => `    <section class="l-section${i % 2 === 0 ? ' l-sec
 </div>
 
 <script type="module">
-  import { boot, el, qs, render, icon, route, pick, mountHeader, mountFooter, ${c.mount}, NAV_BOTTOM }
-    from './assets/js/foundation.js';
+  import { mountPage } from './assets/js/page.js';
+  import { route } from './assets/js/data/config.js';
+  import { ${c.mount} } from './assets/js/components/${c.module}.js';
 
-  // <base> would send href="#main" to the homepage; the skip link scrolls here.
-  qs('[data-skip]')?.addEventListener('click', (e) => { e.preventDefault(); const m = qs('#main'); m.tabIndex = -1; m.focus(); m.scrollIntoView(); });
-
-  let ${c.handle} = null;
-  function paint() {
-    render(qs('#bottom-nav'), NAV_BOTTOM.map((item) =>
-      el('a', { class: 'c-bottom-nav__item', href: route(item.href) },
-        [icon(item.icon, { size: 'sm' }), el('span', {}, pick(item, 'label'))])));
-    ${c.handle} = ${c.mount}({ slug: ${JSON.stringify(r.slug)} });
-    window.no = { ...(window.no ?? {}), ${c.handle} };   // QA handle: no.${c.handle}.render('unknown')
-  }
-  function mountChrome() {
-    // The page carries its own final CTA, so the footer's is switched off.
-    mountFooter({ target: qs('.l-page'), variant: 'marketing', cta: false });
-    mountHeader({ target: qs('.l-page'), current: ${JSON.stringify(c.current)},
-      onSearch: () => { window.location.assign(route(${JSON.stringify(c.search ? c.search(r) : 'book/')})); } });
-  }
-  boot({ sprite: 'assets/icons/sprite.svg', onLocale: () => { mountChrome(); paint(); } });
-  mountChrome();
-  paint();
+  mountPage({
+    handle: ${JSON.stringify(c.handle)},
+    header: { current: ${JSON.stringify(c.current)}, onSearch: () => location.assign(route(${JSON.stringify(c.search ? c.search(r) : 'book/')})) },
+    footer: { cta: false },   // the page carries its own final CTA
+    paint: () => ${c.mount}({ slug: ${JSON.stringify(r.slug)} }),   // QA handle: no.${c.handle}.render('unknown')
+  });
 </script>
 </body>
 </html>
