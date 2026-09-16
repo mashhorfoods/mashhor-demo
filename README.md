@@ -12,6 +12,7 @@ inherits it.
 | **Living style guide** | `styleguide.html` — every token, component and state, in RTL and LTR |
 | **Entry point** | `index.html` — the system running, not a designed homepage |
 | **Brand assets** | [`assets/brand/README.md`](assets/brand/README.md) |
+| **Status report** | [`docs/STATUS-REPORT-2026-09-16.pdf`](docs/STATUS-REPORT-2026-09-16.pdf) — what is built, how it was verified, what is still needed |
 
 ## Run it
 
