@@ -15,7 +15,7 @@
    heading with its panel always open. One DOM, no duplicate component (§23).
    ========================================================================= */
 
-import { el, qs, qsa, uid } from '../core/dom.js';
+import { el, qsa, uid } from '../core/dom.js';
 import { getLocale, pick } from '../core/i18n.js';
 import { route } from '../data/config.js';
 import {

@@ -10,7 +10,7 @@
 import {
   boot, el, qs, qsa, render, icon, toast, setButtonState,
   t, getLocale, applyTranslations,
-  SERVICES, STATUSES, route,
+  SERVICES, STATUSES,
   mountHeader, setSession, getSession, globalFooter,
   serviceGrid, flightCard, hotelCard, packageCard, supervisorCard, tripCard, statusBadge,
   searchWidget, stateRegion, skeletonList, skeletonFlight,

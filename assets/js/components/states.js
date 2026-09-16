@@ -58,15 +58,6 @@ export function loadingBlock(message = t('state.searching')) {
   ]);
 }
 
-export function progressBar({ value = null, label = t('state.loading') } = {}) {
-  const indeterminate = value === null;
-  return el('div', {
-    class: `c-progress${indeterminate ? ' c-progress--indeterminate' : ''}`,
-    role: 'progressbar', 'aria-label': label,
-    ...(indeterminate ? {} : { 'aria-valuenow': String(value), 'aria-valuemin': '0', 'aria-valuemax': '100' }),
-  }, [el('div', { class: 'c-progress__bar', style: indeterminate ? '' : `--progress:${value}%` })]);
-}
-
 /* ---------------------------------------------------------------------------
    STATE BLOCK — empty / error / success / info.
 

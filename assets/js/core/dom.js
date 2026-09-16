@@ -115,6 +115,3 @@ export function unlockScroll() {
   document.body.style.overflow = '';
   document.body.style.paddingInlineEnd = '';
 }
-
-export const prefersReducedMotion = () =>
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches;

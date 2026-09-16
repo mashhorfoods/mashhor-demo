@@ -59,16 +59,6 @@ export const SERVICES = [
     descEn: 'We arrange the medical appointment, the visa and the stay together, and follow up until you return.' },
 ];
 
-/* Secondary lines the brief lists under §15 but that are not primary cards. */
-export const SERVICES_SECONDARY = [
-  { id: 'transport', icon: 'no-transport', href: 'services/transport/', titleAr: 'النقل والمواصلات', titleEn: 'Transport',
-    descAr: 'استقبال في المطار وتنقلات داخلية بسائق.', descEn: 'Airport pickup and chauffeured transfers.' },
-  { id: 'study',     icon: 'no-study',     href: 'services/study/',     titleAr: 'السفر للدراسة',    titleEn: 'Study travel',
-    descAr: 'تأشيرة الدراسة وترتيب السكن والوصول.',   descEn: 'Study visas, accommodation and arrival.' },
-  { id: 'work',      icon: 'no-work',      href: 'services/work/',      titleAr: 'السفر للعمل',      titleEn: 'Work travel',
-    descAr: 'إجراءات سفر العمل وتذاكر الشركات.',       descEn: 'Work travel paperwork and corporate tickets.' },
-];
-
 /* Navigation moved to data/navigation.js in Stage 10.2 — the full IA, the mega
    menus and the account menus now live together in one module. */
 

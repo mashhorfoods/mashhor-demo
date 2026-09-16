@@ -43,13 +43,6 @@
     padding-block: var(--space-64); text-align: center;
   }
 
-  /* Progress bar for a search that takes real time (fare shopping is slow) */
-  .c-progress { block-size: 4px; background-color: var(--color-gray-200); border-radius: var(--radius-pill); overflow: hidden; }
-  .c-progress__bar { block-size: 100%; inline-size: var(--progress, 30%); background-color: var(--color-primary);
-                     border-radius: var(--radius-pill); transition: inline-size var(--duration-slow) var(--ease-standard); }
-  .c-progress--indeterminate .c-progress__bar { inline-size: 40%; animation: no-indeterminate 1.2s var(--ease-standard) infinite; }
-  @keyframes no-indeterminate { 0% { translate: -100% 0; } 100% { translate: 250% 0; } }
-
   /* ---- Empty / error / success blocks -----------------------------------
      One component, three intents. The action slot is required by §21: an
      empty or failed state that offers no next step is a dead end. */

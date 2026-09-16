@@ -21,7 +21,7 @@
    ========================================================================= */
 
 import { el, qs, qsa, uid, lockScroll, unlockScroll, trapFocus } from '../core/dom.js';
-import { getLocale, setLocale, pick, t } from '../core/i18n.js';
+import { getLocale, setLocale, pick } from '../core/i18n.js';
 import { route } from '../data/config.js';
 import {
   NAV_PRIMARY, MENUS, SUPPORT_CHANNELS, ACCOUNT_GUEST, ACCOUNT_CUSTOMER,

@@ -4,55 +4,9 @@
 
 @layer components {
   /* ======================================================================
-     HEADER / NAVIGATION — §25
-     Desktop: logo · services · destinations · offers · support · search ·
-              account · Book Now (the single dominant CTA).
-     Mobile:  logo · search · account · menu — the rest moves into the drawer
-              and the bottom nav. Recomposed, not shrunk. §22
+     MOBILE BOTTOM NAVIGATION — §22
+     The header itself lives in 12-header.css (Stage 10.2).
      ==================================================================== */
-  .c-header {
-    position: sticky; inset-block-start: 0; z-index: var(--z-header);
-    background-color: var(--color-surface);
-    border-block-end: var(--border-hairline);
-  }
-  .c-header__inner {
-    display: flex; align-items: center; gap: var(--space-16);
-    min-block-size: var(--header-height-compact);
-  }
-  @media (min-width: 64em) { .c-header__inner { min-block-size: var(--header-height); gap: var(--space-24); } }
-
-  .c-header__brand { margin-inline-end: auto; }
-  .c-header__nav { display: none; }
-  @media (min-width: 64em) { .c-header__nav { display: block; } }
-  .c-header__actions { display: flex; align-items: center; gap: var(--space-4); }
-  .c-header__cta { display: none; }
-  @media (min-width: 48em) { .c-header__cta { display: inline-flex; } }
-  .c-header__burger { display: inline-flex; }
-  @media (min-width: 64em) { .c-header__burger { display: none; } }
-
-  /* Wraps rather than overflowing. The header hides this nav below 64em, but
-     the component must not depend on where it happens to be used. */
-  .c-nav__list { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); }
-  .c-nav__link {
-    position: relative;
-    display: inline-flex; align-items: center; gap: var(--space-4);
-    padding-inline: var(--space-12); padding-block: var(--space-8);
-    min-block-size: var(--touch-target);
-    font-size: var(--text-body-sm); font-weight: var(--weight-medium);
-    color: var(--color-text-secondary);
-    border-radius: var(--radius-sm);
-    transition: var(--transition-interactive);
-  }
-  .c-nav__link:hover { color: var(--color-text); background-color: var(--color-surface-hover); }
-  /* Active state carries a rule as well as colour, so it survives greyscale
-     and colour-blindness. §20/§23 */
-  .c-nav__link[aria-current="page"] { color: var(--color-text-brand); font-weight: var(--weight-semibold); }
-  .c-nav__link[aria-current="page"]::after {
-    content: ""; position: absolute;
-    inset-block-end: 2px; inset-inline: var(--space-12);
-    block-size: 2px; background-color: var(--color-primary); border-radius: var(--radius-pill);
-  }
-
   /* Mobile bottom navigation — thumb-reachable, max five destinations. §22 */
   .c-bottom-nav {
     position: fixed; inset-block-end: 0; inset-inline: 0; z-index: var(--z-bottom-nav);

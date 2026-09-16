@@ -55,14 +55,6 @@ export function dateShort(iso) {
   return new Intl.DateTimeFormat(`${intlLocale()}-u-nu-latn`, { day: 'numeric', month: 'short' }).format(d);
 }
 
-export function dateLong(iso) {
-  const d = iso instanceof Date ? iso : new Date(iso);
-  if (Number.isNaN(d.valueOf())) return '';
-  return new Intl.DateTimeFormat(`${intlLocale()}-u-nu-latn`, {
-    weekday: 'short', day: 'numeric', month: 'long', year: 'numeric',
-  }).format(d);
-}
-
 /** 24-hour clock, always Western digits: a departure time must never be
     ambiguous, and it is the one number a traveller cannot get wrong. */
 export function time(iso) {
