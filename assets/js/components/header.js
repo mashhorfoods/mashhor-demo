@@ -127,15 +127,32 @@ function createMenuController(scrim, { signal } = {}) {
 /* ---------------------------------------------------------------------------
    SMALL BUILDERS
    ------------------------------------------------------------------------ */
-export function logo({ size = '', href = '' } = {}) {
-  return el('a', { class: `c-logo c-gh__brand ${size}`.trim(), href: route(href) }, [
-    el('img', {
-      class: 'c-logo__img c-logo__img--light',
-      src: route('assets/brand/logo-primary.png'),
-      alt: 'نمبرون للسفر و السياحة — Number One Travel & Tourism',
-      width: 640, height: 444,
-    }),
-  ]);
+/* The two lockup variants and their reversed twins, in one place. Header,
+   drawer and footer all draw from this; before, the footer rebuilt the same
+   <img> contract by hand in two places, so a size or alt change had to be made
+   three times. */
+const LOGO_ART = {
+  primary: { light: 'assets/brand/logo-primary.png', inverse: 'assets/brand/logo-primary-inverse.png', w: 640, h: 444 },
+  lockup:  { light: 'assets/brand/logo-lockup.png',  inverse: 'assets/brand/logo-lockup-inverse.png',  w: 640, h: 498 },
+};
+
+/**
+ * @param {object} o
+ * @param {'primary'|'lockup'} o.variant  without / with the descriptor line
+ * @param {string|null} o.href            null renders a <span> instead of a link
+ * @param {boolean} o.inverse             also emit the reversed image, which
+ *                                        .c-logo swaps in on dark surfaces
+ */
+export function logo({ variant = 'primary', size = '', href = '', inverse = false, className = '' } = {}) {
+  const art = LOGO_ART[variant] ?? LOGO_ART.primary;
+  const alt = 'نمبرون للسفر و السياحة — Number One Travel & Tourism';
+  const imgs = [
+    el('img', { class: 'c-logo__img c-logo__img--light', src: route(art.light), alt, width: art.w, height: art.h }),
+    inverse ? el('img', { class: 'c-logo__img c-logo__img--inverse', src: route(art.inverse),
+                          alt: '', 'aria-hidden': 'true', width: art.w, height: art.h }) : null,
+  ];
+  const cls = `c-logo ${size} ${className}`.replace(/\s+/g, ' ').trim();
+  return href === null ? el('span', { class: cls }, imgs) : el('a', { class: cls, href: route(href) }, imgs);
 }
 
 /** §06 of Stage 10.1 — Arabic and English are both first-class, so the switch
@@ -376,7 +393,7 @@ export function mobileDrawer({ signal } = {}) {
     return el('div', { class: 'c-gh__m-item' }, [trigger, panel]);
   };
 
-  const body = el('div', { class: 'c-gh__drawer-body' }, [
+  const buildBody = () => el('div', { class: 'c-gh__drawer-body' }, [
     el('nav', { 'aria-label': isAr ? 'القائمة الرئيسية' : 'Main menu' }, NAV_PRIMARY.map((item) => {
       const menu = item.menu && MENUS[item.menu];
       if (menu) return accordion({ ...menu, titleAr: item.labelAr, titleEn: item.labelEn });
@@ -397,23 +414,34 @@ export function mobileDrawer({ signal } = {}) {
     el('div', { class: 'c-gh__m-item' }, languageButton({ compact: false })),
   ]);
 
-  const closeBtn = el('button', {
-    type: 'button', class: 'c-btn c-btn--utility',
-    'aria-label': isAr ? 'إغلاق القائمة' : 'Close menu',
-    'data-gh-drawer-close': '',
-  }, icon('no-close'));
-
-  const drawer = el('div', { class: 'c-gh__drawer', hidden: true }, [
-    el('div', { class: 'c-gh__drawer-scrim', 'data-gh-drawer-close': '' }),
-    el('div', { class: 'c-gh__drawer-panel', role: 'dialog', 'aria-modal': 'true',
-                'aria-label': isAr ? 'القائمة' : 'Menu' }, [
-      el('div', { class: 'c-gh__drawer-head' }, [logo({ size: 'c-logo--sm' }), closeBtn]),
-      body,
-      el('div', { class: 'c-gh__drawer-foot' }, bookNowButton({ block: true })),
-    ]),
-  ]);
+  /* The shell exists from the start so the burger's aria-controls points at a
+     real element. The 200-odd nodes inside are built on the first open: on a
+     desktop the burger is display:none and this can never open, so those
+     nodes were 38% of the header's DOM shipped to viewports that cannot use
+     them (§25/§26). */
+  const drawer = el('div', { class: 'c-gh__drawer', hidden: true });
+  let built = false;
+  const build = () => {
+    if (built) return;
+    built = true;
+    const closeBtn = el('button', {
+      type: 'button', class: 'c-btn c-btn--utility',
+      'aria-label': isAr ? 'إغلاق القائمة' : 'Close menu',
+      'data-gh-drawer-close': '',
+    }, icon('no-close'));
+    drawer.append(
+      el('div', { class: 'c-gh__drawer-scrim', 'data-gh-drawer-close': '' }),
+      el('div', { class: 'c-gh__drawer-panel', role: 'dialog', 'aria-modal': 'true',
+                  'aria-label': isAr ? 'القائمة' : 'Menu' }, [
+        el('div', { class: 'c-gh__drawer-head' }, [logo({ size: 'c-logo--sm' }), closeBtn]),
+        buildBody(),
+        el('div', { class: 'c-gh__drawer-foot' }, bookNowButton({ block: true })),
+      ]),
+    );
+  };
 
   const open = () => {
+    build();
     drawer.hidden = false;
     requestAnimationFrame(() => { drawer.dataset.open = 'true'; });
     lockScroll();
@@ -563,7 +591,7 @@ export function globalHeader({ current = null, variant = 'default', onSearch = n
   }, [
     el('div', { class: 'l-container c-gh__inner' }, [
       el('div', { class: 'c-gh__bar' }, [
-        logo(),
+        logo({ className: 'c-gh__brand' }),
 
         isBooking
           ? el('p', { class: 'c-gh__secure' }, [

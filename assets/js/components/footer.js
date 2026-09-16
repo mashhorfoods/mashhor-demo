@@ -91,16 +91,7 @@ export function footerColumn(column, { collapsible = true } = {}) {
    ------------------------------------------------------------------------ */
 export function footerBrand() {
   return el('div', { class: 'c-gf__brand' }, [
-    el('span', { class: 'c-logo c-logo--lg' }, [
-      el('img', {
-        class: 'c-logo__img c-logo__img--light', src: route('assets/brand/logo-lockup.png'),
-        alt: 'نمبرون للسفر و السياحة — Number One Travel & Tourism', width: 640, height: 498,
-      }),
-      el('img', {
-        class: 'c-logo__img c-logo__img--inverse', src: route('assets/brand/logo-lockup-inverse.png'),
-        alt: '', 'aria-hidden': 'true', width: 640, height: 498,
-      }),
-    ]),
+    logo({ variant: 'lockup', size: 'c-logo--lg', href: null, inverse: true }),
     el('p', { class: 'c-gf__statement' }, pick(FOOTER_BRAND, 'statement')),
     el('p', { class: 'c-gf__support-line' }, [
       icon('no-supervisor', { size: 'sm' }),
@@ -220,16 +211,7 @@ export function globalFooter({ variant = 'marketing', collapsible = null } = {})
 
         variant === 'booking' && contact
           ? el('div', { class: 'c-gf__compact' }, [
-              el('span', { class: 'c-logo c-logo--sm' }, [
-                el('img', {
-                  class: 'c-logo__img c-logo__img--light', src: route('assets/brand/logo-primary.png'),
-                  alt: 'نمبرون للسفر و السياحة', width: 640, height: 444,
-                }),
-                el('img', {
-                  class: 'c-logo__img c-logo__img--inverse', src: route('assets/brand/logo-primary-inverse.png'),
-                  alt: '', 'aria-hidden': 'true', width: 640, height: 444,
-                }),
-              ]),
+              logo({ variant: 'primary', size: 'c-logo--sm', href: null, inverse: true }),
               contact,
             ])
           : null,

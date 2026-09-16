@@ -186,6 +186,18 @@ the toggle thumb travel and the card badge corner.
 `setLocale('en' | 'ar')` sets `lang` and `dir` together and re-renders
 everything data-driven. The style guide's language button is the live proof.
 
+**Two translation mechanisms, one rule for which to use.**
+
+| | Mechanism | Use for |
+| --- | --- | --- |
+| `t('key')` | string table in `core/i18n.js` | Interface strings the system owns: button labels, validation, empty states, ARIA names |
+| `pick(record, 'field')` | `fieldAr` / `fieldEn` on the data record | Content a record carries: navigation labels, service titles, menu descriptions, anything an admin or an API will supply |
+
+The test: if the text would be edited by a content owner rather than a
+developer, it belongs on the record. Navigation labels moved from `t()` keys to
+records in Stage 10.2 for exactly that reason; putting them back in the string
+table would be a regression, not a tidy-up.
+
 **Directional icons** carry `data-flip="true"` and mirror automatically; a
 clock or an aeroplane does not flip.
 
