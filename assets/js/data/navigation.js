@@ -158,6 +158,10 @@ export const SUPPORT_CHANNELS = [
 export const MENU_HELP = {
   id: 'help',
   type: 'panel',
+  /* Opened from two places — the primary nav and the Support action — so the
+     header builds it once, anchored to the end of the bar, and points both
+     triggers at it. Two triggers, one panel, one thing to maintain. */
+  placement: 'end',
   titleAr: 'المساعدة', titleEn: 'Help',
   channels: SUPPORT_CHANNELS,
   columns: [

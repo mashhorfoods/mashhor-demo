@@ -29,8 +29,8 @@ export * from './components/footer.js';
 import { ready } from './core/dom.js';
 import { initLocale, setLocale, applyTranslations, onLocaleChange } from './core/i18n.js';
 import {
-  setSpritePath, ensureSprite, initAccordions, initTabs, initDrawers, initModals,
-  initOtp, initPopovers, initUploads, initReveal, initLanguageSwitch,
+  setSpritePath, ensureSprite, initAccordions, initTabs, initModals,
+  initOtp, initPopovers, initUploads, initLanguageSwitch,
 } from './components/ui.js';
 
 /**
@@ -63,11 +63,9 @@ export function boot({ sprite = 'assets/icons/sprite.svg', locale = true, onLoca
 
     initAccordions();
     initTabs();
-    initDrawers();
     initModals();
     initOtp();
     initPopovers();
     initUploads();
-    initReveal();
   });
 }

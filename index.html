@@ -110,7 +110,7 @@
     serviceGrid, searchWidget,
   } from './assets/js/foundation.js';
 
-  let header = null;
+  let header = null;   // kept for page code that wants header.no.*
 
   function paint() {
     render(qs('#bottom-nav'), NAV_BOTTOM.map((item, i) =>
@@ -134,7 +134,9 @@
   // The header is rebuilt on a language change because its labels come from
   // data, not from data-i18n attributes.
   function mountChrome() {
-    header?.remove();
+    // mountHeader/mountFooter find and destroy any previous instance themselves.
+    // Removing the old header here first would hide it from that cleanup and
+    // leak its listeners.
     mountFooter({ target: qs('.l-page'), variant: 'marketing' });
     header = mountHeader({
       target: qs('.l-page'),

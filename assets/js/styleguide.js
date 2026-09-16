@@ -11,7 +11,7 @@ import {
   boot, el, qs, qsa, render, icon, toast, setButtonState,
   t, getLocale, applyTranslations,
   SERVICES, STATUSES, route,
-  globalHeader, initHeaderScrollState, setSession, getSession, globalFooter,
+  mountHeader, setSession, getSession, globalFooter,
   serviceGrid, flightCard, hotelCard, packageCard, supervisorCard, tripCard, statusBadge,
   searchWidget, stateRegion, skeletonList, skeletonFlight,
 } from './foundation.js';
@@ -149,18 +149,13 @@ let showState = null;
 /* The header is the live component, not a mock of it: the style guide gets the
    same one every page gets, so it cannot drift. §33 of Stage 10.1 */
 function mountHeaders() {
-  const host = qs('#sg-header');
-  host.replaceChildren();
-  const h = globalHeader({ current: 'home' });
-  host.append(h);
-  initHeaderScrollState(h);
+  // mountHeader destroys the previous instance (listeners included) before
+  // rendering the new one; replaceChildren() alone would leak them.
+  mountHeader({ target: qs('#sg-header'), current: 'home' });
 
-  const booking = qs('#sg-booking-header');
-  booking.replaceChildren();
   // A second instance in the booking variant, shown inline rather than stuck.
-  const b = globalHeader({ variant: 'booking' });
+  const b = mountHeader({ target: qs('#sg-booking-header'), variant: 'booking' });
   b.style.position = 'static';
-  booking.append(b);
 }
 
 function mountFooters() {

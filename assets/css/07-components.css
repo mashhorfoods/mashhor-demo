@@ -74,50 +74,6 @@
   .c-bottom-nav__item[aria-current="page"] { color: var(--color-text-brand); font-weight: var(--weight-semibold); }
 
   /* ======================================================================
-     DRAWER — mobile menu, filters, any off-canvas panel
-     ==================================================================== */
-  .c-drawer {
-    position: fixed; inset: 0; z-index: var(--z-drawer);
-    display: grid;
-    pointer-events: none;
-  }
-  .c-drawer[hidden] { display: none; }
-  .c-drawer__scrim {
-    position: absolute; inset: 0;
-    background-color: var(--color-overlay);
-    opacity: 0;
-    transition: opacity var(--duration-base) var(--ease-standard);
-  }
-  .c-drawer__panel {
-    position: relative;
-    justify-self: end;
-    inline-size: min(22rem, 88vw);
-    block-size: 100%;
-    display: flex; flex-direction: column;
-    background-color: var(--color-surface);
-    box-shadow: var(--shadow-overlay);
-    translate: 100% 0;
-    transition: translate var(--duration-base) var(--ease-out);
-    overflow-y: auto; overscroll-behavior: contain;
-  }
-  /* In Arabic the panel slides in from the left, because "end" is the left. */
-  [dir="rtl"] .c-drawer__panel { translate: -100% 0; }
-  .c-drawer--start .c-drawer__panel { justify-self: start; translate: -100% 0; }
-  [dir="rtl"] .c-drawer--start .c-drawer__panel { translate: 100% 0; }
-  .c-drawer[data-open="true"] { pointer-events: auto; }
-  .c-drawer[data-open="true"] .c-drawer__scrim { opacity: 1; }
-  .c-drawer[data-open="true"] .c-drawer__panel { translate: 0 0; }
-
-  .c-drawer__head {
-    display: flex; align-items: center; justify-content: space-between; gap: var(--space-16);
-    padding: var(--space-16); border-block-end: var(--border-hairline);
-    position: sticky; inset-block-start: 0; background-color: var(--color-surface); z-index: 1;
-  }
-  .c-drawer__body { padding: var(--space-16); flex: 1; }
-  .c-drawer__foot { padding: var(--space-16); border-block-start: var(--border-hairline);
-                    position: sticky; inset-block-end: 0; background-color: var(--color-surface); }
-
-  /* ======================================================================
      MODAL — built on <dialog> so focus trapping, Esc and inertness are the
      platform's job rather than ours. §23
      ==================================================================== */

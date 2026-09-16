@@ -196,52 +196,6 @@ export function initTabs(root = document) {
 }
 
 /* ---------------------------------------------------------------------------
-   DRAWER — the mobile menu and the filter panel.
-   ------------------------------------------------------------------------ */
-export function initDrawers(root = document) {
-  qsa('[data-drawer]', root).forEach((drawer) => {
-    let release = null;
-
-    const open = () => {
-      drawer.hidden = false;
-      // Next frame, so the translate transition has a start value to run from.
-      requestAnimationFrame(() => { drawer.dataset.open = 'true'; });
-      lockScroll();
-      release = trapFocus(drawer);
-      qsa(`[aria-controls="${drawer.id}"]`).forEach((b) => b.setAttribute('aria-expanded', 'true'));
-    };
-
-    const close = () => {
-      drawer.dataset.open = 'false';
-      unlockScroll();
-      release?.();
-      release = null;
-      qsa(`[aria-controls="${drawer.id}"]`).forEach((b) => b.setAttribute('aria-expanded', 'false'));
-      const panel = qs('.c-drawer__panel', drawer);
-      const done = () => { drawer.hidden = true; };
-      panel?.addEventListener('transitionend', done, { once: true });
-      setTimeout(done, 400); // fallback when reduced motion kills the event
-    };
-
-    drawer.addEventListener('click', (event) => {
-      if (event.target.closest('[data-drawer-close]') || event.target.matches('.c-drawer__scrim')) close();
-    });
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && drawer.dataset.open === 'true') close();
-    });
-
-    qsa(`[aria-controls="${drawer.id}"]`).forEach((trigger) => {
-      trigger.setAttribute('aria-expanded', 'false');
-      trigger.addEventListener('click', () => {
-        (drawer.dataset.open === 'true' ? close : open)();
-      });
-    });
-
-    drawer.no = { open, close };
-  });
-}
-
-/* ---------------------------------------------------------------------------
    MODAL — native <dialog>. The platform gives us focus trapping, Esc, and
    inertness for free, which is more reliable than anything we would write.
    ------------------------------------------------------------------------ */
@@ -465,28 +419,6 @@ export function initUploads(root = document) {
       }
     });
   });
-}
-
-/* ---------------------------------------------------------------------------
-   REVEAL — content arriving on scroll. Opt-in, cheap, and disconnected once
-   an element has been seen. §24 / §30
-   ------------------------------------------------------------------------ */
-export function initReveal(root = document) {
-  const targets = qsa('.u-reveal', root);
-  if (targets.length === 0 || !('IntersectionObserver' in window)) {
-    targets.forEach((node) => node.classList.add('is-visible'));
-    return;
-  }
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (!entry.isIntersecting) return;
-      entry.target.classList.add('is-visible');
-      observer.unobserve(entry.target);
-    });
-  }, { rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
-
-  targets.forEach((node) => observer.observe(node));
 }
 
 /* ---------------------------------------------------------------------------

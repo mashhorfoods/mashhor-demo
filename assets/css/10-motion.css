@@ -7,20 +7,6 @@
    ========================================================================= */
 
 @layer motion {
-  /* Content arriving on scroll. The class is added by JS only when
-     IntersectionObserver is available; without JS everything is visible,
-     so content is never trapped behind an animation. */
-  .js .u-reveal { opacity: 0; translate: 0 var(--space-16); }
-  .js .u-reveal.is-visible {
-    opacity: 1; translate: none;
-    transition: opacity var(--duration-slow) var(--ease-standard),
-                translate var(--duration-slow) var(--ease-out);
-    transition-delay: calc(var(--reveal-delay, 0) * 60ms);
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .js .u-reveal { opacity: 1; translate: none; }
-  }
-
   /* ======================================================================
      GRAPHIC LANGUAGE — §16
      Derived from the numeral 1: a single decisive stroke, and the route it

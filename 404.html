@@ -108,9 +108,8 @@
     render(qs('#service-links'), SERVICES.map((service) =>
       el('li', {}, el('a', { class: 'c-chip', href: route(service.href) }, pick(service, 'title')))));
     qs('#svc-heading').textContent = t('nav.services');
-    header?.remove();
     // No `current`: a 404 is not one of the navigation destinations, so no item
-    // is marked active. §19
+    // is marked active. §19  (mountHeader destroys the previous instance.)
     header = mountHeader({ target: qs('.l-page') });
     mountFooter({ target: qs('.l-page'), variant: 'booking' });
   }

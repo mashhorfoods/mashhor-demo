@@ -120,7 +120,7 @@
 
   /* ---- Print ----------------------------------------------------------- */
   @media print {
-    .c-header, .c-bottom-nav, .c-drawer, .c-toast-region, [data-print="hide"] { display: none !important; }
+    .c-gh, .c-bottom-nav, .c-toast-region, [data-print="hide"] { display: none !important; }
     body { background: #fff; color: #000; }
   }
 }

@@ -51,7 +51,7 @@ const initials = (name) => (name || '')
 /* ---------------------------------------------------------------------------
    MENU CONTROLLER — one open panel at a time, for the whole header.
    ------------------------------------------------------------------------ */
-function createMenuController(scrim) {
+function createMenuController(scrim, { signal } = {}) {
   let open = null;   // { trigger, panel }
 
   const close = ({ restoreFocus = false } = {}) => {
@@ -99,6 +99,9 @@ function createMenuController(scrim) {
       }
     });
 
+    if (panel.dataset.ghWired) return;
+    panel.dataset.ghWired = 'true';
+
     panel.addEventListener('click', (event) => {
       // Choosing an item closes the menu; clicking whitespace inside does not.
       if (event.target.closest('a, [data-menu-close]')) close();
@@ -107,14 +110,16 @@ function createMenuController(scrim) {
 
     // Tabbing past the last item closes and lets focus continue naturally.
     panel.addEventListener('focusout', (event) => {
-      if (!panel.contains(event.relatedTarget) && event.relatedTarget !== trigger) close();
+      if (!panel.contains(event.relatedTarget) && event.relatedTarget !== open?.trigger) close();
     });
   };
 
-  document.addEventListener('click', () => close());
+  // Bound to the header's lifetime. Without the signal every re-mount (each
+  // locale change) left another pair of these on document, forever.
+  document.addEventListener('click', () => close(), { signal });
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') close({ restoreFocus: true });
-  });
+  }, { signal });
 
   return { register, close, isOpen: () => Boolean(open) };
 }
@@ -283,7 +288,7 @@ export function accountPanel() {
 
   paint();
   sessionListeners.add(paint);
-  panel.no = { paint };
+  panel.no = { paint, destroy: () => sessionListeners.delete(paint) };
   return panel;
 }
 
@@ -327,7 +332,7 @@ export function searchPanel({ onSubmit } = {}) {
 /* ---------------------------------------------------------------------------
    MOBILE DRAWER — §16 §17 §18
    ------------------------------------------------------------------------ */
-export function mobileDrawer() {
+export function mobileDrawer({ signal } = {}) {
   const isAr = getLocale() === 'ar';
   let release = null;
 
@@ -432,7 +437,7 @@ export function mobileDrawer() {
   });
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && drawer.dataset.open === 'true') close();
-  });
+  }, { signal });
 
   drawer.no = { open, close };
   return drawer;
@@ -448,7 +453,11 @@ export function mobileDrawer() {
 export function globalHeader({ current = null, variant = 'default', onSearch = null } = {}) {
   const isAr = getLocale() === 'ar';
   const scrim = el('div', { class: 'c-gh__scrim', hidden: true });
-  const menus = createMenuController(scrim);
+  // Everything this header attaches outside itself — document listeners,
+  // session subscriptions — is released by one abort. See header.no.destroy.
+  const lifetime = new AbortController();
+  const { signal } = lifetime;
+  const menus = createMenuController(scrim, { signal });
   const isBooking = variant === 'booking';
 
   /* ---- primary navigation ----
@@ -458,6 +467,7 @@ export function globalHeader({ current = null, variant = 'default', onSearch = n
      the bar inside .c-gh__inner, while the narrow dropdowns stay anchored to
      their trigger's <li>. */
   const megaPanels = [];
+  const sharedPanels = {};
   const navItems = NAV_PRIMARY.map((item) => {
     const menu = item.menu && MENUS[item.menu];
     const active = item.id === current;
@@ -478,8 +488,12 @@ export function globalHeader({ current = null, variant = 'default', onSearch = n
     ]);
     const panel = menuPanel(menu);
     menus.register(trigger, panel);
+    if (menu.placement === 'end') { panel.classList.add('c-gh__panel--end'); sharedPanels[menu.id] = panel; }
 
-    if (menu.type === 'mega') {
+    // Mega and end-anchored panels live at the bar level, not in the <li>:
+    // a mega spans the container, and an end-anchored one is shared with an
+    // action button on the far side of the bar.
+    if (menu.type === 'mega' || menu.placement === 'end') {
       megaPanels.push(panel);
       return el('li', {}, trigger);
     }
@@ -499,7 +513,10 @@ export function globalHeader({ current = null, variant = 'default', onSearch = n
     }
   });
 
-  const helpMenu = menuPanel({ ...MENUS.help, id: 'help-action' });
+  // The Support action opens the SAME help panel the primary nav built — the
+  // page used to carry two byte-identical copies of it, 41 nodes each.
+  const helpMenu = sharedPanels.help ?? menuPanel({ ...MENUS.help, placement: 'end' });
+  if (!sharedPanels.help) { helpMenu.classList.add('c-gh__panel--end'); megaPanels.push(helpMenu); }
   const helpTrigger = el('button', {
     type: 'button', class: 'c-gh__action',
     'aria-label': isAr ? 'المساعدة والدعم' : 'Help and support',
@@ -530,7 +547,7 @@ export function globalHeader({ current = null, variant = 'default', onSearch = n
     'aria-expanded': 'false',
   }, icon('no-menu'));
 
-  const drawer = mobileDrawer();
+  const drawer = mobileDrawer({ signal });
   drawer.id = uid('gh-drawer');
   burger.setAttribute('aria-controls', drawer.id);
   burger.addEventListener('click', () => {
@@ -562,7 +579,7 @@ export function globalHeader({ current = null, variant = 'default', onSearch = n
           searchTrigger,
           // Each dropdown trigger needs a positioned parent, or its panel
           // anchors to the whole bar instead of to the control.
-          el('span', { class: 'u-relative c-gh__desktop-only' }, [helpTrigger, helpMenu]),
+          el('span', { class: 'c-gh__desktop-only' }, helpTrigger),
           el('span', { class: 'u-relative' }, [accountTrigger, account]),
           // §11 — exactly one red action. The booking variant drops it, because
           // on a booking page the page itself is the call to action. §32
@@ -581,6 +598,14 @@ export function globalHeader({ current = null, variant = 'default', onSearch = n
     menus,
     drawer: drawer.no,
     setSession,
+    /** Release every listener this header holds. mountHeader calls it before
+        replacing a header; call it yourself if you place the header manually. */
+    destroy() {
+      lifetime.abort();
+      account.no.destroy();
+      sessionListeners.delete(paintAccountTrigger);
+      header.remove();
+    },
     /** Mark the active item without re-rendering the header. §19 */
     setCurrent(id) {
       qsa('.c-gh__link[aria-current]', header).forEach((n) => n.removeAttribute('aria-current'));
@@ -612,8 +637,9 @@ export function initHeaderScrollState(header) {
 
 /** Mount the header as the first element of a page and wire its scroll state. */
 export function mountHeader(options = {}) {
-  const header = globalHeader(options);
   const target = options.target ?? document.body;
+  qsa('.c-gh', target).forEach((old) => (old.no?.destroy ?? old.remove).call(old.no ?? old));
+  const header = globalHeader(options);
   target.prepend(header);
   initHeaderScrollState(header);
   return header;
