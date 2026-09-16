@@ -11,6 +11,7 @@ inherits it.
 | **Footer** | [`docs/FOOTER.md`](docs/FOOTER.md) — Stage 10.3 |
 | **Homepage build** | [`docs/HOMEPAGE.md`](docs/HOMEPAGE.md) — Stage 10.4 |
 | **Services** | [`docs/SERVICES.md`](docs/SERVICES.md) — Stage 10.5 · `services/` |
+| **Service details** | [`docs/SERVICE-DETAILS.md`](docs/SERVICE-DETAILS.md) — Stage 10.6 · `services/<slug>/` |
 | **Living style guide** | `styleguide.html` — every token, component and state, in RTL and LTR |
 | **Homepage** | `index.html` — the production homepage (Stage 10.4) |
 | **Brand assets** | [`assets/brand/README.md`](assets/brand/README.md) |

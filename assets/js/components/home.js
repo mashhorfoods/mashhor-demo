@@ -220,7 +220,9 @@ export const offerGrid = (list = HOME_OFFERS) =>
    HOW WE HELP — the numbered journey. §10
    ------------------------------------------------------------------------ */
 export function journeySteps(steps = HOME_JOURNEY) {
-  return el('ol', { class: 'c-journey', role: 'list' }, steps.map((s, i) =>
+  // As many desktop columns as there are steps (three to five), so a
+  // five-step journey never strands its last step on a second row.
+  return el('ol', { class: 'c-journey', role: 'list', style: `--journey-cols:${Math.min(Math.max(steps.length, 3), 5)}` }, steps.map((s, i) =>
     el('li', { class: 'c-journey__step' }, [
       el('span', { class: 'c-journey__num', 'aria-hidden': 'true' }, String(i + 1).padStart(2, '0')),
       el('h3', { class: 'c-journey__title' }, pick(s, 'title')),

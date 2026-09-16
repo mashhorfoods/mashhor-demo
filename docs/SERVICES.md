@@ -6,7 +6,7 @@ hero composition. Nothing here redefines a token or a component.
 
 ```
 services/index.html               the route: /services/
-assets/js/data/services.js        THE service registry: 12 services, 4 categories,
+assets/js/data/services.js        THE service registry: 13 services, 4 categories,
                                   3 kinds, the Help Me Choose options
 assets/js/components/services.js  hero · category nav · kind legend · groups ·
                                   help options · mountServices()
@@ -22,12 +22,14 @@ services.regions.core.error();         // any group: loading() empty() error() c
 
 ## One registry, every surface
 
-`SERVICE_REGISTRY` is now the only place a service is defined. These read it:
+`SERVICE_REGISTRY` is now the only place a service is defined (thirteen since
+10.6 added group trips). These read it:
 
 | Surface | Reads |
 | --- | --- |
-| Services page | all 12, grouped by `category` |
-| Homepage grid | all 12; `featured` six first, the rest behind "show all" |
+| Services page | all 13, grouped by `category` |
+| Service detail pages | one generated route per record (10.6) |
+| Homepage grid | all 13; `featured` six first, the rest behind "show all" |
 | Header mega menu | four columns = the four categories; `title` + `short` |
 | Footer services column | derived from the mega menu |
 | 404 chips, style guide, supervisor card | `SERVICES` = the featured six |
@@ -60,8 +62,7 @@ follows the kind: "ابحث واحجز", "اطلب الخدمة", "ابدأ ال
 **Every CTA works today.** A service's CTA opens the homepage booking entry on
 the right vertical (`serviceEntry()` builds `?vertical=…&service=…#booking`,
 and `index.html` honours it). The card title and "service details" link go to
-the future detail route, which lands on the branded 404 until Stage 10.6, as
-the brief asks.
+the service's detail page (Stage 10.6, [`SERVICE-DETAILS.md`](SERVICE-DETAILS.md)).
 
 **`<base href="../">`.** The page lives one level down, so `<base>` points
 every relative URL — assets, the sprite, the module import and `route()` — at
@@ -98,7 +99,7 @@ interaction, 42/42 header responsive, 62/62 footer, and the language audit at
 
 | | |
 | --- | --- |
-| 12 approved services, 4 groups, structured data | ✅ one registry, read by six surfaces |
+| 13 services (the approved 12 + group trips from 10.6), 4 groups, structured data | ✅ one registry, read by seven surfaces |
 | Hero with one primary CTA · category nav · help me choose · human support | ✅ |
 | Existing header, footer, tokens, components reused | ✅ no new tokens, no forked card |
 | Arabic · English · RTL · LTR | ✅ audit 0; title, description and every label switch |

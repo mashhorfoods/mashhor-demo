@@ -125,7 +125,7 @@
      ==================================================================== */
   .c-journey { display: grid; gap: var(--space-32); counter-reset: journey; }
   @media (min-width: 48em) { .c-journey { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (min-width: 64em) { .c-journey { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-32); } }
+  @media (min-width: 64em) { .c-journey { grid-template-columns: repeat(var(--journey-cols, 4), minmax(0, 1fr)); gap: var(--space-32); } }
   .c-journey__step { position: relative; display: flex; flex-direction: column; gap: var(--space-8);
                      padding-block-start: var(--space-16); border-block-start: var(--border-hairline); }
   .c-journey__num { font-family: var(--font-data); font-size: var(--text-number-lg); font-weight: var(--weight-bold);

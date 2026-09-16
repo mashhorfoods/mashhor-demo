@@ -489,8 +489,9 @@ component in this layer. Permission is asked, never assumed.
    Set the two values and the header panels, the drawer, the footer and the
    homepage support block all show them.
 8. **Service photography.** Every registry record in `data/services.js`
-   carries `image.src: null`; the services page renders the neutral slot at the
-   card's ratio until the approved photographs arrive.
+   carries `image.src: null`; the services page and every service detail page
+   render the neutral slot at the reserved ratio until the approved
+   photographs arrive.
 
 ---
 

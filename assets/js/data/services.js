@@ -1,7 +1,8 @@
 /* ============================================================================
    DATA / SERVICES — the one registry of what Number One sells. Stage 10.5
 
-   Twelve approved services in four categories. Every surface that lists a
+   Thirteen approved services in four categories (the 10.5 twelve plus the
+   group trips the 10.6 brief lists). Every surface that lists a
    service reads THIS file: the services page, the homepage grid, the header
    mega menu, the footer column, the 404's chips, the style guide, and later
    the service-detail pages, search, the customer account, the supervisor
@@ -15,8 +16,8 @@
                 'request' — a specialist arranges it after a request
                 'manage'  — an existing ticket is changed or cancelled
      icon       sprite id (outline set only, §05)
-     href       the service-detail route (Stage 10.6). Until it exists it
-                lands on the branded 404, by design (§13)
+     href       the service-detail route: services/<slug>/ (Stage 10.6)
+     slug       the last segment of href — the generated route directory
      vertical   SEARCH_VERTICALS id the booking entry opens for this service
      option     for the 'other' vertical: which service the select preselects
      status     'available' | 'soon'   — 'soon' disables the CTA and says so
@@ -114,6 +115,14 @@ export const SERVICE_REGISTRY = [
     descEn: 'Airport pickups and transfers with a driver at the destination, at an agreed time and price.',
     image: { src: null, altAr: 'النقل', altEn: 'Transport' } },
 
+  { id: 'groups',    category: 'programmes', kind: 'request', icon: 'no-users', href: 'services/groups/', vertical: 'other', option: 'groups',
+    status: 'available', featured: false,
+    titleAr: 'الرحلات الجماعية', titleEn: 'Group trips',
+    shortAr: 'سفر المجموعات في حجز واحد', shortEn: 'Group travel as one booking',
+    descAr: 'تنظيم سفر المجموعات والعائلات الكبيرة في حجز واحد: نفس الرحلة، إقامة متجاورة، وتنقّلات تكفي الجميع.',
+    descEn: 'Travel for groups and large families as one booking: the same flight, rooms close together, and transfers that fit everyone.',
+    image: { src: null, altAr: 'الرحلات الجماعية', altEn: 'Group trips' } },
+
   /* ---- Specialised travel -------------------------------------------- */
   { id: 'medical',   category: 'specialised', kind: 'request', icon: 'no-medical', href: 'services/medical/', vertical: 'medical',
     status: 'available', featured: true,
@@ -160,6 +169,10 @@ export const SERVICE_REGISTRY = [
     descEn: 'We cancel your ticket and explain what is refunded and what is not before you confirm.',
     image: { src: null, altAr: 'إلغاء التذاكر', altEn: 'Ticket cancellation' } },
 ];
+
+/* Every record's slug is the last segment of its route; derived once here so
+   the two can never drift. */
+for (const s of SERVICE_REGISTRY) s.slug = s.href.replace(/\/$/, '').split('/').pop();
 
 /* ---- Selectors every surface shares ------------------------------------ */
 export const serviceById = (id) => SERVICE_REGISTRY.find((s) => s.id === id) ?? null;

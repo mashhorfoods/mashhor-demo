@@ -1,0 +1,41 @@
+/* ============================================================================
+   16 — SERVICE DETAIL COMPOSITIONS  Stage 10.6
+
+   The template reuses .c-hero (14-home), .c-value and .c-journey (14-home),
+   .c-support (14-home), .c-cta-band (14-home), .c-card and .c-breadcrumb
+   (07-components). What is new here is small: the overview lead + points,
+   the feature card, the requirements list, the kind badge in the hero.
+   ========================================================================= */
+
+@layer components {
+  /* Kind badge sits after the category in the overline; the overline is a
+     <p>, so the badge needs its own alignment. */
+  .c-detail__kind { margin-inline-start: var(--space-8); vertical-align: middle; }
+  .c-hero__copy .c-breadcrumb { margin-block-end: var(--space-4); }
+  .c-breadcrumb__list { list-style: none; margin: 0; padding: 0; }
+  .c-breadcrumb__sep { display: inline-flex; }
+  .c-breadcrumb [aria-current="page"] { color: var(--color-text); font-weight: var(--weight-medium); }
+
+  /* Overview: one paragraph at reading measure, points beside it on desktop. */
+  .c-detail__lead { color: var(--color-text); max-inline-size: var(--measure); }
+  .c-detail__points { display: flex; flex-direction: column; gap: var(--space-12); align-self: start;
+                      padding: var(--space-16); border: var(--border-hairline); border-radius: var(--radius-md);
+                      background-color: var(--color-surface); }
+  .c-detail__point { display: flex; align-items: flex-start; gap: var(--space-8); font-size: var(--text-body-sm); }
+  .c-detail__point .c-icon { color: var(--color-success); flex: none; margin-block-start: 2px; }
+
+  /* Feature card: quiet, no hover lift — it is information, not a link. */
+  .c-feature { box-shadow: none; }
+  .c-feature .c-card__title { font-size: var(--text-h4); }
+
+  /* Requirements: what we ask for, as a two-column list from tablet up. */
+  .c-req { display: grid; gap: var(--space-12); margin-block-end: var(--space-24); }
+  @media (min-width: 48em) { .c-req { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-16); } }
+  .c-req__item { display: flex; align-items: center; gap: var(--space-12);
+                 padding: var(--space-16); border: var(--border-hairline); border-radius: var(--radius-md);
+                 background-color: var(--color-surface); font-size: var(--text-body-sm); }
+  .c-req__item .c-icon { color: var(--color-primary); flex: none; }
+
+  /* Hero skeleton: the media block keeps its ratio while loading. */
+  .c-hero__media.c-skeleton { border-radius: var(--radius-lg); }
+}

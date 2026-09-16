@@ -173,6 +173,7 @@ export const SEARCH_VERTICALS = [
       { id: 'service', type: 'select', label: 'search.service', options: [
           { value: 'study',  labelAr: 'السفر للدراسة', labelEn: 'Study travel' },
           { value: 'work',   labelAr: 'السفر للعمل',   labelEn: 'Work travel' },
+          { value: 'groups', labelAr: 'الرحلات الجماعية', labelEn: 'Group trips' },
           { value: 'issue',  labelAr: 'إصدار تذكرة',   labelEn: 'Ticket issuing' },
           { value: 'change', labelAr: 'تعديل تذكرة',   labelEn: 'Change a ticket' },
           { value: 'cancel', labelAr: 'إلغاء تذكرة',   labelEn: 'Cancel a ticket' },
