@@ -18,8 +18,7 @@
 
 <style>
   /* Style-guide chrome only. Nothing here belongs to the product. */
-  .sg-nav { position: sticky; inset-block-start: 0; z-index: var(--z-header);
-            background: var(--color-surface); border-block-end: var(--border-hairline); }
+  .sg-nav { background: var(--color-bg-subtle); border-block-end: var(--border-hairline); }
   .sg-nav__inner { display: flex; align-items: center; gap: var(--space-16);
                    min-block-size: var(--header-height-compact); flex-wrap: wrap; }
   .sg-toc { display: flex; gap: var(--space-4); overflow-x: auto; scrollbar-width: none; flex: 1;
@@ -69,6 +68,7 @@
 </head>
 
 <body>
+<div id="sg-header"></div>
 <a class="c-skip-link" href="#main" data-i18n="a11y.skip">تخطَّ إلى المحتوى</a>
 
 <header class="sg-nav">
@@ -530,10 +530,15 @@
     </div>
     <div class="sg-demo">
       <p class="sg-demo__label">Desktop nav · overlays</p>
-      <nav class="c-nav" aria-label="عرض توضيحي"><ul class="c-nav__list" role="list" id="sg-nav"></ul></nav>
+      <p class="sg-note">الهيدر العام مكوّن حيّ — الموجود أعلى هذه الصفحة هو نفسه المستخدم في كل الموقع.
+         جرّب «خدماتنا» و«المساعدة» و«حسابي» والبحث من الشريط العلوي.</p>
       <div class="l-cluster l-cluster--12" style="margin-block-start:var(--space-24)">
-        <button type="button" class="c-btn c-btn--secondary" aria-controls="sg-drawer">افتح القائمة الجانبية</button>
+        <button type="button" class="c-btn c-btn--secondary" id="sg-auth">بدّل حالة تسجيل الدخول</button>
         <button type="button" class="c-btn c-btn--secondary" data-modal-open="sg-modal">افتح نافذة حوارية</button>
+      </div>
+      <div class="sg-demo" style="margin-block-start:var(--space-24)">
+        <p class="sg-demo__label">§32 — booking variant: navigation recedes, support and account stay</p>
+        <div id="sg-booking-header"></div>
       </div>
       <div class="c-breadcrumb" style="margin-block-start:var(--space-24)">
         <ol class="c-breadcrumb__list" role="list">
@@ -618,20 +623,6 @@
 </main>
 
 <!-- ==================== OVERLAYS ==================== -->
-<div class="c-drawer" id="sg-drawer" data-drawer hidden>
-  <div class="c-drawer__scrim"></div>
-  <div class="c-drawer__panel" role="dialog" aria-modal="true" aria-label="القائمة">
-    <div class="c-drawer__head">
-      <strong>القائمة</strong>
-      <button type="button" class="c-btn c-btn--utility" data-drawer-close aria-label="إغلاق">
-        <svg class="c-icon" aria-hidden="true"><use href="#no-close"></use></svg>
-      </button>
-    </div>
-    <div class="c-drawer__body"><ul class="l-stack l-stack--4" role="list" id="sg-drawer-nav"></ul></div>
-    <div class="c-drawer__foot"><button type="button" class="c-btn c-btn--primary c-btn--block">احجز الآن</button></div>
-  </div>
-</div>
-
 <dialog class="c-modal" id="sg-modal" aria-labelledby="sg-modal-title">
   <form method="dialog" class="c-modal__form">
     <div class="c-modal__head">

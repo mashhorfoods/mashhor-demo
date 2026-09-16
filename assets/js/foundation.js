@@ -17,10 +17,12 @@ export * from './core/dom.js';
 export * from './core/i18n.js';
 export * from './core/format.js';
 export * from './data/config.js';
+export * from './data/navigation.js';
 export * from './components/ui.js';
 export * from './components/cards.js';
 export * from './components/search.js';
 export * from './components/states.js';
+export * from './components/header.js';
 
 import { ready } from './core/dom.js';
 import { initLocale, setLocale, applyTranslations, onLocaleChange } from './core/i18n.js';

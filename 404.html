@@ -52,23 +52,7 @@
 <body>
 <div class="l-page">
 
-  <header class="c-header">
-    <div class="l-container">
-      <div class="c-header__inner">
-        <a class="c-logo c-header__brand" href="./">
-          <img class="c-logo__img c-logo__img--light" src="assets/brand/logo-primary.png"
-               alt="نمبرون للسفر و السياحة — Number One Travel &amp; Tourism"
-               width="640" height="444">
-        </a>
-        <div class="c-header__actions">
-          <button type="button" class="c-btn c-btn--utility" data-lang-switch aria-label="تغيير اللغة">
-            <svg class="c-icon" aria-hidden="true"><use href="#no-language"></use></svg>
-          </button>
-          <a class="c-btn c-btn--secondary c-btn--sm" href="support/" data-i18n="nav.support">الدعم</a>
-        </div>
-      </div>
-    </div>
-  </header>
+  <!-- Global header mounted by the script below. Stage 10.2 -->
 
   <main id="main" class="l-page__main">
     <div class="l-container">
@@ -120,14 +104,19 @@
 </div>
 
 <script type="module">
-  import { boot, el, qs, render, t, route, SERVICES, pick } from './assets/js/foundation.js';
+  import { boot, el, qs, render, route, t, SERVICES, pick, mountHeader }
+    from './assets/js/foundation.js';
+
+  let header = null;
 
   function paint() {
-    // Chips rather than cards: on an error page the services are a way out,
-    // not the content. Same data, lighter presentation.
     render(qs('#service-links'), SERVICES.map((service) =>
       el('li', {}, el('a', { class: 'c-chip', href: route(service.href) }, pick(service, 'title')))));
     qs('#svc-heading').textContent = t('nav.services');
+    header?.remove();
+    // No `current`: a 404 is not one of the navigation destinations, so no item
+    // is marked active. §19
+    header = mountHeader({ target: qs('.l-page') });
   }
 
   boot({ sprite: 'assets/icons/sprite.svg', onLocale: paint });

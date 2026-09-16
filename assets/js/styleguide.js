@@ -10,7 +10,8 @@
 import {
   boot, el, qs, qsa, render, icon, toast, setButtonState,
   t, getLocale, applyTranslations,
-  SERVICES, NAV_PRIMARY, STATUSES, route,
+  SERVICES, STATUSES, route,
+  globalHeader, initHeaderScrollState, setSession, getSession,
   serviceGrid, flightCard, hotelCard, packageCard, supervisorCard, tripCard, statusBadge,
   searchWidget, stateRegion, skeletonList, skeletonFlight,
 } from './foundation.js';
@@ -129,19 +130,6 @@ function renderComponents() {
   ]);
   render(qs('#sg-status'), Object.keys(STATUSES).map(statusBadge));
 
-  render(qs('#sg-nav'), NAV_PRIMARY.map((item, i) => el('li', {}, [
-    el('a', {
-      class: 'c-nav__link', href: route(item.href),
-      ...(i === 0 ? { 'aria-current': 'page' } : {}),
-    }, t(item.label)),
-  ])));
-
-  render(qs('#sg-drawer-nav'), NAV_PRIMARY.map((item) => el('li', {}, [
-    el('a', { class: 'c-nav__link', href: route(item.href), style: 'inline-size:100%' }, [
-      icon(item.icon, { size: 'sm' }), el('span', {}, t(item.label)),
-    ]),
-  ])));
-
   render(qs('#sg-search'), searchWidget({
     onSubmit: (vertical) => toast({
       variant: 'info',
@@ -158,6 +146,32 @@ let showState = null;
 
 /** Binds the demo buttons exactly once. Safe to call again — it will not
     stack a second set of listeners on a language change. */
+/* The header is the live component, not a mock of it: the style guide gets the
+   same one every page gets, so it cannot drift. §33 of Stage 10.1 */
+function mountHeaders() {
+  const host = qs('#sg-header');
+  host.replaceChildren();
+  const h = globalHeader({ current: 'home' });
+  host.append(h);
+  initHeaderScrollState(h);
+
+  const booking = qs('#sg-booking-header');
+  booking.replaceChildren();
+  // A second instance in the booking variant, shown inline rather than stuck.
+  const b = globalHeader({ variant: 'booking' });
+  b.style.position = 'static';
+  booking.append(b);
+}
+
+function wireAuthToggle() {
+  qs('#sg-auth')?.addEventListener('click', () => {
+    const on = getSession().authenticated;
+    setSession(on
+      ? { authenticated: false, name: '', role: 'guest' }
+      : { authenticated: true, name: 'أحمد عبد الرحمن', role: 'customer' });
+  });
+}
+
 function wireStates() {
   if (showState) return showState;
 
@@ -212,11 +226,14 @@ function wireButtonDemo() {
 boot({
   sprite: 'assets/icons/sprite.svg',
   onLocale: () => {
+    mountHeaders();
     renderComponents();
     wireStates()('content');
   },
 });
 
+mountHeaders();
+wireAuthToggle();
 renderSwatches();
 renderSpacing();
 renderGrid();

@@ -1,0 +1,406 @@
+/* ============================================================================
+   12 — GLOBAL HEADER & NAVIGATION   Stage 10.2
+
+   Height is not a magic number (§31): it comes from the logo, the control
+   height and the vertical padding, so changing the logo size changes the
+   header and nothing breaks.
+   ========================================================================= */
+
+@layer components {
+  :root {
+    --header-pad-block: var(--space-12);
+    --header-pad-block-scrolled: var(--space-8);
+    --header-shell: calc(var(--logo-size, 48px) + (var(--header-pad-block) * 2));
+    --menu-max: 72rem;
+  }
+
+  /* ======================================================================
+     SHELL — §14 sticky, §13 scrolled
+     ==================================================================== */
+  .c-gh {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: var(--z-header);
+    background-color: var(--color-surface);
+    border-block-end: var(--border-width) solid var(--color-border);
+    transition: box-shadow var(--duration-base) var(--ease-standard),
+                border-color var(--duration-base) var(--ease-standard);
+  }
+
+  /* Scrolled: a little tighter, and lifted off the page with a hairline
+     shadow. Only padding animates, so the logo never jumps. §13 */
+  .c-gh[data-scrolled="true"] {
+    box-shadow: var(--shadow-sm);
+    border-block-end-color: transparent;
+  }
+  .c-gh[data-scrolled="true"] .c-gh__bar { padding-block: var(--header-pad-block-scrolled); }
+  /* Target .c-logo itself: the primitive sets its own --logo-size, so setting
+     the variable on the header alone is inherited-then-overridden and never
+     reaches the image. */
+  .c-gh[data-scrolled="true"] .c-logo { --logo-size: 40px; }
+  @media (min-width: 64em) {
+    .c-gh[data-scrolled="true"] .c-logo { --logo-size: 44px; }
+  }
+
+  .c-gh__bar {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--space-16);
+    padding-block: var(--header-pad-block);
+    transition: padding-block var(--duration-base) var(--ease-standard);
+  }
+
+  .c-gh__brand { justify-self: start; }
+  .c-gh__nav   { justify-self: center; display: none; }
+  .c-gh__actions { justify-self: end; display: flex; align-items: center; gap: var(--space-4); }
+
+  @media (min-width: 64em) { .c-gh__nav { display: block; } }
+
+  /* Elements that only exist on one side of the tablet line. */
+  .c-gh__desktop-only { display: none; }
+  /* Tablet and up: the phone header stays down to logo + search + account +
+     menu (§15), so anything extra appears only once there is room. */
+  .c-gh__tablet-up { display: none; }
+  @media (min-width: 48em) { .c-gh__tablet-up { display: inline-flex; } }
+  @media (min-width: 64em) {
+    .c-gh__desktop-only { display: inline-flex; }
+    .c-gh__mobile-only  { display: none !important; }
+  }
+
+  /* ======================================================================
+     PRIMARY NAVIGATION — §19 active, §20 hover
+     ==================================================================== */
+  .c-gh__list { display: flex; align-items: center; gap: var(--space-4); }
+
+  .c-gh__link {
+    position: relative;
+    display: inline-flex; align-items: center; gap: var(--space-4);
+    min-block-size: var(--touch-target);
+    padding-inline: var(--space-12);
+    padding-block: var(--space-8);
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-medium);
+    color: var(--color-text);
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+    transition: var(--transition-interactive);
+  }
+  .c-gh__link:hover { background-color: var(--color-surface-hover); color: var(--color-text-brand); }
+  .c-gh__link[aria-expanded="true"] { background-color: var(--color-surface-hover); color: var(--color-text-brand); }
+
+  /* Active carries weight AND a rule, not colour alone. §19 */
+  .c-gh__link[aria-current="page"] {
+    color: var(--color-text-brand);
+    font-weight: var(--weight-semibold);
+  }
+  .c-gh__link[aria-current="page"]::after {
+    content: "";
+    position: absolute;
+    inset-block-end: -1px;
+    inset-inline: var(--space-12);
+    block-size: 3px;
+    border-radius: var(--radius-pill) var(--radius-pill) 0 0;
+    background-color: var(--color-primary);
+  }
+
+  .c-gh__chev { color: var(--color-text-secondary); transition: rotate var(--duration-fast) var(--ease-standard); }
+  .c-gh__link[aria-expanded="true"] .c-gh__chev { rotate: 180deg; color: currentColor; }
+
+  /* ======================================================================
+     ACTIONS — §09 search, §08 support, §10 account, §11 the one red CTA
+     ==================================================================== */
+  .c-gh__action {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--space-8);
+    min-block-size: var(--touch-target);
+    min-inline-size: var(--touch-target);
+    padding-inline: var(--space-8);
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-sm);
+    transition: var(--transition-interactive);
+  }
+  .c-gh__action:hover { background-color: var(--color-surface-hover); color: var(--color-text); }
+  .c-gh__action[aria-expanded="true"] { background-color: var(--color-surface-hover); color: var(--color-text); }
+  .c-gh__action-label { display: none; }
+  @media (min-width: 80em) { .c-gh__action-label { display: inline; } }
+
+  .c-gh__cta { margin-inline-start: var(--space-8); }
+
+  /* An account avatar for the signed-in state. */
+  .c-gh__avatar {
+    inline-size: 28px; block-size: 28px; flex: none;
+    display: grid; place-items: center;
+    border-radius: var(--radius-circle);
+    background-color: var(--color-surface-brand);
+    color: var(--color-text-brand);
+    font-size: var(--text-caption); font-weight: var(--weight-bold);
+  }
+
+  /* ======================================================================
+     DROPDOWN / MEGA MENU — §05 §22
+     One panel system. `--mega` stretches to the container, `--panel` sits
+     under its trigger.
+     ==================================================================== */
+  .c-gh__panel {
+    position: absolute;
+    z-index: 1;
+    inset-block-start: calc(100% + 1px);
+    background-color: var(--color-surface);
+    border: var(--border-hairline);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: var(--space-24);
+    opacity: 0;
+    translate: 0 -6px;
+    pointer-events: none;
+    transition: opacity var(--duration-fast) var(--ease-standard),
+                translate var(--duration-fast) var(--ease-out);
+  }
+  .c-gh__panel[data-open="true"] { opacity: 1; translate: 0; pointer-events: auto; }
+  .c-gh__panel[hidden] { display: none; }
+
+  .c-gh__panel--mega { inset-inline: 0; max-inline-size: var(--menu-max); margin-inline: auto; }
+  .c-gh__panel--panel { inset-inline-start: 0; min-inline-size: 22rem; }
+  .c-gh__panel--end   { inset-inline-start: auto; inset-inline-end: 0; }
+
+  .c-gh__panel-grid { display: grid; gap: var(--space-24) var(--space-32); }
+  @media (min-width: 64em) {
+    .c-gh__panel--mega .c-gh__panel-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .c-gh__panel--panel .c-gh__panel-grid { grid-template-columns: repeat(var(--panel-cols, 1), minmax(0, 1fr)); }
+  }
+
+  .c-gh__group-title {
+    font-size: var(--text-overline);
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--tracking-overline);
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-block-end: var(--space-12);
+  }
+  [lang="ar"] .c-gh__group-title { text-transform: none; letter-spacing: 0; }
+
+  .c-gh__group-list { display: flex; flex-direction: column; gap: var(--space-2, 2px); }
+
+  .c-gh__item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: start;
+    gap: var(--space-12);
+    padding: var(--space-8) var(--space-12);
+    min-block-size: var(--touch-target);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    transition: var(--transition-interactive);
+  }
+  .c-gh__item:hover { background-color: var(--color-surface-hover); }
+  .c-gh__item:hover .c-gh__item-title { color: var(--color-text-brand); }
+  .c-gh__item-icon {
+    display: grid; place-items: center;
+    inline-size: 34px; block-size: 34px;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface-brand);
+    color: var(--color-primary);
+  }
+  .c-gh__item-title { font-size: var(--text-body-sm); font-weight: var(--weight-semibold); line-height: 1.3; }
+  .c-gh__item-desc  { font-size: var(--text-caption); color: var(--color-text-secondary); line-height: 1.4; }
+  /* A plain item — no icon, no description (destinations). */
+  .c-gh__item--plain { grid-template-columns: 1fr; padding-block: var(--space-8); min-block-size: 40px; }
+
+  .c-gh__panel-foot {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: var(--space-16);
+    margin-block-start: var(--space-24);
+    padding-block-start: var(--space-16);
+    border-block-start: var(--border-hairline);
+  }
+
+  /* The two support channels read as buttons, not list rows. §08 §18 */
+  .c-gh__channels { display: grid; gap: var(--space-8); grid-template-columns: repeat(2, minmax(0,1fr));
+                    margin-block-end: var(--space-16); }
+  .c-gh__channel {
+    display: flex; align-items: center; gap: var(--space-12);
+    padding: var(--space-12);
+    min-block-size: var(--touch-target);
+    border: var(--border-hairline);
+    border-radius: var(--radius-md);
+    transition: var(--transition-interactive);
+  }
+  .c-gh__channel:hover { border-color: var(--color-primary); background-color: var(--color-surface-brand); }
+  .c-gh__channel-name { font-size: var(--text-body-sm); font-weight: var(--weight-semibold); }
+  .c-gh__channel-meta { font-size: var(--text-caption); color: var(--color-text-secondary); }
+  .c-gh__channel .c-icon { color: var(--color-primary); }
+
+  /* Account menu rows */
+  .c-gh__menu-list { display: flex; flex-direction: column; }
+  .c-gh__menu-row {
+    display: flex; align-items: center; gap: var(--space-12);
+    padding: var(--space-8) var(--space-12);
+    min-block-size: var(--touch-target);
+    font-size: var(--text-body-sm);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    transition: var(--transition-interactive);
+  }
+  .c-gh__menu-row:hover { background-color: var(--color-surface-hover); color: var(--color-text-brand); }
+  .c-gh__menu-row .c-icon { color: var(--color-text-secondary); }
+  .c-gh__menu-row--divided { margin-block-start: var(--space-8); padding-block-start: var(--space-16);
+                             border-block-start: var(--border-hairline); border-radius: 0; }
+  .c-gh__menu-head { padding: var(--space-8) var(--space-12) var(--space-16); }
+
+  /* ======================================================================
+     GLOBAL SEARCH — §09. A focused sheet, not a permanent field.
+     ==================================================================== */
+  .c-gh__search {
+    position: absolute; inset-inline: 0; inset-block-start: calc(100% + 1px);
+    z-index: 1;
+    background-color: var(--color-surface);
+    border-block-end: var(--border-hairline);
+    box-shadow: var(--shadow-lg);
+    padding-block: var(--space-24);
+  }
+  .c-gh__search[hidden] { display: none; }
+  .c-gh__search-field { display: flex; align-items: center; gap: var(--space-12);
+                        border: var(--border-width-strong) solid var(--color-text);
+                        border-radius: var(--radius-md); padding-inline: var(--space-16); }
+  .c-gh__search-field:focus-within { border-color: var(--color-focus); outline: var(--focus-ring); outline-offset: 2px; }
+  .c-gh__search-input {
+    flex: 1; min-inline-size: 0;
+    border: none; outline: none; background: none;
+    min-block-size: var(--control-height-lg);
+    font-size: var(--text-body-lg);
+  }
+  .c-gh__scopes { display: flex; flex-wrap: wrap; gap: var(--space-8); margin-block-start: var(--space-16); }
+
+  /* Scrim behind any open overlay, so the page reads as inert.
+
+     z-index is local: the scrim is a child of the header, which already sits at
+     --z-header above the page, so 1 is enough to cover everything below while
+     .c-gh__inner at 2 keeps the bar and its panels clickable. Without that the
+     scrim — appended after the bar — paints over the header and swallows every
+     click, including the one that would close it. */
+  .c-gh__scrim {
+    position: fixed; inset: 0;
+    z-index: 1;
+    background-color: rgb(11 13 15 / 0.32);
+    opacity: 0;
+    transition: opacity var(--duration-base) var(--ease-standard);
+  }
+  .c-gh__scrim[hidden] { display: none; }
+  .c-gh__scrim[data-open="true"] { opacity: 1; }
+
+  /* The positioning context for the panels, and the layer that stays above
+     the scrim so the header never blocks itself. */
+  .c-gh__inner { position: relative; z-index: 2; }
+
+  /* ======================================================================
+     MOBILE DRAWER — §16 §17 §18
+     ==================================================================== */
+  .c-gh__drawer {
+    position: fixed; inset: 0;
+    z-index: var(--z-drawer);
+    display: grid;
+    pointer-events: none;
+  }
+  .c-gh__drawer[hidden] { display: none; }
+  .c-gh__drawer-scrim { position: absolute; inset: 0; background-color: var(--color-overlay);
+                        opacity: 0; transition: opacity var(--duration-base) var(--ease-standard); }
+  .c-gh__drawer-panel {
+    position: relative;
+    justify-self: end;
+    inline-size: min(26rem, 92vw);
+    block-size: 100%;
+    display: flex; flex-direction: column;
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-overlay);
+    translate: 100% 0;
+    transition: translate var(--duration-base) var(--ease-out);
+    overflow-y: auto; overscroll-behavior: contain;
+  }
+  [dir="rtl"] .c-gh__drawer-panel { translate: -100% 0; }
+  .c-gh__drawer[data-open="true"] { pointer-events: auto; }
+  .c-gh__drawer[data-open="true"] .c-gh__drawer-scrim { opacity: 1; }
+  .c-gh__drawer[data-open="true"] .c-gh__drawer-panel { translate: 0; }
+
+  .c-gh__drawer-head {
+    position: sticky; inset-block-start: 0; z-index: 1;
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-16);
+    padding: var(--space-12) var(--space-16);
+    background-color: var(--color-surface);
+    border-block-end: var(--border-hairline);
+  }
+  .c-gh__drawer-body { flex: 1; padding: var(--space-8) var(--space-16) var(--space-24); }
+  .c-gh__drawer-foot {
+    position: sticky; inset-block-end: 0;
+    padding: var(--space-16);
+    padding-block-end: max(var(--space-16), env(safe-area-inset-bottom, 0px));
+    background-color: var(--color-surface);
+    border-block-start: var(--border-hairline);
+  }
+
+  /* Drawer rows and the services / help accordions — §17 */
+  .c-gh__m-item { border-block-end: var(--border-hairline); }
+  .c-gh__m-link, .c-gh__m-trigger {
+    inline-size: 100%;
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-12);
+    min-block-size: 56px;
+    padding-block: var(--space-12);
+    text-align: start;
+    font-size: var(--text-body-lg);
+    font-weight: var(--weight-medium);
+    color: var(--color-text);
+  }
+  .c-gh__m-link[aria-current="page"], .c-gh__m-trigger[aria-expanded="true"] {
+    color: var(--color-text-brand); font-weight: var(--weight-semibold);
+  }
+  .c-gh__m-trigger .c-gh__chev { transition: rotate var(--duration-fast) var(--ease-standard); }
+  .c-gh__m-trigger[aria-expanded="true"] .c-gh__chev { rotate: 180deg; }
+
+  .c-gh__m-panel { display: grid; grid-template-rows: 1fr;
+                   transition: grid-template-rows var(--duration-base) var(--ease-out); }
+  .c-gh__m-panel[data-collapsed="true"] { grid-template-rows: 0fr; }
+  .c-gh__m-panel-inner { overflow: hidden; min-block-size: 0; }
+  .c-gh__m-sub { padding-block-end: var(--space-12); }
+  .c-gh__m-group-title { font-size: var(--text-overline); font-weight: var(--weight-bold);
+                         letter-spacing: var(--tracking-overline); text-transform: uppercase;
+                         color: var(--color-text-secondary);
+                         margin-block: var(--space-12) var(--space-4); }
+  [lang="ar"] .c-gh__m-group-title { text-transform: none; letter-spacing: 0; }
+  .c-gh__m-sublink {
+    display: flex; align-items: center; gap: var(--space-12);
+    min-block-size: var(--touch-target);
+    padding: var(--space-8) 0 var(--space-8) 0;
+    padding-inline-start: var(--space-8);
+    font-size: var(--text-body);
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-sm);
+  }
+  .c-gh__m-sublink:hover { color: var(--color-text-brand); background-color: var(--color-surface-hover); }
+  .c-gh__m-sublink .c-icon { color: var(--color-primary); }
+
+  .c-gh__m-channels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr));
+                      gap: var(--space-8); margin-block: var(--space-16); }
+
+  /* ======================================================================
+     BOOKING VARIANT — §32. Navigation recedes; the booking owns the page.
+     ==================================================================== */
+  .c-gh[data-variant="booking"] .c-gh__nav { display: none; }
+  .c-gh[data-variant="booking"] .c-gh__bar { grid-template-columns: auto 1fr auto; }
+  .c-gh__secure {
+    display: none; align-items: center; gap: var(--space-8);
+    font-size: var(--text-caption); color: var(--color-text-secondary);
+  }
+  .c-gh[data-variant="booking"] .c-gh__secure { display: none; }
+  @media (min-width: 48em) {
+    .c-gh[data-variant="booking"] .c-gh__secure { display: inline-flex; justify-self: center; }
+  }
+  .c-gh__secure .c-icon { color: var(--color-success); }
+
+  /* ======================================================================
+     Reduced motion: panels appear, they do not travel. §24 of Stage 10.1
+     ==================================================================== */
+  @media (prefers-reduced-motion: reduce) {
+    .c-gh__panel { translate: none; }
+  }
+}

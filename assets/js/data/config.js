@@ -69,43 +69,8 @@ export const SERVICES_SECONDARY = [
     descAr: 'إجراءات سفر العمل وتذاكر الشركات.',       descEn: 'Work travel paperwork and corporate tickets.' },
 ];
 
-/* ---------------------------------------------------------------------------
-   NAVIGATION — §25. Configurable, not hard-coded markup.
-   ------------------------------------------------------------------------ */
-export const NAV_PRIMARY = [
-  { id: 'services',     label: 'nav.services',     href: 'services/',     icon: 'no-booking' },
-  { id: 'destinations', label: 'nav.destinations', href: 'destinations/', icon: 'no-globe' },
-  { id: 'offers',       label: 'nav.offers',       href: 'offers/',       icon: 'no-price-tag' },
-  { id: 'support',      label: 'nav.support',      href: 'support/',      icon: 'no-support' },
-];
-
-/* Mobile bottom navigation — five at most, thumb-first ordering. §22 */
-export const NAV_BOTTOM = [
-  { id: 'home',    label: 'nav.home',    href: '',          icon: 'no-home' },
-  { id: 'search',  label: 'nav.search',  href: 'search/',   icon: 'no-search' },
-  { id: 'trips',   label: 'nav.trips',   href: 'trips/',    icon: 'no-booking' },
-  { id: 'support', label: 'nav.support', href: 'support/',  icon: 'no-support' },
-  { id: 'account', label: 'nav.account', href: 'account/',  icon: 'no-customer' },
-];
-
-export const NAV_FOOTER = [
-  { id: 'company', titleAr: 'نمبرون', titleEn: 'Number One', links: [
-    { labelAr: 'من نحن', labelEn: 'About us', href: 'about/' },
-    { labelAr: 'مشرفو السفر', labelEn: 'Travel supervisors', href: 'supervisors/' },
-    { labelAr: 'وظائف', labelEn: 'Careers', href: 'careers/' },
-    { labelAr: 'تواصل معنا', labelEn: 'Contact', href: 'contact/' },
-  ]},
-  { id: 'services', titleAr: 'الخدمات', titleEn: 'Services', links: SERVICES.map((s) => (
-    { labelAr: s.titleAr, labelEn: s.titleEn, href: s.href }
-  ))},
-  { id: 'help', titleAr: 'المساعدة', titleEn: 'Help', links: [
-    { labelAr: 'إدارة حجزي', labelEn: 'Manage my booking', href: 'trips/' },
-    { labelAr: 'الأسئلة الشائعة', labelEn: 'FAQ', href: 'support/faq/' },
-    { labelAr: 'سياسة الإلغاء والتعديل', labelEn: 'Cancellation & changes', href: 'policies/changes/' },
-    { labelAr: 'شروط الاستخدام', labelEn: 'Terms of use', href: 'policies/terms/' },
-    { labelAr: 'سياسة الخصوصية', labelEn: 'Privacy policy', href: 'policies/privacy/' },
-  ]},
-];
+/* Navigation moved to data/navigation.js in Stage 10.2 — the full IA, the mega
+   menus and the account menus now live together in one module. */
 
 /* ---------------------------------------------------------------------------
    STATUS — §20. One central registry. Every surface (website, account,
