@@ -32,9 +32,7 @@
 
   /* Latin text inside an Arabic page (a flight number, an airport code) keeps
      its own direction so "SDJ 09:40" never reorders. */
-  [dir="rtl"] .u-ltr-run,
   bdi { unicode-bidi: isolate; }
-  .u-ltr-run { direction: ltr; unicode-bidi: isolate; display: inline-block; }
 
   /* ---- Headings --------------------------------------------------------
      Sizes are set by class, not by tag, so page authors can keep the correct
@@ -86,7 +84,6 @@
 
   /* On a brand-red surface the blue ring alone can be hard to separate, so we
      add a white halo. */
-  .u-on-primary:focus-visible,
   [data-on-primary]:focus-visible {
     outline-color: var(--color-focus-inverse);
     box-shadow: 0 0 0 4px rgb(11 95 191 / 0.9);

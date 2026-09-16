@@ -26,7 +26,6 @@ export const CONTEXT_VERSION = 1;
 const STORAGE_KEY = 'no.booking.context';
 const ATTRIBUTION_KEY = 'no.attribution';
 export const MAX_TRAVELLERS = 9;
-export const MAX_LEGS = 4;
 
 const num = (v, d = 0) => { const n = Number(v); return Number.isFinite(n) ? n : d; };
 const str = (v) => (v == null ? '' : String(v).trim());
@@ -129,7 +128,6 @@ export function saveContext(ctx) {
 export function loadContext() {
   try { const raw = sessionStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null; } catch { return null; }
 }
-export function clearContext() { try { sessionStorage.removeItem(STORAGE_KEY); } catch { /* storage unavailable */ } }
 
 /* ---- Attribution: which supervisor the customer came through ------------ */
 /** Remember a supervisor for this session; only an active registry slug is kept. */
@@ -146,7 +144,6 @@ export function loadAttribution() {
     return record && isActiveSupervisor(record.supervisor) ? record : null;
   } catch { return null; }
 }
-export function clearAttribution() { try { sessionStorage.removeItem(ATTRIBUTION_KEY); } catch { /* storage unavailable */ } }
 /** `?supervisor=<slug>` on any door stores the attribution; otherwise the session's. */
 export function attributionFrom(params) {
   const slug = params?.get?.('supervisor');

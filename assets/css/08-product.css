@@ -22,8 +22,6 @@
                          display: inline-flex; align-items: center; gap: var(--space-8);
                          font-size: var(--text-body-sm); font-weight: var(--weight-semibold);
                          color: var(--color-text-brand); }
-  .c-service-card--interactive:hover .c-service-card__cta .c-icon { translate: 4px 0; }
-  [dir="rtl"] .c-service-card--interactive:hover .c-service-card__cta .c-icon { translate: -4px 0; }
   .c-service-card__cta .c-icon { transition: translate var(--duration-fast) var(--ease-standard); }
 
   /* ======================================================================

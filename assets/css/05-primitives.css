@@ -45,7 +45,6 @@
 
   .t-muted   { color: var(--color-text-secondary); }
   .t-brand   { color: var(--color-text-brand); }
-  .t-inverse { color: var(--color-text-inverse); }
 
   /* ======================================================================
      ICON — §15. One family, one stroke weight, drawn from a single sprite so
@@ -271,7 +270,6 @@
   .c-badge--solid   { background-color: var(--color-primary); color: var(--color-text-on-primary); }
   .c-badge--success { background-color: var(--color-success-bg); color: var(--color-success-fg); }
   .c-badge--warning { background-color: var(--color-warning-bg); color: var(--color-warning-fg); }
-  .c-badge--error   { background-color: var(--color-error-bg);   color: var(--color-error-fg); }
   .c-badge--info    { background-color: var(--color-info-bg);    color: var(--color-info-fg); }
   .c-badge--outline { background-color: transparent; border: var(--border-hairline); color: var(--color-text-secondary); font-weight: var(--weight-medium); }
 

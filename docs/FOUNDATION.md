@@ -388,7 +388,7 @@ What is already expressible without any later-stage code existing:
 | **11 — Booking** | Search verticals, flight/hotel/package cards, fare and baggage display, price breakdown, passenger forms, OTP, upload, steps, sticky rail. (Booking-summary and filter-panel CSS were sketched in 10.1 and removed unused in the second maintainability pass — Stage 11 designs them against real requirements.) |
 | **12 — Customer account** | `tripCard`, status registry, next-step notices, trip reference formatting, empty/error states |
 | **13 — Supervisor** | `supervisorCard`, the `supervisorId` link on every trip, the inline `.c-assist` human-help component |
-| **14 — Admin / operations** | `ROLES` + `can()` permission check, the same status registry, the same data shapes |
+| **14 — Admin / operations** | the same status registry and data shapes; the role ranks and the `can(role, minimum)` check arrive with the stage that has a session to check (removed as unused in the 10.12 cleanup) |
 
 The relationship **Customer → Supervisor → Booking → Payment → Revenue →
 Supervisor right** is expressible today: a trip already carries its supervisor
@@ -419,8 +419,9 @@ meaningful image, `lang` and `dir` correct on both languages, Open Graph and
 
 ## 13. Security-aware UI (§32)
 
-`ROLES` ranks Super Admin → Admin → Operations → Supervisor → Customer → Guest,
-and `can(role, minimum)` is the check. Passwords, payment details, private
+The role model (Super Admin → Admin → Operations → Supervisor → Customer →
+Guest, checked by `can(role, minimum)`) ships with the first stage that has a
+session to check; the public site carries no permission code. Passwords, payment details, private
 documents and internal supervisor information are never rendered by any
 component in this layer. Permission is asked, never assumed.
 

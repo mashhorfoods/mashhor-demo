@@ -38,14 +38,6 @@
   }
 
   /* A directional curve for section transitions. Subtle, single colour. */
-  .u-arc {
-    position: absolute; inset-inline-end: 0; inset-block-start: 0;
-    inline-size: min(40vw, 380px); aspect-ratio: 1;
-    border-inline-end: 1px solid var(--color-border);
-    border-start-end-radius: 100%;
-    pointer-events: none;
-    opacity: 0.8;
-  }
 
   /* The numeral used as a watermark. Deliberately low contrast: it is
      texture, not information. */

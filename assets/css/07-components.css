@@ -43,7 +43,6 @@
     overflow: hidden;
   }
   .c-modal::backdrop { background-color: var(--color-overlay); }
-  .c-modal--lg { inline-size: min(52rem, calc(100vw - var(--space-32))); }
   .c-modal__form { display: flex; flex-direction: column; max-block-size: inherit; }
   .c-modal__head {
     display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-16);
@@ -164,11 +163,9 @@
   .c-search__fields { display: grid; gap: var(--space-16); grid-template-columns: 1fr; }
   @media (min-width: 48em) {
     .c-search__fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .c-search__fields > .is-wide { grid-column: 1 / -1; }
   }
   @media (min-width: 64em) {
     .c-search__fields { grid-template-columns: repeat(var(--search-cols, 4), minmax(0, 1fr)); align-items: end; }
-    .c-search__fields > .is-wide { grid-column: auto; }
     .c-search__fields > .is-full { grid-column: 1 / -1; }
   }
   .c-search__submit { margin-block-start: var(--space-16); }
@@ -216,8 +213,6 @@
   }
   .c-card--interactive:has(:focus-visible) { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
   .c-card--flat { box-shadow: none; }
-  .c-card--raised { box-shadow: var(--shadow-sm); }
-  .c-card--brand { border-color: var(--color-primary); }
   .c-card__media { position: relative; aspect-ratio: 16 / 10; background-color: var(--color-gray-100); }
   .c-card__media img { inline-size: 100%; block-size: 100%; object-fit: cover; }
   .c-card__badges { position: absolute; inset-block-start: var(--space-12); inset-inline-start: var(--space-12);
@@ -280,7 +275,6 @@
     color: var(--note-fg, var(--color-info-fg));
     border-inline-start: 4px solid var(--note-accent, var(--color-info));
   }
-  .c-note--success { --note-bg: var(--color-success-bg); --note-fg: var(--color-success-fg); --note-accent: var(--color-success); }
   .c-note--warning { --note-bg: var(--color-warning-bg); --note-fg: var(--color-warning-fg); --note-accent: var(--color-warning); }
   .c-note--error   { --note-bg: var(--color-error-bg);   --note-fg: var(--color-error-fg);   --note-accent: var(--color-error); }
   .c-note__title { font-weight: var(--weight-semibold); font-size: var(--text-body-sm); }

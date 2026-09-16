@@ -90,16 +90,11 @@
   .c-field__wrap .c-field__control { padding-inline-start: var(--input-pad-start, var(--space-16));
                                      padding-inline-end: var(--input-pad-end, var(--space-16)); }
   .c-field__wrap:has(.c-field__addon--start) { --input-pad-start: var(--space-48); }
-  .c-field__wrap:has(.c-field__addon--end)   { --input-pad-end:   var(--space-48); }
   .c-field__addon {
     position: absolute; display: flex; align-items: center; justify-content: center;
     color: var(--color-text-secondary); pointer-events: none;
   }
   .c-field__addon--start { inset-inline-start: var(--space-16); }
-  .c-field__addon--end   { inset-inline-end:   var(--space-16); }
-  .c-field__addon--action { pointer-events: auto; cursor: pointer; inline-size: var(--touch-target);
-                            block-size: var(--touch-target); inset-inline-end: var(--space-4); }
-  .c-field__wrap:has(.c-field__addon--action) { --input-pad-end: var(--space-48); }
   .c-field__control:focus-visible ~ .c-field__addon { color: var(--color-focus); }
 
   /* --- Select ----------------------------------------------------------- */

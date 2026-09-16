@@ -23,9 +23,6 @@
     margin-inline: auto;
     padding-inline: var(--container-gutter);
   }
-  .l-container--narrow { max-inline-size: var(--container-max-narrow); }
-  .l-container--wide   { max-inline-size: var(--container-max-wide); }
-  .l-container--flush  { padding-inline: 0; }
 
   @media (min-width: 48em) { :root { --container-gutter: var(--space-24); } }
   @media (min-width: 64em) { :root { --container-gutter: var(--space-32); } }
@@ -66,8 +63,6 @@
     .l-span-6\@lg { grid-column: span 6; }
     .l-span-7\@lg { grid-column: span 7; }
     .l-span-8\@lg { grid-column: span 8; }
-    .l-span-9\@lg { grid-column: span 9; }
-    .l-span-12\@lg { grid-column: span 12; }
   }
 
   /* ---- Auto grid — for card decks that should reflow without breakpoints */
@@ -80,9 +75,7 @@
   /* ---- Section rhythm --------------------------------------------------- */
   .l-section { padding-block: var(--section-space); }
   .l-section--tight { padding-block: var(--section-space-tight); }
-  .l-section--loose { padding-block: var(--section-space-loose); }
   .l-section--subtle { background-color: var(--color-bg-subtle); }
-  .l-section--sunken { background-color: var(--color-bg-sunken); }
   .l-section--inverse {
     background-color: var(--color-bg-inverse);
     color: var(--color-text-inverse);
@@ -95,8 +88,6 @@
   .l-stack--8  { --stack-gap: var(--space-8); }
   .l-stack--12 { --stack-gap: var(--space-12); }
   .l-stack--24 { --stack-gap: var(--space-24); }
-  .l-stack--32 { --stack-gap: var(--space-32); }
-  .l-stack--48 { --stack-gap: var(--space-48); }
 
   /* ---- Cluster — horizontal group that wraps instead of overflowing ----- */
   .l-cluster {
@@ -104,15 +95,12 @@
     align-items: var(--cluster-align, center);
     gap: var(--cluster-gap, var(--space-12));
   }
-  .l-cluster--between { justify-content: space-between; }
-  .l-cluster--end { justify-content: flex-end; }
   .l-cluster--8  { --cluster-gap: var(--space-8); }
   .l-cluster--16 { --cluster-gap: var(--space-16); }
   .l-cluster--24 { --cluster-gap: var(--space-24); }
 
   /* ---- Reading measure -------------------------------------------------- */
   .l-prose { max-inline-size: var(--measure); }
-  .l-prose--short { max-inline-size: var(--measure-short); }
   .l-prose > * + * { margin-block-start: var(--space-16); }
 
   /* ---- Section header pattern, reused by every page -------------------- */
@@ -126,10 +114,6 @@
   }
 
   /* ---- Sticky rail for booking summaries (§28 prepares Stage 11) -------- */
-  .l-sticky {
-    position: sticky;
-    inset-block-start: calc(var(--header-height) + var(--space-16));
-  }
 
   /* ---- In-page targets clear the sticky header ---------------------------
      Any section a page scrolls to by id lands below the header rather than

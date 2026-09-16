@@ -74,7 +74,6 @@ export const STRINGS = {
     'trust.clearPrice': 'السعر نهائي وشامل',
     'trust.humanHelp': 'مختص يساعدك',
     'trust.support': 'دعم على مدار الساعة',
-    'state.loading': 'جارٍ التحميل…',
     'state.searching': 'نبحث لك عن أفضل الخيارات…',
     'state.noResults.title': 'لا توجد نتائج مطابقة',
     'state.noResults.text': 'لم نجد رحلات بهذه المواصفات. جرّب تعديل التاريخ أو إزالة بعض عوامل التصفية.',
@@ -100,7 +99,6 @@ export const STRINGS = {
     'search.nights': 'مدة الإقامة',
     'search.service': 'الخدمة',
     'search.notes': 'ملاحظات',
-    'search.required': 'هذا الحقل مطلوب',
     'page.destinations.title': 'الوجهات — نمبرون للسفر و السياحة',
     'page.destinations.description': 'اكتشف وجهتك القادمة مع نمبرون: وجهات للعمرة والعمل والدراسة والعلاج والسياحة والزيارة، ونساعدك على اختيار المناسب لاحتياجك.',
     'search.destinations': 'الوجهات',
@@ -311,10 +309,8 @@ export const STRINGS = {
     'book.attribution.profile': 'الملف الشخصي',
 
     /* ---- Supervisor profile — Stage 10.10 ---- */
-    'page.supervisor.title': 'مشرف نمبرون — نمبرون للسفر و السياحة',
     'sup.brand': 'مشرف من نمبرون للسفر و السياحة',
     'sup.name.fallback': 'مشرف نمبرون',
-    'sup.crumb.supervisors': 'مشرفو السفر',
     'sup.lead': 'يساعدك على اختيار الخيار المناسب، ويتابع حجزك مع فريق نمبرون من البداية إلى العودة.',
     'sup.cta.book': 'ابدأ الحجز',
     'sup.cta.contact': 'تواصل مع المشرف',
@@ -652,7 +648,6 @@ export const STRINGS = {
     'trust.clearPrice': 'Final price, all inclusive',
     'trust.humanHelp': 'A specialist helps you choose',
     'trust.support': 'Support around the clock',
-    'state.loading': 'Loading…',
     'state.searching': 'Finding the best options for you…',
     'state.noResults.title': 'No matching results',
     'state.noResults.text': 'We could not find flights with these details. Try another date or remove a filter.',
@@ -678,7 +673,6 @@ export const STRINGS = {
     'search.nights': 'Length of stay',
     'search.service': 'Service',
     'search.notes': 'Notes',
-    'search.required': 'This field is required',
     'page.destinations.title': 'Destinations — Number One Travel & Tourism',
     'page.destinations.description': 'Discover your next destination with Number One: places for Umrah, work, study, treatment, tourism and visits, and help choosing the one that fits your need.',
     'search.destinations': 'Destinations',
@@ -889,10 +883,8 @@ export const STRINGS = {
     'book.attribution.profile': 'Profile',
 
     /* ---- Supervisor profile — Stage 10.10 ---- */
-    'page.supervisor.title': 'Number One supervisor — Number One Travel & Tourism',
     'sup.brand': 'A Number One Travel & Tourism supervisor',
     'sup.name.fallback': 'Number One supervisor',
-    'sup.crumb.supervisors': 'Travel supervisors',
     'sup.lead': 'Helps you choose the right option and follows your booking with the Number One team, from the start until you are back.',
     'sup.cta.book': 'Start booking',
     'sup.cta.contact': 'Contact the supervisor',

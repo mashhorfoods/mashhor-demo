@@ -70,7 +70,6 @@ export const SUPERVISOR_REGISTRY = [1, 2, 3, 4, 5].map(placeholder);
 
 /* ---- Selectors every surface shares ------------------------------------ */
 export const supervisorBySlug = (slug) => SUPERVISOR_REGISTRY.find((s) => s.slug === slug || s.id === slug) ?? null;
-export const activeSupervisors = () => SUPERVISOR_REGISTRY.filter((s) => s.status === 'active');
 export const isActiveSupervisor = (slug) => supervisorBySlug(slug)?.status === 'active';
 
 /** The registry records of the services this supervisor handles, in registry order. */

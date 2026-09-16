@@ -211,21 +211,3 @@ export const SEARCH_VERTICALS = [
     ],
   },
 ];
-
-/* ---------------------------------------------------------------------------
-   ROLES — §32. The UI reads permissions from here; it never decides on its
-   own what a role may see. Stage 13/14 will extend this, not replace it.
-   ------------------------------------------------------------------------ */
-export const ROLES = {
-  superAdmin:  { id: 'superAdmin',  rank: 50 },
-  admin:       { id: 'admin',       rank: 40 },
-  operations:  { id: 'operations',  rank: 30 },
-  supervisor:  { id: 'supervisor',  rank: 20 },
-  customer:    { id: 'customer',    rank: 10 },
-  guest:       { id: 'guest',       rank: 0  },
-};
-
-/** Never render sensitive data on a hunch — ask this. §32 */
-export function can(role, minimum) {
-  return (ROLES[role]?.rank ?? 0) >= (ROLES[minimum]?.rank ?? Infinity);
-}
