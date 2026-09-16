@@ -169,7 +169,7 @@ export const SEARCH_SCOPES = [
 /* --------------------------------------------------------------------------
    BOOK NOW — §11. One red action in the header, and only one.
    ----------------------------------------------------------------------- */
-export const BOOK_CTA = { id: 'book', href: 'search/', labelAr: 'احجز الآن', labelEn: 'Book now' };
+export const BOOK_CTA = { id: 'book', href: 'book/', labelAr: 'احجز الآن', labelEn: 'Book now' };
 
 /* Menus indexed for lookup by the primary nav's `menu` key. */
 export const MENUS = {
@@ -184,7 +184,7 @@ export const MENUS = {
    ----------------------------------------------------------------------- */
 export const NAV_BOTTOM = [
   { id: 'home',    href: '',          icon: 'no-home',     labelAr: 'الرئيسية', labelEn: 'Home' },
-  { id: 'search',  href: 'search/',   icon: 'no-search',   labelAr: 'بحث',      labelEn: 'Search' },
+  { id: 'search',  href: 'book/',     icon: 'no-search',   labelAr: 'احجز',     labelEn: 'Book' },
   { id: 'trips',   href: 'trips/',    icon: 'no-booking',  labelAr: 'رحلاتي',   labelEn: 'Trips' },
   { id: 'help',    href: 'help/',     icon: 'no-support',  labelAr: 'المساعدة', labelEn: 'Help' },
   { id: 'account', href: 'account/',  icon: 'no-customer', labelAr: 'حسابي',    labelEn: 'Account' },

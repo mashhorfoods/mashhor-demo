@@ -362,8 +362,17 @@ export function initOtp(root = document) {
    ------------------------------------------------------------------------ */
 export function initPopovers(root = document) {
   qsa('[data-popover-trigger]', root).forEach((trigger) => {
-    const panel = document.getElementById(trigger.getAttribute('aria-controls'));
+    // Idempotent: a widget wires its own popovers when it is built and boot()
+    // sweeps the document once more; binding twice would toggle twice.
+    if (trigger.dataset.popoverBound) return;
+    // The trigger may still be detached (a widget built before it is
+    // mounted), so look inside the root before asking the document.
+    const id = trigger.getAttribute('aria-controls');
+    const scope = root instanceof Element ? root : document;
+    const panel = (id && (scope.querySelector(`#${CSS.escape(id)}`) ?? document.getElementById(id)))
+      ?? trigger.closest('.c-popover-host')?.querySelector('.c-popover');
     if (!panel) return;
+    trigger.dataset.popoverBound = 'true';
 
     const close = () => {
       panel.hidden = true;

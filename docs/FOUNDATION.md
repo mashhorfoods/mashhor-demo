@@ -498,6 +498,10 @@ component in this layer. Permission is asked, never assumed.
 10. **Real offers.** The three `data/offers.js` records are placeholders:
    no price, nights, inclusions, programme, terms or FAQ until the business
    approves them; the pages say so and hide what they cannot show.
+11. **The booking engine.** `book/` ends in a booking context
+   (`core/booking.js`) persisted for the next step; `mountBooking({ prepare })`
+   is the seam the Stage 11 search calls into, and the place fields need
+   the airport/city list they will autocomplete from.
 ---
 
 ## 15. Working rules

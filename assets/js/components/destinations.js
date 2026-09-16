@@ -20,7 +20,7 @@ import { destinationCard, mediaPlaceholder } from './cards.js';
 import { searchWidget } from './search.js';
 import { stateRegion, stateBlock, skeletonCard } from './states.js';
 
-const richCard = (d) => destinationCard(d, { country: true, services: true, entry: route('') + destinationEntry(d) });
+const richCard = (d) => destinationCard(d, { country: true, services: true, entry: route(destinationEntry(d)) });
 
 /* ---------------------------------------------------------------------------
    HERO — the 10.4 composition. §3
@@ -124,7 +124,7 @@ export function featuredBlock(list = featuredDestinations()) {
   const [lead, ...rest] = list;
   const support = rest.slice(0, 2);
   return el('div', { class: 'c-featured', dataset: { count: String(1 + support.length) } }, [
-    el('div', { class: 'c-featured__lead' }, destinationCard(lead, { country: true, services: true, entry: route('') + destinationEntry(lead), large: true })),
+    el('div', { class: 'c-featured__lead' }, destinationCard(lead, { country: true, services: true, entry: route(destinationEntry(lead)), large: true })),
     support.length ? el('div', { class: 'c-featured__side' }, support.map(richCard)) : null,
   ]);
 }

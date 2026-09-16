@@ -180,7 +180,7 @@
 <script type="module">
   import {
     boot, el, qs, qsa, render, icon, route, pick,
-    mountHeader, mountFooter, mountHome, NAV_BOTTOM, destinationById,
+    mountHeader, mountFooter, mountHome, NAV_BOTTOM,
   } from './assets/js/foundation.js';
 
   // Static links in the markup are written relative; resolve them through
@@ -196,31 +196,17 @@
         ...(i === 0 ? { 'aria-current': 'page' } : {}),
       }, [icon(item.icon, { size: 'sm' }), el('span', {}, pick(item, 'label'))])));
 
-    home = mountHome({ onSearchSubmit: (vertical, params) => { if (offerSlug) params.set('offer', offerSlug); } });
+    home = mountHome();
     window.no = { ...(window.no ?? {}), home };   // QA handle: no.home.regions.offers.error()
     openRequestedService();
   }
 
-  // A service card or Help Me Choose option arrives as ?vertical=…&service=…
-  // (data/services.js serviceEntry): open that tab, preselect the option and
-  // land on the booking entry. Read once; a language change keeps the tab.
+  // A door elsewhere on the site may still arrive here with ?vertical=…&to=…
+  // (the dedicated entry is /book/, Stage 10.9). Open the widget on it once.
   let requested = new URLSearchParams(location.search);
-  let offerSlug = null;
   function openRequestedService() {
-    const vertical = requested.get('vertical');
-    if (!vertical || !home.search.no.select(vertical)) return;
-    const option = requested.get('service');
-    if (option) { const sel = qs('.c-search__form:not([hidden]) select[name="service"]'); if (sel) sel.value = option; }
-    // ?to=<destination slug> prefills the destination in the traveller's language.
-    const to = requested.get('to');
-    if (to) {
-      const dest = destinationById(to);
-      const input = qs('.c-search__form:not([hidden]) input[name="to"], .c-search__form:not([hidden]) input[name="destination"]');
-      if (dest && input) input.value = pick(dest, 'name');
-    }
-    // ?offer=<slug> — the request is about that offer; it travels with the search.
-    offerSlug = requested.get('offer');
-    if (location.hash === '#booking') home.scrollToSearch();
+    if (!requested.get('vertical')) return;
+    if (home.applyParams(requested) && location.hash === '#booking') home.scrollToSearch();
     requested = new URLSearchParams();
   }
 

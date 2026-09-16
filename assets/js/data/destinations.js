@@ -131,7 +131,7 @@ export const regionsWithDestinations = () => DESTINATION_REGIONS.filter((r) => d
  * to the localised name). The detail page (destinations/<slug>/) is a later
  * stage. Returned without the site root — pass through route().
  */
-export const destinationEntry = (dest) => `?vertical=flights&to=${encodeURIComponent(dest.slug)}#booking`;
+export const destinationEntry = (dest) => `book/?vertical=flights&to=${encodeURIComponent(dest.slug)}`;
 
 /**
  * Filter the registry by the destination search fields. Pure and

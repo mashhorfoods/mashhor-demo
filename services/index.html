@@ -132,7 +132,7 @@
   function mountChrome() {
     mountFooter({ target: qs('.l-page'), variant: 'marketing' });
     mountHeader({ target: qs('.l-page'), current: 'services',
-      onSearch: () => { window.location.assign(route('') + '#booking'); } });
+      onSearch: () => { window.location.assign(route('book/')); } });
   }
 
   boot({ sprite: 'assets/icons/sprite.svg', onLocale: () => { mountChrome(); paint(); } });

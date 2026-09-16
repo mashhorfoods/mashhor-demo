@@ -12,6 +12,8 @@
 
 @layer components {
   .c-field { display: flex; flex-direction: column; gap: var(--space-8); }
+  /* Conditional fields (`when`) are hidden by attribute; display rules below must not win. */
+  .c-field[hidden] { display: none; }
 
   .c-field__label {
     display: flex; align-items: center; gap: var(--space-4);

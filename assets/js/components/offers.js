@@ -134,10 +134,10 @@ export function filterSheet() {
    DECK + FEATURED. §2 §8
    ------------------------------------------------------------------------ */
 export const offerDeck = (list) =>
-  el('div', { class: 'l-grid' }, list.map((o) => el('div', { class: 'l-span-4@md l-span-4@lg' }, offerCard(o, { entry: route('') + offerEntry(o) }))));
+  el('div', { class: 'l-grid' }, list.map((o) => el('div', { class: 'l-span-4@md l-span-4@lg' }, offerCard(o, { entry: route(offerEntry(o)) }))));
 
 export function featuredOfferCard(offer) {
-  return offerCard(offer, { entry: route('') + offerEntry(offer), large: true });
+  return offerCard(offer, { entry: route(offerEntry(offer)), large: true });
 }
 
 /* ---------------------------------------------------------------------------
@@ -250,7 +250,7 @@ export function getOffer(slug) {
 
 /** One dominant action, decided by the record. §4 §5 */
 export function offerAction(record) {
-  const entry = route('') + offerEntry(record);
+  const entry = route(offerEntry(record));
   const expert = route('help/contact/');
   const browse = route('offers/');
   if (record.status === 'ended') return { type: 'browse', primary: { label: t('offers.cta.browse'), href: browse }, secondary: { label: t('offers.cta.expert'), href: expert } };

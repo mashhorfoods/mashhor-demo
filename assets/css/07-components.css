@@ -142,6 +142,8 @@
                     background-color: var(--color-bg-subtle); border-block-end: var(--border-hairline);
                     overflow-x: auto; scrollbar-width: none; }
   .c-search__tabs::-webkit-scrollbar { display: none; }
+  /* A page may hide the strip and drive selection itself (the booking entry). */
+  .c-search__tabs[hidden] { display: none; }
   .c-search__tab {
     display: inline-flex; align-items: center; gap: var(--space-8);
     padding-inline: var(--space-16); padding-block: var(--space-8);

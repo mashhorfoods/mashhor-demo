@@ -100,7 +100,7 @@
             <p class="t-body-lg c-cta-band__text" data-i18n="offers.final.text">أخبرنا بوجهتك وأيامك وميزانيتك، ويعود إليك مختص بالخيارات والسعر.</p>
           </div>
           <div class="c-cta-band__actions">
-            <a class="c-btn c-btn--primary c-btn--lg" href="" data-route="" data-query="vertical=packages" data-hash="booking" data-i18n="offers.final.primary">اطلب باقة</a>
+            <a class="c-btn c-btn--primary c-btn--lg" href="book/" data-route="book/" data-query="vertical=packages" data-i18n="offers.final.primary">اطلب باقة</a>
             <a class="c-btn c-btn--inverse c-btn--lg" href="help/contact/" data-route="help/contact/" data-i18n="offers.cta.expert">تحدث مع خبير</a>
           </div>
         </div>
@@ -138,7 +138,7 @@
   function mountChrome() {
     mountFooter({ target: qs('.l-page'), variant: 'marketing', cta: false });
     mountHeader({ target: qs('.l-page'), current: 'offers',
-      onSearch: () => { window.location.assign(route('') + '#booking'); } });
+      onSearch: () => { window.location.assign(route('book/')); } });
   }
 
   boot({ sprite: 'assets/icons/sprite.svg', onLocale: () => { mountChrome(); paint(); } });

@@ -14,6 +14,7 @@ inherits it.
 | **Service details** | [`docs/SERVICE-DETAILS.md`](docs/SERVICE-DETAILS.md) — Stage 10.6 · `services/<slug>/` |
 | **Destinations** | [`docs/DESTINATIONS.md`](docs/DESTINATIONS.md) — Stage 10.7 · `destinations/` |
 | **Offers & packages** | [`docs/OFFERS.md`](docs/OFFERS.md) — Stage 10.8 · `offers/`, `offers/<slug>/` |
+| **Booking entry** | [`docs/BOOKING.md`](docs/BOOKING.md) — Stage 10.9 · `book/` |
 | **Living style guide** | `styleguide.html` — every token, component and state, in RTL and LTR |
 | **Homepage** | `index.html` — the production homepage (Stage 10.4) |
 | **Brand assets** | [`assets/brand/README.md`](assets/brand/README.md) |

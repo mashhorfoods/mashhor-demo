@@ -41,7 +41,7 @@ export function getServiceDetail(slug) {
    ------------------------------------------------------------------------ */
 export function primaryActionFor(record) {
   const type = record.detail?.primaryAction ?? (record.kind?.id === 'search' ? 'book' : 'request');
-  const entry = route('') + serviceEntry(record);
+  const entry = route(serviceEntry(record));
   const expert = route('help/contact/');
   const map = {
     book:    { label: t('detail.cta.book'),    href: entry },

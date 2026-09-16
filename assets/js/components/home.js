@@ -22,6 +22,7 @@ import {
   HOME_DESTINATIONS, HOME_OFFERS, HOME_JOURNEY, HOME_SUPPORT,
 } from '../data/home.js';
 import { icon, setButtonState } from './ui.js';
+import { buildContext, validate, saveContext, continueUrl, applyEntryParams } from '../core/booking.js';
 import { serviceCard, destinationCard, offerCard, mediaPlaceholder } from './cards.js';
 import { searchWidget } from './search.js';
 import { stateRegion, stateBlock, skeletonService, skeletonCard } from './states.js';
@@ -76,40 +77,33 @@ export function heroMedia(hero = HOME_HERO) {
  * the fields as a query string — the homepage never runs a search itself.
  * `priority` (from Help Me Choose) travels with it as `sort`.
  */
-export function heroSearch({ onSubmit = null, getPriority = () => null } = {}) {
+export function heroSearch({ onSubmit = null, getPriority = () => null, getOffer = () => '' } = {}) {
   const widget = searchWidget({
     onSubmit: (vertical, formData, form) => {
-      // Required fields: mark, explain, focus — the browser's bubble is not
-      // localised and disappears on its own. §12
-      const missing = Array.from(form.querySelectorAll('[required]')).filter((f) => !f.value.trim());
-      form.querySelectorAll('.c-field__error').forEach((n) => n.remove());
-      form.querySelectorAll('[aria-invalid]').forEach((n) => n.removeAttribute('aria-invalid'));
-      if (missing.length) {
-        missing.forEach((field) => {
-          field.setAttribute('aria-invalid', 'true');
-          field.closest('.c-field')?.append(el('p', { class: 'c-field__error', role: 'alert' }, t('search.required')));
-        });
-        missing[0].focus();
+      // The same context, rules and messages as the booking entry (core/booking.js). §12
+      widget.no.clearErrors();
+      const ctx = buildContext(vertical, formData, { sort: getPriority() ?? '', offer: getOffer() ?? '' });
+      const errors = validate(vertical, ctx);
+      if (errors.length) {
+        let first = null;
+        for (const e of errors) { const c = widget.no.setError(e.field, e.message, e.index); first ??= c; }
+        first?.focus();
         return;
       }
-
-      const params = new URLSearchParams(formData);
-      params.set('vertical', vertical);
-      const sort = getPriority();
-      if (sort) params.set('sort', sort);
-
       const button = form.querySelector('button[type="submit"]');
       if (button) setButtonState(button, 'loading');
-
-      if (onSubmit?.(vertical, params) === false) {
+      const params = contextParams(ctx);
+      if (onSubmit?.(vertical, params, ctx) === false) {
         if (button) setButtonState(button, 'idle');
         return;
       }
-      window.location.assign(`${route('search/')}?${params.toString()}`);
+      saveContext(ctx);
+      window.location.assign(continueUrl(ctx));
     },
   });
   return widget;
 }
+const contextParams = (ctx) => new URL(continueUrl(ctx), location.href).searchParams;
 
 /* ---------------------------------------------------------------------------
    SERVICES — the card grid with progressive disclosure. §05
@@ -286,7 +280,8 @@ export function mountHome({
   const choose = chooseModule(HOME_PRIORITIES, {
     onGo: () => { search.no.select('flights'); scrollToSearch(); },
   });
-  const search = heroSearch({ onSubmit: onSearchSubmit, getPriority: () => choose.no.selected });
+  const search = heroSearch({ onSubmit: onSearchSubmit, getPriority: () => choose.no.selected, getOffer: () => offerSlug });
+  let offerSlug = '';
   const scrollToSearch = () => {
     qs('#booking', root)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     // The smooth scroll brings the entry into view; focus must not fight it
@@ -363,6 +358,8 @@ export function mountHome({
 
   return {
     regions, search, choose, scrollToSearch, reload: hydrate,
+    /** Open the widget on what a URL asks for (?vertical=…&to=…&offer=…). */
+    applyParams(params) { const applied = applyEntryParams(search, params); offerSlug = applied?.offer ?? ''; return applied; },
     get locale() { return isAr() ? 'ar' : 'en'; },
   };
 }

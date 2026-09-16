@@ -143,7 +143,7 @@ export const offersHave = (field) => OFFER_REGISTRY.some((o) => {
  * booking engine's own route without touching the pages. Pass through route().
  */
 export const offerEntry = (offer) =>
-  `?vertical=${offer.categories.includes('umrah') ? 'umrah' : 'packages'}&offer=${encodeURIComponent(offer.slug)}&to=${encodeURIComponent(offer.destination)}#booking`;
+  `book/?vertical=${offer.categories.includes('umrah') ? 'umrah' : 'packages'}&offer=${encodeURIComponent(offer.slug)}&to=${encodeURIComponent(offer.destination)}`;
 
 /**
  * Filter + sort the registry. Pure and synchronous today; the same signature

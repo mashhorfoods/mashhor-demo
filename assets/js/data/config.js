@@ -75,23 +75,28 @@ export const SEARCH_VERTICALS = [
        trip type is a segmented control above the fields, and cabin sits in
        the main row rather than behind "more options". */
     id: 'flights', label: 'search.flights', icon: 'no-flight', columns: 4,
+    submit: 'search.submitFlights', submitIcon: 'no-search',
     fields: [
       { id: 'tripType',  type: 'segmented', label: 'search.tripType', full: true, value: 'return',
         options: [
-          { value: 'return',  labelAr: 'ذهاب وعودة',  labelEn: 'Return' },
+          { value: 'return',  labelAr: 'ذهاب وعودة',  labelEn: 'Round trip' },
           { value: 'oneway',  labelAr: 'ذهاب فقط',    labelEn: 'One way' },
           { value: 'multi',   labelAr: 'وجهات متعددة', labelEn: 'Multi-city' },
         ] },
-      { id: 'from',      type: 'place',   label: 'search.from',   icon: 'no-flight',   required: true },
-      { id: 'to',        type: 'place',   label: 'search.to',     icon: 'no-location', required: true },
-      { id: 'depart',    type: 'date',    label: 'search.depart', required: true },
-      { id: 'return',    type: 'date',    label: 'search.return' },
+      // Round trip and one way share one from/to/depart row; the return date
+      // exists only for a round trip; multi-city swaps the row for legs.
+      { id: 'from',      type: 'place',   label: 'search.from',   icon: 'no-flight',   required: true, when: { field: 'tripType', values: ['return', 'oneway'] } },
+      { id: 'to',        type: 'place',   label: 'search.to',     icon: 'no-location', required: true, when: { field: 'tripType', values: ['return', 'oneway'] } },
+      { id: 'depart',    type: 'date',    label: 'search.depart', required: true, when: { field: 'tripType', values: ['return', 'oneway'] } },
+      { id: 'return',    type: 'date',    label: 'search.return', required: true, when: { field: 'tripType', value: 'return' } },
+      { id: 'legs',      type: 'legs',    label: 'search.legs', min: 2, max: 4, full: true, when: { field: 'tripType', value: 'multi' } },
       { id: 'pax',       type: 'pax',     label: 'search.travellers' },
       { id: 'cabin',     type: 'select',  label: 'search.cabin',
         options: [
           { value: 'economy',  labelAr: 'الاقتصادية',        labelEn: 'Economy' },
           { value: 'premium',  labelAr: 'الاقتصادية المميزة', labelEn: 'Premium economy' },
           { value: 'business', labelAr: 'رجال الأعمال',      labelEn: 'Business' },
+          { value: 'first',    labelAr: 'الأولى',            labelEn: 'First' },
         ] },
       { id: 'direct',    type: 'checkbox', label: 'search.direct', advanced: true },
     ],
@@ -103,6 +108,12 @@ export const SEARCH_VERTICALS = [
       { id: 'checkin',     type: 'date',  label: 'search.checkin',  required: true },
       { id: 'checkout',    type: 'date',  label: 'search.checkout', required: true },
       { id: 'guests',      type: 'pax',   label: 'search.guests' },
+      { id: 'rooms',       type: 'select', label: 'search.rooms', value: '1', options: [
+          { value: '1', labelAr: 'غرفة واحدة', labelEn: '1 room' },
+          { value: '2', labelAr: 'غرفتان',     labelEn: '2 rooms' },
+          { value: '3', labelAr: '3 غرف',      labelEn: '3 rooms' },
+          { value: '4', labelAr: '4 غرف',      labelEn: '4 rooms' },
+        ] },
     ],
   },
   {

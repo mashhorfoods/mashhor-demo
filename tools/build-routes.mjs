@@ -116,7 +116,7 @@ ${c.sections.map((s, i) => `    <section class="l-section${i % 2 === 0 ? ' l-sec
     // The page carries its own final CTA, so the footer's is switched off.
     mountFooter({ target: qs('.l-page'), variant: 'marketing', cta: false });
     mountHeader({ target: qs('.l-page'), current: ${JSON.stringify(c.current)},
-      onSearch: () => { window.location.assign(route('') + '#booking'); } });
+      onSearch: () => { window.location.assign(route('book/')); } });
   }
   boot({ sprite: 'assets/icons/sprite.svg', onLocale: () => { mountChrome(); paint(); } });
   mountChrome();

@@ -81,7 +81,7 @@
     // The page carries its own final CTA, so the footer's is switched off.
     mountFooter({ target: qs('.l-page'), variant: 'marketing', cta: false });
     mountHeader({ target: qs('.l-page'), current: "services",
-      onSearch: () => { window.location.assign(route('') + '#booking'); } });
+      onSearch: () => { window.location.assign(route('book/')); } });
   }
   boot({ sprite: 'assets/icons/sprite.svg', onLocale: () => { mountChrome(); paint(); } });
   mountChrome();

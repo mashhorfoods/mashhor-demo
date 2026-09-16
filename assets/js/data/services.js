@@ -180,15 +180,15 @@ export const servicesIn = (categoryId) => SERVICE_REGISTRY.filter((s) => s.categ
 export const featuredServices = () => SERVICE_REGISTRY.filter((s) => s.featured);
 
 /**
- * The route that starts this service's journey TODAY: the homepage booking
- * entry, opened on the right vertical (and, for the "other services" form,
- * the right option). The service-detail page (`href`) is Stage 10.6.
- * Returned without the site root — pass it through route().
+ * The route that starts this service's journey: the booking entry (/book/,
+ * Stage 10.9), opened on the right vertical (and, for the "other services"
+ * form, the right option). Returned without the site root — pass through
+ * route().
  */
 export function serviceEntry(service) {
   const params = new URLSearchParams({ vertical: service.vertical ?? 'other' });
   if (service.option) params.set('service', service.option);
-  return `?${params.toString()}#booking`;
+  return `book/?${params.toString()}`;
 }
 
 /* --------------------------------------------------------------------------

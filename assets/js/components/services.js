@@ -27,7 +27,7 @@ export function servicesHero({ onStart = null } = {}) {
     el('h1', { class: 't-display c-hero__title', id: 'services-title' }, t('services.hero.title')),
     el('p', { class: 'c-hero__lead' }, t('services.hero.lead')),
     el('div', { class: 'l-cluster l-cluster--16' }, [
-      el('a', { class: 'c-btn c-btn--primary c-btn--lg', href: route('') + '#booking', onclick: onStart }, t('services.hero.cta')),
+      el('a', { class: 'c-btn c-btn--primary c-btn--lg', href: route('book/'), onclick: onStart }, t('services.hero.cta')),
     ]),
   ]);
   const media = el('div', { class: 'c-hero__media', dataset: { mediaSlot: 'services-hero' } }, [
@@ -98,7 +98,7 @@ export function serviceGroupHead(category) {
 export function serviceCardGrid(services) {
   return el('div', { class: 'l-grid' }, services.map((s) =>
     el('div', { class: 'l-span-4@md l-span-4@lg' }, serviceCard(s, {
-      media: true, kind: SERVICE_KINDS[s.kind], entry: route('') + serviceEntry(s),
+      media: true, kind: SERVICE_KINDS[s.kind], entry: route(serviceEntry(s)),
     }))));
 }
 
@@ -107,7 +107,7 @@ export function serviceCardGrid(services) {
    ------------------------------------------------------------------------ */
 export function helpOptions(options = SERVICE_HELP_OPTIONS, { onSection = null } = {}) {
   const resolve = (target) => {
-    if (target.type === 'service') { const s = serviceById(target.id); return s ? route('') + serviceEntry(s) : null; }
+    if (target.type === 'service') { const s = serviceById(target.id); return s ? route(serviceEntry(s)) : null; }
     return null;
   };
   return el('ul', { class: 'l-grid c-help', role: 'list' }, options.map((o) => {

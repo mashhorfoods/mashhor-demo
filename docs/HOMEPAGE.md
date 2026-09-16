@@ -25,7 +25,7 @@ home.scrollToSearch();               // what "Start booking" and the header sear
 
 | # | Section | Built from | Data |
 | --- | --- | --- | --- |
-| 01 | Hero + booking entry | `heroCopy` `heroMedia` `heroSearch` → `searchWidget` | `HOME_HERO`, `SEARCH_VERTICALS` |
+| 01 | Hero + booking entry (since 10.9 it validates and persists the same booking context as `book/`, see `docs/BOOKING.md`) | `heroCopy` `heroMedia` `heroSearch` → `searchWidget` | `HOME_HERO`, `SEARCH_VERTICALS` |
 | 02 | Services | `servicesGrid` → `serviceCard` | `HOME_SERVICES` = the 10.5 registry (12, six `featured`) |
 | 03 | Why Number One | `valueList` | `HOME_VALUES` |
 | 04 | Help me choose | `chooseModule` | `HOME_PRIORITIES` |
