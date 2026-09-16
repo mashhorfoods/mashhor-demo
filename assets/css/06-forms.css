@@ -279,7 +279,7 @@
   }
   .c-segmented__option {
     position: relative; display: inline-flex; align-items: center; justify-content: center;
-    min-block-size: calc(var(--touch-target) - var(--space-8));
+    min-block-size: var(--control-height-sm);
     padding-inline: var(--space-16);
     border-radius: var(--radius-sm);
     font-size: var(--text-body-sm); font-weight: var(--weight-medium);

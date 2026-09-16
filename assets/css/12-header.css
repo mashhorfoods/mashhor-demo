@@ -44,7 +44,9 @@
 
   .c-gh__bar {
     display: grid;
-    grid-template-columns: auto 1fr auto;
+    /* The brand never shrinks: an `auto` track would squeeze the logo image
+       before the nav gives way (seen at 64em in English). Stage 10.11 */
+    grid-template-columns: max-content minmax(0, 1fr) max-content;
     align-items: center;
     gap: var(--space-16);
     padding-block: var(--header-pad-block);
@@ -55,7 +57,7 @@
   .c-gh__nav   { justify-self: center; display: none; }
   .c-gh__actions { justify-self: end; display: flex; align-items: center; gap: var(--space-4); }
 
-  @media (min-width: 64em) { .c-gh__nav { display: block; } }
+  @media (min-width: 64em) { .c-gh__nav { display: block; min-inline-size: 0; } }
 
   /* Elements that only exist on one side of the tablet line. */
   .c-gh__desktop-only { display: none; }
@@ -125,6 +127,14 @@
   .c-gh__action[aria-expanded="true"] { background-color: var(--color-surface-hover); color: var(--color-text); }
   .c-gh__action-label { display: none; }
   @media (min-width: 80em) { .c-gh__action-label { display: inline; } }
+
+  /* Between the desktop line and the point where the action labels appear
+     (80em) the bar is at its tightest: the primary links close ranks so the
+     English nav fits beside the brand and the actions. Stage 10.11 */
+  @media (min-width: 64em) and (max-width: 79.999em) {
+    .c-gh__list { gap: 0; }
+    .c-gh__link { padding-inline: var(--space-8); }
+  }
 
   .c-gh__cta { margin-inline-start: var(--space-8); }
 
@@ -386,7 +396,7 @@
      BOOKING VARIANT — §32. Navigation recedes; the booking owns the page.
      ==================================================================== */
   .c-gh[data-variant="booking"] .c-gh__nav { display: none; }
-  .c-gh[data-variant="booking"] .c-gh__bar { grid-template-columns: auto 1fr auto; }
+  .c-gh[data-variant="booking"] .c-gh__bar { grid-template-columns: max-content minmax(0, 1fr) max-content; }
   .c-gh__secure {
     display: none; align-items: center; gap: var(--space-8);
     font-size: var(--text-caption); color: var(--color-text-secondary);

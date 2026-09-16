@@ -16,6 +16,7 @@ inherits it.
 | **Offers & packages** | [`docs/OFFERS.md`](docs/OFFERS.md) — Stage 10.8 · `offers/`, `offers/<slug>/` |
 | **Booking entry** | [`docs/BOOKING.md`](docs/BOOKING.md) — Stage 10.9 · `book/` |
 | **Supervisor profile** | [`docs/SUPERVISOR.md`](docs/SUPERVISOR.md) — Stage 10.10 · `supervisor/<slug>/` |
+| **Responsive & accessibility refinement** | [`docs/REFINEMENT.md`](docs/REFINEMENT.md) — Stage 10.11 · `tools/a11y-audit.mjs` |
 | **Living style guide** | `styleguide.html` — every token, component and state, in RTL and LTR |
 | **Homepage** | `index.html` — the production homepage (Stage 10.4) |
 | **Brand assets** | [`assets/brand/README.md`](assets/brand/README.md) |

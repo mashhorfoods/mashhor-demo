@@ -7,7 +7,7 @@
    category filter, exposed as `window.no.services` for QA. §12 / §7
    ========================================================================= */
 
-import { el, qs, qsa, render } from '../core/dom.js';
+import { el, qs, qsa, render, scrollTo as scrollIntoView } from '../core/dom.js';
 import { t, pick } from '../core/i18n.js';
 import { route } from '../data/config.js';
 import {
@@ -155,7 +155,7 @@ export function mountServices({
   load = async () => SERVICE_REGISTRY,
 } = {}) {
   const mount = (name) => qs(`[data-services="${name}"]`, root);
-  const scrollTo = (id) => qs(`#${id}`, root)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const scrollTo = (id) => scrollIntoView(qs(`#${id}`, root));
 
   render(mount('hero'), servicesHero());
   render(mount('kinds'), kindLegend());

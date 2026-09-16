@@ -272,7 +272,7 @@
     --focus-ring: var(--focus-ring-width) solid var(--color-focus);
 
     --touch-target: 44px;          /* §23 — never smaller on touch */
-    --control-height-sm: 36px;
+    --control-height-sm: 40px;     /* Stage 10.11 — a small control is still a comfortable target */
     --control-height:    48px;
     --control-height-lg: 56px;
     --header-height:         72px;

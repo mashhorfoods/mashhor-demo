@@ -6,7 +6,7 @@
    the search and the region filter — exposed as `window.no.destinations`.
    ========================================================================= */
 
-import { el, qs, qsa, render } from '../core/dom.js';
+import { el, qs, qsa, render, scrollTo as scrollIntoView } from '../core/dom.js';
 import { t, pick } from '../core/i18n.js';
 import { route } from '../data/config.js';
 import {
@@ -177,7 +177,7 @@ export function mountDestinations({
   search = async (query) => searchDestinations(query),
 } = {}) {
   const mount = (name) => qs(`[data-destinations="${name}"]`, root);
-  const scrollTo = (id) => qs(`#${id}`, root)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const scrollTo = (id) => scrollIntoView(qs(`#${id}`, root));
 
   const emptyWith = (titleKey, textKey, actions) => () => stateBlock({ variant: 'empty', title: t(titleKey), text: t(textKey), actions });
   const grid3 = () => el('div', { class: 'l-grid' }, Array.from({ length: 3 }, () => el('div', { class: 'l-span-4@md l-span-4@lg' }, skeletonCard())));

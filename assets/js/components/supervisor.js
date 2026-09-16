@@ -17,7 +17,7 @@
    block with a way forward. Exposed as `window.no.supervisor` for QA.
    ========================================================================= */
 
-import { el, qs, qsa, render } from '../core/dom.js';
+import { el, qs, qsa, render, scrollTo as scrollIntoView } from '../core/dom.js';
 import { t, pick, getLocale } from '../core/i18n.js';
 import { route } from '../data/config.js';
 import { SERVICE_KINDS, serviceEntry } from '../data/services.js';
@@ -244,7 +244,7 @@ export function mountSupervisor({
     if (content) { render(body, content); section.hidden = false; }
     else { render(body, []); section.hidden = true; }
   };
-  const scrollTo = (id) => { const s = qs(`#${id}`, root); if (!s) return; s.scrollIntoView({ behavior: 'smooth', block: 'start' }); qs('a, button', s)?.focus({ preventScroll: true }); };
+  const scrollTo = (id) => { const s = qs(`#${id}`, root); if (s) scrollIntoView(s, { focus: qs('a, button', s) }); };
 
   const paint = (sup) => {
     applyHead(sup);

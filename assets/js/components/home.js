@@ -12,7 +12,7 @@
    exposes that handle as `window.no.home` for QA.
    ========================================================================= */
 
-import { el, qs, render } from '../core/dom.js';
+import { el, qs, render, scrollTo as scrollIntoView } from '../core/dom.js';
 import { t, pick, getLocale } from '../core/i18n.js';
 import { dateShort } from '../core/format.js';
 import { route } from '../data/config.js';
@@ -282,12 +282,7 @@ export function mountHome({
   });
   const search = heroSearch({ onSubmit: onSearchSubmit, getPriority: () => choose.no.selected, getOffer: () => offerSlug });
   let offerSlug = '';
-  const scrollToSearch = () => {
-    qs('#booking', root)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    // The smooth scroll brings the entry into view; focus must not fight it
-    // with a second, instant scroll of its own.
-    setTimeout(() => search.no.focus({ preventScroll: true }), 350);
-  };
+  const scrollToSearch = () => scrollIntoView(qs('#booking', root), { focus: () => search.no.focus({ preventScroll: true }) });
 
   render(mount('hero-copy'), heroCopy());
   render(mount('hero-media'), heroMedia());

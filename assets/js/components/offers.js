@@ -8,7 +8,7 @@
    mountOffers() → window.no.offers · mountOfferDetail() → window.no.offer
    ========================================================================= */
 
-import { el, qs, qsa, render } from '../core/dom.js';
+import { el, qs, qsa, render, scrollTo as scrollIntoView } from '../core/dom.js';
 import { t, pick, getLocale } from '../core/i18n.js';
 import { dateShort } from '../core/format.js';
 import { route } from '../data/config.js';
@@ -159,7 +159,7 @@ export function mountOffers({
   initial = {},
 } = {}) {
   const mount = (name) => qs(`[data-offers="${name}"]`, root);
-  const scrollTo = (id) => qs(`#${id}`, root)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const scrollTo = (id) => scrollIntoView(qs(`#${id}`, root));
   const values = { category: '', destination: '', service: '', duration: '', price: '', period: '', sort: 'recommended', ...initial };
   let data = [];
 

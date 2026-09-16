@@ -10,7 +10,7 @@
    mountBooking() → window.no.booking
    ========================================================================= */
 
-import { el, qs, qsa, render } from '../core/dom.js';
+import { el, qs, qsa, render, scrollTo as scrollIntoView } from '../core/dom.js';
 import { t, pick, getLocale } from '../core/i18n.js';
 import { dateShort } from '../core/format.js';
 import { route, SEARCH_VERTICALS } from '../data/config.js';
@@ -149,7 +149,7 @@ export function mountBooking({
   prepare = async (ctx) => { saveContext(ctx); return ctx; },
 } = {}) {
   const mount = (name) => qs(`[data-booking="${name}"]`, root);
-  const scrollTo = (id) => qs(`#${id}`, root)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const scrollTo = (id) => scrollIntoView(qs(`#${id}`, root));
   let sort = '';
   let offer = '';
   let lastContext = null;

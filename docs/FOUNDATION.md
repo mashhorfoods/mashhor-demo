@@ -448,8 +448,8 @@ component in this layer. Permission is asked, never assumed.
 | 16 | RTL works | ✅ default, verified |
 | 17 | LTR works | ✅ verified by live switch |
 | 18–20 | Mobile / tablet / desktop behaviour | ✅ verified at 390 / 834 / 1440 |
-| 21 | Accessibility rules | ✅ implemented (see §10 above) |
-| 22 | Motion rules | ✅ token-level reduced motion |
+| 21 | Accessibility rules | ✅ implemented (see §10 above); audited site-wide in 10.11 — `tools/a11y-audit.mjs`, see `docs/REFINEMENT.md` |
+| 22 | Motion rules | ✅ token-level reduced motion; in-page scrolls respect it too (10.11) |
 | 23 | Component architecture reusable | ✅ layered, no duplication |
 | 24 | Data-driven structure | ✅ config + sample shapes |
 | 25–28 | Booking / Account / Supervisor / Admin integration supported | ✅ shapes and components in place |

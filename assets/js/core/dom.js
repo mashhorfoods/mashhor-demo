@@ -55,6 +55,20 @@ export function render(target, children) {
   return target;
 }
 
+/**
+ * Bring an element into view, smoothly unless the person asked for reduced
+ * motion — CSS scroll-behavior does not govern scrollIntoView(), so every
+ * in-page move goes through here. §23
+ */
+export function scrollTo(target, { block = 'start', focus = null } = {}) {
+  if (!target) return;
+  const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block });
+  // Focus without a second scroll of its own, so it never fights the first.
+  if (typeof focus === 'function') focus();
+  else focus?.focus({ preventScroll: true });
+}
+
 export const uid = (() => {
   let n = 0;
   return (prefix = 'no') => `${prefix}-${(++n).toString(36)}-${Math.random().toString(36).slice(2, 6)}`;

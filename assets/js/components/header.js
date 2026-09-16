@@ -97,6 +97,16 @@ function createMenuController(scrim, { signal } = {}) {
           qs('a, button', panel)?.focus();
         });
       }
+      // An open panel is the next thing in reading order: Tab enters it
+      // rather than skipping to the next trigger and leaving it open. Stage 10.11
+      if (event.key === 'Tab' && !event.shiftKey && open?.trigger === trigger && !panel.hidden) {
+        const first = qs('a, button, input, select, textarea', panel);
+        if (first) { event.preventDefault(); first.focus(); }
+      }
+    });
+    // Leaving the trigger for anything but its panel closes it.
+    trigger.addEventListener('focusout', (event) => {
+      if (open?.trigger === trigger && event.relatedTarget && !panel.contains(event.relatedTarget)) close();
     });
 
     if (panel.dataset.ghWired) return;

@@ -27,7 +27,7 @@
                 wider instead of scrolling. This is the fix, everywhere. */
              min-inline-size: 0; }
   .sg-toc::-webkit-scrollbar { display: none; }
-  .sg-toc a { padding: var(--space-8) var(--space-12); font-size: var(--text-caption);
+  .sg-toc a { display: inline-flex; align-items: center; min-block-size: var(--control-height-sm); padding: var(--space-8) var(--space-12); font-size: var(--text-caption);
               white-space: nowrap; border-radius: var(--radius-sm); color: var(--color-text-secondary); }
   .sg-toc a:hover { background: var(--color-surface-hover); color: var(--color-text); }
   .sg-section { padding-block: var(--section-space-tight); border-block-start: var(--border-hairline); }
