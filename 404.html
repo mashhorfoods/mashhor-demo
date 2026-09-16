@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ar" dir="rtl" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- ===================================================================
+     THE ONE LINE THAT MATTERS ON THIS PAGE.
+
+     GitHub Pages serves this file for any missing path, but leaves the
+     requested URL in the address bar. Asked for /mashhor-demo/services/
+     flights/, the browser is sitting at that depth while the document is
+     really the site root's 404 — so every relative path (assets/, and the
+     links below) would resolve two levels too deep and 404 in turn.
+
+     <base> pins resolution to the real site root, so this page works
+     identically however deep the missing URL was. It is the only place in
+     the codebase with a hard-coded deploy path: change it here if the site
+     moves to a custom domain root (href="/").
+     =================================================================== -->
+<base href="/mashhor-demo/">
+
+<title>الصفحة غير موجودة — نمبرون للسفر و السياحة</title>
+<meta name="description" content="الصفحة المطلوبة غير موجودة. عد إلى الرئيسية أو ابحث عن رحلتك.">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#C8102E">
+<!-- Pages returns a real 404 status, but this file is also reachable directly
+     at /404.html with a 200, and that copy should never be indexed. -->
+<meta name="robots" content="noindex">
+
+<link rel="icon" href="assets/brand/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/ibm-plex-sans-arabic-arabic-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/ibm-plex-sans-arabic-arabic-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/foundation.css">
+
+<style>
+  /* The numeral is the brand's own asset (§02/§16), so the error page leads
+     with it rather than with a generic broken-link illustration. It is
+     decorative — the heading below carries the meaning. */
+  .c-404 { display: grid; place-items: center; text-align: center;
+           padding-block: var(--section-space); }
+  .c-404__code { font-family: var(--font-data); font-size: clamp(5rem, 3rem + 10vw, 10rem);
+                 font-weight: var(--weight-bold); line-height: 1;
+                 letter-spacing: -0.04em; color: var(--color-gray-200);
+                 font-variant-numeric: tabular-nums; }
+  /* The route runs off the end of the page: the journey that did not arrive. */
+  .c-404__route { inline-size: min(22rem, 70vw); margin-block: var(--space-24); }
+</style>
+</head>
+
+<body>
+<div class="l-page">
+
+  <header class="c-header">
+    <div class="l-container">
+      <div class="c-header__inner">
+        <a class="c-logo c-header__brand" href="./" aria-label="نمبرون للسفر و السياحة — الصفحة الرئيسية">
+          <img class="c-logo__img" src="assets/brand/mark.svg" alt="" width="40" height="40">
+          <span style="display:flex;flex-direction:column;line-height:1.15">
+            <strong data-i18n="brand.name">نمبرون</strong>
+            <span class="t-caption" data-i18n="brand.tagline">للسفر و السياحة</span>
+          </span>
+        </a>
+        <div class="c-header__actions">
+          <button type="button" class="c-btn c-btn--utility" data-lang-switch aria-label="تغيير اللغة">
+            <svg class="c-icon" aria-hidden="true"><use href="#no-language"></use></svg>
+          </button>
+          <a class="c-btn c-btn--secondary c-btn--sm" href="support/" data-i18n="nav.support">الدعم</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="l-page__main">
+    <div class="l-container">
+      <div class="c-404">
+
+        <p class="c-404__code" aria-hidden="true">404</p>
+        <div class="u-route c-404__route" aria-hidden="true"></div>
+
+        <!-- §21: what happened, and what you can do next. The status component
+             is the same .c-state used everywhere else — a 404 is not a reason
+             to invent a one-off layout. §33 -->
+        <div class="c-state" style="padding-block:0">
+          <h1 class="c-state__title" data-i18n="notFound.title">هذه الصفحة غير موجودة</h1>
+          <p class="c-state__text" data-i18n="notFound.text">
+            الرابط الذي فتحته غير صحيح، أو أن الصفحة انتقلت إلى مكان آخر. لم يحدث شيء لحجزك.
+          </p>
+
+          <div class="c-state__actions">
+            <a class="c-btn c-btn--primary" href="./" data-i18n="notFound.home">العودة إلى الرئيسية</a>
+            <a class="c-btn c-btn--secondary" href="./#search" data-i18n="notFound.search">ابحث عن رحلة</a>
+            <a class="c-btn c-btn--tertiary" href="support/" data-i18n="action.help">تحدث مع مختص</a>
+          </div>
+
+          <p class="c-state__next" data-i18n="notFound.next">
+            إن وصلت إلى هنا من رابط داخل موقعنا، أخبرنا به وسنصلحه.
+          </p>
+        </div>
+
+        <!-- Somewhere to go, not just an apology. Generated from the same
+             SERVICES data as every other surface. §27 -->
+        <nav class="l-section l-section--tight" aria-labelledby="svc-heading" style="inline-size:100%">
+          <h2 class="t-h4" id="svc-heading" style="margin-block-end:var(--space-16)">خدماتنا</h2>
+          <ul class="l-cluster l-cluster--8" role="list" id="service-links"
+              style="justify-content:center"></ul>
+        </nav>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="l-section l-section--tight l-section--inverse">
+    <div class="l-container">
+      <p class="t-caption t-inverse" style="opacity:.7">
+        © <span id="year">2026</span> نمبرون للسفر و السياحة — <bdi>Number One Travel &amp; Tourism</bdi>
+      </p>
+    </div>
+  </footer>
+
+</div>
+
+<script type="module">
+  import { boot, el, qs, render, t, route, SERVICES, pick } from './assets/js/foundation.js';
+
+  function paint() {
+    // Chips rather than cards: on an error page the services are a way out,
+    // not the content. Same data, lighter presentation.
+    render(qs('#service-links'), SERVICES.map((service) =>
+      el('li', {}, el('a', { class: 'c-chip', href: route(service.href) }, pick(service, 'title')))));
+    qs('#svc-heading').textContent = t('nav.services');
+  }
+
+  boot({ sprite: 'assets/icons/sprite.svg', onLocale: paint });
+  paint();
+  qs('#year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>

@@ -21,8 +21,13 @@
    work on Pages, on a custom domain and on a local server with no build step.
    ------------------------------------------------------------------------ */
 export const BASE = (() => {
-  // The directory the entry page sits in, e.g. '/mashhor-demo/' or '/'.
-  const path = window.location.pathname;
+  // document.baseURI, not location.pathname, because it honours an explicit
+  // <base> tag. 404.html needs that: GitHub Pages serves it for a missing path
+  // but leaves the deep URL in the address bar, so location would report
+  // '/mashhor-demo/services/flights/' as the site root and every link and asset
+  // would resolve one or more levels too deep. 404.html declares the real root
+  // with <base>, and this reads it.
+  const path = new URL(document.baseURI).pathname;
   return path.endsWith('/') ? path : path.replace(/[^/]*$/, '');
 })();
 
