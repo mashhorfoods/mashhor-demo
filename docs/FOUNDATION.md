@@ -480,14 +480,17 @@ component in this layer. Permission is asked, never assumed.
 5. **Legal entity details**, for Organization JSON-LD. The homepage ships a
    `WebSite` JSON-LD block with name and URL only, and grows to `Organization`
    once these exist.
+6. ~~**Raster brand exports**~~ — `apple-touch-icon.png` (180×180) and
+   `og-image.png` (1200×630) are generated from the official artwork and wired
+   into the pages.
 7. **Contact channels.** Phone and WhatsApp are `href: null` in
    `data/navigation.js` (`SUPPORT_CHANNELS`) since Stage 10.4: no surface renders
    a channel without an href, so nothing placeholder-shaped reaches a customer.
    Set the two values and the header panels, the drawer, the footer and the
    homepage support block all show them.
-6. ~~**Raster brand exports**~~ — `apple-touch-icon.png` (180×180) and
-   `og-image.png` (1200×630) are generated from the official artwork and wired
-   into the pages.
+8. **Service photography.** Every registry record in `data/services.js`
+   carries `image.src: null`; the services page renders the neutral slot at the
+   card's ratio until the approved photographs arrive.
 
 ---
 

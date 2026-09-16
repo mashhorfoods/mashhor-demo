@@ -30,20 +30,46 @@ export function statusBadge(statusId) {
 /* ---------------------------------------------------------------------------
    SERVICE CARD — icon · title · description · CTA
    ------------------------------------------------------------------------ */
-export function serviceCard(service) {
+/**
+ * @param {object} service   a registry record (data/services.js)
+ * @param {object} [options]
+ * @param {boolean} options.media   render the image slot (services page)
+ * @param {object}  options.kind    SERVICE_KINDS entry → badge + CTA label
+ * @param {string}  options.entry   href of the real CTA (the booking entry)
+ * Without options it is the compact card the homepage and style guide use.
+ */
+export function serviceCard(service, { media = false, kind = null, entry = null } = {}) {
   const titleId = uid('svc');
+  const rich = media || kind || entry;
+  const soon = service.status === 'soon';
+  const ctaLabel = service.ctaAr || service.ctaEn ? pick(service, 'cta') : (kind ? pick(kind, 'cta') : null);
 
-  return el('article', { class: 'c-card c-card--interactive c-service-card' }, [
+  return el('article', { class: ['c-card c-card--interactive c-service-card', rich ? 'c-service-card--rich' : ''], 'aria-labelledby': titleId }, [
+    media ? el('div', { class: 'c-card__media' }, mediaPlaceholder(service.image?.src, pick(service.image ?? {}, 'alt'))) : null,
     el('div', { class: 'c-card__body' }, [
-      el('span', { class: 'c-service-card__icon' }, icon(service.icon, { size: 'lg' })),
+      rich
+        ? el('div', { class: 'c-service-card__head' }, [
+            el('span', { class: 'c-service-card__icon' }, icon(service.icon, { size: 'lg' })),
+            kind ? el('span', { class: `c-badge ${kind.badge} c-service-card__kind` }, [icon(kind.icon, { size: 'xs' }), el('span', {}, pick(kind, 'label'))]) : null,
+          ])
+        : el('span', { class: 'c-service-card__icon' }, icon(service.icon, { size: 'lg' })),
       el('h3', { class: 'c-card__title', id: titleId }, [
         el('a', { class: 'c-card__link', href: route(service.href) }, pick(service, 'title')),
       ]),
       el('p', { class: 'c-card__text' }, pick(service, 'desc')),
-      el('span', { class: 'c-service-card__cta', 'aria-hidden': 'true' }, [
-        t('card.cta'),
-        icon('no-arrow-end', { size: 'sm', flip: true }),
-      ]),
+      soon ? el('span', { class: 'c-badge c-badge--warning c-service-card__soon' }, [icon('no-pending', { size: 'xs' }), el('span', {}, t('services.status.soon'))]) : null,
+      rich
+        ? el('div', { class: 'c-service-card__actions' }, [
+            entry && !soon
+              ? el('a', { class: 'c-btn c-btn--secondary-brand c-card__action', href: entry }, [
+                  el('span', {}, ctaLabel ?? t('card.cta')), icon('no-arrow-end', { size: 'sm', flip: true })])
+              : null,
+            el('a', { class: 'c-service-card__details c-card__action', href: route(service.href) }, t('services.details')),
+          ])
+        : el('span', { class: 'c-service-card__cta', 'aria-hidden': 'true' }, [
+            t('card.cta'),
+            icon('no-arrow-end', { size: 'sm', flip: true }),
+          ]),
     ]),
   ]);
 }

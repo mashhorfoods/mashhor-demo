@@ -241,10 +241,13 @@ export function searchWidget({ verticals = null, onSubmit = null } = {}) {
     ...panels,
   ]);
 
-  // The tabs and popovers live inside what we just built, so wire them now.
-  // boot() also sweeps the document once, but a widget rebuilt after a
-  // locale change would otherwise have dead tabs; both inits are idempotent.
-  queueMicrotask(() => { initTabs(widget); initPopovers(widget); });
+  // The tabs and popovers live inside what we just built, so wire them now —
+  // synchronously, because a caller may select a tab in the same tick (the
+  // homepage deep link does). boot() also sweeps the document once, but a
+  // widget rebuilt after a locale change would otherwise have dead tabs;
+  // both inits are idempotent.
+  initTabs(widget);
+  initPopovers(widget);
 
   widget.no = {
     select(id) {

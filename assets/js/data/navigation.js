@@ -33,57 +33,22 @@ export const NAV_PRIMARY = [
 /* --------------------------------------------------------------------------
    SERVICES MEGA MENU — §05. Four groups, scannable, icon + title + one line.
    ----------------------------------------------------------------------- */
+import { SERVICE_CATEGORIES, servicesIn } from './services.js';
+
+/* The four columns ARE the four approved categories, and every item is a
+   registry record (data/services.js): label = title, one-liner = short.
+   The menu cannot list a service the registry does not have. */
 export const MENU_SERVICES = {
   id: 'services',
   type: 'mega',
   titleAr: 'خدماتنا', titleEn: 'Our services',
-  columns: [
-    {
-      id: 'travel',
-      titleAr: 'السفر والحجز', titleEn: 'Travel & booking',
-      items: [
-        { id: 'flights',   icon: 'no-flight',    href: 'services/flights/',   labelAr: 'تذاكر الطيران', labelEn: 'Flight tickets',
-          descAr: 'نقارن الشركات ونرشّح الأنسب', descEn: 'We compare airlines and recommend' },
-        { id: 'hotels',    icon: 'no-hotel',     href: 'services/hotels/',    labelAr: 'الفنادق', labelEn: 'Hotels',
-          descAr: 'إقامة قريبة بأسعار واضحة', descEn: 'Close by, clearly priced' },
-        { id: 'transport', icon: 'no-transport', href: 'services/transport/', labelAr: 'النقل', labelEn: 'Transport',
-          descAr: 'استقبال وتنقلات بسائق', descEn: 'Pickups and transfers' },
-      ],
-    },
-    {
-      id: 'specialist',
-      titleAr: 'الخدمات المتخصصة', titleEn: 'Specialist services',
-      items: [
-        { id: 'visa',    icon: 'no-visa',    href: 'services/visa/',    labelAr: 'التأشيرات', labelEn: 'Visas',
-          descAr: 'مراجعة أوراقك قبل التقديم', descEn: 'Papers checked before you apply' },
-        { id: 'medical', icon: 'no-medical', href: 'services/medical/', labelAr: 'السفر العلاجي', labelEn: 'Medical travel',
-          descAr: 'الموعد والتأشيرة والإقامة معاً', descEn: 'Appointment, visa and stay together' },
-        { id: 'umrah',   icon: 'no-umrah',   href: 'services/umrah/',   labelAr: 'العمرة', labelEn: 'Umrah',
-          descAr: 'إقامة قريبة ومرافقة ميدانية', descEn: 'Close stays, guided on the ground' },
-      ],
-    },
-    {
-      id: 'programmes',
-      titleAr: 'السفر والبرامج', titleEn: 'Travel & programmes',
-      items: [
-        { id: 'packages', icon: 'no-tourism', href: 'services/packages/', labelAr: 'السياحة والباقات', labelEn: 'Tours & packages',
-          descAr: 'برامج عائلية جاهزة', descEn: 'Ready family programmes' },
-        { id: 'study',    icon: 'no-study',   href: 'services/study/',    labelAr: 'الدراسة', labelEn: 'Study',
-          descAr: 'تأشيرة الدراسة والسكن', descEn: 'Study visas and housing' },
-        { id: 'work',     icon: 'no-work',    href: 'services/work/',     labelAr: 'العمل', labelEn: 'Work',
-          descAr: 'إجراءات سفر العمل', descEn: 'Work travel paperwork' },
-      ],
-    },
-    {
-      id: 'tickets',
-      titleAr: 'خدمات التذاكر', titleEn: 'Ticket services',
-      items: [
-        { id: 'issue',  icon: 'no-ticket',      href: 'services/ticket-issue/',  labelAr: 'إصدار التذاكر', labelEn: 'Issue tickets' },
-        { id: 'change', icon: 'no-ticket-edit', href: 'services/ticket-change/', labelAr: 'تعديل التذاكر', labelEn: 'Change tickets' },
-        { id: 'cancel', icon: 'no-cancelled',   href: 'services/ticket-cancel/', labelAr: 'إلغاء التذاكر', labelEn: 'Cancel tickets' },
-      ],
-    },
-  ],
+  columns: SERVICE_CATEGORIES.map((c) => ({
+    id: c.id, titleAr: c.labelAr, titleEn: c.labelEn,
+    items: servicesIn(c.id).map((s) => ({
+      id: s.id, icon: s.icon, href: s.href,
+      labelAr: s.titleAr, labelEn: s.titleEn, descAr: s.shortAr, descEn: s.shortEn,
+    })),
+  })),
   /* The mega menu ends with human help, not another link list. §08 */
   footer: {
     titleAr: 'لست متأكداً من الخدمة المناسبة؟', titleEn: 'Not sure which service you need?',

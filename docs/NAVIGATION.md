@@ -42,6 +42,10 @@ mountHeader({
 | `initHeaderScrollState` | Sentinel + IntersectionObserver. |
 | `setSession` / `getSession` | The Stage 12 seam. |
 
+**The services mega menu is derived (since 10.5).** Its four columns are the
+four approved categories and its items are registry records from
+`data/services.js`; nothing in `navigation.js` names a service any more.
+
 ## Decisions worth knowing
 
 **Click, never hover (§22).** Menus open on click only. A cursor crossing the

@@ -35,29 +35,12 @@ export const BASE = (() => {
 export const route = (path = '') => BASE + String(path).replace(/^\//, '');
 
 /* ---------------------------------------------------------------------------
-   SERVICES — the six travel lines the brief names in §15.
-   `id` is the stable key the booking engine will use. Do not renumber it.
+   SERVICES — the featured six, read from the one registry (data/services.js,
+   Stage 10.5). Kept under this name because the style guide, the 404 and
+   the supervisor card consume it; the registry is the source.
    ------------------------------------------------------------------------ */
-export const SERVICES = [
-  { id: 'flights',   icon: 'no-flight',    href: 'services/flights/',   titleAr: 'حجز الطيران',        titleEn: 'Flights',
-    descAr: 'نقارن لك بين شركات الطيران ونساعدك تختار التذكرة الأنسب لميزانيتك ووقتك.',
-    descEn: 'We compare the airlines and help you pick the ticket that fits your budget and your time.' },
-  { id: 'hotels',    icon: 'no-hotel',     href: 'services/hotels/',    titleAr: 'حجز الفنادق',        titleEn: 'Hotels',
-    descAr: 'فنادق مختارة قريبة من وجهتك، بأسعار واضحة وشروط إلغاء مفهومة.',
-    descEn: 'Selected hotels close to where you are going, with clear prices and cancellation terms.' },
-  { id: 'packages',  icon: 'no-tourism',   href: 'services/packages/',  titleAr: 'الباقات السياحية',   titleEn: 'Tour packages',
-    descAr: 'برامج عائلية جاهزة تشمل الطيران والإقامة والتنقل، ويمكن تعديلها حسب طلبك.',
-    descEn: 'Ready family programmes covering flights, stay and transfers — adjustable on request.' },
-  { id: 'visa',      icon: 'no-visa',      href: 'services/visa/',      titleAr: 'خدمات التأشيرات',    titleEn: 'Visa services',
-    descAr: 'نراجع أوراقك قبل التقديم ونخبرك بما ينقصك، حتى لا يتأخر سفرك.',
-    descEn: 'We check your documents before you apply and tell you what is missing, so your travel is not delayed.' },
-  { id: 'umrah',     icon: 'no-umrah',     href: 'services/umrah/',     titleAr: 'العمرة والحج',       titleEn: 'Umrah & Hajj',
-    descAr: 'برامج عمرة بإقامة قريبة من الحرم، ومرافقة ميدانية طوال الرحلة.',
-    descEn: 'Umrah programmes with accommodation near the Haram and on-the-ground support throughout.' },
-  { id: 'medical',   icon: 'no-medical',   href: 'services/medical/',   titleAr: 'السفر العلاجي',      titleEn: 'Medical travel',
-    descAr: 'ننسّق الموعد الطبي والتأشيرة والإقامة معاً، ونتابع معك حتى العودة.',
-    descEn: 'We arrange the medical appointment, the visa and the stay together, and follow up until you return.' },
-];
+import { featuredServices } from './services.js';
+export const SERVICES = featuredServices();
 
 /* Navigation moved to data/navigation.js in Stage 10.2 — the full IA, the mega
    menus and the account menus now live together in one module. */
@@ -185,12 +168,14 @@ export const SEARCH_VERTICALS = [
   {
     id: 'other', label: 'search.other', icon: 'no-documents', columns: 2, submit: 'search.request',
     fields: [
+      /* The options are the registry services that have no vertical of their
+         own (data/services.js `option`), so the two can never disagree. */
       { id: 'service', type: 'select', label: 'search.service', options: [
-          { value: 'study',  labelAr: 'سفر للدراسة',        labelEn: 'Study travel' },
-          { value: 'work',   labelAr: 'سفر للعمل',          labelEn: 'Work travel' },
-          { value: 'groups', labelAr: 'رحلات جماعية',       labelEn: 'Group trips' },
-          { value: 'change', labelAr: 'تعديل أو إلغاء تذكرة', labelEn: 'Change or cancel a ticket' },
-          { value: 'issue',  labelAr: 'إصدار تذكرة',        labelEn: 'Ticket issuing' },
+          { value: 'study',  labelAr: 'السفر للدراسة', labelEn: 'Study travel' },
+          { value: 'work',   labelAr: 'السفر للعمل',   labelEn: 'Work travel' },
+          { value: 'issue',  labelAr: 'إصدار تذكرة',   labelEn: 'Ticket issuing' },
+          { value: 'change', labelAr: 'تعديل تذكرة',   labelEn: 'Change a ticket' },
+          { value: 'cancel', labelAr: 'إلغاء تذكرة',   labelEn: 'Cancel a ticket' },
         ] },
       { id: 'depart',  type: 'date',     label: 'search.depart' },
       { id: 'notes',   type: 'textarea', label: 'search.notes', full: true },

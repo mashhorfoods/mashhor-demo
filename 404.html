@@ -50,6 +50,7 @@
 </head>
 
 <body>
+<a class="c-skip-link" href="#main" data-i18n="a11y.skip" data-skip>تخطَّ إلى المحتوى</a>
 <div class="l-page">
 
   <!-- Global header mounted by the script below. Stage 10.2 -->
@@ -101,6 +102,9 @@
 <script type="module">
   import { boot, el, qs, render, route, t, SERVICES, pick, mountHeader, mountFooter }
     from './assets/js/foundation.js';
+
+  // <base> would send href="#main" to the homepage; the skip link scrolls here.
+  qs('[data-skip]')?.addEventListener('click', (e) => { e.preventDefault(); const m = qs('#main'); m.tabIndex = -1; m.focus(); m.scrollIntoView(); });
 
   let header = null;
 

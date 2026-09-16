@@ -40,58 +40,12 @@ export const HOME_HERO = {
 };
 
 /* --------------------------------------------------------------------------
-   SERVICES — §05. The eleven lines the brief names, in the brief's order.
-   `href` values are the routes the header's mega menu already uses, so the
-   homepage and the navigation cannot point at different pages.
-   `featured` marks the six shown before "show all services" (progressive
-   disclosure, §05) — change the flag, not the component.
+   SERVICES — §05. The homepage grid reads the one registry (data/services.js,
+   Stage 10.5): `featured` records show first, the rest sit behind "show all
+   services". Change a flag there, not a list here.
    ----------------------------------------------------------------------- */
-export const HOME_SERVICES = [
-  { id: 'flights',  icon: 'no-flight',      href: 'services/flights/',       featured: true,
-    titleAr: 'تذاكر طيران',          titleEn: 'Flight tickets',
-    descAr: 'نقارن بين شركات الطيران ونساعدك تختار التذكرة الأنسب لوقتك وميزانيتك.',
-    descEn: 'We compare the airlines and help you pick the ticket that fits your time and budget.' },
-  { id: 'visa',     icon: 'no-visa',        href: 'services/visa/',          featured: true,
-    titleAr: 'تأشيرات',              titleEn: 'Visas',
-    descAr: 'نراجع أوراقك قبل التقديم ونخبرك بما ينقصك.',
-    descEn: 'We check your documents before you apply and tell you what is missing.' },
-  { id: 'medical',  icon: 'no-medical',     href: 'services/medical/',       featured: true,
-    titleAr: 'سفر علاجي',            titleEn: 'Medical travel',
-    descAr: 'ننسّق الموعد الطبي والتأشيرة والإقامة معاً.',
-    descEn: 'We arrange the medical appointment, the visa and the stay together.' },
-  { id: 'hotels',   icon: 'no-hotel',       href: 'services/hotels/',        featured: true,
-    titleAr: 'حجوزات فنادق',         titleEn: 'Hotel bookings',
-    descAr: 'إقامة قريبة من وجهتك بأسعار واضحة وشروط إلغاء مفهومة.',
-    descEn: 'A stay close to where you are going, with clear prices and cancellation terms.' },
-  { id: 'tourism',  icon: 'no-tourism',     href: 'services/packages/',      featured: true,
-    titleAr: 'سياحة',                titleEn: 'Tourism',
-    descAr: 'برامج سياحية تُصمَّم حسب عدد الأيام والميزانية.',
-    descEn: 'Tourism programmes shaped around your days and your budget.' },
-  { id: 'umrah',    icon: 'no-umrah',       href: 'services/umrah/',         featured: true,
-    titleAr: 'عمرة',                 titleEn: 'Umrah',
-    descAr: 'برامج عمرة بإقامة قريبة من الحرم ومتابعة طوال الرحلة.',
-    descEn: 'Umrah programmes with accommodation near the Haram and support throughout.' },
-  { id: 'groups',   icon: 'no-users',       href: 'services/groups/',
-    titleAr: 'رحلات جماعية',         titleEn: 'Group trips',
-    descAr: 'تنظيم سفر المجموعات والعائلات الكبيرة بحجز واحد.',
-    descEn: 'Travel for groups and large families, arranged as one booking.' },
-  { id: 'study',    icon: 'no-study',       href: 'services/study/',
-    titleAr: 'سفر للدراسة',          titleEn: 'Study travel',
-    descAr: 'التأشيرة والتذكرة والسكن الأول لطلاب الخارج.',
-    descEn: 'Visa, ticket and first accommodation for students going abroad.' },
-  { id: 'work',     icon: 'no-work',        href: 'services/work/',
-    titleAr: 'سفر للعمل',            titleEn: 'Work travel',
-    descAr: 'ترتيبات السفر للعمل، فردية أو لفرق كاملة.',
-    descEn: 'Travel arrangements for work, for one person or a whole team.' },
-  { id: 'change',   icon: 'no-ticket-edit', href: 'services/ticket-change/',
-    titleAr: 'تعديل وإلغاء تذاكر',   titleEn: 'Change & cancel tickets',
-    descAr: 'نعدّل موعدك أو نلغي تذكرتك ونوضّح لك الرسوم قبل أي خطوة.',
-    descEn: 'We change your date or cancel your ticket, and explain any fee before we act.' },
-  { id: 'issue',    icon: 'no-ticket',      href: 'services/ticket-issue/',
-    titleAr: 'إصدار تذاكر',          titleEn: 'Ticket issuing',
-    descAr: 'إصدار التذاكر على كل شركات الطيران التي نتعامل معها.',
-    descEn: 'Ticket issuing across every airline we work with.' },
-];
+import { SERVICE_REGISTRY } from './services.js';
+export const HOME_SERVICES = SERVICE_REGISTRY;
 
 /* --------------------------------------------------------------------------
    WHY NUMBER ONE — §06. Four values, each one sentence. No numbers, no

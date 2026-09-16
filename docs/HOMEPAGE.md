@@ -26,7 +26,7 @@ home.scrollToSearch();               // what "Start booking" and the header sear
 | # | Section | Built from | Data |
 | --- | --- | --- | --- |
 | 01 | Hero + booking entry | `heroCopy` `heroMedia` `heroSearch` → `searchWidget` | `HOME_HERO`, `SEARCH_VERTICALS` |
-| 02 | Services | `servicesGrid` → `serviceCard` | `HOME_SERVICES` (11, six `featured`) |
+| 02 | Services | `servicesGrid` → `serviceCard` | `HOME_SERVICES` = the 10.5 registry (12, six `featured`) |
 | 03 | Why Number One | `valueList` | `HOME_VALUES` |
 | 04 | Help me choose | `chooseModule` | `HOME_PRIORITIES` |
 | 05 | Destinations | `destinationGrid` → `destinationCard` | `HOME_DESTINATIONS` |
@@ -101,7 +101,7 @@ on every page.
 | | |
 | --- | --- |
 | Hero + booking entry, flights first, 8 categories | ✅ trip type, from/to, dates, travellers, cabin, search |
-| Services (11), progressive disclosure | ✅ six featured, "show all" reveals the rest |
+| Services (12), progressive disclosure | ✅ six featured, "show all" reveals the rest |
 | Why Number One · Help Me Choose · Destinations · Offers | ✅ data-driven, no invented figures |
 | How We Help (4 steps) · Human support · Final CTA | ✅ |
 | Existing header, footer, design system reused | ✅ no new tokens, no parallel system |

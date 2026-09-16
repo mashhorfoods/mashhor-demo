@@ -1,0 +1,96 @@
+/* ============================================================================
+   15 — SERVICES PAGE COMPOSITIONS  Stage 10.5
+
+   Built from tokens and the existing primitives. The hero reuses .c-hero
+   from 14-home.css; the cards are .c-card / .c-service-card with the
+   `media` and `kind` options. Nothing here names a colour, a size or a
+   duration directly.
+   ========================================================================= */
+
+@layer components {
+  /* ======================================================================
+     CATEGORY NAVIGATION — a chip row; sticky under the header from tablet
+     up, a plain scrolling row on a phone (the bottom nav owns that edge).
+     ==================================================================== */
+  .c-catnav {
+    background-color: var(--color-bg);
+    border-block: var(--border-hairline);
+    padding-block: var(--space-12);
+  }
+  .c-catnav__row {
+    display: flex; gap: var(--space-8);
+    overflow-x: auto; scrollbar-width: none;
+    padding-inline: var(--container-gutter);
+    margin-inline: calc(-1 * var(--container-gutter));
+    scroll-padding-inline: var(--container-gutter);
+  }
+  .c-catnav__row::-webkit-scrollbar { display: none; }
+  .c-catnav__chip { flex: none; }
+  @media (min-width: 48em) {
+    /* --sticky-offset / --catnav-height are measured by observeStickyOffsets();
+       the fallbacks hold until the first measurement. */
+    .c-catnav { position: sticky; inset-block-start: var(--sticky-offset, var(--header-height)); z-index: var(--z-sticky); }
+    .c-catnav__row { flex-wrap: wrap; overflow: visible; padding-inline: 0; margin-inline: 0; }
+    [data-services^="group-"], #services-groups {
+      scroll-margin-block-start: calc(var(--sticky-offset, var(--header-height)) + var(--catnav-height, var(--space-64)));
+    }
+  }
+  .c-service-card--rich { scroll-margin-block-start: calc(var(--sticky-offset, var(--header-height)) + var(--catnav-height, 0px) + var(--space-16)); }
+  @media (max-width: 47.999em) {
+    [data-services^="group-"], #services-groups { scroll-margin-block-start: var(--sticky-offset, var(--header-height)); }
+  }
+
+  /* ======================================================================
+     KIND LEGEND — three badges with one line each. What happens next.
+     ==================================================================== */
+  .c-kinds { display: grid; gap: var(--space-16); }
+  @media (min-width: 48em) { .c-kinds { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-24); } }
+  .c-kinds__item { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-8);
+                   padding: var(--space-16); border: var(--border-hairline); border-radius: var(--radius-md);
+                   background-color: var(--color-surface); }
+  .c-kinds__text { font-size: var(--text-body-sm); color: var(--color-text-secondary); }
+
+  /* ======================================================================
+     SERVICE CARD — the richer form: media slot, kind badge, real CTA.
+     Extends .c-service-card from 08-product.css.
+     ==================================================================== */
+  .c-service-card--rich .c-card__media { aspect-ratio: 16 / 9; }
+  .c-service-card__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-12); }
+  .c-service-card__head .c-service-card__icon { margin-block-end: 0; }
+  .c-service-card__kind { display: inline-flex; align-items: center; gap: var(--space-4); }
+  .c-service-card__soon { display: inline-flex; align-items: center; gap: var(--space-4); }
+  .c-service-card__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-12); margin-block-start: auto; padding-block-start: var(--space-8); }
+  .c-service-card__details { font-size: var(--text-body-sm); font-weight: var(--weight-medium); color: var(--color-text-secondary); text-decoration: underline; text-underline-offset: 0.2em; }
+  .c-service-card__details:hover { color: var(--color-text-brand); }
+
+  /* ======================================================================
+     HELP ME CHOOSE — option tiles. A link when the target is a service,
+     a button when it moves within the page; both look the same.
+     ==================================================================== */
+  .c-help__option {
+    display: grid; grid-template-columns: auto 1fr auto; grid-template-rows: auto auto; column-gap: var(--space-16); row-gap: var(--space-4);
+    align-items: center; inline-size: 100%; block-size: 100%; text-align: start;
+    font: inherit; line-height: var(--leading-snug);
+    padding: var(--space-16);
+    background-color: var(--color-surface);
+    border: var(--border-hairline); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xs);
+    color: var(--color-text);
+    transition: var(--transition-interactive), translate var(--duration-fast) var(--ease-standard);
+    cursor: pointer;
+  }
+  .c-help__option:hover { border-color: var(--color-border-strong); box-shadow: var(--shadow-md); }
+  @media (hover: hover) { .c-help__option:hover { translate: 0 -2px; } }
+  .c-help__option:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
+  /* Explicit cells: items with a definite row but automatic column are
+     placed before the rest, so without these the arrow would take column 2
+     and the label would land in column 3. */
+  .c-help__icon { grid-column: 1; grid-row: 1 / 3; display: inline-flex; align-items: center; justify-content: center;
+                  inline-size: var(--space-48); block-size: var(--space-48); border-radius: var(--radius-md);
+                  background-color: var(--color-surface-brand); color: var(--color-primary); }
+  .c-help__label { grid-column: 2; grid-row: 1; font-size: var(--text-h4); font-weight: var(--weight-semibold); }
+  .c-help__hint { grid-column: 2; grid-row: 2; font-size: var(--text-body-sm); color: var(--color-text-secondary); }
+  .c-help__arrow { grid-column: 3; grid-row: 1 / 3; color: var(--color-text-brand); transition: translate var(--duration-fast) var(--ease-standard); }
+  .c-help__option:hover .c-help__arrow { translate: 4px 0; }
+  [dir="rtl"] .c-help__option:hover .c-help__arrow { translate: -4px 0; }
+}

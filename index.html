@@ -198,6 +198,20 @@
 
     home = mountHome();
     window.no = { ...(window.no ?? {}), home };   // QA handle: no.home.regions.offers.error()
+    openRequestedService();
+  }
+
+  // A service card or Help Me Choose option arrives as ?vertical=…&service=…
+  // (data/services.js serviceEntry): open that tab, preselect the option and
+  // land on the booking entry. Read once; a language change keeps the tab.
+  let requested = new URLSearchParams(location.search);
+  function openRequestedService() {
+    const vertical = requested.get('vertical');
+    if (!vertical || !home.search.no.select(vertical)) return;
+    const option = requested.get('service');
+    if (option) { const sel = qs('.c-search__form:not([hidden]) select[name="service"]'); if (sel) sel.value = option; }
+    if (location.hash === '#booking') home.scrollToSearch();
+    requested = new URLSearchParams();
   }
 
   // Header and footer labels come from data, so both are rebuilt on a

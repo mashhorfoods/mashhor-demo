@@ -233,6 +233,9 @@
   /* The whole card is clickable but only the title is a link, so the
      accessible name stays meaningful and text remains selectable. §23 */
   .c-card__link::after { content: ""; position: absolute; inset: 0; }
+  /* A second control inside a card (a CTA, a details link) must paint above
+     the stretched title link, or it can never be clicked. */
+  .c-card__action, .c-card__foot .c-btn { position: relative; z-index: var(--z-raised); }
   .c-card { position: relative; }
 
   /* ======================================================================
