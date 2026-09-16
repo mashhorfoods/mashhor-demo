@@ -29,7 +29,7 @@ export const HOME_HERO = {
   /* The photography slot. `src: null` renders the neutral placeholder that
      reserves the same aspect ratio; drop the approved image in here. §04 */
   media: {
-    src: null,
+    src: imageSrc('home/hero'),
     altAr: 'عائلة تستعد للسفر',
     altEn: 'A family getting ready to travel',
     ratio: '4 / 5',
@@ -44,6 +44,7 @@ export const HOME_HERO = {
    Stage 10.5): `featured` records show first, the rest sit behind "show all
    services". Change a flag there, not a list here.
    ----------------------------------------------------------------------- */
+import { imageSrc } from './images.js';
 import { SERVICE_REGISTRY } from './services.js';
 export const HOME_SERVICES = SERVICE_REGISTRY;
 

@@ -1,5 +1,5 @@
 # Number One Travel & Tourism — Website Foundation
-## نمبرون للسفر و السياحة · Stage 10.1
+## نمبرون للسفر و السياحة · Stage 10 — COMPLETE / BUILT + VERIFIED (10.1–10.12)
 
 The master visual, UX and frontend foundation. Every later website stage
 inherits it.
@@ -17,6 +17,8 @@ inherits it.
 | **Booking entry** | [`docs/BOOKING.md`](docs/BOOKING.md) — Stage 10.9 · `book/` |
 | **Supervisor profile** | [`docs/SUPERVISOR.md`](docs/SUPERVISOR.md) — Stage 10.10 · `supervisor/<slug>/` |
 | **Responsive & accessibility refinement** | [`docs/REFINEMENT.md`](docs/REFINEMENT.md) — Stage 10.11 · `tools/a11y-audit.mjs` |
+| **Stage 10 final QA** | [`docs/STAGE-10-QA.md`](docs/STAGE-10-QA.md) — Stage 10.12 · **STAGE 10 — COMPLETE / BUILT + VERIFIED** |
+| **Photography** | `tools/images.manifest.json` + `node tools/fetch-images.mjs` → `assets/images/`, `assets/images/CREDITS.md` |
 | **Living style guide** | `styleguide.html` — every token, component and state, in RTL and LTR |
 | **Homepage** | `index.html` — the production homepage (Stage 10.4) |
 | **Brand assets** | [`assets/brand/README.md`](assets/brand/README.md) |

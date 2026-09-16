@@ -469,7 +469,12 @@ component in this layer. Permission is asked, never assumed.
    travellers, airports and destinations — ideally Sudanese and African
    travellers where appropriate. Rather than ship stock-looking filler, every
    media slot renders a neutral placeholder that reserves the exact aspect
-   ratio, so dropping in the real photograph shifts nothing.
+   ratio, so dropping in the real photograph shifts nothing. Since 10.12 every
+   slot has a key in `tools/images.manifest.json` and reads its file from the
+   generated `data/images.js`; `node tools/fetch-images.mjs` fills the slots
+   with freely licensed stand-ins from Wikimedia Commons (credits written to
+   `assets/images/CREDITS.md`) on a machine with internet access — the build
+   sandbox's egress policy blocks every image host.
 4. ~~**Production domain**~~ — resolved. The site deploys to
    `https://mashhorfoods.github.io/mashhor-demo/`; canonical and `og:url` are
    set. Because it is a *project* page served from a subpath, routes are stored

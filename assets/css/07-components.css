@@ -10,7 +10,7 @@
   /* Mobile bottom navigation — thumb-reachable, max five destinations. §22 */
   .c-bottom-nav {
     position: fixed; inset-block-end: 0; inset-inline: 0; z-index: var(--z-bottom-nav);
-    display: flex;
+    display: flex; min-block-size: var(--bottom-nav-height);
     background-color: var(--color-surface);
     border-block-start: var(--border-hairline);
     padding-block-end: env(safe-area-inset-bottom, 0px);

@@ -7,6 +7,13 @@
    ========================================================================= */
 
 @layer layout {
+  /* First paint happens before the module script fills the page; the
+     regions would appear empty and then push everything down. Until boot()
+     swaps .no-js for .js the main column and the phone nav stay invisible
+     — laid out, not painted — so the first visible frame is the complete
+     one. Stage 10.12 */
+  html.no-js .l-page__main, html.no-js .c-bottom-nav { visibility: hidden; }
+
   /* ---- Container -------------------------------------------------------
      Content never stretches across an ultrawide monitor (§07): the max-width
      caps it and the gutters grow with the viewport. */

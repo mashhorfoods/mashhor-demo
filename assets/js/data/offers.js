@@ -41,6 +41,8 @@
    every surface shows them.
    ========================================================================= */
 
+import { imageSrc } from './images.js';
+
 export const OFFER_CATEGORIES = [
   { id: 'packages', icon: 'no-tourism',   labelAr: 'باقات السفر',   labelEn: 'Travel packages' },
   { id: 'tourism',  icon: 'no-location',  labelAr: 'سياحة',         labelEn: 'Tourism' },
@@ -95,7 +97,7 @@ export const OFFER_REGISTRY = [
     duration: { nights: null }, price: null, travelPeriod: null, publishedAt: null,
     services: ['flights', 'hotels', 'transport', 'packages'],
     inclusions: [], exclusions: [], itinerary: [], important: [], terms: [], faq: [],
-    image: { src: null, altAr: 'إسطنبول', altEn: 'Istanbul' } },
+    image: { src: imageSrc('offers/istanbul-family'), altAr: 'إسطنبول', altEn: 'Istanbul' } },
 
   { id: 'umrah', slug: 'umrah', category: 'umrah', categories: ['umrah', 'packages'],
     destination: 'mkk', featured: true, placeholder: true, status: 'request', bookingMode: 'request',
@@ -107,7 +109,7 @@ export const OFFER_REGISTRY = [
     duration: { nights: null }, price: null, travelPeriod: null, publishedAt: null,
     services: ['umrah', 'hotels', 'transport', 'flights'],
     inclusions: [], exclusions: [], itinerary: [], important: [], terms: [], faq: [],
-    image: { src: null, altAr: 'مكة المكرمة', altEn: 'Makkah' } },
+    image: { src: imageSrc('offers/umrah'), altAr: 'مكة المكرمة', altEn: 'Makkah' } },
 
   { id: 'dubai-break', slug: 'dubai-break', category: 'tourism', categories: ['tourism', 'packages'],
     destination: 'dxb', featured: false, placeholder: true, status: 'request', bookingMode: 'request',
@@ -119,7 +121,7 @@ export const OFFER_REGISTRY = [
     duration: { nights: null }, price: null, travelPeriod: null, publishedAt: null,
     services: ['flights', 'hotels', 'transport'],
     inclusions: [], exclusions: [], itinerary: [], important: [], terms: [], faq: [],
-    image: { src: null, altAr: 'دبي', altEn: 'Dubai' } },
+    image: { src: imageSrc('offers/dubai-break'), altAr: 'دبي', altEn: 'Dubai' } },
 ];
 
 /* ---- Selectors every surface shares ------------------------------------ */

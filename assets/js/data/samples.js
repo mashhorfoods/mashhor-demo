@@ -133,7 +133,7 @@ export const PACKAGES = [
  */
 export const SUPERVISORS = [
   {
-    id: 'SP-01', name: 'أحمد عبد الرحمن', nameEn: 'Ahmed Abdelrahman',
+    id: 'SP-01', slug: 'supervisor-1', name: 'أحمد عبد الرحمن', nameEn: 'Ahmed Abdelrahman',
     roleAr: 'مشرف السفر — الخليج', roleEn: 'Travel supervisor — Gulf',
     photo: null, verified: true,
     bioAr: 'يعمل مع العائلات المسافرة إلى السعودية والإمارات منذ تسع سنوات.',
@@ -143,7 +143,7 @@ export const SUPERVISORS = [
     languages: ['ar', 'en'],
   },
   {
-    id: 'SP-02', name: 'سارة محمد', nameEn: 'Sara Mohamed',
+    id: 'SP-02', slug: 'supervisor-2', name: 'سارة محمد', nameEn: 'Sara Mohamed',
     roleAr: 'مشرفة السفر — تركيا وأوروبا', roleEn: 'Travel supervisor — Türkiye & Europe',
     photo: null, verified: true,
     bioAr: 'متخصصة في الباقات العائلية وتأشيرات الدراسة.',

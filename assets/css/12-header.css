@@ -27,6 +27,13 @@
                 border-color var(--duration-base) var(--ease-standard);
   }
 
+  /* The shell's space is reserved before the script mounts the header, so
+     the page never shifts down when it arrives (Stage 10.12). The size
+     mirrors the real bar: the logo primitive's height (05-primitives) plus
+     the bar padding, plus the hairline. */
+  .c-gh--placeholder { --logo-size: 48px; block-size: calc(var(--header-shell) + var(--border-width)); }
+  @media (min-width: 64em) { .c-gh--placeholder { --logo-size: 56px; } }
+
   /* Scrolled: a little tighter, and lifted off the page with a hairline
      shadow. Only padding animates, so the logo never jumps. §13 */
   .c-gh[data-scrolled="true"] {
