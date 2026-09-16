@@ -502,6 +502,10 @@ component in this layer. Permission is asked, never assumed.
    (`core/booking.js`) persisted for the next step; `mountBooking({ prepare })`
    is the seam the Stage 11 search calls into, and the place fields need
    the airport/city list they will autocomplete from.
+12. **Supervisor data.** The five `data/supervisors.js` records are
+   placeholders: name, photo, title, bio, languages, expertise and verified
+   channels are null until the business supplies them; the profiles render
+   the neutral structure and say the details are being completed.
 ---
 
 ## 15. Working rules

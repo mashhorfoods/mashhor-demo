@@ -17,8 +17,9 @@ import { route, SEARCH_VERTICALS } from '../data/config.js';
 import { HOME_PRIORITIES } from '../data/home.js';
 import { liveChannels } from '../data/navigation.js';
 import {
-  buildContext, validate, saveContext, continueUrl, applyEntryParams, summariseTravellers,
+  buildContext, validate, saveContext, continueUrl, applyEntryParams, summariseTravellers, attributionFrom,
 } from '../core/booking.js';
+import { supervisorBySlug, supervisorUrl } from '../data/supervisors.js';
 import { icon, setButtonState } from './ui.js';
 import { searchWidget } from './search.js';
 import { chooseModule } from './home.js';
@@ -92,12 +93,30 @@ export function contextSummary(ctx, { onEdit = null, href = null } = {}) {
       row('book.summary.cabin', cabin ? (isAr ? cabin.labelAr : cabin.labelEn) : ''),
       row('book.summary.priority', priority ? pick(priority, 'label') : ''),
       row('book.summary.offer', ctx.options.offer),
+      row('book.summary.supervisor', ctx.attribution?.supervisor ? supervisorLabel(ctx.attribution.supervisor) : ''),
       row('book.summary.notes', ctx.options.notes),
     ]),
     el('div', { class: 'c-summary__actions' }, [
       el('a', { class: 'c-btn c-btn--primary c-btn--lg', href }, [el('span', {}, t('book.success.continue')), icon('no-arrow-end', { size: 'sm', flip: true })]),
       el('button', { type: 'button', class: 'c-btn c-btn--tertiary', onclick: onEdit }, t('book.success.edit')),
     ]),
+  ]);
+}
+
+/** The supervisor's display name for a slug (Stage 10.10), or the slug itself. */
+const supervisorLabel = (slug) => { const sup = supervisorBySlug(slug); return sup ? (pick(sup, 'name') || t('sup.name.fallback')) : slug; };
+
+/**
+ * The attribution chip (Stage 10.10): who the customer is booking with.
+ * Rendered only when the session carries an active supervisor.
+ */
+export function attributionChip(attribution) {
+  const sup = attribution?.supervisor ? supervisorBySlug(attribution.supervisor) : null;
+  if (!sup) return null;
+  return el('p', { class: 'c-book__attribution', dataset: { supervisor: sup.slug } }, [
+    icon('no-supervisor', { size: 'sm' }),
+    el('span', {}, t('book.attribution', supervisorLabel(sup.slug))),
+    el('a', { class: 'c-btn c-btn--tertiary c-btn--sm', href: route(supervisorUrl(sup)) }, t('book.attribution.profile')),
   ]);
 }
 
@@ -134,6 +153,9 @@ export function mountBooking({
   let sort = '';
   let offer = '';
   let lastContext = null;
+  // Stage 10.10 — stored on arrival from ?supervisor=…, or remembered for the session.
+  const attribution = attributionFrom(params);
+  render(mount('attribution'), attributionChip(attribution));
 
   // ---- The form, with the tab strip hidden: the selector drives it. §3 §8
   const widget = searchWidget({ tabs: false, onSubmit: (vertical, formData) => submit(vertical, formData) });
@@ -174,7 +196,7 @@ export function mountBooking({
   // ---- Submit: validate → loading → prepare → success | error
   const submit = async (vertical, formData) => {
     widget.no.clearErrors();
-    const ctx = buildContext(vertical, formData, { sort: choose.no.selected ?? sort, offer });
+    const ctx = buildContext(vertical, formData, { sort: choose.no.selected ?? sort, offer, supervisor: attribution?.supervisor ?? '', source: attribution?.source ?? '' });
     const errors = validate(vertical, ctx);
     if (errors.length) {
       // One message per control: rules that hit the same field read as one line.
@@ -218,6 +240,7 @@ export function mountBooking({
   return {
     widget, selector, region, choose,
     get context() { return lastContext; },
+    attribution,
     select: (id) => selector.no.select(id),
     submit: () => widget.no.form()?.requestSubmit(),
     setError: (name, msg, i) => widget.no.setError(name, msg, i),

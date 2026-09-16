@@ -37,6 +37,8 @@ export * from './components/service-detail.js';
 export * from './components/destinations.js';
 export * from './components/offers.js';
 export * from './components/booking.js';
+export * from './components/supervisor.js';
+export * from './data/supervisors.js';
 
 import { ready } from './core/dom.js';
 import { initLocale, setLocale, applyTranslations, onLocaleChange } from './core/i18n.js';

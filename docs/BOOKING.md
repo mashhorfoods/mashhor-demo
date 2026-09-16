@@ -105,6 +105,10 @@ link point here too. The homepage hero keeps its own widget and now runs the
 same `buildContext` → `validate` → `saveContext` → `continueUrl` path, so
 both entries produce the same object.
 
+Since Stage 10.10 a `?supervisor=<slug>` on any door is stored for the
+session and written into the context as `attribution` (see
+`docs/SUPERVISOR.md`); the page shows who the customer is booking with.
+
 A language change re-mounts the page on the chosen service and drops the
 URL prefills; the header and footer are the booking variants (no second red
 action, "حجز آمن — بياناتك محمية").

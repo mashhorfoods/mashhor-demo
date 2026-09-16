@@ -432,7 +432,7 @@ export function supervisorCard(supervisor) {
     el('ul', { class: 'c-supervisor__services', role: 'list' },
       services.map((s) => el('li', {}, el('span', { class: 'c-badge c-badge--outline' }, pick(s, 'title'))))),
 
-    el('a', { class: 'c-btn c-btn--secondary-brand c-btn--sm', href: route(`supervisors/${supervisor.id}/`) }, [
+    el('a', { class: 'c-btn c-btn--secondary-brand c-btn--sm', href: route(`supervisor/${supervisor.slug ?? supervisor.id}/`) }, [
       icon('no-chat', { size: 'sm' }),
       el('span', {}, t('supervisor.contact')),
     ]),

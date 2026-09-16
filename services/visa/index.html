@@ -44,12 +44,12 @@
     <section class="l-section c-hero" aria-labelledby="service-title">
       <div class="l-container"><div class="c-hero__grid" data-detail="hero"></div></div>
     </section>
-    <section class="l-section l-section--subtle" data-detail="overview" aria-labelledby="overview-title" hidden><div class="l-container" data-detail-body></div></section>
-    <section class="l-section" data-detail="features" aria-labelledby="features-title" hidden><div class="l-container" data-detail-body></div></section>
-    <section class="l-section l-section--subtle" data-detail="benefits" aria-labelledby="benefits-title" hidden><div class="l-container" data-detail-body></div></section>
-    <section class="l-section" data-detail="steps" aria-labelledby="steps-title" hidden><div class="l-container" data-detail-body></div></section>
-    <section class="l-section l-section--subtle" data-detail="requirements" aria-labelledby="requirements-title" hidden><div class="l-container" data-detail-body></div></section>
-    <section class="l-section" data-detail="related" aria-labelledby="related-title" hidden><div class="l-container" data-detail-body></div></section>
+    <section class="l-section l-section--subtle" data-detail="overview" aria-labelledby="overview-title" id="overview" hidden><div class="l-container" data-detail-body></div></section>
+    <section class="l-section" data-detail="features" aria-labelledby="features-title" id="features" hidden><div class="l-container" data-detail-body></div></section>
+    <section class="l-section l-section--subtle" data-detail="benefits" aria-labelledby="benefits-title" id="benefits" hidden><div class="l-container" data-detail-body></div></section>
+    <section class="l-section" data-detail="steps" aria-labelledby="steps-title" id="steps" hidden><div class="l-container" data-detail-body></div></section>
+    <section class="l-section l-section--subtle" data-detail="requirements" aria-labelledby="requirements-title" id="requirements" hidden><div class="l-container" data-detail-body></div></section>
+    <section class="l-section" data-detail="related" aria-labelledby="related-title" id="related" hidden><div class="l-container" data-detail-body></div></section>
     <section class="l-section l-section--subtle" data-detail="support" aria-labelledby="support-title" id="support" hidden><div class="l-container" data-detail-body></div></section>
     <section class="l-section l-section--inverse c-cta-band" data-detail="cta" aria-labelledby="cta-title" hidden>
       <span class="u-numeral-watermark" aria-hidden="true">1</span>
@@ -81,7 +81,7 @@
     // The page carries its own final CTA, so the footer's is switched off.
     mountFooter({ target: qs('.l-page'), variant: 'marketing', cta: false });
     mountHeader({ target: qs('.l-page'), current: "services",
-      onSearch: () => { window.location.assign(route('book/')); } });
+      onSearch: () => { window.location.assign(route("book/")); } });
   }
   boot({ sprite: 'assets/icons/sprite.svg', onLocale: () => { mountChrome(); paint(); } });
   mountChrome();

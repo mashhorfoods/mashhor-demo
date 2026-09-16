@@ -44,15 +44,15 @@
     <section class="l-section c-hero" aria-labelledby="offer-title">
       <div class="l-container"><div class="c-hero__grid" data-offer="hero"></div></div>
     </section>
-    <section class="l-section l-section--subtle" data-offer="overview" aria-labelledby="overview-title" hidden><div class="l-container" data-offer-body></div></section>
-    <section class="l-section" data-offer="included" aria-labelledby="included-title" hidden><div class="l-container" data-offer-body></div></section>
-    <section class="l-section l-section--subtle" data-offer="excluded" aria-labelledby="excluded-title" hidden><div class="l-container" data-offer-body></div></section>
-    <section class="l-section" data-offer="itinerary" aria-labelledby="itinerary-title" hidden><div class="l-container" data-offer-body></div></section>
-    <section class="l-section l-section--subtle" data-offer="important" aria-labelledby="important-title" hidden><div class="l-container" data-offer-body></div></section>
-    <section class="l-section" data-offer="terms" aria-labelledby="terms-title" hidden><div class="l-container" data-offer-body></div></section>
-    <section class="l-section l-section--subtle" data-offer="faq" aria-labelledby="faq-title" hidden><div class="l-container" data-offer-body></div></section>
-    <section class="l-section" data-offer="flow" aria-labelledby="flow-title" hidden><div class="l-container" data-offer-body></div></section>
-    <section class="l-section l-section--subtle" data-offer="related" aria-labelledby="related-title" hidden><div class="l-container" data-offer-body></div></section>
+    <section class="l-section l-section--subtle" data-offer="overview" aria-labelledby="overview-title" id="overview" hidden><div class="l-container" data-offer-body></div></section>
+    <section class="l-section" data-offer="included" aria-labelledby="included-title" id="included" hidden><div class="l-container" data-offer-body></div></section>
+    <section class="l-section l-section--subtle" data-offer="excluded" aria-labelledby="excluded-title" id="excluded" hidden><div class="l-container" data-offer-body></div></section>
+    <section class="l-section" data-offer="itinerary" aria-labelledby="itinerary-title" id="itinerary" hidden><div class="l-container" data-offer-body></div></section>
+    <section class="l-section l-section--subtle" data-offer="important" aria-labelledby="important-title" id="important" hidden><div class="l-container" data-offer-body></div></section>
+    <section class="l-section" data-offer="terms" aria-labelledby="terms-title" id="terms" hidden><div class="l-container" data-offer-body></div></section>
+    <section class="l-section l-section--subtle" data-offer="faq" aria-labelledby="faq-title" id="faq" hidden><div class="l-container" data-offer-body></div></section>
+    <section class="l-section" data-offer="flow" aria-labelledby="flow-title" id="flow" hidden><div class="l-container" data-offer-body></div></section>
+    <section class="l-section l-section--subtle" data-offer="related" aria-labelledby="related-title" id="related" hidden><div class="l-container" data-offer-body></div></section>
     <section class="l-section" data-offer="support" aria-labelledby="support-title" id="support" hidden><div class="l-container" data-offer-body></div></section>
     <section class="l-section l-section--inverse c-cta-band" data-offer="cta" aria-labelledby="cta-title" hidden>
       <span class="u-numeral-watermark" aria-hidden="true">1</span>
@@ -84,7 +84,7 @@
     // The page carries its own final CTA, so the footer's is switched off.
     mountFooter({ target: qs('.l-page'), variant: 'marketing', cta: false });
     mountHeader({ target: qs('.l-page'), current: "offers",
-      onSearch: () => { window.location.assign(route('book/')); } });
+      onSearch: () => { window.location.assign(route("book/")); } });
   }
   boot({ sprite: 'assets/icons/sprite.svg', onLocale: () => { mountChrome(); paint(); } });
   mountChrome();

@@ -20,9 +20,11 @@
 import { t, pick, getLocale } from './i18n.js';
 import { route } from '../data/config.js';
 import { destinationById } from '../data/destinations.js';
+import { isActiveSupervisor } from '../data/supervisors.js';
 
 export const CONTEXT_VERSION = 1;
 const STORAGE_KEY = 'no.booking.context';
+const ATTRIBUTION_KEY = 'no.attribution';
 export const MAX_TRAVELLERS = 9;
 export const MAX_LEGS = 4;
 
@@ -60,6 +62,10 @@ export function buildContext(vertical, formData, extras = {}) {
       nights: get('nights'), country: get('country'), nationality: get('nationality'),
       service: get('service'), notes: get('notes'),
     },
+    // Who brought the customer here (Stage 10.10): the supervisor slug from
+    // the current URL, else the one remembered for this session. Later
+    // stages read `attribution.supervisor`; nothing is calculated here.
+    attribution: { supervisor: str(extras.supervisor) || loadAttribution()?.supervisor || '', source: str(extras.source) || (extras.supervisor ? 'link' : (loadAttribution() ? 'session' : '')) },
     locale: getLocale(),
     createdAt: new Date().toISOString(),
   };
@@ -125,6 +131,28 @@ export function loadContext() {
 }
 export function clearContext() { try { sessionStorage.removeItem(STORAGE_KEY); } catch { /* storage unavailable */ } }
 
+/* ---- Attribution: which supervisor the customer came through ------------ */
+/** Remember a supervisor for this session; only an active registry slug is kept. */
+export function saveAttribution(slug, source = 'link') {
+  if (!isActiveSupervisor(slug)) return null;
+  const record = { supervisor: slug, source, at: new Date().toISOString() };
+  try { sessionStorage.setItem(ATTRIBUTION_KEY, JSON.stringify(record)); } catch { /* storage unavailable */ }
+  return record;
+}
+export function loadAttribution() {
+  try {
+    const raw = sessionStorage.getItem(ATTRIBUTION_KEY);
+    const record = raw ? JSON.parse(raw) : null;
+    return record && isActiveSupervisor(record.supervisor) ? record : null;
+  } catch { return null; }
+}
+export function clearAttribution() { try { sessionStorage.removeItem(ATTRIBUTION_KEY); } catch { /* storage unavailable */ } }
+/** `?supervisor=<slug>` on any door stores the attribution; otherwise the session's. */
+export function attributionFrom(params) {
+  const slug = params?.get?.('supervisor');
+  return (slug && saveAttribution(slug, 'link')) || loadAttribution();
+}
+
 /* ---- Routes ------------------------------------------------------------- */
 /** Flat query string; stable key names the booking engine reads. */
 export function contextToParams(ctx) {
@@ -138,6 +166,7 @@ export function contextToParams(ctx) {
   set('rooms', ctx.rooms); set('cabin', ctx.cabin);
   if (ctx.options.direct) p.set('direct', '1');
   for (const k of ['sort', 'offer', 'nights', 'country', 'nationality', 'service', 'notes']) set(k, ctx.options[k]);
+  set('supervisor', ctx.attribution?.supervisor);
   set('locale', ctx.locale);
   return p;
 }
@@ -153,8 +182,11 @@ export const entryUrl = (params) => `${route('book/')}?${params instanceof URLSe
  * applied so the page can carry the rest (the offer id) onward.
  */
 export function applyEntryParams(widget, params) {
+  // Attribution is stored even when no vertical is asked for: a profile's
+  // plain "start booking" link carries only the supervisor.
+  const attribution = attributionFrom(params);
   const vertical = params.get('vertical');
-  if (!vertical || !widget.no.select(vertical)) return null;
+  if (!vertical || !widget.no.select(vertical)) return attribution ? { vertical: null, offer: '', sort: '', supervisor: attribution.supervisor } : null;
   const form = widget.querySelector('.c-search__form:not([hidden])');
   const option = params.get('service');
   if (option) { const sel = form?.querySelector('select[name="service"]'); if (sel) sel.value = option; }
@@ -164,7 +196,7 @@ export function applyEntryParams(widget, params) {
     const input = form?.querySelector('input[name="to"], input[name="destination"]');
     if (dest && input) input.value = pick(dest, 'name');
   }
-  return { vertical, offer: params.get('offer') ?? '', sort: params.get('sort') ?? '' };
+  return { vertical, offer: params.get('offer') ?? '', sort: params.get('sort') ?? '', supervisor: attribution?.supervisor ?? '' };
 }
 
 /* ---- Human summary of a context (the "review" card) ---------------------- */

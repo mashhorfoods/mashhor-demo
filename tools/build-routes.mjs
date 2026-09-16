@@ -17,6 +17,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { SERVICE_REGISTRY } from '../assets/js/data/services.js';
 import { OFFER_REGISTRY } from '../assets/js/data/offers.js';
+import { SUPERVISOR_REGISTRY } from '../assets/js/data/supervisors.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = 'https://mashhorfoods.github.io/mashhor-demo/';
@@ -36,6 +37,16 @@ const COLLECTIONS = [
     dir: 'offers', records: OFFER_REGISTRY, attr: 'offer', mount: 'mountOfferDetail', handle: 'offer',
     title: (o) => o.titleAr, description: (o) => o.shortAr, og: (o) => o.shortAr, heroLabel: 'offer-title', current: 'offers',
     sections: ['overview', 'included', 'excluded', 'itinerary', 'important', 'terms', 'faq', 'flow', 'related', 'support'],
+  },
+  {
+    // Stage 10.10 — one public profile per supervisor. The static title is
+    // neutral until the business supplies the name; the template sets the
+    // real one at runtime. Every door on the page carries ?supervisor=<slug>.
+    dir: 'supervisor', records: SUPERVISOR_REGISTRY, attr: 'profile', mount: 'mountSupervisor', handle: 'supervisor',
+    title: (s) => s.nameAr ?? 'مشرف نمبرون', description: (s) => s.bioAr ?? 'مشرف من نمبرون للسفر و السياحة يساعدك على اختيار الخيار المناسب ويتابع حجزك مع فريق نمبرون.',
+    og: (s) => s.bioAr ?? 'مشرف من نمبرون للسفر و السياحة.', heroLabel: 'profile-title', current: null,
+    search: (s) => `book/?supervisor=${s.slug}`,
+    sections: ['about', 'services', 'trust', 'contact', 'discovery'],
   },
 ];
 
@@ -83,9 +94,9 @@ const shell = (c, r) => `<!doctype html>
 
   <main id="main" class="l-page__main">
     <section class="l-section c-hero" aria-labelledby="${c.heroLabel}">
-      <div class="l-container"><div class="c-hero__grid" data-${c.attr}="hero"></div></div>
+      <div class="l-container"><div class="${c.attr === 'profile' ? 'c-profile-hero' : 'c-hero__grid'}" data-${c.attr}="hero"></div></div>
     </section>
-${c.sections.map((s, i) => `    <section class="l-section${i % 2 === 0 ? ' l-section--subtle' : ''}" data-${c.attr}="${s}" aria-labelledby="${s}-title"${s === 'support' ? ' id="support"' : ''} hidden><div class="l-container" data-${c.attr}-body></div></section>`).join('\n')}
+${c.sections.map((s, i) => `    <section class="l-section${i % 2 === 0 ? ' l-section--subtle' : ''}" data-${c.attr}="${s}" aria-labelledby="${s}-title" id="${s}" hidden><div class="l-container" data-${c.attr}-body></div></section>`).join('\n')}
     <section class="l-section l-section--inverse c-cta-band" data-${c.attr}="cta" aria-labelledby="cta-title" hidden>
       <span class="u-numeral-watermark" aria-hidden="true">1</span>
       <div class="l-container" data-${c.attr}-body></div>
@@ -116,7 +127,7 @@ ${c.sections.map((s, i) => `    <section class="l-section${i % 2 === 0 ? ' l-sec
     // The page carries its own final CTA, so the footer's is switched off.
     mountFooter({ target: qs('.l-page'), variant: 'marketing', cta: false });
     mountHeader({ target: qs('.l-page'), current: ${JSON.stringify(c.current)},
-      onSearch: () => { window.location.assign(route('book/')); } });
+      onSearch: () => { window.location.assign(route(${JSON.stringify(c.search ? c.search(r) : 'book/')})); } });
   }
   boot({ sprite: 'assets/icons/sprite.svg', onLocale: () => { mountChrome(); paint(); } });
   mountChrome();

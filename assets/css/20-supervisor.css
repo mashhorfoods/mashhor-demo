@@ -1,0 +1,75 @@
+/* ============================================================================
+   20 — SUPERVISOR PROFILE COMPOSITIONS  Stage 10.10
+
+   The Number One system with a person inside it. Reuses .c-hero (14-home),
+   the card, badge, chip, trust-list, note, state and CTA-band primitives.
+   New here: the profile hero layout, the photo slot, the facts list, the
+   channel list and the public-link row. No personal colour or type: the
+   only flourish allowed on a person is the Number One red ring.
+   ========================================================================= */
+
+@layer components {
+  /* ---- Hero: photo + copy ---------------------------------------------- */
+  .c-profile { display: grid; gap: var(--space-24); align-items: start; }
+  .c-profile__figure { display: grid; gap: var(--space-12); justify-items: start; margin: 0; }
+  .c-profile__photo {
+    position: relative; inline-size: 9rem; aspect-ratio: 1; border-radius: var(--radius-circle);
+    overflow: hidden; background-color: var(--color-gray-100); color: var(--color-gray-400);
+    display: grid; place-items: center;
+    box-shadow: 0 0 0 3px var(--color-surface), 0 0 0 5px var(--color-primary);
+  }
+  .c-profile__photo > img { inline-size: 100%; block-size: 100%; object-fit: cover; }
+  .c-profile__brand { display: inline-flex; align-items: center; gap: var(--space-8); flex-wrap: wrap; }
+  .c-profile__copy { display: flex; flex-direction: column; gap: var(--space-16); max-inline-size: var(--measure); min-inline-size: 0; }
+  .c-profile__name { max-inline-size: 16ch; }
+  .c-profile__title { font-size: var(--text-body-lg); color: var(--color-text-brand); font-weight: var(--weight-semibold); }
+  .c-profile__badges { display: flex; flex-wrap: wrap; gap: var(--space-8); }
+  .c-profile__actions { display: flex; flex-wrap: wrap; gap: var(--space-12); align-items: center; margin-block-start: var(--space-8); }
+  /* A short route mark under the photo: the direction language, quietly. */
+  .c-profile__route { inline-size: 4rem; block-size: 4px; border-radius: var(--radius-pill); background-color: var(--color-primary); }
+
+  @media (min-width: 48em) {
+    .c-profile { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--space-40); align-items: center; }
+    .c-profile__photo { inline-size: 12rem; }
+  }
+  @media (min-width: 64em) {
+    .c-profile { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--space-64); }
+    .c-profile__photo { inline-size: 15rem; }
+    .c-profile__figure { justify-items: center; }
+  }
+
+  /* ---- About: facts list ------------------------------------------------ */
+  .c-facts { display: grid; gap: var(--space-16); margin: 0; }
+  @media (min-width: 48em) { .c-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-24); } }
+  .c-facts__row { display: grid; gap: var(--space-8); padding: var(--space-16); border: var(--border-hairline); border-radius: var(--radius-md); background-color: var(--color-surface); }
+  .c-facts__row--full { grid-column: 1 / -1; }
+  .c-facts__row dt { display: inline-flex; align-items: center; gap: var(--space-8); font-size: var(--text-caption); color: var(--color-text-secondary); font-weight: var(--weight-semibold); }
+  .c-facts__row dd { margin: 0; }
+  .c-facts__chips { display: flex; flex-wrap: wrap; gap: var(--space-8); }
+  .c-facts__url { display: flex; flex-wrap: wrap; gap: var(--space-8); align-items: center; }
+  .c-facts__url .c-field__control { flex: 1 1 14rem; min-inline-size: 0; font-family: var(--font-mono, inherit); font-size: var(--text-body-sm); direction: ltr; text-align: start; }
+
+  /* ---- Contact: channel list ------------------------------------------- */
+  .c-channels { display: grid; gap: var(--space-12); }
+  @media (min-width: 48em) { .c-channels { grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); } }
+  .c-channel { display: flex; align-items: center; gap: var(--space-12); padding: var(--space-16); min-block-size: var(--touch-target);
+               border: var(--border-hairline); border-radius: var(--radius-md); background-color: var(--color-surface); color: var(--color-text); text-decoration: none; transition: var(--transition-interactive); }
+  .c-channel:hover { border-color: var(--color-gray-500); }
+  .c-channel:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
+  .c-channel__icon { display: inline-flex; align-items: center; justify-content: center; inline-size: var(--space-40); block-size: var(--space-40); border-radius: var(--radius-md); background-color: var(--color-surface-brand); color: var(--color-primary); flex: none; }
+  .c-channel__label { font-weight: var(--weight-semibold); }
+  .c-channel__meta { display: block; font-size: var(--text-caption); color: var(--color-text-secondary); }
+  .c-contact { display: grid; gap: var(--space-24); }
+  @media (min-width: 64em) { .c-contact { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--space-48); align-items: start; } }
+
+  /* ---- Discovery: two quiet rows --------------------------------------- */
+  .c-discovery { display: grid; gap: var(--space-32); }
+  .c-discovery__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-16); flex-wrap: wrap; }
+
+  /* ---- Booking entry: attribution chip (book/) --------------------------- */
+  .c-book__attribution { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--space-8);
+                         padding: var(--space-8) var(--space-12); border-radius: var(--radius-pill);
+                         background-color: var(--color-surface-brand); color: var(--color-text); font-size: var(--text-body-sm); }
+  .c-book__attribution .c-icon { color: var(--color-primary); }
+  .c-book__attribution:empty { display: none; }
+}

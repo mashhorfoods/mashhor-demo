@@ -205,7 +205,8 @@
   // (the dedicated entry is /book/, Stage 10.9). Open the widget on it once.
   let requested = new URLSearchParams(location.search);
   function openRequestedService() {
-    if (!requested.get('vertical')) return;
+    // ?supervisor=… alone (a profile's plain link) still stores the attribution.
+    if (!requested.get('vertical') && !requested.get('supervisor')) return;
     if (home.applyParams(requested) && location.hash === '#booking') home.scrollToSearch();
     requested = new URLSearchParams();
   }
