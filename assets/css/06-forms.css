@@ -80,10 +80,6 @@
     color: var(--color-error-fg);
   }
   .c-field__error .c-icon { --icon-size: var(--icon-sm); margin-block-start: 0.15em; }
-  .c-field__success {
-    display: flex; align-items: center; gap: var(--space-8);
-    font-size: var(--text-caption); color: var(--color-success-fg);
-  }
 
   /* --- Control with a leading or trailing affordance -------------------- */
   .c-field__wrap { position: relative; display: flex; align-items: center; }
@@ -147,117 +143,8 @@
   .c-choice__input:disabled { background-color: var(--color-gray-100); border-color: var(--color-border); cursor: not-allowed; }
   .c-choice__input:disabled + .c-choice__text { color: var(--color-text-disabled); }
   .c-choice__text { font-size: var(--text-body-sm); line-height: var(--leading-snug); }
-  .c-choice__desc { display: block; font-size: var(--text-caption); color: var(--color-text-secondary); margin-block-start: var(--space-4); }
 
   /* A boxed choice — used for fare options and payment methods. */
-  .c-choice--boxed {
-    padding: var(--space-16);
-    border: var(--border-input);
-    border-radius: var(--radius-md);
-    transition: var(--transition-interactive);
-  }
-  .c-choice--boxed:hover { border-color: var(--color-gray-500); background-color: var(--color-surface-hover); }
-  .c-choice--boxed:has(:checked) { border-color: var(--color-primary); background-color: var(--color-surface-brand); }
-  .c-choice--boxed:has(:focus-visible) { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
-
-  /* --- Toggle ----------------------------------------------------------- */
-  .c-toggle { display: flex; align-items: center; gap: var(--space-12); min-block-size: var(--touch-target); cursor: pointer; }
-  .c-toggle__input { position: absolute; opacity: 0; pointer-events: none; }
-  .c-toggle__track {
-    flex: none; position: relative;
-    inline-size: 44px; block-size: 26px;
-    background-color: var(--color-gray-400);
-    border-radius: var(--radius-pill);
-    transition: background-color var(--duration-fast) var(--ease-standard);
-  }
-  .c-toggle__thumb {
-    position: absolute; inset-block-start: 3px; inset-inline-start: 3px;
-    inline-size: 20px; block-size: 20px;
-    background-color: var(--color-white);
-    border-radius: var(--radius-circle);
-    box-shadow: var(--shadow-sm);
-    transition: translate var(--duration-fast) var(--ease-standard);
-  }
-  .c-toggle__input:checked + .c-toggle__track { background-color: var(--color-primary); }
-  /* Logical translation: the thumb moves toward the end of the line, which is
-     leftwards in Arabic, without a direction-specific rule. */
-  .c-toggle__input:checked + .c-toggle__track .c-toggle__thumb { translate: 18px 0; }
-  [dir="rtl"] .c-toggle__input:checked + .c-toggle__track .c-toggle__thumb { translate: -18px 0; }
-  .c-toggle__input:focus-visible + .c-toggle__track { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
-  .c-toggle__input:disabled + .c-toggle__track { background-color: var(--color-gray-200); cursor: not-allowed; }
-
-  /* --- Phone input ------------------------------------------------------ */
-  .c-phone { display: grid; grid-template-columns: minmax(6.5rem, auto) 1fr; gap: var(--space-8); }
-  .c-phone .c-field__control { min-inline-size: 0; }
-  /* The number itself is always LTR even on an Arabic page. §06 */
-  .c-phone__number { direction: ltr; text-align: start; font-family: var(--font-data); }
-  [dir="rtl"] .c-phone__number { text-align: right; }
-
-  /* --- OTP -------------------------------------------------------------- */
-  /* Six fixed-width boxes plus gaps overflow a 390px phone once the page
-     gutters are taken off. Grid, not flex: `minmax(0, 1fr)` has a zero
-     minimum, so the track can always shrink. A flex row cannot — even with
-     min-inline-size:0 the container's min-content still sums the items' caps,
-     which is what pushed the whole form 44px wide on mobile.
-     The cap goes on the CONTAINER, so the boxes stay square-ish on desktop
-     instead of stretching. --otp-length lets a 4-digit code reuse this. */
-  .c-otp {
-    display: grid;
-    grid-template-columns: repeat(var(--otp-length, 6), minmax(0, 1fr));
-    gap: var(--space-8);
-    direction: ltr;
-    inline-size: 100%;
-    max-inline-size: 22rem;
-  }
-  .c-otp__input {
-    inline-size: 100%; min-inline-size: 0;
-    block-size: var(--control-height-lg);
-    padding: 0; text-align: center;
-    font-family: var(--font-data); font-size: var(--text-h4); font-weight: var(--weight-semibold);
-    border: var(--border-input); border-radius: var(--radius-md);
-    background-color: var(--color-surface);
-    transition: var(--transition-interactive);
-  }
-  .c-otp__input:focus-visible { outline: var(--focus-ring); border-color: var(--color-focus); }
-  .c-otp[data-state="error"] .c-otp__input { border-color: var(--color-error); border-width: var(--border-width-strong); }
-
-  /* --- File upload ------------------------------------------------------ */
-  .c-upload {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: var(--space-8);
-    padding: var(--space-32) var(--space-24);
-    text-align: center;
-    border: var(--border-width-strong) dashed var(--color-border-strong);
-    border-radius: var(--radius-lg);
-    background-color: var(--color-bg-subtle);
-    transition: var(--transition-interactive);
-    cursor: pointer;
-  }
-  .c-upload:hover, .c-upload[data-dragover="true"] { border-color: var(--color-primary); background-color: var(--color-surface-brand); }
-  .c-upload:has(:focus-visible) { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
-  .c-upload__input { position: absolute; opacity: 0; inline-size: 1px; block-size: 1px; }
-  .c-upload__icon { color: var(--color-text-secondary); }
-  .c-upload__hint { font-size: var(--text-caption); color: var(--color-text-secondary); }
-  .c-upload-list { display: flex; flex-direction: column; gap: var(--space-8); }
-  .c-upload-item {
-    display: flex; align-items: center; gap: var(--space-12);
-    padding: var(--space-12); border: var(--border-hairline); border-radius: var(--radius-md);
-    background-color: var(--color-surface);
-  }
-  .c-upload-item__name { flex: 1; min-inline-size: 0; font-size: var(--text-body-sm);
-                         overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .c-upload-item__size { font-size: var(--text-caption); color: var(--color-text-secondary); }
-
-  /* --- Fieldset --------------------------------------------------------- */
-  .c-fieldset { border: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: var(--space-16); }
-  .c-fieldset__legend { font-size: var(--text-h4); font-weight: var(--weight-semibold); padding: 0; margin-block-end: var(--space-4); }
-
-  /* --- Form grid — fields line up on the column grid without custom CSS -- */
-  .c-form-grid { display: grid; gap: var(--space-16); grid-template-columns: 1fr; }
-  @media (min-width: 48em) {
-    .c-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-24); }
-    .c-form-grid > .is-full { grid-column: 1 / -1; }
-  }
 
   /* ======================================================================
      SEGMENTED — a radio group presented as one bar (trip type, sort).

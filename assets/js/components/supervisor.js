@@ -31,7 +31,7 @@ import {
 import { icon, toast, sectionHead } from './ui.js';
 import { serviceCard, destinationCard, offerCard } from './cards.js';
 import { stateRegion, stateBlock, notFoundState } from './states.js';
-import { logo } from './header.js';
+import { logo } from './brand.js';
 
 /* ---------------------------------------------------------------------------
    RECORD HELPERS

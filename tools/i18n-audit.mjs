@@ -19,7 +19,7 @@ for (const page of PAGES) {
   const p = await b.newPage({ viewport: { width: 1440, height: 1000 } });
   await p.goto(BASE + page, { waitUntil: 'networkidle' }); await p.waitForTimeout(900);
   for (const locale of ['ar', 'en']) {
-    await p.evaluate(async (l) => { const m = await import('./assets/js/foundation.js'); m.setLocale(l); }, locale);
+    await p.evaluate(async (l) => { const m = await import('./assets/js/foundation.js'); await m.setLocale(l); }, locale);
     await p.waitForTimeout(800);
     const found = await p.evaluate((locale) => {
       const AR = /[؀-ۿ]/, LAT = /[A-Za-z]{2,}/;

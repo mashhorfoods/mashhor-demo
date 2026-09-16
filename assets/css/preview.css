@@ -1,0 +1,286 @@
+/* ============================================================================
+   PREVIEW — the Stage 11/12 parts the style guide shows before their stage
+   ships: product cards, the assist card, the toggle, phone, OTP, upload,
+   fieldset and form grid, price rows and progress steps. Loaded by
+   styleguide.html only; no customer page carries these bytes. Stage 10.12
+   ========================================================================= */
+
+@layer components {
+  /* ======================================================================
+     FLIGHT CARD — §14
+     Airline · times · duration · stops · baggage · price · fare · CTA.
+     Baggage and fare type are NOT optional extras in this layout: §19 says
+     the customer must be able to compare on the true terms, not just price.
+     ==================================================================== */
+  .c-flight { padding: var(--space-16); }
+  @media (min-width: 48em) { .c-flight { padding: var(--space-24); } }
+
+  .c-flight__grid { display: grid; gap: var(--space-16); }
+  @media (min-width: 64em) {
+    /* Itinerary takes the room; the price rail is fixed and sits at the end */
+    .c-flight__grid { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-32); }
+  }
+
+  .c-flight__airline { display: flex; align-items: center; gap: var(--space-12); }
+  .c-flight__airline-logo {
+    inline-size: 36px; block-size: 36px; flex: none;
+    display: grid; place-items: center;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-gray-100);
+    font-family: var(--font-data); font-size: var(--text-caption); font-weight: var(--weight-bold);
+    color: var(--color-gray-700);
+  }
+  .c-flight__airline-name { font-size: var(--text-body-sm); font-weight: var(--weight-medium); }
+  .c-flight__flight-no { font-size: var(--text-caption); color: var(--color-text-secondary); }
+
+  /* The leg: time — route line — time. The route line IS the graphic
+     language of §16: a journey drawn as a path, not an aeroplane clipart. */
+  .c-leg { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--space-12); }
+  .c-leg + .c-leg { margin-block-start: var(--space-16); padding-block-start: var(--space-16); border-block-start: var(--border-hairline); }
+  .c-leg__point { display: flex; flex-direction: column; gap: var(--space-4); }
+  .c-leg__point--end { text-align: end; }
+  .c-leg__time { font-family: var(--font-data); font-size: var(--text-h4); font-weight: var(--weight-bold);
+                 font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .c-leg__code { font-family: var(--font-data); font-size: var(--text-caption); font-weight: var(--weight-semibold);
+                 color: var(--color-text-secondary); letter-spacing: 0.04em; }
+  .c-leg__city { font-size: var(--text-caption); color: var(--color-text-secondary); }
+
+  .c-leg__path { display: flex; flex-direction: column; align-items: center; gap: var(--space-4); min-inline-size: 5rem; }
+  .c-leg__duration { font-family: var(--font-data); font-size: var(--text-caption); color: var(--color-text-secondary); }
+  .c-leg__line {
+    position: relative; inline-size: 100%; block-size: 2px;
+    background: linear-gradient(to inline-end, var(--color-gray-300), var(--color-primary));
+    border-radius: var(--radius-pill);
+  }
+  .c-leg__line::before, .c-leg__line::after {
+    content: ""; position: absolute; inset-block-start: 50%; translate: 0 -50%;
+    inline-size: 6px; block-size: 6px; border-radius: var(--radius-circle);
+  }
+  .c-leg__line::before { inset-inline-start: 0; background-color: var(--color-gray-400); }
+  .c-leg__line::after  { inset-inline-end: 0;  background-color: var(--color-primary); }
+  /* A stop is drawn on the line, so "1 stop" is visible, not just stated. */
+  .c-leg__stop {
+    position: absolute; inset-block-start: 50%; translate: -50% -50%;
+    inline-size: 8px; block-size: 8px;
+    border-radius: var(--radius-circle);
+    background-color: var(--color-white);
+    border: 2px solid var(--color-gray-500);
+  }
+  [dir="rtl"] .c-leg__stop { translate: 50% -50%; }
+  .c-leg__stops { font-size: var(--text-caption); font-weight: var(--weight-medium); color: var(--color-text-secondary); }
+  .c-leg__stops[data-direct="true"] { color: var(--color-success-fg); }
+  .c-leg__next-day {
+    font-size: var(--text-overline); font-weight: var(--weight-bold);
+    color: var(--color-warning-fg); vertical-align: super;
+  }
+
+  .c-flight__meta { display: flex; flex-wrap: wrap; gap: var(--space-8) var(--space-16); margin-block-start: var(--space-16); }
+  .c-flight__meta-item { display: inline-flex; align-items: center; gap: var(--space-4);
+                         font-size: var(--text-caption); color: var(--color-text-secondary); }
+
+  .c-flight__price-rail {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-16);
+    padding-block-start: var(--space-16);
+    border-block-start: var(--border-hairline);
+  }
+  @media (min-width: 64em) {
+    .c-flight__price-rail {
+      flex-direction: column; align-items: stretch; justify-content: center;
+      text-align: end; min-inline-size: 12rem;
+      padding-block-start: 0; padding-inline-start: var(--space-32);
+      border-block-start: none; border-inline-start: var(--border-hairline);
+    }
+  }
+  .c-flight__price { color: var(--color-text); }
+  .c-flight__price-note { font-size: var(--text-caption); color: var(--color-text-secondary); }
+
+  /* ======================================================================
+     HOTEL CARD
+     ==================================================================== */
+  .c-hotel__location { display: flex; align-items: center; gap: var(--space-4);
+                       font-size: var(--text-caption); color: var(--color-text-secondary); }
+  .c-rating__stars { display: inline-flex; gap: 1px; color: var(--_warning-accent); }
+  .c-rating__score {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-inline-size: 2.5rem; padding-inline: var(--space-8); padding-block: var(--space-4);
+    font-family: var(--font-data); font-size: var(--text-caption); font-weight: var(--weight-bold);
+    background-color: var(--color-info-bg); color: var(--color-info-fg);
+    border-radius: var(--radius-sm);
+  }
+
+  /* ======================================================================
+     PACKAGE CARD
+     ==================================================================== */
+  .c-package__includes { display: flex; flex-direction: column; gap: var(--space-4); }
+  .c-package__include { display: flex; align-items: center; gap: var(--space-8); font-size: var(--text-caption); }
+  .c-package__include .c-icon { color: var(--color-success); --icon-size: var(--icon-sm); }
+
+  /* ======================================================================
+     SUPERVISOR CARD — §29
+     A Number One person, presented in the Number One system. The only
+     personal elements are the photo, the name, the bio and the contact.
+     No personal colour, no personal logo, no personal type.
+     ==================================================================== */
+  .c-supervisor { align-items: center; text-align: center; padding: var(--space-24); }
+  .c-supervisor__photo {
+    inline-size: 88px; block-size: 88px;
+    border-radius: var(--radius-circle);
+    object-fit: cover;
+    background-color: var(--color-gray-100);
+    /* The one brand flourish allowed on a person: the Number One red ring. */
+    box-shadow: 0 0 0 3px var(--color-surface), 0 0 0 5px var(--color-primary);
+  }
+  .c-supervisor__name { font-size: var(--text-h4); font-weight: var(--weight-semibold); }
+  .c-supervisor__role { font-size: var(--text-caption); color: var(--color-text-brand); font-weight: var(--weight-semibold); }
+  .c-supervisor__services { display: flex; flex-wrap: wrap; gap: var(--space-4); justify-content: center; }
+  .c-supervisor__verified { display: inline-flex; align-items: center; gap: var(--space-4);
+                            font-size: var(--text-caption); color: var(--color-success-fg); }
+
+  /* ======================================================================
+     TRIP CARD — Stage 12 lives on this. §28
+     ==================================================================== */
+  .c-trip__head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-16); }
+  .c-trip__ref { font-family: var(--font-data); font-size: var(--text-caption);
+                 color: var(--color-text-secondary); letter-spacing: 0.04em; }
+  .c-trip__route { display: flex; align-items: center; gap: var(--space-8);
+                   font-size: var(--text-h4); font-weight: var(--weight-semibold); }
+
+  /* --- Toggle ----------------------------------------------------------- */
+  .c-toggle { display: flex; align-items: center; gap: var(--space-12); min-block-size: var(--touch-target); cursor: pointer; }
+  .c-toggle__input { position: absolute; opacity: 0; pointer-events: none; }
+  .c-toggle__track {
+    flex: none; position: relative;
+    inline-size: 44px; block-size: 26px;
+    background-color: var(--color-gray-400);
+    border-radius: var(--radius-pill);
+    transition: background-color var(--duration-fast) var(--ease-standard);
+  }
+  .c-toggle__thumb {
+    position: absolute; inset-block-start: 3px; inset-inline-start: 3px;
+    inline-size: 20px; block-size: 20px;
+    background-color: var(--color-white);
+    border-radius: var(--radius-circle);
+    box-shadow: var(--shadow-sm);
+    transition: translate var(--duration-fast) var(--ease-standard);
+  }
+  .c-toggle__input:checked + .c-toggle__track { background-color: var(--color-primary); }
+  /* Logical translation: the thumb moves toward the end of the line, which is
+     leftwards in Arabic, without a direction-specific rule. */
+  .c-toggle__input:checked + .c-toggle__track .c-toggle__thumb { translate: 18px 0; }
+  [dir="rtl"] .c-toggle__input:checked + .c-toggle__track .c-toggle__thumb { translate: -18px 0; }
+  .c-toggle__input:focus-visible + .c-toggle__track { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
+  .c-toggle__input:disabled + .c-toggle__track { background-color: var(--color-gray-200); cursor: not-allowed; }
+
+  /* --- Phone input ------------------------------------------------------ */
+  .c-phone { display: grid; grid-template-columns: minmax(6.5rem, auto) 1fr; gap: var(--space-8); }
+  .c-phone .c-field__control { min-inline-size: 0; }
+  /* The number itself is always LTR even on an Arabic page. §06 */
+  .c-phone__number { direction: ltr; text-align: start; font-family: var(--font-data); }
+  [dir="rtl"] .c-phone__number { text-align: right; }
+
+  /* --- OTP -------------------------------------------------------------- */
+  /* Six fixed-width boxes plus gaps overflow a 390px phone once the page
+     gutters are taken off. Grid, not flex: `minmax(0, 1fr)` has a zero
+     minimum, so the track can always shrink. A flex row cannot — even with
+     min-inline-size:0 the container's min-content still sums the items' caps,
+     which is what pushed the whole form 44px wide on mobile.
+     The cap goes on the CONTAINER, so the boxes stay square-ish on desktop
+     instead of stretching. --otp-length lets a 4-digit code reuse this. */
+  .c-otp {
+    display: grid;
+    grid-template-columns: repeat(var(--otp-length, 6), minmax(0, 1fr));
+    gap: var(--space-8);
+    direction: ltr;
+    inline-size: 100%;
+    max-inline-size: 22rem;
+  }
+  .c-otp__input {
+    inline-size: 100%; min-inline-size: 0;
+    block-size: var(--control-height-lg);
+    padding: 0; text-align: center;
+    font-family: var(--font-data); font-size: var(--text-h4); font-weight: var(--weight-semibold);
+    border: var(--border-input); border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    transition: var(--transition-interactive);
+  }
+  .c-otp__input:focus-visible { outline: var(--focus-ring); border-color: var(--color-focus); }
+  .c-otp[data-state="error"] .c-otp__input { border-color: var(--color-error); border-width: var(--border-width-strong); }
+
+  /* --- File upload ------------------------------------------------------ */
+  .c-upload {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: var(--space-8);
+    padding: var(--space-32) var(--space-24);
+    text-align: center;
+    border: var(--border-width-strong) dashed var(--color-border-strong);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-bg-subtle);
+    transition: var(--transition-interactive);
+    cursor: pointer;
+  }
+  .c-upload:hover, .c-upload[data-dragover="true"] { border-color: var(--color-primary); background-color: var(--color-surface-brand); }
+  .c-upload:has(:focus-visible) { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
+  .c-upload__input { position: absolute; opacity: 0; inline-size: 1px; block-size: 1px; }
+  .c-upload__icon { color: var(--color-text-secondary); }
+  .c-upload__hint { font-size: var(--text-caption); color: var(--color-text-secondary); }
+  .c-upload-list { display: flex; flex-direction: column; gap: var(--space-8); }
+  .c-upload-item {
+    display: flex; align-items: center; gap: var(--space-12);
+    padding: var(--space-12); border: var(--border-hairline); border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+  }
+  .c-upload-item__name { flex: 1; min-inline-size: 0; font-size: var(--text-body-sm);
+                         overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .c-upload-item__size { font-size: var(--text-caption); color: var(--color-text-secondary); }
+
+  /* --- Fieldset --------------------------------------------------------- */
+  .c-fieldset { border: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: var(--space-16); }
+  .c-fieldset__legend { font-size: var(--text-h4); font-weight: var(--weight-semibold); padding: 0; margin-block-end: var(--space-4); }
+
+  /* --- Form grid — fields line up on the column grid without custom CSS -- */
+  .c-form-grid { display: grid; gap: var(--space-16); grid-template-columns: 1fr; }
+  @media (min-width: 48em) {
+    .c-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-24); }
+    .c-form-grid > .is-full { grid-column: 1 / -1; }
+  }
+
+  .c-field__success {
+    display: flex; align-items: center; gap: var(--space-8);
+    font-size: var(--text-caption); color: var(--color-success-fg);
+  }
+
+  .c-choice__desc { display: block; font-size: var(--text-caption); color: var(--color-text-secondary); margin-block-start: var(--space-4); }
+
+  .c-choice--boxed {
+    padding: var(--space-16);
+    border: var(--border-input);
+    border-radius: var(--radius-md);
+    transition: var(--transition-interactive);
+  }
+  .c-choice--boxed:hover { border-color: var(--color-gray-500); background-color: var(--color-surface-hover); }
+  .c-choice--boxed:has(:checked) { border-color: var(--color-primary); background-color: var(--color-surface-brand); }
+  .c-choice--boxed:has(:focus-visible) { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
+
+  /* Price breakdown — §18 transparent pricing, §19 never hide a fee */
+  .c-price-rows { display: flex; flex-direction: column; gap: var(--space-8); }
+  .c-price-row { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-16);
+                 font-size: var(--text-body-sm); }
+  .c-price-row__label { color: var(--color-text-secondary); }
+  .c-price-row__value { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+  .c-price-row--total {
+    margin-block-start: var(--space-8); padding-block-start: var(--space-12);
+    border-block-start: var(--border-defined);
+    font-size: var(--text-body); font-weight: var(--weight-bold);
+  }
+  .c-price-row--total .c-price-row__label { color: var(--color-text); }
+
+  .c-steps { display: flex; gap: var(--space-8); counter-reset: step; }
+  .c-steps__item { flex: 1; display: flex; flex-direction: column; gap: var(--space-8); }
+  .c-steps__bar { block-size: 4px; border-radius: var(--radius-pill); background-color: var(--color-gray-200); }
+  .c-steps__item[data-state="done"] .c-steps__bar,
+  .c-steps__item[data-state="current"] .c-steps__bar { background-color: var(--color-primary); }
+  .c-steps__label { display: flex; align-items: center; gap: var(--space-4);
+                    font-size: var(--text-caption); color: var(--color-text-secondary); }
+  .c-steps__item[data-state="current"] .c-steps__label { color: var(--color-text-brand); font-weight: var(--weight-semibold); }
+  .c-steps__item[data-state="done"] .c-steps__label { color: var(--color-text); }
+}

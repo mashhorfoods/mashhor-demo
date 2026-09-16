@@ -111,7 +111,7 @@ async function audit(page, w, loc, deep) {
   const errs = [];
   p.on('pageerror', (e) => errs.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') errs.push(m.text()); });
   await p.goto(ORIGIN + page, { waitUntil: 'networkidle' });
-  if (loc !== 'ar') await p.evaluate(async (l) => { const m = await import('./assets/js/foundation.js'); m.setLocale(l); }, loc);
+  if (loc !== 'ar') await p.evaluate(async (l) => { const m = await import('./assets/js/foundation.js'); await m.setLocale(l); }, loc);
   await p.waitForTimeout(500);
   for (const [c, d] of await p.evaluate(INPAGE)) add(c, page, w, loc, d);
   errs.forEach((e) => add('console', page, w, loc, e.slice(0, 120)));

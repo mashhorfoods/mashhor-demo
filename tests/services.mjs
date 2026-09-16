@@ -15,7 +15,7 @@ async function open(width, height, locale, url = URL) {
   p.on('requestfailed', r => errs.push(`${width}/${locale} reqfail: ${r.url()}`));
   p.on('response', r => { if (r.status() >= 400) errs.push(`${width}/${locale} HTTP ${r.status()} ${r.url()}`); });
   await p.goto(url, { waitUntil: 'networkidle' });
-  await p.evaluate(async (l) => { const m = await import('./assets/js/foundation.js'); m.setLocale(l); }, locale);
+  await p.evaluate(async (l) => { const m = await import('./assets/js/foundation.js'); await m.setLocale(l); }, locale);
   await p.waitForTimeout(700);
   return p;
 }
@@ -147,7 +147,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
   ok('empty state action shows all services', r === 'all', r);
 
   // locale switch: single header/footer/nav, content re-rendered
-  await p.evaluate(async () => { const m = await import('./assets/js/foundation.js'); m.setLocale('en'); });
+  await p.evaluate(async () => { const m = await import('./assets/js/foundation.js'); await m.setLocale('en'); });
   await p.waitForTimeout(700);
   r = await p.evaluate(() => ({ h: document.querySelectorAll('.c-gh').length, f: document.querySelectorAll('.c-gf').length, n: document.querySelectorAll('.c-catnav').length, cards: document.querySelectorAll('.c-service-card').length, h1: document.querySelector('h1').textContent }));
   ok('locale switch keeps one header, footer, nav; 13 cards', r.h === 1 && r.f === 1 && r.n === 1 && r.cards === 13, JSON.stringify(r));

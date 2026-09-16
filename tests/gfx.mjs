@@ -5,7 +5,7 @@ const errs=[]; let pass=0, fail=0;
 const ok=(n,c,x='')=>{ if(c) pass++; else { fail++; console.log('  ✗',n,x); } };
 const SWITCH = async (p) => p.evaluate(async () => {
   const m = await import('./assets/js/foundation.js');
-  m.setLocale(m.getLocale() === 'ar' ? 'en' : 'ar');
+  await m.setLocale(m.getLocale() === 'ar' ? 'en' : 'ar');
 });
 
 for (const [name,w,h] of [['mobile',390,844],['tablet',834,1100],['desktop',1440,1000]]) {

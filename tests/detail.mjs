@@ -15,7 +15,7 @@ async function open(url, width = 1440, height = 1000, locale = 'ar') {
   p.on('requestfailed', r => errs.push(`${url} reqfail: ${r.url()}`));
   p.on('response', r => { if (r.status() >= 400 && !url.includes('nonexistent')) errs.push(`${url} HTTP ${r.status()} ${r.url()}`); });
   await p.goto(ORIGIN + url, { waitUntil: 'networkidle' });
-  await p.evaluate(async (l) => { const m = await import('./assets/js/foundation.js'); m.setLocale(l); }, locale);
+  await p.evaluate(async (l) => { const m = await import('./assets/js/foundation.js'); await m.setLocale(l); }, locale);
   await p.waitForTimeout(700);
   return p;
 }
@@ -150,10 +150,10 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet']]) {
   ok('missing detail content → hero, neutral note, related by category, CTA; no empty sections', r.h1 && r.note && r.hiddenFeatures && r.cta && r.related >= 1, JSON.stringify(r));
   await p.evaluate(() => window.no.detail.reload()); await p.waitForTimeout(300);
   // locale switch keeps one of everything and translates the head
-  await p.evaluate(async () => { const m = await import('./assets/js/foundation.js'); m.setLocale('en'); }); await p.waitForTimeout(800);
+  await p.evaluate(async () => { const m = await import('./assets/js/foundation.js'); await m.setLocale('en'); }); await p.waitForTimeout(800);
   r = await p.evaluate(() => ({ h: document.querySelectorAll('.c-gh').length, f: document.querySelectorAll('.c-gf').length, h1: document.querySelectorAll('h1').length, title: document.title, desc: document.querySelector('meta[name=description]').content }));
   ok('locale switch: one header/footer/h1, English title + description', r.h === 1 && r.f === 1 && r.h1 === 1 && /Flight tickets — Number One/.test(r.title) && /^We /.test(r.desc), JSON.stringify(r));
-  await p.evaluate(async () => { const m = await import('./assets/js/foundation.js'); m.setLocale('ar'); }); await p.waitForTimeout(600);
+  await p.evaluate(async () => { const m = await import('./assets/js/foundation.js'); await m.setLocale('ar'); }); await p.waitForTimeout(600);
 
   // CTA links resolve: hero primary → booking entry with the right tab; related card → detail route
   const primaryHref = await p.getAttribute('[data-detail=hero] .c-btn--primary', 'href');

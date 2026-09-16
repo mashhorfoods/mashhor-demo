@@ -18,7 +18,7 @@ async function open(url = PAGE, width = 1440, height = 1000, locale = 'ar') {
   p.on('requestfailed', r => errs.push(`${url}@${width} reqfail: ${r.url()}`));
   p.on('response', r => { if (r.status() >= 400) errs.push(`${url}@${width} HTTP ${r.status()} ${r.url()}`); });
   await p.goto(ORIGIN + url, { waitUntil: 'networkidle' });
-  if (locale !== 'ar') await p.evaluate(async (l) => { const m = await import('./assets/js/foundation.js'); m.setLocale(l); }, locale);
+  if (locale !== 'ar') await p.evaluate(async (l) => { const m = await import('./assets/js/foundation.js'); await m.setLocale(l); }, locale);
   await p.waitForTimeout(600);
   return p;
 }

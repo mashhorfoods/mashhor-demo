@@ -23,7 +23,7 @@ import {
   FOOTER_SOCIAL, FOOTER_LEGAL, FOOTER_CTA, LEGAL_NAME,
 } from '../data/footer.js';
 import { icon } from './ui.js';
-import { logo } from './header.js';
+import { logo } from './brand.js';
 
 /* ---------------------------------------------------------------------------
    FooterLink

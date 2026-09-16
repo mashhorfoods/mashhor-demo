@@ -19,7 +19,7 @@ const seen = new Map(); const dead = []; const external = new Set(); const heads
 for (const page of PAGES) for (const loc of ['ar', 'en']) {
   const p = await b.newPage({ viewport: { width: 1440, height: 1000 } });
   await p.goto(ORIGIN + BASE + page, { waitUntil: 'networkidle' });
-  if (loc === 'en') await p.evaluate(async () => { const m = await import('./assets/js/foundation.js'); m.setLocale('en'); });
+  if (loc === 'en') await p.evaluate(async () => { const m = await import('./assets/js/foundation.js'); await m.setLocale('en'); });
   await p.waitForTimeout(400);
   const info = await p.evaluate(() => ({
     title: document.title, desc: document.querySelector('meta[name=description]')?.content ?? '', canonical: document.querySelector('link[rel=canonical]')?.href ?? '',

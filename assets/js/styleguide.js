@@ -12,11 +12,12 @@ import {
   t, getLocale, applyTranslations,
   STATUSES, featuredServices,
   mountHeader, setSession, getSession, globalFooter,
-  serviceGrid, flightCard, hotelCard, packageCard, supervisorCard, tripCard, statusBadge,
-  searchWidget, stateRegion, skeletonList, skeletonFlight,
-} from './foundation.js';
+  searchWidget, stateRegion, } from './foundation.js';
 
-import { FLIGHTS, HOTELS, PACKAGES, SUPERVISORS, TRIPS } from './data/samples.js';
+import { serviceGrid, flightCard, hotelCard, packageCard, supervisorCard, tripCard, statusBadge } from './preview/cards.js';
+import { skeletonList, skeletonFlight } from './preview/states.js';
+import { initOtp, initUploads } from './preview/forms.js';
+import { FLIGHTS, HOTELS, PACKAGES, SUPERVISORS, TRIPS } from './preview/samples.js';
 
 /* ---------------------------------------------------------------------------
    COLOUR — read the real computed token values, and compute the real contrast
@@ -236,7 +237,7 @@ boot({
     renderComponents();
     wireStates()('content');
   },
-});
+}).then(() => { initOtp(); initUploads(); });
 
 mountHeaders();
 mountFooters();

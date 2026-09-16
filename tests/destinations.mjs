@@ -17,7 +17,7 @@ async function open(width, height, locale, url = URL) {
   p.on('requestfailed', r => errs.push(`${width}/${locale} reqfail: ${r.url()}`));
   p.on('response', r => { if (r.status() >= 400) errs.push(`${width}/${locale} HTTP ${r.status()} ${r.url()}`); });
   await p.goto(url, { waitUntil: 'networkidle' });
-  await p.evaluate(async (l) => { const m = await import('./assets/js/foundation.js'); m.setLocale(l); }, locale);
+  await p.evaluate(async (l) => { const m = await import('./assets/js/foundation.js'); await m.setLocale(l); }, locale);
   await p.waitForTimeout(700);
   return p;
 }
@@ -189,7 +189,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
   r = await p.evaluate(() => document.querySelector('#help').getBoundingClientRect().top);
   ok('hero "help me choose" moves to the help band', r >= -5 && r < 300, `${r}`);
   // locale switch: one of everything, English strings, registry-driven selects translated
-  await p.evaluate(async () => { const m = await import('./assets/js/foundation.js'); m.setLocale('en'); }); await p.waitForTimeout(800);
+  await p.evaluate(async () => { const m = await import('./assets/js/foundation.js'); await m.setLocale('en'); }); await p.waitForTimeout(800);
   r = await p.evaluate(() => ({ h: document.querySelectorAll('.c-gh').length, f: document.querySelectorAll('.c-gf').length, s: document.querySelectorAll('.c-search').length, h1: document.querySelector('h1').textContent, opt: document.querySelector('.c-search__form select[name=region] option[value=africa]').textContent, chip: document.querySelector('[data-destinations=region-nav] .c-chip[data-region=middleEast]').textContent }));
   ok('locale switch: single header/footer/search, English hero, selects and chips', r.h === 1 && r.f === 1 && r.s === 1 && /Discover/.test(r.h1) && r.opt === 'Africa' && /Middle East/.test(r.chip), JSON.stringify(r));
   await p.close();

@@ -18,7 +18,7 @@ async function open(url = PAGE, width = 1440, height = 1000, locale = 'ar') {
   p.on('requestfailed', r => errs.push(`${url}@${width} reqfail: ${r.url()}`));
   p.on('response', r => { if (r.status() >= 400) errs.push(`${url}@${width} HTTP ${r.status()} ${r.url()}`); });
   await p.goto(ORIGIN + url, { waitUntil: 'networkidle' });
-  if (locale !== 'ar') { await p.evaluate(async (l) => { const m = await import('./assets/js/foundation.js'); m.setLocale(l); }, locale); }
+  if (locale !== 'ar') { await p.evaluate(async (l) => { const m = await import('./assets/js/foundation.js'); await m.setLocale(l); }, locale); }
   await p.waitForTimeout(600);
   return p;
 }
@@ -316,7 +316,7 @@ for (const loc of ['ar', 'en']) {
   let r = await p.evaluate(() => ({ checked: document.querySelector('.c-pick[aria-checked=true]').dataset.vertical, form: document.querySelector('.c-search__form:not([hidden])').dataset.vertical, dest: document.querySelector('.c-search__form:not([hidden]) [name=destination]').value, focused: document.activeElement.tagName, primaries: Array.from(document.querySelectorAll('.c-btn--primary')).filter((n) => n.checkVisibility()).length }));
   ok('?vertical=hotels&to=dubai selects hotels, prefills the destination, focuses the form', r.checked === 'hotels' && r.form === 'hotels' && r.dest === 'دبي' && r.focused === 'INPUT' && r.primaries === 1, JSON.stringify(r));
   // locale change keeps the service, drops the prefill
-  await p.evaluate(async () => { const m = await import('./assets/js/foundation.js'); m.setLocale('en'); }); await p.waitForTimeout(600);
+  await p.evaluate(async () => { const m = await import('./assets/js/foundation.js'); await m.setLocale('en'); }); await p.waitForTimeout(600);
   r = await p.evaluate(() => ({ checked: document.querySelector('.c-pick[aria-checked=true]').dataset.vertical, statuses: document.querySelectorAll('.c-book__status').length, selectors: document.querySelectorAll('.c-pick-grid').length, forms: document.querySelectorAll('.c-search').length, dir: document.documentElement.dir }));
   ok('language switch keeps hotels selected; no duplicated regions', r.checked === 'hotels' && r.statuses === 1 && r.selectors === 1 && r.forms === 1 && r.dir === 'ltr', JSON.stringify(r));
   await p.close();

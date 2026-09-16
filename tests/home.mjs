@@ -14,7 +14,7 @@ async function open(width, height, locale) {
   p.on('console', m => { if (m.type() === 'error' || m.type() === 'warning') errs.push(`${width}/${locale} console: ${m.text()}`); });
   p.on('requestfailed', r => errs.push(`${width}/${locale} reqfail: ${r.url()}`));
   await p.goto(URL, { waitUntil: 'networkidle' });
-  await p.evaluate(async (l) => { const m = await import('./assets/js/foundation.js'); m.setLocale(l); }, locale);
+  await p.evaluate(async (l) => { const m = await import('./assets/js/foundation.js'); await m.setLocale(l); }, locale);
   await p.waitForTimeout(700);
   return p;
 }
@@ -194,7 +194,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
   }
 
   // locale switch keeps everything painted (no duplicate sections/headers)
-  await p.evaluate(async () => { const m = await import('./assets/js/foundation.js'); m.setLocale('en'); });
+  await p.evaluate(async () => { const m = await import('./assets/js/foundation.js'); await m.setLocale('en'); });
   await p.waitForTimeout(700);
   r = await p.evaluate(() => ({
     headers: document.querySelectorAll('.c-gh').length, footers: document.querySelectorAll('.c-gf').length,

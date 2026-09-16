@@ -17,7 +17,7 @@ async function open(url, width = 1440, height = 1000, locale = 'ar') {
   p.on('requestfailed', r => errs.push(`${url}@${width} reqfail: ${r.url()}`));
   p.on('response', r => { if (r.status() >= 400) errs.push(`${url}@${width} HTTP ${r.status()} ${r.url()}`); });
   await p.goto(ORIGIN + url, { waitUntil: 'networkidle' });
-  await p.evaluate(async (l) => { const m = await import('./assets/js/foundation.js'); m.setLocale(l); }, locale);
+  await p.evaluate(async (l) => { const m = await import('./assets/js/foundation.js'); await m.setLocale(l); }, locale);
   await p.waitForTimeout(700);
   return p;
 }
@@ -141,7 +141,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
   r = await p.evaluate(() => ({ n: document.querySelectorAll('[data-offers=grid] .c-offer').length, pressed: document.querySelector('[data-offers=categories] .c-chip[aria-pressed=true]').dataset.category }));
   ok('?category= opens the listing filtered', r.n === 1 && r.pressed === 'umrah', JSON.stringify(r));
   // locale switch: one form, English labels
-  await p.evaluate(async () => { const m = await import('./assets/js/foundation.js'); m.setLocale('en'); }); await p.waitForTimeout(800);
+  await p.evaluate(async () => { const m = await import('./assets/js/foundation.js'); await m.setLocale('en'); }); await p.waitForTimeout(800);
   r = await p.evaluate(() => ({ forms: document.querySelectorAll('form.c-filters').length, sheets: document.querySelectorAll('dialog.c-filters__sheet').length, label: document.querySelector('form.c-filters label').textContent, h1: document.querySelector('h1').textContent }));
   ok('locale switch: one form, one sheet, English', r.forms === 1 && r.sheets === 1 && r.label === 'Destination' && /Packages built/.test(r.h1), JSON.stringify(r));
   await p.close();

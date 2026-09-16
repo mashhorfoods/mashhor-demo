@@ -17,7 +17,7 @@ for (const page of ['index.html','styleguide.html']) {
     for (const dir of ['rtl','ltr']) {
       if (dir==='ltr') { await p.evaluate(async () => {
         const m = await import('./assets/js/foundation.js');
-        m.setLocale(m.getLocale() === 'ar' ? 'en' : 'ar');
+        await m.setLocale(m.getLocale() === 'ar' ? 'en' : 'ar');
       }); await p.waitForTimeout(700); }
       const r = await p.evaluate(() => ({
         dir: document.documentElement.dir,
