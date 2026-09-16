@@ -180,7 +180,7 @@
 <script type="module">
   import {
     boot, el, qs, qsa, render, icon, route, pick,
-    mountHeader, mountFooter, mountHome, NAV_BOTTOM,
+    mountHeader, mountFooter, mountHome, NAV_BOTTOM, destinationById,
   } from './assets/js/foundation.js';
 
   // Static links in the markup are written relative; resolve them through
@@ -210,6 +210,9 @@
     if (!vertical || !home.search.no.select(vertical)) return;
     const option = requested.get('service');
     if (option) { const sel = qs('.c-search__form:not([hidden]) select[name="service"]'); if (sel) sel.value = option; }
+    // ?to=<destination slug> prefills the destination in the traveller's language.
+    const to = requested.get('to');
+    if (to) { const dest = destinationById(to); const input = qs('.c-search__form:not([hidden]) input[name="to"]'); if (dest && input) input.value = pick(dest, 'name'); }
     if (location.hash === '#booking') home.scrollToSearch();
     requested = new URLSearchParams();
   }

@@ -492,7 +492,9 @@ component in this layer. Permission is asked, never assumed.
    carries `image.src: null`; the services page and every service detail page
    render the neutral slot at the reserved ratio until the approved
    photographs arrive.
-
+9. **Destination photography.** Every `data/destinations.js` record carries
+   `image.src: null`; the destinations page and the homepage render the neutral
+   slot at the card's ratio until the approved photographs arrive.
 ---
 
 ## 15. Working rules

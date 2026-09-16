@@ -40,6 +40,7 @@ export const route = (path = '') => BASE + String(path).replace(/^\//, '');
    the supervisor card consume it; the registry is the source.
    ------------------------------------------------------------------------ */
 import { featuredServices } from './services.js';
+import { DESTINATION_REGIONS, TRAVEL_PURPOSES } from './destinations.js';
 export const SERVICES = featuredServices();
 
 /* Navigation moved to data/navigation.js in Stage 10.2 — the full IA, the mega
@@ -180,6 +181,22 @@ export const SEARCH_VERTICALS = [
         ] },
       { id: 'depart',  type: 'date',     label: 'search.depart' },
       { id: 'notes',   type: 'textarea', label: 'search.notes', full: true },
+    ],
+  },
+  /* Destination discovery (10.7). `standalone: true` keeps it out of the
+     booking entry's tab strip; the destinations page asks for it by id. Its
+     select options come from the destinations registry, so a new region or
+     purpose appears here without touching this file. */
+  {
+    id: 'destinations', label: 'search.destinations', icon: 'no-location', columns: 4, standalone: true,
+    filters: true, submitVariant: 'secondary-brand',
+    fields: [
+      { id: 'destination', type: 'place',  label: 'search.destination', icon: 'no-location', placeholder: 'search.destinationPlaceholder' },
+      { id: 'region',      type: 'select', label: 'search.region', blank: 'search.anyRegion',
+        options: DESTINATION_REGIONS.map((r) => ({ value: r.id, labelAr: r.labelAr, labelEn: r.labelEn })) },
+      { id: 'purpose',     type: 'select', label: 'search.purpose', blank: 'search.anyPurpose',
+        options: TRAVEL_PURPOSES.map((p) => ({ value: p.id, labelAr: p.labelAr, labelEn: p.labelEn })) },
+      { id: 'depart',      type: 'date',   label: 'search.depart' },
     ],
   },
 ];

@@ -1,0 +1,55 @@
+/* ============================================================================
+   17 — DESTINATIONS COMPOSITIONS  Stage 10.7
+
+   Reuses .c-hero, .c-choose, .c-disclose, .c-cta-band (14-home), .c-catnav
+   and .c-help (15-services), .c-dest (14-home) and the card system. New
+   here: the destination card's country line, service chips and CTA row,
+   the featured block, and the inline (non-sticky) region nav.
+   ========================================================================= */
+
+@layer components {
+  /* ---- Destination card, rich form --------------------------------------- */
+  .c-dest__country { display: inline-flex; align-items: center; gap: var(--space-4);
+                     font-size: var(--text-caption); color: var(--color-text-secondary); }
+  .c-dest__country .c-icon { --icon-size: var(--icon-xs); }
+  .c-dest__services { display: flex; flex-wrap: wrap; gap: var(--space-4); margin-block-start: var(--space-4); }
+  .c-dest__service { font-size: var(--text-caption); padding-inline: var(--space-8); padding-block: 2px;
+                     border: var(--border-hairline); border-radius: var(--radius-pill); color: var(--color-text-secondary);
+                     background-color: var(--color-bg-subtle); }
+  .c-dest__actions { display: flex; align-items: center; justify-content: space-between; gap: var(--space-12);
+                     margin-block-start: auto; padding-block-start: var(--space-12); }
+  .c-dest--rich .c-dest__body { align-items: flex-start; }
+  .c-dest--rich .c-card__body { gap: var(--space-8); }
+
+  /* The large featured card: taller image, bigger name. */
+  .c-dest--large .c-card__media { aspect-ratio: 16 / 10; }
+  @media (min-width: 64em) { .c-dest--large .c-card__media { aspect-ratio: auto; min-block-size: 22rem; flex: 1; } }
+  .c-dest--large .c-dest__name { font-size: var(--text-h3); }
+  .c-dest--large { display: flex; flex-direction: column; block-size: 100%; }
+
+  /* ---- Featured block: one lead + up to two supporting ------------------ */
+  .c-featured { display: grid; gap: var(--grid-gutter); }
+  .c-featured__side { display: grid; gap: var(--grid-gutter); }
+  @media (min-width: 48em) {
+    .c-featured__side { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (min-width: 64em) {
+    .c-featured { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); align-items: stretch; }
+    .c-featured__side { grid-template-columns: minmax(0, 1fr); }
+    .c-featured[data-count="1"] { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  /* ---- Region nav: the chip row, not sticky, with counts --------------- */
+  .c-catnav--inline { position: static; border-block: none; padding-block: 0; margin-block-end: var(--space-24); }
+  .c-catnav--inline .c-catnav__row { padding-inline: var(--container-gutter); margin-inline: calc(-1 * var(--container-gutter)); }
+  @media (min-width: 48em) { .c-catnav--inline .c-catnav__row { padding-inline: 0; margin-inline: 0; } }
+  .c-chip__count { font-size: var(--text-caption); color: var(--color-text-secondary); }
+  .c-chip[aria-pressed="true"] .c-chip__count { color: var(--color-text-brand); }
+
+  /* ---- Help band: the .c-choose surface with a single action ------------ */
+  .c-choose--band { align-items: center; }
+  @media (min-width: 64em) { .c-choose--band { grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); } .c-choose--band .c-choose__foot { justify-content: flex-end; } }
+
+  /* ---- Results heading row ---------------------------------------------- */
+  .c-results-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-12); margin-block-end: var(--space-24); }
+}

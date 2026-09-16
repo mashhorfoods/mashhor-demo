@@ -11,6 +11,7 @@ import { el, uid } from '../core/dom.js';
 import { t, getLocale, pick } from '../core/i18n.js';
 import { money, time, duration, dateShort, dayOffset } from '../core/format.js';
 import { STATUSES, SERVICES, route } from '../data/config.js';
+import { SERVICE_REGISTRY } from '../data/services.js';
 import { icon } from './ui.js';
 
 /* ---------------------------------------------------------------------------
@@ -274,20 +275,46 @@ export function packageCard(pkg) {
    The descriptor says what the place is FOR; there is no slot for a rank,
    a count or a price, so none can be invented.
    ------------------------------------------------------------------------ */
-export function destinationCard(dest) {
+/**
+ * @param {object} dest      a destinations-registry record (data/destinations.js)
+ * @param {object} [options]
+ * @param {boolean} options.country   show the country line
+ * @param {boolean} options.services  show the relevant-service chips
+ * @param {string}  options.entry     href of the "explore" CTA (the booking entry)
+ * @param {boolean} options.large     the featured lead card
+ * Without options it is the compact card the homepage uses.
+ */
+export function destinationCard(dest, { country = false, services = false, entry = null, large = false } = {}) {
   const titleId = uid('dest');
-  return el('article', { class: 'c-card c-card--interactive c-dest', 'aria-labelledby': titleId }, [
+  const rich = country || services || entry;
+  const href = route(dest.href ?? `destinations/${dest.slug}/`);
+  const serviceChips = services && dest.services?.length
+    ? el('ul', { class: 'c-dest__services', role: 'list', 'aria-label': t('dest.card.services') },
+        dest.services.slice(0, 4).map((id) => SERVICE_REGISTRY.find((s) => s.id === id)).filter(Boolean).map((s) =>
+          el('li', { class: 'c-dest__service' }, pick(s, 'title'))))
+    : null;
+
+  return el('article', { class: ['c-card c-card--interactive c-dest', rich ? 'c-dest--rich' : '', large ? 'c-dest--large' : ''], 'aria-labelledby': titleId }, [
     el('div', { class: 'c-card__media' }, mediaPlaceholder(dest.image?.src, pick(dest.image ?? {}, 'alt'))),
     el('div', { class: 'c-card__body' }, [
+      country && (dest.countryAr || dest.countryEn)
+        ? el('p', { class: 'c-dest__country' }, [icon('no-location', { size: 'xs' }), el('span', {}, pick(dest, 'country'))])
+        : null,
       el('div', { class: 'c-dest__body' }, [
         el('div', {}, [
           el('h3', { class: 'c-dest__name', id: titleId }, [
-            el('a', { class: 'c-card__link', href: route(dest.href) }, pick(dest, 'name')),
+            el('a', { class: 'c-card__link', href }, pick(dest, 'name')),
           ]),
           el('p', { class: 'c-dest__desc' }, pick(dest, 'desc')),
         ]),
-        el('span', { class: 'c-dest__arrow', 'aria-hidden': 'true' }, icon('no-arrow-end', { size: 'md', flip: true })),
+        rich ? null : el('span', { class: 'c-dest__arrow', 'aria-hidden': 'true' }, icon('no-arrow-end', { size: 'md', flip: true })),
       ]),
+      serviceChips,
+      entry
+        ? el('div', { class: 'c-dest__actions' }, [
+            el('a', { class: 'c-btn c-btn--secondary-brand c-card__action', href: entry }, [el('span', {}, t('dest.card.cta')), icon('no-arrow-end', { size: 'sm', flip: true })]),
+          ])
+        : null,
     ]),
   ]);
 }

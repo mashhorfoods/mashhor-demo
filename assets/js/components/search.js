@@ -26,7 +26,7 @@ const FIELD_BUILDERS = {
       el('input', {
         class: 'c-field__control', id, name: field.id, type: 'text',
         autocomplete: 'off', required: field.required,
-        placeholder: getLocale() === 'ar' ? 'المدينة أو المطار' : 'City or airport',
+        placeholder: field.placeholder ? t(field.placeholder) : (getLocale() === 'ar' ? 'المدينة أو المطار' : 'City or airport'),
         'aria-describedby': `${id}-help`,
       }),
     ]));
@@ -44,9 +44,12 @@ const FIELD_BUILDERS = {
   select: (field) => {
     const id = uid('f');
     const isAr = getLocale() === 'ar';
-    return fieldShell(field, id, el('select', { class: 'c-field__control', id, name: field.id },
-      (field.options ?? []).map((option) =>
-        el('option', { value: option.value }, isAr ? option.labelAr : option.labelEn))));
+    return fieldShell(field, id, el('select', { class: 'c-field__control', id, name: field.id }, [
+      // `blank` adds an "any" first option, for filters where nothing is required.
+      field.blank ? el('option', { value: '' }, t(field.blank)) : null,
+      ...(field.options ?? []).map((option) =>
+        el('option', { value: option.value }, isAr ? option.labelAr : option.labelEn)),
+    ]));
   },
 
   /* Segmented control — a radio group that reads as one bar (trip type). */
@@ -131,7 +134,7 @@ function fieldShell(field, id, control) {
       t(field.label),
       field.required
         ? el('span', { class: 'c-field__required', 'aria-hidden': 'true' }, '*')
-        : el('span', { class: 'c-field__optional' }, getLocale() === 'ar' ? '(اختياري)' : '(optional)'),
+        : (field.markOptional === false ? null : el('span', { class: 'c-field__optional' }, getLocale() === 'ar' ? '(اختياري)' : '(optional)')),
     ]),
     control,
   ]);
@@ -147,7 +150,9 @@ function verticalPanel(vertical) {
   const build = (field) => {
     const builder = FIELD_BUILDERS[field.type];
     if (!builder) return null;
-    const node = builder(field);
+    // A filter form (vertical.filters) has nothing required, so "(optional)"
+    // on every label would be noise.
+    const node = builder(vertical.filters ? { ...field, markOptional: false } : field);
     if (field.full) node.classList.add('is-full');
     return node;
   };
@@ -185,7 +190,9 @@ function verticalPanel(vertical) {
     toggle,
     advancedBlock,
     el('div', { class: 'c-search__submit' }, [
-      el('button', { type: 'submit', class: 'c-btn c-btn--primary c-btn--lg c-btn--block@sm' }, [
+      // A vertical may ask for a quieter submit (a filter beside a page's own
+      // primary action) — data, not a special case.
+      el('button', { type: 'submit', class: `c-btn ${vertical.submitVariant ? `c-btn--${vertical.submitVariant}` : 'c-btn--primary'} c-btn--lg c-btn--block@sm` }, [
         icon(vertical.submit ? 'no-arrow-end' : 'no-search', { size: 'sm', className: 'c-btn__icon', flip: !!vertical.submit }),
         el('span', { class: 'c-btn__label' }, t(vertical.submit ?? 'search.submit')),
         el('span', { class: 'c-btn__spinner', 'aria-hidden': 'true' }),
@@ -206,7 +213,7 @@ function verticalPanel(vertical) {
 export function searchWidget({ verticals = null, onSubmit = null } = {}) {
   const list = (verticals
     ? verticals.map((id) => SEARCH_VERTICALS.find((v) => v.id === id)).filter(Boolean)
-    : SEARCH_VERTICALS);
+    : SEARCH_VERTICALS.filter((v) => !v.standalone));
 
   const groupId = uid('search');
   const tabs = [];
@@ -236,8 +243,9 @@ export function searchWidget({ verticals = null, onSubmit = null } = {}) {
     panels.push(panel);
   });
 
+  // One vertical needs no tab strip: the panel stands alone.
   const widget = el('div', { class: 'c-search', dataset: { tabs: '' } }, [
-    el('div', { class: 'c-search__tabs', role: 'tablist', 'aria-label': t('nav.search') }, tabs),
+    list.length > 1 ? el('div', { class: 'c-search__tabs', role: 'tablist', 'aria-label': t('nav.search') }, tabs) : null,
     ...panels,
   ]);
 

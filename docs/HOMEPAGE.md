@@ -29,7 +29,7 @@ home.scrollToSearch();               // what "Start booking" and the header sear
 | 02 | Services | `servicesGrid` → `serviceCard` | `HOME_SERVICES` = the 10.5 registry (12, six `featured`) |
 | 03 | Why Number One | `valueList` | `HOME_VALUES` |
 | 04 | Help me choose | `chooseModule` | `HOME_PRIORITIES` |
-| 05 | Destinations | `destinationGrid` → `destinationCard` | `HOME_DESTINATIONS` |
+| 05 | Destinations | `destinationGrid` → `destinationCard` | `HOME_DESTINATIONS` = registry records flagged `home` (10.7) |
 | 06 | Offers & packages | `offerGrid` → `offerCard` | `HOME_OFFERS` |
 | 07 | How we help | `journeySteps` | `HOME_JOURNEY` |
 | 08 | Human support | `supportPanels` | `HOME_SUPPORT` + `liveChannels()` |

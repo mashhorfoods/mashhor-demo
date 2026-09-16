@@ -46,6 +46,11 @@ mountHeader({
 four approved categories and its items are registry records from
 `data/services.js`; nothing in `navigation.js` names a service any more.
 
+**The destinations menu is derived too (since 10.7).** Its columns are the
+regions that contain something and its items are `data/destinations.js`
+records. The former "most popular" column is gone: the registry has no such
+field, so the menu cannot claim it.
+
 ## Decisions worth knowing
 
 **Click, never hover (§22).** Menus open on click only. A cursor crossing the

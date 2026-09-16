@@ -62,29 +62,19 @@ export const MENU_SERVICES = {
 /* --------------------------------------------------------------------------
    DESTINATIONS — §06. Featured only, plus a way to the full system later.
    ----------------------------------------------------------------------- */
+import { regionsWithDestinations, destinationsIn } from './destinations.js';
+
+/* Columns are the regions that contain something (data/destinations.js);
+   items are registry records. No "most popular" — the registry has no such
+   field, so the menu cannot claim it. */
 export const MENU_DESTINATIONS = {
   id: 'destinations',
   type: 'panel',
   titleAr: 'الوجهات', titleEn: 'Destinations',
-  columns: [
-    { id: 'popular', titleAr: 'الأكثر طلباً', titleEn: 'Most popular', items: [
-      { id: 'jed', href: 'destinations/jeddah/',   labelAr: 'جدة',       labelEn: 'Jeddah' },
-      { id: 'mkk', href: 'destinations/makkah/',   labelAr: 'مكة المكرمة', labelEn: 'Makkah' },
-      { id: 'dxb', href: 'destinations/dubai/',    labelAr: 'دبي',        labelEn: 'Dubai' },
-      { id: 'cai', href: 'destinations/cairo/',    labelAr: 'القاهرة',    labelEn: 'Cairo' },
-    ]},
-    { id: 'regional', titleAr: 'إقليمية', titleEn: 'Regional', items: [
-      { id: 'ist', href: 'destinations/istanbul/', labelAr: 'إسطنبول',   labelEn: 'Istanbul' },
-      { id: 'amm', href: 'destinations/amman/',    labelAr: 'عمّان',      labelEn: 'Amman' },
-      { id: 'nbo', href: 'destinations/nairobi/',  labelAr: 'نيروبي',     labelEn: 'Nairobi' },
-      { id: 'add', href: 'destinations/addis/',    labelAr: 'أديس أبابا', labelEn: 'Addis Ababa' },
-    ]},
-    { id: 'international', titleAr: 'دولية', titleEn: 'International', items: [
-      { id: 'lon', href: 'destinations/london/',   labelAr: 'لندن',      labelEn: 'London' },
-      { id: 'kul', href: 'destinations/kuala-lumpur/', labelAr: 'كوالالمبور', labelEn: 'Kuala Lumpur' },
-      { id: 'del', href: 'destinations/delhi/',    labelAr: 'دلهي',      labelEn: 'Delhi' },
-    ]},
-  ],
+  columns: regionsWithDestinations().map((r) => ({
+    id: r.id, titleAr: r.labelAr, titleEn: r.labelEn,
+    items: destinationsIn(r.id).map((d) => ({ id: d.id, href: `destinations/${d.slug}/`, labelAr: d.nameAr, labelEn: d.nameEn })),
+  })),
   footer: { linkAr: 'كل الوجهات', linkEn: 'All destinations', href: 'destinations/' },
 };
 

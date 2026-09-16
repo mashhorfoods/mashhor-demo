@@ -93,37 +93,11 @@ export const HOME_PRIORITIES = [
 ];
 
 /* --------------------------------------------------------------------------
-   DESTINATIONS — §08. Routes match the header's destinations menu. The
-   descriptor says what people travel there FOR (the services we sell) —
-   never "most popular", never a count.
-   `image.src: null` renders the neutral placeholder at the card's ratio.
+   DESTINATIONS — §08. The homepage grid reads the one registry
+   (data/destinations.js, Stage 10.7): records flagged `home`.
    ----------------------------------------------------------------------- */
-export const HOME_DESTINATIONS = [
-  { id: 'jed', href: 'destinations/jeddah/',
-    nameAr: 'جدة',        nameEn: 'Jeddah',
-    descAr: 'بوابة الحرمين',            descEn: 'Gateway to the Holy Cities',
-    image: { src: null, altAr: 'جدة', altEn: 'Jeddah' } },
-  { id: 'mkk', href: 'destinations/makkah/',
-    nameAr: 'مكة المكرمة', nameEn: 'Makkah',
-    descAr: 'عمرة وزيارة',              descEn: 'Umrah and visits',
-    image: { src: null, altAr: 'مكة المكرمة', altEn: 'Makkah' } },
-  { id: 'dxb', href: 'destinations/dubai/',
-    nameAr: 'دبي',        nameEn: 'Dubai',
-    descAr: 'عمل وتسوق وعائلة',         descEn: 'Business, shopping and family',
-    image: { src: null, altAr: 'دبي', altEn: 'Dubai' } },
-  { id: 'cai', href: 'destinations/cairo/',
-    nameAr: 'القاهرة',    nameEn: 'Cairo',
-    descAr: 'علاج ودراسة وزيارة',       descEn: 'Treatment, study and visits',
-    image: { src: null, altAr: 'القاهرة', altEn: 'Cairo' } },
-  { id: 'ist', href: 'destinations/istanbul/',
-    nameAr: 'إسطنبول',    nameEn: 'Istanbul',
-    descAr: 'سياحة عائلية',             descEn: 'Family tourism',
-    image: { src: null, altAr: 'إسطنبول', altEn: 'Istanbul' } },
-  { id: 'nbo', href: 'destinations/nairobi/',
-    nameAr: 'نيروبي',     nameEn: 'Nairobi',
-    descAr: 'أعمال وطبيعة',             descEn: 'Business and nature',
-    image: { src: null, altAr: 'نيروبي', altEn: 'Nairobi' } },
-];
+import { homeDestinations } from './destinations.js';
+export const HOME_DESTINATIONS = homeDestinations().map((d) => ({ ...d, href: `destinations/${d.slug}/` }));
 
 /* --------------------------------------------------------------------------
    OFFERS & PACKAGES — §09. Neutral records until the business publishes
