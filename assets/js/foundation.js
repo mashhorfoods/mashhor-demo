@@ -30,7 +30,7 @@ import { ready } from './core/dom.js';
 import { initLocale, setLocale, applyTranslations, onLocaleChange } from './core/i18n.js';
 import {
   setSpritePath, ensureSprite, initAccordions, initTabs, initModals,
-  initOtp, initPopovers, initUploads, initLanguageSwitch,
+  initOtp, initPopovers, initUploads,
 } from './components/ui.js';
 
 /**
@@ -54,7 +54,6 @@ export function boot({ sprite = 'assets/icons/sprite.svg', locale = true, onLoca
     if (locale) {
       initLocale();
       applyTranslations();
-      initLanguageSwitch(setLocale);
       onLocaleChange(() => {
         applyTranslations();
         onLocale?.();

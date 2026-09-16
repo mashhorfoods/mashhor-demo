@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>نمبرون للسفر و السياحة — أساس الموقع</title>
-<meta name="description" content="أساس التصميم والواجهة لموقع نمبرون للسفر و السياحة — المرحلة 10.1. نقطة الدخول لنظام التصميم والمكونات.">
+<title data-i18n="page.index.title">نمبرون للسفر و السياحة — أساس الموقع</title>
+<meta name="description" data-i18n-content="page.index.description" content="أساس التصميم والواجهة لموقع نمبرون للسفر و السياحة — المرحلة 10.1. نقطة الدخول لنظام التصميم والمكونات.">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#FE0002">
 <meta name="robots" content="noindex">
@@ -35,7 +35,7 @@
 </head>
 
 <body>
-<a class="c-skip-link" href="#main">تخطَّ إلى المحتوى</a>
+<a class="c-skip-link" href="#main" data-i18n="a11y.skip">تخطَّ إلى المحتوى</a>
 
 <div class="l-page">
   <!-- The global header is a COMPONENT, mounted by the script below — one
@@ -52,15 +52,15 @@
          ============================================================ -->
     <section class="l-section">
       <div class="l-container">
-        <p class="t-overline">Stage 10.1</p>
-        <h1 class="t-display u-mark">أساس الموقع</h1>
-        <p class="t-body-lg t-muted l-prose" style="margin-block-start:var(--space-16)">
+        <p class="t-overline" lang="en">Stage 10.1</p>
+        <h1 class="t-display u-mark" data-i18n="page.index.h1">أساس الموقع</h1>
+        <p class="t-body-lg t-muted l-prose" style="margin-block-start:var(--space-16)" data-i18n="page.index.intro">
           هذه نقطة دخول النظام وليست الصفحة الرئيسية. كل ما يُبنى في المراحل القادمة
           يرث من هذا الأساس: الألوان، الخطوط، المسافات، الشبكة، والمكونات.
         </p>
         <div class="l-cluster l-cluster--16" style="margin-block-start:var(--space-32)">
-          <a class="c-btn c-btn--primary c-btn--lg" href="styleguide.html">افتح دليل النظام</a>
-          <a class="c-btn c-btn--secondary c-btn--lg" href="docs/FOUNDATION.md">وثيقة الأساس</a>
+          <a class="c-btn c-btn--primary c-btn--lg" href="styleguide.html" data-i18n="page.index.openGuide">افتح دليل النظام</a>
+          <a class="c-btn c-btn--secondary c-btn--lg" href="docs/FOUNDATION.md" data-i18n="page.index.doc">وثيقة الأساس</a>
         </div>
       </div>
     </section>
@@ -68,8 +68,8 @@
     <section class="l-section l-section--tight l-section--subtle" id="search">
       <div class="l-container">
         <div class="l-section-head">
-          <h2 class="t-h2">ابحث واختر</h2>
-          <p class="t-body t-muted">معمارية بحث واحدة لكل الخدمات.</p>
+          <h2 class="t-h2" data-i18n="page.index.searchTitle">ابحث واختر</h2>
+          <p class="t-body t-muted" data-i18n="page.index.searchText">معمارية بحث واحدة لكل الخدمات.</p>
         </div>
         <div id="search-mount"></div>
       </div>
@@ -78,8 +78,8 @@
     <section class="l-section">
       <div class="l-container">
         <div class="l-section-head">
-          <h2 class="t-h2">خدماتنا</h2>
-          <p class="t-body t-muted">مولّدة من بيانات الخدمات، لا من قوالب مكرّرة.</p>
+          <h2 class="t-h2" data-i18n="page.index.servicesTitle">خدماتنا</h2>
+          <p class="t-body t-muted" data-i18n="page.index.servicesText">مولّدة من بيانات الخدمات، لا من قوالب مكرّرة.</p>
         </div>
         <div id="services-mount"></div>
       </div>
@@ -100,7 +100,7 @@
   <!-- The global footer is a component, mounted by the script below. 10.3 -->
 
   <!-- Mobile bottom navigation — §22 -->
-  <nav class="c-bottom-nav" aria-label="التنقل السريع"><div id="bottom-nav" style="display:contents"></div></nav>
+  <nav class="c-bottom-nav" aria-label="التنقل السريع" data-i18n-label="nav.quick"><div id="bottom-nav" style="display:contents"></div></nav>
 </div>
 
 <script type="module">

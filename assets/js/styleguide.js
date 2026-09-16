@@ -57,10 +57,10 @@ function renderSwatches() {
 
     return el('div', { class: 'sg-swatch' }, [
       el('div', { class: 'sg-swatch__chip', style: `background:${value}` }),
-      el('span', { class: 'sg-swatch__name' }, label),
+      el('span', { class: 'sg-swatch__name', lang: 'en' }, label),
       el('span', { class: 'sg-swatch__hex' }, value.toUpperCase()),
       ratio === null ? null : el('span', {
-        class: 'sg-swatch__ratio',
+        class: 'sg-swatch__ratio', lang: 'en',
         style: `color:var(${passes ? '--color-success-fg' : '--color-text-secondary'})`,
         title: 'Contrast against white',
       }, `${ratio.toFixed(2)}:1 ${passes ? 'AA' : '·'}`),

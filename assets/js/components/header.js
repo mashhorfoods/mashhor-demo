@@ -163,6 +163,10 @@ export function languageButton({ compact = true } = {}) {
   return el('button', {
     type: 'button',
     class: compact ? 'c-gh__action' : 'c-gh__m-link',
+    // The control names the language it switches TO, in that language — so a
+    // reader who cannot read the current one can still find it. lang= declares
+    // that, so screen readers pronounce it right and audits don't flag it.
+    lang: isAr ? 'en' : 'ar',
     'aria-label': isAr ? 'Switch to English' : 'التبديل إلى العربية',
     onclick: () => setLocale(isAr ? 'en' : 'ar'),
   }, compact

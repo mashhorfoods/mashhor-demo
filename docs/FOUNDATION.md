@@ -215,6 +215,30 @@ handles this in three places, and new code must keep doing it:
 Times use a 24-hour clock with Western digits, always. A departure time is the
 one number a traveller cannot afford to misread.
 
+### Language completeness — a standing rule
+
+**Every page must be fully translated in both directions.** Switching the
+locale must leave nothing behind: no Arabic sentence on the English page, no
+English sentence on the Arabic page — in text, in `aria-label`, `placeholder`,
+`alt` and `title`, in the `<title>` and in the meta description.
+
+How a page meets it:
+
+- every developer-owned string in the markup carries `data-i18n="key"` (or
+  `data-i18n-label` / `-placeholder` / `-title` / `-alt` / `-value` /
+  `-content` for attributes) with the key in **both** tables of
+  `core/i18n.js`; the Arabic in the HTML is only the pre-hydration fallback;
+- every data record carries both `fieldAr` and `fieldEn`;
+- a deliberate exception is declared, never implied: a specimen that is meant
+  to stay in one language carries `lang="en"` (or `lang="ar"`); a code, token,
+  hex value or data cell carries `translate="no"`. Anything without one of
+  those is a bug.
+
+`tools/i18n-audit.mjs` enforces it. It loads each page, switches locale, and
+lists every string still in the wrong script; it exits non-zero if any remain.
+Run it for every page a stage adds or touches — a stage is not done until it
+reports `TOTAL untranslated strings: 0`.
+
 ---
 
 ## 6. Grid, spacing, shape (§07–§10)
@@ -464,7 +488,9 @@ component in this layer. Permission is asked, never assumed.
 
 **Do:** consume tokens · extend an existing component before making a new one ·
 use logical properties · keep meaning out of colour · give every dynamic region
-all five states · keep booking logic out of presentation components.
+all five states · keep booking logic out of presentation components · ship
+every page fully translated in both locales and prove it with
+`tools/i18n-audit.mjs` (§5).
 
 **Do not:** invent a logo or colours · hard-code a hex, a px or a duration in a
 component · write a direction-specific rule when a logical property exists ·

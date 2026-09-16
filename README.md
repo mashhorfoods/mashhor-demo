@@ -19,7 +19,14 @@ No build step. Any static server works, but it must be **`http://`, not
 `file://`** — the icon sprite is fetched at runtime.
 
 ```bash
-python3 -m http.server 8000     # then open http://localhost:8000/numberone/
+python3 -m http.server 8000     # then open http://localhost:8000/
+```
+
+Before a page ships, it must be fully translated in both locales
+(`docs/FOUNDATION.md` §5). Prove it with the audit (needs Playwright):
+
+```bash
+BASE=http://localhost:8000/ node tools/i18n-audit.mjs   # must end with TOTAL untranslated strings: 0
 ```
 
 ## Use it in a page

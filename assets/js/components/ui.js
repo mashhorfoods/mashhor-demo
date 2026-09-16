@@ -420,18 +420,3 @@ export function initUploads(root = document) {
     });
   });
 }
-
-/* ---------------------------------------------------------------------------
-   LANGUAGE SWITCH — wires any [data-lang-switch] button to the locale store.
-   ------------------------------------------------------------------------ */
-export function initLanguageSwitch(onSwitch) {
-  qsa('[data-lang-switch]').forEach((button) => {
-    button.addEventListener('click', () => {
-      const next = document.documentElement.lang.startsWith('ar') ? 'en' : 'ar';
-      onSwitch(next);
-    });
-  });
-  onLocaleChange(() => {
-    qsa('[data-lang-switch] [data-lang-label]').forEach((node) => { node.textContent = t('lang.switch'); });
-  });
-}
