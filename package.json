@@ -1,0 +1,16 @@
+{
+  "name": "numberone-travel-site",
+  "private": true,
+  "description": "نمبرون للسفر و السياحة — Number One Travel & Tourism. Static site: no build step; the tooling below is for verification and content only.",
+  "type": "module",
+  "scripts": {
+    "test": "node tests/run.mjs",
+    "audit:a11y": "node tests/run.mjs --audits",
+    "routes": "node tools/build-routes.mjs",
+    "images": "node tools/fetch-images.mjs",
+    "serve": "python3 -m http.server 8916"
+  },
+  "devDependencies": {
+    "playwright": "^1.49.0"
+  }
+}
