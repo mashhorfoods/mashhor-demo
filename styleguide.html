@@ -6,9 +6,9 @@
 <title>دليل النظام — نمبرون للسفر و السياحة</title>
 <meta name="description" content="دليل نظام التصميم لموقع نمبرون للسفر و السياحة — المرحلة 10.1: الألوان، الخطوط، المسافات، الشبكة، والمكونات.">
 <meta name="color-scheme" content="light">
-<meta name="theme-color" content="#C8102E">
+<meta name="theme-color" content="#FE0002">
 <meta name="robots" content="noindex">
-<link rel="icon" href="assets/brand/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/brand/favicon-32.png" sizes="32x32" type="image/png">
 
 <!-- The two faces the first screen needs, fetched before the CSS asks. §30 -->
 <link rel="preload" href="assets/fonts/ibm-plex-sans-arabic-arabic-400.woff2" as="font" type="font/woff2" crossorigin>
@@ -74,12 +74,9 @@
 <header class="sg-nav">
   <div class="l-container">
     <div class="sg-nav__inner">
-      <span class="c-logo">
-        <img class="c-logo__img c-logo--sm" src="assets/brand/mark.svg" alt="" width="40" height="40" style="block-size:32px">
-        <span style="display:flex;flex-direction:column;line-height:1.1">
-          <strong style="font-size:var(--text-body-sm)" data-i18n="brand.name">نمبرون</strong>
-          <span class="t-caption" style="font-size:11px" data-i18n="brand.tagline">للسفر و السياحة</span>
-        </span>
+      <span class="c-logo c-logo--sm">
+        <img class="c-logo__img c-logo__img--light" src="assets/brand/logo-primary.png"
+             alt="نمبرون للسفر و السياحة" width="640" height="444">
       </span>
 
       <nav class="sg-toc" aria-label="أقسام الدليل">
@@ -131,22 +128,28 @@
     </div>
 
     <div class="sg-demo">
-      <p class="sg-demo__label">.c-logo — one component, every surface</p>
+      <p class="sg-demo__label">.c-logo — the official lockup, on light and on dark</p>
       <div class="l-cluster l-cluster--24">
-        <span class="c-logo">
-          <img class="c-logo__img" src="assets/brand/mark.svg" alt="" width="40" height="40">
-          <span style="display:flex;flex-direction:column;line-height:1.15">
-            <strong data-i18n="brand.name">نمبرون</strong>
-            <span class="t-caption" data-i18n="brand.tagline">للسفر و السياحة</span>
-          </span>
-        </span>
         <span class="c-logo c-logo--lg">
-          <img class="c-logo__img" src="assets/brand/mark.svg" alt="نمبرون" width="56" height="56">
+          <img class="c-logo__img c-logo__img--light" src="assets/brand/logo-lockup.png"
+               alt="نمبرون للسفر و السياحة — Number One Travel &amp; Tourism" width="640" height="498">
+        </span>
+        <span class="c-logo">
+          <img class="c-logo__img c-logo__img--light" src="assets/brand/logo-lockup.png" alt="" width="640" height="498">
+        </span>
+        <span class="c-logo c-logo--sm">
+          <img class="c-logo__img c-logo__img--light" src="assets/brand/logo-lockup.png" alt="" width="640" height="498">
+        </span>
+      </div>
+      <div class="l-section--inverse" style="margin-block-start:var(--space-24);padding:var(--space-24);border-radius:var(--radius-lg)">
+        <span class="c-logo c-logo--lg">
+          <img class="c-logo__img c-logo__img--light" src="assets/brand/logo-lockup.png" alt="" width="640" height="498">
+          <img class="c-logo__img c-logo__img--inverse" src="assets/brand/logo-lockup-inverse.png" alt="" width="640" height="498">
         </span>
       </div>
       <p class="sg-note" style="margin-block-start:var(--space-16)">
-        الشعار أصل مورَّد وليس تصميماً جديداً. الملف الحالي عنصر نائب موثّق في
-        <code>assets/brand/README.md</code> — استبدله بالملف المعتمد ولن يتغير أي شيء آخر.
+        الشعار أصل مورَّد. المكوّن يتحكم في الحجم والمساحة الفارغة فقط — لا يعيد تلوينه أو قصّه.
+        النسخة المعكوسة للخلفيات الداكنة مشتقّة، ويفضّل استبدالها بنسخة رسمية عند توفرها.
       </p>
     </div>
 
@@ -170,6 +173,7 @@
       <h2 class="t-h2 u-mark">الألوان — Colour</h2>
       <p class="sg-note" style="margin-block-start:var(--space-8)">
         النسبة المعروضة هي تباين اللون مع الأبيض. الحد الأدنى للنص العادي 4.5:1 والنص الكبير 3:1.
+        الأحمر الأساسي #FE0002 مأخوذ من الشعار الرسمي، ويُستخدم كتعبئة؛ أما النص الأحمر فيستخدم #D60000.
       </p>
     </div>
     <div class="sg-demo"><p class="sg-demo__label">Brand + neutrals + semantic — contrast measured against white</p>

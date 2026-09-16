@@ -11,37 +11,53 @@
      RAW      --_name    private. The literal values. Never used by a component.
      SEMANTIC --name     public. What the value MEANS. Components use only these.
 
-   Swapping the brand red is therefore a one-line edit in the BRAND SLOT below,
+   Swapping the brand red is therefore a one-line edit in the brand block below,
    and every button, link, focus ring, active tab and price accent follows.
    ========================================================================= */
 
 @layer tokens {
   :root {
     /* ======================================================================
-       BRAND SLOT — §04
+       BRAND — §04.  Sampled from the official logo.
        ----------------------------------------------------------------------
-       PENDING SIGN-OFF. These are the production placeholders. The brief says
-       the exact HEX must come from the approved identity sheet, and that sheet
-       is not in this repository. Replace the five values in this block with the
-       approved values and the entire system re-colours. Change nothing else.
+       The artwork gives two values:
+         numeral / rules  #FE0002      wordmark ink  #01010B
 
-       --_red-600 is the brand red itself. The rest of the ramp is derived from
-       it and should be re-derived if it moves. See docs/FOUNDATION.md §Colour.
+       #FE0002 measures 4.03:1 against white. Contrast is SYMMETRIC, so that is
+       the ratio both for red text on white AND for a white label on a red fill.
+       Both fail WCAG AA for normal text (4.5:1); both pass the 3:1 bar for
+       large text and for UI component boundaries.
+
+       So the interface red is one step down:
+
+         --_red-600  #FE0002  THE IDENTITY RED. The logo artwork carries it.
+                              Safe in the UI only where nothing sits on it at
+                              body size — rules, bars, borders, the route line.
+         --_red-700  #E00000  THE INTERFACE RED — 5.04:1. Every fill that holds
+                              white text, and every instance of red as text.
+                              --color-primary points here.
+
+       The two are a 4% luminance apart and read as the same red side by side;
+       the difference is only that one is legible under a white label and the
+       other is not.
+
+       TO OVERRIDE: if the brand owner requires the exact #FE0002 on buttons,
+       change --color-primary to var(--_red-600) below. That is a deliberate
+       AA failure on every primary action, so make it a recorded decision.
        ==================================================================== */
-    --_red-50:  #FDF2F4;
-    --_red-100: #FBE0E4;
-    --_red-200: #F5BCC4;
-    --_red-300: #EC8A98;
-    --_red-400: #DE4A61;
-    --_red-500: #D4193A;
-    --_red-600: #C8102E; /* ◀ BRAND RED — primary. 5.89:1 on white. */
-    --_red-700: #A50D26;
-    --_red-800: #820A1E;
-    --_red-900: #5E0715;
-    /* ==================== END BRAND SLOT ================================= */
+    --_red-50:  #FFF1F1;
+    --_red-100: #FFDCDC;
+    --_red-200: #FFB8B8;
+    --_red-300: #FF8585;
+    --_red-400: #FF4D4D;
+    --_red-500: #FF2020;
+    --_red-600: #FE0002; /* ◀ IDENTITY RED — the artwork's own value */
+    --_red-700: #E00000; /* ◀ INTERFACE RED — 5.04:1 with white, passes AA */
+    --_red-800: #B00000;
+    --_red-900: #7A0000;
 
     /* ---- RAW neutrals --------------------------------------------------- */
-    --_black:     #0B0D0F;
+    --_black:     #01010B; /* the wordmark ink, sampled from the logo */
     --_charcoal:  #1F2429;
     --_white:     #FFFFFF;
 
@@ -70,9 +86,11 @@
     /* ======================================================================
        PUBLIC COLOUR CONTRACT — the exact token names required by §04.
        ==================================================================== */
-    --color-primary:        var(--_red-600);
-    --color-primary-dark:   var(--_red-700);
-    --color-primary-light:  var(--_red-400);
+    --color-primary:        var(--_red-700); /* see the brand block above */
+    --color-primary-dark:   var(--_red-800);
+    --color-primary-light:  var(--_red-500);
+    /* The identity red, for marks and rules that carry no text on them. */
+    --color-brand-red:      var(--_red-600);
 
     --color-black:     var(--_black);
     --color-charcoal:  var(--_charcoal);

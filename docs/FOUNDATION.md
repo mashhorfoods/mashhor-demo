@@ -18,7 +18,7 @@ numberone/
 │                           every state, in both RTL and LTR
 ├── docs/FOUNDATION.md      This document
 └── assets/
-    ├── brand/              mark.svg · favicon.svg · README.md (the logo slot)
+    ├── brand/              the official lockup (4 variants), icons, OG card
     ├── fonts/              IBM Plex Sans Arabic (12) + Inter (4), self-hosted
     ├── icons/sprite.svg    61 icons, one family
     ├── css/
@@ -80,23 +80,36 @@ necessary. The system must get *more* consistent as the project grows.
 Two tiers. Raw values are private (`--_red-600`); components only ever consume
 semantic names (`--color-primary`, `--color-text-secondary`).
 
-### ⚠ The brand slot
+### The brand colours — signed off
 
-`01-tokens.css` opens with a block marked **BRAND SLOT**. The five values in it
-are **production placeholders pending sign-off** — the brief requires exact
-HEX from the approved identity sheet, and that sheet was not in this repository.
-`#C8102E` was chosen as a credible premium brand red that clears AA on white.
+Sampled directly from the official logo: **red `#FE0002`**, **ink `#01010B`**.
+Both are live in `01-tokens.css`.
 
-**To install the approved palette:** change the values in that block, and the
-matching value in `assets/brand/mark.svg`. Nothing else. Every button, link,
-focus state, active tab, badge and price accent follows automatically.
+**The identity red is not usable as the interface red.** `#FE0002` measures
+4.03:1 against white. Contrast is symmetric, so that is the figure *both* for
+red text on white *and* for a white label on a red fill — both fail WCAG AA for
+normal text (4.5:1). Both clear the 3:1 bar for large text and UI boundaries.
+
+| | Token | Use |
+| --- | --- | --- |
+| `#FE0002` | `--color-brand-red` | The identity red. The artwork carries it. In the UI only where nothing sits on it at body size — rules, bars, borders. |
+| `#E00000` | `--color-primary`, `--color-text-brand`, `--color-text-link` | The interface red. 5.04:1. Every fill holding white text, and red as text. |
+
+They are 4% of luminance apart and read as the same red side by side. The only
+difference is that one is legible under a white label.
+
+To use the exact `#FE0002` on buttons anyway, point `--color-primary` at
+`var(--_red-600)`. That is a deliberate AA failure on every primary action, so
+record it as a decision rather than a default.
 
 ### Measured contrast (against white)
 
 | Token | Value | Ratio | Use |
 | --- | --- | --- | --- |
-| `--color-primary` | `#C8102E` | 5.89:1 | CTA background, brand accents |
+| `--color-brand-red` | `#FE0002` | 4.03:1 | Identity red — no body text on or in it |
+| `--color-primary` | `#E00000` | 5.04:1 | Interface red — fills with white labels |
 | `--color-charcoal` | `#1F2429` | 15.6:1 | Body text |
+| `--color-black` | `#01010B` | 20.4:1 | Inverse surfaces — the wordmark ink |
 | `--color-gray-600` | `#5E6874` | 5.66:1 | Secondary text, help text |
 | `--color-gray-500` | `#7F8994` | 3.55:1 | Disabled only — **not** body text |
 | `--color-success` | `#0F7A43` | 5.41:1 | Success text and icons |
@@ -382,8 +395,8 @@ component in this layer. Permission is asked, never assumed.
 | # | Criterion | Status |
 | --- | --- | --- |
 | 1 | Brand identity preserved | ✅ no new identity; numeral `1` is the mark |
-| 2 | Logo correctly implemented | ⚠️ **implemented as a documented slot** — placeholder pending the official asset (`assets/brand/README.md`) |
-| 3 | Colour tokens | ✅ full contract + applied roles; ⚠️ HEX pending sign-off |
+| 2 | Logo correctly implemented | ✅ official lockup installed — 4 variants (with/without descriptor × light/reversed), favicon, apple-touch-icon, OG card |
+| 3 | Colour tokens | ✅ full contract + applied roles, sampled from the official logo |
 | 4 | Typography tokens | ✅ 14-step scale, AR + EN + booking data |
 | 5 | Spacing system | ✅ |
 | 6 | Grid system | ✅ 4 / 8 / 12, verified in browser |
@@ -410,8 +423,12 @@ component in this layer. Permission is asked, never assumed.
 
 ### Open items — blocked on inputs that do not exist in this repository
 
-1. **The official logo file.** `mark.svg` is a documented placeholder.
-2. **The approved brand HEX values.** The BRAND SLOT is one edit away.
+1. ~~**The official logo file.**~~ Installed. Still wanted: a **vector master**
+   (SVG/EPS/AI). Everything shipped is raster derived from a JPEG, exported at
+   1099px wide which covers every screen use including 2x, but a vector original
+   should replace it. Also wanted: an **official reversed lockup**, to replace
+   the derived one used on dark surfaces.
+2. ~~**The approved brand HEX values.**~~ Sampled from the logo and live.
 3. **Photography (§17).** Real, human, warm, authentic imagery of families,
    travellers, airports and destinations — ideally Sudanese and African
    travellers where appropriate. Rather than ship stock-looking filler, every
@@ -425,8 +442,9 @@ component in this layer. Permission is asked, never assumed.
    `robots.txt` is not honoured at a project-page subpath — see the note in the
    file itself.
 5. **Legal entity details**, for Organization JSON-LD.
-6. **Raster brand exports**: `apple-touch-icon.png` (180×180) and
-   `og-image.png` (1200×630).
+6. ~~**Raster brand exports**~~ — `apple-touch-icon.png` (180×180) and
+   `og-image.png` (1200×630) are generated from the official artwork and wired
+   into the pages.
 
 ---
 

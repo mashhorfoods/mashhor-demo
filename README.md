@@ -31,13 +31,17 @@ python3 -m http.server 8000     # then open http://localhost:8000/numberone/
 </script>
 ```
 
-## Two things need sign-off
+## Brand
 
-1. **The logo** — `assets/brand/mark.svg` is a documented placeholder. Drop the
-   official export in its place; nothing else changes.
-2. **The brand HEX values** — `assets/css/01-tokens.css` opens with a block
-   marked `BRAND SLOT`. Replace those five values and the whole interface
-   re-colours.
+The official logo is installed and the brand colours are sampled from it —
+red `#FE0002`, ink `#01010B`. See [`assets/brand/README.md`](assets/brand/README.md)
+for the asset set and the rules that go with it.
 
-Both, plus the remaining open items (photography, production domain, raster
-exports), are listed in `docs/FOUNDATION.md` § 14.
+One thing to know: `#FE0002` measures 4.03:1 against white, and contrast is
+symmetric — so it fails AA for normal text both as red text *and* under a white
+button label. The interface therefore runs on `#E00000` (5.04:1) while the
+identity red stays on the artwork and on elements that carry no text. One line
+in `01-tokens.css` reverses that if the brand owner insists.
+
+Remaining open items — a vector logo master, photography, an official reversed
+lockup — are listed in `docs/FOUNDATION.md` § 14.

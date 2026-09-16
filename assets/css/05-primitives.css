@@ -126,7 +126,7 @@
     --btn-bg: var(--color-primary);
     --btn-fg: var(--color-text-on-primary);
     --btn-bg-hover: var(--color-primary-dark);
-    --btn-bg-active: var(--_red-800);
+    --btn-bg-active: var(--_red-900);
     --btn-border: var(--color-primary);
     --btn-border-hover: var(--color-primary-dark);
     box-shadow: var(--shadow-xs);
@@ -277,14 +277,48 @@
 
   /* ======================================================================
      LOGO — §02 / §29
-     The lockup is the supplied asset. This component only controls its size
-     and clear space; it never recolours or reconstructs the mark. Supervisor
-     pages use the identical component — there is no second brand. §29
+
+     The supplied artwork is a complete lockup: numeral, wordmark and the
+     "Travel & Tourism" descriptor. It therefore carries the name itself, and
+     the component no longer sets the name as live text beside it — that read
+     as the brand twice over in English.
+
+     Two lockup variants, each with a reversed twin:
+       logo-primary.png   numeral + wordmark, no descriptor. The HEADER uses
+                          this: at 56px the descriptor line would render about
+                          four pixels tall and read as a smudge.
+       logo-lockup.png    the complete lockup including "Travel & Tourism".
+                          Footer, social card, anywhere with room to breathe.
+       *-inverse.png      the same artwork for dark surfaces: the ink knocks
+                          out to white and the 3D shadow darkens, the red is
+                          untouched. Swapped automatically by the rules below.
+
+     The component only ever sets SIZE and CLEAR SPACE. It never recolours,
+     rotates, crops or reconstructs the mark. Supervisor pages use this exact
+     component — there is no second brand. §29
      ==================================================================== */
-  .c-logo { display: inline-flex; align-items: center; gap: var(--space-12); }
-  .c-logo__img { block-size: var(--logo-size, 40px); inline-size: auto; }
-  .c-logo--sm { --logo-size: 32px; }
-  .c-logo--lg { --logo-size: 56px; }
-  /* Clear space: nothing may sit closer than half the mark's height. §02 */
-  .c-logo { padding-inline: 0; margin-inline-end: var(--space-8); }
+  .c-logo { display: inline-flex; align-items: center; }
+  .c-logo__img {
+    block-size: var(--logo-size, 48px);
+    inline-size: auto;
+    /* No aspect-ratio here: the two lockup variants have different proportions
+       (1.442 without the descriptor, 1.284 with it). Each <img> carries its own
+       width/height attributes, which reserve the right box per variant and stop
+       the header reflowing on first paint. */
+    object-fit: contain;
+  }
+  .c-logo--sm { --logo-size: 38px; }
+  .c-logo--lg { --logo-size: 84px; }
+  @media (min-width: 64em) { .c-logo { --logo-size: 56px; } }
+
+  /* Clear space: nothing may sit closer than a quarter of the mark's height. */
+  .c-logo { margin-inline-end: var(--space-8); }
+
+  /* The reversed artwork is a separate file rather than a filter, because a
+     CSS filter would shift the red too. */
+  .c-logo__img--inverse { display: none; }
+  .l-section--inverse .c-logo__img--light,
+  [data-theme="dark"] .c-logo__img--light { display: none; }
+  .l-section--inverse .c-logo__img--inverse,
+  [data-theme="dark"] .c-logo__img--inverse { display: block; }
 }

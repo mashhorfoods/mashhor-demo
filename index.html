@@ -6,7 +6,7 @@
 <title>نمبرون للسفر و السياحة — أساس الموقع</title>
 <meta name="description" content="أساس التصميم والواجهة لموقع نمبرون للسفر و السياحة — المرحلة 10.1. نقطة الدخول لنظام التصميم والمكونات.">
 <meta name="color-scheme" content="light">
-<meta name="theme-color" content="#C8102E">
+<meta name="theme-color" content="#FE0002">
 <meta name="robots" content="noindex">
 
 <meta property="og:type" content="website">
@@ -17,12 +17,18 @@
 <meta property="og:locale:alternate" content="en_GB">
 <meta property="og:url" content="https://mashhorfoods.github.io/mashhor-demo/">
 <link rel="canonical" href="https://mashhorfoods.github.io/mashhor-demo/">
+<meta property="og:image" content="https://mashhorfoods.github.io/mashhor-demo/assets/brand/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Number One Travel &amp; Tourism">
+<meta name="twitter:card" content="summary_large_image">
 <!-- The site serves one document in both languages, switched client-side, so
      there is a single canonical URL and no per-language alternate to declare
      yet. When Stage 11 adds real per-language routes, add hreflang here.
-     TODO (§31): og:image (1200x630) still needs a raster export of the mark. -->
+-->
 
-<link rel="icon" href="assets/brand/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/brand/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
 <link rel="preload" href="assets/fonts/ibm-plex-sans-arabic-arabic-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/ibm-plex-sans-arabic-arabic-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/foundation.css">
@@ -40,12 +46,10 @@
   <header class="c-header">
     <div class="l-container">
       <div class="c-header__inner">
-        <a class="c-logo c-header__brand" href="./" aria-label="نمبرون للسفر و السياحة — الصفحة الرئيسية">
-          <img class="c-logo__img" src="assets/brand/mark.svg" alt="" width="40" height="40">
-          <span style="display:flex;flex-direction:column;line-height:1.15">
-            <strong data-i18n="brand.name">نمبرون</strong>
-            <span class="t-caption" data-i18n="brand.tagline">للسفر و السياحة</span>
-          </span>
+        <a class="c-logo c-header__brand" href="./">
+          <img class="c-logo__img c-logo__img--light" src="assets/brand/logo-primary.png"
+               alt="نمبرون للسفر و السياحة — Number One Travel &amp; Tourism"
+               width="640" height="444">
         </a>
 
         <nav class="c-header__nav" aria-label="التنقل الرئيسي">
@@ -134,12 +138,12 @@
     <div class="l-container">
       <div class="l-grid">
         <div class="l-span-full l-span-4@lg">
-          <span class="c-logo">
-            <img class="c-logo__img" src="assets/brand/mark.svg" alt="" width="40" height="40">
-            <span style="display:flex;flex-direction:column;line-height:1.15">
-              <strong data-i18n="brand.name">نمبرون</strong>
-              <span class="t-caption t-inverse" style="opacity:.7" data-i18n="brand.tagline">للسفر و السياحة</span>
-            </span>
+          <span class="c-logo c-logo--lg">
+            <img class="c-logo__img c-logo__img--light" src="assets/brand/logo-lockup.png"
+                 alt="نمبرون للسفر و السياحة — Number One Travel &amp; Tourism"
+                 width="640" height="498">
+            <img class="c-logo__img c-logo__img--inverse" src="assets/brand/logo-lockup-inverse.png"
+                 alt="" aria-hidden="true" width="640" height="498">
           </span>
           <p class="t-body-sm l-prose--short" style="margin-block-start:var(--space-16);opacity:.75">
             نساعدك على اختيار الخيار الأنسب لك ولعائلتك — لا على البحث وحدك.
