@@ -64,7 +64,7 @@ for (const s of services) {
         superlatives: /الأفضل|الأرخص|رقم واحد في|the best|cheapest|#1 in/i.test(document.querySelector('main').innerText),
         prices: /\d{3,}\s?(ج\.س|SDG|USD|\$)/.test(document.querySelector('main').innerText),
         imgsNoAlt: document.querySelectorAll('img:not([alt])').length,
-        mediaAlt: document.querySelector('.c-hero__media [role=img]')?.getAttribute('aria-label'),
+        mediaAlt: document.querySelector('.c-hero__media [role=img]')?.getAttribute('aria-label') || document.querySelector('.c-hero__media img')?.getAttribute('alt'),
         decorative: Array.from(document.querySelectorAll('.c-hero__route, .u-numeral-watermark, .c-journey__num, .c-support__plus')).every((n) => n.getAttribute('aria-hidden') === 'true'),
         header: !!document.querySelector('.c-gh'), footer: !!document.querySelector('.c-gf'), footerCta: !!document.querySelector('.c-gf__cta'),
         bottomNav: document.querySelectorAll('.c-bottom-nav__item').length,
