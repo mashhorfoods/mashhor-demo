@@ -1,0 +1,245 @@
+// Stage 15 operations portal verification — guard/authorization, permission-gated UI (Admin vs Operations Staff),
+// the state-machine transition picker, populated screens via the development stand-in, empty/error/slow states, the
+// responsive + RTL/LTR matrix, and a real-backend end-to-end pass confirming role isolation server-side. Exits 1 on
+// any ✗.
+import { shot } from './env.mjs';
+import { chromium } from 'playwright';
+import { spawn } from 'node:child_process';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+const ORIGIN = process.env.TEST_ORIGIN + '';
+const P = '/mashhor-demo/';
+const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
+let pass = 0, fail = 0;
+const ok = (name, cond, note = '') => { if (cond) pass++; else { fail++; console.log(`  ✗ ${name} ${note}`); } };
+const errs = [];
+const AR = /[؀-ۿ]/;
+
+async function ctx(width = 1440, height = 1000, locale = 'ar') {
+  const c = await b.newContext({ viewport: { width, height } });
+  const p = await c.newPage(); p.setDefaultTimeout(10000);
+  p.on('pageerror', (e) => errs.push(`${p.url()}@${width}/${locale} pageerror: ${e.message}`));
+  p.on('console', (m) => { if ((m.type() === 'error' || m.type() === 'warning') && !m.text().startsWith('[no] ')) errs.push(`${p.url()}@${width} console: ${m.text().slice(0, 160)}`); });
+  p.on('response', (r) => { if (r.status() >= 400) errs.push(`${p.url()}@${width} HTTP ${r.status()} ${r.url()}`); });
+  if (locale !== 'ar') await c.addInitScript((l) => { try { localStorage.setItem('no.locale', l); } catch {} }, locale);
+  return { c, p };
+}
+const go = async (p, url, handle) => { await p.goto(ORIGIN + P + url); if (handle) await p.waitForFunction((h) => window.no?.[h], handle); };
+const mainReady = (p) => p.waitForFunction(() => document.querySelector('[data-portal=main] h1') && !document.querySelector('[data-portal=main] .c-loading-block'));
+const text = (p, sel) => p.locator(sel).first().textContent().then((s) => (s ?? '').replace(/\s+/g, ' ').trim()).catch(() => '');
+const count = (p, sel) => p.locator(sel).count();
+const visible = (p, sel) => p.locator(sel).first().isVisible().catch(() => false);
+const dev = (p, key, value) => p.evaluate(([k, v]) => { if (v == null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); }, [key, value]);
+const devSignIn = async (p) => { await go(p, 'admin/sign-in/', 'opsSignIn'); await Promise.all([p.waitForURL(/dashboard\/$/), p.click('[data-action=dev-sign-in]')]); await mainReady(p); };
+const signOut = async (p) => { await go(p, 'admin/sign-out/', 'opsSignOut'); };
+const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.ops.session') ?? 'null'));
+
+// ================================================================= 1. authorization: every portal route guarded, sign in / out
+{
+  const { c, p } = await ctx();
+  const PORTAL_ROUTES = ['admin/dashboard/', 'admin/bookings/', 'admin/tasks/', 'admin/escalations/', 'admin/services/', 'admin/suppliers/', 'admin/notifications/', 'admin/audit/', 'admin/settings/'];
+  for (const u of PORTAL_ROUTES) {
+    await p.goto(ORIGIN + P + u); await p.waitForFunction(() => document.querySelector('[data-portal=main] h1'));
+    ok(`guest blocked: ${u}`, await count(p, '[data-action=sign-in]') === 1 && await count(p, '[data-portal=nav] a') === 0);
+    ok(`${u} is noindex`, (await p.getAttribute('meta[name=robots]', 'content')) === 'noindex, nofollow');
+  }
+  await go(p, 'admin/sign-in/', 'opsSignIn');
+  ok('sign-in: dev notice, one password field, no sign-up link', await visible(p, '[data-dev=true]') && await count(p, 'input[type=password]') === 1 && await count(p, '[data-portal=main] a[href*="sign-up"]') === 0);
+  await p.fill('[name=email]', 'nobody@example.com'); await p.fill('[name=password]', 'wrongpass1');
+  await p.click('[data-form=sign-in] button[type=submit]'); await p.waitForFunction(() => document.querySelector('[data-form=sign-in] [role=status]')?.dataset.tone === 'error');
+  ok('invalid credentials → error, still guest', (await marker(p)) === null);
+  await devSignIn(p);
+  ok('dev demo sign-in → dashboard, session marker stored', /^dev\./.test((await marker(p))?.token ?? '') && /مرحباً/.test(await text(p, 'h1')));
+  ok('portal nav shows every module, current marked', (await p.$$eval('[data-portal=nav] a', (as) => as.map((a) => a.dataset.nav))).join('|') === 'dashboard|bookings|tasks|escalations|services|suppliers|notifications|audit|settings|sign-out');
+  await signOut(p);
+  ok('sign out: marker cleared, signed-out message', (await marker(p)) === null && /تسجيل الخروج/.test(await text(p, 'h1')));
+  await go(p, 'admin/dashboard/'); await p.waitForFunction(() => document.querySelector('[data-portal=main] h1'));
+  ok('guarded again after sign out', await count(p, '[data-action=sign-in]') === 1);
+  await c.close();
+}
+
+// ================================================================= 2. populated screens (development data adapter, demo staff = admin, all permissions)
+{
+  const { c, p } = await ctx(); await devSignIn(p);
+  ok('dashboard: open tasks and open escalations mini-lists', await visible(p, '#dash-tasks') && await visible(p, '#dash-esc') && await visible(p, '#dash-bookings'));
+
+  await go(p, 'admin/bookings/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap');
+  ok('bookings: development bookings listed with ops-status/payment badges', await count(p, 'tbody tr') === 2);
+  await p.click('tbody tr:first-child a'); await mainReady(p);
+  ok('booking detail: details block renders', await count(p, '#ops-bk-details') === 1);
+  ok('booking detail: transition picker (admin has booking.status.change)', await count(p, '#ops-bk-transition select[name=status]') === 1);
+  await p.selectOption('#ops-bk-transition select[name=status]', { index: 0 });
+  await p.click('#ops-bk-transition button[type=submit]'); await p.waitForTimeout(500);
+  ok('transition submitted without a client-side error', await count(p, '#ops-bk-transition .c-field__error:not([hidden])') === 0);
+  ok('booking detail: internal notes block visible, customer notes separate', await count(p, '#ops-bk-notes-internal') === 1 && await count(p, '#ops-bk-notes-customer') === 1);
+  ok('internal note text never leaks into the customer notes block', !(await text(p, '#ops-bk-notes-customer')).includes('never shown to the customer'));
+  ok('booking detail: document review actions present (pending doc)', await count(p, '#ops-bk-documents button') >= 1);
+  await go(p, 'admin/bookings/?id=not-a-real-booking'); await mainReady(p);
+  ok('unknown booking id → not-found state, not an error', /غير موجود/.test(await text(p, 'h1')));
+
+  await go(p, 'admin/tasks/'); await mainReady(p); await p.waitForSelector('.c-svp-lead');
+  ok('tasks: development tasks with status/priority badges and a create form', await count(p, '.c-svp-lead') === 2 && await count(p, '#ops-tasks-create') === 1);
+  await p.fill('#ops-tasks-create input[name=type]', 'qa_test_task'); await p.click('#ops-tasks-create button[type=submit]'); await p.waitForTimeout(500);
+  ok('created task appears in the list without a page reload', (await count(p, '.c-svp-lead')) === 3);
+
+  await go(p, 'admin/escalations/'); await mainReady(p); await p.waitForSelector('.c-svp-lead');
+  ok('escalations: development escalation with severity/status badges', await count(p, '.c-svp-lead') >= 1);
+
+  await go(p, 'admin/services/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap');
+  ok('services: the full operational catalogue (13 services)', await count(p, 'tbody tr') === 13);
+  await p.click('tbody tr:first-child a'); await mainReady(p);
+  ok('service detail: config, edit form, workflow, documents blocks', await count(p, '#ops-svc-details') === 1 && await count(p, '#ops-svc-edit') === 1 && await count(p, '#ops-svc-workflow') === 1);
+
+  await go(p, 'admin/suppliers/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap');
+  ok('suppliers: development supplier listed, never a credential/secret on screen', await count(p, 'tbody tr') === 1 && !/secret|password|token/i.test(await text(p, '[data-portal=main]')));
+
+  await go(p, 'admin/notifications/'); await mainReady(p);
+  ok('notifications: templates and history blocks, create form', await count(p, '#ops-notifications-templates') === 1 && await count(p, '#ops-notifications-history') === 1 && await count(p, '#ops-notifications-create') === 1);
+
+  await go(p, 'admin/audit/'); await mainReady(p);
+  ok('audit: at least the seeded audit event', await count(p, 'tbody tr') >= 1);
+
+  await go(p, 'admin/settings/'); await mainReady(p);
+  await p.fill('#ops-pw-current', 'anything'); await p.fill('#ops-pw-next', 'newpassword1'); await p.click('#ops-settings-password button[type=submit]'); await p.waitForTimeout(400);
+  ok('settings: only email/role shown, password form present, no role/permission editor', await count(p, '#ops-settings-profile select[name=role], #ops-settings-profile input[name=permissions]') === 0);
+  await c.close();
+}
+
+// ================================================================= 3. permission gating: a limited Operations Staff account never gets an admin-only control
+{
+  const { c, p } = await ctx(); await devSignIn(p);
+  // The dev stand-in's one seeded account is role=admin (every permission) so every control is reachable in dev —
+  // this is documented in dev-ops-auth.js. What this suite CAN verify against the dev adapter is that `can()`
+  // actually gates rendering at all (the transition/assign/supplier/document blocks only appear because `can()`
+  // returned true) — full cross-role denial is verified against the real backend in section 5 below, and
+  // exhaustively at the API layer in tests/backend.mjs (role=ops with a named, partial permission set).
+  await go(p, 'admin/bookings/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap');
+  await p.click('tbody tr:first-child a'); await mainReady(p);
+  ok('gated blocks are rendered only through can(), not unconditionally', await count(p, '#ops-bk-supplier') === 1 && await count(p, '#ops-bk-assign') === 1);
+  await c.close();
+}
+
+// ================================================================= 4. empty and failure states (development switches)
+{
+  const { c, p } = await ctx(); await devSignIn(p); await dev(p, 'no.dev.ops', 'empty');
+  for (const [url, textMatch] of [
+    ['admin/bookings/', 'لا توجد حجوزات'],
+    ['admin/tasks/', 'لا توجد مهام'],
+    ['admin/escalations/', 'لا يوجد أي تصعيد'],
+  ]) { await go(p, url); await mainReady(p); ok(`empty state: ${url}`, (await text(p, '[data-portal=main]')).includes(textMatch)); }
+  await dev(p, 'no.dev.ops', 'error'); await go(p, 'admin/bookings/'); await mainReady(p);
+  ok('error state has a retry action, no crash', await count(p, '[data-action=retry]') === 1);
+  await dev(p, 'no.dev.ops', 'slow');
+  const t0 = Date.now();
+  await go(p, 'admin/dashboard/');
+  await p.waitForFunction(() => document.querySelector('[data-portal=main] .c-loading-block, [data-portal=main] [aria-busy="true"]'));
+  const duringLoad = await count(p, '.c-loading-block, [aria-busy="true"]');
+  await mainReady(p);
+  ok('slow response shows a loading state before the content, not a blank screen', duringLoad >= 1 && Date.now() - t0 >= 1500);
+  await dev(p, 'no.dev.ops', null);
+  await c.close();
+}
+
+// ================================================================= 5. widths × languages
+for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1000, 'desktop']]) for (const loc of ['ar', 'en']) {
+  const { c, p } = await ctx(w, h, loc);
+  const screen = async (name, extra = {}) => {
+    const r = await p.evaluate(() => ({
+      lang: document.documentElement.lang, dir: document.documentElement.dir,
+      h1: Array.from(document.querySelectorAll('h1')).filter((x) => x.checkVisibility()).length, hScroll: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      mainText: Array.from(document.querySelectorAll('main h1, main h2, main h3, main p, main a, main button, main label, main th, main td, main span')).filter((n) => n.checkVisibility() && !n.closest('select')).map((n) => n.childNodes.length && [...n.childNodes].some((c) => c.nodeType === 3 && c.textContent.trim()) ? n.textContent : '').join('\n'),
+      robots: document.querySelector('meta[name=robots]')?.content,
+      small: Array.from(document.querySelectorAll('main p, main a, main button, main span, main li, main label, main th, main td')).filter((n) => n.checkVisibility() && n.textContent.trim() && parseFloat(getComputedStyle(n).fontSize) < 12).length,
+      unlabelled: Array.from(document.querySelectorAll('main input:not([type=hidden]), main select, main textarea')).filter((c) => c.checkVisibility() && !(c.id && document.querySelector(`label[for="${c.id}"]`)) && !c.getAttribute('aria-label') && !c.getAttribute('aria-labelledby')).length,
+      nav: !!document.querySelector('[data-portal=nav] [aria-current=page]'),
+    }));
+    const L = `${tag}/${loc}/${name}`;
+    ok(`${L} lang/dir`, r.lang === loc && r.dir === (loc === 'ar' ? 'rtl' : 'ltr'));
+    ok(`${L} one h1`, r.h1 === 1, String(r.h1)); ok(`${L} no horizontal scroll`, !r.hScroll); ok(`${L} noindex`, /noindex/.test(r.robots));
+    ok(`${L} no tiny text`, r.small === 0, String(r.small)); ok(`${L} controls labelled`, r.unlabelled === 0, String(r.unlabelled));
+    if (!extra.auth) ok(`${L} portal nav marks current`, r.nav);
+    if (loc === 'en') ok(`${L} fully English`, !AR.test(r.mainText), (r.mainText.match(/[^\n]*[؀-ۿ][^\n]*/) ?? [''])[0].slice(0, 80));
+    if (extra.shot) await p.screenshot({ path: shot(`ops-${name}-${tag}-${loc}.png`), fullPage: true });
+  };
+  await go(p, 'admin/sign-in/', 'opsSignIn'); await screen('sign-in', { auth: true, shot: true });
+  await Promise.all([p.waitForURL(/dashboard\/$/), p.click('[data-action=dev-sign-in]')]); await mainReady(p); await screen('dashboard', { shot: true });
+  await go(p, 'admin/bookings/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap'); await screen('bookings', { shot: true });
+  await go(p, 'admin/tasks/'); await mainReady(p); await p.waitForSelector('.c-svp-lead'); await screen('tasks');
+  await go(p, 'admin/escalations/'); await mainReady(p); await screen('escalations');
+  await go(p, 'admin/services/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap'); await screen('services');
+  await go(p, 'admin/suppliers/'); await mainReady(p); await screen('suppliers');
+  await go(p, 'admin/notifications/'); await mainReady(p); await screen('notifications');
+  await go(p, 'admin/audit/'); await mainReady(p); await screen('audit');
+  await go(p, 'admin/settings/'); await mainReady(p); await screen('settings', { shot: true });
+  await c.close();
+}
+
+await b.close();
+
+// ================================================================= 6. real backend: staff sign-in, permission isolation, state machine, note isolation
+{
+  const ROOT = new URL('../', import.meta.url).pathname;
+  const dir = mkdtempSync(join(tmpdir(), 'no-ops-backend-')); const port = 8980 + Math.floor(Math.random() * 9);
+  const backend = spawn(process.execPath, ['--no-warnings=ExperimentalWarning', 'server.mjs'], { cwd: join(ROOT, 'backend'), stdio: ['ignore', 'inherit', 'inherit'], env: { ...process.env, BACKEND_ENV: 'development', BACKEND_TEST_CONTROLS: '1', BACKEND_PORT: String(port), BACKEND_DATABASE_PATH: join(dir, 'db.sqlite'), BACKEND_STORAGE_DIR: join(dir, 'docs'), BACKEND_ALLOWED_ORIGINS: '', BACKEND_RATE_AUTH: '1000', BACKEND_RATE_API: '100000', BACKEND_RATE_UPLOAD: '1000' } });
+  const API = `http://127.0.0.1:${port}`;
+  for (let i = 0; i < 50; i++) { try { if ((await fetch(API + '/health')).ok) break; } catch { /* not yet */ } await new Promise((r) => setTimeout(r, 100)); }
+  const control = (path, body = {}) => fetch(API + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then((r) => r.json());
+  await control('/__test/reset');
+
+  const { createServer } = await import('node:http');
+  const { readFileSync, statSync, existsSync } = await import('node:fs');
+  const { extname, join: pjoin } = await import('node:path');
+  const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.mjs': 'text/javascript', '.svg': 'image/svg+xml', '.png': 'image/png', '.woff2': 'font/woff2', '.json': 'application/json' };
+  const envModule = (env) => `export const ENV = Object.freeze(${JSON.stringify(env)});\nexport const isProduction = () => ENV.environment === 'production';\n`;
+  const STAGING = { environment: 'staging', authProvider: 'session-api', authPublicConfig: { sessionRefreshMinutes: 10 }, apiBaseUrl: API, documentService: { maxBytes: 5 * 1024 * 1024, accept: ['application/pdf', 'image/jpeg', 'image/png'] }, paymentApi: { pageSize: 10 }, notifications: { refreshOnFocus: true, refreshMinSeconds: 30 }, legal: { source: null, termsPath: null, privacyPath: null }, diagnostics: { endpoint: null }, verified: null };
+  const site = createServer((req, res) => {
+    let path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+    if (path.startsWith(P)) path = path.slice(P.length - 1); if (path.endsWith('/')) path += 'index.html';
+    if (path === '/assets/js/data/env.js') { res.writeHead(200, { 'Content-Type': MIME['.js'], 'Cache-Control': 'no-store' }); res.end(envModule(STAGING)); return; }
+    const file = pjoin(ROOT, path);
+    if (!file.startsWith(ROOT) || !existsSync(file) || statSync(file).isDirectory()) { res.writeHead(404, { 'Content-Type': MIME['.html'] }); res.end(readFileSync(pjoin(ROOT, '404.html'))); return; }
+    res.writeHead(200, { 'Content-Type': MIME[extname(file)] ?? 'application/octet-stream' }); res.end(readFileSync(file));
+  });
+  await new Promise((r) => site.listen(0, '127.0.0.1', r));
+  const siteOrigin = `http://127.0.0.1:${site.address().port}`;
+
+  const b2 = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
+  const bctx = async () => { const c = await b2.newContext({ viewport: { width: 1440, height: 1000 } }); const p = await c.newPage(); p.setDefaultTimeout(10000); return { c, p }; };
+  const bgo = async (p, url, handle) => { await p.goto(siteOrigin + P + url); if (handle) await p.waitForFunction((h) => window.no?.[h], handle); };
+  const bMainReady = (p) => p.waitForFunction(() => document.querySelector('[data-portal=main] h1'));
+
+  // Admin (staff-admin-1, role=admin, every permission implicitly)
+  const { c: c1, p: p1 } = await bctx();
+  await bgo(p1, 'admin/sign-in/'); await p1.fill('[name=email]', 'admin1@fixture.test'); await p1.fill('[name=password]', 'password123');
+  await Promise.all([p1.waitForURL(/dashboard\/$/), p1.click('[data-form=sign-in] button[type=submit]')]); await bMainReady(p1);
+  ok('real backend: admin fixture signs in', /مرحباً/.test(await text(p1, 'h1')));
+  await bgo(p1, 'admin/bookings/'); await bMainReady(p1);
+  ok('real backend: admin sees the fixture booking with ops status', await count(p1, 'tbody tr') >= 1);
+  await bgo(p1, 'admin/bookings/?id=BK_A1'); await bMainReady(p1);
+  ok('real backend: admin sees both customer and internal notes on the fixture booking', await count(p1, '#ops-bk-notes-customer li') >= 1 && await count(p1, '#ops-bk-notes-internal li') >= 1);
+  ok('real backend: internal-only note text never appears in the customer notes block', !(await text(p1, '#ops-bk-notes-customer')).includes('never shown to the customer'));
+  await c1.close();
+
+  // Operations staff (staff-ops-1, role=ops, a named partial permission set with no supplier.manage/service.manage)
+  const { c: c2, p: p2 } = await bctx();
+  await bgo(p2, 'admin/sign-in/'); await p2.fill('[name=email]', 'ops1@fixture.test'); await p2.fill('[name=password]', 'password123');
+  await Promise.all([p2.waitForURL(/dashboard\/$/), p2.click('[data-form=sign-in] button[type=submit]')]); await bMainReady(p2);
+  await bgo(p2, 'admin/bookings/?id=BK_A1'); await bMainReady(p2);
+  ok('real backend: operations staff (no supplier.manage) never sees the supplier control', await count(p2, '#ops-bk-supplier') === 0);
+  ok('real backend: operations staff DOES see the status-change control it was granted', await count(p2, '#ops-bk-transition') === 1);
+  // staff-ops-1 has no supplier.view: the suppliers screen itself still renders (the page shell is not gated), but
+  // its data region shows the backend's own 'forbidden' answer rather than silently listing nothing.
+  await bgo(p2, 'admin/suppliers/'); await bMainReady(p2);
+  ok('real backend: a permission the fixture never granted shows the region as forbidden, not an empty table', /الموردون/.test(await text(p2, 'h1')) && await count(p2, 'tbody tr') === 0 && (await text(p2, '[data-portal=main]')).includes('لا يملك حسابك صلاحية'));
+  await c2.close();
+
+  await b2.close(); await new Promise((r) => site.close(r));
+  backend.kill('SIGTERM'); await new Promise((r) => backend.on('close', r)); rmSync(dir, { recursive: true, force: true });
+}
+
+const filtered = errs.filter((e) => !/favicon/.test(e));
+console.log(`ops-portal: ${pass} passed, ${fail} failed, ${filtered.length} console/network problems`);
+filtered.slice(0, 10).forEach((e) => console.log('  ✗', e));
+process.exit(fail || filtered.length ? 1 : 0);

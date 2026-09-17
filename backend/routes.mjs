@@ -67,7 +67,9 @@ export const me = {
   booking(req, res, ctx, id) {
     const b = q.get('SELECT * FROM bookings WHERE id = ? AND customer_id = ?', id, ctx.customer.id); if (!b) return fail(res, 404, 'notFound');
     const trip = b.trip_id ? q.get('SELECT * FROM trips WHERE id = ? AND customer_id = ?', b.trip_id, ctx.customer.id) : null;
-    return json(res, 200, { booking: nBooking(b), trip: trip ? nTrip(trip) : null, documents: q.all('SELECT * FROM documents WHERE booking_id = ? AND customer_id = ?', b.id, ctx.customer.id).map(nDoc), payments: q.all('SELECT * FROM payments WHERE booking_id = ? AND customer_id = ? ORDER BY at DESC', b.id, ctx.customer.id).map(nPay) });
+    // Stage 15: only CUSTOMER-type notes ever reach this response — internal operations notes have no route here at all.
+    const notes = q.all("SELECT body, created_at FROM booking_notes WHERE booking_id = ? AND type = 'customer' ORDER BY created_at DESC", b.id).map((r) => ({ body: r.body, at: r.created_at }));
+    return json(res, 200, { booking: nBooking(b), trip: trip ? nTrip(trip) : null, documents: q.all('SELECT * FROM documents WHERE booking_id = ? AND customer_id = ?', b.id, ctx.customer.id).map(nDoc), payments: q.all('SELECT * FROM payments WHERE booking_id = ? AND customer_id = ? ORDER BY at DESC', b.id, ctx.customer.id).map(nPay), notes });
   },
   async claim(req, res, ctx) {
     const b = await readJson(req); const ref = str(b.reference, 40); if (!ref) throw new HttpError(422, 'invalid');

@@ -1506,3 +1506,56 @@ supervisor visibility, and cross-supervisor isolation) against the Stage
 real supervisor accounts, and the business decisions in
 `docs/SUPERVISOR-SYSTEM.md` §14 (final attribution rule, commission model
 and rates, real supervisor identities and credentials).
+
+## 15 — Operations control, service management & business integration (partially complete)
+
+Stage 15's own first-action audit found that **Stage 14 does not exist** in
+this repository — there was no admin dashboard to build on. Rather than
+assume one or skip the stage, a minimal Admin/Operations Staff portal was
+built as the necessary host for the operations control layer the brief
+actually asked for: a backend-authoritative, configurable booking lifecycle
+state machine (separate from the customer-facing booking status), a task
+and escalation system, a service operational catalogue (workflow steps and
+document requirements layered onto the existing service ids, never
+duplicating their names), document review, a supplier/provider directory
+kept separate from booking state, strictly isolated customer-facing vs.
+internal booking notes, a sanitized notification-template system with
+delivery history, and a full server-enforced permission system covering
+the Admin and Operations Staff roles. Full guide:
+`docs/STAGE-15-OPERATIONS-CONTROL.md`.
+
+```
+backend/migrations/003_operations.sql    staff/staff_sessions, ops_status/assigned_operator, booking_status_history,
+                                          operation_tasks, escalations, services, service_workflows,
+                                          service_document_requirements, documents.review_*, suppliers,
+                                          booking_suppliers, booking_notes, notification_templates, audit_events
+backend/staff.mjs · staff-routes.mjs     identity, permissions, state machine, tasks/escalations, services,
+                                          suppliers, notes, templates, audit
+assets/js/ops/                           auth.js, data.js, adapters/{dev,api,not-connected,installed}, ui/*
+assets/css/24-ops-portal.css             inline action forms, workflow steps, audit columns
+admin/{dashboard,bookings,tasks,escalations,services,suppliers,notifications,audit,settings,
+  sign-in,forgot-password,reset-password,sign-out}/index.html
+tests/backend.mjs (+Stage 15 block, 130 checks total) · tests/ops-portal.mjs (499 checks)
+```
+
+What changed on screen: nothing on the public site, and nothing in the
+existing customer or supervisor portals — a new, separate authenticated
+area at `admin/*` gives Admin and Operations Staff a dashboard, a booking
+lifecycle/assignment/supplier/document/notes workspace, task and
+escalation queues, a service configuration screen, a supplier directory,
+a notification template/history centre, an audit trail and settings —
+built from the same design system as the customer account and supervisor
+portal, verified at 390/834/1440 in Arabic and English with zero console
+errors, and permission-gated both in the UI and (independently, and
+authoritatively) on the backend.
+
+Status: **STAGE 15 — PARTIALLY COMPLETE.** Implemented and verified,
+including a real end-to-end pass against the Stage 12.2 backend confirming
+permission isolation between an Admin and an Operations Staff fixture.
+Not connected: a deployed backend (same gap as Stage 12.2/13), any real
+supplier/payment/ticketing integration, an outbound notification send
+pipeline, and the business decisions in
+`docs/STAGE-15-OPERATIONS-CONTROL.md` §14 (final lifecycle, SLA durations,
+task priority meaning, per-service document requirements, the remaining
+nine services' workflows, real staff identities). No Stage 14 admin
+dashboard was built or assumed — see §0 of that document.

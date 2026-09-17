@@ -17,6 +17,8 @@ import { liveSession, customerById, sweepSessions, endAllSessions, publicCustome
 import { auth, me, file, legal, diagnostics } from './routes.mjs';
 import { liveSupervisorSession, supervisorById, sweepSupervisorSessions, endAllSupervisorSessions } from './supervisor.mjs';
 import { supervisorAuth, supervisorMe, admin } from './supervisor-routes.mjs';
+import { liveStaffSession, staffById, sweepStaffSessions, endAllStaffSessions, publicStaff } from './staff.mjs';
+import { staffAuth, operations, services as opsServices } from './staff-routes.mjs';
 import { info, warn, error } from './logger.mjs';
 import { fixtureLegal } from './fixtures.mjs';
 
@@ -44,9 +46,9 @@ export function createApp() {
       if (path === '/__test/fault') { test.faults.push({ status: b.status, times: b.times ?? 1, match: b.path ?? null, retryAfter: b.retryAfter ?? null }); return json(res, 200, { ok: true }); }
       if (path === '/__test/legal') { test.legal = b.supplied ? { version: b.version ?? 'fixture-1' } : null; return json(res, 200, { ok: true }); }
       if (path === '/__test/url-ttl') { test.urlTtlMs = b.ttlMs; return json(res, 200, { ok: true }); }
-      if (path === '/__test/revoke') { if (b.customerId) endAllSessions(b.customerId); else if (b.supervisorId) endAllSupervisorSessions(b.supervisorId); else { q.run('DELETE FROM sessions'); q.run('DELETE FROM supervisor_sessions'); } return json(res, 200, { ok: true }); }
+      if (path === '/__test/revoke') { if (b.customerId) endAllSessions(b.customerId); else if (b.supervisorId) endAllSupervisorSessions(b.supervisorId); else if (b.staffId) endAllStaffSessions(b.staffId); else { q.run('DELETE FROM sessions'); q.run('DELETE FROM supervisor_sessions'); q.run('DELETE FROM staff_sessions'); } return json(res, 200, { ok: true }); }
       if (path === '/__test/shorten-session') { q.run('UPDATE sessions SET expires_at = ?', Date.now() + (b.ms ?? 60000)); return json(res, 200, { ok: true }); }
-      if (path === '/__test/state') return json(res, 200, { events: q.all('SELECT * FROM diagnostics ORDER BY id').map((r) => ({ ...JSON.parse(r.payload_json), event: r.event })), requests: test.requests.slice(-200), customers: q.all('SELECT * FROM customers').map(publicCustomer), sessions: q.get('SELECT COUNT(*) AS n FROM sessions').n, resets: q.all('SELECT r.token, c.email FROM reset_tokens r JOIN customers c ON c.id = r.customer_id'), outbox: q.all('SELECT channel, template, status FROM outbox') });
+      if (path === '/__test/state') return json(res, 200, { events: q.all('SELECT * FROM diagnostics ORDER BY id').map((r) => ({ ...JSON.parse(r.payload_json), event: r.event })), requests: test.requests.slice(-200), customers: q.all('SELECT * FROM customers').map(publicCustomer), sessions: q.get('SELECT COUNT(*) AS n FROM sessions').n, resets: q.all('SELECT r.token, c.email FROM reset_tokens r JOIN customers c ON c.id = r.customer_id'), outbox: q.all('SELECT channel, template, status FROM outbox'), staff: q.all('SELECT * FROM staff').map(publicStaff), auditCount: q.get('SELECT COUNT(*) AS n FROM audit_events').n });
       return fail(res, 404, 'notFound');
     }
     if (test) {
@@ -65,7 +67,7 @@ export function createApp() {
     if (path === '/diagnostics' && req.method === 'POST') return diagnostics(req, res);
 
     // ---- rate limits by class ----
-    const cls = path.startsWith('/auth/') || path.startsWith('/supervisor/auth/') ? 'auth' : path === '/me/documents' && req.method === 'POST' ? 'upload' : 'api';
+    const cls = path.startsWith('/auth/') || path.startsWith('/supervisor/auth/') || path.startsWith('/staff/auth/') ? 'auth' : path === '/me/documents' && req.method === 'POST' ? 'upload' : 'api';
     const wait = rateLimit(`${cls}:${ip}`, config.rateLimits[cls]);
     if (wait) { warn('ratelimit.hit', { cls }); return fail(res, 429, 'rateLimited', { 'Retry-After': String(wait) }); }
 
@@ -73,9 +75,10 @@ export function createApp() {
     // a route handler for one role never even receives the other's session object, so there is no field to confuse. ----
     const ck = cookies(req); const session = liveSession(ck.no_session); const customer = session ? customerById(session.customer_id) : null;
     const supervisorSession = liveSupervisorSession(ck.no_supervisor_session); const supervisor = supervisorSession ? supervisorById(supervisorSession.supervisor_id) : null;
-    const ctx = { sid: ck.no_session ?? null, session: customer ? session : null, customer, supervisorSid: ck.no_supervisor_session ?? null, supervisorSession: supervisor ? supervisorSession : null, supervisor, ip, urlTtlMs: test?.urlTtlMs ?? undefined };
+    const staffSession = liveStaffSession(ck.no_ops_session); const staffMember = staffSession ? staffById(staffSession.staff_id) : null;
+    const ctx = { sid: ck.no_session ?? null, session: customer ? session : null, customer, supervisorSid: ck.no_supervisor_session ?? null, supervisorSession: supervisor ? supervisorSession : null, supervisor, staffSid: ck.no_ops_session ?? null, staffSession: staffMember ? staffSession : null, staff: staffMember, ip, urlTtlMs: test?.urlTtlMs ?? undefined };
     if (['POST', 'PATCH', 'DELETE'].includes(req.method)) {
-      const live = ctx.session ?? ctx.supervisorSession;
+      const live = ctx.session ?? ctx.supervisorSession ?? ctx.staffSession;
       if (live) { const h = req.headers['x-csrf-token']; if (!h || h !== live.csrf) { warn('csrf.rejected', { path }); return fail(res, 403, 'forbidden'); } }
     }
 
@@ -113,6 +116,56 @@ export function createApp() {
       if (path === '/supervisor/me/commissions' && req.method === 'GET') return supervisorMe.commissions(req, res, ctx, url);
       if (path === '/supervisor/me/notifications' && req.method === 'GET') return supervisorMe.notifications(req, res, ctx);
       if (path === '/supervisor/me/notifications/read' && req.method === 'POST') return supervisorMe.notificationsRead(req, res, ctx);
+      return fail(res, 404, 'notFound');
+    }
+
+    // ---- /staff/auth: a THIRD session, never accepted by /me or /supervisor/me and vice versa ----
+    if (path === '/staff/auth/sign-in' && req.method === 'POST') return staffAuth.signIn(req, res, ctx);
+    if (path === '/staff/auth/session' && req.method === 'GET') return staffAuth.session(req, res, ctx);
+    if (path === '/staff/auth/refresh' && req.method === 'POST') return staffAuth.refresh(req, res, ctx);
+    if (path === '/staff/auth/sign-out' && req.method === 'POST') return staffAuth.signOut(req, res, ctx);
+    if (path === '/staff/auth/password/reset-request' && req.method === 'POST') return staffAuth.resetRequest(req, res, ctx);
+    if (path === '/staff/auth/password/reset' && req.method === 'POST') return staffAuth.reset(req, res, ctx);
+    if (path === '/staff/auth/password/change' && req.method === 'POST') return staffAuth.change(req, res, ctx);
+
+    // ---- Stage 15: /services, /operations, /bookings/:id/*, /documents/:id/review, /documents/requirements,
+    // /notifications/templates|history — every one requires a live STAFF session; the specific permission each
+    // action needs is checked inside staff-routes.mjs (backend/staff.mjs requirePermission), never here alone. ----
+    if (path === '/services' && req.method === 'GET') { if (!ctx.staffSession) return fail(res, 401, 'unauthenticated'); return opsServices.list(req, res, ctx); }
+    if ((m = path.match(/^\/services\/([^/]+)$/)) && req.method === 'GET') { if (!ctx.staffSession) return fail(res, 401, 'unauthenticated'); return opsServices.one(req, res, ctx, decodeURIComponent(m[1])); }
+    if ((m = path.match(/^\/services\/([^/]+)$/)) && req.method === 'PATCH') { if (!ctx.staffSession) return fail(res, 401, 'unauthenticated'); return opsServices.update(req, res, ctx, decodeURIComponent(m[1])); }
+    if ((m = path.match(/^\/services\/([^/]+)\/workflow$/)) && req.method === 'GET') { if (!ctx.staffSession) return fail(res, 401, 'unauthenticated'); return opsServices.workflow(req, res, ctx, decodeURIComponent(m[1])); }
+    if ((m = path.match(/^\/services\/([^/]+)\/workflow$/)) && req.method === 'POST') { if (!ctx.staffSession) return fail(res, 401, 'unauthenticated'); return opsServices.workflowUpdate(req, res, ctx, decodeURIComponent(m[1])); }
+    if ((m = path.match(/^\/services\/([^/]+)\/document-requirements$/)) && req.method === 'GET') { if (!ctx.staffSession) return fail(res, 401, 'unauthenticated'); return opsServices.documentRequirements(req, res, ctx, decodeURIComponent(m[1])); }
+    if ((m = path.match(/^\/services\/([^/]+)\/document-requirements$/)) && req.method === 'POST') { if (!ctx.staffSession) return fail(res, 401, 'unauthenticated'); return opsServices.documentRequirementAdd(req, res, ctx, decodeURIComponent(m[1])); }
+
+    if (path.startsWith('/operations/') || path === '/bookings' || path.startsWith('/bookings/') || path.startsWith('/documents/') || path.startsWith('/notifications/')) {
+      if (!ctx.staffSession) return fail(res, 401, 'unauthenticated');
+      if (path === '/operations/meta' && req.method === 'GET') return operations.meta(req, res, ctx);
+      if (path === '/operations/tasks' && req.method === 'GET') return operations.tasks(req, res, ctx, url);
+      if (path === '/operations/tasks' && req.method === 'POST') return operations.taskCreate(req, res, ctx);
+      if ((m = path.match(/^\/operations\/tasks\/([^/]+)$/)) && req.method === 'GET') return operations.task(req, res, ctx, decodeURIComponent(m[1]));
+      if ((m = path.match(/^\/operations\/tasks\/([^/]+)\/assign$/)) && req.method === 'POST') return operations.taskAssign(req, res, ctx, decodeURIComponent(m[1]));
+      if ((m = path.match(/^\/operations\/tasks\/([^/]+)\/status$/)) && req.method === 'POST') return operations.taskStatus(req, res, ctx, decodeURIComponent(m[1]));
+      if (path === '/operations/escalations' && req.method === 'GET') return operations.escalations(req, res, ctx, url);
+      if (path === '/operations/escalations' && req.method === 'POST') return operations.escalationCreate(req, res, ctx);
+      if ((m = path.match(/^\/operations\/escalations\/([^/]+)\/status$/)) && req.method === 'POST') return operations.escalationStatus(req, res, ctx, decodeURIComponent(m[1]));
+      if (path === '/operations/suppliers' && req.method === 'GET') return operations.suppliers(req, res, ctx);
+      if (path === '/operations/suppliers' && req.method === 'POST') return operations.supplierCreate(req, res, ctx);
+      if (path === '/operations/audit' && req.method === 'GET') return operations.audit(req, res, ctx, url);
+      if (path === '/documents/requirements' && req.method === 'GET') return operations.documentRequirements(req, res, ctx);
+      if ((m = path.match(/^\/documents\/([^/]+)\/review$/)) && req.method === 'POST') return operations.documentReviewSubmit(req, res, ctx, decodeURIComponent(m[1]));
+      if (path === '/notifications/templates' && req.method === 'GET') return operations.templates(req, res, ctx);
+      if (path === '/notifications/templates' && req.method === 'POST') return operations.templateUpsert(req, res, ctx);
+      if (path === '/notifications/history' && req.method === 'GET') return operations.notificationHistory(req, res, ctx, url);
+      if (path === '/bookings' && req.method === 'GET') return operations.bookings(req, res, ctx, url);
+      if ((m = path.match(/^\/bookings\/([^/]+)$/)) && req.method === 'GET') return operations.booking(req, res, ctx, decodeURIComponent(m[1]));
+      if ((m = path.match(/^\/bookings\/([^/]+)\/status$/)) && req.method === 'POST') return operations.bookingStatus(req, res, ctx, decodeURIComponent(m[1]));
+      if ((m = path.match(/^\/bookings\/([^/]+)\/assign$/)) && req.method === 'POST') return operations.bookingAssign(req, res, ctx, decodeURIComponent(m[1]));
+      if ((m = path.match(/^\/bookings\/([^/]+)\/notes$/)) && req.method === 'GET') return operations.bookingNotes(req, res, ctx, decodeURIComponent(m[1]), url);
+      if ((m = path.match(/^\/bookings\/([^/]+)\/notes$/)) && req.method === 'POST') return operations.bookingNoteAdd(req, res, ctx, decodeURIComponent(m[1]));
+      if ((m = path.match(/^\/bookings\/([^/]+)\/supplier$/)) && req.method === 'POST') return operations.bookingSupplierAssign(req, res, ctx, decodeURIComponent(m[1]));
+      if ((m = path.match(/^\/operations\/booking-suppliers\/([^/]+)$/)) && req.method === 'POST') return operations.bookingSupplierUpdate(req, res, ctx, decodeURIComponent(m[1]));
       return fail(res, 404, 'notFound');
     }
 
@@ -159,6 +212,7 @@ if (process.argv[1]?.endsWith('server.mjs')) {
   server.listen(config.port, config.host, () => info('server.listening', { host: config.host, port: config.port, environment: config.environment, testControls: config.testControls }));
   setInterval(() => sweepSessions(), 10 * 60 * 1000).unref();
   setInterval(() => sweepSupervisorSessions(), 10 * 60 * 1000).unref();
+  setInterval(() => sweepStaffSessions(), 10 * 60 * 1000).unref();
   const stop = () => { info('server.stopping'); server.close(() => process.exit(0)); setTimeout(() => process.exit(0), 3000).unref(); };
   process.on('SIGTERM', stop); process.on('SIGINT', stop);
 }

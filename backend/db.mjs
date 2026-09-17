@@ -31,6 +31,28 @@ export function migrate() {
     : d.prepare('INSERT OR IGNORE INTO supervisors (id, active) VALUES (?, 1)');
   const t = new Date().toISOString();
   for (const s of config.supervisors) hasProfileCols ? ins.run(s, t, t) : ins.run(s);
+
+  // Stage 15 — the service operational catalogue, keyed by the SAME ids as the frontend registry
+  // (assets/js/data/services.js SERVICE_REGISTRY) so the two never drift; this table adds only the
+  // operational config (active, booking-enabled, workflow type) — names and descriptions stay in that file.
+  if (d.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='services'").get()) {
+    const svcIns = d.prepare('INSERT OR IGNORE INTO services (id, active, booking_enabled, created_at, updated_at) VALUES (?, 1, ?, ?, ?)');
+    const SERVICE_IDS = ['flights', 'hotels', 'visa', 'packages', 'umrah', 'transport', 'groups', 'medical', 'study', 'work', 'issue', 'change', 'cancel'];
+    for (const id of SERVICE_IDS) svcIns.run(id, 1, t, t);
+    // The example workflows the Stage 15 brief itself gives (§09) — seeded as the working default for the
+    // services it names; every other service starts with no configured workflow (honestly unconfigured). Guarded
+    // once PER SERVICE (not per step) so a fresh seed writes every step, while a later migrate() run never re-seeds
+    // a service an admin has since reconfigured.
+    const wfIns = d.prepare('INSERT INTO service_workflows (service_id, step_order, step_key, label_ar, label_en) VALUES (?,?,?,?,?)');
+    const wfHas = d.prepare('SELECT 1 FROM service_workflows WHERE service_id = ?');
+    const WORKFLOWS = {
+      flights: [['search', 'البحث', 'Search'], ['select', 'الاختيار', 'Selection'], ['passengers', 'بيانات المسافرين', 'Passenger data'], ['payment', 'الدفع', 'Payment'], ['ticketing', 'إصدار التذكرة', 'Ticketing'], ['confirmation', 'التأكيد', 'Confirmation']],
+      visa: [['application', 'الطلب', 'Application'], ['documents', 'المستندات', 'Documents'], ['review', 'المراجعة', 'Review'], ['submission', 'التقديم', 'Submission'], ['processing', 'المعالجة', 'Processing'], ['decision', 'القرار', 'Decision']],
+      hotels: [['search', 'البحث', 'Search'], ['select', 'الاختيار', 'Selection'], ['payment', 'الدفع', 'Payment'], ['supplier_confirmation', 'تأكيد المزود', 'Supplier confirmation'], ['customer_confirmation', 'تأكيد العميل', 'Customer confirmation']],
+      medical: [['request', 'الطلب', 'Request'], ['information', 'المعلومات', 'Information'], ['review', 'المراجعة', 'Review'], ['provider_coordination', 'التنسيق مع المزود', 'Provider coordination'], ['confirmation', 'التأكيد', 'Confirmation']],
+    };
+    for (const [serviceId, steps] of Object.entries(WORKFLOWS)) { if (wfHas.get(serviceId)) continue; steps.forEach(([key, ar, en], i) => wfIns.run(serviceId, i, key, ar, en)); }
+  }
   return n;
 }
 export const q = {

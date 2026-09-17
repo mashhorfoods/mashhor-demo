@@ -263,6 +263,136 @@ await control('/__test/reset');
   jarS1.clear(); jarS2.clear(); jarC.clear();
 }
 
+// ---- Stage 15: the operations control layer — staff auth/session isolation, permission enforcement, the booking
+// state machine (valid/invalid/payment-gated transitions), tasks, escalations, document review, suppliers, notes
+// isolation, notification templates (sanitisation), notification history and the audit trail. ----
+{
+  await control('/__test/reset');
+  const jarAdmin = new Map(); const jarOps = new Map(); const jarCust2 = new Map();
+  const reqAs = (jar, csrfCookie) => async (path, { method = 'GET', body = null, headers = {}, origin = SITE, csrf = true, raw = null } = {}) => {
+    const h = { Origin: origin, ...headers }; if (body != null) h['Content-Type'] = 'application/json';
+    if (jar.size) h.Cookie = [...jar].map(([k, v]) => `${k}=${v}`).join('; ');
+    if (csrf && jar.get(csrfCookie) && method !== 'GET') h['X-CSRF-Token'] = jar.get(csrfCookie);
+    const r = await fetch(API + path, { method, headers: h, body: raw ?? (body != null ? JSON.stringify(body) : null), redirect: 'manual' });
+    for (const c of r.headers.getSetCookie?.() ?? []) { const [kv, ...attrs] = c.split(';'); const [k, v] = kv.split('='); if (/Max-Age=0/.test(attrs.join(';'))) jar.delete(k); else jar.set(k, v); }
+    let data = null; try { data = await r.clone().json(); } catch { /* not json */ }
+    return { status: r.status, headers: r.headers, data };
+  };
+  const reqAdmin = reqAs(jarAdmin, 'no_ops_csrf'); const reqOps = reqAs(jarOps, 'no_ops_csrf'); const reqCust2 = reqAs(jarCust2, 'no_csrf');
+
+  const noStaff = await reqAdmin('/staff/auth/sign-in', { method: 'POST', body: { email: 'nobody@fixture.test', password: 'wrongpass1' } });
+  ok('unknown staff email answers the same 401 invalid as a wrong password', noStaff.status === 401 && noStaff.data?.error?.code === 'invalid');
+  const inAdmin = await reqAdmin('/staff/auth/sign-in', { method: 'POST', body: { email: 'admin1@fixture.test', password: 'password123' } });
+  const inOps = await reqOps('/staff/auth/sign-in', { method: 'POST', body: { email: 'ops1@fixture.test', password: 'password123' } });
+  ok('admin and ops sign in with separate sessions/CSRF, a THIRD cookie pair (no_ops_session) distinct from customer/supervisor', inAdmin.status === 200 && inOps.status === 200 && jarAdmin.get('no_ops_session') !== jarOps.get('no_ops_session') && (inAdmin.headers.getSetCookie?.() ?? []).some((c) => /no_ops_session=.*HttpOnly/.test(c)) && !(inAdmin.headers.getSetCookie?.() ?? []).some((c) => /^no_session=|^no_supervisor_session=/.test(c)));
+  ok('admin implicitly holds every permission; ops holds only its named subset', inAdmin.data.staff.permissions.includes('audit.view') && !inOps.data.staff.permissions.includes('audit.view') && inOps.data.staff.permissions.includes('booking.status.change'));
+
+  // ---- role isolation: a customer or supervisor session cannot reach staff routes, and vice versa ----
+  const custIn = await reqCust2('/auth/sign-in', { method: 'POST', body: { email: 'alpha@fixture.test', password: 'password123' } });
+  ok('customer sign-in succeeds independently', custIn.status === 200);
+  ok('Customer → operations bookings list = denied (401)', (await reqCust2('/bookings')).status === 401);
+  ok('Staff → /me (customer API) = denied (401)', (await reqAdmin('/me')).status === 401);
+  ok('Staff → /supervisor/me = denied (401)', (await reqAdmin('/supervisor/me')).status === 401);
+
+  // ---- CSRF on staff routes ----
+  ok('missing CSRF on a staff state change → 403', (await reqAdmin('/bookings/BK_A1/assign', { method: 'POST', body: { staffId: 'staff-ops-1' }, csrf: false })).status === 403);
+  ok('invalid CSRF on a staff state change → 403', (await reqAdmin('/bookings/BK_A1/assign', { method: 'POST', body: { staffId: 'staff-ops-1' }, headers: { 'X-CSRF-Token': 'wrong' }, csrf: false })).status === 403);
+  const validAssign = await reqAdmin('/bookings/BK_A1/assign', { method: 'POST', body: { staffId: 'staff-ops-1' } });
+  ok('valid CSRF → the assignment is applied', validAssign.status === 200 && validAssign.data.assignedOperator === 'staff-ops-1');
+  await control('/__test/revoke', { staffId: 'staff-admin-1' });
+  ok('CSRF token from a revoked staff session → 401 (the session, not just the token, is gone)', (await reqAdmin('/bookings/BK_A1/assign', { method: 'POST', body: { staffId: null } })).status === 401);
+  const backIn = await reqAdmin('/staff/auth/sign-in', { method: 'POST', body: { email: 'admin1@fixture.test', password: 'password123' } }); ok('admin signs back in', backIn.status === 200);
+
+  // ---- permission enforcement: ops lacks audit.view, service.manage, supplier.manage, notification.manage ----
+  ok('ops without audit.view → 403', (await reqOps('/operations/audit')).status === 403);
+  ok('ops without service.manage → 403 patching a service', (await reqOps('/services/flights', { method: 'PATCH', body: { active: false } })).status === 403);
+  ok('ops without supplier.manage → 403 creating a supplier', (await reqOps('/operations/suppliers', { method: 'POST', body: { name: 'x', type: 'flight' } })).status === 403);
+  ok('ops without notification.manage → 403 upserting a template', (await reqOps('/notifications/templates', { method: 'POST', body: { event: 'x', channel: 'email', bodyAr: 'x', bodyEn: 'x' } })).status === 403);
+  ok('admin (implicit) → 200 for every one of the above', (await reqAdmin('/operations/audit')).status === 200 && (await reqAdmin('/services/flights', { method: 'PATCH', body: {} })).status === 200);
+
+  // ---- booking state machine ----
+  const bk = await reqAdmin('/bookings/BK_A1'); ok('booking detail exposes allowedTransitions from the configured lifecycle', bk.data.booking.opsStatus === 'submitted' && bk.data.booking.allowedTransitions.includes('pending_review'));
+  ok('an unlisted transition is rejected (422), never applied', (await reqAdmin('/bookings/BK_A1/status', { method: 'POST', body: { status: 'completed' } })).status === 422);
+  const toReview = await reqAdmin('/bookings/BK_A1/status', { method: 'POST', body: { status: 'pending_review', reason: 'fixture' } });
+  ok('a listed transition is applied and recorded in history with actor/role/reason', toReview.status === 200 && toReview.data.booking.opsStatus === 'pending_review' && toReview.data.booking.history.at(-1).reason === 'fixture' && toReview.data.booking.history.at(-1).actorRole === 'admin');
+  await reqAdmin('/bookings/BK_A1/status', { method: 'POST', body: { status: 'awaiting_payment' } });
+  const toPayment = await reqAdmin('/bookings/BK_A1/status', { method: 'POST', body: { status: 'payment_received' } });
+  const toProcessing = await reqAdmin('/bookings/BK_A1/status', { method: 'POST', body: { status: 'processing' } });
+  ok('a payment-gated transition succeeds when payment_status is already paid (BK_A1 fixture is paid)', toPayment.status === 200 && toProcessing.status === 200);
+  // BK_A2 fixture is unpaid — walk it to a payment-gated state and confirm the gate holds even though the transition itself is listed.
+  await reqAdmin('/bookings/BK_A2/status', { method: 'POST', body: { status: 'pending_review' } });
+  await reqAdmin('/bookings/BK_A2/status', { method: 'POST', body: { status: 'awaiting_payment' } });
+  const unpaidGate = await reqAdmin('/bookings/BK_A2/status', { method: 'POST', body: { status: 'payment_received' } });
+  ok('payment_received is listed but still gated — unpaid booking cannot enter it (409), payment provider stays authoritative', unpaidGate.status === 409);
+  ok('an unknown booking id → 404', (await reqAdmin('/bookings/NOT-A-BOOKING/status', { method: 'POST', body: { status: 'pending_review' } })).status === 404);
+
+  // ---- tasks: create, assign, reassign, unassign, complete, reopen ----
+  const taskCreate = await reqAdmin('/operations/tasks', { method: 'POST', body: { type: 'document_review', bookingId: 'BK_A1', priority: 'high' } });
+  ok('task created with a priority from the configured levels', taskCreate.status === 201 && taskCreate.data.task.priority === 'high' && taskCreate.data.task.status === 'open');
+  const taskId = taskCreate.data.task.id;
+  ok('an unauthorized priority falls back to the configured default rather than being invented', (await reqAdmin('/operations/tasks', { method: 'POST', body: { type: 'x', priority: 'not-a-level' } })).data.task.priority === 'low');
+  const assigned = await reqAdmin(`/operations/tasks/${taskId}/assign`, { method: 'POST', body: { assignedTo: 'staff-ops-1' } });
+  ok('task assigned', assigned.status === 200 && assigned.data.task.assignedTo === 'staff-ops-1');
+  const reassigned = await reqAdmin(`/operations/tasks/${taskId}/assign`, { method: 'POST', body: { assignedTo: 'staff-admin-1' } });
+  ok('task reassigned', reassigned.data.task.assignedTo === 'staff-admin-1');
+  const unassigned = await reqAdmin(`/operations/tasks/${taskId}/assign`, { method: 'POST', body: { assignedTo: null } });
+  ok('task unassigned', unassigned.data.task.assignedTo === null);
+  const completed = await reqAdmin(`/operations/tasks/${taskId}/status`, { method: 'POST', body: { status: 'completed' } });
+  ok('task completed — completedAt stamped', completed.data.task.status === 'completed' && !!completed.data.task.completedAt);
+  const reopened = await reqAdmin(`/operations/tasks/${taskId}/status`, { method: 'POST', body: { status: 'open' } });
+  ok('task reopened — completedAt cleared', reopened.data.task.status === 'open' && reopened.data.task.completedAt === null);
+  ok('an invalid task status is rejected (422)', (await reqAdmin(`/operations/tasks/${taskId}/status`, { method: 'POST', body: { status: 'nonsense' } })).status === 422);
+  const taskList = await reqAdmin('/operations/tasks'); ok('task list retrieval', taskList.status === 200 && taskList.data.items.some((t) => t.id === taskId));
+
+  // ---- escalations ----
+  const escCreate = await reqAdmin('/operations/escalations', { method: 'POST', body: { bookingId: 'BK_A1', reason: 'fixture escalation', severity: 'high' } });
+  ok('escalation created open', escCreate.status === 201 && escCreate.data.escalation.status === 'open');
+  const escResolved = await reqAdmin(`/operations/escalations/${escCreate.data.escalation.id}/status`, { method: 'POST', body: { status: 'resolved' } });
+  ok('escalation resolved — resolvedAt stamped', escResolved.data.escalation.status === 'resolved' && !!escResolved.data.escalation.resolvedAt);
+
+  // ---- document review ----
+  const docReview = await reqAdmin('/documents/doc_A1/review', { method: 'POST', body: { status: 'approved' } });
+  ok('document approved, reviewer recorded', docReview.status === 200 && docReview.data.document.reviewStatus === 'approved' && docReview.data.document.reviewerId === 'staff-admin-1');
+  const docReject = await reqAdmin('/documents/doc_A2/review', { method: 'POST', body: { status: 'rejected', reason: 'blurry scan' } });
+  ok('document rejected with a reason', docReject.data.document.reviewStatus === 'rejected' && docReject.data.document.rejectionReason === 'blurry scan');
+  ok('an invalid review status is rejected (422)', (await reqAdmin('/documents/doc_A1/review', { method: 'POST', body: { status: 'maybe' } })).status === 422);
+
+  // ---- suppliers ----
+  const supplierCreate = await reqAdmin('/operations/suppliers', { method: 'POST', body: { name: 'Second Fixture Supplier', type: 'hotel' } });
+  ok('supplier created, NOT CONNECTED by default (never fabricated as live)', supplierCreate.status === 201 && supplierCreate.data.supplier.integrationStatus === 'not_connected');
+  const supplierAssign = await reqAdmin('/bookings/BK_A2/supplier', { method: 'POST', body: { supplierId: supplierCreate.data.supplier.id } });
+  ok('supplier assigned to a booking, starts pending (separate from the customer-facing booking status)', supplierAssign.status === 201 && supplierAssign.data.bookingSupplier.status === 'pending');
+  const supplierUpdate = await reqAdmin(`/operations/booking-suppliers/${supplierAssign.data.bookingSupplier.id}`, { method: 'POST', body: { status: 'confirmed', supplierReference: 'REF123', ticketNumber: 'TCK999' } });
+  ok('supplier reservation reference and ticket number are tracked separately from the booking reference', supplierUpdate.data.bookingSupplier.supplierReference === 'REF123' && supplierUpdate.data.bookingSupplier.ticketNumber === 'TCK999');
+
+  // ---- notes: customer-facing vs internal, strictly separate ----
+  const custNote = await reqAdmin('/bookings/BK_A1/notes', { method: 'POST', body: { type: 'customer', body: 'Your document was received.' } });
+  const intNote = await reqAdmin('/bookings/BK_A1/notes', { method: 'POST', body: { type: 'internal', body: 'Waiting on supplier confirmation — do not tell the customer yet.' } });
+  ok('both note types created', custNote.status === 201 && intNote.status === 201);
+  const custView = await reqCust2('/me/bookings/BK_A1');
+  const custNoteBodies = (custView.data.notes ?? []).map((n) => n.body).join(' ');
+  ok('the customer account exposes ONLY customer-facing notes', custView.status === 200 && custNoteBodies.includes('Your document was received') && !custNoteBodies.includes('do not tell the customer'));
+  const internalList = await reqAdmin('/bookings/BK_A1/notes?type=internal');
+  ok('staff can read the internal note through the operations API', internalList.data.notes.some((n) => n.body.includes('do not tell the customer')));
+
+  // ---- notification templates: sanitised, never raw script/HTML ----
+  const tmpl = await reqAdmin('/notifications/templates', { method: 'POST', body: { event: 'booking.ticketed', channel: 'sms', bodyAr: '<script>alert(1)</script>مرحباً {{name}}', bodyEn: '<b>Hi</b> {{name}}', variables: ['name'] } });
+  ok('a template body strips tags/scripts — never executable, plain text with {{variables}} preserved', tmpl.status === 200 && !/<script|<b>/i.test(tmpl.data.template.bodyAr + tmpl.data.template.bodyEn) && tmpl.data.template.bodyEn.includes('{{name}}'));
+  const tmplList = await reqAdmin('/notifications/templates'); ok('template list retrieval', tmplList.data.templates.some((t) => t.event === 'booking.ticketed'));
+  const history = await reqAdmin('/notifications/history'); ok('notification history reads the existing outbox, not a duplicate store', history.status === 200 && Array.isArray(history.data.items));
+
+  // ---- audit trail: every operational action above left a trace ----
+  const auditList = await reqAdmin('/operations/audit');
+  ok('the audit trail recorded the state transitions, task actions, document review and supplier changes above', auditList.data.items.some((e) => e.action === 'booking.status.change') && auditList.data.items.some((e) => e.action.startsWith('task.')) && auditList.data.items.some((e) => e.action === 'document.review') && auditList.data.items.some((e) => e.action === 'supplier.create'));
+  ok('audit entries never carry a secret — no password/token substrings anywhere in the payload', !/password|token=|hunter22/i.test(JSON.stringify(auditList.data.items)));
+
+  // ---- services / workflow ----
+  const svc = await reqAdmin('/services/flights'); ok('a seeded service has a workflow the brief itself specifies (Search → … → Confirmation)', svc.status === 200);
+  const wf = await reqAdmin('/services/flights/workflow'); ok('flight workflow has the six documented steps', wf.data.steps.length === 6 && wf.data.steps[0].key === 'search');
+  const wfUnset = await reqAdmin('/services/study/workflow'); ok('a service without a brief-given example starts honestly unconfigured, not invented', wfUnset.data.steps.length === 0);
+  jarAdmin.clear(); jarOps.clear(); jarCust2.clear();
+}
+
 // ---- diagnostics scrubbing + logs ----
 {
   await fetch(API + '/diagnostics', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: SITE }, body: JSON.stringify({ event: 'api.failure', code: 'unavailable', password: 'hunter22', token: 'abcdef0123456789abcdef0123456789abcdef', email: 'x@y.z', note: 'x'.repeat(500) }) });

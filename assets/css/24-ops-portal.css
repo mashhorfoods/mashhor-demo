@@ -1,0 +1,37 @@
+/* ============================================================================
+   24 — OPERATIONS PORTAL  Stage 15
+
+   The Admin / Operations Staff workspace: everything structural (metrics,
+   the responsive table, filters, lead-style rows, mini-lists) is the
+   supervisor portal's own 23-supervisor-portal.css, reused as-is. This file
+   adds only what Stage 15 introduces that Stage 13 did not: an inline
+   action form (the lifecycle transition picker, the assignment/supplier
+   forms), an ordered workflow-step list, and the audit trail's monospace
+   actor/entity columns. Built from tokens; logical properties only.
+   ========================================================================= */
+
+@layer components {
+  /* ---- Inline action forms (transition, assign, supplier, notes, create) ---- */
+  .c-svp-lead form,
+  #ops-bk-transition form, #ops-bk-assign form, #ops-bk-supplier form,
+  #ops-bk-notes-customer form, #ops-bk-notes-internal form {
+    display: flex; flex-wrap: wrap; gap: var(--space-8); align-items: flex-start;
+  }
+  #ops-bk-transition form select,
+  #ops-bk-transition form input,
+  #ops-bk-assign form input,
+  #ops-bk-supplier form select,
+  #ops-bk-supplier form input { min-inline-size: 10rem; flex: 1 1 12rem; }
+  #ops-bk-notes-customer textarea, #ops-bk-notes-internal textarea { inline-size: 100%; }
+
+  /* ---- Workflow steps: an ordered, numbered list, not a plain <ul> ---- */
+  #ops-svc-workflow ol { counter-reset: none; }
+  #ops-svc-workflow li { font-variant-numeric: tabular-nums; }
+
+  /* ---- Audit trail: actor/entity read as data, not prose ---- */
+  #ops-bk-history li span:first-child,
+  .c-svp-table td[data-label] bdi { font-family: var(--font-data); }
+
+  /* ---- A staff member's own dev-adapter badge, set on <html> by shell.js ---- */
+  [data-ops-portal="staff"] .c-acct-nav__link[aria-current="page"] { font-weight: var(--weight-bold); }
+}

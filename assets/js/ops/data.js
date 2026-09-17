@@ -1,0 +1,92 @@
+/* ============================================================================
+   OPS / DATA — Stage 15. The facade the operations screens call. Every
+   method takes the current staff session token from auth.js and hands it to
+   the registered adapter; the adapter (backed by the staff's session cookie)
+   answers only what the backend's permission check allows — a screen calling
+   a method its staff member lacks permission for gets a 'forbidden' ApiError
+   from the backend, not a client-side guess.
+
+   Shapes:
+     staff        { id, email, name, role: 'admin'|'ops', permissions[], active, createdAt, updatedAt }
+     bookingRow   { id, customerId, service, status, paymentStatus, amount, currency, supervisorId,
+                    opsStatus, assignedOperator, createdAt, missingDocuments }
+     bookingDetail bookingRow + { allowedTransitions[], history[], documents[], supplier, notesCustomer[],
+                    notesInternal[], tasks[] }
+     task         { id, type, bookingId, customerId, supervisorId, assignedTo, status, priority, dueAt,
+                    notes, createdBy, createdAt, updatedAt, completedAt }
+     escalation   { id, bookingId, taskId, reason, severity, assignedTeam, assignedOperator, status,
+                    createdBy, createdAt, updatedAt, resolvedAt }
+     service      { id, active, bookingEnabled, workflowType, supplierType, operationalRequirements, createdAt, updatedAt }
+     workflowStep { order, key, labelAr, labelEn }
+     documentRequirement { id, docType, required, customerUpload }
+     supplier     { id, name, type, services[], status, integrationStatus, supportedOperations[], contact, createdAt, updatedAt }
+     bookingSupplier { id, bookingId, supplierId, supplierReference, ticketNumber, status, notes, createdAt, updatedAt }
+     note         { id, bookingId, type: 'customer'|'internal', body, authorId, authorRole, createdAt }
+     template     { id, event, channel, subjectAr, subjectEn, bodyAr, bodyEn, variables[], active, version, createdAt, updatedAt }
+     auditEvent   { id, actorId, actorRole, action, entityType, entityId, metadata, at }
+     A paged list answers { items, page, pageSize, total, nextPage }.
+   ========================================================================= */
+import { currentOpsToken, opsSessionLost, OpsAuthError } from './auth.js';
+import { track } from '../core/diagnostics.js';
+
+let adapter = null;
+export function registerOpsDataAdapter(a) { adapter = a; return a; }
+export const opsDataAdapter = () => adapter;
+
+const call = async (method, ...args) => {
+  const token = currentOpsToken();
+  if (!token) throw new OpsAuthError('unauthenticated');
+  if (!adapter) throw new Error('no ops data adapter registered');
+  try { return await adapter[method](token, ...args); }
+  catch (error) {
+    if (error?.code === 'unauthenticated') { opsSessionLost('rejected'); throw new OpsAuthError('unauthenticated'); }
+    if (!(error instanceof OpsAuthError)) track(`ops.${method}.failure`, { code: error?.code ?? 'error' });
+    throw error;
+  }
+};
+
+export const TASK_STATUSES = ['open', 'in_progress', 'waiting', 'completed', 'cancelled'];
+export const ESCALATION_STATUSES = ['open', 'investigating', 'waiting', 'resolved', 'closed'];
+export const BOOKING_SUPPLIER_STATUSES = ['not_required', 'pending', 'submitted', 'processing', 'confirmed', 'rejected', 'failed', 'cancelled'];
+
+export const opsData = {
+  meta: () => call('meta'),                                                  // { permissions, priorityLevels, lifecycle }
+  bookings: (params = { page: 1 }) => call('bookings', params),              // { status, service, assignedTo, page, pageSize }
+  booking: (id) => call('booking', id),
+  transitionBooking: (id, status, reason) => call('transitionBooking', id, status, reason),
+  assignBooking: (id, staffId) => call('assignBooking', id, staffId),
+  bookingNotes: (id, type) => call('bookingNotes', id, type),
+  addBookingNote: (id, type, body) => call('addBookingNote', id, type, body),
+  assignSupplierToBooking: (id, supplierId) => call('assignSupplierToBooking', id, supplierId),
+  updateBookingSupplier: (id, patch) => call('updateBookingSupplier', id, patch),
+
+  tasks: (params = { page: 1 }) => call('tasks', params),                    // { status, assignedTo, bookingId, page, pageSize }
+  task: (id) => call('task', id),
+  createTask: (task) => call('createTask', task),
+  assignTask: (id, staffId) => call('assignTask', id, staffId),
+  updateTaskStatus: (id, status) => call('updateTaskStatus', id, status),
+
+  escalations: (params = { page: 1 }) => call('escalations', params),
+  createEscalation: (escalation) => call('createEscalation', escalation),
+  updateEscalationStatus: (id, status) => call('updateEscalationStatus', id, status),
+
+  reviewDocument: (id, status, reason) => call('reviewDocument', id, status, reason),
+  documentRequirements: () => call('documentRequirements'),
+
+  services: () => call('services'),
+  service: (id) => call('service', id),
+  updateService: (id, patch) => call('updateService', id, patch),
+  serviceWorkflow: (id) => call('serviceWorkflow', id),
+  setServiceWorkflow: (id, steps) => call('setServiceWorkflow', id, steps),
+  serviceDocumentRequirements: (id) => call('serviceDocumentRequirements', id),
+  addServiceDocumentRequirement: (id, req) => call('addServiceDocumentRequirement', id, req),
+
+  suppliers: () => call('suppliers'),
+  createSupplier: (supplier) => call('createSupplier', supplier),
+
+  templates: () => call('templates'),
+  upsertTemplate: (template) => call('upsertTemplate', template),
+  notificationHistory: (params = { page: 1 }) => call('notificationHistory', params),
+
+  audit: (params = { page: 1 }) => call('audit', params),
+};

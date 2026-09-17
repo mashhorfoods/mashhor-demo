@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ar" dir="rtl" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- <base> points every relative URL at the site root. In-page moves go through script, never href="#…". Stage 15 -->
+<base href="../../">
+<title data-i18n="page.ops.audit">عمليات نمبرون — نمبرون للسفر و السياحة</title>
+<meta name="description" data-i18n-content="page.ops.description" content="بوابة عمليات نمبرون: الحجوزات والمهام والتصعيدات والخدمات في مكان واحد.">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#FE0002">
+<!-- Admin/Operations Staff's private workspace: never indexed, no canonical, no social card. -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="same-origin">
+
+<link rel="icon" href="assets/brand/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/ibm-plex-sans-arabic-arabic-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/ibm-plex-sans-arabic-arabic-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/foundation.css">
+</head>
+
+<body>
+<a class="c-skip-link" href="#main" data-i18n="a11y.skip" data-skip>تخطَّ إلى المحتوى</a>
+
+<div class="l-page">
+  <!-- Global header: mounted by the script below (the placeholder holds its space). Stage 10.2 -->
+  <div class="c-gh c-gh--placeholder" aria-hidden="true"></div>
+
+  <main id="main" class="l-page__main">
+    <section class="l-section l-section--tight">
+      <div class="l-container">
+        <div class="l-stack l-stack--16">
+          <div data-portal="notice"></div>
+          <div class="c-account">
+            <div class="c-account__side">
+              <div data-portal="nav"></div>
+            </div>
+            <div class="c-account__main" data-portal="main"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Global footer: mounted by the script below. Stage 10.3 -->
+
+  <nav class="c-bottom-nav" aria-label="التنقل السريع" data-i18n-label="nav.quick"><div id="bottom-nav" style="display:contents"></div></nav>
+</div>
+
+<script type="module">
+  import { mountPage } from './assets/js/page.js';
+  import { route } from './assets/js/data/config.js';
+  import { mountOpsAudit } from './assets/js/ops/ui/audit.js';
+
+  mountPage({
+    handle: 'opsAudit', bottom: null,
+    header: { current: null, onSearch: () => location.assign(route('book/')) },
+    footer: { variant: 'app' },
+    paint: () => mountOpsAudit({ root: document }),
+  });
+</script>
+</body>
+</html>

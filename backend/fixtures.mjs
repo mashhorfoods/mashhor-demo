@@ -4,6 +4,7 @@
 import { q, now } from './db.mjs';
 import { createIdentity } from './identity.mjs';
 import { setSupervisorPassword } from './supervisor.mjs';
+import { setStaffPassword } from './staff.mjs';
 import { storage } from './storage.mjs';
 import { config } from './config.mjs';
 import { readdirSync, unlinkSync, existsSync } from 'node:fs';
@@ -15,7 +16,11 @@ const dateOnly = (offset) => day(offset).toISOString().slice(0, 10);
 
 export function wipe() {
   for (const t of ['diagnostics', 'outbox', 'notifications', 'payments', 'documents', 'travellers', 'bookings', 'trips', 'login_attempts', 'reset_tokens', 'sessions', 'customers',
-    'attribution_events', 'commissions', 'leads', 'supervisor_notifications', 'supervisor_reset_tokens', 'supervisor_sessions']) q.run(`DELETE FROM ${t}`);
+    'attribution_events', 'commissions', 'leads', 'supervisor_notifications', 'supervisor_reset_tokens', 'supervisor_sessions',
+    // Order matters under `PRAGMA foreign_keys = ON`: every table below with a REFERENCES clause is deleted BEFORE
+    // the table it references (operation_tasks/escalations reference staff; booking_suppliers references suppliers).
+    'operation_tasks', 'escalations', 'booking_suppliers', 'booking_notes', 'booking_status_history',
+    'staff_sessions', 'staff_reset_tokens', 'staff', 'suppliers', 'notification_templates', 'audit_events']) q.run(`DELETE FROM ${t}`);
   // Supervisor rows themselves are config-seeded (migrate()), not test data — only their PROFILE fields reset here, so
   // a run always starts from "provisioned, no profile supplied yet", exactly like production before the business fills it in.
   q.run("UPDATE supervisors SET slug = NULL, name_ar = NULL, name_en = NULL, title_ar = NULL, title_en = NULL, bio_ar = NULL, bio_en = NULL, phone = NULL, whatsapp = NULL, email = NULL, city = NULL, password_salt = NULL, password_hash = NULL, languages_json = '[]', specialties_json = '[]', services_json = '[]', notification_prefs_json = '{}'");
@@ -52,6 +57,33 @@ export function seed() {
   q.run('INSERT INTO leads (id, supervisor_id, customer_id, name, contact, source, service_interest, status, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?)', 'lead_S1', 'supervisor-1', null, 'Fixture Lead', 'lead@fixture.test', 'link', 'flights', 'new', iso(t0 - 864e5 * 2), iso(t0 - 864e5 * 2));
   q.run('INSERT INTO supervisor_notifications (id, supervisor_id, kind, at, read, title_ar, title_en, text_ar, text_en, href, booking_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)', 'sntf_1', 'supervisor-1', 'booking', iso(t0 - 36e5), 0, 'حجز جديد (تجريبي)', 'New booking (fixture)', 'حجز تجريبي جديد يخصك.', 'A new fixture booking is attributed to you.', 'supervisor/bookings/?id=BK_A1', 'BK_A1');
   q.run('INSERT INTO attribution_events (customer_id, supervisor_id, previous_supervisor_id, source, actor, at) VALUES (?,?,?,?,?,?)', a.id, 'supervisor-1', null, 'link', 'customer', iso(t0 - 864e5 * 10));
+
+  // ---- Stage 15: two staff accounts (an Admin with every permission implicitly, and Operations Staff with a named
+  // subset) for permission-boundary testing; one booking already in the operational lifecycle, a supplier assigned to
+  // it, a task, an escalation and a notification template, so every operations screen has something real to show.
+  const t = now();
+  q.run('INSERT INTO staff (id, email, name, role, permissions_json, active, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?)', 'staff-admin-1', 'admin1@fixture.test', 'Fixture Admin One', 'admin', '[]', 1, t, t);
+  q.run('INSERT INTO staff (id, email, name, role, permissions_json, active, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?)', 'staff-ops-1', 'ops1@fixture.test', 'Fixture Ops One', 'ops', JSON.stringify(['booking.view', 'booking.status.change', 'booking.assign', 'booking.manage', 'task.view', 'task.manage', 'document.review']), 1, t, t);
+  setStaffPassword('staff-admin-1', 'password123'); setStaffPassword('staff-ops-1', 'password123');
+
+  q.run('UPDATE bookings SET ops_status = ?, assigned_operator = ? WHERE id = ?', 'submitted', 'staff-ops-1', 'BK_A1');
+  q.run('INSERT INTO booking_status_history (booking_id, previous_status, new_status, actor, actor_role, reason, metadata_json, at) VALUES (?,?,?,?,?,?,?,?)', 'BK_A1', null, 'submitted', 'staff-ops-1', 'ops', null, '{}', iso(t0 - 36e5));
+
+  q.run('INSERT INTO suppliers (id, name, type, services_json, status, integration_status, supported_operations_json, contact_json, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?)',
+    'sup_fixture_1', 'Fixture Flight Supplier', 'flight', JSON.stringify(['flights']), 'active', 'not_connected', JSON.stringify(['reserve', 'ticket']), '{}', t, t);
+  q.run('INSERT INTO booking_suppliers (id, booking_id, supplier_id, status, created_at, updated_at) VALUES (?,?,?,?,?,?)', 'bksup_fixture_1', 'BK_A1', 'sup_fixture_1', 'pending', t, t);
+
+  q.run('INSERT INTO operation_tasks (id, type, booking_id, customer_id, supervisor_id, assigned_to, status, priority, due_at, notes, created_by, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)',
+    'task_fixture_1', 'document_review', 'BK_A1', a.id, 'supervisor-1', 'staff-ops-1', 'open', 'normal', null, 'Fixture task.', 'staff-admin-1', t, t);
+
+  q.run('INSERT INTO escalations (id, booking_id, task_id, reason, severity, assigned_team, assigned_operator, status, created_by, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+    'esc_fixture_1', 'BK_A1', 'task_fixture_1', 'Fixture escalation reason.', 'normal', 'operations', 'staff-ops-1', 'open', 'staff-admin-1', t, t);
+
+  q.run('INSERT INTO notification_templates (id, event, channel, subject_ar, subject_en, body_ar, body_en, variables_json, active, version, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,1,1,?,?)',
+    'tmpl_fixture_1', 'booking.confirmed', 'email', 'تم تأكيد حجزك (تجريبي)', 'Your booking is confirmed (fixture)', 'مرحباً {{name}}، تم تأكيد حجزك {{reference}}.', 'Hello {{name}}, your booking {{reference}} is confirmed.', JSON.stringify(['name', 'reference']), t, t);
+
+  q.run('INSERT INTO booking_notes (id, booking_id, type, body, author_id, author_role, created_at) VALUES (?,?,?,?,?,?,?)', 'note_fixture_customer', 'BK_A1', 'customer', 'Fixture customer-facing note.', 'staff-ops-1', 'ops', t);
+  q.run('INSERT INTO booking_notes (id, booking_id, type, body, author_id, author_role, created_at) VALUES (?,?,?,?,?,?,?)', 'note_fixture_internal', 'BK_A1', 'internal', 'Fixture internal-only note — never shown to the customer.', 'staff-ops-1', 'ops', t);
 }
 
 /** Test-fixture legal documents: labelled as fixtures, served only while test controls are on and the toggle is set. */

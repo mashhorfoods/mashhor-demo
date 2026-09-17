@@ -18,6 +18,10 @@ export const clearSessionCookies = (res) => res.setHeader('Set-Cookie', [`no_ses
 // keeps them independent.
 export const setSupervisorSessionCookies = (res, sid, csrf, maxAgeSeconds) => res.setHeader('Set-Cookie', [`no_supervisor_session=${sid}; HttpOnly; ${attrs(`; Max-Age=${maxAgeSeconds}`)}`, `no_supervisor_csrf=${csrf}; ${attrs(`; Max-Age=${maxAgeSeconds}`)}`]);
 export const clearSupervisorSessionCookies = (res) => res.setHeader('Set-Cookie', [`no_supervisor_session=; HttpOnly; ${attrs('; Max-Age=0')}`, `no_supervisor_csrf=; ${attrs('; Max-Age=0')}`]);
+// Stage 15 — a THIRD cookie pair for staff (Admin + Operations Staff share this one portal, distinguished by
+// role/permissions, never by which cookie they hold).
+export const setStaffSessionCookies = (res, sid, csrf, maxAgeSeconds) => res.setHeader('Set-Cookie', [`no_ops_session=${sid}; HttpOnly; ${attrs(`; Max-Age=${maxAgeSeconds}`)}`, `no_ops_csrf=${csrf}; ${attrs(`; Max-Age=${maxAgeSeconds}`)}`]);
+export const clearStaffSessionCookies = (res) => res.setHeader('Set-Cookie', [`no_ops_session=; HttpOnly; ${attrs('; Max-Age=0')}`, `no_ops_csrf=; ${attrs('; Max-Age=0')}`]);
 
 /** Exact-origin CORS with credentials; anything else gets no CORS headers at all. In development any origin is echoed. */
 export function cors(req, res) {

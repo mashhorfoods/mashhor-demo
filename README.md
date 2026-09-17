@@ -1,5 +1,5 @@
 # Number One Travel & Tourism — Website Foundation
-## نمبرون للسفر و السياحة · Stage 10 — COMPLETE / BUILT + VERIFIED (10.1–10.12) · Stage 11 — BUILT + VERIFIED · Stage 12 — BUILT + VERIFIED · Stage 12.1 — PARTIALLY COMPLETE · Stage 12.2 — PARTIALLY COMPLETE · Stage 13 — PARTIALLY COMPLETE (supervisor system implemented and verified locally; nothing external connected)
+## نمبرون للسفر و السياحة · Stage 10 — COMPLETE / BUILT + VERIFIED (10.1–10.12) · Stage 11 — BUILT + VERIFIED · Stage 12 — BUILT + VERIFIED · Stage 12.1 — PARTIALLY COMPLETE · Stage 12.2 — PARTIALLY COMPLETE · Stage 13 — PARTIALLY COMPLETE (supervisor system implemented and verified locally; nothing external connected) · Stage 15 — PARTIALLY COMPLETE (operations control layer implemented and verified locally; no Stage 14 admin dashboard exists — see §0 of the Stage 15 doc)
 
 The master visual, UX and frontend foundation. Every later website stage
 inherits it.
@@ -8,6 +8,7 @@ inherits it.
 | --- | --- |
 | **Full documentation** | [`docs/FOUNDATION.md`](docs/FOUNDATION.md) — Stage 10.1 foundation |
 | **Stages 10.2 – 10.11** | [`docs/STAGES.md`](docs/STAGES.md) — header & navigation, footer, homepage, services, service details, destinations, offers, booking entry, supervisor profile, refinement |
+| **Stage 15 — operations control** | [`docs/STAGE-15-OPERATIONS-CONTROL.md`](docs/STAGE-15-OPERATIONS-CONTROL.md) — booking lifecycle state machine, tasks & escalations, service operational catalogue, document review, supplier directory, customer/internal notes, notification templates & history, a minimal Admin/Operations Staff portal with server-enforced permissions, full audit trail; `tests/ops-portal.mjs` |
 | **Stage 13 — supervisor system** | [`docs/SUPERVISOR-SYSTEM.md`](docs/SUPERVISOR-SYSTEM.md) — supervisor accounts, portal (dashboard, customers, leads, bookings, revenue, performance, notifications, settings), server-side attribution with an audit trail, commission architecture, reassignment prepared for Stage 14; `tests/supervisor-portal.mjs` |
 | **Stage 12.2 — real backend** | [`backend/`](backend/README.md) — the deployable customer backend (Node 22, SQLite, no dependencies): sessions, CSRF, CORS, boundary, private storage + signed URLs, payments, notifications, legal seam, rate limits; `npm run test:backend` runs the browser suite against it, `npm run deploy` is the gated deployment; **not deployed, nothing external connected** — [`docs/INTEGRATION.md`](docs/INTEGRATION.md) §13 lists the inputs |
 | **Stage 12.1 — integrations** | [`docs/INTEGRATION.md`](docs/INTEGRATION.md) — backend contract, environment variables (`.env.example`, `tools/write-env.mjs`), production adapters verified against `tests/contract-server.mjs` and the real backend |
