@@ -1,5 +1,6 @@
 /* ACCOUNT / UI / SETTINGS — profile, language, password, session. Stage 12 */
 import { el, render, uid } from '../../core/dom.js';
+import { dateShort } from '../../core/format.js';
 import { t, getLocale, setLocale } from '../../core/i18n.js';
 import { route } from '../../data/config.js';
 import { icon, setButtonState, toast } from '../../components/ui.js';
@@ -69,6 +70,7 @@ export function mountSettings({ root = document } = {}) {
         el('div', { class: 'l-stack l-stack--16' }, [
           block(t('acct.set.password'), pw, { id: 'set-password' }),
           sup ? block(t('acct.supervisor'), el('div', { class: 'l-stack l-stack--8' }, [rows([[t('acct.supervisor'), el('a', { href: route(`supervisor/${sup.slug}/`) }, t('sup.name.fallback'))]]), el('p', { class: 't-body-sm t-muted' }, t('acct.supervisor.locked'))]), { id: 'set-supervisor' }) : null,
+          block(t('acct.set.acceptance'), me.acceptance?.at ? rows([[t('acct.set.acceptedOn'), `${dateShort(me.acceptance.at)}${me.acceptance.terms?.version ? ` · ${t('legal.version')} ${me.acceptance.terms.version}` : ''}`], [t('legal.terms.title'), el('a', { href: route('legal/terms/') }, t('legal.terms.title'))], [t('legal.privacy.title'), el('a', { href: route('legal/privacy/') }, t('legal.privacy.title'))]]) : el('div', { class: 'l-stack l-stack--8' }, [el('p', { class: 't-body-sm t-muted' }, t('acct.set.acceptanceNone')), el('p', { class: 't-body-sm' }, [el('a', { href: route('legal/terms/') }, t('legal.terms.title')), ' · ', el('a', { href: route('legal/privacy/') }, t('legal.privacy.title'))])]), { id: 'set-acceptance' }),
           block(t('acct.set.session'), el('div', { class: 'l-stack l-stack--12' }, [el('p', { class: 't-body-sm t-muted' }, t('acct.set.signOutText')), el('a', { class: 'c-btn c-btn--secondary', href: route('account/sign-out/'), dataset: { action: 'sign-out' } }, [icon('no-logout', { size: 'sm' }), el('span', {}, t('acct.set.signOut'))]), el('p', { class: 't-body-sm t-muted c-acct-inline' }, [icon('no-shield', { size: 'sm' }), t('acct.set.privacy')])]), { id: 'set-session' }),
         ]),
       ]),

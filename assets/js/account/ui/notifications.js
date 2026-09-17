@@ -6,6 +6,8 @@ import { route } from '../../data/config.js';
 import { icon, setButtonState } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { customer, unreadCount } from '../customer.js';
+import { ENV } from '../../data/env.js';
+import { isAuthenticated } from '../auth.js';
 import { mountAccount, loadRegion, pageTitle } from './shell.js';
 
 const KIND_ICON = { booking: 'no-booking', payment: 'no-payment', trip: 'no-location', document: 'no-documents', visa: 'no-visa', support: 'no-support' };
@@ -41,6 +43,10 @@ export function mountNotifications({ root = document } = {}) {
     paintChips();
     const region = loadRegion(host, () => customer.notifications(), { paint: (list) => { state.list = list; queueMicrotask(paint); return el('div'); } });
     await region.run();
-    return { state, refresh: region.run };
+    // Coming back to the tab refreshes quietly (no loading flash, no polling), at most once per refreshMinSeconds.
+    let last = Date.now(); const minMs = (ENV.notifications?.refreshMinSeconds ?? 30) * 1000;
+    const quiet = async () => { if (!isAuthenticated() || document.visibilityState !== 'visible' || Date.now() - last < minMs) return; last = Date.now(); try { state.list = await customer.notifications(); paint(); } catch { /* the list on screen stands; the next visit retries */ } };
+    if (ENV.notifications?.refreshOnFocus !== false) { document.addEventListener('visibilitychange', quiet); window.addEventListener('focus', quiet); }
+    return { state, refresh: region.run, quietRefresh: () => { last = 0; return quiet(); } };
   } });
 }

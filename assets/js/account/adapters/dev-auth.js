@@ -27,7 +27,7 @@ async function digest(salt, password) {
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 const normEmail = (e) => String(e ?? '').trim().toLowerCase();
-const publicCustomer = (a) => ({ id: a.id, name: a.name, email: a.email, phone: a.phone ?? '', locale: a.locale ?? 'ar', image: null, supervisorId: a.supervisorId ?? null, createdAt: a.createdAt, dev: true });
+const publicCustomer = (a) => ({ id: a.id, name: a.name, email: a.email, phone: a.phone ?? '', locale: a.locale ?? 'ar', image: null, supervisorId: a.supervisorId ?? null, attribution: a.attribution ?? (a.supervisorId ? { supervisorId: a.supervisorId, source: 'link', at: a.createdAt } : null), acceptance: a.acceptance ?? null, createdAt: a.createdAt, dev: true });
 
 /** The seeded development customer: signed in with one click, no password, so the populated account can be reviewed. */
 export const DEV_CUSTOMER = { id: 'cus-dev-demo', name: 'Demo Customer', email: 'demo@dev.invalid', phone: '', locale: 'ar', supervisorId: 'supervisor-1', createdAt: '2026-06-01T09:00:00.000Z' };
@@ -49,13 +49,13 @@ export const DEV_AUTH = registerAuthProvider({
     if (!a || !password || (await digest(a.salt, password)) !== a.hash) throw new AuthError('invalid', 'invalid credentials');
     return issue(db, a);
   },
-  async signUp({ name, email, phone = '', password, locale = 'ar', supervisorId = null }) {
+  async signUp({ name, email, phone = '', password, locale = 'ar', supervisorId = null, acceptance = null }) {
     await wait();
     const db = load(); const key = normEmail(email);
     if (db.accounts[key]) throw new AuthError('exists', 'account exists');
     if (!password || password.length < 8) throw new AuthError('weak', 'password too short');
     const salt = rand(8);
-    db.accounts[key] = { id: `cus-${rand(6)}`, name: String(name).trim(), email: key, phone: String(phone).trim(), locale, supervisorId, salt, hash: await digest(salt, password), createdAt: new Date().toISOString() };
+    db.accounts[key] = { id: `cus-${rand(6)}`, name: String(name).trim(), email: key, phone: String(phone).trim(), locale, supervisorId, attribution: supervisorId ? { supervisorId, source: 'link', at: new Date().toISOString() } : null, acceptance: acceptance ? { ...acceptance, at: new Date().toISOString() } : null, salt, hash: await digest(salt, password), createdAt: new Date().toISOString() };
     return issue(db, db.accounts[key]);
   },
   /** Development shortcut: the seeded customer, no password. Not part of the contract a real provider implements. */
@@ -105,7 +105,8 @@ export const DEV_AUTH = registerAuthProvider({
     if (patch.name != null) a.name = String(patch.name).trim();
     if (patch.phone != null) a.phone = String(patch.phone).trim();
     if (patch.locale != null) a.locale = patch.locale;
-    if (patch.supervisorId && !a.supervisorId) a.supervisorId = patch.supervisorId;   // set once, never edited by the customer
+    if (patch.supervisorId && !a.supervisorId) { a.supervisorId = patch.supervisorId; a.attribution = { supervisorId: patch.supervisorId, source: 'booking', at: new Date().toISOString() }; }   // set once, never edited by the customer
+    if (patch.acceptance) a.acceptance = { ...patch.acceptance, at: new Date().toISOString() };
     save(db); return publicCustomer(a);
   },
   async customerOf(token) { const v = await this.verify(token); return v?.customer ?? null; },

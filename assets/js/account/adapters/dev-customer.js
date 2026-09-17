@@ -13,11 +13,14 @@
    installed.js.
 
    QA switches (sessionStorage):  no.dev.account = 'error' | 'slow' | 'empty'
+                                  no.dev.docurl  = 'expired'     (signed links come back already expired)
    ========================================================================= */
 
 import { registerCustomerAdapter } from '../customer.js';
 import { authProvider, AuthError } from '../auth.js';
 import { DEV_CUSTOMER } from './dev-auth.js';
+import { ENV } from '../../data/env.js';
+import { ApiError } from '../../core/api.js';
 
 const read = (k) => { try { return sessionStorage.getItem(k); } catch { return null; } };
 const wait = async () => { await new Promise((r) => setTimeout(r, read('no.dev.account') === 'slow' ? 2500 : 200)); if (read('no.dev.account') === 'error') throw new Error('development customer data: simulated outage'); };
@@ -29,7 +32,7 @@ const iso = (d) => d.toISOString();
 const day = (offset, h = 9) => { const d = new Date(); d.setUTCHours(h, 0, 0, 0); d.setUTCDate(d.getUTCDate() + offset); return d; };
 const dateOnly = (offset) => day(offset).toISOString().slice(0, 10);
 
-const empty = () => ({ version: 1, trips: [], bookings: [], travellers: [], documents: [], payments: [], notifications: [] });
+const empty = () => ({ version: 1, trips: [], bookings: [], travellers: [], documents: [], payments: [], notifications: [], files: {} });
 
 /* ---- The seeded customer's sample records (fictional, labelled dev) ---- */
 function seed(customerId) {
@@ -106,8 +109,38 @@ export const DEV_CUSTOMER_ADAPTER = registerCustomerAdapter({
   async trip(token, id) { await wait(); const { data } = await scope(token); const t = data.trips.find((x) => x.id === id); return t ? clone({ ...t, bookings: data.bookings.filter((b) => b.tripId === t.id), documents: data.documents.filter((d) => d.tripId === t.id), payments: data.payments.filter((p) => data.bookings.some((b) => b.tripId === t.id && b.id === p.bookingId)) }) : null; },
   async bookings(token) { await wait(); return clone((await scope(token)).data.bookings); },
   async booking(token, id) { await wait(); const { data } = await scope(token); const b = data.bookings.find((x) => x.id === id); return b ? clone({ ...b, trip: data.trips.find((t) => t.id === b.tripId) ?? null, documents: data.documents.filter((d) => d.bookingId === b.id), payments: data.payments.filter((p) => p.bookingId === b.id) }) : null; },
-  async documents(token) { await wait(); const { data } = await scope(token); return clone(data.documents.map((d) => ({ ...d, booking: data.bookings.find((b) => b.id === d.bookingId) ?? null, trip: data.trips.find((t) => t.id === d.tripId) ?? null }))); },
-  async payments(token) { await wait(); const { data } = await scope(token); return clone(data.payments.map((p) => ({ ...p, booking: data.bookings.find((b) => b.id === p.bookingId) ?? null }))); },
+  async documents(token) { await wait(); const { data } = await scope(token); return clone(data.documents.map((d) => ({ kind: 'issued', ...d, booking: data.bookings.find((b) => b.id === d.bookingId) ?? null, trip: data.trips.find((t) => t.id === d.tripId) ?? null }))); },
+  async payments(token, page = { page: 1 }) {
+    await wait(); const { data } = await scope(token);
+    const size = page.pageSize ?? ENV.paymentApi?.pageSize ?? 20; const n = Math.max(1, page.page ?? 1);
+    const all = [...data.payments].sort((a, b) => String(b.at).localeCompare(String(a.at))).map((p) => ({ ...p, booking: data.bookings.find((b) => b.id === p.bookingId) ?? null }));
+    const items = all.slice((n - 1) * size, n * size);
+    return clone({ items, page: n, pageSize: size, total: all.length, nextPage: n * size < all.length ? n + 1 : null });
+  },
+  /* Documents a customer uploads live in this browser (development). The "signed URL" is a data: URL with an expiry the viewer honours. */
+  async uploadDocument(token, { file, title, type = 'customer' }) {
+    await wait(); const s = await scope(token);
+    const limit = Math.min(ENV.documentService?.maxBytes ?? Infinity, 1024 * 1024); const accept = ENV.documentService?.accept ?? [];
+    if (!file) throw new ApiError('invalid'); if (file.size > limit) throw new ApiError('tooLarge'); if (accept.length && !accept.includes(file.type)) throw new ApiError('unsupported');
+    const dataUrl = await new Promise((resolve, reject) => { const r = new FileReader(); r.onload = () => resolve(r.result); r.onerror = () => reject(new ApiError('failed')); r.readAsDataURL(file); });
+    const doc = { id: `doc-${rand()}`, customerId: s.id, bookingId: null, tripId: null, type, kind: 'customer', status: 'available', issuedAt: new Date().toISOString(), title: String(title || file.name).slice(0, 120), size: file.size, contentType: file.type, deletable: true, dev: true };
+    s.data.documents.push(doc); s.data.files = { ...(s.data.files ?? {}), [doc.id]: dataUrl }; s.commit();
+    return clone(doc);
+  },
+  async documentUrl(token, id) {
+    await wait(); const { data } = await scope(token);
+    const doc = data.documents.find((d) => d.id === id); if (!doc || doc.status !== 'available') throw new ApiError('notFound');
+    const expired = read('no.dev.docurl') === 'expired';
+    const expiresAt = new Date(Date.now() + (expired ? -1000 : 5 * 60 * 1000)).toISOString();
+    // Issued documents are rendered from booking data (the viewer builds them); uploads come back as the stored file.
+    return { url: data.files?.[id] ?? null, expiresAt, rendered: !data.files?.[id] };
+  },
+  async deleteDocument(token, id) {
+    await wait(); const s = await scope(token);
+    const doc = s.data.documents.find((d) => d.id === id); if (!doc) throw new ApiError('notFound'); if (!doc.deletable) throw new ApiError('forbidden');
+    s.data.documents = s.data.documents.filter((d) => d.id !== id); if (s.data.files) delete s.data.files[id]; s.commit(); return true;
+  },
+  async recordAcceptance(token, acceptance) { await wait(); await scope(token); await authProvider().updateAccount(token, { acceptance }); return true; },
   async notifications(token) { await wait(); return clone((await scope(token)).data.notifications.sort((a, b) => b.at.localeCompare(a.at))); },
   async markRead(token, ids = null) { await wait(); const s = await scope(token); s.data.notifications.forEach((n) => { if (!ids || ids.includes(n.id)) n.read = true; }); s.commit(); return clone(s.data.notifications); },
   async travellers(token) { await wait(); return clone((await scope(token)).data.travellers); },

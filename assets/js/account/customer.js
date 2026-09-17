@@ -11,23 +11,37 @@
                     services[], status: upcoming|current|completed|cancelled, bookingIds[], travellers, supervisorId }
      booking      { id, customerId, tripId, service, status, paymentStatus: paid|unpaid|refunded, amount, currency,
                     supervisorId, ticketed, createdAt, detail{…} }
-     document     { id, bookingId, tripId, type: eticket|confirmation|visa|receipt, status: available|pending, issuedAt }
+     document     { id, bookingId, tripId, type: eticket|confirmation|visa|receipt|customer, status: available|pending,
+                    issuedAt, title?, size?, contentType?, kind: 'issued'|'customer' } — a customer-uploaded one is kind 'customer'
      payment      { id, bookingId, at, amount, currency, status: paid|refunded|failed|pending, reference, methodAr/En }
+                  payments() answers a page: { items, page, pageSize, total, nextPage }
      notification { id, kind: booking|payment|trip|document|visa|support, at, read, titleAr/En, textAr/En, href }
      traveller    { id, firstName, lastName, dob, gender, nationality, passport, passportExpiry }
    ========================================================================= */
 
-import { currentToken, AuthError } from './auth.js';
+import { currentToken, sessionLost, AuthError } from './auth.js';
+import { track } from '../core/diagnostics.js';
 
 let adapter = null;
 export function registerCustomerAdapter(a) { adapter = a; return a; }
 export const customerAdapter = () => adapter;
 
-const call = (method, ...args) => {
+/**
+ * Every call: the session marker must exist, the adapter answers for the
+ * customer the backend recognises. A 401 anywhere means the session is gone
+ * (revoked, expired) — the marker is dropped and the screens send the customer
+ * to sign in; every other failure keeps its customer-safe code.
+ */
+const call = async (method, ...args) => {
   const token = currentToken();
-  if (!token) return Promise.reject(new AuthError('unauthenticated'));
-  if (!adapter) return Promise.reject(new Error('no customer adapter registered'));
-  return adapter[method](token, ...args);
+  if (!token) throw new AuthError('unauthenticated');
+  if (!adapter) throw new Error('no customer adapter registered');
+  try { return await adapter[method](token, ...args); }
+  catch (error) {
+    if (error?.code === 'unauthenticated') { sessionLost('rejected'); throw new AuthError('unauthenticated'); }
+    if (!(error instanceof AuthError)) track(`${method}.failure`, { code: error?.code ?? 'error' });
+    throw error;
+  }
 };
 
 export const customer = {
@@ -38,7 +52,11 @@ export const customer = {
   bookings: () => call('bookings'),
   booking: (id) => call('booking', id),
   documents: () => call('documents'),
-  payments: () => call('payments'),
+  uploadDocument: (spec) => call('uploadDocument', spec),          // { file, title, type }
+  documentUrl: (id) => call('documentUrl', id),                    // → { url, expiresAt } — temporary, never a permanent link
+  deleteDocument: (id) => call('deleteDocument', id),
+  payments: (page = { page: 1 }) => call('payments', page),        // → { items, page, pageSize, total, nextPage }
+  recordAcceptance: (acceptance) => call('recordAcceptance', acceptance),
   notifications: () => call('notifications'),
   markRead: (ids = null) => call('markRead', ids),
   travellers: () => call('travellers'),

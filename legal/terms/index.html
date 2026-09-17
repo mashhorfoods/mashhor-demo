@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ar" dir="rtl" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- <base> points every relative URL at the site root. Stage 12.1 -->
+<base href="../../">
+<title data-i18n="page.legal.terms">شروط الاستخدام — نمبرون للسفر و السياحة</title>
+<meta name="description" data-i18n-content="page.legal.description" content="الوثائق القانونية لموقع نمبرون للسفر و السياحة.">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#FE0002">
+<link rel="canonical" href="https://mashhorfoods.github.io/mashhor-demo/legal/terms/">
+<link rel="icon" href="assets/brand/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/ibm-plex-sans-arabic-arabic-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/ibm-plex-sans-arabic-arabic-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/foundation.css">
+</head>
+
+<body>
+<a class="c-skip-link" href="#main" data-i18n="a11y.skip" data-skip>تخطَّ إلى المحتوى</a>
+
+<div class="l-page">
+  <div class="c-gh c-gh--placeholder" aria-hidden="true"></div>
+
+  <main id="main" class="l-page__main">
+    <section class="l-section l-section--tight" aria-labelledby="legal-title">
+      <div class="l-container">
+        <div class="c-legal l-stack l-stack--16" data-legal="main"></div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="c-bottom-nav" aria-label="التنقل السريع" data-i18n-label="nav.quick"><div id="bottom-nav" style="display:contents"></div></nav>
+</div>
+
+<script type="module">
+  import { mountPage } from './assets/js/page.js';
+  import { route } from './assets/js/data/config.js';
+  import { mountLegal } from './assets/js/account/ui/legal.js';
+
+  mountPage({
+    handle: 'legal', bottom: null,
+    header: { current: null, onSearch: () => location.assign(route('book/')) },
+    footer: { cta: false },
+    paint: () => mountLegal({ root: document, kind: 'terms' }),   // QA handle: no.legal (async)
+  });
+</script>
+</body>
+</html>

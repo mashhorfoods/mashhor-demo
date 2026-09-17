@@ -492,8 +492,9 @@ component in this layer. Permission is asked, never assumed.
    or HttpOnly cookies), a backend customer API that enforces the customer
    boundary, document storage with signed URLs, the payment layer's history
    endpoint, notification delivery, and the terms / privacy documents the
-   sign-up refers to. Each is one registration in
-   `account/adapters/installed.js`; the screens do not change.
+   sign-up refers to. Since 12.1 the production adapters exist and
+   `docs/INTEGRATION.md` states the contract and the exact inputs; the
+   screens do not change.
 4. ~~**Production domain**~~ — resolved. The site deploys to
    `https://mashhorfoods.github.io/mashhor-demo/`; canonical and `og:url` are
    set. Because it is a *project* page served from a subpath, routes are stored

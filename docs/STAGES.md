@@ -1396,3 +1396,40 @@ policy, MFA if wanted), a backend customer API that enforces the customer
 boundary, document storage with signed URLs, the payment layer's history
 endpoint, notification delivery (e-mail / SMS / push), and the terms and
 privacy documents the sign-up refers to.
+
+## 12.1 — Production integrations (partially complete)
+
+The account's six integrations connected through the adapter architecture:
+hosted identity, customer backend API, document storage, payment history,
+notification delivery, Terms & Privacy. Each is **implemented against a
+documented backend contract and verified in a real browser against the
+contract test server** (`tests/contract-server.mjs`); **none is connected to
+a real external service**, because no backend, identity provider, storage,
+payment endpoint, notification service or legal text exists for this
+repository. `docs/INTEGRATION.md` is the full guide; the summary:
+
+```
+assets/js/data/env.js              public runtime configuration (generated at deploy by tools/write-env.mjs; .env.example)
+assets/js/core/api.js              the HTTP client: cookie sessions, CSRF header, timeouts, customer-safe error codes
+assets/js/core/diagnostics.js      scrubbed technical events, optional beacon to the backend
+assets/js/account/adapters/
+  session-api-auth.js · api-customer.js · api-legal.js     the production adapters (NOT CONNECTED)
+  not-connected.js                                          production without a backend: fails safely
+  installed.js                                              chooses by environment; production never gets dev data
+assets/js/account/legal.js         Terms / Privacy seam (fetch, version, sanitise) — never writes legal text
+legal/terms/ · legal/privacy/      the pages (say "not published" until the text is supplied)
+tests/contract-server.mjs          the backend stand-in: cookie sessions, CSRF, per-customer scoping, signed expiring URLs, faults
+tests/integration.mjs              518 checks: auth, authorization, documents, payments, notifications, legal, continuity, errors, 6 widths × 2 languages
+```
+
+What changed on screen: documents can be uploaded, are viewed through
+temporary signed links (expiry shown, renew on lapse) and deleted where
+permitted; payments page through the history; notifications refresh quietly
+on focus; the sign-up shows the acceptance checkbox with Terms and Privacy
+links when the documents are published and records the versions; every
+failure has a customer-language state (network, timeout, 401, 403, 404,
+429, 5xx, not connected) with retry and a support path; a backend that is
+unreachable while verifying the session no longer signs the customer out.
+
+Status: **STAGE 12.1 — PARTIALLY COMPLETE.** Connected: nothing external.
+Pending with exact inputs: see `docs/INTEGRATION.md` §11.

@@ -20,6 +20,8 @@
 
 import { setSession, getSession } from '../components/session.js';
 import { route, BASE } from '../data/config.js';
+import { ENV } from '../data/env.js';
+import { track } from '../core/diagnostics.js';
 
 export class AuthError extends Error {
   constructor(code, message = code) { super(message); this.name = 'AuthError'; this.code = code; }
@@ -36,20 +38,39 @@ const write = (s) => { try { if (s) localStorage.setItem(KEY, JSON.stringify(s))
 /** The opaque token the data adapters present; null when signed out. */
 export const currentToken = () => read()?.token ?? null;
 
+const guest = () => setSession({ authenticated: false, name: '', role: 'guest', customerId: null });
+/** The session is gone (a 401 from any call, or an expiry): drop the marker, tell the header. */
+export function sessionLost(reason = 'expired') {
+  if (read()) track('session.expired', { reason });
+  write(null); guest(); restored = Promise.resolve({ status: 'expired', customer: null });
+}
+
 let restored = null;
 /**
- * Re-establish the customer session from the stored token, once per page.
- * Resolves { status: 'guest' | 'customer' | 'expired', customer }.
+ * Re-establish the customer session, once per page. What the client holds is a
+ * marker, not an authority: the provider is asked every time. With the
+ * session-api provider that is the backend reading its own HttpOnly cookie.
+ * Resolves { status: 'guest' | 'customer' | 'expired' | 'unavailable', customer, code }.
  */
 export function restoreSession({ force = false } = {}) {
   if (restored && !force) return restored;
   restored = (async () => {
     const stored = read(); const provider = authProvider();
-    if (!stored?.token || !provider) { setSession({ authenticated: false, name: '', role: 'guest', customerId: null }); return { status: 'guest', customer: null }; }
-    if (stored.expiresAt && Date.parse(stored.expiresAt) < Date.now()) { write(null); setSession({ authenticated: false, name: '', role: 'guest', customerId: null }); return { status: 'expired', customer: null }; }
+    if (!stored?.token || !provider) { guest(); return { status: 'guest', customer: null }; }
+    if (stored.expiresAt && Date.parse(stored.expiresAt) < Date.now()) { sessionLost('expired'); return { status: 'expired', customer: null }; }
     let v = null;
-    try { v = await provider.verify(stored.token); } catch { v = null; }
-    if (!v) { write(null); setSession({ authenticated: false, name: '', role: 'guest', customerId: null }); return { status: 'expired', customer: null }; }
+    try { v = await provider.verify(stored.token); } catch (error) {
+      // Unreachable is not the same as signed out: keep the marker, report the outage.
+      const code = error?.code ?? 'unavailable';
+      if (code === 'unauthenticated') { sessionLost('rejected'); return { status: 'expired', customer: null }; }
+      guest(); track('auth.unavailable', { code }); return { status: 'unavailable', customer: null, code };
+    }
+    if (!v) { sessionLost('rejected'); return { status: 'expired', customer: null }; }
+    // Refresh a session that is about to lapse, when the provider supports it.
+    const refreshMs = (ENV.authPublicConfig?.sessionRefreshMinutes ?? 10) * 60 * 1000;
+    if (provider.refresh && v.expiresAt && Date.parse(v.expiresAt) - Date.now() < refreshMs) {
+      try { const r = await provider.refresh(stored.token); if (r) { v = { ...v, ...r }; write({ ...stored, expiresAt: r.expiresAt ?? stored.expiresAt }); } } catch { /* the current session still stands */ }
+    }
     setSession({ authenticated: true, name: v.customer.name, role: 'customer', customerId: v.customerId });
     return { status: 'customer', customer: v.customer };
   })();
@@ -64,13 +85,18 @@ export const adoptSession = ({ token, expiresAt, customer }) => {
   return customer;
 };
 
-export async function signIn(credentials) { return adoptSession(await authProvider().signIn(credentials)); }
-export async function signUp(details) { return adoptSession(await authProvider().signUp(details)); }
+export async function signIn(credentials) {
+  try { return adoptSession(await authProvider().signIn(credentials)); }
+  catch (error) { track('auth.failure', { code: error?.code ?? 'error', flow: 'signIn' }); throw error; }
+}
+export async function signUp(details) {
+  try { return adoptSession(await authProvider().signUp(details)); }
+  catch (error) { track('auth.failure', { code: error?.code ?? 'error', flow: 'signUp' }); throw error; }
+}
 export async function signOut() {
   const token = currentToken();
-  try { if (token) await authProvider()?.signOut(token); } catch { /* the token is dropped regardless */ }
-  write(null);
-  setSession({ authenticated: false, name: '', role: 'guest', customerId: null });
+  try { if (token) await authProvider()?.signOut(token); } catch { /* the marker is dropped regardless; the server session lapses on its own */ }
+  write(null); guest();
   restored = Promise.resolve({ status: 'guest', customer: null });
 }
 export const requestReset = (email) => authProvider().requestReset(email);

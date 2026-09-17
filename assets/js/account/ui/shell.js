@@ -52,12 +52,17 @@ export function supportEntry(customer, { compact = false } = {}) {
 }
 
 /** The guest / expired state: one action, back here afterwards. */
-export function guardState(status) {
+export function guardState(status, code = null) {
   const expired = status === 'expired';
+  if (status === 'unavailable') return [
+    el('h1', { class: 't-h1' }, t(code === 'notConfigured' ? 'acct.state.notConnected.title' : 'auth.guard.unavailableTitle')),
+    stateBlock({ variant: 'warning', iconName: 'no-alert', headingLevel: 2, title: code === 'notConfigured' ? errorText('notConfigured') : t('auth.guard.unavailable'),
+      actions: [...(code === 'notConfigured' ? [] : [{ id: 'retry', label: t('acct.retry'), variant: 'c-btn--primary', onClick: () => location.reload() }]), { id: 'support', label: t('acct.support.open'), href: route('account/support/'), ...(code === 'notConfigured' ? { variant: 'c-btn--primary' } : {}) }] }),
+  ];
   return [
     el('h1', { class: 't-h1' }, t(expired ? 'auth.guard.expiredTitle' : 'auth.guard.title')),
     stateBlock({ variant: expired ? 'warning' : 'info', iconName: expired ? 'no-expired' : 'no-customer', headingLevel: 2, title: t(expired ? 'auth.guard.expired' : 'auth.guard.text'),
-      actions: [{ label: t('auth.signIn.action'), href: signInHref(here()), variant: 'c-btn--primary', id: 'sign-in' }, { label: t('auth.signIn.create'), href: route('account/sign-up/') + `?next=${encodeURIComponent(here())}` }] }),
+      actions: [{ label: t('auth.signIn.action'), href: signInHref(here()), variant: 'c-btn--primary', id: 'sign-in' }, { label: t('auth.signUp.action'), href: route('account/sign-up/') + `?next=${encodeURIComponent(here())}` }] }),
   ];
 }
 
@@ -69,9 +74,9 @@ export function guardState(status) {
  */
 export async function mountAccount({ root = document, id, head, paint }) {
   setHead(head);
-  const { status, customer } = await restoreSession();
+  const { status, customer, code } = await restoreSession();
   if (status !== 'customer') {
-    put('notice', null, root); put('nav', null, root); put('main', guardState(status), root); put('support', null, root);
+    put('notice', null, root); put('nav', null, root); put('main', guardState(status, code), root); put('support', null, root);
     document.documentElement.dataset.account = status;
     return { blocked: status, customer: null };
   }
@@ -87,14 +92,20 @@ export async function mountAccount({ root = document, id, head, paint }) {
     main.append(supportEntry(customer));   // the phone/tablet copy, after the content (CSS hides one of the two)
   } catch (error) {
     if (error instanceof AuthError) { put('main', guardState('expired'), root); return { blocked: 'expired', customer: null }; }
-    console.warn('[no] account screen failed', error);
-    render(main, errorState(() => mountAccount({ root, id, head, paint })));
+    console.warn('[no] account screen failed', error?.code ?? error?.name);
+    render(main, errorState(() => mountAccount({ root, id, head, paint }), error?.code ?? null));
   }
   return { customer, ...(handle ?? {}) };
 }
 
 /* ---- Shared pieces ------------------------------------------------------ */
-export const errorState = (retry) => stateBlock({ variant: 'error', headingLevel: 2, title: t('acct.state.error.title'), text: t('acct.state.error.text'), actions: [{ id: 'retry', label: t('acct.retry'), variant: 'c-btn--primary', onClick: retry }] });
+/** A customer-safe message for a failure code (ApiError / AuthError); never the raw error. */
+export const errorText = (code) => t(['unavailable', 'network', 'timeout', 'forbidden', 'notFound', 'rateLimited', 'notConfigured', 'invalid', 'tooLarge', 'unsupported', 'expired'].includes(code) ? `acct.err.${code}` : 'acct.err.failed');
+export const errorState = (retry, code = null) => stateBlock({
+  variant: code === 'notConfigured' ? 'warning' : 'error', iconName: code === 'notConfigured' ? 'no-info' : undefined, headingLevel: 2,
+  title: t(code === 'notConfigured' ? 'acct.state.notConnected.title' : 'acct.state.error.title'), text: code ? `${errorText(code)} ${t('acct.err.support')}` : t('acct.state.error.text'),
+  actions: [...(code === 'notConfigured' || code === 'forbidden' ? [] : [{ id: 'retry', label: t('acct.retry'), variant: 'c-btn--primary', onClick: retry }]), { id: 'support', label: t('acct.support.open'), href: route('account/support/'), ...(code === 'notConfigured' || code === 'forbidden' ? { variant: 'c-btn--primary' } : {}) }],
+});
 export const notFoundState = (backHref, backLabel) => [el('h1', { class: 't-h1' }, t('acct.state.notFound.title')), stateBlock({ variant: 'empty', headingLevel: 2, title: t('acct.state.notFound.text'), actions: [{ label: backLabel, href: backHref, variant: 'c-btn--primary' }] })];
 
 /** A region that loads a customer call and paints its result; the screens compose these. */
@@ -108,7 +119,7 @@ export function loadRegion(host, load, { empty, paint, minHeight = '12rem' } = {
       region.content(paint(data)); return data;
     } catch (error) {
       if (error instanceof AuthError) { location.assign(signInHref(here())); return null; }
-      console.warn('[no] account data failed', error); region.content(errorState(run)); return null;
+      console.warn('[no] account data failed', error?.code ?? error?.name); region.content(errorState(run, error?.code ?? null)); return null;
     }
   };
   return { region, run };

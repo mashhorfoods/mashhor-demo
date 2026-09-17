@@ -122,8 +122,9 @@ export const FOOTER_SOCIAL = [
    publishing a link to a page that is not written yet.
    ----------------------------------------------------------------------- */
 export const FOOTER_LEGAL = [
-  { id: 'privacy',  href: 'policies/privacy/',  labelAr: 'سياسة الخصوصية',      labelEn: 'Privacy policy',      exists: false },
-  { id: 'terms',    href: 'policies/terms/',    labelAr: 'الشروط والأحكام',     labelEn: 'Terms & conditions',  exists: false },
+  // The privacy and terms pages exist (Stage 12.1); they show the business's text once supplied and say so until then.
+  { id: 'privacy',  href: 'legal/privacy/',     labelAr: 'سياسة الخصوصية',      labelEn: 'Privacy policy',      exists: true },
+  { id: 'terms',    href: 'legal/terms/',       labelAr: 'شروط الاستخدام',      labelEn: 'Terms of Service',    exists: true },
   { id: 'cancel',   href: 'policies/cancel/',   labelAr: 'سياسة الإلغاء',       labelEn: 'Cancellation policy', exists: false },
   { id: 'refund',   href: 'policies/refund/',   labelAr: 'سياسة الاسترداد',     labelEn: 'Refund policy',       exists: false },
   { id: 'usage',    href: 'policies/usage/',    labelAr: 'سياسة استخدام الموقع', labelEn: 'Website usage policy', exists: false },

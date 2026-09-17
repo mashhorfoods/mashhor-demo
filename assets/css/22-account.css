@@ -11,6 +11,8 @@
   .c-acct-inline .c-icon { flex: none; margin-block-start: 0.15em; }
   /* An arrow that points back toward the start of the reading direction. */
   .c-icon--start { scale: -1 1; } [dir="rtl"] .c-icon--start { scale: 1 1; }
+  /* A link inside a note takes the note's own text colour: red on a tinted background does not pass contrast. */
+  .c-note a { color: var(--note-fg, inherit); font-weight: var(--weight-semibold); }
   .c-badge--error { background-color: var(--color-error-bg); color: var(--color-error-fg); }
 
   /* ---- Auth forms: one narrow column ------------------------------------ */
@@ -113,6 +115,13 @@
   @media (min-width: 40em) { .c-acct-trv { grid-template-columns: auto minmax(0, 1fr) auto; } .c-acct-trv__actions { grid-column: auto; } }
 
   /* ---- Document view ----------------------------------------------------- */
+  .c-acct-docview__img { display: block; max-inline-size: 100%; block-size: auto; margin-inline: auto; border-radius: var(--radius-md); }
+  .c-acct-docview__frame { display: block; inline-size: 100%; block-size: min(70svb, 40rem); border: var(--border-hairline); border-radius: var(--radius-md); background-color: var(--color-white); }
+  .c-modal__foot [data-expiry] { flex: 1 1 100%; margin: 0; }
+  @media (min-width: 48em) { .c-modal__foot [data-expiry] { flex: 1 1 auto; margin-inline-end: auto; } }
+  .c-legal { max-inline-size: 46rem; }
+  .c-legal__meta { display: flex; flex-wrap: wrap; gap: var(--space-8) var(--space-16); font-size: var(--text-body-sm); color: var(--color-text-secondary); }
+  .c-legal__body { display: grid; gap: var(--space-16); } .c-legal__body h2 { font-size: var(--text-h3); } .c-legal__body h3 { font-size: var(--text-h4); } .c-legal__body ul, .c-legal__body ol { padding-inline-start: var(--space-24); }
   .c-acct-docview { display: grid; gap: var(--space-16); }
   .c-acct-docview__head { display: grid; gap: var(--space-4); padding-block-end: var(--space-12); border-block-end: var(--border-defined); }
   @media print {

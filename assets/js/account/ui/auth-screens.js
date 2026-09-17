@@ -14,6 +14,7 @@ import { stateBlock } from '../../components/states.js';
 import { loadAttribution } from '../../core/booking.js';
 import { supervisorBySlug } from '../../data/supervisors.js';
 import { authProvider, restoreSession, adoptSession, signIn, signUp, signOut, requestReset, resetPassword, nextFrom, AuthError } from '../auth.js';
+import { legalVersions } from '../legal.js';
 import { put, isAr } from './shell.js';
 
 const setHead = (key) => setPageHead({ title: t(key), description: t('page.account.description') });
@@ -51,7 +52,7 @@ export function applyErrors(form, errors, status) {
 }
 const statusLine = () => el('p', { class: 'c-book__status t-body-sm', role: 'status', 'aria-live': 'polite' });
 const submitButton = (labelKey) => el('button', { type: 'submit', class: 'c-btn c-btn--primary c-btn--lg c-btn--block' }, [el('span', { class: 'c-btn__label' }, t(labelKey)), el('span', { class: 'c-btn__spinner', 'aria-hidden': 'true' })]);
-const authError = (error) => (error instanceof AuthError ? t(`auth.err.${['invalid', 'exists', 'unavailable', 'invalidToken', 'weak'].includes(error.code) ? (error.code === 'weak' ? 'password' : error.code) : 'unavailable'}`) : t('auth.err.unavailable'));
+const authError = (error) => (error instanceof AuthError ? t(`auth.err.${['invalid', 'exists', 'unavailable', 'invalidToken', 'weak', 'notConfigured', 'rateLimited'].includes(error.code) ? (error.code === 'weak' ? 'password' : error.code) : 'unavailable'}`) : t('auth.err.unavailable'));
 const wrap = (children) => el('div', { class: 'c-auth' }, children);
 const devDemoButton = (after) => (authProvider()?.devSignIn ? el('div', { class: 'c-auth__dev' }, [
   el('button', { type: 'button', class: 'c-btn c-btn--secondary c-btn--block', dataset: { action: 'dev-sign-in' }, onclick: async (e) => { setButtonState(e.currentTarget, 'loading'); try { adoptSession(await authProvider().devSignIn()); after(); } catch { setButtonState(e.currentTarget, 'idle'); } } }, t('auth.dev.demo')),
@@ -100,7 +101,7 @@ export async function mountSignUp({ root = document, params = new URLSearchParam
   const { status: session } = await restoreSession();
   if (session === 'customer') { go(); return { redirected: true }; }
   const attribution = loadAttribution(); const sup = attribution?.supervisor ? supervisorBySlug(attribution.supervisor) : null;
-  const p = uid('su'); const status = statusLine(); const submit = submitButton('auth.signUp.action');
+  const p = uid('su'); const status = statusLine(); const submit = submitButton('auth.signUp.action'); const legalHost = el('div', { class: 'l-stack l-stack--8', dataset: { legal: 'host' } });
   const form = el('form', { class: 'c-auth__form l-stack l-stack--16', novalidate: true, dataset: { form: 'sign-up' } }, [
     field({ id: `${p}-name`, name: 'name', labelKey: 'auth.field.name', autocomplete: 'name' }),
     field({ id: `${p}-email`, name: 'email', labelKey: 'auth.field.email', type: 'email', autocomplete: 'email', dir: 'ltr', inputmode: 'email' }),
@@ -108,9 +109,18 @@ export async function mountSignUp({ root = document, params = new URLSearchParam
     field({ id: `${p}-password`, name: 'password', labelKey: 'auth.field.password', type: 'password', autocomplete: 'new-password', dir: 'ltr', help: 'auth.field.password.help' }),
     field({ id: `${p}-confirm`, name: 'confirm', labelKey: 'auth.field.passwordConfirm', type: 'password', autocomplete: 'new-password', dir: 'ltr' }),
     sup ? el('p', { class: 'c-note', role: 'note', dataset: { attributed: sup.slug } }, [icon('no-supervisor', { size: 'sm' }), el('span', { class: 'c-note__text' }, t('auth.signUp.supervisor'))]) : null,
-    el('p', { class: 't-body-sm t-muted' }, t('auth.signUp.terms')),
+    legalHost,
     status, submit,
   ]);
+  // The Terms of Service and Privacy Policy: linked before the account exists, their versions recorded with the acceptance.
+  const legalLink = (kind) => el('a', { href: route(`legal/${kind}/`), target: '_blank', rel: 'noopener', dataset: { legal: kind } }, t(`auth.signUp.${kind}Link`));
+  let versions = { terms: null, privacy: null };
+  try { versions = await legalVersions(getLocale()); } catch { /* treated as not supplied */ }
+  const supplied = !!(versions.terms && versions.privacy);
+  render(legalHost, supplied
+    ? [el('label', { class: 'c-choice', for: `${p}-accept` }, [el('input', { class: 'c-choice__input', type: 'checkbox', id: `${p}-accept`, name: 'accept', required: true }), el('span', { class: 'c-choice__text' }, [t('auth.signUp.acceptPrefix'), ' ', legalLink('terms'), ' ', t('auth.signUp.and'), ' ', legalLink('privacy'), versions.terms.version ? el('span', { class: 't-body-sm t-muted' }, ` · ${t('auth.signUp.legalVersion')} ${versions.terms.version}`) : null])]),
+      el('p', { class: 'c-field__error', id: `${p}-accept-err`, role: 'alert', hidden: true })]
+    : [el('p', { class: 'c-note', role: 'note', dataset: { legal: 'pending' } }, [icon('no-info', { size: 'sm' }), el('span', { class: 'c-note__text' }, [t('auth.signUp.legalPending'), ' ', legalLink('terms'), ' · ', legalLink('privacy')])])]);
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const v = Object.fromEntries(new FormData(form)); const errors = {};
@@ -119,9 +129,12 @@ export async function mountSignUp({ root = document, params = new URLSearchParam
     if (v.phone && !PHONE.test(v.phone)) errors.phone = t('auth.err.phone');
     if (!v.password) errors.password = t('auth.err.required'); else if (v.password.length < 8) errors.password = t('auth.err.password');
     if (v.confirm !== v.password) errors.confirm = t('auth.err.confirm');
-    if (applyErrors(form, errors, status)) return;
+    const acceptErr = form.querySelector(`#${p}-accept-err`);
+    if (acceptErr) { const okAccept = !!v.accept; acceptErr.hidden = okAccept; acceptErr.replaceChildren(...(okAccept ? [] : [icon('no-alert', { size: 'sm' }), el('span', {}, t('auth.err.accept'))])); form.querySelector('[name=accept]').setAttribute('aria-invalid', String(!okAccept)); if (!okAccept) errors.accept = t('auth.err.accept'); }
+    if (Object.keys(errors).length) { const focused = applyErrors(form, errors, status); if (!focused) { status.dataset.tone = 'error'; status.textContent = t('book.status.fix', 1); form.querySelector('[name=accept]')?.focus(); } return; }
+    const acceptance = supplied ? { terms: versions.terms, privacy: versions.privacy, locale: getLocale() } : null;
     setButtonState(submit, 'loading'); status.dataset.tone = ''; status.textContent = t('auth.status.creating');
-    try { await signUp({ name: v.name, email: v.email, phone: v.phone, password: v.password, locale: getLocale(), supervisorId: sup?.slug ?? null }); form.reset(); go(); }
+    try { await signUp({ name: v.name, email: v.email, phone: v.phone, password: v.password, locale: getLocale(), supervisorId: sup?.slug ?? null, acceptance }); form.reset(); go(); }
     catch (error) { setButtonState(submit, 'idle'); form.querySelectorAll('[type=password]').forEach((i) => { i.value = ''; }); status.dataset.tone = 'error'; status.textContent = authError(error); if (error?.code === 'exists') setError(form, 'email', t('auth.err.exists')); form.querySelector('[name=email]').focus(); }
   });
   put('main', wrap([

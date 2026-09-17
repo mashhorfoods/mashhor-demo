@@ -163,10 +163,10 @@ const next = async (p, re) => { await Promise.all([p.waitForURL(re), p.click('.c
   // documents
   await go(p, 'account/documents/'); await mainReady(p); await p.waitForSelector('.c-acct-docrow');
   ok('documents: type, related booking, date, status, action only when available', await count(p, '.c-acct-docrow') === 8 && await count(p, '.c-acct-docrow[data-doc-status=available] [data-action=view]') === 7 && await count(p, '.c-acct-docrow[data-doc-status=pending] [data-action=view]') === 0);
-  await p.locator('[data-action=view]').first().click(); await p.waitForSelector('dialog[data-dialog=document][open]');
+  await p.locator('[data-action=view]').first().click(); await p.waitForSelector('dialog[data-dialog=document][data-state=ready]');
   ok('document view: dialog with content, dev label, print action; Escape closes', await count(p, 'dialog[open] .c-acct-docview') === 1 && await count(p, 'dialog[open] [data-dev=true]') === 1 && await count(p, 'dialog[open] [data-action=print]') === 1);
   await p.keyboard.press('Escape'); await p.waitForTimeout(100); ok('document dialog closed', await count(p, 'dialog[data-dialog=document]') === 0);
-  await go(p, 'account/documents/?id=doc-dev-6'); await mainReady(p); await p.waitForSelector('dialog[data-dialog=document][open]'); ok('deep link opens the document', /NO-DEV-F2IST/.test(await text(p, 'dialog[open] h2'))); await p.keyboard.press('Escape');
+  await go(p, 'account/documents/?id=doc-dev-6'); await mainReady(p); await p.waitForSelector('dialog[data-dialog=document][data-state=ready]'); ok('deep link opens the document', /NO-DEV-F2IST/.test(await text(p, 'dialog[open] h2'))); await p.keyboard.press('Escape');
   // payments
   await go(p, 'account/payments/'); await mainReady(p); await p.waitForSelector('.c-acct-pay');
   const payText = await text(p, '[data-account=main]');
