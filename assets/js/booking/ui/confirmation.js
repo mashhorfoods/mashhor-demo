@@ -10,7 +10,10 @@ import { money, dateShort } from '../../core/format.js';
 import { route } from '../../data/config.js';
 import { supervisorBySlug } from '../../data/supervisors.js';
 import { icon } from '../../components/ui.js';
-import { loadJourney, stepUrl, guard, attributionOf } from '../journey.js';
+import { loadJourney, stepUrl, guard, attributionOf, update } from '../journey.js';
+import { restoreSession, signInHref, signUpHref } from '../../account/auth.js';
+import { customer } from '../../account/customer.js';
+import { stateBlock } from '../../components/states.js';
 import { devNotice, progress, tripCard, recoveryState, legSummary, put, setHead, carrierName, isAr } from './shared.js';
 
 export function mountConfirmation({ root = document } = {}) {
@@ -28,6 +31,8 @@ export function mountConfirmation({ root = document } = {}) {
   const sup = attributionOf(j); const supRec = sup ? supervisorBySlug(sup.supervisor) : null;
   const row = (k, v) => (v ? el('div', { class: 'c-rules__row' }, [el('dt', {}, t(k)), el('dd', {}, v)]) : null);
   const titleKey = request ? 'bk.confirm.requestTitle' : b.status === 'confirmed' ? 'bk.confirm.title' : 'bk.confirm.processingTitle';
+  const accountHost = el('div', { dataset: { account: 'claim' } });
+  const viewTrip = el('a', { class: 'c-btn c-btn--primary', href: b.tripId ? route(`trips/?id=${encodeURIComponent(b.tripId)}`) : route('trips/'), dataset: { action: 'view-trip' } }, t('bk.confirm.viewTrip'));
   put('main', el('div', { class: 'c-confirm' }, [
     el('div', { class: 'c-confirm__head' }, [
       el('span', { class: 'c-confirm__icon' }, icon('no-check-circle', { size: 'xl' })),
@@ -46,14 +51,34 @@ export function mountConfirmation({ root = document } = {}) {
     ])),
     el('section', { class: 'l-stack l-stack--8', 'aria-labelledby': 'next-title' }, [el('h2', { class: 't-h3', id: 'next-title' }, t('bk.confirm.next')),
       el('ol', { class: 'c-inclusions', role: 'list' }, ['bk.confirm.next1', 'bk.confirm.next2', 'bk.confirm.next3'].map((k) => el('li', {}, [icon('no-check', { size: 'sm' }), el('span', {}, t(k))])))]),
+    accountHost,
     el('div', { class: 'c-journey__actions c-confirm__actions' }, [
       el('div', { class: 'l-cluster l-cluster--8' }, [
-        el('a', { class: 'c-btn c-btn--primary', href: route(`trips/${encodeURIComponent(b.reference)}/`), title: t('bk.confirm.viewTripSoon') }, t('bk.confirm.viewTrip')),
+        viewTrip,
         el('button', { type: 'button', class: 'c-btn c-btn--secondary', onclick: () => window.print() }, [icon('no-documents', { size: 'sm' }), el('span', {}, t('bk.confirm.download'))]),
-        el('a', { class: 'c-btn c-btn--secondary', href: route('help/contact/') }, t('bk.confirm.support')),
+        el('a', { class: 'c-btn c-btn--secondary', href: route('account/support/') }, t('bk.confirm.support')),
       ]),
       el('a', { class: 'c-btn c-btn--tertiary', href: route('book/') }, t('bk.confirm.newSearch')),
     ]),
   ]), root);
-  return { booking: b };
+
+  // ---- The account: a signed-in customer keeps the booking; a guest is invited to. Stage 12
+  const here = location.pathname + location.search;
+  const claimed = async () => {
+    const { status } = await restoreSession();
+    if (status !== 'customer') {
+      viewTrip.href = signInHref(here); viewTrip.classList.replace('c-btn--primary', 'c-btn--secondary');   // the one red action is the sign-in that keeps the booking
+      accountHost.replaceChildren(stateBlock({ variant: 'info', iconName: 'no-customer', headingLevel: 2, title: t('acct.claim.title'), text: t('acct.claim.text'),
+        actions: [{ id: 'claim-sign-in', label: t('auth.signIn.action'), href: signInHref(here), variant: 'c-btn--primary' }, { id: 'claim-sign-up', label: t('auth.signIn.create'), href: signUpHref(here) }] }));
+      return null;
+    }
+    try {
+      const rec = b.claimed ? await customer.booking(b.reference) : await customer.claimBooking(j);
+      if (rec) { update({ booking: { ...loadJourney().booking, claimed: true, tripId: rec.tripId } }); viewTrip.href = route(`trips/?id=${encodeURIComponent(rec.tripId)}`); viewTrip.removeAttribute('title');
+        accountHost.replaceChildren(el('p', { class: 'c-note', role: 'status', dataset: { claimed: rec.tripId } }, [icon('no-check-circle', { size: 'sm' }), el('span', { class: 'c-note__text' }, [t('acct.claim.done'), ' ', el('a', { href: viewTrip.href }, t('acct.claim.view'))])])); }
+      return rec;
+    } catch (error) { console.warn('[no] booking could not be attached to the account', error); return null; }
+  };
+  const done = claimed();
+  return { booking: b, claimed: done };
 }

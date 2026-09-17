@@ -1281,3 +1281,118 @@ airport / city registry the supplier serves; fare-rule texts, baggage
 policies and service-fee amounts; the terms the review step links to; e-mail
 or SMS confirmation delivery. Until these exist the journey runs on the
 development adapter and says so on every screen.
+
+## 12 — Customer account
+
+The authenticated customer ecosystem: sign in / sign up / sign out /
+password recovery, a customer session the header reads, and an account
+where a customer finds trips, bookings, travellers, documents, payments,
+notifications, support and settings. Everything runs on two clearly
+labelled **development adapters** (identity and customer data) that a
+production identity provider and backend API replace one line each; no
+screen presents the development set-up as security.
+
+```
+account/index.html                     dashboard
+account/sign-in/ · sign-up/ · forgot-password/ · reset-password/ · sign-out/
+trips/index.html                       my trips (?id= → one trip, everything that belongs to it)
+account/bookings/index.html            bookings (?id= → one booking)
+account/travellers/ · documents/ · payments/ · notifications/ · support/ · settings/
+
+assets/js/account/
+  auth.js             provider contract, the stored opaque token, restoreSession() (the
+                      session the header shows is derived from the provider on every load),
+                      signIn/signUp/signOut/requestReset/resetPassword, safeNext() for
+                      booking continuity (in-site paths only)
+  customer.js         the data facade: every call carries the session token; the adapter
+                      resolves it to ONE customer — screens never name a customer id
+  adapters/dev-auth.js       development identity: accounts in this browser, salted digest,
+                             12-hour tokens, single-use reset links, a one-click development customer
+  adapters/dev-customer.js   development records for the seeded customer; new customers start
+                             empty and gain records only from bookings made on this site
+  adapters/installed.js      the two registrations a production build swaps
+  ui/shell.js         mountAccount(): session guard, navigation, support entry, shared pieces
+  ui/auth-screens.js  sign in, sign up, forgot, reset, sign out
+  ui/dashboard.js · trips.js · bookings.js · travellers.js · documents.js · payments.js ·
+  notifications.js · support.js · settings.js
+assets/css/22-account.css
+tests/account.mjs   the Stage 12 suite (782 checks)
+```
+
+### Architecture and authorization
+
+* **Authentication → session → data → screens.** `page.js` restores the
+  session before the header paints; `components/session.js` is only ever
+  set from the provider's answer. The client keeps one opaque token in
+  `localStorage`; nothing about the role is trusted from the client.
+* **Scoping.** `customer.js` passes the token to the adapter, which resolves
+  it to a customer and answers from that customer's records. A URL id for a
+  trip, booking or document that belongs to someone else resolves to *not
+  found*; a call without a token is refused. The backend enforces the same
+  boundary when connected; the frontend already never asks any other way.
+* **Continuity.** Sign-in and sign-up accept `?next=` (validated: same site,
+  no scheme, no traversal) and return there. The Stage 11 journey lives in
+  the session, so a guest who signs in mid-booking continues where they
+  were, with search, selection, options, typed draft, locale and supervisor
+  attribution intact. At the confirmation a signed-in customer's booking is
+  attached to the account (idempotently) and becomes a trip; a guest sees
+  the invitation to keep it and, after signing in, returns to the same
+  confirmation, where it is attached.
+* **Attribution.** The supervisor from the entry link is carried through
+  sign-up, the booking and the trip; the customer record takes it from the
+  first attributed booking and cannot edit it. No commission, no supervisor
+  surface (Stage 13).
+
+### Screens
+
+* **Dashboard** — identity, the next trip with a countdown, the latest
+  booking, four quick actions, unread notifications, the support entry.
+* **My trips** — search and status filter (shown once there are trips),
+  cards with destination, dates, services, status and the next action.
+* **Trip details** — every service of the trip (flight, hotel, visa …) in
+  one view with reference, status, payment status and its details; the
+  trip's documents (pending ones shown as *not issued yet*), payments,
+  supervisor and support.
+* **Bookings** — reference, service, date, status, payment status, total,
+  trip; one booking with its documents and payments.
+* **Travellers** — add / edit / delete saved travellers (names, birth date,
+  gender, nationality, passport, expiry; nothing else). Passport numbers are
+  masked in lists. A signed-in customer picks a saved traveller in the
+  booking's traveller form.
+* **Documents** — only what the (development) booking system issued:
+  tickets, confirmations, receipts; a visa still with the consulate shows
+  as pending with no action. A document opens in a dialog with print/save.
+* **Payments** — booking, date, amount, currency, status, transaction
+  reference, method label. No card data exists on this site.
+* **Notifications** — unread/read, filter, mark one or all, open the
+  related record.
+* **Support** — verified channels only (none are configured, so the
+  honest "announced soon" note), the supervisor when there is one, recent
+  support replies.
+* **Settings** — profile (name, phone, language; e-mail locked as the
+  identifier; image slot honest), password change, sign out, the
+  supervisor shown read-only.
+
+### Acceptance
+
+`npm test`: the earlier fourteen suites, the account suite (authentication
+including invalid credentials, session expiry, reset links single-use and
+non-enumerating, outage; authorization across two customers and via the
+facade; trips, details, bookings, documents, payments, notifications,
+support, settings; travellers add/edit/delete/validation and the booking
+picker; booking continuity and attribution; 390 / 834 / 1440 × ar / en on
+every screen with no overflow, one h1, ≤ 1 dominant action, labelled
+controls, touch targets, no Arabic left in English; dialog focus handling),
+links, the language audit (0 untranslated across 49 pages) and the
+accessibility audit (0 findings) all green with zero console errors.
+
+### Security notes and what production must supply
+
+The development identity adapter keeps a salted SHA-256 digest of the
+password in `localStorage` — a stand-in for testing screens, not security;
+the notice on every auth screen says so. Production needs: a hosted
+identity provider (server sessions or HttpOnly cookies, real password
+policy, MFA if wanted), a backend customer API that enforces the customer
+boundary, document storage with signed URLs, the payment layer's history
+endpoint, notification delivery (e-mail / SMS / push), and the terms and
+privacy documents the sign-up refers to.

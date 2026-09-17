@@ -1,0 +1,124 @@
+/* ============================================================================
+   22 — CUSTOMER ACCOUNT  Stage 12
+
+   Sign-in forms, the account shell (navigation + main + support), trip and
+   booking cards, traveller cards, documents, payments, notifications. Built
+   from the tokens and the existing primitives; logical properties only.
+   ========================================================================= */
+
+@layer components {
+  .c-acct-inline { display: flex; align-items: flex-start; gap: var(--space-4); }
+  .c-acct-inline .c-icon { flex: none; margin-block-start: 0.15em; }
+  /* An arrow that points back toward the start of the reading direction. */
+  .c-icon--start { scale: -1 1; } [dir="rtl"] .c-icon--start { scale: 1 1; }
+  .c-badge--error { background-color: var(--color-error-bg); color: var(--color-error-fg); }
+
+  /* ---- Auth forms: one narrow column ------------------------------------ */
+  .c-auth { display: grid; gap: var(--space-24); max-inline-size: 30rem; margin-inline: auto; }
+  .c-auth__form { padding: var(--space-24); border: var(--border-hairline); border-radius: var(--radius-lg); background-color: var(--color-surface); }
+  .c-auth__pw { display: flex; gap: var(--space-8); align-items: stretch; }
+  .c-auth__pw .c-field__control { flex: 1; min-inline-size: 0; }
+  .c-auth__toggle { flex: none; }
+  .c-auth__dev { display: grid; gap: var(--space-8); padding-block-start: var(--space-16); border-block-start: var(--border-hairline); }
+
+  /* ---- Account shell ---------------------------------------------------- */
+  .c-account { display: grid; gap: var(--space-24); align-items: start; }
+  .c-account__main { display: grid; gap: var(--space-24); min-inline-size: 0; }
+  .c-account__side { display: grid; gap: var(--space-16); min-inline-size: 0; }
+  @media (min-width: 64em) {
+    .c-account { grid-template-columns: minmax(0, 3fr) minmax(0, 9fr); gap: var(--space-40); }
+    .c-account__side { position: sticky; inset-block-start: calc(var(--header-height) + var(--space-16)); }
+  }
+  /* The navigation: a sidebar on desktop, a scrolling strip of chips on phones and tablets. */
+  .c-acct-nav__list { display: flex; gap: var(--space-8); margin: 0; padding: 0 0 var(--space-4); list-style: none; overflow-x: auto; scrollbar-width: none; scroll-snap-type: inline proximity; }
+  .c-acct-nav__list::-webkit-scrollbar { display: none; }
+  /* The strip scrolls inside its column; its content never widens the page. */
+  .c-acct-nav, .c-account__side > * { min-inline-size: 0; max-inline-size: 100%; }
+  @media (max-width: 63.999em) { .c-acct-nav { overflow: hidden; } }
+  .c-acct-nav__list li { flex: none; scroll-snap-align: start; }
+  .c-acct-nav__link {
+    display: inline-flex; align-items: center; gap: var(--space-8);
+    min-block-size: var(--control-height-sm); padding: var(--space-8) var(--space-12);
+    border: var(--border-hairline); border-radius: var(--radius-pill);
+    font-size: var(--text-body-sm); font-weight: var(--weight-medium); color: var(--color-text); text-decoration: none; white-space: nowrap;
+    background-color: var(--color-surface);
+  }
+  .c-acct-nav__link:hover { border-color: var(--color-gray-500); }
+  .c-acct-nav__link[aria-current="page"] { background-color: var(--color-primary); border-color: var(--color-primary); color: var(--color-white); }
+  @media (min-width: 64em) {
+    .c-acct-nav__list { flex-direction: column; gap: var(--space-4); overflow: visible; }
+    .c-acct-nav__link { display: flex; border-radius: var(--radius-md); border-color: transparent; background: none; min-block-size: var(--control-height); }
+    .c-acct-nav__link:hover { background-color: var(--color-bg-subtle); border-color: transparent; }
+    .c-acct-nav__link[aria-current="page"] { background-color: var(--color-surface-brand); color: var(--color-text-brand); border-color: transparent; }
+  }
+  .c-acct-support { display: grid; gap: var(--space-12); padding: var(--space-16); border: var(--border-hairline); border-radius: var(--radius-lg); background-color: var(--color-bg-subtle); }
+  .c-acct-support__title { display: flex; align-items: center; gap: var(--space-4); font-size: var(--text-body); font-weight: var(--weight-semibold); }
+  .c-acct-support__sup { display: flex; gap: var(--space-8); align-items: flex-start; font-size: var(--text-body-sm); text-decoration: none; color: var(--color-text); }
+  .c-acct-support__sup strong { color: var(--color-text-secondary); font-size: var(--text-caption); font-weight: var(--weight-medium); }
+  .c-acct-support__channels { display: flex; flex-wrap: wrap; gap: var(--space-8); }
+  @media (max-width: 63.999em) { .c-account__side .c-acct-support { display: none; } }   /* the phone/tablet copy sits after the content */
+  @media (min-width: 64em) { .c-account__main > .c-acct-support { display: none; } }
+
+  .c-acct-grid { display: grid; gap: var(--space-16); align-items: start; }
+  @media (min-width: 48em) { .c-acct-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-24); } }
+  .c-acct-list { display: grid; gap: var(--space-12); }
+  .c-acct-tools { display: grid; gap: var(--space-12); }
+  @media (min-width: 48em) { .c-acct-tools { grid-template-columns: minmax(0, 1fr) auto; align-items: center; } .c-acct-tools > [role="status"] { grid-column: 1 / -1; } }
+  .c-acct-filters { display: flex; flex-wrap: wrap; gap: var(--space-8); }
+  .c-acct-quick { display: grid; gap: var(--space-8); }
+  @media (min-width: 30em) { .c-acct-quick { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+  /* ---- Trip card --------------------------------------------------------- */
+  .c-acct-trip { display: grid; gap: var(--space-12); padding: var(--space-16); }
+  .c-acct-trip__head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-12); flex-wrap: wrap; }
+  .c-acct-trip__title { font-size: var(--text-h4); font-weight: var(--weight-semibold); }
+  .c-acct-trip__title a { color: inherit; text-decoration: none; }
+  .c-acct-trip__meta { display: grid; gap: var(--space-8); margin: 0; font-size: var(--text-body-sm); }
+  @media (min-width: 30em) { .c-acct-trip__meta { grid-template-columns: repeat(3, minmax(0, auto)); gap: var(--space-16); } }
+  .c-acct-trip__meta dt { color: var(--color-text-secondary); font-size: var(--text-caption); } .c-acct-trip__meta dd { margin: 0; font-weight: var(--weight-medium); }
+  .c-acct-trip__services { display: flex; flex-wrap: wrap; gap: var(--space-8); }
+  .c-acct-trip__service { display: inline-flex; align-items: center; gap: var(--space-4); }
+  .c-acct-trip__foot { display: flex; justify-content: space-between; align-items: center; gap: var(--space-8); flex-wrap: wrap; padding-block-start: var(--space-8); border-block-start: var(--border-hairline); }
+  .c-acct-trip--large { padding: var(--space-24); }
+
+  /* ---- Booking / document / payment / notification rows ----------------- */
+  .c-acct-booking, .c-acct-docrow, .c-acct-pay, .c-acct-ntf.c-card { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-12); padding: var(--space-16); align-items: start; }
+  .c-acct-booking, .c-acct-pay { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .c-acct-docrow { grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; }
+  .c-acct-booking__icon { display: grid; place-items: center; inline-size: 44px; block-size: 44px; border-radius: var(--radius-md); background-color: var(--color-surface-brand); color: var(--color-primary); }
+  .c-acct-booking__body { display: grid; gap: var(--space-4); min-inline-size: 0; }
+  .c-acct-booking__title { font-size: var(--text-body); font-weight: var(--weight-semibold); overflow-wrap: anywhere; }
+  .c-acct-booking__title a { color: inherit; text-decoration: none; }
+  .c-acct-booking__badges { display: flex; flex-wrap: wrap; gap: var(--space-8); }
+  .c-acct-booking__amount { text-align: end; }
+  @media (max-width: 29.999em) { .c-acct-booking, .c-acct-pay { grid-template-columns: auto minmax(0, 1fr); } .c-acct-booking__amount { grid-column: 2; text-align: start; } }
+  .c-acct-service .c-review-block__title { display: flex; align-items: center; gap: var(--space-4); }
+  .c-acct-docs { display: grid; gap: var(--space-8); margin: 0; padding: 0; list-style: none; }
+  .c-acct-doc { display: flex; align-items: center; gap: var(--space-12); font-size: var(--text-body-sm); }
+  .c-acct-doc__body { display: grid; flex: 1; min-inline-size: 0; }
+  .c-acct-ntf-list { display: grid; gap: var(--space-8); margin: 0; padding: 0; list-style: none; }
+  .c-acct-ntf-list .c-acct-ntf { display: grid; gap: var(--space-4); padding: var(--space-8) var(--space-12); border-inline-start: 3px solid var(--color-gray-300); }
+  .c-acct-ntf--unread { border-color: var(--color-primary) !important; }
+  .c-acct-ntf.c-card.c-acct-ntf--unread { background-color: var(--color-surface-brand); }
+  .c-acct-ntf__head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-8); }
+  .c-acct-ntf__title { font-size: var(--text-body); font-weight: var(--weight-semibold); }
+  .c-acct-ntf__actions { display: flex; flex-wrap: wrap; gap: var(--space-8); padding-block-start: var(--space-4); }
+
+  /* ---- Travellers -------------------------------------------------------- */
+  .c-acct-trv { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-12); padding: var(--space-16); align-items: center; }
+  .c-acct-trv__avatar { display: grid; place-items: center; inline-size: 44px; block-size: 44px; border-radius: var(--radius-circle); background-color: var(--color-gray-100); font-family: var(--font-data); font-weight: var(--weight-bold); }
+  .c-acct-trv__body { display: grid; gap: var(--space-4); min-inline-size: 0; }
+  .c-acct-trv__name { font-size: var(--text-body); font-weight: var(--weight-semibold); }
+  .c-acct-trv__actions { display: flex; flex-wrap: wrap; gap: var(--space-8); grid-column: 2; }
+  @media (min-width: 40em) { .c-acct-trv { grid-template-columns: auto minmax(0, 1fr) auto; } .c-acct-trv__actions { grid-column: auto; } }
+
+  /* ---- Document view ----------------------------------------------------- */
+  .c-acct-docview { display: grid; gap: var(--space-16); }
+  .c-acct-docview__head { display: grid; gap: var(--space-4); padding-block-end: var(--space-12); border-block-end: var(--border-defined); }
+  @media print {
+    body.is-printing-doc .l-page { display: none !important; }
+    body.is-printing-doc dialog[data-dialog="document"] { display: block; position: static; inline-size: auto; max-block-size: none; box-shadow: none; border: 0; }
+    body.is-printing-doc dialog[data-dialog="document"]::backdrop { display: none; }
+    body.is-printing-doc .c-modal__foot, body.is-printing-doc .c-modal__head .c-btn { display: none !important; }
+  }
+}

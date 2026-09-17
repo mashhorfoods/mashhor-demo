@@ -1,5 +1,5 @@
 # Number One Travel & Tourism — Website Foundation
-## نمبرون للسفر و السياحة · Stage 10 — COMPLETE / BUILT + VERIFIED (10.1–10.12) · Stage 11 — BUILT + VERIFIED
+## نمبرون للسفر و السياحة · Stage 10 — COMPLETE / BUILT + VERIFIED (10.1–10.12) · Stage 11 — BUILT + VERIFIED · Stage 12 — BUILT + VERIFIED
 
 The master visual, UX and frontend foundation. Every later website stage
 inherits it.
@@ -8,6 +8,7 @@ inherits it.
 | --- | --- |
 | **Full documentation** | [`docs/FOUNDATION.md`](docs/FOUNDATION.md) — Stage 10.1 foundation |
 | **Stages 10.2 – 10.11** | [`docs/STAGES.md`](docs/STAGES.md) — header & navigation, footer, homepage, services, service details, destinations, offers, booking entry, supervisor profile, refinement |
+| **Stage 12 — customer account** | [`docs/STAGES.md` §12](docs/STAGES.md#12--customer-account) — sign in / sign up / recovery on a labelled development identity adapter, dashboard, trips, trip details, bookings, travellers, documents, payments, notifications, support, settings; `tests/account.mjs` |
 | **Stage 11 — booking engine** | [`docs/STAGES.md` §11](docs/STAGES.md#11--booking-experience--booking-engine) — search → results → compare → details → travellers → extras → review → payment → confirmation on a clearly labelled development adapter; `tests/journey.mjs` |
 | **Code-quality cleanup** | [`docs/CLEANUP.md`](docs/CLEANUP.md) — what was removed, merged and split; `npm test` |
 | **Stage 10 final QA** | [`docs/STAGE-10-QA.md`](docs/STAGE-10-QA.md) — Stage 10.12 · **STAGE 10 — COMPLETE / BUILT + VERIFIED** |

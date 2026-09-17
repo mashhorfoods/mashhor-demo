@@ -486,6 +486,14 @@ component in this layer. Permission is asked, never assumed.
    texts, service-fee amounts, the booking terms, and confirmation delivery
    (e-mail / SMS). Each is one registration in `adapters/installed.js` or
    `payment.js`; the screens do not change.
+3c. **Identity and customer API (Stage 12).** The account runs on
+   `assets/js/account/adapters/dev-auth.js` and `dev-customer.js`, both
+   labelled on screen. Needed: a hosted identity provider (server sessions
+   or HttpOnly cookies), a backend customer API that enforces the customer
+   boundary, document storage with signed URLs, the payment layer's history
+   endpoint, notification delivery, and the terms / privacy documents the
+   sign-up refers to. Each is one registration in
+   `account/adapters/installed.js`; the screens do not change.
 4. ~~**Production domain**~~ — resolved. The site deploys to
    `https://mashhorfoods.github.io/mashhor-demo/`; canonical and `og:url` are
    set. Because it is a *project* page served from a subpath, routes are stored

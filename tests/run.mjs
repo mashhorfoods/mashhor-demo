@@ -31,7 +31,7 @@ const origin = `http://127.0.0.1:${server.address().port}`;
 const env = { ...process.env, TEST_ORIGIN: origin, BASE: `${origin}${PREFIX}` };
 
 const args = process.argv.slice(2);
-const SUITES = ['final', 'ghx', 'ghm', 'gfx', 'home', 'services', 'detail', 'destinations', 'offers', 'booking', 'supervisor', 'journey', 'rm', 'links'];
+const SUITES = ['final', 'ghx', 'ghm', 'gfx', 'home', 'services', 'detail', 'destinations', 'offers', 'booking', 'supervisor', 'journey', 'account', 'rm', 'links'];
 const wanted = args.filter((a) => !a.startsWith('--'));
 const suites = wanted.length ? wanted : (args.includes('--audits') ? [] : SUITES);
 const audits = !wanted.length;
@@ -60,6 +60,7 @@ if (audits) {
   const pages = ['index.html', '404.html', 'styleguide.html', 'services/index.html', 'destinations/index.html', 'offers/index.html', 'book/index.html'];
   for (const dir of ['services', 'offers', 'supervisor']) for (const d of readdirSync(join(ROOT, dir), { withFileTypes: true })) if (d.isDirectory()) pages.push(`${dir}/${d.name}/index.html`);
   pages.push('search/index.html'); for (const d of readdirSync(join(ROOT, 'booking'), { withFileTypes: true })) if (d.isDirectory()) pages.push(`booking/${d.name}/index.html`);
+  pages.push('trips/index.html', 'account/index.html'); for (const d of readdirSync(join(ROOT, 'account'), { withFileTypes: true })) if (d.isDirectory()) pages.push(`account/${d.name}/index.html`);
   await run('i18n', join(ROOT, 'tools/i18n-audit.mjs'), { PAGES: pages.join(',') });
   await run('a11y', join(ROOT, 'tools/a11y-audit.mjs'));
 }

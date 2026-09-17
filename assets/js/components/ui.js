@@ -33,6 +33,8 @@ import { t } from '../core/i18n.js';
 let SPRITE = 'assets/icons/sprite.svg';
 let spritePromise = null;
 
+let unloading = false;
+if (typeof window !== 'undefined') window.addEventListener('pagehide', () => { unloading = true; });
 export const setSpritePath = (path) => { SPRITE = path; };
 
 /** Fetch and inject the sprite. Safe to call repeatedly. */
@@ -59,7 +61,8 @@ export function ensureSprite(path = SPRITE) {
     .catch((error) => {
       // file:// has no fetch. Fall back to the external reference, which at
       // least renders in Firefox, rather than failing silently everywhere.
-      console.warn('[no] Icon sprite could not be injected (%s). Falling back to external references.', error.message);
+      // A navigation that interrupts the fetch is not a failure worth reporting.
+      if (!unloading) console.warn('[no] Icon sprite could not be injected (%s). Falling back to external references.', error.message);
       document.documentElement.dataset.spriteFallback = 'true';
     });
 

@@ -13,6 +13,8 @@ import { loadJourney, setTravellers, stepUrl, guard, update } from '../journey.j
 import { travellerSlots, travellerFields, CONTACT_FIELDS, validateTraveller, validateContact } from '../travellers.js';
 import { totalTravellers } from '../pricing.js';
 import { devNotice, progress, tripCard, recoveryState, put, setHead, isAr } from './shared.js';
+import { isAuthenticated } from '../../account/auth.js';
+import { customer } from '../../account/customer.js';
 
 function field(f, prefix, value = '') {
   const id = `${prefix}-${f.id}`;
@@ -90,6 +92,20 @@ export function mountTravellers({ root = document } = {}) {
   });
   root.querySelectorAll('form').forEach((f) => f.addEventListener('submit', (e) => { e.preventDefault(); submit.click(); }));
   [...forms.map((f) => f.form), contactForm].forEach((f) => f.addEventListener('input', draft));
+
+  // A signed-in customer picks a saved traveller to fill a form (Stage 12). Guests see nothing extra.
+  if (isAuthenticated()) customer.travellers().then((saved) => {
+    if (!saved.length) return;
+    forms.forEach(({ form, fields }) => {
+      const id = `${form.dataset.traveller}-pick`;
+      const select = el('select', { class: 'c-field__control', id, dataset: { pick: 'traveller' }, onchange: (e) => {
+        const tr = saved.find((x) => x.id === e.currentTarget.value); if (!tr) return;
+        fields.forEach((f) => { const c = form.querySelector(`[name="${f.id}"]`); if (c && tr[f.id] != null) c.value = tr[f.id]; });
+        draft();
+      } }, [el('option', { value: '' }, t('acct.trv.pickHint')), ...saved.map((tr) => el('option', { value: tr.id }, `${tr.firstName} ${tr.lastName}`))]);
+      form.querySelector('.c-traveller__head').after(el('div', { class: 'c-field' }, [el('label', { class: 'c-field__label', for: id }, t('acct.trv.pick')), select]));
+    });
+  }).catch(() => {});
 
   put('main', el('div', { class: 'l-stack l-stack--24' }, [
     el('div', { class: 'l-stack l-stack--8' }, [el('h1', { class: 't-h1' }, t('bk.tr.title')), el('p', { class: 't-body t-muted' }, `${t('bk.tr.text')} · ${t('bk.tr.count', totalTravellers(j.context.travellers))}`)]),

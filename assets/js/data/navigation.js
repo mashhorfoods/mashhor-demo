@@ -144,13 +144,14 @@ export const ACCOUNT_GUEST = [
 ];
 
 export const ACCOUNT_CUSTOMER = [
+  { id: 'account',   icon: 'no-customer',     href: 'account/',              labelAr: 'حسابي',      labelEn: 'My account' },
   { id: 'trips',     icon: 'no-booking',      href: 'trips/',                labelAr: 'رحلاتي',     labelEn: 'My trips' },
   { id: 'bookings',  icon: 'no-ticket',       href: 'account/bookings/',     labelAr: 'حجوزاتي',    labelEn: 'My bookings' },
   { id: 'travelers', icon: 'no-users',        href: 'account/travellers/',   labelAr: 'المسافرون',  labelEn: 'Travellers' },
   { id: 'documents', icon: 'no-documents',    href: 'account/documents/',    labelAr: 'المستندات',  labelEn: 'Documents' },
   { id: 'payments',  icon: 'no-payment',      href: 'account/payments/',     labelAr: 'المدفوعات',  labelEn: 'Payments' },
   { id: 'notifs',    icon: 'no-notification', href: 'account/notifications/',labelAr: 'الإشعارات',  labelEn: 'Notifications' },
-  { id: 'support',   icon: 'no-support',      href: 'help/',                 labelAr: 'الدعم',      labelEn: 'Support' },
+  { id: 'support',   icon: 'no-support',      href: 'account/support/',      labelAr: 'المساعدة',   labelEn: 'Help' },
   { id: 'settings',  icon: 'no-settings',     href: 'account/settings/',     labelAr: 'الإعدادات',  labelEn: 'Settings', divider: true },
   { id: 'logout',    icon: 'no-logout',       href: 'account/sign-out/',     labelAr: 'تسجيل الخروج', labelEn: 'Sign out' },
 ];

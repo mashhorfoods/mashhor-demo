@@ -307,7 +307,7 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
   await dev(p, 'no.dev.quote', null); await dev(p, 'no.dev.book', 'error'); await p.reload(); await p.waitForFunction(() => window.no?.review); await p.waitForSelector('#review-terms');
   await p.check('#review-terms'); await next(p, /payment/); await p.waitForFunction(() => window.no?.payment);
   await p.check('#pm-dev-success'); await p.click('[data-action=pay]'); await p.waitForSelector('.c-state--warning');
-  ok('booking failure after payment → warning with support + back, not a confirmation', /payment/.test(p.url()) && await count(p, '.c-state--warning a[href*="help/contact"]') === 1 && !(await journey(p)).booking);
+  ok('booking failure after payment → warning with support + back, not a confirmation', /payment/.test(p.url()) && await count(p, '.c-state--warning a[href*="account/support"]') === 1 && !(await journey(p)).booking);
   await c.close();
 }
 

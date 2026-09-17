@@ -15,4 +15,10 @@ Allow: /
 # The design-system reference is for the team, not for search results.
 Disallow: /styleguide.html
 
+# Private journeys and customer pages carry noindex too; they are never search results.
+Disallow: /search/
+Disallow: /booking/
+Disallow: /account/
+Disallow: /trips/
+
 Sitemap: https://mashhorfoods.github.io/mashhor-demo/sitemap.xml

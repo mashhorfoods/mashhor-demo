@@ -276,7 +276,7 @@ export function tripCard(trip) {
         el('div', {}, [
           el('p', { class: 'c-trip__ref u-data' }, trip.reference),
           el('h3', { class: 'c-trip__route', id: titleId }, [
-            el('a', { class: 'c-card__link', href: route(`trips/${trip.id}/`) }, pick(trip, 'title')),
+            el('a', { class: 'c-card__link', href: route(`trips/?id=${trip.id}`) }, pick(trip, 'title')),
           ]),
         ]),
         statusBadge(trip.status),

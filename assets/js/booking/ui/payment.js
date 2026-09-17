@@ -6,6 +6,7 @@
    ========================================================================= */
 
 import { el, render } from '../../core/dom.js';
+import { route } from '../../data/config.js';
 import { t, pick } from '../../core/i18n.js';
 import { money } from '../../core/format.js';
 import { icon, setButtonState } from '../../components/ui.js';
@@ -91,7 +92,7 @@ export function mountPayment({ root = document } = {}) {
       } catch (error) {
         console.warn('[no] booking failed after payment', error);
         state.status = 'bookFailed';
-        render(main, [el('h1', { class: 't-h1' }, t('bk.pay.title')), stateBlock({ variant: 'warning', iconName: 'no-alert', title: t('bk.pay.bookFailed.title'), text: t('bk.pay.bookFailed.text'), actions: [{ label: t('action.help'), href: stepUrl('review').replace('booking/review/', 'help/contact/'), variant: 'c-btn--primary' }, { label: t('bk.pay.backReview'), href: stepUrl('review') }] })]);
+        render(main, [el('h1', { class: 't-h1' }, t('bk.pay.title')), stateBlock({ variant: 'warning', iconName: 'no-alert', title: t('bk.pay.bookFailed.title'), text: t('bk.pay.bookFailed.text'), actions: [{ label: t('action.help'), href: route('account/support/'), variant: 'c-btn--primary' }, { label: t('bk.pay.backReview'), href: stepUrl('review') }] })]);
         return null;
       }
     } catch (error) {

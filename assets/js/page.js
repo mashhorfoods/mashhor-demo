@@ -25,6 +25,8 @@ import { NAV_BOTTOM } from './data/navigation.js';
 import { setSpritePath, ensureSprite, initAccordions, initTabs, initModals, initPopovers, icon } from './components/ui.js';
 import { mountHeader } from './components/header.js';
 import { mountFooter } from './components/footer.js';
+import './account/adapters/installed.js';
+import { restoreSession } from './account/auth.js';
 
 /**
  * Wire the document: sprite, language, and the behaviours every page shares.
@@ -40,6 +42,8 @@ export async function boot({ sprite = 'assets/icons/sprite.svg', locale = true, 
     applyTranslations();
     onLocaleChange(() => { applyTranslations(); onLocale?.(); });
   }
+  // The customer session, if any, before the header paints: the account menu reads it.
+  await restoreSession();
   document.documentElement.classList.remove('no-js');
   document.documentElement.classList.add('js');
   initAccordions(); initTabs(); initModals(); initPopovers();
