@@ -193,7 +193,7 @@ for (const o of offers) {
         support: document.querySelectorAll('[data-offer=support] .c-support__panel').length,
         placeholders: document.querySelectorAll('a[href^="tel:"], a[href*="wa.me"], a[href^="mailto:"]').length,
         numbers: /\d{3,}\s?(ج\.س|SDG|USD)|خصم|%/.test(document.querySelector('main').innerText),
-        mediaAlt: document.querySelector('.c-hero__media [role=img]')?.getAttribute('aria-label'),
+        mediaAlt: document.querySelector('.c-hero__media [role=img]')?.getAttribute('aria-label') || document.querySelector('.c-hero__media img')?.getAttribute('alt'),
       };
     });
     const T = `${o.slug}/${loc}`;
