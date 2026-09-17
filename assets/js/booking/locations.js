@@ -41,7 +41,6 @@ const norm = (s) => String(s ?? '').trim().toLowerCase()
   .replace(/\s+/g, ' ');
 
 export const locationByCode = (code) => LOCATIONS.find((l) => l.code === String(code ?? '').toUpperCase()) ?? null;
-export const locationBySlug = (slug) => LOCATIONS.find((l) => l.slug === slug) ?? null;
 
 /**
  * Turn what a customer typed into a location: an exact code, a selected

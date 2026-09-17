@@ -13,16 +13,12 @@
 // UI being built now (§40).
 // ============================================================================
 import { config } from './config.mjs';
-import { q, now } from './db.mjs';
-import { hex, HttpError, str } from './http.mjs';
+import { q, now, paginate } from './db.mjs';
+import { hex, HttpError, loginAttempts, recordLoginFailure, clearLoginFailures } from './http.mjs';
 import { hash, same, checkPassword, normEmail } from './identity.mjs';
 import { warn } from './logger.mjs';
 
 const J = (s, d) => { try { return s ? JSON.parse(s) : d; } catch { return d; } };
-
-/** Reserved route segments under /supervisor/ that a slug may never take (they are the portal's own pages). */
-export const RESERVED_SLUGS = ['dashboard', 'customers', 'leads', 'bookings', 'revenue', 'performance', 'notifications', 'settings', 'profile', 'sign-in', 'sign-up', 'sign-out', 'forgot-password', 'reset-password', 'admin', 'me', 'auth', 'api'];
-export const isValidSlug = (slug) => typeof slug === 'string' && /^[a-z0-9]([a-z0-9-]{0,38}[a-z0-9])?$/.test(slug) && !RESERVED_SLUGS.includes(slug);
 
 /* ---- rows → contract shapes ---------------------------------------------- */
 /** Public-safe: what the (future) public directory and the portal's own "my profile" view may show anyone. No credential, no internal id. */
@@ -42,18 +38,17 @@ export function privateSupervisor(s) {
 }
 export const supervisorById = (id) => q.get('SELECT * FROM supervisors WHERE id = ?', id);
 export const supervisorByEmail = (email) => q.get('SELECT * FROM supervisors WHERE email = ?', normEmail(email));
-export const supervisorBySlug = (slug) => q.get('SELECT * FROM supervisors WHERE slug = ?', slug);
 export const activeSupervisor = (id) => { const s = supervisorById(id); return s && s.active ? s : null; };
 
 /* ---- credentials (same algorithm as identity.mjs; a separate store) ------ */
 /** True only for an ACTIVE supervisor with a password already set — a freshly provisioned account (no password yet) never authenticates by guessing. */
 export function verifySupervisorPassword({ email, password, ip }) {
   const e = normEmail(email); const keys = [`sv:e:${e}`, `sv:ip:${ip}`];
-  if (keys.some((k) => attempts(k) >= config.lockout.attempts)) { warn('supervisor.auth.lockout', { ip }); throw new HttpError(429, 'rateLimited', { retryAfter: Math.ceil(config.lockout.windowMs / 1000) }); }
+  if (keys.some((k) => loginAttempts(k) >= config.lockout.attempts)) { warn('supervisor.auth.lockout', { ip }); throw new HttpError(429, 'rateLimited', { retryAfter: Math.ceil(config.lockout.windowMs / 1000) }); }
   const s = supervisorByEmail(e);
   const ok = !!s && s.active && s.password_hash && typeof password === 'string' && same(hash(password, s.password_salt), s.password_hash);
-  if (!ok) { keys.forEach(recordFailure); throw new HttpError(401, 'invalid'); }
-  keys.forEach(clearFailures); return s;
+  if (!ok) { keys.forEach(recordLoginFailure); throw new HttpError(401, 'invalid'); }
+  keys.forEach(clearLoginFailures); return s;
 }
 export function setSupervisorPassword(supervisorId, password) { checkPassword(password); const salt = hex(8); q.run('UPDATE supervisors SET password_salt = ?, password_hash = ?, updated_at = ? WHERE id = ?', salt, hash(password, salt), now(), supervisorId); }
 export function changeSupervisorPassword(supervisorId, current, next) {
@@ -61,9 +56,6 @@ export function changeSupervisorPassword(supervisorId, current, next) {
   if (!s.password_hash || !same(hash(String(current ?? ''), s.password_salt), s.password_hash)) throw new HttpError(422, 'invalid');
   setSupervisorPassword(s.id, next);
 }
-function attempts(key) { const row = q.get('SELECT * FROM login_attempts WHERE key = ?', key); const t = Date.now(); if (!row || t - row.window_start > config.lockout.windowMs) return 0; return row.count; }
-function recordFailure(key) { const t = Date.now(); const row = q.get('SELECT * FROM login_attempts WHERE key = ?', key); if (!row || t - row.window_start > config.lockout.windowMs) q.run('INSERT OR REPLACE INTO login_attempts (key, count, window_start) VALUES (?, 1, ?)', key, t); else q.run('UPDATE login_attempts SET count = count + 1 WHERE key = ?', key); }
-const clearFailures = (key) => q.run('DELETE FROM login_attempts WHERE key = ?', key);
 
 /* ---- sessions (own table, own cookies — backend/http.mjs) ----------------- */
 export function createSupervisorSession(supervisorId) {
@@ -94,7 +86,6 @@ export function consumeSupervisorReset(token, password) {
 }
 
 /* ---- attribution: business rule from business_config, server-authoritative (§9, §26, §27) ---- */
-export const attributionModel = () => J(q.get("SELECT value_json FROM business_config WHERE key = 'attribution_model'")?.value_json, { rule: 'first', status: 'pending_business_confirmation' });
 export const commissionModel = () => J(q.get("SELECT value_json FROM business_config WHERE key = 'commission_model'")?.value_json, { model: null, status: 'pending_business_configuration' });
 
 function logAttribution(customerId, supervisorId, previousSupervisorId, source, actor) {
@@ -106,11 +97,10 @@ function logAttribution(customerId, supervisorId, previousSupervisorId, source, 
  * when it changes nothing, so the audit trail shows every touch a customer received. Returns the customer's
  * attribution after the call (unchanged if one already existed).
  */
-export function assignAttribution(customerId, supervisorId, source, actor = 'customer') {
+export function assignAttribution(customerId, supervisorId, source, actor = 'customer', at = now()) {
   const c = q.get('SELECT * FROM customers WHERE id = ?', customerId); if (!c) return null;
   if (c.attribution_supervisor) { logAttribution(customerId, c.attribution_supervisor, c.attribution_supervisor, `${source}:no-op(first-wins)`, actor); return { supervisorId: c.attribution_supervisor, source: c.attribution_source, at: c.attribution_at }; }
   if (!supervisorId || !activeSupervisor(supervisorId)) return null;
-  const at = now();
   q.run('UPDATE customers SET attribution_supervisor = ?, attribution_source = ?, attribution_at = ?, updated_at = ? WHERE id = ?', supervisorId, source, at, at, customerId);
   logAttribution(customerId, supervisorId, null, source, actor);
   return { supervisorId, source, at };
@@ -136,12 +126,14 @@ export function supervisorCustomers(supervisorId, { search = '', status = '', pa
   if (search) { where.push('(name LIKE ? OR email LIKE ? OR phone LIKE ?)'); const s = `%${search}%`; params.push(s, s, s); }
   const sql = `SELECT * FROM customers WHERE ${where.join(' AND ')} ORDER BY created_at DESC`;
   const all = q.all(sql, ...params);
-  const size = Math.min(50, Math.max(1, pageSize)); const p = Math.max(1, page);
-  const slice = all.slice((p - 1) * size, p * size);
+  const { slice, ...meta } = paginate(all, page, pageSize, 50);
+  // One batched query for the page's booking stats instead of two per row (was an N+1 on this list screen).
+  const ids = slice.map((c) => c.id); const stats = new Map();
+  if (ids.length) for (const r of q.all(`SELECT customer_id, COUNT(*) AS n, MAX(created_at) AS m FROM bookings WHERE customer_id IN (${ids.map(() => '?').join(',')}) GROUP BY customer_id`, ...ids)) stats.set(r.customer_id, r);
   return {
     items: slice.map((c) => ({ id: c.id, name: c.name, email: c.email, phone: c.phone, locale: c.locale, attributionAt: c.attribution_at, createdAt: c.created_at,
-      bookingsCount: q.get('SELECT COUNT(*) AS n FROM bookings WHERE customer_id = ?', c.id).n, lastActivityAt: q.get('SELECT MAX(created_at) AS m FROM bookings WHERE customer_id = ?', c.id).m ?? c.created_at })),
-    page: p, pageSize: size, total: all.length, nextPage: p * size < all.length ? p + 1 : null,
+      bookingsCount: stats.get(c.id)?.n ?? 0, lastActivityAt: stats.get(c.id)?.m ?? c.created_at })),
+    ...meta,
   };
 }
 /** A customer detail — ONLY when currently attributed to this supervisor; a foreign customer id is 404, exactly like /me/*. */
@@ -163,8 +155,11 @@ export function supervisorBookings(supervisorId, { status = '', service = '', pa
   if (status) { where.push('status = ?'); params.push(status); }
   if (service) { where.push('service = ?'); params.push(service); }
   const all = q.all(`SELECT * FROM bookings WHERE ${where.join(' AND ')} ORDER BY created_at DESC`, ...params);
-  const size = Math.min(50, Math.max(1, pageSize)); const p = Math.max(1, page); const slice = all.slice((p - 1) * size, p * size);
-  return { items: slice.map((b) => ({ id: b.id, customerId: b.customer_id, customerName: custOf(b.customer_id)?.name ?? '', service: b.service, status: b.status, paymentStatus: b.payment_status, amount: b.amount, currency: b.currency, createdAt: b.created_at, tripId: b.trip_id })), page: p, pageSize: size, total: all.length, nextPage: p * size < all.length ? p + 1 : null };
+  const { slice, ...meta } = paginate(all, page, pageSize, 50);
+  // One batched customer-name lookup for the page instead of one query per row (was an N+1 on this list screen).
+  const ids = [...new Set(slice.map((b) => b.customer_id))]; const names = new Map();
+  if (ids.length) for (const c of q.all(`SELECT id, name FROM customers WHERE id IN (${ids.map(() => '?').join(',')})`, ...ids)) names.set(c.id, c.name);
+  return { items: slice.map((b) => ({ id: b.id, customerId: b.customer_id, customerName: names.get(b.customer_id) ?? '', service: b.service, status: b.status, paymentStatus: b.payment_status, amount: b.amount, currency: b.currency, createdAt: b.created_at, tripId: b.trip_id })), ...meta };
 }
 /** ONLY a booking currently attributed to this supervisor — never any booking by id. */
 export function supervisorBooking(supervisorId, bookingId) {
@@ -176,8 +171,8 @@ export function supervisorLeads(supervisorId, { status = '', page = 1, pageSize 
   const where = ['supervisor_id = ?']; const params = [supervisorId];
   if (status) { where.push('status = ?'); params.push(status); }
   const all = q.all(`SELECT * FROM leads WHERE ${where.join(' AND ')} ORDER BY created_at DESC`, ...params);
-  const size = Math.min(50, Math.max(1, pageSize)); const p = Math.max(1, page); const slice = all.slice((p - 1) * size, p * size);
-  return { items: slice.map(nLead), page: p, pageSize: size, total: all.length, nextPage: p * size < all.length ? p + 1 : null };
+  const { slice, ...meta } = paginate(all, page, pageSize, 50);
+  return { items: slice.map(nLead), ...meta };
 }
 const nLead = (l) => ({ id: l.id, customerId: l.customer_id, name: l.name, contact: l.contact, source: l.source, serviceInterest: l.service_interest, status: l.status, convertedBookingId: l.converted_booking_id, createdAt: l.created_at, updatedAt: l.updated_at });
 export const LEAD_STATUSES = ['new', 'contacted', 'in_progress', 'converted', 'closed'];
@@ -226,6 +221,6 @@ export const nSupervisorNotification = (r) => ({ id: r.id, kind: r.kind, at: r.a
 /** Supervisor rights / commission, scoped to this supervisor only. Empty (not fabricated) until the business configures a model; existing rows read status 'pending_configuration' with a null amount rather than a guessed figure. §18 */
 export function supervisorCommissions(supervisorId, { page = 1, pageSize = 20 } = {}) {
   const all = q.all('SELECT * FROM commissions WHERE supervisor_id = ? ORDER BY created_at DESC', supervisorId);
-  const size = Math.min(50, Math.max(1, pageSize)); const p = Math.max(1, page); const slice = all.slice((p - 1) * size, p * size);
-  return { model: commissionModel(), items: slice.map((c) => ({ id: c.id, bookingId: c.booking_id, amount: c.amount, currency: c.currency, status: c.status, period: c.period, createdAt: c.created_at })), page: p, pageSize: size, total: all.length, nextPage: p * size < all.length ? p + 1 : null };
+  const { slice, ...meta } = paginate(all, page, pageSize, 50);
+  return { model: commissionModel(), items: slice.map((c) => ({ id: c.id, bookingId: c.booking_id, amount: c.amount, currency: c.currency, status: c.status, period: c.period, createdAt: c.created_at })), ...meta };
 }

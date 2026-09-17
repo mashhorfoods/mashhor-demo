@@ -16,8 +16,8 @@
 // on a guess.
 // ============================================================================
 import { config } from './config.mjs';
-import { q, now } from './db.mjs';
-import { hex, HttpError, str } from './http.mjs';
+import { q, now, paginate } from './db.mjs';
+import { hex, HttpError, str, loginAttempts, recordLoginFailure, clearLoginFailures } from './http.mjs';
 import { hash, same, checkPassword, normEmail } from './identity.mjs';
 import { warn } from './logger.mjs';
 
@@ -48,17 +48,13 @@ export const staffById = (id) => q.get('SELECT * FROM staff WHERE id = ?', id);
 export const staffByEmail = (email) => q.get('SELECT * FROM staff WHERE email = ?', normEmail(email));
 
 /* ---- credentials (same algorithm as identity.mjs; a third, separate store) ------ */
-function attempts(key) { const row = q.get('SELECT * FROM login_attempts WHERE key = ?', key); const t = Date.now(); if (!row || t - row.window_start > config.lockout.windowMs) return 0; return row.count; }
-function recordFailure(key) { const t = Date.now(); const row = q.get('SELECT * FROM login_attempts WHERE key = ?', key); if (!row || t - row.window_start > config.lockout.windowMs) q.run('INSERT OR REPLACE INTO login_attempts (key, count, window_start) VALUES (?, 1, ?)', key, t); else q.run('UPDATE login_attempts SET count = count + 1 WHERE key = ?', key); }
-const clearFailures = (key) => q.run('DELETE FROM login_attempts WHERE key = ?', key);
-
 export function verifyStaffPassword({ email, password, ip }) {
   const e = normEmail(email); const keys = [`st:e:${e}`, `st:ip:${ip}`];
-  if (keys.some((k) => attempts(k) >= config.lockout.attempts)) { warn('staff.auth.lockout', { ip }); throw new HttpError(429, 'rateLimited', { retryAfter: Math.ceil(config.lockout.windowMs / 1000) }); }
+  if (keys.some((k) => loginAttempts(k) >= config.lockout.attempts)) { warn('staff.auth.lockout', { ip }); throw new HttpError(429, 'rateLimited', { retryAfter: Math.ceil(config.lockout.windowMs / 1000) }); }
   const s = staffByEmail(e);
   const ok = !!s && s.active && s.password_hash && typeof password === 'string' && same(hash(password, s.password_salt), s.password_hash);
-  if (!ok) { keys.forEach(recordFailure); throw new HttpError(401, 'invalid'); }
-  keys.forEach(clearFailures); return s;
+  if (!ok) { keys.forEach(recordLoginFailure); throw new HttpError(401, 'invalid'); }
+  keys.forEach(clearLoginFailures); return s;
 }
 export function setStaffPassword(staffId, password) { checkPassword(password); const salt = hex(8); q.run('UPDATE staff SET password_salt = ?, password_hash = ?, updated_at = ? WHERE id = ?', salt, hash(password, salt), now(), staffId); }
 export function changeStaffPassword(staffId, current, next) {
@@ -104,8 +100,8 @@ export function auditEvents({ entityType = '', entityId = '', page = 1, pageSize
   if (entityType) { where.push('entity_type = ?'); params.push(entityType); }
   if (entityId) { where.push('entity_id = ?'); params.push(entityId); }
   const all = q.all(`SELECT * FROM audit_events ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY at DESC`, ...params);
-  const size = Math.min(100, Math.max(1, pageSize)); const p = Math.max(1, page); const slice = all.slice((p - 1) * size, p * size);
-  return { items: slice.map(nAudit), page: p, pageSize: size, total: all.length, nextPage: p * size < all.length ? p + 1 : null };
+  const { slice, ...meta } = paginate(all, page, pageSize, 100);
+  return { items: slice.map(nAudit), ...meta };
 }
 const nAudit = (r) => ({ id: r.id, actorId: r.actor_id, actorRole: r.actor_role, action: r.action, entityType: r.entity_type, entityId: r.entity_id, metadata: J(r.metadata_json, {}), at: r.at });
 
@@ -157,8 +153,11 @@ export function opsBookingList({ status = '', service = '', assignedTo = '', pag
   if (service) { where.push('service = ?'); params.push(service); }
   if (assignedTo) { where.push('assigned_operator = ?'); params.push(assignedTo); }
   const all = q.all(`SELECT * FROM bookings ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY created_at DESC`, ...params);
-  const size = Math.min(100, Math.max(1, pageSize)); const p = Math.max(1, page); const slice = all.slice((p - 1) * size, p * size);
-  return { items: slice.map((r) => ({ ...nBookingRow(r), missingDocuments: q.get("SELECT COUNT(*) AS n FROM documents WHERE booking_id = ? AND review_status != 'approved'", r.id).n })), page: p, pageSize: size, total: all.length, nextPage: p * size < all.length ? p + 1 : null };
+  const { slice, ...meta } = paginate(all, page, pageSize, 100);
+  // One batched count for the page instead of one query per row (was an N+1 on this list screen).
+  const ids = slice.map((r) => r.id); const missing = new Map();
+  if (ids.length) for (const r of q.all(`SELECT booking_id, COUNT(*) AS n FROM documents WHERE booking_id IN (${ids.map(() => '?').join(',')}) AND review_status != 'approved' GROUP BY booking_id`, ...ids)) missing.set(r.booking_id, r.n);
+  return { items: slice.map((r) => ({ ...nBookingRow(r), missingDocuments: missing.get(r.id) ?? 0 })), ...meta };
 }
 export function opsBookingDetail(bookingId) {
   const b = q.get('SELECT * FROM bookings WHERE id = ?', bookingId); if (!b) return null;
@@ -192,8 +191,8 @@ export function listTasks({ status = '', assignedTo = '', bookingId = '', page =
   if (assignedTo) { where.push('assigned_to = ?'); params.push(assignedTo); }
   if (bookingId) { where.push('booking_id = ?'); params.push(bookingId); }
   const all = q.all(`SELECT * FROM operation_tasks ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY created_at DESC`, ...params);
-  const size = Math.min(100, Math.max(1, pageSize)); const p = Math.max(1, page); const slice = all.slice((p - 1) * size, p * size);
-  return { items: slice.map(nTask), page: p, pageSize: size, total: all.length, nextPage: p * size < all.length ? p + 1 : null };
+  const { slice, ...meta } = paginate(all, page, pageSize, 100);
+  return { items: slice.map(nTask), ...meta };
 }
 export function taskById(id) { const r = q.get('SELECT * FROM operation_tasks WHERE id = ?', id); return r ? nTask(r) : null; }
 export function assignTask(id, assignedTo, actor) {
@@ -226,8 +225,8 @@ export function listEscalations({ status = '', page = 1, pageSize = 20 } = {}) {
   const where = []; const params = [];
   if (status) { where.push('status = ?'); params.push(status); }
   const all = q.all(`SELECT * FROM escalations ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY created_at DESC`, ...params);
-  const size = Math.min(100, Math.max(1, pageSize)); const p = Math.max(1, page); const slice = all.slice((p - 1) * size, p * size);
-  return { items: slice.map(nEscalation), page: p, pageSize: size, total: all.length, nextPage: p * size < all.length ? p + 1 : null };
+  const { slice, ...meta } = paginate(all, page, pageSize, 100);
+  return { items: slice.map(nEscalation), ...meta };
 }
 export function updateEscalationStatus(id, status, actor) {
   if (!ESCALATION_STATUSES.includes(status)) throw new HttpError(422, 'invalid');
@@ -327,7 +326,6 @@ const escapeHtml = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '
 const sanitizeTemplateBody = (s) => escapeHtml(String(s ?? '').replace(/<[^>]*>/g, '').slice(0, 4000));
 const nTemplate = (r) => ({ id: r.id, event: r.event, channel: r.channel, subjectAr: r.subject_ar, subjectEn: r.subject_en, bodyAr: r.body_ar, bodyEn: r.body_en, variables: J(r.variables_json, []), active: !!r.active, version: r.version, createdAt: r.created_at, updatedAt: r.updated_at });
 export const listTemplates = () => q.all('SELECT * FROM notification_templates ORDER BY event, channel').map(nTemplate);
-export const templateFor = (event, channel) => { const r = q.get('SELECT * FROM notification_templates WHERE event = ? AND channel = ? AND active = 1', event, channel); return r ? nTemplate(r) : null; };
 export function upsertTemplate({ event, channel, subjectAr = null, subjectEn = null, bodyAr, bodyEn, variables = [], active = true }, actor) {
   const existing = q.get('SELECT * FROM notification_templates WHERE event = ? AND channel = ?', event, channel);
   const t = now(); const cleanAr = sanitizeTemplateBody(bodyAr); const cleanEn = sanitizeTemplateBody(bodyEn);
@@ -349,6 +347,6 @@ export function notificationHistory({ customerId = '', bookingId = '', page = 1,
   let rows = q.all('SELECT * FROM outbox ORDER BY created_at DESC');
   if (customerId) rows = rows.filter((r) => r.customer_id === customerId);
   if (bookingId) rows = rows.filter((r) => { const p = J(r.payload_json, {}); return p.bookingId === bookingId; });
-  const size = Math.min(100, Math.max(1, pageSize)); const p = Math.max(1, page); const slice = rows.slice((p - 1) * size, p * size);
-  return { items: slice.map((r) => ({ id: r.id, channel: r.channel, event: r.template, at: r.created_at, status: r.status, reference: r.id })), page: p, pageSize: size, total: rows.length, nextPage: p * size < rows.length ? p + 1 : null };
+  const { slice, ...meta } = paginate(rows, page, pageSize, 100);
+  return { items: slice.map((r) => ({ id: r.id, channel: r.channel, event: r.template, at: r.created_at, status: r.status, reference: r.id })), ...meta };
 }

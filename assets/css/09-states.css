@@ -69,9 +69,6 @@
   /* What the customer can do next — always present. §21 */
   .c-state__next { font-size: var(--text-caption); color: var(--color-text-secondary); }
 
-  .c-state--inline { flex-direction: row; text-align: start; padding: var(--space-24); }
-  .c-state--inline .c-state__icon { inline-size: 40px; block-size: 40px; flex: none; }
-
   /* A region swapping between states keeps its height so the page does not
      jump when results replace a skeleton. */
   [data-state-region] { min-block-size: var(--state-min-height, auto); }

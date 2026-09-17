@@ -12,7 +12,6 @@
 const providers = new Map();
 export function registerPaymentProvider(p) { providers.set(p.id, p); return p; }
 export function paymentProviders() { return [...providers.values()]; }
-export function paymentProvider(id) { return providers.get(id) ?? [...providers.values()][0] ?? null; }
 
 export const DEV_PAYMENT = registerPaymentProvider({
   id: 'dev', dev: true, labelAr: 'وضع الدفع التجريبي', labelEn: 'Development payment mode',

@@ -14,7 +14,6 @@
 
 let adapter = null;
 export function registerLegalAdapter(a) { adapter = a; return a; }
-export const legalAdapter = () => adapter;
 
 export const KINDS = ['terms', 'privacy'];
 const cache = new Map();

@@ -4,7 +4,7 @@
 
 import { adapterFor } from './adapters/index.js';
 import { resolveLocation } from './locations.js';
-import { startSearch, setResults, loadJourney } from './journey.js';
+import { startSearch, setResults } from './journey.js';
 
 /**
  * Translate the booking context into a supplier-neutral request. Places are
@@ -48,6 +48,3 @@ export async function runSearch(ctx) {
   setResults(offers, { ...meta, mode: 'search', dev: adapter.dev });
   return { offers, meta, adapter, errors: [] };
 }
-
-/** The current results without a new search (the page came back). */
-export const currentResults = () => loadJourney().search?.results ?? null;

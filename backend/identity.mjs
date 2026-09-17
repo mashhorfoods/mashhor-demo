@@ -12,7 +12,7 @@
 import { scryptSync, timingSafeEqual } from 'node:crypto';
 import { config } from './config.mjs';
 import { q, now } from './db.mjs';
-import { hex, HttpError } from './http.mjs';
+import { hex, HttpError, loginAttempts, recordLoginFailure, clearLoginFailures } from './http.mjs';
 import { warn } from './logger.mjs';
 
 // Exported so backend/supervisor.mjs (Stage 13) can hash and compare supervisor passwords with the same scrypt settings
@@ -51,17 +51,13 @@ export function createIdentity({ name, email, phone, locale, password, attributi
 }
 
 /** Lockout: too many failures for an email or an address within the window → 429, whatever the password. */
-function attempts(key) { const row = q.get('SELECT * FROM login_attempts WHERE key = ?', key); const t = Date.now(); if (!row || t - row.window_start > config.lockout.windowMs) return 0; return row.count; }
-function recordFailure(key) { const t = Date.now(); const row = q.get('SELECT * FROM login_attempts WHERE key = ?', key); if (!row || t - row.window_start > config.lockout.windowMs) q.run('INSERT OR REPLACE INTO login_attempts (key, count, window_start) VALUES (?, 1, ?)', key, t); else q.run('UPDATE login_attempts SET count = count + 1 WHERE key = ?', key); }
-const clearFailures = (key) => q.run('DELETE FROM login_attempts WHERE key = ?', key);
-
 export function verifyPassword({ email, password, ip }) {
   const e = normEmail(email); const keys = [`e:${e}`, `ip:${ip}`];
-  if (keys.some((k) => attempts(k) >= config.lockout.attempts)) { warn('auth.lockout', { ip }); throw new HttpError(429, 'rateLimited', { retryAfter: Math.ceil(config.lockout.windowMs / 1000) }); }
+  if (keys.some((k) => loginAttempts(k) >= config.lockout.attempts)) { warn('auth.lockout', { ip }); throw new HttpError(429, 'rateLimited', { retryAfter: Math.ceil(config.lockout.windowMs / 1000) }); }
   const c = customerByEmail(e);
   const ok = !!c && typeof password === 'string' && same(hash(password, c.password_salt), c.password_hash);
-  if (!ok) { keys.forEach(recordFailure); throw new HttpError(401, 'invalid'); }   // one answer for unknown and wrong
-  keys.forEach(clearFailures); return c;
+  if (!ok) { keys.forEach(recordLoginFailure); throw new HttpError(401, 'invalid'); }   // one answer for unknown and wrong
+  keys.forEach(clearLoginFailures); return c;
 }
 export function changePassword(customerId, current, next) {
   const c = customerById(customerId); if (!c) throw new HttpError(401, 'unauthenticated');

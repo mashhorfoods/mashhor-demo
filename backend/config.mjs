@@ -55,7 +55,6 @@ export const config = Object.freeze({
   signingSecret, allowedOrigins, publicUrl,
   cookie: { secure: cookieSecure, sameSite: cookieSameSite, domain: env.BACKEND_COOKIE_DOMAIN || null },
   sessionTtlMs: num(env.BACKEND_SESSION_TTL_HOURS, 12) * 3600 * 1000,
-  refreshWindowMs: num(env.BACKEND_SESSION_REFRESH_MINUTES, 10) * 60 * 1000,
   resetTtlMs: num(env.BACKEND_RESET_TTL_MINUTES, 30) * 60 * 1000,
   lockout: { attempts: num(env.BACKEND_LOCKOUT_ATTEMPTS, 10), windowMs: num(env.BACKEND_LOCKOUT_MINUTES, 15) * 60 * 1000 },
   passwordMinLength: num(env.BACKEND_PASSWORD_MIN_LENGTH, 8),

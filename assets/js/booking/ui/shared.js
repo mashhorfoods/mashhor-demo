@@ -110,7 +110,7 @@ export const legSummary = (leg) => `${time(leg.departAt)} ${leg.from.code} → $
 export const offerTitle = (o) => `${carrierName(o.carrier)} · ${routeLine(o.legs).textContent} · ${duration(totalDuration(o))} · ${totalStops(o) ? t('flight.stops', totalStops(o)) : t('flight.direct')}`;
 
 /** Every journey page sets its head the same way. */
-export const setHead = (key) => setPageHead({ title: t(key), description: t('page.booking.description') });
+export const setHead = (key) => setPageHead({ title: t(key), description: t(key.replace(/\.[^.]+$/, '.description')) });
 
 /** Mount helper: draw content into [data-journey="…"] slots. */
 export const slot = (name, root = document) => qs(`[data-journey="${name}"]`, root);

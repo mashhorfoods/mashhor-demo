@@ -12,7 +12,7 @@ import { config } from './config.mjs';
 import { q, now } from './db.mjs';
 import { json, empty, fail, HttpError, readJson, str, isEmail, setSupervisorSessionCookies, clearSupervisorSessionCookies } from './http.mjs';
 import {
-  privateSupervisor, publicSupervisor, supervisorById, verifySupervisorPassword, changeSupervisorPassword, setSupervisorPassword,
+  privateSupervisor, supervisorById, verifySupervisorPassword, changeSupervisorPassword, setSupervisorPassword,
   createSupervisorSession, endSupervisorSession, createSupervisorReset, consumeSupervisorReset,
   supervisorCustomers, supervisorCustomer, supervisorBookings, supervisorBooking, supervisorLeads, updateLeadStatus, LEAD_STATUSES,
   supervisorRevenue, supervisorPerformance, supervisorCommissions, nSupervisorNotification, reassignAttribution, activeSupervisor,
@@ -86,7 +86,3 @@ export const admin = {
     return json(res, 200, { attribution: result });
   },
 };
-
-/** The public-safe row for the (future) directory endpoint used only by tests today; the live public profile still reads assets/js/data/supervisors.js (§5/§6 — no redesign). */
-export const supervisorPublicLookup = (slug) => { const s = q.get('SELECT * FROM supervisors WHERE slug = ? AND active = 1', slug); return s ? publicSupervisor(s) : null; };
-export const LEAD_STATUS_LIST = LEAD_STATUSES;

@@ -11,12 +11,6 @@
   .u-relative { position: relative; }
 
 
-  @media (max-width: 47.999em)  { .u-hide\@sm-down { display: none !important; } }
-  @media (min-width: 48em)      { .u-hide\@md-up   { display: none !important; } }
-  @media (max-width: 63.999em)  { .u-hide\@lg-down { display: none !important; } }
-  @media (min-width: 64em)      { .u-hide\@lg-up   { display: none !important; } }
-
-
   /* Images: reserve the box before the file arrives so nothing shifts. §30 */
   .u-img-cover { inline-size: 100%; block-size: 100%; object-fit: cover; }
 

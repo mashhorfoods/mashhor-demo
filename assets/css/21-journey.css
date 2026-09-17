@@ -123,7 +123,7 @@
 
   /* ---- Page layout: content + sticky summary ------------------------------ */
   .c-journey { display: grid; gap: var(--space-24); align-items: start; }
-  @media (min-width: 64em) { .c-journey { grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); gap: var(--space-48); } .c-journey--wide { grid-template-columns: minmax(0, 3fr) minmax(0, 9fr); } }
+  @media (min-width: 64em) { .c-journey { grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); gap: var(--space-48); } }
   .c-journey__main { display: grid; gap: var(--space-24); min-inline-size: 0; }
   .c-journey__aside { display: grid; gap: var(--space-16); min-inline-size: 0; }
   @media (min-width: 64em) { .c-journey__aside { position: sticky; inset-block-start: calc(var(--header-height) + var(--space-16)); } }

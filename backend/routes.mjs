@@ -6,7 +6,8 @@
 import { config } from './config.mjs';
 import { q, now } from './db.mjs';
 import { json, empty, fail, HttpError, hex, readJson, readBody, parseMultipart, str, isEmail, setSessionCookies, clearSessionCookies } from './http.mjs';
-import { publicCustomer, customerById, createIdentity, verifyPassword, changePassword, createSession, endSession, endAllSessions, createReset, consumeReset, validAttribution, normEmail } from './identity.mjs';
+import { publicCustomer, customerById, createIdentity, verifyPassword, changePassword, createSession, endSession, createReset, consumeReset, validAttribution, normEmail } from './identity.mjs';
+import { assignAttribution } from './supervisor.mjs';
 import { validateUpload, storage, signedUrl, verifySignature } from './storage.mjs';
 import { enqueue } from './mailer.mjs';
 import { legalDocument } from './legal.mjs';
@@ -87,8 +88,7 @@ export const me = {
       q.run('INSERT INTO bookings (id, customer_id, trip_id, service, status, payment_status, amount, currency, supervisor_id, ticketed, detail_json, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', ref, cid, tripId, str(ctxB.service ?? 'flights', 20), b.status === 'received' ? 'pending' : 'confirmed', paid ? 'paid' : 'unpaid', Number(b.total) || 0, str(b.currency ?? 'USD', 3) || 'USD', attribution?.supervisorId ?? null, 0, JSON.stringify(detail), t);
       if (paid) { q.run('INSERT INTO payments (id, customer_id, booking_id, at, amount, currency, status, reference, method_ar, method_en) VALUES (?,?,?,?,?,?,?,?,?,?)', `pay_${hex(6)}`, cid, ref, t, Number(b.total) || 0, str(b.currency ?? 'USD', 3) || 'USD', 'paid', str(b.payment?.transactionId ?? '', 60), 'مزوّد دفع تجريبي', 'Development payment provider'); q.run('INSERT INTO documents (id, customer_id, booking_id, trip_id, type, kind, status, size, content_type, deletable, issued_at, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', `doc_${hex(6)}`, cid, ref, tripId, 'receipt', 'issued', 'pending', null, null, 0, null, t); }
       q.run('INSERT INTO notifications (id, customer_id, kind, at, read, title_ar, title_en, text_ar, text_en, href, booking_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)', `ntf_${hex(6)}`, cid, 'booking', t, 0, b.status === 'received' ? 'استلمنا طلبك' : 'تم تأكيد حجزك', b.status === 'received' ? 'Request received' : 'Booking confirmed', `المرجع ${ref}.`, `Reference ${ref}.`, `account/bookings/?id=${ref}`, ref);
-      if (attribution && !ctx.customer.attribution_supervisor) { q.run('UPDATE customers SET attribution_supervisor = ?, attribution_source = ?, attribution_at = ?, updated_at = ? WHERE id = ?', attribution.supervisorId, 'booking', attribution.at, t, cid); q.run('INSERT INTO attribution_events (customer_id, supervisor_id, previous_supervisor_id, source, actor, at) VALUES (?,?,?,?,?,?)', cid, attribution.supervisorId, null, 'booking', 'customer', t); }
-      else if (attribution) { q.run('INSERT INTO attribution_events (customer_id, supervisor_id, previous_supervisor_id, source, actor, at) VALUES (?,?,?,?,?,?)', cid, ctx.customer.attribution_supervisor, ctx.customer.attribution_supervisor, 'booking:no-op(first-wins)', 'customer', t); }
+      if (attribution) assignAttribution(cid, attribution.supervisorId, 'booking', 'customer', t);
       return q.get('SELECT * FROM bookings WHERE id = ?', ref);
     });
     info('booking.claimed', { service: booking.service, attributed: !!attribution });
@@ -100,9 +100,13 @@ export const me = {
   travellerDelete(req, res, ctx, id) { const r = q.run('DELETE FROM travellers WHERE id = ? AND customer_id = ?', id, ctx.customer.id); if (!r.changes) return fail(res, 404, 'notFound'); return empty(res); },
   documents(req, res, ctx) {
     const cid = ctx.customer.id;
-    const bookingOf = (id) => { const b = id && q.get('SELECT * FROM bookings WHERE id = ? AND customer_id = ?', id, cid); return b ? nBooking(b) : null; };
-    const tripOf = (id) => { const t = id && q.get('SELECT * FROM trips WHERE id = ? AND customer_id = ?', id, cid); return t ? nTrip(t) : null; };
-    return json(res, 200, { documents: q.all('SELECT * FROM documents WHERE customer_id = ? ORDER BY created_at DESC', cid).map((d) => ({ ...nDoc(d), booking: bookingOf(d.booking_id), trip: tripOf(d.trip_id) })) });
+    const docs = q.all('SELECT * FROM documents WHERE customer_id = ? ORDER BY created_at DESC', cid);
+    // One batched lookup per related table instead of two queries per document row (was an N+1 on this list screen).
+    const bookingIds = [...new Set(docs.map((d) => d.booking_id).filter(Boolean))];
+    const tripIds = [...new Set(docs.map((d) => d.trip_id).filter(Boolean))];
+    const bookings = new Map(bookingIds.length ? q.all(`SELECT * FROM bookings WHERE customer_id = ? AND id IN (${bookingIds.map(() => '?').join(',')})`, cid, ...bookingIds).map((b) => [b.id, nBooking(b)]) : []);
+    const trips = new Map(tripIds.length ? q.all(`SELECT * FROM trips WHERE customer_id = ? AND id IN (${tripIds.map(() => '?').join(',')})`, cid, ...tripIds).map((t) => [t.id, nTrip(t)]) : []);
+    return json(res, 200, { documents: docs.map((d) => ({ ...nDoc(d), booking: bookings.get(d.booking_id) ?? null, trip: trips.get(d.trip_id) ?? null })) });
   },
   async documentUpload(req, res, ctx) {
     const ct = req.headers['content-type'] ?? ''; if (!ct.startsWith('multipart/form-data')) throw new HttpError(415, 'unsupported');
@@ -118,7 +122,11 @@ export const me = {
   payments(req, res, ctx, url) {
     const page = Math.max(1, Number(url.searchParams.get('page')) || 1); const size = Math.min(50, Math.max(1, Number(url.searchParams.get('pageSize')) || 20)); const cid = ctx.customer.id;
     const total = q.get('SELECT COUNT(*) AS n FROM payments WHERE customer_id = ?', cid).n;
-    const items = q.all('SELECT * FROM payments WHERE customer_id = ? ORDER BY at DESC LIMIT ? OFFSET ?', cid, size, (page - 1) * size).map((p) => ({ ...nPay(p), booking: p.booking_id ? (() => { const b = q.get('SELECT * FROM bookings WHERE id = ? AND customer_id = ?', p.booking_id, cid); return b ? nBooking(b) : null; })() : null }));
+    const rows = q.all('SELECT * FROM payments WHERE customer_id = ? ORDER BY at DESC LIMIT ? OFFSET ?', cid, size, (page - 1) * size);
+    // One batched booking lookup for the page instead of one query per row (was an N+1 on this list screen).
+    const bookingIds = [...new Set(rows.map((p) => p.booking_id).filter(Boolean))];
+    const bookings = new Map(bookingIds.length ? q.all(`SELECT * FROM bookings WHERE customer_id = ? AND id IN (${bookingIds.map(() => '?').join(',')})`, cid, ...bookingIds).map((b) => [b.id, nBooking(b)]) : []);
+    const items = rows.map((p) => ({ ...nPay(p), booking: bookings.get(p.booking_id) ?? null }));
     return json(res, 200, { items, page, pageSize: size, total, nextPage: page * size < total ? page + 1 : null });
   },
   notifications(req, res, ctx) { return json(res, 200, { notifications: q.all('SELECT * FROM notifications WHERE customer_id = ? ORDER BY at DESC', ctx.customer.id).map(nNtf) }); },

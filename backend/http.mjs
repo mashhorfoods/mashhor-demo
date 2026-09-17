@@ -1,9 +1,16 @@
 // BACKEND / HTTP — request plumbing: JSON, cookies, CORS, bodies with limits, multipart, errors, rate limiting.
 import { randomBytes } from 'node:crypto';
 import { config } from './config.mjs';
+import { q } from './db.mjs';
 
 export class HttpError extends Error { constructor(status, code, extra = {}) { super(code); this.status = status; this.code = code; this.extra = extra; } }
 export const hex = (n = 16) => randomBytes(n).toString('hex');
+
+/* ---- login lockout: one shared `login_attempts` table across customer/supervisor/staff identity (each keys its own
+   `e:<email>`/`ip:<ip>` rows, so the three roles never share a lockout window, only the storage/logic) ---- */
+export const loginAttempts = (key) => { const row = q.get('SELECT * FROM login_attempts WHERE key = ?', key); const t = Date.now(); if (!row || t - row.window_start > config.lockout.windowMs) return 0; return row.count; };
+export const recordLoginFailure = (key) => { const t = Date.now(); const row = q.get('SELECT * FROM login_attempts WHERE key = ?', key); if (!row || t - row.window_start > config.lockout.windowMs) q.run('INSERT OR REPLACE INTO login_attempts (key, count, window_start) VALUES (?, 1, ?)', key, t); else q.run('UPDATE login_attempts SET count = count + 1 WHERE key = ?', key); };
+export const clearLoginFailures = (key) => q.run('DELETE FROM login_attempts WHERE key = ?', key);
 
 export const json = (res, status, body, headers = {}) => { res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', ...headers }); res.end(body == null ? '' : JSON.stringify(body)); };
 export const empty = (res, status = 204, headers = {}) => { res.writeHead(status, { 'Cache-Control': 'no-store', ...headers }); res.end(); };

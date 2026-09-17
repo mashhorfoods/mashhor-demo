@@ -11,14 +11,12 @@
      saveContext / loadContext                 → sessionStorage, survives the hop
      contextToParams / continueUrl             → the Stage 11 route with the
                                                  context as a query string
-     entryUrl(params)                          → the /book/ route with a
-                                                 service and prefills
      applyEntryParams(widget, params)          → open a widget on what the
                                                  URL asks for
    ========================================================================= */
 
 import { t, pick, getLocale } from './i18n.js';
-import { route, bookingEntry } from '../data/config.js';
+import { route } from '../data/config.js';
 import { destinationById } from '../data/destinations.js';
 import { isActiveSupervisor } from '../data/supervisors.js';
 
@@ -192,8 +190,6 @@ export function contextFromParams(params) {
 
 /** Where "continue" goes: the Stage 11 search/results route. */
 export const continueUrl = (ctx) => `${route('search/')}?${contextToParams(ctx).toString()}`;
-/** Where every "book / request" door on the site goes: the booking entry. */
-export const entryUrl = (params) => route(bookingEntry(params instanceof URLSearchParams ? Object.fromEntries(params) : params));
 
 /**
  * Open a search widget on what the URL asks for: ?vertical=… selects the

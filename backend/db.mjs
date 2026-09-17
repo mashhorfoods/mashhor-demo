@@ -62,3 +62,10 @@ export const q = {
   tx: (fn) => { const d = open(); d.exec('BEGIN'); try { const r = fn(); d.exec('COMMIT'); return r; } catch (e) { d.exec('ROLLBACK'); throw e; } },
 };
 export const now = () => new Date().toISOString();
+
+/** The page/pageSize/total/nextPage shape every list read model answers with, in one place instead of nine near-identical copies. `all` is the already-filtered, already-ordered full result set — this only clamps and slices it. */
+export function paginate(all, page = 1, pageSize = 20, maxPageSize = 100) {
+  const size = Math.min(maxPageSize, Math.max(1, pageSize));
+  const p = Math.max(1, page);
+  return { slice: all.slice((p - 1) * size, p * size), page: p, pageSize: size, total: all.length, nextPage: p * size < all.length ? p + 1 : null };
+}
