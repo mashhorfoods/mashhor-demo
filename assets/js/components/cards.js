@@ -200,13 +200,10 @@ export function offerCard(offer, { entry = null, large = false } = {}) {
 
 /* ---------------------------------------------------------------------------
    MEDIA PLACEHOLDER
-   Photography is a Stage 10.1 gap (§17): the brief requires real, human,
-   authentic imagery, and every slot currently renders a generated, on-brand
-   stand-in (assets/images/CREDITS.md explains why and how it gets replaced)
-   rather than a real photograph. A slot with no image at all yet — the
+   Every photography slot (§17) is filled with the business's own supplied
+   photograph (assets/images/CREDITS.md). A slot with no image at all — the
    `src` is falsy — still falls back to this neutral box, reserving the
-   exact aspect ratio so dropping either the stand-in or the real photograph
-   in later shifts nothing. §30
+   exact aspect ratio so dropping a photograph in later shifts nothing. §30
    ------------------------------------------------------------------------ */
 export function mediaPlaceholder(src, alt = '') {
   if (src) {
