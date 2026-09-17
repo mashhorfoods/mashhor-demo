@@ -31,7 +31,7 @@ const origin = `http://127.0.0.1:${server.address().port}`;
 const env = { ...process.env, TEST_ORIGIN: origin, BASE: `${origin}${PREFIX}` };
 
 const args = process.argv.slice(2);
-const SUITES = ['final', 'ghx', 'ghm', 'gfx', 'home', 'services', 'detail', 'destinations', 'offers', 'booking', 'supervisor', 'journey', 'account', 'integration', 'backend', 'rm', 'links'];
+const SUITES = ['final', 'ghx', 'ghm', 'gfx', 'home', 'services', 'detail', 'destinations', 'offers', 'booking', 'supervisor', 'journey', 'account', 'integration', 'backend', 'supervisor-portal', 'rm', 'links'];
 const wanted = args.filter((a) => !a.startsWith('--'));
 const suites = wanted.length ? wanted : (args.includes('--audits') ? [] : SUITES);
 const audits = !wanted.length;

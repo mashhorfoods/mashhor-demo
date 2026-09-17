@@ -15,8 +15,10 @@ import { q, now } from './db.mjs';
 import { hex, HttpError } from './http.mjs';
 import { warn } from './logger.mjs';
 
-const hash = (password, salt) => scryptSync(password, salt, 32).toString('hex');
-const same = (a, b) => a.length === b.length && timingSafeEqual(Buffer.from(a), Buffer.from(b));
+// Exported so backend/supervisor.mjs (Stage 13) can hash and compare supervisor passwords with the same scrypt settings
+// without a second implementation; the credential STORE is separate (a different table), only the algorithm is shared.
+export const hash = (password, salt) => scryptSync(password, salt, 32).toString('hex');
+export const same = (a, b) => a.length === b.length && timingSafeEqual(Buffer.from(a), Buffer.from(b));
 export const normEmail = (e) => String(e ?? '').trim().toLowerCase();
 
 export function publicCustomer(c) {
@@ -43,6 +45,8 @@ export function createIdentity({ name, email, phone, locale, password, attributi
   const id = `cus_${hex(8)}`; const salt = hex(8); const t = now(); const attr = validAttribution(attribution);
   q.run('INSERT INTO customers (id, email, name, phone, locale, password_salt, password_hash, attribution_supervisor, attribution_source, attribution_at, acceptance_json, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)',
     id, normEmail(email), name, phone, locale, salt, hash(password, salt), attr?.supervisorId ?? null, attr?.source ?? null, attr?.at ?? null, acceptance ? JSON.stringify({ ...acceptance, at: t }) : null, t, t);
+  // Stage 13 audit trail (§26): every attribution a customer receives is logged server-side, at creation included.
+  if (attr) q.run('INSERT INTO attribution_events (customer_id, supervisor_id, previous_supervisor_id, source, actor, at) VALUES (?,?,?,?,?,?)', id, attr.supervisorId, null, 'sign-up', 'customer', t);
   return customerById(id);
 }
 

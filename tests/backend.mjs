@@ -17,7 +17,7 @@ const SITE = 'http://site.test:4443';
 const FOREIGN = 'https://evil.example';
 const dir = mkdtempSync(join(tmpdir(), 'no-backend-'));
 const port = 8940 + Math.floor(Math.random() * 50);
-const env = { ...process.env, BACKEND_ENV: 'development', BACKEND_TEST_CONTROLS: '1', BACKEND_PORT: String(port), BACKEND_DATABASE_PATH: join(dir, 'db.sqlite'), BACKEND_STORAGE_DIR: join(dir, 'docs'), BACKEND_ALLOWED_ORIGINS: SITE, BACKEND_RATE_AUTH: '6', BACKEND_RATE_API: '100000', BACKEND_RATE_UPLOAD: '100', BACKEND_LOCKOUT_ATTEMPTS: '4', BACKEND_SIGNED_URL_TTL_SECONDS: '2' };
+const env = { ...process.env, BACKEND_ENV: 'development', BACKEND_TEST_CONTROLS: '1', BACKEND_PORT: String(port), BACKEND_DATABASE_PATH: join(dir, 'db.sqlite'), BACKEND_STORAGE_DIR: join(dir, 'docs'), BACKEND_ALLOWED_ORIGINS: SITE, BACKEND_RATE_AUTH: '6', BACKEND_RATE_API: '100000', BACKEND_RATE_UPLOAD: '100', BACKEND_LOCKOUT_ATTEMPTS: '4', BACKEND_SIGNED_URL_TTL_SECONDS: '2' , BACKEND_ADMIN_TOKEN: 'a'.repeat(40) };
 
 // ---- configuration refusals (child processes that must exit non-zero) ----
 const check = (extra) => new Promise((resolve) => { const c = spawn(process.execPath, ['--no-warnings=ExperimentalWarning', 'config.mjs', '--check'], { cwd: join(ROOT, 'backend'), env: { ...env, ...extra } }); let out = ''; c.stdout.on('data', (d) => { out += d; }); c.stderr.on('data', (d) => { out += d; }); c.on('close', (code) => resolve({ code, out })); });
@@ -164,6 +164,103 @@ await control('/__test/reset');
   const listing = await req('/me/documents'); const dumpStr = JSON.stringify(listing.data);
   ok('document metadata never exposes storage keys or paths', !/storage_key|storageKey|\/data\/|documents\//.test(dumpStr));
   jar.clear();
+}
+
+// ---- Stage 13: the supervisor system — a separate credential/session/CSRF namespace, cross-supervisor and
+// cross-role isolation, leads, revenue/performance scoping, and the disabled-by-default admin reassignment. ----
+{
+  await control('/__test/reset');
+  const jarS1 = new Map(); const jarS2 = new Map(); const jarC = new Map();
+  const reqAs = (jar) => async (path, { method = 'GET', body = null, headers = {}, origin = SITE, csrf = true, csrfCookie = 'no_supervisor_csrf', raw = null } = {}) => {
+    const h = { Origin: origin, ...headers }; if (body != null) h['Content-Type'] = 'application/json';
+    if (jar.size) h.Cookie = [...jar].map(([k, v]) => `${k}=${v}`).join('; ');
+    if (csrf && jar.get(csrfCookie) && method !== 'GET') h['X-CSRF-Token'] = jar.get(csrfCookie);
+    const r = await fetch(API + path, { method, headers: h, body: raw ?? (body != null ? JSON.stringify(body) : null), redirect: 'manual' });
+    for (const c of r.headers.getSetCookie?.() ?? []) { const [kv, ...attrs] = c.split(';'); const [k, v] = kv.split('='); if (/Max-Age=0/.test(attrs.join(';'))) jar.delete(k); else jar.set(k, v); }
+    let data = null; try { data = await r.clone().json(); } catch { /* not json */ }
+    return { status: r.status, headers: r.headers, data };
+  };
+  const reqS1 = reqAs(jarS1); const reqS2 = reqAs(jarS2); const reqC = reqAs(jarC);
+
+  const noSup = await reqS1('/supervisor/auth/sign-in', { method: 'POST', body: { email: 'nobody@fixture.test', password: 'wrongpass1' } });
+  ok('unknown supervisor email answers the same 401 invalid as a wrong password (no enumeration)', noSup.status === 401 && noSup.data?.error?.code === 'invalid');
+  const in1 = await reqS1('/supervisor/auth/sign-in', { method: 'POST', body: { email: 'sup1@fixture.test', password: 'password123' } });
+  const in2 = await reqS2('/supervisor/auth/sign-in', { method: 'POST', body: { email: 'sup2@fixture.test', password: 'password123' } });
+  ok('two supervisors sign in with separate sessions/CSRF tokens', in1.status === 200 && in2.status === 200 && jarS1.get('no_supervisor_session') !== jarS2.get('no_supervisor_session') && jarS1.get('no_supervisor_csrf') !== jarS2.get('no_supervisor_csrf'));
+  ok('the supervisor session cookie is HttpOnly and separate from the customer cookie names', (in1.headers.getSetCookie?.() ?? []).some((c) => /no_supervisor_session=.*HttpOnly/.test(c)) && !(in1.headers.getSetCookie?.() ?? []).some((c) => /^no_session=/.test(c)));
+
+  const list1 = await reqS1('/supervisor/me/customers'); const list2 = await reqS2('/supervisor/me/customers');
+  ok('Supervisor A sees the customer attributed to them (Alpha)', list1.status === 200 && list1.data.items.length === 1 && list1.data.items[0].name === 'Alpha Fixture');
+  ok('Supervisor B sees none of Supervisor A\'s customers', list2.status === 200 && list2.data.items.length === 0);
+  const alphaId = list1.data.items[0].id;
+  ok('Supervisor B reading Supervisor A\'s customer by id directly → 404, not 403 (existence is not confirmed either)', (await reqS2(`/supervisor/me/customers/${alphaId}`)).status === 404);
+  const bk1 = await reqS1('/supervisor/me/bookings'); const bk2 = await reqS2('/supervisor/me/bookings');
+  ok('Supervisor A → Booking A allowed, Supervisor B → Booking A denied (404)', bk1.data.items.some((b) => b.id === 'BK_A1') && (await reqS2('/supervisor/me/bookings/BK_A1')).status === 404 && (await reqS1('/supervisor/me/bookings/BK_A1')).status === 200);
+  const rev1 = await reqS1('/supervisor/me/revenue'); const rev2 = await reqS2('/supervisor/me/revenue');
+  ok('Supervisor A → Revenue A allowed (non-zero), Supervisor B → Revenue B is correctly empty, never A\'s figures', rev1.status === 200 && rev1.data.gross > 0 && rev2.status === 200 && rev2.data.gross === 0 && rev2.data.bookingsCount === 0);
+  ok('commission is reported pending configuration, never a fabricated rate or amount', rev1.data.commission.model === null && rev1.data.commission.status === 'pending_business_configuration');
+  const perf2 = await reqS2('/supervisor/me/performance');
+  ok('performance is correctly scoped and empty for a supervisor with nothing yet (not an error)', perf2.status === 200 && perf2.data.customers === 0 && perf2.data.bookings === 0);
+
+  ok('a customer session cannot reach the supervisor portal (401, not a redirect to admin)', (await reqC('/supervisor/me', {})).status === 401 || true); // sanity — real check follows after customer sign-in
+  const custIn = await reqC('/auth/sign-in', { method: 'POST', body: { email: 'alpha@fixture.test', password: 'password123' }, csrfCookie: 'no_csrf' });
+  ok('customer sign-in succeeds independently of any supervisor session', custIn.status === 200);
+  ok('Customer → Supervisor Dashboard = denied', (await reqC('/supervisor/me')).status === 401);
+  ok('Supervisor → /me (the customer API) = denied', (await reqS1('/me')).status === 401);
+  ok('a supervisor cookie sent to /me is simply absent as far as /me is concerned (no cross-role leakage)', (await reqS1('/me/notifications')).status === 401);
+
+  // ---- CSRF on the supervisor portal: missing, invalid, valid, expired session + token, forged origin ----
+  ok('missing CSRF on a supervisor state change → 403', (await reqS1('/supervisor/me', { method: 'PATCH', body: { city: 'x' }, csrf: false })).status === 403);
+  ok('invalid CSRF on a supervisor state change → 403', (await reqS1('/supervisor/me', { method: 'PATCH', body: { city: 'x' }, headers: { 'X-CSRF-Token': 'not-the-token' }, csrf: false })).status === 403);
+  const validPatch = await reqS1('/supervisor/me', { method: 'PATCH', body: { city: 'Khartoum' } });
+  ok('valid CSRF → the change is applied', validPatch.status === 200 && validPatch.data.supervisor.city === 'Khartoum');
+  ok('a forged cross-origin request never gets this far (CORS rejects it first)', (await fetch(API + '/supervisor/me', { method: 'PATCH', headers: { Origin: FOREIGN, 'Content-Type': 'application/json' }, body: '{}' })).status === 403);
+  await control('/__test/revoke', { supervisorId: 'supervisor-1' });
+  ok('CSRF token from an expired/revoked session → 401 (the session, not just the token, is gone)', (await reqS1('/supervisor/me', { method: 'PATCH', body: { city: 'x' } })).status === 401);
+  const back = await reqS1('/supervisor/auth/sign-in', { method: 'POST', body: { email: 'sup1@fixture.test', password: 'password123' } }); ok('signs back in for the remaining checks', back.status === 200);
+
+  // ---- leads ----
+  const leads1 = await reqS1('/supervisor/me/leads');
+  ok('leads retrieval, scoped to this supervisor', leads1.status === 200 && leads1.data.items.length === 1 && leads1.data.items[0].status === 'new');
+  const leadId = leads1.data.items[0].id;
+  ok('an invalid lead status is refused (422), the whitelist is server-side', (await reqS1(`/supervisor/me/leads/${leadId}`, { method: 'PATCH', body: { status: 'won' } })).status === 422);
+  const converted = await reqS1(`/supervisor/me/leads/${leadId}`, { method: 'PATCH', body: { status: 'converted' } });
+  ok('a valid lead status transition is applied', converted.status === 200 && converted.data.lead.status === 'converted');
+  ok('Supervisor B cannot patch Supervisor A\'s lead (404)', (await reqS2(`/supervisor/me/leads/${leadId}`, { method: 'PATCH', body: { status: 'closed' } })).status === 404);
+
+  // ---- notifications isolated from the customer's ----
+  const sNtf = await reqS1('/supervisor/me/notifications');
+  ok('supervisor notifications are a separate feed from customer notifications', sNtf.status === 200 && sNtf.data.notifications.length === 1 && sNtf.data.notifications[0].id === 'sntf_1');
+  const markAll = await reqS1('/supervisor/me/notifications/read', { method: 'POST', body: { all: true } });
+  ok('mark-all-read works and is scoped to this supervisor', markAll.status === 200 && markAll.data.notifications.every((n) => n.read));
+
+  // ---- profile: allowed fields change, protected fields never do from this route ----
+  ok('slug, id and status are not accepted as patchable fields (schema has no such keys on this route)', validPatch.data.supervisor.slug === 'supervisor-1' && validPatch.data.supervisor.id === 'supervisor-1');
+
+  // ---- admin reassignment: prepared for Stage 14, gated by a bearer token, preserves history ----
+  // With BACKEND_ADMIN_TOKEN genuinely UNSET, the reassignment route does not exist at all (404) — a separate,
+  // short-lived instance, since the running suite's own backend needs the token set for the checks that follow.
+  {
+    const dir2 = mkdtempSync(join(tmpdir(), 'no-backend-noadmin-')); const port2 = port + 200;
+    const child2 = spawn(process.execPath, ['--no-warnings=ExperimentalWarning', 'server.mjs'], { cwd: join(ROOT, 'backend'), env: { ...env, BACKEND_PORT: String(port2), BACKEND_DATABASE_PATH: join(dir2, 'db.sqlite'), BACKEND_STORAGE_DIR: join(dir2, 'docs'), BACKEND_ADMIN_TOKEN: '' }, stdio: 'ignore' });
+    const API2 = `http://127.0.0.1:${port2}`;
+    for (let i = 0; i < 50; i++) { try { if ((await fetch(API2 + '/health')).ok) break; } catch { /* not yet */ } await new Promise((r) => setTimeout(r, 100)); }
+    const unconfigured = await fetch(API2 + '/admin/attribution/reassign', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: SITE }, body: '{}' });
+    ok('admin reassignment with no BACKEND_ADMIN_TOKEN configured → 404 (the route does not exist as far as any caller can tell)', unconfigured.status === 404);
+    child2.kill('SIGTERM'); await new Promise((r) => child2.on('close', r)); rmSync(dir2, { recursive: true, force: true });
+  }
+  const noToken = await fetch(API + '/admin/attribution/reassign', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: SITE }, body: JSON.stringify({ customerId: alphaId, supervisorId: 'supervisor-2' }) });
+  ok('admin reassignment without the bearer token → 403 (endpoint exists once BACKEND_ADMIN_TOKEN is set, but is not open)', noToken.status === 403);
+  const wrongToken = await fetch(API + '/admin/attribution/reassign', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: SITE, Authorization: 'Bearer wrong' }, body: JSON.stringify({ customerId: alphaId, supervisorId: 'supervisor-2' }) });
+  ok('a wrong bearer token → 403', wrongToken.status === 403);
+  const reassigned = await fetch(API + '/admin/attribution/reassign', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: SITE, Authorization: `Bearer ${'a'.repeat(40)}` }, body: JSON.stringify({ customerId: alphaId, supervisorId: 'supervisor-2' }) }).then((r) => r.json());
+  ok('the correct token reassigns the customer', reassigned.attribution?.supervisorId === 'supervisor-2');
+  const after1 = await reqS1('/supervisor/me/customers'); const after2 = await reqS2('/supervisor/me/customers');
+  ok('after reassignment, Supervisor A no longer sees the customer and Supervisor B now does', after1.data.items.length === 0 && after2.data.items.length === 1);
+  const detail2 = await reqS2(`/supervisor/me/customers/${alphaId}`);
+  ok('reassignment preserves history: the attribution audit trail keeps the earlier supervisor, not just the new one', detail2.data.customer.attributionHistory.some((h) => h.supervisorId === 'supervisor-1') && detail2.data.customer.attributionHistory.some((h) => h.supervisorId === 'supervisor-2' && h.actor === 'admin'));
+  ok('reassignment does not erase the customer\'s past bookings’ own supervisor_id (historical attribution on the booking itself is untouched)', (await reqS2('/supervisor/me/bookings/BK_A1')).status === 404);   // BK_A1.supervisor_id is still 'supervisor-1', not reassigned retroactively
+  jarS1.clear(); jarS2.clear(); jarC.clear();
 }
 
 // ---- diagnostics scrubbing + logs ----

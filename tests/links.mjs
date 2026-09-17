@@ -5,12 +5,15 @@ import './env.mjs';
 import { chromium } from 'playwright';
 import { readdirSync } from 'node:fs';
 import http from 'node:http';
+import { RESERVED_SUPERVISOR_SLUGS } from '../assets/js/data/supervisors.js';
 const ORIGIN = process.env.TEST_ORIGIN + ''; const BASE = '/mashhor-demo/';
 const ROOT = new URL('../', import.meta.url).pathname;
 const PAGES = ['index.html', '404.html', 'styleguide.html', 'services/index.html', 'destinations/index.html', 'offers/index.html', 'book/index.html',
   ...readdirSync(ROOT + 'services', { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => `services/${d.name}/index.html`),
   ...readdirSync(ROOT + 'offers', { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => `offers/${d.name}/index.html`),
-  ...readdirSync(ROOT + 'supervisor', { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => `supervisor/${d.name}/index.html`)];
+  // Stage 13's authenticated portal lives in the same directory (supervisor/dashboard/, …) but is private/noindex,
+  // never a public profile: it is excluded here exactly like account/* is never in this list at all.
+  ...readdirSync(ROOT + 'supervisor', { withFileTypes: true }).filter((d) => d.isDirectory() && !RESERVED_SUPERVISOR_SLUGS.includes(d.name)).map((d) => `supervisor/${d.name}/index.html`)];
 // Routes that later stages own: they 404 today by design (the 404 page explains and routes back).
 const PLANNED = /^\/mashhor-demo\/(help|supervisors|destinations\/[a-z-]+|hotels\/[A-Z0-9-]+|packages\/[A-Z0-9-]+|legal|about|careers|partners|privacy|terms|cookies|faq|contact|offers\/categories)(\/|$)/;
 const head = (path) => new Promise((res) => http.request({ host: new URL(process.env.TEST_ORIGIN).hostname, port: new URL(process.env.TEST_ORIGIN).port, path, method: 'HEAD' }, (r) => res(r.statusCode)).on('error', () => res(0)).end());

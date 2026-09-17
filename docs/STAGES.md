@@ -1466,3 +1466,43 @@ locally: everything above. Connected to a real external service: nothing —
 no deployed origin, hosted identity provider, S3, email/SMS provider, legal
 text, flight supplier or payment provider is available to this repository.
 Exact inputs: `docs/INTEGRATION.md` §13.
+
+
+## 13 — The supervisor system (partially complete)
+
+The public supervisor profile (Stage 10) and booking attribution (Stage
+10.9) become a first-class, authenticated part of the platform: an account,
+a session and a portal for each supervisor — separate from the customer
+account, on the same Stage 12.2 backend — with server-authoritative
+attribution (an audit trail, first-attribution preserved as the current
+rule pending business confirmation), customers/leads/bookings/revenue/
+performance scoped to that one supervisor and enforced in SQL, and a
+commission architecture that never fabricates a rate. Full guide:
+`docs/SUPERVISOR-SYSTEM.md`.
+
+```
+backend/migrations/002_supervisors.sql   profile/credential columns, supervisor_sessions, leads,
+                                          attribution_events, commissions, supervisor_notifications, business_config
+backend/supervisor.mjs · supervisor-routes.mjs   identity, attribution (assign/reassign), scoped read models, routes
+assets/js/supervisor/                    auth.js, data.js, adapters/{dev,api,not-connected,installed}, ui/*
+assets/css/23-supervisor-portal.css      metrics, responsive table, filters, lead cards
+supervisor/{dashboard,customers,leads,bookings,revenue,performance,notifications,settings,
+  sign-in,forgot-password,reset-password,sign-out}/index.html
+tests/backend.mjs (+Stage 13 block, 79 checks) · tests/supervisor-portal.mjs (505 checks)
+```
+
+What changed on screen: nothing on the public site — the profile pages and
+booking flow are unchanged. A new, separate authenticated area at
+`supervisor/*` gives a signed-in supervisor their own dashboard, customer
+list and detail, leads with a status workflow, bookings, revenue and
+performance (with a period filter), notifications and settings — built
+from the same design system as the customer account, verified at
+390/834/1440 in Arabic and English with zero console errors.
+
+Status: **STAGE 13 — PARTIALLY COMPLETE.** Implemented and verified,
+including a real end-to-end flow (public profile → booking → attribution →
+supervisor visibility, and cross-supervisor isolation) against the Stage
+12.2 backend. Not connected: a deployed backend (same gap as Stage 12.2),
+real supervisor accounts, and the business decisions in
+`docs/SUPERVISOR-SYSTEM.md` §14 (final attribution rule, commission model
+and rates, real supervisor identities and credentials).

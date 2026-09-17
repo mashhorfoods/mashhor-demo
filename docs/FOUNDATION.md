@@ -497,6 +497,14 @@ component in this layer. Permission is asked, never assumed.
    12.2 the backend itself exists (`backend/`, verified locally) and what
    remains is a deployment, a hosted identity choice, storage, delivery
    and the legal texts; the screens do not change.
+3d. **Supervisor accounts (Stage 13).** The supervisor portal
+   (`assets/js/supervisor/`) runs on the same backend as the customer
+   account, with the same gap: no deployment. Additionally needed: real
+   supervisor identities and credentials (today `password_hash` is null
+   until a reset/admin flow sets one), and the business decisions
+   `docs/SUPERVISOR-SYSTEM.md` §14 lists (the final attribution rule, a
+   commission model and rates). The five launch supervisors remain
+   Stage 10's placeholders.
 4. ~~**Production domain**~~ — resolved. The site deploys to
    `https://mashhorfoods.github.io/mashhor-demo/`; canonical and `og:url` are
    set. Because it is a *project* page served from a subpath, routes are stored

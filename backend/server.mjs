@@ -15,6 +15,8 @@ import { migrate, q } from './db.mjs';
 import { cors, json, empty, fail, HttpError, cookies, rateLimit, resetRateLimits, clientIp } from './http.mjs';
 import { liveSession, customerById, sweepSessions, endAllSessions, publicCustomer } from './identity.mjs';
 import { auth, me, file, legal, diagnostics } from './routes.mjs';
+import { liveSupervisorSession, supervisorById, sweepSupervisorSessions, endAllSupervisorSessions } from './supervisor.mjs';
+import { supervisorAuth, supervisorMe, admin } from './supervisor-routes.mjs';
 import { info, warn, error } from './logger.mjs';
 import { fixtureLegal } from './fixtures.mjs';
 
@@ -42,7 +44,7 @@ export function createApp() {
       if (path === '/__test/fault') { test.faults.push({ status: b.status, times: b.times ?? 1, match: b.path ?? null, retryAfter: b.retryAfter ?? null }); return json(res, 200, { ok: true }); }
       if (path === '/__test/legal') { test.legal = b.supplied ? { version: b.version ?? 'fixture-1' } : null; return json(res, 200, { ok: true }); }
       if (path === '/__test/url-ttl') { test.urlTtlMs = b.ttlMs; return json(res, 200, { ok: true }); }
-      if (path === '/__test/revoke') { if (b.customerId) endAllSessions(b.customerId); else q.run('DELETE FROM sessions'); return json(res, 200, { ok: true }); }
+      if (path === '/__test/revoke') { if (b.customerId) endAllSessions(b.customerId); else if (b.supervisorId) endAllSupervisorSessions(b.supervisorId); else { q.run('DELETE FROM sessions'); q.run('DELETE FROM supervisor_sessions'); } return json(res, 200, { ok: true }); }
       if (path === '/__test/shorten-session') { q.run('UPDATE sessions SET expires_at = ?', Date.now() + (b.ms ?? 60000)); return json(res, 200, { ok: true }); }
       if (path === '/__test/state') return json(res, 200, { events: q.all('SELECT * FROM diagnostics ORDER BY id').map((r) => ({ ...JSON.parse(r.payload_json), event: r.event })), requests: test.requests.slice(-200), customers: q.all('SELECT * FROM customers').map(publicCustomer), sessions: q.get('SELECT COUNT(*) AS n FROM sessions').n, resets: q.all('SELECT r.token, c.email FROM reset_tokens r JOIN customers c ON c.id = r.customer_id'), outbox: q.all('SELECT channel, template, status FROM outbox') });
       return fail(res, 404, 'notFound');
@@ -63,14 +65,19 @@ export function createApp() {
     if (path === '/diagnostics' && req.method === 'POST') return diagnostics(req, res);
 
     // ---- rate limits by class ----
-    const cls = path.startsWith('/auth/') ? 'auth' : path === '/me/documents' && req.method === 'POST' ? 'upload' : 'api';
+    const cls = path.startsWith('/auth/') || path.startsWith('/supervisor/auth/') ? 'auth' : path === '/me/documents' && req.method === 'POST' ? 'upload' : 'api';
     const wait = rateLimit(`${cls}:${ip}`, config.rateLimits[cls]);
     if (wait) { warn('ratelimit.hit', { cls }); return fail(res, 429, 'rateLimited', { 'Retry-After': String(wait) }); }
 
-    // ---- session + CSRF ----
+    // ---- session + CSRF: customer and supervisor sessions are read from DIFFERENT cookies into DIFFERENT ctx fields —
+    // a route handler for one role never even receives the other's session object, so there is no field to confuse. ----
     const ck = cookies(req); const session = liveSession(ck.no_session); const customer = session ? customerById(session.customer_id) : null;
-    const ctx = { sid: ck.no_session ?? null, session: customer ? session : null, customer, ip, urlTtlMs: test?.urlTtlMs ?? undefined };
-    if (['POST', 'PATCH', 'DELETE'].includes(req.method) && ctx.session) { const h = req.headers['x-csrf-token']; if (!h || h !== ctx.session.csrf) { warn('csrf.rejected', { path }); return fail(res, 403, 'forbidden'); } }
+    const supervisorSession = liveSupervisorSession(ck.no_supervisor_session); const supervisor = supervisorSession ? supervisorById(supervisorSession.supervisor_id) : null;
+    const ctx = { sid: ck.no_session ?? null, session: customer ? session : null, customer, supervisorSid: ck.no_supervisor_session ?? null, supervisorSession: supervisor ? supervisorSession : null, supervisor, ip, urlTtlMs: test?.urlTtlMs ?? undefined };
+    if (['POST', 'PATCH', 'DELETE'].includes(req.method)) {
+      const live = ctx.session ?? ctx.supervisorSession;
+      if (live) { const h = req.headers['x-csrf-token']; if (!h || h !== live.csrf) { warn('csrf.rejected', { path }); return fail(res, 403, 'forbidden'); } }
+    }
 
     // ---- /auth ----
     if (path === '/auth/sign-up' && req.method === 'POST') return auth.signUp(req, res, ctx);
@@ -81,6 +88,33 @@ export function createApp() {
     if (path === '/auth/password/reset-request' && req.method === 'POST') return auth.resetRequest(req, res, ctx);
     if (path === '/auth/password/reset' && req.method === 'POST') return auth.reset(req, res, ctx);
     if (path === '/auth/password/change' && req.method === 'POST') return auth.change(req, res, ctx);
+
+    // ---- /supervisor/auth, /supervisor/me: a DIFFERENT session from /me — the customer session above is never accepted here ----
+    if (path === '/supervisor/auth/sign-in' && req.method === 'POST') return supervisorAuth.signIn(req, res, ctx);
+    if (path === '/supervisor/auth/session' && req.method === 'GET') return supervisorAuth.session(req, res, ctx);
+    if (path === '/supervisor/auth/refresh' && req.method === 'POST') return supervisorAuth.refresh(req, res, ctx);
+    if (path === '/supervisor/auth/sign-out' && req.method === 'POST') return supervisorAuth.signOut(req, res, ctx);
+    if (path === '/supervisor/auth/password/reset-request' && req.method === 'POST') return supervisorAuth.resetRequest(req, res, ctx);
+    if (path === '/supervisor/auth/password/reset' && req.method === 'POST') return supervisorAuth.reset(req, res, ctx);
+    if (path === '/supervisor/auth/password/change' && req.method === 'POST') return supervisorAuth.change(req, res, ctx);
+    if (path === '/admin/attribution/reassign' && req.method === 'POST') return admin.reassign(req, res, ctx);
+    if (path.startsWith('/supervisor/me')) {
+      if (!ctx.supervisorSession) return fail(res, 401, 'unauthenticated');
+      if (path === '/supervisor/me' && req.method === 'GET') return supervisorMe.profile(req, res, ctx);
+      if (path === '/supervisor/me' && req.method === 'PATCH') return supervisorMe.patch(req, res, ctx);
+      if (path === '/supervisor/me/customers' && req.method === 'GET') return supervisorMe.customers(req, res, ctx, url);
+      if ((m = path.match(/^\/supervisor\/me\/customers\/([^/]+)$/)) && req.method === 'GET') return supervisorMe.customer(req, res, ctx, decodeURIComponent(m[1]));
+      if (path === '/supervisor/me/bookings' && req.method === 'GET') return supervisorMe.bookings(req, res, ctx, url);
+      if ((m = path.match(/^\/supervisor\/me\/bookings\/([^/]+)$/)) && req.method === 'GET') return supervisorMe.booking(req, res, ctx, decodeURIComponent(m[1]));
+      if (path === '/supervisor/me/leads' && req.method === 'GET') return supervisorMe.leads(req, res, ctx, url);
+      if ((m = path.match(/^\/supervisor\/me\/leads\/([^/]+)$/)) && req.method === 'PATCH') return supervisorMe.leadPatch(req, res, ctx, decodeURIComponent(m[1]));
+      if (path === '/supervisor/me/revenue' && req.method === 'GET') return supervisorMe.revenue(req, res, ctx, url);
+      if (path === '/supervisor/me/performance' && req.method === 'GET') return supervisorMe.performance(req, res, ctx, url);
+      if (path === '/supervisor/me/commissions' && req.method === 'GET') return supervisorMe.commissions(req, res, ctx, url);
+      if (path === '/supervisor/me/notifications' && req.method === 'GET') return supervisorMe.notifications(req, res, ctx);
+      if (path === '/supervisor/me/notifications/read' && req.method === 'POST') return supervisorMe.notificationsRead(req, res, ctx);
+      return fail(res, 404, 'notFound');
+    }
 
     // ---- /me: the session's customer, nobody else ----
     if (!path.startsWith('/me')) return fail(res, 404, 'notFound');
@@ -124,6 +158,7 @@ if (process.argv[1]?.endsWith('server.mjs')) {
   const server = createApp();
   server.listen(config.port, config.host, () => info('server.listening', { host: config.host, port: config.port, environment: config.environment, testControls: config.testControls }));
   setInterval(() => sweepSessions(), 10 * 60 * 1000).unref();
+  setInterval(() => sweepSupervisorSessions(), 10 * 60 * 1000).unref();
   const stop = () => { info('server.stopping'); server.close(() => process.exit(0)); setTimeout(() => process.exit(0), 3000).unref(); };
   process.on('SIGTERM', stop); process.on('SIGINT', stop);
 }

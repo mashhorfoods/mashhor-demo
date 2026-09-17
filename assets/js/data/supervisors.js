@@ -69,6 +69,13 @@ const placeholder = (n) => ({
 
 export const SUPERVISOR_REGISTRY = [1, 2, 3, 4, 5].map(placeholder);
 
+/* Stage 13 — route segments under supervisor/ that a slug may never take: the supervisor portal's own private pages
+   live at these exact paths (supervisor/dashboard/, supervisor/customers/, …), sibling to the public profiles this
+   file generates. A future admin assigning a real slug must reject one of these (backend/supervisor.mjs enforces the
+   same list server-side; this copy is for any client-side slug form the admin UI eventually adds). */
+export const RESERVED_SUPERVISOR_SLUGS = ['dashboard', 'customers', 'leads', 'bookings', 'revenue', 'performance', 'notifications', 'settings', 'profile', 'sign-in', 'sign-up', 'sign-out', 'forgot-password', 'reset-password', 'admin', 'me', 'auth', 'api'];
+export const isValidSupervisorSlug = (slug) => typeof slug === 'string' && /^[a-z0-9]([a-z0-9-]{0,38}[a-z0-9])?$/.test(slug) && !RESERVED_SUPERVISOR_SLUGS.includes(slug);
+
 /* ---- Selectors every surface shares ------------------------------------ */
 export const supervisorBySlug = (slug) => SUPERVISOR_REGISTRY.find((s) => s.slug === slug || s.id === slug) ?? null;
 export const isActiveSupervisor = (slug) => supervisorBySlug(slug)?.status === 'active';

@@ -25,8 +25,12 @@ export function migrate() {
     d.exec('BEGIN'); try { d.exec(readFileSync(join(dir, f), 'utf8')); d.prepare('INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)').run(f, new Date().toISOString()); d.exec('COMMIT'); n++; info('db.migrated', { version: f }); }
     catch (e) { d.exec('ROLLBACK'); throw e; }
   }
-  const ins = d.prepare('INSERT OR IGNORE INTO supervisors (id, active) VALUES (?, 1)');
-  for (const s of config.supervisors) ins.run(s);
+  const hasProfileCols = d.prepare("SELECT 1 FROM pragma_table_info('supervisors') WHERE name = 'created_at'").get();
+  const ins = hasProfileCols
+    ? d.prepare('INSERT OR IGNORE INTO supervisors (id, active, created_at, updated_at) VALUES (?, 1, ?, ?)')
+    : d.prepare('INSERT OR IGNORE INTO supervisors (id, active) VALUES (?, 1)');
+  const t = new Date().toISOString();
+  for (const s of config.supervisors) hasProfileCols ? ins.run(s, t, t) : ins.run(s);
   return n;
 }
 export const q = {

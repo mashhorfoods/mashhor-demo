@@ -3,6 +3,7 @@
 // a labelled fixture, never business content.
 import { q, now } from './db.mjs';
 import { createIdentity } from './identity.mjs';
+import { setSupervisorPassword } from './supervisor.mjs';
 import { storage } from './storage.mjs';
 import { config } from './config.mjs';
 import { readdirSync, unlinkSync, existsSync } from 'node:fs';
@@ -13,7 +14,11 @@ const day = (offset) => { const d = new Date(); d.setUTCHours(9, 0, 0, 0); d.set
 const dateOnly = (offset) => day(offset).toISOString().slice(0, 10);
 
 export function wipe() {
-  for (const t of ['diagnostics', 'outbox', 'notifications', 'payments', 'documents', 'travellers', 'bookings', 'trips', 'login_attempts', 'reset_tokens', 'sessions', 'customers']) q.run(`DELETE FROM ${t}`);
+  for (const t of ['diagnostics', 'outbox', 'notifications', 'payments', 'documents', 'travellers', 'bookings', 'trips', 'login_attempts', 'reset_tokens', 'sessions', 'customers',
+    'attribution_events', 'commissions', 'leads', 'supervisor_notifications', 'supervisor_reset_tokens', 'supervisor_sessions']) q.run(`DELETE FROM ${t}`);
+  // Supervisor rows themselves are config-seeded (migrate()), not test data — only their PROFILE fields reset here, so
+  // a run always starts from "provisioned, no profile supplied yet", exactly like production before the business fills it in.
+  q.run("UPDATE supervisors SET slug = NULL, name_ar = NULL, name_en = NULL, title_ar = NULL, title_en = NULL, bio_ar = NULL, bio_en = NULL, phone = NULL, whatsapp = NULL, email = NULL, city = NULL, password_salt = NULL, password_hash = NULL, languages_json = '[]', specialties_json = '[]', services_json = '[]', notification_prefs_json = '{}'");
   if (existsSync(config.storageDir)) for (const f of readdirSync(config.storageDir)) { try { unlinkSync(join(config.storageDir, f)); } catch { /* ignore */ } }
 }
 
@@ -37,6 +42,16 @@ export function seed() {
   trip('trip_B1', b.id, { titleAr: 'رحلة بيتا', titleEn: 'Beta trip', destination: { code: 'DXB', cityAr: 'دبي', cityEn: 'Dubai', countryAr: 'الإمارات', countryEn: 'UAE' }, startDate: dateOnly(5), endDate: dateOnly(9), services: ['flights'], status: 'upcoming', travellers: 1 });
   booking('BK_B1', b.id, { tripId: 'trip_B1', service: 'flights', status: 'confirmed', paymentStatus: 'paid', amount: 300, ticketed: false, createdAt: iso(t0 - 864e5), detail: { route: 'KRT → DXB', dates: [dateOnly(5)], travellers: 1 } });
   doc('doc_B1', b.id, { bookingId: 'BK_B1', tripId: 'trip_B1', type: 'confirmation', contentType: 'application/pdf', issuedAt: iso(t0 - 864e5) }, pdf('confirmation (Beta)'));
+
+  // ---- Stage 13: two supervisor accounts for boundary testing. Fixture-labelled, reachable only while test controls
+  // are on (never in production). supervisor-1 already attributes Alpha's trip/bookings above; supervisor-2 has none —
+  // the isolation test is "supervisor-1 sees Alpha, supervisor-2 sees nothing of Alpha's".
+  q.run('UPDATE supervisors SET slug = ?, name_ar = ?, name_en = ?, email = ?, phone = ?, city = ?, languages_json = ?, updated_at = ? WHERE id = ?', 'supervisor-1', 'مشرف تجريبي واحد', 'Fixture Supervisor One', 'sup1@fixture.test', '', 'Khartoum', JSON.stringify(['ar', 'en']), iso(t0), 'supervisor-1');
+  q.run('UPDATE supervisors SET slug = ?, name_ar = ?, name_en = ?, email = ?, phone = ?, city = ?, languages_json = ?, updated_at = ? WHERE id = ?', 'supervisor-2', 'مشرف تجريبي اثنان', 'Fixture Supervisor Two', 'sup2@fixture.test', '', 'Khartoum', JSON.stringify(['ar']), iso(t0), 'supervisor-2');
+  setSupervisorPassword('supervisor-1', 'password123'); setSupervisorPassword('supervisor-2', 'password123');
+  q.run('INSERT INTO leads (id, supervisor_id, customer_id, name, contact, source, service_interest, status, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?)', 'lead_S1', 'supervisor-1', null, 'Fixture Lead', 'lead@fixture.test', 'link', 'flights', 'new', iso(t0 - 864e5 * 2), iso(t0 - 864e5 * 2));
+  q.run('INSERT INTO supervisor_notifications (id, supervisor_id, kind, at, read, title_ar, title_en, text_ar, text_en, href, booking_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)', 'sntf_1', 'supervisor-1', 'booking', iso(t0 - 36e5), 0, 'حجز جديد (تجريبي)', 'New booking (fixture)', 'حجز تجريبي جديد يخصك.', 'A new fixture booking is attributed to you.', 'supervisor/bookings/?id=BK_A1', 'BK_A1');
+  q.run('INSERT INTO attribution_events (customer_id, supervisor_id, previous_supervisor_id, source, actor, at) VALUES (?,?,?,?,?,?)', a.id, 'supervisor-1', null, 'link', 'customer', iso(t0 - 864e5 * 10));
 }
 
 /** Test-fixture legal documents: labelled as fixtures, served only while test controls are on and the toggle is set. */

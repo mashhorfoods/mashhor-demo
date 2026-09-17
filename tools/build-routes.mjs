@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { SERVICE_REGISTRY } from '../assets/js/data/services.js';
 import { OFFER_REGISTRY } from '../assets/js/data/offers.js';
-import { SUPERVISOR_REGISTRY } from '../assets/js/data/supervisors.js';
+import { SUPERVISOR_REGISTRY, RESERVED_SUPERVISOR_SLUGS } from '../assets/js/data/supervisors.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = 'https://mashhorfoods.github.io/mashhor-demo/';
@@ -130,8 +130,11 @@ for (const c of COLLECTIONS) {
   const dir = join(ROOT, c.dir);
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
   const wanted = new Set(c.records.map((r) => r.slug));
+  // supervisor/ also carries the hand-authored portal pages (dashboard, customers, …) — never generated, never
+  // removed here; RESERVED_SUPERVISOR_SLUGS is exactly the set a real slug can never take, so there is no ambiguity.
+  const reserved = c.dir === 'supervisor' ? new Set(RESERVED_SUPERVISOR_SLUGS) : new Set();
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (entry.isDirectory() && !wanted.has(entry.name)) { rmSync(join(dir, entry.name), { recursive: true }); console.log(`removed  ${c.dir}/${entry.name}/`); }
+    if (entry.isDirectory() && !wanted.has(entry.name) && !reserved.has(entry.name)) { rmSync(join(dir, entry.name), { recursive: true }); console.log(`removed  ${c.dir}/${entry.name}/`); }
   }
   for (const r of c.records) {
     const out = join(dir, r.slug);

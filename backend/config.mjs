@@ -42,6 +42,12 @@ const storageDir = resolve(env.BACKEND_STORAGE_DIR ?? './data/documents');
 const mailer = env.BACKEND_MAILER ?? 'none';
 if (!['none'].includes(mailer)) problems.push(`BACKEND_MAILER=${mailer} is not implemented (none only: deliveries are recorded, never claimed sent)`);
 
+// Stage 13 — the ONE entry point reserved for the future Admin Dashboard (reassigning a customer's attribution, §27,
+// §40). Disabled unless set; when set, it must be a real secret (32+ chars), whatever the environment, because it is
+// a bearer credential over an admin-only action, not a public toggle.
+const adminToken = env.BACKEND_ADMIN_TOKEN ?? '';
+if (adminToken && adminToken.length < 32) problems.push('BACKEND_ADMIN_TOKEN must be at least 32 characters when set (it is a bearer credential, not a flag)');
+
 export const config = Object.freeze({
   environment, production,
   host: env.BACKEND_HOST ?? '127.0.0.1', port: num(env.BACKEND_PORT, 8930),
@@ -58,6 +64,7 @@ export const config = Object.freeze({
   signedUrlTtlMs: num(env.BACKEND_SIGNED_URL_TTL_SECONDS, 300) * 1000,
   mailer, legalDir: resolve(env.BACKEND_LEGAL_DIR ?? './legal'),
   supervisors: list(env.BACKEND_SUPERVISORS ?? 'supervisor-1,supervisor-2,supervisor-3,supervisor-4,supervisor-5'),
+  adminToken: adminToken || null,
   trustProxy: bool(env.BACKEND_TRUST_PROXY, false),
   testControls,
   rateLimits: { auth: { limit: num(env.BACKEND_RATE_AUTH, 10), windowMs: 60000 }, upload: { limit: num(env.BACKEND_RATE_UPLOAD, 20), windowMs: 60000 }, api: { limit: num(env.BACKEND_RATE_API, 300), windowMs: 60000 } },

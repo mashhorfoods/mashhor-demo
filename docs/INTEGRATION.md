@@ -89,6 +89,13 @@ Secrets exist only in the server's environment or its platform secret store;
 
 ## 3. Backend contract
 
+Stage 13 adds a second, separate contract on the same backend and origin —
+`/supervisor/auth/*` and `/supervisor/me/*`, with their own session cookie
+(`no_supervisor_session`) and their own CSRF token, never interchangeable
+with the customer session below. See `docs/SUPERVISOR-SYSTEM.md` for that
+contract, the attribution model, the commission architecture and the
+authorization boundary between supervisors.
+
 All routes relative to `API_BASE_URL`. JSON in and out; errors as
 `{ "error": { "code": "…" } }` with the HTTP status. Codes the browser maps:
 401 unauthenticated · 403 forbidden · 404 notFound · 409 conflict/exists ·

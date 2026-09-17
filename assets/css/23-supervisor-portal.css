@@ -1,0 +1,53 @@
+/* ============================================================================
+   23 — SUPERVISOR PORTAL  Stage 13
+
+   The authenticated supervisor workspace: metrics, a responsive data table
+   (a real <table> at wide widths, stacked cards at narrow ones — no
+   horizontal scroll is required to read a row), lead cards, filters. Reuses
+   the account shell's grid (.c-account, .c-acct-nav) so the sidebar/strip
+   behaviour at 390–1440 is identical to the customer account, already
+   verified in Stage 12. Built from tokens; logical properties only.
+   ========================================================================= */
+
+@layer components {
+  /* ---- Metrics -------------------------------------------------------- */
+  .c-svp-metrics { display: grid; gap: var(--space-16); grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); }
+  .c-svp-metric { display: flex; align-items: flex-start; gap: var(--space-12); padding: var(--space-16); border: var(--border-hairline); border-radius: var(--radius-lg); background-color: var(--color-surface); }
+  .c-svp-metric__icon { flex: none; display: grid; place-items: center; inline-size: 2.5rem; block-size: 2.5rem; border-radius: var(--radius-md); background-color: var(--color-surface-brand); color: var(--color-brand-red); }
+  .c-svp-metric__value { font-size: var(--text-h3); font-weight: var(--weight-bold); line-height: 1.1; }
+  .c-svp-metric__label { color: var(--color-text-muted); font-size: var(--text-body-sm); }
+  .c-svp-metric--success .c-svp-metric__icon { color: var(--color-success-fg); background-color: var(--color-success-bg); }
+  .c-svp-metric--warning .c-svp-metric__icon { color: var(--color-warning-fg); background-color: var(--color-warning-bg); }
+  .c-svp-metric--muted .c-svp-metric__icon { color: var(--color-text-muted); }
+
+  /* ---- Filters ---------------------------------------------------------- */
+  .c-svp-filter { display: flex; flex-wrap: wrap; gap: var(--space-8); align-items: center; }
+  .c-svp-filter__select { max-inline-size: 14rem; }
+
+  /* ---- Responsive table: a real table on wide screens, stacked cards on narrow ones ---- */
+  .c-svp-table-wrap { overflow-x: auto; }
+  .c-svp-table { inline-size: 100%; border-collapse: collapse; }
+  .c-svp-table th, .c-svp-table td { padding: var(--space-8) var(--space-12); text-align: start; border-block-end: var(--border-hairline); font-size: var(--text-body-sm); }
+  .c-svp-table th { color: var(--color-text-muted); font-weight: var(--weight-semibold); white-space: nowrap; }
+  /* A plain link, NOT .c-card__link: that class's ::after is an absolute stretched-click overlay meant for a
+     position:relative card, and inside a table cell it escapes its row and covers the rows below it. */
+  .c-svp-link { color: var(--color-brand-red); font-weight: var(--weight-semibold); text-decoration: underline; text-underline-offset: 0.15em; }
+  @media (max-width: 47.999em) {
+    .c-svp-table thead { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .c-svp-table, .c-svp-table tbody, .c-svp-table tr, .c-svp-table td { display: block; inline-size: 100%; }
+    .c-svp-table tr { margin-block-end: var(--space-12); border: var(--border-hairline); border-radius: var(--radius-md); padding: var(--space-8) var(--space-12); }
+    .c-svp-table td { display: flex; justify-content: space-between; gap: var(--space-12); border-block-end: none; padding-block: var(--space-4); }
+    .c-svp-table td::before { content: attr(data-label); color: var(--color-text-muted); font-weight: var(--weight-semibold); }
+  }
+
+  /* ---- Leads -------------------------------------------------------------- */
+  .c-svp-lead { display: flex; align-items: center; gap: var(--space-12); flex-wrap: wrap; }
+  .c-svp-lead__icon { flex: none; display: grid; place-items: center; inline-size: 2.75rem; block-size: 2.75rem; border-radius: var(--radius-md); background-color: var(--color-surface-brand); color: var(--color-brand-red); }
+  .c-svp-lead__body { flex: 1; min-inline-size: 10rem; }
+
+  /* ---- Small inline lists (dashboard mini-lists, attribution history) ----- */
+  .c-svp-mini-list { display: grid; gap: var(--space-8); margin: 0; padding: 0; list-style: none; }
+  .c-svp-mini-list li { display: flex; justify-content: space-between; gap: var(--space-12); padding-block-end: var(--space-8); border-block-end: var(--border-hairline); font-size: var(--text-body-sm); }
+  .c-svp-mini-list li:last-child { border-block-end: none; padding-block-end: 0; }
+  .c-svp-ntf { display: grid; gap: var(--space-4); }
+}

@@ -13,6 +13,11 @@ export const cookies = (req) => Object.fromEntries((req.headers.cookie ?? '').sp
 const attrs = (extra = '') => `Path=/; SameSite=${config.cookie.sameSite}${config.cookie.secure ? '; Secure' : ''}${config.cookie.domain ? `; Domain=${config.cookie.domain}` : ''}${extra}`;
 export const setSessionCookies = (res, sid, csrf, maxAgeSeconds) => res.setHeader('Set-Cookie', [`no_session=${sid}; HttpOnly; ${attrs(`; Max-Age=${maxAgeSeconds}`)}`, `no_csrf=${csrf}; ${attrs(`; Max-Age=${maxAgeSeconds}`)}`]);
 export const clearSessionCookies = (res) => res.setHeader('Set-Cookie', [`no_session=; HttpOnly; ${attrs('; Max-Age=0')}`, `no_csrf=; ${attrs('; Max-Age=0')}`]);
+// Stage 13 — a SEPARATE cookie pair for the supervisor portal, distinct names so a customer session and a supervisor
+// session can never be confused by either side reading the other's cookie, and so a browser holding both (e.g. QA)
+// keeps them independent.
+export const setSupervisorSessionCookies = (res, sid, csrf, maxAgeSeconds) => res.setHeader('Set-Cookie', [`no_supervisor_session=${sid}; HttpOnly; ${attrs(`; Max-Age=${maxAgeSeconds}`)}`, `no_supervisor_csrf=${csrf}; ${attrs(`; Max-Age=${maxAgeSeconds}`)}`]);
+export const clearSupervisorSessionCookies = (res) => res.setHeader('Set-Cookie', [`no_supervisor_session=; HttpOnly; ${attrs('; Max-Age=0')}`, `no_supervisor_csrf=; ${attrs('; Max-Age=0')}`]);
 
 /** Exact-origin CORS with credentials; anything else gets no CORS headers at all. In development any origin is echoed. */
 export function cors(req, res) {

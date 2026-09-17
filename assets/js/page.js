@@ -27,6 +27,9 @@ import { mountHeader } from './components/header.js';
 import { mountFooter } from './components/footer.js';
 import './account/adapters/installed.js';
 import { restoreSession } from './account/auth.js';
+// Stage 13 — the supervisor portal's own adapter registry, registered the same way and gated by the same ENV; a
+// customer-facing page never calls restoreSupervisorSession() itself, so registering it here costs nothing there.
+import './supervisor/adapters/installed.js';
 
 /**
  * Wire the document: sprite, language, and the behaviours every page shares.
