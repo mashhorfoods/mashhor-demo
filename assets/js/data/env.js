@@ -18,6 +18,10 @@
      notifications         NOTIFICATION_CONFIG  JSON { refreshOnFocus, refreshMinSeconds }
      legal                 LEGAL_DOCUMENT_CONFIG JSON { source: 'api' | 'static' | null, termsPath, privacyPath }
      diagnostics           DIAGNOSTICS_CONFIG   JSON { endpoint } — a same-backend path that accepts beacons, or null
+     verified              INTEGRATIONS_VERIFIED  null, or { at, backend, adapters[] } — written ONLY by
+                                                tools/deploy.mjs after the acceptance suites passed against
+                                                the deployed backend (Stage 12.2); it is what lets the adapter
+                                                registry say CONNECTED. Never hand-edited.
    ========================================================================= */
 
 export const ENV = Object.freeze({
@@ -30,6 +34,7 @@ export const ENV = Object.freeze({
   notifications: { refreshOnFocus: true, refreshMinSeconds: 30 },
   legal: { source: null, termsPath: null, privacyPath: null },
   diagnostics: { endpoint: null },
+  verified: null,
 });
 
 export const isProduction = () => ENV.environment === 'production';

@@ -16,7 +16,7 @@ const ROOT = new URL('../', import.meta.url).pathname;
 const PREFIX = '/mashhor-demo/';
 const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.mjs': 'text/javascript', '.svg': 'image/svg+xml', '.png': 'image/png', '.woff2': 'font/woff2', '.json': 'application/json' };
 const envModule = (env) => `export const ENV = Object.freeze(${JSON.stringify(env)});\nexport const isProduction = () => ENV.environment === 'production';\n`;
-function staticServer(env) {
+function staticServer(env, port = 0) {
   const server = createServer((req, res) => {
     let path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
     if (path.startsWith(PREFIX)) path = path.slice(PREFIX.length - 1);
@@ -26,7 +26,7 @@ function staticServer(env) {
     if (!file.startsWith(ROOT) || !existsSync(file) || statSync(file).isDirectory()) { res.writeHead(404, { 'Content-Type': MIME['.html'] }); res.end(readFileSync(join(ROOT, '404.html'))); return; }
     res.writeHead(200, { 'Content-Type': MIME[extname(file)] ?? 'application/octet-stream' }); res.end(readFileSync(file));
   });
-  return new Promise((resolve) => server.listen(0, '127.0.0.1', () => resolve({ server, origin: `http://127.0.0.1:${server.address().port}`, close: () => new Promise((r) => server.close(r)) })));
+  return new Promise((resolve) => server.listen(port, '127.0.0.1', () => resolve({ server, origin: `http://127.0.0.1:${server.address().port}`, close: () => new Promise((r) => server.close(r)) })));
 }
 
 const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
@@ -35,9 +35,12 @@ const ok = (name, cond, note = '') => { if (cond) pass++; else { fail++; console
 const errs = [];
 const AR = /[؀-ۿ]/;
 
-const api = await startContractServer();
+// Against the REAL backend: BACKEND_ORIGIN=http://127.0.0.1:8930 (started with BACKEND_TEST_CONTROLS=1); otherwise the contract test server.
+const api = process.env.BACKEND_ORIGIN ? { origin: process.env.BACKEND_ORIGIN.replace(/\/+$/, ''), close: async () => {} } : await startContractServer();
+console.log(`integration target: ${process.env.BACKEND_ORIGIN ? 'real backend' : 'contract test server'} at ${api.origin}`);
 const STAGING = { environment: 'staging', authProvider: 'session-api', authPublicConfig: { sessionRefreshMinutes: 10 }, apiBaseUrl: api.origin, documentService: { maxBytes: 5 * 1024 * 1024, accept: ['application/pdf', 'image/jpeg', 'image/png'] }, paymentApi: { pageSize: 10 }, notifications: { refreshOnFocus: true, refreshMinSeconds: 0 }, legal: { source: 'api' }, diagnostics: { endpoint: '/diagnostics' } };
-const site = await staticServer(STAGING);
+// SITE_PORT pins the site's origin so a staging backend can list it in BACKEND_ALLOWED_ORIGINS (see docs/INTEGRATION.md §10).
+const site = await staticServer(STAGING, Number(process.env.SITE_PORT ?? 0));
 const prodNoApi = await staticServer({ ...STAGING, environment: 'production', apiBaseUrl: '' });
 const P = (o) => o + PREFIX;
 

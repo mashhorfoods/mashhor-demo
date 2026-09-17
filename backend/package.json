@@ -1,0 +1,12 @@
+{
+  "name": "numberone-backend",
+  "private": true,
+  "description": "Number One Travel & Tourism — the customer backend: the single origin the website talks to. Implements docs/INTEGRATION.md §3. Node 22+, no dependencies.",
+  "type": "module",
+  "engines": { "node": ">=22.13" },
+  "scripts": {
+    "start": "node --no-warnings=ExperimentalWarning server.mjs",
+    "migrate": "node --no-warnings=ExperimentalWarning migrate.mjs",
+    "check": "node --no-warnings=ExperimentalWarning config.mjs --check"
+  }
+}

@@ -6,3 +6,7 @@ tests/.shots/
 .env
 .env.*
 !.env.example
+
+# backend runtime data and local configuration
+backend/data/
+backend/.env

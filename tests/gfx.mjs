@@ -1,4 +1,4 @@
-import './env.mjs';
+import { shot } from './env.mjs';
 import { chromium } from 'playwright';
 const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
 const errs=[]; let pass=0, fail=0;
@@ -64,7 +64,7 @@ for (const [name,w,h] of [['mobile',390,844],['tablet',834,1100],['desktop',1440
     });
     ok('accordion expands', e.expanded==='true' && e.collapsed==='false');
     ok('expanded reveals links', e.links>0, `${e.links}`);
-    await p.screenshot({path:'gf-mobile.png', fullPage:false});
+    await p.screenshot({ path: shot('gf-mobile.png'), fullPage: false });
   }
   await p.close();
 }

@@ -493,8 +493,10 @@ component in this layer. Permission is asked, never assumed.
    boundary, document storage with signed URLs, the payment layer's history
    endpoint, notification delivery, and the terms / privacy documents the
    sign-up refers to. Since 12.1 the production adapters exist and
-   `docs/INTEGRATION.md` states the contract and the exact inputs; the
-   screens do not change.
+   `docs/INTEGRATION.md` states the contract and the exact inputs; since
+   12.2 the backend itself exists (`backend/`, verified locally) and what
+   remains is a deployment, a hosted identity choice, storage, delivery
+   and the legal texts; the screens do not change.
 4. ~~**Production domain**~~ — resolved. The site deploys to
    `https://mashhorfoods.github.io/mashhor-demo/`; canonical and `og:url` are
    set. Because it is a *project* page served from a subpath, routes are stored

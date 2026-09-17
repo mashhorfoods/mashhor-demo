@@ -1432,4 +1432,37 @@ failure has a customer-language state (network, timeout, 401, 403, 404,
 unreachable while verifying the session no longer signs the customer out.
 
 Status: **STAGE 12.1 — PARTIALLY COMPLETE.** Connected: nothing external.
-Pending with exact inputs: see `docs/INTEGRATION.md` §11.
+Pending with exact inputs: see `docs/INTEGRATION.md` §13.
+
+## 12.2 — Real backend and production security (partially complete)
+
+The contract from 12.1 now has a **real, deployable implementation**:
+`backend/` — a dependency-free Node 22 service (SQLite, migrations) with
+backend-managed identity (scrypt, lockout, neutral single-use reset),
+HttpOnly/Secure/SameSite server sessions with refresh and revocation, CSRF
+double-submit, exact-origin CORS with credentials, security headers, rate
+limiting (429 + Retry-After), the customer boundary enforced in SQL,
+private document storage with content validation, sanitised names and
+HMAC-signed expiring revocable links, paged payment history,
+notifications, the legal-document seam (official files or 404), a mailer
+outbox that never claims delivery, scrubbed logs and diagnostics, and test
+controls that production configuration refuses. `docs/INTEGRATION.md` is
+the full guide (architecture, env variables, deployment, rollback, inputs).
+
+```
+backend/                     config.mjs db.mjs http.mjs identity.mjs storage.mjs mailer.mjs legal.mjs routes.mjs server.mjs fixtures.mjs logger.mjs
+backend/migrations/001_init.sql   customers, sessions, reset_tokens, login_attempts, supervisors, trips, bookings, travellers, documents, payments, notifications, outbox, diagnostics
+backend/.env.example · README.md · Dockerfile · legal/README.md
+tools/deploy.mjs             validate → env.js (unverified) → backend check + migrate → smoke → real-backend acceptance → env.js with INTEGRATIONS_VERIFIED
+tools/smoke.mjs              safe production checks from the outside
+tools/write-env.mjs          + INTEGRATIONS_VERIFIED only with --verified-by-deploy → ENV.verified
+adapters/installed.js        CONNECTED only from ENV.verified; otherwise "implemented — NOT CONNECTED"
+tests/run-backend.mjs        npm run test:backend — tests/integration.mjs against the real backend (518 checks)
+tests/backend.mjs            38 HTTP checks: config refusals, CORS, CSRF ×5, lockout, rate limit, uploads, signed URLs, boundary, scrubbing
+```
+
+Status: **STAGE 12.2 — PARTIALLY COMPLETE.** Implemented and verified
+locally: everything above. Connected to a real external service: nothing —
+no deployed origin, hosted identity provider, S3, email/SMS provider, legal
+text, flight supplier or payment provider is available to this repository.
+Exact inputs: `docs/INTEGRATION.md` §13.
