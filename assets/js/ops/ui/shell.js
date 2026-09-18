@@ -40,6 +40,7 @@ const NAV = [
   { id: 'reports', icon: 'no-chart', href: 'admin/reports/', labelAr: 'التقارير', labelEn: 'Reports', permission: 'report.view' },
   { id: 'audit', icon: 'no-documents', href: 'admin/audit/', labelAr: 'سجل التدقيق', labelEn: 'Audit trail' },
   { id: 'staff', icon: 'no-shield', href: 'admin/staff/', labelAr: 'الموظفون والصلاحيات', labelEn: 'Staff & Permissions', permission: 'staff.manage' },
+  { id: 'rules', icon: 'no-settings', href: 'admin/business-rules/', labelAr: 'قواعد العمل', labelEn: 'Business Rules', permission: 'rules.view' },
   { id: 'settings', icon: 'no-settings', href: 'admin/settings/', labelAr: 'الإعدادات', labelEn: 'Settings', divider: true },
   { id: 'sign-out', icon: 'no-logout', href: 'admin/sign-out/', labelAr: 'تسجيل الخروج', labelEn: 'Sign out' },
 ];
@@ -139,6 +140,10 @@ export function taskStatusBadge(status) {
 export function escalationStatusBadge(status) {
   const tone = { open: 'error', investigating: 'warning', waiting: 'warning', resolved: 'success', closed: 'outline' }[status] ?? 'outline';
   return el('span', { class: `c-badge c-badge--${tone}`, dataset: { escalationStatus: status } }, t(`ops.escalation.status.${status}`));
+}
+export function ruleStatusBadge(status) {
+  const tone = { DRAFT: 'outline', PENDING: 'warning', APPROVED: 'info', ACTIVE: 'success', DISABLED: 'outline', SUPERSEDED: 'outline' }[status] ?? 'outline';
+  return el('span', { class: `c-badge c-badge--${tone}`, dataset: { ruleStatus: status } }, t(`ops.rules.status.${status}`) || status);
 }
 export function priorityBadge(priority) {
   const tone = { low: 'outline', normal: 'brand', high: 'warning', urgent: 'error' }[priority] ?? 'outline';

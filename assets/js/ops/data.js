@@ -121,4 +121,17 @@ export const opsData = {
   createStaff: (staff) => call('createStaff', staff),
   setStaffActive: (id, active) => call('setStaffActive', id, active),
   setStaffPermissions: (id, permissions) => call('setStaffPermissions', id, permissions),
+
+  // ---- Stage 15A: the Business Rules Register — every unresolved (or technical-default) business decision,
+  // versioned and audited. rules.view/rules.manage are separate permissions (§18, §22). ----
+  rules: (params = {}) => call('rules', params),
+  rule: (id) => call('rule', id),
+  ruleHistory: (id) => call('ruleHistory', id),
+  updateRule: (id, patch) => call('updateRule', id, patch),
+  activateRule: (id) => call('activateRule', id),
+  disableRule: (id) => call('disableRule', id),
+  pendingDecisions: () => call('pendingDecisions'),
+  ruleMatrix: () => call('ruleMatrix'),
 };
+
+export const RULE_STATUSES = ['DRAFT', 'PENDING', 'APPROVED', 'ACTIVE', 'DISABLED', 'SUPERSEDED'];

@@ -39,7 +39,7 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.ops.s
 // ================================================================= 1. authorization: every portal route guarded, sign in / out
 {
   const { c, p } = await ctx();
-  const PORTAL_ROUTES = ['admin/dashboard/', 'admin/customers/', 'admin/supervisors/', 'admin/leads/', 'admin/bookings/', 'admin/tasks/', 'admin/escalations/', 'admin/services/', 'admin/suppliers/', 'admin/payments/', 'admin/documents/', 'admin/notifications/', 'admin/reports/', 'admin/audit/', 'admin/staff/', 'admin/settings/'];
+  const PORTAL_ROUTES = ['admin/dashboard/', 'admin/customers/', 'admin/supervisors/', 'admin/leads/', 'admin/bookings/', 'admin/tasks/', 'admin/escalations/', 'admin/services/', 'admin/suppliers/', 'admin/payments/', 'admin/documents/', 'admin/notifications/', 'admin/reports/', 'admin/audit/', 'admin/staff/', 'admin/business-rules/', 'admin/settings/'];
   for (const u of PORTAL_ROUTES) {
     await p.goto(ORIGIN + P + u); await p.waitForFunction(() => document.querySelector('[data-portal=main] h1'));
     ok(`guest blocked: ${u}`, await count(p, '[data-action=sign-in]') === 1 && await count(p, '[data-portal=nav] a') === 0);
@@ -52,7 +52,7 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.ops.s
   ok('invalid credentials → error, still guest', (await marker(p)) === null);
   await devSignIn(p);
   ok('dev demo sign-in → dashboard, session marker stored', /^dev\./.test((await marker(p))?.token ?? '') && /مرحباً/.test(await text(p, 'h1')));
-  ok('portal nav shows every module (admin sees Stage 14\'s modules too), current marked', (await p.$$eval('[data-portal=nav] a', (as) => as.map((a) => a.dataset.nav))).join('|') === 'dashboard|customers|supervisors|leads|bookings|tasks|escalations|services|suppliers|payments|documents|notifications|reports|audit|staff|settings|sign-out');
+  ok('portal nav shows every module (admin sees Stage 14/15A\'s modules too), current marked', (await p.$$eval('[data-portal=nav] a', (as) => as.map((a) => a.dataset.nav))).join('|') === 'dashboard|customers|supervisors|leads|bookings|tasks|escalations|services|suppliers|payments|documents|notifications|reports|audit|staff|rules|settings|sign-out');
   await signOut(p);
   ok('sign out: marker cleared, signed-out message', (await marker(p)) === null && /تسجيل الخروج/.test(await text(p, 'h1')));
   await go(p, 'admin/dashboard/'); await p.waitForFunction(() => document.querySelector('[data-portal=main] h1'));
@@ -136,6 +136,15 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.ops.s
 
   await go(p, 'admin/staff/'); await mainReady(p);
   ok('staff: the seeded demo admin listed, a create-account form present', await count(p, '#ops-staff-create') === 1 && await count(p, '[data-staff]') >= 1);
+
+  await go(p, 'admin/business-rules/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap');
+  ok('business rules: register, pending decisions and final matrix panels all render', await count(p, '#ops-rules-register') === 1 && await count(p, '#ops-rules-pending') === 1 && await count(p, '#ops-rules-matrix') === 1);
+  ok('the register lists development rules with their PENDING/DRAFT/ACTIVE status, nothing fabricated as confirmed', await count(p, '#ops-rules-register tbody tr') >= 10);
+  await p.click('#ops-rules-register tbody tr:first-child a'); await mainReady(p);
+  ok('rule detail: details, current value and manage form all render (admin has rules.manage)', await count(p, '#ops-rule-details') === 1 && await count(p, '#ops-rule-value') === 1 && await count(p, '#ops-rule-manage') === 1);
+  await p.selectOption('#ops-rule-manage select[name=status]', 'ACTIVE'); await p.click('#ops-rule-manage button[type=submit]'); await p.waitForTimeout(500);
+  ok('activating a rule from the form applies and re-renders the new status', await count(p, '[data-rule-status="ACTIVE"]') >= 1);
+  ok('the version history records the change rather than discarding the prior version', await count(p, '#ops-rule-history li') >= 1);
   await c.close();
 }
 
@@ -211,6 +220,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
   await go(p, 'admin/reports/'); await mainReady(p); await screen('reports');
   await go(p, 'admin/audit/'); await mainReady(p); await screen('audit');
   await go(p, 'admin/staff/'); await mainReady(p); await screen('staff', { shot: true });
+  await go(p, 'admin/business-rules/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap'); await screen('business-rules', { shot: true });
   await go(p, 'admin/settings/'); await mainReady(p); await screen('settings', { shot: true });
   await c.close();
 }
@@ -272,7 +282,7 @@ await b.close();
   // its data region shows the backend's own 'forbidden' answer rather than silently listing nothing.
   await bgo(p2, 'admin/suppliers/'); await bMainReady(p2);
   ok('real backend: a permission the fixture never granted shows the region as forbidden, not an empty table', /الموردون/.test(await text(p2, 'h1')) && await count(p2, 'tbody tr') === 0 && (await text(p2, '[data-portal=main]')).includes('لا يملك حسابك صلاحية'));
-  ok('real backend: Stage 14 modules are hidden from the nav entirely for a staff member with none of their permissions', (await p2.$$eval('[data-portal=nav] a', (as) => as.map((a) => a.dataset.nav))).every((id) => !['customers', 'supervisors', 'leads', 'payments', 'documents', 'reports', 'staff'].includes(id)));
+  ok('real backend: Stage 14/15A modules are hidden from the nav entirely for a staff member with none of their permissions', (await p2.$$eval('[data-portal=nav] a', (as) => as.map((a) => a.dataset.nav))).every((id) => !['customers', 'supervisors', 'leads', 'payments', 'documents', 'reports', 'staff', 'rules'].includes(id)));
   await bgo(p2, 'admin/customers/'); await bMainReady(p2);
   ok('real backend: ops-1 (no customer.view) sees the Stage 14 screen refuse, not fabricated data', await count(p2, 'tbody tr') === 0 && (await text(p2, '[data-portal=main]')).includes('لا يملك حسابك صلاحية'));
   await c2.close();
@@ -286,6 +296,11 @@ await b.close();
   ok('real backend: ops-2 (customer.view) sees the real fixture customers', await count(p3, 'tbody tr') === 2);
   await bgo(p3, 'admin/staff/'); await bMainReady(p3);
   ok('real backend: ops-2 (no staff.manage) reaching /admin/staff/ directly still gets refused server-side', (await text(p3, '[data-portal=main]')).includes('لا يملك حسابك صلاحية'));
+  ok('real backend: ops-2 (rules.view) sees the Business Rules nav item', (await p3.$$eval('[data-portal=nav] a', (as) => as.map((a) => a.dataset.nav))).includes('rules'));
+  await bgo(p3, 'admin/business-rules/'); await bMainReady(p3);
+  ok('real backend: ops-2 (rules.view) reads the real seeded register, exactly the codebase\'s own PENDING/DRAFT state', await count(p3, '#ops-rules-register tbody tr') >= 8);
+  await p3.click('#ops-rules-register tbody tr:first-child a'); await bMainReady(p3);
+  ok('real backend: ops-2 (rules.view but no rules.manage) sees the rule\'s details but never the change-status form', await count(p3, '#ops-rule-details') === 1 && await count(p3, '#ops-rule-manage') === 0);
   await c3.close();
 
   await b2.close(); await new Promise((r) => site.close(r));

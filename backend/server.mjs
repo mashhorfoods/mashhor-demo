@@ -168,6 +168,14 @@ export function createApp() {
       if (path === '/admin/staff' && req.method === 'POST') return dashboard.staffCreate(req, res, ctx);
       if ((m = path.match(/^\/admin\/staff\/([^/]+)\/active$/)) && req.method === 'POST') return dashboard.staffActive(req, res, ctx, decodeURIComponent(m[1]));
       if ((m = path.match(/^\/admin\/staff\/([^/]+)\/permissions$/)) && req.method === 'POST') return dashboard.staffPermissions(req, res, ctx, decodeURIComponent(m[1]));
+      if (path === '/admin/rules' && req.method === 'GET') return dashboard.rules(req, res, ctx, url);
+      if (path === '/admin/rules/pending' && req.method === 'GET') return dashboard.pendingDecisions(req, res, ctx);
+      if (path === '/admin/rules/matrix' && req.method === 'GET') return dashboard.ruleMatrix(req, res, ctx);
+      if ((m = path.match(/^\/admin\/rules\/([^/]+)$/)) && req.method === 'GET') return dashboard.rule(req, res, ctx, decodeURIComponent(m[1]));
+      if ((m = path.match(/^\/admin\/rules\/([^/]+)$/)) && req.method === 'PATCH') return dashboard.ruleUpdate(req, res, ctx, decodeURIComponent(m[1]));
+      if ((m = path.match(/^\/admin\/rules\/([^/]+)\/history$/)) && req.method === 'GET') return dashboard.ruleHistory(req, res, ctx, decodeURIComponent(m[1]));
+      if ((m = path.match(/^\/admin\/rules\/([^/]+)\/activate$/)) && req.method === 'POST') return dashboard.ruleActivate(req, res, ctx, decodeURIComponent(m[1]));
+      if ((m = path.match(/^\/admin\/rules\/([^/]+)\/disable$/)) && req.method === 'POST') return dashboard.ruleDisable(req, res, ctx, decodeURIComponent(m[1]));
       return fail(res, 404, 'notFound');
     }
 

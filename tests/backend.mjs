@@ -492,6 +492,40 @@ await control('/__test/reset');
   ok('admin search spans every category', ['customers', 'bookings', 'supervisors', 'suppliers', 'tasks', 'escalations'].every((k) => k in searchAdmin.data));
   ok('an empty query returns no results rather than dumping every row', Object.keys((await reqAdmin2('/admin/search?q=')).data).length === 0);
 
+  // ---- Stage 15A: the Business Rules Register — formalizes business_config (Stage 13/15) into a versioned
+  // rule_id/category/name/status/source/effective_from/effective_to register. Every seeded value is read back
+  // exactly as the codebase already had it (nothing fabricated); a change only happens through an explicit,
+  // audited, versioned admin action, and every prior version survives in history. ----
+  ok('ops-1 (no rules.view) → 403 listing rules', (await reqOps1b('/admin/rules')).status === 403);
+  const rulesList = await reqOps2('/admin/rules');
+  ok('ops-2 (rules.view) → 200, sees the register seeded from the codebase\'s own existing PENDING/DRAFT state, nothing fabricated', rulesList.status === 200 && rulesList.data.items.some((r) => r.ruleId === 'commission_model' && r.status === 'PENDING' && r.currentValue.model === null) && rulesList.data.items.some((r) => r.ruleId === 'refund_policy' && r.currentValue.policy === null) && rulesList.data.items.some((r) => r.ruleId === 'sla_config' && r.currentValue.targets === null));
+  ok('the booking lifecycle graph and attribution model are registered as DRAFT (a technical default in effect, not yet business-confirmed) — never silently marked ACTIVE', rulesList.data.items.some((r) => r.ruleId === 'booking_lifecycle' && r.status === 'DRAFT') && rulesList.data.items.some((r) => r.ruleId === 'attribution_model' && r.status === 'DRAFT'));
+  const filtered = await reqOps2('/admin/rules?category=commission');
+  ok('rules can be filtered by category', filtered.data.items.length === 1 && filtered.data.items[0].ruleId === 'commission_model');
+  ok('an unknown rule id → 404', (await reqOps2('/admin/rules/not-a-rule')).status === 404);
+
+  ok('ops-1 (no rules.view) → 403 on pending decisions and the final matrix', (await reqOps1b('/admin/rules/pending')).status === 403 && (await reqOps1b('/admin/rules/matrix')).status === 403);
+  const pending = await reqOps2('/admin/rules/pending');
+  ok('the Pending Decision Center lists every unresolved register rule plus unconfigured services/suppliers, computed not duplicated', pending.status === 200 && pending.data.items.some((d) => d.category === 'commission') && pending.data.items.some((d) => d.category === 'service_workflow') && pending.data.items.some((d) => d.category === 'supplier_integration'));
+  const matrix = await reqOps2('/admin/rules/matrix');
+  ok('the final business rule matrix reports real, computed coverage counts, never a fabricated percentage', matrix.status === 200 && /^\d+\/\d+ services have a configured workflow$/.test(matrix.data.items.find((r) => r.category === 'service_workflows')?.impact ?? '') && /^\d+\/\d+ suppliers verified connected$/.test(matrix.data.items.find((r) => r.category === 'suppliers')?.impact ?? ''));
+
+  ok('ops-2 (rules.view only, no rules.manage) → 403 updating/activating/disabling a rule', (await reqOps2('/admin/rules/task_priority_levels', { method: 'PATCH', body: { notes: 'x' } })).status === 403 && (await reqOps2('/admin/rules/task_priority_levels/activate', { method: 'POST' })).status === 403);
+  const beforeActivate = await reqAdmin2('/admin/rules/task_priority_levels');
+  ok('task_priority_levels starts DRAFT, as seeded from the existing technical default', beforeActivate.data.rule.status === 'DRAFT');
+  const activated = await reqAdmin2('/admin/rules/task_priority_levels/activate', { method: 'POST' });
+  ok('admin (rules.manage implicitly) activates a rule; effectiveFrom is stamped fresh', activated.status === 200 && activated.data.rule.status === 'ACTIVE' && activated.data.rule.effectiveFrom && activated.data.rule.updatedBy === 'staff-admin-1');
+  const historyAfterActivate = await reqAdmin2('/admin/rules/task_priority_levels/history');
+  ok('activating archived the prior DRAFT version to history rather than discarding it', historyAfterActivate.status === 200 && historyAfterActivate.data.items.length === 1 && historyAfterActivate.data.items[0].status === 'DRAFT' && historyAfterActivate.data.items[0].effectiveTo === activated.data.rule.effectiveFrom);
+  const disabled = await reqAdmin2('/admin/rules/task_priority_levels/disable', { method: 'POST' });
+  ok('admin disables the same rule; a second history entry is appended, not overwritten', disabled.status === 200 && disabled.data.rule.status === 'DISABLED' && (await reqAdmin2('/admin/rules/task_priority_levels/history')).data.items.length === 2);
+  const invalidStatus = await reqAdmin2('/admin/rules/task_priority_levels', { method: 'PATCH', body: { status: 'not-a-real-status' } });
+  ok('an unrecognised status is rejected (422), the vocabulary is server-side', invalidStatus.status === 422);
+  const valueUpdate = await reqAdmin2('/admin/rules/commission_model', { method: 'PATCH', body: { notes: 'Awaiting finance sign-off.' } });
+  ok('admin can annotate a rule with notes without inventing its value — commission_model.currentValue stays null', valueUpdate.status === 200 && valueUpdate.data.rule.notes === 'Awaiting finance sign-off.' && valueUpdate.data.rule.currentValue.model === null && valueUpdate.data.rule.status === 'PENDING');
+  const auditAfterRules = await reqAdmin2('/operations/audit');
+  ok('every business-rule mutation left an audit trace (§18/§22)', auditAfterRules.data.items.filter((e) => e.action === 'businessRule.update').length === 3);
+
   jarAdmin2.clear(); jarOps1b.clear(); jarOps2.clear();
 }
 

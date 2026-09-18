@@ -68,7 +68,7 @@ export function seed() {
   // supervisor.manage/staff.manage) — lets the permission boundary be exercised on both sides: ops-1 above holds
   // NONE of the Stage 14 permissions (a clean "lacks the permission entirely" case), ops-2 holds view-only ones (a
   // "can read but not manage" case), and admin holds every permission implicitly, exactly like Stage 15's roles.
-  q.run('INSERT INTO staff (id, email, name, role, permissions_json, active, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?)', 'staff-ops-2', 'ops2@fixture.test', 'Fixture Ops Two', 'ops', JSON.stringify(['customer.view', 'supervisor.view', 'payment.view', 'document.view', 'attribution.view']), 1, t, t);
+  q.run('INSERT INTO staff (id, email, name, role, permissions_json, active, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?)', 'staff-ops-2', 'ops2@fixture.test', 'Fixture Ops Two', 'ops', JSON.stringify(['customer.view', 'supervisor.view', 'payment.view', 'document.view', 'attribution.view', 'rules.view']), 1, t, t);
   setStaffPassword('staff-admin-1', 'password123'); setStaffPassword('staff-ops-1', 'password123'); setStaffPassword('staff-ops-2', 'password123');
 
   q.run('UPDATE bookings SET ops_status = ?, assigned_operator = ? WHERE id = ?', 'submitted', 'staff-ops-1', 'BK_A1');

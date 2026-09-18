@@ -27,6 +27,7 @@ import {
 } from './supervisor.mjs';
 import { normEmail } from './identity.mjs';
 import { enqueue } from './mailer.mjs';
+import { listBusinessRules, businessRuleById, businessRuleHistory, updateBusinessRule, activateBusinessRule, disableBusinessRule, pendingDecisions, businessRuleMatrix } from './business-rules.mjs';
 
 const sessionAnswer = (res, s) => { const sess = createStaffSession(s.id); setStaffSessionCookies(res, sess.id, sess.csrf, sess.maxAge); return { staff: publicStaff(s), expiresAt: sess.expiresAt }; };
 const page = (url) => Math.max(1, Number(url.searchParams.get('page')) || 1);
@@ -144,4 +145,13 @@ export const dashboard = {
   async staffCreate(req, res, ctx) { requirePermission(ctx.staff, 'staff.manage'); const b = await readJson(req); return json(res, 201, { staff: createStaffAccount(b, actorOf(ctx)) }); },
   async staffActive(req, res, ctx, id) { requirePermission(ctx.staff, 'staff.manage'); const b = await readJson(req); return json(res, 200, { staff: setStaffActive(id, !!b.active, actorOf(ctx)) }); },
   async staffPermissions(req, res, ctx, id) { requirePermission(ctx.staff, 'staff.manage'); const b = await readJson(req); return json(res, 200, { staff: setStaffPermissions(id, Array.isArray(b.permissions) ? b.permissions : [], actorOf(ctx)) }); },
+
+  rules(req, res, ctx, url) { requirePermission(ctx.staff, 'rules.view'); return json(res, 200, listBusinessRules({ category: str(url.searchParams.get('category') ?? '', 40), status: str(url.searchParams.get('status') ?? '', 20) })); },
+  rule(req, res, ctx, id) { requirePermission(ctx.staff, 'rules.view'); const r = businessRuleById(id); if (!r) return fail(res, 404, 'notFound'); return json(res, 200, { rule: r }); },
+  ruleHistory(req, res, ctx, id) { requirePermission(ctx.staff, 'rules.view'); return json(res, 200, { items: businessRuleHistory(id) }); },
+  async ruleUpdate(req, res, ctx, id) { requirePermission(ctx.staff, 'rules.manage'); const b = await readJson(req); return json(res, 200, { rule: updateBusinessRule(id, { value: b.value, allowedValues: b.allowedValues, status: b.status, notes: b.notes }, actorOf(ctx)) }); },
+  async ruleActivate(req, res, ctx, id) { requirePermission(ctx.staff, 'rules.manage'); return json(res, 200, { rule: activateBusinessRule(id, actorOf(ctx)) }); },
+  async ruleDisable(req, res, ctx, id) { requirePermission(ctx.staff, 'rules.manage'); return json(res, 200, { rule: disableBusinessRule(id, actorOf(ctx)) }); },
+  pendingDecisions(req, res, ctx) { requirePermission(ctx.staff, 'rules.view'); return json(res, 200, pendingDecisions()); },
+  ruleMatrix(req, res, ctx) { requirePermission(ctx.staff, 'rules.view'); return json(res, 200, businessRuleMatrix()); },
 };

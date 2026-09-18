@@ -86,4 +86,13 @@ export const API_OPS_DATA = registerOpsDataAdapter({
   async createStaff(_t, staff) { const d = await post('/admin/staff', staff); return d.staff; },
   async setStaffActive(_t, id, active) { const d = await post(`/admin/staff/${encodeURIComponent(id)}/active`, { active }); return d.staff; },
   async setStaffPermissions(_t, id, permissions) { const d = await post(`/admin/staff/${encodeURIComponent(id)}/permissions`, { permissions }); return d.staff; },
+
+  async rules(_t, params = {}) { return get(`/admin/rules${q(params)}`); },
+  async rule(_t, id) { const d = await get(`/admin/rules/${encodeURIComponent(id)}`); return d.rule; },
+  async ruleHistory(_t, id) { const d = await get(`/admin/rules/${encodeURIComponent(id)}/history`); return d.items; },
+  async updateRule(_t, id, patchBody) { const d = await patch(`/admin/rules/${encodeURIComponent(id)}`, patchBody); return d.rule; },
+  async activateRule(_t, id) { const d = await post(`/admin/rules/${encodeURIComponent(id)}/activate`, {}); return d.rule; },
+  async disableRule(_t, id) { const d = await post(`/admin/rules/${encodeURIComponent(id)}/disable`, {}); return d.rule; },
+  async pendingDecisions() { return get('/admin/rules/pending'); },
+  async ruleMatrix() { return get('/admin/rules/matrix'); },
 });

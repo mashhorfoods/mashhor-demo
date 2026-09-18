@@ -70,6 +70,8 @@ Stage 15's, for the Admin Dashboard's own modules:
 | `document.view` | Admin-wide document browse |
 | `attribution.view` | Leads, attribution history; combined with `supervisor.manage` for reassignment |
 | `staff.manage` | Staff & Permissions: list/create/activate/deactivate/set-permissions |
+| `rules.view` | Business Rules (Stage 15A): view the register, pending decisions, final matrix |
+| `rules.manage` | Business Rules: change a rule's status/value/notes |
 
 Every one of these is enforced **server-side** in `staff-routes.mjs`'s
 `dashboard` object via `requirePermission(ctx.staff, '...')` — the
@@ -114,7 +116,18 @@ GET  /admin/staff
 POST /admin/staff                         { email, name, role, permissions? }
 POST /admin/staff/:id/active              { active }
 POST /admin/staff/:id/permissions         { permissions }
+GET  /admin/rules?category=&status=
+GET  /admin/rules/pending
+GET  /admin/rules/matrix
+GET  /admin/rules/:id
+PATCH /admin/rules/:id                    { value?, allowedValues?, status?, notes? }
+GET  /admin/rules/:id/history
+POST /admin/rules/:id/activate
+POST /admin/rules/:id/disable
 ```
+
+The `/admin/rules/*` routes (Stage 15A — the Business Rules Register)
+are documented fully in `docs/BUSINESS-RULES.md`.
 
 `/admin/attribution/reassign` (Stage 13, bearer-token, `BACKEND_ADMIN_
 TOKEN`) is a separate, pre-existing route matched before this prefix and
@@ -169,13 +182,15 @@ Stage 12/12.2/13/15 already created:
 Overview/Today (Stage 15's existing screen, unchanged), **Customers**,
 **Supervisors**, **Leads / Attribution**, Bookings, Operations (Tasks,
 Escalations), Services, Suppliers, **Payments**, **Documents**,
-Notifications, **Reports**, Audit Log, **Staff & Permissions**, Settings.
-Bold entries are new in this stage; the rest are Stage 15's, unchanged.
-Every nav entry with a Stage 14 permission attached
+Notifications, **Reports**, Audit Log, **Staff & Permissions**,
+**Business Rules** (Stage 15A — see `docs/BUSINESS-RULES.md`), Settings.
+Bold entries are new since Stage 14; the rest are Stage 15's, unchanged.
+Every nav entry with a permission attached
 (`assets/js/ops/ui/shell.js`'s `NAV` array) is hidden for a staff member
 who lacks that permission — the array is filtered by `hasOpsPermission`
 before rendering, so an Operations Staff account with only view
-permissions never even sees a Staff & Permissions link it could not use.
+permissions never even sees a Staff & Permissions or Business Rules
+link it could not use.
 
 ## 6. Stage 15 integration
 

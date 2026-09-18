@@ -32,6 +32,8 @@ export const PERMISSIONS = [
   'notification.send', 'notification.manage', 'service.manage', 'workflow.manage', 'report.view', 'audit.view',
   // Stage 14 — the Admin Dashboard's own management-layer permissions, added on top of Stage 15's operational ones.
   'customer.view', 'supervisor.view', 'supervisor.manage', 'payment.view', 'document.view', 'attribution.view', 'staff.manage',
+  // Stage 15A — the Business Rules Register: viewing vs. changing a rule's value/status are separate permissions.
+  'rules.view', 'rules.manage',
 ];
 /** role 'admin' holds every permission implicitly; role 'ops' holds exactly what permissions_json lists. */
 export function hasPermission(staffMember, permission) {

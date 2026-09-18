@@ -78,8 +78,24 @@ let devDocumentsAdmin = [
   { id: 'dev-doc-1', customerId: 'dev-cus-1', bookingId: 'dev-bk-1', tripId: null, type: 'eticket', kind: 'issued', status: 'available', reviewStatus: 'pending', reviewerId: null, reviewedAt: null, rejectionReason: null, title: null, createdAt: iso(3) },
 ];
 let staffAccounts = [
-  { id: 'staff-dev-demo', email: 'admin@example.test', name: 'Development Admin', role: 'admin', permissions: ['booking.view', 'booking.manage', 'booking.status.change', 'booking.assign', 'task.view', 'task.manage', 'document.review', 'supplier.view', 'supplier.manage', 'notification.send', 'notification.manage', 'service.manage', 'workflow.manage', 'report.view', 'audit.view', 'customer.view', 'supervisor.view', 'supervisor.manage', 'payment.view', 'document.view', 'attribution.view', 'staff.manage'], active: true, createdAt: iso(120), updatedAt: iso(120) },
+  { id: 'staff-dev-demo', email: 'admin@example.test', name: 'Development Admin', role: 'admin', permissions: ['booking.view', 'booking.manage', 'booking.status.change', 'booking.assign', 'task.view', 'task.manage', 'document.review', 'supplier.view', 'supplier.manage', 'notification.send', 'notification.manage', 'service.manage', 'workflow.manage', 'report.view', 'audit.view', 'customer.view', 'supervisor.view', 'supervisor.manage', 'payment.view', 'document.view', 'attribution.view', 'staff.manage', 'rules.view', 'rules.manage'], active: true, createdAt: iso(120), updatedAt: iso(120) },
 ];
+
+// ---- Stage 15A: the Business Rules Register — mirrors exactly the PENDING/DRAFT/ACTIVE seed the real backend's
+// migration 004_business_rules.sql carries, never a fabricated confirmed value.
+let devRules = [
+  { ruleId: 'commission_model', category: 'commission', name: 'Supervisor commission model', description: 'How (and whether) a supervisor earns commission on a booking.', currentValue: { model: null, status: 'pending_business_configuration', note: 'no percentage, fixed amount or service-specific rule has been supplied' }, allowedValues: null, status: 'PENDING', source: 'Stage 13 brief §18 — no rule supplied', effectiveFrom: iso(30), effectiveTo: null, updatedBy: null, updatedAt: iso(30), notes: null },
+  { ruleId: 'task_priority_levels', category: 'task_priority', name: 'Task priority levels', description: 'The priority vocabulary and ordering used by the operations task queue.', currentValue: { levels: ['low', 'normal', 'high', 'urgent'], status: 'default_pending_confirmation', note: 'a working vocabulary, not confirmed as final' }, allowedValues: null, status: 'DRAFT', source: 'Stage 15 brief — a working technical default', effectiveFrom: iso(30), effectiveTo: null, updatedBy: null, updatedAt: iso(30), notes: null },
+  { ruleId: 'refund_policy', category: 'refund', name: 'Refund policy', description: 'Refund eligibility, approval authority, method and audit requirements.', currentValue: { policy: null, status: 'pending_business_configuration', note: 'no refund policy has been supplied' }, allowedValues: null, status: 'PENDING', source: 'Stage 15 brief §26/§39', effectiveFrom: iso(30), effectiveTo: null, updatedBy: null, updatedAt: iso(30), notes: null },
+  { ruleId: 'cancellation_policy', category: 'cancellation', name: 'Cancellation policy', description: 'Cancellation eligibility, timing, fees and notice periods.', currentValue: { policy: null, status: 'pending_business_configuration', note: 'no cancellation policy has been supplied' }, allowedValues: null, status: 'PENDING', source: 'Stage 15 brief §26/§39', effectiveFrom: iso(30), effectiveTo: null, updatedBy: null, updatedAt: iso(30), notes: null },
+  { ruleId: 'sla_config', category: 'sla', name: 'SLA targets', description: 'Target duration, warning and escalation thresholds.', currentValue: { targets: null, status: 'pending_business_configuration', note: 'no SLA durations have been supplied' }, allowedValues: null, status: 'PENDING', source: 'Stage 15 brief §26/§39', effectiveFrom: iso(30), effectiveTo: null, updatedBy: null, updatedAt: iso(30), notes: null },
+  { ruleId: 'booking_lifecycle', category: 'booking_lifecycle', name: 'Booking lifecycle graph', description: 'The full internal operations-status state graph.', currentValue: { ...LIFECYCLE }, allowedValues: null, status: 'DRAFT', source: 'Stage 15 brief’s own worked example', effectiveFrom: iso(30), effectiveTo: null, updatedBy: null, updatedAt: iso(30), notes: null },
+  { ruleId: 'attribution_model', category: 'attribution', name: 'Supervisor attribution model', description: 'Which attribution rule is in effect: first-touch, last-touch, manual or hybrid.', currentValue: { model: 'first-touch', status: 'pending_business_confirmation', note: 'a technical default in effect since Stage 10, not yet confirmed' }, allowedValues: null, status: 'DRAFT', source: 'Stage 10/13 implementation', effectiveFrom: iso(30), effectiveTo: null, updatedBy: null, updatedAt: iso(30), notes: null },
+  { ruleId: 'payment_gates', category: 'payment', name: 'Payment gates', description: 'Which operational statuses require a paid booking before the transition is allowed.', currentValue: { gatedStatuses: [...PAYMENT_GATED], requiresPaidBeforeGate: true, status: 'technical_example_pending_business_confirmation' }, allowedValues: null, status: 'DRAFT', source: 'Stage 15 brief’s own worked example (PAYMENT_GATED)', effectiveFrom: iso(30), effectiveTo: null, updatedBy: null, updatedAt: iso(30), notes: null },
+  { ruleId: 'staff_provisioning', category: 'staff', name: 'Real staff provisioning', description: 'Whether real (non-fixture) staff accounts have been provisioned.', currentValue: { method: 'admin-created account, reset-token flow', realHiring: false, status: 'pending_business_configuration' }, allowedValues: null, status: 'PENDING', source: 'Stage 14 — provisioning mechanism built, no real hiring has occurred', effectiveFrom: iso(30), effectiveTo: null, updatedBy: null, updatedAt: iso(30), notes: null },
+  { ruleId: 'admin_dashboard_scope', category: 'admin', name: 'Admin Dashboard scope', description: 'The final agreed module scope of the Admin Dashboard.', currentValue: { modules: ['overview', 'customers', 'supervisors', 'business_rules'], status: 'active' }, allowedValues: null, status: 'ACTIVE', source: 'Stage 14 delivered scope, extended by this stage', effectiveFrom: iso(30), effectiveTo: null, updatedBy: null, updatedAt: iso(30), notes: null },
+];
+let devRuleHistory = {};
 
 const paged = (all, { page = 1, pageSize = 20 } = {}) => { const size = Math.min(100, Math.max(1, pageSize)); const p = Math.max(1, page); const slice = all.slice((p - 1) * size, p * size); return { items: slice, page: p, pageSize: size, total: all.length, nextPage: p * size < all.length ? p + 1 : null }; };
 const bookingById = (id) => BOOKINGS.find((b) => b.id === id);
@@ -214,4 +230,40 @@ export const DEV_OPS_DATA = registerOpsDataAdapter({
   async createStaff(_t, staff) { await wait(); const s = { id: `dev-staff-${Date.now()}`, email: staff.email, name: staff.name, role: staff.role ?? 'ops', permissions: staff.role === 'admin' ? [] : (staff.permissions ?? []), active: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }; staffAccounts = [s, ...staffAccounts]; return s; },
   async setStaffActive(_t, id, active) { await wait(); const s = staffAccounts.find((x) => x.id === id); if (!s) return null; s.active = !!active; s.updatedAt = new Date().toISOString(); return { ...s }; },
   async setStaffPermissions(_t, id, permissions) { await wait(); const s = staffAccounts.find((x) => x.id === id); if (!s) return null; if (s.role === 'admin') { const e = new Error('invalid'); e.code = 'invalid'; throw e; } s.permissions = permissions; s.updatedAt = new Date().toISOString(); return { ...s }; },
+
+  async rules(_t, params = {}) { await wait(); let items = devRules; if (params.category) items = items.filter((r) => r.category === params.category); if (params.status) items = items.filter((r) => r.status === params.status); return { items }; },
+  async rule(_t, id) { await wait(); return devRules.find((r) => r.ruleId === id) ?? null; },
+  async ruleHistory(_t, id) { await wait(); return devRuleHistory[id] ?? []; },
+  async updateRule(_t, id, patch) {
+    await wait(); const r = devRules.find((x) => x.ruleId === id); if (!r) { const e = new Error('not found'); e.code = 'notFound'; throw e; }
+    const RULE_STATUSES = ['DRAFT', 'PENDING', 'APPROVED', 'ACTIVE', 'DISABLED', 'SUPERSEDED'];
+    if (patch.status !== undefined && !RULE_STATUSES.includes(patch.status)) { const e = new Error('invalid'); e.code = 'invalid'; throw e; }
+    devRuleHistory[id] = [{ ...r, supersededAt: new Date().toISOString(), effectiveTo: new Date().toISOString() }, ...(devRuleHistory[id] ?? [])];
+    if (patch.value !== undefined) r.currentValue = patch.value;
+    if (patch.allowedValues !== undefined) r.allowedValues = patch.allowedValues;
+    if (patch.notes !== undefined) r.notes = patch.notes;
+    if (patch.status !== undefined && patch.status !== r.status) { r.status = patch.status; r.effectiveFrom = new Date().toISOString(); }
+    r.updatedBy = 'staff-dev-demo'; r.updatedAt = new Date().toISOString();
+    return { ...r };
+  },
+  async activateRule(_t, id) { return this.updateRule(_t, id, { status: 'ACTIVE' }); },
+  async disableRule(_t, id) { return this.updateRule(_t, id, { status: 'DISABLED' }); },
+  async pendingDecisions() {
+    await wait();
+    const rules = devRules.filter((r) => ['PENDING', 'DRAFT'].includes(r.status)).map((r) => ({ id: r.ruleId, category: r.category, name: r.name, status: r.status, reason: r.currentValue?.note ?? r.source, impact: 'business_rule' }));
+    const configuredIds = new Set(Object.keys(WORKFLOWS));
+    const unconfigured = SERVICES.filter((s) => !configuredIds.has(s.id)).map((s) => ({ id: `service:${s.id}`, category: 'service_workflow', name: `${s.id} workflow`, status: 'NOT_CONFIGURED', reason: 'no workflow steps configured for this service', impact: 'service' }));
+    const notConnected = suppliers.filter((s) => s.integrationStatus !== 'connected').map((s) => ({ id: `supplier:${s.id}`, category: 'supplier_integration', name: s.name, status: 'NOT_CONNECTED', reason: 'no real integration has been verified for this supplier', impact: 'supplier' }));
+    return { items: [...rules, ...unconfigured, ...notConnected] };
+  },
+  async ruleMatrix() {
+    await wait();
+    const rows = devRules.map((r) => ({ category: r.category, rule: r.name, status: r.status, configured: r.status === 'ACTIVE' || r.status === 'APPROVED', source: r.source, impact: r.currentValue?.note ?? '' }));
+    const configuredIds = new Set(Object.keys(WORKFLOWS));
+    const configuredCount = SERVICES.filter((s) => configuredIds.has(s.id)).length;
+    rows.push({ category: 'service_workflows', rule: 'Service workflow coverage', status: configuredCount === SERVICES.length ? 'ACTIVE' : 'PARTIALLY_CONFIGURED', configured: configuredCount > 0, source: 'services / service_workflows tables', impact: `${configuredCount}/${SERVICES.length} services have a configured workflow` });
+    const connected = suppliers.filter((s) => s.integrationStatus === 'connected').length;
+    rows.push({ category: 'suppliers', rule: 'Supplier integration coverage', status: connected ? 'PARTIALLY_CONFIGURED' : 'NOT_CONNECTED', configured: connected > 0, source: 'suppliers table', impact: `${connected}/${suppliers.length} suppliers verified connected` });
+    return { items: rows };
+  },
 });
