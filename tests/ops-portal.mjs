@@ -39,7 +39,7 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.ops.s
 // ================================================================= 1. authorization: every portal route guarded, sign in / out
 {
   const { c, p } = await ctx();
-  const PORTAL_ROUTES = ['admin/dashboard/', 'admin/bookings/', 'admin/tasks/', 'admin/escalations/', 'admin/services/', 'admin/suppliers/', 'admin/notifications/', 'admin/audit/', 'admin/settings/'];
+  const PORTAL_ROUTES = ['admin/dashboard/', 'admin/customers/', 'admin/supervisors/', 'admin/leads/', 'admin/bookings/', 'admin/tasks/', 'admin/escalations/', 'admin/services/', 'admin/suppliers/', 'admin/payments/', 'admin/documents/', 'admin/notifications/', 'admin/reports/', 'admin/audit/', 'admin/staff/', 'admin/settings/'];
   for (const u of PORTAL_ROUTES) {
     await p.goto(ORIGIN + P + u); await p.waitForFunction(() => document.querySelector('[data-portal=main] h1'));
     ok(`guest blocked: ${u}`, await count(p, '[data-action=sign-in]') === 1 && await count(p, '[data-portal=nav] a') === 0);
@@ -52,7 +52,7 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.ops.s
   ok('invalid credentials → error, still guest', (await marker(p)) === null);
   await devSignIn(p);
   ok('dev demo sign-in → dashboard, session marker stored', /^dev\./.test((await marker(p))?.token ?? '') && /مرحباً/.test(await text(p, 'h1')));
-  ok('portal nav shows every module, current marked', (await p.$$eval('[data-portal=nav] a', (as) => as.map((a) => a.dataset.nav))).join('|') === 'dashboard|bookings|tasks|escalations|services|suppliers|notifications|audit|settings|sign-out');
+  ok('portal nav shows every module (admin sees Stage 14\'s modules too), current marked', (await p.$$eval('[data-portal=nav] a', (as) => as.map((a) => a.dataset.nav))).join('|') === 'dashboard|customers|supervisors|leads|bookings|tasks|escalations|services|suppliers|payments|documents|notifications|reports|audit|staff|settings|sign-out');
   await signOut(p);
   ok('sign out: marker cleared, signed-out message', (await marker(p)) === null && /تسجيل الخروج/.test(await text(p, 'h1')));
   await go(p, 'admin/dashboard/'); await p.waitForFunction(() => document.querySelector('[data-portal=main] h1'));
@@ -104,6 +104,38 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.ops.s
   await go(p, 'admin/settings/'); await mainReady(p);
   await p.fill('#ops-pw-current', 'anything'); await p.fill('#ops-pw-next', 'newpassword1'); await p.click('#ops-settings-password button[type=submit]'); await p.waitForTimeout(400);
   ok('settings: only email/role shown, password form present, no role/permission editor', await count(p, '#ops-settings-profile select[name=role], #ops-settings-profile input[name=permissions]') === 0);
+  await c.close();
+}
+
+// ================================================================= 2b. Stage 14: the Admin Dashboard's own screens (development stand-in, demo staff = admin)
+{
+  const { c, p } = await ctx(); await devSignIn(p);
+  ok('dashboard: overview-style metrics still render (Stage 15\'s Today screen, unchanged)', await visible(p, '#dash-tasks'));
+
+  await go(p, 'admin/customers/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap');
+  ok('customers: development customers listed', await count(p, 'tbody tr') === 2);
+  await p.click('tbody tr:first-child a'); await mainReady(p);
+  ok('customer detail: unified view (details, reassignment, bookings, payments, documents, attribution)', await count(p, '#ops-cus-details') === 1 && await count(p, '#ops-cus-reassign') === 1 && await count(p, '#ops-cus-attribution') === 1);
+
+  await go(p, 'admin/supervisors/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap');
+  ok('supervisors: development supervisors listed with a create form', await count(p, 'tbody tr') === 2 && await count(p, '#ops-sv-create') === 1);
+  await p.click('tbody tr:first-child a'); await mainReady(p);
+  ok('supervisor detail: composes the same scoped read models the supervisor portal itself uses', await count(p, '#ops-sv-details') === 1 && await count(p, '#ops-sv-manage') === 1);
+
+  await go(p, 'admin/leads/'); await mainReady(p);
+  ok('leads: admin-wide leads and attribution history panels', await count(p, '#ops-leads-list') === 1 && await count(p, '#ops-leads-attribution') === 1);
+
+  await go(p, 'admin/payments/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap');
+  ok('payments: development payment records, read-only', await count(p, 'tbody tr') === 2);
+
+  await go(p, 'admin/documents/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap');
+  ok('documents: admin-wide document browse, never a storage key on screen', await count(p, 'tbody tr') === 1 && !/storage_key|storageKey/i.test(await text(p, '[data-portal=main]')));
+
+  await go(p, 'admin/reports/'); await mainReady(p);
+  ok('reports: every descriptive report panel renders', await count(p, '#ops-rep-bookings') === 1 && await count(p, '#ops-rep-operations') === 1 && await count(p, '#ops-rep-suppliers') === 1 && await count(p, '#ops-rep-documents') === 1 && await count(p, '#ops-rep-notifications') === 1);
+
+  await go(p, 'admin/staff/'); await mainReady(p);
+  ok('staff: the seeded demo admin listed, a create-account form present', await count(p, '#ops-staff-create') === 1 && await count(p, '[data-staff]') >= 1);
   await c.close();
 }
 
@@ -165,13 +197,20 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
   };
   await go(p, 'admin/sign-in/', 'opsSignIn'); await screen('sign-in', { auth: true, shot: true });
   await Promise.all([p.waitForURL(/dashboard\/$/), p.click('[data-action=dev-sign-in]')]); await mainReady(p); await screen('dashboard', { shot: true });
+  await go(p, 'admin/customers/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap'); await screen('customers', { shot: true });
+  await go(p, 'admin/supervisors/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap'); await screen('supervisors');
+  await go(p, 'admin/leads/'); await mainReady(p); await screen('leads');
   await go(p, 'admin/bookings/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap'); await screen('bookings', { shot: true });
   await go(p, 'admin/tasks/'); await mainReady(p); await p.waitForSelector('.c-svp-lead'); await screen('tasks');
   await go(p, 'admin/escalations/'); await mainReady(p); await screen('escalations');
   await go(p, 'admin/services/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap'); await screen('services');
   await go(p, 'admin/suppliers/'); await mainReady(p); await screen('suppliers');
+  await go(p, 'admin/payments/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap'); await screen('payments');
+  await go(p, 'admin/documents/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap'); await screen('documents');
   await go(p, 'admin/notifications/'); await mainReady(p); await screen('notifications');
+  await go(p, 'admin/reports/'); await mainReady(p); await screen('reports');
   await go(p, 'admin/audit/'); await mainReady(p); await screen('audit');
+  await go(p, 'admin/staff/'); await mainReady(p); await screen('staff', { shot: true });
   await go(p, 'admin/settings/'); await mainReady(p); await screen('settings', { shot: true });
   await c.close();
 }
@@ -233,7 +272,21 @@ await b.close();
   // its data region shows the backend's own 'forbidden' answer rather than silently listing nothing.
   await bgo(p2, 'admin/suppliers/'); await bMainReady(p2);
   ok('real backend: a permission the fixture never granted shows the region as forbidden, not an empty table', /الموردون/.test(await text(p2, 'h1')) && await count(p2, 'tbody tr') === 0 && (await text(p2, '[data-portal=main]')).includes('لا يملك حسابك صلاحية'));
+  ok('real backend: Stage 14 modules are hidden from the nav entirely for a staff member with none of their permissions', (await p2.$$eval('[data-portal=nav] a', (as) => as.map((a) => a.dataset.nav))).every((id) => !['customers', 'supervisors', 'leads', 'payments', 'documents', 'reports', 'staff'].includes(id)));
+  await bgo(p2, 'admin/customers/'); await bMainReady(p2);
+  ok('real backend: ops-1 (no customer.view) sees the Stage 14 screen refuse, not fabricated data', await count(p2, 'tbody tr') === 0 && (await text(p2, '[data-portal=main]')).includes('لا يملك حسابك صلاحية'));
   await c2.close();
+
+  // Operations staff with only the Stage 14 VIEW permissions (staff-ops-2, no supervisor.manage/staff.manage)
+  const { c: c3, p: p3 } = await bctx();
+  await bgo(p3, 'admin/sign-in/'); await p3.fill('[name=email]', 'ops2@fixture.test'); await p3.fill('[name=password]', 'password123');
+  await Promise.all([p3.waitForURL(/dashboard\/$/), p3.click('[data-form=sign-in] button[type=submit]')]); await bMainReady(p3);
+  ok('real backend: ops-2 nav shows Customers/Supervisors but never Staff & Permissions', (await p3.$$eval('[data-portal=nav] a', (as) => as.map((a) => a.dataset.nav))).includes('customers') && !(await p3.$$eval('[data-portal=nav] a', (as) => as.map((a) => a.dataset.nav))).includes('staff'));
+  await bgo(p3, 'admin/customers/'); await bMainReady(p3);
+  ok('real backend: ops-2 (customer.view) sees the real fixture customers', await count(p3, 'tbody tr') === 2);
+  await bgo(p3, 'admin/staff/'); await bMainReady(p3);
+  ok('real backend: ops-2 (no staff.manage) reaching /admin/staff/ directly still gets refused server-side', (await text(p3, '[data-portal=main]')).includes('لا يملك حسابك صلاحية'));
+  await c3.close();
 
   await b2.close(); await new Promise((r) => site.close(r));
   backend.kill('SIGTERM'); await new Promise((r) => backend.on('close', r)); rmSync(dir, { recursive: true, force: true });

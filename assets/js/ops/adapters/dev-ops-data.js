@@ -58,13 +58,36 @@ let suppliers = [{ id: 'dev-sup-1', name: 'Development Flight Supplier', type: '
 let templates = [{ id: 'dev-tmpl-1', event: 'booking.confirmed', channel: 'email', subjectAr: 'تم تأكيد حجزك', subjectEn: 'Your booking is confirmed', bodyAr: 'مرحباً {{name}}', bodyEn: 'Hello {{name}}', variables: ['name'], active: true, version: 1, createdAt: iso(30), updatedAt: iso(30) }];
 let auditLog = [{ id: 1, actorId: 'staff-dev-demo', actorRole: 'admin', action: 'booking.status.change', entityType: 'booking', entityId: 'dev-bk-1', metadata: { from: null, to: 'submitted' }, at: iso(3) }];
 
+// ---- Stage 14: the Admin Dashboard's own development stand-in data — same rule as everything above, a small
+// fixed dataset, dev: true, never presented as real customers/supervisors/payments/staff.
+let customers = [
+  { id: 'dev-cus-1', name: 'Development Customer One', email: 'dev-cus-1@example.test', phone: '', locale: 'ar', image: null, supervisorId: 'supervisor-1', attribution: { supervisorId: 'supervisor-1', source: 'link', at: iso(30) }, acceptance: null, createdAt: iso(30), bookingsCount: 1, dev: true },
+  { id: 'dev-cus-2', name: 'Development Customer Two', email: 'dev-cus-2@example.test', phone: '', locale: 'ar', image: null, supervisorId: null, attribution: null, acceptance: null, createdAt: iso(10), bookingsCount: 1, dev: true },
+];
+let supervisorsAdmin = [
+  { id: 'supervisor-1', slug: 'supervisor-1', status: 'active', nameAr: 'مشرف تطوير واحد', nameEn: 'Development Supervisor One', titleAr: null, titleEn: null, bioAr: null, bioEn: null, image: null, languages: ['ar', 'en'], specialties: [], services: [], phone: '', whatsapp: null, email: 'dev-sup-1@example.test', city: 'Khartoum', internalId: null, notificationPrefs: {}, createdAt: iso(90), updatedAt: iso(30), customersCount: 1, dev: true },
+  { id: 'supervisor-2', slug: 'supervisor-2', status: 'active', nameAr: 'مشرف تطوير اثنان', nameEn: 'Development Supervisor Two', titleAr: null, titleEn: null, bioAr: null, bioEn: null, image: null, languages: ['ar'], specialties: [], services: [], phone: '', whatsapp: null, email: 'dev-sup-2@example.test', city: 'Khartoum', internalId: null, notificationPrefs: {}, createdAt: iso(90), updatedAt: iso(30), customersCount: 0, dev: true },
+];
+let devLeads = [{ id: 'dev-lead-1', customerId: null, name: 'Development Lead', contact: 'lead@example.test', source: 'link', serviceInterest: 'flights', status: 'new', convertedBookingId: null, createdAt: iso(5), updatedAt: iso(5) }];
+let devAttributionEvents = [{ customerId: 'dev-cus-1', supervisorId: 'supervisor-1', previousSupervisorId: null, source: 'link', actor: 'customer', at: iso(30) }];
+let devPayments = [
+  { id: 'dev-pay-1', customerId: 'dev-cus-1', bookingId: 'dev-bk-1', at: iso(3), amount: 900, currency: 'USD', status: 'paid', reference: 'DEVTX-0001', methodAr: 'مزوّد دفع تطوير', methodEn: 'Development payment provider', customerName: 'Development Customer One' },
+  { id: 'dev-pay-2', customerId: 'dev-cus-2', bookingId: 'dev-bk-2', at: iso(1), amount: 0, currency: 'USD', status: 'failed', reference: 'DEVTX-0002', methodAr: 'مزوّد دفع تطوير', methodEn: 'Development payment provider', customerName: 'Development Customer Two' },
+];
+let devDocumentsAdmin = [
+  { id: 'dev-doc-1', customerId: 'dev-cus-1', bookingId: 'dev-bk-1', tripId: null, type: 'eticket', kind: 'issued', status: 'available', reviewStatus: 'pending', reviewerId: null, reviewedAt: null, rejectionReason: null, title: null, createdAt: iso(3) },
+];
+let staffAccounts = [
+  { id: 'staff-dev-demo', email: 'admin@example.test', name: 'Development Admin', role: 'admin', permissions: ['booking.view', 'booking.manage', 'booking.status.change', 'booking.assign', 'task.view', 'task.manage', 'document.review', 'supplier.view', 'supplier.manage', 'notification.send', 'notification.manage', 'service.manage', 'workflow.manage', 'report.view', 'audit.view', 'customer.view', 'supervisor.view', 'supervisor.manage', 'payment.view', 'document.view', 'attribution.view', 'staff.manage'], active: true, createdAt: iso(120), updatedAt: iso(120) },
+];
+
 const paged = (all, { page = 1, pageSize = 20 } = {}) => { const size = Math.min(100, Math.max(1, pageSize)); const p = Math.max(1, page); const slice = all.slice((p - 1) * size, p * size); return { items: slice, page: p, pageSize: size, total: all.length, nextPage: p * size < all.length ? p + 1 : null }; };
 const bookingById = (id) => BOOKINGS.find((b) => b.id === id);
 
 export const DEV_OPS_DATA = registerOpsDataAdapter({
   id: 'dev-ops-data', dev: true, provider: 'in-browser development stand-in', configSource: 'none',
-  capabilities: ['bookings.operations', 'tasks', 'escalations', 'documents.review', 'services', 'workflow', 'suppliers', 'notifications.templates', 'notifications.history', 'audit'],
-  async meta() { await wait(); return { permissions: ['booking.view', 'booking.manage', 'booking.status.change', 'booking.assign', 'task.view', 'task.manage', 'document.review', 'supplier.view', 'supplier.manage', 'notification.send', 'notification.manage', 'service.manage', 'workflow.manage', 'report.view', 'audit.view'], priorityLevels: PRIORITY_LEVELS, lifecycle: LIFECYCLE }; },
+  capabilities: ['bookings.operations', 'tasks', 'escalations', 'documents.review', 'services', 'workflow', 'suppliers', 'notifications.templates', 'notifications.history', 'audit', 'admin.dashboard'],
+  async meta() { await wait(); return { permissions: ['booking.view', 'booking.manage', 'booking.status.change', 'booking.assign', 'task.view', 'task.manage', 'document.review', 'supplier.view', 'supplier.manage', 'notification.send', 'notification.manage', 'service.manage', 'workflow.manage', 'report.view', 'audit.view', 'customer.view', 'supervisor.view', 'supervisor.manage', 'payment.view', 'document.view', 'attribution.view', 'staff.manage'], priorityLevels: PRIORITY_LEVELS, lifecycle: LIFECYCLE }; },
   async bookings() { await wait(); if (isEmpty()) return paged([]); return paged(BOOKINGS); },
   async booking(_t, id) {
     await wait(); const b = bookingById(id); if (!b) return null;
@@ -123,4 +146,72 @@ export const DEV_OPS_DATA = registerOpsDataAdapter({
   async notificationHistory(_t, params = {}) { await wait(); return paged([{ id: 'dev-msg-1', channel: 'email', event: 'welcome', at: iso(2), status: 'queued', reference: 'dev-msg-1' }], params); },
 
   async audit(_t, params = {}) { await wait(); return paged(auditLog, params); },
+
+  // ---- Stage 14: the Admin Dashboard ----
+  async overview() {
+    await wait();
+    return {
+      customers: customers.length, newCustomers7d: customers.filter((c) => Date.parse(c.createdAt) > Date.now() - 7 * 864e5).length,
+      bookings: BOOKINGS.length, bookingsInProgress: BOOKINGS.filter((b) => !['completed', 'cancelled', 'failed', 'refunded'].includes(b.opsStatus)).length, bookingsUnpaid: BOOKINGS.filter((b) => b.paymentStatus === 'unpaid').length,
+      tasksOpen: tasks.filter((x) => x.status === 'open').length, escalationsOpen: escalations.filter((x) => x.status === 'open').length,
+      documentsPending: devDocumentsAdmin.filter((d) => d.reviewStatus === 'pending').length,
+      suppliers: suppliers.length, suppliersNotConnected: suppliers.filter((s) => s.integrationStatus === 'not_connected').length,
+      supervisors: supervisorsAdmin.filter((s) => s.status === 'active').length,
+    };
+  },
+  async search(_t, query) {
+    await wait(); const s = String(query ?? '').toLowerCase(); if (!s) return {};
+    return {
+      customers: customers.filter((c) => c.name.toLowerCase().includes(s) || c.id.includes(s)).slice(0, 5).map((c) => ({ id: c.id, name: c.name, email: c.email })),
+      bookings: BOOKINGS.filter((b) => b.id.includes(s)).slice(0, 5).map((b) => ({ id: b.id, service: b.service, customerId: b.customerId })),
+      supervisors: supervisorsAdmin.filter((sv) => (sv.nameEn ?? '').toLowerCase().includes(s) || sv.id.includes(s)).slice(0, 5).map((sv) => ({ id: sv.id, nameAr: sv.nameAr, nameEn: sv.nameEn })),
+      suppliers: suppliers.filter((sp) => sp.name.toLowerCase().includes(s)).slice(0, 5).map((sp) => ({ id: sp.id, name: sp.name })),
+      tasks: tasks.filter((tk) => tk.id.includes(s) || tk.type.includes(s)).slice(0, 5).map((tk) => ({ id: tk.id, type: tk.type, bookingId: tk.bookingId })),
+      escalations: escalations.filter((e) => e.id.includes(s) || e.reason.includes(s)).slice(0, 5).map((e) => ({ id: e.id, reason: e.reason, bookingId: e.bookingId })),
+    };
+  },
+
+  async customers(_t, params = {}) { await wait(); if (isEmpty()) return paged([], params); let items = customers; if (params.search) { const s = params.search.toLowerCase(); items = items.filter((c) => c.name.toLowerCase().includes(s) || c.email.toLowerCase().includes(s)); } return paged(items, params); },
+  async customer(_t, id) {
+    await wait(); const c = customers.find((x) => x.id === id); if (!c) return null;
+    return { ...c, bookings: BOOKINGS.filter((b) => b.customerId === id), documents: devDocumentsAdmin.filter((d) => d.customerId === id), payments: devPayments.filter((p) => p.customerId === id), notifications: [], attributionHistory: devAttributionEvents.filter((e) => e.customerId === id) };
+  },
+  async reassignCustomer(_t, id, supervisorId) {
+    await wait(); const c = customers.find((x) => x.id === id); if (!c) { const e = new Error('not found'); e.code = 'notFound'; throw e; }
+    const previous = c.supervisorId; c.supervisorId = supervisorId ?? null; c.attribution = supervisorId ? { supervisorId, source: 'reassigned', at: new Date().toISOString() } : null;
+    devAttributionEvents = [...devAttributionEvents, { customerId: id, supervisorId: c.supervisorId, previousSupervisorId: previous, source: 'reassigned', actor: 'staff-dev-demo', at: new Date().toISOString() }];
+    return { supervisorId: c.supervisorId, source: 'reassigned', at: new Date().toISOString(), previousSupervisorId: previous };
+  },
+
+  async supervisorsAdmin(_t, params = {}) { await wait(); if (isEmpty()) return paged([], params); let items = supervisorsAdmin; if (params.search) { const s = params.search.toLowerCase(); items = items.filter((sv) => (sv.nameEn ?? '').toLowerCase().includes(s) || (sv.slug ?? '').includes(s)); } return paged(items, params); },
+  async supervisorAdmin(_t, id) {
+    await wait(); const sv = supervisorsAdmin.find((x) => x.id === id); if (!sv) return null;
+    return { ...sv, customers: customers.filter((c) => c.supervisorId === id), bookings: BOOKINGS.filter((b) => b.supervisorId === id), leads: devLeads, revenue: { currency: 'USD', gross: 0, completed: 0, pending: 0, cancelled: 0, bookingsCount: 0, commission: { model: null, status: 'pending_business_configuration' } }, performance: { customers: 0, leads: 0, leadsConverted: 0, conversionRate: null, bookings: 0, bookingsConfirmed: 0, bookingsCancelled: 0 }, commissions: [] };
+  },
+  async createSupervisorAdmin(_t, supervisor) {
+    await wait(); const sv = { id: `dev-sv-${Date.now()}`, slug: supervisor.slug, status: 'active', nameAr: supervisor.nameAr ?? null, nameEn: supervisor.nameEn ?? null, titleAr: null, titleEn: null, bioAr: null, bioEn: null, image: null, languages: [], specialties: [], services: [], phone: supervisor.phone ?? null, whatsapp: null, email: supervisor.email ?? null, city: supervisor.city ?? null, internalId: null, notificationPrefs: {}, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), customersCount: 0, dev: true };
+    supervisorsAdmin = [sv, ...supervisorsAdmin]; return sv;
+  },
+  async updateSupervisorAdmin(_t, id, patchBody) {
+    await wait(); const sv = supervisorsAdmin.find((x) => x.id === id); if (!sv) return null;
+    Object.assign(sv, patchBody, { status: patchBody.active !== undefined ? (patchBody.active ? 'active' : 'inactive') : sv.status, updatedAt: new Date().toISOString() });
+    return { ...sv };
+  },
+
+  async leads(_t, params = {}) { await wait(); return paged(devLeads, params); },
+  async attributionEvents(_t, params = {}) { await wait(); return paged(devAttributionEvents, params); },
+
+  async payments(_t, params = {}) { await wait(); let items = devPayments; if (params.customerId) items = items.filter((p) => p.customerId === params.customerId); return paged(items, params); },
+  async documentsAdmin(_t, params = {}) { await wait(); let items = devDocumentsAdmin; if (params.customerId) items = items.filter((d) => d.customerId === params.customerId); return paged(items, params); },
+
+  async reportBookings() { await wait(); return { total: BOOKINGS.length, byOperationalStatus: [{ status: 'submitted', n: BOOKINGS.length }], byService: [{ service: 'flights', n: 1 }, { service: 'visa', n: 1 }], byPaymentStatus: [{ status: 'paid', n: 1 }, { status: 'unpaid', n: 1 }] }; },
+  async reportOperations() { await wait(); return { tasksByStatus: [{ status: 'open', n: tasks.filter((x) => x.status === 'open').length }], tasksByPriority: [{ priority: 'normal', n: 1 }, { priority: 'high', n: 1 }], escalationsByStatus: [{ status: 'open', n: escalations.length }], escalationsBySeverity: [{ severity: 'high', n: 1 }] }; },
+  async reportSuppliers() { await wait(); return { total: suppliers.length, byIntegrationStatus: [{ status: 'not_connected', n: suppliers.length }], bookingsBySupplier: [] }; },
+  async reportDocuments() { await wait(); return { byReviewStatus: [{ status: 'pending', n: devDocumentsAdmin.length }], total: devDocumentsAdmin.length }; },
+  async reportNotifications() { await wait(); return { byStatus: [{ status: 'queued', n: 1 }], byChannel: [{ channel: 'email', n: 1 }], total: 1 }; },
+
+  async staffList() { await wait(); return staffAccounts; },
+  async createStaff(_t, staff) { await wait(); const s = { id: `dev-staff-${Date.now()}`, email: staff.email, name: staff.name, role: staff.role ?? 'ops', permissions: staff.role === 'admin' ? [] : (staff.permissions ?? []), active: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }; staffAccounts = [s, ...staffAccounts]; return s; },
+  async setStaffActive(_t, id, active) { await wait(); const s = staffAccounts.find((x) => x.id === id); if (!s) return null; s.active = !!active; s.updatedAt = new Date().toISOString(); return { ...s }; },
+  async setStaffPermissions(_t, id, permissions) { await wait(); const s = staffAccounts.find((x) => x.id === id); if (!s) return null; if (s.role === 'admin') { const e = new Error('invalid'); e.code = 'invalid'; throw e; } s.permissions = permissions; s.updatedAt = new Date().toISOString(); return { ...s }; },
 });

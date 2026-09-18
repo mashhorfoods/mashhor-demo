@@ -16,7 +16,7 @@ const q = (params = {}) => { const p = new URLSearchParams(); for (const [k, v] 
 
 export const API_OPS_DATA = registerOpsDataAdapter({
   id: 'api-ops-data', dev: false, provider: 'customer backend API', configSource: 'API_BASE_URL',
-  capabilities: ['bookings.operations', 'tasks', 'escalations', 'documents.review', 'services', 'workflow', 'suppliers', 'notifications.templates', 'notifications.history', 'audit'],
+  capabilities: ['bookings.operations', 'tasks', 'escalations', 'documents.review', 'services', 'workflow', 'suppliers', 'notifications.templates', 'notifications.history', 'audit', 'admin.dashboard'],
   async meta() { return get('/operations/meta'); },
   async bookings(_t, params = {}) { return get(`/bookings${q(params)}`); },
   async booking(_t, id) { const d = await get(`/bookings/${encodeURIComponent(id)}`); return d.booking; },
@@ -56,4 +56,34 @@ export const API_OPS_DATA = registerOpsDataAdapter({
   async notificationHistory(_t, params = {}) { return get(`/notifications/history${q(params)}`); },
 
   async audit(_t, params = {}) { return get(`/operations/audit${q(params)}`); },
+
+  // ---- Stage 14: the Admin Dashboard, /admin/* ----
+  async overview() { return get('/admin/overview'); },
+  async search(_t, query) { return get(`/admin/search${q({ q: query })}`); },
+
+  async customers(_t, params = {}) { return get(`/admin/customers${q(params)}`); },
+  async customer(_t, id) { const d = await get(`/admin/customers/${encodeURIComponent(id)}`); return d.customer; },
+  async reassignCustomer(_t, id, supervisorId) { return post(`/admin/customers/${encodeURIComponent(id)}/reassign`, { supervisorId }); },
+
+  async supervisorsAdmin(_t, params = {}) { return get(`/admin/supervisors${q(params)}`); },
+  async supervisorAdmin(_t, id) { const d = await get(`/admin/supervisors/${encodeURIComponent(id)}`); return d.supervisor; },
+  async createSupervisorAdmin(_t, supervisor) { const d = await post('/admin/supervisors', supervisor); return d.supervisor; },
+  async updateSupervisorAdmin(_t, id, patchBody) { const d = await patch(`/admin/supervisors/${encodeURIComponent(id)}`, patchBody); return d.supervisor; },
+
+  async leads(_t, params = {}) { return get(`/admin/leads${q(params)}`); },
+  async attributionEvents(_t, params = {}) { return get(`/admin/attribution-events${q(params)}`); },
+
+  async payments(_t, params = {}) { return get(`/admin/payments${q(params)}`); },
+  async documentsAdmin(_t, params = {}) { return get(`/admin/documents${q(params)}`); },
+
+  async reportBookings() { return get('/admin/reports/bookings'); },
+  async reportOperations() { return get('/admin/reports/operations'); },
+  async reportSuppliers() { return get('/admin/reports/suppliers'); },
+  async reportDocuments() { return get('/admin/reports/documents'); },
+  async reportNotifications() { return get('/admin/reports/notifications'); },
+
+  async staffList() { const d = await get('/admin/staff'); return list(d, 'staff'); },
+  async createStaff(_t, staff) { const d = await post('/admin/staff', staff); return d.staff; },
+  async setStaffActive(_t, id, active) { const d = await post(`/admin/staff/${encodeURIComponent(id)}/active`, { active }); return d.staff; },
+  async setStaffPermissions(_t, id, permissions) { const d = await post(`/admin/staff/${encodeURIComponent(id)}/permissions`, { permissions }); return d.staff; },
 });

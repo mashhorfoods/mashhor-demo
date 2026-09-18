@@ -10,14 +10,21 @@
 import { json, empty, fail, HttpError, readJson, str, isEmail, setStaffSessionCookies, clearStaffSessionCookies } from './http.mjs';
 import {
   publicStaff, staffById, verifyStaffPassword, changeStaffPassword, createStaffSession, endStaffSession,
-  createStaffReset, consumeStaffReset, requirePermission,
+  createStaffReset, consumeStaffReset, requirePermission, hasPermission,
   opsBookingList, opsBookingDetail, transitionBooking, assignBookingOperator,
   createTask, listTasks, taskById, assignTask, updateTaskStatus, taskPriorityLevels,
   createEscalation, listEscalations, updateEscalationStatus,
   listServices, serviceById, updateService, serviceWorkflow, setServiceWorkflow, serviceDocumentRequirements, addServiceDocumentRequirement, allDocumentRequirements,
   reviewDocument, listSuppliers, createSupplier, assignSupplierToBooking, updateBookingSupplier,
   addBookingNote, bookingNotes, listTemplates, upsertTemplate, notificationHistory, auditEvents, lifecycleConfig,
+  listCustomers, customerDetailForStaff, listPayments, listDocumentsAdmin,
+  listStaff, createStaffAccount, setStaffActive, setStaffPermissions,
+  reportBookings, reportOperations, reportSuppliers, reportDocuments, reportNotifications, overview, adminSearch,
 } from './staff.mjs';
+import {
+  listSupervisors, createSupervisor, updateSupervisor, supervisorDetailForStaff,
+  adminLeads, adminAttributionEvents, reassignAttribution,
+} from './supervisor.mjs';
 import { normEmail } from './identity.mjs';
 import { enqueue } from './mailer.mjs';
 
@@ -95,4 +102,46 @@ export const services = {
   async workflowUpdate(req, res, ctx, id) { requirePermission(ctx.staff, 'workflow.manage'); const b = await readJson(req); return json(res, 200, { steps: setServiceWorkflow(id, Array.isArray(b.steps) ? b.steps : [], actorOf(ctx)) }); },
   documentRequirements(req, res, ctx, id) { return json(res, 200, { requirements: serviceDocumentRequirements(id) }); },
   async documentRequirementAdd(req, res, ctx, id) { requirePermission(ctx.staff, 'service.manage'); const b = await readJson(req); return json(res, 201, { requirements: addServiceDocumentRequirement(id, b, actorOf(ctx)) }); },
+};
+
+/* ---- /admin/* — Stage 14, the management/oversight layer ABOVE the Stage 15 operational domain (§29/§30). Every
+   handler checks its own permission here — the frontend nav only hides what a role cannot use, it never gates it. */
+export const dashboard = {
+  overview(req, res, ctx) { requirePermission(ctx.staff, 'customer.view'); return json(res, 200, overview()); },
+  search(req, res, ctx, url) {
+    const q = str(url.searchParams.get('q') ?? '', 80); if (!q) return json(res, 200, {});
+    const categories = [];
+    if (hasPermission(ctx.staff, 'customer.view')) categories.push('customer');
+    if (hasPermission(ctx.staff, 'booking.view')) categories.push('booking');
+    if (hasPermission(ctx.staff, 'supervisor.view')) categories.push('supervisor');
+    if (hasPermission(ctx.staff, 'supplier.view')) categories.push('supplier');
+    if (hasPermission(ctx.staff, 'task.view')) categories.push('task', 'escalation');
+    return json(res, 200, adminSearch(q, categories));
+  },
+
+  customers(req, res, ctx, url) { requirePermission(ctx.staff, 'customer.view'); return json(res, 200, listCustomers({ search: str(url.searchParams.get('search') ?? '', 120), page: page(url), pageSize: pageSize(url) })); },
+  customer(req, res, ctx, id) { requirePermission(ctx.staff, 'customer.view'); const c = customerDetailForStaff(id); if (!c) return fail(res, 404, 'notFound'); return json(res, 200, { customer: c }); },
+  async customerReassign(req, res, ctx, id) { requirePermission(ctx.staff, 'attribution.view'); requirePermission(ctx.staff, 'supervisor.manage'); const b = await readJson(req); return json(res, 200, reassignAttribution(id, b.supervisorId || null, ctx.staff.id)); },
+
+  supervisors(req, res, ctx, url) { requirePermission(ctx.staff, 'supervisor.view'); return json(res, 200, listSupervisors({ search: str(url.searchParams.get('search') ?? '', 120), page: page(url), pageSize: pageSize(url) })); },
+  supervisor(req, res, ctx, id) { requirePermission(ctx.staff, 'supervisor.view'); const s = supervisorDetailForStaff(id); if (!s) return fail(res, 404, 'notFound'); return json(res, 200, { supervisor: s }); },
+  async supervisorCreate(req, res, ctx) { requirePermission(ctx.staff, 'supervisor.manage'); const b = await readJson(req); return json(res, 201, { supervisor: createSupervisor(b, actorOf(ctx)) }); },
+  async supervisorUpdate(req, res, ctx, id) { requirePermission(ctx.staff, 'supervisor.manage'); const b = await readJson(req); return json(res, 200, { supervisor: updateSupervisor(id, b, actorOf(ctx)) }); },
+
+  leads(req, res, ctx, url) { requirePermission(ctx.staff, 'attribution.view'); return json(res, 200, adminLeads({ supervisorId: str(url.searchParams.get('supervisorId') ?? '', 40), status: str(url.searchParams.get('status') ?? '', 20), page: page(url), pageSize: pageSize(url) })); },
+  attributionEvents(req, res, ctx, url) { requirePermission(ctx.staff, 'attribution.view'); return json(res, 200, adminAttributionEvents({ supervisorId: str(url.searchParams.get('supervisorId') ?? '', 40), customerId: str(url.searchParams.get('customerId') ?? '', 40), page: page(url), pageSize: pageSize(url) })); },
+
+  payments(req, res, ctx, url) { requirePermission(ctx.staff, 'payment.view'); return json(res, 200, listPayments({ customerId: str(url.searchParams.get('customerId') ?? '', 40), bookingId: str(url.searchParams.get('bookingId') ?? '', 40), status: str(url.searchParams.get('status') ?? '', 20), page: page(url), pageSize: pageSize(url) })); },
+  documents(req, res, ctx, url) { requirePermission(ctx.staff, 'document.view'); return json(res, 200, listDocumentsAdmin({ customerId: str(url.searchParams.get('customerId') ?? '', 40), bookingId: str(url.searchParams.get('bookingId') ?? '', 40), reviewStatus: str(url.searchParams.get('reviewStatus') ?? '', 20), page: page(url), pageSize: pageSize(url) })); },
+
+  reportBookings(req, res, ctx) { requirePermission(ctx.staff, 'report.view'); return json(res, 200, reportBookings()); },
+  reportOperations(req, res, ctx) { requirePermission(ctx.staff, 'report.view'); return json(res, 200, reportOperations()); },
+  reportSuppliers(req, res, ctx) { requirePermission(ctx.staff, 'report.view'); return json(res, 200, reportSuppliers()); },
+  reportDocuments(req, res, ctx) { requirePermission(ctx.staff, 'report.view'); return json(res, 200, reportDocuments()); },
+  reportNotifications(req, res, ctx) { requirePermission(ctx.staff, 'report.view'); return json(res, 200, reportNotifications()); },
+
+  staffList(req, res, ctx) { requirePermission(ctx.staff, 'staff.manage'); return json(res, 200, { staff: listStaff() }); },
+  async staffCreate(req, res, ctx) { requirePermission(ctx.staff, 'staff.manage'); const b = await readJson(req); return json(res, 201, { staff: createStaffAccount(b, actorOf(ctx)) }); },
+  async staffActive(req, res, ctx, id) { requirePermission(ctx.staff, 'staff.manage'); const b = await readJson(req); return json(res, 200, { staff: setStaffActive(id, !!b.active, actorOf(ctx)) }); },
+  async staffPermissions(req, res, ctx, id) { requirePermission(ctx.staff, 'staff.manage'); const b = await readJson(req); return json(res, 200, { staff: setStaffPermissions(id, Array.isArray(b.permissions) ? b.permissions : [], actorOf(ctx)) }); },
 };

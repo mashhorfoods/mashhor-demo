@@ -89,4 +89,36 @@ export const opsData = {
   notificationHistory: (params = { page: 1 }) => call('notificationHistory', params),
 
   audit: (params = { page: 1 }) => call('audit', params),
+
+  // ---- Stage 14: the Admin Dashboard — the management/oversight layer ABOVE everything above. Every method here
+  // is gated by its own backend permission (customer.view, supervisor.view/manage, payment.view, document.view,
+  // attribution.view, report.view, staff.manage) exactly like the Stage 15 methods above §29/§30. ----
+  overview: () => call('overview'),
+  search: (query) => call('search', query),
+
+  customers: (params = { page: 1 }) => call('customers', params),
+  customer: (id) => call('customer', id),
+  reassignCustomer: (id, supervisorId) => call('reassignCustomer', id, supervisorId),
+
+  supervisorsAdmin: (params = { page: 1 }) => call('supervisorsAdmin', params),
+  supervisorAdmin: (id) => call('supervisorAdmin', id),
+  createSupervisorAdmin: (supervisor) => call('createSupervisorAdmin', supervisor),
+  updateSupervisorAdmin: (id, patch) => call('updateSupervisorAdmin', id, patch),
+
+  leads: (params = { page: 1 }) => call('leads', params),
+  attributionEvents: (params = { page: 1 }) => call('attributionEvents', params),
+
+  payments: (params = { page: 1 }) => call('payments', params),
+  documentsAdmin: (params = { page: 1 }) => call('documentsAdmin', params),
+
+  reportBookings: () => call('reportBookings'),
+  reportOperations: () => call('reportOperations'),
+  reportSuppliers: () => call('reportSuppliers'),
+  reportDocuments: () => call('reportDocuments'),
+  reportNotifications: () => call('reportNotifications'),
+
+  staffList: () => call('staffList'),
+  createStaff: (staff) => call('createStaff', staff),
+  setStaffActive: (id, active) => call('setStaffActive', id, active),
+  setStaffPermissions: (id, permissions) => call('setStaffPermissions', id, permissions),
 };

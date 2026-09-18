@@ -26,19 +26,27 @@ export const devNotice = () => (opsDataAdapter()?.dev ? el('p', { class: 'c-note
 
 const NAV = [
   { id: 'dashboard', icon: 'no-dashboard', href: 'admin/dashboard/', labelAr: 'اليوم', labelEn: 'Today' },
+  { id: 'customers', icon: 'no-customer', href: 'admin/customers/', labelAr: 'العملاء', labelEn: 'Customers', permission: 'customer.view' },
+  { id: 'supervisors', icon: 'no-supervisor', href: 'admin/supervisors/', labelAr: 'المشرفون', labelEn: 'Supervisors', permission: 'supervisor.view' },
+  { id: 'leads', icon: 'no-lead', href: 'admin/leads/', labelAr: 'العملاء المحتملون والإسناد', labelEn: 'Leads / Attribution', permission: 'attribution.view' },
   { id: 'bookings', icon: 'no-ticket', href: 'admin/bookings/', labelAr: 'الحجوزات', labelEn: 'Bookings' },
   { id: 'tasks', icon: 'no-check', href: 'admin/tasks/', labelAr: 'المهام', labelEn: 'Tasks' },
   { id: 'escalations', icon: 'no-alert', href: 'admin/escalations/', labelAr: 'التصعيدات', labelEn: 'Escalations' },
   { id: 'services', icon: 'no-booking', href: 'admin/services/', labelAr: 'الخدمات', labelEn: 'Services' },
   { id: 'suppliers', icon: 'no-supervisor', href: 'admin/suppliers/', labelAr: 'الموردون', labelEn: 'Suppliers' },
+  { id: 'payments', icon: 'no-payment', href: 'admin/payments/', labelAr: 'المدفوعات', labelEn: 'Payments', permission: 'payment.view' },
+  { id: 'documents', icon: 'no-documents', href: 'admin/documents/', labelAr: 'المستندات', labelEn: 'Documents', permission: 'document.view' },
   { id: 'notifications', icon: 'no-notification', href: 'admin/notifications/', labelAr: 'الإشعارات', labelEn: 'Notifications' },
+  { id: 'reports', icon: 'no-chart', href: 'admin/reports/', labelAr: 'التقارير', labelEn: 'Reports', permission: 'report.view' },
   { id: 'audit', icon: 'no-documents', href: 'admin/audit/', labelAr: 'سجل التدقيق', labelEn: 'Audit trail' },
+  { id: 'staff', icon: 'no-shield', href: 'admin/staff/', labelAr: 'الموظفون والصلاحيات', labelEn: 'Staff & Permissions', permission: 'staff.manage' },
   { id: 'settings', icon: 'no-settings', href: 'admin/settings/', labelAr: 'الإعدادات', labelEn: 'Settings', divider: true },
   { id: 'sign-out', icon: 'no-logout', href: 'admin/sign-out/', labelAr: 'تسجيل الخروج', labelEn: 'Sign out' },
 ];
-export function opsNav(current) {
+export function opsNav(current, staff = null) {
+  const items = NAV.filter((item) => !item.permission || !staff || hasOpsPermission(staff, item.permission));
   return el('nav', { class: 'c-acct-nav c-svp-nav', 'aria-label': t('ops.nav.label') }, [
-    el('ul', { class: 'c-acct-nav__list', role: 'list' }, NAV.map((item) => el('li', {}, el('a', {
+    el('ul', { class: 'c-acct-nav__list', role: 'list' }, items.map((item) => el('li', {}, el('a', {
       class: 'c-acct-nav__link', href: route(item.href), dataset: { nav: item.id },
       ...(item.id === current ? { 'aria-current': 'page' } : {}),
     }, [icon(item.icon, { size: 'sm' }), el('span', {}, pick(item, 'label'))])))),
@@ -78,7 +86,7 @@ export async function mountOpsPortal({ root = document, id, head, paint }) {
   }
   document.documentElement.dataset.opsPortal = 'staff';
   put('notice', devNotice(), root);
-  put('nav', opsNav(id), root);
+  put('nav', opsNav(id, staff), root);
   const main = slot('main', root);
   render(main, loadingBlock(t('acct.state.loading')));
   let handle = null;

@@ -17,8 +17,8 @@
 // ============================================================================
 import { config } from './config.mjs';
 import { q, now, paginate } from './db.mjs';
-import { hex, HttpError, str, loginAttempts, recordLoginFailure, clearLoginFailures } from './http.mjs';
-import { hash, same, checkPassword, normEmail } from './identity.mjs';
+import { hex, HttpError, str, isEmail, loginAttempts, recordLoginFailure, clearLoginFailures } from './http.mjs';
+import { hash, same, checkPassword, normEmail, publicCustomer, customerById } from './identity.mjs';
 import { warn } from './logger.mjs';
 
 const J = (s, d) => { try { return s ? JSON.parse(s) : d; } catch { return d; } };
@@ -30,6 +30,8 @@ export const PERMISSIONS = [
   'booking.view', 'booking.manage', 'booking.status.change', 'booking.assign',
   'task.view', 'task.manage', 'document.review', 'supplier.view', 'supplier.manage',
   'notification.send', 'notification.manage', 'service.manage', 'workflow.manage', 'report.view', 'audit.view',
+  // Stage 14 — the Admin Dashboard's own management-layer permissions, added on top of Stage 15's operational ones.
+  'customer.view', 'supervisor.view', 'supervisor.manage', 'payment.view', 'document.view', 'attribution.view', 'staff.manage',
 ];
 /** role 'admin' holds every permission implicitly; role 'ops' holds exactly what permissions_json lists. */
 export function hasPermission(staffMember, permission) {
@@ -349,4 +351,161 @@ export function notificationHistory({ customerId = '', bookingId = '', page = 1,
   if (bookingId) rows = rows.filter((r) => { const p = J(r.payload_json, {}); return p.bookingId === bookingId; });
   const { slice, ...meta } = paginate(rows, page, pageSize, 100);
   return { items: slice.map((r) => ({ id: r.id, channel: r.channel, event: r.template, at: r.created_at, status: r.status, reference: r.id })), ...meta };
+}
+
+// ============================================================================
+// Stage 14 — ADMIN DASHBOARD. The management/oversight layer ABOVE the Stage
+// 15 operational domain: every function below either reads existing tables
+// admin-wide (never scoped to one customer/supervisor's own session the way
+// the customer/supervisor portals are) or performs a write Stage 13/15 left
+// as a documented gap (no supervisor account creation existed at all; no
+// staff account management existed at all). Nothing here duplicates a task,
+// escalation, service, supplier, notification, audit or booking-lifecycle
+// system — those stay exactly as Stage 15 built them (§30).
+// ============================================================================
+
+/* ---- customers, admin-wide (§7) — the `customers` table has no active/inactive column, so none is invented here;
+   only bookingsCount is added, a plain COUNT, never a fabricated "activity" score ---- */
+export function listCustomers({ search = '', page = 1, pageSize = 20 } = {}) {
+  const where = []; const params = [];
+  if (search) { const s = `%${str(search, 120)}%`; where.push('(name LIKE ? OR email LIKE ? OR phone LIKE ? OR id LIKE ?)'); params.push(s, s, s, s); }
+  const all = q.all(`SELECT * FROM customers ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY created_at DESC`, ...params);
+  const { slice, ...meta } = paginate(all, page, pageSize, 100);
+  const ids = slice.map((c) => c.id); const bookingsCount = new Map();
+  if (ids.length) for (const r of q.all(`SELECT customer_id, COUNT(*) AS n FROM bookings WHERE customer_id IN (${ids.map(() => '?').join(',')}) GROUP BY customer_id`, ...ids)) bookingsCount.set(r.customer_id, r.n);
+  return { items: slice.map((c) => ({ ...publicCustomer(c), bookingsCount: bookingsCount.get(c.id) ?? 0 })), ...meta };
+}
+/** The unified operational view of one customer (§7): profile, every booking, every document, every payment, recent
+    notifications, and the full attribution history — nothing a booking/document/payment screen doesn't already
+    expose to the customer's own /me/* routes, just gathered admin-side without a session filter. */
+export function customerDetailForStaff(id) {
+  const c = customerById(id); if (!c) return null;
+  return {
+    ...publicCustomer(c),
+    bookings: q.all('SELECT * FROM bookings WHERE customer_id = ? ORDER BY created_at DESC', id).map(nBookingRow),
+    documents: q.all('SELECT * FROM documents WHERE customer_id = ? ORDER BY created_at DESC', id).map(nDocReview),
+    payments: q.all('SELECT * FROM payments WHERE customer_id = ? ORDER BY at DESC', id).map(nPaymentRow),
+    notifications: q.all('SELECT * FROM notifications WHERE customer_id = ? ORDER BY at DESC LIMIT 50', id).map((r) => ({ id: r.id, kind: r.kind, at: r.at, read: !!r.read, titleAr: r.title_ar, titleEn: r.title_en })),
+    attributionHistory: q.all('SELECT * FROM attribution_events WHERE customer_id = ? ORDER BY at', id).map((h) => ({ supervisorId: h.supervisor_id, previousSupervisorId: h.previous_supervisor_id, source: h.source, actor: h.actor, at: h.at })),
+  };
+}
+
+/* ---- payments, admin-wide (§15) — read-only: no settlement/refund/commission calculation is performed or invented,
+   exactly the fields the `payments` table (Stage 12.2) already has ---- */
+const nPaymentRow = (r) => ({ id: r.id, customerId: r.customer_id, bookingId: r.booking_id, at: r.at, amount: r.amount, currency: r.currency, status: r.status, reference: r.reference, methodAr: r.method_ar, methodEn: r.method_en });
+export function listPayments({ customerId = '', bookingId = '', status = '', page = 1, pageSize = 20 } = {}) {
+  const where = []; const params = [];
+  if (customerId) { where.push('customer_id = ?'); params.push(customerId); }
+  if (bookingId) { where.push('booking_id = ?'); params.push(bookingId); }
+  if (status) { where.push('status = ?'); params.push(status); }
+  const all = q.all(`SELECT * FROM payments ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY at DESC`, ...params);
+  const { slice, ...meta } = paginate(all, page, pageSize, 100);
+  const ids = [...new Set(slice.map((p) => p.customer_id))]; const names = new Map();
+  if (ids.length) for (const c of q.all(`SELECT id, name FROM customers WHERE id IN (${ids.map(() => '?').join(',')})`, ...ids)) names.set(c.id, c.name);
+  return { items: slice.map((r) => ({ ...nPaymentRow(r), customerName: names.get(r.customer_id) ?? '' })), ...meta };
+}
+
+/* ---- documents, admin-wide browse (§16) — distinct from reviewDocument (one document by id) above: a filterable
+   list, still never returning storage_key or a permanent URL — the existing signed-URL mechanism is unchanged ---- */
+const nDocumentAdmin = (r) => ({ id: r.id, customerId: r.customer_id, bookingId: r.booking_id, tripId: r.trip_id, type: r.type, kind: r.kind, status: r.status, reviewStatus: r.review_status, reviewerId: r.reviewer_id ?? null, reviewedAt: r.reviewed_at ?? null, rejectionReason: r.rejection_reason ?? null, title: r.title, createdAt: r.created_at });
+export function listDocumentsAdmin({ customerId = '', bookingId = '', reviewStatus = '', page = 1, pageSize = 20 } = {}) {
+  const where = []; const params = [];
+  if (customerId) { where.push('customer_id = ?'); params.push(customerId); }
+  if (bookingId) { where.push('booking_id = ?'); params.push(bookingId); }
+  if (reviewStatus) { where.push('review_status = ?'); params.push(reviewStatus); }
+  const all = q.all(`SELECT * FROM documents ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY created_at DESC`, ...params);
+  const { slice, ...meta } = paginate(all, page, pageSize, 100);
+  return { items: slice.map(nDocumentAdmin), ...meta };
+}
+
+/* ---- staff accounts (§20) — genuinely absent before Stage 14: only self-service auth existed. A new account gets
+   no password here (never handled/transmitted by an admin) — the SAME reset-token flow staffAuth already uses lets
+   the new hire set their own, exactly like a forgotten-password reset. ---- */
+export const listStaff = () => q.all('SELECT * FROM staff ORDER BY created_at DESC').map(publicStaff);
+export function createStaffAccount({ email, name, role = 'ops', permissions = [] }, actor) {
+  const e = normEmail(email);
+  if (!isEmail(e) || !str(name, 120)) throw new HttpError(422, 'invalid');
+  if (!['admin', 'ops'].includes(role)) throw new HttpError(422, 'invalid');
+  if (staffByEmail(e)) throw new HttpError(409, 'exists');
+  const id = `staff_${hex(8)}`; const t = now();
+  const perms = role === 'admin' ? [] : (Array.isArray(permissions) ? permissions : []).filter((p) => PERMISSIONS.includes(p));
+  q.run('INSERT INTO staff (id, email, name, role, permissions_json, active, created_at, updated_at) VALUES (?,?,?,?,?,1,?,?)', id, e, str(name, 120), role, JSON.stringify(perms), t, t);
+  audit(actor, 'staff.create', 'staff', id, { email: e, role });
+  return publicStaff(staffById(id));
+}
+export function setStaffActive(id, active, actor) {
+  if (!staffById(id)) throw new HttpError(404, 'notFound');
+  q.run('UPDATE staff SET active = ?, updated_at = ? WHERE id = ?', active ? 1 : 0, now(), id);
+  audit(actor, active ? 'staff.activate' : 'staff.deactivate', 'staff', id, {});
+  return publicStaff(staffById(id));
+}
+/** role 'admin' already holds every permission implicitly (hasPermission) — assigning a permission list to one is a no-op the caller should not expect to change behaviour, so it is rejected rather than silently ignored. */
+export function setStaffPermissions(id, permissions, actor) {
+  const s = staffById(id); if (!s) throw new HttpError(404, 'notFound');
+  if (s.role === 'admin') throw new HttpError(422, 'invalid');
+  const perms = (Array.isArray(permissions) ? permissions : []).filter((p) => PERMISSIONS.includes(p));
+  q.run('UPDATE staff SET permissions_json = ?, updated_at = ? WHERE id = ?', JSON.stringify(perms), now(), id);
+  audit(actor, 'staff.permissions.update', 'staff', id, { permissions: perms });
+  return publicStaff(staffById(id));
+}
+
+/* ---- reports (§18) — descriptive counts/distributions from tables that already exist, nothing ranked, scored or
+   projected; each report states plainly what it counts rather than naming an invented metric ---- */
+export function reportBookings() {
+  const byStatus = q.all('SELECT ops_status AS status, COUNT(*) AS n FROM bookings GROUP BY ops_status');
+  const byService = q.all('SELECT service, COUNT(*) AS n FROM bookings GROUP BY service ORDER BY n DESC');
+  const byPayment = q.all('SELECT payment_status AS status, COUNT(*) AS n FROM bookings GROUP BY payment_status');
+  return { total: q.get('SELECT COUNT(*) AS n FROM bookings').n, byOperationalStatus: byStatus, byService, byPaymentStatus: byPayment };
+}
+export function reportOperations() {
+  return {
+    tasksByStatus: q.all('SELECT status, COUNT(*) AS n FROM operation_tasks GROUP BY status'),
+    tasksByPriority: q.all('SELECT priority, COUNT(*) AS n FROM operation_tasks GROUP BY priority'),
+    escalationsByStatus: q.all('SELECT status, COUNT(*) AS n FROM escalations GROUP BY status'),
+    escalationsBySeverity: q.all('SELECT severity, COUNT(*) AS n FROM escalations GROUP BY severity'),
+  };
+}
+export function reportSuppliers() {
+  return {
+    total: q.get('SELECT COUNT(*) AS n FROM suppliers').n,
+    byIntegrationStatus: q.all('SELECT integration_status AS status, COUNT(*) AS n FROM suppliers GROUP BY integration_status'),
+    bookingsBySupplier: q.all("SELECT s.name, COUNT(*) AS n FROM booking_suppliers bs JOIN suppliers s ON s.id = bs.supplier_id GROUP BY bs.supplier_id ORDER BY n DESC"),
+  };
+}
+export function reportDocuments() {
+  return { byReviewStatus: q.all('SELECT review_status AS status, COUNT(*) AS n FROM documents GROUP BY review_status'), total: q.get('SELECT COUNT(*) AS n FROM documents').n };
+}
+export function reportNotifications() {
+  return { byStatus: q.all('SELECT status, COUNT(*) AS n FROM outbox GROUP BY status'), byChannel: q.all('SELECT channel, COUNT(*) AS n FROM outbox GROUP BY channel'), total: q.get('SELECT COUNT(*) AS n FROM outbox').n };
+}
+
+/* ---- overview (§5) — every figure a plain COUNT/filter over an existing, already-defined status vocabulary; no
+   "active customer" or similar fabricated category is computed ---- */
+export function overview() {
+  return {
+    customers: q.get('SELECT COUNT(*) AS n FROM customers').n,
+    newCustomers7d: q.get('SELECT COUNT(*) AS n FROM customers WHERE created_at >= ?', new Date(Date.now() - 7 * 864e5).toISOString()).n,
+    bookings: q.get('SELECT COUNT(*) AS n FROM bookings').n,
+    bookingsInProgress: q.get("SELECT COUNT(*) AS n FROM bookings WHERE ops_status NOT IN ('completed', 'cancelled', 'failed', 'refunded') OR ops_status IS NULL").n,
+    bookingsUnpaid: q.get("SELECT COUNT(*) AS n FROM bookings WHERE payment_status = 'unpaid'").n,
+    tasksOpen: q.get("SELECT COUNT(*) AS n FROM operation_tasks WHERE status = 'open'").n,
+    escalationsOpen: q.get("SELECT COUNT(*) AS n FROM escalations WHERE status = 'open'").n,
+    documentsPending: q.get("SELECT COUNT(*) AS n FROM documents WHERE review_status = 'pending'").n,
+    suppliers: q.get('SELECT COUNT(*) AS n FROM suppliers').n,
+    suppliersNotConnected: q.get("SELECT COUNT(*) AS n FROM suppliers WHERE integration_status = 'not_connected'").n,
+    supervisors: q.get('SELECT COUNT(*) AS n FROM supervisors WHERE active = 1').n,
+  };
+}
+
+/* ---- global search (§6) — bounded LIKE matches per table, capped, no ranking; each category is included only if
+   the caller passes it (the route only passes categories the requesting staff member's permissions allow) ---- */
+export function adminSearch(query, categories) {
+  const s = `%${str(query, 80)}%`; const LIMIT = 5; const out = {};
+  if (categories.includes('customer')) out.customers = q.all('SELECT id, name, email, phone FROM customers WHERE name LIKE ? OR email LIKE ? OR phone LIKE ? OR id LIKE ? LIMIT ?', s, s, s, s, LIMIT).map((c) => ({ id: c.id, name: c.name, email: c.email }));
+  if (categories.includes('booking')) out.bookings = q.all('SELECT id, service, customer_id FROM bookings WHERE id LIKE ? LIMIT ?', s, LIMIT).map((b) => ({ id: b.id, service: b.service, customerId: b.customer_id }));
+  if (categories.includes('supervisor')) out.supervisors = q.all('SELECT id, name_ar, name_en, email FROM supervisors WHERE name_ar LIKE ? OR name_en LIKE ? OR email LIKE ? OR id LIKE ? LIMIT ?', s, s, s, s, LIMIT).map((r) => ({ id: r.id, nameAr: r.name_ar, nameEn: r.name_en }));
+  if (categories.includes('supplier')) out.suppliers = q.all('SELECT id, name FROM suppliers WHERE name LIKE ? LIMIT ?', s, LIMIT).map((r) => ({ id: r.id, name: r.name }));
+  if (categories.includes('task')) out.tasks = q.all('SELECT id, type, booking_id FROM operation_tasks WHERE id LIKE ? OR type LIKE ? LIMIT ?', s, s, LIMIT).map((r) => ({ id: r.id, type: r.type, bookingId: r.booking_id }));
+  if (categories.includes('escalation')) out.escalations = q.all('SELECT id, reason, booking_id FROM escalations WHERE id LIKE ? OR reason LIKE ? LIMIT ?', s, s, LIMIT).map((r) => ({ id: r.id, reason: r.reason, bookingId: r.booking_id }));
+  return out;
 }

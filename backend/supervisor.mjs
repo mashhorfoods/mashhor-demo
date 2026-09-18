@@ -14,9 +14,10 @@
 // ============================================================================
 import { config } from './config.mjs';
 import { q, now, paginate } from './db.mjs';
-import { hex, HttpError, loginAttempts, recordLoginFailure, clearLoginFailures } from './http.mjs';
+import { hex, HttpError, str, loginAttempts, recordLoginFailure, clearLoginFailures } from './http.mjs';
 import { hash, same, checkPassword, normEmail } from './identity.mjs';
 import { warn } from './logger.mjs';
+import { audit } from './staff.mjs';
 
 const J = (s, d) => { try { return s ? JSON.parse(s) : d; } catch { return d; } };
 
@@ -223,4 +224,87 @@ export function supervisorCommissions(supervisorId, { page = 1, pageSize = 20 } 
   const all = q.all('SELECT * FROM commissions WHERE supervisor_id = ? ORDER BY created_at DESC', supervisorId);
   const { slice, ...meta } = paginate(all, page, pageSize, 50);
   return { model: commissionModel(), items: slice.map((c) => ({ id: c.id, bookingId: c.booking_id, amount: c.amount, currency: c.currency, status: c.status, period: c.period, createdAt: c.created_at })), ...meta };
+}
+
+// ============================================================================
+// Stage 14 — ADMIN DASHBOARD: supervisor management admin-wide. Genuinely
+// absent before this stage — supervisors existed only via a fixed row list
+// seeded from `config.supervisors` (backend/db.mjs) and were never
+// creatable/editable through any API. `supervisorCustomers`/`Bookings`/
+// `Leads`/`Revenue`/`Performance`/`Commissions` above already take an
+// explicit `supervisorId`, so they are reused as-is by the admin routes —
+// nothing above this line changes. Reassignment reuses `reassignAttribution`
+// above, the SAME function the bearer-token `admin.reassign` route already
+// called; a staff-session route just gives it a second, permission-checked
+// entry point (the old bearer-token route is untouched, for compatibility).
+// ============================================================================
+const RESERVED_SLUGS = ['dashboard', 'customers', 'leads', 'bookings', 'revenue', 'performance', 'notifications', 'settings', 'profile', 'sign-in', 'sign-up', 'sign-out', 'forgot-password', 'reset-password', 'admin', 'me', 'auth', 'api'];
+const isValidSlug = (slug) => typeof slug === 'string' && /^[a-z0-9]([a-z0-9-]{0,38}[a-z0-9])?$/.test(slug) && !RESERVED_SLUGS.includes(slug);
+
+export function listSupervisors({ search = '', page = 1, pageSize = 20 } = {}) {
+  const where = []; const params = [];
+  if (search) { const s = `%${str(search, 120)}%`; where.push('(name_ar LIKE ? OR name_en LIKE ? OR email LIKE ? OR slug LIKE ? OR id LIKE ?)'); params.push(s, s, s, s, s); }
+  const all = q.all(`SELECT * FROM supervisors ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY created_at DESC`, ...params);
+  const { slice, ...meta } = paginate(all, page, pageSize, 100);
+  const ids = slice.map((s) => s.id); const customersCount = new Map();
+  if (ids.length) for (const r of q.all(`SELECT attribution_supervisor AS id, COUNT(*) AS n FROM customers WHERE attribution_supervisor IN (${ids.map(() => '?').join(',')}) GROUP BY attribution_supervisor`, ...ids)) customersCount.set(r.id, r.n);
+  return { items: slice.map((s) => ({ ...privateSupervisor(s), customersCount: customersCount.get(s.id) ?? 0 })), ...meta };
+}
+export function createSupervisor({ slug, nameAr, nameEn, email, phone = '', city = '' }, actor) {
+  if (!isValidSlug(slug)) throw new HttpError(422, 'invalid');
+  if (!nameAr && !nameEn) throw new HttpError(422, 'invalid');
+  const e = email ? normEmail(email) : null;
+  if (q.get('SELECT id FROM supervisors WHERE slug = ?', slug)) throw new HttpError(409, 'exists');
+  if (e && q.get('SELECT id FROM supervisors WHERE email = ?', e)) throw new HttpError(409, 'exists');
+  const id = `sv_${hex(8)}`; const t = now();
+  q.run('INSERT INTO supervisors (id, active, slug, name_ar, name_en, email, phone, city, languages_json, specialties_json, services_json, notification_prefs_json, created_at, updated_at) VALUES (?,1,?,?,?,?,?,?,?,?,?,?,?,?)',
+    id, slug, str(nameAr, 120) || null, str(nameEn, 120) || null, e, str(phone, 30) || null, str(city, 60) || null, '[]', '[]', '[]', '{}', t, t);
+  audit(actor, 'supervisor.create', 'supervisor', id, { slug });
+  return privateSupervisor(supervisorById(id));
+}
+export function updateSupervisor(id, patch, actor) {
+  const s = supervisorById(id); if (!s) throw new HttpError(404, 'notFound');
+  if (patch.slug !== undefined && patch.slug !== s.slug) {
+    if (!isValidSlug(patch.slug)) throw new HttpError(422, 'invalid');
+    if (q.get('SELECT id FROM supervisors WHERE slug = ? AND id != ?', patch.slug, id)) throw new HttpError(409, 'exists');
+  }
+  const v = (k, cur, n = 120) => (patch[k] !== undefined ? str(patch[k], n) || null : cur);
+  const active = patch.active !== undefined ? (patch.active ? 1 : 0) : s.active;
+  q.run('UPDATE supervisors SET slug = ?, name_ar = ?, name_en = ?, title_ar = ?, title_en = ?, bio_ar = ?, bio_en = ?, phone = ?, whatsapp = ?, email = ?, city = ?, active = ?, updated_at = ? WHERE id = ?',
+    v('slug', s.slug, 40), v('nameAr', s.name_ar), v('nameEn', s.name_en), v('titleAr', s.title_ar), v('titleEn', s.title_en), v('bioAr', s.bio_ar, 600), v('bioEn', s.bio_en, 600),
+    v('phone', s.phone, 30), v('whatsapp', s.whatsapp, 30), patch.email !== undefined ? normEmail(patch.email) || null : s.email, v('city', s.city, 60), active, now(), id);
+  audit(actor, active !== s.active ? (active ? 'supervisor.activate' : 'supervisor.deactivate') : 'supervisor.update', 'supervisor', id, {});
+  return privateSupervisor(supervisorById(id));
+}
+/** The admin-side unified view of one supervisor: profile plus every scoped read model above, called explicitly with
+    this supervisor's id rather than derived from a session — the same functions the supervisor's own portal uses. */
+export function supervisorDetailForStaff(id) {
+  const s = supervisorById(id); if (!s) return null;
+  return {
+    ...privateSupervisor(s),
+    customers: supervisorCustomers(id, { pageSize: 50 }).items,
+    bookings: supervisorBookings(id, { pageSize: 50 }).items,
+    leads: supervisorLeads(id, { pageSize: 50 }).items,
+    revenue: supervisorRevenue(id),
+    performance: supervisorPerformance(id),
+    commissions: supervisorCommissions(id, { pageSize: 20 }).items,
+  };
+}
+/** Admin-wide leads across every supervisor — `supervisorLeads` above stays scoped to one supervisor's own session. */
+export function adminLeads({ supervisorId = '', status = '', page = 1, pageSize = 20 } = {}) {
+  const where = []; const params = [];
+  if (supervisorId) { where.push('supervisor_id = ?'); params.push(supervisorId); }
+  if (status) { where.push('status = ?'); params.push(status); }
+  const all = q.all(`SELECT * FROM leads ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY created_at DESC`, ...params);
+  const { slice, ...meta } = paginate(all, page, pageSize, 100);
+  return { items: slice.map(nLead), ...meta };
+}
+/** Admin-wide attribution history — `supervisorCustomer` above reads this table too, but only for one customer reached through one supervisor's own session. */
+export function adminAttributionEvents({ supervisorId = '', customerId = '', page = 1, pageSize = 20 } = {}) {
+  const where = []; const params = [];
+  if (supervisorId) { where.push('supervisor_id = ?'); params.push(supervisorId); }
+  if (customerId) { where.push('customer_id = ?'); params.push(customerId); }
+  const all = q.all(`SELECT * FROM attribution_events ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY at DESC`, ...params);
+  const { slice, ...meta } = paginate(all, page, pageSize, 100);
+  return { items: slice.map((h) => ({ customerId: h.customer_id, supervisorId: h.supervisor_id, previousSupervisorId: h.previous_supervisor_id, source: h.source, actor: h.actor, at: h.at })), ...meta };
 }

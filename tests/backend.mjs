@@ -393,6 +393,108 @@ await control('/__test/reset');
   jarAdmin.clear(); jarOps.clear(); jarCust2.clear();
 }
 
+// ---- Stage 14: the Admin Dashboard — the management/oversight layer ABOVE the Stage 15 operational domain. Every
+// permission added on top of Stage 15's is checked here exactly like Stage 15's own (ops-1 holds NONE of them,
+// ops-2 holds only the VIEW ones, admin holds every permission implicitly) — no invented business numbers, no
+// duplicate registries, storage keys never exposed, attribution reassignment requires both permissions at once. ----
+{
+  await control('/__test/reset');
+  const jarAdmin2 = new Map(); const jarOps1b = new Map(); const jarOps2 = new Map();
+  const reqAs2 = (jar) => async (path, { method = 'GET', body = null, headers = {}, origin = SITE, csrf = true, raw = null } = {}) => {
+    const h = { Origin: origin, ...headers }; if (body != null) h['Content-Type'] = 'application/json';
+    if (jar.size) h.Cookie = [...jar].map(([k, v]) => `${k}=${v}`).join('; ');
+    if (csrf && jar.get('no_ops_csrf') && method !== 'GET') h['X-CSRF-Token'] = jar.get('no_ops_csrf');
+    const r = await fetch(API + path, { method, headers: h, body: raw ?? (body != null ? JSON.stringify(body) : null), redirect: 'manual' });
+    for (const c of r.headers.getSetCookie?.() ?? []) { const [kv, ...attrs] = c.split(';'); const [k, v] = kv.split('='); if (/Max-Age=0/.test(attrs.join(';'))) jar.delete(k); else jar.set(k, v); }
+    let data = null; try { data = await r.clone().json(); } catch { /* not json */ }
+    return { status: r.status, headers: r.headers, data };
+  };
+  const reqAdmin2 = reqAs2(jarAdmin2); const reqOps1b = reqAs2(jarOps1b); const reqOps2 = reqAs2(jarOps2);
+  await reqAdmin2('/staff/auth/sign-in', { method: 'POST', body: { email: 'admin1@fixture.test', password: 'password123' } });
+  await reqOps1b('/staff/auth/sign-in', { method: 'POST', body: { email: 'ops1@fixture.test', password: 'password123' } });
+  const inOps2 = await reqOps2('/staff/auth/sign-in', { method: 'POST', body: { email: 'ops2@fixture.test', password: 'password123' } });
+  ok('ops-2 holds only the Stage 14 view permissions granted to it, none of the manage ones', inOps2.data.staff.permissions.includes('customer.view') && inOps2.data.staff.permissions.includes('supervisor.view') && !inOps2.data.staff.permissions.includes('supervisor.manage') && !inOps2.data.staff.permissions.includes('staff.manage'));
+
+  // ---- overview: factual counts only, gated by customer.view ----
+  ok('ops-1 (no customer.view) → 403 on the overview', (await reqOps1b('/admin/overview')).status === 403);
+  const ov = await reqAdmin2('/admin/overview');
+  ok('overview returns plain counts, not fabricated metrics — a customer count, a booking count, an open-tasks count', ov.status === 200 && typeof ov.data.customers === 'number' && ov.data.customers >= 2 && typeof ov.data.bookingsUnpaid === 'number' && typeof ov.data.tasksOpen === 'number');
+
+  // ---- customers, admin-wide ----
+  ok('ops-1 (no customer.view) → 403 listing customers', (await reqOps1b('/admin/customers')).status === 403);
+  const customers = await reqOps2('/admin/customers');
+  ok('ops-2 (customer.view) → 200, sees both fixture customers with a real bookingsCount, not a fabricated activity score', customers.status === 200 && customers.data.items.length === 2 && customers.data.items.every((c) => typeof c.bookingsCount === 'number'));
+  const alphaC = customers.data.items.find((c) => c.name === 'Alpha Fixture');
+  const custDetail = await reqOps2(`/admin/customers/${alphaC.id}`);
+  ok('customer detail unifies bookings/documents/payments/notifications/attribution history in one admin-wide view', custDetail.status === 200 && custDetail.data.customer.bookings.length >= 2 && custDetail.data.customer.payments.length > 0 && custDetail.data.customer.attributionHistory.some((h) => h.supervisorId === 'supervisor-1'));
+  ok('an unknown customer id → 404', (await reqOps2('/admin/customers/not-a-customer')).status === 404);
+  ok('ops-2 (attribution.view but not supervisor.manage) → 403 reassigning a customer', (await reqOps2(`/admin/customers/${alphaC.id}/reassign`, { method: 'POST', body: { supervisorId: 'supervisor-2' } })).status === 403);
+  const reassignAdmin = await reqAdmin2(`/admin/customers/${alphaC.id}/reassign`, { method: 'POST', body: { supervisorId: 'supervisor-2' } });
+  ok('admin (both permissions implicitly) → 200, reassignment preserves the previous supervisor in the response', reassignAdmin.status === 200 && reassignAdmin.data.previousSupervisorId === 'supervisor-1' && reassignAdmin.data.supervisorId === 'supervisor-2');
+
+  // ---- supervisors, admin-wide: view vs manage are separate permissions ----
+  ok('ops-1 (no supervisor.view) → 403 listing supervisors', (await reqOps1b('/admin/supervisors')).status === 403);
+  const supervisors = await reqOps2('/admin/supervisors');
+  ok('ops-2 (supervisor.view) → 200, sees the fixture supervisors (config-seeded rows plus profile data) with a real customersCount reflecting the reassignment just above', supervisors.status === 200 && supervisors.data.items.some((s) => s.id === 'supervisor-1' && s.customersCount === 0) && supervisors.data.items.some((s) => s.id === 'supervisor-2' && s.customersCount === 1));
+  ok('ops-2 (no supervisor.manage) → 403 creating a supervisor', (await reqOps2('/admin/supervisors', { method: 'POST', body: { slug: 'sv-new', nameEn: 'New Supervisor' } })).status === 403);
+  const svCreate = await reqAdmin2('/admin/supervisors', { method: 'POST', body: { slug: 'sv-new', nameEn: 'New Supervisor' } });
+  ok('admin creates a new supervisor', svCreate.status === 201 && svCreate.data.supervisor.slug === 'sv-new');
+  ok('a reserved slug is refused (422)', (await reqAdmin2('/admin/supervisors', { method: 'POST', body: { slug: 'settings', nameEn: 'x' } })).status === 422);
+  const svDetail = await reqOps2(`/admin/supervisors/${svCreate.data.supervisor.id}`);
+  ok('supervisor detail composes the same scoped read models the supervisor portal itself uses (customers/bookings/leads/revenue/performance/commissions)', svDetail.status === 200 && Array.isArray(svDetail.data.supervisor.customers) && svDetail.data.supervisor.revenue.commission.model === null);
+  const svUpdate = await reqAdmin2(`/admin/supervisors/${svCreate.data.supervisor.id}`, { method: 'PATCH', body: { active: false } });
+  ok('admin deactivates a supervisor', svUpdate.status === 200 && svUpdate.data.supervisor.status === 'inactive');
+
+  // ---- leads / attribution, admin-wide ----
+  ok('ops-1 (no attribution.view) → 403 on admin-wide leads', (await reqOps1b('/admin/leads')).status === 403);
+  const leadsAll = await reqOps2('/admin/leads');
+  ok('ops-2 (attribution.view) → 200, sees the fixture lead across every supervisor, not just one', leadsAll.status === 200 && leadsAll.data.items.some((l) => l.id === 'lead_S1'));
+  const attrEvents = await reqOps2('/admin/attribution-events');
+  ok('admin-wide attribution history reads the same events table, never a second attribution system (§30)', attrEvents.status === 200 && attrEvents.data.items.some((e) => e.customerId === alphaC.id && e.supervisorId === 'supervisor-2'));
+
+  // ---- payments, admin-wide (read-only, no settlement/refund logic invented) ----
+  ok('ops-1 (no payment.view) → 403 on admin-wide payments', (await reqOps1b('/admin/payments')).status === 403);
+  const payments = await reqOps2(`/admin/payments?customerId=${alphaC.id}`);
+  ok('ops-2 (payment.view) → 200, payments filtered to the requested customer with a resolved customerName', payments.status === 200 && payments.data.items.length > 0 && payments.data.items.every((p) => p.customerId === alphaC.id) && payments.data.items[0].customerName === 'Alpha Fixture');
+
+  // ---- documents, admin-wide browse (never storage_key or a permanent URL) ----
+  ok('ops-1 (no document.view) → 403 on admin-wide documents', (await reqOps1b('/admin/documents')).status === 403);
+  const docsAll = await reqOps2('/admin/documents');
+  ok('ops-2 (document.view) → 200, sees fixture documents across customers', docsAll.status === 200 && docsAll.data.items.length >= 3);
+  ok('admin document browse never exposes a storage key or a permanent path', !/storage_key|storageKey|\/data\/|documents\//.test(JSON.stringify(docsAll.data)));
+
+  // ---- reports: descriptive counts only, gated by report.view (neither ops-1 nor ops-2 hold it) ----
+  ok('ops-1 and ops-2 both lack report.view → 403 on every report', (await reqOps1b('/admin/reports/bookings')).status === 403 && (await reqOps2('/admin/reports/bookings')).status === 403);
+  const repBookings = await reqAdmin2('/admin/reports/bookings');
+  ok('booking report is a plain distribution, nothing ranked or scored', repBookings.status === 200 && Array.isArray(repBookings.data.byService) && typeof repBookings.data.total === 'number');
+  ok('operations/suppliers/documents/notifications reports all answer for admin', (await reqAdmin2('/admin/reports/operations')).status === 200 && (await reqAdmin2('/admin/reports/suppliers')).status === 200 && (await reqAdmin2('/admin/reports/documents')).status === 200 && (await reqAdmin2('/admin/reports/notifications')).status === 200);
+
+  // ---- staff management: only staff.manage holders (admin, implicitly) may provision or change staff ----
+  ok('ops-2 (no staff.manage) → 403 listing staff', (await reqOps2('/admin/staff')).status === 403);
+  const staffList = await reqAdmin2('/admin/staff');
+  ok('admin lists every staff account', staffList.status === 200 && staffList.data.staff.length === 3);
+  ok('ops-2 (no staff.manage) → 403 creating a staff account', (await reqOps2('/admin/staff', { method: 'POST', body: { email: 'new@fixture.test', name: 'New Hire', role: 'ops' } })).status === 403);
+  const staffCreate = await reqAdmin2('/admin/staff', { method: 'POST', body: { email: 'new@fixture.test', name: 'New Hire', role: 'ops', permissions: ['booking.view'] } });
+  ok('a new staff account is created with no password set by the admin — it relies on the existing reset-token flow', staffCreate.status === 201 && staffCreate.data.staff.permissions.includes('booking.view'));
+  const cannotSignIn = await fetch(API + '/staff/auth/sign-in', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: SITE }, body: JSON.stringify({ email: 'new@fixture.test', password: 'anything12' }) });
+  ok('the new hire cannot sign in until they set a password via reset (never handled/transmitted by the admin)', cannotSignIn.status === 401);
+  ok('creating a staff account with a duplicate e-mail is refused (409)', (await reqAdmin2('/admin/staff', { method: 'POST', body: { email: 'ops1@fixture.test', name: 'Dup', role: 'ops' } })).status === 409);
+  const deactivated = await reqAdmin2(`/admin/staff/${staffCreate.data.staff.id}/active`, { method: 'POST', body: { active: false } });
+  ok('admin deactivates the new staff account', deactivated.status === 200 && deactivated.data.staff.active === false);
+  const permsUpdate = await reqAdmin2(`/admin/staff/${staffCreate.data.staff.id}/permissions`, { method: 'POST', body: { permissions: ['payment.view', 'not-a-real-permission'] } });
+  ok('permissions are filtered to the server\'s own vocabulary — an unknown permission is silently dropped, never stored', permsUpdate.status === 200 && permsUpdate.data.staff.permissions.includes('payment.view') && permsUpdate.data.staff.permissions.length === 1);
+  ok('assigning a permission list to an admin account is rejected (422) — admin already holds every permission implicitly, so the call would be a meaningless no-op', (await reqAdmin2('/admin/staff/staff-admin-1/permissions', { method: 'POST', body: { permissions: ['booking.view'] } })).status === 422);
+
+  // ---- global search: bounded, permission-scoped categories, never exposing what the caller cannot see ----
+  const searchOps2 = await reqOps2('/admin/search?q=Fixture');
+  ok('ops-2 search returns only categories it can see (customer, supervisor) — never bookings/tasks/escalations it has no permission for', 'customers' in searchOps2.data && 'supervisors' in searchOps2.data && !('bookings' in searchOps2.data) && !('tasks' in searchOps2.data));
+  const searchAdmin = await reqAdmin2('/admin/search?q=Fixture');
+  ok('admin search spans every category', ['customers', 'bookings', 'supervisors', 'suppliers', 'tasks', 'escalations'].every((k) => k in searchAdmin.data));
+  ok('an empty query returns no results rather than dumping every row', Object.keys((await reqAdmin2('/admin/search?q=')).data).length === 0);
+
+  jarAdmin2.clear(); jarOps1b.clear(); jarOps2.clear();
+}
+
 // ---- diagnostics scrubbing + logs ----
 {
   await fetch(API + '/diagnostics', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: SITE }, body: JSON.stringify({ event: 'api.failure', code: 'unavailable', password: 'hunter22', token: 'abcdef0123456789abcdef0123456789abcdef', email: 'x@y.z', note: 'x'.repeat(500) }) });

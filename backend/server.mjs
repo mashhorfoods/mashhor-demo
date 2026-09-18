@@ -18,7 +18,7 @@ import { auth, me, file, legal, diagnostics } from './routes.mjs';
 import { liveSupervisorSession, supervisorById, sweepSupervisorSessions, endAllSupervisorSessions } from './supervisor.mjs';
 import { supervisorAuth, supervisorMe, admin } from './supervisor-routes.mjs';
 import { liveStaffSession, staffById, sweepStaffSessions, endAllStaffSessions, publicStaff } from './staff.mjs';
-import { staffAuth, operations, services as opsServices } from './staff-routes.mjs';
+import { staffAuth, operations, services as opsServices, dashboard } from './staff-routes.mjs';
 import { info, warn, error } from './logger.mjs';
 import { fixtureLegal } from './fixtures.mjs';
 
@@ -138,6 +138,38 @@ export function createApp() {
     if ((m = path.match(/^\/services\/([^/]+)\/workflow$/)) && req.method === 'POST') { if (!ctx.staffSession) return fail(res, 401, 'unauthenticated'); return opsServices.workflowUpdate(req, res, ctx, decodeURIComponent(m[1])); }
     if ((m = path.match(/^\/services\/([^/]+)\/document-requirements$/)) && req.method === 'GET') { if (!ctx.staffSession) return fail(res, 401, 'unauthenticated'); return opsServices.documentRequirements(req, res, ctx, decodeURIComponent(m[1])); }
     if ((m = path.match(/^\/services\/([^/]+)\/document-requirements$/)) && req.method === 'POST') { if (!ctx.staffSession) return fail(res, 401, 'unauthenticated'); return opsServices.documentRequirementAdd(req, res, ctx, decodeURIComponent(m[1])); }
+
+    // ---- Stage 14: /admin/* — the management/oversight layer ABOVE the Stage 15 operational domain. A live staff
+    // session is required for all of these; the specific permission each action needs is checked inside
+    // staff-routes.mjs's `dashboard` object (backend/staff.mjs requirePermission), never here alone. This is
+    // distinct from the pre-existing bearer-token '/admin/attribution/reassign' route matched above, which stays
+    // untouched at its exact path for compatibility. ----
+    if (path.startsWith('/admin/')) {
+      if (!ctx.staffSession) return fail(res, 401, 'unauthenticated');
+      if (path === '/admin/overview' && req.method === 'GET') return dashboard.overview(req, res, ctx);
+      if (path === '/admin/search' && req.method === 'GET') return dashboard.search(req, res, ctx, url);
+      if (path === '/admin/customers' && req.method === 'GET') return dashboard.customers(req, res, ctx, url);
+      if ((m = path.match(/^\/admin\/customers\/([^/]+)$/)) && req.method === 'GET') return dashboard.customer(req, res, ctx, decodeURIComponent(m[1]));
+      if ((m = path.match(/^\/admin\/customers\/([^/]+)\/reassign$/)) && req.method === 'POST') return dashboard.customerReassign(req, res, ctx, decodeURIComponent(m[1]));
+      if (path === '/admin/supervisors' && req.method === 'GET') return dashboard.supervisors(req, res, ctx, url);
+      if (path === '/admin/supervisors' && req.method === 'POST') return dashboard.supervisorCreate(req, res, ctx);
+      if ((m = path.match(/^\/admin\/supervisors\/([^/]+)$/)) && req.method === 'GET') return dashboard.supervisor(req, res, ctx, decodeURIComponent(m[1]));
+      if ((m = path.match(/^\/admin\/supervisors\/([^/]+)$/)) && req.method === 'PATCH') return dashboard.supervisorUpdate(req, res, ctx, decodeURIComponent(m[1]));
+      if (path === '/admin/leads' && req.method === 'GET') return dashboard.leads(req, res, ctx, url);
+      if (path === '/admin/attribution-events' && req.method === 'GET') return dashboard.attributionEvents(req, res, ctx, url);
+      if (path === '/admin/payments' && req.method === 'GET') return dashboard.payments(req, res, ctx, url);
+      if (path === '/admin/documents' && req.method === 'GET') return dashboard.documents(req, res, ctx, url);
+      if (path === '/admin/reports/bookings' && req.method === 'GET') return dashboard.reportBookings(req, res, ctx);
+      if (path === '/admin/reports/operations' && req.method === 'GET') return dashboard.reportOperations(req, res, ctx);
+      if (path === '/admin/reports/suppliers' && req.method === 'GET') return dashboard.reportSuppliers(req, res, ctx);
+      if (path === '/admin/reports/documents' && req.method === 'GET') return dashboard.reportDocuments(req, res, ctx);
+      if (path === '/admin/reports/notifications' && req.method === 'GET') return dashboard.reportNotifications(req, res, ctx);
+      if (path === '/admin/staff' && req.method === 'GET') return dashboard.staffList(req, res, ctx);
+      if (path === '/admin/staff' && req.method === 'POST') return dashboard.staffCreate(req, res, ctx);
+      if ((m = path.match(/^\/admin\/staff\/([^/]+)\/active$/)) && req.method === 'POST') return dashboard.staffActive(req, res, ctx, decodeURIComponent(m[1]));
+      if ((m = path.match(/^\/admin\/staff\/([^/]+)\/permissions$/)) && req.method === 'POST') return dashboard.staffPermissions(req, res, ctx, decodeURIComponent(m[1]));
+      return fail(res, 404, 'notFound');
+    }
 
     if (path.startsWith('/operations/') || path === '/bookings' || path.startsWith('/bookings/') || path.startsWith('/documents/') || path.startsWith('/notifications/')) {
       if (!ctx.staffSession) return fail(res, 401, 'unauthenticated');
