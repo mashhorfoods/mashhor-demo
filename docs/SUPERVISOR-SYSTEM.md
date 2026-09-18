@@ -8,6 +8,12 @@ deliberately leaves open (§9). The five launch supervisors remain
 placeholders until the business supplies their names, photos and contact
 channels — unchanged from Stage 10.
 
+*(The five launch supervisors below were subsequently populated with DEMO
+/ PLACEHOLDER data — real names still to come from the business — and a
+real attribution bug this stage's architecture had was found and fixed;
+see `docs/SUPERVISOR-PROFILES.md`. This file's own historical claims are
+left as written above.)*
+
 ## 1. What this stage adds
 
 Number One already had (Stage 10) a public supervisor profile and (Stage

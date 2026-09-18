@@ -32,11 +32,18 @@ export const customerByEmail = (email) => q.get('SELECT * FROM customers WHERE e
 
 export function checkPassword(password) { if (typeof password !== 'string' || password.length < config.passwordMinLength || password.length > 256) throw new HttpError(422, 'weak'); }
 
-/** Attribution is accepted once, at creation, and only for a supervisor the backend knows. Never editable by the customer. */
+/** Attribution is accepted once, at creation, and only for a supervisor the backend knows. Never editable by the
+    customer. The frontend always carries the supervisor SLUG (the public route segment, `?supervisor=<slug>` — see
+    assets/js/data/supervisors.js), never a real backend id, so resolution is by slug first, falling back to id for
+    a caller that already has the real id (an admin action, or a pre-slug row). Whichever matched, the REAL backend
+    id is what gets returned and stored — every FK (customers.attribution_supervisor, bookings.supervisor_id, …)
+    stays keyed on the one real id, never on the public-facing slug. */
 export function validAttribution(a) {
-  const id = typeof a?.supervisorId === 'string' ? a.supervisorId : null;
-  if (!id || !q.get('SELECT id FROM supervisors WHERE id = ? AND active = 1', id)) return null;
-  return { supervisorId: id, source: a.source === 'booking' ? 'booking' : 'link', at: now() };
+  const key = typeof a?.supervisorId === 'string' ? a.supervisorId : null;
+  if (!key) return null;
+  const row = q.get('SELECT id FROM supervisors WHERE (slug = ? OR id = ?) AND active = 1', key, key);
+  if (!row) return null;
+  return { supervisorId: row.id, source: a.source === 'booking' ? 'booking' : 'link', at: now() };
 }
 
 export function createIdentity({ name, email, phone, locale, password, attribution, acceptance }) {

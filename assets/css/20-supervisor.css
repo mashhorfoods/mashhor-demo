@@ -72,4 +72,13 @@
                          background-color: var(--color-surface-brand); color: var(--color-text); font-size: var(--text-body-sm); }
   .c-book__attribution .c-icon { color: var(--color-primary); }
   .c-book__attribution:empty { display: none; }
+
+  /* ---- Directory card: /supervisors/ ------------------------------------ */
+  .c-sup-card .c-card__media { aspect-ratio: 1; border-radius: var(--radius-circle); inline-size: 6rem; margin-inline: auto; margin-block-start: var(--space-16); display: grid; place-items: center; color: var(--color-gray-400); }
+  .c-sup-card .c-card__body { display: grid; gap: var(--space-8); text-align: center; }
+  .c-sup-card__name { font-size: var(--text-h4); }
+  .c-sup-card__city { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-4); color: var(--color-text-secondary); font-size: var(--text-body-sm); }
+  .c-sup-card__chips { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-8); list-style: none; margin: 0; padding: 0; }
+  .c-sup-card__bio { color: var(--color-text-secondary); font-size: var(--text-body-sm); }
+  .c-sup-card__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-8); margin-block-start: var(--space-8); }
 }

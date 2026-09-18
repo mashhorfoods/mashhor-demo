@@ -13,6 +13,7 @@ import { makeReq } from './env.mjs';
 import { createHmac } from 'node:crypto';
 import { createServer as createNetServer } from 'node:net';
 import { TLSSocket } from 'node:tls';
+import { DatabaseSync } from 'node:sqlite';
 
 const ROOT = new URL('../', import.meta.url).pathname;
 let pass = 0, fail = 0;
@@ -74,6 +75,23 @@ for (let i = 0; i < 50; i++) { try { if ((await fetch(API + '/health')).ok) brea
 const jar = new Map();
 const req = makeReq(API, SITE)(jar, 'no_csrf');
 const control = (path, body = {}) => fetch(API + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then((r) => r.json());
+
+// ---- supervisor-profiles §15.1: the real production seed, read directly from the database file BEFORE any
+// /__test/reset touches it (fixtures.wipe() nulls every supervisor profile field on every reset — by design, so a
+// test run always starts "provisioned, no profile supplied yet" — so this is the one honest window to see what a
+// genuinely fresh deployment gets from db.mjs's migrate() alone, exactly what a real first boot produces). ----
+{
+  const raw = new DatabaseSync(env.BACKEND_DATABASE_PATH, { readOnly: true });
+  const rows = raw.prepare('SELECT id, slug, active, name_ar, name_en, bio_ar, bio_en FROM supervisors ORDER BY id').all();
+  raw.close();
+  ok('exactly five supervisors exist after a fresh boot, none more, none fewer', rows.length === 5);
+  ok('all five are active by default', rows.every((r) => r.active === 1));
+  const slugs = rows.map((r) => r.slug);
+  ok('every supervisor has a unique, non-null slug', slugs.every(Boolean) && new Set(slugs).size === 5);
+  ok('every supervisor has real (if placeholder) demo content — name and bio in both languages, nothing blank', rows.every((r) => r.name_ar && r.name_en && r.bio_ar && r.bio_en));
+  ok('the launch slugs match the demo profiles the brief specified', ['ahmed-mohamed', 'mohamed-abdullah', 'sara-ahmed', 'omar-hassan', 'maryam-ali'].every((s) => slugs.includes(s)));
+}
+
 await control('/__test/reset');
 
 // ---- CORS ----
@@ -516,6 +534,63 @@ await control('/__test/reset');
   ok('every business-rule mutation left an audit trace (§18/§22)', auditAfterRules.data.items.filter((e) => e.action === 'businessRule.update').length === 3);
 
   jarAdmin2.clear(); jarOps1b.clear(); jarOps2.clear();
+}
+
+// ---- supervisor-profiles: the five launch profiles — admin full-field edit, attribution by the public SLUG (not
+// the backend id), unique-slug enforcement, and a deactivated supervisor's slug refusing new attribution. Its own
+// block (own /__test/reset, own auth-rate-limit budget) since it needs several extra /auth/sign-up calls that
+// would otherwise share — and exhaust — the giant admin-wide block's own auth-class request budget above. ----
+{
+  await control('/__test/reset');
+  const jarAdmin4 = new Map(); const reqAdmin4 = makeReq(API, SITE)(jarAdmin4, 'no_ops_csrf');
+  await reqAdmin4('/staff/auth/sign-in', { method: 'POST', body: { email: 'admin1@fixture.test', password: 'password123' } });
+
+  // ---- §10 admin can edit: every field the brief lists round-trips through the real PATCH route (photo/name/
+  // phone/whatsapp/email/bio/city/languages/specialties/slug — updateSupervisor() only persisted a subset of these
+  // before this stage; languages/specialties/services/image had no write path at all) ----
+  const fullPatch = { slug: 'test-sup-slug', nameAr: 'اسم تجريبي', nameEn: 'Test Name', titleAr: 'مشرف', titleEn: 'Supervisor',
+    bioAr: 'نبذة تجريبية', bioEn: 'Test bio', phone: '+249900000099', whatsapp: '+249900000098', email: 'test-sup@fixture.test', city: 'Khartoum',
+    image: { src: 'assets/brand/supervisors/test.svg', altAr: 'صورة', altEn: 'Photo' }, languages: ['ar', 'en'], specialties: ['tourism'] };
+  const edited = await reqAdmin4('/admin/supervisors/supervisor-3', { method: 'PATCH', body: fullPatch });
+  ok('admin edits every field the brief lists, and every one persists — including languages/specialties/image, which had no write path before this stage',
+    edited.status === 200 && edited.data.supervisor.slug === 'test-sup-slug' && edited.data.supervisor.nameAr === 'اسم تجريبي' && edited.data.supervisor.phone === '+249900000099'
+    && edited.data.supervisor.whatsapp === '+249900000098' && edited.data.supervisor.city === 'Khartoum' && edited.data.supervisor.image?.src === 'assets/brand/supervisors/test.svg'
+    && JSON.stringify(edited.data.supervisor.languages) === JSON.stringify(['ar', 'en']) && JSON.stringify(edited.data.supervisor.specialties) === JSON.stringify(['tourism']));
+  const reread = await reqAdmin4('/admin/supervisors/supervisor-3');
+  ok('the edit is durable, not just echoed back — re-reading the same supervisor shows the same saved values', reread.data.supervisor.nameEn === 'Test Name' && reread.data.supervisor.bioEn === 'Test bio');
+
+  // §4/§2 unique slugs: a slug already in use by another supervisor is refused, so no two profiles can ever answer
+  // the same public URL
+  ok('a duplicate slug is refused (409)', (await reqAdmin4('/admin/supervisors/supervisor-4', { method: 'PATCH', body: { slug: 'test-sup-slug' } })).status === 409);
+  const secondSlug = await reqAdmin4('/admin/supervisors/supervisor-1', { method: 'PATCH', body: { slug: 'second-sup-slug', nameAr: 'الثاني', nameEn: 'Second' } });
+  ok('a second, distinct slug on a different supervisor is accepted', secondSlug.status === 200 && secondSlug.data.supervisor.slug === 'second-sup-slug');
+
+  // §7 CRITICAL: attribution by the public SLUG, not the backend id — this is exactly the field the public profile
+  // pages send (`ctx.attribution.supervisor`, assets/js/core/booking.js), which validAttribution() previously could
+  // never resolve (it only ever matched supervisors.id, and a real admin-created supervisor's id is never its slug).
+  const su = await fetch(API + '/auth/sign-up', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: SITE }, body: JSON.stringify({ name: 'Slug Attribution Fixture', email: 'slugattr@fixture.test', password: 'password123', locale: 'en', attribution: { supervisorId: 'test-sup-slug' } }) }).then(async (r) => ({ status: r.status, data: await r.json() }));
+  ok('§7: a customer attributed via the public slug resolves to the real supervisor, stored by the real backend id', su.status === 201 && su.data.customer.attribution?.supervisorId === 'supervisor-3');
+  ok('an unresolvable slug is not silently stored as an attribution', (await fetch(API + '/auth/sign-up', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: SITE }, body: JSON.stringify({ name: 'Unknown Slug Fixture', email: 'unknownslug@fixture.test', password: 'password123', attribution: { supervisorId: 'no-such-slug' } }) }).then((r) => r.json())).customer.attribution === null);
+
+  // §9: an existing first-touch attribution is never overwritten by a later, different slug. This is a property of
+  // the CUSTOMER's own attribution (customers.attribution_supervisor, what assignAttribution()'s first-wins rule
+  // protects) — a booking's own supervisor_id is a separate, pre-existing, per-booking fact (which supervisor's
+  // link led to THAT booking) and is intentionally NOT the field this guarantee is about, so the check reads the
+  // customer record, not the booking.
+  const jarSlug = new Map(); const reqSlug = makeReq(API, SITE)(jarSlug, 'no_csrf');
+  await reqSlug('/auth/sign-in', { method: 'POST', body: { email: 'slugattr@fixture.test', password: 'password123' } });
+  const reclaim = await reqSlug('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-SUP-ATTR', context: { service: 'flights' }, total: 100, currency: 'USD', attribution: { supervisor: 'second-sup-slug' } } });
+  ok('claiming a booking through a different supervisor\'s slug still succeeds', reclaim.status === 201);
+  const meAfter = await reqSlug('/me');
+  ok('§9: the customer\'s own first-touch attribution is unchanged by a later booking claimed through a different supervisor\'s slug', meAfter.data.customer.attribution?.supervisorId === 'supervisor-3');
+  jarSlug.clear();
+
+  // §8: a deactivated supervisor's slug cannot receive NEW attribution — sign-up still succeeds, just unattributed
+  await reqAdmin4('/admin/supervisors/supervisor-4', { method: 'PATCH', body: { slug: 'deactivated-demo', active: false } });
+  const su2 = await fetch(API + '/auth/sign-up', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: SITE }, body: JSON.stringify({ name: 'Deactivated Attribution Fixture', email: 'deactattr@fixture.test', password: 'password123', locale: 'en', attribution: { supervisorId: 'deactivated-demo' } }) }).then(async (r) => ({ status: r.status, data: await r.json() }));
+  ok('§8: a deactivated supervisor\'s slug is refused for new attribution — never a fabricated one', su2.status === 201 && su2.data.customer.attribution === null);
+
+  jarAdmin4.clear();
 }
 
 // ---- Stage 15B: apply & verify — the register's status COLUMN (Stage 15A) now drives the resolved status

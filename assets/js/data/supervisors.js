@@ -54,20 +54,44 @@ export const SUPERVISOR_SPECIALTIES = TRAVEL_PURPOSES;
 const DEFAULT_SERVICES = ['flights', 'hotels', 'visa', 'packages', 'umrah', 'medical', 'transport', 'issue'];
 
 /* Five launch records, one per supervisor the business will onboard.
-   Personal fields are null on purpose: the business supplies the name,
-   photo, title, bio, languages, specialties and channels; nothing is
-   invented here. Rename the slug when the person is known and re-run
-   tools/build-routes.mjs. */
-const placeholder = (n) => ({
-  id: `sup-${n}`, slug: `supervisor-${n}`, status: 'active', placeholder: true,
-  nameAr: null, nameEn: null, titleAr: null, titleEn: null, bioAr: null, bioEn: null,
-  image: { src: null, altAr: null, altEn: null },
-  languages: [], specialties: [], services: DEFAULT_SERVICES,
-  phone: null, whatsapp: null, email: null,
+   DEMO / PLACEHOLDER SUPERVISOR DATA — fictional names, safe placeholder
+   contact info, generated abstract avatars: not real employees. Every
+   field here is exactly what an admin edits when the business supplies
+   the real five (see docs/SUPERVISOR-PROFILES.md for the replacement
+   procedure) — replacing values requires editing these records only,
+   never a new route, a new component or a redesigned page. Rename a slug
+   only together with tools/build-routes.mjs's regeneration and the
+   matching backend record's slug (backend/db.mjs LAUNCH_SUPERVISORS),
+   since attribution resolves a booking's `?supervisor=<slug>` against
+   the backend's OWN slug column, not this file. */
+const launch = (n, rec) => ({
+  id: `sup-${n}`, slug: rec.slug, status: 'active', placeholder: true,
+  nameAr: rec.nameAr, nameEn: rec.nameEn, titleAr: 'مشرف سفر', titleEn: 'Travel Supervisor',
+  bioAr: rec.bioAr, bioEn: rec.bioEn,
+  image: { src: `assets/brand/supervisors/${rec.slug}.svg`, altAr: `الصورة الرمزية لـ${rec.nameAr}`, altEn: `Avatar placeholder for ${rec.nameEn}` },
+  cityAr: 'الخرطوم', cityEn: 'Khartoum',
+  languages: ['ar', 'en'], specialties: rec.specialties, services: rec.services,
+  phone: rec.phone, whatsapp: rec.phone, email: rec.email,
   createdAt: '2026-09-16',
 });
 
-export const SUPERVISOR_REGISTRY = [1, 2, 3, 4, 5].map(placeholder);
+export const SUPERVISOR_REGISTRY = [
+  launch(1, { slug: 'ahmed-mohamed', nameAr: 'أحمد محمد', nameEn: 'Ahmed Mohamed', specialties: ['visit', 'tourism'], services: ['flights', 'hotels', 'packages'], phone: '+249900000001', email: 'ahmed.demo@numberone.example',
+    bioAr: 'متخصص في مساعدة المسافرين على اختيار الرحلات والحجوزات المناسبة لاحتياجاتهم وميزانيتهم، مع التركيز على سهولة الإجراءات وسرعة المتابعة.',
+    bioEn: 'Specialises in helping travellers choose flights and bookings that fit their needs and budget, focusing on simple procedures and fast follow-up.' }),
+  launch(2, { slug: 'mohamed-abdullah', nameAr: 'محمد عبدالله', nameEn: 'Mohamed Abdullah', specialties: ['study', 'work'], services: ['visa', 'study', 'work'], phone: '+249900000002', email: 'mohamed.demo@numberone.example',
+    bioAr: 'يساعد المسافرين في ترتيب متطلبات السفر والتأشيرات وخيارات الدراسة والعمل، مع تقديم إرشاد واضح خلال مراحل الرحلة.',
+    bioEn: 'Helps travellers arrange visas and study or work travel requirements, with clear guidance through every stage of the journey.' }),
+  launch(3, { slug: 'sara-ahmed', nameAr: 'سارة أحمد', nameEn: 'Sara Ahmed', specialties: ['tourism', 'visit'], services: ['packages'], phone: '+249900000003', email: 'sara.demo@numberone.example',
+    bioAr: 'متخصصة في تنظيم الرحلات السياحية والرحلات الجماعية، ومساعدة العائلات والمسافرين على الوصول إلى خيارات سفر عملية ومناسبة.',
+    bioEn: 'Specialises in organising tourism and group trips, helping families and travellers reach practical, suitable travel options.' }),
+  launch(4, { slug: 'omar-hassan', nameAr: 'عمر حسن', nameEn: 'Omar Hassan', specialties: ['umrah'], services: ['umrah', 'hotels', 'flights'], phone: '+249900000004', email: 'omar.demo@numberone.example',
+    bioAr: 'يساعد المسافرين في تنسيق رحلات العمرة وحجوزات الفنادق وتذاكر الطيران، مع متابعة تفاصيل الرحلة من الحجز حتى الاستعداد للسفر.',
+    bioEn: 'Helps travellers coordinate Umrah trips, hotel bookings and flight tickets, following up on every detail from booking through departure.' }),
+  launch(5, { slug: 'maryam-ali', nameAr: 'مريم علي', nameEn: 'Maryam Ali', specialties: ['medical', 'visit'], services: ['medical', 'flights'], phone: '+249900000005', email: 'maryam.demo@numberone.example',
+    bioAr: 'تساعد المسافرين والعائلات في تنسيق احتياجات السفر، بما في ذلك السفر العلاجي واختيار الرحلات والحجوزات المناسبة.',
+    bioEn: 'Helps travellers and families coordinate their travel needs, including medical travel and choosing the right flights and bookings.' }),
+];
 
 /* Stage 13 — route segments under supervisor/ that a slug may never take: the supervisor portal's own private pages
    live at these exact paths (supervisor/dashboard/, supervisor/customers/, …), sibling to the public profiles this
@@ -90,7 +114,7 @@ export const supervisorSpecialties = (sup) => SUPERVISOR_SPECIALTIES.filter((p) 
 /** Whether the record carries anything beyond its identity and services. */
 export const supervisorHasDetails = (sup) =>
   !!(sup.nameAr || sup.nameEn || sup.titleAr || sup.titleEn || sup.bioAr || sup.bioEn || sup.image?.src
-     || sup.languages?.length || sup.specialties?.length || supervisorChannels(sup).length);
+     || sup.cityAr || sup.cityEn || sup.languages?.length || sup.specialties?.length || supervisorChannels(sup).length);
 
 /**
  * The contact actions a customer can actually use — built ONLY from

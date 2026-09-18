@@ -20,6 +20,10 @@ import { warn } from './logger.mjs';
 import { audit } from './staff.mjs';
 
 const J = (s, d) => { try { return s ? JSON.parse(s) : d; } catch { return d; } };
+/** A short-string array, sanitised item by item — used for languages/specialties/services ids from an admin patch.
+    No closed vocabulary is enforced here (that list lives in the frontend registry, a separate deployable); this is
+    defense in depth against an oversized or malformed payload, not business validation. */
+const strArr = (v, max = 12, itemLen = 30) => (Array.isArray(v) ? v.slice(0, max).map((x) => str(x, itemLen)).filter(Boolean) : []);
 
 /* ---- rows → contract shapes ---------------------------------------------- */
 /** Public-safe: what the (future) public directory and the portal's own "my profile" view may show anyone. No credential, no internal id. */
@@ -271,8 +275,17 @@ export function updateSupervisor(id, patch, actor) {
   }
   const v = (k, cur, n = 120) => (patch[k] !== undefined ? str(patch[k], n) || null : cur);
   const active = patch.active !== undefined ? (patch.active ? 1 : 0) : s.active;
-  q.run('UPDATE supervisors SET slug = ?, name_ar = ?, name_en = ?, title_ar = ?, title_en = ?, bio_ar = ?, bio_en = ?, phone = ?, whatsapp = ?, email = ?, city = ?, active = ?, updated_at = ? WHERE id = ?',
+  const languagesJson = patch.languages !== undefined ? JSON.stringify(strArr(patch.languages, 6, 8)) : s.languages_json;
+  const specialtiesJson = patch.specialties !== undefined ? JSON.stringify(strArr(patch.specialties)) : s.specialties_json;
+  const servicesJson = patch.services !== undefined ? JSON.stringify(strArr(patch.services)) : s.services_json;
+  const imageJson = patch.image !== undefined
+    ? (patch.image && (patch.image.src || patch.image.altAr || patch.image.altEn)
+        ? JSON.stringify({ src: str(patch.image.src, 300) || null, altAr: str(patch.image.altAr, 160) || null, altEn: str(patch.image.altEn, 160) || null })
+        : null)
+    : s.image_json;
+  q.run('UPDATE supervisors SET slug = ?, name_ar = ?, name_en = ?, title_ar = ?, title_en = ?, bio_ar = ?, bio_en = ?, image_json = ?, languages_json = ?, specialties_json = ?, services_json = ?, phone = ?, whatsapp = ?, email = ?, city = ?, active = ?, updated_at = ? WHERE id = ?',
     v('slug', s.slug, 40), v('nameAr', s.name_ar), v('nameEn', s.name_en), v('titleAr', s.title_ar), v('titleEn', s.title_en), v('bioAr', s.bio_ar, 600), v('bioEn', s.bio_en, 600),
+    imageJson, languagesJson, specialtiesJson, servicesJson,
     v('phone', s.phone, 30), v('whatsapp', s.whatsapp, 30), patch.email !== undefined ? normEmail(patch.email) || null : s.email, v('city', s.city, 60), active, now(), id);
   audit(actor, active !== s.active ? (active ? 'supervisor.activate' : 'supervisor.deactivate') : 'supervisor.update', 'supervisor', id, {});
   return privateSupervisor(supervisorById(id));

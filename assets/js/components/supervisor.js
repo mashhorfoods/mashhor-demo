@@ -25,7 +25,7 @@ import { HOME_DESTINATIONS, HOME_OFFERS } from '../data/home.js';
 import { destinationEntry } from '../data/destinations.js';
 import { offerEntry } from '../data/offers.js';
 import {
-  SUPERVISOR_STATUSES, supervisorBySlug, supervisorServices, supervisorLanguages, supervisorSpecialties,
+  SUPERVISOR_REGISTRY, SUPERVISOR_STATUSES, supervisorBySlug, supervisorServices, supervisorLanguages, supervisorSpecialties,
   supervisorChannels, supervisorHasDetails, supervisorUrl, supervisorEntry, supervisorContactUrl, attributed,
 } from '../data/supervisors.js';
 import { icon, toast, sectionHead } from './ui.js';
@@ -96,6 +96,7 @@ export function aboutSection(sup) {
     supervisorHasDetails(sup) ? null : stateBlock({ variant: 'info', iconName: 'no-info', title: t('sup.about.empty.title'), text: t('sup.about.empty.text'),
       actions: [{ label: t('sup.cta.book'), href: route(supervisorEntry(sup)), variant: 'c-btn--secondary-brand' }] }),
     el('dl', { class: 'c-facts' }, [
+      pick(sup, 'city') ? row('sup.about.city', 'no-location', pick(sup, 'city')) : null,
       languages.length ? row('sup.about.languages', 'no-language', chips(languages)) : null,
       specialties.length ? row('sup.about.specialties', 'no-sparkle', chips(specialties, (p) => p.icon)) : null,
       row('sup.about.services', 'no-booking', el('a', { class: 'c-btn c-btn--tertiary c-btn--sm', href: route(supervisorEntry(sup)), dataset: { profileLink: 'services' } }, t('sup.about.servicesCount', services.length))),
@@ -266,6 +267,65 @@ export function mountSupervisor({
     /** Draw any record through the template — QA and the future admin preview. */
     paint(record) { api.current = record; paint(record); return record; },
     scrollTo,
+  };
+  api.render();
+  return api;
+}
+
+/* ===========================================================================
+   DIRECTORY — /supervisors/, one card per active supervisor. §5 of the
+   supervisor-profiles brief: card = photo, name, specialties, city, short
+   bio, "view profile" (primary) + "start booking with this supervisor"
+   (secondary, only once the record has enough to act on). No filters: five
+   launch profiles need none, and nothing here invents a count/rating.
+   ========================================================================= */
+export function supervisorCard(sup) {
+  const titleId = `sup-card-${sup.id}`;
+  const specialties = supervisorSpecialties(sup).slice(0, 3);
+  return el('article', { class: 'c-card c-card--interactive c-sup-card', 'aria-labelledby': titleId }, [
+    el('div', { class: 'c-card__media c-sup-card__media' }, sup.image?.src
+      ? el('img', { src: sup.image.src, alt: pick(sup.image, 'alt') || t('sup.photo.alt', supervisorName(sup)), loading: 'lazy', decoding: 'async', width: 480, height: 480 })
+      : el('span', { role: 'img', 'aria-label': t('sup.photo.empty'), style: 'display:contents' }, icon('no-supervisor', { size: 'xl' }))),
+    el('div', { class: 'c-card__body' }, [
+      el('h3', { class: 'c-sup-card__name', id: titleId }, [el('a', { class: 'c-card__link', href: route(supervisorUrl(sup)) }, supervisorName(sup))]),
+      pick(sup, 'city') ? el('p', { class: 'c-sup-card__city' }, [icon('no-location', { size: 'xs' }), el('span', {}, pick(sup, 'city'))]) : null,
+      specialties.length ? el('ul', { class: 'c-sup-card__chips', role: 'list' }, specialties.map((p) => el('li', {}, el('span', { class: 'c-badge c-badge--outline' }, pick(p, 'label'))))) : null,
+      pick(sup, 'bio') ? el('p', { class: 'c-sup-card__bio' }, pick(sup, 'bio')) : null,
+      el('div', { class: 'c-sup-card__actions' }, [
+        el('a', { class: 'c-btn c-btn--secondary-brand c-card__action', href: route(supervisorUrl(sup)) }, t('sup.card.view')),
+        el('a', { class: 'c-btn c-btn--tertiary c-card__action', href: route(supervisorEntry(sup)) }, t('sup.card.book')),
+      ]),
+    ]),
+  ]);
+}
+
+export function supervisorsHero() {
+  return [
+    el('p', { class: 't-overline' }, t('sups.hero.overline')),
+    el('h1', { class: 't-display c-hero__title', id: 'sups-title' }, t('sups.hero.title')),
+    el('p', { class: 'c-hero__lead' }, t('sups.hero.lead')),
+  ];
+}
+
+export function mountSupervisors({ root = document, load = async () => SUPERVISOR_REGISTRY.filter((s) => s.status === 'active') } = {}) {
+  const mount = (name) => qs(`[data-sups="${name}"]`, root);
+  render(mount('hero'), supervisorsHero());
+  const region = stateRegion(mount('grid'), {
+    loading: () => el('div', { class: 'l-grid' }, Array.from({ length: 3 }, () => el('div', { class: 'l-span-4@md l-span-4@lg' }, el('div', { class: 'c-skeleton', style: 'block-size:22rem' })))),
+    empty: () => stateBlock({ variant: 'empty', title: t('sups.empty.title'), text: t('sups.empty.text'), actions: [{ label: t('sup.cta.book'), href: route('book/'), variant: 'c-btn--primary' }] }),
+    error: () => stateBlock({ variant: 'error', title: t('sup.error.title'), text: t('sup.error.text'), actions: [{ label: t('action.retry'), variant: 'c-btn--primary', onClick: () => api.render() }] }),
+  });
+  const api = {
+    region, current: [],
+    async render() {
+      region.loading();
+      let list;
+      try { list = await load(); }
+      catch (error) { console.error('[no] supervisors directory failed to load', error); region.error(); return null; }
+      api.current = list;
+      list.length ? region.content(el('div', { class: 'l-grid' }, list.map((s) => el('div', { class: 'l-span-4@md l-span-4@lg' }, supervisorCard(s))))) : region.empty();
+      return list;
+    },
   };
   api.render();
   return api;

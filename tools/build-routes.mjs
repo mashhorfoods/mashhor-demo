@@ -44,15 +44,16 @@ const COLLECTIONS = [
     // Stage 10.10 — one public profile per supervisor. The static title is
     // neutral until the business supplies the name; the template sets the
     // real one at runtime. Every door on the page carries ?supervisor=<slug>.
-    // noindex: true until real staff replace the placeholder registry records
-    // (see docs/STAGE-16D-NOTIFICATIONS-LEGAL-STAFF.md) — do not flip this to
-    // false without confirming SUPERVISOR_REGISTRY holds real, approved staff.
+    // noindex: false since the five launch profiles (assets/js/data/supervisors.js) now carry real content —
+    // DEMO / PLACEHOLDER SUPERVISOR DATA, not real employees, but genuinely public per the supervisor-profiles
+    // brief §12; do not flip back to true without a reason, and re-check whether the registry still needs it if a
+    // future record ever ships genuinely blank again (name/bio null).
     dir: 'supervisor', records: SUPERVISOR_REGISTRY, attr: 'profile', mount: 'mountSupervisor', module: 'supervisor', handle: 'supervisor',
     title: (s) => s.nameAr ?? 'مشرف نمبرون', description: (s) => s.bioAr ?? 'مشرف من نمبرون للسفر و السياحة يساعدك على اختيار الخيار المناسب ويتابع حجزك مع فريق نمبرون.',
     og: (s) => s.bioAr ?? 'مشرف من نمبرون للسفر و السياحة.', heroLabel: 'profile-title', current: null,
     search: (s) => `book/?supervisor=${s.slug}`,
     sections: ['about', 'services', 'trust', 'contact', 'discovery'],
-    noindex: true,
+    noindex: false,
   },
 ];
 

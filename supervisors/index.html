@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ar" dir="rtl" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- One level down: <base> points every relative URL at the site root.
+     In-page moves go through script, never href="#…". -->
+<base href="../">
+<title data-i18n="page.supervisors.title">مشرفونا — نمبرون للسفر و السياحة</title>
+<meta name="description" data-i18n-content="page.supervisors.description" content="تعرّف على مشرفي نمبرون للسفر و السياحة الذين يساعدونك على اختيار الرحلة والحجز المناسبين ومتابعة رحلتك من البداية حتى السفر.">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#FE0002">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Number One Travel &amp; Tourism">
+<meta property="og:title" content="مشرفونا — نمبرون للسفر و السياحة">
+<meta property="og:description" content="تعرّف على مشرفي نمبرون الذين يتابعون رحلتك من البداية حتى السفر.">
+<meta property="og:locale" content="ar_SD">
+<meta property="og:locale:alternate" content="en_GB">
+<meta property="og:url" content="https://mashhorfoods.github.io/mashhor-demo/supervisors/">
+<link rel="canonical" href="https://mashhorfoods.github.io/mashhor-demo/supervisors/">
+<meta property="og:image" content="https://mashhorfoods.github.io/mashhor-demo/assets/brand/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Number One Travel &amp; Tourism">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="assets/brand/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/ibm-plex-sans-arabic-arabic-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/ibm-plex-sans-arabic-arabic-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/foundation.css">
+</head>
+
+<body>
+<a class="c-skip-link" href="#main" data-i18n="a11y.skip" data-skip>تخطَّ إلى المحتوى</a>
+
+<div class="l-page">
+  <!-- Global header: mounted by the script below (the placeholder holds its space). Stage 10.2 -->
+  <div class="c-gh c-gh--placeholder" aria-hidden="true"></div>
+
+  <main id="main" class="l-page__main">
+
+    <!-- HERO ================================================================ -->
+    <section class="l-section c-hero" aria-labelledby="sups-title">
+      <div class="l-container"><div class="c-hero__copy" data-sups="hero"></div></div>
+    </section>
+
+    <!-- DIRECTORY =========================================================== -->
+    <section class="l-section" aria-labelledby="sups-title" id="supervisors">
+      <div class="l-container">
+        <div data-sups="grid"></div>
+      </div>
+    </section>
+
+    <!-- FINAL CTA =========================================================== -->
+    <section class="l-section l-section--inverse c-cta-band" aria-labelledby="cta-title">
+      <span class="u-numeral-watermark" aria-hidden="true">1</span>
+      <div class="l-container">
+        <div class="c-cta-band__inner">
+          <div class="l-stack l-stack--12">
+            <h2 class="t-h1 c-cta-band__title" id="cta-title" data-i18n="sups.final.title">لم تختر مشرفاً بعد؟</h2>
+            <p class="t-body-lg c-cta-band__text" data-i18n="sups.final.text">يمكنك بدء الحجز مباشرة وسيتابع معك أحد مشرفينا عند الحاجة.</p>
+          </div>
+          <div class="c-cta-band__actions">
+            <a class="c-btn c-btn--primary c-btn--lg" href="book/" data-route="book/" data-i18n="sup.cta.book">احجز رحلتك</a>
+            <a class="c-btn c-btn--inverse c-btn--lg" href="help/contact/" data-route="help/contact/" data-i18n="detail.cta.expert">تحدث مع خبير</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Global footer: mounted by the script below. Stage 10.3 -->
+
+  <nav class="c-bottom-nav" aria-label="التنقل السريع" data-i18n-label="nav.quick"><div id="bottom-nav" style="display:contents"></div></nav>
+</div>
+
+<script type="module">
+  import { mountPage } from './assets/js/page.js';
+  import { mountSupervisors } from './assets/js/components/supervisor.js';
+
+  mountPage({
+    handle: 'supervisors',
+    header: { current: null, onSearch: () => location.assign('book/') },
+    footer: { cta: false },
+    paint: () => mountSupervisors(),   // QA handle: no.supervisors.render('unknown')
+  });
+</script>
+</body>
+</html>

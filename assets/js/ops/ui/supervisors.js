@@ -3,10 +3,11 @@
    bookings, leads, revenue, performance, commissions — composed admin-side, never a second copy of that logic).
    Commission/revenue figures are shown exactly as the backend reports them; nothing here invents a formula (§8). */
 import { el, render } from '../../core/dom.js';
-import { t } from '../../core/i18n.js';
+import { t, pick } from '../../core/i18n.js';
 import { route } from '../../data/config.js';
 import { icon, toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
+import { SUPERVISOR_LANGUAGES, SUPERVISOR_SPECIALTIES } from '../../data/supervisors.js';
 import { opsData } from '../data.js';
 import { mountOpsPortal, loadRegion, pageTitle, notFoundBlock, actionForm, debouncedRun, emptyNote, dataTable, opsStatusBadge, dateTime, block, rows } from './shell.js';
 
@@ -74,6 +75,7 @@ function mountSupervisorDetail({ root, id }) {
         const btn = el('button', { type: 'button', class: `c-btn c-btn--sm ${active ? 'c-btn--tertiary' : 'c-btn--primary'}` }, t(active ? 'ops.supervisors.deactivate' : 'ops.supervisors.activate'));
         btn.addEventListener('click', async () => { btn.disabled = true; try { await opsData.updateSupervisorAdmin(id, { active: !active }); toast({ title: t('ops.supervisors.updated'), variant: 'success', duration: 3000 }); await refresh(); } catch { btn.disabled = false; } });
         nodes.push(block(t('ops.supervisors.manage.title'), btn, { id: 'ops-sv-manage' }));
+        nodes.push(block(t('ops.supervisors.edit.title'), editForm(fresh, refresh), { id: 'ops-sv-edit' }));
       }
 
       if (can('customer.view')) nodes.push(block(t('ops.supervisors.customers.title'), fresh.customers.length
@@ -94,4 +96,60 @@ function mountSupervisorDetail({ root, id }) {
     render(main, await view(s));
     return { supervisor: s, refresh };
   } });
+}
+
+/** Full profile edit — every field an admin may replace once the business supplies the real supervisor: name, slug,
+    title, bio, photo, contact channels, city, languages, specialties. A field left blank clears it (matches the
+    public profile's own "a field the record does not have is not rendered" rule) — this form never invents a value
+    the admin didn't type. */
+function editForm(fresh, refresh) {
+  const field = (name, labelKey, value, opts = {}) => {
+    const input = el('input', { name, class: 'c-field__control', type: opts.type ?? 'text', dir: opts.dir, value: value ?? '', 'aria-label': t(labelKey), placeholder: t(labelKey) });
+    return el('div', { class: 'c-field' }, [el('label', { class: 'c-field__label' }, t(labelKey)), input]);
+  };
+  const bioAr = el('textarea', { name: 'bioAr', class: 'c-field__control', rows: 3, 'aria-label': t('ops.supervisors.edit.bioAr') }, fresh.bioAr ?? '');
+  const bioEn = el('textarea', { name: 'bioEn', class: 'c-field__control', rows: 3, dir: 'ltr', 'aria-label': t('ops.supervisors.edit.bioEn') }, fresh.bioEn ?? '');
+
+  const checks = (list, chosen, prefix) => el('ul', { class: 'c-svp-mini-list', role: 'list' }, list.map((item) => {
+    const checkbox = el('input', { type: 'checkbox', value: item.id, dataset: { group: prefix }, ...(chosen?.includes(item.id) ? { checked: true } : {}) });
+    return el('li', {}, el('label', { class: 'l-cluster l-cluster--8' }, [checkbox, el('span', {}, pick(item, 'label'))]));
+  }));
+  const languagesList = checks(SUPERVISOR_LANGUAGES, fresh.languages, 'lang');
+  const specialtiesList = checks(SUPERVISOR_SPECIALTIES, fresh.specialties, 'spec');
+  const checked = (list, group) => [...list.querySelectorAll(`input[type=checkbox][data-group="${group}"]:checked`)].map((c) => c.value);
+
+  const slug = field('slug', 'ops.supervisors.edit.slug', fresh.slug, { dir: 'ltr' });
+  const nameAr = field('nameAr', 'ops.supervisors.edit.nameAr', fresh.nameAr);
+  const nameEn = field('nameEn', 'ops.supervisors.edit.nameEn', fresh.nameEn, { dir: 'ltr' });
+  const titleAr = field('titleAr', 'ops.supervisors.edit.titleAr', fresh.titleAr);
+  const titleEn = field('titleEn', 'ops.supervisors.edit.titleEn', fresh.titleEn, { dir: 'ltr' });
+  const phone = field('phone', 'ops.supervisors.edit.phone', fresh.phone, { dir: 'ltr' });
+  const whatsapp = field('whatsapp', 'ops.supervisors.edit.whatsapp', fresh.whatsapp, { dir: 'ltr' });
+  const email = field('email', 'ops.supervisors.edit.email', fresh.email, { type: 'email', dir: 'ltr' });
+  const city = field('city', 'ops.supervisors.edit.city', fresh.city);
+  const imageSrc = field('imageSrc', 'ops.supervisors.edit.imageSrc', fresh.image?.src, { dir: 'ltr' });
+
+  return actionForm({
+    submitLabel: t('ops.supervisors.edit.save'),
+    onSubmit: async (fd) => {
+      await opsData.updateSupervisorAdmin(fresh.id, {
+        slug: fd.get('slug')?.trim() || undefined,
+        nameAr: fd.get('nameAr')?.trim() ?? '', nameEn: fd.get('nameEn')?.trim() ?? '',
+        titleAr: fd.get('titleAr')?.trim() ?? '', titleEn: fd.get('titleEn')?.trim() ?? '',
+        bioAr: fd.get('bioAr')?.trim() ?? '', bioEn: fd.get('bioEn')?.trim() ?? '',
+        phone: fd.get('phone')?.trim() ?? '', whatsapp: fd.get('whatsapp')?.trim() ?? '', email: fd.get('email')?.trim() ?? '', city: fd.get('city')?.trim() ?? '',
+        image: fd.get('imageSrc')?.trim() ? { src: fd.get('imageSrc').trim(), altAr: fresh.image?.altAr, altEn: fresh.image?.altEn } : null,
+        languages: checked(languagesList, 'lang'), specialties: checked(specialtiesList, 'spec'),
+      });
+      toast({ title: t('ops.supervisors.updated'), variant: 'success', duration: 3000 }); await refresh();
+    },
+    children: [
+      slug, nameAr, nameEn, titleAr, titleEn,
+      el('div', { class: 'c-field' }, [el('label', { class: 'c-field__label' }, t('ops.supervisors.edit.bioAr')), bioAr]),
+      el('div', { class: 'c-field' }, [el('label', { class: 'c-field__label' }, t('ops.supervisors.edit.bioEn')), bioEn]),
+      phone, whatsapp, email, city, imageSrc,
+      el('div', { class: 'l-stack l-stack--8' }, [el('p', { class: 'c-field__label' }, t('sup.about.languages')), languagesList]),
+      el('div', { class: 'l-stack l-stack--8' }, [el('p', { class: 'c-field__label' }, t('sup.about.specialties')), specialtiesList]),
+    ],
+  });
 }
