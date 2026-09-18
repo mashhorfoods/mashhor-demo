@@ -87,7 +87,15 @@ export function consumeSupervisorReset(token, password) {
 }
 
 /* ---- attribution: business rule from business_config, server-authoritative (§9, §26, §27) ---- */
-export const commissionModel = () => J(q.get("SELECT value_json FROM business_config WHERE key = 'commission_model'")?.value_json, { model: null, status: 'pending_business_configuration' });
+/** Stage 15B: `.status` derived from the Business Rules Register's own status column (Stage 15A), the same
+    single-source-of-truth pattern as `lifecycleConfig()`/`taskPriorityLevels()` in staff.mjs — activating this
+    rule from the Admin Dashboard is reflected here immediately; `model` stays whatever value the register holds
+    (null until the business supplies one — never computed or guessed here). */
+export function commissionModel() {
+  const r = q.get("SELECT value_json, status FROM business_config WHERE key = 'commission_model'");
+  const v = J(r?.value_json, { model: null });
+  return { ...v, status: r && (r.status === 'ACTIVE' || r.status === 'APPROVED') ? 'confirmed' : (v.status ?? 'pending_business_configuration') };
+}
 
 function logAttribution(customerId, supervisorId, previousSupervisorId, source, actor) {
   q.run('INSERT INTO attribution_events (customer_id, supervisor_id, previous_supervisor_id, source, actor, at) VALUES (?,?,?,?,?,?)', customerId, supervisorId, previousSupervisorId, source, actor, now());

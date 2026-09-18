@@ -1623,6 +1623,7 @@ export default {
     'ops.rules.detail.updatedBy': 'آخر من قام بالتحديث',
     'ops.rules.empty.title': 'لا توجد قواعد عمل مسجّلة بعد',
     'ops.rules.history.title': 'سجل الإصدارات',
+    'ops.rules.invalidValue': 'يجب أن تكون القيمة الحالية بصيغة JSON صحيحة.',
     'ops.rules.manage.title': 'تغيير الحالة / الملاحظات',
     'ops.rules.matrix.col.impact': 'الأثر',
     'ops.rules.matrix.col.rule': 'القاعدة',

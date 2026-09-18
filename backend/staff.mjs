@@ -110,7 +110,15 @@ export function auditEvents({ entityType = '', entityId = '', page = 1, pageSize
 const nAudit = (r) => ({ id: r.id, actorId: r.actor_id, actorRole: r.actor_role, action: r.action, entityType: r.entity_type, entityId: r.entity_id, metadata: J(r.metadata_json, {}), at: r.at });
 
 /* ---- booking operational lifecycle: backend-authoritative state machine (§03/§04) ------------------------------ */
-export const lifecycleConfig = () => J(q.get("SELECT value_json FROM business_config WHERE key = 'booking_lifecycle'")?.value_json, { initial: 'submitted', transitions: {}, status: 'pending_business_configuration' });
+/** Stage 15B: `.status` is derived from the Business Rules Register's own `status` column (the single source of
+    truth since Stage 15A) rather than a second, independently-editable copy embedded in the JSON value — so
+    activating this rule from the Admin Dashboard is immediately reflected here, and nothing can leave the two
+    disagreeing about whether the graph is confirmed. */
+export function lifecycleConfig() {
+  const r = q.get("SELECT value_json, status FROM business_config WHERE key = 'booking_lifecycle'");
+  const v = J(r?.value_json, { initial: 'submitted', transitions: {} });
+  return { ...v, status: r && (r.status === 'ACTIVE' || r.status === 'APPROVED') ? 'confirmed' : (v.status ?? 'pending_business_configuration') };
+}
 const nBookingRow = (r) => ({ id: r.id, customerId: r.customer_id, service: r.service, status: r.status, paymentStatus: r.payment_status, amount: r.amount, currency: r.currency, supervisorId: r.supervisor_id, opsStatus: r.ops_status, assignedOperator: r.assigned_operator, createdAt: r.created_at });
 
 /** Every current valid next state from `from`, per the configured lifecycle — what the UI is allowed to offer. */
@@ -125,13 +133,21 @@ export function allowedTransitions(fromStatus) {
  * Every attempt — accepted or not — is NOT logged (only accepted transitions are, to keep the trail meaningful);
  * a rejected attempt still throws, so the caller's own audit/logging can record the refusal if it chooses to.
  */
-const PAYMENT_GATED = new Set(['payment_received', 'processing', 'confirmed', 'ticketed', 'service_in_progress', 'completed']);
+const DEFAULT_PAYMENT_GATES = ['payment_received', 'processing', 'confirmed', 'ticketed', 'service_in_progress', 'completed'];
+/** Stage 15B: reads live from the Business Rules Register (`payment_gates`) instead of a hardcoded constant — the
+    exact same default list as before, now genuinely admin-editable through `/admin/rules/payment_gates`, matching
+    how `lifecycleConfig()`/`taskPriorityLevels()` already worked. The rule's register status stays DRAFT (§1 —
+    this wires the existing technical default live, it does not confirm it as final business policy). */
+function paymentGates() {
+  const v = J(q.get("SELECT value_json FROM business_config WHERE key = 'payment_gates'")?.value_json, null);
+  return new Set(Array.isArray(v?.gatedStatuses) ? v.gatedStatuses : DEFAULT_PAYMENT_GATES);
+}
 export function transitionBooking(bookingId, newStatus, actor, reason = null, metadata = {}) {
   const b = q.get('SELECT * FROM bookings WHERE id = ?', bookingId); if (!b) throw new HttpError(404, 'notFound');
   const cfg = lifecycleConfig(); const current = b.ops_status ?? cfg.initial;
   const allowed = cfg.transitions[current] ?? [];
   if (!allowed.includes(newStatus)) throw new HttpError(422, 'invalid', { from: current, to: newStatus });
-  if (PAYMENT_GATED.has(newStatus) && b.payment_status !== 'paid') throw new HttpError(409, 'conflict', { reason: 'paymentNotConfirmed' });
+  if (paymentGates().has(newStatus) && b.payment_status !== 'paid') throw new HttpError(409, 'conflict', { reason: 'paymentNotConfirmed' });
   const t = now();
   // bookings (Stage 12.2 schema) has no updated_at column — only ops_status changes here.
   q.run('UPDATE bookings SET ops_status = ? WHERE id = ?', newStatus, bookingId);
@@ -179,7 +195,12 @@ export function opsBookingDetail(bookingId) {
 
 /* ---- operations tasks (§06/§07) -------------------------------------------------------------------------------- */
 const TASK_STATUSES = ['open', 'in_progress', 'waiting', 'completed', 'cancelled'];
-export const taskPriorityLevels = () => J(q.get("SELECT value_json FROM business_config WHERE key = 'task_priority_levels'")?.value_json, { levels: ['normal'], status: 'pending_business_configuration' });
+/** Stage 15B: `.status` derived from the register's own status column, same pattern as `lifecycleConfig()` above. */
+export function taskPriorityLevels() {
+  const r = q.get("SELECT value_json, status FROM business_config WHERE key = 'task_priority_levels'");
+  const v = J(r?.value_json, { levels: ['normal'] });
+  return { ...v, status: r && (r.status === 'ACTIVE' || r.status === 'APPROVED') ? 'confirmed' : (v.status ?? 'pending_business_configuration') };
+}
 const nTask = (r) => ({ id: r.id, type: r.type, bookingId: r.booking_id, customerId: r.customer_id, supervisorId: r.supervisor_id, assignedTo: r.assigned_to, status: r.status, priority: r.priority, dueAt: r.due_at, notes: r.notes, createdBy: r.created_by, createdAt: r.created_at, updatedAt: r.updated_at, completedAt: r.completed_at });
 export function createTask({ type, bookingId = null, customerId = null, supervisorId = null, assignedTo = null, priority = 'normal', dueAt = null, notes = '' }, actor) {
   const id = `task_${hex(8)}`; const t = now();

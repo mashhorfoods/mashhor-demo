@@ -145,6 +145,10 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.ops.s
   await p.selectOption('#ops-rule-manage select[name=status]', 'ACTIVE'); await p.click('#ops-rule-manage button[type=submit]'); await p.waitForTimeout(500);
   ok('activating a rule from the form applies and re-renders the new status', await count(p, '[data-rule-status="ACTIVE"]') >= 1);
   ok('the version history records the change rather than discarding the prior version', await count(p, '#ops-rule-history li') >= 1);
+  await p.fill('#ops-rule-manage textarea[name=value]', '{ not valid json'); await p.click('#ops-rule-manage button[type=submit]'); await p.waitForTimeout(300);
+  ok('an invalid JSON value is caught client-side with an inline error, never sent to the backend', await visible(p, '#ops-rule-manage .c-field__error'));
+  await p.fill('#ops-rule-manage textarea[name=value]', '{"levels":["low","normal","high","urgent","critical"]}'); await p.click('#ops-rule-manage button[type=submit]'); await p.waitForTimeout(500);
+  ok('a valid JSON value is applied and re-rendered', (await text(p, '#ops-rule-value')).includes('critical'));
   await c.close();
 }
 

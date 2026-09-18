@@ -1623,6 +1623,7 @@ export default {
     'ops.rules.detail.updatedBy': 'Last updated by',
     'ops.rules.empty.title': 'No business rules registered yet',
     'ops.rules.history.title': 'Version history',
+    'ops.rules.invalidValue': 'The current value must be valid JSON.',
     'ops.rules.manage.title': 'Change status / notes',
     'ops.rules.matrix.col.impact': 'Impact',
     'ops.rules.matrix.col.rule': 'Rule',

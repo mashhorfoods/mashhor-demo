@@ -82,14 +82,25 @@ function mountRuleDetail({ root, id }) {
 
       if (can('rules.manage')) {
         const status = el('select', { name: 'status', class: 'c-field__control', 'aria-label': t('ops.rules.col.status') }, RULE_STATUSES.map((s) => el('option', { value: s, ...(s === fresh.status ? { selected: true } : {}) }, t(`ops.rules.status.${s}`))));
+        const value = el('textarea', { name: 'value', class: 'c-field__control', rows: 8, dir: 'ltr', 'aria-label': t('ops.rules.detail.currentValue') }, JSON.stringify(fresh.currentValue, null, 2));
         const notes = el('textarea', { name: 'notes', class: 'c-field__control', rows: 3, 'aria-label': t('ops.rules.detail.notes'), placeholder: t('ops.rules.detail.notes') }, fresh.notes ?? '');
+        const err = el('p', { class: 'c-field__error', role: 'alert', hidden: true });
         const btn = el('button', { type: 'submit', class: 'c-btn c-btn--primary c-btn--sm' }, [el('span', { class: 'c-btn__label' }, t('ops.rules.save')), el('span', { class: 'c-btn__spinner', 'aria-hidden': 'true' })]);
         const form = el('form', { class: 'l-stack l-stack--8', onsubmit: async (e) => {
-          e.preventDefault(); setButtonState(btn, 'loading');
-          try { await opsData.updateRule(id, { status: status.value, notes: notes.value || null }); toast({ title: t('ops.rules.updated'), variant: 'success', duration: 3000 }); setButtonState(btn, 'success'); await refresh(); }
+          e.preventDefault(); err.hidden = true;
+          let parsedValue;
+          try { parsedValue = JSON.parse(value.value); }
+          catch { err.hidden = false; err.replaceChildren(icon('no-alert', { size: 'sm' }), el('span', {}, t('ops.rules.invalidValue'))); return; }
+          setButtonState(btn, 'loading');
+          try { await opsData.updateRule(id, { status: status.value, value: parsedValue, notes: notes.value || null }); toast({ title: t('ops.rules.updated'), variant: 'success', duration: 3000 }); setButtonState(btn, 'success'); await refresh(); }
           catch { setButtonState(btn, 'error'); }
           setTimeout(() => setButtonState(btn, 'idle'), 1200);
-        } }, [status, notes, btn]);
+        } }, [
+          el('label', { class: 'l-stack l-stack--4' }, [el('span', {}, t('ops.rules.col.status')), status]),
+          el('label', { class: 'l-stack l-stack--4' }, [el('span', {}, t('ops.rules.detail.currentValue')), value]),
+          el('label', { class: 'l-stack l-stack--4' }, [el('span', {}, t('ops.rules.detail.notes')), notes]),
+          err, btn,
+        ]);
         nodes.push(block(t('ops.rules.manage.title'), form, { id: 'ops-rule-manage' }));
       }
 

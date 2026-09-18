@@ -529,6 +529,77 @@ await control('/__test/reset');
   jarAdmin2.clear(); jarOps1b.clear(); jarOps2.clear();
 }
 
+// ---- Stage 15B: apply & verify — the register's status COLUMN (Stage 15A) now drives the resolved status
+// lifecycleConfig()/taskPriorityLevels()/commissionModel() hand to their real callers, with no separate cache or
+// reload step; payment gates are live-configurable from the register exactly like the lifecycle graph already
+// was. A PENDING/DRAFT rule is never treated as approved by any consumer (§19's protection layer), and nothing
+// customer-facing ever leaks an internal operations field. ----
+{
+  await control('/__test/reset');
+  const jarAdmin3 = new Map(); const jarSup3 = new Map();
+  const reqAs3 = (jar, csrfCookie) => async (path, { method = 'GET', body = null, headers = {}, origin = SITE, csrf = true } = {}) => {
+    const h = { Origin: origin, ...headers }; if (body != null) h['Content-Type'] = 'application/json';
+    if (jar.size) h.Cookie = [...jar].map(([k, v]) => `${k}=${v}`).join('; ');
+    if (csrf && jar.get(csrfCookie) && method !== 'GET') h['X-CSRF-Token'] = jar.get(csrfCookie);
+    const r = await fetch(API + path, { method, headers: h, body: body != null ? JSON.stringify(body) : null, redirect: 'manual' });
+    for (const c of r.headers.getSetCookie?.() ?? []) { const [kv, ...attrs] = c.split(';'); const [k, v] = kv.split('='); if (/Max-Age=0/.test(attrs.join(';'))) jar.delete(k); else jar.set(k, v); }
+    let data = null; try { data = await r.clone().json(); } catch { /* not json */ }
+    return { status: r.status, data };
+  };
+  const reqAdmin3 = reqAs3(jarAdmin3, 'no_ops_csrf'); const reqSup3 = reqAs3(jarSup3, 'no_supervisor_csrf');
+  await reqAdmin3('/staff/auth/sign-in', { method: 'POST', body: { email: 'admin1@fixture.test', password: 'password123' } });
+  await reqSup3('/supervisor/auth/sign-in', { method: 'POST', body: { email: 'sup1@fixture.test', password: 'password123' } });
+
+  // ---- register status column → live resolved status, immediately, no reload step ----
+  const metaBefore = await reqAdmin3('/operations/meta');
+  ok('lifecycle/priority resolved status reads pending while the register rule is DRAFT (not yet approved)', metaBefore.data.lifecycle.status !== 'confirmed' && metaBefore.data.priorityLevels.status !== 'confirmed');
+  const revBefore = await reqSup3('/supervisor/me/revenue');
+  ok('commission resolved status reads pending while commission_model is PENDING — no calculation, no confirmed status', revBefore.data.commission.model === null && revBefore.data.commission.status !== 'confirmed');
+  await reqAdmin3('/admin/rules/booking_lifecycle/activate', { method: 'POST' });
+  await reqAdmin3('/admin/rules/task_priority_levels/activate', { method: 'POST' });
+  const metaAfter = await reqAdmin3('/operations/meta');
+  ok('activating a rule from the Admin Dashboard flips the resolved status every live consumer sees, with no cache to invalidate', metaAfter.data.lifecycle.status === 'confirmed' && metaAfter.data.priorityLevels.status === 'confirmed');
+  await reqAdmin3('/admin/rules/booking_lifecycle/disable', { method: 'POST' });
+  await reqAdmin3('/admin/rules/task_priority_levels/disable', { method: 'POST' });
+  const metaRestored = await reqAdmin3('/operations/meta');
+  ok('disabling reverts the resolved status just as immediately', metaRestored.data.lifecycle.status !== 'confirmed' && metaRestored.data.priorityLevels.status !== 'confirmed');
+
+  // ---- payment gates: live-configurable from the register (§6), same default values as the prior hardcoded set ----
+  await reqAdmin3('/bookings/BK_A2/status', { method: 'POST', body: { status: 'pending_review' } });
+  await reqAdmin3('/bookings/BK_A2/status', { method: 'POST', body: { status: 'awaiting_payment' } });
+  const gatedDefault = await reqAdmin3('/bookings/BK_A2/status', { method: 'POST', body: { status: 'payment_received' } });
+  ok('payment_received is gated by default — an unpaid booking cannot enter it (409)', gatedDefault.status === 409);
+  const original = await reqAdmin3('/admin/rules/payment_gates');
+  await reqAdmin3('/admin/rules/payment_gates', { method: 'PATCH', body: { value: { ...original.data.rule.currentValue, gatedStatuses: [] } } });
+  const gateLifted = await reqAdmin3('/bookings/BK_A2/status', { method: 'POST', body: { status: 'payment_received' } });
+  ok('emptying gatedStatuses in the register immediately lifts the gate — the SAME unpaid booking now succeeds', gateLifted.status === 200 && gateLifted.data.booking.opsStatus === 'payment_received');
+  await reqAdmin3('/admin/rules/payment_gates', { method: 'PATCH', body: { value: original.data.rule.currentValue } });
+  const gateRestored = await reqAdmin3('/bookings/BK_A2/status', { method: 'POST', body: { status: 'processing' } });
+  ok('restoring the original gatedStatuses re-enables the gate — the next gated transition is rejected again (409)', gateRestored.status === 409);
+
+  // ---- pending-decision protection: nothing invents a value a PENDING/unconfigured rule doesn't have ----
+  const rulesNow = await reqAdmin3('/admin/rules');
+  for (const key of ['commission_model', 'refund_policy', 'cancellation_policy', 'sla_config']) {
+    const r = rulesNow.data.items.find((x) => x.ruleId === key);
+    ok(`${key} still carries no fabricated value (PENDING protection holds)`, r.status === 'PENDING' && Object.values(r.currentValue).some((v) => v === null));
+  }
+  const opsBody = JSON.stringify((await reqAdmin3('/operations/tasks')).data) + JSON.stringify((await reqAdmin3('/operations/escalations')).data);
+  ok('no task/escalation response ever claims an SLA breach or "overdue" state — none is configured', !/overdue|slaBreach|sla_breach/i.test(opsBody));
+
+  // ---- customer/operations status separation is preserved (§5) ----
+  const jarCust3 = new Map(); const reqCust3 = reqAs3(jarCust3, 'no_csrf');
+  await reqCust3('/auth/sign-in', { method: 'POST', body: { email: 'alpha@fixture.test', password: 'password123' } });
+  const meBooking = JSON.stringify(await reqCust3('/me/bookings/BK_A1'));
+  ok('a customer reading their own booking never sees an internal ops field (opsStatus/assignedOperator), even though the ops-side transitions above just changed it', !/opsStatus|assignedOperator/.test(meBooking));
+
+  // ---- direct-API authorization: a customer or supervisor session can never reach a staff-only mutation (§21) ----
+  ok('a customer session attempting a booking lifecycle transition → 401, never a client-side-only restriction', (await reqCust3('/bookings/BK_A1/status', { method: 'POST', body: { status: 'pending_review' } })).status === 401);
+  ok('a supervisor session attempting to activate a business rule → 401', (await reqSup3('/admin/rules/commission_model/activate', { method: 'POST' })).status === 401);
+  ok('no session at all reaching the business rules register → 401', (await reqAs3(new Map(), '')('/admin/rules')).status === 401);
+
+  jarAdmin3.clear(); jarSup3.clear(); jarCust3.clear();
+}
+
 // ---- diagnostics scrubbing + logs ----
 {
   await fetch(API + '/diagnostics', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: SITE }, body: JSON.stringify({ event: 'api.failure', code: 'unavailable', password: 'hunter22', token: 'abcdef0123456789abcdef0123456789abcdef', email: 'x@y.z', note: 'x'.repeat(500) }) });

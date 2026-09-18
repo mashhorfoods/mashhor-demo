@@ -109,10 +109,8 @@ truth (§30).
 ## 4. Booking lifecycle & payment gates
 
 The **mechanism** (the state machine in `backend/staff.mjs`,
-`transitionBooking`, and the `PAYMENT_GATED` set) is active and
-enforced server-side regardless of the register's status — Stage 15A
-does not touch behaviour, only how the still-unconfirmed graph is
-tracked and surfaced. An invalid transition is rejected with 422; a
+`transitionBooking`) is active and enforced server-side regardless of
+the register's status. An invalid transition is rejected with 422; a
 payment-gated transition on an unpaid booking is rejected with 409 —
 both already covered by `tests/backend.mjs`'s Stage 15 section,
 unchanged. The register documents:
@@ -123,6 +121,41 @@ unchanged. The register documents:
   (moves to `cancelled`, gate never crossed), and timeout (**not
   implemented** — no automatic timeout exists; this is stated plainly
   rather than pretended).
+
+### 4.1 Stage 15B — live wiring
+
+Stage 15A's register and the domain functions that actually enforce
+behaviour were, for the lifecycle and payment gates, two separate
+things: `lifecycleConfig()`/`taskPriorityLevels()`/`commissionModel()`
+already read `value_json` live from `business_config` on every call (so
+editing a rule's **value** through `/admin/rules/:id` was already live
+end-to-end), but each embedded its own `status` string in that same
+JSON — a second, independently-stale copy of what the register's own
+`status` **column** said. Activating a rule from the Admin Dashboard
+changed the column but not the embedded string, so a live consumer
+could show "pending" even after an admin approved it.
+
+Stage 15B closes this: all three functions now derive the `status`
+they return from the register's own status column (`ACTIVE`/`APPROVED`
+→ `'confirmed'`, anything else → the existing pending label) — one
+source of truth, no separate reload or cache-invalidation step, because
+nothing was ever cached. `payment_gates` (previously a hardcoded
+`PAYMENT_GATED` `Set` in `backend/staff.mjs`) was also converted to
+read live from the register's `gatedStatuses` array — the exact same
+default values as before, now genuinely admin-editable through
+`/admin/rules/payment_gates`, matching how the lifecycle graph already
+worked. None of this changes current behaviour (every rule involved
+stays DRAFT/PENDING); it only makes the "Admin Configuration → Business
+Rules → Backend Domain Logic" pipeline in the Stage 15B brief's own
+architecture diagram actually true end-to-end, verified in
+`tests/backend.mjs` by editing a live rule and observing the change
+take effect immediately, then reverting it.
+
+The Business Rules screen's manage form (`assets/js/ops/ui/business-
+rules.js`) now also exposes the rule's raw JSON `value` for editing
+(`rules.manage` only), client-side JSON-validated before submit — the
+§18 "Authorized Admin may... modify where permitted" requirement,
+previously only reachable via the API directly.
 
 ## 5. Cancellation & refund
 
