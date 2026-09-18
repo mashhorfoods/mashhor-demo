@@ -17,6 +17,7 @@ import { liveSession, customerById, sweepSessions, endAllSessions, publicCustome
 import { auth, me, file, legal, diagnostics, paymentsWebhook, flights } from './routes.mjs';
 import { registerDevPaymentProvider } from './payments.mjs';
 import { registerDevFlightProvider } from './flights.mjs';
+import { registerSmtpProvider, deliverOutbox } from './mailer.mjs';
 import { liveSupervisorSession, supervisorById, sweepSupervisorSessions, endAllSupervisorSessions } from './supervisor.mjs';
 import { supervisorAuth, supervisorMe, admin } from './supervisor-routes.mjs';
 import { liveStaffSession, staffById, sweepStaffSessions, endAllStaffSessions, publicStaff } from './staff.mjs';
@@ -24,13 +25,14 @@ import { staffAuth, operations, services as opsServices, dashboard } from './sta
 import { info, warn, error } from './logger.mjs';
 import { fixtureLegal } from './fixtures.mjs';
 
-const VERSION = '16.3';
+const VERSION = '16.4';
 
-// Stage 16B/16C: the only provider ever registered is whatever config.paymentProvider/config.flightProvider
-// names — config.mjs already refuses the dev value in production, so neither can silently become the
-// production fallback.
+// Stage 16B/16C/16D: the only provider ever registered is whatever config.paymentProvider/config.flightProvider/
+// config.mailer names — config.mjs already refuses an unconfigured value, so none of them can silently become
+// the production fallback (§27: Email = CONNECTED only when this line actually runs for it).
 if (config.paymentProvider === 'dev') registerDevPaymentProvider(config.paymentDevSecret);
 if (config.flightProvider === 'dev') registerDevFlightProvider();
+if (config.mailer === 'smtp') registerSmtpProvider(config.smtp);
 
 export function createApp() {
   const test = config.testControls ? { faults: [], legal: null, urlTtlMs: null, requests: [] } : null;
@@ -56,7 +58,11 @@ export function createApp() {
       if (path === '/__test/url-ttl') { test.urlTtlMs = b.ttlMs; return json(res, 200, { ok: true }); }
       if (path === '/__test/revoke') { if (b.customerId) endAllSessions(b.customerId); else if (b.supervisorId) endAllSupervisorSessions(b.supervisorId); else if (b.staffId) endAllStaffSessions(b.staffId); else { q.run('DELETE FROM sessions'); q.run('DELETE FROM supervisor_sessions'); q.run('DELETE FROM staff_sessions'); } return json(res, 200, { ok: true }); }
       if (path === '/__test/shorten-session') { q.run('UPDATE sessions SET expires_at = ?', Date.now() + (b.ms ?? 60000)); return json(res, 200, { ok: true }); }
-      if (path === '/__test/state') return json(res, 200, { events: q.all('SELECT * FROM diagnostics ORDER BY id').map((r) => ({ ...JSON.parse(r.payload_json), event: r.event })), requests: test.requests.slice(-200), customers: q.all('SELECT * FROM customers').map(publicCustomer), sessions: q.get('SELECT COUNT(*) AS n FROM sessions').n, resets: q.all('SELECT r.token, c.email FROM reset_tokens r JOIN customers c ON c.id = r.customer_id'), outbox: q.all('SELECT channel, template, status FROM outbox'), staff: q.all('SELECT * FROM staff').map(publicStaff), auditCount: q.get('SELECT COUNT(*) AS n FROM audit_events').n });
+      // Stage 16D: delivery runs on its own 15s interval in production; tests trigger it on demand instead of
+      // waiting — the SAME deliverOutbox() the interval calls, nothing test-only about the delivery logic itself.
+      if (path === '/__test/deliver-outbox') { if (b.force) q.run("UPDATE outbox SET next_attempt_at = NULL WHERE status = 'retrying'"); return json(res, 200, await deliverOutbox({ limit: b.limit ?? 20 })); }
+      if (path === '/__test/enqueue') { const { enqueue } = await import('./mailer.mjs'); return json(res, 200, enqueue({ customerId: b.customerId ?? null, recipient: b.recipient ?? null, template: b.template ?? 'test', payload: b.payload ?? {}, idempotencyKey: b.idempotencyKey ?? null })); }
+      if (path === '/__test/state') return json(res, 200, { events: q.all('SELECT * FROM diagnostics ORDER BY id').map((r) => ({ ...JSON.parse(r.payload_json), event: r.event })), requests: test.requests.slice(-200), customers: q.all('SELECT * FROM customers').map(publicCustomer), sessions: q.get('SELECT COUNT(*) AS n FROM sessions').n, resets: q.all('SELECT r.token, c.email FROM reset_tokens r JOIN customers c ON c.id = r.customer_id'), outbox: q.all('SELECT * FROM outbox ORDER BY created_at'), staff: q.all('SELECT * FROM staff').map(publicStaff), auditCount: q.get('SELECT COUNT(*) AS n FROM audit_events').n });
       return fail(res, 404, 'notFound');
     }
     if (test) {
@@ -70,8 +76,10 @@ export function createApp() {
     // ---- public routes ----
     if (path === '/health' && req.method === 'GET') return json(res, 200, { ok: true, environment: config.environment, version: VERSION, storage: config.storage, mailer: config.mailer, paymentProvider: config.paymentProvider, flightProvider: config.flightProvider, testControls: config.testControls });
     let m;
+    // Shared with auth.signUp below (§13's backend-enforced acceptance) so both agree on whether legal is configured.
+    const legalOverride = test?.legal ? (kind, locale) => fixtureLegal(kind, locale, test.legal.version) : null;
     if ((m = path.match(/^\/files\/([A-Za-z0-9_-]+)$/)) && req.method === 'GET') return file(req, res, m[1], url);
-    if ((m = path.match(/^\/legal\/(terms|privacy)$/)) && req.method === 'GET') return legal(req, res, m[1], url, test?.legal ? (kind, locale) => fixtureLegal(kind, locale, test.legal.version) : null);
+    if ((m = path.match(/^\/legal\/(terms|privacy)$/)) && req.method === 'GET') return legal(req, res, m[1], url, legalOverride);
     if (path === '/diagnostics' && req.method === 'POST') return diagnostics(req, res);
 
     // ---- rate limits by class ----
@@ -101,7 +109,7 @@ export function createApp() {
     }
 
     // ---- /auth ----
-    if (path === '/auth/sign-up' && req.method === 'POST') return auth.signUp(req, res, ctx);
+    if (path === '/auth/sign-up' && req.method === 'POST') return auth.signUp(req, res, ctx, legalOverride);
     if (path === '/auth/sign-in' && req.method === 'POST') return auth.signIn(req, res, ctx);
     if (path === '/auth/session' && req.method === 'GET') return auth.session(req, res, ctx);
     if (path === '/auth/refresh' && req.method === 'POST') return auth.refresh(req, res, ctx);
@@ -186,6 +194,7 @@ export function createApp() {
       if (path === '/admin/staff' && req.method === 'POST') return dashboard.staffCreate(req, res, ctx);
       if ((m = path.match(/^\/admin\/staff\/([^/]+)\/active$/)) && req.method === 'POST') return dashboard.staffActive(req, res, ctx, decodeURIComponent(m[1]));
       if ((m = path.match(/^\/admin\/staff\/([^/]+)\/permissions$/)) && req.method === 'POST') return dashboard.staffPermissions(req, res, ctx, decodeURIComponent(m[1]));
+      if ((m = path.match(/^\/admin\/staff\/([^/]+)\/role$/)) && req.method === 'POST') return dashboard.staffRole(req, res, ctx, decodeURIComponent(m[1]));
       if (path === '/admin/rules' && req.method === 'GET') return dashboard.rules(req, res, ctx, url);
       if (path === '/admin/rules/pending' && req.method === 'GET') return dashboard.pendingDecisions(req, res, ctx);
       if (path === '/admin/rules/matrix' && req.method === 'GET') return dashboard.ruleMatrix(req, res, ctx);
@@ -272,6 +281,10 @@ if (process.argv[1]?.endsWith('server.mjs')) {
   setInterval(() => sweepSessions(), 10 * 60 * 1000).unref();
   setInterval(() => sweepSupervisorSessions(), 10 * 60 * 1000).unref();
   setInterval(() => sweepStaffSessions(), 10 * 60 * 1000).unref();
+  // Stage 16D §4/§9: delivery runs on its own schedule, never inside the request that queued a message — a
+  // provider outage here can never lose an event (it just stays 'queued'/'retrying') or affect the booking/
+  // payment/document operation that triggered it. No-ops immediately when config.mailer === 'none'.
+  setInterval(() => { deliverOutbox().catch((e) => error('mailer.deliverOutbox.failed', { kind: e?.name ?? 'Error' })); }, 15000).unref();
   const stop = () => { info('server.stopping'); server.close(() => process.exit(0)); setTimeout(() => process.exit(0), 3000).unref(); };
   process.on('SIGTERM', stop); process.on('SIGINT', stop);
 }

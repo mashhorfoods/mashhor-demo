@@ -58,11 +58,17 @@ export const flights = {
 
 /* ---- /auth ------------------------------------------------------------ */
 export const auth = {
-  async signUp(req, res, ctx) {
+  async signUp(req, res, ctx, legalOverride) {
     const b = await readJson(req);
     const name = str(b.name, 120); const email = normEmail(b.email); const phone = str(b.phone, 30); const locale = b.locale === 'en' ? 'en' : 'ar';
     if (!name || !isEmail(email)) throw new HttpError(422, 'invalid');
-    const c = createIdentity({ name, email, phone, locale, password: b.password, attribution: b.attribution, acceptance: cleanAcceptance(b.acceptance) });
+    // Stage 16D §13: Signup → Legal Acceptance → Account Creation, enforced HERE — never only by the UI checkbox.
+    // Only when legal is actually configured (real files, or the test fixture override server.mjs also passes to
+    // the /legal/:kind route): an unconfigured business has nothing to accept, so nothing is required (§28).
+    const legalRead = legalOverride ?? legalDocument;
+    const acceptance = cleanAcceptance(b.acceptance);
+    if ((legalRead('terms', 'ar') || legalRead('privacy', 'ar')) && !(acceptance?.terms && acceptance?.privacy)) throw new HttpError(422, 'invalid', { reason: 'acceptanceRequired' });
+    const c = createIdentity({ name, email, phone, locale, password: b.password, attribution: b.attribution, acceptance });
     enqueue({ customerId: c.id, template: 'welcome', payload: { locale } });
     info('auth.signup', { attributed: !!c.attribution_supervisor });
     return json(res, 201, sessionAnswer(res, c));
@@ -136,6 +142,10 @@ export const me = {
       if (attribution) assignAttribution(cid, attribution.supervisorId, 'booking', 'customer', t);
       return q.get('SELECT * FROM bookings WHERE id = ?', ref);
     });
+    // Stage 16D §6: a genuinely new booking, once — the early return above for an already-claimed reference
+    // means this line is only ever reached the one time the INSERT above actually ran; idempotencyKey is
+    // defense in depth against the same reference somehow reaching this path twice.
+    enqueue({ customerId: cid, bookingId: ref, template: 'booking-created', eventType: 'booking.created', payload: { bookingId: ref, service: booking.service }, idempotencyKey: `booking-created:${ref}` });
     info('booking.claimed', { service: booking.service, attributed: !!attribution });
     return json(res, 201, { booking: nBooking(booking) });
   },

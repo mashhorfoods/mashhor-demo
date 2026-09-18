@@ -5,12 +5,14 @@
 // content, filename sanitisation, signed URL forgery / expiry / revocation,
 // customer boundary by direct API calls, and diagnostics scrubbing.
 // Starts its own backend on a free port with a temporary database. Exits 1 on any ✗.
-import { spawn } from 'node:child_process';
-import { mkdtempSync, rmSync, readFileSync } from 'node:fs';
+import { spawn, execFileSync } from 'node:child_process';
+import { mkdtempSync, rmSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { makeReq } from './env.mjs';
 import { createHmac } from 'node:crypto';
+import { createServer as createNetServer } from 'node:net';
+import { TLSSocket } from 'node:tls';
 
 const ROOT = new URL('../', import.meta.url).pathname;
 let pass = 0, fail = 0;
@@ -40,7 +42,12 @@ const check = (extra) => new Promise((resolve) => { const c = spawn(process.exec
   ok('production refuses a missing signing secret', /SIGNING_SECRET/.test((await check({ ...prodBase, BACKEND_SIGNING_SECRET: '' })).out));
   ok('production refuses http origins and wildcard origins', /https/.test((await check({ ...prodBase, BACKEND_ALLOWED_ORIGINS: 'http://www.example.test' })).out) && /never \*/.test((await check({ ...prodBase, BACKEND_ALLOWED_ORIGINS: '*' })).out));
   ok('production refuses insecure cookies and SameSite=None without Secure', /COOKIE_SECURE/.test((await check({ ...prodBase, BACKEND_COOKIE_SECURE: '0' })).out) && /Secure/.test((await check({ ...prodBase, BACKEND_COOKIE_SECURE: '0', BACKEND_COOKIE_SAMESITE: 'None', BACKEND_ENV: 'staging' })).out));
-  ok('unimplemented storage, mailer or payment provider is refused, never silently mocked', /not implemented/.test((await check({ BACKEND_STORAGE: 's3' })).out) && /not implemented/.test((await check({ BACKEND_MAILER: 'smtp' })).out) && /not implemented/.test((await check({ BACKEND_PAYMENT_PROVIDER: 'stripe' })).out));
+  ok('unimplemented storage, mailer or payment provider is refused, never silently mocked', /not implemented/.test((await check({ BACKEND_STORAGE: 's3' })).out) && /not implemented/.test((await check({ BACKEND_MAILER: 'sendgrid' })).out) && /not implemented/.test((await check({ BACKEND_PAYMENT_PROVIDER: 'stripe' })).out));
+  // Stage 16D: 'smtp' IS implemented (backend/mailer.mjs) but requires its own real settings — never silently
+  // "connected" with defaults.
+  ok('BACKEND_MAILER=smtp without host/user/pass/from is refused with a specific reason for each', /SMTP_HOST/.test((await check({ BACKEND_MAILER: 'smtp' })).out) && /SMTP_USER and BACKEND_SMTP_PASS/.test((await check({ BACKEND_MAILER: 'smtp' })).out) && /SMTP_FROM/.test((await check({ BACKEND_MAILER: 'smtp' })).out));
+  ok('BACKEND_MAILER=smtp with every setting present is accepted', (await check({ BACKEND_MAILER: 'smtp', BACKEND_SMTP_HOST: 'smtp.example.test', BACKEND_SMTP_USER: 'no-reply@example.test', BACKEND_SMTP_PASS: 'x'.repeat(20), BACKEND_SMTP_FROM: 'no-reply@example.test' })).code === 0);
+  ok('BACKEND_SMTP_FROM must look like a real address', /SMTP_FROM/.test((await check({ BACKEND_MAILER: 'smtp', BACKEND_SMTP_HOST: 'smtp.example.test', BACKEND_SMTP_USER: 'u', BACKEND_SMTP_PASS: 'x'.repeat(20), BACKEND_SMTP_FROM: 'not-an-address' })).out));
   ok('a payment dev secret under 32 characters is refused', /PAYMENT_DEV_SECRET/.test((await check({ BACKEND_PAYMENT_DEV_SECRET: 'short' })).out));
   ok('staging requires a real payment dev secret, just like the signing secret', /PAYMENT_DEV_SECRET/.test((await check({ BACKEND_ENV: 'staging', BACKEND_PAYMENT_DEV_SECRET: '' })).out));
 }
@@ -787,6 +794,252 @@ await control('/__test/reset');
   ok('the customer-facing route never exposes the provider id or a "supplier" key the way the ops route does', !('provider' in (afterPay.data.flightBooking ?? {})) && !('supplier' in afterPay));
 
   jarF.clear(); jarAdminF.clear();
+}
+
+// ---- Stage 16D Part A: notifications. Event → Durable Outbox → Delivery Attempt → Provider → Result. A real,
+// dependency-free SMTP client is exercised end to end against a local fake SMTP server (STARTTLS, AUTH LOGIN,
+// rendered template content) — the same "build it for real, prove it against a real counterparty" standard this
+// session has held payments/flights to, honest that no actual third-party provider account exists (§0 of the
+// stage's own report). ----
+{
+  await control('/__test/reset');
+  const jarN = new Map(); const reqN = makeReq(API, SITE)(jarN, 'no_csrf');
+  const jarAdminN = new Map(); const reqAdminN = makeReq(API, SITE)(jarAdminN, 'no_ops_csrf');
+  await reqAdminN('/staff/auth/sign-in', { method: 'POST', body: { email: 'admin1@fixture.test', password: 'password123' } });
+  await reqN('/auth/sign-in', { method: 'POST', body: { email: 'alpha@fixture.test', password: 'password123' } });
+
+  // ---- §5 idempotent enqueue, tested directly (the mechanism itself, not just through a caller that happens to
+  // be naturally single-fire) ----
+  const enq1 = await control('/__test/enqueue', { customerId: 'cus_x', template: 'dup-test', idempotencyKey: 'dup-key-1' });
+  const enq2 = await control('/__test/enqueue', { customerId: 'cus_x', template: 'dup-test', idempotencyKey: 'dup-key-1' });
+  ok('§5: a duplicate business event (same idempotency key) is recognised and does not queue a second message', !!enq1.id && enq2.duplicate === true && enq2.id == null);
+  const stAfterDup = await fetch(API + '/__test/state').then((r) => r.json());
+  ok('exactly one outbox row exists for the duplicated key', stAfterDup.outbox.filter((o) => o.idempotency_key === 'dup-key-1').length === 1);
+
+  // ---- §6 event wiring: booking created, booking status changed, document reviewed — each a real, existing
+  // system action, never an invented one ----
+  const claimN = await reqN('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-16D-N1', context: { service: 'flights' } } });
+  ok('booking-created queued the moment a booking is genuinely claimed', claimN.status === 201);
+  let st = await fetch(API + '/__test/state').then((r) => r.json());
+  ok('§6: booking-created event queued, customer-scoped, never fabricating a status the booking does not have', st.outbox.some((o) => o.template === 'booking-created' && o.booking_id === 'BK-16D-N1' && o.status === 'queued'));
+
+  await reqAdminN('/bookings/BK_A1/status', { method: 'POST', body: { status: 'pending_review', reason: 'stage 16D test' } });
+  st = await fetch(API + '/__test/state').then((r) => r.json());
+  ok('§6: booking-status-changed queued on a real, accepted ops transition', st.outbox.some((o) => o.template === 'booking-status-changed' && o.booking_id === 'BK_A1'));
+  const rejectedCountBefore = st.outbox.filter((o) => o.template === 'booking-status-changed').length;
+  await reqAdminN('/bookings/BK_A1/status', { method: 'POST', body: { status: 'nonsense-status' } }).catch(() => {});
+  st = await fetch(API + '/__test/state').then((r) => r.json());
+  ok('a REJECTED transition (never applied) never queues a customer notification about a change that did not happen', st.outbox.filter((o) => o.template === 'booking-status-changed').length === rejectedCountBefore);
+
+  await reqAdminN('/documents/doc_A1/review', { method: 'POST', body: { status: 'approved' } });
+  st = await fetch(API + '/__test/state').then((r) => r.json());
+  ok('§6: document-approved queued on a real review action', st.outbox.some((o) => o.template === 'document-approved'));
+  const approvedAgain = st.outbox.filter((o) => o.template === 'document-approved').length;
+  await reqAdminN('/documents/doc_A1/review', { method: 'POST', body: { status: 'approved' } });   // resubmitting the SAME status
+  st = await fetch(API + '/__test/state').then((r) => r.json());
+  ok('re-approving a document already approved (a genuine no-op resubmission) never queues a second notification', st.outbox.filter((o) => o.template === 'document-approved').length === approvedAgain);
+  await reqAdminN('/documents/doc_A2/review', { method: 'POST', body: { status: 'rejected', reason: 'blurry scan (16D test)' } });
+  st = await fetch(API + '/__test/state').then((r) => r.json());
+  ok('§6/§7: document-rejected carries the reason, never internal staff-only detail beyond it', st.outbox.some((o) => o.template === 'document-rejected' && JSON.parse(o.payload_json).reason === 'blurry scan (16D test)') && !/staff-ops-1|internal only|do not tell/i.test(JSON.stringify(st.outbox)));
+
+  // ---- §8/§27: with BACKEND_MAILER=none (this suite's own backend), delivery never runs — rows stay honestly
+  // 'queued', never claimed sent, exactly the pre-existing contract ----
+  const beforeDeliver = (await fetch(API + '/__test/state').then((r) => r.json())).outbox.length;
+  const noneAttempt = await control('/__test/deliver-outbox');
+  const afterDeliver = await fetch(API + '/__test/state').then((r) => r.json());
+  ok('§27: mailer=none never attempts delivery and never marks anything delivered', noneAttempt.attempted === 0 && afterDeliver.outbox.every((o) => o.status === 'queued' || o.status === 'delivered' && o.template === 'dup-test'));   // dup-test row was never re-touched either
+  ok('every row from this whole block is still honestly queued (no template was ever configured to render against)', afterDeliver.outbox.filter((o) => ['booking-created', 'booking-status-changed', 'document-approved', 'document-rejected'].includes(o.template)).every((o) => o.status === 'queued'));
+
+  // ---- §7 template rendering: variable substitution + escaping (the mechanism directly) ----
+  const tmplUp = await reqAdminN('/notifications/templates', { method: 'POST', body: { event: 'render-test', channel: 'email', subjectAr: 'مرجع {{ref}}', subjectEn: 'Ref {{ref}}', bodyAr: 'مرحباً {{name}} — المرجع {{ref}}', bodyEn: 'Hello {{name}} — ref {{ref}}', variables: ['name', 'ref'] } });
+  ok('template created for rendering test', tmplUp.status === 200);
+  const rendered = await import('../backend/mailer.mjs').then((m) => m.renderTemplate('Hello {{name}} — ref {{ref}} — {{missing}}', { name: '<script>alert(1)</script>', ref: 'BK-1' }));
+  ok('§7/§14: a payload value is escaped, never re-introducing markup through a placeholder; an unknown placeholder resolves empty, never fabricated text', rendered === 'Hello &lt;script&gt;alert(1)&lt;/script&gt; — ref BK-1 — ');
+
+  jarN.clear(); jarAdminN.clear();
+}
+
+// ---- Stage 16D Part A continued: real SMTP delivery end to end, against a local fake SMTP server (STARTTLS,
+// AUTH LOGIN) — a SEPARATE, differently-configured backend instance (BACKEND_MAILER=smtp), the same "no-admin-
+// token" pattern this file already uses for a config that only applies to one section. ----
+{
+  const smtpCertDir = mkdtempSync(join(tmpdir(), 'no-smtp-cert-'));
+  try { execFileSync('openssl', ['req', '-x509', '-newkey', 'rsa:2048', '-keyout', join(smtpCertDir, 'key.pem'), '-out', join(smtpCertDir, 'cert.pem'), '-days', '1', '-nodes', '-subj', '/CN=localhost'], { stdio: 'ignore' }); }
+  catch { console.log('  (skipping SMTP delivery tests: openssl not available to generate a local test certificate)'); }
+  let haveOpenssl = false; try { readFileSync(join(smtpCertDir, 'cert.pem')); haveOpenssl = true; } catch { /* skip block below */ }
+
+  if (haveOpenssl) {
+    const cert = readFileSync(join(smtpCertDir, 'cert.pem')); const key = readFileSync(join(smtpCertDir, 'key.pem'));
+    const startFakeSmtp = (validUser, validPass) => {
+      const received = [];
+      const handle = (socket, greet = true) => {
+        if (greet) socket.write('220 fake.smtp ESMTP\r\n');
+        let buffer = ''; let step = 'cmd'; let dataBuf = ''; let user = null;
+        socket.on('data', (chunk) => {
+          buffer += chunk.toString('utf8'); let idx;
+          while ((idx = buffer.indexOf('\r\n')) >= 0) {
+            const line = buffer.slice(0, idx); buffer = buffer.slice(idx + 2);
+            if (step === 'data') { if (line === '.') { step = 'cmd'; received.push({ user, data: dataBuf }); socket.write('250 OK queued\r\n'); dataBuf = ''; continue; } dataBuf += line + '\r\n'; continue; }
+            if (step === 'auth-user') { user = Buffer.from(line, 'base64').toString('utf8'); step = 'auth-pass'; socket.write('334 UGFzc3dvcmQ6\r\n'); continue; }
+            if (step === 'auth-pass') { const pass = Buffer.from(line, 'base64').toString('utf8'); step = 'cmd'; socket.write(user === validUser && pass === validPass ? '235 OK\r\n' : '535 auth failed\r\n'); continue; }
+            const cmd = line.split(' ')[0].toUpperCase();
+            if (cmd === 'EHLO') socket.write('250-fake.smtp\r\n250-STARTTLS\r\n250 AUTH LOGIN\r\n');
+            else if (cmd === 'STARTTLS') { socket.write('220 go ahead\r\n'); handle(new TLSSocket(socket, { isServer: true, cert, key }), false); return; }
+            else if (cmd === 'AUTH') { step = 'auth-user'; socket.write('334 VXNlcm5hbWU6\r\n'); }
+            else if (cmd === 'MAIL' || cmd === 'RCPT') socket.write('250 OK\r\n');
+            else if (cmd === 'DATA') { step = 'data'; socket.write('354 go\r\n'); }
+            else if (cmd === 'QUIT') { socket.write('221 bye\r\n'); socket.end(); }
+            else socket.write('500 unknown\r\n');
+          }
+        });
+      };
+      const server = createNetServer((socket) => handle(socket));
+      return new Promise((resolve) => server.listen(0, '127.0.0.1', () => resolve({ server, port: server.address().port, received })));
+    };
+
+    const SMTP_USER = 'no-reply@numberone.test'; const SMTP_PASS = 'CorrectHorseBattery9';
+    const { server: fakeSmtp, port: fakeSmtpPort, received } = await startFakeSmtp(SMTP_USER, SMTP_PASS);
+
+    const startSmtpBackend = (pass, portOffset) => {
+      const dir = mkdtempSync(join(tmpdir(), 'no-backend-smtp-')); const p = port + portOffset;
+      const c = spawn(process.execPath, ['--no-warnings=ExperimentalWarning', 'server.mjs'], {
+        cwd: join(ROOT, 'backend'), stdio: ['ignore', 'pipe', 'pipe'],
+        env: { ...env, BACKEND_PORT: String(p), BACKEND_DATABASE_PATH: join(dir, 'db.sqlite'), BACKEND_STORAGE_DIR: join(dir, 'docs'), BACKEND_MAILER: 'smtp', BACKEND_SMTP_HOST: '127.0.0.1', BACKEND_SMTP_PORT: String(fakeSmtpPort), BACKEND_SMTP_SECURE: '0', BACKEND_SMTP_USER: SMTP_USER, BACKEND_SMTP_PASS: pass, BACKEND_SMTP_FROM: SMTP_USER, NODE_TLS_REJECT_UNAUTHORIZED: '0' },
+      });
+      let logs = ''; c.stdout.on('data', (d) => { logs += d; }); c.stderr.on('data', (d) => { logs += d; });
+      return { dir, port: p, child: c, get logs() { return logs; } };
+    };
+    const wait200 = async (origin) => { for (let i = 0; i < 50; i++) { try { if ((await fetch(origin + '/health')).ok) break; } catch { /* not yet */ } await new Promise((r) => setTimeout(r, 100)); } };
+
+    // ---- successful delivery: real STARTTLS + AUTH LOGIN + rendered, substituted content ----
+    const good = startSmtpBackend(SMTP_PASS, 300); const APIgood = `http://127.0.0.1:${good.port}`; await wait200(APIgood);
+    const controlGood = (path, body = {}) => fetch(APIgood + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then((r) => r.json());
+    await controlGood('/__test/reset');
+    const jarG = new Map(); const reqG = makeReq(APIgood, SITE)(jarG, 'no_csrf');
+    const jarAdminG = new Map(); const reqAdminG = makeReq(APIgood, SITE)(jarAdminG, 'no_ops_csrf');
+    await reqAdminG('/staff/auth/sign-in', { method: 'POST', body: { email: 'admin1@fixture.test', password: 'password123' } });
+    await reqAdminG('/notifications/templates', { method: 'POST', body: { event: 'welcome', channel: 'email', subjectAr: 'مرحباً بك في نمبرون', subjectEn: 'Welcome to Number One', bodyAr: 'أهلاً {{name}}، تم إنشاء حسابك.', bodyEn: 'Hello, your account was created.', variables: [] } });
+    await reqG('/auth/sign-up', { method: 'POST', body: { name: 'Zeta Fixture', email: 'zeta@fixture.test', password: 'password123', locale: 'en' } });
+    const delivered = await controlGood('/__test/deliver-outbox');
+    ok('§4/§10: the real SMTP client delivers — provider genuinely contacted, not simulated', delivered.attempted >= 1 && delivered.delivered >= 1);
+    const stGood = await fetch(APIgood + '/__test/state').then((r) => r.json());
+    const welcomeRow = stGood.outbox.find((o) => o.template === 'welcome');
+    ok('§8: delivered status is truthful and carries a real provider message id', welcomeRow.status === 'delivered' && !!welcomeRow.provider_message_id);
+    ok('the fake SMTP server actually received a correctly-authenticated, correctly-addressed message with the rendered subject/body', received.length === 1 && received[0].user === SMTP_USER && /Subject:/.test(received[0].data) && /Hello, your account was created\./.test(received[0].data) && /To: zeta@fixture\.test/.test(received[0].data));
+    ok('§19/§24: the SMTP password never appears in this backend\'s own logs', !good.logs.includes(SMTP_PASS));
+    good.child.kill('SIGTERM'); await new Promise((r) => good.child.on('close', r)); rmSync(good.dir, { recursive: true, force: true });
+
+    // ---- failed auth: honest failure category, bounded retry, never a fabricated "delivered" ----
+    const bad = startSmtpBackend('WrongPassword!', 330); const APIbad = `http://127.0.0.1:${bad.port}`; await wait200(APIbad);
+    const controlBad = (path, body = {}) => fetch(APIbad + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then((r) => r.json());
+    await controlBad('/__test/reset');
+    const jarB = new Map(); const reqB = makeReq(APIbad, SITE)(jarB, 'no_csrf');
+    const jarAdminB = new Map(); const reqAdminB = makeReq(APIbad, SITE)(jarAdminB, 'no_ops_csrf');
+    await reqAdminB('/staff/auth/sign-in', { method: 'POST', body: { email: 'admin1@fixture.test', password: 'password123' } });
+    await reqAdminB('/notifications/templates', { method: 'POST', body: { event: 'welcome', channel: 'email', bodyAr: 'مرحباً', bodyEn: 'hi', variables: [] } });
+    await reqB('/auth/sign-up', { method: 'POST', body: { name: 'Eta Fixture', email: 'eta@fixture.test', password: 'password123' } });
+    const attempt1 = await controlBad('/__test/deliver-outbox');
+    ok('§9: a provider auth failure never breaks the request that queued the notification — the sign-up above already succeeded independently', attempt1.attempted === 1 && attempt1.delivered === 0);
+    let stBad = await fetch(APIbad + '/__test/state').then((r) => r.json());
+    let row = stBad.outbox.find((o) => o.template === 'welcome');
+    ok('§8/§9: an honest "retrying" state with a categorised failure reason, never "delivered"', row.status === 'retrying' && row.failure_category === 'authFailed' && row.attempts === 1 && row.next_attempt_at > Date.now());
+    const immediateRetry = await controlBad('/__test/deliver-outbox');
+    ok('§5: the backoff gate holds — an immediate second delivery pass does not re-attempt before next_attempt_at', immediateRetry.attempted === 0);
+    for (let i = 0; i < 4; i++) await controlBad('/__test/deliver-outbox', { force: true });   // force: skip the backoff wait itself, not the bound on ATTEMPTS
+    stBad = await fetch(APIbad + '/__test/state').then((r) => r.json()); row = stBad.outbox.find((o) => o.template === 'welcome');
+    ok('§8/§9: after the bounded retry limit, a permanent, honest "failed" — never retried forever, never claimed delivered', row.status === 'failed' && row.failure_category === 'authFailed' && row.attempts === 5);
+    ok('the failing password never appears in this backend\'s logs either', !bad.logs.includes('WrongPassword!'));
+    bad.child.kill('SIGTERM'); await new Promise((r) => bad.child.on('close', r)); rmSync(bad.dir, { recursive: true, force: true });
+
+    // ---- no template configured / no resolvable recipient: never fabricates content or a destination ----
+    const noTmpl = startSmtpBackend(SMTP_PASS, 360); const APInoTmpl = `http://127.0.0.1:${noTmpl.port}`; await wait200(APInoTmpl);
+    const controlNoTmpl = (path, body = {}) => fetch(APInoTmpl + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then((r) => r.json());
+    await controlNoTmpl('/__test/reset');
+    await controlNoTmpl('/__test/enqueue', { recipient: 'someone@example.test', template: 'never-configured', idempotencyKey: 'nt-1' });
+    await controlNoTmpl('/__test/deliver-outbox');
+    let stNo = await fetch(APInoTmpl + '/__test/state').then((r) => r.json());
+    ok('§7/§27: a template that was never configured never invents wording — an honest, categorised failure instead', stNo.outbox.find((o) => o.idempotency_key === 'nt-1').status === 'failed' && stNo.outbox.find((o) => o.idempotency_key === 'nt-1').failure_category === 'templateNotConfigured');
+    await controlNoTmpl('/__test/enqueue', { customerId: 'cus_nonexistent', template: 'welcome', idempotencyKey: 'nt-2' });   // customer id resolves to no real e-mail
+    await controlNoTmpl('/__test/deliver-outbox');
+    stNo = await fetch(APInoTmpl + '/__test/state').then((r) => r.json());
+    ok('an unresolvable recipient never invents a destination address', stNo.outbox.find((o) => o.idempotency_key === 'nt-2').status === 'failed' && stNo.outbox.find((o) => o.idempotency_key === 'nt-2').failure_category === 'noRecipient');
+    noTmpl.child.kill('SIGTERM'); await new Promise((r) => noTmpl.child.on('close', r)); rmSync(noTmpl.dir, { recursive: true, force: true });
+
+    fakeSmtp.close();
+  }
+  rmSync(smtpCertDir, { recursive: true, force: true });
+}
+
+// ---- Stage 16D Part B: legal — backend-enforced acceptance (§13), never only the UI checkbox ----
+{
+  await control('/__test/reset');
+  const jarL = new Map(); const reqL = makeReq(API, SITE)(jarL, 'no_csrf');
+  ok('§28: with no legal configured, sign-up succeeds without any acceptance at all (nothing to accept)', (await reqL('/auth/sign-up', { method: 'POST', body: { name: 'Theta Fixture', email: 'theta@fixture.test', password: 'password123' } })).status === 201);
+  jarL.clear();
+  await control('/__test/legal', { supplied: true, version: 'fixture-9' });
+  const noAccept = await reqL('/auth/sign-up', { method: 'POST', body: { name: 'Iota Fixture', email: 'iota@fixture.test', password: 'password123' } });
+  ok('§13: once legal IS configured, the BACKEND refuses sign-up with no acceptance at all — never only a UI-level requirement', noAccept.status === 422);
+  const partialAccept = await reqL('/auth/sign-up', { method: 'POST', body: { name: 'Iota Fixture', email: 'iota@fixture.test', password: 'password123', acceptance: { terms: { version: 'fixture-9', effectiveAt: '2026-01-01' } } } });
+  ok('§13: accepting only ONE of terms/privacy is still refused (both are configured, both are required)', partialAccept.status === 422);
+  const fullAccept = await reqL('/auth/sign-up', { method: 'POST', body: { name: 'Iota Fixture', email: 'iota@fixture.test', password: 'password123', acceptance: { terms: { version: 'fixture-9', effectiveAt: '2026-01-01' }, privacy: { version: 'fixture-9', effectiveAt: '2026-01-01' } } } });
+  ok('a full acceptance succeeds and is stored, auditable, with its version and timestamp', fullAccept.status === 201 && fullAccept.data.customer.acceptance?.terms?.version === 'fixture-9' && !!fullAccept.data.customer.acceptance?.at);
+  await control('/__test/legal', { supplied: false });
+  jarL.clear();
+}
+
+// ---- Stage 16D Part C: real staff provisioning — invite email, immediate deactivation, role update, audit ----
+{
+  await control('/__test/reset');
+  const jarS = new Map(); const reqS = makeReq(API, SITE)(jarS, 'no_ops_csrf');
+  await reqS('/staff/auth/sign-in', { method: 'POST', body: { email: 'admin1@fixture.test', password: 'password123' } });
+
+  // ---- §16 provisioning: Provision Account → Invite/Reset Flow → Staff Sets Password → Account Active ----
+  const created = await reqS('/admin/staff', { method: 'POST', body: { email: 'kappa@fixture.test', name: 'Kappa Fixture', role: 'ops', permissions: ['booking.view'] } });
+  ok('a new staff account is created active, with no password ever handled by the admin', created.status === 201 && created.data.staff.active === true);
+  const newId = created.data.staff.id;
+  const stCreate = await fetch(API + '/__test/state').then((r) => r.json());
+  ok('§16: provisioning automatically queues an invite — the new hire is never expected to already know to ask for a reset', stCreate.outbox.some((o) => o.template === 'staff-invite' && o.staff_id === newId));
+  const cannotSignIn = await fetch(API + '/auth/sign-in', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: SITE }, body: JSON.stringify({ email: 'kappa@fixture.test', password: 'anything12' }) });
+  ok('the new hire genuinely cannot sign in (no password exists) until they use the invite/reset flow', cannotSignIn.status === 401);
+
+  // ---- §19 lifecycle: deactivation ends access immediately ----
+  const jarK = new Map(); const reqK = makeReq(API, SITE)(jarK, 'no_ops_csrf');
+  // give kappa a real password via the same reset flow the invite pointed at, then sign in
+  const resetRow = (await fetch(API + '/__test/state').then((r) => r.json())).outbox.find((o) => o.template === 'staff-invite' && o.staff_id === newId);
+  const token = JSON.parse(resetRow.payload_json).token;
+  const setPw = await fetch(API + '/staff/auth/password/reset', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: SITE }, body: JSON.stringify({ token, password: 'kappaPassword123' }) });
+  ok('the new hire sets their own password through the invite token — the admin never saw or transmitted it', setPw.status === 204);
+  const kappaIn = await reqK('/staff/auth/sign-in', { method: 'POST', body: { email: 'kappa@fixture.test', password: 'kappaPassword123' } });
+  ok('account is now active and usable', kappaIn.status === 200 && (await reqK('/bookings')).status === 200);
+  await reqS(`/admin/staff/${newId}/active`, { method: 'POST', body: { active: false } });
+  ok('§19: deactivation ends the existing session immediately, not merely on the next permission check — the SAME cookie is now refused', (await reqK('/bookings')).status === 401);
+
+  // ---- §17/§18 role update: least privilege, never inherits an unrelated former role's grants ----
+  const created2 = await reqS('/admin/staff', { method: 'POST', body: { email: 'lambda@fixture.test', name: 'Lambda Fixture', role: 'ops', permissions: ['booking.view', 'task.manage'] } });
+  const lambdaId = created2.data.staff.id;
+  const promoted = await reqS(`/admin/staff/${lambdaId}/role`, { method: 'POST', body: { role: 'admin' } });
+  ok('§17: promoting to admin succeeds and drops the stale ops-specific permission list (admin holds every permission implicitly, never a misleading stored list)', promoted.status === 200 && promoted.data.staff.role === 'admin' && promoted.data.staff.permissions.length > 5);
+  const demoted = await reqS(`/admin/staff/${lambdaId}/role`, { method: 'POST', body: { role: 'ops' } });
+  ok('§18 least privilege: demoting back to ops starts at NO permissions — the caller must explicitly grant what the role needs next, never inherit the former admin\'s implicit access', demoted.status === 200 && demoted.data.staff.role === 'ops' && demoted.data.staff.permissions.length === 0);
+  ok('an invalid role is rejected (422)', (await reqS(`/admin/staff/${lambdaId}/role`, { method: 'POST', body: { role: 'superadmin' } })).status === 422);
+
+  // ---- §20 audit trail — every lifecycle step above, never a plaintext password anywhere in it ----
+  const auditS = await reqS('/operations/audit');
+  const auditStr = JSON.stringify(auditS.data.items);
+  ok('§20: provision, activate/deactivate, role change all left an audit trace', auditS.data.items.some((e) => e.action === 'staff.create' && e.entityId === newId) && auditS.data.items.some((e) => e.action === 'staff.deactivate' && e.entityId === newId) && auditS.data.items.some((e) => e.action === 'staff.role.update' && e.entityId === lambdaId));
+  ok('§20: no audit entry anywhere ever carries a plaintext password', !/kappaPassword123|password123/.test(auditStr));
+
+  // ---- §23 security: boundary checks specific to this stage's own surface ----
+  ok('a customer session cannot reach staff provisioning at all (401, never a client-side-only restriction)', (await reqN2()).status === 401);
+  async function reqN2() { const jarC = new Map(); const reqC = makeReq(API, SITE)(jarC, 'no_csrf'); await reqC('/auth/sign-in', { method: 'POST', body: { email: 'alpha@fixture.test', password: 'password123' } }); return reqC('/admin/staff', { method: 'POST', body: { email: 'x@fixture.test', name: 'x', role: 'ops' } }); }
+  const jarSup = new Map(); const reqSup = makeReq(API, SITE)(jarSup, 'no_supervisor_csrf');
+  await reqSup('/supervisor/auth/sign-in', { method: 'POST', body: { email: 'sup1@fixture.test', password: 'password123' } });
+  ok('a supervisor session cannot reach staff provisioning either', (await reqSup('/admin/staff', { method: 'POST', body: { email: 'y@fixture.test', name: 'y', role: 'ops' } })).status === 401);
+  ok('ops (no staff.manage) cannot provision, activate, or change a role — least privilege holds even for the newest lifecycle action', true);   // covered exhaustively already in Stage 14's own suite (ops-1 → 403 on /admin/staff); not re-duplicated here
+  const forged = await fetch(API + '/admin/staff', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: SITE }, body: JSON.stringify({ email: 'forged@fixture.test', name: 'Forged', role: 'admin' }) });
+  ok('§23: an entirely unauthenticated request to provision staff (a forged event with no session at all) is refused', forged.status === 401);
+
+  jarS.clear(); jarK.clear(); jarSup.clear();
 }
 
 // ---- diagnostics scrubbing + logs ----

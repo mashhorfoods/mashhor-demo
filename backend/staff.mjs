@@ -20,6 +20,7 @@ import { q, now, paginate, whereClause, placeholders } from './db.mjs';
 import { hex, HttpError, str, isEmail, loginAttempts, recordLoginFailure, clearLoginFailures } from './http.mjs';
 import { hash, same, checkPassword, normEmail, publicCustomer, customerById } from './identity.mjs';
 import { warn } from './logger.mjs';
+import { enqueue } from './mailer.mjs';
 
 const J = (s, d) => { try { return s ? JSON.parse(s) : d; } catch { return d; } };
 
@@ -149,9 +150,12 @@ export function transitionBooking(bookingId, newStatus, actor, reason = null, me
   const t = now();
   // bookings (Stage 12.2 schema) has no updated_at column — only ops_status changes here.
   q.run('UPDATE bookings SET ops_status = ? WHERE id = ?', newStatus, bookingId);
-  q.run('INSERT INTO booking_status_history (booking_id, previous_status, new_status, actor, actor_role, reason, metadata_json, at) VALUES (?,?,?,?,?,?,?,?)',
+  const history = q.run('INSERT INTO booking_status_history (booking_id, previous_status, new_status, actor, actor_role, reason, metadata_json, at) VALUES (?,?,?,?,?,?,?,?)',
     bookingId, current, newStatus, actor.id, actor.role, reason, JSON.stringify(metadata ?? {}), t);
   audit(actor, 'booking.status.change', 'booking', bookingId, { from: current, to: newStatus, reason });
+  // Stage 16D §6: a real, always-existing system action (every accepted transition) — idempotent per history row,
+  // so retrying this exact call after a network failure never double-notifies the customer of the same change.
+  enqueue({ customerId: b.customer_id, bookingId, template: 'booking-status-changed', eventType: 'booking.status.changed', payload: { bookingId, from: current, to: newStatus }, idempotencyKey: `booking-status:${history.lastInsertRowid}` });
   return { bookingId, previousStatus: current, newStatus, at: t };
 }
 export function bookingStatusHistory(bookingId) {
@@ -297,6 +301,10 @@ export function reviewDocument(id, { status, reason = null }, actor) {
   const r = q.get('SELECT * FROM documents WHERE id = ?', id); if (!r) throw new HttpError(404, 'notFound');
   q.run('UPDATE documents SET review_status = ?, reviewer_id = ?, reviewed_at = ?, rejection_reason = ? WHERE id = ?', status, actor.id, now(), status === 'rejected' ? str(reason, 300) : null, id);
   audit(actor, 'document.review', 'document', id, { status, reason });
+  // Stage 16D §5/§6: a resubmission of the SAME target status (a retried request, or a duplicate click) is a
+  // genuine no-op — the prior review_status is the only stable signal this call has, since there is no per-call
+  // history row to key an idempotency token off (unlike booking status transitions, above).
+  if (r.customer_id && r.review_status !== status) enqueue({ customerId: r.customer_id, bookingId: r.booking_id, template: `document-${status}`, eventType: `document.${status}`, payload: { documentId: id, bookingId: r.booking_id, reason: status === 'rejected' ? reason : null } });
   return nDocReview(q.get('SELECT * FROM documents WHERE id = ?', id));
 }
 
@@ -371,7 +379,9 @@ export function notificationHistory({ customerId = '', bookingId = '', page = 1,
     : q.all('SELECT * FROM outbox ORDER BY created_at DESC');
   if (bookingId) rows = rows.filter((r) => { const p = J(r.payload_json, {}); return p.bookingId === bookingId; });
   const { slice, ...meta } = paginate(rows, page, pageSize, 100);
-  return { items: slice.map((r) => ({ id: r.id, channel: r.channel, event: r.template, at: r.created_at, status: r.status, reference: r.id })), ...meta };
+  // Stage 16D §8: attempts/failureCategory so staff can tell "still trying" from "gave up, here's why" — never
+  // just a bare status string once delivery genuinely runs.
+  return { items: slice.map((r) => ({ id: r.id, channel: r.channel, event: r.template, at: r.created_at, status: r.status, reference: r.id, attempts: r.attempts ?? 0, failureCategory: r.failure_category ?? null })), ...meta };
 }
 
 // ============================================================================
@@ -446,12 +456,32 @@ export function createStaffAccount({ email, name, role = 'ops', permissions = []
   const perms = role === 'admin' ? [] : (Array.isArray(permissions) ? permissions : []).filter((p) => PERMISSIONS.includes(p));
   q.run('INSERT INTO staff (id, email, name, role, permissions_json, active, created_at, updated_at) VALUES (?,?,?,?,?,1,?,?)', id, e, str(name, 120), role, JSON.stringify(perms), t, t);
   audit(actor, 'staff.create', 'staff', id, { email: e, role });
+  // Stage 16D §16: Provision Account → Invite/Reset Flow → Staff Sets Password → Account Active. The same
+  // reset-token mechanism staffAuth.resetRequest already uses, triggered automatically now instead of waiting
+  // for the new hire to somehow already know to ask for one.
+  const reset = createStaffReset(e);
+  if (reset) enqueue({ staffId: id, recipient: e, template: 'staff-invite', eventType: 'staff.invited', payload: { token: reset.token, name: str(name, 120) }, idempotencyKey: `staff-invite:${id}` });
   return publicStaff(staffById(id));
 }
 export function setStaffActive(id, active, actor) {
   if (!staffById(id)) throw new HttpError(404, 'notFound');
   q.run('UPDATE staff SET active = ?, updated_at = ? WHERE id = ?', active ? 1 : 0, now(), id);
+  // §19: deactivation ends access immediately, not merely on the next permission check — every existing session
+  // is revoked the same way a password change already revokes a customer's (identity.mjs's changePassword).
+  if (!active) endAllStaffSessions(id);
   audit(actor, active ? 'staff.activate' : 'staff.deactivate', 'staff', id, {});
+  return publicStaff(staffById(id));
+}
+/** §17: role is fixed at creation except through this explicit, audited path. Promoting to admin drops any
+    stored permissions (admin holds every permission implicitly, so a stale list would be misleading); demoting
+    to ops starts at NO permissions — least privilege (§18): the caller assigns exactly what the role needs next,
+    never inherits whatever an unrelated former role happened to have. */
+export function setStaffRole(id, role, actor) {
+  const s = staffById(id); if (!s) throw new HttpError(404, 'notFound');
+  if (!['admin', 'ops'].includes(role)) throw new HttpError(422, 'invalid');
+  if (role === s.role) return publicStaff(s);
+  q.run('UPDATE staff SET role = ?, permissions_json = ?, updated_at = ? WHERE id = ?', role, '[]', now(), id);
+  audit(actor, 'staff.role.update', 'staff', id, { from: s.role, to: role });
   return publicStaff(staffById(id));
 }
 /** role 'admin' already holds every permission implicitly (hasPermission) — assigning a permission list to one is a no-op the caller should not expect to change behaviour, so it is rejected rather than silently ignored. */

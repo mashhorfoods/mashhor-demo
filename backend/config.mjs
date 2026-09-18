@@ -39,8 +39,21 @@ if (production && testControls) problems.push('BACKEND_TEST_CONTROLS cannot be e
 const storage = env.BACKEND_STORAGE ?? 'local';
 if (!['local'].includes(storage)) problems.push(`BACKEND_STORAGE=${storage} is not implemented (local only; see docs/INTEGRATION.md for the S3 seam)`);
 const storageDir = resolve(env.BACKEND_STORAGE_DIR ?? './data/documents');
+// Stage 16D — real e-mail delivery. Implemented: 'none' (deliveries recorded, never claimed sent — the historical
+// default) and 'smtp' (a real, dependency-free RFC 5321 client, backend/mailer.mjs). 'smtp' requires every one of
+// its own settings below; anything else is refused the same way an unimplemented storage/payment/flight provider
+// already is — never silently treated as connected.
 const mailer = env.BACKEND_MAILER ?? 'none';
-if (!['none'].includes(mailer)) problems.push(`BACKEND_MAILER=${mailer} is not implemented (none only: deliveries are recorded, never claimed sent)`);
+if (!['none', 'smtp'].includes(mailer)) problems.push(`BACKEND_MAILER=${mailer} is not implemented (none or smtp)`);
+let smtp = null;
+if (mailer === 'smtp') {
+  const host = env.BACKEND_SMTP_HOST ?? ''; const port = num(env.BACKEND_SMTP_PORT, 587);
+  const user = env.BACKEND_SMTP_USER ?? ''; const pass = env.BACKEND_SMTP_PASS ?? ''; const from = env.BACKEND_SMTP_FROM ?? '';
+  if (!host) problems.push('BACKEND_SMTP_HOST is required when BACKEND_MAILER=smtp');
+  if (!user || !pass) problems.push('BACKEND_SMTP_USER and BACKEND_SMTP_PASS are required when BACKEND_MAILER=smtp (the account this backend sends as)');
+  if (!from || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(from)) problems.push('BACKEND_SMTP_FROM must be a real sender address when BACKEND_MAILER=smtp');
+  smtp = { host, port, user, pass, from, secure: bool(env.BACKEND_SMTP_SECURE, port === 465) };
+}
 
 // Stage 16B — payment provider. Implemented: dev (charges nothing, clearly labelled to the customer). A real
 // provider is a new backend/payments.mjs adapter (createIntent/verifySignature/normalizeEvent), not a config
@@ -79,7 +92,7 @@ export const config = Object.freeze({
   storage, storageDir,
   upload: { maxBytes: num(env.BACKEND_UPLOAD_MAX_BYTES, 5 * 1024 * 1024), types: list(env.BACKEND_UPLOAD_TYPES ?? 'application/pdf,image/jpeg,image/png') },
   signedUrlTtlMs: num(env.BACKEND_SIGNED_URL_TTL_SECONDS, 300) * 1000,
-  mailer, legalDir: resolve(env.BACKEND_LEGAL_DIR ?? './legal'),
+  mailer, smtp, legalDir: resolve(env.BACKEND_LEGAL_DIR ?? './legal'),
   paymentProvider, paymentDevSecret,
   flightProvider,
   supervisors: list(env.BACKEND_SUPERVISORS ?? 'supervisor-1,supervisor-2,supervisor-3,supervisor-4,supervisor-5'),

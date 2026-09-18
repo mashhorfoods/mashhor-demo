@@ -18,7 +18,7 @@ import {
   reviewDocument, listSuppliers, createSupplier, assignSupplierToBooking, updateBookingSupplier,
   addBookingNote, bookingNotes, listTemplates, upsertTemplate, notificationHistory, auditEvents, lifecycleConfig,
   listCustomers, customerDetailForStaff, listPayments, listDocumentsAdmin,
-  listStaff, createStaffAccount, setStaffActive, setStaffPermissions,
+  listStaff, createStaffAccount, setStaffActive, setStaffPermissions, setStaffRole,
   reportBookings, reportOperations, reportSuppliers, reportDocuments, reportNotifications, overview, adminSearch,
 } from './staff.mjs';
 import {
@@ -145,6 +145,7 @@ export const dashboard = {
   async staffCreate(req, res, ctx) { requirePermission(ctx.staff, 'staff.manage'); const b = await readJson(req); return json(res, 201, { staff: createStaffAccount(b, actorOf(ctx)) }); },
   async staffActive(req, res, ctx, id) { requirePermission(ctx.staff, 'staff.manage'); const b = await readJson(req); return json(res, 200, { staff: setStaffActive(id, !!b.active, actorOf(ctx)) }); },
   async staffPermissions(req, res, ctx, id) { requirePermission(ctx.staff, 'staff.manage'); const b = await readJson(req); return json(res, 200, { staff: setStaffPermissions(id, Array.isArray(b.permissions) ? b.permissions : [], actorOf(ctx)) }); },
+  async staffRole(req, res, ctx, id) { requirePermission(ctx.staff, 'staff.manage'); const b = await readJson(req); return json(res, 200, { staff: setStaffRole(id, str(b.role, 10), actorOf(ctx)) }); },
 
   rules(req, res, ctx, url) { requirePermission(ctx.staff, 'rules.view'); return json(res, 200, listBusinessRules({ category: str(url.searchParams.get('category') ?? '', 40), status: str(url.searchParams.get('status') ?? '', 20) })); },
   rule(req, res, ctx, id) { requirePermission(ctx.staff, 'rules.view'); const r = businessRuleById(id); if (!r) return fail(res, 404, 'notFound'); return json(res, 200, { rule: r }); },
