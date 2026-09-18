@@ -7,7 +7,7 @@
    ========================================================================= */
 
 import { el, qs, render, uid, setPageHead } from '../../core/dom.js';
-import { t, getLocale, setLocale } from '../../core/i18n.js';
+import { t, getLocale } from '../../core/i18n.js';
 import { route } from '../../data/config.js';
 import { icon, setButtonState } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
@@ -15,7 +15,7 @@ import { loadAttribution } from '../../core/booking.js';
 import { supervisorBySlug } from '../../data/supervisors.js';
 import { authProvider, restoreSession, adoptSession, signIn, signUp, signOut, requestReset, resetPassword, nextFrom, AuthError } from '../auth.js';
 import { legalVersions } from '../legal.js';
-import { put, isAr } from './shell.js';
+import { put } from './shell.js';
 
 const setHead = (key) => setPageHead({ title: t(key), description: t('page.account.description') });
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

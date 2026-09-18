@@ -13,7 +13,7 @@
 // UI being built now (§40).
 // ============================================================================
 import { config } from './config.mjs';
-import { q, now, paginate } from './db.mjs';
+import { q, now, paginate, whereClause, placeholders } from './db.mjs';
 import { hex, HttpError, str, loginAttempts, recordLoginFailure, clearLoginFailures } from './http.mjs';
 import { hash, same, checkPassword, normEmail } from './identity.mjs';
 import { warn } from './logger.mjs';
@@ -23,7 +23,7 @@ const J = (s, d) => { try { return s ? JSON.parse(s) : d; } catch { return d; } 
 
 /* ---- rows → contract shapes ---------------------------------------------- */
 /** Public-safe: what the (future) public directory and the portal's own "my profile" view may show anyone. No credential, no internal id. */
-export function publicSupervisor(s) {
+function publicSupervisor(s) {
   if (!s) return null;
   return {
     id: s.id, slug: s.slug ?? null, status: s.active ? 'active' : 'inactive',
@@ -131,14 +131,13 @@ export function reassignAttribution(customerId, newSupervisorId, actor) {
 /* ---- scoped read models: everything here takes supervisorId from the SESSION, never from a request value --------- */
 const custOf = (id) => q.get('SELECT * FROM customers WHERE id = ?', id);
 export function supervisorCustomers(supervisorId, { search = '', status = '', page = 1, pageSize = 20 } = {}) {
-  const where = ['attribution_supervisor = ?']; const params = [supervisorId];
-  if (search) { where.push('(name LIKE ? OR email LIKE ? OR phone LIKE ?)'); const s = `%${search}%`; params.push(s, s, s); }
-  const sql = `SELECT * FROM customers WHERE ${where.join(' AND ')} ORDER BY created_at DESC`;
-  const all = q.all(sql, ...params);
+  const s = search ? `%${search}%` : '';
+  const { sql, params } = whereClause([['attribution_supervisor = ?', supervisorId], ['(name LIKE ? OR email LIKE ? OR phone LIKE ?)', s && [s, s, s]]]);
+  const all = q.all(`SELECT * FROM customers ${sql} ORDER BY created_at DESC`, ...params);
   const { slice, ...meta } = paginate(all, page, pageSize, 50);
   // One batched query for the page's booking stats instead of two per row (was an N+1 on this list screen).
   const ids = slice.map((c) => c.id); const stats = new Map();
-  if (ids.length) for (const r of q.all(`SELECT customer_id, COUNT(*) AS n, MAX(created_at) AS m FROM bookings WHERE customer_id IN (${ids.map(() => '?').join(',')}) GROUP BY customer_id`, ...ids)) stats.set(r.customer_id, r);
+  if (ids.length) for (const r of q.all(`SELECT customer_id, COUNT(*) AS n, MAX(created_at) AS m FROM bookings WHERE customer_id IN (${placeholders(ids)}) GROUP BY customer_id`, ...ids)) stats.set(r.customer_id, r);
   return {
     items: slice.map((c) => ({ id: c.id, name: c.name, email: c.email, phone: c.phone, locale: c.locale, attributionAt: c.attribution_at, createdAt: c.created_at,
       bookingsCount: stats.get(c.id)?.n ?? 0, lastActivityAt: stats.get(c.id)?.m ?? c.created_at })),
@@ -160,14 +159,12 @@ export function supervisorCustomer(supervisorId, customerId) {
   };
 }
 export function supervisorBookings(supervisorId, { status = '', service = '', page = 1, pageSize = 20 } = {}) {
-  const where = ['supervisor_id = ?']; const params = [supervisorId];
-  if (status) { where.push('status = ?'); params.push(status); }
-  if (service) { where.push('service = ?'); params.push(service); }
-  const all = q.all(`SELECT * FROM bookings WHERE ${where.join(' AND ')} ORDER BY created_at DESC`, ...params);
+  const { sql, params } = whereClause([['supervisor_id = ?', supervisorId], ['status = ?', status], ['service = ?', service]]);
+  const all = q.all(`SELECT * FROM bookings ${sql} ORDER BY created_at DESC`, ...params);
   const { slice, ...meta } = paginate(all, page, pageSize, 50);
   // One batched customer-name lookup for the page instead of one query per row (was an N+1 on this list screen).
   const ids = [...new Set(slice.map((b) => b.customer_id))]; const names = new Map();
-  if (ids.length) for (const c of q.all(`SELECT id, name FROM customers WHERE id IN (${ids.map(() => '?').join(',')})`, ...ids)) names.set(c.id, c.name);
+  if (ids.length) for (const c of q.all(`SELECT id, name FROM customers WHERE id IN (${placeholders(ids)})`, ...ids)) names.set(c.id, c.name);
   return { items: slice.map((b) => ({ id: b.id, customerId: b.customer_id, customerName: names.get(b.customer_id) ?? '', service: b.service, status: b.status, paymentStatus: b.payment_status, amount: b.amount, currency: b.currency, createdAt: b.created_at, tripId: b.trip_id })), ...meta };
 }
 /** ONLY a booking currently attributed to this supervisor — never any booking by id. */
@@ -177,9 +174,8 @@ export function supervisorBooking(supervisorId, bookingId) {
   return { id: b.id, customerId: b.customer_id, customerName: c?.name ?? '', service: b.service, status: b.status, paymentStatus: b.payment_status, amount: b.amount, currency: b.currency, createdAt: b.created_at, detail: J(b.detail_json, {}) };
 }
 export function supervisorLeads(supervisorId, { status = '', page = 1, pageSize = 20 } = {}) {
-  const where = ['supervisor_id = ?']; const params = [supervisorId];
-  if (status) { where.push('status = ?'); params.push(status); }
-  const all = q.all(`SELECT * FROM leads WHERE ${where.join(' AND ')} ORDER BY created_at DESC`, ...params);
+  const { sql, params } = whereClause([['supervisor_id = ?', supervisorId], ['status = ?', status]]);
+  const all = q.all(`SELECT * FROM leads ${sql} ORDER BY created_at DESC`, ...params);
   const { slice, ...meta } = paginate(all, page, pageSize, 50);
   return { items: slice.map(nLead), ...meta };
 }
@@ -194,9 +190,8 @@ export function updateLeadStatus(supervisorId, leadId, status) {
 
 /** Revenue — computed from THIS supervisor's own bookings/payments only, never a cross-supervisor read. §17 */
 export function supervisorRevenue(supervisorId, { since = null } = {}) {
-  const params = [supervisorId]; let clause = 'supervisor_id = ?';
-  if (since) { clause += ' AND created_at >= ?'; params.push(since); }
-  const rows = q.all(`SELECT status, payment_status, amount, currency FROM bookings WHERE ${clause}`, ...params);
+  const { sql, params } = whereClause([['supervisor_id = ?', supervisorId], ['created_at >= ?', since]]);
+  const rows = q.all(`SELECT status, payment_status, amount, currency FROM bookings ${sql}`, ...params);
   const sum = (pred) => rows.filter(pred).reduce((n, r) => n + (r.amount || 0), 0);
   const currency = rows[0]?.currency ?? 'USD';
   return {
@@ -210,15 +205,13 @@ export function supervisorRevenue(supervisorId, { since = null } = {}) {
   };
 }
 export function supervisorPerformance(supervisorId, { since = null } = {}) {
-  const params = [supervisorId]; let clause = 'attribution_supervisor = ?';
-  if (since) { clause += ' AND created_at >= ?'; params.push(since); }
-  const customers = q.get(`SELECT COUNT(*) AS n FROM customers WHERE ${clause}`, ...params).n;
-  const bookingParams = [supervisorId]; let bClause = 'supervisor_id = ?';
-  if (since) { bClause += ' AND created_at >= ?'; bookingParams.push(since); }
-  const bookings = q.all(`SELECT status FROM bookings WHERE ${bClause}`, ...bookingParams);
-  const leadParams = [supervisorId]; let lClause = 'supervisor_id = ?';
-  if (since) { lClause += ' AND created_at >= ?'; leadParams.push(since); }
-  const leads = q.all(`SELECT status FROM leads WHERE ${lClause}`, ...leadParams);
+  const withSince = (col) => whereClause([[`${col} = ?`, supervisorId], ['created_at >= ?', since]]);
+  const cust = withSince('attribution_supervisor');
+  const customers = q.get(`SELECT COUNT(*) AS n FROM customers ${cust.sql}`, ...cust.params).n;
+  const bk = withSince('supervisor_id');
+  const bookings = q.all(`SELECT status FROM bookings ${bk.sql}`, ...bk.params);
+  const ld = withSince('supervisor_id');
+  const leads = q.all(`SELECT status FROM leads ${ld.sql}`, ...ld.params);
   const converted = leads.filter((l) => l.status === 'converted').length;
   return {
     customers, leads: leads.length, leadsConverted: converted, conversionRate: leads.length ? converted / leads.length : null,
@@ -250,12 +243,12 @@ const RESERVED_SLUGS = ['dashboard', 'customers', 'leads', 'bookings', 'revenue'
 const isValidSlug = (slug) => typeof slug === 'string' && /^[a-z0-9]([a-z0-9-]{0,38}[a-z0-9])?$/.test(slug) && !RESERVED_SLUGS.includes(slug);
 
 export function listSupervisors({ search = '', page = 1, pageSize = 20 } = {}) {
-  const where = []; const params = [];
-  if (search) { const s = `%${str(search, 120)}%`; where.push('(name_ar LIKE ? OR name_en LIKE ? OR email LIKE ? OR slug LIKE ? OR id LIKE ?)'); params.push(s, s, s, s, s); }
-  const all = q.all(`SELECT * FROM supervisors ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY created_at DESC`, ...params);
+  const like = search ? `%${str(search, 120)}%` : '';
+  const { sql, params } = whereClause([['(name_ar LIKE ? OR name_en LIKE ? OR email LIKE ? OR slug LIKE ? OR id LIKE ?)', like && [like, like, like, like, like]]]);
+  const all = q.all(`SELECT * FROM supervisors ${sql} ORDER BY created_at DESC`, ...params);
   const { slice, ...meta } = paginate(all, page, pageSize, 100);
   const ids = slice.map((s) => s.id); const customersCount = new Map();
-  if (ids.length) for (const r of q.all(`SELECT attribution_supervisor AS id, COUNT(*) AS n FROM customers WHERE attribution_supervisor IN (${ids.map(() => '?').join(',')}) GROUP BY attribution_supervisor`, ...ids)) customersCount.set(r.id, r.n);
+  if (ids.length) for (const r of q.all(`SELECT attribution_supervisor AS id, COUNT(*) AS n FROM customers WHERE attribution_supervisor IN (${placeholders(ids)}) GROUP BY attribution_supervisor`, ...ids)) customersCount.set(r.id, r.n);
   return { items: slice.map((s) => ({ ...privateSupervisor(s), customersCount: customersCount.get(s.id) ?? 0 })), ...meta };
 }
 export function createSupervisor({ slug, nameAr, nameEn, email, phone = '', city = '' }, actor) {
@@ -300,19 +293,15 @@ export function supervisorDetailForStaff(id) {
 }
 /** Admin-wide leads across every supervisor — `supervisorLeads` above stays scoped to one supervisor's own session. */
 export function adminLeads({ supervisorId = '', status = '', page = 1, pageSize = 20 } = {}) {
-  const where = []; const params = [];
-  if (supervisorId) { where.push('supervisor_id = ?'); params.push(supervisorId); }
-  if (status) { where.push('status = ?'); params.push(status); }
-  const all = q.all(`SELECT * FROM leads ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY created_at DESC`, ...params);
+  const { sql, params } = whereClause([['supervisor_id = ?', supervisorId], ['status = ?', status]]);
+  const all = q.all(`SELECT * FROM leads ${sql} ORDER BY created_at DESC`, ...params);
   const { slice, ...meta } = paginate(all, page, pageSize, 100);
   return { items: slice.map(nLead), ...meta };
 }
 /** Admin-wide attribution history — `supervisorCustomer` above reads this table too, but only for one customer reached through one supervisor's own session. */
 export function adminAttributionEvents({ supervisorId = '', customerId = '', page = 1, pageSize = 20 } = {}) {
-  const where = []; const params = [];
-  if (supervisorId) { where.push('supervisor_id = ?'); params.push(supervisorId); }
-  if (customerId) { where.push('customer_id = ?'); params.push(customerId); }
-  const all = q.all(`SELECT * FROM attribution_events ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY at DESC`, ...params);
+  const { sql, params } = whereClause([['supervisor_id = ?', supervisorId], ['customer_id = ?', customerId]]);
+  const all = q.all(`SELECT * FROM attribution_events ${sql} ORDER BY at DESC`, ...params);
   const { slice, ...meta } = paginate(all, page, pageSize, 100);
   return { items: slice.map((h) => ({ customerId: h.customer_id, supervisorId: h.supervisor_id, previousSupervisorId: h.previous_supervisor_id, source: h.source, actor: h.actor, at: h.at })), ...meta };
 }

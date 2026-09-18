@@ -9,6 +9,7 @@ import { spawn } from 'node:child_process';
 import { mkdtempSync, rmSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { makeReq } from './env.mjs';
 
 const ROOT = new URL('../', import.meta.url).pathname;
 let pass = 0, fail = 0;
@@ -51,15 +52,7 @@ let logs = ''; child.stdout.on('data', (d) => { logs += d; }); child.stderr.on('
 const API = `http://127.0.0.1:${port}`;
 for (let i = 0; i < 50; i++) { try { if ((await fetch(API + '/health')).ok) break; } catch { /* not yet */ } await new Promise((r) => setTimeout(r, 100)); }
 const jar = new Map();
-const req = async (path, { method = 'GET', body = null, headers = {}, origin = SITE, csrf = true, raw = null } = {}) => {
-  const h = { Origin: origin, ...headers }; if (body != null) h['Content-Type'] = 'application/json';
-  if (jar.size) h.Cookie = [...jar].map(([k, v]) => `${k}=${v}`).join('; ');
-  if (csrf && jar.get('no_csrf') && method !== 'GET') h['X-CSRF-Token'] = jar.get('no_csrf');
-  const r = await fetch(API + path, { method, headers: h, body: raw ?? (body != null ? JSON.stringify(body) : null), redirect: 'manual' });
-  for (const c of r.headers.getSetCookie?.() ?? []) { const [kv, ...attrs] = c.split(';'); const [k, v] = kv.split('='); if (/Max-Age=0/.test(attrs.join(';'))) jar.delete(k); else jar.set(k, v); }
-  let data = null; try { data = await r.clone().json(); } catch { /* not json */ }
-  return { status: r.status, headers: r.headers, data, text: await r.text() };
-};
+const req = makeReq(API, SITE)(jar, 'no_csrf');
 const control = (path, body = {}) => fetch(API + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then((r) => r.json());
 await control('/__test/reset');
 
@@ -171,15 +164,7 @@ await control('/__test/reset');
 {
   await control('/__test/reset');
   const jarS1 = new Map(); const jarS2 = new Map(); const jarC = new Map();
-  const reqAs = (jar) => async (path, { method = 'GET', body = null, headers = {}, origin = SITE, csrf = true, csrfCookie = 'no_supervisor_csrf', raw = null } = {}) => {
-    const h = { Origin: origin, ...headers }; if (body != null) h['Content-Type'] = 'application/json';
-    if (jar.size) h.Cookie = [...jar].map(([k, v]) => `${k}=${v}`).join('; ');
-    if (csrf && jar.get(csrfCookie) && method !== 'GET') h['X-CSRF-Token'] = jar.get(csrfCookie);
-    const r = await fetch(API + path, { method, headers: h, body: raw ?? (body != null ? JSON.stringify(body) : null), redirect: 'manual' });
-    for (const c of r.headers.getSetCookie?.() ?? []) { const [kv, ...attrs] = c.split(';'); const [k, v] = kv.split('='); if (/Max-Age=0/.test(attrs.join(';'))) jar.delete(k); else jar.set(k, v); }
-    let data = null; try { data = await r.clone().json(); } catch { /* not json */ }
-    return { status: r.status, headers: r.headers, data };
-  };
+  const reqAs = (jar) => makeReq(API, SITE)(jar, 'no_supervisor_csrf');
   const reqS1 = reqAs(jarS1); const reqS2 = reqAs(jarS2); const reqC = reqAs(jarC);
 
   const noSup = await reqS1('/supervisor/auth/sign-in', { method: 'POST', body: { email: 'nobody@fixture.test', password: 'wrongpass1' } });
@@ -269,15 +254,7 @@ await control('/__test/reset');
 {
   await control('/__test/reset');
   const jarAdmin = new Map(); const jarOps = new Map(); const jarCust2 = new Map();
-  const reqAs = (jar, csrfCookie) => async (path, { method = 'GET', body = null, headers = {}, origin = SITE, csrf = true, raw = null } = {}) => {
-    const h = { Origin: origin, ...headers }; if (body != null) h['Content-Type'] = 'application/json';
-    if (jar.size) h.Cookie = [...jar].map(([k, v]) => `${k}=${v}`).join('; ');
-    if (csrf && jar.get(csrfCookie) && method !== 'GET') h['X-CSRF-Token'] = jar.get(csrfCookie);
-    const r = await fetch(API + path, { method, headers: h, body: raw ?? (body != null ? JSON.stringify(body) : null), redirect: 'manual' });
-    for (const c of r.headers.getSetCookie?.() ?? []) { const [kv, ...attrs] = c.split(';'); const [k, v] = kv.split('='); if (/Max-Age=0/.test(attrs.join(';'))) jar.delete(k); else jar.set(k, v); }
-    let data = null; try { data = await r.clone().json(); } catch { /* not json */ }
-    return { status: r.status, headers: r.headers, data };
-  };
+  const reqAs = (jar, csrfCookie) => makeReq(API, SITE)(jar, csrfCookie);
   const reqAdmin = reqAs(jarAdmin, 'no_ops_csrf'); const reqOps = reqAs(jarOps, 'no_ops_csrf'); const reqCust2 = reqAs(jarCust2, 'no_csrf');
 
   const noStaff = await reqAdmin('/staff/auth/sign-in', { method: 'POST', body: { email: 'nobody@fixture.test', password: 'wrongpass1' } });
@@ -400,15 +377,7 @@ await control('/__test/reset');
 {
   await control('/__test/reset');
   const jarAdmin2 = new Map(); const jarOps1b = new Map(); const jarOps2 = new Map();
-  const reqAs2 = (jar) => async (path, { method = 'GET', body = null, headers = {}, origin = SITE, csrf = true, raw = null } = {}) => {
-    const h = { Origin: origin, ...headers }; if (body != null) h['Content-Type'] = 'application/json';
-    if (jar.size) h.Cookie = [...jar].map(([k, v]) => `${k}=${v}`).join('; ');
-    if (csrf && jar.get('no_ops_csrf') && method !== 'GET') h['X-CSRF-Token'] = jar.get('no_ops_csrf');
-    const r = await fetch(API + path, { method, headers: h, body: raw ?? (body != null ? JSON.stringify(body) : null), redirect: 'manual' });
-    for (const c of r.headers.getSetCookie?.() ?? []) { const [kv, ...attrs] = c.split(';'); const [k, v] = kv.split('='); if (/Max-Age=0/.test(attrs.join(';'))) jar.delete(k); else jar.set(k, v); }
-    let data = null; try { data = await r.clone().json(); } catch { /* not json */ }
-    return { status: r.status, headers: r.headers, data };
-  };
+  const reqAs2 = (jar) => makeReq(API, SITE)(jar, 'no_ops_csrf');
   const reqAdmin2 = reqAs2(jarAdmin2); const reqOps1b = reqAs2(jarOps1b); const reqOps2 = reqAs2(jarOps2);
   await reqAdmin2('/staff/auth/sign-in', { method: 'POST', body: { email: 'admin1@fixture.test', password: 'password123' } });
   await reqOps1b('/staff/auth/sign-in', { method: 'POST', body: { email: 'ops1@fixture.test', password: 'password123' } });
@@ -537,15 +506,7 @@ await control('/__test/reset');
 {
   await control('/__test/reset');
   const jarAdmin3 = new Map(); const jarSup3 = new Map();
-  const reqAs3 = (jar, csrfCookie) => async (path, { method = 'GET', body = null, headers = {}, origin = SITE, csrf = true } = {}) => {
-    const h = { Origin: origin, ...headers }; if (body != null) h['Content-Type'] = 'application/json';
-    if (jar.size) h.Cookie = [...jar].map(([k, v]) => `${k}=${v}`).join('; ');
-    if (csrf && jar.get(csrfCookie) && method !== 'GET') h['X-CSRF-Token'] = jar.get(csrfCookie);
-    const r = await fetch(API + path, { method, headers: h, body: body != null ? JSON.stringify(body) : null, redirect: 'manual' });
-    for (const c of r.headers.getSetCookie?.() ?? []) { const [kv, ...attrs] = c.split(';'); const [k, v] = kv.split('='); if (/Max-Age=0/.test(attrs.join(';'))) jar.delete(k); else jar.set(k, v); }
-    let data = null; try { data = await r.clone().json(); } catch { /* not json */ }
-    return { status: r.status, data };
-  };
+  const reqAs3 = (jar, csrfCookie) => makeReq(API, SITE)(jar, csrfCookie);
   const reqAdmin3 = reqAs3(jarAdmin3, 'no_ops_csrf'); const reqSup3 = reqAs3(jarSup3, 'no_supervisor_csrf');
   await reqAdmin3('/staff/auth/sign-in', { method: 'POST', body: { email: 'admin1@fixture.test', password: 'password123' } });
   await reqSup3('/supervisor/auth/sign-in', { method: 'POST', body: { email: 'sup1@fixture.test', password: 'password123' } });

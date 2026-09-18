@@ -1,12 +1,12 @@
 /* ACCOUNT / UI / TRAVELLERS — saved traveller profiles: list, add, edit, delete. Stage 12 */
 import { el, render, uid, lockScroll, unlockScroll, trapFocus } from '../../core/dom.js';
-import { t, pick } from '../../core/i18n.js';
+import { t } from '../../core/i18n.js';
 import { dateShort } from '../../core/format.js';
 import { icon, setButtonState, toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { travellerFields, validateTraveller, NATIONALITIES } from '../../booking/travellers.js';
 import { customer } from '../customer.js';
-import { mountAccount, loadRegion, block, pageTitle, isAr } from './shell.js';
+import { mountAccount, loadRegion, pageTitle, isAr } from './shell.js';
 
 const FIELDS = () => travellerFields('adult', 'flights');   // names, birth date, gender, nationality, passport, expiry — nothing more
 export const maskPassport = (p) => (p ? `•••• ${String(p).slice(-3)}` : '');

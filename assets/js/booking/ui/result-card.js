@@ -10,7 +10,6 @@ import { el, uid } from '../../core/dom.js';
 import { t, getLocale, pick } from '../../core/i18n.js';
 import { money, time, duration, dayOffset } from '../../core/format.js';
 import { icon } from '../../components/ui.js';
-import { totalTravellers } from '../pricing.js';
 import { placeName, carrierName } from './shared.js';
 
 const LABEL_ICON = { cheapest: 'no-price-tag', fastest: 'no-processing', fewestStops: 'no-flight', family: 'no-users', recommended: 'no-sparkle' };

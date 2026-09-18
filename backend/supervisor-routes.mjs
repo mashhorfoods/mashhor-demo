@@ -10,11 +10,11 @@
 // ============================================================================
 import { config } from './config.mjs';
 import { q, now } from './db.mjs';
-import { json, empty, fail, HttpError, readJson, str, isEmail, setSupervisorSessionCookies, clearSupervisorSessionCookies } from './http.mjs';
+import { json, empty, fail, HttpError, readJson, str, isEmail, pageParams, setSupervisorSessionCookies, clearSupervisorSessionCookies } from './http.mjs';
 import {
-  privateSupervisor, supervisorById, verifySupervisorPassword, changeSupervisorPassword, setSupervisorPassword,
+  privateSupervisor, supervisorById, verifySupervisorPassword, changeSupervisorPassword,
   createSupervisorSession, endSupervisorSession, createSupervisorReset, consumeSupervisorReset,
-  supervisorCustomers, supervisorCustomer, supervisorBookings, supervisorBooking, supervisorLeads, updateLeadStatus, LEAD_STATUSES,
+  supervisorCustomers, supervisorCustomer, supervisorBookings, supervisorBooking, supervisorLeads, updateLeadStatus,
   supervisorRevenue, supervisorPerformance, supervisorCommissions, nSupervisorNotification, reassignAttribution, activeSupervisor,
 } from './supervisor.mjs';
 import { enqueue } from './mailer.mjs';
@@ -23,8 +23,8 @@ import { info, warn } from './logger.mjs';
 
 const sessionAnswer = (res, s) => { const sess = createSupervisorSession(s.id); setSupervisorSessionCookies(res, sess.id, sess.csrf, sess.maxAge); return { supervisor: privateSupervisor(s), expiresAt: sess.expiresAt }; };
 const period = (url) => { const p = url.searchParams.get('period'); const days = { today: 1, week: 7, month: 30 }[p]; return days ? new Date(Date.now() - days * 864e5).toISOString() : null; };
-const page = (url) => Math.max(1, Number(url.searchParams.get('page')) || 1);
-const pageSize = (url, d = 20) => Math.min(50, Math.max(1, Number(url.searchParams.get('pageSize')) || d));
+const page = (url) => pageParams(url, { max: 50 }).page;
+const pageSize = (url, d = 20) => pageParams(url, { def: d, max: 50 }).pageSize;
 
 /* ---- /supervisor/auth --------------------------------------------------- */
 export const supervisorAuth = {
@@ -38,7 +38,7 @@ export const supervisorAuth = {
     if (isEmail(email)) { const r = createSupervisorReset(email); if (r) enqueue({ customerId: null, template: 'supervisor-password-reset', payload: { token: r.token, locale: 'ar', supervisorId: r.supervisor.id } }); }
     return json(res, 202, {});   // never reveals whether the address exists — same neutral answer as the customer flow
   },
-  async reset(req, res) { const b = await readJson(req); const sid = consumeSupervisorReset(str(b.token, 80), b.password); info('supervisor.auth.reset', { ok: true }); return empty(res); },
+  async reset(req, res) { const b = await readJson(req); consumeSupervisorReset(str(b.token, 80), b.password); info('supervisor.auth.reset', { ok: true }); return empty(res); },
   async change(req, res, ctx) { if (!ctx.supervisorSession) return fail(res, 401, 'unauthenticated'); const b = await readJson(req); changeSupervisorPassword(ctx.supervisor.id, b.current, b.next); return empty(res); },
 };
 

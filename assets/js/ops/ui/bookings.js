@@ -6,10 +6,10 @@
 import { el, render } from '../../core/dom.js';
 import { t } from '../../core/i18n.js';
 import { route } from '../../data/config.js';
-import { icon, toast, setButtonState } from '../../components/ui.js';
+import { icon, toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData, BOOKING_SUPPLIER_STATUSES } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, notFoundState, errorText, dataTable, bookingStatusBadge, opsStatusBadge, payBadge, supplierStatusBadge, taskStatusBadge, amount, dateTime, block, rows } from './shell.js';
+import { mountOpsPortal, loadRegion, pageTitle, notFoundBlock, actionForm, emptyNote, busyButton, dataTable, bookingStatusBadge, opsStatusBadge, payBadge, supplierStatusBadge, taskStatusBadge, amount, dateTime, block, rows } from './shell.js';
 
 const columns = [
   { labelKey: 'ops.bookings.col.id', render: (b) => el('a', { class: 'c-svp-link', href: route(`admin/bookings/?id=${encodeURIComponent(b.id)}`) }, el('bdi', { dir: 'ltr' }, b.id)) },
@@ -36,26 +36,14 @@ export function mountOpsBookings({ root = document, params = new URLSearchParams
   } });
 }
 
-function actionForm({ submitLabel, disabled, onSubmit, children }) {
-  const btn = el('button', { type: 'submit', class: 'c-btn c-btn--primary c-btn--sm', ...(disabled ? { disabled: true } : {}) }, [el('span', { class: 'c-btn__label' }, submitLabel), el('span', { class: 'c-btn__spinner', 'aria-hidden': 'true' })]);
-  const err = el('p', { class: 'c-field__error', role: 'alert', hidden: true });
-  const form = el('form', { class: 'l-stack l-stack--8', onsubmit: async (e) => {
-    e.preventDefault(); err.hidden = true; setButtonState(btn, 'loading');
-    try { await onSubmit(new FormData(form)); setButtonState(btn, 'success'); }
-    catch (error) { err.hidden = false; err.replaceChildren(icon('no-alert', { size: 'sm' }), el('span', {}, error?.code === 'conflict' ? t('ops.bookings.paymentGate') : errorText(error?.code))); setButtonState(btn, 'error'); }
-    setTimeout(() => setButtonState(btn, 'idle'), 1200);
-  } }, [...children, err, btn]);
-  return form;
-}
-
 function mountBookingDetail({ root, id }) {
   return mountOpsPortal({ root, id: 'bookings', head: 'page.ops.bookingDetail', paint: async ({ main, can }) => {
     const b = await opsData.booking(id);
-    if (!b) { render(main, notFoundState(route('admin/bookings/'), t('ops.bookings.title'))); return { booking: null }; }
+    if (!b) { render(main, notFoundBlock(route('admin/bookings/'), t('ops.bookings.title'))); return { booking: null }; }
     const refresh = async () => render(main, await view());
 
-    async function view() {
-      const fresh = await opsData.booking(id);
+    async function view(preloaded) {
+      const fresh = preloaded ?? await opsData.booking(id);
       const nodes = [
         el('p', {}, el('a', { class: 'c-btn c-btn--tertiary c-btn--sm', href: route('admin/bookings/') }, [icon('no-arrow-end', { size: 'xs', className: 'c-icon--start' }), el('span', {}, t('ops.bookings.title'))])),
         el('div', { class: 'c-acct-trip__head' }, [
@@ -78,7 +66,7 @@ function mountBookingDetail({ root, id }) {
         nodes.push(block(t('ops.bookings.transition.title'), actionForm({
           submitLabel: t('ops.bookings.transition.action'), disabled: !fresh.allowedTransitions.length,
           onSubmit: async (fd) => { await opsData.transitionBooking(id, fd.get('status'), fd.get('reason') || null); toast({ title: t('ops.bookings.transition.done'), variant: 'success', duration: 3000 }); await refresh(); },
-          children: [select, reason],
+          children: [select, reason], conflictMessage: t('ops.bookings.paymentGate'),
         }), { id: 'ops-bk-transition' }));
       }
 
@@ -87,7 +75,7 @@ function mountBookingDetail({ root, id }) {
         nodes.push(block(t('ops.bookings.assign.title'), actionForm({
           submitLabel: t('ops.bookings.assign.action'), disabled: false,
           onSubmit: async (fd) => { await opsData.assignBooking(id, fd.get('staffId') || null); toast({ title: t('ops.bookings.assign.done'), variant: 'success', duration: 3000 }); await refresh(); },
-          children: [staffId],
+          children: [staffId], conflictMessage: t('ops.bookings.paymentGate'),
         }), { id: 'ops-bk-assign' }));
       }
 
@@ -97,7 +85,7 @@ function mountBookingDetail({ root, id }) {
         const reference = el('input', { name: 'supplierReference', class: 'c-field__control', type: 'text', dir: 'ltr', value: sup?.supplierReference ?? '', 'aria-label': t('ops.bookings.supplier.reference'), placeholder: t('ops.bookings.supplier.reference') });
         const ticket = el('input', { name: 'ticketNumber', class: 'c-field__control', type: 'text', dir: 'ltr', value: sup?.ticketNumber ?? '', 'aria-label': t('ops.bookings.supplier.ticket'), placeholder: t('ops.bookings.supplier.ticket') });
         nodes.push(block(t('ops.bookings.supplier.title'), [
-          sup ? el('p', {}, [t('ops.bookings.supplier.current'), ' ', supplierStatusBadge(sup.status)]) : el('p', { class: 't-body-sm t-muted' }, t('ops.bookings.supplier.none')),
+          sup ? el('p', {}, [t('ops.bookings.supplier.current'), ' ', supplierStatusBadge(sup.status)]) : emptyNote('ops.bookings.supplier.none'),
           actionForm({
             submitLabel: t('ops.bookings.supplier.action'), disabled: false,
             onSubmit: async (fd) => {
@@ -105,7 +93,7 @@ function mountBookingDetail({ root, id }) {
               if (sup) await opsData.updateBookingSupplier(id, patch); else await opsData.assignSupplierToBooking(id, null);
               toast({ title: t('ops.bookings.supplier.done'), variant: 'success', duration: 3000 }); await refresh();
             },
-            children: [status, reference, ticket],
+            children: [status, reference, ticket], conflictMessage: t('ops.bookings.paymentGate'),
           }),
         ], { id: 'ops-bk-supplier' }));
       }
@@ -115,36 +103,37 @@ function mountBookingDetail({ root, id }) {
           ? el('div', { class: 'l-stack l-stack--8' }, fresh.documents.map((d) => el('div', { class: 'c-svp-lead', dataset: { document: d.id } }, [
               el('div', {}, [el('p', {}, d.type), el('p', { class: 't-body-sm t-muted' }, `${t('ops.bookings.documents.status')}: ${d.reviewStatus}`)]),
               d.reviewStatus === 'pending' ? el('div', { class: 'l-cluster l-cluster--8' }, [
-                el('button', { type: 'button', class: 'c-btn c-btn--primary c-btn--sm', onclick: async (e) => { e.currentTarget.disabled = true; try { await opsData.reviewDocument(d.id, 'approved', null); await refresh(); } catch { e.currentTarget.disabled = false; } } }, t('ops.bookings.documents.approve')),
-                el('button', { type: 'button', class: 'c-btn c-btn--tertiary c-btn--sm', onclick: async (e) => { const reason = prompt(t('ops.bookings.documents.rejectPrompt')); if (reason == null) return; e.currentTarget.disabled = true; try { await opsData.reviewDocument(d.id, 'rejected', reason); await refresh(); } catch { e.currentTarget.disabled = false; } } }, t('ops.bookings.documents.reject')),
+                busyButton(t('ops.bookings.documents.approve'), 'primary', () => opsData.reviewDocument(d.id, 'approved', null).then(refresh)),
+                busyButton(t('ops.bookings.documents.reject'), 'tertiary', () => { const reason = prompt(t('ops.bookings.documents.rejectPrompt')); if (reason == null) return Promise.resolve(); return opsData.reviewDocument(d.id, 'rejected', reason).then(refresh); }),
               ]) : el('p', { class: 't-body-sm t-muted' }, d.rejectionReason || '—'),
             ])))
-          : el('p', { class: 't-body-sm t-muted' }, t('ops.table.empty')), { id: 'ops-bk-documents' }));
+          : emptyNote('ops.table.empty'), { id: 'ops-bk-documents' }));
       }
 
       const noteList = (list, emptyKey) => list.length
         ? el('ul', { class: 'c-svp-mini-list', role: 'list' }, list.map((n) => el('li', {}, [el('p', {}, n.body), el('p', { class: 't-body-sm t-muted' }, dateTime(n.createdAt))])))
-        : el('p', { class: 't-body-sm t-muted' }, t(emptyKey));
+        : emptyNote(emptyKey);
       const noteForm = (type) => actionForm({
         submitLabel: t('ops.bookings.notes.add'), disabled: false,
         onSubmit: async (fd) => { const body = fd.get('body'); if (!body?.trim()) return; await opsData.addBookingNote(id, type, body.trim()); await refresh(); },
         children: [el('textarea', { name: 'body', class: 'c-field__control', rows: 2, required: true, 'aria-label': t('ops.bookings.notes.add') })],
+        conflictMessage: t('ops.bookings.paymentGate'),
       });
       if (can('booking.view')) nodes.push(block(t('ops.bookings.notes.customer'), [noteList(fresh.notesCustomer, 'ops.bookings.notes.emptyCustomer'), can('booking.manage') ? noteForm('customer') : null], { id: 'ops-bk-notes-customer' }));
       if (can('booking.manage')) nodes.push(block(t('ops.bookings.notes.internal'), [noteList(fresh.notesInternal, 'ops.bookings.notes.emptyInternal'), noteForm('internal')], { id: 'ops-bk-notes-internal' }));
 
       nodes.push(block(t('ops.bookings.history.title'), fresh.history.length
         ? el('ol', { class: 'c-svp-mini-list', role: 'list' }, fresh.history.slice().reverse().map((h) => el('li', {}, [el('span', {}, `${h.previousStatus ?? '—'} → ${t(`ops.lifecycle.${h.newStatus}`)}`), el('span', { class: 't-body-sm t-muted' }, `${h.actor} · ${dateTime(h.at)}`)])))
-        : el('p', { class: 't-body-sm t-muted' }, t('ops.table.empty')), { id: 'ops-bk-history' }));
+        : emptyNote('ops.table.empty'), { id: 'ops-bk-history' }));
 
       if (can('task.view')) nodes.push(block(t('ops.bookings.tasks.title'), fresh.tasks.length
         ? el('ul', { class: 'c-svp-mini-list', role: 'list' }, fresh.tasks.map((task) => el('li', {}, [el('span', {}, task.type), taskStatusBadge(task.status)])))
-        : el('p', { class: 't-body-sm t-muted' }, t('ops.table.empty')), { id: 'ops-bk-tasks' }));
+        : emptyNote('ops.table.empty'), { id: 'ops-bk-tasks' }));
 
       return nodes;
     }
 
-    render(main, await view());
+    render(main, await view(b));
     return { booking: b, refresh };
   } });
 }

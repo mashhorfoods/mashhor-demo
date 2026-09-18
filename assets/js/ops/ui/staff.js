@@ -4,12 +4,12 @@
    staff.manage holders (admin, implicitly) can reach this screen at all; the backend enforces the same boundary. */
 import { el } from '../../core/dom.js';
 import { t } from '../../core/i18n.js';
-import { icon, toast, setButtonState } from '../../components/ui.js';
+import { icon, toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, block } from './shell.js';
+import { mountOpsPortal, loadRegion, pageTitle, actionForm, block } from './shell.js';
 
-const OPS_PERMISSIONS = ['booking.view', 'booking.manage', 'booking.status.change', 'booking.assign', 'task.view', 'task.manage', 'document.review', 'supplier.view', 'supplier.manage', 'notification.send', 'notification.manage', 'service.manage', 'workflow.manage', 'report.view', 'audit.view', 'customer.view', 'supervisor.view', 'supervisor.manage', 'payment.view', 'document.view', 'attribution.view', 'staff.manage'];
+const OPS_PERMISSIONS = ['booking.view', 'booking.manage', 'booking.status.change', 'booking.assign', 'task.view', 'task.manage', 'document.review', 'supplier.view', 'supplier.manage', 'notification.send', 'notification.manage', 'service.manage', 'workflow.manage', 'report.view', 'audit.view', 'customer.view', 'supervisor.view', 'supervisor.manage', 'payment.view', 'document.view', 'attribution.view', 'staff.manage', 'rules.view', 'rules.manage'];
 
 export function mountOpsStaff({ root = document } = {}) {
   return mountOpsPortal({ root, id: 'staff', head: 'page.ops.staff', paint: async ({ main, can }) => {
@@ -19,13 +19,14 @@ export function mountOpsStaff({ root = document } = {}) {
       const email = el('input', { name: 'email', class: 'c-field__control', type: 'email', dir: 'ltr', required: true, 'aria-label': t('ops.staff.create.email'), placeholder: t('ops.staff.create.email') });
       const name = el('input', { name: 'name', class: 'c-field__control', type: 'text', required: true, 'aria-label': t('ops.staff.create.name'), placeholder: t('ops.staff.create.name') });
       const role = el('select', { name: 'role', class: 'c-field__control', 'aria-label': t('ops.staff.create.role') }, [el('option', { value: 'ops' }, t('ops.role.ops')), el('option', { value: 'admin' }, t('ops.role.admin'))]);
-      const btn = el('button', { type: 'submit', class: 'c-btn c-btn--primary c-btn--sm' }, [el('span', { class: 'c-btn__label' }, t('ops.staff.create.action')), el('span', { class: 'c-btn__spinner', 'aria-hidden': 'true' })]);
-      const form = el('form', { class: 'l-stack l-stack--8', onsubmit: async (e) => {
-        e.preventDefault(); setButtonState(btn, 'loading');
-        try { await opsData.createStaff({ email: email.value.trim(), name: name.value.trim(), role: role.value }); form.reset(); setButtonState(btn, 'success'); toast({ title: t('ops.staff.created'), variant: 'success', duration: 4000 }); await region.run(); }
-        catch { setButtonState(btn, 'error'); }
-        setTimeout(() => setButtonState(btn, 'idle'), 1200);
-      } }, [email, name, role, btn, el('p', { class: 't-body-sm t-muted' }, t('ops.staff.create.note'))]);
+      const form = actionForm({
+        submitLabel: t('ops.staff.create.action'),
+        onSubmit: async (fd, formEl) => {
+          await opsData.createStaff({ email: fd.get('email')?.trim(), name: fd.get('name')?.trim(), role: fd.get('role') });
+          formEl.reset(); toast({ title: t('ops.staff.created'), variant: 'success', duration: 4000 }); await region.run();
+        },
+        children: [email, name, role, el('p', { class: 't-body-sm t-muted' }, t('ops.staff.create.note'))],
+      });
       return block(t('ops.staff.create.title'), form, { id: 'ops-staff-create' });
     })() : null;
 

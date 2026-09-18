@@ -16,7 +16,7 @@
 // on a guess.
 // ============================================================================
 import { config } from './config.mjs';
-import { q, now, paginate } from './db.mjs';
+import { q, now, paginate, whereClause, placeholders } from './db.mjs';
 import { hex, HttpError, str, isEmail, loginAttempts, recordLoginFailure, clearLoginFailures } from './http.mjs';
 import { hash, same, checkPassword, normEmail, publicCustomer, customerById } from './identity.mjs';
 import { warn } from './logger.mjs';
@@ -100,10 +100,8 @@ export function audit(actor, action, entityType, entityId, metadata = {}) {
     actor.id, actor.role, action, entityType, entityId ?? null, JSON.stringify(metadata ?? {}), now());
 }
 export function auditEvents({ entityType = '', entityId = '', page = 1, pageSize = 50 } = {}) {
-  const where = []; const params = [];
-  if (entityType) { where.push('entity_type = ?'); params.push(entityType); }
-  if (entityId) { where.push('entity_id = ?'); params.push(entityId); }
-  const all = q.all(`SELECT * FROM audit_events ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY at DESC`, ...params);
+  const { sql, params } = whereClause([['entity_type = ?', entityType], ['entity_id = ?', entityId]]);
+  const all = q.all(`SELECT * FROM audit_events ${sql} ORDER BY at DESC`, ...params);
   const { slice, ...meta } = paginate(all, page, pageSize, 100);
   return { items: slice.map(nAudit), ...meta };
 }
@@ -168,15 +166,12 @@ export function assignBookingOperator(bookingId, staffId, actor) {
   return { bookingId, assignedOperator: staffId ?? null };
 }
 export function opsBookingList({ status = '', service = '', assignedTo = '', page = 1, pageSize = 20 } = {}) {
-  const where = []; const params = [];
-  if (status) { where.push('ops_status = ?'); params.push(status); }
-  if (service) { where.push('service = ?'); params.push(service); }
-  if (assignedTo) { where.push('assigned_operator = ?'); params.push(assignedTo); }
-  const all = q.all(`SELECT * FROM bookings ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY created_at DESC`, ...params);
+  const { sql, params } = whereClause([['ops_status = ?', status], ['service = ?', service], ['assigned_operator = ?', assignedTo]]);
+  const all = q.all(`SELECT * FROM bookings ${sql} ORDER BY created_at DESC`, ...params);
   const { slice, ...meta } = paginate(all, page, pageSize, 100);
   // One batched count for the page instead of one query per row (was an N+1 on this list screen).
   const ids = slice.map((r) => r.id); const missing = new Map();
-  if (ids.length) for (const r of q.all(`SELECT booking_id, COUNT(*) AS n FROM documents WHERE booking_id IN (${ids.map(() => '?').join(',')}) AND review_status != 'approved' GROUP BY booking_id`, ...ids)) missing.set(r.booking_id, r.n);
+  if (ids.length) for (const r of q.all(`SELECT booking_id, COUNT(*) AS n FROM documents WHERE booking_id IN (${placeholders(ids)}) AND review_status != 'approved' GROUP BY booking_id`, ...ids)) missing.set(r.booking_id, r.n);
   return { items: slice.map((r) => ({ ...nBookingRow(r), missingDocuments: missing.get(r.id) ?? 0 })), ...meta };
 }
 export function opsBookingDetail(bookingId) {
@@ -211,11 +206,8 @@ export function createTask({ type, bookingId = null, customerId = null, supervis
   return nTask(q.get('SELECT * FROM operation_tasks WHERE id = ?', id));
 }
 export function listTasks({ status = '', assignedTo = '', bookingId = '', page = 1, pageSize = 20 } = {}) {
-  const where = []; const params = [];
-  if (status) { where.push('status = ?'); params.push(status); }
-  if (assignedTo) { where.push('assigned_to = ?'); params.push(assignedTo); }
-  if (bookingId) { where.push('booking_id = ?'); params.push(bookingId); }
-  const all = q.all(`SELECT * FROM operation_tasks ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY created_at DESC`, ...params);
+  const { sql, params } = whereClause([['status = ?', status], ['assigned_to = ?', assignedTo], ['booking_id = ?', bookingId]]);
+  const all = q.all(`SELECT * FROM operation_tasks ${sql} ORDER BY created_at DESC`, ...params);
   const { slice, ...meta } = paginate(all, page, pageSize, 100);
   return { items: slice.map(nTask), ...meta };
 }
@@ -247,9 +239,8 @@ export function createEscalation({ bookingId = null, taskId = null, reason, seve
   return nEscalation(q.get('SELECT * FROM escalations WHERE id = ?', id));
 }
 export function listEscalations({ status = '', page = 1, pageSize = 20 } = {}) {
-  const where = []; const params = [];
-  if (status) { where.push('status = ?'); params.push(status); }
-  const all = q.all(`SELECT * FROM escalations ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY created_at DESC`, ...params);
+  const { sql, params } = whereClause([['status = ?', status]]);
+  const all = q.all(`SELECT * FROM escalations ${sql} ORDER BY created_at DESC`, ...params);
   const { slice, ...meta } = paginate(all, page, pageSize, 100);
   return { items: slice.map(nEscalation), ...meta };
 }
@@ -369,8 +360,9 @@ export function upsertTemplate({ event, channel, subjectAr = null, subjectEn = n
 
 /* ---- notification history — reads the EXISTING outbox table (Stage 12.2), never a duplicate (§16) --------------- */
 export function notificationHistory({ customerId = '', bookingId = '', page = 1, pageSize = 20 } = {}) {
-  let rows = q.all('SELECT * FROM outbox ORDER BY created_at DESC');
-  if (customerId) rows = rows.filter((r) => r.customer_id === customerId);
+  let rows = customerId
+    ? q.all('SELECT * FROM outbox WHERE customer_id = ? ORDER BY created_at DESC', customerId)
+    : q.all('SELECT * FROM outbox ORDER BY created_at DESC');
   if (bookingId) rows = rows.filter((r) => { const p = J(r.payload_json, {}); return p.bookingId === bookingId; });
   const { slice, ...meta } = paginate(rows, page, pageSize, 100);
   return { items: slice.map((r) => ({ id: r.id, channel: r.channel, event: r.template, at: r.created_at, status: r.status, reference: r.id })), ...meta };
@@ -390,12 +382,12 @@ export function notificationHistory({ customerId = '', bookingId = '', page = 1,
 /* ---- customers, admin-wide (§7) — the `customers` table has no active/inactive column, so none is invented here;
    only bookingsCount is added, a plain COUNT, never a fabricated "activity" score ---- */
 export function listCustomers({ search = '', page = 1, pageSize = 20 } = {}) {
-  const where = []; const params = [];
-  if (search) { const s = `%${str(search, 120)}%`; where.push('(name LIKE ? OR email LIKE ? OR phone LIKE ? OR id LIKE ?)'); params.push(s, s, s, s); }
-  const all = q.all(`SELECT * FROM customers ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY created_at DESC`, ...params);
+  const s = search ? `%${str(search, 120)}%` : '';
+  const sql = s ? 'WHERE (name LIKE ? OR email LIKE ? OR phone LIKE ? OR id LIKE ?)' : '';
+  const all = q.all(`SELECT * FROM customers ${sql} ORDER BY created_at DESC`, ...(s ? [s, s, s, s] : []));
   const { slice, ...meta } = paginate(all, page, pageSize, 100);
   const ids = slice.map((c) => c.id); const bookingsCount = new Map();
-  if (ids.length) for (const r of q.all(`SELECT customer_id, COUNT(*) AS n FROM bookings WHERE customer_id IN (${ids.map(() => '?').join(',')}) GROUP BY customer_id`, ...ids)) bookingsCount.set(r.customer_id, r.n);
+  if (ids.length) for (const r of q.all(`SELECT customer_id, COUNT(*) AS n FROM bookings WHERE customer_id IN (${placeholders(ids)}) GROUP BY customer_id`, ...ids)) bookingsCount.set(r.customer_id, r.n);
   return { items: slice.map((c) => ({ ...publicCustomer(c), bookingsCount: bookingsCount.get(c.id) ?? 0 })), ...meta };
 }
 /** The unified operational view of one customer (§7): profile, every booking, every document, every payment, recent
@@ -417,26 +409,20 @@ export function customerDetailForStaff(id) {
    exactly the fields the `payments` table (Stage 12.2) already has ---- */
 const nPaymentRow = (r) => ({ id: r.id, customerId: r.customer_id, bookingId: r.booking_id, at: r.at, amount: r.amount, currency: r.currency, status: r.status, reference: r.reference, methodAr: r.method_ar, methodEn: r.method_en });
 export function listPayments({ customerId = '', bookingId = '', status = '', page = 1, pageSize = 20 } = {}) {
-  const where = []; const params = [];
-  if (customerId) { where.push('customer_id = ?'); params.push(customerId); }
-  if (bookingId) { where.push('booking_id = ?'); params.push(bookingId); }
-  if (status) { where.push('status = ?'); params.push(status); }
-  const all = q.all(`SELECT * FROM payments ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY at DESC`, ...params);
+  const { sql, params } = whereClause([['customer_id = ?', customerId], ['booking_id = ?', bookingId], ['status = ?', status]]);
+  const all = q.all(`SELECT * FROM payments ${sql} ORDER BY at DESC`, ...params);
   const { slice, ...meta } = paginate(all, page, pageSize, 100);
   const ids = [...new Set(slice.map((p) => p.customer_id))]; const names = new Map();
-  if (ids.length) for (const c of q.all(`SELECT id, name FROM customers WHERE id IN (${ids.map(() => '?').join(',')})`, ...ids)) names.set(c.id, c.name);
+  if (ids.length) for (const c of q.all(`SELECT id, name FROM customers WHERE id IN (${placeholders(ids)})`, ...ids)) names.set(c.id, c.name);
   return { items: slice.map((r) => ({ ...nPaymentRow(r), customerName: names.get(r.customer_id) ?? '' })), ...meta };
 }
 
 /* ---- documents, admin-wide browse (§16) — distinct from reviewDocument (one document by id) above: a filterable
    list, still never returning storage_key or a permanent URL — the existing signed-URL mechanism is unchanged ---- */
-const nDocumentAdmin = (r) => ({ id: r.id, customerId: r.customer_id, bookingId: r.booking_id, tripId: r.trip_id, type: r.type, kind: r.kind, status: r.status, reviewStatus: r.review_status, reviewerId: r.reviewer_id ?? null, reviewedAt: r.reviewed_at ?? null, rejectionReason: r.rejection_reason ?? null, title: r.title, createdAt: r.created_at });
+const nDocumentAdmin = (r) => ({ ...nDocReview(r), customerId: r.customer_id, tripId: r.trip_id, kind: r.kind });
 export function listDocumentsAdmin({ customerId = '', bookingId = '', reviewStatus = '', page = 1, pageSize = 20 } = {}) {
-  const where = []; const params = [];
-  if (customerId) { where.push('customer_id = ?'); params.push(customerId); }
-  if (bookingId) { where.push('booking_id = ?'); params.push(bookingId); }
-  if (reviewStatus) { where.push('review_status = ?'); params.push(reviewStatus); }
-  const all = q.all(`SELECT * FROM documents ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY created_at DESC`, ...params);
+  const { sql, params } = whereClause([['customer_id = ?', customerId], ['booking_id = ?', bookingId], ['review_status = ?', reviewStatus]]);
+  const all = q.all(`SELECT * FROM documents ${sql} ORDER BY created_at DESC`, ...params);
   const { slice, ...meta } = paginate(all, page, pageSize, 100);
   return { items: slice.map(nDocumentAdmin), ...meta };
 }

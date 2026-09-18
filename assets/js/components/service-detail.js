@@ -22,7 +22,7 @@ import {
 import { SERVICE_DETAILS, SERVICE_BENEFITS } from '../data/service-details.js';
 import { icon, routeGraphic, sectionHead } from './ui.js';
 import { serviceCard, mediaPlaceholder } from './cards.js';
-import { stateRegion, stateBlock, skeletonService, notFoundState } from './states.js';
+import { stateRegion, notFoundState } from './states.js';
 import { supportPanels, journeySteps } from './home.js';
 
 /* ---------------------------------------------------------------------------

@@ -2,12 +2,9 @@
 // dashboard end to end against the REAL backend; the supervisor portal's screens (dashboard, customers, leads,
 // bookings, revenue, performance, notifications, settings) against the development stand-in; guard/authorization,
 // empty/error/slow states, and the responsive + RTL/LTR matrix. Exits 1 on any ✗.
-import { shot } from './env.mjs';
+import { shot, makeCtx, startEphemeralBackend } from './env.mjs';
 import { chromium } from 'playwright';
-import { spawn } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { rmSync } from 'node:fs';
 
 const ORIGIN = process.env.TEST_ORIGIN + '';
 const P = '/mashhor-demo/';
@@ -17,15 +14,7 @@ const ok = (name, cond, note = '') => { if (cond) pass++; else { fail++; console
 const errs = [];
 const AR = /[؀-ۿ]/;
 
-async function ctx(width = 1440, height = 1000, locale = 'ar') {
-  const c = await b.newContext({ viewport: { width, height } });
-  const p = await c.newPage(); p.setDefaultTimeout(10000);
-  p.on('pageerror', (e) => errs.push(`${p.url()}@${width}/${locale} pageerror: ${e.message}`));
-  p.on('console', (m) => { if ((m.type() === 'error' || m.type() === 'warning') && !m.text().startsWith('[no] ')) errs.push(`${p.url()}@${width} console: ${m.text().slice(0, 160)}`); });
-  p.on('response', (r) => { if (r.status() >= 400) errs.push(`${p.url()}@${width} HTTP ${r.status()} ${r.url()}`); });
-  if (locale !== 'ar') await c.addInitScript((l) => { try { localStorage.setItem('no.locale', l); } catch {} }, locale);
-  return { c, p };
-}
+const ctx = makeCtx(b, errs);
 const go = async (p, url, handle) => { await p.goto(ORIGIN + P + url); if (handle) await p.waitForFunction((h) => window.no?.[h], handle); };
 const mainReady = (p) => p.waitForFunction(() => document.querySelector('[data-portal=main] h1') && !document.querySelector('[data-portal=main] .c-loading-block'));
 const text = (p, sel) => p.locator(sel).first().textContent().then((s) => (s ?? '').replace(/\s+/g, ' ').trim()).catch(() => '');
@@ -168,10 +157,7 @@ await b.close();
 // ================================================================= 5. real backend: public profile → attribution → booking → supervisor visibility
 {
   const ROOT = new URL('../', import.meta.url).pathname;
-  const dir = mkdtempSync(join(tmpdir(), 'no-sup-backend-')); const port = 8990 + Math.floor(Math.random() * 9);
-  const backend = spawn(process.execPath, ['--no-warnings=ExperimentalWarning', 'server.mjs'], { cwd: join(ROOT, 'backend'), stdio: ['ignore', 'inherit', 'inherit'], env: { ...process.env, BACKEND_ENV: 'development', BACKEND_TEST_CONTROLS: '1', BACKEND_PORT: String(port), BACKEND_DATABASE_PATH: join(dir, 'db.sqlite'), BACKEND_STORAGE_DIR: join(dir, 'docs'), BACKEND_ALLOWED_ORIGINS: '', BACKEND_RATE_AUTH: '1000', BACKEND_RATE_API: '100000', BACKEND_RATE_UPLOAD: '1000' } });
-  const API = `http://127.0.0.1:${port}`;
-  for (let i = 0; i < 50; i++) { try { if ((await fetch(API + '/health')).ok) break; } catch { /* not yet */ } await new Promise((r) => setTimeout(r, 100)); }
+  const { dir, backend, origin: API } = await startEphemeralBackend({ prefix: 'no-sup-backend-', portBase: 8990, portSpread: 9 });
   const control = (path, body = {}) => fetch(API + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then((r) => r.json());
   const apiState = () => fetch(API + '/__test/state').then((r) => r.json());
   await control('/__test/reset');

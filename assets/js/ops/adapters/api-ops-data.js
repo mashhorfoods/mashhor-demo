@@ -17,18 +17,15 @@ const q = (params = {}) => { const p = new URLSearchParams(); for (const [k, v] 
 export const API_OPS_DATA = registerOpsDataAdapter({
   id: 'api-ops-data', dev: false, provider: 'customer backend API', configSource: 'API_BASE_URL',
   capabilities: ['bookings.operations', 'tasks', 'escalations', 'documents.review', 'services', 'workflow', 'suppliers', 'notifications.templates', 'notifications.history', 'audit', 'admin.dashboard'],
-  async meta() { return get('/operations/meta'); },
   async bookings(_t, params = {}) { return get(`/bookings${q(params)}`); },
   async booking(_t, id) { const d = await get(`/bookings/${encodeURIComponent(id)}`); return d.booking; },
   async transitionBooking(_t, id, status, reason) { const d = await post(`/bookings/${encodeURIComponent(id)}/status`, { status, reason }); return d.booking; },
   async assignBooking(_t, id, staffId) { return post(`/bookings/${encodeURIComponent(id)}/assign`, { staffId }); },
-  async bookingNotes(_t, id, type) { const d = await get(`/bookings/${encodeURIComponent(id)}/notes${q({ type })}`); return list(d, 'notes'); },
   async addBookingNote(_t, id, type, body) { const d = await post(`/bookings/${encodeURIComponent(id)}/notes`, { type, body }); return d.note; },
   async assignSupplierToBooking(_t, id, supplierId) { const d = await post(`/bookings/${encodeURIComponent(id)}/supplier`, { supplierId }); return d.bookingSupplier; },
   async updateBookingSupplier(_t, id, patchBody) { const d = await post(`/operations/booking-suppliers/${encodeURIComponent(id)}`, patchBody); return d.bookingSupplier; },
 
   async tasks(_t, params = {}) { return get(`/operations/tasks${q(params)}`); },
-  async task(_t, id) { const d = await get(`/operations/tasks/${encodeURIComponent(id)}`); return d.task; },
   async createTask(_t, task) { const d = await post('/operations/tasks', task); return d.task; },
   async assignTask(_t, id, staffId) { const d = await post(`/operations/tasks/${encodeURIComponent(id)}/assign`, { assignedTo: staffId }); return d.task; },
   async updateTaskStatus(_t, id, status) { const d = await post(`/operations/tasks/${encodeURIComponent(id)}/status`, { status }); return d.task; },
@@ -38,7 +35,6 @@ export const API_OPS_DATA = registerOpsDataAdapter({
   async updateEscalationStatus(_t, id, status) { const d = await post(`/operations/escalations/${encodeURIComponent(id)}/status`, { status }); return d.escalation; },
 
   async reviewDocument(_t, id, status, reason) { const d = await post(`/documents/${encodeURIComponent(id)}/review`, { status, reason }); return d.document; },
-  async documentRequirements() { const d = await get('/documents/requirements'); return d.requirements; },
 
   async services() { const d = await get('/services'); return list(d, 'services'); },
   async service(_t, id) { const d = await get(`/services/${encodeURIComponent(id)}`); return d.service; },
@@ -91,8 +87,6 @@ export const API_OPS_DATA = registerOpsDataAdapter({
   async rule(_t, id) { const d = await get(`/admin/rules/${encodeURIComponent(id)}`); return d.rule; },
   async ruleHistory(_t, id) { const d = await get(`/admin/rules/${encodeURIComponent(id)}/history`); return d.items; },
   async updateRule(_t, id, patchBody) { const d = await patch(`/admin/rules/${encodeURIComponent(id)}`, patchBody); return d.rule; },
-  async activateRule(_t, id) { const d = await post(`/admin/rules/${encodeURIComponent(id)}/activate`, {}); return d.rule; },
-  async disableRule(_t, id) { const d = await post(`/admin/rules/${encodeURIComponent(id)}/disable`, {}); return d.rule; },
   async pendingDecisions() { return get('/admin/rules/pending'); },
   async ruleMatrix() { return get('/admin/rules/matrix'); },
 });

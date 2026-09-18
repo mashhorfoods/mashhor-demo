@@ -9,7 +9,7 @@
 
    QA switches (sessionStorage): no.dev.ops = 'error' | 'slow' | 'empty'
    ========================================================================= */
-import { registerOpsDataAdapter } from '../data.js';
+import { registerOpsDataAdapter, RULE_STATUSES } from '../data.js';
 
 const read = (k) => { try { return sessionStorage.getItem(k); } catch { return null; } };
 const wait = async () => { await new Promise((r) => setTimeout(r, read('no.dev.ops') === 'slow' ? 2000 : 200)); if (read('no.dev.ops') === 'error') { const e = new Error('dev outage'); e.code = 'unavailable'; throw e; } };
@@ -103,7 +103,6 @@ const bookingById = (id) => BOOKINGS.find((b) => b.id === id);
 export const DEV_OPS_DATA = registerOpsDataAdapter({
   id: 'dev-ops-data', dev: true, provider: 'in-browser development stand-in', configSource: 'none',
   capabilities: ['bookings.operations', 'tasks', 'escalations', 'documents.review', 'services', 'workflow', 'suppliers', 'notifications.templates', 'notifications.history', 'audit', 'admin.dashboard'],
-  async meta() { await wait(); return { permissions: ['booking.view', 'booking.manage', 'booking.status.change', 'booking.assign', 'task.view', 'task.manage', 'document.review', 'supplier.view', 'supplier.manage', 'notification.send', 'notification.manage', 'service.manage', 'workflow.manage', 'report.view', 'audit.view', 'customer.view', 'supervisor.view', 'supervisor.manage', 'payment.view', 'document.view', 'attribution.view', 'staff.manage'], priorityLevels: PRIORITY_LEVELS, lifecycle: LIFECYCLE }; },
   async bookings() { await wait(); if (isEmpty()) return paged([]); return paged(BOOKINGS); },
   async booking(_t, id) {
     await wait(); const b = bookingById(id); if (!b) return null;
@@ -120,13 +119,11 @@ export const DEV_OPS_DATA = registerOpsDataAdapter({
     return this.booking(_t, id);
   },
   async assignBooking(_t, id, staffId) { await wait(); const b = bookingById(id); if (!b) { const e = new Error('not found'); e.code = 'notFound'; throw e; } b.assignedOperator = staffId ?? null; return { bookingId: id, assignedOperator: b.assignedOperator }; },
-  async bookingNotes(_t, id, type) { await wait(); return (type === 'customer' ? notesCustomer : notesInternal).filter((n) => n.bookingId === id); },
   async addBookingNote(_t, id, type, body) { await wait(); const note = { id: `dev-note-${Date.now()}`, bookingId: id, type, body, authorId: 'staff-dev-demo', authorRole: 'admin', createdAt: new Date().toISOString() }; if (type === 'customer') notesCustomer = [note, ...notesCustomer]; else notesInternal = [note, ...notesInternal]; return note; },
   async assignSupplierToBooking(_t, id, supplierId) { await wait(); return { id: `dev-bksup-${Date.now()}`, bookingId: id, supplierId, supplierReference: null, ticketNumber: null, status: 'pending', notes: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }; },
   async updateBookingSupplier(_t, id, patch) { await wait(); Object.assign(SUPPLIER, patch, { updatedAt: new Date().toISOString() }); return { ...SUPPLIER }; },
 
   async tasks(_t, params = {}) { await wait(); if (isEmpty()) return paged([], params); let items = tasks; if (params.status) items = items.filter((t) => t.status === params.status); if (params.assignedTo) items = items.filter((t) => t.assignedTo === params.assignedTo); return paged(items, params); },
-  async task(_t, id) { await wait(); return tasks.find((t) => t.id === id) ?? null; },
   async createTask(_t, task) { await wait(); const t = { id: `dev-task-${Date.now()}`, type: task.type ?? 'general', bookingId: task.bookingId ?? null, customerId: task.customerId ?? null, supervisorId: task.supervisorId ?? null, assignedTo: task.assignedTo ?? null, status: 'open', priority: PRIORITY_LEVELS.levels.includes(task.priority) ? task.priority : 'normal', dueAt: task.dueAt ?? null, notes: task.notes ?? '', createdBy: 'staff-dev-demo', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), completedAt: null }; tasks = [t, ...tasks]; return t; },
   async assignTask(_t, id, staffId) { await wait(); const t = tasks.find((x) => x.id === id); if (!t) return null; t.assignedTo = staffId ?? null; t.updatedAt = new Date().toISOString(); return { ...t }; },
   async updateTaskStatus(_t, id, status) { await wait(); const t = tasks.find((x) => x.id === id); if (!t) return null; t.status = status; t.completedAt = status === 'completed' ? new Date().toISOString() : null; t.updatedAt = new Date().toISOString(); return { ...t }; },
@@ -136,8 +133,6 @@ export const DEV_OPS_DATA = registerOpsDataAdapter({
   async updateEscalationStatus(_t, id, status) { await wait(); const e = escalations.find((x) => x.id === id); if (!e) return null; e.status = status; e.resolvedAt = ['resolved', 'closed'].includes(status) ? new Date().toISOString() : null; e.updatedAt = new Date().toISOString(); return { ...e }; },
 
   async reviewDocument(_t, id, status, reason) { await wait(); const d = DOCS.find((x) => x.id === id); if (!d) return null; d.reviewStatus = status; d.reviewerId = 'staff-dev-demo'; d.reviewedAt = new Date().toISOString(); d.rejectionReason = status === 'rejected' ? reason : null; return { ...d }; },
-  async documentRequirements() { await wait(); return []; },
-
   async services() { await wait(); return SERVICES; },
   async service(_t, id) { await wait(); return SERVICES.find((s) => s.id === id) ?? null; },
   async updateService(_t, id, patch) { await wait(); const s = SERVICES.find((x) => x.id === id); if (!s) return null; Object.assign(s, patch, { updatedAt: new Date().toISOString() }); return { ...s }; },
@@ -236,7 +231,6 @@ export const DEV_OPS_DATA = registerOpsDataAdapter({
   async ruleHistory(_t, id) { await wait(); return devRuleHistory[id] ?? []; },
   async updateRule(_t, id, patch) {
     await wait(); const r = devRules.find((x) => x.ruleId === id); if (!r) { const e = new Error('not found'); e.code = 'notFound'; throw e; }
-    const RULE_STATUSES = ['DRAFT', 'PENDING', 'APPROVED', 'ACTIVE', 'DISABLED', 'SUPERSEDED'];
     if (patch.status !== undefined && !RULE_STATUSES.includes(patch.status)) { const e = new Error('invalid'); e.code = 'invalid'; throw e; }
     devRuleHistory[id] = [{ ...r, supersededAt: new Date().toISOString(), effectiveTo: new Date().toISOString() }, ...(devRuleHistory[id] ?? [])];
     if (patch.value !== undefined) r.currentValue = patch.value;
@@ -246,8 +240,6 @@ export const DEV_OPS_DATA = registerOpsDataAdapter({
     r.updatedBy = 'staff-dev-demo'; r.updatedAt = new Date().toISOString();
     return { ...r };
   },
-  async activateRule(_t, id) { return this.updateRule(_t, id, { status: 'ACTIVE' }); },
-  async disableRule(_t, id) { return this.updateRule(_t, id, { status: 'DISABLED' }); },
   async pendingDecisions() {
     await wait();
     const rules = devRules.filter((r) => ['PENDING', 'DRAFT'].includes(r.status)).map((r) => ({ id: r.ruleId, category: r.category, name: r.name, status: r.status, reason: r.currentValue?.note ?? r.source, impact: 'business_rule' }));

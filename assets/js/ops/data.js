@@ -50,18 +50,15 @@ export const ESCALATION_STATUSES = ['open', 'investigating', 'waiting', 'resolve
 export const BOOKING_SUPPLIER_STATUSES = ['not_required', 'pending', 'submitted', 'processing', 'confirmed', 'rejected', 'failed', 'cancelled'];
 
 export const opsData = {
-  meta: () => call('meta'),                                                  // { permissions, priorityLevels, lifecycle }
   bookings: (params = { page: 1 }) => call('bookings', params),              // { status, service, assignedTo, page, pageSize }
   booking: (id) => call('booking', id),
   transitionBooking: (id, status, reason) => call('transitionBooking', id, status, reason),
   assignBooking: (id, staffId) => call('assignBooking', id, staffId),
-  bookingNotes: (id, type) => call('bookingNotes', id, type),
   addBookingNote: (id, type, body) => call('addBookingNote', id, type, body),
   assignSupplierToBooking: (id, supplierId) => call('assignSupplierToBooking', id, supplierId),
   updateBookingSupplier: (id, patch) => call('updateBookingSupplier', id, patch),
 
   tasks: (params = { page: 1 }) => call('tasks', params),                    // { status, assignedTo, bookingId, page, pageSize }
-  task: (id) => call('task', id),
   createTask: (task) => call('createTask', task),
   assignTask: (id, staffId) => call('assignTask', id, staffId),
   updateTaskStatus: (id, status) => call('updateTaskStatus', id, status),
@@ -71,7 +68,6 @@ export const opsData = {
   updateEscalationStatus: (id, status) => call('updateEscalationStatus', id, status),
 
   reviewDocument: (id, status, reason) => call('reviewDocument', id, status, reason),
-  documentRequirements: () => call('documentRequirements'),
 
   services: () => call('services'),
   service: (id) => call('service', id),
@@ -128,8 +124,6 @@ export const opsData = {
   rule: (id) => call('rule', id),
   ruleHistory: (id) => call('ruleHistory', id),
   updateRule: (id, patch) => call('updateRule', id, patch),
-  activateRule: (id) => call('activateRule', id),
-  disableRule: (id) => call('disableRule', id),
   pendingDecisions: () => call('pendingDecisions'),
   ruleMatrix: () => call('ruleMatrix'),
 };

@@ -11,7 +11,7 @@ import { icon } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { summariseTravellers } from '../../core/booking.js';
 import { STEPS, stepUrl, loadJourney, attributionOf } from '../journey.js';
-import { breakdown, totalTravellers } from '../pricing.js';
+import { breakdown } from '../pricing.js';
 import { totalDuration, totalStops } from '../rank.js';
 
 export const isAr = () => getLocale() === 'ar';

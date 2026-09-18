@@ -6,7 +6,7 @@ import { t } from '../../core/i18n.js';
 import { route } from '../../data/config.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, dataTable, dateTime } from './shell.js';
+import { mountOpsPortal, loadRegion, pageTitle, statusFilterSelect, dataTable, dateTime } from './shell.js';
 
 const REVIEW_STATUSES = ['pending', 'approved', 'rejected'];
 const columns = [
@@ -20,9 +20,7 @@ const columns = [
 export function mountOpsDocuments({ root = document } = {}) {
   return mountOpsPortal({ root, id: 'documents', head: 'page.ops.documents', paint: async ({ main }) => {
     const host = el('div', { dataset: { region: 'documents' } });
-    const status = el('select', { class: 'c-field__control c-svp-filter__select', 'aria-label': t('ops.documents.filterLabel') },
-      [''].concat(REVIEW_STATUSES).map((s) => el('option', { value: s }, s ? t(`ops.documents.reviewStatus.${s}`) : t('ops.tasks.filterAll'))));
-    status.addEventListener('change', () => region.run());
+    const status = statusFilterSelect('ops.documents.filterLabel', REVIEW_STATUSES, 'ops.documents.reviewStatus', () => region.run());
     main.replaceChildren(pageTitle('ops.documents.title', 'ops.documents.text'), el('div', { class: 'c-svp-filter' }, [status]), host);
     const region = loadRegion(host, async () => (await opsData.documentsAdmin({ reviewStatus: status.value || undefined, page: 1, pageSize: 50 })).items, {
       empty: () => stateBlock({ variant: 'empty', iconName: 'no-documents', headingLevel: 2, title: t('ops.documents.empty.title'), text: t('ops.documents.empty.text') }),

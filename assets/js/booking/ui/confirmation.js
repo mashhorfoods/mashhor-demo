@@ -5,12 +5,12 @@
    ========================================================================= */
 
 import { el } from '../../core/dom.js';
-import { t, pick, getLocale } from '../../core/i18n.js';
+import { t, pick } from '../../core/i18n.js';
 import { money, dateShort } from '../../core/format.js';
 import { route } from '../../data/config.js';
 import { supervisorBySlug } from '../../data/supervisors.js';
 import { icon } from '../../components/ui.js';
-import { loadJourney, stepUrl, guard, attributionOf, update } from '../journey.js';
+import { loadJourney, guard, attributionOf, update } from '../journey.js';
 import { restoreSession, signInHref, signUpHref } from '../../account/auth.js';
 import { customer } from '../../account/customer.js';
 import { stateBlock } from '../../components/states.js';

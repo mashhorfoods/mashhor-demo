@@ -7,9 +7,9 @@ import { icon, setButtonState, toast } from '../../components/ui.js';
 import { supervisorBySlug } from '../../data/supervisors.js';
 import { setSession } from '../../components/session.js';
 import { customer } from '../customer.js';
-import { changePassword, authProvider } from '../auth.js';
-import { mountAccount, block, pageTitle, rows, isAr } from './shell.js';
-import { field, applyErrors, clearErrors, setError } from './auth-screens.js';
+import { changePassword } from '../auth.js';
+import { mountAccount, block, pageTitle, rows } from './shell.js';
+import { field, applyErrors, setError } from './auth-screens.js';
 
 const PHONE = /^\+?[0-9 ()-]{7,20}$/;
 

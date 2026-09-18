@@ -4,7 +4,7 @@
 // trips, bookings, travellers, documents, payments, notifications, support,
 // settings, booking continuity and supervisor attribution, three widths ×
 // both languages, zero console errors. Exits 1 on any ✗.
-import { shot } from './env.mjs';
+import { shot, makeCtx } from './env.mjs';
 import { chromium } from 'playwright';
 const ORIGIN = process.env.TEST_ORIGIN + '';
 const P = '/mashhor-demo/';
@@ -15,15 +15,7 @@ const errs = [];
 const AR = /[؀-ۿ]/;
 const DOB = { adult: '1990-01-01', child: '2019-01-01', infant: '2025-06-01' };
 
-async function ctx(width = 1440, height = 1000, locale = 'ar') {
-  const c = await b.newContext({ viewport: { width, height } });
-  const p = await c.newPage(); p.setDefaultTimeout(10000);
-  p.on('pageerror', (e) => errs.push(`${p.url()}@${width}/${locale} pageerror: ${e.message}`));
-  p.on('console', (m) => { if ((m.type() === 'error' || m.type() === 'warning') && !m.text().startsWith('[no] ')) errs.push(`${p.url()}@${width} console: ${m.text().slice(0, 160)}`); });
-  p.on('response', (r) => { if (r.status() >= 400) errs.push(`${p.url()}@${width} HTTP ${r.status()} ${r.url()}`); });
-  if (locale !== 'ar') await c.addInitScript((l) => { try { localStorage.setItem('no.locale', l); } catch {} }, locale);
-  return { c, p };
-}
+const ctx = makeCtx(b, errs);
 const go = async (p, url, handle) => { await p.goto(ORIGIN + P + url); if (handle) await p.waitForFunction((h) => window.no?.[h], handle); };
 const mainReady = (p) => p.waitForFunction(() => document.querySelector('[data-account=main] h1') && !document.querySelector('[data-account=main] .c-loading-block'));
 const text = (p, sel) => p.locator(sel).first().textContent().then((s) => (s ?? '').replace(/\s+/g, ' ').trim()).catch(() => '');

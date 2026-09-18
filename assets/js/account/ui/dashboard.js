@@ -6,7 +6,7 @@ import { route } from '../../data/config.js';
 import { icon } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { customer, nextTrip, latestBooking, unreadCount } from '../customer.js';
-import { mountAccount, loadRegion, tripCard, bookingCard, block, isAr } from './shell.js';
+import { mountAccount, loadRegion, tripCard, bookingCard, block } from './shell.js';
 
 const daysTo = (iso) => Math.max(0, Math.round((Date.parse(iso) - Date.now()) / 86400000));
 

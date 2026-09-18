@@ -12,7 +12,7 @@ import { route } from '../data/config.js';
 import {
   DESTINATION_REGISTRY, DESTINATION_REGIONS, TRAVEL_PURPOSES,
   destinationsIn, destinationsFor, featuredDestinations, regionsWithDestinations,
-  destinationEntry, searchDestinations, destinationById,
+  destinationEntry, searchDestinations,
 } from '../data/destinations.js';
 import { serviceById } from '../data/services.js';
 import { icon, routeGraphic } from './ui.js';

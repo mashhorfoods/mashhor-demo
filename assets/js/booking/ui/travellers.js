@@ -6,8 +6,8 @@
    mountTravellers() → window.no.travellers
    ========================================================================= */
 
-import { el, uid, qs } from '../../core/dom.js';
-import { t, pick, getLocale } from '../../core/i18n.js';
+import { el, uid } from '../../core/dom.js';
+import { t, pick } from '../../core/i18n.js';
 import { icon, setButtonState } from '../../components/ui.js';
 import { loadJourney, setTravellers, stepUrl, guard, update } from '../journey.js';
 import { travellerSlots, travellerFields, CONTACT_FIELDS, validateTraveller, validateContact } from '../travellers.js';

@@ -69,3 +69,18 @@ export function paginate(all, page = 1, pageSize = 20, maxPageSize = 100) {
   const p = Math.max(1, page);
   return { slice: all.slice((p - 1) * size, p * size), page: p, pageSize: size, total: all.length, nextPage: p * size < all.length ? p + 1 : null };
 }
+
+/** Builds a `WHERE a = ? AND b = ?` clause (or '' if every filter is empty) from [condition, value] pairs,
+    skipping falsy values — the optional-filter scaffolding every list read model in staff.mjs/supervisor.mjs/
+    business-rules.mjs otherwise hand-rolled the same way. `value` may be an array for a condition with more than
+    one placeholder (e.g. a multi-column LIKE), spread into params in order. */
+export function whereClause(pairs) {
+  const where = []; const params = [];
+  for (const [cond, value] of pairs) {
+    if (Array.isArray(value) ? value.length : value) { where.push(cond); params.push(...(Array.isArray(value) ? value : [value])); }
+  }
+  return { sql: where.length ? `WHERE ${where.join(' AND ')}` : '', params };
+}
+
+/** `?` placeholders for a batched `IN (...)` lookup — `IN (${placeholders(ids)})`. Callers still guard `ids.length`. */
+export const placeholders = (ids) => ids.map(() => '?').join(',');

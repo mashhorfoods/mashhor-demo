@@ -4,10 +4,10 @@
    booking's own detail screen (assets/js/ops/ui/bookings.js). No provider credentials ever appear here. Stage 15 */
 import { el } from '../../core/dom.js';
 import { t } from '../../core/i18n.js';
-import { icon, toast, setButtonState } from '../../components/ui.js';
+import { icon, toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, dataTable, block } from './shell.js';
+import { mountOpsPortal, loadRegion, pageTitle, actionForm, dataTable, block } from './shell.js';
 
 const columns = [
   { labelKey: 'ops.suppliers.col.name', render: (s) => s.name },
@@ -25,13 +25,14 @@ export function mountOpsSuppliers({ root = document } = {}) {
       const name = el('input', { name: 'name', class: 'c-field__control', type: 'text', required: true, 'aria-label': t('ops.suppliers.create.name'), placeholder: t('ops.suppliers.create.name') });
       const type = el('input', { name: 'type', class: 'c-field__control', type: 'text', required: true, 'aria-label': t('ops.suppliers.create.type'), placeholder: t('ops.suppliers.create.type') });
       const services = el('input', { name: 'services', class: 'c-field__control', type: 'text', 'aria-label': t('ops.suppliers.create.services'), placeholder: t('ops.suppliers.create.services') });
-      const btn = el('button', { type: 'submit', class: 'c-btn c-btn--primary c-btn--sm' }, [el('span', { class: 'c-btn__label' }, t('ops.suppliers.create.action')), el('span', { class: 'c-btn__spinner', 'aria-hidden': 'true' })]);
-      const form = el('form', { class: 'l-stack l-stack--8', onsubmit: async (e) => {
-        e.preventDefault(); setButtonState(btn, 'loading');
-        try { await opsData.createSupplier({ name: name.value, type: type.value, services: services.value.split(',').map((s) => s.trim()).filter(Boolean) }); form.reset(); setButtonState(btn, 'success'); toast({ title: t('ops.suppliers.created'), variant: 'success', duration: 3000 }); await region.run(); }
-        catch { setButtonState(btn, 'error'); }
-        setTimeout(() => setButtonState(btn, 'idle'), 1200);
-      } }, [name, type, services, btn]);
+      const form = actionForm({
+        submitLabel: t('ops.suppliers.create.action'),
+        onSubmit: async (fd, formEl) => {
+          await opsData.createSupplier({ name: fd.get('name'), type: fd.get('type'), services: (fd.get('services') || '').split(',').map((s) => s.trim()).filter(Boolean) });
+          formEl.reset(); toast({ title: t('ops.suppliers.created'), variant: 'success', duration: 3000 }); await region.run();
+        },
+        children: [name, type, services],
+      });
       return block(t('ops.suppliers.create.title'), form, { id: 'ops-suppliers-create' });
     })() : null;
 

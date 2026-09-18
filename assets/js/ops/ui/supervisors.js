@@ -5,10 +5,10 @@
 import { el, render } from '../../core/dom.js';
 import { t } from '../../core/i18n.js';
 import { route } from '../../data/config.js';
-import { icon, toast, setButtonState } from '../../components/ui.js';
+import { icon, toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, notFoundState, dataTable, opsStatusBadge, dateTime, block, rows } from './shell.js';
+import { mountOpsPortal, loadRegion, pageTitle, notFoundBlock, actionForm, debouncedRun, emptyNote, dataTable, opsStatusBadge, dateTime, block, rows } from './shell.js';
 
 const columns = [
   { labelKey: 'ops.supervisors.col.name', render: (s) => el('a', { class: 'c-svp-link', href: route(`admin/supervisors/?id=${encodeURIComponent(s.id)}`) }, s.nameEn || s.nameAr || s.id) },
@@ -23,21 +23,21 @@ export function mountOpsSupervisors({ root = document, params = new URLSearchPar
   return mountOpsPortal({ root, id: 'supervisors', head: 'page.ops.supervisors', paint: async ({ main, can }) => {
     const host = el('div', { dataset: { region: 'supervisors' } });
     const search = el('input', { class: 'c-field__control c-svp-filter__select', type: 'search', placeholder: t('ops.supervisors.searchPlaceholder'), 'aria-label': t('ops.supervisors.searchPlaceholder') });
-    let debounce = null;
-    search.addEventListener('input', () => { clearTimeout(debounce); debounce = setTimeout(() => region.run(), 300); });
+    debouncedRun(search, () => region.run());
 
     const createForm = can('supervisor.manage') ? (() => {
       const slug = el('input', { name: 'slug', class: 'c-field__control', type: 'text', dir: 'ltr', required: true, 'aria-label': t('ops.supervisors.create.slug'), placeholder: t('ops.supervisors.create.slug') });
       const nameEn = el('input', { name: 'nameEn', class: 'c-field__control', type: 'text', 'aria-label': t('ops.supervisors.create.nameEn'), placeholder: t('ops.supervisors.create.nameEn') });
       const nameAr = el('input', { name: 'nameAr', class: 'c-field__control', type: 'text', 'aria-label': t('ops.supervisors.create.nameAr'), placeholder: t('ops.supervisors.create.nameAr') });
       const email = el('input', { name: 'email', class: 'c-field__control', type: 'email', dir: 'ltr', 'aria-label': t('ops.supervisors.create.email'), placeholder: t('ops.supervisors.create.email') });
-      const btn = el('button', { type: 'submit', class: 'c-btn c-btn--primary c-btn--sm' }, [el('span', { class: 'c-btn__label' }, t('ops.supervisors.create.action')), el('span', { class: 'c-btn__spinner', 'aria-hidden': 'true' })]);
-      const form = el('form', { class: 'l-stack l-stack--8', onsubmit: async (e) => {
-        e.preventDefault(); setButtonState(btn, 'loading');
-        try { await opsData.createSupervisorAdmin({ slug: slug.value.trim(), nameEn: nameEn.value.trim() || undefined, nameAr: nameAr.value.trim() || undefined, email: email.value.trim() || undefined }); form.reset(); setButtonState(btn, 'success'); toast({ title: t('ops.supervisors.created'), variant: 'success', duration: 3000 }); await region.run(); }
-        catch { setButtonState(btn, 'error'); }
-        setTimeout(() => setButtonState(btn, 'idle'), 1200);
-      } }, [slug, nameEn, nameAr, email, btn]);
+      const form = actionForm({
+        submitLabel: t('ops.supervisors.create.action'),
+        onSubmit: async (fd, formEl) => {
+          await opsData.createSupervisorAdmin({ slug: fd.get('slug')?.trim(), nameEn: fd.get('nameEn')?.trim() || undefined, nameAr: fd.get('nameAr')?.trim() || undefined, email: fd.get('email')?.trim() || undefined });
+          formEl.reset(); toast({ title: t('ops.supervisors.created'), variant: 'success', duration: 3000 }); await region.run();
+        },
+        children: [slug, nameEn, nameAr, email],
+      });
       return block(t('ops.supervisors.create.title'), form, { id: 'ops-sv-create' });
     })() : null;
 
@@ -54,11 +54,11 @@ export function mountOpsSupervisors({ root = document, params = new URLSearchPar
 function mountSupervisorDetail({ root, id }) {
   return mountOpsPortal({ root, id: 'supervisors', head: 'page.ops.supervisorDetail', paint: async ({ main, can }) => {
     const s = await opsData.supervisorAdmin(id);
-    if (!s) { render(main, notFoundState(route('admin/supervisors/'), t('ops.supervisors.title'))); return { supervisor: null }; }
+    if (!s) { render(main, notFoundBlock(route('admin/supervisors/'), t('ops.supervisors.title'))); return { supervisor: null }; }
     const refresh = async () => render(main, await view());
 
-    async function view() {
-      const fresh = await opsData.supervisorAdmin(id);
+    async function view(preloaded) {
+      const fresh = preloaded ?? await opsData.supervisorAdmin(id);
       const nodes = [
         el('p', {}, el('a', { class: 'c-btn c-btn--tertiary c-btn--sm', href: route('admin/supervisors/') }, [icon('no-arrow-end', { size: 'xs', className: 'c-icon--start' }), el('span', {}, t('ops.supervisors.title'))])),
         el('div', { class: 'l-stack l-stack--4' }, [el('h1', { class: 't-h1' }, fresh.nameEn || fresh.nameAr || fresh.id), el('p', { class: 't-body t-muted' }, [t(`ops.supervisors.status.${fresh.status}`), ' · ', el('bdi', { dir: 'ltr' }, fresh.slug || '—')])]),
@@ -78,7 +78,7 @@ function mountSupervisorDetail({ root, id }) {
 
       if (can('customer.view')) nodes.push(block(t('ops.supervisors.customers.title'), fresh.customers.length
         ? el('ul', { class: 'c-svp-mini-list', role: 'list' }, fresh.customers.map((c) => el('li', {}, [el('a', { class: 'c-svp-link', href: route(`admin/customers/?id=${encodeURIComponent(c.id)}`) }, c.name), el('span', { class: 't-body-sm t-muted' }, dateTime(c.createdAt))])))
-        : el('p', { class: 't-body-sm t-muted' }, t('ops.table.empty')), { id: 'ops-sv-customers' }));
+        : emptyNote('ops.table.empty'), { id: 'ops-sv-customers' }));
 
       nodes.push(block(t('ops.supervisors.bookings.title'), fresh.bookings.length
         ? dataTable({ columns: [
@@ -86,12 +86,12 @@ function mountSupervisorDetail({ root, id }) {
             { labelKey: 'ops.bookings.col.service', render: (b) => b.service },
             { labelKey: 'ops.bookings.col.status', render: (b) => opsStatusBadge(b.opsStatus) },
           ], rows: fresh.bookings, rowKey: (b) => b.id })
-        : el('p', { class: 't-body-sm t-muted' }, t('ops.table.empty')), { id: 'ops-sv-bookings' }));
+        : emptyNote('ops.table.empty'), { id: 'ops-sv-bookings' }));
 
       return nodes;
     }
 
-    render(main, await view());
+    render(main, await view(s));
     return { supervisor: s, refresh };
   } });
 }

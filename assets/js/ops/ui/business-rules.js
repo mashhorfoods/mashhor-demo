@@ -8,10 +8,10 @@
 import { el, render } from '../../core/dom.js';
 import { t } from '../../core/i18n.js';
 import { route } from '../../data/config.js';
-import { icon, toast, setButtonState } from '../../components/ui.js';
+import { icon, toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData, RULE_STATUSES } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, notFoundState, dataTable, ruleStatusBadge, dateTime, block, rows } from './shell.js';
+import { mountOpsPortal, loadRegion, pageTitle, notFoundBlock, actionForm, emptyNote, dataTable, ruleStatusBadge, dateTime, block, rows } from './shell.js';
 
 const columns = [
   { labelKey: 'ops.rules.col.name', render: (r) => el('a', { class: 'c-svp-link', href: route(`admin/business-rules/?id=${encodeURIComponent(r.ruleId)}`) }, r.name) },
@@ -61,11 +61,11 @@ export function mountOpsBusinessRules({ root = document, params = new URLSearchP
 function mountRuleDetail({ root, id }) {
   return mountOpsPortal({ root, id: 'rules', head: 'page.ops.ruleDetail', paint: async ({ main, can }) => {
     const r = await opsData.rule(id);
-    if (!r) { render(main, notFoundState(route('admin/business-rules/'), t('ops.rules.title'))); return { rule: null }; }
+    if (!r) { render(main, notFoundBlock(route('admin/business-rules/'), t('ops.rules.title'))); return { rule: null }; }
     const refresh = async () => render(main, await view());
 
-    async function view() {
-      const [fresh, history] = await Promise.all([opsData.rule(id), opsData.ruleHistory(id)]);
+    async function view(preloaded) {
+      const [fresh, history] = await Promise.all([preloaded ? Promise.resolve(preloaded) : opsData.rule(id), opsData.ruleHistory(id)]);
       const nodes = [
         el('p', {}, el('a', { class: 'c-btn c-btn--tertiary c-btn--sm', href: route('admin/business-rules/') }, [icon('no-arrow-end', { size: 'xs', className: 'c-icon--start' }), el('span', {}, t('ops.rules.title'))])),
         el('div', { class: 'l-stack l-stack--4' }, [el('h1', { class: 't-h1' }, fresh.name), el('p', { class: 't-body t-muted' }, fresh.description)]),
@@ -84,34 +84,32 @@ function mountRuleDetail({ root, id }) {
         const status = el('select', { name: 'status', class: 'c-field__control', 'aria-label': t('ops.rules.col.status') }, RULE_STATUSES.map((s) => el('option', { value: s, ...(s === fresh.status ? { selected: true } : {}) }, t(`ops.rules.status.${s}`))));
         const value = el('textarea', { name: 'value', class: 'c-field__control', rows: 8, dir: 'ltr', 'aria-label': t('ops.rules.detail.currentValue') }, JSON.stringify(fresh.currentValue, null, 2));
         const notes = el('textarea', { name: 'notes', class: 'c-field__control', rows: 3, 'aria-label': t('ops.rules.detail.notes'), placeholder: t('ops.rules.detail.notes') }, fresh.notes ?? '');
-        const err = el('p', { class: 'c-field__error', role: 'alert', hidden: true });
-        const btn = el('button', { type: 'submit', class: 'c-btn c-btn--primary c-btn--sm' }, [el('span', { class: 'c-btn__label' }, t('ops.rules.save')), el('span', { class: 'c-btn__spinner', 'aria-hidden': 'true' })]);
-        const form = el('form', { class: 'l-stack l-stack--8', onsubmit: async (e) => {
-          e.preventDefault(); err.hidden = true;
-          let parsedValue;
-          try { parsedValue = JSON.parse(value.value); }
-          catch { err.hidden = false; err.replaceChildren(icon('no-alert', { size: 'sm' }), el('span', {}, t('ops.rules.invalidValue'))); return; }
-          setButtonState(btn, 'loading');
-          try { await opsData.updateRule(id, { status: status.value, value: parsedValue, notes: notes.value || null }); toast({ title: t('ops.rules.updated'), variant: 'success', duration: 3000 }); setButtonState(btn, 'success'); await refresh(); }
-          catch { setButtonState(btn, 'error'); }
-          setTimeout(() => setButtonState(btn, 'idle'), 1200);
-        } }, [
-          el('label', { class: 'l-stack l-stack--4' }, [el('span', {}, t('ops.rules.col.status')), status]),
-          el('label', { class: 'l-stack l-stack--4' }, [el('span', {}, t('ops.rules.detail.currentValue')), value]),
-          el('label', { class: 'l-stack l-stack--4' }, [el('span', {}, t('ops.rules.detail.notes')), notes]),
-          err, btn,
-        ]);
+        const form = actionForm({
+          submitLabel: t('ops.rules.save'),
+          onSubmit: async (fd) => {
+            let parsedValue;
+            try { parsedValue = JSON.parse(fd.get('value')); }
+            catch { const e = new Error('invalid'); e.displayMessage = t('ops.rules.invalidValue'); throw e; }
+            await opsData.updateRule(id, { status: fd.get('status'), value: parsedValue, notes: fd.get('notes') || null });
+            toast({ title: t('ops.rules.updated'), variant: 'success', duration: 3000 }); await refresh();
+          },
+          children: [
+            el('label', { class: 'l-stack l-stack--4' }, [el('span', {}, t('ops.rules.col.status')), status]),
+            el('label', { class: 'l-stack l-stack--4' }, [el('span', {}, t('ops.rules.detail.currentValue')), value]),
+            el('label', { class: 'l-stack l-stack--4' }, [el('span', {}, t('ops.rules.detail.notes')), notes]),
+          ],
+        });
         nodes.push(block(t('ops.rules.manage.title'), form, { id: 'ops-rule-manage' }));
       }
 
       nodes.push(block(t('ops.rules.history.title'), history.length
         ? el('ol', { class: 'c-svp-mini-list', role: 'list' }, history.map((h) => el('li', {}, [el('span', {}, `${h.status} → ${dateTime(h.effectiveTo)}`), el('span', { class: 't-body-sm t-muted' }, h.updatedBy || '—')])))
-        : el('p', { class: 't-body-sm t-muted' }, t('ops.table.empty')), { id: 'ops-rule-history' }));
+        : emptyNote('ops.table.empty'), { id: 'ops-rule-history' }));
 
       return nodes;
     }
 
-    render(main, await view());
+    render(main, await view(r));
     return { rule: r, refresh };
   } });
 }

@@ -18,7 +18,7 @@
    ========================================================================= */
 
 import { el, qs, qsa, render, scrollTo as scrollIntoView, setPageHead } from '../core/dom.js';
-import { t, pick, getLocale } from '../core/i18n.js';
+import { t, pick } from '../core/i18n.js';
 import { route } from '../data/config.js';
 import { SERVICE_KINDS, serviceEntry } from '../data/services.js';
 import { HOME_DESTINATIONS, HOME_OFFERS } from '../data/home.js';

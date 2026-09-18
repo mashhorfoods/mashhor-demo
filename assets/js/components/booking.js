@@ -10,7 +10,7 @@
    mountBooking() → window.no.booking
    ========================================================================= */
 
-import { el, qs, qsa, render, scrollTo as scrollIntoView } from '../core/dom.js';
+import { el, qs, render, scrollTo as scrollIntoView } from '../core/dom.js';
 import { t, pick, getLocale } from '../core/i18n.js';
 import { dateShort } from '../core/format.js';
 import { route, SEARCH_VERTICALS } from '../data/config.js';

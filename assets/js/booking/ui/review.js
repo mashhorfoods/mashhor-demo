@@ -7,7 +7,7 @@
    ========================================================================= */
 
 import { el } from '../../core/dom.js';
-import { t, pick, getLocale } from '../../core/i18n.js';
+import { t, pick } from '../../core/i18n.js';
 import { money, dateShort } from '../../core/format.js';
 import { route } from '../../data/config.js';
 import { supervisorBySlug } from '../../data/supervisors.js';
@@ -15,7 +15,7 @@ import { icon, setButtonState } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { loadJourney, setQuote, setBooking, stepUrl, guard, attributionOf } from '../journey.js';
 import { adapterFor } from '../adapters/index.js';
-import { breakdown, totalTravellers } from '../pricing.js';
+import { breakdown } from '../pricing.js';
 import { devNotice, progress, tripCard, priceRows, recoveryState, legSummary, put, setHead, carrierName, isAr } from './shared.js';
 
 const block = (id, titleKey, editHref, body) => el('section', { class: 'c-review-block', 'aria-labelledby': id }, [

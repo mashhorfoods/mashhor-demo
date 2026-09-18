@@ -5,9 +5,9 @@
 import { el, render } from '../../core/dom.js';
 import { t, pick } from '../../core/i18n.js';
 import { route } from '../../data/config.js';
-import { icon, toast, setButtonState } from '../../components/ui.js';
+import { icon, toast } from '../../components/ui.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, notFoundState, dataTable, block, rows } from './shell.js';
+import { mountOpsPortal, loadRegion, pageTitle, notFoundBlock, actionForm, dataTable, block, rows } from './shell.js';
 
 const columns = [
   { labelKey: 'ops.services.col.id', render: (s) => el('a', { class: 'c-svp-link', href: route(`admin/services/?id=${encodeURIComponent(s.id)}`) }, s.id) },
@@ -32,11 +32,11 @@ export function mountOpsServices({ root = document, params = new URLSearchParams
 function mountServiceDetail({ root, id }) {
   return mountOpsPortal({ root, id: 'services', head: 'page.ops.serviceDetail', paint: async ({ main, can }) => {
     const s = await opsData.service(id);
-    if (!s) { render(main, notFoundState(route('admin/services/'), t('ops.services.title'))); return { service: null }; }
+    if (!s) { render(main, notFoundBlock(route('admin/services/'), t('ops.services.title'))); return { service: null }; }
     const refresh = async () => render(main, await view());
 
-    async function view() {
-      const fresh = await opsData.service(id);
+    async function view(preloaded) {
+      const fresh = preloaded ?? await opsData.service(id);
       const workflow = await opsData.serviceWorkflow(id);
       const docs = await opsData.serviceDocumentRequirements(id);
       const nodes = [
@@ -57,20 +57,20 @@ function mountServiceDetail({ root, id }) {
         const workflowType = el('input', { id: 'ops-svc-workflowType', name: 'workflowType', class: 'c-field__control', type: 'text', value: fresh.workflowType ?? '' });
         const supplierType = el('input', { id: 'ops-svc-supplierType', name: 'supplierType', class: 'c-field__control', type: 'text', value: fresh.supplierType ?? '' });
         const requirements = el('textarea', { id: 'ops-svc-requirements', name: 'operationalRequirements', class: 'c-field__control', rows: 2 }, fresh.operationalRequirements ?? '');
-        const btn = el('button', { type: 'submit', class: 'c-btn c-btn--primary c-btn--sm' }, [el('span', { class: 'c-btn__label' }, t('acct.set.save')), el('span', { class: 'c-btn__spinner', 'aria-hidden': 'true' })]);
-        const form = el('form', { class: 'l-stack l-stack--8', onsubmit: async (e) => {
-          e.preventDefault(); setButtonState(btn, 'loading');
-          try { await opsData.updateService(id, { active: active.checked, bookingEnabled: bookingEnabled.checked, workflowType: workflowType.value || null, supplierType: supplierType.value || null, operationalRequirements: requirements.value || null }); toast({ title: t('acct.set.saved'), variant: 'success', duration: 3000 }); setButtonState(btn, 'success'); await refresh(); }
-          catch { setButtonState(btn, 'error'); }
-          setTimeout(() => setButtonState(btn, 'idle'), 1200);
-        } }, [
-          el('label', { class: 'c-choice' }, [active, el('span', { class: 'c-choice__text' }, t('ops.services.col.active'))]),
-          el('label', { class: 'c-choice' }, [bookingEnabled, el('span', { class: 'c-choice__text' }, t('ops.services.col.bookingEnabled'))]),
-          el('div', { class: 'c-field' }, [el('label', { class: 'c-field__label', for: 'ops-svc-workflowType' }, t('ops.services.col.workflowType')), workflowType]),
-          el('div', { class: 'c-field' }, [el('label', { class: 'c-field__label', for: 'ops-svc-supplierType' }, t('ops.services.col.supplierType')), supplierType]),
-          el('div', { class: 'c-field' }, [el('label', { class: 'c-field__label', for: 'ops-svc-requirements' }, t('ops.services.operationalRequirements')), requirements]),
-          btn,
-        ]);
+        const form = actionForm({
+          submitLabel: t('acct.set.save'),
+          onSubmit: async (fd) => {
+            await opsData.updateService(id, { active: !!fd.get('active'), bookingEnabled: !!fd.get('bookingEnabled'), workflowType: fd.get('workflowType') || null, supplierType: fd.get('supplierType') || null, operationalRequirements: fd.get('operationalRequirements') || null });
+            toast({ title: t('acct.set.saved'), variant: 'success', duration: 3000 }); await refresh();
+          },
+          children: [
+            el('label', { class: 'c-choice' }, [active, el('span', { class: 'c-choice__text' }, t('ops.services.col.active'))]),
+            el('label', { class: 'c-choice' }, [bookingEnabled, el('span', { class: 'c-choice__text' }, t('ops.services.col.bookingEnabled'))]),
+            el('div', { class: 'c-field' }, [el('label', { class: 'c-field__label', for: 'ops-svc-workflowType' }, t('ops.services.col.workflowType')), workflowType]),
+            el('div', { class: 'c-field' }, [el('label', { class: 'c-field__label', for: 'ops-svc-supplierType' }, t('ops.services.col.supplierType')), supplierType]),
+            el('div', { class: 'c-field' }, [el('label', { class: 'c-field__label', for: 'ops-svc-requirements' }, t('ops.services.operationalRequirements')), requirements]),
+          ],
+        });
         nodes.push(block(t('ops.services.edit.title'), form, { id: 'ops-svc-edit' }));
       }
 
@@ -85,7 +85,7 @@ function mountServiceDetail({ root, id }) {
       return nodes;
     }
 
-    render(main, await view());
+    render(main, await view(s));
     return { service: s, refresh };
   } });
 }

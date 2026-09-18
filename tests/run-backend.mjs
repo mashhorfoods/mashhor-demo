@@ -9,18 +9,14 @@
 //        an already-running staging backend with BACKEND_TEST_CONTROLS=1 and
 //        http://127.0.0.1:4173 in its BACKEND_ALLOWED_ORIGINS
 import { spawn } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { rmSync } from 'node:fs';
 import { join } from 'node:path';
-import './env.mjs';
+import { startEphemeralBackend } from './env.mjs';
 
 const ROOT = new URL('../', import.meta.url).pathname;
 let backend = null; let dir = null; let backendOrigin = process.env.BACKEND_ORIGIN;
 if (!backendOrigin) {
-  dir = mkdtempSync(join(tmpdir(), 'no-backend-')); const port = 8960 + Math.floor(Math.random() * 30);
-  backend = spawn(process.execPath, ['--no-warnings=ExperimentalWarning', 'server.mjs'], { cwd: join(ROOT, 'backend'), stdio: ['ignore', 'inherit', 'inherit'], env: { ...process.env, BACKEND_ENV: 'development', BACKEND_TEST_CONTROLS: '1', BACKEND_PORT: String(port), BACKEND_DATABASE_PATH: join(dir, 'db.sqlite'), BACKEND_STORAGE_DIR: join(dir, 'docs'), BACKEND_ALLOWED_ORIGINS: '', BACKEND_RATE_AUTH: '1000', BACKEND_RATE_API: '100000', BACKEND_RATE_UPLOAD: '1000' } });
-  backendOrigin = `http://127.0.0.1:${port}`;
-  for (let i = 0; i < 50; i++) { try { if ((await fetch(backendOrigin + '/health')).ok) break; } catch { /* not yet */ } await new Promise((r) => setTimeout(r, 100)); }
+  ({ dir, backend, origin: backendOrigin } = await startEphemeralBackend({ prefix: 'no-backend-', portBase: 8960, portSpread: 30 }));
 }
 const health = await fetch(backendOrigin + '/health').then((r) => r.json()).catch(() => null);
 if (!health?.ok) { console.error(`real backend at ${backendOrigin} does not answer /health`); process.exit(1); }

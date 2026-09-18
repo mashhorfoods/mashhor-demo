@@ -9,16 +9,16 @@
    window.no.results
    ========================================================================= */
 
-import { el, qs, qsa, render, lockScroll, scrollTo as scrollIntoView } from '../../core/dom.js';
-import { t, pick, getLocale } from '../../core/i18n.js';
+import { el, render, lockScroll } from '../../core/dom.js';
+import { t, pick } from '../../core/i18n.js';
 import { money, duration, time, dateShort } from '../../core/format.js';
 import { route } from '../../data/config.js';
-import { contextFromParams, contextToParams, loadContext, saveContext, attributionFrom, summariseTravellers } from '../../core/booking.js';
+import { contextFromParams, contextToParams, loadContext, saveContext, attributionFrom } from '../../core/booking.js';
 import { icon, initModals } from '../../components/ui.js';
 import { stateRegion, stateBlock, skeletonCard } from '../../components/states.js';
 import { runSearch, toSearchRequest } from '../search.js';
 import { adapterFor } from '../adapters/index.js';
-import { loadJourney, selectOffer, stepUrl, searchExpired, startSearch, setResults } from '../journey.js';
+import { loadJourney, selectOffer, stepUrl, searchExpired } from '../journey.js';
 import { SORTS, PRIORITIES, EMPTY_FILTERS, TIME_SLOTS, sortOffers, applyFilters, facetsOf, labelOffers, activeFilterCount, totalDuration, totalStops } from '../rank.js';
 import { totalTravellers } from '../pricing.js';
 import { flightResultCard } from './result-card.js';

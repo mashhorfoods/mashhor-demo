@@ -7,7 +7,7 @@
 
 import { el, render } from '../../core/dom.js';
 import { route } from '../../data/config.js';
-import { t, pick } from '../../core/i18n.js';
+import { t } from '../../core/i18n.js';
 import { money } from '../../core/format.js';
 import { icon, setButtonState } from '../../components/ui.js';
 import { stateBlock, loadingBlock } from '../../components/states.js';

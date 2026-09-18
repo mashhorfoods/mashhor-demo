@@ -81,7 +81,7 @@ export const MENU_DESTINATIONS = {
 /* --------------------------------------------------------------------------
    OFFERS — §07. Kept visually simple on purpose.
    ----------------------------------------------------------------------- */
-import { OFFER_CATEGORIES, offersIn } from './offers.js';
+import { OFFER_CATEGORIES } from './offers.js';
 
 /* The offers menu lists the data-driven categories (data/offers.js); each
    item opens the listing filtered on that category. */

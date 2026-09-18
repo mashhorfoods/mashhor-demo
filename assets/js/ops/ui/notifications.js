@@ -3,10 +3,10 @@
    message was delivered beyond what that record says (§16). Stage 15 */
 import { el } from '../../core/dom.js';
 import { t } from '../../core/i18n.js';
-import { icon, toast, setButtonState } from '../../components/ui.js';
+import { icon, toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, dataTable, dateTime, block } from './shell.js';
+import { mountOpsPortal, loadRegion, pageTitle, actionForm, dataTable, dateTime, block } from './shell.js';
 
 const CHANNELS = ['email', 'sms', 'push'];
 
@@ -22,14 +22,15 @@ export function mountOpsNotifications({ root = document } = {}) {
       const subjectEn = el('input', { name: 'subjectEn', class: 'c-field__control', type: 'text', dir: 'ltr', 'aria-label': t('ops.notifications.create.subjectEn'), placeholder: t('ops.notifications.create.subjectEn') });
       const bodyAr = el('textarea', { name: 'bodyAr', class: 'c-field__control', rows: 3, 'aria-label': t('ops.notifications.create.bodyAr'), placeholder: t('ops.notifications.create.bodyAr') });
       const bodyEn = el('textarea', { name: 'bodyEn', class: 'c-field__control', rows: 3, dir: 'ltr', 'aria-label': t('ops.notifications.create.bodyEn'), placeholder: t('ops.notifications.create.bodyEn') });
-      const btn = el('button', { type: 'submit', class: 'c-btn c-btn--primary c-btn--sm' }, [el('span', { class: 'c-btn__label' }, t('ops.notifications.create.action')), el('span', { class: 'c-btn__spinner', 'aria-hidden': 'true' })]);
       const help = el('p', { class: 't-body-sm t-muted' }, t('ops.notifications.create.help'));
-      const form = el('form', { class: 'l-stack l-stack--8', onsubmit: async (e) => {
-        e.preventDefault(); setButtonState(btn, 'loading');
-        try { await opsData.upsertTemplate({ event: event.value, channel: channel.value, subjectAr: subjectAr.value, subjectEn: subjectEn.value, bodyAr: bodyAr.value, bodyEn: bodyEn.value, active: true }); form.reset(); setButtonState(btn, 'success'); toast({ title: t('ops.notifications.saved'), variant: 'success', duration: 3000 }); await tmpl.run(); }
-        catch { setButtonState(btn, 'error'); }
-        setTimeout(() => setButtonState(btn, 'idle'), 1200);
-      } }, [event, channel, subjectAr, subjectEn, bodyAr, bodyEn, help, btn]);
+      const form = actionForm({
+        submitLabel: t('ops.notifications.create.action'),
+        onSubmit: async (fd, formEl) => {
+          await opsData.upsertTemplate({ event: fd.get('event'), channel: fd.get('channel'), subjectAr: fd.get('subjectAr'), subjectEn: fd.get('subjectEn'), bodyAr: fd.get('bodyAr'), bodyEn: fd.get('bodyEn'), active: true });
+          formEl.reset(); toast({ title: t('ops.notifications.saved'), variant: 'success', duration: 3000 }); await tmpl.run();
+        },
+        children: [event, channel, subjectAr, subjectEn, bodyAr, bodyEn, help],
+      });
       return block(t('ops.notifications.create.title'), form, { id: 'ops-notifications-create' });
     })() : null;
 

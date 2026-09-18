@@ -3,19 +3,17 @@
    set them; the SLA duration for any of this is one of the business decisions Stage 15 leaves unresolved (§21). Stage 15 */
 import { el } from '../../core/dom.js';
 import { t } from '../../core/i18n.js';
-import { icon, toast, setButtonState } from '../../components/ui.js';
+import { icon, toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData, ESCALATION_STATUSES } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, escalationStatusBadge, dateTime, block } from './shell.js';
+import { mountOpsPortal, loadRegion, pageTitle, actionForm, statusFilterSelect, escalationStatusBadge, dateTime, block } from './shell.js';
 
 const SEVERITIES = ['low', 'normal', 'high', 'urgent'];
 
 export function mountOpsEscalations({ root = document } = {}) {
   return mountOpsPortal({ root, id: 'escalations', head: 'page.ops.escalations', paint: async ({ main, can }) => {
     const host = el('div', { dataset: { region: 'escalations' } });
-    const filter = el('select', { class: 'c-field__control c-svp-filter__select', 'aria-label': t('ops.escalations.filterLabel') },
-      [''].concat(ESCALATION_STATUSES).map((s) => el('option', { value: s }, s ? t(`ops.escalation.status.${s}`) : t('ops.escalations.filterAll'))));
-    filter.addEventListener('change', () => region.run());
+    const filter = statusFilterSelect('ops.escalations.filterLabel', ESCALATION_STATUSES, 'ops.escalation.status', () => region.run());
 
     const row = (esc) => {
       const statusSelect = el('select', { class: 'c-field__control c-field__control--sm', 'aria-label': t('ops.escalations.statusLabel'), ...(can('task.manage') ? {} : { disabled: true }) },
@@ -37,13 +35,15 @@ export function mountOpsEscalations({ root = document } = {}) {
       const reason = el('textarea', { name: 'reason', class: 'c-field__control', rows: 2, required: true, 'aria-label': t('ops.escalations.create.reason'), placeholder: t('ops.escalations.create.reason') });
       const severity = el('select', { name: 'severity', class: 'c-field__control', 'aria-label': t('ops.priority.label') }, SEVERITIES.map((s) => el('option', { value: s, ...(s === 'normal' ? { selected: true } : {}) }, t(`ops.priority.${s}`))));
       const team = el('input', { name: 'assignedTeam', class: 'c-field__control', type: 'text', 'aria-label': t('ops.escalations.create.team'), placeholder: t('ops.escalations.create.team') });
-      const btn = el('button', { type: 'submit', class: 'c-btn c-btn--primary c-btn--sm' }, [el('span', { class: 'c-btn__label' }, t('ops.escalations.create.action')), el('span', { class: 'c-btn__spinner', 'aria-hidden': 'true' })]);
-      const form = el('form', { class: 'l-stack l-stack--8', onsubmit: async (e) => {
-        e.preventDefault(); if (!reason.value.trim()) return; setButtonState(btn, 'loading');
-        try { await opsData.createEscalation({ bookingId: bookingId.value || null, reason: reason.value.trim(), severity: severity.value, assignedTeam: team.value || null }); form.reset(); setButtonState(btn, 'success'); await region.run(); }
-        catch { setButtonState(btn, 'error'); }
-        setTimeout(() => setButtonState(btn, 'idle'), 1200);
-      } }, [bookingId, reason, severity, team, btn]);
+      const form = actionForm({
+        submitLabel: t('ops.escalations.create.action'),
+        onSubmit: async (fd, formEl) => {
+          const reasonValue = fd.get('reason')?.trim(); if (!reasonValue) return;
+          await opsData.createEscalation({ bookingId: fd.get('bookingId') || null, reason: reasonValue, severity: fd.get('severity'), assignedTeam: fd.get('assignedTeam') || null });
+          formEl.reset(); await region.run();
+        },
+        children: [bookingId, reason, severity, team],
+      });
       return block(t('ops.escalations.create.title'), form, { id: 'ops-escalations-create' });
     })() : null;
 

@@ -29,7 +29,6 @@ import { session, sessionListeners, initials, setSession } from './session.js';
 import { logo, languageButton, bookNowButton } from './brand.js';
 import { createMenuController, menuPanel, accountPanel } from './menus.js';
 import { mobileDrawer } from './drawer.js';
-export { logo, languageButton, bookNowButton } from './brand.js';
 export { setSession, getSession } from './session.js';
 
 /* ---------------------------------------------------------------------------

@@ -14,7 +14,7 @@
 // (services/service_workflows, suppliers) — those are read, not duplicated,
 // by pendingDecisions()/businessRuleMatrix() below (§30).
 // ============================================================================
-import { q, now } from './db.mjs';
+import { q, now, whereClause } from './db.mjs';
 import { HttpError, str } from './http.mjs';
 import { audit } from './staff.mjs';
 
@@ -30,10 +30,8 @@ const nRule = (r) => ({
 });
 
 export function listBusinessRules({ category = '', status = '' } = {}) {
-  const where = []; const params = [];
-  if (category) { where.push('category = ?'); params.push(category); }
-  if (status) { where.push('status = ?'); params.push(status); }
-  const rows = q.all(`SELECT * FROM business_config ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY category, key`, ...params);
+  const { sql, params } = whereClause([['category = ?', category], ['status = ?', status]]);
+  const rows = q.all(`SELECT * FROM business_config ${sql} ORDER BY category, key`, ...params);
   return { items: rows.map(nRule) };
 }
 export function businessRuleById(id) {

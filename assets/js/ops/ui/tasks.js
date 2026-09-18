@@ -3,17 +3,15 @@
    (§07) — this screen only calls the same task.manage-gated endpoints twice, not a client-side log. Stage 15 */
 import { el } from '../../core/dom.js';
 import { t } from '../../core/i18n.js';
-import { icon, toast, setButtonState } from '../../components/ui.js';
+import { icon, toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData, TASK_STATUSES } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, taskStatusBadge, priorityBadge, dateTime, block } from './shell.js';
+import { mountOpsPortal, loadRegion, pageTitle, actionForm, statusFilterSelect, taskStatusBadge, priorityBadge, dateTime, block } from './shell.js';
 
 export function mountOpsTasks({ root = document } = {}) {
   return mountOpsPortal({ root, id: 'tasks', head: 'page.ops.tasks', paint: async ({ main, can }) => {
     const host = el('div', { dataset: { region: 'tasks' } });
-    const filter = el('select', { class: 'c-field__control c-svp-filter__select', 'aria-label': t('ops.tasks.filterLabel') },
-      [''].concat(TASK_STATUSES).map((s) => el('option', { value: s }, s ? t(`ops.task.status.${s}`) : t('ops.tasks.filterAll'))));
-    filter.addEventListener('change', () => region.run());
+    const filter = statusFilterSelect('ops.tasks.filterLabel', TASK_STATUSES, 'ops.task.status', () => region.run());
 
     const row = (task) => {
       const assignInput = el('input', { class: 'c-field__control c-field__control--sm', type: 'text', dir: 'ltr', value: task.assignedTo ?? '', 'aria-label': t('ops.tasks.assignLabel'), ...(can('task.manage') ? {} : { disabled: true }) });
@@ -39,13 +37,14 @@ export function mountOpsTasks({ root = document } = {}) {
       const bookingId = el('input', { name: 'bookingId', class: 'c-field__control', type: 'text', dir: 'ltr', 'aria-label': t('ops.tasks.create.bookingId'), placeholder: t('ops.tasks.create.bookingId') });
       const priority = el('select', { name: 'priority', class: 'c-field__control', 'aria-label': t('ops.priority.label') }, ['normal', 'low', 'high', 'urgent'].map((p) => el('option', { value: p }, t(`ops.priority.${p}`))));
       const notes = el('textarea', { name: 'notes', class: 'c-field__control', rows: 2, 'aria-label': t('ops.tasks.create.title') });
-      const btn = el('button', { type: 'submit', class: 'c-btn c-btn--primary c-btn--sm' }, [el('span', { class: 'c-btn__label' }, t('ops.tasks.create.action')), el('span', { class: 'c-btn__spinner', 'aria-hidden': 'true' })]);
-      const form = el('form', { class: 'l-stack l-stack--8', onsubmit: async (e) => {
-        e.preventDefault(); setButtonState(btn, 'loading');
-        try { await opsData.createTask({ type: type.value, bookingId: bookingId.value || null, priority: priority.value, notes: notes.value || null }); form.reset(); setButtonState(btn, 'success'); await region.run(); }
-        catch { setButtonState(btn, 'error'); }
-        setTimeout(() => setButtonState(btn, 'idle'), 1200);
-      } }, [type, bookingId, priority, notes, btn]);
+      const form = actionForm({
+        submitLabel: t('ops.tasks.create.action'),
+        onSubmit: async (fd, formEl) => {
+          await opsData.createTask({ type: fd.get('type'), bookingId: fd.get('bookingId') || null, priority: fd.get('priority'), notes: fd.get('notes') || null });
+          formEl.reset(); await region.run();
+        },
+        children: [type, bookingId, priority, notes],
+      });
       return block(t('ops.tasks.create.title'), form, { id: 'ops-tasks-create' });
     })() : null;
 

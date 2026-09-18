@@ -10,7 +10,6 @@
 
 import { el, qs, qsa, render, scrollTo as scrollIntoView, setPageHead } from '../core/dom.js';
 import { t, pick, getLocale } from '../core/i18n.js';
-import { dateShort } from '../core/format.js';
 import { route } from '../data/config.js';
 import {
   OFFER_REGISTRY, OFFER_CATEGORIES, OFFER_STATUSES, DURATION_BUCKETS, OFFER_SORTS, OFFER_GUIDES,

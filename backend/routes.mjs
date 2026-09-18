@@ -4,14 +4,14 @@
 // URL, body or header can name another customer.
 // ============================================================================
 import { config } from './config.mjs';
-import { q, now } from './db.mjs';
-import { json, empty, fail, HttpError, hex, readJson, readBody, parseMultipart, str, isEmail, setSessionCookies, clearSessionCookies } from './http.mjs';
+import { q, now, placeholders } from './db.mjs';
+import { json, empty, fail, HttpError, hex, readJson, readBody, parseMultipart, str, isEmail, pageParams, setSessionCookies, clearSessionCookies } from './http.mjs';
 import { publicCustomer, customerById, createIdentity, verifyPassword, changePassword, createSession, endSession, createReset, consumeReset, validAttribution, normEmail } from './identity.mjs';
 import { assignAttribution } from './supervisor.mjs';
 import { validateUpload, storage, signedUrl, verifySignature } from './storage.mjs';
 import { enqueue } from './mailer.mjs';
 import { legalDocument } from './legal.mjs';
-import { info, warn } from './logger.mjs';
+import { info } from './logger.mjs';
 
 /* ---- row → contract shape ---------------------------------------------- */
 const J = (s, d) => { try { return s ? JSON.parse(s) : d; } catch { return d; } };
@@ -62,7 +62,7 @@ export const me = {
   trip(req, res, ctx, id) {
     const t = q.get('SELECT * FROM trips WHERE id = ? AND customer_id = ?', id, ctx.customer.id); if (!t) return fail(res, 404, 'notFound');
     const bookings = q.all('SELECT * FROM bookings WHERE trip_id = ? AND customer_id = ?', t.id, ctx.customer.id);
-    return json(res, 200, { trip: nTrip(t), bookings: bookings.map(nBooking), documents: q.all('SELECT * FROM documents WHERE trip_id = ? AND customer_id = ?', t.id, ctx.customer.id).map(nDoc), payments: bookings.length ? q.all(`SELECT * FROM payments WHERE customer_id = ? AND booking_id IN (${bookings.map(() => '?').join(',')}) ORDER BY at DESC`, ctx.customer.id, ...bookings.map((b) => b.id)).map(nPay) : [] });
+    return json(res, 200, { trip: nTrip(t), bookings: bookings.map(nBooking), documents: q.all('SELECT * FROM documents WHERE trip_id = ? AND customer_id = ?', t.id, ctx.customer.id).map(nDoc), payments: bookings.length ? q.all(`SELECT * FROM payments WHERE customer_id = ? AND booking_id IN (${placeholders(bookings)}) ORDER BY at DESC`, ctx.customer.id, ...bookings.map((b) => b.id)).map(nPay) : [] });
   },
   bookings(req, res, ctx) { return json(res, 200, { bookings: q.all('SELECT * FROM bookings WHERE customer_id = ? ORDER BY created_at DESC', ctx.customer.id).map(nBooking) }); },
   booking(req, res, ctx, id) {
@@ -104,8 +104,8 @@ export const me = {
     // One batched lookup per related table instead of two queries per document row (was an N+1 on this list screen).
     const bookingIds = [...new Set(docs.map((d) => d.booking_id).filter(Boolean))];
     const tripIds = [...new Set(docs.map((d) => d.trip_id).filter(Boolean))];
-    const bookings = new Map(bookingIds.length ? q.all(`SELECT * FROM bookings WHERE customer_id = ? AND id IN (${bookingIds.map(() => '?').join(',')})`, cid, ...bookingIds).map((b) => [b.id, nBooking(b)]) : []);
-    const trips = new Map(tripIds.length ? q.all(`SELECT * FROM trips WHERE customer_id = ? AND id IN (${tripIds.map(() => '?').join(',')})`, cid, ...tripIds).map((t) => [t.id, nTrip(t)]) : []);
+    const bookings = new Map(bookingIds.length ? q.all(`SELECT * FROM bookings WHERE customer_id = ? AND id IN (${placeholders(bookingIds)})`, cid, ...bookingIds).map((b) => [b.id, nBooking(b)]) : []);
+    const trips = new Map(tripIds.length ? q.all(`SELECT * FROM trips WHERE customer_id = ? AND id IN (${placeholders(tripIds)})`, cid, ...tripIds).map((t) => [t.id, nTrip(t)]) : []);
     return json(res, 200, { documents: docs.map((d) => ({ ...nDoc(d), booking: bookings.get(d.booking_id) ?? null, trip: trips.get(d.trip_id) ?? null })) });
   },
   async documentUpload(req, res, ctx) {
@@ -120,12 +120,12 @@ export const me = {
   documentUrl(req, res, ctx, id, origin) { const d = q.get('SELECT * FROM documents WHERE id = ? AND customer_id = ?', id, ctx.customer.id); if (!d || d.status !== 'available' || d.revoked_at || !d.storage_key) return fail(res, 404, 'notFound'); return json(res, 200, signedUrl(origin, d.id, ctx.urlTtlMs)); },
   documentDelete(req, res, ctx, id) { const d = q.get('SELECT * FROM documents WHERE id = ? AND customer_id = ?', id, ctx.customer.id); if (!d) return fail(res, 404, 'notFound'); if (!d.deletable) return fail(res, 403, 'forbidden'); q.run('DELETE FROM documents WHERE id = ?', d.id); storage.remove(d.storage_key); return empty(res); },
   payments(req, res, ctx, url) {
-    const page = Math.max(1, Number(url.searchParams.get('page')) || 1); const size = Math.min(50, Math.max(1, Number(url.searchParams.get('pageSize')) || 20)); const cid = ctx.customer.id;
+    const { page, pageSize: size } = pageParams(url, { max: 50 }); const cid = ctx.customer.id;
     const total = q.get('SELECT COUNT(*) AS n FROM payments WHERE customer_id = ?', cid).n;
     const rows = q.all('SELECT * FROM payments WHERE customer_id = ? ORDER BY at DESC LIMIT ? OFFSET ?', cid, size, (page - 1) * size);
     // One batched booking lookup for the page instead of one query per row (was an N+1 on this list screen).
     const bookingIds = [...new Set(rows.map((p) => p.booking_id).filter(Boolean))];
-    const bookings = new Map(bookingIds.length ? q.all(`SELECT * FROM bookings WHERE customer_id = ? AND id IN (${bookingIds.map(() => '?').join(',')})`, cid, ...bookingIds).map((b) => [b.id, nBooking(b)]) : []);
+    const bookings = new Map(bookingIds.length ? q.all(`SELECT * FROM bookings WHERE customer_id = ? AND id IN (${placeholders(bookingIds)})`, cid, ...bookingIds).map((b) => [b.id, nBooking(b)]) : []);
     const items = rows.map((p) => ({ ...nPay(p), booking: bookings.get(p.booking_id) ?? null }));
     return json(res, 200, { items, page, pageSize: size, total, nextPage: page * size < total ? page + 1 : null });
   },

@@ -8,16 +8,15 @@
    workflow step list, an audit timeline) in 24-ops-portal.css.
    ========================================================================= */
 import { el, qs, render, setPageHead } from '../../core/dom.js';
-import { t, pick, getLocale } from '../../core/i18n.js';
+import { t, pick } from '../../core/i18n.js';
 import { dateShort } from '../../core/format.js';
 import { route } from '../../data/config.js';
-import { icon } from '../../components/ui.js';
+import { icon, setButtonState } from '../../components/ui.js';
 import { stateBlock, stateRegion, loadingBlock } from '../../components/states.js';
 import { restoreOpsSession, OpsAuthError, hasOpsPermission } from '../auth.js';
 import { opsDataAdapter } from '../data.js';
 
-export const isAr = () => getLocale() === 'ar';
-export const slot = (name, root = document) => qs(`[data-portal="${name}"]`, root);
+const slot = (name, root = document) => qs(`[data-portal="${name}"]`, root);
 export const put = (name, nodes, root = document) => { const s = slot(name, root); if (s) render(s, nodes); return s; };
 export const setHead = (key) => setPageHead({ title: t(key), description: t('page.ops.description') });
 export const here = () => location.pathname + location.search;
@@ -44,7 +43,7 @@ const NAV = [
   { id: 'settings', icon: 'no-settings', href: 'admin/settings/', labelAr: 'الإعدادات', labelEn: 'Settings', divider: true },
   { id: 'sign-out', icon: 'no-logout', href: 'admin/sign-out/', labelAr: 'تسجيل الخروج', labelEn: 'Sign out' },
 ];
-export function opsNav(current, staff = null) {
+function opsNav(current, staff = null) {
   const items = NAV.filter((item) => !item.permission || !staff || hasOpsPermission(staff, item.permission));
   return el('nav', { class: 'c-acct-nav c-svp-nav', 'aria-label': t('ops.nav.label') }, [
     el('ul', { class: 'c-acct-nav__list', role: 'list' }, items.map((item) => el('li', {}, el('a', {
@@ -54,7 +53,7 @@ export function opsNav(current, staff = null) {
   ]);
 }
 
-export function guardState(status, code = null) {
+function guardState(status, code = null) {
   const expired = status === 'expired';
   if (status === 'unavailable') return [
     el('h1', { class: 't-h1' }, t(code === 'notConfigured' ? 'ops.state.notConnected.title' : 'ops.guard.unavailableTitle')),
@@ -69,13 +68,63 @@ export function guardState(status, code = null) {
 }
 
 export const errorText = (code) => t(['unavailable', 'network', 'timeout', 'forbidden', 'notFound', 'rateLimited', 'notConfigured', 'invalid', 'conflict'].includes(code) ? `acct.err.${code === 'conflict' ? 'failed' : code}` : 'acct.err.failed');
-export const errorState = (retry, code = null) => stateBlock({
+const errorState = (retry, code = null) => stateBlock({
   variant: code === 'notConfigured' ? 'warning' : 'error', iconName: code === 'notConfigured' ? 'no-info' : undefined, headingLevel: 2,
   title: t(code === 'notConfigured' ? 'ops.state.notConnected.title' : 'ops.state.error.title'), text: code ? errorText(code) : t('ops.state.error.text'),
   actions: code === 'notConfigured' || code === 'forbidden' ? [] : [{ id: 'retry', label: t('acct.retry'), variant: 'c-btn--primary', onClick: retry }],
 });
-export const notFoundState = (backHref, backLabel) => [el('h1', { class: 't-h1' }, t('ops.state.notFound.title')), stateBlock({ variant: 'empty', headingLevel: 2, title: t('ops.state.notFound.text'), actions: [{ label: backLabel, href: backHref, variant: 'c-btn--primary' }] })];
-export const forbiddenNote = () => el('p', { class: 'c-note c-note--warning', role: 'note' }, [icon('no-shield', { size: 'sm' }), el('span', { class: 'c-note__text' }, t('ops.forbidden.text'))]);
+export const notFoundBlock = (backHref, backLabel) => [el('h1', { class: 't-h1' }, t('ops.state.notFound.title')), stateBlock({ variant: 'empty', headingLevel: 2, title: t('ops.state.notFound.text'), actions: [{ label: backLabel, href: backHref, variant: 'c-btn--primary' }] })];
+const forbiddenNote = () => el('p', { class: 'c-note c-note--warning', role: 'note' }, [icon('no-shield', { size: 'sm' }), el('span', { class: 'c-note__text' }, t('ops.forbidden.text'))]);
+
+/** A submit button with a loading/success/error spinner state, an inline error line, and a FormData-based
+    onSubmit — the create/edit/action form shape every ops screen needs. `conflictMessage` overrides the generic
+    error text for a 409 (e.g. a booking's payment gate); `onSubmit` may reject with `{ displayMessage }` to show
+    a specific inline message (e.g. client-side validation) instead of the generic one; every other error code
+    falls back to `errorText`. */
+export function actionForm({ submitLabel, disabled, onSubmit, children, conflictMessage = null, size = 'c-btn--sm', stackGap = 8 }) {
+  const btn = el('button', { type: 'submit', class: `c-btn c-btn--primary ${size}`.trim(), ...(disabled ? { disabled: true } : {}) }, [el('span', { class: 'c-btn__label' }, submitLabel), el('span', { class: 'c-btn__spinner', 'aria-hidden': 'true' })]);
+  const err = el('p', { class: 'c-field__error', role: 'alert', hidden: true });
+  const form = el('form', { class: `l-stack l-stack--${stackGap}`, onsubmit: async (e) => {
+    e.preventDefault(); err.hidden = true; setButtonState(btn, 'loading');
+    try { await onSubmit(new FormData(form), form); setButtonState(btn, 'success'); }
+    catch (error) {
+      err.hidden = false;
+      const message = error?.displayMessage ?? (error?.code === 'conflict' && conflictMessage ? conflictMessage : errorText(error?.code));
+      err.replaceChildren(icon('no-alert', { size: 'sm' }), el('span', {}, message));
+      setButtonState(btn, 'error');
+    }
+    setTimeout(() => setButtonState(btn, 'idle'), 1200);
+  } }, [...children, err, btn]);
+  return form;
+}
+
+/** Wires a debounced `input` listener onto a search/filter field — the same 300ms-by-default pattern every
+    searchable list screen needs. */
+export function debouncedRun(input, run, ms = 300) {
+  let timer = null;
+  input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(run, ms); });
+}
+
+/** A `<select>` over a status enum plus an "All" option, with i18n keyed `${prefix}.${status}` and change wired to
+    `run` — the status-filter dropdown every list screen builds. `labelKey` sets the field's aria-label. */
+export function statusFilterSelect(labelKey, statuses, prefix, run) {
+  const select = el('select', { class: 'c-field__control c-svp-filter__select', 'aria-label': t(labelKey) },
+    [''].concat(statuses).map((s) => el('option', { value: s }, s ? t(`${prefix}.${s}`) : t('ops.filter.all'))));
+  select.addEventListener('change', run);
+  return select;
+}
+
+/** A muted empty-state line for a sub-list inside a detail block (distinct from `loadRegion`'s own top-level
+    `empty` option). */
+export const emptyNote = (key) => el('p', { class: 't-body-sm t-muted' }, t(key));
+
+/** A standalone action button (not part of a form) that disables itself while `onClick` runs and re-enables only
+    on failure — the row-action idiom (activate/deactivate, approve/reject) list and detail screens reuse. */
+export function busyButton(label, variant, onClick) {
+  const btn = el('button', { type: 'button', class: `c-btn c-btn--${variant} c-btn--sm` }, label);
+  btn.addEventListener('click', async () => { btn.disabled = true; try { await onClick(); } catch { btn.disabled = false; } });
+  return btn;
+}
 
 export async function mountOpsPortal({ root = document, id, head, paint }) {
   setHead(head);

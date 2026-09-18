@@ -8,7 +8,6 @@
 import { el } from '../../core/dom.js';
 import { t, pick } from '../../core/i18n.js';
 import { money, time, duration, dateShort, dayOffset } from '../../core/format.js';
-import { route } from '../../data/config.js';
 import { icon } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { loadJourney, selectOffer, stepUrl, guard } from '../journey.js';

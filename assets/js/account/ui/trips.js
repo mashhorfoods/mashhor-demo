@@ -6,7 +6,7 @@ import { route } from '../../data/config.js';
 import { icon } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { customer, TRIP_ORDER } from '../customer.js';
-import { mountAccount, loadRegion, tripCard, bookingCard, block, rows, pageTitle, notFoundState, statusBadge, payBadge, tripStatusBadge, dateRange, serviceName, serviceIcon, supportEntry, isAr } from './shell.js';
+import { mountAccount, loadRegion, tripCard, block, rows, pageTitle, notFoundState, statusBadge, payBadge, tripStatusBadge, dateRange, serviceName, serviceIcon, supportEntry } from './shell.js';
 
 const FILTERS = ['all', 'upcoming', 'current', 'completed', 'cancelled'];
 const matches = (trip, q) => !q || [trip.titleAr, trip.titleEn, trip.destination?.cityAr, trip.destination?.cityEn, trip.destination?.code, ...trip.bookingIds].join(' ').toLowerCase().includes(q.toLowerCase());

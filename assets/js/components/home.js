@@ -14,7 +14,6 @@
 
 import { el, qs, render, scrollTo as scrollIntoView } from '../core/dom.js';
 import { t, pick, getLocale } from '../core/i18n.js';
-import { dateShort } from '../core/format.js';
 import { route } from '../data/config.js';
 import { liveChannels } from '../data/navigation.js';
 import {

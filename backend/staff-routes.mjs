@@ -7,9 +7,9 @@
 // permissions the backend does not actually enforce" — every permission
 // named below is checked here, not just displayed in a UI).
 // ============================================================================
-import { json, empty, fail, HttpError, readJson, str, isEmail, setStaffSessionCookies, clearStaffSessionCookies } from './http.mjs';
+import { json, empty, fail, readJson, str, isEmail, pageParams, setStaffSessionCookies, clearStaffSessionCookies } from './http.mjs';
 import {
-  publicStaff, staffById, verifyStaffPassword, changeStaffPassword, createStaffSession, endStaffSession,
+  publicStaff, verifyStaffPassword, changeStaffPassword, createStaffSession, endStaffSession,
   createStaffReset, consumeStaffReset, requirePermission, hasPermission,
   opsBookingList, opsBookingDetail, transitionBooking, assignBookingOperator,
   createTask, listTasks, taskById, assignTask, updateTaskStatus, taskPriorityLevels,
@@ -30,8 +30,8 @@ import { enqueue } from './mailer.mjs';
 import { listBusinessRules, businessRuleById, businessRuleHistory, updateBusinessRule, activateBusinessRule, disableBusinessRule, pendingDecisions, businessRuleMatrix } from './business-rules.mjs';
 
 const sessionAnswer = (res, s) => { const sess = createStaffSession(s.id); setStaffSessionCookies(res, sess.id, sess.csrf, sess.maxAge); return { staff: publicStaff(s), expiresAt: sess.expiresAt }; };
-const page = (url) => Math.max(1, Number(url.searchParams.get('page')) || 1);
-const pageSize = (url, d = 20) => Math.min(100, Math.max(1, Number(url.searchParams.get('pageSize')) || d));
+const page = (url) => pageParams(url, { max: 100 }).page;
+const pageSize = (url, d = 20) => pageParams(url, { def: d, max: 100 }).pageSize;
 const actorOf = (ctx) => ({ id: ctx.staff.id, role: ctx.staff.role });
 
 /* ---- /staff/auth --------------------------------------------------------- */

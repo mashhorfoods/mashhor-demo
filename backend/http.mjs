@@ -71,6 +71,11 @@ export function parseMultipart(buf, contentType) {
 export const clientIp = (req) => (config.trustProxy && req.headers['x-forwarded-for'] ? String(req.headers['x-forwarded-for']).split(',')[0].trim() : req.socket.remoteAddress ?? '');
 export const str = (v, max = 200) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 export const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) && v.length <= 254;
+/** `?page`/`?pageSize` parsing, clamped to `max` (staff/admin routes allow up to 100; supervisor/customer up to 50) — one place instead of three near-identical copies. */
+export const pageParams = (url, { def = 20, max = 20 } = {}) => ({
+  page: Math.max(1, Number(url.searchParams.get('page')) || 1),
+  pageSize: Math.min(max, Math.max(1, Number(url.searchParams.get('pageSize')) || def)),
+});
 
 /** Fixed-window rate limiter per key; answers 429 with Retry-After without revealing the policy. */
 const buckets = new Map();
