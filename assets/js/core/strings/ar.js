@@ -796,6 +796,8 @@ export default {
     'bk.confirm.paymentStatus': 'حالة الدفع',
     'bk.confirm.paid': 'مدفوع',
     'bk.confirm.notCharged': 'لم يُحصَّل أي مبلغ',
+    'bk.confirm.paymentPending': 'يتم تأكيد عملية الدفع…',
+    'bk.confirm.paymentFailed': 'لم يتم تأكيد عملية الدفع. تم حفظ حجزك كغير مدفوع — يرجى التواصل مع الدعم أو إعادة المحاولة من حجوزاتي.',
     'bk.confirm.ticket': 'التذكرة',
     'bk.confirm.ticketPending': 'تُصدر بعد تأكيد المزوّد؛ نبلغك عند الإصدار.',
     'bk.confirm.next': 'الخطوات التالية',

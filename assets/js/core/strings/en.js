@@ -796,6 +796,8 @@ export default {
     'bk.confirm.paymentStatus': 'Payment status',
     'bk.confirm.paid': 'Paid',
     'bk.confirm.notCharged': 'Nothing charged',
+    'bk.confirm.paymentPending': 'Confirming your payment…',
+    'bk.confirm.paymentFailed': 'Payment was not confirmed. Your booking is saved as unpaid — contact support or retry from My Bookings.',
     'bk.confirm.ticket': 'Ticket',
     'bk.confirm.ticketPending': 'Issued once the supplier confirms; we notify you when it is.',
     'bk.confirm.next': 'Next steps',

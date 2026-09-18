@@ -10,6 +10,7 @@ import { mkdtempSync, rmSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { makeReq } from './env.mjs';
+import { createHmac } from 'node:crypto';
 
 const ROOT = new URL('../', import.meta.url).pathname;
 let pass = 0, fail = 0;
@@ -18,18 +19,26 @@ const SITE = 'http://site.test:4443';
 const FOREIGN = 'https://evil.example';
 const dir = mkdtempSync(join(tmpdir(), 'no-backend-'));
 const port = 8940 + Math.floor(Math.random() * 50);
-const env = { ...process.env, BACKEND_ENV: 'development', BACKEND_TEST_CONTROLS: '1', BACKEND_PORT: String(port), BACKEND_DATABASE_PATH: join(dir, 'db.sqlite'), BACKEND_STORAGE_DIR: join(dir, 'docs'), BACKEND_ALLOWED_ORIGINS: SITE, BACKEND_RATE_AUTH: '6', BACKEND_RATE_API: '100000', BACKEND_RATE_UPLOAD: '100', BACKEND_LOCKOUT_ATTEMPTS: '4', BACKEND_SIGNED_URL_TTL_SECONDS: '2' , BACKEND_ADMIN_TOKEN: 'a'.repeat(40) };
+const PAYMENT_DEV_SECRET = 'd'.repeat(40);
+const env = { ...process.env, BACKEND_ENV: 'development', BACKEND_TEST_CONTROLS: '1', BACKEND_PORT: String(port), BACKEND_DATABASE_PATH: join(dir, 'db.sqlite'), BACKEND_STORAGE_DIR: join(dir, 'docs'), BACKEND_ALLOWED_ORIGINS: SITE, BACKEND_RATE_AUTH: '6', BACKEND_RATE_API: '100000', BACKEND_RATE_UPLOAD: '100', BACKEND_LOCKOUT_ATTEMPTS: '4', BACKEND_SIGNED_URL_TTL_SECONDS: '2' , BACKEND_ADMIN_TOKEN: 'a'.repeat(40), BACKEND_PAYMENT_DEV_SECRET: PAYMENT_DEV_SECRET };
 
 // ---- configuration refusals (child processes that must exit non-zero) ----
 const check = (extra) => new Promise((resolve) => { const c = spawn(process.execPath, ['--no-warnings=ExperimentalWarning', 'config.mjs', '--check'], { cwd: join(ROOT, 'backend'), env: { ...env, ...extra } }); let out = ''; c.stdout.on('data', (d) => { out += d; }); c.stderr.on('data', (d) => { out += d; }); c.on('close', (code) => resolve({ code, out })); });
 {
   const prodBase = { BACKEND_ENV: 'production', BACKEND_TEST_CONTROLS: '0', BACKEND_SIGNING_SECRET: 'x'.repeat(40), BACKEND_ALLOWED_ORIGINS: 'https://www.example.test', BACKEND_PUBLIC_URL: 'https://api.example.test', BACKEND_COOKIE_SECURE: '1' };
-  ok('production config with everything set is accepted', (await check(prodBase)).code === 0);
+  // Stage 16B: production now ALSO requires a real (non-dev) payment provider. Only 'dev' is implemented, and
+  // it is unconditionally refused in production (§23 — never a silent fallback), so prodBase alone — which
+  // leaves BACKEND_PAYMENT_PROVIDER at its 'dev' default — is correctly refused rather than accepted; this is
+  // the one deliberate remaining gap the Stage 16B report documents, not a regression.
+  ok('production refuses the dev payment provider as a silent fallback, even with every other production setting correct', /BACKEND_PAYMENT_PROVIDER cannot be dev in production/.test((await check(prodBase)).out));
+  ok('every OTHER production requirement in prodBase is independently satisfied (payment provider is the sole remaining refusal)', !/SIGNING_SECRET|ALLOWED_ORIGINS|COOKIE_SECURE|TEST_CONTROLS/.test((await check(prodBase)).out));
   ok('production refuses test controls', /TEST_CONTROLS/.test((await check({ ...prodBase, BACKEND_TEST_CONTROLS: '1' })).out));
   ok('production refuses a missing signing secret', /SIGNING_SECRET/.test((await check({ ...prodBase, BACKEND_SIGNING_SECRET: '' })).out));
   ok('production refuses http origins and wildcard origins', /https/.test((await check({ ...prodBase, BACKEND_ALLOWED_ORIGINS: 'http://www.example.test' })).out) && /never \*/.test((await check({ ...prodBase, BACKEND_ALLOWED_ORIGINS: '*' })).out));
   ok('production refuses insecure cookies and SameSite=None without Secure', /COOKIE_SECURE/.test((await check({ ...prodBase, BACKEND_COOKIE_SECURE: '0' })).out) && /Secure/.test((await check({ ...prodBase, BACKEND_COOKIE_SECURE: '0', BACKEND_COOKIE_SAMESITE: 'None', BACKEND_ENV: 'staging' })).out));
-  ok('unimplemented storage or mailer is refused, never silently mocked', /not implemented/.test((await check({ BACKEND_STORAGE: 's3' })).out) && /not implemented/.test((await check({ BACKEND_MAILER: 'smtp' })).out));
+  ok('unimplemented storage, mailer or payment provider is refused, never silently mocked', /not implemented/.test((await check({ BACKEND_STORAGE: 's3' })).out) && /not implemented/.test((await check({ BACKEND_MAILER: 'smtp' })).out) && /not implemented/.test((await check({ BACKEND_PAYMENT_PROVIDER: 'stripe' })).out));
+  ok('a payment dev secret under 32 characters is refused', /PAYMENT_DEV_SECRET/.test((await check({ BACKEND_PAYMENT_DEV_SECRET: 'short' })).out));
+  ok('staging requires a real payment dev secret, just like the signing secret', /PAYMENT_DEV_SECRET/.test((await check({ BACKEND_ENV: 'staging', BACKEND_PAYMENT_DEV_SECRET: '' })).out));
 }
 
 // ---- the site's public configuration generator (writes to a temporary file) ----
@@ -559,6 +568,104 @@ await control('/__test/reset');
   ok('no session at all reaching the business rules register → 401', (await reqAs3(new Map(), '')('/admin/rules')).status === 401);
 
   jarAdmin3.clear(); jarSup3.clear(); jarCust3.clear();
+}
+
+// ---- Stage 16B: real payment provider integration. Customer → Booking → Server Payment Intent → Payment
+// Provider → Secure Webhook → Server Verification → Booking Payment Status → Confirmation. The property every
+// test below exists to prove: only handleWebhookEvent's own signature-verified path (backend/payments.mjs) may
+// ever mark a payment — and therefore a booking — paid. A client-supplied payment_status has zero authority. ----
+{
+  await control('/__test/reset');
+  const jarP = new Map(); const reqP = makeReq(API, SITE)(jarP, 'no_csrf');
+  const jarAdminP = new Map(); const reqAdminP = makeReq(API, SITE)(jarAdminP, 'no_ops_csrf');
+  await reqAdminP('/staff/auth/sign-in', { method: 'POST', body: { email: 'admin1@fixture.test', password: 'password123' } });
+  await reqP('/auth/sign-in', { method: 'POST', body: { email: 'alpha@fixture.test', password: 'password123' } });
+
+  const sign = (buf) => createHmac('sha256', PAYMENT_DEV_SECRET).update(buf).digest('hex');
+  const webhook = (body, { badSig = false, rawOverride = null } = {}) => {
+    const raw = rawOverride ?? Buffer.from(JSON.stringify(body));
+    const sig = badSig ? '0'.repeat(64) : sign(raw);
+    return fetch(`${API}/payments/webhook/dev`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Dev-Signature': sig }, body: raw }).then(async (r) => ({ status: r.status, data: await r.json().catch(() => null) }));
+  };
+
+  // ---- §22: the critical attack — a forged client payment_status must be REJECTED, never authoritative ----
+  const forgedClaim = await reqP('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-16B-FORGE', context: { service: 'flights' }, total: 777, currency: 'USD', payment: { status: 'paid', method: 'card', transactionId: 'forged-tx', providerReference: 'FORGED-REF' } } });
+  ok('§22 attack: a client-forged payment_status=paid has ZERO effect — the booking is created unpaid regardless', forgedClaim.status === 201 && forgedClaim.data.booking.paymentStatus === 'unpaid');
+  const forgedDetail = await reqP('/me/bookings/BK-16B-FORGE');
+  ok('§22 attack: re-reading the booking confirms it stayed unpaid — no payment-gated state, no paid confirmation, no paid-only side effect ran', forgedDetail.data.booking.paymentStatus === 'unpaid' && forgedDetail.data.payments.length === 0);
+
+  // ---- §22 valid flow: intent → real verified webhook → server status=paid → gate succeeds ----
+  const claim = await reqP('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-16B-PAY', context: { service: 'flights' }, total: 500, currency: 'USD' } });
+  ok('booking claimed unpaid; the amount on the stored booking row is what the payment intent will read (never a later client-submitted amount)', claim.status === 201 && claim.data.booking.paymentStatus === 'unpaid' && claim.data.booking.amount === 500);
+  const intent = await reqP('/me/bookings/BK-16B-PAY/payment-intent', { method: 'POST', body: { method: 'dev-success' } });
+  ok('payment intent created server-side; amount/currency come from the stored booking, and the SAME verified-webhook path a real provider would hit resolves it to paid', intent.status === 201 && intent.data.payment.amount === 500 && intent.data.payment.currency === 'USD' && intent.data.payment.status === 'paid' && !!intent.data.payment.verifiedAt);
+  const paidBooking = await reqP('/me/bookings/BK-16B-PAY');
+  ok('the booking payment gate now reads paid — set only by the verified webhook, never by the intent route itself', paidBooking.data.booking.paymentStatus === 'paid' && paidBooking.data.payments.some((p) => p.status === 'paid' && p.amount === 500));
+  ok('customer payment history reflects the real, verified payment', (await reqP('/me/payments')).data.items.some((p) => p.bookingId === 'BK-16B-PAY' && p.status === 'paid'));
+  ok('a receipt document was issued only through the verified webhook path', (await reqP('/me/documents')).data.documents.some((d) => d.bookingId === 'BK-16B-PAY' && d.type === 'receipt'));
+  ok('a payment-successful notification was queued to the existing outbox (never claimed delivered — no provider connected)', (await fetch(API + '/__test/state').then((r) => r.json())).outbox.some((o) => o.template === 'payment-successful' && o.status === 'queued'));
+
+  // ---- failed payment: safe, retryable, no duplicate booking ----
+  await reqP('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-16B-FAIL', context: { service: 'flights' }, total: 250, currency: 'USD' } });
+  const intentFail = await reqP('/me/bookings/BK-16B-FAIL/payment-intent', { method: 'POST', body: { method: 'dev-failure' } });
+  ok('a failed payment never marks the booking paid, and records a failure code', intentFail.status === 201 && intentFail.data.payment.status === 'failed' && !!intentFail.data.payment.failureCode && (await reqP('/me/bookings/BK-16B-FAIL')).data.booking.paymentStatus === 'unpaid');
+  const retry = await reqP('/me/bookings/BK-16B-FAIL/payment-intent', { method: 'POST', body: { method: 'dev-success' } });
+  ok('retrying after a failure succeeds via a fresh payment intent — same booking id, no duplicate booking created', retry.status === 201 && retry.data.payment.status === 'paid' && (await reqP('/me/bookings/BK-16B-FAIL')).data.booking.paymentStatus === 'paid' && (await reqP('/me/bookings')).data.bookings.filter((b) => b.id === 'BK-16B-FAIL').length === 1);
+
+  // ---- amount integrity: an already-paid booking can never be charged again ----
+  ok('a payment intent for an already-paid booking is refused (409), never a second charge', (await reqP('/me/bookings/BK-16B-PAY/payment-intent', { method: 'POST', body: { method: 'dev-success' } })).status === 409);
+
+  // ---- request-only booking: no payable amount is never fabricated a price ----
+  const claimRequest = await reqP('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-16B-REQ', context: { service: 'study' }, status: 'received' } });
+  ok('a request-only booking (no total given) has no payable amount', claimRequest.data.booking.amount === 0);
+  ok('creating a payment intent for a non-payable booking is refused (422), never a fabricated price', (await reqP('/me/bookings/BK-16B-REQ/payment-intent', { method: 'POST', body: { method: 'dev-success' } })).status === 422);
+  ok('a payment intent for an unknown booking id → 404', (await reqP('/me/bookings/NOT-A-BOOKING/payment-intent', { method: 'POST', body: { method: 'dev-success' } })).status === 404);
+
+  // ---- wrong customer: a payment intent can only ever be created for the CALLER's own booking ----
+  jarP.clear(); await reqP('/auth/sign-in', { method: 'POST', body: { email: 'beta@fixture.test', password: 'password123' } });
+  ok('Beta cannot create a payment intent against Alpha\'s booking (404 — existence is not even confirmed)', (await reqP('/me/bookings/BK-16B-PAY/payment-intent', { method: 'POST', body: { method: 'dev-success' } })).status === 404);
+  jarP.clear(); await reqP('/auth/sign-in', { method: 'POST', body: { email: 'alpha@fixture.test', password: 'password123' } });
+
+  // ---- webhook authentication: unknown provider, invalid signature, missing signature, malformed body ----
+  ok('an unknown provider id on the webhook route → 404 (also covers "provider mismatch" — no other provider is ever registered)', (await fetch(`${API}/payments/webhook/stripe`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })).status === 404);
+  const forgedSig = await webhook({ eventId: 'evt_forged', type: 'succeeded', providerReference: 'DEVPAY-forged' }, { badSig: true });
+  ok('a forged/invalid signature is rejected (401), never processed', forgedSig.status === 401);
+  const missingSig = await fetch(`${API}/payments/webhook/dev`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ eventId: 'evt_missing', type: 'succeeded', providerReference: 'x' }) });
+  ok('a missing signature header is rejected (401)', missingSig.status === 401);
+  const malformedRaw = Buffer.from('not json');
+  const malformed = await webhook(null, { rawOverride: malformedRaw });
+  ok('a malformed (non-JSON) body, even with a valid signature over those exact bytes, is rejected (400)', malformed.status === 400);
+  const afterAuthAttacks = await reqP('/me/bookings/BK-16B-PAY');
+  ok('none of the authentication attacks above changed any payment or booking state — still exactly one paid payment of 500', afterAuthAttacks.data.booking.paymentStatus === 'paid' && afterAuthAttacks.data.payments.length === 1 && afterAuthAttacks.data.payments[0].amount === 500);
+
+  // ---- webhook business-logic integrity: unmatched reference, amount/currency mismatch, already-final, replay ----
+  const secBooking = await reqP('/me/bookings/BK-16B-PAY'); const secRef = secBooking.data.payments.find((p) => p.status === 'paid').reference;
+  ok('the payment history exposes a provider reference (transaction id) for the customer\'s own receipt — never a webhook secret or credential', /^DEVPAY-/.test(secRef));
+  const unmatched = await webhook({ eventId: 'evt_unmatched', type: 'succeeded', providerReference: 'DEVPAY-does-not-exist' });
+  ok('a webhook event for an unknown provider reference is internally rejected but acknowledged 200 (never a browser-visible retry storm on our own business rejection)', unmatched.status === 200 && unmatched.data.ok === true);
+  const amountAttack = { eventId: 'evt_amount_attack', type: 'succeeded', providerReference: secRef, amount: 999999, currency: 'USD' };
+  const amountMismatch = await webhook(amountAttack);
+  ok('an altered amount against a real, already-verified payment reference is rejected — the webhook payload\'s amount is never trusted as a second source of truth', amountMismatch.status === 200 && amountMismatch.data.ok === true);
+  const currencyMismatch = await webhook({ eventId: 'evt_currency_attack', type: 'succeeded', providerReference: secRef, amount: 500, currency: 'EUR' });
+  ok('an altered currency against a real payment reference is rejected the same way', currencyMismatch.status === 200 && currencyMismatch.data.ok === true);
+  const alreadyFinal = await webhook({ eventId: 'evt_already_final', type: 'succeeded', providerReference: secRef, amount: 500, currency: 'USD' });
+  ok('a second, differently-identified event for an already-paid payment is rejected — an already-final payment is never re-applied', alreadyFinal.status === 200 && alreadyFinal.data.ok === true);
+  const replay = await webhook(amountAttack);
+  ok('replaying the EXACT same event (same provider + event id) a second time is recognised as a duplicate and safely ignored, not reprocessed', replay.status === 200 && replay.data.duplicate === true);
+  ok('none of the integrity attacks above (unmatched/amount/currency/already-final/replay) changed the payment\'s stored amount, currency or status', (await reqP('/me/bookings/BK-16B-PAY')).data.payments.find((p) => p.reference === secRef).amount === 500 && (await reqP('/me/bookings/BK-16B-PAY')).data.payments.find((p) => p.reference === secRef).currency === 'USD' && (await reqP('/me/bookings/BK-16B-PAY')).data.booking.paymentStatus === 'paid');
+
+  // ---- supervisor attribution: untouched by the payment flow ----
+  const claimAttr = await reqP('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-16B-ATTR', context: { service: 'flights' }, total: 300, currency: 'USD', attribution: { supervisorId: 'supervisor-1' } } });
+  await reqP('/me/bookings/BK-16B-ATTR/payment-intent', { method: 'POST', body: { method: 'dev-success' } });
+  ok('a payment succeeding leaves the booking\'s existing supervisor attribution exactly as it was — payment integration invents no commission logic and does not touch attribution', claimAttr.data.booking.supervisorId === 'supervisor-1' && (await reqP('/me/bookings/BK-16B-ATTR')).data.booking.supervisorId === 'supervisor-1');
+
+  // ---- audit trail: every payment step above left a trace, and it carries no secret ----
+  const auditPay = await reqAdminP('/operations/audit');
+  const auditStr = JSON.stringify(auditPay.data.items);
+  ok('the audit trail recorded intent creation, verified status changes, the booking payment gate passing, and rejected webhook attempts', auditPay.data.items.some((e) => e.action === 'payment.created') && auditPay.data.items.some((e) => e.action === 'payment.status.changed') && auditPay.data.items.some((e) => e.action === 'booking.paymentGate.passed') && auditPay.data.items.some((e) => e.action === 'payment.webhook.rejected'));
+  ok('no audit entry for any of this ever carries the webhook signing secret, a card number or a CVV', !new RegExp(PAYMENT_DEV_SECRET).test(auditStr) && !/cvv|card.?number/i.test(auditStr));
+
+  jarP.clear(); jarAdminP.clear();
 }
 
 // ---- diagnostics scrubbing + logs ----

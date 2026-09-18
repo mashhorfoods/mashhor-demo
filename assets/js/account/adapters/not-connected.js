@@ -13,7 +13,7 @@ import { ApiError } from '../../core/api.js';
 const authFail = async () => { throw new AuthError('notConfigured'); };
 const dataFail = async () => { throw new ApiError('notConfigured'); };
 const AUTH_METHODS = ['verify', 'signIn', 'signUp', 'requestReset', 'resetPassword', 'changePassword', 'updateAccount', 'refresh'];
-const DATA_METHODS = ['profile', 'updateProfile', 'trips', 'trip', 'bookings', 'booking', 'documents', 'uploadDocument', 'documentUrl', 'deleteDocument', 'payments', 'notifications', 'markRead', 'travellers', 'saveTraveller', 'deleteTraveller', 'claimBooking', 'recordAcceptance'];
+const DATA_METHODS = ['profile', 'updateProfile', 'trips', 'trip', 'bookings', 'booking', 'documents', 'uploadDocument', 'documentUrl', 'deleteDocument', 'payments', 'notifications', 'markRead', 'travellers', 'saveTraveller', 'deleteTraveller', 'claimBooking', 'createPaymentIntent', 'recordAcceptance'];
 
 export const NOT_CONNECTED_AUTH = registerAuthProvider({ id: 'not-connected', dev: false, provider: 'none', configSource: 'AUTH_PROVIDER / API_BASE_URL', signOut: async () => {}, ...Object.fromEntries(AUTH_METHODS.map((m) => [m, authFail])) });
 export const NOT_CONNECTED_CUSTOMER = registerCustomerAdapter({ id: 'not-connected', dev: false, provider: 'none', configSource: 'API_BASE_URL', capabilities: [], ...Object.fromEntries(DATA_METHODS.map((m) => [m, dataFail])) });

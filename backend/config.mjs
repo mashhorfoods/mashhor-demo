@@ -42,6 +42,16 @@ const storageDir = resolve(env.BACKEND_STORAGE_DIR ?? './data/documents');
 const mailer = env.BACKEND_MAILER ?? 'none';
 if (!['none'].includes(mailer)) problems.push(`BACKEND_MAILER=${mailer} is not implemented (none only: deliveries are recorded, never claimed sent)`);
 
+// Stage 16B — payment provider. Implemented: dev (charges nothing, clearly labelled to the customer). A real
+// provider is a new backend/payments.mjs adapter (createIntent/verifySignature/normalizeEvent), not a config
+// value this list accepts yet — production must never silently fall back to the dev stand-in.
+const paymentProvider = env.BACKEND_PAYMENT_PROVIDER ?? 'dev';
+if (!['dev'].includes(paymentProvider)) problems.push(`BACKEND_PAYMENT_PROVIDER=${paymentProvider} is not implemented (dev only)`);
+if (production && paymentProvider === 'dev') problems.push('BACKEND_PAYMENT_PROVIDER cannot be dev in production — no real payment provider is connected yet (see docs/STAGE-16B-PAYMENT-INTEGRATION.md)');
+let paymentDevSecret = env.BACKEND_PAYMENT_DEV_SECRET ?? '';
+if (!paymentDevSecret) { if (environment === 'staging') problems.push('BACKEND_PAYMENT_DEV_SECRET is required in staging (32+ random characters)'); else paymentDevSecret = randomBytes(32).toString('hex'); }
+else if (paymentDevSecret.length < 32) problems.push('BACKEND_PAYMENT_DEV_SECRET must be at least 32 characters');
+
 // Stage 13 — the ONE entry point reserved for the future Admin Dashboard (reassigning a customer's attribution, §27,
 // §40). Disabled unless set; when set, it must be a real secret (32+ chars), whatever the environment, because it is
 // a bearer credential over an admin-only action, not a public toggle.
@@ -62,6 +72,7 @@ export const config = Object.freeze({
   upload: { maxBytes: num(env.BACKEND_UPLOAD_MAX_BYTES, 5 * 1024 * 1024), types: list(env.BACKEND_UPLOAD_TYPES ?? 'application/pdf,image/jpeg,image/png') },
   signedUrlTtlMs: num(env.BACKEND_SIGNED_URL_TTL_SECONDS, 300) * 1000,
   mailer, legalDir: resolve(env.BACKEND_LEGAL_DIR ?? './legal'),
+  paymentProvider, paymentDevSecret,
   supervisors: list(env.BACKEND_SUPERVISORS ?? 'supervisor-1,supervisor-2,supervisor-3,supervisor-4,supervisor-5'),
   adminToken: adminToken || null,
   trustProxy: bool(env.BACKEND_TRUST_PROXY, false),

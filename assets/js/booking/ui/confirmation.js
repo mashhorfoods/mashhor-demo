@@ -32,6 +32,11 @@ export function mountConfirmation({ root = document } = {}) {
   const row = (k, v) => (v ? el('div', { class: 'c-rules__row' }, [el('dt', {}, t(k)), el('dd', {}, v)]) : null);
   const titleKey = request ? 'bk.confirm.requestTitle' : b.status === 'confirmed' ? 'bk.confirm.title' : 'bk.confirm.processingTitle';
   const accountHost = el('div', { dataset: { account: 'claim' } });
+  // Stage 16B: never rendered as "paid" from local journey state — only a server-verified payment can say that.
+  // Starts as "confirming" for any payable booking and is updated once claim() + the real payment intent resolve.
+  const payable = !request && !!b.total;
+  const paymentDd = el('dd', { dataset: { paymentStatus: 'pending' } }, payable ? t('bk.confirm.paymentPending') : t('bk.confirm.notCharged'));
+  const paymentRow = el('div', { class: 'c-rules__row' }, [el('dt', {}, t('bk.confirm.paymentStatus')), paymentDd]);
   const viewTrip = el('a', { class: 'c-btn c-btn--primary', href: b.tripId ? route(`trips/?id=${encodeURIComponent(b.tripId)}`) : route('trips/'), dataset: { action: 'view-trip' } }, t('bk.confirm.viewTrip'));
   put('main', el('div', { class: 'c-confirm' }, [
     el('div', { class: 'c-confirm__head' }, [
@@ -45,7 +50,7 @@ export function mountConfirmation({ root = document } = {}) {
       row('bk.confirm.service', t(`search.${ctx.service}`)),
       row('bk.confirm.trip', offer ? `${carrierName(offer.carrier)} · ${offer.legs.map((l) => `${dateShort(l.departAt)} ${legSummary(l)}`).join(' / ')}` : [ctx.origin, ctx.destination].filter(Boolean).join(' → ')),
       row('bk.confirm.date', dateShort(b.at)),
-      row('bk.confirm.paymentStatus', request || !b.total ? t('bk.confirm.notCharged') : `${t('bk.confirm.paid')} · ${money(b.total, b.currency)}`),
+      paymentRow,
       offer ? row('bk.confirm.ticket', b.ticketed ? t('status.confirmed') : t('bk.confirm.ticketPending')) : null,
       supRec ? row('bk.summary.supervisor', pick(supRec, 'name') || t('sup.name.fallback')) : null,
     ])),
@@ -76,6 +81,15 @@ export function mountConfirmation({ root = document } = {}) {
       const rec = b.claimed ? await customer.booking(b.reference) : await customer.claimBooking(j);
       if (rec) { update({ booking: { ...loadJourney().booking, claimed: true, tripId: rec.tripId } }); viewTrip.href = route(`trips/?id=${encodeURIComponent(rec.tripId)}`); viewTrip.removeAttribute('title');
         accountHost.replaceChildren(el('p', { class: 'c-note', role: 'status', dataset: { claimed: rec.tripId } }, [icon('no-check-circle', { size: 'sm' }), el('span', { class: 'c-note__text' }, [t('acct.claim.done'), ' ', el('a', { href: viewTrip.href }, t('acct.claim.view'))])])); }
+      // Stage 16B: the payment row only ever reflects what the backend verified — never local journey state.
+      if (rec && payable && rec.paymentStatus !== 'paid') {
+        try {
+          const intent = await customer.createPaymentIntent(rec.id, j.payment?.method);
+          const status = intent?.payment?.status ?? 'pending';
+          paymentDd.dataset.paymentStatus = status;
+          paymentDd.textContent = status === 'paid' ? `${t('bk.confirm.paid')} · ${money(intent.payment.amount ?? rec.amount, intent.payment.currency ?? rec.currency)}` : status === 'failed' ? t('bk.confirm.paymentFailed') : t('bk.confirm.paymentPending');
+        } catch (error) { console.warn('[no] payment intent could not be verified', error); paymentDd.dataset.paymentStatus = 'failed'; paymentDd.textContent = t('bk.confirm.paymentFailed'); }
+      }
       return rec;
     } catch (error) { console.warn('[no] booking could not be attached to the account', error); return null; }
   };

@@ -11,7 +11,8 @@ import { assignAttribution } from './supervisor.mjs';
 import { validateUpload, storage, signedUrl, verifySignature } from './storage.mjs';
 import { enqueue } from './mailer.mjs';
 import { legalDocument } from './legal.mjs';
-import { info } from './logger.mjs';
+import { info, warn } from './logger.mjs';
+import { createPaymentIntent, handleWebhookEvent, simulateDevWebhook } from './payments.mjs';
 
 /* ---- row → contract shape ---------------------------------------------- */
 const J = (s, d) => { try { return s ? JSON.parse(s) : d; } catch { return d; } };
@@ -79,20 +80,36 @@ export const me = {
     const ctxB = b.context ?? {}; const offer = b.offer ?? null; const dest = offer?.legs?.[0]?.to ?? null; const t = now();
     const attribution = validAttribution({ supervisorId: b.attribution?.supervisor ?? b.attribution?.supervisorId, source: 'booking' });
     const tripId = `trip_${hex(6)}`; const travellers = (ctxB.travellers?.adults ?? 1) + (ctxB.travellers?.children ?? 0) + (ctxB.travellers?.infants ?? 0);
-    const paid = b.payment?.status === 'paid';
+    // Stage 16B: payment status is NEVER read from the client here — a booking is always claimed 'unpaid'.
+    // Only backend/payments.mjs's verified-webhook path (POST /payments/webhook/:provider) may ever mark a
+    // booking paid, after a real payment intent (POST /me/bookings/:id/payment-intent) and a signature-verified
+    // provider event. `b.payment` from the request body has zero authority over booking.payment_status.
     const booking = q.tx(() => {
       q.run('INSERT INTO trips (id, customer_id, title_ar, title_en, destination_json, start_date, end_date, services_json, status, travellers, supervisor_id, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
         tripId, cid, str(dest?.cityAr ?? ctxB.destination ?? 'رحلة', 80), str(dest?.cityEn ?? ctxB.destination ?? 'Trip', 80), JSON.stringify(dest ? { code: str(dest.code, 4), cityAr: str(dest.cityAr, 80), cityEn: str(dest.cityEn, 80), countryAr: str(dest.countryAr ?? '', 80), countryEn: str(dest.countryEn ?? '', 80) } : { code: '', cityAr: '', cityEn: '', countryAr: '', countryEn: '' }),
         str(offer?.legs?.[0]?.departAt?.slice(0, 10) ?? ctxB.dates?.depart ?? ctxB.dates?.checkin ?? '', 10) || null, str(offer?.legs?.at?.(-1)?.arriveAt?.slice(0, 10) ?? ctxB.dates?.return ?? ctxB.dates?.checkout ?? '', 10) || null, JSON.stringify([str(ctxB.service ?? 'flights', 20)]), 'upcoming', travellers, attribution?.supervisorId ?? null, t);
       const detail = offer ? { route: (offer.legs ?? []).map((l) => `${str(l.from?.code, 4)} → ${str(l.to?.code, 4)}`).join(' · '), dates: (offer.legs ?? []).map((l) => str(l.departAt?.slice(0, 10), 10)), carrierAr: str(offer.carrier?.nameAr, 80), carrierEn: str(offer.carrier?.nameEn, 80), flights: (offer.legs ?? []).map((l) => (l.segments ?? []).map((s) => str(s.flightNumber, 10)).join(', ')).join(' / '), travellers } : { travellers };
-      q.run('INSERT INTO bookings (id, customer_id, trip_id, service, status, payment_status, amount, currency, supervisor_id, ticketed, detail_json, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', ref, cid, tripId, str(ctxB.service ?? 'flights', 20), b.status === 'received' ? 'pending' : 'confirmed', paid ? 'paid' : 'unpaid', Number(b.total) || 0, str(b.currency ?? 'USD', 3) || 'USD', attribution?.supervisorId ?? null, 0, JSON.stringify(detail), t);
-      if (paid) { q.run('INSERT INTO payments (id, customer_id, booking_id, at, amount, currency, status, reference, method_ar, method_en) VALUES (?,?,?,?,?,?,?,?,?,?)', `pay_${hex(6)}`, cid, ref, t, Number(b.total) || 0, str(b.currency ?? 'USD', 3) || 'USD', 'paid', str(b.payment?.transactionId ?? '', 60), 'مزوّد دفع تجريبي', 'Development payment provider'); q.run('INSERT INTO documents (id, customer_id, booking_id, trip_id, type, kind, status, size, content_type, deletable, issued_at, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', `doc_${hex(6)}`, cid, ref, tripId, 'receipt', 'issued', 'pending', null, null, 0, null, t); }
+      q.run('INSERT INTO bookings (id, customer_id, trip_id, service, status, payment_status, amount, currency, supervisor_id, ticketed, detail_json, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', ref, cid, tripId, str(ctxB.service ?? 'flights', 20), b.status === 'received' ? 'pending' : 'confirmed', 'unpaid', Number(b.total) || 0, str(b.currency ?? 'USD', 3) || 'USD', attribution?.supervisorId ?? null, 0, JSON.stringify(detail), t);
       q.run('INSERT INTO notifications (id, customer_id, kind, at, read, title_ar, title_en, text_ar, text_en, href, booking_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)', `ntf_${hex(6)}`, cid, 'booking', t, 0, b.status === 'received' ? 'استلمنا طلبك' : 'تم تأكيد حجزك', b.status === 'received' ? 'Request received' : 'Booking confirmed', `المرجع ${ref}.`, `Reference ${ref}.`, `account/bookings/?id=${ref}`, ref);
       if (attribution) assignAttribution(cid, attribution.supervisorId, 'booking', 'customer', t);
       return q.get('SELECT * FROM bookings WHERE id = ?', ref);
     });
     info('booking.claimed', { service: booking.service, attributed: !!attribution });
     return json(res, 201, { booking: nBooking(booking) });
+  },
+  /* ---- Stage 16B: Customer → Booking → Server Payment Intent (§5). The booking (already claimed, always
+     'unpaid') is loaded by id + this session's customer id; amount/currency come from that row alone. Nothing
+     this route returns marks the booking paid — only a verified webhook event can (backend/payments.mjs). ---- */
+  async paymentIntent(req, res, ctx, id) {
+    const b = await readJson(req); const method = str(b.method, 40);
+    const { payment, client } = createPaymentIntent({ bookingId: id, customerId: ctx.customer.id, method, idempotencyKey: str(b.idempotencyKey, 80) || null }, config.paymentProvider);
+    // DEV PROVIDER ONLY: stands in for the customer completing the provider's own hosted payment page and that
+    // provider's server calling our real webhook a moment later — see simulateDevWebhook's own comment. A real
+    // provider never reaches this branch; its webhook arrives from its own infrastructure, on its own schedule,
+    // over the real /payments/webhook/:provider route, and the payment record below is what that call updates.
+    if (config.paymentProvider === 'dev' && payment.status === 'pending') simulateDevWebhook(payment.id, method);
+    const fresh = q.get('SELECT * FROM payments WHERE id = ?', payment.id);   // re-read: reflects the webhook's own update, never a value this route computes itself
+    return json(res, 201, { payment: { ...payment, status: fresh.status, verifiedAt: fresh.verified_at ?? null, failureCode: fresh.failure_code ?? null }, client });
   },
   travellers(req, res, ctx) { return json(res, 200, { travellers: q.all('SELECT * FROM travellers WHERE customer_id = ? ORDER BY created_at', ctx.customer.id).map(nTrv) }); },
   async travellerCreate(req, res, ctx) { const b = await readJson(req); const id = `trv_${hex(6)}`; const t = now(); q.run('INSERT INTO travellers (id, customer_id, first_name, last_name, dob, gender, nationality, passport, passport_expiry, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)', id, ctx.customer.id, str(b.firstName, 40), str(b.lastName, 40), str(b.dob, 10), str(b.gender, 1), str(b.nationality, 2), str(b.passport, 20), str(b.passportExpiry, 10), t, t); return json(res, 201, { traveller: nTrv(q.get('SELECT * FROM travellers WHERE id = ?', id)) }); },
@@ -153,4 +170,12 @@ export async function diagnostics(req, res) {
   const buf = await readBody(req, 8 * 1024); let e = null; try { e = JSON.parse(buf.toString()); } catch { /* ignored */ }
   if (e && typeof e.event === 'string') { const safe = {}; for (const [k, v] of Object.entries(e)) if (!/pass|token|secret|cookie|card|email|phone|name|passport/i.test(k) && (typeof v === 'string' ? v.length <= 120 : typeof v === 'number' || typeof v === 'boolean')) safe[k] = v; q.run('INSERT INTO diagnostics (at, event, payload_json) VALUES (?,?,?)', now(), e.event.slice(0, 60), JSON.stringify(safe)); q.run('DELETE FROM diagnostics WHERE id < (SELECT MAX(id) FROM diagnostics) - 5000'); }
   return empty(res);
+}
+/* ---- Stage 16B: Secure Webhook → Server Verification (§8). Public — no customer/staff session exists for a
+   provider's own server calling us — authenticated entirely by the provider's signature over the RAW body.
+   The single code path that may ever mark a payment (and its booking) paid; see backend/payments.mjs. ---- */
+export async function paymentsWebhook(req, res, providerId) {
+  const rawBody = await readBody(req, 64 * 1024);
+  try { const result = await handleWebhookEvent(providerId, rawBody, req.headers); return json(res, 200, { ok: true, ...('duplicate' in result ? { duplicate: true } : {}) }); }
+  catch (e) { if (e instanceof HttpError) throw e; warn('payment.webhook.error', { provider: providerId }); throw new HttpError(400, 'invalid'); }
 }

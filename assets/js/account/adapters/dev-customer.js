@@ -178,4 +178,12 @@ export const DEV_CUSTOMER_ADAPTER = registerCustomerAdapter({
     if (supervisorId) await authProvider().updateAccount(token, { supervisorId });
     s.commit(); return clone(s.data.bookings.at(-1));
   },
+  /** This adapter has no real backend behind it at all (AUTH_PROVIDER=dev) — the whole "customer" is a local
+      sandbox, so there is no client-trusted-payment vulnerability to close here the way api-customer.js's real
+      backend has one. Kept only so calling code has a consistent method to call in every environment. */
+  async createPaymentIntent(token, bookingId, method) {
+    await wait(); const s = await scope(token); const b = s.data.bookings.find((x) => x.id === bookingId); if (!b) return null;
+    if (method !== 'dev-failure') { b.paymentStatus = 'paid'; s.data.payments.push({ id: `pay-${rand()}`, customerId: s.id, bookingId, at: new Date().toISOString(), amount: b.amount, currency: b.currency, status: 'paid', reference: '', methodAr: 'مزوّد دفع تجريبي', methodEn: 'Development payment provider', dev: true }); }
+    s.commit(); return { payment: { id: `pay-${rand()}`, bookingId, status: b.paymentStatus === 'paid' ? 'paid' : 'failed' }, client: { dev: true } };
+  },
 });

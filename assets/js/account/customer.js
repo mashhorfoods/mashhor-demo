@@ -63,6 +63,10 @@ export const customer = {
   saveTraveller: (t) => call('saveTraveller', t),
   deleteTraveller: (id) => call('deleteTraveller', id),
   claimBooking: (journey) => call('claimBooking', journey),
+  /** Stage 16B — Server Payment Intent (§5): the backend is the only thing that can ever mark this paid, via a
+      signature-verified provider webhook. `method` is the provider's own payment-method choice (which card
+      network, hosted-fields step, …); nothing here reports a payment outcome, only requests one. */
+  createPaymentIntent: (bookingId, method) => call('createPaymentIntent', bookingId, method),
 };
 
 /* ---- Derived views shared by the screens ---------------------------------- */

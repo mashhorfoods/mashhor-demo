@@ -52,8 +52,11 @@ export const API_CUSTOMER = registerCustomerAdapter({
   async deleteTraveller(_m, id) { await del(`/me/travellers/${encodeURIComponent(id)}`); return true; },
   async claimBooking(_m, journey) {
     const b = journey?.booking; if (!b?.reference) return null;
-    const data = await post('/me/bookings/claim', { reference: b.reference, context: journey.context, offer: journey.selection?.offer ?? null, travellers: journey.travellers ?? null, contact: journey.contact ?? null, extras: journey.extras ?? [], payment: journey.payment ? { status: journey.payment.status, transactionId: journey.payment.transactionId ?? null } : null, attribution: journey.context?.attribution ?? null });
+    // Stage 16B: no `payment` field is sent — the backend never accepted client-reported payment status as
+    // authoritative, and claiming a booking always leaves it 'unpaid'; see customer.createPaymentIntent().
+    const data = await post('/me/bookings/claim', { reference: b.reference, context: journey.context, offer: journey.selection?.offer ?? null, travellers: journey.travellers ?? null, contact: journey.contact ?? null, extras: journey.extras ?? [], attribution: journey.context?.attribution ?? null });
     return nBooking(data.booking ?? data);
   },
   async recordAcceptance(_m, acceptance) { await post('/me/legal/acceptance', acceptance); return true; },
+  async createPaymentIntent(_m, bookingId, method) { return post(`/me/bookings/${encodeURIComponent(bookingId)}/payment-intent`, { method }); },
 });
