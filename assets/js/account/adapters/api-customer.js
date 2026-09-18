@@ -34,7 +34,7 @@ export const API_CUSTOMER = registerCustomerAdapter({
   async trips() { return list(await get('/me/trips'), 'trips').map(nTrip); },
   async trip(_m, id) { const t = await notFoundNull(get(`/me/trips/${encodeURIComponent(id)}`)); return t ? { ...nTrip(t.trip ?? t), bookings: list(t.bookings ?? t.trip?.bookings, 'bookings').map(nBooking), documents: list(t.documents ?? [], 'documents').map(nDocument), payments: list(t.payments ?? [], 'payments').map(nPayment) } : null; },
   async bookings() { return list(await get('/me/bookings'), 'bookings').map(nBooking); },
-  async booking(_m, id) { const b = await notFoundNull(get(`/me/bookings/${encodeURIComponent(id)}`)); return b ? { ...nBooking(b.booking ?? b), trip: b.trip ? nTrip(b.trip) : null, documents: list(b.documents ?? [], 'documents').map(nDocument), payments: list(b.payments ?? [], 'payments').map(nPayment) } : null; },
+  async booking(_m, id) { const b = await notFoundNull(get(`/me/bookings/${encodeURIComponent(id)}`)); return b ? { ...nBooking(b.booking ?? b), trip: b.trip ? nTrip(b.trip) : null, documents: list(b.documents ?? [], 'documents').map(nDocument), payments: list(b.payments ?? [], 'payments').map(nPayment), flightBooking: b.flightBooking ?? null } : null; },
   async documents() { const data = await get('/me/documents'); return list(data, 'documents').map((d) => ({ ...nDocument(d), booking: d.booking ? nBooking(d.booking) : null, trip: d.trip ? nTrip(d.trip) : null })); },
   async uploadDocument(_m, { file, title, type = 'customer' }) {
     const limit = ENV.documentService?.maxBytes ?? Infinity; const accept = ENV.documentService?.accept ?? [];
@@ -54,7 +54,10 @@ export const API_CUSTOMER = registerCustomerAdapter({
     const b = journey?.booking; if (!b?.reference) return null;
     // Stage 16B: no `payment` field is sent — the backend never accepted client-reported payment status as
     // authoritative, and claiming a booking always leaves it 'unpaid'; see customer.createPaymentIntent().
-    const data = await post('/me/bookings/claim', { reference: b.reference, context: journey.context, offer: journey.selection?.offer ?? null, travellers: journey.travellers ?? null, contact: journey.contact ?? null, extras: journey.extras ?? [], attribution: journey.context?.attribution ?? null });
+    // Stage 16C: searchId/offerId let the backend re-read its OWN server-issued flight offer (backend/flights.mjs)
+    // and price the booking from a fresh revalidation — never from a client-submitted total/currency (removed
+    // above for the same reason payment status was).
+    const data = await post('/me/bookings/claim', { reference: b.reference, context: journey.context, offer: journey.selection?.offer ?? null, searchId: journey.selection?.searchId ?? null, offerId: journey.selection?.offer?.id ?? null, travellers: journey.travellers ?? null, contact: journey.contact ?? null, extras: journey.extras ?? [], attribution: journey.context?.attribution ?? null });
     return nBooking(data.booking ?? data);
   },
   async recordAcceptance(_m, acceptance) { await post('/me/legal/acceptance', acceptance); return true; },

@@ -13,6 +13,7 @@ import { enqueue } from './mailer.mjs';
 import { legalDocument } from './legal.mjs';
 import { info, warn } from './logger.mjs';
 import { createPaymentIntent, handleWebhookEvent, simulateDevWebhook } from './payments.mjs';
+import { searchFlights, getFlightOffer, quoteFlightOffer } from './flights.mjs';
 
 /* ---- row → contract shape ---------------------------------------------- */
 const J = (s, d) => { try { return s ? JSON.parse(s) : d; } catch { return d; } };
@@ -22,8 +23,38 @@ const nDoc = (r) => ({ id: r.id, bookingId: r.booking_id, tripId: r.trip_id, typ
 const nPay = (r) => ({ id: r.id, bookingId: r.booking_id, at: r.at, amount: r.amount, currency: r.currency, status: r.status, reference: r.reference, methodAr: r.method_ar, methodEn: r.method_en });
 const nNtf = (r) => ({ id: r.id, kind: r.kind, at: r.at, read: !!r.read, titleAr: r.title_ar, titleEn: r.title_en, textAr: r.text_ar, textEn: r.text_en, href: r.href, bookingId: r.booking_id });
 const nTrv = (r) => ({ id: r.id, firstName: r.first_name, lastName: r.last_name, dob: r.dob, gender: r.gender, nationality: r.nationality, passport: r.passport, passportExpiry: r.passport_expiry });
+// Stage 16C: the customer's own flight-supplier booking state — status, ticketed and a reference only; never
+// the provider id, the raw supplier response, or itinerary_json (the customer-facing route/dates/flights
+// strings already come from bookings.detail_json, set at claim time).
+const nFlightBookingCustomer = (bookingId) => { const r = q.get('SELECT * FROM flight_bookings WHERE booking_id = ?', bookingId); return r ? { status: r.status, reference: r.provider_booking_id, failureReason: r.status === 'failed' ? r.failure_reason : null, updatedAt: r.updated_at } : null; };
 const sessionAnswer = (res, c) => { const s = createSession(c.id); setSessionCookies(res, s.id, s.csrf, s.maxAge); return { customer: publicCustomer(c), expiresAt: s.expiresAt }; };
 const cleanAcceptance = (a) => (a && typeof a === 'object' ? { terms: a.terms ? { version: str(a.terms.version, 40), effectiveAt: str(a.terms.effectiveAt, 20) } : null, privacy: a.privacy ? { version: str(a.privacy.version, 40), effectiveAt: str(a.privacy.effectiveAt, 20) } : null, locale: a.locale === 'en' ? 'en' : 'ar' } : null);
+// Stage 16C §20: only the passenger fields a supplier booking actually needs, at most 9 (the journey's own cap) —
+// never the internal customer/supervisor/staff records a booking's detail_json has no business carrying.
+const sanitizeTravellers = (raw) => { const out = {}; if (raw && typeof raw === 'object') for (const [id, v] of Object.entries(raw).slice(0, 9)) out[str(id, 20)] = { firstName: str(v?.firstName, 40), lastName: str(v?.lastName, 40), dob: str(v?.dob, 10), gender: str(v?.gender, 1), nationality: str(v?.nationality, 2), passport: str(v?.passport, 20), passportExpiry: str(v?.passportExpiry, 10) }; return out; };
+
+/* ---- Stage 16C: /flights/* — public (no session; search happens before sign-in), server-validated. The
+   browser never talks to a supplier directly: Frontend → Number One Backend → Flight Supplier Adapter →
+   Supplier API. Results and offers are cached under a server-issued searchId (backend/flights.mjs); nothing
+   about price or availability is ever trusted back from a later client request. ---- */
+const stripInternal = (o) => { const { _devTest, ...rest } = o; return rest; };
+export const flights = {
+  async search(req, res) {
+    const b = await readJson(req);
+    const { offers, meta } = await searchFlights(b, config.flightProvider);
+    return json(res, 200, { offers: offers.map(stripInternal), meta });
+  },
+  offer(req, res, searchId, offerId) {
+    const offer = getFlightOffer(str(searchId, 40), str(offerId, 40));
+    if (!offer) return fail(res, 404, 'notFound');
+    return json(res, 200, { offer: stripInternal(offer) });
+  },
+  async quote(req, res) {
+    const b = await readJson(req);
+    const result = await quoteFlightOffer(str(b.searchId, 40), str(b.offerId, 40), config.flightProvider);
+    return json(res, 200, result);
+  },
+};
 
 /* ---- /auth ------------------------------------------------------------ */
 export const auth = {
@@ -71,7 +102,7 @@ export const me = {
     const trip = b.trip_id ? q.get('SELECT * FROM trips WHERE id = ? AND customer_id = ?', b.trip_id, ctx.customer.id) : null;
     // Stage 15: only CUSTOMER-type notes ever reach this response — internal operations notes have no route here at all.
     const notes = q.all("SELECT body, created_at FROM booking_notes WHERE booking_id = ? AND type = 'customer' ORDER BY created_at DESC", b.id).map((r) => ({ body: r.body, at: r.created_at }));
-    return json(res, 200, { booking: nBooking(b), trip: trip ? nTrip(trip) : null, documents: q.all('SELECT * FROM documents WHERE booking_id = ? AND customer_id = ?', b.id, ctx.customer.id).map(nDoc), payments: q.all('SELECT * FROM payments WHERE booking_id = ? AND customer_id = ? ORDER BY at DESC', b.id, ctx.customer.id).map(nPay), notes });
+    return json(res, 200, { booking: nBooking(b), trip: trip ? nTrip(trip) : null, documents: q.all('SELECT * FROM documents WHERE booking_id = ? AND customer_id = ?', b.id, ctx.customer.id).map(nDoc), payments: q.all('SELECT * FROM payments WHERE booking_id = ? AND customer_id = ? ORDER BY at DESC', b.id, ctx.customer.id).map(nPay), notes, flightBooking: nFlightBookingCustomer(b.id) });
   },
   async claim(req, res, ctx) {
     const b = await readJson(req); const ref = str(b.reference, 40); if (!ref) throw new HttpError(422, 'invalid');
@@ -79,7 +110,18 @@ export const me = {
     if (q.get('SELECT id FROM bookings WHERE id = ?', ref)) throw new HttpError(409, 'conflict');   // someone else's reference
     const ctxB = b.context ?? {}; const offer = b.offer ?? null; const dest = offer?.legs?.[0]?.to ?? null; const t = now();
     const attribution = validAttribution({ supervisorId: b.attribution?.supervisor ?? b.attribution?.supervisorId, source: 'booking' });
-    const tripId = `trip_${hex(6)}`; const travellers = (ctxB.travellers?.adults ?? 1) + (ctxB.travellers?.children ?? 0) + (ctxB.travellers?.infants ?? 0);
+    const tripId = `trip_${hex(6)}`; const travellerCount = (ctxB.travellers?.adults ?? 1) + (ctxB.travellers?.children ?? 0) + (ctxB.travellers?.infants ?? 0);
+    // Stage 16C: a server-issued flight offer (backend/flights.mjs) is the ONLY authoritative fare source — a
+    // fresh revalidation runs right here, at the moment the amount is committed, never `b.total`/`b.currency`
+    // from the request body. An expired/unavailable offer refuses the claim outright (never a stale fare).
+    const flightSearchId = str(b.searchId, 40) || null; const flightOfferId = str(b.offerId, 40) || null;
+    let amount = Number(b.total) || 0; let currency = str(b.currency ?? 'USD', 3) || 'USD';
+    if (flightSearchId && flightOfferId) {
+      const revalidated = await quoteFlightOffer(flightSearchId, flightOfferId, config.flightProvider);
+      if (revalidated.unavailable || !revalidated.price) throw new HttpError(409, 'conflict', { reason: 'offerUnavailable' });
+      amount = revalidated.price.total; currency = revalidated.price.currency;
+    }
+    const travellersDetail = sanitizeTravellers(b.travellers);
     // Stage 16B: payment status is NEVER read from the client here — a booking is always claimed 'unpaid'.
     // Only backend/payments.mjs's verified-webhook path (POST /payments/webhook/:provider) may ever mark a
     // booking paid, after a real payment intent (POST /me/bookings/:id/payment-intent) and a signature-verified
@@ -87,9 +129,9 @@ export const me = {
     const booking = q.tx(() => {
       q.run('INSERT INTO trips (id, customer_id, title_ar, title_en, destination_json, start_date, end_date, services_json, status, travellers, supervisor_id, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
         tripId, cid, str(dest?.cityAr ?? ctxB.destination ?? 'رحلة', 80), str(dest?.cityEn ?? ctxB.destination ?? 'Trip', 80), JSON.stringify(dest ? { code: str(dest.code, 4), cityAr: str(dest.cityAr, 80), cityEn: str(dest.cityEn, 80), countryAr: str(dest.countryAr ?? '', 80), countryEn: str(dest.countryEn ?? '', 80) } : { code: '', cityAr: '', cityEn: '', countryAr: '', countryEn: '' }),
-        str(offer?.legs?.[0]?.departAt?.slice(0, 10) ?? ctxB.dates?.depart ?? ctxB.dates?.checkin ?? '', 10) || null, str(offer?.legs?.at?.(-1)?.arriveAt?.slice(0, 10) ?? ctxB.dates?.return ?? ctxB.dates?.checkout ?? '', 10) || null, JSON.stringify([str(ctxB.service ?? 'flights', 20)]), 'upcoming', travellers, attribution?.supervisorId ?? null, t);
-      const detail = offer ? { route: (offer.legs ?? []).map((l) => `${str(l.from?.code, 4)} → ${str(l.to?.code, 4)}`).join(' · '), dates: (offer.legs ?? []).map((l) => str(l.departAt?.slice(0, 10), 10)), carrierAr: str(offer.carrier?.nameAr, 80), carrierEn: str(offer.carrier?.nameEn, 80), flights: (offer.legs ?? []).map((l) => (l.segments ?? []).map((s) => str(s.flightNumber, 10)).join(', ')).join(' / '), travellers } : { travellers };
-      q.run('INSERT INTO bookings (id, customer_id, trip_id, service, status, payment_status, amount, currency, supervisor_id, ticketed, detail_json, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', ref, cid, tripId, str(ctxB.service ?? 'flights', 20), b.status === 'received' ? 'pending' : 'confirmed', 'unpaid', Number(b.total) || 0, str(b.currency ?? 'USD', 3) || 'USD', attribution?.supervisorId ?? null, 0, JSON.stringify(detail), t);
+        str(offer?.legs?.[0]?.departAt?.slice(0, 10) ?? ctxB.dates?.depart ?? ctxB.dates?.checkin ?? '', 10) || null, str(offer?.legs?.at?.(-1)?.arriveAt?.slice(0, 10) ?? ctxB.dates?.return ?? ctxB.dates?.checkout ?? '', 10) || null, JSON.stringify([str(ctxB.service ?? 'flights', 20)]), 'upcoming', travellerCount, attribution?.supervisorId ?? null, t);
+      const detail = offer ? { route: (offer.legs ?? []).map((l) => `${str(l.from?.code, 4)} → ${str(l.to?.code, 4)}`).join(' · '), dates: (offer.legs ?? []).map((l) => str(l.departAt?.slice(0, 10), 10)), carrierAr: str(offer.carrier?.nameAr, 80), carrierEn: str(offer.carrier?.nameEn, 80), flights: (offer.legs ?? []).map((l) => (l.segments ?? []).map((s) => str(s.flightNumber, 10)).join(', ')).join(' / '), travellers: travellerCount, travellersDetail } : { travellers: travellerCount, travellersDetail };
+      q.run('INSERT INTO bookings (id, customer_id, trip_id, service, status, payment_status, amount, currency, supervisor_id, ticketed, detail_json, flight_search_id, flight_offer_id, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)', ref, cid, tripId, str(ctxB.service ?? 'flights', 20), b.status === 'received' ? 'pending' : 'confirmed', 'unpaid', amount, currency, attribution?.supervisorId ?? null, 0, JSON.stringify(detail), flightSearchId, flightOfferId, t);
       q.run('INSERT INTO notifications (id, customer_id, kind, at, read, title_ar, title_en, text_ar, text_en, href, booking_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)', `ntf_${hex(6)}`, cid, 'booking', t, 0, b.status === 'received' ? 'استلمنا طلبك' : 'تم تأكيد حجزك', b.status === 'received' ? 'Request received' : 'Booking confirmed', `المرجع ${ref}.`, `Reference ${ref}.`, `account/bookings/?id=${ref}`, ref);
       if (attribution) assignAttribution(cid, attribution.supervisorId, 'booking', 'customer', t);
       return q.get('SELECT * FROM bookings WHERE id = ?', ref);
@@ -107,9 +149,13 @@ export const me = {
     // provider's server calling our real webhook a moment later — see simulateDevWebhook's own comment. A real
     // provider never reaches this branch; its webhook arrives from its own infrastructure, on its own schedule,
     // over the real /payments/webhook/:provider route, and the payment record below is what that call updates.
-    if (config.paymentProvider === 'dev' && payment.status === 'pending') simulateDevWebhook(payment.id, method);
+    if (config.paymentProvider === 'dev' && payment.status === 'pending') await simulateDevWebhook(payment.id, method);
     const fresh = q.get('SELECT * FROM payments WHERE id = ?', payment.id);   // re-read: reflects the webhook's own update, never a value this route computes itself
-    return json(res, 201, { payment: { ...payment, status: fresh.status, verifiedAt: fresh.verified_at ?? null, failureCode: fresh.failure_code ?? null }, client });
+    // Stage 16C: by the time this responds, a verified 'paid' event has already run createFlightBooking()
+    // synchronously (backend/payments.mjs) — re-read the booking's own fresh ticketed/supplier state too, so
+    // the confirmation screen never needs a second round-trip to show the real outcome.
+    const freshBooking = q.get('SELECT ticketed FROM bookings WHERE id = ?', id);
+    return json(res, 201, { payment: { ...payment, status: fresh.status, verifiedAt: fresh.verified_at ?? null, failureCode: fresh.failure_code ?? null }, client, ticketed: !!freshBooking?.ticketed, flightBooking: nFlightBookingCustomer(id) });
   },
   travellers(req, res, ctx) { return json(res, 200, { travellers: q.all('SELECT * FROM travellers WHERE customer_id = ? ORDER BY created_at', ctx.customer.id).map(nTrv) }); },
   async travellerCreate(req, res, ctx) { const b = await readJson(req); const id = `trv_${hex(6)}`; const t = now(); q.run('INSERT INTO travellers (id, customer_id, first_name, last_name, dob, gender, nationality, passport, passport_expiry, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)', id, ctx.customer.id, str(b.firstName, 40), str(b.lastName, 40), str(b.dob, 10), str(b.gender, 1), str(b.nationality, 2), str(b.passport, 20), str(b.passportExpiry, 10), t, t); return json(res, 201, { traveller: nTrv(q.get('SELECT * FROM travellers WHERE id = ?', id)) }); },

@@ -52,6 +52,14 @@ let paymentDevSecret = env.BACKEND_PAYMENT_DEV_SECRET ?? '';
 if (!paymentDevSecret) { if (environment === 'staging') problems.push('BACKEND_PAYMENT_DEV_SECRET is required in staging (32+ random characters)'); else paymentDevSecret = randomBytes(32).toString('hex'); }
 else if (paymentDevSecret.length < 32) problems.push('BACKEND_PAYMENT_DEV_SECRET must be at least 32 characters');
 
+// Stage 16C — flight supplier. Implemented: dev (fictional carriers, clearly labelled, no real supplier
+// credentials involved). A real supplier is a new backend/flights.mjs adapter (search/quote/book against the
+// supplier's own API), not a config value this list accepts yet — production must never silently fall back to
+// the dev stand-in, the same rule Stage 16B already applies to the payment provider.
+const flightProvider = env.BACKEND_FLIGHT_PROVIDER ?? 'dev';
+if (!['dev'].includes(flightProvider)) problems.push(`BACKEND_FLIGHT_PROVIDER=${flightProvider} is not implemented (dev only)`);
+if (production && flightProvider === 'dev') problems.push('BACKEND_FLIGHT_PROVIDER cannot be dev in production — no real flight supplier is connected yet (see docs/STAGE-16C-FLIGHT-SUPPLIER-INTEGRATION.md)');
+
 // Stage 13 — the ONE entry point reserved for the future Admin Dashboard (reassigning a customer's attribution, §27,
 // §40). Disabled unless set; when set, it must be a real secret (32+ chars), whatever the environment, because it is
 // a bearer credential over an admin-only action, not a public toggle.
@@ -73,6 +81,7 @@ export const config = Object.freeze({
   signedUrlTtlMs: num(env.BACKEND_SIGNED_URL_TTL_SECONDS, 300) * 1000,
   mailer, legalDir: resolve(env.BACKEND_LEGAL_DIR ?? './legal'),
   paymentProvider, paymentDevSecret,
+  flightProvider,
   supervisors: list(env.BACKEND_SUPERVISORS ?? 'supervisor-1,supervisor-2,supervisor-3,supervisor-4,supervisor-5'),
   adminToken: adminToken || null,
   trustProxy: bool(env.BACKEND_TRUST_PROXY, false),

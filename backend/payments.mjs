@@ -21,6 +21,8 @@ import { HttpError } from './http.mjs';
 import { info, warn } from './logger.mjs';
 import { audit } from './staff.mjs';
 import { enqueue } from './mailer.mjs';
+import { config } from './config.mjs';
+import { createFlightBooking } from './flights.mjs';
 
 export const PAYMENT_STATUSES = ['pending', 'processing', 'paid', 'failed', 'cancelled', 'refunded'];
 const SYSTEM_ACTOR = { id: 'system', role: 'system' };
@@ -76,7 +78,7 @@ export function createPaymentIntent({ bookingId, customerId, method, idempotency
     and safely ignored before it can touch anything twice — and cross-checks the event's amount/currency against
     what THIS backend already stored for that payment, rejecting any mismatch as a forged/corrupted event rather
     than trusting the webhook payload's amount as a second source of truth. */
-export function handleWebhookEvent(providerId, rawBody, headers) {
+export async function handleWebhookEvent(providerId, rawBody, headers) {
   const provider = paymentProviderFor(providerId);
   if (!provider) { warn('payment.webhook.unknownProvider', { provider: providerId }); throw new HttpError(404, 'notFound'); }
   if (!provider.verifySignature(rawBody, headers)) { warn('payment.webhook.invalidSignature', { provider: providerId }); throw new HttpError(401, 'invalid'); }
@@ -109,6 +111,15 @@ export function handleWebhookEvent(providerId, rawBody, headers) {
       `doc_${hex(6)}`, payment.customer_id, payment.booking_id, q.get('SELECT trip_id FROM bookings WHERE id = ?', payment.booking_id)?.trip_id ?? null, 'receipt', 'issued', 'pending', null, null, 0, null, t);
     enqueue({ customerId: payment.customer_id, template: 'payment-successful', payload: { bookingId: payment.booking_id, amount: payment.amount, currency: payment.currency } });
     audit(SYSTEM_ACTOR, 'booking.paymentGate.passed', 'booking', payment.booking_id, { paymentId: payment.id });
+    // Stage 16C §13: Revalidate → Payment → Supplier Booking → Confirmation. Runs only now, only once (this
+    // whole branch is itself reached only once per payment, guarded by the idempotent payment_events insert
+    // above), and only for a flights booking claimed against a server-issued offer. A supplier failure here
+    // never unwinds the payment or reports a false ticketed confirmation — see flights.mjs recordFailure().
+    const bkg = q.get('SELECT * FROM bookings WHERE id = ?', payment.booking_id);
+    if (bkg?.service === 'flights' && bkg.flight_search_id && bkg.flight_offer_id) {
+      try { await createFlightBooking({ bookingId: bkg.id, customerId: bkg.customer_id, searchId: bkg.flight_search_id, offerId: bkg.flight_offer_id }, config.flightProvider); }
+      catch (e) { warn('flight.booking.orchestrationError', { bookingId: bkg.id }); }
+    }
   } else if (nextStatus === 'failed') {
     enqueue({ customerId: payment.customer_id, template: 'payment-failed', payload: { bookingId: payment.booking_id } });
   }
@@ -126,7 +137,7 @@ export function handleWebhookEvent(providerId, rawBody, headers) {
     failure still only becomes real once it comes back out through `handleWebhookEvent`'s verification. A real
     provider's webhook always arrives from that provider's own infrastructure, over the real
     /payments/webhook/:provider route, never through a call like this one. */
-export function simulateDevWebhook(paymentId, method) {
+export async function simulateDevWebhook(paymentId, method) {
   const provider = paymentProviderFor('dev'); if (!provider?.signEvent) return null;
   const payment = q.get('SELECT * FROM payments WHERE id = ? AND provider = ?', paymentId, 'dev'); if (!payment || payment.status !== 'pending') return null;
   const type = method === 'dev-failure' ? 'failed' : 'succeeded';

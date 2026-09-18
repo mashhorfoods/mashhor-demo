@@ -174,14 +174,20 @@ export function opsBookingList({ status = '', service = '', assignedTo = '', pag
   if (ids.length) for (const r of q.all(`SELECT booking_id, COUNT(*) AS n FROM documents WHERE booking_id IN (${placeholders(ids)}) AND review_status != 'approved' GROUP BY booking_id`, ...ids)) missing.set(r.booking_id, r.n);
   return { items: slice.map((r) => ({ ...nBookingRow(r), missingDocuments: missing.get(r.id) ?? 0 })), ...meta };
 }
+// Stage 16C §17: the live flight-supplier-API booking (backend/flights.mjs) — distinct from `supplier` above,
+// which is the Stage 15 manually-tracked business-partner assignment. Ops sees the full record (provider,
+// failure reason); nothing here is customer-facing (see routes.mjs's own, narrower nFlightBookingCustomer).
+const nFlightBookingOps = (r) => (r ? { id: r.id, provider: r.provider, providerBookingId: r.provider_booking_id, status: r.status, failureReason: r.failure_reason, createdAt: r.created_at, updatedAt: r.updated_at } : null);
 export function opsBookingDetail(bookingId) {
   const b = q.get('SELECT * FROM bookings WHERE id = ?', bookingId); if (!b) return null;
   const supplier = q.get('SELECT * FROM booking_suppliers WHERE booking_id = ? ORDER BY created_at DESC LIMIT 1', bookingId);
+  const flightBooking = q.get('SELECT * FROM flight_bookings WHERE booking_id = ?', bookingId);
   return {
     ...nBookingRow(b), allowedTransitions: allowedTransitions(b.ops_status),
     history: bookingStatusHistory(bookingId),
     documents: q.all('SELECT * FROM documents WHERE booking_id = ?', bookingId).map(nDocReview),
     supplier: supplier ? nBookingSupplier(supplier) : null,
+    flightBooking: nFlightBookingOps(flightBooking),
     notesCustomer: q.all("SELECT * FROM booking_notes WHERE booking_id = ? AND type = 'customer' ORDER BY created_at DESC", bookingId).map(nNote),
     notesInternal: q.all("SELECT * FROM booking_notes WHERE booking_id = ? AND type = 'internal' ORDER BY created_at DESC", bookingId).map(nNote),
     tasks: q.all('SELECT * FROM operation_tasks WHERE booking_id = ? ORDER BY created_at DESC', bookingId).map(nTask),

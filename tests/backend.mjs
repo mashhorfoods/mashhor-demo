@@ -31,7 +31,11 @@ const check = (extra) => new Promise((resolve) => { const c = spawn(process.exec
   // leaves BACKEND_PAYMENT_PROVIDER at its 'dev' default — is correctly refused rather than accepted; this is
   // the one deliberate remaining gap the Stage 16B report documents, not a regression.
   ok('production refuses the dev payment provider as a silent fallback, even with every other production setting correct', /BACKEND_PAYMENT_PROVIDER cannot be dev in production/.test((await check(prodBase)).out));
-  ok('every OTHER production requirement in prodBase is independently satisfied (payment provider is the sole remaining refusal)', !/SIGNING_SECRET|ALLOWED_ORIGINS|COOKIE_SECURE|TEST_CONTROLS/.test((await check(prodBase)).out));
+  // Stage 16C: the flight supplier gets the identical treatment — only 'dev' is implemented, unconditionally
+  // refused in production (§19/§23's "never mark a supplier CONNECTED without real verification").
+  ok('production refuses the dev flight provider as a silent fallback', /BACKEND_FLIGHT_PROVIDER cannot be dev in production/.test((await check(prodBase)).out));
+  ok('an unimplemented flight provider is refused, never silently mocked', /not implemented/.test((await check({ BACKEND_FLIGHT_PROVIDER: 'amadeus' })).out));
+  ok('every OTHER production requirement in prodBase is independently satisfied (payment and flight provider are the sole remaining refusals)', !/SIGNING_SECRET|ALLOWED_ORIGINS|COOKIE_SECURE|TEST_CONTROLS/.test((await check(prodBase)).out));
   ok('production refuses test controls', /TEST_CONTROLS/.test((await check({ ...prodBase, BACKEND_TEST_CONTROLS: '1' })).out));
   ok('production refuses a missing signing secret', /SIGNING_SECRET/.test((await check({ ...prodBase, BACKEND_SIGNING_SECRET: '' })).out));
   ok('production refuses http origins and wildcard origins', /https/.test((await check({ ...prodBase, BACKEND_ALLOWED_ORIGINS: 'http://www.example.test' })).out) && /never \*/.test((await check({ ...prodBase, BACKEND_ALLOWED_ORIGINS: '*' })).out));
@@ -666,6 +670,123 @@ await control('/__test/reset');
   ok('no audit entry for any of this ever carries the webhook signing secret, a card number or a CVV', !new RegExp(PAYMENT_DEV_SECRET).test(auditStr) && !/cvv|card.?number/i.test(auditStr));
 
   jarP.clear(); jarAdminP.clear();
+}
+
+// ---- Stage 16C: real flight supplier integration. Frontend → Number One Backend → Flight Supplier Adapter →
+// Supplier API (backend/flights.mjs) — the browser never talks to a supplier. Every test below proves either
+// server-side input validation, that a server-issued offer/searchId is the only authoritative fare source, that
+// a supplier order is created only after Stage 16B's own verified payment (and is idempotent), or one of this
+// stage's own §26 critical failure properties. ----
+{
+  await control('/__test/reset');
+  const jarF = new Map(); const reqF = makeReq(API, SITE)(jarF, 'no_csrf');
+  const jarAdminF = new Map(); const reqAdminF = makeReq(API, SITE)(jarAdminF, 'no_ops_csrf');
+  await reqAdminF('/staff/auth/sign-in', { method: 'POST', body: { email: 'admin1@fixture.test', password: 'password123' } });
+  await reqF('/auth/sign-in', { method: 'POST', body: { email: 'alpha@fixture.test', password: 'password123' } });
+
+  const search = (body) => reqF('/flights/search', { method: 'POST', body, csrf: false });
+  const oneWay = { tripType: 'oneway', legs: [{ from: 'KRT', to: 'JED', date: '2099-01-10' }], cabin: 'economy', travellers: { adults: 1, children: 0, infants: 0 } };
+
+  // ---- search: one-way, round-trip, multi-city, passenger/date/airport validation, no-results ----
+  const sOneWay = await search(oneWay);
+  ok('one-way search returns normalised offers with a server-issued searchId', sOneWay.status === 200 && sOneWay.data.offers.length > 0 && !!sOneWay.data.meta.searchId && sOneWay.data.meta.currency === 'USD');
+  ok('no internal test-only field ever leaks into a customer-visible offer', !JSON.stringify(sOneWay.data.offers).includes('_devTest'));
+  const firstOffer = sOneWay.data.offers[0];
+  ok('a normalised offer matches the documented contract shape (id, provider, carrier, legs, baggage, fare, price, availability, included, extras)', ['id', 'provider', 'service', 'tripType', 'carrier', 'legs', 'baggage', 'fare', 'price', 'availability', 'included', 'extras'].every((k) => k in firstOffer) && firstOffer.legs[0].segments.length > 0 && firstOffer.price.currency === 'USD' && typeof firstOffer.price.total === 'number');
+  const sReturn = await search({ tripType: 'return', legs: [{ from: 'KRT', to: 'DXB', date: '2099-01-10' }, { from: 'DXB', to: 'KRT', date: '2099-01-17' }], cabin: 'economy', travellers: { adults: 2, children: 1, infants: 0 } });
+  ok('round-trip search accepts two legs and a mixed party', sReturn.status === 200 && sReturn.data.offers.length > 0 && sReturn.data.offers[0].legs.length === 2);
+  const sMulti = await search({ tripType: 'multi', legs: [{ from: 'KRT', to: 'DXB', date: '2099-01-10' }, { from: 'DXB', to: 'CAI', date: '2099-01-15' }, { from: 'CAI', to: 'KRT', date: '2099-01-20' }], cabin: 'business', travellers: { adults: 1, children: 0, infants: 0 } });
+  ok('multi-city search accepts 2-4 ordered legs', sMulti.status === 200 && sMulti.data.offers[0].legs.length === 3);
+  ok('multi-city legs out of date order are rejected (422)', (await search({ tripType: 'multi', legs: [{ from: 'KRT', to: 'DXB', date: '2099-01-15' }, { from: 'DXB', to: 'CAI', date: '2099-01-10' }], cabin: 'economy', travellers: { adults: 1, children: 0, infants: 0 } })).status === 422);
+  ok('an invalid trip type is rejected (422)', (await search({ ...oneWay, tripType: 'nonsense' })).status === 422);
+  ok('a non-IATA-shaped airport code is rejected (422)', (await search({ ...oneWay, legs: [{ from: 'khartoum', to: 'JED', date: '2099-01-10' }] })).status === 422);
+  ok('the same origin and destination is rejected (422)', (await search({ ...oneWay, legs: [{ from: 'KRT', to: 'KRT', date: '2099-01-10' }] })).status === 422);
+  ok('a past departure date is rejected (422)', (await search({ ...oneWay, legs: [{ from: 'KRT', to: 'JED', date: '2020-01-01' }] })).status === 422);
+  ok('a malformed date is rejected (422)', (await search({ ...oneWay, legs: [{ from: 'KRT', to: 'JED', date: 'not-a-date' }] })).status === 422);
+  ok('zero adults is rejected (422) — a party needs a lead traveller', (await search({ ...oneWay, travellers: { adults: 0, children: 0, infants: 0 } })).status === 422);
+  ok('more infants than adults is rejected (422)', (await search({ ...oneWay, travellers: { adults: 1, children: 0, infants: 2 } })).status === 422);
+  ok('a party over 9 travellers is rejected (422)', (await search({ ...oneWay, travellers: { adults: 9, children: 1, infants: 0 } })).status === 422);
+  const sEmpty = await search({ ...oneWay, devTest: 'empty' });
+  ok('a no-results search answers 200 with an empty offer list, never an error', sEmpty.status === 200 && sEmpty.data.offers.length === 0);
+  const sOutage = await search({ ...oneWay, devTest: 'error' });
+  ok('a simulated supplier outage is normalised to a safe 503, never a raw exception', sOutage.status === 503);
+
+  // ---- offer detail + quote (revalidation): unknown offer, same fare, changed fare, unavailable fare ----
+  const searchId = sOneWay.data.meta.searchId; const offerId = firstOffer.id;
+  const offerDetail = await reqF(`/flights/offers/${searchId}/${offerId}`, { csrf: false });
+  ok('offer detail retrieval by the server-issued searchId', offerDetail.status === 200 && offerDetail.data.offer.id === offerId);
+  ok('an unknown offer id under a real searchId → 404', (await reqF(`/flights/offers/${searchId}/NOT-AN-OFFER`, { csrf: false })).status === 404);
+  ok('an unknown searchId entirely → 404', (await reqF(`/flights/offers/S-doesnotexist/${offerId}`, { csrf: false })).status === 404);
+  const q1 = await reqF('/flights/quote', { method: 'POST', body: { searchId, offerId }, csrf: false });
+  ok('revalidating an untouched offer returns the same price, unchanged', q1.status === 200 && q1.data.changed === false && q1.data.price.total === firstOffer.price.total);
+  const sChanged = await search({ ...oneWay, devTest: 'changed' });
+  const qChanged = await reqF('/flights/quote', { method: 'POST', body: { searchId: sChanged.data.meta.searchId, offerId: sChanged.data.offers[0].id }, csrf: false });
+  ok('a fare that changed between search and revalidation is reported as changed, with both prices', qChanged.data.changed === true && qChanged.data.price.total > qChanged.data.previous.total);
+  const sUnavail = await search({ ...oneWay, devTest: 'unavailable' });
+  const qUnavail = await reqF('/flights/quote', { method: 'POST', body: { searchId: sUnavail.data.meta.searchId, offerId: sUnavail.data.offers[0].id }, csrf: false });
+  ok('a fare that became unavailable is reported honestly, never a stale price', qUnavail.data.unavailable === true && qUnavail.data.price === null);
+  const qExpired = await reqF('/flights/quote', { method: 'POST', body: { searchId: 'S-neverexisted', offerId: 'X' }, csrf: false });
+  ok('revalidating against an unknown/expired search is reported unavailable, never an error or a fabricated price', qExpired.status === 200 && qExpired.data.unavailable === true);
+
+  // ---- §26 critical test 1: a stale search result cannot be used to create a booking without revalidation ----
+  const staleClaim = await reqF('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-16C-STALE', context: { service: 'flights' }, searchId: 'S-doesnotexist', offerId: 'X', total: 1, currency: 'USD' } });
+  ok('§26: claiming a booking against a stale/unknown search+offer is refused (409), never silently accepted', staleClaim.status === 409);
+
+  // ---- amount integrity at claim: the server-revalidated offer is authoritative, a forged total/currency is ignored ----
+  const claim1 = await reqF('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-16C-PAY', context: { service: 'flights' }, searchId, offerId, total: 999999, currency: 'EUR',
+    travellers: { 'adult-1': { firstName: 'Ali', lastName: 'Hassan', dob: '1990-01-01', gender: 'M', nationality: 'SD', passport: 'P1234567', passportExpiry: '2030-01-01' } } } });
+  ok('a forged client total/currency at claim time is completely ignored — the booking amount is the server-revalidated offer fare', claim1.status === 201 && claim1.data.booking.amount === firstOffer.price.total && claim1.data.booking.currency === 'USD' && claim1.data.booking.amount !== 999999);
+  ok('submitted traveller details are stored, sanitised, only the fields a supplier booking needs', claim1.data.booking.detail.travellersDetail['adult-1'].passport === 'P1234567' && !('creditCard' in (claim1.data.booking.detail.travellersDetail['adult-1'] ?? {})));
+
+  // ---- §13 orchestration: Revalidate → Payment → Supplier Booking → Confirmation, and the customer never sees
+  // a false "ticketed" claim until the supplier genuinely confirms ----
+  const beforePay = await reqF('/me/bookings/BK-16C-PAY', { csrf: false });
+  ok('before payment: no supplier booking exists yet — nothing was created ahead of a verified charge', beforePay.data.flightBooking === null && beforePay.data.booking.ticketed === false);
+  const intent1 = await reqF('/me/bookings/BK-16C-PAY/payment-intent', { method: 'POST', body: { method: 'dev-success' } });
+  ok('payment verified paid, and the SAME response already reflects the real supplier outcome (no second round-trip needed)', intent1.data.payment.status === 'paid' && intent1.data.flightBooking?.status === 'confirmed' && !!intent1.data.flightBooking.reference);
+  const afterPay = await reqF('/me/bookings/BK-16C-PAY', { csrf: false });
+  ok('the booking now carries the real supplier reference and status, sourced from flight_bookings, never fabricated', afterPay.data.flightBooking.status === 'confirmed' && afterPay.data.flightBooking.reference === intent1.data.flightBooking.reference);
+  ok('supplier reference is a plain identifier, never a provider credential or a raw supplier response', /^DEVPNR-/.test(afterPay.data.flightBooking.reference));
+
+  // ---- §26 critical test 2: a failed supplier booking is never reported as a confirmed ticket ----
+  const sFail = await search({ ...oneWay, devTest: 'book-fail' });
+  const failOfferId = sFail.data.offers[0].id;
+  const claimFail = await reqF('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-16C-SUPFAIL', context: { service: 'flights' }, searchId: sFail.data.meta.searchId, offerId: failOfferId } });
+  ok('booking claimed against an offer the dev supplier will reject at book() time', claimFail.status === 201);
+  const intentFail = await reqF('/me/bookings/BK-16C-SUPFAIL/payment-intent', { method: 'POST', body: { method: 'dev-success' } });
+  ok('§26: payment still verifies paid (the charge itself succeeded) — a supplier rejection never unwinds a real payment', intentFail.data.payment.status === 'paid');
+  ok('§26: the supplier rejection is recorded as FAILED, never as a confirmed ticket, and ticketed stays false', intentFail.data.flightBooking?.status === 'failed' && intentFail.data.ticketed === false);
+  const detailFail = await reqF('/me/bookings/BK-16C-SUPFAIL', { csrf: false });
+  ok('re-reading the booking confirms it: payment paid, ticket never issued, the failure reason recorded for recovery — a real, defined recovery path, not silence', detailFail.data.booking.paymentStatus === 'paid' && detailFail.data.booking.ticketed === false && detailFail.data.flightBooking.status === 'failed' && !!detailFail.data.flightBooking.failureReason);
+  const auditFail = await reqAdminF('/operations/audit');
+  ok('the failure left an audit trace for staff to act on', auditFail.data.items.some((e) => e.action === 'flightBooking.failed' && e.entityId === 'BK-16C-SUPFAIL'));
+
+  // ---- §26 critical test 3 / §14 idempotency: a duplicated webhook delivery cannot cause a duplicate supplier
+  // booking — the same idempotent payment_events guard from Stage 16B is what the flight-booking trigger sits
+  // behind, so proving the payment side stays idempotent proves the supplier side never re-fires either. ----
+  const dupIntent = await reqF('/me/bookings/BK-16C-PAY/payment-intent', { method: 'POST', body: { method: 'dev-success' } });
+  ok('§14/§26: retrying payment-intent on an already-paid flights booking is refused (409) — never a second charge, never a second supplier order attempt', dupIntent.status === 409);
+  const afterDup = await reqF('/me/bookings/BK-16C-PAY', { csrf: false });
+  ok('the supplier reference is EXACTLY the same as before the retry — no duplicate reservation was created', afterDup.data.flightBooking.reference === afterPay.data.flightBooking.reference);
+
+  // ---- wrong customer: claiming/paying never crosses a customer boundary (flights uses the same /me routes) ----
+  jarF.clear(); await reqF('/auth/sign-in', { method: 'POST', body: { email: 'beta@fixture.test', password: 'password123' } });
+  ok('Beta cannot read Alpha\'s flight booking by id (404)', (await reqF('/me/bookings/BK-16C-PAY', { csrf: false })).status === 404);
+  jarF.clear(); await reqF('/auth/sign-in', { method: 'POST', body: { email: 'alpha@fixture.test', password: 'password123' } });
+
+  // ---- §16 supervisor attribution survives the whole flight journey ----
+  const sAttr = await search(oneWay);
+  const claimAttr = await reqF('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-16C-ATTR', context: { service: 'flights' }, searchId: sAttr.data.meta.searchId, offerId: sAttr.data.offers[0].id, attribution: { supervisorId: 'supervisor-1' } } });
+  await reqF('/me/bookings/BK-16C-ATTR/payment-intent', { method: 'POST', body: { method: 'dev-success' } });
+  ok('attribution survives search → selection → claim → payment → supplier booking, unchanged — no commission logic was invented along the way', claimAttr.data.booking.supervisorId === 'supervisor-1' && (await reqF('/me/bookings/BK-16C-ATTR', { csrf: false })).data.booking.supervisorId === 'supervisor-1');
+
+  // ---- §17 operations dashboard: the live flight-supplier booking is visible to staff, separate from the
+  // Stage 15 manually-tracked business-partner `supplier`, and never reaches a customer-facing route by that name ----
+  const opsDetail = await reqAdminF(`/bookings/BK-16C-PAY`);
+  ok('ops booking detail exposes the real flight-supplier booking (provider, reference, status) distinct from the manual supplier-assignment field', opsDetail.data.booking.flightBooking?.status === 'confirmed' && opsDetail.data.booking.flightBooking.provider === 'dev' && 'supplier' in opsDetail.data.booking);
+  ok('the customer-facing route never exposes the provider id or a "supplier" key the way the ops route does', !('provider' in (afterPay.data.flightBooking ?? {})) && !('supplier' in afterPay));
+
+  jarF.clear(); jarAdminF.clear();
 }
 
 // ---- diagnostics scrubbing + logs ----

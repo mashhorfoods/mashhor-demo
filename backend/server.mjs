@@ -14,8 +14,9 @@ import { config, assertConfig } from './config.mjs';
 import { migrate, q } from './db.mjs';
 import { cors, json, empty, fail, HttpError, cookies, rateLimit, resetRateLimits, clientIp } from './http.mjs';
 import { liveSession, customerById, sweepSessions, endAllSessions, publicCustomer } from './identity.mjs';
-import { auth, me, file, legal, diagnostics, paymentsWebhook } from './routes.mjs';
+import { auth, me, file, legal, diagnostics, paymentsWebhook, flights } from './routes.mjs';
 import { registerDevPaymentProvider } from './payments.mjs';
+import { registerDevFlightProvider } from './flights.mjs';
 import { liveSupervisorSession, supervisorById, sweepSupervisorSessions, endAllSupervisorSessions } from './supervisor.mjs';
 import { supervisorAuth, supervisorMe, admin } from './supervisor-routes.mjs';
 import { liveStaffSession, staffById, sweepStaffSessions, endAllStaffSessions, publicStaff } from './staff.mjs';
@@ -23,11 +24,13 @@ import { staffAuth, operations, services as opsServices, dashboard } from './sta
 import { info, warn, error } from './logger.mjs';
 import { fixtureLegal } from './fixtures.mjs';
 
-const VERSION = '16.2';
+const VERSION = '16.3';
 
-// Stage 16B: the only provider ever registered is whatever config.paymentProvider names — config.mjs already
-// refuses BACKEND_PAYMENT_PROVIDER=dev in production, so this can never silently become the production fallback.
+// Stage 16B/16C: the only provider ever registered is whatever config.paymentProvider/config.flightProvider
+// names — config.mjs already refuses the dev value in production, so neither can silently become the
+// production fallback.
 if (config.paymentProvider === 'dev') registerDevPaymentProvider(config.paymentDevSecret);
+if (config.flightProvider === 'dev') registerDevFlightProvider();
 
 export function createApp() {
   const test = config.testControls ? { faults: [], legal: null, urlTtlMs: null, requests: [] } : null;
@@ -65,7 +68,7 @@ export function createApp() {
     }
 
     // ---- public routes ----
-    if (path === '/health' && req.method === 'GET') return json(res, 200, { ok: true, environment: config.environment, version: VERSION, storage: config.storage, mailer: config.mailer, paymentProvider: config.paymentProvider, testControls: config.testControls });
+    if (path === '/health' && req.method === 'GET') return json(res, 200, { ok: true, environment: config.environment, version: VERSION, storage: config.storage, mailer: config.mailer, paymentProvider: config.paymentProvider, flightProvider: config.flightProvider, testControls: config.testControls });
     let m;
     if ((m = path.match(/^\/files\/([A-Za-z0-9_-]+)$/)) && req.method === 'GET') return file(req, res, m[1], url);
     if ((m = path.match(/^\/legal\/(terms|privacy)$/)) && req.method === 'GET') return legal(req, res, m[1], url, test?.legal ? (kind, locale) => fixtureLegal(kind, locale, test.legal.version) : null);
@@ -79,6 +82,12 @@ export function createApp() {
     // ---- Stage 16B: /payments/webhook/:provider — a real external provider's own server calling us, never a
     // browser; authenticated by its signature over the raw body (backend/payments.mjs), not by a cookie session. ----
     if ((m = path.match(/^\/payments\/webhook\/([^/]+)$/)) && req.method === 'POST') return paymentsWebhook(req, res, decodeURIComponent(m[1]));
+
+    // ---- Stage 16C: /flights/* — public, no session (search happens before sign-in); server-validated
+    // (backend/flights.mjs), never trusting a browser parameter straight through to the supplier. ----
+    if (path === '/flights/search' && req.method === 'POST') return flights.search(req, res);
+    if ((m = path.match(/^\/flights\/offers\/([^/]+)\/([^/]+)$/)) && req.method === 'GET') return flights.offer(req, res, decodeURIComponent(m[1]), decodeURIComponent(m[2]));
+    if (path === '/flights/quote' && req.method === 'POST') return flights.quote(req, res);
 
     // ---- session + CSRF: customer and supervisor sessions are read from DIFFERENT cookies into DIFFERENT ctx fields —
     // a route handler for one role never even receives the other's session object, so there is no field to confuse. ----

@@ -800,6 +800,7 @@ export default {
     'bk.confirm.paymentFailed': 'Payment was not confirmed. Your booking is saved as unpaid — contact support or retry from My Bookings.',
     'bk.confirm.ticket': 'Ticket',
     'bk.confirm.ticketPending': 'Issued once the supplier confirms; we notify you when it is.',
+    'bk.confirm.ticketFailed': 'The supplier could not confirm this reservation. Your payment is safe — support is already on it and will follow up.',
     'bk.confirm.next': 'Next steps',
     'bk.confirm.next1': 'Save or print this page; the booking summary is on it.',
     'bk.confirm.next2': 'Keep the reference to hand whenever you contact us about this booking.',

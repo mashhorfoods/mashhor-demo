@@ -37,6 +37,11 @@ export function mountConfirmation({ root = document } = {}) {
   const payable = !request && !!b.total;
   const paymentDd = el('dd', { dataset: { paymentStatus: 'pending' } }, payable ? t('bk.confirm.paymentPending') : t('bk.confirm.notCharged'));
   const paymentRow = el('div', { class: 'c-rules__row' }, [el('dt', {}, t('bk.confirm.paymentStatus')), paymentDd]);
+  // Stage 16C: ticketing is a supplier fact, never local journey state — b.ticketed here is only ever `false`
+  // (the client-side book() step never claims otherwise; see adapters/api-flights.js). This row starts pending
+  // and is updated once the payment intent's own response reflects createFlightBooking()'s real outcome.
+  const ticketDd = el('dd', { dataset: { ticketStatus: 'pending' } }, t('bk.confirm.ticketPending'));
+  const ticketRow = offer ? el('div', { class: 'c-rules__row' }, [el('dt', {}, t('bk.confirm.ticket')), ticketDd]) : null;
   const viewTrip = el('a', { class: 'c-btn c-btn--primary', href: b.tripId ? route(`trips/?id=${encodeURIComponent(b.tripId)}`) : route('trips/'), dataset: { action: 'view-trip' } }, t('bk.confirm.viewTrip'));
   put('main', el('div', { class: 'c-confirm' }, [
     el('div', { class: 'c-confirm__head' }, [
@@ -51,7 +56,7 @@ export function mountConfirmation({ root = document } = {}) {
       row('bk.confirm.trip', offer ? `${carrierName(offer.carrier)} · ${offer.legs.map((l) => `${dateShort(l.departAt)} ${legSummary(l)}`).join(' / ')}` : [ctx.origin, ctx.destination].filter(Boolean).join(' → ')),
       row('bk.confirm.date', dateShort(b.at)),
       paymentRow,
-      offer ? row('bk.confirm.ticket', b.ticketed ? t('status.confirmed') : t('bk.confirm.ticketPending')) : null,
+      ticketRow,
       supRec ? row('bk.summary.supervisor', pick(supRec, 'name') || t('sup.name.fallback')) : null,
     ])),
     el('section', { class: 'l-stack l-stack--8', 'aria-labelledby': 'next-title' }, [el('h2', { class: 't-h3', id: 'next-title' }, t('bk.confirm.next')),
@@ -88,6 +93,13 @@ export function mountConfirmation({ root = document } = {}) {
           const status = intent?.payment?.status ?? 'pending';
           paymentDd.dataset.paymentStatus = status;
           paymentDd.textContent = status === 'paid' ? `${t('bk.confirm.paid')} · ${money(intent.payment.amount ?? rec.amount, intent.payment.currency ?? rec.currency)}` : status === 'failed' ? t('bk.confirm.paymentFailed') : t('bk.confirm.paymentPending');
+          // Stage 16C: ticketing reflects createFlightBooking()'s real, server-verified outcome — never assumed
+          // from a successful payment alone (a paid booking can still fail supplier revalidation/booking).
+          if (ticketDd) {
+            if (intent.ticketed) { ticketDd.dataset.ticketStatus = 'confirmed'; ticketDd.textContent = t('status.confirmed'); }
+            else if (intent.flightBooking?.status === 'failed') { ticketDd.dataset.ticketStatus = 'failed'; ticketDd.textContent = t('bk.confirm.ticketFailed'); }
+            else if (intent.flightBooking?.status === 'confirmed') { ticketDd.dataset.ticketStatus = 'confirmed'; ticketDd.textContent = t('bk.confirm.ticketPending'); }
+          }
         } catch (error) { console.warn('[no] payment intent could not be verified', error); paymentDd.dataset.paymentStatus = 'failed'; paymentDd.textContent = t('bk.confirm.paymentFailed'); }
       }
       return rec;

@@ -29,8 +29,8 @@ const hash = (password, salt) => scryptSync(password, salt, 32).toString('hex');
 const sign = (s) => createHmac('sha256', SECRET).update(s).digest('hex');
 
 export function startContractServer({ allowOrigin = null, port = 0, urlTtlMs = 5 * 60 * 1000 } = {}) {
-  const state = { accounts: new Map(), sessions: new Map(), resets: new Map(), csrf: new Map(), customers: new Map(), files: new Map(), faults: [], legal: { supplied: false, version: 'fixture-1' }, urlTtlMs, events: [], requests: [] };
-  const reset = () => { state.accounts.clear(); state.sessions.clear(); state.resets.clear(); state.customers.clear(); state.files.clear(); state.faults = []; state.legal = { supplied: false, version: 'fixture-1' }; state.urlTtlMs = urlTtlMs; state.events = []; state.requests = []; seed(); };
+  const state = { accounts: new Map(), sessions: new Map(), resets: new Map(), csrf: new Map(), customers: new Map(), files: new Map(), faults: [], legal: { supplied: false, version: 'fixture-1' }, urlTtlMs, events: [], requests: [], flightSearches: new Map() };
+  const reset = () => { state.accounts.clear(); state.sessions.clear(); state.resets.clear(); state.customers.clear(); state.files.clear(); state.faults = []; state.legal = { supplied: false, version: 'fixture-1' }; state.urlTtlMs = urlTtlMs; state.events = []; state.requests = []; state.flightSearches.clear(); seed(); };
 
   const emptyData = () => ({ trips: [], bookings: [], travellers: [], documents: [], payments: [], notifications: [] });
   function createCustomer({ name, email, phone = '', locale = 'ar', password, attribution = null, acceptance = null }) {
@@ -80,6 +80,27 @@ export function startContractServer({ allowOrigin = null, port = 0, urlTtlMs = 5
     return parts;
   };
   const signedUrl = (origin, docId, ttlMs) => { const exp = now() + ttlMs; const sig = sign(`${docId}:${exp}`); return { url: `${origin}/files/${docId}?exp=${exp}&sig=${sig}`, expiresAt: iso(exp) }; };
+
+  // ---- Stage 16C: a minimal flight-supplier stand-in, the same reason this whole file exists for the
+  // customer API — so assets/js/booking/adapters/api-flights.js can be verified end to end in a real browser
+  // too, not just its dev-only sibling. Deterministic, one fictional carrier, clearly not real inventory. ----
+  const FLIGHT_CARRIER = { code: 'CT', nameAr: 'ناقل العقد (تجريبي)', nameEn: 'Contract Carrier (fixture)' };
+  const flightPlace = (code) => ({ code, cityAr: code, cityEn: code, airportAr: code, airportEn: code });
+  const makeFlightOffer = (request, n) => {
+    const legs = (request.legs ?? []).map((l, i) => {
+      const depart = dayOffset(10 + i, 8 + n); const arrive = new Date(depart.getTime() + 150 * 60000);
+      const seg = { carrier: FLIGHT_CARRIER, flightNumber: `CT ${100 + n}`, from: flightPlace(l.from), to: flightPlace(l.to), departAt: depart.toISOString().slice(0, 19), arriveAt: arrive.toISOString().slice(0, 19), durationMinutes: 150, aircraft: null };
+      return { from: flightPlace(l.from), to: flightPlace(l.to), departAt: seg.departAt, arriveAt: seg.arriveAt, durationMinutes: 150, stops: [], segments: [seg] };
+    });
+    const { adults = 1, children = 0, infants = 0 } = request.travellers ?? {};
+    const perAdult = 250 + n * 20; const perChild = Math.round(perAdult * 0.75); const perInfant = Math.round(perAdult * 0.1);
+    const base = perAdult * adults + perChild * children + perInfant * infants; const taxes = Math.round(base * 0.14); const fees = 12 * (adults + children + infants);
+    return { id: `CT-${hex(3)}${n}`, provider: { id: 'contract', dev: true }, service: 'flights', tripType: request.tripType, carrier: FLIGHT_CARRIER, legs,
+      baggage: { cabinKg: 7, checkedKg: 23, checkedPieces: 1 },
+      fare: { family: 'standard', refundable: true, changeable: true, changeFee: 40, cancelFee: 120, labelAr: 'قياسية (تجريبي)', labelEn: 'Standard (fixture)', rulesAr: [], rulesEn: [] },
+      price: { currency: 'USD', perTraveller: { adult: perAdult, child: perChild, infant: perInfant }, base, taxes, fees, total: base + taxes + fees },
+      availability: { seatsLeft: 9 }, included: [], extras: [] };
+  };
 
   const server = createServer(async (req, res) => {
     const url = new URL(req.url, 'http://x'); const path = url.pathname; const origin = `http://${req.headers.host}`;
@@ -133,6 +154,25 @@ export function startContractServer({ allowOrigin = null, port = 0, urlTtlMs = 5
     // CSRF on every state change: the readable cookie must be echoed in the header.
     if (['POST', 'PATCH', 'DELETE'].includes(req.method) && live) { const h = req.headers['x-csrf-token']; if (!h || h !== live.csrf) return fail(res, 403, 'forbidden'); }
 
+    // ---- Stage 16C: /flights/* — public, no session (mirrors backend/flights.mjs's own route placement) ----
+    if (path === '/flights/search' && req.method === 'POST') {
+      const b = parse();
+      const offers = Array.from({ length: 3 }, (_, n) => makeFlightOffer(b, n));
+      const searchId = `S-${hex(6)}`; state.flightSearches.set(searchId, { request: b, offers, expiresAt: now() + 20 * 60000 });
+      return json(res, 200, { offers, meta: { searchId, expiresAt: now() + 20 * 60000, currency: 'USD' } });
+    }
+    const offerMatch = path.match(/^\/flights\/offers\/([^/]+)\/([^/]+)$/);
+    if (offerMatch && req.method === 'GET') {
+      const s = state.flightSearches.get(decodeURIComponent(offerMatch[1])); const offer = s?.offers.find((o) => o.id === decodeURIComponent(offerMatch[2]));
+      if (!offer) return fail(res, 404, 'notFound');
+      return json(res, 200, { offer });
+    }
+    if (path === '/flights/quote' && req.method === 'POST') {
+      const b = parse(); const s = state.flightSearches.get(b.searchId); const offer = s?.offers.find((o) => o.id === b.offerId);
+      if (!offer) return json(res, 200, { price: null, changed: false, previous: null, unavailable: true });
+      return json(res, 200, { price: offer.price, changed: false, previous: null, unavailable: false });
+    }
+
     // ---- auth ----
     if (path === '/auth/sign-up' && req.method === 'POST') {
       const b = parse(); const email = String(b.email ?? '').toLowerCase();
@@ -171,10 +211,24 @@ export function startContractServer({ allowOrigin = null, port = 0, urlTtlMs = 5
       const existing = D.bookings.find((x) => x.id === b.reference); if (existing) return json(res, 200, { booking: existing });
       const tripId = `trip_${hex(4)}`; const dest = b.offer?.legs?.[0]?.to ?? null; const supervisorId = b.attribution?.supervisor ?? null;
       D.trips.push({ id: tripId, customerId: me.profile.id, titleAr: dest?.cityAr ?? b.context?.destination ?? 'رحلة', titleEn: dest?.cityEn ?? b.context?.destination ?? 'Trip', destination: dest ? { code: dest.code, cityAr: dest.cityAr, cityEn: dest.cityEn, countryAr: dest.countryAr ?? '', countryEn: dest.countryEn ?? '' } : { code: '', cityAr: '', cityEn: '', countryAr: '', countryEn: '' }, startDate: b.offer?.legs?.[0]?.departAt?.slice(0, 10) ?? b.context?.dates?.depart ?? null, endDate: b.offer?.legs?.at(-1)?.arriveAt?.slice(0, 10) ?? b.context?.dates?.return ?? null, services: [b.context?.service ?? 'flights'], status: 'upcoming', bookingIds: [b.reference], travellers: (b.context?.travellers?.adults ?? 1) + (b.context?.travellers?.children ?? 0) + (b.context?.travellers?.infants ?? 0), supervisorId, createdAt: iso(now()) });
-      const booking = { id: b.reference, customerId: me.profile.id, tripId, service: b.context?.service ?? 'flights', status: 'confirmed', paymentStatus: b.payment?.status === 'paid' ? 'paid' : 'unpaid', amount: 0, currency: 'USD', supervisorId, ticketed: false, createdAt: iso(now()), detail: { route: b.offer ? b.offer.legs.map((l) => `${l.from.code} → ${l.to.code}`).join(' · ') : '', travellers: 1 } };
+      // Stage 16C: the offer's own revalidated price is the authoritative amount, same as the real backend —
+      // never a client-submitted total. Stage 16B: payment status is never read from the client either.
+      const booking = { id: b.reference, customerId: me.profile.id, tripId, service: b.context?.service ?? 'flights', status: 'confirmed', paymentStatus: 'unpaid', amount: b.offer?.price?.total ?? 0, currency: b.offer?.price?.currency ?? 'USD', supervisorId, ticketed: false, createdAt: iso(now()), detail: { route: b.offer ? b.offer.legs.map((l) => `${l.from.code} → ${l.to.code}`).join(' · ') : '', travellers: 1 } };
       D.bookings.push(booking);
       if (supervisorId && !me.profile.attribution) me.profile.attribution = { supervisorId, source: 'booking', at: iso(now()) };   // backend-owned attribution, set once
       return json(res, 201, { booking });
+    }
+    // ---- Stage 16B/16C: a minimal, always-succeeding payment intent + supplier booking, the same reason the
+    // /flights/* stand-in above exists — so the production adapter's full journey (payment-intent call, then
+    // reading back the real ticketed/flightBooking state) can be verified here, not just against dev adapters. ----
+    const intentMatch = path.match(/^\/me\/bookings\/([^/]+)\/payment-intent$/);
+    if (intentMatch && req.method === 'POST') {
+      const bkg = D.bookings.find((x) => x.id === decodeURIComponent(intentMatch[1])); if (!bkg) return fail(res, 404, 'notFound');
+      if (bkg.paymentStatus === 'paid') return fail(res, 409, 'conflict');
+      bkg.paymentStatus = 'paid'; bkg.ticketed = true;
+      const payment = { id: `pay_${hex(4)}`, bookingId: bkg.id, at: iso(now()), amount: bkg.amount, currency: bkg.currency, status: 'paid', reference: `CTPAY-${hex(3)}`, methodAr: 'دفع تجريبي (نموذج العقد)', methodEn: 'Contract test payment', verifiedAt: iso(now()), failureCode: null };
+      D.payments.push(payment);
+      return json(res, 201, { payment, client: { dev: true }, ticketed: true, flightBooking: { status: 'confirmed', reference: `CTPNR-${hex(3)}`, failureReason: null, updatedAt: iso(now()) } });
     }
     if (path === '/me/travellers' && req.method === 'GET') return json(res, 200, { travellers: D.travellers });
     if (path === '/me/travellers' && req.method === 'POST') { const b = parse(); const t = { id: `trv_${hex(4)}`, firstName: b.firstName, lastName: b.lastName, dob: b.dob, gender: b.gender, nationality: b.nationality, passport: b.passport, passportExpiry: b.passportExpiry }; D.travellers.push(t); return json(res, 201, { traveller: t }); }
