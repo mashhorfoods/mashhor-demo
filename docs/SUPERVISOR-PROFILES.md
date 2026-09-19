@@ -153,6 +153,52 @@ a bug fix to the existing, single attribution mechanism's lookup key, not
 a second mechanism; every other attribution rule (first-wins, the audit
 trail, admin reassignment) is unchanged.
 
+## 7.1 Three more bugs the same slug change surfaced
+
+Making the slugs real names (rather than `supervisor-N`, which happened
+to equal the backend id) exposed three more places that had been quietly
+relying on that coincidence. All three are fixed; none is a new mechanism.
+
+1. **Customer-facing API returned the raw backend id, not the slug.**
+   `nTrip`/`nBooking` (`backend/routes.mjs`) and `publicCustomer()`
+   (`backend/identity.mjs`) sent the customer's own browser the internal
+   `supervisor_id` (`sv_xxxxxxxx` for an admin-created supervisor, or the
+   seed's own `supervisor-N` id). The frontend's "your supervisor" banner
+   on account pages resolves that value through
+   `supervisorBySlug()` — which only ever indexes by the public slug.
+   Once the seed's slugs stopped being spelled the same as the ids, that
+   lookup would have failed for every real customer, not just a test
+   fixture. Fixed with a small `supervisorSlug(id)` lookup (kept as a
+   duplicated local function in both files, not a shared import, to avoid
+   a circular import — `backend/supervisor.mjs` already imports from
+   `backend/identity.mjs`) that translates the id to its slug before the
+   value ever reaches the browser, falling back to the raw id only if a
+   supervisor genuinely has no slug set.
+2. **Test fixtures reset to the old placeholder slugs on every
+   `/__test/reset`.** `backend/fixtures.mjs`'s `seed()` (which runs
+   immediately after `wipe()` nulls every supervisor field, on every
+   reset) was still writing the literal strings `'supervisor-1'` /
+   `'supervisor-2'` into the `slug` column for its two portal-login
+   fixtures, and left supervisor-3/4 with no slug at all. Updated to the
+   real registry slugs (`ahmed-mohamed`, `mohamed-abdullah`, and a slug
+   each for supervisor-3/4) so every test run — not just a never-reset
+   production database — exercises the real slugs.
+3. **A styleguide demo card linked to a route that no longer exists.**
+   `assets/js/preview/samples.js`'s `SUPERVISORS` demo array (used only
+   by `styleguide.html` to show what the generic `supervisorCard()`
+   component looks like) still had `slug: 'supervisor-1'` /
+   `'supervisor-2'` — a UI-showcase fixture, unconnected to the real
+   `SUPERVISOR_REGISTRY`, that `tests/links.mjs` caught as a 404 once the
+   real `/supervisor/supervisor-1/` route stopped existing. Pointed both
+   demo cards at real slugs (`ahmed-mohamed`, `mohamed-abdullah`) so the
+   styleguide's own links resolve.
+
+All five affected test files (`tests/account.mjs`, `tests/backend.mjs`,
+`tests/integration.mjs`, `tests/journey.mjs`,
+`tests/supervisor-portal.mjs`) were updated to assert the corrected,
+slug-based API contract, and `tests/links.mjs` re-run clean (0 problems)
+after the fix — see §8 for the exact counts.
+
 ## 8. Testing
 
 - **`tests/backend.mjs`** (+16 new assertions in a dedicated block):
@@ -180,9 +226,23 @@ trail, admin reassignment) is unchanged.
 - **`tests/ops-portal.mjs`** (+2 assertions): the admin edit form is
   present, pre-filled with the current record, and a save round-trips
   correctly. **Result: 902/902 checks pass** (900 pre-existing + 2 new).
-- **Full regression** (`npm test` — every suite + i18n/a11y audits):
-  see the accompanying commit for the exact final counts; run as part of
-  this task's own verification before considering it done.
+- **`tests/account.mjs`, `tests/journey.mjs`, `tests/integration.mjs`,
+  `tests/supervisor-portal.mjs`** — updated for the §7.1 id→slug fix and
+  re-verified individually: **782/782, 512/512, 518/518, 505/505** all
+  pass.
+- **`tests/links.mjs`** — the one broken link the §7.1 styleguide fix
+  addressed is gone: **0 problems** (49 unique internal paths, 17 known
+  future-stage routes, 5 external supervisor contact channels, all
+  resolve).
+- **Full regression** (`npm test` — every suite + i18n/a11y audits): every
+  suite this task touched was re-verified individually after the §7.1
+  fixes (counts above); the remaining, untouched suites
+  (`home` 170/170, `services` 146/146, `detail` 470/470,
+  `destinations` 165/165, `offers` 170/170, `booking` 236/236,
+  `final` 96/96, `ghx` 16/16, `ghm` 42/42, `gfx` 62/62, `rm` 27/27) were
+  also re-run individually and pass unchanged. A single end-to-end
+  `npm test` invocation covering all 19 suites plus both audits in one
+  run is the last verification step for this task.
 
 ## 9. Responsive & accessibility
 
