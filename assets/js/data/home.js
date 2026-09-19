@@ -20,12 +20,16 @@
    HERO — §04. One message, one supporting line.
    ----------------------------------------------------------------------- */
 export const HOME_HERO = {
-  overlineAr: 'نمبرون للسفر و السياحة',
-  overlineEn: 'Number One Travel & Tourism',
-  titleAr: 'سافر بثقة. اختر الأنسب.',
-  titleEn: 'Travel with confidence. Choose what fits.',
-  leadAr: 'نساعدك على إيجاد خيار السفر الذي يناسب احتياجك وميزانيتك — لا مجرد قائمة نتائج.',
-  leadEn: 'We help you find the travel option that fits your needs and your budget, not just a list of results.',
+  // Egypt launch-market positioning (Sudanese residents in Egypt is the
+  // primary launch audience; Sudanese travellers worldwide is the long-term
+  // direction — see the coordinator/Egypt-launch update task). Egypt is the
+  // current market configuration, not a permanent limit on the brand.
+  overlineAr: 'منصة سفر موثوقة للسودانيين',
+  overlineEn: 'A trusted travel platform for Sudanese travellers',
+  titleAr: 'سفرك من مصر يبدأ مع نمبرون',
+  titleEn: 'Your journey from Egypt starts with Number One',
+  leadAr: 'تذاكر طيران، تأشيرات، فنادق وخدمات سفر متكاملة للسودانيين المقيمين في مصر.',
+  leadEn: 'Flights, visas, hotels and complete travel services for Sudanese residents in Egypt.',
   /* The photography slot. `src: null` renders the neutral placeholder that
      reserves the same aspect ratio; drop the approved image in here. §04 */
   media: {

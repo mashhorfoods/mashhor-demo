@@ -43,6 +43,7 @@
 
   .c-hero__search { margin-block-start: var(--space-32); }
   .c-hero__search .c-search { box-shadow: var(--shadow-lg); }
+  .c-hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-12); }
   .c-hero__trust { display: flex; flex-wrap: wrap; gap: var(--space-12) var(--space-24); }
 
   /* Phone: copy, then the search (it must stay within the first thumb reach),

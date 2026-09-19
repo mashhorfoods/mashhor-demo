@@ -36,6 +36,12 @@ export function heroCopy(hero = HOME_HERO) {
     el('p', { class: 't-overline' }, pick(hero, 'overline')),
     el('h1', { class: 't-display c-hero__title', id: 'hero-title' }, pick(hero, 'title')),
     el('p', { class: 'c-hero__lead' }, pick(hero, 'lead')),
+    el('div', { class: 'c-hero__actions' }, [
+      // Not c-btn--primary: the site caps visible primaries at 3 (header,
+      // search, final CTA) — this stays visually strong without competing.
+      el('a', { class: 'c-btn c-btn--secondary-brand c-btn--sm', href: '#booking', dataset: { homeAction: 'hero-book' } }, t('home.hero.cta.primary')),
+      el('a', { class: 'c-btn c-btn--tertiary c-btn--sm', href: route('supervisors/') }, t('home.hero.cta.secondary')),
+    ]),
     el('ul', { class: 'c-trust-list c-hero__trust', role: 'list' }, hero.trust.map((key) =>
       el('li', { class: 'c-trust-item' }, [icon('no-check-circle', { size: 'sm' }), el('span', {}, t(key))]))),
   ]);
@@ -346,6 +352,13 @@ export function mountHome({
   // change and the button is static markup, so a listener would accumulate.
   const book = qs('[data-home-action="book"]', root);
   if (book) book.onclick = (event) => {
+    event.preventDefault();
+    search.no.select('flights');
+    scrollToSearch();
+  };
+  // ---- Hero CTA: same "start booking" action, from the top of the page.
+  const heroBook = qs('[data-home-action="hero-book"]', root);
+  if (heroBook) heroBook.onclick = (event) => {
     event.preventDefault();
     search.no.select('flights');
     scrollToSearch();
