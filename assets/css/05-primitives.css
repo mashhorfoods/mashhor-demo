@@ -305,6 +305,9 @@
        width/height attributes, which reserve the right box per variant and stop
        the header reflowing on first paint. */
     object-fit: contain;
+    /* So the header's scrolled-state logo shrink (12-header.css) reads as one
+       smooth motion with the bar's own padding transition, not a small jump. */
+    transition: block-size var(--duration-base) var(--ease-standard);
   }
   .c-logo--sm { --logo-size: 38px; }
   .c-logo--lg { --logo-size: 84px; }

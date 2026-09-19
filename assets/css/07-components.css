@@ -312,4 +312,53 @@
   .c-breadcrumb__sep { color: var(--color-gray-400); }
   .c-breadcrumb__link:hover { color: var(--color-text-brand); text-decoration: underline; }
 
+  /* ======================================================================
+     NEWSLETTER — reusable subscription card. Redesign §4. A two-zone
+     surface (photo + dark content panel) built entirely from existing
+     tokens: same overflow-hidden/radius/shadow language as .c-card, same
+     inverse surface .l-section--inverse already uses, --color-primary-light
+     for the one accent line instead of a new colour. No new component
+     system: .c-field / .c-choice / .c-btn underneath are the same ones
+     booking and account already use.
+     ==================================================================== */
+  .c-newsletter {
+    display: grid;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    background-color: var(--color-bg-inverse);
+  }
+  .c-newsletter__media { position: relative; min-block-size: 14rem; }
+  .c-newsletter__media img { inline-size: 100%; block-size: 100%; object-fit: cover; display: block; }
+  .c-newsletter__panel {
+    display: flex; flex-direction: column; gap: var(--space-16);
+    padding: var(--space-32);
+    color: var(--color-text-inverse);
+  }
+  .c-newsletter .t-overline { color: var(--color-primary-light); }
+  .c-newsletter__title { font-size: var(--text-h2); font-weight: var(--weight-semibold); color: var(--color-text-inverse); }
+  .c-newsletter__text { color: rgb(255 255 255 / 0.75); max-inline-size: var(--measure); }
+  .c-newsletter__form { max-inline-size: 28rem; }
+  /* Inside the dark panel the shared .c-field/.c-choice controls need their
+     labels and hairlines to read on charcoal, not on the light-mode default. */
+  .c-newsletter__panel .c-field__label,
+  .c-newsletter__panel .c-choice__text { color: var(--color-text-inverse); }
+  .c-newsletter__panel .c-field__control {
+    background-color: rgb(255 255 255 / 0.06);
+    border-color: rgb(255 255 255 / 0.2);
+    color: var(--color-text-inverse);
+  }
+  .c-newsletter__panel .c-field__control::placeholder { color: rgb(255 255 255 / 0.5); }
+  .c-newsletter__panel .c-choice__input { border-color: rgb(255 255 255 / 0.35); }
+  .c-newsletter__panel .c-state__title { color: var(--color-text-inverse); }
+  .c-newsletter__panel .c-state__text { color: rgb(255 255 255 / 0.75); }
+  /* --color-error-fg is tuned for AA on white (§ tokens); on this dark panel
+     the same red family's lightest step keeps the error legible instead. */
+  .c-newsletter__panel .c-field__error { color: var(--_red-200); }
+
+  @media (min-width: 48em) {
+    .c-newsletter { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+    .c-newsletter__media { min-block-size: 100%; }
+  }
+
 }

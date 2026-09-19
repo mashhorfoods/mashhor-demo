@@ -81,6 +81,11 @@
     color: var(--color-text-inverse);
   }
   .l-section--inverse :is(h1,h2,h3,h4) { color: var(--color-text-inverse); }
+  /* A fourth, deliberately rare step in the section rhythm (white → subtle
+     gray → white → …): the same red-tinted surface a brand-outlined button
+     already hovers to, just as a section wash. Text stays the normal
+     foreground colour — only the background carries the accent. */
+  .l-section--brand { background-color: var(--color-surface-brand); }
 
   /* ---- Stack — vertical rhythm between siblings. §08 -------------------- */
   .l-stack { display: flex; flex-direction: column; gap: var(--stack-gap, var(--space-16)); }

@@ -27,6 +27,8 @@ import { serviceCard, destinationCard, offerCard, mediaPlaceholder } from './car
 import { supervisorCard } from './supervisor.js';
 import { searchWidget } from './search.js';
 import { stateRegion, stateBlock, skeletonService, skeletonCard } from './states.js';
+import { newsletterCard } from './newsletter.js';
+import { imageSrc } from '../data/images.js';
 
 /* ---------------------------------------------------------------------------
    HERO — copy, media slot, booking entry. §04
@@ -291,6 +293,9 @@ export function mountHome({
   render(mount('values'), valueList());
   render(mount('choose'), choose);
   render(mount('journey'), journeySteps());
+  render(mount('newsletter'), newsletterCard({
+    image: { src: imageSrc('destinations/cairo'), altAr: 'القاهرة، مصر', altEn: 'Cairo, Egypt' },
+  }));
 
   // ---- Dynamic regions — every one owns all five states. §15
   const emptyState = (key, action) => () => stateBlock({

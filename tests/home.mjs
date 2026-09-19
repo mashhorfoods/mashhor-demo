@@ -65,7 +65,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
     ok(`${T} no h-scroll`, !r.hScroll);
     ok(`${T} one h1`, r.h1 === 1);
     ok(`${T} heading order`, r.jumps === 0, `${r.jumps}`);
-    ok(`${T} section order`, r.order.join(',') === 'hero-title,services-title,why-title,choose-title,destinations-title,offers-title,journey-title,team-title,support-title,cta-title', r.order.join(','));
+    ok(`${T} section order`, r.order.join(',') === 'hero-title,services-title,why-title,choose-title,destinations-title,offers-title,journey-title,team-title,newsletter-title,support-title,cta-title', r.order.join(','));
     ok(`${T} header + footer present, footer CTA off`, r.header && r.footer && !r.footerCta);
     ok(`${T} 8 search categories`, r.tabs === 8, `${r.tabs}`);
     ok(`${T} trip type control`, r.segmented === 3);
