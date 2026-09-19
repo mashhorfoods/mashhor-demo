@@ -427,6 +427,8 @@ export default {
     'home.offers.empty.title': 'No offers published right now',
     'home.offers.empty.text': 'Ask for a package built for you instead of waiting for an offer.',
     'home.offers.empty.action': 'Request a package',
+    'home.providers.title': 'Airline Providers',
+    'home.providers.text': 'Book your flights through the airline providers available on Number One Travel & Tourism.',
     'home.team.overline': 'Our team',
     'home.team.title': 'Your travel coordinators',
     'home.team.text': 'The Number One team helps you choose the right trip and follows your journey from Egypt to your destination.',

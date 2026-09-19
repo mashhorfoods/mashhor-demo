@@ -427,6 +427,8 @@ export default {
     'home.offers.empty.title': 'لا توجد عروض منشورة حالياً',
     'home.offers.empty.text': 'اطلب باقة مصمّمة لك بدل انتظار عرض.',
     'home.offers.empty.action': 'اطلب باقة',
+    'home.providers.title': 'شركات الطيران',
+    'home.providers.text': 'احجز رحلتك عبر شركات الطيران المتاحة من خلال نمبرون للسفر والسياحة.',
     'home.team.overline': 'فريقنا',
     'home.team.title': 'منسقو رحلتك',
     'home.team.text': 'فريق نمبرون يساعدك في اختيار الرحلة الأنسب ومتابعة تفاصيل سفرك من مصر إلى وجهتك.',

@@ -45,6 +45,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
         dests: document.querySelectorAll('[data-home=destinations] .c-dest').length,
         offers: document.querySelectorAll('[data-home=offers] .c-offer').length,
         offerPrices: document.querySelectorAll('[data-home=offers] .t-price').length,
+        providers: document.querySelectorAll('[data-home=providers] .c-provider-card').length,
         supportPanels: document.querySelectorAll('[data-home=support] .c-support__panel').length,
         placeholderContacts: document.querySelectorAll('a[href^="tel:"], a[href*="wa.me"], a[href^="mailto:"]').length,
         placeholderText: /\+249|wa\.me|XXXX/.test(document.body.innerText),
@@ -63,7 +64,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
     ok(`${T} no h-scroll`, !r.hScroll);
     ok(`${T} one h1`, r.h1 === 1);
     ok(`${T} heading order`, r.jumps === 0, `${r.jumps}`);
-    ok(`${T} section order`, r.order.join(',') === 'hero-title,choose-title,destinations-title,services-title,team-title,offers-title,newsletter-title,support-title', r.order.join(','));
+    ok(`${T} section order`, r.order.join(',') === 'hero-title,choose-title,destinations-title,services-title,team-title,offers-title,providers-title,newsletter-title,support-title', r.order.join(','));
     ok(`${T} header + footer present, footer CTA on`, r.header && r.footer && r.footerCta);
     ok(`${T} 8 search categories`, r.tabs === 8, `${r.tabs}`);
     ok(`${T} trip type control`, r.segmented === 3);
@@ -72,6 +73,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
     ok(`${T} 5 priorities`, r.priorities === 5);
     ok(`${T} 6 destinations`, r.dests === 6);
     ok(`${T} 3 offers, no invented price`, r.offers === 3 && r.offerPrices === 0);
+    ok(`${T} 3 airline providers`, r.providers === 3, `${r.providers}`);
     ok(`${T} support panels`, r.supportPanels === 2);
     ok(`${T} no placeholder contact info`, r.placeholderContacts === 0 && !r.placeholderText);
     ok(`${T} alt on every img`, r.imgsNoAlt === 0);
