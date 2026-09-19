@@ -20,9 +20,11 @@ import {
   HOME_HERO, HOME_SERVICES, HOME_VALUES, HOME_PRIORITIES,
   HOME_DESTINATIONS, HOME_OFFERS, HOME_JOURNEY, HOME_SUPPORT,
 } from '../data/home.js';
+import { SUPERVISOR_REGISTRY } from '../data/supervisors.js';
 import { icon, setButtonState, routeGraphic } from './ui.js';
 import { buildContext, validate, saveContext, continueUrl, applyEntryParams } from '../core/booking.js';
 import { serviceCard, destinationCard, offerCard, mediaPlaceholder } from './cards.js';
+import { supervisorCard } from './supervisor.js';
 import { searchWidget } from './search.js';
 import { stateRegion, stateBlock, skeletonService, skeletonCard } from './states.js';
 
@@ -194,6 +196,15 @@ export const offerGrid = (list = HOME_OFFERS) =>
     el('div', { class: 'l-span-4@md l-span-4@lg' }, offerCard(o))));
 
 /* ---------------------------------------------------------------------------
+   OUR TEAM — the Number One Travel Coordinators. §07.5. Reuses the same
+   supervisorCard the /supervisors/ directory draws: one component, two
+   listings, no duplicate template.
+   ------------------------------------------------------------------------ */
+export const teamGrid = (list = SUPERVISOR_REGISTRY.filter((s) => s.status === 'active')) =>
+  el('div', { class: 'l-grid' }, list.map((s) =>
+    el('div', { class: 'l-span-4@md l-span-4@lg' }, supervisorCard(s))));
+
+/* ---------------------------------------------------------------------------
    HOW WE HELP — the numbered journey. §10
    ------------------------------------------------------------------------ */
 export function journeySteps(steps = HOME_JOURNEY) {
@@ -252,6 +263,7 @@ export function mountHome({
   root = document,
   load = async () => ({
     services: HOME_SERVICES, destinations: HOME_DESTINATIONS, offers: HOME_OFFERS,
+    team: SUPERVISOR_REGISTRY.filter((s) => s.status === 'active'),
     support: HOME_SUPPORT, channels: liveChannels(),
   }),
   onSearchSubmit = null,
@@ -295,6 +307,10 @@ export function mountHome({
       loading: () => el('div', { class: 'l-grid' }, Array.from({ length: 3 }, () => el('div', { class: 'l-span-4@md l-span-4@lg' }, skeletonCard()))),
       empty: emptyState('offers', { label: t('home.offers.empty.action'), href: route('help/contact/'), variant: 'c-btn--primary' }),
     }),
+    team: stateRegion(mount('team'), {
+      loading: () => el('div', { class: 'l-grid' }, Array.from({ length: 3 }, () => el('div', { class: 'l-span-4@md l-span-4@lg' }, skeletonCard()))),
+      empty: emptyState('team', { label: t('sup.cta.book'), href: route('book/'), variant: 'c-btn--primary' }),
+    }),
     support: stateRegion(mount('support'), {
       loading: () => el('div', { class: 'c-support' }, [skeletonService(), el('span'), skeletonService()]),
       empty: () => stateBlock({
@@ -319,6 +335,7 @@ export function mountHome({
     fill(regions.services, data.services, (list) => servicesGrid(list));
     fill(regions.destinations, data.destinations, destinationGrid);
     fill(regions.offers, data.offers, offerGrid);
+    fill(regions.team, data.team, teamGrid);
     if (data.support) regions.support.content(supportPanels(data.support, data.channels ?? liveChannels()));
     else regions.support.empty();
   };

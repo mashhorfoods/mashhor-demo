@@ -41,16 +41,19 @@ const COLLECTIONS = [
     noindex: false,
   },
   {
-    // Stage 10.10 — one public profile per supervisor. The static title is
-    // neutral until the business supplies the name; the template sets the
-    // real one at runtime. Every door on the page carries ?supervisor=<slug>.
+    // Stage 10.10 — one public profile per Number One Travel Coordinator (the
+    // customer-facing role; internal dir/route/attribution naming stays
+    // `supervisor`, unchanged by the coordinator-update task). The static
+    // title is neutral until the business supplies the name; the template
+    // sets the real one at runtime. Every door on the page carries
+    // ?supervisor=<slug>.
     // noindex: false since the five launch profiles (assets/js/data/supervisors.js) now carry real content —
-    // DEMO / PLACEHOLDER SUPERVISOR DATA, not real employees, but genuinely public per the supervisor-profiles
+    // DEMO / PLACEHOLDER COORDINATOR DATA, not real employees, but genuinely public per the supervisor-profiles
     // brief §12; do not flip back to true without a reason, and re-check whether the registry still needs it if a
     // future record ever ships genuinely blank again (name/bio null).
     dir: 'supervisor', records: SUPERVISOR_REGISTRY, attr: 'profile', mount: 'mountSupervisor', module: 'supervisor', handle: 'supervisor',
-    title: (s) => s.nameAr ?? 'مشرف نمبرون', description: (s) => s.bioAr ?? 'مشرف من نمبرون للسفر و السياحة يساعدك على اختيار الخيار المناسب ويتابع حجزك مع فريق نمبرون.',
-    og: (s) => s.bioAr ?? 'مشرف من نمبرون للسفر و السياحة.', heroLabel: 'profile-title', current: null,
+    title: (s) => s.nameAr ?? 'منسق نمبرون', description: (s) => s.bioAr ?? 'منسق رحلات من نمبرون للسفر و السياحة يساعدك على اختيار الخيار المناسب ويتابع حجزك مع فريق نمبرون.',
+    og: (s) => s.bioAr ?? 'منسق رحلات من نمبرون للسفر و السياحة.', heroLabel: 'profile-title', current: null,
     search: (s) => `book/?supervisor=${s.slug}`,
     sections: ['about', 'services', 'trust', 'contact', 'discovery'],
     noindex: false,

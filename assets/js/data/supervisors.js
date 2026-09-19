@@ -1,13 +1,18 @@
 /* ============================================================================
-   DATA / SUPERVISORS — the one registry of Number One's travel supervisors.
-   Stage 10.10
+   DATA / SUPERVISORS — the one registry of Number One's travel coordinators
+   (customer-facing role: "Number One Travel Coordinator" / "منسق رحلات").
+   Stage 10.10; business role corrected in the coordinator-update task —
+   the internal record shape, route segment and `supervisor` naming are
+   unchanged (see the replacement procedure below), only the public title
+   and copy shown to customers changed.
 
-   A supervisor is a person inside Number One, never a brand of their own:
+   A coordinator is a person inside Number One, never a brand of their own:
    the record carries personal FACTS only — no colour, no logo, no theme,
-   no rating, no statistic. Every surface that shows a supervisor reads
-   THIS file: the public profile (supervisor/<slug>/), the booking
-   attribution chip, and later the supervisor dashboard and the admin
-   system, which will edit these same fields.
+   no rating, no statistic. They are customer-facing support staff, not
+   platform administrators: no login, no dashboard, no commission UI is
+   exposed to them. Every surface that shows a coordinator reads THIS
+   file: the public profile (supervisor/<slug>/), the booking attribution
+   chip, and the admin system, which edits these same fields.
 
    Shape of a record — the contract an admin surface will edit:
 
@@ -33,7 +38,7 @@ import { SERVICE_REGISTRY } from './services.js';
 import { TRAVEL_PURPOSES } from './destinations.js';
 
 export const SUPERVISOR_STATUSES = {
-  active:   { id: 'active',   icon: 'no-shield',    labelAr: 'مشرف معتمد',     labelEn: 'Verified supervisor' },
+  active:   { id: 'active',   icon: 'no-shield',    labelAr: 'منسق معتمد',     labelEn: 'Verified coordinator' },
   inactive: { id: 'inactive', icon: 'no-pending',   labelAr: 'غير متاح حالياً', labelEn: 'Currently unavailable' },
 };
 
@@ -66,7 +71,7 @@ const DEFAULT_SERVICES = ['flights', 'hotels', 'visa', 'packages', 'umrah', 'med
    the backend's OWN slug column, not this file. */
 const launch = (n, rec) => ({
   id: `sup-${n}`, slug: rec.slug, status: 'active', placeholder: true,
-  nameAr: rec.nameAr, nameEn: rec.nameEn, titleAr: 'مشرف سفر', titleEn: 'Travel Supervisor',
+  nameAr: rec.nameAr, nameEn: rec.nameEn, titleAr: 'منسق رحلات', titleEn: 'Travel Coordinator',
   bioAr: rec.bioAr, bioEn: rec.bioEn,
   image: { src: `assets/brand/supervisors/${rec.slug}.svg`, altAr: `الصورة الرمزية لـ${rec.nameAr}`, altEn: `Avatar placeholder for ${rec.nameEn}` },
   cityAr: 'الخرطوم', cityEn: 'Khartoum',
