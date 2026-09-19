@@ -234,15 +234,28 @@ after the fix — see §8 for the exact counts.
   addressed is gone: **0 problems** (49 unique internal paths, 17 known
   future-stage routes, 5 external supervisor contact channels, all
   resolve).
-- **Full regression** (`npm test` — every suite + i18n/a11y audits): every
-  suite this task touched was re-verified individually after the §7.1
-  fixes (counts above); the remaining, untouched suites
-  (`home` 170/170, `services` 146/146, `detail` 470/470,
-  `destinations` 165/165, `offers` 170/170, `booking` 236/236,
-  `final` 96/96, `ghx` 16/16, `ghm` 42/42, `gfx` 62/62, `rm` 27/27) were
-  also re-run individually and pass unchanged. A single end-to-end
-  `npm test` invocation covering all 19 suites plus both audits in one
-  run is the last verification step for this task.
+- **Full regression** (`npm test` — every suite + i18n/a11y audits): a
+  single end-to-end run, after every fix above landed, passes clean:
+  `final` 96/96, `ghx` 16/16, `ghm` 42/42, `gfx` 62/62, `home` 170/170,
+  `services` 146/146, `detail` 470/470, `destinations` 165/165,
+  `offers` 170/170, `booking` 236/236, `supervisor` 216/216,
+  `journey` 512/512, `account` 782/782, `integration` 518/518,
+  `backend` 337/337, `supervisor-portal` 505/505, `ops-portal` 902/902,
+  `rm` 27/27, `links` 0 problems, i18n audit 0 untranslated strings,
+  a11y audit **0 unique findings** — all 19 suites plus both audits
+  green in one invocation.
+- **One a11y regression found and fixed by that final run**: the first
+  full-regression pass reported one a11y-audit finding —
+  `heading-jump | h1→h3` on `/supervisors/` at every width and locale.
+  The directory's hero `<h1>` was followed directly by each card's
+  `<h3>` name with no `<h2>` in between (the pattern every other listing
+  page — e.g. `offers/index.html`'s "كل العروض والباقات" — already
+  avoids with its own section `<h2>`). Fixed by adding the same section
+  heading here: a new `sups.list.title` i18n key
+  ("كل مشرفينا" / "All our supervisors") rendered as an `<h2>` right
+  before the card grid in `supervisors/index.html`. Re-verified with a
+  targeted `a11y-audit.mjs` run against just that page (0 findings)
+  before the clean full-regression run above.
 
 ## 9. Responsive & accessibility
 
