@@ -241,16 +241,19 @@
      AIRLINE PROVIDERS — a quiet trust band, not a promo carousel. Same
      white surface + hairline border as .c-card, no hover lift: these are
      not clickable. A logo keeps its own proportions (object-fit: contain,
-     no cropping/stretch/recolor); with none supplied yet, the provider's
-     real name stands in as a plain wordmark instead of a placeholder mark.
+     no cropping/stretch/recolor); a provider with no logo on file falls
+     back to its own real name as a plain wordmark instead of a placeholder
+     mark. A fixed logo row height keeps differently-shaped real logos
+     (a wide wordmark, a squarer badge) sitting at a consistent visual
+     weight, the same way any "as seen in" logo row does.
      ==================================================================== */
   .c-provider-card {
     display: flex; align-items: center; justify-content: center;
-    min-block-size: 6.5rem;
+    min-block-size: 7rem;
     padding: var(--space-24);
     text-align: center;
   }
-  .c-provider-card__logo { max-inline-size: 100%; max-block-size: 3rem; object-fit: contain; }
+  .c-provider-card__logo { max-inline-size: 100%; max-block-size: 3.75rem; object-fit: contain; }
   .c-provider-card__wordmark { font-size: var(--text-h4); font-weight: var(--weight-semibold); color: var(--color-text); }
 
   /* ======================================================================

@@ -10,9 +10,12 @@
      nameAr/nameEn the airline's own name, not a marketing label
      logo          null until the business supplies rights-cleared artwork
                    (a scraped or fan-made logo is worse than no logo: it can
-                   be outdated, distorted or simply wrong). Until then the
-                   card shows the plain name as its own wordmark — a clean
-                   fallback, not a placeholder.
+                   be outdated, distorted or simply wrong). With one supplied,
+                   the card shows it — object-fit: contain, own proportions,
+                   no recolor — instead of the plain-name wordmark fallback.
+                   Files live in assets/images/providers/, cropped to their
+                   own content box (no surrounding dead canvas) but otherwise
+                   untouched — same artwork the business supplied.
 
    ════════════════════════════════════════════════════════════════════════════
    §12 CONTENT RULE — do not upgrade the wording around this list ("partner",
@@ -23,7 +26,7 @@
    ========================================================================= */
 
 export const AIRLINE_PROVIDERS = [
-  { id: 'tarco',    nameAr: 'تاركو للطيران',              nameEn: 'Tarco Aviation', logo: null },
-  { id: 'badr',     nameAr: 'بدر للطيران',                 nameEn: 'Badr Airlines',  logo: null },
-  { id: 'sudanair', nameAr: 'الخطوط الجوية السودانية',     nameEn: 'Sudan Airways',  logo: null },
+  { id: 'tarco',    nameAr: 'تاركو للطيران',          nameEn: 'Tarco Aviation', logo: 'assets/images/providers/tarco.webp' },
+  { id: 'badr',     nameAr: 'بدر للطيران',             nameEn: 'Badr Airlines',  logo: 'assets/images/providers/badr.webp' },
+  { id: 'sudanair', nameAr: 'الخطوط الجوية السودانية', nameEn: 'Sudan Airways',  logo: 'assets/images/providers/sudanair.webp' },
 ];
