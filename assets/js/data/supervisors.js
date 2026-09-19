@@ -60,7 +60,7 @@ const DEFAULT_SERVICES = ['flights', 'hotels', 'visa', 'packages', 'umrah', 'med
 
 /* Five launch records, one per supervisor the business will onboard.
    DEMO / PLACEHOLDER SUPERVISOR DATA — fictional names, safe placeholder
-   contact info, generated abstract avatars: not real employees. Every
+   contact info, stock-style placeholder photos: not real employees. Every
    field here is exactly what an admin edits when the business supplies
    the real five (see docs/SUPERVISOR-PROFILES.md for the replacement
    procedure) — replacing values requires editing these records only,
@@ -73,7 +73,7 @@ const launch = (n, rec) => ({
   id: `sup-${n}`, slug: rec.slug, status: 'active', placeholder: true,
   nameAr: rec.nameAr, nameEn: rec.nameEn, titleAr: 'منسق رحلات', titleEn: 'Travel Coordinator',
   bioAr: rec.bioAr, bioEn: rec.bioEn,
-  image: { src: `assets/brand/supervisors/${rec.slug}.svg`, altAr: `الصورة الرمزية لـ${rec.nameAr}`, altEn: `Avatar placeholder for ${rec.nameEn}` },
+  image: { src: `assets/images/supervisors/${rec.slug}.webp`, altAr: `صورة ${rec.nameAr}`, altEn: `Photo of ${rec.nameEn}` },
   cityAr: 'الخرطوم', cityEn: 'Khartoum',
   languages: ['ar', 'en'], specialties: rec.specialties, services: rec.services,
   phone: rec.phone, whatsapp: rec.phone, email: rec.email,

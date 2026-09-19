@@ -38,10 +38,9 @@ Each carries: bilingual name/title/bio, a city (Khartoum), languages
 (Arabic, English), a set of specialties and services (mapped from the
 brief's specialty text onto the existing `TRAVEL_PURPOSES`/`SERVICE_REGISTRY`
 vocabularies — no new vocabulary was invented), a fictional phone/WhatsApp
-number, a fictional `*.example` e-mail address, and a generated abstract
-avatar (a flat-colour SVG initial, `assets/brand/supervisors/<slug>.svg` —
-no photograph, no real or fabricated identity, "clearly replaceable
-later" per the brief's own instruction).
+number, a fictional `*.example` e-mail address, and a stock-style
+placeholder photo (`assets/images/supervisors/<slug>.webp` — not a real
+employee, "clearly replaceable later" per the brief's own instruction).
 
 ## 2. Exact location of the supervisor data — TWO coordinated stores, not one
 
