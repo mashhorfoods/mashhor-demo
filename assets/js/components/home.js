@@ -17,8 +17,8 @@ import { t, pick, getLocale } from '../core/i18n.js';
 import { route } from '../data/config.js';
 import { liveChannels } from '../data/navigation.js';
 import {
-  HOME_HERO, HOME_SERVICES, HOME_VALUES, HOME_PRIORITIES,
-  HOME_DESTINATIONS, HOME_OFFERS, HOME_JOURNEY, HOME_SUPPORT,
+  HOME_HERO, HOME_SERVICES, HOME_PRIORITIES,
+  HOME_DESTINATIONS, HOME_OFFERS, HOME_SUPPORT,
 } from '../data/home.js';
 import { SUPERVISOR_REGISTRY } from '../data/supervisors.js';
 import { icon, setButtonState, routeGraphic } from './ui.js';
@@ -129,18 +129,6 @@ export function servicesGrid(services = HOME_SERVICES, { expanded = false } = {}
 }
 
 /* ---------------------------------------------------------------------------
-   WHY NUMBER ONE — four values. §06
-   ------------------------------------------------------------------------ */
-export function valueList(values = HOME_VALUES) {
-  return el('ul', { class: 'l-grid', role: 'list' }, values.map((v) =>
-    el('li', { class: 'c-value l-span-4@md l-span-3@lg' }, [
-      el('span', { class: 'c-value__icon' }, icon(v.icon, { size: 'lg' })),
-      el('h3', { class: 'c-value__title' }, pick(v, 'title')),
-      el('p', { class: 'c-value__text' }, pick(v, 'text')),
-    ])));
-}
-
-/* ---------------------------------------------------------------------------
    HELP ME CHOOSE — priorities as pressable chips. §07
    Returns the node and a getter for the selected sort key, which the
    search carries into Stage 11.
@@ -213,9 +201,10 @@ export const teamGrid = (list = SUPERVISOR_REGISTRY.filter((s) => s.status === '
     el('div', { class: 'l-span-4@md l-span-4@lg' }, supervisorCard(s))));
 
 /* ---------------------------------------------------------------------------
-   HOW WE HELP — the numbered journey. §10
+   THE NUMBERED JOURNEY — shared by offers and service-detail pages, each
+   with their own steps. §10
    ------------------------------------------------------------------------ */
-export function journeySteps(steps = HOME_JOURNEY) {
+export function journeySteps(steps) {
   // As many desktop columns as there are steps (three to five), so a
   // five-step journey never strands its last step on a second row.
   return el('ol', { class: 'c-journey', role: 'list', style: `--journey-cols:${Math.min(Math.max(steps.length, 3), 5)}` }, steps.map((s, i) =>
@@ -290,9 +279,7 @@ export function mountHome({
   render(mount('hero-copy'), heroCopy());
   render(mount('hero-media'), heroMedia());
   render(mount('search'), search);
-  render(mount('values'), valueList());
   render(mount('choose'), choose);
-  render(mount('journey'), journeySteps());
   render(mount('newsletter'), newsletterCard({
     image: { src: imageSrc('destinations/cairo'), altAr: 'القاهرة، مصر', altEn: 'Cairo, Egypt' },
   }));
@@ -352,16 +339,9 @@ export function mountHome({
   };
   hydrate();
 
-  // ---- Final CTA: the primary action re-enters the booking flow.
+  // ---- Hero CTA: re-enters the booking flow from the top of the page.
   // Assigned, not addEventListener'd: mountHome runs again on every language
   // change and the button is static markup, so a listener would accumulate.
-  const book = qs('[data-home-action="book"]', root);
-  if (book) book.onclick = (event) => {
-    event.preventDefault();
-    search.no.select('flights');
-    scrollToSearch();
-  };
-  // ---- Hero CTA: same "start booking" action, from the top of the page.
   const heroBook = qs('[data-home-action="hero-book"]', root);
   if (heroBook) heroBook.onclick = (event) => {
     event.preventDefault();

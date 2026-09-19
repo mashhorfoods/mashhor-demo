@@ -41,19 +41,17 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
         segmented: document.querySelectorAll('.c-segmented__input').length,
         fields: Array.from(document.querySelectorAll('.c-search__form:not([hidden]) .c-field__label')).map((l) => l.textContent.trim()),
         services: document.querySelectorAll('[data-home=services] .c-service-card').length,
-        values: document.querySelectorAll('[data-home=values] .c-value').length,
         priorities: document.querySelectorAll('[data-home=choose] .c-choose__option').length,
         dests: document.querySelectorAll('[data-home=destinations] .c-dest').length,
         offers: document.querySelectorAll('[data-home=offers] .c-offer').length,
         offerPrices: document.querySelectorAll('[data-home=offers] .t-price').length,
-        steps: document.querySelectorAll('[data-home=journey] .c-journey__step').length,
         supportPanels: document.querySelectorAll('[data-home=support] .c-support__panel').length,
         placeholderContacts: document.querySelectorAll('a[href^="tel:"], a[href*="wa.me"], a[href^="mailto:"]').length,
         placeholderText: /\+249|wa\.me|XXXX/.test(document.body.innerText),
         footer: !!document.querySelector('.c-gf'), footerCta: !!document.querySelector('.c-gf__cta'),
         header: !!document.querySelector('.c-gh'),
         imgsNoAlt: document.querySelectorAll('img:not([alt])').length,
-        decorativeHidden: Array.from(document.querySelectorAll('.c-hero__route, .u-numeral-watermark, .c-journey__num, .c-support__plus')).every((n) => n.getAttribute('aria-hidden') === 'true'),
+        decorativeHidden: Array.from(document.querySelectorAll('.c-hero__route, .c-support__plus')).every((n) => n.getAttribute('aria-hidden') === 'true'),
         small, targets,
         searchTop: Math.round(document.querySelector('#booking').getBoundingClientRect().top),
         mediaRatio: (() => { const m = document.querySelector('.c-hero__media'); const r = m.getBoundingClientRect(); return +(r.width / r.height).toFixed(2); })(),
@@ -65,24 +63,22 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
     ok(`${T} no h-scroll`, !r.hScroll);
     ok(`${T} one h1`, r.h1 === 1);
     ok(`${T} heading order`, r.jumps === 0, `${r.jumps}`);
-    ok(`${T} section order`, r.order.join(',') === 'hero-title,services-title,why-title,choose-title,destinations-title,offers-title,journey-title,team-title,newsletter-title,support-title,cta-title', r.order.join(','));
-    ok(`${T} header + footer present, footer CTA off`, r.header && r.footer && !r.footerCta);
+    ok(`${T} section order`, r.order.join(',') === 'hero-title,choose-title,destinations-title,services-title,team-title,offers-title,newsletter-title,support-title', r.order.join(','));
+    ok(`${T} header + footer present, footer CTA on`, r.header && r.footer && r.footerCta);
     ok(`${T} 8 search categories`, r.tabs === 8, `${r.tabs}`);
     ok(`${T} trip type control`, r.segmented === 3);
     ok(`${T} flight fields`, r.fields.length >= 6, r.fields.join('|'));
     ok(`${T} 6 featured services`, r.services === 6, `${r.services}`);
-    ok(`${T} 4 values`, r.values === 4);
     ok(`${T} 5 priorities`, r.priorities === 5);
     ok(`${T} 6 destinations`, r.dests === 6);
     ok(`${T} 3 offers, no invented price`, r.offers === 3 && r.offerPrices === 0);
-    ok(`${T} 4 journey steps`, r.steps === 4);
     ok(`${T} support panels`, r.supportPanels === 2);
     ok(`${T} no placeholder contact info`, r.placeholderContacts === 0 && !r.placeholderText);
     ok(`${T} alt on every img`, r.imgsNoAlt === 0);
     ok(`${T} decorative hidden from AT`, r.decorativeHidden);
     ok(`${T} no tiny text`, r.small === 0, `${r.small}`);
     ok(`${T} touch targets ≥40`, r.targets.length === 0, r.targets.slice(0, 4).join(' '));
-    ok(`${T} primaries ≤ 3 (header, search, final CTA)`, r.primaries <= 3, r.primaryTexts.join('|'));
+    ok(`${T} primaries ≤ 3 (header, search)`, r.primaries <= 3, r.primaryTexts.join('|'));
     if (tag === 'mobile') ok(`${T} search within first screen`, r.searchTop < 700, `${r.searchTop}`);
     ok(`${T} title/description localised`, loc === 'ar' ? /نمبرون/.test(r.title) && /نمبرون/.test(r.desc) : /Number One/.test(r.title) && /Number One/.test(r.desc));
     await p.close();
@@ -175,13 +171,6 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
     }, region);
     ok(`${region}: loading/empty/error/success states`, s.loading && s.empty && s.error && s.content, JSON.stringify(s));
   }
-
-  // final CTA re-enters the booking flow
-  await p.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-  await p.click('[data-home-action=book]');
-  await p.waitForTimeout(1200);
-  r = await p.evaluate(() => ({ focused: document.activeElement?.name }));
-  ok('final CTA scrolls to booking entry', r.focused === 'from' && await inView(), JSON.stringify(r));
 
   // the header's search action lands on the hero form
   await p.evaluate(() => window.scrollTo(0, 3000));

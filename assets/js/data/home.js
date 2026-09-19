@@ -53,29 +53,6 @@ import { SERVICE_REGISTRY } from './services.js';
 export const HOME_SERVICES = SERVICE_REGISTRY;
 
 /* --------------------------------------------------------------------------
-   WHY NUMBER ONE — §06. Four values, each one sentence. No numbers, no
-   awards, no superlatives that would need evidence.
-   ----------------------------------------------------------------------- */
-export const HOME_VALUES = [
-  { id: 'trust',      icon: 'no-shield',
-    titleAr: 'الثقة',            titleEn: 'Trust',
-    textAr: 'السعر الذي تراه هو السعر الذي تدفعه، والشروط مكتوبة قبل الحجز لا بعده.',
-    textEn: 'The price you see is the price you pay, and the terms are written before you book, not after.' },
-  { id: 'choice',     icon: 'no-sparkle',
-    titleAr: 'الاختيار الذكي',   titleEn: 'Smart choice',
-    textAr: 'لا نعرض لك كل شيء ونتركك؛ نرشّح الخيار الأنسب لاحتياجك ونقول لماذا.',
-    textEn: 'We do not show you everything and walk away. We flag the option that fits your need, and say why.' },
-  { id: 'simplicity', icon: 'no-check-circle',
-    titleAr: 'البساطة',          titleEn: 'Simplicity',
-    textAr: 'خطوات قليلة وواضحة، من البحث إلى التذكرة، بلا تعقيد وبلا مفاجآت.',
-    textEn: 'A few clear steps from search to ticket, with no complication and no surprises.' },
-  { id: 'complete',   icon: 'no-booking',
-    titleAr: 'الرحلة المتكاملة', titleEn: 'The complete journey',
-    textAr: 'الطيران والإقامة والتأشيرة والمتابعة في مكان واحد ومع فريق واحد.',
-    textEn: 'Flights, stay, visa and follow-up in one place, with one team.' },
-];
-
-/* --------------------------------------------------------------------------
    HELP ME CHOOSE — §07. The priorities a traveller can sort by. `sort` is
    the value Stage 11 receives with the search; the homepage only carries it.
    ----------------------------------------------------------------------- */
@@ -111,25 +88,6 @@ export const HOME_DESTINATIONS = homeDestinations().map((d) => ({ ...d, href: `d
    ----------------------------------------------------------------------- */
 import { homeOffers } from './offers.js';
 export const HOME_OFFERS = homeOffers();
-
-/* --------------------------------------------------------------------------
-   HOW WE HELP — §10. The four-step journey. Order carries meaning here, so
-   the component numbers them.
-   ----------------------------------------------------------------------- */
-export const HOME_JOURNEY = [
-  { id: 'need',    titleAr: 'حدد احتياجك',      titleEn: 'Tell us what you need',
-    textAr: 'وجهة وتاريخ وعدد مسافرين، أو مجرد فكرة.',
-    textEn: 'A destination, a date and who is travelling. Or just an idea.' },
-  { id: 'compare', titleAr: 'ابحث وقارن',       titleEn: 'Search and compare',
-    textAr: 'الخيارات جنباً إلى جنب، بالسعر والمدة والشروط.',
-    textEn: 'Options side by side, by price, duration and terms.' },
-  { id: 'choose',  titleAr: 'اختر الأنسب',      titleEn: 'Choose what fits',
-    textAr: 'نرشّح لك خياراً ونقول لماذا؛ القرار قرارك.',
-    textEn: 'We flag one option and say why. The decision is yours.' },
-  { id: 'book',    titleAr: 'احجز وسافر بثقة',  titleEn: 'Book and travel with confidence',
-    textAr: 'تذكرتك في حسابك، ومختص يتابع معك حتى العودة.',
-    textEn: 'Your ticket in your account, and a specialist with you until you are back.' },
-];
 
 /* --------------------------------------------------------------------------
    HUMAN SUPPORT — §11. Digital booking plus human expertise. Contact
