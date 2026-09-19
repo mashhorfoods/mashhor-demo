@@ -26,7 +26,11 @@
    ========================================================================= */
 
 export const AIRLINE_PROVIDERS = [
-  { id: 'tarco',    nameAr: 'تاركو للطيران',          nameEn: 'Tarco Aviation', logo: 'assets/images/providers/tarco.webp' },
-  { id: 'badr',     nameAr: 'بدر للطيران',             nameEn: 'Badr Airlines',  logo: 'assets/images/providers/badr.webp' },
-  { id: 'sudanair', nameAr: 'الخطوط الجوية السودانية', nameEn: 'Sudan Airways',  logo: 'assets/images/providers/sudanair.webp' },
+  { id: 'tarco',      nameAr: 'تاركو للطيران',              nameEn: 'Tarco Aviation',    logo: 'assets/images/providers/tarco.webp' },
+  { id: 'badr',       nameAr: 'بدر للطيران',                 nameEn: 'Badr Airlines',     logo: 'assets/images/providers/badr.webp' },
+  { id: 'sudanair',   nameAr: 'الخطوط الجوية السودانية',     nameEn: 'Sudan Airways',     logo: 'assets/images/providers/sudanair.webp' },
+  { id: 'egyptair',   nameAr: 'الخطوط الجوية المصرية',       nameEn: 'EgyptAir',          logo: 'assets/images/providers/egyptair.webp' },
+  { id: 'qatar',      nameAr: 'الخطوط الجوية القطرية',       nameEn: 'Qatar Airways',     logo: 'assets/images/providers/qatar.webp' },
+  { id: 'salamair',   nameAr: 'طيران السلام',                nameEn: 'SalamAir',          logo: 'assets/images/providers/salamair.webp' },
+  { id: 'ethiopian',  nameAr: 'الخطوط الجوية الإثيوبية',     nameEn: 'Ethiopian Airlines', logo: 'assets/images/providers/ethiopian.webp' },
 ];
