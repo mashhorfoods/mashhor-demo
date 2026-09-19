@@ -40,7 +40,7 @@ export function heroCopy(hero = HOME_HERO) {
       // Not c-btn--primary: the site caps visible primaries at 3 (header,
       // search, final CTA) — this stays visually strong without competing.
       el('a', { class: 'c-btn c-btn--secondary-brand c-btn--sm', href: '#booking', dataset: { homeAction: 'hero-book' } }, t('home.hero.cta.primary')),
-      el('a', { class: 'c-btn c-btn--tertiary c-btn--sm', href: route('supervisors/') }, t('home.hero.cta.secondary')),
+      el('a', { class: 'c-btn c-btn--inverse c-btn--sm', href: route('supervisors/') }, t('home.hero.cta.secondary')),
     ]),
     el('ul', { class: 'c-trust-list c-hero__trust', role: 'list' }, hero.trust.map((key) =>
       el('li', { class: 'c-trust-item' }, [icon('no-check-circle', { size: 'sm' }), el('span', {}, t(key))]))),

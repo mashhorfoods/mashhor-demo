@@ -64,6 +64,60 @@
     .c-hero__search { margin-block-start: var(--space-8); }
   }
 
+  /* ----------------------------------------------------------------------
+     HERO — full-bleed photo variant. Home only (.c-hero--photo); the
+     boxed-card media above is unchanged for destinations/offers/service
+     heroes, which have no real photograph yet (a neutral placeholder, not
+     a photo, sits in that slot — a dark overlay over a placeholder box
+     would just be a dark rectangle, so this variant is opt-in per page).
+
+     The photo fills the section edge to edge (the section's own height is
+     still whatever its content needs — nothing forces a viewport-height
+     hero). A dark scrim sits between the photo and the text so the copy
+     stays readable over any photograph; :is(h1) and the lead/overline/
+     trust-row colours flip to the inverse palette already used for other
+     dark-ground sections (.l-section--inverse, .c-cta-band).
+     ---------------------------------------------------------------------- */
+  .c-hero--photo .c-hero__media {
+    position: absolute; inset: 0;
+    aspect-ratio: auto; max-block-size: none; border-radius: 0;
+    z-index: 0; pointer-events: none; /* decorative background only — never steals clicks from the header or search */
+  }
+  .c-hero--photo .c-hero__media > img, .c-hero--photo .c-hero__media > [role="img"] {
+    inline-size: 100%; block-size: 100%; object-fit: cover;
+  }
+  .c-hero--photo .c-hero__route { display: none; } /* the dashed route line suits a boxed card, not a full photo */
+  /* A flat wash, not a gradient: the photo's brightness varies a lot from
+     region to region (bright windows one side, people mid-ground, floor
+     below), so a directional fade would leave some text on an
+     under-darkened patch depending on which photo is dropped in. A single
+     opacity strong enough for the brightest plausible photo keeps the
+     text readable everywhere, reusing the same --color-overlay token the
+     modal backdrop and drawer scrim already use for the same job. */
+  .c-hero--photo::after {
+    content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background-color: var(--color-overlay);
+  }
+  /* .c-hero__copy/.c-hero__search need to be lifted above the absolutely
+     positioned media AND the overlay, both of which sit in the same
+     stacking context (nothing between them and .c-hero creates a new
+     one). Giving .c-hero__grid itself a position+z-index instead would
+     make IT the containing block for the media's inset:0 (shrinking the
+     photo to the container's padded width instead of the full section)
+     and would trap the media above the copy inside its own new stacking
+     context regardless of DOM order — position:absolute always outranks
+     unpositioned in-flow content at the same level. Positioning copy and
+     search directly, with a z-index above both media (0) and the
+     overlay (1), avoids both problems. */
+  .c-hero--photo .c-hero__copy,
+  .c-hero--photo .c-hero__search { position: relative; z-index: 2; }
+  .c-hero--photo .c-hero__copy,
+  .c-hero--photo .c-hero__copy :is(h1) { color: var(--color-text-inverse); }
+  .c-hero--photo .c-hero__copy .t-overline { color: rgb(255 255 255 / 0.85); }
+  .c-hero--photo .c-hero__lead { color: rgb(255 255 255 / 0.85); }
+  .c-hero--photo .c-hero__trust,
+  .c-hero--photo .c-hero__trust .c-icon { color: var(--color-text-inverse); }
+
   /* ======================================================================
      VALUE — icon · title · one sentence. "Why Number One". §06
      A quiet list, not a card deck: no border, no shadow, a rule on the
