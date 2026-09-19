@@ -243,17 +243,21 @@
      not clickable. A logo keeps its own proportions (object-fit: contain,
      no cropping/stretch/recolor); a provider with no logo on file falls
      back to its own real name as a plain wordmark instead of a placeholder
-     mark. A fixed logo row height keeps differently-shaped real logos
-     (a wide wordmark, a squarer badge) sitting at a consistent visual
-     weight, the same way any "as seen in" logo row does.
+     mark. Equal-area sizing (providers.js) keeps differently-shaped real
+     logos (a wide wordmark, a squarer badge) at a consistent visual
+     weight, the same way any "as seen in" logo row does — a shared height
+     alone doesn't, since a wide mark still reads far larger than a narrow
+     one at the same height.
      ==================================================================== */
   .c-provider-card {
     display: flex; align-items: center; justify-content: center;
-    min-block-size: 7rem;
+    min-block-size: 7.5rem;
     padding: var(--space-24);
     text-align: center;
   }
-  .c-provider-card__logo { max-inline-size: 100%; max-block-size: 3.75rem; object-fit: contain; }
+  /* block-size/inline-size come from JS (equal-area sizing, see providers.js);
+     these are just the safety ceiling/fallback before that runs. */
+  .c-provider-card__logo { max-inline-size: 100%; max-block-size: 4.75rem; object-fit: contain; }
   .c-provider-card__wordmark { font-size: var(--text-h4); font-weight: var(--weight-semibold); color: var(--color-text); }
 
   /* ======================================================================
