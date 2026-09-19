@@ -347,6 +347,7 @@ export default {
     'sups.hero.overline': 'Our team',
     'sups.hero.title': 'Meet our supervisors',
     'sups.hero.lead': 'A Number One supervisor helps you choose the right trip and follows your booking with you.',
+    'sups.list.title': 'All our supervisors',
     'sups.empty.title': 'No supervisors published yet',
     'sups.empty.text': 'You can still start a booking directly — the Number One team follows up with you.',
     'sups.final.title': "Haven't picked a supervisor yet?",

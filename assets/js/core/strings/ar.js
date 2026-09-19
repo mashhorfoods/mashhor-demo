@@ -347,6 +347,7 @@ export default {
     'sups.hero.overline': 'فريقنا',
     'sups.hero.title': 'تعرّف على مشرفينا',
     'sups.hero.lead': 'مشرف نمبرون يساعدك على اختيار الرحلة المناسبة ويتابع حجزك معك.',
+    'sups.list.title': 'كل مشرفينا',
     'sups.empty.title': 'لا يوجد مشرفون منشورون بعد',
     'sups.empty.text': 'يمكنك بدء الحجز مباشرة، وسيتابع معك فريق نمبرون.',
     'sups.final.title': 'لم تختر مشرفاً بعد؟',
