@@ -21,10 +21,15 @@ export const hash = (password, salt) => scryptSync(password, salt, 32).toString(
 export const same = (a, b) => a.length === b.length && timingSafeEqual(Buffer.from(a), Buffer.from(b));
 export const normEmail = (e) => String(e ?? '').trim().toLowerCase();
 
+// Customer-facing responses expose the supervisor's PUBLIC slug, never the internal backend id — see the identical
+// helper and comment in backend/routes.mjs (nTrip/nBooking); kept as a separate local copy rather than a shared
+// import to avoid a circular import (backend/supervisor.mjs already imports from this file).
+const supervisorSlug = (id) => (id ? (q.get('SELECT slug FROM supervisors WHERE id = ?', id)?.slug ?? id) : null);
 export function publicCustomer(c) {
   if (!c) return null;
+  const supervisorId = supervisorSlug(c.attribution_supervisor);
   return { id: c.id, name: c.name, email: c.email, phone: c.phone, locale: c.locale, image: c.image ?? null,
-    supervisorId: c.attribution_supervisor ?? null, attribution: c.attribution_supervisor ? { supervisorId: c.attribution_supervisor, source: c.attribution_source, at: c.attribution_at } : null,
+    supervisorId, attribution: c.attribution_supervisor ? { supervisorId, source: c.attribution_source, at: c.attribution_at } : null,
     acceptance: c.acceptance_json ? JSON.parse(c.acceptance_json) : null, createdAt: c.created_at };
 }
 export const customerById = (id) => q.get('SELECT * FROM customers WHERE id = ?', id);

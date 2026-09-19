@@ -37,8 +37,8 @@ const empty = () => ({ version: 1, trips: [], bookings: [], travellers: [], docu
 /* ---- The seeded customer's sample records (fictional, labelled dev) ---- */
 function seed(customerId) {
   const d = empty();
-  const trip = (n, o) => ({ id: `trip-dev-${n}`, customerId, supervisorId: 'supervisor-1', createdAt: iso(day(-60)), ...o });
-  const booking = (n, o) => ({ id: `NO-DEV-${n}`, customerId, supervisorId: 'supervisor-1', currency: 'USD', dev: true, ...o });
+  const trip = (n, o) => ({ id: `trip-dev-${n}`, customerId, supervisorId: 'ahmed-mohamed', createdAt: iso(day(-60)), ...o });
+  const booking = (n, o) => ({ id: `NO-DEV-${n}`, customerId, supervisorId: 'ahmed-mohamed', currency: 'USD', dev: true, ...o });
   d.trips = [
     trip('jed', { titleAr: 'رحلة العائلة إلى جدة', titleEn: 'Family trip to Jeddah', destination: { code: 'JED', cityAr: 'جدة', cityEn: 'Jeddah', countryAr: 'السعودية', countryEn: 'Saudi Arabia' }, startDate: dateOnly(21), endDate: dateOnly(28), services: ['flights', 'hotels', 'visa'], status: 'upcoming', bookingIds: ['NO-DEV-F1JED', 'NO-DEV-H1JED', 'NO-DEV-V1JED'], travellers: 4 }),
     trip('ist', { titleAr: 'إسطنبول', titleEn: 'Istanbul', destination: { code: 'IST', cityAr: 'إسطنبول', cityEn: 'Istanbul', countryAr: 'تركيا', countryEn: 'Türkiye' }, startDate: dateOnly(-40), endDate: dateOnly(-33), services: ['flights', 'hotels'], status: 'completed', bookingIds: ['NO-DEV-F2IST', 'NO-DEV-H2IST'], travellers: 2 }),

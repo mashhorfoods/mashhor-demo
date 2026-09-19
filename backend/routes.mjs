@@ -17,8 +17,13 @@ import { searchFlights, getFlightOffer, quoteFlightOffer } from './flights.mjs';
 
 /* ---- row → contract shape ---------------------------------------------- */
 const J = (s, d) => { try { return s ? JSON.parse(s) : d; } catch { return d; } };
-const nTrip = (r) => ({ id: r.id, customerId: r.customer_id, titleAr: r.title_ar, titleEn: r.title_en, destination: J(r.destination_json, null), startDate: r.start_date, endDate: r.end_date, services: J(r.services_json, []), status: r.status, bookingIds: q.all('SELECT id FROM bookings WHERE trip_id = ? AND customer_id = ?', r.id, r.customer_id).map((b) => b.id), travellers: r.travellers, supervisorId: r.supervisor_id, createdAt: r.created_at });
-const nBooking = (r) => ({ id: r.id, customerId: r.customer_id, tripId: r.trip_id, service: r.service, status: r.status, paymentStatus: r.payment_status, amount: r.amount, currency: r.currency, supervisorId: r.supervisor_id, ticketed: !!r.ticketed, createdAt: r.created_at, detail: J(r.detail_json, {}) });
+// Customer-facing responses expose the supervisor's PUBLIC slug, never the internal backend id — the frontend
+// registry (assets/js/data/supervisors.js) only ever recognises a supervisor by slug (supervisorBySlug()), so a raw
+// backend id here would silently fail to resolve to anything on the account pages. Falls back to the raw id only
+// if a supervisor genuinely has no slug yet (can still be attributed to by id, per identity.mjs's validAttribution).
+const supervisorSlug = (id) => (id ? (q.get('SELECT slug FROM supervisors WHERE id = ?', id)?.slug ?? id) : null);
+const nTrip = (r) => ({ id: r.id, customerId: r.customer_id, titleAr: r.title_ar, titleEn: r.title_en, destination: J(r.destination_json, null), startDate: r.start_date, endDate: r.end_date, services: J(r.services_json, []), status: r.status, bookingIds: q.all('SELECT id FROM bookings WHERE trip_id = ? AND customer_id = ?', r.id, r.customer_id).map((b) => b.id), travellers: r.travellers, supervisorId: supervisorSlug(r.supervisor_id), createdAt: r.created_at });
+const nBooking = (r) => ({ id: r.id, customerId: r.customer_id, tripId: r.trip_id, service: r.service, status: r.status, paymentStatus: r.payment_status, amount: r.amount, currency: r.currency, supervisorId: supervisorSlug(r.supervisor_id), ticketed: !!r.ticketed, createdAt: r.created_at, detail: J(r.detail_json, {}) });
 const nDoc = (r) => ({ id: r.id, bookingId: r.booking_id, tripId: r.trip_id, type: r.type, kind: r.kind, status: r.revoked_at ? 'pending' : r.status, title: r.title, size: r.size, contentType: r.content_type, deletable: !!r.deletable, issuedAt: r.issued_at });
 const nPay = (r) => ({ id: r.id, bookingId: r.booking_id, at: r.at, amount: r.amount, currency: r.currency, status: r.status, reference: r.reference, methodAr: r.method_ar, methodEn: r.method_en });
 const nNtf = (r) => ({ id: r.id, kind: r.kind, at: r.at, read: !!r.read, titleAr: r.title_ar, titleEn: r.title_en, textAr: r.text_ar, textEn: r.text_en, href: r.href, bookingId: r.booking_id });

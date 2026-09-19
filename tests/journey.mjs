@@ -12,7 +12,7 @@ const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process
 let pass = 0, fail = 0;
 const ok = (name, cond, note = '') => { if (cond) pass++; else { fail++; console.log(`  ✗ ${name} ${note}`); } };
 const errs = [];
-const SEARCH = 'search/?vertical=flights&tripType=return&from=KRT&to=JED&fromCode=KRT&toCode=JED&depart=2026-10-16&return=2026-10-23&adults=2&children=1&infants=1&cabin=economy&supervisor=supervisor-1';
+const SEARCH = 'search/?vertical=flights&tripType=return&from=KRT&to=JED&fromCode=KRT&toCode=JED&depart=2026-10-16&return=2026-10-23&adults=2&children=1&infants=1&cabin=economy&supervisor=ahmed-mohamed';
 const DOB = { adult: '1990-01-01', child: '2019-01-01', infant: '2025-06-01' };
 const AR = /[؀-ۿ]/;
 
@@ -134,20 +134,20 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
 
 // ================================================================= 3. entry → search → results (URL context, attribution)
 {
-  const { c, p } = await ctx(); await go(p, 'book/?vertical=flights&supervisor=supervisor-2', 'booking');
+  const { c, p } = await ctx(); await go(p, 'book/?vertical=flights&supervisor=mohamed-abdullah', 'booking');
   const F = 'form.c-search__form:not([hidden]) ';
   await p.fill(F + 'input[name=from]', 'KRT'); await p.locator('.c-loc__option:visible').first().click();
   await p.fill(F + 'input[name=to]', 'Jeddah'); await p.locator('.c-loc__option:visible').first().click();
   await p.fill(F + 'input[name=depart]', '2026-11-10'); await p.fill(F + 'input[name=return]', '2026-11-17');
   await p.click(F + 'button[type=submit]'); await p.waitForSelector('.c-summary__actions a.c-btn--primary');
   const href = await p.getAttribute('.c-summary__actions a.c-btn--primary', 'href');
-  ok('entry continues to search/ with codes + supervisor', /\/search\/\?/.test(href) && /fromCode=KRT/.test(href) && /toCode=JED/.test(href) && /supervisor=supervisor-2/.test(href), href);
+  ok('entry continues to search/ with codes + supervisor', /\/search\/\?/.test(href) && /fromCode=KRT/.test(href) && /toCode=JED/.test(href) && /supervisor=mohamed-abdullah/.test(href), href);
   await Promise.all([p.waitForURL(/search\//), p.click('.c-summary__actions a.c-btn--primary')]);
   await p.waitForFunction(() => window.no?.results);
   ok('loading feedback appears immediately', await count(p, '[data-state-region][aria-busy=true], .c-skeleton, .c-loading-block') >= 1 || await count(p, '.c-flight[data-offer]') > 0);
   await p.waitForSelector('.c-flight[data-offer]');
   const j = await journey(p);
-  ok('journey context saved with attribution', j?.context?.originCode === 'KRT' && j?.context?.attribution?.supervisor === 'supervisor-2' && Array.isArray(j?.search?.results));
+  ok('journey context saved with attribution', j?.context?.originCode === 'KRT' && j?.context?.attribution?.supervisor === 'mohamed-abdullah' && Array.isArray(j?.search?.results));
   ok('summary shows the supervisor', /supervisor\//.test(await p.locator('[data-journey=summary] a[href*="supervisor/"]').first().getAttribute('href').catch(() => '')));
   ok('dev data notice visible', await visible(p, '[data-dev=true]'));
   ok('progress marks search current', await text(p, '.c-steps__item[aria-current=step]') !== '' && await count(p, '.c-steps__item') === 7);

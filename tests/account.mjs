@@ -130,7 +130,7 @@ const next = async (p, re) => { await Promise.all([p.waitForURL(re), p.click('.c
 {
   const { c, p } = await ctx(); await devSignIn(p);
   ok('dashboard: identity, next trip with countdown, latest booking, notifications, dev notice', /Demo Customer/.test(await text(p, 'h1')) && await count(p, '[data-region=trip] .c-acct-trip') === 1 && await visible(p, '[data-countdown]') && await count(p, '[data-region=booking] .c-acct-booking') === 1 && /2/.test(await text(p, '[data-region=notifications] [data-unread]')) && await visible(p, '[data-account=notice] [data-dev=true]'));
-  ok('dashboard support entry with supervisor', await count(p, '[data-account=support] a[href*="supervisor/supervisor-1"]') === 1);
+  ok('dashboard support entry with supervisor', await count(p, '[data-account=support] a[href*="supervisor/ahmed-mohamed"]') === 1);
   ok('one dominant primary action on the dashboard', await count(p, '[data-account=main] .c-btn--primary:visible') === 1);
   // trips
   await go(p, 'trips/'); await mainReady(p); await p.waitForSelector('.c-acct-trip');
@@ -141,7 +141,7 @@ const next = async (p, re) => { await Promise.all([p.waitForURL(re), p.click('.c
   await p.fill('#trips-search', 'nothing-here'); ok('no match → state with clear', await count(p, '.c-state--empty [data-action=clear]') === 1); await p.click('[data-action=clear]'); ok('clear restores', await count(p, '.c-acct-trip') === 3);
   await Promise.all([p.waitForURL(/trips\/\?id=trip-dev-jed/), p.locator('[data-trip=trip-dev-jed] a').first().click()]); await mainReady(p);
   ok('trip details: service names rendered', await p.$$eval('.c-acct-service h3', (hs) => hs.every((h) => h.textContent.trim().length > 2)));
-  ok('trip details: every service of the trip in one view, documents, payments, support, supervisor', await count(p, '.c-acct-service') === 3 && await p.$$eval('.c-acct-service', (els) => els.map((e) => e.dataset.service).join()) === 'flights,hotels,visa' && await count(p, '.c-acct-doc') === 5 && await count(p, '#trip-pays dd') === 2 && await count(p, '#trip-support') === 1 && await count(p, '[data-account=main] a[href*="supervisor/supervisor-1"]') >= 1);
+  ok('trip details: every service of the trip in one view, documents, payments, support, supervisor', await count(p, '.c-acct-service') === 3 && await p.$$eval('.c-acct-service', (els) => els.map((e) => e.dataset.service).join()) === 'flights,hotels,visa' && await count(p, '.c-acct-doc') === 5 && await count(p, '#trip-pays dd') === 2 && await count(p, '#trip-support') === 1 && await count(p, '[data-account=main] a[href*="supervisor/ahmed-mohamed"]') >= 1);
   ok('trip details: pending visa document shown as not issued, never claimed', await count(p, '.c-acct-doc[data-doc-status=pending]') === 1 && await count(p, '.c-acct-doc[data-doc-status=pending] a') === 0);
   await go(p, 'trips/?id=trip-dev-nope'); await mainReady(p); ok('unknown trip → not found with a way back', /غير موجود/.test(await text(p, 'h1')) && await count(p, '.c-state a[href$="/trips/"]') === 1);
   // bookings
@@ -229,13 +229,13 @@ const next = async (p, re) => { await Promise.all([p.waitForURL(re), p.click('.c
 // ================================================================= 5. booking continuity + supervisor attribution
 {
   const { c, p } = await ctx();
-  await go(p, 'search/?vertical=flights&tripType=return&from=KRT&to=JED&fromCode=KRT&toCode=JED&depart=2026-11-16&return=2026-11-23&adults=2&children=1&supervisor=supervisor-3', 'results'); await p.waitForSelector('.c-flight[data-offer]');
+  await go(p, 'search/?vertical=flights&tripType=return&from=KRT&to=JED&fromCode=KRT&toCode=JED&depart=2026-11-16&return=2026-11-23&adults=2&children=1&supervisor=sara-ahmed', 'results'); await p.waitForSelector('.c-flight[data-offer]');
   await Promise.all([p.waitForURL(/travellers/), p.locator('[data-action=select]').first().click()]); await p.waitForFunction(() => window.no?.travellers);
   await p.locator('form.c-traveller[data-traveller]').first().locator('[name=firstName]').fill('Keep');
   const back = new URL(p.url()).pathname;
   await signUp(p, { name: 'Delta Customer', email: 'delta@example.com', next: back });
   await p.waitForFunction(() => window.no?.travellers);
-  ok('sign-up mid-journey returns to the step with the journey intact (search, selection, attribution, typed draft)', /booking\/travellers/.test(p.url()) && await p.evaluate(() => { const j = JSON.parse(sessionStorage.getItem('no.journey')); return !!j.selection && j.context.attribution.supervisor === 'supervisor-3' && j.context.travellers.children === 1; }) && await p.locator('form.c-traveller[data-traveller]').first().locator('[name=firstName]').inputValue() === 'Keep');
+  ok('sign-up mid-journey returns to the step with the journey intact (search, selection, attribution, typed draft)', /booking\/travellers/.test(p.url()) && await p.evaluate(() => { const j = JSON.parse(sessionStorage.getItem('no.journey')); return !!j.selection && j.context.attribution.supervisor === 'sara-ahmed' && j.context.travellers.children === 1; }) && await p.locator('form.c-traveller[data-traveller]').first().locator('[name=firstName]').inputValue() === 'Keep');
   await fillTravellers(p); await next(p, /extras/); await p.waitForFunction(() => window.no?.extras); await next(p, /review/); await p.waitForFunction(() => window.no?.review); await p.waitForSelector('#review-terms'); await p.check('#review-terms'); await next(p, /payment/); await p.waitForFunction(() => window.no?.payment);
   await p.check('#pm-dev-success'); await p.click('[data-action=pay]'); await p.waitForURL(/confirmation/); await p.waitForFunction(() => window.no?.confirmation); await p.waitForSelector('[data-claimed]');
   const tripId = await p.getAttribute('[data-claimed]', 'data-claimed');
@@ -243,9 +243,9 @@ const next = async (p, re) => { await Promise.all([p.waitForURL(re), p.click('.c
   await p.reload(); await p.waitForFunction(() => window.no?.confirmation); await p.waitForSelector('[data-claimed]');
   ok('reload does not attach twice', await p.evaluate(async () => (await (await import('./assets/js/account/customer.js')).customer.bookings()).length) === 1);
   await go(p, `trips/?id=${tripId}`); await mainReady(p);
-  ok('trip in the account with the flight, travellers 3, supervisor-3 attribution', await count(p, '.c-acct-service[data-service=flights]') === 1 && await count(p, '[data-account=main] a[href*="supervisor/supervisor-3"]') >= 1);
+  ok('trip in the account with the flight, travellers 3, sara-ahmed attribution', await count(p, '.c-acct-service[data-service=flights]') === 1 && await count(p, '[data-account=main] a[href*="supervisor/sara-ahmed"]') >= 1);
   await go(p, 'account/settings/'); await mainReady(p);
-  ok('customer now attributed to supervisor-3, not editable', await count(p, '#set-supervisor a[href*="supervisor-3"]') === 1 && await count(p, '#set-supervisor input') === 0);
+  ok('customer now attributed to sara-ahmed, not editable', await count(p, '#set-supervisor a[href*="sara-ahmed"]') === 1 && await count(p, '#set-supervisor input') === 0);
   await go(p, 'account/documents/'); await mainReady(p); await p.waitForSelector('.c-acct-docrow');
   ok('documents the system issued for the new booking: receipt + confirmation only', await count(p, '.c-acct-docrow') === 2 && await count(p, '.c-acct-docrow[data-type=eticket]') === 0);
   await go(p, 'account/payments/'); await mainReady(p); ok('payment recorded', await count(p, '.c-acct-pay[data-pay-status=paid]') === 1);

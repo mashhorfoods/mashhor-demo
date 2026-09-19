@@ -270,23 +270,25 @@ const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR
 // ================================================================= 6. booking continuity + attribution through the backend
 {
   const { c, p } = await ctx(); await control('/__test/reset');
-  await p.go('search/?vertical=flights&tripType=return&from=KRT&to=JED&fromCode=KRT&toCode=JED&depart=2026-11-16&return=2026-11-23&adults=2&children=1&cabin=business&supervisor=supervisor-4', 'results'); await p.waitForSelector('.c-flight[data-offer]');
+  await p.go('search/?vertical=flights&tripType=return&from=KRT&to=JED&fromCode=KRT&toCode=JED&depart=2026-11-16&return=2026-11-23&adults=2&children=1&cabin=business&supervisor=omar-hassan', 'results'); await p.waitForSelector('.c-flight[data-offer]');
   await Promise.all([p.waitForURL(/travellers/), p.locator('[data-action=select]').first().click()]); await p.waitForFunction(() => window.no?.travellers);
   const back = new URL(p.url()).pathname;
   await p.go('account/sign-up/?next=' + encodeURIComponent(back), 'signUp'); await p.waitForSelector('[data-legal]');
-  ok('sign-up carries the attribution note', await count(p, '[data-attributed=supervisor-4]') === 1);
+  ok('sign-up carries the attribution note', await count(p, '[data-attributed=omar-hassan]') === 1);
   await p.fill('[name=name]', 'Epsilon'); await p.fill('[name=email]', 'epsilon@fixture.test'); await p.fill('[name=password]', 'password123'); await p.fill('[name=confirm]', 'password123'); const acc = p.locator('[name=accept]'); if (await acc.count()) await acc.check();
   await Promise.all([p.waitForURL(/booking\/travellers/), p.click('[data-form=sign-up] button[type=submit]')]); await p.waitForFunction(() => window.no?.travellers);
   const j = await p.evaluate(() => JSON.parse(sessionStorage.getItem('no.journey')));
-  ok('booking context survives authentication (service, trip type, route, dates, travellers, cabin, attribution, locale)', j.context.service === 'flights' && j.context.tripType === 'return' && j.context.originCode === 'KRT' && j.context.destinationCode === 'JED' && j.context.dates.depart === '2026-11-16' && j.context.travellers.children === 1 && j.context.cabin === 'business' && j.context.attribution.supervisor === 'supervisor-4' && j.context.locale === 'ar' && !!j.selection);
+  ok('booking context survives authentication (service, trip type, route, dates, travellers, cabin, attribution, locale)', j.context.service === 'flights' && j.context.tripType === 'return' && j.context.originCode === 'KRT' && j.context.destinationCode === 'JED' && j.context.dates.depart === '2026-11-16' && j.context.travellers.children === 1 && j.context.cabin === 'business' && j.context.attribution.supervisor === 'omar-hassan' && j.context.locale === 'ar' && !!j.selection);
   const eps = (await apiState()).customers.find((x) => x.email === 'epsilon@fixture.test');
-  ok('backend holds the attribution (supervisor, source, date) from sign-up', eps?.attribution?.supervisorId === 'supervisor-4' && eps.attribution.source === 'link' && !!eps.attribution.at);
+  // The customer-facing state exposes the supervisor's PUBLIC slug (what the frontend registry recognises), not the
+  // internal backend id — see backend/identity.mjs's publicCustomer().
+  ok('backend holds the attribution (supervisor, source, date) from sign-up', eps?.attribution?.supervisorId === 'omar-hassan' && eps.attribution.source === 'link' && !!eps.attribution.at);
   await fillTravellers(p); await next(p, /extras/); await p.waitForFunction(() => window.no?.extras); await next(p, /review/); await p.waitForFunction(() => window.no?.review); await p.waitForSelector('#review-terms'); await p.check('#review-terms'); await next(p, /payment/); await p.waitForFunction(() => window.no?.payment);
   await p.check('#pm-dev-success'); await p.click('[data-action=pay]'); await p.waitForURL(/confirmation/); await p.waitForFunction(() => window.no?.confirmation); await p.waitForSelector('[data-claimed]');
   const tripId = await p.getAttribute('[data-claimed]', 'data-claimed');
   ok('the booking is attached through the backend and becomes a trip', /^trip_/.test(tripId) && (await apiState()).requests.some((r) => r.path === '/me/bookings/claim'));
   await p.go(`trips/?id=${tripId}`); await mainReady(p);
-  ok('trip from the backend with the attributed supervisor', await count(p, '.c-acct-service') === 1 && await count(p, '[data-account=main] a[href*="supervisor/supervisor-4"]') >= 1);
+  ok('trip from the backend with the attributed supervisor', await count(p, '.c-acct-service') === 1 && await count(p, '[data-account=main] a[href*="supervisor/omar-hassan"]') >= 1);
   await p.go('account/settings/'); await mainReady(p);
   ok('attribution read-only in settings; no commission anywhere', await count(p, '#set-supervisor input, #set-supervisor select') === 0 && !/commission|عمولة/i.test(await p.evaluate(() => document.body.innerText)));
   await c.close();

@@ -51,8 +51,14 @@ export function seed() {
   // ---- Stage 13: two supervisor accounts for boundary testing. Fixture-labelled, reachable only while test controls
   // are on (never in production). supervisor-1 already attributes Alpha's trip/bookings above; supervisor-2 has none —
   // the isolation test is "supervisor-1 sees Alpha, supervisor-2 sees nothing of Alpha's".
-  q.run('UPDATE supervisors SET slug = ?, name_ar = ?, name_en = ?, email = ?, phone = ?, city = ?, languages_json = ?, updated_at = ? WHERE id = ?', 'supervisor-1', 'مشرف تجريبي واحد', 'Fixture Supervisor One', 'sup1@fixture.test', '', 'Khartoum', JSON.stringify(['ar', 'en']), iso(t0), 'supervisor-1');
-  q.run('UPDATE supervisors SET slug = ?, name_ar = ?, name_en = ?, email = ?, phone = ?, city = ?, languages_json = ?, updated_at = ? WHERE id = ?', 'supervisor-2', 'مشرف تجريبي اثنان', 'Fixture Supervisor Two', 'sup2@fixture.test', '', 'Khartoum', JSON.stringify(['ar']), iso(t0), 'supervisor-2');
+  // Slugs match the supervisor-profiles stage's real frontend registry (assets/js/data/supervisors.js) 1:1 — a slug
+  // used to validate/attribute client-side (isActiveSupervisor) must exist there, not just as a backend fixture id.
+  q.run('UPDATE supervisors SET slug = ?, name_ar = ?, name_en = ?, email = ?, phone = ?, city = ?, languages_json = ?, updated_at = ? WHERE id = ?', 'ahmed-mohamed', 'مشرف تجريبي واحد', 'Fixture Supervisor One', 'sup1@fixture.test', '', 'Khartoum', JSON.stringify(['ar', 'en']), iso(t0), 'supervisor-1');
+  q.run('UPDATE supervisors SET slug = ?, name_ar = ?, name_en = ?, email = ?, phone = ?, city = ?, languages_json = ?, updated_at = ? WHERE id = ?', 'mohamed-abdullah', 'مشرف تجريبي اثنان', 'Fixture Supervisor Two', 'sup2@fixture.test', '', 'Khartoum', JSON.stringify(['ar']), iso(t0), 'supervisor-2');
+  // supervisor-3/4 carry no other fixture identity (no test signs in as them), only the slug some tests attribute
+  // a booking/journey through — restored here for the same reason: the wipe() above nulls it every reset.
+  q.run('UPDATE supervisors SET slug = ? WHERE id = ?', 'sara-ahmed', 'supervisor-3');
+  q.run('UPDATE supervisors SET slug = ? WHERE id = ?', 'omar-hassan', 'supervisor-4');
   setSupervisorPassword('supervisor-1', 'password123'); setSupervisorPassword('supervisor-2', 'password123');
   q.run('INSERT INTO leads (id, supervisor_id, customer_id, name, contact, source, service_interest, status, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?)', 'lead_S1', 'supervisor-1', null, 'Fixture Lead', 'lead@fixture.test', 'link', 'flights', 'new', iso(t0 - 864e5 * 2), iso(t0 - 864e5 * 2));
   q.run('INSERT INTO supervisor_notifications (id, supervisor_id, kind, at, read, title_ar, title_en, text_ar, text_en, href, booking_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)', 'sntf_1', 'supervisor-1', 'booking', iso(t0 - 36e5), 0, 'حجز جديد (تجريبي)', 'New booking (fixture)', 'حجز تجريبي جديد يخصك.', 'A new fixture booking is attributed to you.', 'supervisor/bookings/?id=BK_A1', 'BK_A1');

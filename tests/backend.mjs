@@ -159,7 +159,7 @@ await control('/__test/reset');
   const claimOther = await req('/me/bookings/claim', { method: 'POST', body: { reference: 'BK_B1', context: { service: 'flights' } } });
   ok('claiming another customer\'s booking reference → 409, never re-parented', claimOther.status === 409);
   const patch = await req('/me', { method: 'PATCH', body: { name: 'Alpha Renamed', supervisorId: 'supervisor-5', attribution: { supervisorId: 'supervisor-5' }, email: 'other@fixture.test', id: 'cus_forged' } });
-  ok('PATCH /me cannot change attribution, e-mail or id', patch.status === 200 && patch.data.customer.attribution.supervisorId === 'supervisor-1' && patch.data.customer.email === 'alpha@fixture.test' && patch.data.customer.name === 'Alpha Renamed');
+  ok('PATCH /me cannot change attribution, e-mail or id', patch.status === 200 && patch.data.customer.attribution.supervisorId === 'ahmed-mohamed' && patch.data.customer.email === 'alpha@fixture.test' && patch.data.customer.name === 'Alpha Renamed');
   const bogusSup = await req('/auth/sign-out', { method: 'POST', body: {} }); jar.clear();
   const su = await req('/auth/sign-up', { method: 'POST', body: { name: 'Gamma', email: 'gamma@fixture.test', password: 'password123', attribution: { supervisorId: 'supervisor-999', source: 'admin' } } });
   ok('an unknown supervisor id at sign-up is not stored (backend registry decides)', su.status === 201 && su.data.customer.attribution === null);
@@ -258,7 +258,7 @@ await control('/__test/reset');
   ok('mark-all-read works and is scoped to this supervisor', markAll.status === 200 && markAll.data.notifications.every((n) => n.read));
 
   // ---- profile: allowed fields change, protected fields never do from this route ----
-  ok('slug, id and status are not accepted as patchable fields (schema has no such keys on this route)', validPatch.data.supervisor.slug === 'supervisor-1' && validPatch.data.supervisor.id === 'supervisor-1');
+  ok('slug, id and status are not accepted as patchable fields (schema has no such keys on this route)', validPatch.data.supervisor.slug === 'ahmed-mohamed' && validPatch.data.supervisor.id === 'supervisor-1');
 
   // ---- admin reassignment: prepared for Stage 14, gated by a bearer token, preserves history ----
   // With BACKEND_ADMIN_TOKEN genuinely UNSET, the reassignment route does not exist at all (404) — a separate,
@@ -569,7 +569,9 @@ await control('/__test/reset');
   // pages send (`ctx.attribution.supervisor`, assets/js/core/booking.js), which validAttribution() previously could
   // never resolve (it only ever matched supervisors.id, and a real admin-created supervisor's id is never its slug).
   const su = await fetch(API + '/auth/sign-up', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: SITE }, body: JSON.stringify({ name: 'Slug Attribution Fixture', email: 'slugattr@fixture.test', password: 'password123', locale: 'en', attribution: { supervisorId: 'test-sup-slug' } }) }).then(async (r) => ({ status: r.status, data: await r.json() }));
-  ok('§7: a customer attributed via the public slug resolves to the real supervisor, stored by the real backend id', su.status === 201 && su.data.customer.attribution?.supervisorId === 'supervisor-3');
+  // The customer-facing response exposes the supervisor's PUBLIC slug (what the frontend registry actually
+  // recognises), not the internal backend id — see backend/identity.mjs's publicCustomer().
+  ok('§7: a customer attributed via the public slug resolves to the real supervisor', su.status === 201 && su.data.customer.attribution?.supervisorId === 'test-sup-slug');
   ok('an unresolvable slug is not silently stored as an attribution', (await fetch(API + '/auth/sign-up', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: SITE }, body: JSON.stringify({ name: 'Unknown Slug Fixture', email: 'unknownslug@fixture.test', password: 'password123', attribution: { supervisorId: 'no-such-slug' } }) }).then((r) => r.json())).customer.attribution === null);
 
   // §9: an existing first-touch attribution is never overwritten by a later, different slug. This is a property of
@@ -582,7 +584,7 @@ await control('/__test/reset');
   const reclaim = await reqSlug('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-SUP-ATTR', context: { service: 'flights' }, total: 100, currency: 'USD', attribution: { supervisor: 'second-sup-slug' } } });
   ok('claiming a booking through a different supervisor\'s slug still succeeds', reclaim.status === 201);
   const meAfter = await reqSlug('/me');
-  ok('§9: the customer\'s own first-touch attribution is unchanged by a later booking claimed through a different supervisor\'s slug', meAfter.data.customer.attribution?.supervisorId === 'supervisor-3');
+  ok('§9: the customer\'s own first-touch attribution is unchanged by a later booking claimed through a different supervisor\'s slug', meAfter.data.customer.attribution?.supervisorId === 'test-sup-slug');
   jarSlug.clear();
 
   // §8: a deactivated supervisor's slug cannot receive NEW attribution — sign-up still succeeds, just unattributed
@@ -743,7 +745,7 @@ await control('/__test/reset');
   // ---- supervisor attribution: untouched by the payment flow ----
   const claimAttr = await reqP('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-16B-ATTR', context: { service: 'flights' }, total: 300, currency: 'USD', attribution: { supervisorId: 'supervisor-1' } } });
   await reqP('/me/bookings/BK-16B-ATTR/payment-intent', { method: 'POST', body: { method: 'dev-success' } });
-  ok('a payment succeeding leaves the booking\'s existing supervisor attribution exactly as it was — payment integration invents no commission logic and does not touch attribution', claimAttr.data.booking.supervisorId === 'supervisor-1' && (await reqP('/me/bookings/BK-16B-ATTR')).data.booking.supervisorId === 'supervisor-1');
+  ok('a payment succeeding leaves the booking\'s existing supervisor attribution exactly as it was — payment integration invents no commission logic and does not touch attribution', claimAttr.data.booking.supervisorId === 'ahmed-mohamed' && (await reqP('/me/bookings/BK-16B-ATTR')).data.booking.supervisorId === 'ahmed-mohamed');
 
   // ---- audit trail: every payment step above left a trace, and it carries no secret ----
   const auditPay = await reqAdminP('/operations/audit');
@@ -860,7 +862,7 @@ await control('/__test/reset');
   const sAttr = await search(oneWay);
   const claimAttr = await reqF('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-16C-ATTR', context: { service: 'flights' }, searchId: sAttr.data.meta.searchId, offerId: sAttr.data.offers[0].id, attribution: { supervisorId: 'supervisor-1' } } });
   await reqF('/me/bookings/BK-16C-ATTR/payment-intent', { method: 'POST', body: { method: 'dev-success' } });
-  ok('attribution survives search → selection → claim → payment → supplier booking, unchanged — no commission logic was invented along the way', claimAttr.data.booking.supervisorId === 'supervisor-1' && (await reqF('/me/bookings/BK-16C-ATTR', { csrf: false })).data.booking.supervisorId === 'supervisor-1');
+  ok('attribution survives search → selection → claim → payment → supplier booking, unchanged — no commission logic was invented along the way', claimAttr.data.booking.supervisorId === 'ahmed-mohamed' && (await reqF('/me/bookings/BK-16C-ATTR', { csrf: false })).data.booking.supervisorId === 'ahmed-mohamed');
 
   // ---- §17 operations dashboard: the live flight-supplier booking is visible to staff, separate from the
   // Stage 15 manually-tracked business-partner `supplier`, and never reaches a customer-facing route by that name ----

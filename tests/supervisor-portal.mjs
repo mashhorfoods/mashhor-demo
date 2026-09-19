@@ -185,15 +185,15 @@ await b.close();
 
   // Public profile → booking, attributed to supervisor-1
   const { c: c1, p: p1 } = await bctx();
-  await bgo(p1, 'supervisor/supervisor-1/', 'supervisor');
+  await bgo(p1, 'supervisor/ahmed-mohamed/', 'supervisor');
   await Promise.all([p1.waitForURL(/search|book/), p1.click('[data-profile-action=book]')]);
-  await bgo(p1, 'search/?vertical=flights&tripType=oneway&from=KRT&to=JED&fromCode=KRT&toCode=JED&depart=2026-12-01&adults=1&supervisor=supervisor-1', 'results');
+  await bgo(p1, 'search/?vertical=flights&tripType=oneway&from=KRT&to=JED&fromCode=KRT&toCode=JED&depart=2026-12-01&adults=1&supervisor=ahmed-mohamed', 'results');
   await p1.waitForSelector('.c-flight[data-offer]');
   await Promise.all([p1.waitForURL(/travellers/), p1.locator('[data-action=select]').first().click()]);
   await p1.waitForFunction(() => window.no?.travellers);
   const backUrl = new URL(p1.url()).pathname;
   await bgo(p1, 'account/sign-up/?next=' + encodeURIComponent(backUrl), 'signUp');
-  ok('sign-up shows the supervisor-1 attribution note', await count(p1, '[data-attributed=supervisor-1]') === 1);
+  ok('sign-up shows the supervisor-1 attribution note', await count(p1, '[data-attributed=ahmed-mohamed]') === 1);
   await p1.fill('[name=name]', 'Zeta Customer'); await p1.fill('[name=email]', 'zeta@fixture.test'); await p1.fill('[name=password]', 'password123'); await p1.fill('[name=confirm]', 'password123');
   const acc = p1.locator('[name=accept]'); if (await acc.count()) await acc.check();
   await Promise.all([p1.waitForURL(/booking\/travellers/), p1.click('[data-form=sign-up] button[type=submit]')]); await p1.waitForFunction(() => window.no?.travellers);
@@ -205,7 +205,7 @@ await b.close();
   await p1.check('#pm-dev-success'); await p1.click('[data-action=pay]'); await p1.waitForURL(/confirmation/); await p1.waitForFunction(() => window.no?.confirmation); await p1.waitForSelector('[data-claimed]');
   ok('the booking claims through the real backend', /^trip_/.test(await p1.getAttribute('[data-claimed]', 'data-claimed')));
   const zeta = (await apiState()).customers.find((x) => x.email === 'zeta@fixture.test');
-  ok('the real backend recorded the attribution to supervisor-1', zeta?.attribution?.supervisorId === 'supervisor-1' && zeta.attribution.source === 'link');
+  ok('the real backend recorded the attribution to supervisor-1', zeta?.attribution?.supervisorId === 'ahmed-mohamed' && zeta.attribution.source === 'link');
   await c1.close();
 
   // Supervisor-1 signs in on the SAME backend and sees the new customer + booking

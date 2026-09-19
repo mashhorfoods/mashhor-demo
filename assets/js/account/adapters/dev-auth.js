@@ -30,7 +30,7 @@ const normEmail = (e) => String(e ?? '').trim().toLowerCase();
 const publicCustomer = (a) => ({ id: a.id, name: a.name, email: a.email, phone: a.phone ?? '', locale: a.locale ?? 'ar', image: null, supervisorId: a.supervisorId ?? null, attribution: a.attribution ?? (a.supervisorId ? { supervisorId: a.supervisorId, source: 'link', at: a.createdAt } : null), acceptance: a.acceptance ?? null, createdAt: a.createdAt, dev: true });
 
 /** The seeded development customer: signed in with one click, no password, so the populated account can be reviewed. */
-export const DEV_CUSTOMER = { id: 'cus-dev-demo', name: 'Demo Customer', email: 'demo@dev.invalid', phone: '', locale: 'ar', supervisorId: 'supervisor-1', createdAt: '2026-06-01T09:00:00.000Z' };
+export const DEV_CUSTOMER = { id: 'cus-dev-demo', name: 'Demo Customer', email: 'demo@dev.invalid', phone: '', locale: 'ar', supervisorId: 'ahmed-mohamed', createdAt: '2026-06-01T09:00:00.000Z' };
 
 function issue(db, account) {
   const token = `dev.${rand()}`; const expiresAt = new Date(Date.now() + TTL_MS).toISOString();
