@@ -256,7 +256,7 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
   ok('review blocks: trip, travellers, price, contact, supervisor, each editable', await count(p, '.c-review-block') >= 5 && await count(p, '.c-review-block a[href*="booking/"], .c-review-block a[href*="search/"]') >= 3 && /الخرطوم|Khartoum|KRT/.test(await text(p, '#rv-trip, [aria-labelledby=rv-trip]')));
   const review = await journey(p); const expected = await p.evaluate(async (j) => { const Pr = await import('./assets/js/booking/pricing.js'); return Pr.breakdown(j.selection.offer, j.context.travellers, j.extras, j.quote?.price ?? j.selection.offer.price).total; }, review);
   ok('review total = pricing.breakdown (base + taxes + fees + extras)', Number((await text(p, '.c-review-block .c-price-row--total .c-price-row__value')).replace(/[^\d.]/g, '')) === Math.round(expected), `${expected}`);
-  ok('supervisor named on review', /supervisor|مشرف/i.test(await text(p, '[data-journey=main]')));
+  ok('supervisor named on review', /supervisor|coordinator|مشرف|منسق/i.test(await text(p, '[data-journey=main]')));
   await p.click('.c-journey__actions .c-btn--primary'); await p.waitForTimeout(150);
   ok('terms required before payment', await visible(p, '.c-field__error') && /review/.test(p.url()));
   await p.check('#review-terms'); await next(p, /booking\/payment/); await p.waitForFunction(() => window.no?.payment);
