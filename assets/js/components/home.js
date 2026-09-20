@@ -279,6 +279,10 @@ export function mountHome({
 
   render(mount('hero-copy'), heroCopy());
   render(mount('hero-media'), heroMedia());
+  // Fixed hero image scroll effect + transparent-over-hero header, the same
+  // mechanism destination/offer detail heroes already use (header.js
+  // trackHero()) — the homepage hero is just another .c-hero--full now.
+  qs('.c-gh', document)?.no?.trackHero(qs('.c-hero', root));
   render(mount('search'), search);
   render(mount('choose'), choose);
   render(mount('providers'), providerMarquee());

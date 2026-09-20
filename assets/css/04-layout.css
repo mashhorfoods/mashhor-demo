@@ -73,7 +73,14 @@
   }
 
   /* ---- Section rhythm --------------------------------------------------- */
-  .l-section { padding-block: var(--section-space); }
+  /* An explicit opaque background, not just the page canvas showing through:
+     fixed-hero-image scroll effect brief §19 — a section needs to actually
+     cover the pinned hero photo behind it (assets/css/14-home.css
+     .c-hero__media, position:fixed with a negative z-index) as it scrolls
+     up over it, not merely happen to look opaque because nothing was ever
+     behind it before. --color-surface is the same white the canvas already
+     painted, so this changes nothing visually anywhere else. */
+  .l-section { padding-block: var(--section-space); background-color: var(--color-surface); }
   .l-section--tight { padding-block: var(--section-space-tight); }
   .l-section--subtle { background-color: var(--color-bg-subtle); }
   .l-section--inverse {

@@ -11,7 +11,10 @@
   /* ======================================================================
      HERO — editorial: copy + media above, the booking entry below. §04
      ==================================================================== */
-  .c-hero { position: relative; overflow: hidden; padding-block: var(--section-space-tight); }
+  /* Stays transparent against 04-layout.css's opaque .l-section default (the
+     components layer wins that tie) — a hero with a pinned .c-hero__media
+     behind it needs the section itself to stay see-through to that image. */
+  .c-hero { position: relative; overflow: hidden; padding-block: var(--section-space-tight); background-color: transparent; }
   /* minmax(0, …) on every track: the search widget's tab strip is a scroll
      container whose min-content is the sum of its tabs, and an `auto` track
      would grow to it and push the whole hero past the phone's edge. */
@@ -65,23 +68,42 @@
   }
 
   /* ----------------------------------------------------------------------
-     HERO — full-bleed photo variant. Home only (.c-hero--photo); the
-     boxed-card media above is unchanged for destinations/offers/service
-     heroes, which have no real photograph yet (a neutral placeholder, not
-     a photo, sits in that slot — a dark overlay over a placeholder box
-     would just be a dark rectangle, so this variant is opt-in per page).
+     HERO — full-bleed photo variant (.c-hero--photo): the homepage, and
+     every destination/offer detail hero below. Service heroes stay on the
+     boxed-card media above — they have no real photograph yet, and a dark
+     overlay over a placeholder box would just be a dark rectangle.
 
-     The photo fills the section edge to edge (the section's own height is
-     still whatever its content needs — nothing forces a viewport-height
-     hero). A dark scrim sits between the photo and the text so the copy
+     The photo fills the section edge to edge, and — fixed-hero-image scroll
+     effect brief — pins to the viewport while .c-hero itself scrolls with
+     the document (see .c-hero__media below): the photo stays visually
+     still, the copy scrolls over it, and the next section covers it once
+     the hero's own height (still whatever its content needs, or the full
+     viewport on .c-hero--full below) has scrolled past. A dark scrim sits
+     between the photo and the text so the copy
      stays readable over any photograph; :is(h1) and the lead/overline/
      trust-row colours flip to the inverse palette already used for other
      dark-ground sections (.l-section--inverse, .c-cta-band).
      ---------------------------------------------------------------------- */
+  /* Fixed Hero Image scroll effect — update brief §1/§4/§5/§23: the image
+     itself is what pins, never the whole .c-hero (that would take it out of
+     flow and collapse the section's document height, causing the layout
+     shift / overlap bugs the brief calls out by name). position:fixed here
+     binds to the viewport, not to .c-hero — .c-hero keeps its ordinary
+     height (min-block-size:100vh on .c-hero--full below, or its natural
+     content height on the boxed homepage hero), so the document still
+     reserves exactly the space the hero needs and nothing jumps. The
+     negative z-index keeps it under every normal-flow section that follows
+     — no z-index arms race, no ancestor stacking context to fight. */
   .c-hero--photo .c-hero__media {
-    position: absolute; inset: 0;
+    position: fixed; inset: 0;
     aspect-ratio: auto; max-block-size: none; border-radius: 0;
-    z-index: 0; pointer-events: none; /* decorative background only — never steals clicks from the header or search */
+    z-index: -1; pointer-events: none; /* decorative background only — never steals clicks from the header or search */
+  }
+  /* The pin IS the motion this page has to offer relative to the content
+     scrolling over it — prefers-reduced-motion turns it back into the
+     ordinary scroll-with-the-page image, exactly as it behaved before. §16 */
+  @media (prefers-reduced-motion: reduce) {
+    .c-hero--photo .c-hero__media { position: absolute; }
   }
   .c-hero--photo .c-hero__media > img, .c-hero--photo .c-hero__media > [role="img"] {
     inline-size: 100%; block-size: 100%; object-fit: cover;
@@ -104,17 +126,15 @@
     content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
     background-color: var(--color-hero-scrim);
   }
-  /* .c-hero__copy/.c-hero__search need to be lifted above the absolutely
-     positioned media AND the overlay, both of which sit in the same
-     stacking context (nothing between them and .c-hero creates a new
-     one). Giving .c-hero__grid itself a position+z-index instead would
-     make IT the containing block for the media's inset:0 (shrinking the
-     photo to the container's padded width instead of the full section)
-     and would trap the media above the copy inside its own new stacking
-     context regardless of DOM order — position:absolute always outranks
-     unpositioned in-flow content at the same level. Positioning copy and
-     search directly, with a z-index above both media (0) and the
-     overlay (1), avoids both problems. */
+  /* .c-hero__copy/.c-hero__search need to be lifted above the fixed media
+     AND the overlay. Giving .c-hero__grid itself a position+z-index instead
+     would make IT the containing block for the overlay's inset:0 (shrinking
+     it to the container's padded width instead of the full section) and
+     would trap the overlay above the copy inside its own new stacking
+     context regardless of DOM order — a positioned element with z-index
+     always outranks unpositioned in-flow content at the same level.
+     Positioning copy and search directly, with a z-index above both the
+     media (-1) and the overlay (1), avoids both problems. */
   .c-hero--photo .c-hero__copy,
   .c-hero--photo .c-hero__search { position: relative; z-index: 2; }
   .c-hero--photo .c-hero__copy,

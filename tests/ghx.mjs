@@ -51,20 +51,31 @@ await p.keyboard.press('Escape'); await p.waitForTimeout(200);
 await p.evaluate(()=>window.__setSession?.({authenticated:true,name:'أحمد عبد الرحمن',role:'customer'}));
 
 // smart auto-hide header (§14): visible at load, hides on scroll down, reappears on scroll up,
-// always visible at the very top, permanent shadow throughout.
+// always visible at the very top. The homepage hero is now a pinned .c-hero--full (fixed hero
+// image scroll effect brief): the header starts transparent over it (no shadow, by design — the
+// same look destinations/offers already use) and only gains its shadow once solid, past the hero.
 const hidden = () => p.evaluate(()=>document.querySelector('.c-gh').dataset.hidden);
 const headerTop = () => p.evaluate(()=>Math.round(document.querySelector('.c-gh').getBoundingClientRect().top));
-ok('header has a shadow', await p.evaluate(()=>getComputedStyle(document.querySelector('.c-gh')).boxShadow !== 'none'));
+const surface = () => p.evaluate(()=>document.querySelector('.c-gh').dataset.surface);
+const shadow = () => p.evaluate(()=>getComputedStyle(document.querySelector('.c-gh')).boxShadow);
+const heroHeight = await p.evaluate(()=>Math.ceil(document.querySelector('.c-hero').getBoundingClientRect().height));
+const past = heroHeight + 200;
+ok('header starts transparent over the pinned hero, no shadow yet', await surface() === 'transparent' && await shadow() === 'none');
 ok('header visible on load', await hidden() === 'false');
 await p.evaluate(()=>window.scrollTo(0,150)); await p.waitForTimeout(150);
-await p.evaluate(()=>window.scrollTo(0,900)); await p.waitForTimeout(500);
+await p.evaluate((y)=>window.scrollTo(0,y), past); await p.waitForTimeout(500);
+// The page can still be settling (images sizing in below the fold) right after these scrolls,
+// so a requested target can land short of `past` — read back the actual position rather than
+// trust the request, so the next "scroll up" step is a real decrease from where we really are.
+const y1 = await p.evaluate(()=>window.scrollY);
 ok('header hides on scroll down', await hidden() === 'true');
 ok('hidden header slides off the top of the viewport', await headerTop() < 0);
-ok('header keeps its shadow while hidden', await p.evaluate(()=>getComputedStyle(document.querySelector('.c-gh')).boxShadow !== 'none'));
-await p.evaluate(()=>window.scrollTo(0,850)); await p.waitForTimeout(500);
+ok('past the hero the header is solid and keeps its shadow while hidden', await surface() === 'solid' && await shadow() !== 'none');
+await p.evaluate((y)=>window.scrollTo(0,y-50), y1); await p.waitForTimeout(500);
 ok('header reappears on scroll up', await hidden() === 'false');
 ok('reappeared header sits back at the top', await headerTop() === 0, `${await headerTop()}`);
-await p.evaluate(()=>window.scrollTo(0,900)); await p.waitForTimeout(500);
+const y2 = await p.evaluate(()=>window.scrollY);
+await p.evaluate((y)=>window.scrollTo(0,y+50), y2); await p.waitForTimeout(500);
 ok('header hides again on scroll down', await hidden() === 'true');
 await p.evaluate(()=>window.scrollTo(0,0)); await p.waitForTimeout(500);
 ok('header always visible at the very top', await hidden() === 'false');
