@@ -25,6 +25,7 @@ import { NAV_BOTTOM } from './data/navigation.js';
 import { setSpritePath, ensureSprite, initAccordions, initTabs, initModals, initPopovers, icon } from './components/ui.js';
 import { mountHeader } from './components/header.js';
 import { mountFooter } from './components/footer.js';
+import { mountThemeSections } from './components/theme-section.js';
 import './account/adapters/installed.js';
 import { restoreSession } from './account/auth.js';
 // Stage 13 — the supervisor portal's own adapter registry, registered the same way and gated by the same ENV; a
@@ -93,6 +94,9 @@ export function mountPage({ handle = 'page', header = {}, footer = {}, bottom = 
     if (painted?.then) { expose(null); painted.then(expose); } else expose(painted);
   };
   api.repaint = repaint;
-  boot({ onLocale: () => { chrome(); repaint(); } }).then(() => { chrome(); repaint(); });
+  // Section-based dark scroll transition (brief §20): a page-lifetime scan
+  // for [data-theme="dark"] sections, once — the markup it watches is
+  // static and survives a locale change, so this never re-runs with chrome().
+  boot({ onLocale: () => { chrome(); repaint(); } }).then(() => { chrome(); repaint(); mountThemeSections(); });
   return api;
 }

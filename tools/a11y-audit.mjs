@@ -88,7 +88,42 @@ const INPAGE = () => {
   ids.forEach((id) => { if (seen.has(id)) out.push(['dup-id', id]); seen.add(id); });
   for (const attr of ['aria-labelledby', 'aria-describedby', 'aria-controls']) document.querySelectorAll(`[${attr}]`).forEach((n) => { if (n.closest('[hidden]')) return; n.getAttribute(attr).split(/\s+/).forEach((id) => { if (id && !document.getElementById(id)) out.push(['aria-ref', `${attr}=${id} on ${n.tagName.toLowerCase()}.${[...n.classList].slice(0, 1)}`]); }); });
   // 9 contrast
-  const parse = (c) => { const m = c.match(/[\d.]+/g)?.map(Number) ?? [0, 0, 0, 1]; return { r: m[0], g: m[1], b: m[2], a: m.length > 3 ? m[3] : 1 }; };
+  // getComputedStyle doesn't always serialize as rgb()/rgba() — a colour
+  // that came from color-mix() (the section-based dark-transition brief;
+  // 25-theme-section.css) can come back as color(srgb r g b) (0..1, not
+  // 0..255) or oklab(L a b), and the old digits-only parse below silently
+  // misread either as near-black regardless of the real colour, which is
+  // exactly a false "white on white" / "black on black" finding waiting to
+  // happen the next time anything in the codebase uses color-mix(). Handle
+  // all three notations and always return 0..255 like the rest of this
+  // file (lum()/blend()) already assumes.
+  const oklabToRgb = (L, a, bb) => {
+    const l_ = L + 0.3963377774 * a + 0.2158037573 * bb;
+    const m_ = L - 0.1055613458 * a - 0.0638541728 * bb;
+    const s_ = L - 0.0894841775 * a - 1.2914855480 * bb;
+    const l = l_ ** 3, m = m_ ** 3, s = s_ ** 3;
+    const lin = [
+      4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+      -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+      -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s,
+    ];
+    const toSrgb = (v) => { const c = Math.min(1, Math.max(0, v)); return (c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055) * 255; };
+    return lin.map(toSrgb);
+  };
+  const parse = (c) => {
+    if (c.startsWith('oklab(')) {
+      const n = c.match(/-?[\d.]+/g)?.map(Number) ?? [0, 0, 0];
+      const [r, g, b] = oklabToRgb(n[0], n[1], n[2]);
+      return { r, g, b, a: n.length > 3 ? n[3] : 1 };
+    }
+    if (c.startsWith('color(')) {
+      const n = c.match(/-?[\d.]+/g)?.map(Number) ?? [0, 0, 0, 1];
+      // color(srgb r g b [/ a]) — 0..1 per channel, unlike rgb()'s 0..255.
+      return { r: n[0] * 255, g: n[1] * 255, b: n[2] * 255, a: n.length > 3 ? n[3] : 1 };
+    }
+    const m = c.match(/[\d.]+/g)?.map(Number) ?? [0, 0, 0, 1];
+    return { r: m[0], g: m[1], b: m[2], a: m.length > 3 ? m[3] : 1 };
+  };
   const lum = ({ r, g, b }) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
   const blend = (fg, bg) => ({ r: fg.r * fg.a + bg.r * (1 - fg.a), g: fg.g * fg.a + bg.g * (1 - fg.a), b: fg.b * fg.a + bg.b * (1 - fg.a), a: 1 });
   // A full-bleed photo (e.g. a hero image) is sometimes painted as a sibling

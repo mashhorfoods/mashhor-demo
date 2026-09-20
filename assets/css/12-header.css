@@ -77,6 +77,42 @@
      hero's inverse one, whatever the bar above it looks like. */
   .c-gh[data-surface="transparent"] .c-gh__panel { color: var(--color-text); }
 
+  /* ======================================================================
+     DARK-SECTION SURFACE — section-based dark mode scroll transition brief
+     §5. A mid-page "dark chapter" (theme-section.js) passing behind the
+     header gets this third, OPAQUE state — not transparent (there is no
+     hero photo to show through here) and not the plain solid state (the
+     bar itself needs to read as part of the dark chapter while it lasts).
+     Same inverse text/logo treatment as the transparent-over-hero state
+     above, reused rather than redeclared; only the surface itself differs:
+     opaque near-black instead of see-through, with the same low-contrast
+     hairline the footer/CTA band already use for a dark-on-dark border.
+     theme-section.js only ever sets this on top of the existing 'solid'
+     state and always clears it back to 'solid' — it never touches an
+     active 'transparent' hero state. */
+  .c-gh[data-surface="dark"] {
+    background-color: var(--color-bg-inverse);
+    border-block-end-color: rgb(255 255 255 / 0.14);
+    box-shadow: none;
+  }
+  .c-gh[data-surface="dark"] .c-logo__img--light { display: none; }
+  .c-gh[data-surface="dark"] .c-logo__img--inverse { display: block; }
+  .c-gh[data-surface="dark"] .c-gh__link,
+  .c-gh[data-surface="dark"] .c-gh__action,
+  .c-gh[data-surface="dark"] .c-gh__secure,
+  .c-gh[data-surface="dark"] .c-gh__mobile-only {
+    color: var(--color-text-inverse);
+  }
+  .c-gh[data-surface="dark"] .c-gh__link:hover,
+  .c-gh[data-surface="dark"] .c-gh__link[aria-expanded="true"],
+  .c-gh[data-surface="dark"] .c-gh__action:hover,
+  .c-gh[data-surface="dark"] .c-gh__action[aria-expanded="true"],
+  .c-gh[data-surface="dark"] .c-gh__mobile-only:hover {
+    background-color: rgb(255 255 255 / 0.16);
+    color: var(--color-text-inverse);
+  }
+  .c-gh[data-surface="dark"] .c-gh__panel { color: var(--color-text); }
+
   /* The shell's space is reserved before the script mounts the header, so
      the page never shifts down when it arrives (Stage 10.12). The size
      mirrors the real bar: the logo primitive's height (05-primitives) plus
