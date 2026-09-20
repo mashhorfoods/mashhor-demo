@@ -276,7 +276,7 @@
     display: flex;
     gap: var(--grid-gutter);
     inline-size: max-content;
-    animation: c-provider-marquee-scroll 40s linear infinite;
+    animation: c-provider-marquee-scroll 80s linear infinite;
     will-change: transform;
   }
   .c-provider-marquee__item { flex: none; }
