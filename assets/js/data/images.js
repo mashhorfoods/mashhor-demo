@@ -13,6 +13,7 @@
 
 export const IMAGES = {
   "home/hero": "assets/images/home/hero.webp",
+  "home/newsletter": "assets/images/home/newsletter.webp",
   "services/flights": "assets/images/services/flights.webp",
   "services/hotels": "assets/images/services/hotels.webp",
   "services/visa": "assets/images/services/visa.webp",

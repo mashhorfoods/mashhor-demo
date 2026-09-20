@@ -283,7 +283,7 @@ export function mountHome({
   render(mount('choose'), choose);
   render(mount('providers'), providerMarquee());
   render(mount('newsletter'), newsletterCard({
-    image: { src: imageSrc('destinations/cairo'), altAr: 'القاهرة، مصر', altEn: 'Cairo, Egypt' },
+    image: { src: imageSrc('home/newsletter'), altAr: 'الخرطوم، السودان', altEn: 'Khartoum, Sudan' },
   }));
 
   // ---- Dynamic regions — every one owns all five states. §15

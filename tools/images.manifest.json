@@ -4,6 +4,7 @@
   "width": 1280,
   "slots": [
     { "key": "home/hero",               "subject": "a family with luggage at an airport departure hall",           "search": "family airport departure luggage" },
+    { "key": "home/newsletter",         "subject": "Khartoum skyline at night along the Nile",                      "search": "Khartoum Nile skyline night" },
 
     { "key": "services/flights",        "subject": "view from an airliner window over the wing",                   "search": "airplane wing window view clouds" },
     { "key": "services/hotels",         "subject": "a bright, clean hotel room",                                    "search": "hotel room bed interior" },
