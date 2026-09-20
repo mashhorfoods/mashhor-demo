@@ -18,7 +18,7 @@ import {
 } from '../data/destinations.js';
 import { serviceById } from '../data/services.js';
 import { OFFER_REGISTRY } from '../data/offers.js';
-import { icon, sectionHead } from './ui.js';
+import { icon, sectionHead, heroFocalStyle } from './ui.js';
 import { serviceCard, mediaPlaceholder } from './cards.js';
 import { offerDeck } from './offers.js';
 import { stateRegion, notFoundState } from './states.js';
@@ -71,7 +71,7 @@ export function destHero(record) {
       el('a', { class: 'c-btn c-btn--tertiary c-btn--lg', href: cta.secondary.href }, cta.secondary.label),
     ]),
   ]);
-  const media = el('div', { class: 'c-hero__media', dataset: { mediaSlot: `dest-${record.id}` } }, [
+  const media = el('div', { class: 'c-hero__media', dataset: { mediaSlot: `dest-${record.id}` }, style: heroFocalStyle(record.image?.focal) || null }, [
     record.image?.src
       ? el('img', { src: record.image.src, alt: pick(record.image, 'alt'), class: 'u-img-cover', fetchpriority: 'high', decoding: 'async' })
       : mediaPlaceholder(null, pick(record.image ?? {}, 'alt')),

@@ -378,6 +378,23 @@ export function routeGraphic({ d = 'M 40 450 C 90 330, 200 330, 240 220 S 330 11
 }
 
 /* ---------------------------------------------------------------------------
+   HERO FOCAL POINT — hero image responsiveness brief: an image's own
+   `focal` field (desktop/tablet/mobile — each any valid CSS object-position
+   value, e.g. "70% 30%") becomes a set of custom properties on its
+   .c-hero__media; 14-home.css's media queries pick the right one and fall
+   back to plain centring where a size isn't given. One helper, shared by
+   every hero (home.js, destination-detail.js, offers.js) instead of each
+   page hand-rolling its own object-position logic — extend a hero's own
+   `media`/`image` object with `focal` to opt in; nothing else changes for
+   a hero that never sets it.
+   ------------------------------------------------------------------------ */
+export function heroFocalStyle(focal) {
+  if (!focal) return '';
+  const props = { desktop: '--hero-focal-desktop', tablet: '--hero-focal-tablet', mobile: '--hero-focal-mobile' };
+  return Object.entries(props).filter(([k]) => focal[k]).map(([k, prop]) => `${prop}:${focal[k]}`).join(';');
+}
+
+/* ---------------------------------------------------------------------------
    SECTION HEAD — overline · h2 (with the mark) · optional lead. One builder
    for every section on every page; pass translated strings.
    ------------------------------------------------------------------------ */

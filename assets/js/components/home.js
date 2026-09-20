@@ -21,7 +21,7 @@ import {
   HOME_DESTINATIONS, HOME_OFFERS, HOME_SUPPORT,
 } from '../data/home.js';
 import { SUPERVISOR_REGISTRY } from '../data/supervisors.js';
-import { icon, setButtonState, routeGraphic } from './ui.js';
+import { icon, setButtonState, routeGraphic, heroFocalStyle } from './ui.js';
 import { buildContext, validate, saveContext, continueUrl, applyEntryParams } from '../core/booking.js';
 import { serviceCard, destinationCard, offerCard, mediaPlaceholder } from './cards.js';
 import { supervisorCard } from './supervisor.js';
@@ -53,9 +53,10 @@ export function heroCopy(hero = HOME_HERO) {
 /** The §16 route graphic: one dashed path from the near corner to a point. */
 
 export function heroMedia(hero = HOME_HERO) {
+  const style = [hero.media.ratio ? `--hero-media-ratio:${hero.media.ratio}` : '', heroFocalStyle(hero.media.focal)].filter(Boolean).join(';');
   const media = el('div', {
     class: 'c-hero__media', dataset: { mediaSlot: 'hero' },
-    style: hero.media.ratio ? `--hero-media-ratio:${hero.media.ratio}` : null,
+    style: style || null,
   }, [
     hero.media.src
       ? el('img', { src: hero.media.src, alt: pick(hero.media, 'alt'), class: 'u-img-cover',

@@ -18,7 +18,7 @@ import {
 import { destinationById, DESTINATION_REGISTRY } from '../data/destinations.js';
 import { SERVICE_REGISTRY, serviceById } from '../data/services.js';
 import { liveChannels } from '../data/navigation.js';
-import { icon, initModals, initAccordions, routeGraphic, sectionHead } from './ui.js';
+import { icon, initModals, initAccordions, routeGraphic, sectionHead, heroFocalStyle } from './ui.js';
 import { offerCard, offerBadge, priceBlock, offerMeta, inclusionList, mediaPlaceholder } from './cards.js';
 import { stateRegion, stateBlock, skeletonCard } from './states.js';
 import { supportPanels, journeySteps } from './home.js';
@@ -275,7 +275,7 @@ export function offerHero(record) {
       el('a', { class: 'c-btn c-btn--tertiary c-btn--lg', href: cta.secondary.href }, cta.secondary.label),
     ]),
   ]);
-  const media = el('div', { class: 'c-hero__media', dataset: { mediaSlot: `offer-${record.id}` } }, [
+  const media = el('div', { class: 'c-hero__media', dataset: { mediaSlot: `offer-${record.id}` }, style: heroFocalStyle(record.image?.focal) || null }, [
     record.image?.src ? el('img', { src: record.image.src, alt: pick(record.image, 'alt'), class: 'u-img-cover', fetchpriority: 'high', decoding: 'async' }) : mediaPlaceholder(null, pick(record.image ?? {}, 'alt')),
     routeGraphic({ d: 'M 40 460 C 60 320, 180 300, 210 210 S 300 100, 356 60', start: [40, 460], end: [356, 60] }),
   ]);
