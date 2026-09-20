@@ -152,6 +152,30 @@
     align-self: flex-end;
     inline-size: 100%;
   }
+  /* A full flat wash (.c-hero--photo::after, --color-overlay at 60%) reads
+     right on a boxed card but hides real photography at full-viewport size
+     — header/hero refinement brief §07/§08 asks for the photo itself to
+     stay the dominant, legible element. A top+bottom vignette instead:
+     dark enough right behind the header and right behind the copy for both
+     to read clearly, essentially clear through the middle of the frame
+     where the photograph itself does the work. */
+  .c-hero--full::after {
+    background: linear-gradient(
+      to bottom,
+      rgb(11 13 15 / 0.42) 0%,
+      rgb(11 13 15 / 0) 20%,
+      rgb(11 13 15 / 0) 58%,
+      rgb(11 13 15 / 0.5) 100%
+    );
+  }
+  /* A lighter overlay means a very bright photo can still crowd the text
+     right at the edge of the readable band — one more readability layer
+     that costs the photo nothing, instead of darkening it further. §08 */
+  .c-hero--full .c-breadcrumb__list,
+  .c-hero--full .c-hero__title,
+  .c-hero--full .c-hero__lead {
+    text-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+  }
 
   /* ======================================================================
      VALUE — icon · title · one sentence. "Why Number One". §06

@@ -83,6 +83,11 @@
      the bar padding, plus the hairline. */
   .c-gh--placeholder { --logo-size: 48px; block-size: calc(var(--header-shell) + var(--border-width)); }
   @media (min-width: 64em) { .c-gh--placeholder { --logo-size: 56px; } }
+  /* A page with a full-bleed hero (build-routes.mjs's heroClass) starts the
+     placeholder transparent too, so there is no flash of a solid bar over
+     the photo in the moment before the script mounts the real header and
+     trackHero() takes over. §03 of the header/hero refinement brief. */
+  .c-gh--placeholder-transparent { background-color: transparent; border-block-end-color: transparent; box-shadow: none; }
 
   .c-gh__bar {
     display: grid;
