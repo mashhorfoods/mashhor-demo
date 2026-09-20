@@ -74,18 +74,26 @@ export function createApp() {
     }
 
     // ---- public routes ----
+    // /health only: cheap, and needs to stay available for frequent uptime checks even under load — every other
+    // route (including the public ones just below) goes through the rate-limit gate first. /files, /legal and
+    // /diagnostics used to be matched here, ahead of the gate, which let an unauthenticated caller drive unlimited
+    // DB writes through /diagnostics (an INSERT + a range DELETE on every call) at no cost to themselves.
     if (path === '/health' && req.method === 'GET') return json(res, 200, { ok: true, environment: config.environment, version: VERSION, storage: config.storage, mailer: config.mailer, paymentProvider: config.paymentProvider, flightProvider: config.flightProvider, testControls: config.testControls });
     let m;
+
+    // ---- rate limits by class ----
+    const cls = path.startsWith('/auth/') || path.startsWith('/supervisor/auth/') || path.startsWith('/staff/auth/') ? 'auth'
+      : path === '/me/documents' && req.method === 'POST' ? 'upload'
+      : path === '/diagnostics' && req.method === 'POST' ? 'diagnostics'
+      : 'api';
+    const wait = rateLimit(`${cls}:${ip}`, config.rateLimits[cls]);
+    if (wait) { warn('ratelimit.hit', { cls }); return fail(res, 429, 'rateLimited', { 'Retry-After': String(wait) }); }
+
     // Shared with auth.signUp below (§13's backend-enforced acceptance) so both agree on whether legal is configured.
     const legalOverride = test?.legal ? (kind, locale) => fixtureLegal(kind, locale, test.legal.version) : null;
     if ((m = path.match(/^\/files\/([A-Za-z0-9_-]+)$/)) && req.method === 'GET') return file(req, res, m[1], url);
     if ((m = path.match(/^\/legal\/(terms|privacy)$/)) && req.method === 'GET') return legal(req, res, m[1], url, legalOverride);
     if (path === '/diagnostics' && req.method === 'POST') return diagnostics(req, res);
-
-    // ---- rate limits by class ----
-    const cls = path.startsWith('/auth/') || path.startsWith('/supervisor/auth/') || path.startsWith('/staff/auth/') ? 'auth' : path === '/me/documents' && req.method === 'POST' ? 'upload' : 'api';
-    const wait = rateLimit(`${cls}:${ip}`, config.rateLimits[cls]);
-    if (wait) { warn('ratelimit.hit', { cls }); return fail(res, 429, 'rateLimited', { 'Retry-After': String(wait) }); }
 
     // ---- Stage 16B: /payments/webhook/:provider — a real external provider's own server calling us, never a
     // browser; authenticated by its signature over the raw body (backend/payments.mjs), not by a cookie session. ----

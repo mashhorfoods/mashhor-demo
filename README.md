@@ -16,7 +16,7 @@ inherits it.
 | **Stage 11 — booking engine** | [`docs/STAGES.md` §11](docs/STAGES.md#11--booking-experience--booking-engine) — search → results → compare → details → travellers → extras → review → payment → confirmation on a clearly labelled development adapter; `tests/journey.mjs` |
 | **Code-quality cleanup** | [`docs/CLEANUP.md`](docs/CLEANUP.md) — what was removed, merged and split; `npm test` |
 | **Stage 10 final QA** | [`docs/STAGE-10-QA.md`](docs/STAGE-10-QA.md) — Stage 10.12 · **STAGE 10 — COMPLETE / BUILT + VERIFIED** |
-| **Photography** | `tools/images.manifest.json` + `node tools/fetch-images.mjs` → `assets/images/`, `assets/images/CREDITS.md` |
+| **Photography** | `assets/images/` — business-supplied photography, see [`assets/images/CREDITS.md`](assets/images/CREDITS.md); `assets/js/data/images.js` maps each slot key to its file |
 | **Living style guide** | `styleguide.html` — every token, component and state, in RTL and LTR |
 | **Homepage** | `index.html` — the production homepage (Stage 10.4) |
 | **Brand assets** | [`assets/brand/README.md`](assets/brand/README.md) |

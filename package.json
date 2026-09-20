@@ -13,7 +13,6 @@
     "smoke": "node tools/smoke.mjs",
     "deploy": "node tools/deploy.mjs",
     "routes": "node tools/build-routes.mjs",
-    "images": "node tools/fetch-images.mjs",
     "serve": "python3 -m http.server 8916"
   },
   "devDependencies": {

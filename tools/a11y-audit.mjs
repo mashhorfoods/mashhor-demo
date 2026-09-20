@@ -21,9 +21,10 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 const ORIGIN = process.env.BASE || 'http://localhost:8000/';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..') + '/';
-const KEY = ['index.html', '404.html', 'styleguide.html', 'services/index.html', 'destinations/index.html', 'offers/index.html', 'book/index.html', 'services/flights/index.html', 'offers/umrah/index.html', 'supervisor/ahmed-mohamed/index.html', 'supervisors/index.html', 'search/index.html', 'booking/travellers/index.html', 'booking/review/index.html', 'booking/payment/index.html', 'booking/confirmation/index.html', 'account/sign-in/index.html', 'account/sign-up/index.html', 'account/index.html', 'legal/terms/index.html'];
+const KEY = ['index.html', '404.html', 'styleguide.html', 'services/index.html', 'destinations/index.html', 'offers/index.html', 'book/index.html', 'services/flights/index.html', 'offers/umrah/index.html', 'destinations/dubai/index.html', 'supervisor/ahmed-mohamed/index.html', 'supervisors/index.html', 'search/index.html', 'booking/travellers/index.html', 'booking/review/index.html', 'booking/payment/index.html', 'booking/confirmation/index.html', 'account/sign-in/index.html', 'account/sign-up/index.html', 'account/index.html', 'legal/terms/index.html'];
 const REST = [...readdirSync(ROOT + 'services', { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== 'flights').map((d) => `services/${d.name}/index.html`),
   ...readdirSync(ROOT + 'offers', { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== 'umrah').map((d) => `offers/${d.name}/index.html`),
+  ...readdirSync(ROOT + 'destinations', { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== 'dubai').map((d) => `destinations/${d.name}/index.html`),
   ...readdirSync(ROOT + 'supervisor', { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== 'ahmed-mohamed').map((d) => `supervisor/${d.name}/index.html`)];
 const WIDTHS = [390, 600, 834, 1024, 1200, 1440];
 const ONLY = process.env.ONLY ? process.env.ONLY.split(',') : null;

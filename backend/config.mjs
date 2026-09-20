@@ -99,7 +99,7 @@ export const config = Object.freeze({
   adminToken: adminToken || null,
   trustProxy: bool(env.BACKEND_TRUST_PROXY, false),
   testControls,
-  rateLimits: { auth: { limit: num(env.BACKEND_RATE_AUTH, 10), windowMs: 60000 }, upload: { limit: num(env.BACKEND_RATE_UPLOAD, 20), windowMs: 60000 }, api: { limit: num(env.BACKEND_RATE_API, 300), windowMs: 60000 } },
+  rateLimits: { auth: { limit: num(env.BACKEND_RATE_AUTH, 10), windowMs: 60000 }, upload: { limit: num(env.BACKEND_RATE_UPLOAD, 20), windowMs: 60000 }, api: { limit: num(env.BACKEND_RATE_API, 300), windowMs: 60000 }, diagnostics: { limit: num(env.BACKEND_RATE_DIAGNOSTICS, 30), windowMs: 60000 } },
   problems,
 });
 

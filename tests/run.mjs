@@ -58,7 +58,7 @@ const run = async (label, file, extra = {}) => {
 for (const s of suites) await run(s, join(ROOT, 'tests', `${s}.mjs`));
 if (audits) {
   const pages = ['index.html', '404.html', 'styleguide.html', 'services/index.html', 'destinations/index.html', 'offers/index.html', 'book/index.html'];
-  for (const dir of ['services', 'offers', 'supervisor']) for (const d of readdirSync(join(ROOT, dir), { withFileTypes: true })) if (d.isDirectory()) pages.push(`${dir}/${d.name}/index.html`);
+  for (const dir of ['services', 'offers', 'supervisor', 'destinations']) for (const d of readdirSync(join(ROOT, dir), { withFileTypes: true })) if (d.isDirectory()) pages.push(`${dir}/${d.name}/index.html`);
   pages.push('search/index.html'); for (const d of readdirSync(join(ROOT, 'booking'), { withFileTypes: true })) if (d.isDirectory()) pages.push(`booking/${d.name}/index.html`);
   pages.push('trips/index.html', 'account/index.html', 'legal/terms/index.html', 'legal/privacy/index.html'); for (const d of readdirSync(join(ROOT, 'account'), { withFileTypes: true })) if (d.isDirectory()) pages.push(`account/${d.name}/index.html`);
   await run('i18n', join(ROOT, 'tools/i18n-audit.mjs'), { PAGES: pages.join(',') });
