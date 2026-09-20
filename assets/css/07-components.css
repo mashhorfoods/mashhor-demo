@@ -205,11 +205,19 @@
     border: var(--border-hairline);
     border-radius: var(--radius-lg);
     overflow: hidden;
+    /* Rest already carries the lightest step of the shared elevation scale
+       (--card-shadow-rest) — a soft lift off the page, not a flat bordered
+       box, on every card whether or not it is interactive. */
+    box-shadow: var(--card-shadow-rest);
     transition: var(--transition-interactive), translate var(--duration-base) var(--ease-standard);
   }
-  .c-card--interactive:hover { border-color: var(--color-border-strong); box-shadow: var(--shadow-md); }
+  .c-card--interactive:hover { border-color: var(--color-border-strong); box-shadow: var(--card-shadow-hover); }
+  /* Pressed settles between rest and hover — reads as the card meeting the
+     cursor's push, never as it dropping below its own resting depth. */
+  .c-card--interactive:active { box-shadow: var(--card-shadow-active); }
   @media (prefers-reduced-motion: no-preference) {
     .c-card--interactive:hover { translate: 0 -2px; }
+    .c-card--interactive:active { translate: 0 -1px; }
   }
   .c-card--interactive:has(:focus-visible) { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
   .c-card--flat { box-shadow: none; }

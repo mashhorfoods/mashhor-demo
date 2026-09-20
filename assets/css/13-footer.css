@@ -12,6 +12,9 @@
     background-color: var(--color-bg-inverse);
     color: var(--color-text-inverse);
     overflow: hidden;   /* contains the route graphic */
+    /* Same hairline weight as the dividers between the footer's own bands
+       below — a seam against the page above it, not new decoration. */
+    border-block-start: var(--border-width) solid rgb(255 255 255 / 0.10);
   }
 
   /* §19 — the route, drawn once, at the top edge. A single hairline that fades

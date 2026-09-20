@@ -145,6 +145,11 @@
                                                    red button. §23 */
     --color-focus-inverse: var(--_white);
     --color-overlay:       rgb(11 13 15 / 0.60);
+    /* Same ink as --color-overlay, lighter: a photo hero's own scrim (not a
+       modal/drawer backdrop, which stays at the darker value above). Matches
+       the darkest band of the full-viewport hero's vignette (14-home.css
+       .c-hero--full::after) so every photo hero reads as one tonal family. */
+    --color-hero-scrim:    rgb(11 13 15 / 0.42);
     --color-skeleton:      var(--_gray-200);
     --color-skeleton-sheen:var(--_gray-100);
 
@@ -257,6 +262,15 @@
     --shadow-md: 0 4px 12px -2px rgb(11 13 15 / 0.08), 0 2px 4px -2px rgb(11 13 15 / 0.04);
     --shadow-lg: 0 12px 28px -8px rgb(11 13 15 / 0.12), 0 4px 10px -6px rgb(11 13 15 / 0.06);
     --shadow-overlay: 0 24px 56px -16px rgb(11 13 15 / 0.24);
+
+    /* One elevation language for every card (service/destination/offer/
+       provider/coordinator/booking/info/CTA) — contrast/depth stage §03.
+       Three steps off the shadow scale above, not new shadow values: a
+       card sits a little off the page at rest, lifts on hover, settles
+       back down (between rest and hover, not below rest) when pressed. */
+    --card-shadow-rest:   var(--shadow-xs);
+    --card-shadow-hover:  var(--shadow-md);
+    --card-shadow-active: var(--shadow-sm);
 
     /* ======================================================================
        BORDERS / CONTROLS

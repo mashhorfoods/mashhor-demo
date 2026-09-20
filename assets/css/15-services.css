@@ -83,13 +83,17 @@
     padding: var(--space-16);
     background-color: var(--color-surface);
     border: var(--border-hairline); border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-xs);
+    box-shadow: var(--card-shadow-rest);
     color: var(--color-text);
     transition: var(--transition-interactive), translate var(--duration-fast) var(--ease-standard);
     cursor: pointer;
   }
-  .c-help__option:hover { border-color: var(--color-border-strong); box-shadow: var(--shadow-md); }
-  @media (hover: hover) { .c-help__option:hover { translate: 0 -2px; } }
+  .c-help__option:hover { border-color: var(--color-border-strong); box-shadow: var(--card-shadow-hover); }
+  .c-help__option:active { box-shadow: var(--card-shadow-active); }
+  @media (hover: hover) {
+    .c-help__option:hover { translate: 0 -2px; }
+    .c-help__option:active { translate: 0 -1px; }
+  }
   .c-help__option:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
   /* Explicit cells: items with a definite row but automatic column are
      placed before the rest, so without these the arrow would take column 2
