@@ -17,6 +17,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { SERVICE_REGISTRY } from '../assets/js/data/services.js';
 import { OFFER_REGISTRY } from '../assets/js/data/offers.js';
+import { DESTINATION_REGISTRY } from '../assets/js/data/destinations.js';
 import { SUPERVISOR_REGISTRY, RESERVED_SUPERVISOR_SLUGS } from '../assets/js/data/supervisors.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -37,7 +38,22 @@ const COLLECTIONS = [
   {
     dir: 'offers', records: OFFER_REGISTRY, attr: 'offer', mount: 'mountOfferDetail', module: 'offers', handle: 'offer',
     title: (o) => o.titleAr, description: (o) => o.shortAr, og: (o) => o.shortAr, heroLabel: 'offer-title', current: 'offers',
+    // Full-bleed photo hero with the header tracked transparent over it —
+    // the header/hero update brief §03-05. .c-hero--photo alone (no --full)
+    // would keep the boxed-card hero height instead of the ~100vh treatment.
+    heroClass: 'c-hero--photo c-hero--full',
     sections: ['overview', 'included', 'excluded', 'itinerary', 'important', 'terms', 'faq', 'flow', 'related', 'support'],
+    noindex: false,
+  },
+  {
+    // header/hero update brief §01-02/§19 — one reusable destination detail
+    // template, generated the same way services/offers already are.
+    // DESTINATION_REGISTRY stays the single source; nothing here is a
+    // hand-authored per-destination page.
+    dir: 'destinations', records: DESTINATION_REGISTRY, attr: 'dest', mount: 'mountDestinationDetail', module: 'destination-detail', handle: 'destination',
+    title: (d) => d.nameAr, description: (d) => d.descAr, og: (d) => d.descAr, heroLabel: 'dest-title', current: 'destinations',
+    heroClass: 'c-hero--photo c-hero--full',
+    sections: ['overview', 'travel', 'services', 'offers', 'support'],
     noindex: false,
   },
   {
@@ -103,7 +119,7 @@ ${c.noindex ? '<meta name="robots" content="noindex">\n' : ''}
   <div class="c-gh c-gh--placeholder" aria-hidden="true"></div>
 
   <main id="main" class="l-page__main">
-    <section class="l-section c-hero" aria-labelledby="${c.heroLabel}">
+    <section class="l-section c-hero${c.heroClass ? ` ${c.heroClass}` : ''}" aria-labelledby="${c.heroLabel}">
       <div class="l-container"><div class="${c.attr === 'profile' ? 'c-profile-hero' : 'c-hero__grid'}" data-${c.attr}="hero"></div></div>
     </section>
 ${c.sections.map((s, i) => `    <section class="l-section${i % 2 === 0 ? ' l-section--subtle' : ''}" data-${c.attr}="${s}" aria-labelledby="${s}-title" id="${s}" hidden><div class="l-container" data-${c.attr}-body></div></section>`).join('\n')}

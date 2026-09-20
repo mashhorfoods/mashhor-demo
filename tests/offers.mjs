@@ -263,8 +263,21 @@ for (const o of offers) {
 // ---------------------------------------------------------------- mobile detail + keyboard
 {
   const p = await open('/mashhor-demo/offers/istanbul-family/', 390, 844, 'ar');
-  const r = await p.evaluate(() => { const cta = document.querySelector('[data-offer=hero] .c-btn--primary').getBoundingClientRect(); const media = document.querySelector('.c-hero__media').getBoundingClientRect(); return { hScroll: document.documentElement.scrollWidth > document.documentElement.clientWidth, ctaTop: Math.round(cta.top), ratio: +(media.width / media.height).toFixed(2), priceSize: parseFloat(getComputedStyle(document.querySelector('.c-price__value')).fontSize) }; });
-  ok('mobile detail: CTA within the first screen, media ratio kept, price readable', !r.hScroll && r.ctaTop < 800 && r.ratio > 1.4 && r.ratio < 1.8 && r.priceSize >= 18, JSON.stringify(r));
+  const r = await p.evaluate(() => {
+    const cta = document.querySelector('[data-offer=hero] .c-btn--primary').getBoundingClientRect();
+    const hero = document.querySelector('.c-hero').getBoundingClientRect();
+    return {
+      hScroll: document.documentElement.scrollWidth > document.documentElement.clientWidth, ctaTop: Math.round(cta.top),
+      priceSize: parseFloat(getComputedStyle(document.querySelector('.c-price__value')).fontSize),
+      heroTop: Math.round(hero.top), heroTallEnough: hero.height >= window.innerHeight * 0.9,
+      surface: document.querySelector('.c-gh').dataset.surface,
+    };
+  });
+  // Full-bleed hero (header/hero update brief §03): the photo now runs the
+  // full mobile viewport height behind a transparent header, not the old
+  // boxed 16:10 card, so the CTA sits toward the bottom of that first
+  // screen rather than right under the title.
+  ok('mobile detail: full-bleed hero behind a transparent header, CTA reachable, price readable', !r.hScroll && r.heroTop <= 0 && r.heroTallEnough && r.surface === 'transparent' && r.ctaTop < 1000 && r.priceSize >= 18, JSON.stringify(r));
   await p.keyboard.press('Tab');
   ok('first Tab is the skip link', await p.evaluate(() => document.activeElement.hasAttribute('data-skip')));
   const seen = [];

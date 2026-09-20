@@ -227,6 +227,116 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
   await m.close();
 }
 
+// ---------------------------------------------------------------- destination card → destination detail page (header/hero update brief §01/§21)
+{
+  const p = await open(1440, 1000, 'ar');
+  const href = await p.getAttribute('[data-destinations=popular] .c-dest .c-card__link', 'href');
+  ok('card links to the destination detail route', /\/destinations\/[a-z-]+\/$/.test(href), href);
+  await p.click('[data-destinations=popular] .c-dest .c-card__link'); await p.waitForTimeout(1200);
+  const path = await p.evaluate(() => location.pathname);
+  ok('clicking the card opens the destination detail page', href.endsWith(path) || path.endsWith(href.replace(/^https?:\/\/[^/]+/, '')), `${href} -> ${path}`);
+  await p.close();
+}
+
+// ---------------------------------------------------------------- destination detail — every route, both locales
+const DEST = process.env.TEST_ORIGIN + '/mashhor-demo/destinations/';
+const seedD = await open(1440, 1000, 'ar');
+const destSlugs = await seedD.evaluate(async () => { const m = await import('./assets/js/foundation.js'); return m.DESTINATION_REGISTRY.map((d) => d.slug); });
+await seedD.close();
+ok('registry: 11 launch destinations, all with a slug', destSlugs.length === 11 && destSlugs.every(Boolean), destSlugs.length);
+for (const slug of destSlugs) {
+  const p = await open(1440, 1000, 'ar', `${DEST}${slug}/`);
+  const r = await p.evaluate(() => {
+    const headings = Array.from(document.querySelectorAll('h1,h2,h3')).filter((x) => x.checkVisibility()).map((x) => Number(x.tagName[1]));
+    let jumps = 0; for (let i = 1; i < headings.length; i++) if (headings[i] - headings[i - 1] > 1) jumps++;
+    const hero = document.querySelector('[data-dest=hero]');
+    return {
+      title: document.title, h1: document.querySelector('h1')?.textContent.trim(), h1s: document.querySelectorAll('h1').length, jumps,
+      canonical: document.querySelector('link[rel=canonical]').href, hScroll: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      crumbs: document.querySelectorAll('.c-breadcrumb li a, .c-breadcrumb li [aria-current]').length,
+      primary: hero.querySelector('.c-btn--primary')?.textContent.trim(), primaryHref: hero.querySelector('.c-btn--primary')?.getAttribute('href'),
+      secondary: hero.querySelector('.c-btn--tertiary')?.textContent.trim(), secondaryHref: hero.querySelector('.c-btn--tertiary')?.getAttribute('href'),
+      visible: Array.from(document.querySelectorAll('main > section[data-dest]')).filter((x) => !x.hidden).map((x) => x.dataset.dest),
+      emptySections: Array.from(document.querySelectorAll('main > section[data-dest]')).filter((x) => !x.hidden && !x.querySelector('[data-dest-body] *, [data-dest] > *')).length,
+      services: document.querySelectorAll('[data-dest=services] .c-service-card').length,
+      offers: document.querySelectorAll('[data-dest=offers] .c-offer').length,
+      support: document.querySelectorAll('[data-dest=support] .c-support__panel').length,
+      placeholders: document.querySelectorAll('a[href^="tel:"], a[href*="wa.me"], a[href^="mailto:"]').length,
+      numbers: /\d{3,}\s?(ج\.س|SDG|USD)/.test(document.querySelector('main').innerText),
+      mediaAlt: document.querySelector('.c-hero__media img')?.getAttribute('alt'),
+      surface: document.querySelector('.c-gh').dataset.surface, ghHeight: getComputedStyle(document.documentElement).getPropertyValue('--gh-height').trim(),
+      heroFull: hero.closest('.c-hero').classList.contains('c-hero--full'),
+    };
+  });
+  const T = `dest/${slug}`;
+  ok(`${T} title, canonical, one h1, ordered headings, no h-scroll`, r.title.includes(r.h1) && r.canonical.endsWith(`/destinations/${slug}/`) && r.h1s === 1 && r.jumps === 0 && !r.hScroll, `${r.title} jumps=${r.jumps}`);
+  ok(`${T} breadcrumb (home › destinations › name), full-bleed hero`, r.crumbs === 3 && r.heroFull);
+  ok(`${T} primary books this destination, secondary talks to the coordinator`, /\/book\/\?vertical=flights&to=/.test(r.primaryHref) && r.secondaryHref?.endsWith('/supervisors/'), JSON.stringify({ p: r.primaryHref, s: r.secondaryHref }));
+  ok(`${T} no empty sections, relevant services shown, no invented price/number`, r.emptySections === 0 && r.services > 0 && r.placeholders === 0 && !r.numbers && !!r.mediaAlt, r.visible.join(','));
+  ok(`${T} header measured its own live height for the hero to pull up behind`, /^\d+px$/.test(r.ghHeight), r.ghHeight);
+  await p.close();
+}
+{
+  // jeddah has no linked offer (data/offers.js); dubai has exactly one — the conditional section, both ways.
+  const noOffers = await open(1440, 1000, 'ar', `${DEST}jeddah/`);
+  const a = await noOffers.evaluate(() => document.querySelector('[data-dest=offers]').hidden);
+  ok('destination with no linked offer: the related-offers section stays hidden, not empty', a);
+  await noOffers.close();
+  const withOffers = await open(1440, 1000, 'ar', `${DEST}dubai/`);
+  const b2 = await withOffers.evaluate(() => ({ hidden: document.querySelector('[data-dest=offers]').hidden, n: document.querySelectorAll('[data-dest=offers] .c-offer').length }));
+  ok('destination with a linked offer: related offers section shows it', !b2.hidden && b2.n === 1, JSON.stringify(b2));
+  await withOffers.close();
+}
+
+// ---------------------------------------------------------------- unrecognised slug (window.no.destination, like every other detail template's states) — not-found state, no invented destination
+{
+  const p = await open(1440, 1000, 'ar', `${DEST}jeddah/`);
+  const r = await p.evaluate(async () => {
+    await window.no.destination.render('nonexistent');
+    return {
+      empty: !!document.querySelector('.c-state--empty'),
+      allHidden: Array.from(document.querySelectorAll('main > section[data-dest]')).every((x) => x.hidden),
+      title: document.title,
+      surface: document.querySelector('.c-gh').dataset.surface,
+    };
+  });
+  ok('unknown destination slug: not-found state, every section hidden, no fabricated page', r.empty && r.allHidden, JSON.stringify(r));
+  ok('unknown slug: header stops tracking the (now empty) hero', r.surface === undefined || r.surface === '', r.surface);
+  await p.close();
+}
+
+// ---------------------------------------------------------------- header: transparent over the hero, solid once past it, auto-hide still works
+{
+  const p = await open(1440, 1000, 'ar', `${DEST}jeddah/`);
+  const top = await p.evaluate(() => document.querySelector('.c-gh').dataset.surface);
+  ok('detail page loads with the header transparent over the hero', top === 'transparent', top);
+  await p.evaluate(() => window.scrollTo(0, 1400)); await p.waitForTimeout(500);
+  const past = await p.evaluate(() => document.querySelector('.c-gh').dataset.surface);
+  ok('header turns solid once the hero has fully scrolled past', past === 'solid', past);
+  await p.evaluate(() => window.scrollTo(0, 1300)); await p.waitForTimeout(500);
+  const shown = await p.evaluate(() => ({ hidden: document.querySelector('.c-gh').dataset.hidden, surface: document.querySelector('.c-gh').dataset.surface }));
+  ok('scrolling up past the hero still reveals a SOLID header (not the transparent hero look)', shown.hidden === 'false' && shown.surface === 'solid', JSON.stringify(shown));
+  await p.evaluate(() => window.scrollTo(0, 0)); await p.waitForTimeout(500);
+  const home = await p.evaluate(() => document.querySelector('.c-gh').dataset.surface);
+  ok('back at the top, the header is transparent over the hero again', home === 'transparent', home);
+  await p.close();
+}
+
+// ---------------------------------------------------------------- mobile detail page
+{
+  const p = await open(390, 844, 'ar', `${DEST}jeddah/`);
+  const r = await p.evaluate(() => ({
+    hScroll: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    heroTop: document.querySelector('.c-hero').getBoundingClientRect().top,
+    navUsable: getComputedStyle(document.querySelector('.c-gh__mobile-only')).display !== 'none',
+  }));
+  ok('mobile: full-bleed hero starts at the true top, no h-scroll, menu button usable', !r.hScroll && r.heroTop <= 0 && r.navUsable, JSON.stringify(r));
+  await p.click('.c-gh__mobile-only'); await p.waitForTimeout(400);
+  const d = await p.evaluate(() => document.querySelector('.c-gh__drawer')?.dataset.open);
+  ok('mobile drawer still opens over a transparent-hero header', d === 'true');
+  await p.close();
+}
+
 await b.close();
 console.log(`\n${pass}/${pass + fail} destinations checks passed`);
 console.log('errors:', errs.length ? errs : 'none');

@@ -406,6 +406,10 @@ export function mountOfferDetail({ slug, root = document, load = async (s) => ge
   const paint = (record) => {
     applyHead(record);
     region.content(offerHero(record));
+    // The header tracks this section for the transparent-over-hero surface
+    // (header/hero update brief §04/§05); every other page never calls
+    // trackHero and the header looks exactly as it always has.
+    qs('.c-gh', document)?.no?.trackHero(qs('.c-hero', root));
     show('overview', overviewSection(record));
     show('included', inclusionsSection(record));
     show('excluded', exclusionsSection(record));
@@ -425,7 +429,7 @@ export function mountOfferDetail({ slug, root = document, load = async (s) => ge
       let record;
       try { record = await load(nextSlug); }
       catch (error) { console.error('[no] offer failed to load', error); region.error(); return null; }
-      if (!record) { region.empty(); document.title = `${t('offers.unknown.title')} — ${t('brand.name')}`; return null; }
+      if (!record) { region.empty(); qs('.c-gh', document)?.no?.trackHero(null); document.title = `${t('offers.unknown.title')} — ${t('brand.name')}`; return null; }
       api.current = record; paint(record); return record;
     },
     reload() { return api.render(slug); },

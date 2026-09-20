@@ -117,6 +117,41 @@
   .c-hero--photo .c-hero__lead { color: rgb(255 255 255 / 0.85); }
   .c-hero--photo .c-hero__trust,
   .c-hero--photo .c-hero__trust .c-icon { color: var(--color-text-inverse); }
+  /* The detail-page breadcrumb (offers/destinations, 16-service-detail.css)
+     rides in the same copy column — it needs the same inverse treatment,
+     the current-page crumb included. */
+  .c-hero--photo .c-breadcrumb__list { color: rgb(255 255 255 / 0.85); }
+  .c-hero--photo .c-breadcrumb__sep { color: rgb(255 255 255 / 0.55); }
+  .c-hero--photo .c-breadcrumb [aria-current="page"] { color: var(--color-text-inverse); }
+
+  /* ----------------------------------------------------------------------
+     HERO — full VIEWPORT variant, on top of --photo. Header/hero update
+     brief §03: the destination and offer detail pages want the photo to
+     fill the first screen (~100vh) and run behind the header, not just
+     bleed edge to edge at whatever height the copy needs.
+
+     The section pulls itself up by the header's own live height
+     (--gh-height, published by header.js's trackHero() — the static
+     --header-height token until that measurement lands) so the photo
+     starts at the true top of the viewport, underneath the header; the
+     inner grid gets that same amount back as padding so the copy itself
+     never sits under the (transparent) bar. dvh over vh: 100vh includes
+     the area a mobile browser's own chrome can cover, cropping the
+     "important subject" of a photo without it — dvh tracks the real
+     visible viewport instead. */
+  .c-hero--full {
+    margin-block-start: calc(-1 * var(--gh-height, var(--header-height)));
+    min-block-size: 100vh;
+    min-block-size: 100dvh;
+    display: flex;
+    padding-block-start: 0;
+  }
+  .c-hero--full .c-hero__grid {
+    padding-block-start: calc(var(--gh-height, var(--header-height)) + var(--space-48));
+    padding-block-end: var(--space-48);
+    align-self: flex-end;
+    inline-size: 100%;
+  }
 
   /* ======================================================================
      VALUE — icon · title · one sentence. "Why Number One". §06

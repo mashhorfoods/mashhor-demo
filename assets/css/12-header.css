@@ -28,11 +28,54 @@
     border-block-end: var(--border-width) solid var(--color-border);
     box-shadow: var(--shadow-sm);
     transform: translateY(0);
-    transition: transform var(--duration-base) var(--ease-standard);
+    transition: transform var(--duration-base) var(--ease-standard),
+                background-color var(--duration-base) var(--ease-standard),
+                border-color var(--duration-base) var(--ease-standard),
+                box-shadow var(--duration-base) var(--ease-standard);
   }
   /* Scrolling down past the threshold (header.js) hides it off the top of
      the viewport; scrolling up, or being at the very top, brings it back. */
   .c-gh[data-hidden="true"] { transform: translateY(-100%); }
+
+  /* ======================================================================
+     TRANSPARENT-OVER-HERO SURFACE — §04/§05/§08/§09 of the header/hero
+     update brief. Only a page with a full-bleed hero ever sets
+     data-surface (header.js's trackHero()); every other page never
+     receives the attribute, so the rules above are the whole story there.
+     Transparent throughout the hero (STATE 01/02), solid once the hero has
+     fully scrolled past (STATE 03) — header.js's IntersectionObserver
+     flips the attribute; this only draws the two looks. The hero's own
+     dark overlay (.c-hero--photo::after, 14-home.css) already keeps the
+     photo behind it readable, so no extra backdrop-blur is layered here.
+     ==================================================================== */
+  .c-gh[data-surface="transparent"] {
+    background-color: transparent;
+    border-block-end-color: transparent;
+    box-shadow: none;
+  }
+  /* brand.js's logo(..., { inverse: true }) renders both lockups; swap to
+     the light one exactly like every other dark surface already does
+     (05-primitives.css) — no new logo variant, no redesign. §09 */
+  .c-gh[data-surface="transparent"] .c-logo__img--light { display: none; }
+  .c-gh[data-surface="transparent"] .c-logo__img--inverse { display: block; }
+  .c-gh[data-surface="transparent"] .c-gh__link,
+  .c-gh[data-surface="transparent"] .c-gh__action,
+  .c-gh[data-surface="transparent"] .c-gh__secure,
+  .c-gh[data-surface="transparent"] .c-gh__mobile-only {
+    color: var(--color-text-inverse);
+  }
+  .c-gh[data-surface="transparent"] .c-gh__link:hover,
+  .c-gh[data-surface="transparent"] .c-gh__link[aria-expanded="true"],
+  .c-gh[data-surface="transparent"] .c-gh__action:hover,
+  .c-gh[data-surface="transparent"] .c-gh__action[aria-expanded="true"],
+  .c-gh[data-surface="transparent"] .c-gh__mobile-only:hover {
+    background-color: rgb(255 255 255 / 0.16);
+    color: var(--color-text-inverse);
+  }
+  /* An open panel is always the normal light surface — its own content
+     (a mega menu, the account list) needs the ordinary contrast, not the
+     hero's inverse one, whatever the bar above it looks like. */
+  .c-gh[data-surface="transparent"] .c-gh__panel { color: var(--color-text); }
 
   /* The shell's space is reserved before the script mounts the header, so
      the page never shifts down when it arrives (Stage 10.12). The size

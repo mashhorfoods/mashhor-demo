@@ -149,7 +149,10 @@ export function globalHeader({ current = null, variant = 'default', onSearch = n
   }, [
     el('div', { class: 'l-container c-gh__inner' }, [
       el('div', { class: 'c-gh__bar' }, [
-        logo({ className: 'c-gh__brand' }),
+        // inverse: true renders the light/reversed lockup alongside the
+        // normal one (brand.js), so CSS can swap to it over a photo hero
+        // (§09 of the header/hero update brief) without redesigning the mark.
+        logo({ className: 'c-gh__brand', inverse: true }),
 
         isBooking
           ? el('p', { class: 'c-gh__secure' }, [
@@ -185,12 +188,14 @@ export function globalHeader({ current = null, variant = 'default', onSearch = n
   // appends them beside the header instead; destroy() below still cleans up
   // both by direct reference, wherever they ended up in the DOM.
   initAutoHide(header, { menus, drawer, signal });
+  const trackHero = initHeroSurface(header, { signal });
 
   header.no = {
     menus,
     drawer: drawer.no,
     setSession,
     overlays: [scrim, drawer],
+    trackHero,
     /** Release every listener this header holds. mountHeader calls it before
         replacing a header; call it yourself if you place the header manually. */
     destroy() {
@@ -241,6 +246,44 @@ function initAutoHide(header, { menus, drawer, signal }) {
     ticking = true;
     requestAnimationFrame(update);
   }, { passive: true, signal });
+}
+
+/* ---------------------------------------------------------------------------
+   HERO SURFACE — §04/§05/§08 of the header/hero update brief. A page with a
+   full-bleed hero (destination-detail.js, offers.js) calls the returned
+   trackHero(heroEl) once its hero exists; every other page never calls it,
+   so `data-surface` is simply never set and the header looks exactly as it
+   always has (solid, no transform, unaffected by any of this).
+
+   Two independent jobs, both driven off the one hero element:
+     - an IntersectionObserver flips data-surface between 'transparent'
+       (any part of the hero still on screen) and 'solid' (fully scrolled
+       past) — a plain default observer does exactly that, since the hero is
+       always the first thing on the page.
+     - a ResizeObserver publishes the header's own live height as
+       --gh-height, so .c-hero--full (14-home.css) can pull the photo up
+       exactly behind the header — not an approximation — regardless of
+       which breakpoint's logo size is in play.
+   ------------------------------------------------------------------------ */
+function initHeroSurface(header, { signal }) {
+  let io = null;
+  let ro = null;
+  const setHeight = () => document.documentElement.style.setProperty('--gh-height', `${header.offsetHeight}px`);
+
+  signal.addEventListener('abort', () => { io?.disconnect(); ro?.disconnect(); });
+
+  return function trackHero(heroEl) {
+    io?.disconnect(); ro?.disconnect();
+    if (!heroEl) { delete header.dataset.surface; return; }
+    header.dataset.surface = 'transparent';
+    ro = new ResizeObserver(setHeight);
+    ro.observe(header);
+    setHeight();
+    io = new IntersectionObserver(([entry]) => {
+      header.dataset.surface = entry.isIntersecting ? 'transparent' : 'solid';
+    }, { threshold: 0 });
+    io.observe(heroEl);
+  };
 }
 
 /** Mount the header as the first element of a page. */
