@@ -53,7 +53,7 @@ const COLLECTIONS = [
     dir: 'destinations', records: DESTINATION_REGISTRY, attr: 'dest', mount: 'mountDestinationDetail', module: 'destination-detail', handle: 'destination',
     title: (d) => d.nameAr, description: (d) => d.descAr, og: (d) => d.descAr, heroLabel: 'dest-title', current: 'destinations',
     heroClass: 'c-hero--photo c-hero--full',
-    sections: ['overview', 'travel', 'services', 'offers', 'support'],
+    sections: ['overview', 'why', 'travel', 'services', 'offers', 'support'],
     noindex: false,
   },
   {

@@ -83,29 +83,38 @@ export function destHero(record) {
    SECTIONS — each returns null (hidden by the shell) when it has nothing
    the registry actually says. §11/§4
    ------------------------------------------------------------------------ */
+/** Just the intro — the "what/why" facts have their own sections below, so this stays a clean lead-in. */
 export function overviewSection(record) {
-  const region = DESTINATION_REGIONS.find((r) => r.id === record.region);
-  const place = [pick(record, 'country'), region ? pick(region, 'label') : null].filter(Boolean).join(' — ');
-  const facts = [place ? { icon: 'no-location', text: place } : null].filter(Boolean);
   return [
     sectionHead({ id: 'overview-title', overline: t('detail.overview.overline'), title: t('dest.detail.overview.title', pick(record, 'name')) }),
-    el('div', { class: 'l-grid' }, [
-      el('p', { class: 't-body-lg l-span-8@md l-span-7@lg c-detail__lead' }, pick(record, 'desc')),
-      facts.length
-        ? el('ul', { class: 'c-detail__points l-span-8@md l-span-5@lg', role: 'list' }, facts.map((f) =>
-            el('li', { class: 'c-detail__point' }, [icon(f.icon, { size: 'sm' }), el('span', {}, f.text)])))
-        : null,
-    ]),
+    el('p', { class: 't-body-lg l-span-8@md l-span-7@lg c-detail__lead' }, pick(record, 'desc')),
   ];
 }
 
-export function travelSection(record) {
+/** "Why / what to know" — the destination's own travel purposes, each with its real hint text. */
+export function whySection(record) {
   const purposes = (record.purposes ?? []).map((id) => TRAVEL_PURPOSES.find((p) => p.id === id)).filter(Boolean);
   if (!purposes.length) return null;
   return [
-    sectionHead({ id: 'travel-title', overline: t('dest.detail.travel.overline'), title: t('dest.detail.travel.title', pick(record, 'name')) }),
+    sectionHead({ id: 'why-title', overline: t('dest.detail.why.overline'), title: t('dest.detail.why.title', pick(record, 'name')) }),
     el('ul', { class: 'c-detail__points', role: 'list' }, purposes.map((p) =>
       el('li', { class: 'c-detail__point' }, [icon(p.icon, { size: 'sm' }), el('span', {}, [pick(p, 'label'), ' — ', pick(p, 'hint')])]))),
+  ];
+}
+
+/** "Travel information" — the structural facts the record actually carries: where it is, and whether
+    it's bookable today. Nothing here is a schedule, a price or a guarantee the registry doesn't have. */
+export function travelInfoSection(record) {
+  const region = DESTINATION_REGIONS.find((r) => r.id === record.region);
+  const facts = [
+    (record.countryAr || record.countryEn) ? { icon: 'no-location', text: pick(record, 'country') } : null,
+    region ? { icon: 'no-flight', text: pick(region, 'label') } : null,
+    { icon: record.status === 'soon' ? 'no-pending' : 'no-check-circle', text: t(`dest.detail.status.${record.status === 'soon' ? 'soon' : 'available'}`) },
+  ].filter(Boolean);
+  return [
+    sectionHead({ id: 'travel-title', overline: t('dest.detail.travel.overline'), title: t('dest.detail.travel.title', pick(record, 'name')) }),
+    el('ul', { class: 'c-detail__points', role: 'list' }, facts.map((f) =>
+      el('li', { class: 'c-detail__point' }, [icon(f.icon, { size: 'sm' }), el('span', {}, f.text)]))),
   ];
 }
 
@@ -169,7 +178,7 @@ const applyHead = (record) => setPageHead({ title: `${pick(record, 'name')} — 
    ------------------------------------------------------------------------ */
 export function mountDestinationDetail({ slug, root = document, load = async (s) => getDestination(s) } = {}) {
   const mount = (name) => qs(`[data-dest="${name}"]`, root);
-  const sections = ['overview', 'travel', 'services', 'offers', 'support', 'cta'];
+  const sections = ['overview', 'why', 'travel', 'services', 'offers', 'support', 'cta'];
   const region = stateRegion(mount('hero'), {
     loading: () => el('div', { style: 'display:contents' }, [
       el('div', { class: 'l-stack' }, [el('div', { class: 'c-skeleton c-skeleton--text c-skeleton--line-sm' }), el('div', { class: 'c-skeleton c-skeleton--title' }), el('div', { class: 'c-skeleton c-skeleton--text c-skeleton--line-md' })]),
@@ -191,7 +200,8 @@ export function mountDestinationDetail({ slug, root = document, load = async (s)
     // keys off the full 100vh section, not the two-column content inside it.
     qs('.c-gh', document)?.no?.trackHero(qs('.c-hero', root));
     show('overview', overviewSection(record));
-    show('travel', travelSection(record));
+    show('why', whySection(record));
+    show('travel', travelInfoSection(record));
     show('services', relatedServicesSection(record));
     show('offers', relatedOffersSection(record));
     show('support', supportSection());

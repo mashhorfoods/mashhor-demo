@@ -261,6 +261,9 @@ for (const slug of destSlugs) {
       services: document.querySelectorAll('[data-dest=services] .c-service-card').length,
       offers: document.querySelectorAll('[data-dest=offers] .c-offer').length,
       support: document.querySelectorAll('[data-dest=support] .c-support__panel').length,
+      why: document.querySelectorAll('[data-dest=why] .c-detail__point').length,
+      travelFacts: document.querySelectorAll('[data-dest=travel] .c-detail__point').length,
+      overviewHasNoFacts: !document.querySelector('[data-dest=overview] .c-detail__points'),
       placeholders: document.querySelectorAll('a[href^="tel:"], a[href*="wa.me"], a[href^="mailto:"]').length,
       numbers: /\d{3,}\s?(ج\.س|SDG|USD)/.test(document.querySelector('main').innerText),
       mediaAlt: document.querySelector('.c-hero__media img')?.getAttribute('alt'),
@@ -273,6 +276,7 @@ for (const slug of destSlugs) {
   ok(`${T} breadcrumb (home › destinations › name), full-bleed hero`, r.crumbs === 3 && r.heroFull);
   ok(`${T} primary books this destination, secondary talks to the coordinator`, /\/book\/\?vertical=flights&to=/.test(r.primaryHref) && r.secondaryHref?.endsWith('/supervisors/'), JSON.stringify({ p: r.primaryHref, s: r.secondaryHref }));
   ok(`${T} no empty sections, relevant services shown, no invented price/number`, r.emptySections === 0 && r.services > 0 && r.placeholders === 0 && !r.numbers && !!r.mediaAlt, r.visible.join(','));
+  ok(`${T} why/what-to-know (travel purposes) and travel information (facts incl. status) are distinct sections`, r.why > 0 && r.travelFacts > 0 && r.overviewHasNoFacts, JSON.stringify({ why: r.why, travel: r.travelFacts, ov: r.overviewHasNoFacts }));
   ok(`${T} header measured its own live height for the hero to pull up behind`, /^\d+px$/.test(r.ghHeight), r.ghHeight);
   await p.close();
 }

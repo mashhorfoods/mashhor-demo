@@ -146,6 +146,12 @@
     display: flex;
     padding-block-start: 0;
   }
+  /* The transparent header's light text needs a dark surface to sit on
+     even before the photo has painted (a slow connection, or an image
+     load failure) — .c-hero__media is what actually paints behind it
+     (absolutely positioned, inset:0); its own light --color-bg-sunken
+     fallback would read as white-on-white for that brief window. */
+  .c-hero--full .c-hero__media { background-color: var(--color-gray-800); }
   .c-hero--full .c-hero__grid {
     padding-block-start: calc(var(--gh-height, var(--header-height)) + var(--space-48));
     padding-block-end: var(--space-48);
