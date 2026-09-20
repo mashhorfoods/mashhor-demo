@@ -248,6 +248,9 @@
      weight, the same way any "as seen in" logo row does — a shared height
      alone doesn't, since a wide mark still reads far larger than a narrow
      one at the same height.
+
+     The strip itself is a continuous right-to-left marquee (providers.js
+     duplicates the list; see below), not a static grid.
      ==================================================================== */
   .c-provider-card {
     display: flex; align-items: center; justify-content: center;
@@ -259,6 +262,41 @@
      these are just the safety ceiling/fallback before that runs. */
   .c-provider-card__logo { max-inline-size: 100%; max-block-size: 4.75rem; object-fit: contain; }
   .c-provider-card__wordmark { font-size: var(--text-h4); font-weight: var(--weight-semibold); color: var(--color-text); }
+
+  /* ---- the marquee itself ----
+     .c-provider-marquee clips the strip to the section width; its track is
+     the (JS-)duplicated list laid edge to edge and shifted left by exactly
+     one copy's width (translate3d, GPU-composited) — at -50% the loop
+     resets onto pixel-identical content, so the seam is invisible and the
+     motion never stops or jumps. Card sizing is fixed in rem, not
+     viewport-relative, so this holds at every breakpoint without extra
+     rules. */
+  .c-provider-marquee { overflow: hidden; }
+  .c-provider-marquee__track {
+    display: flex;
+    gap: var(--grid-gutter);
+    inline-size: max-content;
+    animation: c-provider-marquee-scroll 40s linear infinite;
+    will-change: transform;
+  }
+  .c-provider-marquee__item { flex: none; }
+
+  @keyframes c-provider-marquee-scroll {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(-50%, 0, 0); }
+  }
+
+  /* Reduced motion: a static row of the real logos (the duplicates that
+     only exist to fill the loop are hidden), not a forced-continuous
+     animation. §06 of the update brief. */
+  @media (prefers-reduced-motion: reduce) {
+    .c-provider-marquee { overflow: visible; }
+    .c-provider-marquee__track {
+      animation: none; transform: none;
+      flex-wrap: wrap; inline-size: auto;
+    }
+    .c-provider-marquee__item--dup { display: none; }
+  }
 
   /* ======================================================================
      SECTION HEAD WITH ACTION — heading on the start side, a link on the end.

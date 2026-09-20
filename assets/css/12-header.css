@@ -9,22 +9,19 @@
 @layer components {
   :root {
     --header-pad-block: var(--space-12);
-    --header-pad-block-scrolled: var(--space-8);
     --header-shell: calc(var(--logo-size, 48px) + (var(--header-pad-block) * 2));
     --menu-max: 72rem;
   }
 
   /* ======================================================================
-     SHELL — §14 sticky, §13 scrolled
+     SHELL — §14. The header sits in normal flow and scrolls away with the
+     page (no position: sticky/fixed): a permanent, subtle shadow gives it
+     separation from the content below instead of a scroll-triggered one.
      ==================================================================== */
   .c-gh {
-    position: sticky;
-    inset-block-start: 0;
-    z-index: var(--z-header);
     background-color: var(--color-surface);
     border-block-end: var(--border-width) solid var(--color-border);
-    transition: box-shadow var(--duration-base) var(--ease-standard),
-                border-color var(--duration-base) var(--ease-standard);
+    box-shadow: var(--shadow-sm);
   }
 
   /* The shell's space is reserved before the script mounts the header, so
@@ -33,21 +30,6 @@
      the bar padding, plus the hairline. */
   .c-gh--placeholder { --logo-size: 48px; block-size: calc(var(--header-shell) + var(--border-width)); }
   @media (min-width: 64em) { .c-gh--placeholder { --logo-size: 56px; } }
-
-  /* Scrolled: a little tighter, and lifted off the page with a hairline
-     shadow. Only padding animates, so the logo never jumps. §13 */
-  .c-gh[data-scrolled="true"] {
-    box-shadow: var(--shadow-sm);
-    border-block-end-color: transparent;
-  }
-  .c-gh[data-scrolled="true"] .c-gh__bar { padding-block: var(--header-pad-block-scrolled); }
-  /* Target .c-logo itself: the primitive sets its own --logo-size, so setting
-     the variable on the header alone is inherited-then-overridden and never
-     reaches the image. */
-  .c-gh[data-scrolled="true"] .c-logo { --logo-size: 40px; }
-  @media (min-width: 64em) {
-    .c-gh[data-scrolled="true"] .c-logo { --logo-size: 44px; }
-  }
 
   .c-gh__bar {
     display: grid;
@@ -268,11 +250,13 @@
 
   /* Scrim behind any open overlay, so the page reads as inert.
 
-     z-index is local: the scrim is a child of the header, which already sits at
-     --z-header above the page, so 1 is enough to cover everything below while
-     .c-gh__inner at 2 keeps the bar and its panels clickable. Without that the
-     scrim — appended after the bar — paints over the header and swallows every
-     click, including the one that would close it. */
+     The header itself is unpositioned (it scrolls away with the page, §14),
+     so this fixed-position scrim and .c-gh__inner both stack in whatever
+     context contains the header — ordinary page content stays at the default
+     z-index:0, so scrim(1) still covers it while .c-gh__inner(2) keeps the
+     bar and its panels above the scrim and clickable. Without that the
+     scrim — appended after the bar — paints over the header and swallows
+     every click, including the one that would close it. */
   .c-gh__scrim {
     position: fixed; inset: 0;
     z-index: 1;

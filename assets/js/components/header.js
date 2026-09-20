@@ -145,7 +145,6 @@ export function globalHeader({ current = null, variant = 'default', onSearch = n
   const header = el('header', {
     class: 'c-gh',
     'data-variant': variant,
-    'data-scrolled': 'false',
   }, [
     el('div', { class: 'l-container c-gh__inner' }, [
       el('div', { class: 'c-gh__bar' }, [
@@ -203,29 +202,13 @@ export function globalHeader({ current = null, variant = 'default', onSearch = n
   return header;
 }
 
-/* ---------------------------------------------------------------------------
-   SCROLL STATE — §13.
-   A sentinel above the header, watched by IntersectionObserver. No scroll
-   handler runs on the main thread, which matters for a component present on
-   every page (§26).
-   ------------------------------------------------------------------------ */
-export function initHeaderScrollState(header) {
-  if (!header) return;
-  const sentinel = el('div', { 'aria-hidden': 'true', style: 'position:absolute;inset-block-start:0;block-size:1px;inline-size:1px' });
-  header.parentNode.insertBefore(sentinel, header);
-
-  if (!('IntersectionObserver' in window)) return;
-  new IntersectionObserver(([entry]) => {
-    header.dataset.scrolled = String(!entry.isIntersecting);
-  }, { threshold: 0 }).observe(sentinel);
-}
-
-/** Mount the header as the first element of a page and wire its scroll state. */
+/** Mount the header as the first element of a page. The header sits in
+    normal flow (no position: sticky/fixed, §14) and scrolls away with the
+    page, so it needs no scroll-state wiring. */
 export function mountHeader(options = {}) {
   const target = options.target ?? document.body;
   qsa('.c-gh', target).forEach((old) => (old.no?.destroy ?? old.remove).call(old.no ?? old));
   const header = globalHeader(options);
   target.prepend(header);
-  initHeaderScrollState(header);
   return header;
 }

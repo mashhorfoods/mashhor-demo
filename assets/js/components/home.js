@@ -28,7 +28,7 @@ import { supervisorCard } from './supervisor.js';
 import { searchWidget } from './search.js';
 import { stateRegion, stateBlock, skeletonService, skeletonCard } from './states.js';
 import { newsletterCard } from './newsletter.js';
-import { providerGrid } from './providers.js';
+import { providerMarquee } from './providers.js';
 import { imageSrc } from '../data/images.js';
 
 /* ---------------------------------------------------------------------------
@@ -281,7 +281,7 @@ export function mountHome({
   render(mount('hero-media'), heroMedia());
   render(mount('search'), search);
   render(mount('choose'), choose);
-  render(mount('providers'), providerGrid());
+  render(mount('providers'), providerMarquee());
   render(mount('newsletter'), newsletterCard({
     image: { src: imageSrc('destinations/cairo'), altAr: 'القاهرة، مصر', altEn: 'Cairo, Egypt' },
   }));

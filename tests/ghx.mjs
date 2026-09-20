@@ -50,14 +50,18 @@ ok('guest menu has 2 entries', await p.locator('.c-gh__panel[data-open="true"] .
 await p.keyboard.press('Escape'); await p.waitForTimeout(200);
 await p.evaluate(()=>window.__setSession?.({authenticated:true,name:'أحمد عبد الرحمن',role:'customer'}));
 
-// scroll state §13
-ok('not scrolled at top', await p.evaluate(()=>document.querySelector('.c-gh').dataset.scrolled)==='false');
+// header is NOT sticky/fixed — it scrolls away with the page, with a permanent shadow (§14)
+ok('header is not sticky/fixed', await p.evaluate(()=>{
+  const pos = getComputedStyle(document.querySelector('.c-gh')).position;
+  return pos !== 'sticky' && pos !== 'fixed';
+}));
+ok('header has a shadow at the top', await p.evaluate(()=>getComputedStyle(document.querySelector('.c-gh')).boxShadow !== 'none'));
+const topY = await p.evaluate(()=>document.querySelector('.c-gh').getBoundingClientRect().top);
 await p.evaluate(()=>window.scrollTo(0,600)); await p.waitForTimeout(400);
-ok('scrolled state set', await p.evaluate(()=>document.querySelector('.c-gh').dataset.scrolled)==='true');
-const h = await p.evaluate(()=>Math.round(document.querySelector('.c-gh__bar').getBoundingClientRect().height));
-await p.evaluate(()=>window.scrollTo(0,0)); await p.waitForTimeout(800);
-const h0 = await p.evaluate(()=>Math.round(document.querySelector('.c-gh__bar').getBoundingClientRect().height));
-ok('scrolled header is shorter', h < h0, `scrolled=${h} top=${h0}`);
+const scrolledY = await p.evaluate(()=>document.querySelector('.c-gh').getBoundingClientRect().top);
+ok('header scrolls away with the page', scrolledY < topY, `top=${topY} scrolled=${scrolledY}`);
+ok('header keeps its shadow while scrolled', await p.evaluate(()=>getComputedStyle(document.querySelector('.c-gh')).boxShadow !== 'none'));
+await p.evaluate(()=>window.scrollTo(0,0)); await p.waitForTimeout(400);
 
 console.log(`\n${pass}/${pass+fail} interaction checks passed`);
 console.log('errors:', errs.length?errs:'none');

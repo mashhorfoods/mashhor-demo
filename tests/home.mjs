@@ -45,7 +45,8 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
         dests: document.querySelectorAll('[data-home=destinations] .c-dest').length,
         offers: document.querySelectorAll('[data-home=offers] .c-offer').length,
         offerPrices: document.querySelectorAll('[data-home=offers] .t-price').length,
-        providers: document.querySelectorAll('[data-home=providers] .c-provider-card').length,
+        providers: document.querySelectorAll('[data-home=providers] .c-provider-marquee__item:not(.c-provider-marquee__item--dup) .c-provider-card').length,
+        providersMarqueeLooping: !!document.querySelector('[data-home=providers] .c-provider-marquee__track'),
         supportPanels: document.querySelectorAll('[data-home=support] .c-support__panel').length,
         placeholderContacts: document.querySelectorAll('a[href^="tel:"], a[href*="wa.me"], a[href^="mailto:"]').length,
         placeholderText: /\+249|wa\.me|XXXX/.test(document.body.innerText),
@@ -74,6 +75,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
     ok(`${T} 6 destinations`, r.dests === 6);
     ok(`${T} 3 offers, no invented price`, r.offers === 3 && r.offerPrices === 0);
     ok(`${T} 7 airline providers`, r.providers === 7, `${r.providers}`);
+    ok(`${T} providers render as a marquee track`, r.providersMarqueeLooping);
     ok(`${T} support panels`, r.supportPanels === 2);
     ok(`${T} no placeholder contact info`, r.placeholderContacts === 0 && !r.placeholderText);
     ok(`${T} alt on every img`, r.imgsNoAlt === 0);
@@ -231,6 +233,52 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
   ok('bottom nav present', d.bottomNav >= 4);
   await p.keyboard.press('Escape'); await p.waitForTimeout(300);
   ok('Escape closes drawer', (await p.evaluate(() => document.querySelector('.c-gh__drawer')?.dataset.open)) !== 'true');
+  await p.close();
+}
+
+// ---------------------------------------------------------------- providers marquee (§04-06 of the header/menu/providers brief)
+for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1000, 'desktop']]) {
+  const p = await open(w, h, 'ar');
+  const r = await p.evaluate(() => {
+    const track = document.querySelector('[data-home=providers] .c-provider-marquee__track');
+    const wrap = document.querySelector('[data-home=providers] .c-provider-marquee');
+    const cs = getComputedStyle(track);
+    return {
+      animName: cs.animationName,
+      animDuration: cs.animationDuration,
+      animIteration: cs.animationIterationCount,
+      trackWiderThanWrap: track.scrollWidth > wrap.getBoundingClientRect().width,
+      wrapClips: getComputedStyle(wrap).overflow === 'hidden',
+    };
+  });
+  const T = `providers/${tag}`;
+  ok(`${T} track animates`, r.animName !== 'none' && r.animDuration !== '0s');
+  ok(`${T} loops forever`, r.animIteration === 'infinite');
+  ok(`${T} track is wider than the viewport (room to loop)`, r.trackWiderThanWrap);
+  ok(`${T} wrapper clips the strip`, r.wrapClips);
+  const x1 = await p.evaluate(() => new DOMMatrixReadOnly(getComputedStyle(document.querySelector('[data-home=providers] .c-provider-marquee__track')).transform).m41);
+  await p.waitForTimeout(600);
+  const x2 = await p.evaluate(() => new DOMMatrixReadOnly(getComputedStyle(document.querySelector('[data-home=providers] .c-provider-marquee__track')).transform).m41);
+  ok(`${T} moves right-to-left over time`, x2 < x1, `${x1} -> ${x2}`);
+  const hScroll = await p.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+  ok(`${T} no page horizontal scroll from the marquee`, !hScroll);
+  await p.close();
+}
+
+// reduced motion: static, non-animating, only the real (non-duplicate) logos
+{
+  const p = await b.newPage({ viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce' });
+  await p.goto(URL, { waitUntil: 'networkidle' });
+  await p.waitForTimeout(700);
+  const r = await p.evaluate(() => {
+    const track = document.querySelector('[data-home=providers] .c-provider-marquee__track');
+    return {
+      animName: getComputedStyle(track).animationName,
+      visibleDups: Array.from(document.querySelectorAll('[data-home=providers] .c-provider-marquee__item--dup')).some((n) => n.checkVisibility()),
+    };
+  });
+  ok('reduced motion: marquee animation is off', r.animName === 'none', r.animName);
+  ok('reduced motion: duplicate fill logos are hidden', !r.visibleDups);
   await p.close();
 }
 

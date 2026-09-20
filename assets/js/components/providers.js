@@ -39,7 +39,32 @@ export function providerCard(provider) {
   return el('div', { class: 'c-card c-provider-card' }, img);
 }
 
-export function providerGrid(list = AIRLINE_PROVIDERS) {
-  return el('div', { class: 'l-grid' }, list.map((provider) =>
-    el('div', { class: 'l-span-4@md l-span-4@lg' }, providerCard(provider))));
+/* A period is the raw list repeated this many times — wide enough that one
+   period never runs shorter than the widest supported container (1280px,
+   --container-max), so the seamless loop (below) never exposes a gap. Card
+   width depends on each logo's own aspect ratio (equal-area sizing, above)
+   and is not viewport-dependent, so a fixed repeat count holds at every
+   breakpoint; there's nothing to measure at runtime. */
+const MARQUEE_REPEATS = 3;
+
+/**
+ * The continuous right-to-left marquee (§04 of the update brief): the track
+ * is the period duplicated once more, animated by exactly one period-width
+ * (translate3d, -50% of the doubled track) so the loop never jumps or gaps.
+ * Only the first pass of the raw list is exposed to assistive tech; every
+ * repeat that exists purely to fill the track is `aria-hidden`, so a screen
+ * reader hears the seven airlines once, not six times over.
+ */
+export function providerMarquee(list = AIRLINE_PROVIDERS) {
+  const perPeriod = list.length * MARQUEE_REPEATS;
+  const items = Array.from({ length: perPeriod * 2 }, (_, i) => {
+    const provider = list[i % list.length];
+    const canonical = i < list.length;
+    return el('div', {
+      class: `c-provider-marquee__item${canonical ? '' : ' c-provider-marquee__item--dup'}`,
+      ...(canonical ? {} : { 'aria-hidden': 'true' }),
+    }, providerCard(provider));
+  });
+  return el('div', { class: 'c-provider-marquee' },
+    el('div', { class: 'c-provider-marquee__track' }, items));
 }
