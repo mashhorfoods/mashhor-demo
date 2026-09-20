@@ -50,18 +50,24 @@ ok('guest menu has 2 entries', await p.locator('.c-gh__panel[data-open="true"] .
 await p.keyboard.press('Escape'); await p.waitForTimeout(200);
 await p.evaluate(()=>window.__setSession?.({authenticated:true,name:'أحمد عبد الرحمن',role:'customer'}));
 
-// header is NOT sticky/fixed — it scrolls away with the page, with a permanent shadow (§14)
-ok('header is not sticky/fixed', await p.evaluate(()=>{
-  const pos = getComputedStyle(document.querySelector('.c-gh')).position;
-  return pos !== 'sticky' && pos !== 'fixed';
-}));
-ok('header has a shadow at the top', await p.evaluate(()=>getComputedStyle(document.querySelector('.c-gh')).boxShadow !== 'none'));
-const topY = await p.evaluate(()=>document.querySelector('.c-gh').getBoundingClientRect().top);
-await p.evaluate(()=>window.scrollTo(0,600)); await p.waitForTimeout(400);
-const scrolledY = await p.evaluate(()=>document.querySelector('.c-gh').getBoundingClientRect().top);
-ok('header scrolls away with the page', scrolledY < topY, `top=${topY} scrolled=${scrolledY}`);
-ok('header keeps its shadow while scrolled', await p.evaluate(()=>getComputedStyle(document.querySelector('.c-gh')).boxShadow !== 'none'));
-await p.evaluate(()=>window.scrollTo(0,0)); await p.waitForTimeout(400);
+// smart auto-hide header (§14): visible at load, hides on scroll down, reappears on scroll up,
+// always visible at the very top, permanent shadow throughout.
+const hidden = () => p.evaluate(()=>document.querySelector('.c-gh').dataset.hidden);
+const headerTop = () => p.evaluate(()=>Math.round(document.querySelector('.c-gh').getBoundingClientRect().top));
+ok('header has a shadow', await p.evaluate(()=>getComputedStyle(document.querySelector('.c-gh')).boxShadow !== 'none'));
+ok('header visible on load', await hidden() === 'false');
+await p.evaluate(()=>window.scrollTo(0,150)); await p.waitForTimeout(150);
+await p.evaluate(()=>window.scrollTo(0,900)); await p.waitForTimeout(500);
+ok('header hides on scroll down', await hidden() === 'true');
+ok('hidden header slides off the top of the viewport', await headerTop() < 0);
+ok('header keeps its shadow while hidden', await p.evaluate(()=>getComputedStyle(document.querySelector('.c-gh')).boxShadow !== 'none'));
+await p.evaluate(()=>window.scrollTo(0,850)); await p.waitForTimeout(500);
+ok('header reappears on scroll up', await hidden() === 'false');
+ok('reappeared header sits back at the top', await headerTop() === 0, `${await headerTop()}`);
+await p.evaluate(()=>window.scrollTo(0,900)); await p.waitForTimeout(500);
+ok('header hides again on scroll down', await hidden() === 'true');
+await p.evaluate(()=>window.scrollTo(0,0)); await p.waitForTimeout(500);
+ok('header always visible at the very top', await hidden() === 'false');
 
 console.log(`\n${pass}/${pass+fail} interaction checks passed`);
 console.log('errors:', errs.length?errs:'none');

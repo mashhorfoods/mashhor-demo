@@ -145,6 +145,7 @@ export function globalHeader({ current = null, variant = 'default', onSearch = n
   const header = el('header', {
     class: 'c-gh',
     'data-variant': variant,
+    'data-hidden': 'false',
   }, [
     el('div', { class: 'l-container c-gh__inner' }, [
       el('div', { class: 'c-gh__bar' }, [
@@ -176,18 +177,28 @@ export function globalHeader({ current = null, variant = 'default', onSearch = n
     ]),
   ]);
 
-  header.append(scrim, drawer);
+  // Scrim and drawer are position: fixed against the VIEWPORT, so they must
+  // not be DOM descendants of .c-gh: the auto-hide transform below makes any
+  // transformed element the containing block for its fixed-position
+  // descendants (a CSS quirk), which would confine a nested drawer/scrim to
+  // the header's own small box instead of the whole screen. mountHeader
+  // appends them beside the header instead; destroy() below still cleans up
+  // both by direct reference, wherever they ended up in the DOM.
+  initAutoHide(header, { menus, drawer, signal });
 
   header.no = {
     menus,
     drawer: drawer.no,
     setSession,
+    overlays: [scrim, drawer],
     /** Release every listener this header holds. mountHeader calls it before
         replacing a header; call it yourself if you place the header manually. */
     destroy() {
       lifetime.abort();
       account.no.destroy();
       sessionListeners.delete(paintAccountTrigger);
+      scrim.remove();
+      drawer.remove();
       header.remove();
     },
     /** Mark the active item without re-rendering the header. §19 */
@@ -202,13 +213,44 @@ export function globalHeader({ current = null, variant = 'default', onSearch = n
   return header;
 }
 
-/** Mount the header as the first element of a page. The header sits in
-    normal flow (no position: sticky/fixed, §14) and scrolls away with the
-    page, so it needs no scroll-state wiring. */
+/* ---------------------------------------------------------------------------
+   SMART AUTO-HIDE — §14. Hides on scroll down, reappears on scroll up, and
+   is always visible at the very top of the page. A rAF-throttled, passive
+   scroll listener (no layout read beyond scrollY, so this never forces a
+   reflow) toggles `data-hidden`; the CSS transform does the actual showing
+   and hiding. Suppressed while a menu or the mobile drawer is open, so a
+   panel anchored to the header never slides away out from under itself.
+   ------------------------------------------------------------------------ */
+function initAutoHide(header, { menus, drawer, signal }) {
+  const THRESHOLD = 8; // ignores sub-pixel/momentum jitter
+  let lastY = window.scrollY;
+  let ticking = false;
+
+  const update = () => {
+    ticking = false;
+    const y = Math.max(window.scrollY, 0);
+    if (y <= 0) { header.dataset.hidden = 'false'; lastY = y; return; }
+    const busy = menus.isOpen() || drawer.dataset.open === 'true';
+    if (!busy && y > lastY + THRESHOLD) header.dataset.hidden = 'true';
+    else if (y < lastY - THRESHOLD) header.dataset.hidden = 'false';
+    lastY = y;
+  };
+
+  window.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  }, { passive: true, signal });
+}
+
+/** Mount the header as the first element of a page. */
 export function mountHeader(options = {}) {
   const target = options.target ?? document.body;
   qsa('.c-gh', target).forEach((old) => (old.no?.destroy ?? old.remove).call(old.no ?? old));
   const header = globalHeader(options);
   target.prepend(header);
+  // Scrim + drawer: see the note in globalHeader() — they live beside the
+  // header, not inside it, so the auto-hide transform never traps them.
+  target.append(...header.no.overlays);
   return header;
 }

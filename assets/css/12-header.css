@@ -14,15 +14,25 @@
   }
 
   /* ======================================================================
-     SHELL — §14. The header sits in normal flow and scrolls away with the
-     page (no position: sticky/fixed): a permanent, subtle shadow gives it
-     separation from the content below instead of a scroll-triggered one.
+     SHELL — §14. Smart auto-hide: sticky at the top so it can slide off and
+     back on (a static header has nowhere to hide to without leaving a gap),
+     but not a "traditional" sticky header — header.js flips data-hidden as
+     the user scrolls, and the transform below is what actually shows/hides
+     it. A permanent, subtle shadow travels with it either way.
      ==================================================================== */
   .c-gh {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: var(--z-header);
     background-color: var(--color-surface);
     border-block-end: var(--border-width) solid var(--color-border);
     box-shadow: var(--shadow-sm);
+    transform: translateY(0);
+    transition: transform var(--duration-base) var(--ease-standard);
   }
+  /* Scrolling down past the threshold (header.js) hides it off the top of
+     the viewport; scrolling up, or being at the very top, brings it back. */
+  .c-gh[data-hidden="true"] { transform: translateY(-100%); }
 
   /* The shell's space is reserved before the script mounts the header, so
      the page never shifts down when it arrives (Stage 10.12). The size
@@ -250,13 +260,13 @@
 
   /* Scrim behind any open overlay, so the page reads as inert.
 
-     The header itself is unpositioned (it scrolls away with the page, §14),
-     so this fixed-position scrim and .c-gh__inner both stack in whatever
-     context contains the header — ordinary page content stays at the default
-     z-index:0, so scrim(1) still covers it while .c-gh__inner(2) keeps the
-     bar and its panels above the scrim and clickable. Without that the
-     scrim — appended after the bar — paints over the header and swallows
-     every click, including the one that would close it. */
+     header.js appends this as a SIBLING of .c-gh, not a child (§14 — a
+     descendant of the auto-hide transform would be trapped inside its
+     containing block). Its own z-index only has to clear ordinary page
+     content (z-index:auto), because .c-gh carries --z-header (200) as a
+     positioned element in the same page-level stacking arena and so
+     out-ranks it regardless of nesting: the header and its open panels stay
+     above the scrim, and the scrim still dims everything else. */
   .c-gh__scrim {
     position: fixed; inset: 0;
     z-index: 1;

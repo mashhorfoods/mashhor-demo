@@ -29,7 +29,14 @@
   @media (min-width: 48em) {
     /* --sticky-offset / --catnav-height are measured by observeStickyOffsets();
        the fallbacks hold until the first measurement. */
-    .c-catnav { position: sticky; inset-block-start: var(--sticky-offset, var(--header-height)); z-index: var(--z-sticky); }
+    .c-catnav {
+      position: sticky; inset-block-start: var(--sticky-offset, var(--header-height)); z-index: var(--z-sticky);
+      transition: inset-block-start var(--duration-base) var(--ease-standard);
+    }
+    /* The smart auto-hide header (12-header.css, §14) can slide off-screen on
+       scroll; when it does, nothing sticks under it any more, so the nav
+       follows it up to the true top instead of leaving a gap. */
+    body:has(.c-gh[data-hidden="true"]) .c-catnav { inset-block-start: 0; }
     .c-catnav__row { flex-wrap: wrap; overflow: visible; padding-inline: 0; margin-inline: 0; }
     [data-services^="group-"], #services-groups {
       scroll-margin-block-start: calc(var(--sticky-offset, var(--header-height)) + var(--catnav-height, var(--space-64)));
