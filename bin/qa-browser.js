@@ -924,10 +924,17 @@ async function main() {
      strips comments, so the shipped page has no reference at all. Matched on
      the actual <link>, not on the substring, which is what made this read as a
      failure the first time it ran. */
-  const built = fs.existsSync(path.join(__dirname, '..', 'dist', 'index.html'))
-    ? fs.readFileSync(path.join(__dirname, '..', 'dist', 'index.html'), 'utf8') : '';
+  /* dist/ is generated and no longer committed, so it can legitimately be
+     absent — and an absent file used to make this check PASS: the empty
+     string matches no <link>, and the note saying so was easy to miss in a
+     green run. A question that cannot be answered is not a question that was
+     answered well, so a missing build fails here and says what to run. */
+  const builtPath = path.join(__dirname, '..', 'dist', 'index.html');
+  const haveBuild = fs.existsSync(builtPath);
+  const built = haveBuild ? fs.readFileSync(builtPath, 'utf8') : '';
   check('admin', 'the public site loads no third-party stylesheet',
-    !/<link[^>]+fonts\.googleapis\.com/.test(built || ''), built ? '' : 'dist/ not built — run node build.js');
+    haveBuild && !/<link[^>]+fonts\.googleapis\.com/.test(built),
+    haveBuild ? '' : 'dist/ is not built — run `node build.js` (release.php does this for you)');
   if (googleFontPages.length) {
     advisories.push(`admin — ${googleFontPages.length}/${adminPages.length} pages load typefaces from fonts.googleapis.com. `
       + 'Known and accepted for now: every sign-in is visible to Google, and the dashboard loses its typefaces whenever '

@@ -72,9 +72,13 @@ if (!files.includes('.htaccess'))
   problems.push('.htaccess is missing — the archive tool dropped the dotfile');
 if (files.some(f => f.startsWith('dist/')))
   problems.push('entries are nested under dist/');
+/* ux/ is gone but stays named here: the guard costs nothing and a directory
+   that reappears should not ride along silently. docs/ holds the operator
+   guide and the reports — written for people, never served to a visitor. */
 const forbidden = files.filter(f =>
-  /(^|\/)(ux|seo|node_modules)\//.test(f) || /^(build|tools-[a-z-]+)\.js$/.test(f)
-  || /^package(-lock)?\.json$/.test(f) || /\.md$/.test(f) && !f.startsWith('fonts/'));
+  /(^|\/)(ux|seo|docs|node_modules)\//.test(f) || /^(build|tools-[a-z-]+)\.js$/.test(f)
+  || /^package(-lock)?\.json$/.test(f) || /\.md$/.test(f) && !f.startsWith('fonts/')
+  || /^[^/]+\.pdf$/.test(f));
 if (forbidden.length) problems.push('development material in the archive: ' + forbidden.join(', '));
 
 /* every file build.js wrote must be in the archive, and nothing else */

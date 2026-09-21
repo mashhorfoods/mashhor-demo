@@ -156,6 +156,57 @@ if (!$JSON) {
     fwrite(STDOUT, str_repeat('═', 78) . "\n\n");
 }
 
+/* dist/ is build output and is not committed. Three gates read it — the CSP
+   policy is sealed into dist/.htaccess at build time, the performance gate
+   serves dist/ over its own static fixture, and the browser gate reads the
+   shipped page — so a clean checkout has to build before any of them runs.
+   Doing it here rather than asking the operator to remember means the
+   freshness condition below is also always answering about this source, not
+   about whatever happened to be on disk. */
+/* The responsive photo variants and img/manifest.json are generated from the
+   masters by tools-images.js and are not committed either, so on a clean
+   checkout build.js cannot find the manifest and stops. That was invisible
+   while dist/ was committed — nobody had to build — and DEPLOY.md said a
+   clean checkout could build without running the tools scripts, which was
+   not true. Regenerating them here when the manifest is missing makes the
+   claim true: masters in, package out, one command. It needs sharp, which is
+   the project's one devDependency. */
+if (!$JSON) fwrite(STDOUT, "  البناء    dist/ من المصدر الحالي" . str_repeat(' ', 20));
+$buildStart = microtime(true);
+$buildOut = [];
+$buildCode = 0;
+if (!is_file($ROOT . '/img/manifest.json')) {
+    exec('node ' . escapeshellarg($ROOT . '/tools-images.js') . ' 2>&1', $buildOut, $buildCode);
+    if ($buildCode !== 0) {
+        if (!$JSON) {
+            fwrite(STDOUT, "✗  تعذّر توليد صور المقاسات\n\n");
+            fwrite(STDERR, "  img/manifest.json مفقود و tools-images.js فشل. جرّب `npm install` أولاً:\n");
+            foreach (array_slice($buildOut, -8) as $l) fwrite(STDERR, '    ' . $l . "\n");
+        }
+        exit(2);
+    }
+    $buildOut = [];
+}
+exec('node ' . escapeshellarg($ROOT . '/build.js') . ' 2>&1', $buildOut, $buildCode);
+if (!$JSON) {
+    $built = 0;
+    foreach ($buildOut as $l) if (preg_match('/dist contents\s*:\s*(\d+) files/', $l, $m)) $built = (int) $m[1];
+    fwrite(STDOUT, sprintf("%s  %s  %ds
+
+", $buildCode === 0 ? '✓' : '✗',
+        $buildCode === 0 ? "{$built} ملفاً" : 'فشل البناء', (int) round(microtime(true) - $buildStart)));
+}
+if ($buildCode !== 0) {
+    if (!$JSON) {
+        fwrite(STDERR, "
+  البناء فشل، ولا معنى لتشغيل بوابة على حزمة لم تُبنَ:
+");
+        foreach (array_slice($buildOut, -12) as $l) fwrite(STDERR, '    ' . $l . "
+");
+    }
+    exit(2);
+}
+
 foreach ($GATES as [$name, $label, $cmd, $slow]) {
     if ($ONLY !== null && !in_array($name, $ONLY, true)) { $skipped[] = $name; continue; }
     if ($ONLY === null && $QUICK && $slow) { $skipped[] = $name; continue; }
@@ -269,7 +320,7 @@ if (!is_array($stamp) || !isset($stamp['sources'])) {
 /* 5 · a backup exists and someone knows how to restore it */
 $hasBackupTool = is_file($ROOT . '/bin/backup.php');
 $restoreDocumented = str_contains((string) @file_get_contents($ROOT . '/DEPLOY.md'), 'backup')
-    || str_contains((string) @file_get_contents($ROOT . '/دليل-المشغل.html'), 'نسخة احتياطية');
+    || str_contains((string) @file_get_contents($ROOT . '/docs/دليل-المشغل.html'), 'نسخة احتياطية');
 condition('backup', 'توجد وسيلة نسخ احتياطي واستعادة، وموثّقة',
     ($hasBackupTool && $restoreDocumented) ? 'act' : 'block',
     ($hasBackupTool ? 'bin/backup.php ✓' : 'no backup tool') . ' · ' .

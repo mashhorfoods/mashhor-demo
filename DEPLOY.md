@@ -20,10 +20,27 @@ node tools-package.js  # optional — dist/ as one uploadable, verified archive
 `build.js` deletes `dist/` before writing it, so the folder is never stale, and
 it fails loudly if the page references an asset that is not there.
 
-Only `build.js` is needed for a normal deploy. The three `tools-*.js` scripts
-regenerate **derived** assets — the responsive photo variants, the self-hosted
-font subsets, the social card and icons — and their outputs are committed, so a
-clean checkout can build without running them.
+The three `tools-*.js` scripts regenerate **derived** assets — the responsive
+photo variants, the self-hosted font subsets, the social card and icons. Their
+outputs are *not* committed, and neither is `dist/`: what the repository holds
+is the sources they are made from.
+
+So a clean checkout needs the dependency installed once, and then one command:
+
+```sh
+npm install                      # sharp, the only dependency, used by the image tool
+npm run release                  # regenerates what is missing, builds, then runs every gate
+```
+
+`npm run build` alone is enough when the photo variants are already present;
+it fails clearly if `img/manifest.json` is not, and `npm run release`
+regenerates it rather than stopping.
+
+> This page used to say the tools' outputs were committed and that a clean
+> checkout could build without running them. That was not true — the variants
+> and the manifest have always been ignored — and it went unnoticed because
+> `dist/` was committed, so nobody ever had to build. Untracking `dist/` is
+> what surfaced it.
 
 `dist/` after a build — `node tools-package.js` prints the file count and size
 of the archive it writes, and checks the archive against `dist/` file by file.
