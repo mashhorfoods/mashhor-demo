@@ -426,6 +426,59 @@
     .c-cta-band__inner { flex-direction: row; align-items: center; justify-content: space-between; gap: var(--space-48); }
   }
 
+  /* ----------------------------------------------------------------------
+     CTA BAND — photo variant. The homepage's Services→Team bridge: a real
+     photograph instead of the flat inverse surface, everything else
+     (__inner/__title/__text/__actions) unchanged from the plain band above.
+     Structure mirrors the hero's photo layers (media behind, a scrim
+     between, copy on top) but with position:absolute, not fixed — this
+     band scrolls with the page like any other section, it never pins.
+     ------------------------------------------------------------------- */
+  .c-cta-band--photo {
+    padding-block: var(--space-48);
+    min-block-size: clamp(18rem, 16vw + 10rem, 26rem);
+    display: flex; align-items: center;
+    color: var(--color-text-inverse);
+  }
+  .c-cta-band--photo .c-cta-band__media { position: absolute; inset: 0; z-index: 0; background-color: var(--color-gray-800); }
+  .c-cta-band--photo .c-cta-band__media img {
+    inline-size: 100%; block-size: 100%; object-fit: cover;
+    /* The source photo is a fairly ordinary 16:9 (unlike the hero's 2.5:1
+       panorama), so one static crop already keeps the family, the
+       coordinator and their documents in frame at every breakpoint this
+       band actually renders at — narrow viewports crop its sides (full
+       height shows), wide ones crop top/bottom (full width shows), and
+       50%/36% lands inside both safe windows. No per-breakpoint tiers
+       needed the way the hero's much wider photo required. */
+    object-position: 50% 36%;
+  }
+  .c-cta-band--photo::after {
+    content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background-color: rgb(11 13 15 / 0.4);
+  }
+  @media (min-width: 48em) {
+    [dir="ltr"] .c-cta-band--photo::after { background-image: linear-gradient(to right, rgb(11 13 15 / 0.3) 0%, rgb(11 13 15 / 0) 62%); }
+    [dir="rtl"] .c-cta-band--photo::after { background-image: linear-gradient(to left, rgb(11 13 15 / 0.3) 0%, rgb(11 13 15 / 0) 62%); }
+  }
+  .c-cta-band--photo .l-container { position: relative; z-index: 2; inline-size: 100%; }
+  /* Row layout (title+text | actions spread edge to edge) would push the
+     actions onto whichever side of the photo carries its own subject —
+     kept as one compact column, on the copy's own safe side, at every
+     width instead. */
+  .c-cta-band--photo .c-cta-band__inner { flex-direction: column; align-items: flex-start; max-inline-size: 34rem; }
+  /* 03-base.css sets color directly on every h1-h6, which always wins over
+     an inherited value — .c-cta-band--photo's own inverse color on the
+     section never reaches the title without this, same reason
+     .l-section--inverse targets :is(h1,h2,h3,h4) explicitly instead of
+     relying on inheritance. */
+  .c-cta-band--photo .c-cta-band__title { color: var(--color-text-inverse); }
+  .c-cta-band--photo .c-cta-band__title,
+  .c-cta-band--photo .c-cta-band__text,
+  .c-cta-band--photo .t-overline {
+    text-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+  }
+  .c-cta-band--photo .t-overline { color: rgb(255 255 255 / 0.85); }
+
   /* ======================================================================
      AIRLINE PROVIDERS — a quiet trust band, not a promo carousel. Same
      white surface + hairline border as .c-card, no hover lift: these are

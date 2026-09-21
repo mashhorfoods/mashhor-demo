@@ -17,7 +17,7 @@ import { t, pick, getLocale } from '../core/i18n.js';
 import { route } from '../data/config.js';
 import { liveChannels } from '../data/navigation.js';
 import {
-  HOME_HERO, HOME_SERVICES, HOME_PRIORITIES,
+  HOME_HERO, HOME_SERVICES, HOME_PRIORITIES, HOME_JOURNEY_BAND,
   HOME_DESTINATIONS, HOME_OFFERS, HOME_SUPPORT,
 } from '../data/home.js';
 import { SUPERVISOR_REGISTRY } from '../data/supervisors.js';
@@ -128,6 +128,38 @@ export function servicesGrid(services = HOME_SERVICES, { expanded = false } = {}
   }, [label, icon('no-chevron-down', { size: 'sm' })]);
   wrap.append(el('div', { class: 'c-disclose' }, button));
   return wrap;
+}
+
+/* ---------------------------------------------------------------------------
+   JOURNEY BAND — the full-bleed photo bridging Services into Team right
+   below it. Extends the existing .c-cta-band (destination/offer/service
+   detail final-CTA pattern) with a --photo variant instead of a new band
+   system; media/copy structure otherwise matches heroMedia()/heroCopy().
+   ------------------------------------------------------------------------ */
+export function journeyBand(band = HOME_JOURNEY_BAND) {
+  const media = el('div', { class: 'c-cta-band__media' }, [
+    el('img', {
+      src: band.media.src, alt: pick(band.media, 'alt'),
+      class: 'u-img-cover', loading: 'lazy', decoding: 'async',
+    }),
+  ]);
+  const copy = el('div', { class: 'l-container' }, [
+    el('div', { class: 'c-cta-band__inner' }, [
+      el('div', { class: 'l-stack l-stack--12' }, [
+        el('p', { class: 't-overline' }, pick(band, 'overline')),
+        el('h2', { class: 't-h1 c-cta-band__title', id: 'journey-title' }, pick(band, 'title')),
+        el('p', { class: 'c-cta-band__text' }, pick(band, 'text')),
+      ]),
+      el('div', { class: 'c-cta-band__actions' }, [
+        // Not c-btn--primary: tests/home.mjs caps visible primaries at 3
+        // (header, search, hero) — the same reason newsletterCard() reaches
+        // for c-btn--secondary-brand instead, here too.
+        el('a', { class: 'c-btn c-btn--secondary-brand c-btn--lg', href: route('supervisors/') }, t('home.journey.cta.primary')),
+        el('a', { class: 'c-btn c-btn--inverse c-btn--lg', href: route('services/') }, t('home.journey.cta.secondary')),
+      ]),
+    ]),
+  ]);
+  return [media, copy];
 }
 
 /* ---------------------------------------------------------------------------
@@ -285,6 +317,7 @@ export function mountHome({
   // trackHero()) — the homepage hero is just another .c-hero--full now.
   qs('.c-gh', document)?.no?.trackHero(qs('.c-hero', root));
   render(mount('search'), search);
+  render(mount('journey'), journeyBand());
   render(mount('choose'), choose);
   render(mount('providers'), providerMarquee());
   render(mount('newsletter'), newsletterCard({

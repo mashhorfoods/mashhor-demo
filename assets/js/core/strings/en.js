@@ -422,6 +422,8 @@ export default {
     'home.services.showLess': 'Show fewer',
     'home.services.empty.title': 'Services are unavailable right now',
     'home.services.empty.text': 'Tell us what you need and we will arrange it.',
+    'home.journey.cta.primary': 'Talk to your coordinator',
+    'home.journey.cta.secondary': 'Browse all services',
     'home.choose.overline': 'Help me choose',
     'home.choose.title': 'What matters most to you?',
     'home.choose.text': 'Pick your priority and we will order the results by it.',

@@ -422,6 +422,8 @@ export default {
     'home.services.showLess': 'عرض أقل',
     'home.services.empty.title': 'الخدمات غير متاحة الآن',
     'home.services.empty.text': 'أخبرنا بما تحتاجه وسنرتّبه لك.',
+    'home.journey.cta.primary': 'تحدث مع منسق رحلتك',
+    'home.journey.cta.secondary': 'تصفح كل الخدمات',
     'home.choose.overline': 'ساعدني في الاختيار',
     'home.choose.title': 'ما الأهم بالنسبة لك؟',
     'home.choose.text': 'اختر أولويتك وسنرتّب النتائج على أساسها.',

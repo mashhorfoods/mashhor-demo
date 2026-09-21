@@ -62,6 +62,26 @@ import { SERVICE_REGISTRY } from './services.js';
 export const HOME_SERVICES = SERVICE_REGISTRY;
 
 /* --------------------------------------------------------------------------
+   JOURNEY BAND — the visual bridge between Services and the coordinators
+   section right after it: one photo, one line, that ties "every service"
+   to "a real person running it" before the Team section shows who that
+   person is.
+   ----------------------------------------------------------------------- */
+export const HOME_JOURNEY_BAND = {
+  overlineAr: 'خدماتنا وفريقنا',
+  overlineEn: 'Services and team',
+  titleAr: 'خدماتنا تُنجز رحلتك، وفريقنا يرافقك فيها',
+  titleEn: 'Our services complete your journey — our team is with you every step',
+  textAr: 'من التذكرة والتأشيرة إلى الفندق والانتقالات، كل خدمة تصلك بإشراف منسق حقيقي من نمبرون يتابع تفاصيل رحلتك خطوة بخطوة.',
+  textEn: "From flights and visas to hotels and transport, every service comes with a real Number One coordinator following your journey's details, step by step.",
+  media: {
+    src: imageSrc('home/journey'),
+    altAr: 'عائلة مسافرة تراجع تذاكرها مع منسق رحلات نمبرون في صالة المطار',
+    altEn: "A travelling family reviewing their tickets with a Number One travel coordinator in the airport lounge",
+  },
+};
+
+/* --------------------------------------------------------------------------
    HELP ME CHOOSE — §07. The priorities a traveller can sort by. `sort` is
    the value Stage 11 receives with the search; the homepage only carries it.
    ----------------------------------------------------------------------- */
