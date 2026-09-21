@@ -452,34 +452,55 @@ await control('/__test/reset');
   const svUpdate = await reqAdmin2(`/admin/supervisors/${svCreate.data.supervisor.id}`, { method: 'PATCH', body: { active: false } });
   ok('admin deactivates a supervisor', svUpdate.status === 200 && svUpdate.data.supervisor.status === 'inactive');
 
-  // ---- content: destinations & offers, admin-wide (Command Center CMS Phase 2A) — viewing is ungated like
-  // services' own list/one; only creating/editing needs content.manage. No draft/publish state yet (Phase 2B). ----
+  // ---- content: destinations & offers, admin-wide (Command Center CMS Phase 2A/2B-i) — viewing is ungated like
+  // services' own list/one; only creating/editing/publishing needs content.manage. ----
   const destList0 = await reqOps1b('/admin/destinations');
   ok('destinations list is ungated, like services — any signed-in staff member can view', destList0.status === 200 && Array.isArray(destList0.data.items));
   ok('ops-1 (no content.manage) → 403 creating a destination', (await reqOps1b('/admin/destinations', { method: 'POST', body: { slug: 'test-destination', nameEn: 'Test Destination' } })).status === 403);
   const dstCreate = await reqAdmin2('/admin/destinations', { method: 'POST', body: { slug: 'test-destination', nameAr: 'وجهة تجريبية', nameEn: 'Test Destination' } });
-  ok('admin creates a destination', dstCreate.status === 201 && dstCreate.data.destination.slug === 'test-destination' && dstCreate.data.destination.active === true);
+  ok('admin creates a destination — seeded as a draft, never live by default', dstCreate.status === 201 && dstCreate.data.destination.slug === 'test-destination' && dstCreate.data.destination.publishStatus === 'draft' && dstCreate.data.destination.publishedAt === null);
   ok('a duplicate slug is refused (409)', (await reqAdmin2('/admin/destinations', { method: 'POST', body: { slug: 'test-destination', nameEn: 'x' } })).status === 409);
   ok('an invalid slug is refused (422)', (await reqAdmin2('/admin/destinations', { method: 'POST', body: { slug: 'Not A Slug!', nameEn: 'x' } })).status === 422);
-  const dstUpdate = await reqAdmin2(`/admin/destinations/${dstCreate.data.destination.id}`, { method: 'PATCH', body: { region: 'asia', descAr: 'وصف', descEn: 'A description', featured: true, active: false } });
-  ok('admin updates a destination — region/description/featured/active all take, no field invented', dstUpdate.status === 200 && dstUpdate.data.destination.region === 'asia' && dstUpdate.data.destination.featured === true && dstUpdate.data.destination.active === false);
+  const dstId = dstCreate.data.destination.id;
+  const dstUpdate = await reqAdmin2(`/admin/destinations/${dstId}`, { method: 'PATCH', body: { region: 'asia', descAr: 'وصف', descEn: 'A description', featured: true } });
+  ok('admin updates a destination\'s content — region/description/featured all take; publishStatus untouched by a plain content edit', dstUpdate.status === 200 && dstUpdate.data.destination.region === 'asia' && dstUpdate.data.destination.featured === true && dstUpdate.data.destination.publishStatus === 'draft');
   const dstBySlug = await reqOps1b(`/admin/destinations/${dstCreate.data.destination.slug}`);
-  ok('a destination is also reachable by slug, not only by id', dstBySlug.status === 200 && dstBySlug.data.destination.id === dstCreate.data.destination.id);
+  ok('a destination is also reachable by slug, not only by id', dstBySlug.status === 200 && dstBySlug.data.destination.id === dstId);
   ok('an unknown destination id → 404', (await reqOps1b('/admin/destinations/not-a-destination')).status === 404);
+  ok('ops-1 (no content.manage) → 403 publishing a destination', (await reqOps1b(`/admin/destinations/${dstId}`, { method: 'PATCH', body: { publishStatus: 'published' } })).status === 403);
+  const dstPublish = await reqAdmin2(`/admin/destinations/${dstId}`, { method: 'PATCH', body: { publishStatus: 'published' } });
+  ok('admin publishes the destination — publishedAt stamped, no pending changes right after publish', dstPublish.status === 200 && dstPublish.data.destination.publishStatus === 'published' && !!dstPublish.data.destination.publishedAt && dstPublish.data.destination.hasUnpublishedChanges === false);
+  const dstEditWhileLive = await reqAdmin2(`/admin/destinations/${dstId}`, { method: 'PATCH', body: { descEn: 'Updated after publish' } });
+  ok('editing an already-published destination leaves it live (not silently drafted) but flags it as having unpublished changes', dstEditWhileLive.status === 200 && dstEditWhileLive.data.destination.publishStatus === 'published' && dstEditWhileLive.data.destination.hasUnpublishedChanges === true && dstEditWhileLive.data.destination.publishedAt === dstPublish.data.destination.publishedAt);
+  const dstArchive = await reqAdmin2(`/admin/destinations/${dstId}`, { method: 'PATCH', body: { publishStatus: 'archived' } });
+  ok('published → archived is an allowed transition', dstArchive.status === 200 && dstArchive.data.destination.publishStatus === 'archived');
+  ok('archived → published directly is refused (422) — must go through draft first', (await reqAdmin2(`/admin/destinations/${dstId}`, { method: 'PATCH', body: { publishStatus: 'published' } })).status === 422);
+  const dstUnarchive = await reqAdmin2(`/admin/destinations/${dstId}`, { method: 'PATCH', body: { publishStatus: 'draft' } });
+  ok('archived → draft is allowed, republishing after that (draft → published) works again', dstUnarchive.status === 200 && dstUnarchive.data.destination.publishStatus === 'draft' && (await reqAdmin2(`/admin/destinations/${dstId}`, { method: 'PATCH', body: { publishStatus: 'published' } })).status === 200);
+  const dstNoName = await reqAdmin2('/admin/destinations', { method: 'POST', body: { slug: 'test-destination-blank', nameEn: 'placeholder' } });
+  const dstBlankThenPublish = await reqAdmin2(`/admin/destinations/${dstNoName.data.destination.id}`, { method: 'PATCH', body: { nameEn: '', publishStatus: 'published' } });
+  ok('publishing with no name in either language is refused (422) — nothing goes live empty', dstBlankThenPublish.status === 422);
 
   const offList0 = await reqOps1b('/admin/offers');
   ok('offers list is ungated too', offList0.status === 200 && Array.isArray(offList0.data.items));
   ok('ops-1 (no content.manage) → 403 creating an offer', (await reqOps1b('/admin/offers', { method: 'POST', body: { slug: 'test-offer', titleEn: 'Test Offer' } })).status === 403);
   const offCreate = await reqAdmin2('/admin/offers', { method: 'POST', body: { slug: 'test-offer', titleAr: 'عرض تجريبي', titleEn: 'Test Offer' } });
-  ok('admin creates an offer, seeded as a placeholder with no price — never a fabricated number', offCreate.status === 201 && offCreate.data.offer.placeholder === true && offCreate.data.offer.price === null);
+  ok('admin creates an offer, seeded as a draft placeholder with no price — never a fabricated number', offCreate.status === 201 && offCreate.data.offer.publishStatus === 'draft' && offCreate.data.offer.placeholder === true && offCreate.data.offer.price === null);
   ok('an offer referencing a real destination is refused if the destination id is fake (422)', (await reqAdmin2(`/admin/offers/${offCreate.data.offer.id}`, { method: 'PATCH', body: { destinationId: 'not-a-destination' } })).status === 422);
   const offUpdate = await reqAdmin2(`/admin/offers/${offCreate.data.offer.id}`, { method: 'PATCH', body: {
-    destinationId: dstCreate.data.destination.id, status: 'available', price: { amount: 450, currency: 'USD', type: 'from', basisEn: 'per person' },
+    destinationId: dstId, status: 'available', price: { amount: 450, currency: 'USD', type: 'from', basisEn: 'per person' },
     detail: { inclusions: [{ ar: 'تذكرة', en: 'Flight ticket' }] }, placeholder: false,
   } });
-  ok('admin sets a real price and detail content once approved — price/detail/status/destination/placeholder all take', offUpdate.status === 200 && offUpdate.data.offer.price.amount === 450 && offUpdate.data.offer.status === 'available' && offUpdate.data.offer.destinationId === dstCreate.data.destination.id && offUpdate.data.offer.detail.inclusions.length === 1 && offUpdate.data.offer.placeholder === false);
+  ok('admin sets a real price and detail content once approved — price/detail/status/destination/placeholder all take, publishStatus untouched', offUpdate.status === 200 && offUpdate.data.offer.price.amount === 450 && offUpdate.data.offer.status === 'available' && offUpdate.data.offer.destinationId === dstId && offUpdate.data.offer.detail.inclusions.length === 1 && offUpdate.data.offer.placeholder === false && offUpdate.data.offer.publishStatus === 'draft');
   ok('an invalid status is refused (422)', (await reqAdmin2(`/admin/offers/${offCreate.data.offer.id}`, { method: 'PATCH', body: { status: 'not-a-status' } })).status === 422);
   ok('a malformed detail payload (not a plain object) is refused (422), never silently discarded', (await reqAdmin2(`/admin/offers/${offCreate.data.offer.id}`, { method: 'PATCH', body: { detail: 'not-an-object' } })).status === 422);
+  const offPublish = await reqAdmin2(`/admin/offers/${offCreate.data.offer.id}`, { method: 'PATCH', body: { publishStatus: 'published' } });
+  ok('admin publishes the offer', offPublish.status === 200 && offPublish.data.offer.publishStatus === 'published' && !!offPublish.data.offer.publishedAt);
+  const offUnpublish = await reqAdmin2(`/admin/offers/${offCreate.data.offer.id}`, { method: 'PATCH', body: { publishStatus: 'draft' } });
+  ok('unpublishing an offer returns it to draft but keeps its last publishedAt for reference', offUnpublish.status === 200 && offUnpublish.data.offer.publishStatus === 'draft' && offUnpublish.data.offer.publishedAt === offPublish.data.offer.publishedAt);
+
+  const publishedDst = await reqOps1b('/admin/destinations?publishStatus=published');
+  ok('the destinations list can be filtered by publishStatus (the Publishing Center\'s own read model)', publishedDst.status === 200 && publishedDst.data.items.every((d) => d.publishStatus === 'published') && publishedDst.data.items.some((d) => d.id === dstId));
 
   // ---- leads / attribution, admin-wide ----
   ok('ops-1 (no attribution.view) → 403 on admin-wide leads', (await reqOps1b('/admin/leads')).status === 403);

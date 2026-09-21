@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ar" dir="rtl" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- <base> points every relative URL at the site root. Command Center CMS Phase 2B — staff-only preview of a
+     destination draft, rendered through the SAME public component the live destinations/<slug>/ pages use. -->
+<base href="../../../">
+<title data-i18n="page.ops.destinationDetail">الوجهة — عمليات نمبرون — نمبرون للسفر و السياحة</title>
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#FE0002">
+<!-- A draft preview: never indexed, no canonical, no social card. -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="same-origin">
+
+<link rel="icon" href="assets/brand/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/ibm-plex-sans-arabic-arabic-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/ibm-plex-sans-arabic-arabic-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/foundation.css">
+</head>
+
+<body>
+<a class="c-skip-link" href="#main" data-i18n="a11y.skip" data-skip>تخطَّ إلى المحتوى</a>
+
+<div class="l-page">
+  <div class="c-gh c-gh--placeholder c-gh--placeholder-transparent" aria-hidden="true"></div>
+
+  <main id="main" class="l-page__main">
+    <section class="l-section c-hero c-hero--photo c-hero--full" aria-labelledby="dest-title">
+      <div class="l-container"><div class="c-hero__grid" data-dest="hero"></div></div>
+    </section>
+    <section class="l-section l-section--subtle" data-dest="overview" aria-labelledby="overview-title" id="overview" hidden><div class="l-container" data-dest-body></div></section>
+    <section class="l-section" data-dest="why" aria-labelledby="why-title" id="why" hidden><div class="l-container" data-dest-body></div></section>
+    <section class="l-section l-section--subtle" data-dest="travel" aria-labelledby="travel-title" id="travel" hidden><div class="l-container" data-dest-body></div></section>
+    <section class="l-section" data-dest="services" aria-labelledby="services-title" id="services" hidden><div class="l-container" data-dest-body></div></section>
+    <section class="l-section l-section--subtle" data-dest="offers" aria-labelledby="offers-title" id="offers" hidden><div class="l-container" data-dest-body></div></section>
+    <section class="l-section" data-dest="support" aria-labelledby="support-title" id="support" hidden><div class="l-container" data-dest-body></div></section>
+    <section class="l-section l-section--inverse c-cta-band" data-dest="cta" aria-labelledby="cta-title" hidden>
+      <span class="u-numeral-watermark" aria-hidden="true">1</span>
+      <div class="l-container" data-dest-body></div>
+    </section>
+  </main>
+</div>
+
+<script type="module">
+  import { mountPage } from './assets/js/page.js';
+  import { route } from './assets/js/data/config.js';
+  import { mountOpsDestinationPreview } from './assets/js/ops/ui/preview.js';
+
+  mountPage({
+    handle: 'opsDestinationPreview',
+    header: { current: 'destinations', onSearch: () => location.assign(route('book/')) },
+    footer: { cta: false },
+    paint: () => mountOpsDestinationPreview({ id: new URLSearchParams(location.search).get('id') }),
+  });
+</script>
+</body>
+</html>

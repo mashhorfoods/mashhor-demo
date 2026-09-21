@@ -84,11 +84,21 @@ let staffAccounts = [
 // ---- Command Center CMS Phase 2A: Destinations & Offers admin CRUD stand-in. One seeded row each, active, so the
 // list screens aren't empty; every other field starts null/empty rather than a plausible-looking placeholder.
 let devDestinations = [
-  { id: 'dev-dst-1', slug: 'dev-destination', region: 'middleEast', nameAr: 'وجهة تطوير', nameEn: 'Development Destination', countryAr: null, countryEn: null, descAr: null, descEn: null, purposes: [], services: [], image: null, featured: false, home: false, active: true, order: null, createdAt: iso(30), updatedAt: iso(30) },
+  { id: 'dev-dst-1', slug: 'dev-destination', region: 'middleEast', nameAr: 'وجهة تطوير', nameEn: 'Development Destination', countryAr: null, countryEn: null, descAr: null, descEn: null, purposes: [], services: [], image: null, featured: false, home: false, publishStatus: 'published', publishedAt: iso(30), hasUnpublishedChanges: false, order: null, createdAt: iso(30), updatedAt: iso(30) },
 ];
 let devOffers = [
-  { id: 'dev-off-1', slug: 'dev-offer', category: null, categories: [], destinationId: 'dev-dst-1', titleAr: 'عرض تطوير', titleEn: 'Development Offer', shortAr: null, shortEn: null, descAr: null, descEn: null, duration: { nights: null }, price: null, status: 'request', bookingMode: 'request', featured: false, placeholder: true, services: [], image: null, detail: {}, active: true, createdAt: iso(30), updatedAt: iso(30) },
+  { id: 'dev-off-1', slug: 'dev-offer', category: null, categories: [], destinationId: 'dev-dst-1', titleAr: 'عرض تطوير', titleEn: 'Development Offer', shortAr: null, shortEn: null, descAr: null, descEn: null, duration: { nights: null }, price: null, status: 'request', bookingMode: 'request', featured: false, placeholder: true, services: [], image: null, detail: {}, publishStatus: 'draft', publishedAt: null, hasUnpublishedChanges: false, createdAt: iso(30), updatedAt: iso(30) },
 ];
+const CONTENT_TRANSITIONS = { draft: ['published', 'archived'], published: ['draft', 'archived'], archived: ['draft'] };
+/** Mirrors backend/content.mjs's resolvePublishStatus closely enough for the dev stand-in: a same-state or
+    omitted publishStatus is a no-op; an illegal transition or a publish with no name/title throws 'invalid'. */
+function applyPublishTransition(row, patch, hasContent, t) {
+  if (patch.publishStatus === undefined || patch.publishStatus === row.publishStatus) return;
+  if (!CONTENT_TRANSITIONS[row.publishStatus]?.includes(patch.publishStatus)) { const e = new Error('invalid transition'); e.code = 'invalid'; throw e; }
+  if (patch.publishStatus === 'published' && !hasContent) { const e = new Error('nothing to publish'); e.code = 'invalid'; throw e; }
+  row.publishStatus = patch.publishStatus;
+  if (patch.publishStatus === 'published') row.publishedAt = t;
+}
 
 // ---- Stage 15A: the Business Rules Register — mirrors exactly the PENDING/DRAFT/ACTIVE seed the real backend's
 // migration 004_business_rules.sql carries, never a fabricated confirmed value.
@@ -218,26 +228,34 @@ export const DEV_OPS_DATA = registerOpsDataAdapter({
     return { ...sv };
   },
 
-  async destinationsAdmin(_t, params = {}) { await wait(); let items = devDestinations; if (params.search) { const s = params.search.toLowerCase(); items = items.filter((d) => (d.nameEn ?? '').toLowerCase().includes(s) || d.slug.includes(s)); } if (params.region) items = items.filter((d) => d.region === params.region); return paged(items, params); },
+  async destinationsAdmin(_t, params = {}) { await wait(); let items = devDestinations; if (params.search) { const s = params.search.toLowerCase(); items = items.filter((d) => (d.nameEn ?? '').toLowerCase().includes(s) || d.slug.includes(s)); } if (params.region) items = items.filter((d) => d.region === params.region); if (params.publishStatus) items = items.filter((d) => d.publishStatus === params.publishStatus); return paged(items, params); },
   async destinationAdmin(_t, id) { await wait(); return devDestinations.find((d) => d.id === id || d.slug === id) ?? null; },
   async createDestinationAdmin(_t, destination) {
-    await wait(); const d = { id: `dev-dst-${Date.now()}`, slug: destination.slug, region: null, nameAr: destination.nameAr ?? null, nameEn: destination.nameEn ?? null, countryAr: null, countryEn: null, descAr: null, descEn: null, purposes: [], services: [], image: null, featured: false, home: false, active: true, order: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    await wait(); const d = { id: `dev-dst-${Date.now()}`, slug: destination.slug, region: null, nameAr: destination.nameAr ?? null, nameEn: destination.nameEn ?? null, countryAr: null, countryEn: null, descAr: null, descEn: null, purposes: [], services: [], image: null, featured: false, home: false, publishStatus: 'draft', publishedAt: null, hasUnpublishedChanges: false, order: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
     devDestinations = [d, ...devDestinations]; return d;
   },
   async updateDestinationAdmin(_t, id, patchBody) {
     await wait(); const d = devDestinations.find((x) => x.id === id); if (!d) return null;
-    Object.assign(d, patchBody, { updatedAt: new Date().toISOString() }); return { ...d };
+    const { publishStatus, ...contentPatch } = patchBody; const t = new Date().toISOString();
+    Object.assign(d, contentPatch, { updatedAt: t });
+    applyPublishTransition(d, { publishStatus }, !!(d.nameAr || d.nameEn), t);
+    d.hasUnpublishedChanges = d.publishStatus === 'published' && !!d.publishedAt && d.updatedAt > d.publishedAt;
+    return { ...d };
   },
 
-  async offersAdmin(_t, params = {}) { await wait(); let items = devOffers; if (params.search) { const s = params.search.toLowerCase(); items = items.filter((o) => (o.titleEn ?? '').toLowerCase().includes(s) || o.slug.includes(s)); } if (params.destinationId) items = items.filter((o) => o.destinationId === params.destinationId); return paged(items, params); },
+  async offersAdmin(_t, params = {}) { await wait(); let items = devOffers; if (params.search) { const s = params.search.toLowerCase(); items = items.filter((o) => (o.titleEn ?? '').toLowerCase().includes(s) || o.slug.includes(s)); } if (params.destinationId) items = items.filter((o) => o.destinationId === params.destinationId); if (params.publishStatus) items = items.filter((o) => o.publishStatus === params.publishStatus); return paged(items, params); },
   async offerAdmin(_t, id) { await wait(); return devOffers.find((o) => o.id === id || o.slug === id) ?? null; },
   async createOfferAdmin(_t, offer) {
-    await wait(); const o = { id: `dev-off-${Date.now()}`, slug: offer.slug, category: null, categories: [], destinationId: null, titleAr: offer.titleAr ?? null, titleEn: offer.titleEn ?? null, shortAr: null, shortEn: null, descAr: null, descEn: null, duration: { nights: null }, price: null, status: 'request', bookingMode: 'request', featured: false, placeholder: true, services: [], image: null, detail: {}, active: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    await wait(); const o = { id: `dev-off-${Date.now()}`, slug: offer.slug, category: null, categories: [], destinationId: null, titleAr: offer.titleAr ?? null, titleEn: offer.titleEn ?? null, shortAr: null, shortEn: null, descAr: null, descEn: null, duration: { nights: null }, price: null, status: 'request', bookingMode: 'request', featured: false, placeholder: true, services: [], image: null, detail: {}, publishStatus: 'draft', publishedAt: null, hasUnpublishedChanges: false, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
     devOffers = [o, ...devOffers]; return o;
   },
   async updateOfferAdmin(_t, id, patchBody) {
     await wait(); const o = devOffers.find((x) => x.id === id); if (!o) return null;
-    Object.assign(o, patchBody, { updatedAt: new Date().toISOString() }); return { ...o };
+    const { publishStatus, ...contentPatch } = patchBody; const t = new Date().toISOString();
+    Object.assign(o, contentPatch, { updatedAt: t });
+    applyPublishTransition(o, { publishStatus }, !!(o.titleAr || o.titleEn), t);
+    o.hasUnpublishedChanges = o.publishStatus === 'published' && !!o.publishedAt && o.updatedAt > o.publishedAt;
+    return { ...o };
   },
 
   async leads(_t, params = {}) { await wait(); return paged(devLeads, params); },

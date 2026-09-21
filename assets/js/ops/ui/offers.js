@@ -1,21 +1,24 @@
-/* OPS / UI / OFFERS — Command Center CMS Phase 2A. Admin-wide offers & packages directory: view, create, edit,
-   activate/deactivate. A real backend entity now (backend/content.mjs) — the public site's own offers registry
-   (assets/js/data/offers.js) is untouched and does not yet read from here (Phase 2 scope decision: the public site
-   stays static until a later phase). The richer nested content (inclusions/exclusions/itinerary/terms/FAQ/travel
-   period) is one `detail` JSON blob, edited as raw JSON here — the same "no dedicated UI yet" pattern the Business
-   Rules manage form already established for its own raw-value editor. No draft/publish state yet — `active` only. */
+/* OPS / UI / OFFERS — Command Center CMS. Admin-wide offers & packages directory: view, create, edit, and the
+   draft → published → archived lifecycle (Phase 2B-i; backend/content.mjs). A real backend entity since Phase 2A
+   — the public site's own offers registry (assets/js/data/offers.js) is untouched and does not yet read from here
+   (Phase 2 scope decision: the public site stays static; staff preview it through admin/offers/preview/ instead).
+   The richer nested content (inclusions/exclusions/itinerary/terms/FAQ/travel period) is one `detail` JSON blob,
+   edited as raw JSON here — the same "no dedicated UI yet" pattern the Business Rules manage form already
+   established for its own raw-value editor. Editing an already-published offer never silently unpublishes it. */
 import { el, render } from '../../core/dom.js';
 import { t } from '../../core/i18n.js';
 import { route } from '../../data/config.js';
 import { toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, notFoundBlock, actionForm, debouncedRun, dataTable, block, rows } from './shell.js';
+import { mountOpsPortal, loadRegion, pageTitle, notFoundBlock, actionForm, debouncedRun, dataTable, block, rows, publishStatusBadge, unpublishedChangesNote, dateTime } from './shell.js';
+import { publishingControls } from './destinations.js';
 
 const priceText = (p) => (p ? `${p.amount} ${p.currency ?? ''} (${p.type ?? ''})`.trim() : '—');
 const columns = [
   { labelKey: 'ops.offers.col.title', render: (o) => el('a', { class: 'c-svp-link', href: route(`admin/offers/?id=${encodeURIComponent(o.id)}`) }, o.titleEn || o.titleAr || o.id) },
   { labelKey: 'ops.offers.col.slug', render: (o) => el('bdi', { dir: 'ltr' }, o.slug) },
+  { labelKey: 'ops.offers.col.publishStatus', render: (o) => el('span', { class: 'l-cluster l-cluster--8' }, [publishStatusBadge(o.publishStatus), o.hasUnpublishedChanges ? unpublishedChangesNote() : null]) },
   { labelKey: 'ops.offers.col.status', render: (o) => t(`ops.offers.status.${o.status}`) || o.status },
   { labelKey: 'ops.offers.col.price', render: (o) => el('bdi', { dir: 'ltr' }, priceText(o.price)) },
 ];
@@ -64,15 +67,20 @@ function mountOfferDetail({ root, id }) {
       const fresh = preloaded ?? await opsData.offerAdmin(id);
       const nodes = [
         el('p', {}, el('a', { class: 'c-btn c-btn--tertiary c-btn--sm', href: route('admin/offers/') }, [el('span', {}, t('ops.offers.title'))])),
-        el('div', { class: 'l-stack l-stack--4' }, [el('h1', { class: 't-h1' }, fresh.titleEn || fresh.titleAr || fresh.id), el('p', { class: 't-body t-muted' }, [t(`ops.offers.status.${fresh.status}`) || fresh.status, ' · ', el('bdi', { dir: 'ltr' }, fresh.slug)])]),
+        el('div', { class: 'l-stack l-stack--4' }, [
+          el('h1', { class: 't-h1' }, fresh.titleEn || fresh.titleAr || fresh.id),
+          el('p', { class: 'l-cluster l-cluster--8 t-body t-muted' }, [publishStatusBadge(fresh.publishStatus), fresh.hasUnpublishedChanges ? unpublishedChangesNote() : null, el('bdi', { dir: 'ltr' }, fresh.slug)]),
+        ]),
         fresh.placeholder ? el('p', { class: 'c-note c-note--warning', role: 'note' }, t('ops.offers.placeholderNote')) : null,
-        block(t('ops.offers.detail.title'), rows([
-          [t('ops.offers.col.price'), priceText(fresh.price)],
-          [t('ops.offers.edit.bookingMode'), t(`ops.offers.bookingMode.${fresh.bookingMode}`) || fresh.bookingMode],
-          [t('ops.offers.edit.nights'), fresh.duration?.nights ?? '—'],
-          [t('ops.offers.edit.destinationId'), fresh.destinationId ? el('a', { class: 'c-svp-link', href: route(`admin/destinations/?id=${encodeURIComponent(fresh.destinationId)}`) }, fresh.destinationId) : '—'],
-        ]), { id: 'ops-off-details' }),
       ];
+      if (can('content.manage')) nodes.push(block(t('ops.offers.publishing.title'), publishingControls(fresh, refresh, 'offer'), { id: 'ops-off-publishing' }));
+      nodes.push(block(t('ops.offers.detail.title'), rows([
+        [t('ops.offers.col.price'), priceText(fresh.price)],
+        [t('ops.offers.edit.bookingMode'), t(`ops.offers.bookingMode.${fresh.bookingMode}`) || fresh.bookingMode],
+        [t('ops.offers.edit.nights'), fresh.duration?.nights ?? '—'],
+        [t('ops.offers.edit.destinationId'), fresh.destinationId ? el('a', { class: 'c-svp-link', href: route(`admin/destinations/?id=${encodeURIComponent(fresh.destinationId)}`) }, fresh.destinationId) : '—'],
+        [t('ops.content.publishedAt'), fresh.publishedAt ? dateTime(fresh.publishedAt) : '—'],
+      ]), { id: 'ops-off-details' }));
       if (can('content.manage')) nodes.push(block(t('ops.offers.edit.title'), editForm(fresh, refresh), { id: 'ops-off-edit' }));
       return nodes;
     }
@@ -104,7 +112,6 @@ function editForm(fresh, refresh) {
   const detail = el('textarea', { name: 'detail', class: 'c-field__control', rows: 6, dir: 'ltr', 'aria-label': t('ops.offers.edit.detail') }, JSON.stringify(fresh.detail ?? {}, null, 2));
   const featured = el('input', { type: 'checkbox', name: 'featured', ...(fresh.featured ? { checked: true } : {}) });
   const placeholder = el('input', { type: 'checkbox', name: 'placeholder', ...(fresh.placeholder ? { checked: true } : {}) });
-  const active = el('input', { type: 'checkbox', name: 'active', ...(fresh.active ? { checked: true } : {}) });
 
   return actionForm({
     submitLabel: t('ops.offers.edit.save'),
@@ -121,7 +128,7 @@ function editForm(fresh, refresh) {
         price: hasPrice ? { amount: Number(amount), currency: fd.get('priceCurrency')?.trim() || 'USD', type: 'from', basisEn: fd.get('priceBasisEn')?.trim() || null } : null,
         image: fd.get('imageSrc')?.trim() ? { src: fd.get('imageSrc').trim(), altAr: fresh.image?.altAr, altEn: fresh.image?.altEn } : null,
         status: fd.get('status'), bookingMode: fd.get('bookingMode'), detail: detailValue,
-        featured: fd.get('featured') === 'on', placeholder: fd.get('placeholder') === 'on', active: fd.get('active') === 'on',
+        featured: fd.get('featured') === 'on', placeholder: fd.get('placeholder') === 'on',
       });
       toast({ title: t('ops.offers.updated'), variant: 'success', duration: 3000 }); await refresh();
     },
@@ -136,7 +143,6 @@ function editForm(fresh, refresh) {
       el('div', { class: 'c-field' }, [el('label', { class: 'c-field__label' }, t('ops.offers.edit.detail')), detail]),
       el('label', { class: 'l-cluster l-cluster--8' }, [featured, el('span', {}, t('ops.offers.edit.featured'))]),
       el('label', { class: 'l-cluster l-cluster--8' }, [placeholder, el('span', {}, t('ops.offers.edit.placeholder'))]),
-      el('label', { class: 'l-cluster l-cluster--8' }, [active, el('span', {}, t('ops.offers.edit.activeLabel'))]),
     ],
   });
 }

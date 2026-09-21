@@ -1,23 +1,29 @@
-/* OPS / UI / DESTINATIONS — Command Center CMS Phase 2A. Admin-wide destination directory: view, create, edit,
-   activate/deactivate. A real backend entity now (backend/content.mjs) — the public site's own destinations
-   registry (assets/js/data/destinations.js) is untouched and does not yet read from here (Phase 2 scope decision:
-   the public site stays static until a later phase). No draft/publish state yet — `active` only, same as Services. */
+/* OPS / UI / DESTINATIONS — Command Center CMS. Admin-wide destination directory: view, create, edit, and the
+   draft → published → archived lifecycle (Phase 2B-i; backend/content.mjs). A real backend entity since Phase 2A
+   — the public site's own destinations registry (assets/js/data/destinations.js) is untouched and does not yet
+   read from here (Phase 2 scope decision: the public site stays static; staff preview it through
+   admin/destinations/preview/ instead). Editing an already-published destination never silently unpublishes it —
+   it stays live, flagged as having unpublished changes, until someone explicitly republishes. */
 import { el, render } from '../../core/dom.js';
 import { t } from '../../core/i18n.js';
 import { route } from '../../data/config.js';
 import { toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, notFoundBlock, actionForm, debouncedRun, dataTable, block, rows } from './shell.js';
+import { mountOpsPortal, loadRegion, pageTitle, notFoundBlock, actionForm, debouncedRun, dataTable, block, rows, busyButton, publishStatusBadge, unpublishedChangesNote, dateTime } from './shell.js';
 
 const columns = [
   { labelKey: 'ops.destinations.col.name', render: (d) => el('a', { class: 'c-svp-link', href: route(`admin/destinations/?id=${encodeURIComponent(d.id)}`) }, d.nameEn || d.nameAr || d.id) },
   { labelKey: 'ops.destinations.col.slug', render: (d) => el('bdi', { dir: 'ltr' }, d.slug) },
   { labelKey: 'ops.destinations.col.region', render: (d) => d.region ?? '—' },
-  { labelKey: 'ops.destinations.col.status', render: (d) => t(d.active ? 'ops.destinations.status.active' : 'ops.destinations.status.inactive') },
+  { labelKey: 'ops.destinations.col.status', render: (d) => el('span', { class: 'l-cluster l-cluster--8' }, [publishStatusBadge(d.publishStatus), d.hasUnpublishedChanges ? unpublishedChangesNote() : null]) },
 ];
 const strList = (v) => (v ?? []).join(', ');
 const parseList = (v) => String(v ?? '').split(',').map((x) => x.trim()).filter(Boolean);
+// The draft/published/archived graph backend/content.mjs enforces — mirrored here only to decide which action
+// buttons to offer; the server is the real gate (an offered button whose transition the server refuses still
+// surfaces the server's own error, never silently no-ops).
+const NEXT_STATES = { draft: ['published', 'archived'], published: ['draft', 'archived'], archived: ['draft'] };
 
 export function mountOpsDestinations({ root = document, params = new URLSearchParams(location.search) } = {}) {
   const id = params.get('id');
@@ -63,15 +69,20 @@ function mountDestinationDetail({ root, id }) {
       const fresh = preloaded ?? await opsData.destinationAdmin(id);
       const nodes = [
         el('p', {}, el('a', { class: 'c-btn c-btn--tertiary c-btn--sm', href: route('admin/destinations/') }, [el('span', {}, t('ops.destinations.title'))])),
-        el('div', { class: 'l-stack l-stack--4' }, [el('h1', { class: 't-h1' }, fresh.nameEn || fresh.nameAr || fresh.id), el('p', { class: 't-body t-muted' }, [t(fresh.active ? 'ops.destinations.status.active' : 'ops.destinations.status.inactive'), ' · ', el('bdi', { dir: 'ltr' }, fresh.slug)])]),
-        block(t('ops.destinations.detail.title'), rows([
-          [t('ops.destinations.col.region'), fresh.region ?? '—'],
-          [t('ops.destinations.edit.purposes'), strList(fresh.purposes) || '—'],
-          [t('ops.destinations.edit.services'), strList(fresh.services) || '—'],
-          [t('ops.destinations.edit.featured'), t(fresh.featured ? 'ops.destinations.yes' : 'ops.destinations.no')],
-          [t('ops.destinations.edit.home'), t(fresh.home ? 'ops.destinations.yes' : 'ops.destinations.no')],
-        ]), { id: 'ops-dst-details' }),
+        el('div', { class: 'l-stack l-stack--4' }, [
+          el('h1', { class: 't-h1' }, fresh.nameEn || fresh.nameAr || fresh.id),
+          el('p', { class: 'l-cluster l-cluster--8 t-body t-muted' }, [publishStatusBadge(fresh.publishStatus), fresh.hasUnpublishedChanges ? unpublishedChangesNote() : null, el('bdi', { dir: 'ltr' }, fresh.slug)]),
+        ]),
       ];
+      if (can('content.manage')) nodes.push(block(t('ops.destinations.publishing.title'), publishingControls(fresh, refresh, 'destination'), { id: 'ops-dst-publishing' }));
+      nodes.push(block(t('ops.destinations.detail.title'), rows([
+        [t('ops.destinations.col.region'), fresh.region ?? '—'],
+        [t('ops.destinations.edit.purposes'), strList(fresh.purposes) || '—'],
+        [t('ops.destinations.edit.services'), strList(fresh.services) || '—'],
+        [t('ops.destinations.edit.featured'), t(fresh.featured ? 'ops.destinations.yes' : 'ops.destinations.no')],
+        [t('ops.destinations.edit.home'), t(fresh.home ? 'ops.destinations.yes' : 'ops.destinations.no')],
+        [t('ops.content.publishedAt'), fresh.publishedAt ? dateTime(fresh.publishedAt) : '—'],
+      ]), { id: 'ops-dst-details' }));
       if (can('content.manage')) nodes.push(block(t('ops.destinations.edit.title'), editForm(fresh, refresh), { id: 'ops-dst-edit' }));
       return nodes;
     }
@@ -79,6 +90,26 @@ function mountDestinationDetail({ root, id }) {
     render(main, await view(d));
     return { destination: d, refresh };
   } });
+}
+
+/** The publish/unpublish/archive/restore buttons plus a Preview link — same shape for destinations and offers,
+    just the route prefix and the action-taken toast text differ. */
+function publishingControls(fresh, refresh, kind) {
+  const previewRoute = kind === 'destination' ? 'admin/destinations/preview/' : 'admin/offers/preview/';
+  const transition = async (publishStatus, toastKey) => {
+    const updater = kind === 'destination' ? opsData.updateDestinationAdmin : opsData.updateOfferAdmin;
+    await updater(fresh.id, { publishStatus });
+    toast({ title: t(toastKey), variant: 'success', duration: 3000 });
+    await refresh();
+  };
+  const buttons = [];
+  const next = NEXT_STATES[fresh.publishStatus] ?? [];
+  if (next.includes('published')) buttons.push(busyButton(t('ops.content.publish'), 'primary', () => transition('published', 'ops.content.published.action')));
+  if (fresh.publishStatus === 'published' && next.includes('draft')) buttons.push(busyButton(t('ops.content.unpublish'), 'tertiary', () => transition('draft', 'ops.content.unpublished.action')));
+  if (fresh.publishStatus === 'archived' && next.includes('draft')) buttons.push(busyButton(t('ops.content.restoreToDraft'), 'tertiary', () => transition('draft', 'ops.content.restored.action')));
+  if (next.includes('archived')) buttons.push(busyButton(t('ops.content.archive'), 'tertiary', () => transition('archived', 'ops.content.archived.action')));
+  buttons.push(el('a', { class: 'c-btn c-btn--tertiary c-btn--sm', href: route(`${previewRoute}?id=${encodeURIComponent(fresh.id)}`), target: '_blank', rel: 'noopener' }, t('ops.content.preview')));
+  return el('div', { class: 'l-cluster l-cluster--8' }, buttons);
 }
 
 function editForm(fresh, refresh) {
@@ -100,7 +131,6 @@ function editForm(fresh, refresh) {
   const order = field('order', 'ops.destinations.edit.order', fresh.order, { type: 'number' });
   const featured = el('input', { type: 'checkbox', name: 'featured', ...(fresh.featured ? { checked: true } : {}) });
   const home = el('input', { type: 'checkbox', name: 'home', ...(fresh.home ? { checked: true } : {}) });
-  const active = el('input', { type: 'checkbox', name: 'active', ...(fresh.active ? { checked: true } : {}) });
 
   return actionForm({
     submitLabel: t('ops.destinations.edit.save'),
@@ -113,7 +143,7 @@ function editForm(fresh, refresh) {
         image: fd.get('imageSrc')?.trim() ? { src: fd.get('imageSrc').trim(), altAr: fresh.image?.altAr, altEn: fresh.image?.altEn } : null,
         purposes: parseList(fd.get('purposes')), services: parseList(fd.get('services')),
         order: fd.get('order') ? Number(fd.get('order')) : null,
-        featured: fd.get('featured') === 'on', home: fd.get('home') === 'on', active: fd.get('active') === 'on',
+        featured: fd.get('featured') === 'on', home: fd.get('home') === 'on',
       });
       toast({ title: t('ops.destinations.updated'), variant: 'success', duration: 3000 }); await refresh();
     },
@@ -125,7 +155,8 @@ function editForm(fresh, refresh) {
       imageSrc, purposes, services, order,
       el('label', { class: 'l-cluster l-cluster--8' }, [featured, el('span', {}, t('ops.destinations.edit.featured'))]),
       el('label', { class: 'l-cluster l-cluster--8' }, [home, el('span', {}, t('ops.destinations.edit.home'))]),
-      el('label', { class: 'l-cluster l-cluster--8' }, [active, el('span', {}, t('ops.destinations.edit.activeLabel'))]),
     ],
   });
 }
+
+export { publishingControls };

@@ -288,6 +288,16 @@
   .c-note__title { font-weight: var(--weight-semibold); font-size: var(--text-body-sm); }
   .c-note__text  { font-size: var(--text-body-sm); }
 
+  /* Command Center CMS Phase 2B-i — the staff-only preview route's persistent flag that a public detail page is
+     showing a draft, not the live page. Sits above the (sometimes transparent-over-hero) global header so it is
+     never mistaken for on-site content. */
+  .c-preview-banner {
+    position: sticky; inset-block-start: 0; z-index: var(--z-drawer);
+    padding: var(--space-8) var(--space-16);
+    text-align: center; font-size: var(--text-body-sm); font-weight: var(--weight-medium);
+    background-color: var(--color-warning); color: var(--color-warning-fg, var(--color-ink));
+  }
+
 
   /* ======================================================================
      CHIP — used by the 404 service links and the global search scopes

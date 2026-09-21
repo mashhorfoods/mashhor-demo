@@ -132,12 +132,12 @@ export const dashboard = {
 
   // Command Center CMS Phase 2A — Destinations & Offers admin CRUD. Viewing is ungated (matches services' own
   // list/one), only create/update need content.manage.
-  destinations(req, res, ctx, url) { return json(res, 200, listDestinations({ search: str(url.searchParams.get('search') ?? '', 120), region: str(url.searchParams.get('region') ?? '', 30), page: page(url), pageSize: pageSize(url) })); },
+  destinations(req, res, ctx, url) { return json(res, 200, listDestinations({ search: str(url.searchParams.get('search') ?? '', 120), region: str(url.searchParams.get('region') ?? '', 30), publishStatus: str(url.searchParams.get('publishStatus') ?? '', 20), page: page(url), pageSize: pageSize(url) })); },
   destination(req, res, ctx, id) { const d = destinationById(id); if (!d) return fail(res, 404, 'notFound'); return json(res, 200, { destination: d }); },
   async destinationCreate(req, res, ctx) { requirePermission(ctx.staff, 'content.manage'); const b = await readJson(req); return json(res, 201, { destination: createDestination(b, actorOf(ctx)) }); },
   async destinationUpdate(req, res, ctx, id) { requirePermission(ctx.staff, 'content.manage'); const b = await readJson(req); return json(res, 200, { destination: updateDestination(id, b, actorOf(ctx)) }); },
 
-  offers(req, res, ctx, url) { return json(res, 200, listOffers({ search: str(url.searchParams.get('search') ?? '', 120), category: str(url.searchParams.get('category') ?? '', 30), destinationId: str(url.searchParams.get('destinationId') ?? '', 40), page: page(url), pageSize: pageSize(url) })); },
+  offers(req, res, ctx, url) { return json(res, 200, listOffers({ search: str(url.searchParams.get('search') ?? '', 120), category: str(url.searchParams.get('category') ?? '', 30), destinationId: str(url.searchParams.get('destinationId') ?? '', 40), publishStatus: str(url.searchParams.get('publishStatus') ?? '', 20), page: page(url), pageSize: pageSize(url) })); },
   offer(req, res, ctx, id) { const o = offerById(id); if (!o) return fail(res, 404, 'notFound'); return json(res, 200, { offer: o }); },
   async offerCreate(req, res, ctx) { requirePermission(ctx.staff, 'content.manage'); const b = await readJson(req); return json(res, 201, { offer: createOffer(b, actorOf(ctx)) }); },
   async offerUpdate(req, res, ctx, id) { requirePermission(ctx.staff, 'content.manage'); const b = await readJson(req); return json(res, 200, { offer: updateOffer(id, b, actorOf(ctx)) }); },

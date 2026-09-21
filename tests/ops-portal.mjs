@@ -28,7 +28,7 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.ops.s
 // ================================================================= 1. authorization: every portal route guarded, sign in / out
 {
   const { c, p } = await ctx();
-  const PORTAL_ROUTES = ['admin/dashboard/', 'admin/customers/', 'admin/supervisors/', 'admin/destinations/', 'admin/offers/', 'admin/leads/', 'admin/bookings/', 'admin/tasks/', 'admin/escalations/', 'admin/services/', 'admin/suppliers/', 'admin/payments/', 'admin/documents/', 'admin/notifications/', 'admin/reports/', 'admin/audit/', 'admin/staff/', 'admin/business-rules/', 'admin/settings/'];
+  const PORTAL_ROUTES = ['admin/dashboard/', 'admin/customers/', 'admin/supervisors/', 'admin/destinations/', 'admin/offers/', 'admin/publishing/', 'admin/leads/', 'admin/bookings/', 'admin/tasks/', 'admin/escalations/', 'admin/services/', 'admin/suppliers/', 'admin/payments/', 'admin/documents/', 'admin/notifications/', 'admin/reports/', 'admin/audit/', 'admin/staff/', 'admin/business-rules/', 'admin/settings/'];
   for (const u of PORTAL_ROUTES) {
     await p.goto(ORIGIN + P + u); await p.waitForFunction(() => document.querySelector('[data-portal=main] h1'));
     ok(`guest blocked: ${u}`, await count(p, '[data-action=sign-in]') === 1 && await count(p, '[data-portal=nav] a') === 0);
@@ -41,7 +41,7 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.ops.s
   ok('invalid credentials → error, still guest', (await marker(p)) === null);
   await devSignIn(p);
   ok('dev demo sign-in → dashboard, session marker stored', /^dev\./.test((await marker(p))?.token ?? '') && /مرحباً/.test(await text(p, 'h1')));
-  ok('portal nav shows every module (admin sees Stage 14/15A\'s modules too), current marked, grouped by the Command Center taxonomy', (await p.$$eval('[data-portal=nav] a', (as) => as.map((a) => a.dataset.nav))).join('|') === 'dashboard|services|destinations|offers|supervisors|customers|leads|bookings|payments|documents|tasks|escalations|suppliers|notifications|reports|audit|staff|rules|settings|sign-out');
+  ok('portal nav shows every module (admin sees Stage 14/15A\'s modules too), current marked, grouped by the Command Center taxonomy', (await p.$$eval('[data-portal=nav] a', (as) => as.map((a) => a.dataset.nav))).join('|') === 'dashboard|services|destinations|offers|publishing|supervisors|customers|leads|bookings|payments|documents|tasks|escalations|suppliers|notifications|reports|audit|staff|rules|settings|sign-out');
   await signOut(p);
   ok('sign out: marker cleared, signed-out message', (await marker(p)) === null && /تسجيل الخروج/.test(await text(p, 'h1')));
   await go(p, 'admin/dashboard/'); await p.waitForFunction(() => document.querySelector('[data-portal=main] h1'));
@@ -116,6 +116,15 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.ops.s
   await p.click('#ops-sv-edit button[type=submit]'); await p.waitForTimeout(500);
   ok('admin edits a supervisor\'s profile (city, bio) through the extended edit form and it persists on re-render', await p.inputValue('#ops-sv-edit input[name=city]') === 'Port Sudan' && (await p.$eval('#ops-sv-edit textarea[name=bioEn]', (t) => t.value)) === 'Updated demo bio.');
 
+  // Phase 2B-i Publishing Center, checked against the pristine seed (1 published destination, 1 draft offer) —
+  // each admin screen is its own static document (a full navigation, not an SPA route), so the development
+  // stand-in's in-memory records reset between page loads; only in-page state (an edit followed by `refresh()`,
+  // no navigation) can be asserted to persist, which is what the destination/offer flows below rely on instead.
+  await go(p, 'admin/publishing/'); await mainReady(p);
+  ok('Publishing Center: pending changes / drafts / published / archived sections all render', await count(p, '#ops-pub-pendingChanges') === 1 && await count(p, '#ops-pub-drafts') === 1 && await count(p, '#ops-pub-published') === 1 && await count(p, '#ops-pub-archived') === 1);
+  ok('Publishing Center: the seeded published destination is listed under Published, the seeded draft offer under Drafts', await count(p, '#ops-pub-published li') === 1 && await count(p, '#ops-pub-drafts li') === 1 && await count(p, '#ops-pub-archived li') === 0);
+  ok('Publishing Center: each row carries a working preview link', (await p.getAttribute('#ops-pub-published a[target=_blank]', 'href'))?.includes('admin/destinations/preview/?id=dev-dst-1'));
+
   await go(p, 'admin/destinations/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap');
   ok('destinations: development destination listed with a create form (Command Center CMS Phase 2A)', await count(p, 'tbody tr') === 1 && await count(p, '#ops-dst-create') === 1);
   await p.click('tbody tr:first-child a'); await mainReady(p);
@@ -124,6 +133,15 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.ops.s
   await p.click('#ops-dst-edit button[type=submit]'); await p.waitForTimeout(500);
   ok('admin edits a destination\'s region through the edit form and it persists on re-render', await p.inputValue('#ops-dst-edit input[name=region]') === 'asia');
 
+  // Phase 2B-i: the seeded dev destination starts published — unpublish/archive offered, not publish/restore, and a
+  // Preview link points at the staff-only preview route. :text-is() (exact match) throughout, not :has-text()
+  // (substring) — "نشر" (publish) is itself a substring of "إلغاء النشر" (unpublish) in Arabic.
+  ok('destination detail (published): publishing block offers unpublish + archive, a preview link, no publish/restore', await count(p, '#ops-dst-publishing') === 1 && await count(p, '#ops-dst-publishing button:text-is("إلغاء النشر")') === 1 && await count(p, '#ops-dst-publishing button:text-is("أرشفة")') === 1 && await count(p, '#ops-dst-publishing button:text-is("نشر")') === 0 && (await p.getAttribute('#ops-dst-publishing a', 'href')).includes('admin/destinations/preview/?id=dev-dst-1'));
+  await p.click('#ops-dst-publishing button:text-is("إلغاء النشر")'); await p.waitForTimeout(500);
+  ok('unpublishing a destination swaps the publishing block to offer publish again', await count(p, '#ops-dst-publishing button:text-is("نشر")') === 1 && await count(p, '#ops-dst-publishing button:text-is("إلغاء النشر")') === 0);
+  await p.click('#ops-dst-publishing button:text-is("نشر")'); await p.waitForTimeout(500);
+  ok('re-publishing restores the unpublish button', await count(p, '#ops-dst-publishing button:text-is("إلغاء النشر")') === 1 && await count(p, '#ops-dst-publishing button:text-is("نشر")') === 0);
+
   await go(p, 'admin/offers/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap');
   ok('offers: development offer listed with a create form', await count(p, 'tbody tr') === 1 && await count(p, '#ops-off-create') === 1);
   await p.click('tbody tr:first-child a'); await mainReady(p);
@@ -131,6 +149,16 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.ops.s
   await p.fill('#ops-off-edit input[name=priceAmount]', '450');
   await p.click('#ops-off-edit button[type=submit]'); await p.waitForTimeout(500);
   ok('admin sets a real price through the edit form and it persists on re-render', await p.inputValue('#ops-off-edit input[name=priceAmount]') === '450');
+
+  // Phase 2B-i: the seeded dev offer starts a draft — publish/archive offered, not unpublish/restore.
+  ok('offer detail (draft): publishing block offers publish + archive, a preview link, no unpublish/restore', await count(p, '#ops-off-publishing') === 1 && await count(p, '#ops-off-publishing button:text-is("نشر")') === 1 && await count(p, '#ops-off-publishing button:text-is("أرشفة")') === 1 && await count(p, '#ops-off-publishing button:text-is("إلغاء النشر")') === 0 && (await p.getAttribute('#ops-off-publishing a', 'href')).includes('admin/offers/preview/?id=dev-off-1'));
+  await p.click('#ops-off-publishing button:text-is("نشر")'); await p.waitForTimeout(500);
+  ok('publishing an offer offers unpublish afterwards', await count(p, '#ops-off-publishing button:text-is("إلغاء النشر")') === 1);
+
+  await go(p, 'admin/destinations/preview/?id=dev-dst-1'); await p.waitForSelector('[data-preview=true]');
+  ok('destination preview: banner shown, hero renders the draft record through the public component', await visible(p, '[data-preview=true]') && (await text(p, '#dest-title')).includes('وجهة تطوير'));
+  await go(p, 'admin/offers/preview/?id=dev-off-1'); await p.waitForSelector('[data-preview=true]');
+  ok('offer preview: banner shown, hero renders the draft record through the public component', await visible(p, '[data-preview=true]') && (await text(p, '#offer-title')).includes('عرض تطوير'));
 
   await go(p, 'admin/leads/'); await mainReady(p);
   ok('leads: admin-wide leads and attribution history panels', await count(p, '#ops-leads-list') === 1 && await count(p, '#ops-leads-attribution') === 1);

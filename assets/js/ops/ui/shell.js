@@ -26,13 +26,14 @@ export const devNotice = () => (opsDataAdapter()?.dev ? el('p', { class: 'c-note
 /* Grouped to match the Command Center's information architecture — Command
    Center / Website / Business / Operations / Insights / Control. Only
    modules that already exist are listed here; the brief's fuller taxonomy
-   (Destinations, Offers, Media Library, Publishing Center) has no backend
-   yet, so no dead nav entries were added for it. */
+   (Media Library, Content Health) has no backend yet, so no dead nav
+   entries were added for it. */
 const NAV = [
   { id: 'dashboard', group: 'command', icon: 'no-dashboard', href: 'admin/dashboard/', labelAr: 'نظرة عامة', labelEn: 'Overview' },
   { id: 'services', group: 'website', icon: 'no-booking', href: 'admin/services/', labelAr: 'الخدمات', labelEn: 'Services' },
   { id: 'destinations', group: 'website', icon: 'no-location', href: 'admin/destinations/', labelAr: 'الوجهات', labelEn: 'Destinations' },
   { id: 'offers', group: 'website', icon: 'no-price-tag', href: 'admin/offers/', labelAr: 'العروض والباقات', labelEn: 'Offers & Packages' },
+  { id: 'publishing', group: 'website', icon: 'no-publish', href: 'admin/publishing/', labelAr: 'مركز النشر', labelEn: 'Publishing Center' },
   { id: 'supervisors', group: 'website', icon: 'no-supervisor', href: 'admin/supervisors/', labelAr: 'المشرفون', labelEn: 'Supervisors', permission: 'supervisor.view' },
   { id: 'customers', group: 'business', icon: 'no-customer', href: 'admin/customers/', labelAr: 'العملاء', labelEn: 'Customers', permission: 'customer.view' },
   { id: 'leads', group: 'business', icon: 'no-lead', href: 'admin/leads/', labelAr: 'العملاء المحتملون والإسناد', labelEn: 'Leads / Attribution', permission: 'attribution.view' },
@@ -194,6 +195,13 @@ export function opsStatusBadge(status) {
   return el('span', { class: `c-badge c-badge--${tone}`, dataset: { opsStatus: status } }, t(`ops.lifecycle.${status}`));
 }
 export const payBadge = (status) => el('span', { class: `c-badge c-badge--${{ paid: 'success', refunded: 'info', pending: 'warning', failed: 'error', unpaid: 'outline' }[status] ?? 'outline'}`, dataset: { pay: status } }, t(`acct.pay.${status}`));
+/** The Command Center CMS's draft/published/archived lifecycle (backend/content.mjs) — shared by destinations and
+    offers, and any future content type, so a status reads the same way everywhere in the portal. */
+export function publishStatusBadge(status) {
+  const tone = { draft: 'outline', published: 'success', archived: 'outline' }[status] ?? 'outline';
+  return el('span', { class: `c-badge c-badge--${tone}`, dataset: { publishStatus: status } }, t(`ops.content.publishStatus.${status}`));
+}
+export const unpublishedChangesNote = () => el('span', { class: 'c-badge c-badge--warning' }, t('ops.content.hasUnpublishedChanges'));
 export function supplierStatusBadge(status) {
   const tone = { not_required: 'outline', pending: 'warning', submitted: 'info', processing: 'info', confirmed: 'success', rejected: 'error', failed: 'error', cancelled: 'outline' }[status] ?? 'outline';
   return el('span', { class: `c-badge c-badge--${tone}`, dataset: { supplierStatus: status } }, t(`ops.supplierStatus.${status}`));
