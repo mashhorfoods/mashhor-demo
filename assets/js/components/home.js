@@ -20,8 +20,8 @@ import {
   HOME_HERO, HOME_SERVICES, HOME_PRIORITIES, HOME_JOURNEY_BAND,
   HOME_DESTINATIONS, HOME_OFFERS, HOME_SUPPORT,
 } from '../data/home.js';
-import { SUPERVISOR_REGISTRY, supervisorSpecialties, supervisorUrl, supervisorEntry, supervisorContactUrl } from '../data/supervisors.js';
-import { icon, setButtonState, routeGraphic, heroFocalStyle } from './ui.js';
+import { SUPERVISOR_REGISTRY, supervisorSpecialties, supervisorUrl, supervisorContactUrl } from '../data/supervisors.js';
+import { icon, setButtonState, routeGraphic, heroFocalStyle, initTabs } from './ui.js';
 import { buildContext, validate, saveContext, continueUrl, applyEntryParams } from '../core/booking.js';
 import { serviceCard, destinationCard, offerCard, mediaPlaceholder } from './cards.js';
 import { supervisorName } from './supervisor.js';
@@ -239,58 +239,59 @@ export const offerGrid = (list = HOME_OFFERS) =>
     el('div', { class: 'l-span-4@md l-span-4@lg' }, offerCard(o))));
 
 /* ---------------------------------------------------------------------------
-   OUR TEAM — a trust section, not an employee directory: one coordinator
-   featured (which one rotates by day, never by performance — see
-   teamFeaturedIndex) alongside the rest in a reflowing deck. Both card
-   shapes here are a presentational variant of the same record and the same
-   helpers /supervisors/ uses (supervisorCard, supervisor.js) — profile
-   URLs, booking attribution and the record shape are untouched; only how
-   the homepage lays the cards out differs. §07.5 / Our-Team redesign brief
+   OUR TEAM — a coordinator showcase: one shared stage (portrait + info)
+   whose content swaps between pre-rendered panels as the visitor picks a
+   coordinator from the selector strip below it. Selection/keyboard/ARIA is
+   the site's own generic tab-group wiring (initTabs, ui.js — the same one
+   the search widget's verticals use), so there is no bespoke selection
+   logic here; only the markup and the CSS panel-swap animation are new.
+   Record helpers/URLs/attribution are exactly the shared ones the profile
+   page and /supervisors/ directory use. §07.5 / Our-Team Showcase brief
    ------------------------------------------------------------------------ */
-const teamFeaturedIndex = (list) => (list.length ? Math.floor(Date.now() / 86400000) % list.length : 0);
+const teamInitialIndex = (list) => (list.length ? Math.floor(Date.now() / 86400000) % list.length : 0);
 
-const teamPortrait = (sup, size) => (sup.image?.src
-  ? el('img', { src: sup.image.src, alt: pick(sup.image, 'alt') || t('sup.photo.alt', supervisorName(sup)), loading: 'lazy', decoding: 'async', width: size, height: Math.round(size * 1.25) })
-  : el('span', { role: 'img', 'aria-label': t('sup.photo.empty'), style: 'display:contents' }, icon('no-supervisor', { size: 'xl' })));
-
-const teamFeatureCard = (sup) => {
-  const titleId = `team-feature-${sup.id}`;
+const teamPanel = (sup, { selected }) => {
+  const tabId = `team-tab-${sup.id}`;
   const specialties = supervisorSpecialties(sup).slice(0, 4);
-  return el('article', { class: 'c-card c-card--interactive c-team-feature', 'aria-labelledby': titleId }, [
-    el('div', { class: 'c-card__media c-team-feature__media' }, teamPortrait(sup, 480)),
-    el('div', { class: 'c-card__body c-team-feature__body' }, [
-      pick(sup, 'title') ? el('p', { class: 'c-team-feature__role' }, pick(sup, 'title')) : null,
-      el('h3', { class: 'c-team-feature__name', id: titleId }, [el('a', { class: 'c-card__link', href: route(supervisorUrl(sup)) }, supervisorName(sup))]),
-      specialties.length ? el('ul', { class: 'c-sup-card__chips c-team-feature__chips', role: 'list' }, specialties.map((p) => el('li', {}, el('span', { class: 'c-badge c-badge--outline' }, pick(p, 'label'))))) : null,
-      pick(sup, 'bio') ? el('p', { class: 'c-team-feature__bio' }, pick(sup, 'bio')) : null,
-      el('div', { class: 'c-team-feature__actions' }, [
-        el('a', { class: 'c-btn c-btn--secondary-brand c-card__action', href: route(supervisorUrl(sup)) }, t('sup.card.view')),
-        el('a', { class: 'c-btn c-btn--tertiary c-card__action', href: route(supervisorContactUrl(sup)) }, t('sup.cta.contact')),
+  return el('div', { class: 'c-team-showcase__panel', id: `team-panel-${sup.id}`, role: 'tabpanel', 'aria-labelledby': tabId, hidden: !selected }, [
+    el('div', { class: 'c-team-showcase__media' }, sup.image?.src
+      ? el('img', { src: sup.image.src, alt: pick(sup.image, 'alt') || t('sup.photo.alt', supervisorName(sup)), loading: 'lazy', decoding: 'async', width: 480, height: 600 })
+      : el('span', { role: 'img', 'aria-label': t('sup.photo.empty'), style: 'display:contents' }, icon('no-supervisor', { size: 'xl' }))),
+    el('div', { class: 'c-team-showcase__info' }, [
+      pick(sup, 'title') ? el('p', { class: 'c-team-showcase__role' }, pick(sup, 'title')) : null,
+      el('h3', { class: 'c-team-showcase__name' }, supervisorName(sup)),
+      specialties.length ? el('ul', { class: 'c-team-showcase__chips', role: 'list' }, specialties.map((p) => el('li', {}, el('span', { class: 'c-badge c-badge--outline' }, pick(p, 'label'))))) : null,
+      pick(sup, 'bio') ? el('p', { class: 'c-team-showcase__bio' }, pick(sup, 'bio')) : null,
+      el('div', { class: 'c-team-showcase__actions' }, [
+        el('a', { class: 'c-btn c-btn--secondary-brand', href: route(supervisorContactUrl(sup)) }, t('home.team.cta.talk', supervisorName(sup))),
+        el('a', { class: 'c-btn c-btn--tertiary', href: route(supervisorUrl(sup)) }, t('sup.card.view')),
       ]),
     ]),
   ]);
 };
 
-const teamMemberCard = (sup) => {
-  const titleId = `team-card-${sup.id}`;
-  const specialty = supervisorSpecialties(sup)[0];
-  return el('article', { class: 'c-card c-card--interactive c-team-card', 'aria-labelledby': titleId }, [
-    el('div', { class: 'c-card__media c-team-card__media' }, teamPortrait(sup, 200)),
-    el('div', { class: 'c-card__body c-team-card__body' }, [
-      el('h3', { class: 'c-team-card__name', id: titleId }, [el('a', { class: 'c-card__link', href: route(supervisorUrl(sup)) }, supervisorName(sup))]),
-      pick(sup, 'title') ? el('p', { class: 'c-team-card__role' }, pick(sup, 'title')) : null,
-      specialty ? el('span', { class: 'c-badge c-badge--outline c-team-card__chip' }, pick(specialty, 'label')) : null,
+const teamTab = (sup, { selected }) => el('button', {
+  type: 'button', class: 'c-team-showcase__tab', role: 'tab',
+  id: `team-tab-${sup.id}`, 'aria-controls': `team-panel-${sup.id}`, 'aria-selected': String(selected),
+}, [
+  el('span', { class: 'c-team-showcase__tab-thumb' }, sup.image?.src
+    ? el('img', { src: sup.image.src, alt: '', loading: 'lazy', decoding: 'async', width: 64, height: 64 })
+    : icon('no-supervisor', { size: 'sm' })),
+  el('span', { class: 'c-team-showcase__tab-name' }, supervisorName(sup)),
+]);
+
+export const teamShowcase = (list = SUPERVISOR_REGISTRY.filter((s) => s.status === 'active')) => {
+  const initial = teamInitialIndex(list);
+  const node = el('div', { class: 'c-team-showcase', dataset: { tabs: '' } }, [
+    el('div', { class: 'c-team-showcase__stage' }, list.map((s, i) => teamPanel(s, { selected: i === initial }))),
+    el('div', { class: 'c-team-showcase__selector' }, [
+      el('div', { class: 'c-team-showcase__tabs', role: 'tablist', 'aria-label': t('home.team.selector.label') }, list.map((s, i) => teamTab(s, { selected: i === initial }))),
     ]),
   ]);
-};
-
-export const teamGrid = (list = SUPERVISOR_REGISTRY.filter((s) => s.status === 'active')) => {
-  const featured = list[teamFeaturedIndex(list)];
-  const rest = list.filter((s) => s !== featured);
-  return el('div', { class: 'c-team-deck' }, [
-    teamFeatureCard(featured),
-    rest.length ? el('div', { class: 'l-auto-grid c-team-deck__support', style: '--min-col:11rem' }, rest.map(teamMemberCard)) : null,
-  ]);
+  // Built after page.js's own initTabs() sweep may already have run (async
+  // hydrate()), the same reason searchWidget wires its own tab group itself.
+  initTabs(node);
+  return node;
 };
 
 /* ---------------------------------------------------------------------------
@@ -405,11 +406,12 @@ export function mountHome({
       empty: emptyState('offers', { label: t('home.offers.empty.action'), href: route('help/contact/'), variant: 'c-btn--primary' }),
     }),
     team: stateRegion(mount('team'), {
-      // Mirrors teamGrid()'s own shape (one feature + a reflowing deck) so
-      // hydration never jumps the layout once the real cards land.
-      loading: () => el('div', { class: 'c-team-deck', 'aria-hidden': 'true' }, [
-        el('div', { class: 'c-card c-team-feature' }, skeletonCard()),
-        el('div', { class: 'l-auto-grid c-team-deck__support', style: '--min-col:11rem' }, Array.from({ length: 4 }, () => el('div', { class: 'c-card c-team-card' }, skeletonCard()))),
+      // Mirrors teamShowcase()'s own shape (stage + selector strip) so
+      // hydration never jumps the layout once the real showcase lands.
+      loading: () => el('div', { class: 'c-team-showcase', 'aria-hidden': 'true' }, [
+        el('div', { class: 'c-team-showcase__panel' }, skeletonCard()),
+        el('div', { class: 'c-team-showcase__selector' }, el('div', { class: 'c-team-showcase__tabs' },
+          Array.from({ length: 5 }, () => el('div', { class: 'c-skeleton', style: 'inline-size:6rem;block-size:2.5rem;border-radius:var(--radius-pill);flex:none' })))),
       ]),
       empty: emptyState('team', { label: t('sup.cta.book'), href: route('book/'), variant: 'c-btn--primary' }),
     }),
@@ -437,7 +439,7 @@ export function mountHome({
     fill(regions.services, data.services, (list) => servicesGrid(list));
     fill(regions.destinations, data.destinations, destinationGrid);
     fill(regions.offers, data.offers, offerGrid);
-    fill(regions.team, data.team, teamGrid);
+    fill(regions.team, data.team, teamShowcase);
     if (data.support) regions.support.content(supportPanels(data.support, data.channels ?? liveChannels()));
     else regions.support.empty();
   };

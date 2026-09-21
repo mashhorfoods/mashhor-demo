@@ -449,6 +449,8 @@ export default {
     'home.team.tagline': 'رحلتك، برفقة شخص حقيقي من نمبرون.',
     'home.team.text': 'منسّق يساعدك في الاختيار، يحجز معك، ويتابع تفاصيل رحلتك حتى موعد السفر — الوجه الإنساني لمنصة نمبرون.',
     'home.team.all': 'كل منسقي الرحلات',
+    'home.team.cta.talk': (name) => `تحدث مع ${name}`,
+    'home.team.selector.label': 'اختر منسق رحلتك',
     'home.team.empty.title': 'لا يوجد منسقون منشورون بعد',
     'home.team.empty.text': 'يمكنك بدء الحجز مباشرة، وسيتابع معك فريق نمبرون.',
     'home.newsletter.overline': 'ابقَ على اطلاع',

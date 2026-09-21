@@ -644,50 +644,100 @@
   .c-disclose { display: flex; justify-content: center; margin-block-start: var(--space-24); }
 
   /* ======================================================================
-     OUR TEAM — a trust composition, not a repeating employee grid: one
-     coordinator featured (home.js rotates which record daily, never by
-     performance) beside the rest in a reflowing deck. Both card shapes
-     are the shared .c-card/.c-card--interactive primitive (hover lift,
-     focus ring, reduced-motion handling already come from there) — only
-     the portrait treatment and layout are new. Our-Team redesign brief.
+     OUR TEAM — a coordinator showcase: one shared stage (portrait + info)
+     whose content swaps between pre-rendered panels (home.js) as the
+     selector strip below it is used. Panel swap is a plain CSS animation
+     gated on :not([hidden]) — no JS-driven transition state — and the
+     selector strip borrows the search widget's own tab-strip language
+     (.c-search__tabs) so it reads as one system, not a second control.
+     Selection/keyboard/ARIA come from the shared tab-group wiring
+     (initTabs, ui.js). Our-Team Showcase brief.
      ==================================================================== */
   .c-team__tagline { font-size: var(--text-body-lg); font-weight: var(--weight-medium); color: var(--color-text-brand); }
 
-  .c-team-deck { display: grid; gap: var(--space-24); }
+  /* minmax(0, 1fr), not a bare grid (which would default the implicit
+     column to auto/content-based sizing): the selector strip below is an
+     intentionally-wider-than-its-box horizontal scroller (.c-team-
+     showcase__tabs), and without this its min-content width — five
+     unwrapped tab buttons, wider than any phone — would otherwise stretch
+     this whole outer grid, and the section, past the viewport. */
+  .c-team-showcase { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-24); }
+  /* Every panel occupies the same single cell, so the stage never
+     collapses to 0 height between the outgoing panel hiding and the
+     incoming one's animation starting. minmax(0, 1fr) everywhere here
+     (not a bare 1fr/auto column) matters: a plain fr/auto track sizes to
+     its content's min-content width, and a nowrap CTA label ("Talk to
+     Mohamed Abdullah") is wide enough on its own to push the whole stage
+     past a narrow viewport without it. */
+  .c-team-showcase__stage { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+  .c-team-showcase__panel { grid-area: 1 / 1; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-24); }
+  .c-team-showcase__panel[hidden] { display: none; }
 
-  /* Same consistent crop/background treatment on the feature and every
-     support card — only the box's size differs, per the brief's "consistent
-     aspect ratio, consistent crop" requirement. */
-  .c-team-feature__media, .c-team-card__media {
+  .c-team-showcase__media {
     aspect-ratio: 4 / 5; background-color: var(--color-gray-100); color: var(--color-gray-400);
-    display: grid; place-items: center;
+    display: grid; place-items: center; border-radius: var(--radius-lg); overflow: hidden;
   }
-  .c-team-feature__body { gap: var(--space-12); }
-  .c-team-feature__role { font-size: var(--text-body-sm); font-weight: var(--weight-semibold); color: var(--color-text-brand); }
-  .c-team-feature__name { font-size: var(--text-h3); }
-  .c-team-feature__chips { display: flex; flex-wrap: wrap; gap: var(--space-8); list-style: none; margin: 0; padding: 0; }
-  .c-team-feature__bio { color: var(--color-text-secondary); max-inline-size: 42ch; }
-  .c-team-feature__actions { display: flex; flex-wrap: wrap; gap: var(--space-12); margin-block-start: var(--space-8); }
+  .c-team-showcase__media img { inline-size: 100%; block-size: 100%; object-fit: cover; }
 
-  .c-team-deck__support { align-content: start; }
-  .c-team-card__body { gap: var(--space-4); }
-  .c-team-card__name { font-size: var(--text-body); font-weight: var(--weight-semibold); }
-  .c-team-card__role { font-size: var(--text-caption); color: var(--color-text-secondary); }
-  .c-team-card__chip { align-self: flex-start; margin-block-start: var(--space-4); }
+  /* A fixed minimum height for the copy column plus a clamped bio: the
+     five coordinators' bios are not the same length, and without this the
+     stage's own height — and everything below the section — would jump
+     on every selection. */
+  .c-team-showcase__info { display: grid; gap: var(--space-12); align-content: start; min-block-size: 19rem; min-inline-size: 0; }
+  .c-team-showcase__role { font-size: var(--text-body-sm); font-weight: var(--weight-semibold); color: var(--color-text-brand); }
+  .c-team-showcase__name { font-size: var(--text-h2); }
+  .c-team-showcase__chips { display: flex; flex-wrap: wrap; gap: var(--space-8); list-style: none; margin: 0; padding: 0; min-block-size: 2.25rem; }
+  .c-team-showcase__bio {
+    color: var(--color-text-secondary); max-inline-size: 48ch;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .c-team-showcase__actions { display: flex; flex-wrap: wrap; gap: var(--space-12); margin-block-start: var(--space-8); }
 
   @media (min-width: 48em) {
-    /* 7fr/5fr: the featured portrait keeps the visual weight the brief asks
-       for, while the support deck's own .l-auto-grid (--min-col, set by
-       home.js) reflows on its own as records are added or removed — no
-       breakpoint here assumes exactly five coordinators. */
-    .c-team-deck { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--space-32); }
+    /* 5fr/7fr media:info — the same ratio the coordinator's own public
+       profile hero already uses for photo-beside-copy (.c-profile,
+       20-supervisor.css), so this reads as the same visual system. */
+    .c-team-showcase__panel { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: start; gap: var(--space-32); }
   }
-  @media (min-width: 64em) { .c-team-deck { gap: var(--space-48); } }
+  @media (min-width: 64em) {
+    .c-team-showcase__panel { gap: var(--space-48); }
+    .c-team-showcase__info { min-block-size: 16rem; }
+  }
 
-  /* Hover: a quiet image scale on top of .c-card--interactive's own lift —
-     never the only cue, never under reduced motion. */
-  @media (prefers-reduced-motion: no-preference) {
-    .c-team-feature__media img, .c-team-card__media img { transition: transform var(--duration-slow) var(--ease-standard); }
-    .c-team-feature:hover .c-team-feature__media img, .c-team-card:hover .c-team-card__media img { transform: scale(1.04); }
+  /* ---- Selector strip: the coordinator "tabs" — same visual language as
+     the search widget's own vertical tabs, a horizontally scrollable strip
+     with no visible scrollbar, so it works identically as a swipeable
+     mobile selector without extra code. ---- */
+  .c-team-showcase__tabs { display: flex; gap: var(--space-8); padding-block: var(--space-4); overflow-x: auto; scrollbar-width: none; }
+  .c-team-showcase__tabs::-webkit-scrollbar { display: none; }
+  .c-team-showcase__tab {
+    display: inline-flex; align-items: center; gap: var(--space-8); flex: none;
+    padding-inline: var(--space-12); padding-block: var(--space-8);
+    min-block-size: var(--touch-target);
+    font-size: var(--text-body-sm); font-weight: var(--weight-medium);
+    color: var(--color-text-secondary);
+    border: var(--border-hairline); border-radius: var(--radius-pill);
+    background-color: var(--color-surface);
+    transition: var(--transition-interactive);
   }
+  .c-team-showcase__tab:hover { border-color: var(--color-border-strong); color: var(--color-text); }
+  /* Selected state is never colour alone: weight, border and a filled
+     background all change together. */
+  .c-team-showcase__tab[aria-selected="true"] {
+    border-color: var(--color-primary); color: var(--color-text-brand); font-weight: var(--weight-semibold);
+    background-color: var(--color-surface-brand); box-shadow: var(--shadow-xs);
+  }
+  .c-team-showcase__tab-thumb {
+    inline-size: 2rem; block-size: 2rem; border-radius: var(--radius-circle); overflow: hidden; flex: none;
+    display: grid; place-items: center; background-color: var(--color-gray-100); color: var(--color-gray-400);
+  }
+  .c-team-showcase__tab-thumb img { inline-size: 100%; block-size: 100%; object-fit: cover; }
+
+  /* Panel-swap motion: a plain CSS animation that plays whenever a panel
+     goes from [hidden] to shown — no JS-driven transition state, no
+     transition-on-display gotcha. Collapses to ~instant under reduced
+     motion via the same --duration-slow token every other transition on
+     the site already uses (01-tokens.css). */
+  @keyframes c-team-panel-in { from { opacity: 0; transform: translateY(6px) scale(0.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  .c-team-showcase__panel:not([hidden]) { animation: c-team-panel-in var(--duration-slow) var(--ease-out); }
 }

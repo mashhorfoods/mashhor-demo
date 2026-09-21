@@ -449,6 +449,8 @@ export default {
     'home.team.tagline': 'Your journey, supported by a real person.',
     'home.team.text': 'A coordinator helps you choose, books with you and follows up until you travel — the human side of the Number One platform.',
     'home.team.all': 'See all coordinators',
+    'home.team.cta.talk': (name) => `Talk to ${name}`,
+    'home.team.selector.label': 'Choose your travel coordinator',
     'home.team.empty.title': 'No coordinators published yet',
     'home.team.empty.text': 'You can still start a booking directly — the Number One team follows up with you.',
     'home.newsletter.overline': 'Stay in the loop',
