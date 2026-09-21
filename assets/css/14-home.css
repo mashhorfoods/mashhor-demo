@@ -47,7 +47,6 @@
   .c-hero__search { margin-block-start: var(--space-32); }
   .c-hero__search .c-search { box-shadow: var(--shadow-lg); }
   .c-hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-12); }
-  .c-hero__trust { display: flex; flex-wrap: wrap; gap: var(--space-12) var(--space-24); }
 
   /* Phone: copy, then the search (it must stay within the first thumb reach),
      then the media at a shorter ratio so it does not push the services off
@@ -70,10 +69,9 @@
   /* MOBILE/TABLET HERO OPTIMIZATION — homepage hero only. The headline
      shrinks and switches to a deterministic 3-line short title (exactly 3
      lines via explicit <br>s in heroTitleShortLines(), not left to natural
-     wrap at whatever width a phone happens to be), the trust reassurances
-     are removed from layout entirely rather than just visually hidden, and
-     the forced full-viewport height goes back to content-sized so the
-     search form isn't pushed below the fold. Scoped to .c-hero--home, not
+     wrap at whatever width a phone happens to be), and the forced
+     full-viewport height goes back to content-sized so the search form
+     isn't pushed below the fold. Scoped to .c-hero--home, not
      .c-hero--photo/.c-hero--full (shared with the destination/offer hero,
      which keep their existing full-bleed treatment untouched) — desktop
      (64em+) is completely unaffected. */
@@ -87,7 +85,6 @@
     }
     .c-hero--home .c-hero__title-full { display: none; }
     .c-hero--home .c-hero__title-short { display: inline; }
-    .c-hero--home .c-hero__trust { display: none; }
   }
 
   /* ----------------------------------------------------------------------
@@ -206,8 +203,6 @@
   .c-hero--photo .c-hero__copy :is(h1) { color: var(--color-text-inverse); }
   .c-hero--photo .c-hero__copy .t-overline { color: rgb(255 255 255 / 0.85); }
   .c-hero--photo .c-hero__lead { color: rgb(255 255 255 / 0.85); }
-  .c-hero--photo .c-hero__trust,
-  .c-hero--photo .c-hero__trust .c-icon { color: var(--color-text-inverse); }
   /* The detail-page breadcrumb (offers/destinations, 16-service-detail.css)
      rides in the same copy column — it needs the same inverse treatment,
      the current-page crumb included. */
@@ -219,26 +214,6 @@
   .c-hero--photo .c-hero__lead,
   .c-hero--photo .c-hero__copy .t-overline {
     text-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
-  }
-  /* The trust row sits lowest in the copy stack, right at this photo's own
-     horizon band — the brightest, most changeable part of any airport/sky
-     photograph (tarmac, glass, a light shirt) — at every breakpoint, not
-     just the narrow ones. A shadow alone proved not enough there even on
-     desktop, so each item gets a quiet translucent chip: a guaranteed-dark
-     backing regardless of what's under it, at the same visual weight as the
-     small pill buttons already in this hero. The checkmarks are SVGs
-     painted with currentColor, so text-shadow has no effect on their fill;
-     drop-shadow protects those instead. */
-  .c-hero--photo .c-hero__trust {
-    text-shadow: 0 1px 3px rgb(0 0 0 / 0.55), 0 1px 8px rgb(0 0 0 / 0.4);
-  }
-  .c-hero--photo .c-hero__trust .c-icon {
-    filter: drop-shadow(0 1px 3px rgb(0 0 0 / 0.55));
-  }
-  .c-hero--photo .c-hero__trust .c-trust-item {
-    background-color: rgb(11 13 15 / 0.38);
-    border-radius: var(--radius-pill);
-    padding-inline: var(--space-12); padding-block: var(--space-4);
   }
   /* The tertiary CTA keeps its transparent background and brand-red text
      (no color/backdrop change per brand rules) but still sits on the photo,

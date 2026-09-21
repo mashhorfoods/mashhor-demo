@@ -55,9 +55,6 @@ export const HOME_HERO = {
     ratio: '4 / 5',
     focal: { desktop: '50% 50%', tablet: '22% 50%', mobile: '27% 50%' },
   },
-  /* Three short reassurances under the headline. Reuses the trust keys the
-     foundation already ships, so the wording matches the rest of the site. */
-  trust: ['trust.clearPrice', 'trust.humanHelp', 'trust.securePayment'],
 };
 
 /* --------------------------------------------------------------------------
