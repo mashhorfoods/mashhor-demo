@@ -25,6 +25,7 @@ import {
   listSupervisors, createSupervisor, updateSupervisor, supervisorDetailForStaff,
   adminLeads, adminAttributionEvents, reassignAttribution,
 } from './supervisor.mjs';
+import { listDestinations, destinationById, createDestination, updateDestination, listOffers, offerById, createOffer, updateOffer } from './content.mjs';
 import { normEmail } from './identity.mjs';
 import { enqueue } from './mailer.mjs';
 import { listBusinessRules, businessRuleById, businessRuleHistory, updateBusinessRule, activateBusinessRule, disableBusinessRule, pendingDecisions, businessRuleMatrix } from './business-rules.mjs';
@@ -128,6 +129,18 @@ export const dashboard = {
   supervisor(req, res, ctx, id) { requirePermission(ctx.staff, 'supervisor.view'); const s = supervisorDetailForStaff(id); if (!s) return fail(res, 404, 'notFound'); return json(res, 200, { supervisor: s }); },
   async supervisorCreate(req, res, ctx) { requirePermission(ctx.staff, 'supervisor.manage'); const b = await readJson(req); return json(res, 201, { supervisor: createSupervisor(b, actorOf(ctx)) }); },
   async supervisorUpdate(req, res, ctx, id) { requirePermission(ctx.staff, 'supervisor.manage'); const b = await readJson(req); return json(res, 200, { supervisor: updateSupervisor(id, b, actorOf(ctx)) }); },
+
+  // Command Center CMS Phase 2A — Destinations & Offers admin CRUD. Viewing is ungated (matches services' own
+  // list/one), only create/update need content.manage.
+  destinations(req, res, ctx, url) { return json(res, 200, listDestinations({ search: str(url.searchParams.get('search') ?? '', 120), region: str(url.searchParams.get('region') ?? '', 30), page: page(url), pageSize: pageSize(url) })); },
+  destination(req, res, ctx, id) { const d = destinationById(id); if (!d) return fail(res, 404, 'notFound'); return json(res, 200, { destination: d }); },
+  async destinationCreate(req, res, ctx) { requirePermission(ctx.staff, 'content.manage'); const b = await readJson(req); return json(res, 201, { destination: createDestination(b, actorOf(ctx)) }); },
+  async destinationUpdate(req, res, ctx, id) { requirePermission(ctx.staff, 'content.manage'); const b = await readJson(req); return json(res, 200, { destination: updateDestination(id, b, actorOf(ctx)) }); },
+
+  offers(req, res, ctx, url) { return json(res, 200, listOffers({ search: str(url.searchParams.get('search') ?? '', 120), category: str(url.searchParams.get('category') ?? '', 30), destinationId: str(url.searchParams.get('destinationId') ?? '', 40), page: page(url), pageSize: pageSize(url) })); },
+  offer(req, res, ctx, id) { const o = offerById(id); if (!o) return fail(res, 404, 'notFound'); return json(res, 200, { offer: o }); },
+  async offerCreate(req, res, ctx) { requirePermission(ctx.staff, 'content.manage'); const b = await readJson(req); return json(res, 201, { offer: createOffer(b, actorOf(ctx)) }); },
+  async offerUpdate(req, res, ctx, id) { requirePermission(ctx.staff, 'content.manage'); const b = await readJson(req); return json(res, 200, { offer: updateOffer(id, b, actorOf(ctx)) }); },
 
   leads(req, res, ctx, url) { requirePermission(ctx.staff, 'attribution.view'); return json(res, 200, adminLeads({ supervisorId: str(url.searchParams.get('supervisorId') ?? '', 40), status: str(url.searchParams.get('status') ?? '', 20), page: page(url), pageSize: pageSize(url) })); },
   attributionEvents(req, res, ctx, url) { requirePermission(ctx.staff, 'attribution.view'); return json(res, 200, adminAttributionEvents({ supervisorId: str(url.searchParams.get('supervisorId') ?? '', 40), customerId: str(url.searchParams.get('customerId') ?? '', 40), page: page(url), pageSize: pageSize(url) })); },

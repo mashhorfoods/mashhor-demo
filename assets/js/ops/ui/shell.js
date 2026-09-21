@@ -31,6 +31,8 @@ export const devNotice = () => (opsDataAdapter()?.dev ? el('p', { class: 'c-note
 const NAV = [
   { id: 'dashboard', group: 'command', icon: 'no-dashboard', href: 'admin/dashboard/', labelAr: 'نظرة عامة', labelEn: 'Overview' },
   { id: 'services', group: 'website', icon: 'no-booking', href: 'admin/services/', labelAr: 'الخدمات', labelEn: 'Services' },
+  { id: 'destinations', group: 'website', icon: 'no-location', href: 'admin/destinations/', labelAr: 'الوجهات', labelEn: 'Destinations' },
+  { id: 'offers', group: 'website', icon: 'no-price-tag', href: 'admin/offers/', labelAr: 'العروض والباقات', labelEn: 'Offers & Packages' },
   { id: 'supervisors', group: 'website', icon: 'no-supervisor', href: 'admin/supervisors/', labelAr: 'المشرفون', labelEn: 'Supervisors', permission: 'supervisor.view' },
   { id: 'customers', group: 'business', icon: 'no-customer', href: 'admin/customers/', labelAr: 'العملاء', labelEn: 'Customers', permission: 'customer.view' },
   { id: 'leads', group: 'business', icon: 'no-lead', href: 'admin/leads/', labelAr: 'العملاء المحتملون والإسناد', labelEn: 'Leads / Attribution', permission: 'attribution.view' },

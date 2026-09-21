@@ -189,6 +189,14 @@ export function createApp() {
       if (path === '/admin/supervisors' && req.method === 'POST') return dashboard.supervisorCreate(req, res, ctx);
       if ((m = path.match(/^\/admin\/supervisors\/([^/]+)$/)) && req.method === 'GET') return dashboard.supervisor(req, res, ctx, decodeURIComponent(m[1]));
       if ((m = path.match(/^\/admin\/supervisors\/([^/]+)$/)) && req.method === 'PATCH') return dashboard.supervisorUpdate(req, res, ctx, decodeURIComponent(m[1]));
+      if (path === '/admin/destinations' && req.method === 'GET') return dashboard.destinations(req, res, ctx, url);
+      if (path === '/admin/destinations' && req.method === 'POST') return dashboard.destinationCreate(req, res, ctx);
+      if ((m = path.match(/^\/admin\/destinations\/([^/]+)$/)) && req.method === 'GET') return dashboard.destination(req, res, ctx, decodeURIComponent(m[1]));
+      if ((m = path.match(/^\/admin\/destinations\/([^/]+)$/)) && req.method === 'PATCH') return dashboard.destinationUpdate(req, res, ctx, decodeURIComponent(m[1]));
+      if (path === '/admin/offers' && req.method === 'GET') return dashboard.offers(req, res, ctx, url);
+      if (path === '/admin/offers' && req.method === 'POST') return dashboard.offerCreate(req, res, ctx);
+      if ((m = path.match(/^\/admin\/offers\/([^/]+)$/)) && req.method === 'GET') return dashboard.offer(req, res, ctx, decodeURIComponent(m[1]));
+      if ((m = path.match(/^\/admin\/offers\/([^/]+)$/)) && req.method === 'PATCH') return dashboard.offerUpdate(req, res, ctx, decodeURIComponent(m[1]));
       if (path === '/admin/leads' && req.method === 'GET') return dashboard.leads(req, res, ctx, url);
       if (path === '/admin/attribution-events' && req.method === 'GET') return dashboard.attributionEvents(req, res, ctx, url);
       if (path === '/admin/payments' && req.method === 'GET') return dashboard.payments(req, res, ctx, url);

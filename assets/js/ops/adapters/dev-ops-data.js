@@ -78,7 +78,16 @@ let devDocumentsAdmin = [
   { id: 'dev-doc-1', customerId: 'dev-cus-1', bookingId: 'dev-bk-1', tripId: null, type: 'eticket', kind: 'issued', status: 'available', reviewStatus: 'pending', reviewerId: null, reviewedAt: null, rejectionReason: null, title: null, createdAt: iso(3) },
 ];
 let staffAccounts = [
-  { id: 'staff-dev-demo', email: 'admin@example.test', name: 'Development Admin', role: 'admin', permissions: ['booking.view', 'booking.manage', 'booking.status.change', 'booking.assign', 'task.view', 'task.manage', 'document.review', 'supplier.view', 'supplier.manage', 'notification.send', 'notification.manage', 'service.manage', 'workflow.manage', 'report.view', 'audit.view', 'customer.view', 'supervisor.view', 'supervisor.manage', 'payment.view', 'document.view', 'attribution.view', 'staff.manage', 'rules.view', 'rules.manage'], active: true, createdAt: iso(120), updatedAt: iso(120) },
+  { id: 'staff-dev-demo', email: 'admin@example.test', name: 'Development Admin', role: 'admin', permissions: ['booking.view', 'booking.manage', 'booking.status.change', 'booking.assign', 'task.view', 'task.manage', 'document.review', 'supplier.view', 'supplier.manage', 'notification.send', 'notification.manage', 'service.manage', 'workflow.manage', 'report.view', 'audit.view', 'customer.view', 'supervisor.view', 'supervisor.manage', 'payment.view', 'document.view', 'attribution.view', 'staff.manage', 'rules.view', 'rules.manage', 'content.manage'], active: true, createdAt: iso(120), updatedAt: iso(120) },
+];
+
+// ---- Command Center CMS Phase 2A: Destinations & Offers admin CRUD stand-in. One seeded row each, active, so the
+// list screens aren't empty; every other field starts null/empty rather than a plausible-looking placeholder.
+let devDestinations = [
+  { id: 'dev-dst-1', slug: 'dev-destination', region: 'middleEast', nameAr: 'وجهة تطوير', nameEn: 'Development Destination', countryAr: null, countryEn: null, descAr: null, descEn: null, purposes: [], services: [], image: null, featured: false, home: false, active: true, order: null, createdAt: iso(30), updatedAt: iso(30) },
+];
+let devOffers = [
+  { id: 'dev-off-1', slug: 'dev-offer', category: null, categories: [], destinationId: 'dev-dst-1', titleAr: 'عرض تطوير', titleEn: 'Development Offer', shortAr: null, shortEn: null, descAr: null, descEn: null, duration: { nights: null }, price: null, status: 'request', bookingMode: 'request', featured: false, placeholder: true, services: [], image: null, detail: {}, active: true, createdAt: iso(30), updatedAt: iso(30) },
 ];
 
 // ---- Stage 15A: the Business Rules Register — mirrors exactly the PENDING/DRAFT/ACTIVE seed the real backend's
@@ -102,7 +111,7 @@ const bookingById = (id) => BOOKINGS.find((b) => b.id === id);
 
 export const DEV_OPS_DATA = registerOpsDataAdapter({
   id: 'dev-ops-data', dev: true, provider: 'in-browser development stand-in', configSource: 'none',
-  capabilities: ['bookings.operations', 'tasks', 'escalations', 'documents.review', 'services', 'workflow', 'suppliers', 'notifications.templates', 'notifications.history', 'audit', 'admin.dashboard'],
+  capabilities: ['bookings.operations', 'tasks', 'escalations', 'documents.review', 'services', 'workflow', 'suppliers', 'notifications.templates', 'notifications.history', 'audit', 'admin.dashboard', 'content'],
   async bookings() { await wait(); if (isEmpty()) return paged([]); return paged(BOOKINGS); },
   async booking(_t, id) {
     await wait(); const b = bookingById(id); if (!b) return null;
@@ -207,6 +216,28 @@ export const DEV_OPS_DATA = registerOpsDataAdapter({
     await wait(); const sv = supervisorsAdmin.find((x) => x.id === id); if (!sv) return null;
     Object.assign(sv, patchBody, { status: patchBody.active !== undefined ? (patchBody.active ? 'active' : 'inactive') : sv.status, updatedAt: new Date().toISOString() });
     return { ...sv };
+  },
+
+  async destinationsAdmin(_t, params = {}) { await wait(); let items = devDestinations; if (params.search) { const s = params.search.toLowerCase(); items = items.filter((d) => (d.nameEn ?? '').toLowerCase().includes(s) || d.slug.includes(s)); } if (params.region) items = items.filter((d) => d.region === params.region); return paged(items, params); },
+  async destinationAdmin(_t, id) { await wait(); return devDestinations.find((d) => d.id === id || d.slug === id) ?? null; },
+  async createDestinationAdmin(_t, destination) {
+    await wait(); const d = { id: `dev-dst-${Date.now()}`, slug: destination.slug, region: null, nameAr: destination.nameAr ?? null, nameEn: destination.nameEn ?? null, countryAr: null, countryEn: null, descAr: null, descEn: null, purposes: [], services: [], image: null, featured: false, home: false, active: true, order: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    devDestinations = [d, ...devDestinations]; return d;
+  },
+  async updateDestinationAdmin(_t, id, patchBody) {
+    await wait(); const d = devDestinations.find((x) => x.id === id); if (!d) return null;
+    Object.assign(d, patchBody, { updatedAt: new Date().toISOString() }); return { ...d };
+  },
+
+  async offersAdmin(_t, params = {}) { await wait(); let items = devOffers; if (params.search) { const s = params.search.toLowerCase(); items = items.filter((o) => (o.titleEn ?? '').toLowerCase().includes(s) || o.slug.includes(s)); } if (params.destinationId) items = items.filter((o) => o.destinationId === params.destinationId); return paged(items, params); },
+  async offerAdmin(_t, id) { await wait(); return devOffers.find((o) => o.id === id || o.slug === id) ?? null; },
+  async createOfferAdmin(_t, offer) {
+    await wait(); const o = { id: `dev-off-${Date.now()}`, slug: offer.slug, category: null, categories: [], destinationId: null, titleAr: offer.titleAr ?? null, titleEn: offer.titleEn ?? null, shortAr: null, shortEn: null, descAr: null, descEn: null, duration: { nights: null }, price: null, status: 'request', bookingMode: 'request', featured: false, placeholder: true, services: [], image: null, detail: {}, active: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    devOffers = [o, ...devOffers]; return o;
+  },
+  async updateOfferAdmin(_t, id, patchBody) {
+    await wait(); const o = devOffers.find((x) => x.id === id); if (!o) return null;
+    Object.assign(o, patchBody, { updatedAt: new Date().toISOString() }); return { ...o };
   },
 
   async leads(_t, params = {}) { await wait(); return paged(devLeads, params); },

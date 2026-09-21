@@ -28,7 +28,7 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.ops.s
 // ================================================================= 1. authorization: every portal route guarded, sign in / out
 {
   const { c, p } = await ctx();
-  const PORTAL_ROUTES = ['admin/dashboard/', 'admin/customers/', 'admin/supervisors/', 'admin/leads/', 'admin/bookings/', 'admin/tasks/', 'admin/escalations/', 'admin/services/', 'admin/suppliers/', 'admin/payments/', 'admin/documents/', 'admin/notifications/', 'admin/reports/', 'admin/audit/', 'admin/staff/', 'admin/business-rules/', 'admin/settings/'];
+  const PORTAL_ROUTES = ['admin/dashboard/', 'admin/customers/', 'admin/supervisors/', 'admin/destinations/', 'admin/offers/', 'admin/leads/', 'admin/bookings/', 'admin/tasks/', 'admin/escalations/', 'admin/services/', 'admin/suppliers/', 'admin/payments/', 'admin/documents/', 'admin/notifications/', 'admin/reports/', 'admin/audit/', 'admin/staff/', 'admin/business-rules/', 'admin/settings/'];
   for (const u of PORTAL_ROUTES) {
     await p.goto(ORIGIN + P + u); await p.waitForFunction(() => document.querySelector('[data-portal=main] h1'));
     ok(`guest blocked: ${u}`, await count(p, '[data-action=sign-in]') === 1 && await count(p, '[data-portal=nav] a') === 0);
@@ -41,7 +41,7 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.ops.s
   ok('invalid credentials → error, still guest', (await marker(p)) === null);
   await devSignIn(p);
   ok('dev demo sign-in → dashboard, session marker stored', /^dev\./.test((await marker(p))?.token ?? '') && /مرحباً/.test(await text(p, 'h1')));
-  ok('portal nav shows every module (admin sees Stage 14/15A\'s modules too), current marked, grouped by the Command Center taxonomy', (await p.$$eval('[data-portal=nav] a', (as) => as.map((a) => a.dataset.nav))).join('|') === 'dashboard|services|supervisors|customers|leads|bookings|payments|documents|tasks|escalations|suppliers|notifications|reports|audit|staff|rules|settings|sign-out');
+  ok('portal nav shows every module (admin sees Stage 14/15A\'s modules too), current marked, grouped by the Command Center taxonomy', (await p.$$eval('[data-portal=nav] a', (as) => as.map((a) => a.dataset.nav))).join('|') === 'dashboard|services|destinations|offers|supervisors|customers|leads|bookings|payments|documents|tasks|escalations|suppliers|notifications|reports|audit|staff|rules|settings|sign-out');
   await signOut(p);
   ok('sign out: marker cleared, signed-out message', (await marker(p)) === null && /تسجيل الخروج/.test(await text(p, 'h1')));
   await go(p, 'admin/dashboard/'); await p.waitForFunction(() => document.querySelector('[data-portal=main] h1'));
@@ -115,6 +115,22 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.ops.s
   await p.fill('#ops-sv-edit textarea[name=bioEn]', 'Updated demo bio.');
   await p.click('#ops-sv-edit button[type=submit]'); await p.waitForTimeout(500);
   ok('admin edits a supervisor\'s profile (city, bio) through the extended edit form and it persists on re-render', await p.inputValue('#ops-sv-edit input[name=city]') === 'Port Sudan' && (await p.$eval('#ops-sv-edit textarea[name=bioEn]', (t) => t.value)) === 'Updated demo bio.');
+
+  await go(p, 'admin/destinations/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap');
+  ok('destinations: development destination listed with a create form (Command Center CMS Phase 2A)', await count(p, 'tbody tr') === 1 && await count(p, '#ops-dst-create') === 1);
+  await p.click('tbody tr:first-child a'); await mainReady(p);
+  ok('destination detail: details block and edit form both present', await count(p, '#ops-dst-details') === 1 && await count(p, '#ops-dst-edit') === 1);
+  await p.fill('#ops-dst-edit input[name=region]', 'asia');
+  await p.click('#ops-dst-edit button[type=submit]'); await p.waitForTimeout(500);
+  ok('admin edits a destination\'s region through the edit form and it persists on re-render', await p.inputValue('#ops-dst-edit input[name=region]') === 'asia');
+
+  await go(p, 'admin/offers/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap');
+  ok('offers: development offer listed with a create form', await count(p, 'tbody tr') === 1 && await count(p, '#ops-off-create') === 1);
+  await p.click('tbody tr:first-child a'); await mainReady(p);
+  ok('offer detail: placeholder note shown (programme not yet approved), details and edit form both present', await count(p, '#ops-off-details') === 1 && await count(p, '#ops-off-edit') === 1 && await count(p, '[data-portal=main] .c-note--warning') === 1);
+  await p.fill('#ops-off-edit input[name=priceAmount]', '450');
+  await p.click('#ops-off-edit button[type=submit]'); await p.waitForTimeout(500);
+  ok('admin sets a real price through the edit form and it persists on re-render', await p.inputValue('#ops-off-edit input[name=priceAmount]') === '450');
 
   await go(p, 'admin/leads/'); await mainReady(p);
   ok('leads: admin-wide leads and attribution history panels', await count(p, '#ops-leads-list') === 1 && await count(p, '#ops-leads-attribution') === 1);

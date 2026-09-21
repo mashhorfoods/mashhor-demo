@@ -1,0 +1,164 @@
+// ============================================================================
+// BACKEND / CONTENT — Command Center CMS, Phase 2A. Destinations and Offers as
+// real, admin-manageable entities — genuinely absent before this: both were
+// pure hardcoded frontend registries (assets/js/data/destinations.js, offers.js)
+// with no backend representation at all. Field shapes mirror those registries'
+// own documented contracts so a later phase can feed the public pages from
+// here without a reshape; this phase does not wire that — the public site
+// stays on its static registries (Phase 2 scope decision: static site + a
+// staff preview overlay comes in Phase 2B, not this one).
+//
+// No draft/publish state yet: `active` is the only lifecycle here, the same
+// convention `services` (backend/staff.mjs) already uses — Phase 2B adds
+// status/publishedAt on top without touching what's below.
+// ============================================================================
+import { hex, HttpError, str } from './http.mjs';
+import { q, now, paginate, whereClause } from './db.mjs';
+import { audit } from './staff.mjs';
+
+const J = (s, d) => { try { return s ? JSON.parse(s) : d; } catch { return d; } };
+/** A short-string array, sanitised item by item — same defense-in-depth shape as supervisor.mjs's strArr: no closed
+    vocabulary is enforced here (regions/purposes/categories/services ids live in the frontend registries), this
+    just guards against an oversized or malformed payload. */
+const strArr = (v, max = 12, itemLen = 40) => (Array.isArray(v) ? v.slice(0, max).map((x) => str(x, itemLen)).filter(Boolean) : []);
+const isValidSlug = (slug) => typeof slug === 'string' && /^[a-z0-9]([a-z0-9-]{0,58}[a-z0-9])?$/.test(slug);
+const imageJson = (image) => (image && (image.src || image.altAr || image.altEn)
+  ? JSON.stringify({ src: str(image.src, 300) || null, altAr: str(image.altAr, 160) || null, altEn: str(image.altEn, 160) || null })
+  : null);
+
+/* ============================================================================
+   DESTINATIONS
+   ========================================================================= */
+function nDestination(d) {
+  if (!d) return null;
+  return {
+    id: d.id, slug: d.slug, region: d.region ?? null, active: !!d.active, featured: !!d.featured, home: !!d.home, order: d.order_index ?? null,
+    nameAr: d.name_ar ?? null, nameEn: d.name_en ?? null, countryAr: d.country_ar ?? null, countryEn: d.country_en ?? null,
+    descAr: d.desc_ar ?? null, descEn: d.desc_en ?? null,
+    purposes: J(d.purposes_json, []), services: J(d.services_json, []), image: J(d.image_json, null),
+    createdAt: d.created_at, updatedAt: d.updated_at,
+  };
+}
+export const destinationById = (id) => nDestination(q.get('SELECT * FROM destinations WHERE id = ? OR slug = ?', id, id));
+export function listDestinations({ search = '', region = '', page = 1, pageSize = 20 } = {}) {
+  const like = search ? `%${str(search, 120)}%` : '';
+  const { sql, params } = whereClause([
+    ['(name_ar LIKE ? OR name_en LIKE ? OR slug LIKE ?)', like && [like, like, like]],
+    ['region = ?', region],
+  ]);
+  const all = q.all(`SELECT * FROM destinations ${sql} ORDER BY order_index IS NULL, order_index, created_at DESC`, ...params);
+  const { slice, ...meta } = paginate(all, page, pageSize, 100);
+  return { items: slice.map(nDestination), ...meta };
+}
+export function createDestination({ slug, nameAr, nameEn }, actor) {
+  if (!isValidSlug(slug)) throw new HttpError(422, 'invalid');
+  if (!nameAr && !nameEn) throw new HttpError(422, 'invalid');
+  if (q.get('SELECT id FROM destinations WHERE slug = ?', slug)) throw new HttpError(409, 'exists');
+  const id = `dst_${hex(8)}`; const t = now();
+  q.run('INSERT INTO destinations (id, slug, name_ar, name_en, active, purposes_json, services_json, created_at, updated_at) VALUES (?,?,?,?,1,?,?,?,?)',
+    id, slug, str(nameAr, 120) || null, str(nameEn, 120) || null, '[]', '[]', t, t);
+  audit(actor, 'destination.create', 'destination', id, { slug });
+  return destinationById(id);
+}
+export function updateDestination(id, patch, actor) {
+  const row = q.get('SELECT * FROM destinations WHERE id = ?', id); if (!row) throw new HttpError(404, 'notFound');
+  if (patch.slug !== undefined && patch.slug !== row.slug) {
+    if (!isValidSlug(patch.slug)) throw new HttpError(422, 'invalid');
+    if (q.get('SELECT id FROM destinations WHERE slug = ? AND id != ?', patch.slug, id)) throw new HttpError(409, 'exists');
+  }
+  const v = (k, cur, n = 120) => (patch[k] !== undefined ? str(patch[k], n) || null : cur);
+  const active = patch.active !== undefined ? (patch.active ? 1 : 0) : row.active;
+  const featured = patch.featured !== undefined ? (patch.featured ? 1 : 0) : row.featured;
+  const home = patch.home !== undefined ? (patch.home ? 1 : 0) : row.home;
+  const orderIndex = patch.order !== undefined ? (Number.isFinite(patch.order) ? Math.trunc(patch.order) : null) : row.order_index;
+  const purposesJson = patch.purposes !== undefined ? JSON.stringify(strArr(patch.purposes)) : row.purposes_json;
+  const servicesJson = patch.services !== undefined ? JSON.stringify(strArr(patch.services)) : row.services_json;
+  const image = patch.image !== undefined ? imageJson(patch.image) : row.image_json;
+  q.run(`UPDATE destinations SET slug = ?, region = ?, name_ar = ?, name_en = ?, country_ar = ?, country_en = ?, desc_ar = ?, desc_en = ?,
+         purposes_json = ?, services_json = ?, image_json = ?, featured = ?, home = ?, active = ?, order_index = ?, updated_at = ? WHERE id = ?`,
+    v('slug', row.slug, 60), v('region', row.region, 30), v('nameAr', row.name_ar), v('nameEn', row.name_en),
+    v('countryAr', row.country_ar), v('countryEn', row.country_en), v('descAr', row.desc_ar, 300), v('descEn', row.desc_en, 300),
+    purposesJson, servicesJson, image, featured, home, active, orderIndex, now(), id);
+  audit(actor, active !== row.active ? (active ? 'destination.activate' : 'destination.deactivate') : 'destination.update', 'destination', id, {});
+  return destinationById(id);
+}
+
+/* ============================================================================
+   OFFERS & PACKAGES
+   ========================================================================= */
+function nOffer(o) {
+  if (!o) return null;
+  return {
+    id: o.id, slug: o.slug, category: o.category ?? null, categories: J(o.categories_json, []), destinationId: o.destination_id ?? null,
+    active: !!o.active, featured: !!o.featured, placeholder: !!o.placeholder, status: o.status, bookingMode: o.booking_mode,
+    titleAr: o.title_ar ?? null, titleEn: o.title_en ?? null, shortAr: o.short_ar ?? null, shortEn: o.short_en ?? null, descAr: o.desc_ar ?? null, descEn: o.desc_en ?? null,
+    duration: { nights: o.duration_nights ?? null },
+    price: o.price_amount != null ? { amount: o.price_amount, currency: o.price_currency, type: o.price_type, basisAr: o.price_basis_ar, basisEn: o.price_basis_en } : null,
+    services: J(o.services_json, []), image: J(o.image_json, null), detail: J(o.detail_json, {}),
+    createdAt: o.created_at, updatedAt: o.updated_at,
+  };
+}
+export const OFFER_STATUSES = ['available', 'request', 'soon', 'ended'];
+export const offerById = (id) => nOffer(q.get('SELECT * FROM offers WHERE id = ? OR slug = ?', id, id));
+export function listOffers({ search = '', category = '', destinationId = '', page = 1, pageSize = 20 } = {}) {
+  const like = search ? `%${str(search, 120)}%` : '';
+  const { sql, params } = whereClause([
+    ['(title_ar LIKE ? OR title_en LIKE ? OR slug LIKE ?)', like && [like, like, like]],
+    ['category = ?', category], ['destination_id = ?', destinationId],
+  ]);
+  const all = q.all(`SELECT * FROM offers ${sql} ORDER BY created_at DESC`, ...params);
+  const { slice, ...meta } = paginate(all, page, pageSize, 100);
+  return { items: slice.map(nOffer), ...meta };
+}
+export function createOffer({ slug, titleAr, titleEn }, actor) {
+  if (!isValidSlug(slug)) throw new HttpError(422, 'invalid');
+  if (!titleAr && !titleEn) throw new HttpError(422, 'invalid');
+  if (q.get('SELECT id FROM offers WHERE slug = ?', slug)) throw new HttpError(409, 'exists');
+  const id = `off_${hex(8)}`; const t = now();
+  q.run(`INSERT INTO offers (id, slug, title_ar, title_en, status, booking_mode, active, placeholder, categories_json, services_json, detail_json, created_at, updated_at)
+         VALUES (?,?,?,?,'request','request',1,1,?,?,?,?,?)`,
+    id, slug, str(titleAr, 120) || null, str(titleEn, 120) || null, '[]', '[]', '{}', t, t);
+  audit(actor, 'offer.create', 'offer', id, { slug });
+  return offerById(id);
+}
+export function updateOffer(id, patch, actor) {
+  const row = q.get('SELECT * FROM offers WHERE id = ?', id); if (!row) throw new HttpError(404, 'notFound');
+  if (patch.slug !== undefined && patch.slug !== row.slug) {
+    if (!isValidSlug(patch.slug)) throw new HttpError(422, 'invalid');
+    if (q.get('SELECT id FROM offers WHERE slug = ? AND id != ?', patch.slug, id)) throw new HttpError(409, 'exists');
+  }
+  if (patch.destinationId !== undefined && patch.destinationId && !q.get('SELECT id FROM destinations WHERE id = ?', patch.destinationId)) throw new HttpError(422, 'invalid');
+  if (patch.status !== undefined && !OFFER_STATUSES.includes(patch.status)) throw new HttpError(422, 'invalid');
+  const v = (k, cur, n = 120) => (patch[k] !== undefined ? str(patch[k], n) || null : cur);
+  const active = patch.active !== undefined ? (patch.active ? 1 : 0) : row.active;
+  const featured = patch.featured !== undefined ? (patch.featured ? 1 : 0) : row.featured;
+  const placeholder = patch.placeholder !== undefined ? (patch.placeholder ? 1 : 0) : row.placeholder;
+  const categoriesJson = patch.categories !== undefined ? JSON.stringify(strArr(patch.categories)) : row.categories_json;
+  const servicesJson = patch.services !== undefined ? JSON.stringify(strArr(patch.services)) : row.services_json;
+  const image = patch.image !== undefined ? imageJson(patch.image) : row.image_json;
+  const nights = patch.duration?.nights !== undefined ? (Number.isFinite(patch.duration.nights) ? Math.trunc(patch.duration.nights) : null) : row.duration_nights;
+  const price = patch.price !== undefined ? patch.price : undefined;
+  const priceAmount = price !== undefined ? (price && Number.isFinite(price.amount) ? price.amount : null) : row.price_amount;
+  const priceCurrency = price !== undefined ? (price ? str(price.currency, 10) || null : null) : row.price_currency;
+  const priceType = price !== undefined ? (price ? str(price.type, 10) || null : null) : row.price_type;
+  const priceBasisAr = price !== undefined ? (price ? str(price.basisAr, 120) || null : null) : row.price_basis_ar;
+  const priceBasisEn = price !== undefined ? (price ? str(price.basisEn, 120) || null : null) : row.price_basis_en;
+  // detail_json is the raw-JSON-edited catch-all for inclusions/exclusions/itinerary/important/terms/faq/travelPeriod
+  // (§ note atop this file) — must be a plain object (never silently coerced from something malformed), never
+  // shape-checked field by field beyond that.
+  let detailJson = row.detail_json;
+  if (patch.detail !== undefined) {
+    if (patch.detail === null || typeof patch.detail !== 'object' || Array.isArray(patch.detail)) throw new HttpError(422, 'invalid');
+    try { detailJson = JSON.stringify(patch.detail); } catch { throw new HttpError(422, 'invalid'); }
+  }
+  q.run(`UPDATE offers SET slug = ?, category = ?, categories_json = ?, destination_id = ?, title_ar = ?, title_en = ?, short_ar = ?, short_en = ?, desc_ar = ?, desc_en = ?,
+         duration_nights = ?, price_amount = ?, price_currency = ?, price_type = ?, price_basis_ar = ?, price_basis_en = ?, status = ?, booking_mode = ?,
+         featured = ?, placeholder = ?, services_json = ?, image_json = ?, detail_json = ?, active = ?, updated_at = ? WHERE id = ?`,
+    v('slug', row.slug, 60), v('category', row.category, 30), categoriesJson, patch.destinationId !== undefined ? (patch.destinationId || null) : row.destination_id,
+    v('titleAr', row.title_ar), v('titleEn', row.title_en), v('shortAr', row.short_ar, 200), v('shortEn', row.short_en, 200), v('descAr', row.desc_ar, 600), v('descEn', row.desc_en, 600),
+    nights, priceAmount, priceCurrency, priceType, priceBasisAr, priceBasisEn,
+    v('status', row.status, 10), v('bookingMode', row.booking_mode, 10),
+    featured, placeholder, servicesJson, image, detailJson, active, now(), id);
+  audit(actor, active !== row.active ? (active ? 'offer.activate' : 'offer.deactivate') : 'offer.update', 'offer', id, {});
+  return offerById(id);
+}

@@ -35,6 +35,9 @@ export const PERMISSIONS = [
   'customer.view', 'supervisor.view', 'supervisor.manage', 'payment.view', 'document.view', 'attribution.view', 'staff.manage',
   // Stage 15A — the Business Rules Register: viewing vs. changing a rule's value/status are separate permissions.
   'rules.view', 'rules.manage',
+  // Command Center CMS Phase 2A — Destinations/Offers admin CRUD (backend/content.mjs). Viewing is ungated, same
+  // as Services; only creating/editing needs this.
+  'content.manage',
 ];
 /** role 'admin' holds every permission implicitly; role 'ops' holds exactly what permissions_json lists. */
 export function hasPermission(staffMember, permission) {

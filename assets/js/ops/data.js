@@ -101,6 +101,18 @@ export const opsData = {
   createSupervisorAdmin: (supervisor) => call('createSupervisorAdmin', supervisor),
   updateSupervisorAdmin: (id, patch) => call('updateSupervisorAdmin', id, patch),
 
+  // Command Center CMS Phase 2A — Destinations & Offers admin CRUD (backend/content.mjs). Every method gated by
+  // its own backend permission (content.manage for create/update; list/one are ungated, like services).
+  destinationsAdmin: (params = { page: 1 }) => call('destinationsAdmin', params),
+  destinationAdmin: (id) => call('destinationAdmin', id),
+  createDestinationAdmin: (destination) => call('createDestinationAdmin', destination),
+  updateDestinationAdmin: (id, patch) => call('updateDestinationAdmin', id, patch),
+
+  offersAdmin: (params = { page: 1 }) => call('offersAdmin', params),
+  offerAdmin: (id) => call('offerAdmin', id),
+  createOfferAdmin: (offer) => call('createOfferAdmin', offer),
+  updateOfferAdmin: (id, patch) => call('updateOfferAdmin', id, patch),
+
   leads: (params = { page: 1 }) => call('leads', params),
   attributionEvents: (params = { page: 1 }) => call('attributionEvents', params),
 

@@ -16,7 +16,7 @@ const q = (params = {}) => { const p = new URLSearchParams(); for (const [k, v] 
 
 export const API_OPS_DATA = registerOpsDataAdapter({
   id: 'api-ops-data', dev: false, provider: 'customer backend API', configSource: 'API_BASE_URL',
-  capabilities: ['bookings.operations', 'tasks', 'escalations', 'documents.review', 'services', 'workflow', 'suppliers', 'notifications.templates', 'notifications.history', 'audit', 'admin.dashboard'],
+  capabilities: ['bookings.operations', 'tasks', 'escalations', 'documents.review', 'services', 'workflow', 'suppliers', 'notifications.templates', 'notifications.history', 'audit', 'admin.dashboard', 'content'],
   async bookings(_t, params = {}) { return get(`/bookings${q(params)}`); },
   async booking(_t, id) { const d = await get(`/bookings/${encodeURIComponent(id)}`); return d.booking; },
   async transitionBooking(_t, id, status, reason) { const d = await post(`/bookings/${encodeURIComponent(id)}/status`, { status, reason }); return d.booking; },
@@ -65,6 +65,16 @@ export const API_OPS_DATA = registerOpsDataAdapter({
   async supervisorAdmin(_t, id) { const d = await get(`/admin/supervisors/${encodeURIComponent(id)}`); return d.supervisor; },
   async createSupervisorAdmin(_t, supervisor) { const d = await post('/admin/supervisors', supervisor); return d.supervisor; },
   async updateSupervisorAdmin(_t, id, patchBody) { const d = await patch(`/admin/supervisors/${encodeURIComponent(id)}`, patchBody); return d.supervisor; },
+
+  async destinationsAdmin(_t, params = {}) { return get(`/admin/destinations${q(params)}`); },
+  async destinationAdmin(_t, id) { const d = await get(`/admin/destinations/${encodeURIComponent(id)}`); return d.destination; },
+  async createDestinationAdmin(_t, destination) { const d = await post('/admin/destinations', destination); return d.destination; },
+  async updateDestinationAdmin(_t, id, patchBody) { const d = await patch(`/admin/destinations/${encodeURIComponent(id)}`, patchBody); return d.destination; },
+
+  async offersAdmin(_t, params = {}) { return get(`/admin/offers${q(params)}`); },
+  async offerAdmin(_t, id) { const d = await get(`/admin/offers/${encodeURIComponent(id)}`); return d.offer; },
+  async createOfferAdmin(_t, offer) { const d = await post('/admin/offers', offer); return d.offer; },
+  async updateOfferAdmin(_t, id, patchBody) { const d = await patch(`/admin/offers/${encodeURIComponent(id)}`, patchBody); return d.offer; },
 
   async leads(_t, params = {}) { return get(`/admin/leads${q(params)}`); },
   async attributionEvents(_t, params = {}) { return get(`/admin/attribution-events${q(params)}`); },
