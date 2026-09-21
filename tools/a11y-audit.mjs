@@ -134,26 +134,35 @@ const INPAGE = () => {
   // report a false "white on white" failure for text that is genuinely
   // legible over the (unpredictable) photo. Treat a detected covering layer
   // like the existing background-image bail-out: skip rather than guess.
+  // Sticky counts alongside absolute/fixed (Command Center CMS homepage
+  // Sticky Visual Banner — 14-home.css's .c-cta-band--photo .c-cta-band__media
+  // pins the same way at ≥48em). Coverage is checked against the ORIGINAL
+  // text node's own rect at every level of the ancestor walk, not each
+  // ancestor's own (possibly larger) box — that same banner's copy wrapper
+  // is deliberately taller than the pinned image (the extra height is the
+  // scroll distance the sticky hold lasts for; §12 of the brief), so the
+  // image only ever covers the text's own box, never that wrapper's full
+  // height, and a per-ancestor-box check would misreport it as uncovered.
   const expandContents = (el) => { const out = []; for (const c of Array.from(el.children ?? [])) { if (getComputedStyle(c).display === 'contents') out.push(...expandContents(c)); else out.push(c); } return out; };
-  const hasCoveringLayer = (e) => {
+  const hasCoveringLayer = (e, targetRect) => {
     const after = getComputedStyle(e, '::after'); const before = getComputedStyle(e, '::before');
     if ((after.content !== 'none' && (after.backgroundImage !== 'none' || parse(after.backgroundColor).a > 0.15)) ||
         (before.content !== 'none' && (before.backgroundImage !== 'none' || parse(before.backgroundColor).a > 0.15))) return true;
     const parent = e.parentElement; if (!parent) return false;
-    const er = e.getBoundingClientRect(); if (er.width === 0 || er.height === 0) return false;
+    if (targetRect.width === 0 || targetRect.height === 0) return false;
     for (const sib of expandContents(parent)) {
       if (sib === e || sib.contains(e)) continue;
       const cs = getComputedStyle(sib);
-      if (cs.position !== 'absolute' && cs.position !== 'fixed') continue;
+      if (cs.position !== 'absolute' && cs.position !== 'fixed' && cs.position !== 'sticky') continue;
       if (cs.visibility === 'hidden' || cs.display === 'none') continue;
       const sr = sib.getBoundingClientRect();
-      if (sr.left <= er.left + 1 && sr.top <= er.top + 1 && sr.right >= er.right - 1 && sr.bottom >= er.bottom - 1) {
+      if (sr.left <= targetRect.left + 1 && sr.top <= targetRect.top + 1 && sr.right >= targetRect.right - 1 && sr.bottom >= targetRect.bottom - 1) {
         if (sib.tagName === 'IMG' || cs.backgroundImage !== 'none' || parse(cs.backgroundColor).a > 0.15 || sib.querySelector('img')) return true;
       }
     }
     return false;
   };
-  const bgOf = (n) => { let bg = { r: 255, g: 255, b: 255, a: 1 }; const layers = []; let e = n; while (e && e !== document.documentElement) { const cs = getComputedStyle(e); if (cs.backgroundImage !== 'none' || hasCoveringLayer(e)) return null; const c = parse(cs.backgroundColor); if (c.a > 0) layers.push(c); if (c.a >= 1) break; e = e.parentElement; } for (const c of layers.reverse()) bg = blend(c, bg); return bg; };
+  const bgOf = (n) => { let bg = { r: 255, g: 255, b: 255, a: 1 }; const layers = []; let e = n; const targetRect = n.getBoundingClientRect(); while (e && e !== document.documentElement) { const cs = getComputedStyle(e); if (cs.backgroundImage !== 'none' || hasCoveringLayer(e, targetRect)) return null; const c = parse(cs.backgroundColor); if (c.a > 0) layers.push(c); if (c.a >= 1) break; e = e.parentElement; } for (const c of layers.reverse()) bg = blend(c, bg); return bg; };
   const reported = new Set();
   for (const n of document.querySelectorAll('p,a,button,span,li,dt,dd,label,legend,th,td,small,h1,h2,h3,h4,time,output,option')) {
     if (!vis(n) || !Array.from(n.childNodes).some((c) => c.nodeType === 3 && c.textContent.trim())) continue;

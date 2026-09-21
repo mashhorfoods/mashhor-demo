@@ -429,16 +429,33 @@
   }
 
   /* ----------------------------------------------------------------------
-     CTA BAND — photo variant. The homepage's Services→Team bridge: a real
-     photograph instead of the flat inverse surface, everything else
-     (__inner/__title/__text/__actions) unchanged from the plain band above.
-     Structure mirrors the hero's photo layers (media behind, a scrim
-     between, copy on top) but with position:absolute, not fixed — this
-     band scrolls with the page like any other section, it never pins.
+     CTA BAND — photo variant. The homepage's Services→Team bridge, and the
+     site's one "Promotional Banner": a real photograph instead of the flat
+     inverse surface, everything else (__inner/__title/__text/__actions)
+     unchanged from the plain band above.
+
+     Base layout (mobile, and desktop/tablet under prefers-reduced-motion):
+     media behind at inset:0, a scrim between, copy on top — static, scrolls
+     with the page like any other section, never pins. This is also the
+     fallback every breakpoint gets before the enhancement below applies.
+
+     Enhancement (≥48em, no-preference motion): the "Sticky Visual Banner"
+     (full rationale where it's actually declared, below) — the short
+     version: .c-cta-band__media and .l-container share one grid cell
+     (image sized off the copy's own real height, never a guess), a second,
+     empty grid row adds pure extra section height so the sticky image has
+     somewhere to hold. .l-container is ordinary (non-sticky) flow, so it
+     keeps scrolling normally while its sticky sibling holds in place — that
+     difference alone is what makes the copy visibly pass through the
+     stable image. No JS: the browser's native position:sticky against the
+     section's own extra height *is* the enter/hold/release behaviour §12
+     of the brief asks for, constrained to this section and never bleeding
+     into the next.
      ------------------------------------------------------------------- */
   .c-cta-band--photo {
+    --cta-photo-stage: clamp(18rem, 16vw + 10rem, 26rem);
     padding-block: var(--space-48);
-    min-block-size: clamp(18rem, 16vw + 10rem, 26rem);
+    min-block-size: var(--cta-photo-stage);
     display: flex; align-items: center;
     color: var(--color-text-inverse);
   }
@@ -458,7 +475,7 @@
      crop window is unaffected either way, only left/right orientation
      changes, same reasoning as the homepage hero's own LTR mirror above. */
   [dir="ltr"] .c-cta-band--photo .c-cta-band__media img { transform: scaleX(-1); }
-  .c-cta-band--photo::after {
+  .c-cta-band--photo .c-cta-band__media::after {
     content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
     background-color: rgb(11 13 15 / 0.4);
   }
@@ -470,11 +487,11 @@
      gets the hero's stronger weight instead of the lighter one this band
      otherwise shares with the wide/two-tone layout above. */
   @media (max-width: 47.999em) {
-    .c-cta-band--photo::after { background-color: rgb(11 13 15 / 0.58); }
+    .c-cta-band--photo .c-cta-band__media::after { background-color: rgb(11 13 15 / 0.58); }
   }
   @media (min-width: 48em) {
-    [dir="ltr"] .c-cta-band--photo::after { background-image: linear-gradient(to right, rgb(11 13 15 / 0.3) 0%, rgb(11 13 15 / 0) 62%); }
-    [dir="rtl"] .c-cta-band--photo::after { background-image: linear-gradient(to left, rgb(11 13 15 / 0.3) 0%, rgb(11 13 15 / 0) 62%); }
+    [dir="ltr"] .c-cta-band--photo .c-cta-band__media::after { background-image: linear-gradient(to right, rgb(11 13 15 / 0.3) 0%, rgb(11 13 15 / 0) 62%); }
+    [dir="rtl"] .c-cta-band--photo .c-cta-band__media::after { background-image: linear-gradient(to left, rgb(11 13 15 / 0.3) 0%, rgb(11 13 15 / 0) 62%); }
   }
   .c-cta-band--photo .l-container { position: relative; z-index: 2; inline-size: 100%; }
   /* Row layout (title+text | actions spread edge to edge) would push the
@@ -494,6 +511,67 @@
     text-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
   }
   .c-cta-band--photo .t-overline { color: rgb(255 255 255 / 0.85); }
+
+  /* ---- Sticky Visual Banner enhancement — tablet/desktop, motion allowed.
+     A tighter reveal on tablet ("adjust sticky dimensions" per the brief),
+     a fuller one from 64em up; both modest — felt, not noticed. overflow
+     stays hidden on the base .c-cta-band (destination/offer/service/
+     supervisor final-CTA bands elsewhere still clip their numeral
+     watermark) but this variant carries no watermark and needs its sticky
+     child's containing block to be the viewport, not a hidden-overflow
+     ancestor, so it alone opts back to visible.
+
+     A grid, not a fixed stage height: row 1 holds media and .l-container in
+     the SAME cell (auto-sized to whichever needs more — the copy, on any
+     realistic content/locale/breakpoint, exactly like the static layout
+     above already lets the section grow past --cta-photo-stage's own
+     min-block-size for longer copy), row 2 is a plain, empty spacer whose
+     only job is extra section height — the scroll distance the hold lasts
+     for. A fixed pinned block-size on the image (an earlier pass of this
+     component tried exactly that) can only ever GUESS at the copy's real
+     height; on real content (the English title/text run longer than
+     Arabic's) that guess was short, and the CTA row rendered past the
+     image's bottom, over plain page background — illegible, not merely a
+     lint finding. Sizing media from the grid row instead of a custom
+     property removes the guess entirely: image and copy are always the
+     same height, so the copy can never render off the image, at any
+     breakpoint or locale — the "motion" this section is here for still
+     comes through, because .l-container is ordinary (non-sticky) flow: it
+     scrolls normally while its sticky sibling holds, same as before. */
+  @media (min-width: 48em) and (prefers-reduced-motion: no-preference) {
+    .c-cta-band--photo {
+      --cta-photo-reveal: clamp(6rem, 8vw, 10rem);
+      overflow: visible;
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto var(--cta-photo-reveal);
+      min-block-size: auto;
+      padding-block: 0;
+    }
+    .c-cta-band--photo .c-cta-band__media {
+      grid-area: 1 / 1;
+      position: sticky;
+      /* The base (mobile/reduced-motion) rule sets inset:0 (all four sides) for its absolute layout; sticky
+         positioning with both a top AND a bottom inset is over-constrained and stops the browser from actually
+         pinning it, so inset-block-end must be cleared back to auto here, not just the two sides overridden.
+         block-size:100% (the grid area's own resolved height, itself driven by whichever of media/.l-container
+         is taller) rather than relying on align-self:stretch's default — a sticky grid item's intrinsic size
+         depends on its own img child's height:100%, which has nothing definite to resolve against until the
+         item's own size is known, and that circularity leaves stretch alone collapsing a sticky item to 0. */
+      inset-block-start: var(--header-height);
+      inset-block-end: auto;
+      inset-inline: 0;
+      block-size: 100%;
+    }
+    .c-cta-band--photo .l-container {
+      grid-area: 1 / 1;
+      display: flex; align-items: center;
+      padding-block: var(--space-48);
+    }
+  }
+  @media (min-width: 64em) and (prefers-reduced-motion: no-preference) {
+    .c-cta-band--photo { --cta-photo-reveal: clamp(9rem, 9vw, 14rem); }
+  }
 
   /* ======================================================================
      AIRLINE PROVIDERS — a quiet trust band, not a promo carousel. Same
