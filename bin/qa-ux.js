@@ -109,27 +109,7 @@ function check(page, name, ok, detail = '') {
 function section(t) { lines.push('\n' + t); }
 
 /* ---------- a minimal CDP client (same shape as bin/qa-browser.js) ----- */
-class Cdp {
-  constructor(ws) { this.ws = ws; this.id = 0; this.waiting = new Map(); this.listeners = []; }
-  static async attach(wsUrl) {
-    const ws = new WebSocket(wsUrl);
-    await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; });
-    const c = new Cdp(ws);
-    ws.onmessage = (ev) => {
-      const m = JSON.parse(ev.data);
-      if (m.id && c.waiting.has(m.id)) {
-        const { resolve, reject } = c.waiting.get(m.id);
-        c.waiting.delete(m.id);
-        m.error ? reject(new Error(m.error.message)) : resolve(m.result);
-      } else if (m.method) {
-        c.listeners.forEach((fn) => fn(m));
-      }
-    };
-    return c;
-  }
-  on(fn) { this.listeners.push(fn); }
-  close() { try { this.ws.close(); } catch (e) { /* already gone */ } }
-}
+const { Cdp } = require('./lib/cdp.js');
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 

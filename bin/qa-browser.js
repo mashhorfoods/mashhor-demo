@@ -90,44 +90,7 @@ function check(page, name, ok, detail = '') {
 function section(t) { lines.push('\n' + t); }
 
 /* ---------- a minimal CDP client ------------------------------------- */
-class Cdp {
-  constructor(ws) { this.ws = ws; this.id = 0; this.waiting = new Map(); this.listeners = []; }
-  static async attach(wsUrl) {
-    const ws = new WebSocket(wsUrl);
-    await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; });
-    const c = new Cdp(ws);
-    ws.onmessage = (ev) => {
-      const m = JSON.parse(ev.data);
-      if (m.id && c.waiting.has(m.id)) {
-        const { resolve, reject } = c.waiting.get(m.id);
-        c.waiting.delete(m.id);
-        m.error ? reject(new Error(m.error.message)) : resolve(m.result);
-      } else if (m.method) {
-        c.listeners.forEach((fn) => fn(m));
-      }
-    };
-    return c;
-  }
-  send(method, params = {}) {
-    const id = ++this.id;
-    return new Promise((resolve, reject) => {
-      this.waiting.set(id, { resolve, reject });
-      this.ws.send(JSON.stringify({ id, method, params }));
-      setTimeout(() => {
-        if (this.waiting.has(id)) { this.waiting.delete(id); reject(new Error(method + ' timed out')); }
-      }, 60000);
-    });
-  }
-  on(fn) { this.listeners.push(fn); }
-  async eval(expression) {
-    const r = await this.send('Runtime.evaluate', {
-      expression, returnByValue: true, awaitPromise: true,
-    });
-    if (r.exceptionDetails) throw new Error(r.exceptionDetails.text + ' — ' + expression.slice(0, 80));
-    return r.result.value;
-  }
-  close() { try { this.ws.close(); } catch (e) { /* already gone */ } }
-}
+const { Cdp } = require('./lib/cdp.js');
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
