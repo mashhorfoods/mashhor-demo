@@ -48,4 +48,49 @@
     pointer-events: none; user-select: none;
     z-index: var(--z-base);
   }
+
+  /* ======================================================================
+     SIGNATURE TRANSITION — the numeral + route above, staged as a brief
+     "arrival" cue on a major section's own entry into the viewport
+     (signature.js, IntersectionObserver — never a continuous scroll
+     listener). .is-visible is added once and never removed: this marks
+     ARRIVAL, not a repeating scroll gimmick, and the section title next to
+     it is always present in the markup regardless — aria-hidden, decorative
+     only, never a gate on real content. Placement: directly before a major
+     section's own heading (see index.html's Destinations/Services/Offers
+     section heads); use it selectively, not on every section.
+     ==================================================================== */
+  .c-signature {
+    display: flex; align-items: baseline; gap: var(--space-8);
+    margin-block-end: var(--space-8);
+    color: var(--color-primary);
+  }
+  .c-signature__num {
+    font-family: var(--font-display); font-weight: var(--weight-bold);
+    font-size: var(--text-h4); line-height: 1;
+    opacity: 0; transform: translateY(4px);
+    transition: opacity var(--duration-slow) var(--ease-out), transform var(--duration-slow) var(--ease-out);
+  }
+  /* The route: thin, short, draws outward from the numeral toward the
+     title. transform-origin has no logical keyword equivalent, so the one
+     physical-side override below is unavoidable — everything else here is
+     direction-agnostic (flexbox's own row axis already puts the numeral at
+     inline-start and the route after it in both directions). */
+  .c-signature__route {
+    flex: 0 1 4rem; min-inline-size: 2rem; block-size: 1px;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: 0%;
+    transition: transform var(--duration-slow) var(--ease-out) 120ms;
+  }
+  [dir="rtl"] .c-signature__route { transform-origin: 100%; }
+  .c-signature.is-visible .c-signature__num { opacity: 1; transform: translateY(0); }
+  .c-signature.is-visible .c-signature__route { transform: scaleX(1); }
+  /* Inverse ground (the CTA band's photo variant, .l-section--inverse) already flips its own title/text to
+     --color-text-inverse rather than keeping them brand red, since red fights a photo's own colours — the
+     signature mark follows the same rule for the same reason. */
+  .l-section--inverse .c-signature,
+  .c-cta-band .c-signature {
+    color: var(--color-text-inverse);
+  }
 }

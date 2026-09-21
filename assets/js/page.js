@@ -25,6 +25,7 @@ import { NAV_BOTTOM } from './data/navigation.js';
 import { setSpritePath, ensureSprite, initAccordions, initTabs, initModals, initPopovers, icon } from './components/ui.js';
 import { mountHeader } from './components/header.js';
 import { mountFooter } from './components/footer.js';
+import { initSignatureMarks } from './components/signature.js';
 import './account/adapters/installed.js';
 import { restoreSession } from './account/auth.js';
 // Stage 13 — the supervisor portal's own adapter registry, registered the same way and gated by the same ENV; a
@@ -51,7 +52,7 @@ export async function boot({ sprite = 'assets/icons/sprite.svg', locale = true, 
   await restoreSession();
   document.documentElement.classList.remove('no-js');
   document.documentElement.classList.add('js');
-  initAccordions(); initTabs(); initModals(); initPopovers();
+  initAccordions(); initTabs(); initModals(); initPopovers(); initSignatureMarks();
 }
 
 /** The phone nav, from data; `current` marks one item. */
