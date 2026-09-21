@@ -18,7 +18,7 @@ import {
   supervisorRevenue, supervisorPerformance, supervisorCommissions, nSupervisorNotification, reassignAttribution, activeSupervisor,
 } from './supervisor.mjs';
 import { enqueue } from './mailer.mjs';
-import { normEmail } from './identity.mjs';
+import { normEmail, same } from './identity.mjs';
 import { info, warn } from './logger.mjs';
 
 const sessionAnswer = (res, s) => { const sess = createSupervisorSession(s.id); setSupervisorSessionCookies(res, sess.id, sess.csrf, sess.maxAge); return { supervisor: privateSupervisor(s), expiresAt: sess.expiresAt }; };
@@ -77,7 +77,7 @@ export const admin = {
   async reassign(req, res, ctx) {
     if (!config.adminToken) return fail(res, 404, 'notFound');   // not configured: the endpoint does not exist as far as any caller can tell
     const given = (req.headers.authorization ?? '').replace(/^Bearer\s+/i, '');
-    if (given.length !== config.adminToken.length || given !== config.adminToken) { warn('admin.auth.rejected', {}); return fail(res, 403, 'forbidden'); }
+    if (!same(given, config.adminToken)) { warn('admin.auth.rejected', {}); return fail(res, 403, 'forbidden'); }
     const b = await readJson(req); const customerId = str(b.customerId, 40); const supervisorId = str(b.supervisorId, 40) || null;
     if (!customerId) throw new HttpError(422, 'invalid');
     if (supervisorId && !activeSupervisor(supervisorId)) throw new HttpError(422, 'invalid');

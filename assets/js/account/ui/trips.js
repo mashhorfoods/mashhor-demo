@@ -6,7 +6,7 @@ import { route } from '../../data/config.js';
 import { icon } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { customer, TRIP_ORDER } from '../customer.js';
-import { mountAccount, loadRegion, tripCard, block, rows, pageTitle, notFoundState, statusBadge, payBadge, tripStatusBadge, dateRange, serviceName, serviceIcon, supportEntry } from './shell.js';
+import { mountAccount, loadRegion, tripCard, block, rows, pageTitle, notFoundState, statusBadge, payBadge, tripStatusBadge, dateRange, serviceName, serviceIcon, supportEntry, amount } from './shell.js';
 
 const FILTERS = ['all', 'upcoming', 'current', 'completed', 'cancelled'];
 const matches = (trip, q) => !q || [trip.titleAr, trip.titleEn, trip.destination?.cityAr, trip.destination?.cityEn, trip.destination?.code, ...trip.bookingIds].join(' ').toLowerCase().includes(q.toLowerCase());
@@ -71,7 +71,7 @@ export function mountTrip({ root = document, id }) {
         block(t('acct.trip.services'), el('div', { class: 'l-stack l-stack--12', dataset: { region: 'services' } }, trip.bookings.map(bookingBlock)), { id: 'trip-services' }),
         el('div', { class: 'l-stack l-stack--16' }, [
           block(t('acct.trip.documents'), docs.length ? el('ul', { class: 'c-acct-docs', role: 'list' }, docs.map((d) => el('li', { class: 'c-acct-doc', dataset: { doc: d.id, docStatus: d.status } }, [icon('no-documents', { size: 'sm' }), el('span', { class: 'c-acct-doc__body' }, [el('strong', {}, t(`acct.docs.type.${d.type}`)), el('span', { class: 't-body-sm t-muted' }, d.status === 'available' ? `${t('acct.docs.available')} · ${dateShort(d.issuedAt)}` : t('acct.docs.pending'))]), d.status === 'available' ? el('a', { class: 'c-btn c-btn--secondary c-btn--sm', href: route(`account/documents/?id=${encodeURIComponent(d.id)}`) }, t('acct.docs.view')) : null]))) : el('p', { class: 't-body-sm t-muted' }, t('acct.trip.noDocs')), { id: 'trip-docs', action: el('a', { class: 'c-btn c-btn--tertiary c-btn--sm', href: route('account/documents/') }, t('acct.viewAll')) }),
-          block(t('acct.trip.payments'), pays.length ? rows(pays.map((p) => [dateShort(p.at), `${money(Math.abs(p.amount), p.currency)} · ${t(`acct.pay.${p.status}`)}`])) : el('p', { class: 't-body-sm t-muted' }, t('acct.trip.noPayments')), { id: 'trip-pays', action: el('a', { class: 'c-btn c-btn--tertiary c-btn--sm', href: route('account/payments/') }, t('acct.viewAll')) }),
+          block(t('acct.trip.payments'), pays.length ? rows(pays.map((p) => [dateShort(p.at), `${amount(p.amount, p.currency)} · ${t(`acct.pay.${p.status}`)}`])) : el('p', { class: 't-body-sm t-muted' }, t('acct.trip.noPayments')), { id: 'trip-pays', action: el('a', { class: 'c-btn c-btn--tertiary c-btn--sm', href: route('account/payments/') }, t('acct.viewAll')) }),
           trip.supervisorId ? rows([[t('acct.supervisor'), el('a', { href: route(`supervisor/${trip.supervisorId}/`) }, t('sup.name.fallback'))]]) : null,
           block(t('acct.trip.support'), supportEntry(me, { compact: true }), { id: 'trip-support' }),
         ]),

@@ -33,12 +33,21 @@ export function mountOpsDashboard({ root = document } = {}) {
         ? el('ul', { class: 'c-svp-mini-list', role: 'list' }, items.map((b) => el('li', {}, [el('a', { class: 'c-svp-link', href: route(`admin/bookings/?id=${encodeURIComponent(b.id)}`) }, el('bdi', { dir: 'ltr' }, b.id)), opsStatusBadge(b.opsStatus), el('span', { class: 't-body-sm t-muted' }, dateTime(b.createdAt))])))
         : el('p', { class: 't-body-sm t-muted' }, t('ops.bookings.empty.title')),
     });
-    const [t1, t2] = await Promise.all([tasks.run(), esc.run()]);
+    const [t1, t2, overview] = await Promise.all([
+      tasks.run(), esc.run(),
+      // opsData.overview() gives the true open counts (this list is capped
+      // at pageSize:5 above, so its own .length would silently under-report
+      // past 5) — overview() is gated on customer.view, a permission the
+      // ungated dashboard nav entry doesn't require, so a staff member
+      // without it falls back to the capped list length rather than
+      // breaking the page, same as every other region here degrades.
+      opsData.overview().catch(() => null),
+    ]);
     await bk.run();
     return {
       metrics: el('div', { class: 'c-svp-metrics' }, [
-        metricCard('ops.metrics.openTasks', (t1 ?? []).length, { icon: 'no-check' }),
-        metricCard('ops.metrics.openEscalations', (t2 ?? []).length, { icon: 'no-alert' }),
+        metricCard('ops.metrics.openTasks', overview?.tasksOpen ?? (t1 ?? []).length, { icon: 'no-check' }),
+        metricCard('ops.metrics.openEscalations', overview?.escalationsOpen ?? (t2 ?? []).length, { icon: 'no-alert' }),
       ]),
       regions: { tasks, esc, bk },
     };

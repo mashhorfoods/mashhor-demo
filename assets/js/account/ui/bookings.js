@@ -6,7 +6,7 @@ import { route } from '../../data/config.js';
 import { icon } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { customer } from '../customer.js';
-import { mountAccount, loadRegion, bookingCard, block, rows, pageTitle, notFoundState, statusBadge, payBadge, dateRange, serviceName, serviceIcon, supportEntry } from './shell.js';
+import { mountAccount, loadRegion, bookingCard, block, rows, pageTitle, notFoundState, statusBadge, payBadge, dateRange, serviceName, serviceIcon, supportEntry, amount } from './shell.js';
 
 export function mountBookings({ root = document, params = new URLSearchParams(location.search) } = {}) {
   const id = params.get('id');
@@ -47,7 +47,7 @@ export function mountBooking({ root = document, id }) {
         ].filter(Boolean)), { id: 'bk-details', action: b.trip ? el('a', { class: 'c-btn c-btn--tertiary c-btn--sm', href: route(`trips/?id=${encodeURIComponent(b.trip.id)}`) }, t('acct.booking.viewTrip')) : null }),
         el('div', { class: 'l-stack l-stack--16' }, [
           block(t('acct.trip.documents'), b.documents?.length ? el('ul', { class: 'c-acct-docs', role: 'list' }, b.documents.map((doc) => el('li', { class: 'c-acct-doc', dataset: { doc: doc.id } }, [icon('no-documents', { size: 'sm' }), el('span', { class: 'c-acct-doc__body' }, [el('strong', {}, t(`acct.docs.type.${doc.type}`)), el('span', { class: 't-body-sm t-muted' }, doc.status === 'available' ? dateShort(doc.issuedAt) : t('acct.docs.pending'))]), doc.status === 'available' ? el('a', { class: 'c-btn c-btn--secondary c-btn--sm', href: route(`account/documents/?id=${encodeURIComponent(doc.id)}`) }, t('acct.docs.view')) : null]))) : el('p', { class: 't-body-sm t-muted' }, t('acct.trip.noDocs')), { id: 'bk-docs' }),
-          block(t('acct.trip.payments'), b.payments?.length ? rows(b.payments.map((p) => [dateShort(p.at), `${money(Math.abs(p.amount), p.currency)} · ${t(`acct.pay.${p.status}`)}`])) : el('p', { class: 't-body-sm t-muted' }, t('acct.trip.noPayments')), { id: 'bk-pays' }),
+          block(t('acct.trip.payments'), b.payments?.length ? rows(b.payments.map((p) => [dateShort(p.at), `${amount(p.amount, p.currency)} · ${t(`acct.pay.${p.status}`)}`])) : el('p', { class: 't-body-sm t-muted' }, t('acct.trip.noPayments')), { id: 'bk-pays' }),
           block(t('acct.trip.support'), supportEntry(me, { compact: true }), { id: 'bk-support' }),
         ]),
       ]),

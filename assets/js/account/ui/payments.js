@@ -1,12 +1,12 @@
 /* ACCOUNT / UI / PAYMENTS — history from the payment layer: no card data exists on this site. Stage 12 */
 import { el, render } from '../../core/dom.js';
 import { t, pick } from '../../core/i18n.js';
-import { money, dateShort } from '../../core/format.js';
+import { dateShort } from '../../core/format.js';
 import { route } from '../../data/config.js';
 import { icon, setButtonState } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { customer } from '../customer.js';
-import { mountAccount, loadRegion, pageTitle, payBadge, serviceName, errorText } from './shell.js';
+import { mountAccount, loadRegion, pageTitle, payBadge, serviceName, errorText, amount } from './shell.js';
 import { track } from '../../core/diagnostics.js';
 
 const row = (p) => el('article', { class: 'c-card c-acct-pay', dataset: { payment: p.id, payStatus: p.status } }, [
@@ -16,7 +16,7 @@ const row = (p) => el('article', { class: 'c-card c-acct-pay', dataset: { paymen
     el('p', { class: 't-body-sm t-muted' }, [dateShort(p.at), ' · ', pick(p, 'method'), p.reference ? [' · ', t('acct.pays.txn'), ' ', el('bdi', { dir: 'ltr' }, p.reference)] : null].flat()),
     payBadge(p.status),
   ]),
-  el('div', { class: 'c-acct-booking__amount' }, el('span', { class: 't-price', dataset: { amount: p.amount } }, `${p.amount < 0 ? '−' : ''}${money(Math.abs(p.amount), p.currency)}`)),
+  el('div', { class: 'c-acct-booking__amount' }, el('span', { class: 't-price', dataset: { amount: p.amount } }, amount(p.amount, p.currency))),
 ]);
 
 export function mountPayments({ root = document } = {}) {
