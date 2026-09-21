@@ -8,9 +8,13 @@
   RewriteEngine On
   RewriteBase /admin/
 
-  # guard.php itself, and the shared script, are served directly
+  # guard.php itself, and the two shared assets, are served directly
   RewriteRule ^guard\.php$ - [L]
   RewriteRule ^app\.js$ - [L]
+  # admin.css carries the stylesheet the eleven pages used to hold a copy of
+  # each. The rules below would not catch it anyway — their character class has
+  # no dot — but relying on that is relying on an accident, so it is named.
+  RewriteRule ^admin\.css$ - [L]
 
   # /admin/ with no page named
   RewriteRule ^$ guard.php?page=dashboard.html [QSA,L]

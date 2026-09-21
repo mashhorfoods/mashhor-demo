@@ -221,10 +221,14 @@ async function main() {
   await send('DOM.enable');
   await send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
 
+  await send('Page.enable');
+
   /* network quiet, so a page that fills itself after load is measured settled */
   const inFlight = new Set();
   let lastActivity = 0;
+  let loaded = false;
   browser.on((m) => {
+    if (m.method === 'Page.loadEventFired') loaded = true;
     if (m.method === 'Network.requestWillBeSent') { inFlight.add(m.params.requestId); lastActivity = Date.now(); }
     if (m.method === 'Network.loadingFinished' || m.method === 'Network.loadingFailed') {
       inFlight.delete(m.params.requestId); lastActivity = Date.now();
@@ -235,6 +239,7 @@ async function main() {
      failing; letting it reject kills the whole gate and the runner reads a
      failed gate where every check passed. One retry; a second failure is real. */
   const goto = async (url) => {
+    loaded = false;
     try {
       await send('Page.navigate', { url });
     } catch (e) {
@@ -242,7 +247,15 @@ async function main() {
       await sleep(1500);
       await send('Page.navigate', { url });
     }
-    await sleep(500);
+    /* Wait for the load event before judging by network quiet. Quiet alone is
+       not evidence that the new page arrived: straight after Page.navigate the
+       request set is empty and lastActivity still belongs to the PREVIOUS page,
+       so the loop below could satisfy itself immediately and every assertion
+       that followed would read the document we had just left. The 500ms sleep
+       was the only thing standing between this gate and that, and on a loaded
+       machine 500ms is not always enough — which is how four pages reported
+       «regions=1 polite=0» in a release run while passing on their own. */
+    for (let i = 0; i < 100 && !loaded; i++) await sleep(100);
     const started = Date.now();
     while (Date.now() - started < 9000) {
       if (inFlight.size === 0 && Date.now() - lastActivity > 700) break;

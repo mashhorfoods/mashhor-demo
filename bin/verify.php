@@ -2393,12 +2393,40 @@ check('gate', 'and the public page still declares all four',
     && (bool) preg_match('/<meta[^>]*charset=/i', substr($pub, 0, 1024))
     && (bool) preg_match('/<meta[^>]*name="viewport"/i', substr($pub, 0, 1024)));
 
+/**
+ * A page as the browser assembles it: its own markup, plus every stylesheet it
+ * links from its own directory, appended as a <style> block.
+ *
+ * The eleven admin pages each used to carry a copy of the same 272-rule
+ * stylesheet. It is one file now, loaded with <link rel="stylesheet">. The
+ * checks below ask structural questions of "the page's CSS" — which tokens it
+ * defines, which faces it declares, whether it has a phone breakpoint — and
+ * those are questions about the CSS the browser ends up with, not about which
+ * file the bytes happen to sit in. Reading the linked sheet keeps every one of
+ * them asking what it always meant to ask.
+ */
+function aun_page_source(string $abs): string
+{
+    $html = (string) @file_get_contents($abs);
+    if ($html === '') return '';
+    $dir = dirname($abs);
+    $extra = '';
+    if (preg_match_all('/<link[^>]+rel=["\']stylesheet["\'][^>]*href=["\']([^"\']+)["\']/i', $html, $m)) {
+        foreach ($m[1] as $href) {
+            if (preg_match('#^(https?:)?//#', $href)) continue;   /* off-origin is not ours to read */
+            $f = $dir . '/' . ltrim(explode('?', $href)[0], '/');
+            if (is_file($f)) $extra .= "\n<style>\n" . (string) file_get_contents($f) . "\n</style>\n";
+        }
+    }
+    return $html . $extra;
+}
+
 /* A var() naming a token nobody defined is not an error anywhere: the
    declaration is simply dropped, and the element falls back to its initial
    value. That is how the sign-in button spent this project 20px tall. */
 $tokenTrouble = [];
 foreach (array_merge(array_map(static fn($f) => 'admin/' . $f, $adminPages), ['index.html']) as $rel) {
-    $html = (string) @file_get_contents(AUN_ROOT . '/' . $rel);
+    $html = aun_page_source(AUN_ROOT . '/' . $rel);
     preg_match_all('/<style[^>]*>(.*?)<\/style>/s', $html, $m);
     $css = implode("\n", $m[1]);
     preg_match_all('/(--[A-Za-z0-9_-]+)\s*:/', $css, $d);
@@ -2682,7 +2710,7 @@ check('fonts', 'nor does the public page',
 $missingFaces = [];
 $declared = 0;
 foreach ($adminHtml as $f) {
-    $t = (string) @file_get_contents($f);
+    $t = aun_page_source($f);
     preg_match_all('/@font-face\{[^}]*url\(([^)]+)\)/', $t, $m);
     foreach ($m[1] as $u) {
         $declared++;
@@ -2694,14 +2722,14 @@ check('fonts', 'every face the admin declares is a file that exists',
     $missingFaces === [], $missingFaces === [] ? "{$declared} declarations" : implode(', ', array_slice($missingFaces, 0, 3)));
 check('fonts', 'and the admin declares the four weights it uses',
     (static function () use ($adminHtml): bool {
-        $t = (string) @file_get_contents($adminHtml[0]);
+        $t = aun_page_source($adminHtml[0]);
         foreach ([400, 500, 600, 700] as $w) {
             if (!preg_match('/@font-face\{[^}]*font-weight:' . $w . ';/', $t)) return false;
         }
         return true;
     })());
 check('fonts', 'including the monospace face the tables set numbers in',
-    str_contains((string) @file_get_contents($adminHtml[0]), "font-family:'IBM Plex Mono'"));
+    str_contains(aun_page_source($adminHtml[0]), "font-family:'IBM Plex Mono'"));
 /* Read from the header the server actually sends, not from the source: the
    first version of this check searched guard.php for the host name and found
    it in the comment explaining why it is no longer there. */
@@ -2892,7 +2920,7 @@ foreach ($adminHtml as $file) {
 $labelClasses = ['side__name', 'navitem__lbl', 'navitem__count', 'side__grp', 'side__foot'];
 foreach ($adminHtml as $file) {
     $name = basename($file);
-    $src  = (string) @file_get_contents($file);
+    $src  = aun_page_source($file);
     if (!str_contains($src, 'side__brand')) continue;   /* login carries no rail */
 
     /* the phone breakpoint, with its comments removed so prose cannot fail it */
@@ -2939,7 +2967,7 @@ foreach ($adminHtml as $file) {
    which put «إضافة الخدمة» below the bottom of a 768px screen. */
 foreach ($adminHtml as $file) {
     $name = basename($file);
-    $src  = (string) @file_get_contents($file);
+    $src  = aun_page_source($file);
     if (!str_contains($src, 'class="modalwrap"')) continue;
 
     preg_match('/\.modal\{([^}]*)\}/', $src, $m);
@@ -3612,7 +3640,7 @@ $grpOld = 0; $grpNew = 0;
 foreach (glob(AUN_ROOT . '/admin/*.html') as $f) {
     $b = basename($f, '.html');
     if (str_starts_with($b, 'stage-') || str_starts_with($b, 'recovery-')) continue;
-    $src = (string) @file_get_contents($f);
+    $src = aun_page_source($f);
     if (str_contains($src, 'color:rgba(217,228,243,.72)')) $grpOld++;
     if (str_contains($src, 'color:rgba(217,228,243,.84)')) $grpNew++;
 }
