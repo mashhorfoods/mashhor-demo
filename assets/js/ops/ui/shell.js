@@ -23,33 +23,47 @@ export const here = () => location.pathname + location.search;
 
 export const devNotice = () => (opsDataAdapter()?.dev ? el('p', { class: 'c-note c-note--warning', role: 'note', dataset: { dev: 'true' } }, [icon('no-alert', { size: 'sm' }), el('span', { class: 'c-note__text' }, [el('strong', {}, `${t('ops.dev.title')}: `), t('ops.dev.text')])]) : null);
 
+/* Grouped to match the Command Center's information architecture — Command
+   Center / Website / Business / Operations / Insights / Control. Only
+   modules that already exist are listed here; the brief's fuller taxonomy
+   (Destinations, Offers, Media Library, Publishing Center) has no backend
+   yet, so no dead nav entries were added for it. */
 const NAV = [
-  { id: 'dashboard', icon: 'no-dashboard', href: 'admin/dashboard/', labelAr: 'اليوم', labelEn: 'Today' },
-  { id: 'customers', icon: 'no-customer', href: 'admin/customers/', labelAr: 'العملاء', labelEn: 'Customers', permission: 'customer.view' },
-  { id: 'supervisors', icon: 'no-supervisor', href: 'admin/supervisors/', labelAr: 'المشرفون', labelEn: 'Supervisors', permission: 'supervisor.view' },
-  { id: 'leads', icon: 'no-lead', href: 'admin/leads/', labelAr: 'العملاء المحتملون والإسناد', labelEn: 'Leads / Attribution', permission: 'attribution.view' },
-  { id: 'bookings', icon: 'no-ticket', href: 'admin/bookings/', labelAr: 'الحجوزات', labelEn: 'Bookings' },
-  { id: 'tasks', icon: 'no-check', href: 'admin/tasks/', labelAr: 'المهام', labelEn: 'Tasks' },
-  { id: 'escalations', icon: 'no-alert', href: 'admin/escalations/', labelAr: 'التصعيدات', labelEn: 'Escalations' },
-  { id: 'services', icon: 'no-booking', href: 'admin/services/', labelAr: 'الخدمات', labelEn: 'Services' },
-  { id: 'suppliers', icon: 'no-supervisor', href: 'admin/suppliers/', labelAr: 'الموردون', labelEn: 'Suppliers' },
-  { id: 'payments', icon: 'no-payment', href: 'admin/payments/', labelAr: 'المدفوعات', labelEn: 'Payments', permission: 'payment.view' },
-  { id: 'documents', icon: 'no-documents', href: 'admin/documents/', labelAr: 'المستندات', labelEn: 'Documents', permission: 'document.view' },
-  { id: 'notifications', icon: 'no-notification', href: 'admin/notifications/', labelAr: 'الإشعارات', labelEn: 'Notifications' },
-  { id: 'reports', icon: 'no-chart', href: 'admin/reports/', labelAr: 'التقارير', labelEn: 'Reports', permission: 'report.view' },
-  { id: 'audit', icon: 'no-documents', href: 'admin/audit/', labelAr: 'سجل التدقيق', labelEn: 'Audit trail' },
-  { id: 'staff', icon: 'no-shield', href: 'admin/staff/', labelAr: 'الموظفون والصلاحيات', labelEn: 'Staff & Permissions', permission: 'staff.manage' },
-  { id: 'rules', icon: 'no-settings', href: 'admin/business-rules/', labelAr: 'قواعد العمل', labelEn: 'Business Rules', permission: 'rules.view' },
-  { id: 'settings', icon: 'no-settings', href: 'admin/settings/', labelAr: 'الإعدادات', labelEn: 'Settings', divider: true },
-  { id: 'sign-out', icon: 'no-logout', href: 'admin/sign-out/', labelAr: 'تسجيل الخروج', labelEn: 'Sign out' },
+  { id: 'dashboard', group: 'command', icon: 'no-dashboard', href: 'admin/dashboard/', labelAr: 'نظرة عامة', labelEn: 'Overview' },
+  { id: 'services', group: 'website', icon: 'no-booking', href: 'admin/services/', labelAr: 'الخدمات', labelEn: 'Services' },
+  { id: 'supervisors', group: 'website', icon: 'no-supervisor', href: 'admin/supervisors/', labelAr: 'المشرفون', labelEn: 'Supervisors', permission: 'supervisor.view' },
+  { id: 'customers', group: 'business', icon: 'no-customer', href: 'admin/customers/', labelAr: 'العملاء', labelEn: 'Customers', permission: 'customer.view' },
+  { id: 'leads', group: 'business', icon: 'no-lead', href: 'admin/leads/', labelAr: 'العملاء المحتملون والإسناد', labelEn: 'Leads / Attribution', permission: 'attribution.view' },
+  { id: 'bookings', group: 'business', icon: 'no-ticket', href: 'admin/bookings/', labelAr: 'الحجوزات', labelEn: 'Bookings' },
+  { id: 'payments', group: 'business', icon: 'no-payment', href: 'admin/payments/', labelAr: 'المدفوعات', labelEn: 'Payments', permission: 'payment.view' },
+  { id: 'documents', group: 'business', icon: 'no-documents', href: 'admin/documents/', labelAr: 'المستندات', labelEn: 'Documents', permission: 'document.view' },
+  { id: 'tasks', group: 'operations', icon: 'no-check', href: 'admin/tasks/', labelAr: 'المهام', labelEn: 'Tasks' },
+  { id: 'escalations', group: 'operations', icon: 'no-alert', href: 'admin/escalations/', labelAr: 'التصعيدات', labelEn: 'Escalations' },
+  { id: 'suppliers', group: 'operations', icon: 'no-supervisor', href: 'admin/suppliers/', labelAr: 'الموردون', labelEn: 'Suppliers' },
+  { id: 'notifications', group: 'operations', icon: 'no-notification', href: 'admin/notifications/', labelAr: 'الإشعارات', labelEn: 'Notifications' },
+  { id: 'reports', group: 'insights', icon: 'no-chart', href: 'admin/reports/', labelAr: 'التقارير', labelEn: 'Reports', permission: 'report.view' },
+  { id: 'audit', group: 'insights', icon: 'no-documents', href: 'admin/audit/', labelAr: 'النشاط', labelEn: 'Activity' },
+  { id: 'staff', group: 'control', icon: 'no-shield', href: 'admin/staff/', labelAr: 'الموظفون والصلاحيات', labelEn: 'Staff & Permissions', permission: 'staff.manage' },
+  { id: 'rules', group: 'control', icon: 'no-settings', href: 'admin/business-rules/', labelAr: 'قواعد العمل', labelEn: 'Business Rules', permission: 'rules.view' },
+  { id: 'settings', group: 'control', icon: 'no-settings', href: 'admin/settings/', labelAr: 'الإعدادات', labelEn: 'Settings' },
+  { id: 'sign-out', group: 'control', icon: 'no-logout', href: 'admin/sign-out/', labelAr: 'تسجيل الخروج', labelEn: 'Sign out' },
 ];
+const NAV_GROUP_LABEL = { command: 'ops.navGroup.command', website: 'ops.navGroup.website', business: 'ops.navGroup.business', operations: 'ops.navGroup.operations', insights: 'ops.navGroup.insights', control: 'ops.navGroup.control' };
 function opsNav(current, staff = null) {
   const items = NAV.filter((item) => !item.permission || !staff || hasOpsPermission(staff, item.permission));
-  return el('nav', { class: 'c-acct-nav c-svp-nav', 'aria-label': t('ops.nav.label') }, [
-    el('ul', { class: 'c-acct-nav__list', role: 'list' }, items.map((item) => el('li', {}, el('a', {
+  let lastGroup = null;
+  const rows = items.flatMap((item) => {
+    const header = item.group !== lastGroup
+      ? [el('li', { class: 'c-acct-nav__group', role: 'presentation' }, el('span', { 'aria-hidden': 'true' }, t(NAV_GROUP_LABEL[item.group])))]
+      : [];
+    lastGroup = item.group;
+    return [...header, el('li', {}, el('a', {
       class: 'c-acct-nav__link', href: route(item.href), dataset: { nav: item.id },
       ...(item.id === current ? { 'aria-current': 'page' } : {}),
-    }, [icon(item.icon, { size: 'sm' }), el('span', {}, pick(item, 'label'))])))),
+    }, [icon(item.icon, { size: 'sm' }), el('span', {}, pick(item, 'label'))]))];
+  });
+  return el('nav', { class: 'c-acct-nav c-svp-nav', 'aria-label': t('ops.nav.label') }, [
+    el('ul', { class: 'c-acct-nav__list', role: 'list' }, rows),
   ]);
 }
 

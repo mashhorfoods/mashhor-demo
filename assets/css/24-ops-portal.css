@@ -34,4 +34,20 @@
 
   /* ---- A staff member's own dev-adapter badge, set on <html> by shell.js ---- */
   [data-ops-portal="staff"] .c-acct-nav__link[aria-current="page"] { font-weight: var(--weight-bold); }
+
+  /* ---- Command Center nav groups: a quiet label between sections, never a
+     link itself. Below 64em the nav is a horizontal scroll-snap chip strip
+     (22-account.css) with no room for a non-interactive label, so groups
+     stay hidden there; from 64em, where the same markup becomes a vertical
+     sidebar list, they read as proper section headings. ---- */
+  .c-acct-nav__group { display: none; }
+  @media (min-width: 64em) {
+    .c-acct-nav__group {
+      display: block; padding-block-start: var(--space-12); padding-inline: var(--space-12);
+      font-size: var(--text-caption); font-weight: var(--weight-semibold);
+      letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-text-secondary);
+      white-space: nowrap;
+    }
+    .c-acct-nav__group:first-child { padding-block-start: 0; }
+  }
 }

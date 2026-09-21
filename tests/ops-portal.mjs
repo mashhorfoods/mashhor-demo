@@ -41,7 +41,7 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.ops.s
   ok('invalid credentials → error, still guest', (await marker(p)) === null);
   await devSignIn(p);
   ok('dev demo sign-in → dashboard, session marker stored', /^dev\./.test((await marker(p))?.token ?? '') && /مرحباً/.test(await text(p, 'h1')));
-  ok('portal nav shows every module (admin sees Stage 14/15A\'s modules too), current marked', (await p.$$eval('[data-portal=nav] a', (as) => as.map((a) => a.dataset.nav))).join('|') === 'dashboard|customers|supervisors|leads|bookings|tasks|escalations|services|suppliers|payments|documents|notifications|reports|audit|staff|rules|settings|sign-out');
+  ok('portal nav shows every module (admin sees Stage 14/15A\'s modules too), current marked, grouped by the Command Center taxonomy', (await p.$$eval('[data-portal=nav] a', (as) => as.map((a) => a.dataset.nav))).join('|') === 'dashboard|services|supervisors|customers|leads|bookings|payments|documents|tasks|escalations|suppliers|notifications|reports|audit|staff|rules|settings|sign-out');
   await signOut(p);
   ok('sign out: marker cleared, signed-out message', (await marker(p)) === null && /تسجيل الخروج/.test(await text(p, 'h1')));
   await go(p, 'admin/dashboard/'); await p.waitForFunction(() => document.querySelector('[data-portal=main] h1'));
@@ -99,7 +99,7 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.ops.s
 // ================================================================= 2b. Stage 14: the Admin Dashboard's own screens (development stand-in, demo staff = admin)
 {
   const { c, p } = await ctx(); await devSignIn(p);
-  ok('dashboard: overview-style metrics still render (Stage 15\'s Today screen, unchanged)', await visible(p, '#dash-tasks'));
+  ok('dashboard: Command Center overview metrics and quick actions render', await visible(p, '#dash-tasks') && await visible(p, '#dash-quick-actions'));
 
   await go(p, 'admin/customers/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap');
   ok('customers: development customers listed', await count(p, 'tbody tr') === 2);

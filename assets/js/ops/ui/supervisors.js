@@ -90,6 +90,23 @@ function mountSupervisorDetail({ root, id }) {
           ], rows: fresh.bookings, rowKey: (b) => b.id })
         : emptyNote('ops.table.empty'), { id: 'ops-sv-bookings' }));
 
+      // Command Center brief §12/§13 — "what did the coordinator do, when, on which
+      // customer, what happened next": the same attribution_events the admin-wide
+      // Leads/Attribution screen reads, scoped to this one supervisor instead of
+      // every supervisor at once.
+      if (can('attribution.view')) {
+        const activityHost = el('div', { dataset: { region: 'coordinator-activity' } });
+        nodes.push(block(t('ops.supervisors.activity.title'), activityHost, { id: 'ops-sv-activity' }));
+        const activity = loadRegion(activityHost, async () => (await opsData.attributionEvents({ supervisorId: id, page: 1, pageSize: 10 })).items, {
+          empty: () => emptyNote('ops.table.empty'),
+          paint: (items) => el('ul', { class: 'c-svp-mini-list', role: 'list' }, items.map((e) => el('li', {}, [
+            el('a', { class: 'c-svp-link', href: route(`admin/customers/?id=${encodeURIComponent(e.customerId)}`) }, el('bdi', { dir: 'ltr' }, e.customerId)),
+            el('span', { class: 't-body-sm t-muted' }, `${e.source} · ${dateTime(e.at)}`),
+          ]))),
+        });
+        activity.run();
+      }
+
       return nodes;
     }
 
