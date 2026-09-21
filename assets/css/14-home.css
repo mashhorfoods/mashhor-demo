@@ -642,4 +642,52 @@
 
   /* Disclosure for "show all services". */
   .c-disclose { display: flex; justify-content: center; margin-block-start: var(--space-24); }
+
+  /* ======================================================================
+     OUR TEAM — a trust composition, not a repeating employee grid: one
+     coordinator featured (home.js rotates which record daily, never by
+     performance) beside the rest in a reflowing deck. Both card shapes
+     are the shared .c-card/.c-card--interactive primitive (hover lift,
+     focus ring, reduced-motion handling already come from there) — only
+     the portrait treatment and layout are new. Our-Team redesign brief.
+     ==================================================================== */
+  .c-team__tagline { font-size: var(--text-body-lg); font-weight: var(--weight-medium); color: var(--color-text-brand); }
+
+  .c-team-deck { display: grid; gap: var(--space-24); }
+
+  /* Same consistent crop/background treatment on the feature and every
+     support card — only the box's size differs, per the brief's "consistent
+     aspect ratio, consistent crop" requirement. */
+  .c-team-feature__media, .c-team-card__media {
+    aspect-ratio: 4 / 5; background-color: var(--color-gray-100); color: var(--color-gray-400);
+    display: grid; place-items: center;
+  }
+  .c-team-feature__body { gap: var(--space-12); }
+  .c-team-feature__role { font-size: var(--text-body-sm); font-weight: var(--weight-semibold); color: var(--color-text-brand); }
+  .c-team-feature__name { font-size: var(--text-h3); }
+  .c-team-feature__chips { display: flex; flex-wrap: wrap; gap: var(--space-8); list-style: none; margin: 0; padding: 0; }
+  .c-team-feature__bio { color: var(--color-text-secondary); max-inline-size: 42ch; }
+  .c-team-feature__actions { display: flex; flex-wrap: wrap; gap: var(--space-12); margin-block-start: var(--space-8); }
+
+  .c-team-deck__support { align-content: start; }
+  .c-team-card__body { gap: var(--space-4); }
+  .c-team-card__name { font-size: var(--text-body); font-weight: var(--weight-semibold); }
+  .c-team-card__role { font-size: var(--text-caption); color: var(--color-text-secondary); }
+  .c-team-card__chip { align-self: flex-start; margin-block-start: var(--space-4); }
+
+  @media (min-width: 48em) {
+    /* 7fr/5fr: the featured portrait keeps the visual weight the brief asks
+       for, while the support deck's own .l-auto-grid (--min-col, set by
+       home.js) reflows on its own as records are added or removed — no
+       breakpoint here assumes exactly five coordinators. */
+    .c-team-deck { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--space-32); }
+  }
+  @media (min-width: 64em) { .c-team-deck { gap: var(--space-48); } }
+
+  /* Hover: a quiet image scale on top of .c-card--interactive's own lift —
+     never the only cue, never under reduced motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    .c-team-feature__media img, .c-team-card__media img { transition: transform var(--duration-slow) var(--ease-standard); }
+    .c-team-feature:hover .c-team-feature__media img, .c-team-card:hover .c-team-card__media img { transform: scale(1.04); }
+  }
 }

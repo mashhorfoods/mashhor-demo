@@ -20,11 +20,11 @@ import {
   HOME_HERO, HOME_SERVICES, HOME_PRIORITIES, HOME_JOURNEY_BAND,
   HOME_DESTINATIONS, HOME_OFFERS, HOME_SUPPORT,
 } from '../data/home.js';
-import { SUPERVISOR_REGISTRY } from '../data/supervisors.js';
+import { SUPERVISOR_REGISTRY, supervisorSpecialties, supervisorUrl, supervisorEntry, supervisorContactUrl } from '../data/supervisors.js';
 import { icon, setButtonState, routeGraphic, heroFocalStyle } from './ui.js';
 import { buildContext, validate, saveContext, continueUrl, applyEntryParams } from '../core/booking.js';
 import { serviceCard, destinationCard, offerCard, mediaPlaceholder } from './cards.js';
-import { supervisorCard } from './supervisor.js';
+import { supervisorName } from './supervisor.js';
 import { searchWidget } from './search.js';
 import { stateRegion, stateBlock, skeletonService, skeletonCard } from './states.js';
 import { newsletterCard } from './newsletter.js';
@@ -239,13 +239,59 @@ export const offerGrid = (list = HOME_OFFERS) =>
     el('div', { class: 'l-span-4@md l-span-4@lg' }, offerCard(o))));
 
 /* ---------------------------------------------------------------------------
-   OUR TEAM — the Number One Travel Coordinators. §07.5. Reuses the same
-   supervisorCard the /supervisors/ directory draws: one component, two
-   listings, no duplicate template.
+   OUR TEAM — a trust section, not an employee directory: one coordinator
+   featured (which one rotates by day, never by performance — see
+   teamFeaturedIndex) alongside the rest in a reflowing deck. Both card
+   shapes here are a presentational variant of the same record and the same
+   helpers /supervisors/ uses (supervisorCard, supervisor.js) — profile
+   URLs, booking attribution and the record shape are untouched; only how
+   the homepage lays the cards out differs. §07.5 / Our-Team redesign brief
    ------------------------------------------------------------------------ */
-export const teamGrid = (list = SUPERVISOR_REGISTRY.filter((s) => s.status === 'active')) =>
-  el('div', { class: 'l-grid' }, list.map((s) =>
-    el('div', { class: 'l-span-4@md l-span-4@lg' }, supervisorCard(s))));
+const teamFeaturedIndex = (list) => (list.length ? Math.floor(Date.now() / 86400000) % list.length : 0);
+
+const teamPortrait = (sup, size) => (sup.image?.src
+  ? el('img', { src: sup.image.src, alt: pick(sup.image, 'alt') || t('sup.photo.alt', supervisorName(sup)), loading: 'lazy', decoding: 'async', width: size, height: Math.round(size * 1.25) })
+  : el('span', { role: 'img', 'aria-label': t('sup.photo.empty'), style: 'display:contents' }, icon('no-supervisor', { size: 'xl' })));
+
+const teamFeatureCard = (sup) => {
+  const titleId = `team-feature-${sup.id}`;
+  const specialties = supervisorSpecialties(sup).slice(0, 4);
+  return el('article', { class: 'c-card c-card--interactive c-team-feature', 'aria-labelledby': titleId }, [
+    el('div', { class: 'c-card__media c-team-feature__media' }, teamPortrait(sup, 480)),
+    el('div', { class: 'c-card__body c-team-feature__body' }, [
+      pick(sup, 'title') ? el('p', { class: 'c-team-feature__role' }, pick(sup, 'title')) : null,
+      el('h3', { class: 'c-team-feature__name', id: titleId }, [el('a', { class: 'c-card__link', href: route(supervisorUrl(sup)) }, supervisorName(sup))]),
+      specialties.length ? el('ul', { class: 'c-sup-card__chips c-team-feature__chips', role: 'list' }, specialties.map((p) => el('li', {}, el('span', { class: 'c-badge c-badge--outline' }, pick(p, 'label'))))) : null,
+      pick(sup, 'bio') ? el('p', { class: 'c-team-feature__bio' }, pick(sup, 'bio')) : null,
+      el('div', { class: 'c-team-feature__actions' }, [
+        el('a', { class: 'c-btn c-btn--secondary-brand c-card__action', href: route(supervisorUrl(sup)) }, t('sup.card.view')),
+        el('a', { class: 'c-btn c-btn--tertiary c-card__action', href: route(supervisorContactUrl(sup)) }, t('sup.cta.contact')),
+      ]),
+    ]),
+  ]);
+};
+
+const teamMemberCard = (sup) => {
+  const titleId = `team-card-${sup.id}`;
+  const specialty = supervisorSpecialties(sup)[0];
+  return el('article', { class: 'c-card c-card--interactive c-team-card', 'aria-labelledby': titleId }, [
+    el('div', { class: 'c-card__media c-team-card__media' }, teamPortrait(sup, 200)),
+    el('div', { class: 'c-card__body c-team-card__body' }, [
+      el('h3', { class: 'c-team-card__name', id: titleId }, [el('a', { class: 'c-card__link', href: route(supervisorUrl(sup)) }, supervisorName(sup))]),
+      pick(sup, 'title') ? el('p', { class: 'c-team-card__role' }, pick(sup, 'title')) : null,
+      specialty ? el('span', { class: 'c-badge c-badge--outline c-team-card__chip' }, pick(specialty, 'label')) : null,
+    ]),
+  ]);
+};
+
+export const teamGrid = (list = SUPERVISOR_REGISTRY.filter((s) => s.status === 'active')) => {
+  const featured = list[teamFeaturedIndex(list)];
+  const rest = list.filter((s) => s !== featured);
+  return el('div', { class: 'c-team-deck' }, [
+    teamFeatureCard(featured),
+    rest.length ? el('div', { class: 'l-auto-grid c-team-deck__support', style: '--min-col:11rem' }, rest.map(teamMemberCard)) : null,
+  ]);
+};
 
 /* ---------------------------------------------------------------------------
    THE NUMBERED JOURNEY — shared by offers and service-detail pages, each
@@ -359,7 +405,12 @@ export function mountHome({
       empty: emptyState('offers', { label: t('home.offers.empty.action'), href: route('help/contact/'), variant: 'c-btn--primary' }),
     }),
     team: stateRegion(mount('team'), {
-      loading: () => el('div', { class: 'l-grid' }, Array.from({ length: 3 }, () => el('div', { class: 'l-span-4@md l-span-4@lg' }, skeletonCard()))),
+      // Mirrors teamGrid()'s own shape (one feature + a reflowing deck) so
+      // hydration never jumps the layout once the real cards land.
+      loading: () => el('div', { class: 'c-team-deck', 'aria-hidden': 'true' }, [
+        el('div', { class: 'c-card c-team-feature' }, skeletonCard()),
+        el('div', { class: 'l-auto-grid c-team-deck__support', style: '--min-col:11rem' }, Array.from({ length: 4 }, () => el('div', { class: 'c-card c-team-card' }, skeletonCard()))),
+      ]),
       empty: emptyState('team', { label: t('sup.cta.book'), href: route('book/'), variant: 'c-btn--primary' }),
     }),
     support: stateRegion(mount('support'), {
