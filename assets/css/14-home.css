@@ -124,6 +124,10 @@
     inline-size: 100%; block-size: 100%; object-fit: cover;
     object-position: var(--hero-focal, 50% 50%);
   }
+  /* Mirrored for LTR only, homepage hero only: object-position picks the
+     crop window before this runs, so the same focal tuning above still
+     keeps the traveller in frame — only left/right orientation changes. */
+  [dir="ltr"] .c-hero--home .c-hero__media > img { transform: scaleX(-1); }
   .c-hero--photo .c-hero__route { display: none; } /* the dashed route line suits a boxed card, not a full photo */
   /* TEXT-SAFE AREA — image responsiveness brief §2. A flat wash as the base
      layer, not a gradient alone: the photo's brightness varies a lot from
@@ -452,9 +456,23 @@
        needed the way the hero's much wider photo required. */
     object-position: 50% 36%;
   }
+  /* Mirrored for LTR only — object-position's X is centred (50%) so the
+     crop window is unaffected either way, only left/right orientation
+     changes, same reasoning as the homepage hero's own LTR mirror above. */
+  [dir="ltr"] .c-cta-band--photo .c-cta-band__media img { transform: scaleX(-1); }
   .c-cta-band--photo::after {
     content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
     background-color: rgb(11 13 15 / 0.4);
+  }
+  /* Below 48em the crop is full-height/cropped-sides (see the object-position
+     comment above) and this particular photo has people spanning nearly its
+     full width, so there is no emptier "opposite side" to lean the 48em+
+     directional gradient on below — the flat wash alone carries text
+     legibility here, same reasoning as the hero's own <64em tier, so it
+     gets the hero's stronger weight instead of the lighter one this band
+     otherwise shares with the wide/two-tone layout above. */
+  @media (max-width: 47.999em) {
+    .c-cta-band--photo::after { background-color: rgb(11 13 15 / 0.58); }
   }
   @media (min-width: 48em) {
     [dir="ltr"] .c-cta-band--photo::after { background-image: linear-gradient(to right, rgb(11 13 15 / 0.3) 0%, rgb(11 13 15 / 0) 62%); }
