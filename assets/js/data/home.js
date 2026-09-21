@@ -31,12 +31,21 @@ export const HOME_HERO = {
   leadAr: 'تذاكر طيران، تأشيرات، فنادق وخدمات سفر متكاملة للسودانيين المقيمين في مصر.',
   leadEn: 'Flights, visas, hotels and complete travel services for Sudanese residents in Egypt.',
   /* The photography slot. `src: null` renders the neutral placeholder that
-     reserves the same aspect ratio; drop the approved image in here. §04 */
+     reserves the same aspect ratio; drop the approved image in here. §04
+     `focal` (hero image responsiveness brief §1/§2): this photo is a very
+     wide (2.5:1) panorama — every listed breakpoint is narrower than that,
+     so object-fit:cover only ever crops its width, never its height. The
+     traveller sits at roughly the image's first third; tablet/mobile crops
+     centre on him (the brief's non-negotiable subject) since a portrait
+     viewport's narrow slice can't also reach the airplane further right —
+     desktop's wider slice keeps the whole story: traveller, airplane,
+     skyline and the sunset glow together. */
   media: {
     src: imageSrc('home/hero'),
-    altAr: 'عائلة تستعد للسفر',
-    altEn: 'A family getting ready to travel',
+    altAr: 'مسافر يقف في صالة المطار عند الغروب، يشاهد طائرة تقلع فوق أفق المدينة',
+    altEn: 'A traveller with luggage in an airport lounge at sunset, watching a plane take off over the city skyline',
     ratio: '4 / 5',
+    focal: { desktop: '50% 50%', tablet: '22% 50%', mobile: '27% 50%' },
   },
   /* Three short reassurances under the headline. Reuses the trust keys the
      foundation already ships, so the wording matches the rest of the site. */

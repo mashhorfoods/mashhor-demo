@@ -114,7 +114,7 @@
   .c-hero--photo .c-hero__media {
     --hero-focal: var(--hero-focal-desktop, 50% 50%);
   }
-  @media (max-width: 63.999em) {
+  @media (max-width: 64em) {
     .c-hero--photo .c-hero__media { --hero-focal: var(--hero-focal-tablet, var(--hero-focal-desktop, 50% 50%)); }
   }
   @media (max-width: 47.999em) {
@@ -155,6 +155,15 @@
     [dir="ltr"] .c-hero--photo::after { background-image: linear-gradient(to right, rgb(11 13 15 / 0.22) 0%, rgb(11 13 15 / 0) 58%); }
     [dir="rtl"] .c-hero--photo::after { background-image: linear-gradient(to left, rgb(11 13 15 / 0.22) 0%, rgb(11 13 15 / 0) 58%); }
   }
+  /* Below 64em the copy column always spans (near-)full width — image
+     responsiveness brief §4/§8: there is no "opposite, emptier side" left to
+     lean on the way the 48em+ directional layer does, so the flat wash gets
+     a bit more weight here specifically, keeping the two-column desktop
+     tiers at the lighter base wash where the photo still carries most of
+     the frame unobstructed. */
+  @media (max-width: 63.999em) {
+    .c-hero--photo::after { background-color: rgb(11 13 15 / 0.5); }
+  }
   /* .c-hero__copy/.c-hero__search need to be lifted above the fixed media
      AND the overlay. Giving .c-hero__grid itself a position+z-index instead
      would make IT the containing block for the overlay's inset:0 (shrinking
@@ -183,6 +192,26 @@
   .c-hero--photo .c-hero__lead,
   .c-hero--photo .c-hero__copy .t-overline {
     text-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+  }
+  /* The trust row sits lowest in the copy stack, right at this photo's own
+     horizon band — the brightest, most changeable part of any airport/sky
+     photograph (tarmac, glass, a light shirt) — at every breakpoint, not
+     just the narrow ones. A shadow alone proved not enough there even on
+     desktop, so each item gets a quiet translucent chip: a guaranteed-dark
+     backing regardless of what's under it, at the same visual weight as the
+     small pill buttons already in this hero. The checkmarks are SVGs
+     painted with currentColor, so text-shadow has no effect on their fill;
+     drop-shadow protects those instead. */
+  .c-hero--photo .c-hero__trust {
+    text-shadow: 0 1px 3px rgb(0 0 0 / 0.55), 0 1px 8px rgb(0 0 0 / 0.4);
+  }
+  .c-hero--photo .c-hero__trust .c-icon {
+    filter: drop-shadow(0 1px 3px rgb(0 0 0 / 0.55));
+  }
+  .c-hero--photo .c-hero__trust .c-trust-item {
+    background-color: rgb(11 13 15 / 0.38);
+    border-radius: var(--radius-pill);
+    padding-inline: var(--space-12); padding-block: var(--space-4);
   }
   /* The tertiary CTA keeps its transparent background and brand-red text
      (no color/backdrop change per brand rules) but still sits on the photo,
