@@ -108,14 +108,16 @@
 
   /* Elements that only exist on one side of the tablet line. */
   .c-gh__desktop-only { display: none; }
-  /* Tablet and up: the phone header stays down to logo + search + account +
-     menu (§15), so anything extra appears only once there is room. */
-  .c-gh__tablet-up { display: none; }
-  @media (min-width: 48em) { .c-gh__tablet-up { display: inline-flex; } }
   @media (min-width: 64em) {
     .c-gh__desktop-only { display: inline-flex; }
     .c-gh__mobile-only  { display: none !important; }
   }
+
+  /* Hidden below the point where the drawer and the floating bottom-nav stop
+     covering account access on their own (matches .c-bottom-nav's own 48em
+     threshold) — rejoins the bar from tablet width up. */
+  .c-gh__tablet-up { display: none; }
+  @media (min-width: 48em) { .c-gh__tablet-up { display: inline-flex; } }
 
   /* ======================================================================
      PRIMARY NAVIGATION — §19 active, §20 hover
@@ -174,6 +176,9 @@
   .c-gh__action[aria-expanded="true"] { background-color: var(--color-surface-hover); color: var(--color-text); }
   .c-gh__action-label { display: none; }
   @media (min-width: 80em) { .c-gh__action-label { display: inline; } }
+  /* The language name, unlike search/support's labels, is visible at every
+     width — reference mockup shows it in the bar on a phone too. */
+  .c-gh__lang-label { display: inline; }
 
   /* Between the desktop line and the point where the action labels appear
      (80em) the bar is at its tightest: the primary links close ranks so the

@@ -9,7 +9,7 @@ import { getLocale, pick } from '../core/i18n.js';
 import { route } from '../data/config.js';
 import { NAV_PRIMARY, MENUS } from '../data/navigation.js';
 import { icon } from './ui.js';
-import { logo, languageButton, bookNowButton } from './brand.js';
+import { logo, bookNowButton } from './brand.js';
 import { supportChannelLinks } from './menus.js';
 
 /* ---------------------------------------------------------------------------
@@ -77,7 +77,6 @@ export function mobileDrawer({ signal } = {}) {
       ]),
     ]),
     el('div', { class: 'c-gh__m-channels' }, supportChannelLinks()),
-    el('div', { class: 'c-gh__m-item' }, languageButton({ compact: false })),
   ]);
 
   /* The shell exists from the start so the burger's aria-controls points at a

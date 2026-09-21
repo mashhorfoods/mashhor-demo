@@ -164,12 +164,16 @@ export function globalHeader({ current = null, variant = 'default', onSearch = n
             ]),
 
         el('div', { class: 'c-gh__actions' }, [
-          el('span', { class: 'c-gh__tablet-up' }, languageButton()),
+          languageButton(),
           searchTrigger,
           // Each dropdown trigger needs a positioned parent, or its panel
           // anchors to the whole bar instead of to the control.
           el('span', { class: 'c-gh__desktop-only' }, helpTrigger),
-          el('span', { class: 'u-relative' }, [accountTrigger, account]),
+          // Phone width already surfaces account access twice — the drawer's
+          // "My account" link and the customer floating bottom-nav's Account
+          // tab — so the header's own trigger is redundant there and only
+          // rejoins the bar from tablet width up.
+          el('span', { class: 'u-relative c-gh__tablet-up' }, [accountTrigger, account]),
           // §11 — exactly one red action. The booking variant drops it, because
           // on a booking page the page itself is the call to action. §32
           isBooking ? null : el('span', { class: 'c-gh__desktop-only' }, bookNowButton()),

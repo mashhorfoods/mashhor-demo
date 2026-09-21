@@ -42,22 +42,28 @@ export function logo({ variant = 'primary', size = '', href = '', inverse = fals
 }
 
 /** §06 of Stage 10.1 — Arabic and English are both first-class, so the switch
-    has to be reachable from every page. Tablet and up it sits in the bar; on a
-    phone it moves into the drawer, where §15 wants the extra controls. */
-export function languageButton({ compact = true } = {}) {
+    has to be reachable from every page. Reference mockup: a single "<other
+    language name> ⌄" control that lives in the bar itself at every width,
+    including phone — it no longer moves into the drawer, so the bar is its
+    only home now. */
+export function languageButton() {
   const isAr = getLocale() === 'ar';
   return el('button', {
     type: 'button',
-    class: compact ? 'c-gh__action' : 'c-gh__m-link',
+    class: 'c-gh__action',
     // The control names the language it switches TO, in that language — so a
     // reader who cannot read the current one can still find it. lang= declares
     // that, so screen readers pronounce it right and audits don't flag it.
     lang: isAr ? 'en' : 'ar',
     'aria-label': isAr ? 'Switch to English' : 'التبديل إلى العربية',
     onclick: () => setLocale(isAr ? 'en' : 'ar'),
-  }, compact
-    ? [icon('no-language'), el('span', { class: 'c-gh__action-label' }, isAr ? 'EN' : 'ع')]
-    : [el('span', {}, isAr ? 'English' : 'العربية'), icon('no-language', { size: 'sm' })]);
+  }, [
+    // c-gh__lang-label, not c-gh__action-label: search/support keep their
+    // text hidden until 80em, but the language name is always visible here,
+    // matching the mockup at every breakpoint.
+    el('span', { class: 'c-gh__lang-label' }, isAr ? 'English' : 'العربية'),
+    icon('no-chevron-down', { size: 'sm' }),
+  ]);
 }
 
 export function bookNowButton({ block = false } = {}) {
