@@ -34,15 +34,29 @@ import { imageSrc } from '../data/images.js';
 /* ---------------------------------------------------------------------------
    HERO — copy, media slot, booking entry. §04
    ------------------------------------------------------------------------ */
+// Mobile/tablet hero optimization brief §1: titleShort's lines (joined with
+// '\n' in the data) become explicit <br>-separated lines — deterministic,
+// exactly 3 lines at every width in that range, not left to natural wrap.
+const heroTitleShortLines = (hero) => pick(hero, 'titleShort').split('\n')
+  .flatMap((line, i, lines) => (i < lines.length - 1 ? [line, el('br')] : [line]));
+
 export function heroCopy(hero = HOME_HERO) {
   return el('div', { class: 'c-hero__copy' }, [
     el('p', { class: 't-overline' }, pick(hero, 'overline')),
-    el('h1', { class: 't-display c-hero__title', id: 'hero-title' }, pick(hero, 'title')),
+    el('h1', { class: 't-display c-hero__title', id: 'hero-title' }, [
+      // CSS toggles which of these two shows per breakpoint (03-base.css
+      // precedent: display:none is excluded from the accessible name, so
+      // only the visible one is ever exposed to assistive tech).
+      el('span', { class: 'c-hero__title-full' }, pick(hero, 'title')),
+      el('span', { class: 'c-hero__title-short' }, heroTitleShortLines(hero)),
+    ]),
     el('p', { class: 'c-hero__lead' }, pick(hero, 'lead')),
     el('div', { class: 'c-hero__actions' }, [
-      // Not c-btn--primary: the site caps visible primaries at 3 (header,
-      // search, final CTA) — this stays visually strong without competing.
-      el('a', { class: 'c-btn c-btn--secondary-brand c-btn--sm', href: '#booking', dataset: { homeAction: 'hero-book' } }, t('home.hero.cta.primary')),
+      // Mobile/tablet hero optimization brief follow-up: matches the
+      // reference mockup's solid "Book now" CTA — tests/home.mjs's visible-
+      // primaries cap moved from 3 to 4 to allow it (header, hero, search,
+      // final CTA).
+      el('a', { class: 'c-btn c-btn--primary c-btn--sm', href: '#booking', dataset: { homeAction: 'hero-book' } }, [el('span', {}, t('home.hero.cta.primary')), icon('no-arrow-end', { size: 'sm', flip: true })]),
       el('a', { class: 'c-btn c-btn--inverse c-btn--sm', href: route('supervisors/') }, t('home.hero.cta.secondary')),
     ]),
     el('ul', { class: 'c-trust-list c-hero__trust', role: 'list' }, hero.trust.map((key) =>
@@ -151,9 +165,10 @@ export function journeyBand(band = HOME_JOURNEY_BAND) {
         el('p', { class: 'c-cta-band__text' }, pick(band, 'text')),
       ]),
       el('div', { class: 'c-cta-band__actions' }, [
-        // Not c-btn--primary: tests/home.mjs caps visible primaries at 3
-        // (header, search, hero) — the same reason newsletterCard() reaches
-        // for c-btn--secondary-brand instead, here too.
+        // Not c-btn--primary: tests/home.mjs caps visible primaries at 4
+        // (header, hero, search, final CTA) — the same reason
+        // newsletterCard() reaches for c-btn--secondary-brand instead, here
+        // too.
         el('a', { class: 'c-btn c-btn--secondary-brand c-btn--lg', href: route('supervisors/') }, t('home.journey.cta.primary')),
         el('a', { class: 'c-btn c-btn--inverse c-btn--lg', href: route('services/') }, t('home.journey.cta.secondary')),
       ]),

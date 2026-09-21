@@ -413,7 +413,7 @@ export default {
     'services.help.title': 'مش عارف تبدأ من وين؟',
     'services.help.text': 'اختر ما يشبه حاجتك وسنأخذك إلى الخدمة المناسبة.',
     'home.search.label': 'ابدأ البحث',
-    'home.hero.cta.primary': 'ابدأ رحلتك',
+    'home.hero.cta.primary': 'احجز الآن',
     'home.hero.cta.secondary': 'تحدث مع منسق رحلتك',
     'home.services.title': 'خدماتنا',
     'home.services.text': 'كل ما تحتاجه للسفر، من التذكرة إلى العودة.',

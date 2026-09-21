@@ -103,7 +103,7 @@
     background-color: var(--btn-bg);
     color: var(--btn-fg);
     border: var(--border-width) solid var(--btn-border);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-pill);
     cursor: pointer;
     transition: var(--transition-interactive), translate var(--duration-fast) var(--ease-standard);
     -webkit-tap-highlight-color: transparent;
@@ -187,16 +187,19 @@
     --btn-border: var(--color-error);
   }
 
+  /* The secondary action on a dark/photo section (hero, cta-band, detail-page
+     hero) sitewide — reference mockup's hollow white pill, not a solid fill,
+     so it never competes with the section's own primary CTA. */
   .c-btn--inverse {
-    --btn-bg: var(--color-white);
-    --btn-fg: var(--color-black);
-    --btn-bg-hover: var(--color-gray-100);
+    --btn-bg: transparent;
+    --btn-fg: var(--color-white);
+    --btn-bg-hover: rgb(255 255 255 / 0.14);
     --btn-border: var(--color-white);
   }
 
   /* --- Sizes --- */
   .c-btn--sm { min-block-size: var(--control-height-sm); font-size: var(--text-button-sm);
-               padding-inline: var(--space-16); padding-block: var(--space-8); border-radius: var(--radius-sm); }
+               padding-inline: var(--space-16); padding-block: var(--space-8); }
   .c-btn--lg { min-block-size: var(--control-height-lg); padding-inline: var(--space-32); font-size: var(--text-body-lg); }
   .c-btn--block { inline-size: 100%; }
   /* On phones the primary action goes full width — it is the easiest target

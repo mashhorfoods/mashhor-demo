@@ -413,7 +413,7 @@ export default {
     'services.help.title': 'Not sure where to start?',
     'services.help.text': 'Pick what sounds like your need and we will take you to the right service.',
     'home.search.label': 'Start your search',
-    'home.hero.cta.primary': 'Start your journey',
+    'home.hero.cta.primary': 'Book now',
     'home.hero.cta.secondary': 'Talk to your travel coordinator',
     'home.services.title': 'Our services',
     'home.services.text': 'Everything you need to travel, from the ticket to the return.',

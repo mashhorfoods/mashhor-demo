@@ -82,7 +82,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
     ok(`${T} decorative hidden from AT`, r.decorativeHidden);
     ok(`${T} no tiny text`, r.small === 0, `${r.small}`);
     ok(`${T} touch targets ≥40`, r.targets.length === 0, r.targets.slice(0, 4).join(' '));
-    ok(`${T} primaries ≤ 3 (header, search)`, r.primaries <= 3, r.primaryTexts.join('|'));
+    ok(`${T} primaries ≤ 4 (header, hero, search, final CTA)`, r.primaries <= 4, r.primaryTexts.join('|'));
     // The pinned hero (fixed hero image scroll effect brief) reserves the transparent header's
     // own height at the top of the hero grid now, same as every other full-bleed hero — search
     // sits a little further down than before, but still well inside the 844px mobile viewport.

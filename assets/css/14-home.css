@@ -67,6 +67,29 @@
     .c-hero__search { margin-block-start: var(--space-8); }
   }
 
+  /* MOBILE/TABLET HERO OPTIMIZATION — homepage hero only. The headline
+     shrinks and switches to a deterministic 3-line short title (exactly 3
+     lines via explicit <br>s in heroTitleShortLines(), not left to natural
+     wrap at whatever width a phone happens to be), the trust reassurances
+     are removed from layout entirely rather than just visually hidden, and
+     the forced full-viewport height goes back to content-sized so the
+     search form isn't pushed below the fold. Scoped to .c-hero--home, not
+     .c-hero--photo/.c-hero--full (shared with the destination/offer hero,
+     which keep their existing full-bleed treatment untouched) — desktop
+     (64em+) is completely unaffected. */
+  .c-hero--home .c-hero__title-short { display: none; }
+  @media (max-width: 63.999em) {
+    .c-hero--home { min-block-size: auto; }
+    .c-hero--home .c-hero__title {
+      font-size: clamp(1.75rem, 1.35rem + 4vw, 2.5rem);
+      line-height: 1.15;
+      max-inline-size: none;
+    }
+    .c-hero--home .c-hero__title-full { display: none; }
+    .c-hero--home .c-hero__title-short { display: inline; }
+    .c-hero--home .c-hero__trust { display: none; }
+  }
+
   /* ----------------------------------------------------------------------
      HERO — full-bleed photo variant (.c-hero--photo): the homepage, and
      every destination/offer detail hero below. Service heroes stay on the

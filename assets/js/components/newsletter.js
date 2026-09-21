@@ -56,9 +56,9 @@ export function newsletterCard({ image = null } = {}) {
     }
   };
 
-  // Not c-btn--primary: tests/home.mjs caps visible primaries at 3 (header,
-  // search, final CTA). c-btn--secondary-brand is the same "confident CTA on
-  // a dark surface" pairing the hero photo already uses.
+  // Not c-btn--primary: tests/home.mjs caps visible primaries at 4 (header,
+  // hero, search, final CTA). c-btn--secondary-brand is the same "confident
+  // CTA on a dark surface" pairing the hero photo already uses.
   const cta = el('button', { type: 'submit', class: 'c-btn c-btn--secondary-brand c-btn--block' }, t('home.newsletter.cta'));
   const form = el('form', { class: 'c-newsletter__form l-stack l-stack--16', novalidate: true }, [
     emailField, consentField, cta,

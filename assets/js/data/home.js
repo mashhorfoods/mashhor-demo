@@ -28,6 +28,14 @@ export const HOME_HERO = {
   overlineEn: 'A trusted travel platform for Sudanese travellers',
   titleAr: 'سفرك من مصر يبدأ مع نمبرون',
   titleEn: 'Your journey from Egypt starts with Number One',
+  /* Mobile/tablet hero optimization brief §1: the full title above wraps
+     across 4 awkward lines once the headline is sized down for small
+     screens, splitting mid-phrase ("from Egypt starts" / "with Number
+     One"). A shorter, deliberately 3-line title for those breakpoints
+     only — rendered as separate lines (title-short spans below, joined
+     with <br>), desktop keeps the full sentence unchanged. */
+  titleShortAr: 'سفرك\nيبدأ مع\nنمبرون',
+  titleShortEn: 'Your journey\nstarts with,\nNumber One',
   leadAr: 'تذاكر طيران، تأشيرات، فنادق وخدمات سفر متكاملة للسودانيين المقيمين في مصر.',
   leadEn: 'Flights, visas, hotels and complete travel services for Sudanese residents in Egypt.',
   /* The photography slot. `src: null` renders the neutral placeholder that
