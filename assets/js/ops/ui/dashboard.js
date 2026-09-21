@@ -1,5 +1,5 @@
 /* OPS / UI / DASHBOARD — "Today": open tasks, open escalations, recent bookings needing attention. Stage 15 */
-import { el } from '../../core/dom.js';
+import { el, render } from '../../core/dom.js';
 import { t, pick } from '../../core/i18n.js';
 import { route } from '../../data/config.js';
 import { opsData } from '../data.js';
@@ -10,8 +10,15 @@ export function mountOpsDashboard({ root = document } = {}) {
     const tasksHost = el('div', { dataset: { region: 'tasks' } });
     const escHost = el('div', { dataset: { region: 'escalations' } });
     const bkHost = el('div', { dataset: { region: 'bookings' } });
+    // Dashboard-refinement brief §7: page context, then key operational
+    // metrics, then the priority-item regions below — metricsHost used to be
+    // built (see the returned `metrics` handle) but never mounted anywhere,
+    // so the tiles never actually appeared on screen. Filled in once the
+    // counts resolve, same async-region shape as tasks/esc/bk below.
+    const metricsHost = el('div', { class: 'c-svp-metrics' });
     main.replaceChildren(
       el('div', { class: 'l-stack l-stack--8' }, [el('h1', { class: 't-h1' }, t('ops.dash.welcome', pick(staff, 'name') || staff.email)), el('p', { class: 't-body t-muted' }, t('ops.dash.text'))]),
+      metricsHost,
       el('div', { class: 'c-acct-grid' }, [
         block(t('ops.tasks.title'), tasksHost, { id: 'dash-tasks', action: el('a', { class: 'c-btn c-btn--tertiary c-btn--sm', href: route('admin/tasks/') }, t('acct.viewAll')) }),
         block(t('ops.escalations.title'), escHost, { id: 'dash-esc', action: el('a', { class: 'c-btn c-btn--tertiary c-btn--sm', href: route('admin/escalations/') }, t('acct.viewAll')) }),
@@ -44,11 +51,17 @@ export function mountOpsDashboard({ root = document } = {}) {
       opsData.overview().catch(() => null),
     ]);
     await bk.run();
+    const metrics = [
+      metricCard('ops.metrics.openTasks', overview?.tasksOpen ?? (t1 ?? []).length, { icon: 'no-check' }),
+      // Escalations are exceptions, not routine work — the warning tone
+      // (already defined in 23-supervisor-portal.css, unused until now)
+      // gives the two cards visual hierarchy instead of two identical
+      // brand-red tiles.
+      metricCard('ops.metrics.openEscalations', overview?.escalationsOpen ?? (t2 ?? []).length, { icon: 'no-alert', tone: 'warning' }),
+    ];
+    render(metricsHost, metrics);
     return {
-      metrics: el('div', { class: 'c-svp-metrics' }, [
-        metricCard('ops.metrics.openTasks', overview?.tasksOpen ?? (t1 ?? []).length, { icon: 'no-check' }),
-        metricCard('ops.metrics.openEscalations', overview?.escalationsOpen ?? (t2 ?? []).length, { icon: 'no-alert' }),
-      ]),
+      metrics,
       regions: { tasks, esc, bk },
     };
   } });
