@@ -44,14 +44,28 @@
      receives the attribute, so the rules above are the whole story there.
      Transparent throughout the hero (STATE 01/02), solid once the hero has
      fully scrolled past (STATE 03) — header.js's IntersectionObserver
-     flips the attribute; this only draws the two looks. The hero's own
-     dark overlay (.c-hero--photo::after, 14-home.css) already keeps the
-     photo behind it readable, so no extra backdrop-blur is layered here.
-     ==================================================================== */
+     flips the attribute; this only draws the two looks.
+
+     The hero's own dark overlay (.c-hero--photo::after, 14-home.css) keeps
+     the PHOTO readable, but says nothing about the header text specifically
+     — a11y audit measured white nav links/action labels at 1:1 against a
+     bright sky/glass crop of the homepage hero (real photos vary; nothing
+     here can assume they're dark exactly where the bar sits). ::before adds
+     a scrim scoped to the header's own (short) box only — never stretching
+     into the hero below it — strong enough at the top, where the text
+     actually sits, to hold AA contrast for white text against a
+     worst-case near-white background, tapering toward the bar's own lower
+     edge so it still reads as chrome, not a hero-wide darkening. */
   .c-gh[data-surface="transparent"] {
     background-color: transparent;
     border-block-end-color: transparent;
     box-shadow: none;
+  }
+  .c-gh[data-surface="transparent"]::before {
+    content: "";
+    position: absolute; inset: 0;
+    background-image: linear-gradient(to bottom, rgb(0 0 0 / 0.6) 0%, rgb(0 0 0 / 0.38) 60%, rgb(0 0 0 / 0.16) 100%);
+    pointer-events: none;
   }
   /* brand.js's logo(..., { inverse: true }) renders both lockups; swap to
      the light one exactly like every other dark surface already does
@@ -90,6 +104,10 @@
   .c-gh--placeholder-transparent { background-color: transparent; border-block-end-color: transparent; box-shadow: none; }
 
   .c-gh__bar {
+    /* Above the transparent-state scrim (.c-gh::before) — a positioned
+       stacking context regardless of surface, since it costs nothing on
+       the ordinary solid bar. */
+    position: relative; z-index: 1;
     display: grid;
     /* The brand never shrinks: an `auto` track would squeeze the logo image
        before the nav gives way (seen at 64em in English). Stage 10.11 */
