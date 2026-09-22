@@ -128,6 +128,7 @@ export default {
     'dest.help.cta': 'Help me choose',
     'dest.card.cta': 'Explore',
     'dest.card.services': 'Available services',
+    'dest.cta.primary': 'Start booking',
     'dest.cta.expert': 'Talk to an expert',
     'dest.detail.overview.title': (name) => `About ${name}`,
     'dest.detail.why.overline': 'Purpose of travel',

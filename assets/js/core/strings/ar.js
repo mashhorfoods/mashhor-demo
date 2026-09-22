@@ -128,6 +128,7 @@ export default {
     'dest.help.cta': 'ساعدني في الاختيار',
     'dest.card.cta': 'استكشف',
     'dest.card.services': 'الخدمات المتاحة',
+    'dest.cta.primary': 'ابدأ الحجز',
     'dest.cta.expert': 'تحدث مع خبير',
     'dest.detail.overview.title': (name) => `عن ${name}`,
     'dest.detail.why.overline': 'الغرض من السفر',
