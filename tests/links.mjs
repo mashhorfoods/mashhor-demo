@@ -8,7 +8,7 @@ import http from 'node:http';
 import { RESERVED_SUPERVISOR_SLUGS } from '../assets/js/data/supervisors.js';
 const ORIGIN = process.env.TEST_ORIGIN + ''; const BASE = '/mashhor-demo/';
 const ROOT = new URL('../', import.meta.url).pathname;
-const PAGES = ['index.html', '404.html', 'styleguide.html', 'services/index.html', 'destinations/index.html', 'offers/index.html', 'book/index.html',
+const PAGES = ['index.html', '404.html', 'styleguide.html', 'services/index.html', 'destinations/index.html', 'offers/index.html', 'book/index.html', 'help/index.html', 'help/contact/index.html',
   ...readdirSync(ROOT + 'services', { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => `services/${d.name}/index.html`),
   ...readdirSync(ROOT + 'offers', { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => `offers/${d.name}/index.html`),
   // Stage 13's authenticated portal lives in the same directory (supervisor/dashboard/, …) but is private/noindex,
