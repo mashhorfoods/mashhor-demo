@@ -1,5 +1,6 @@
 // BACKEND / LOGGER — structured lines to stdout with sensitive keys removed. Never logs passwords, tokens, cookies, card data, document contents or free-text personal fields.
-const SENSITIVE = /pass|token|secret|authorization|cookie|card|cvv|iban|passport|email|phone|name|address|dob|birth|body|html/i;
+// Exported so other sensitive-field filters (e.g. the /diagnostics endpoint) share this one list instead of drifting.
+export const SENSITIVE = /pass|token|secret|authorization|cookie|card|cvv|iban|passport|email|phone|name|address|dob|birth|body|html/i;
 export function scrub(data = {}) {
   const out = {};
   for (const [k, v] of Object.entries(data)) {

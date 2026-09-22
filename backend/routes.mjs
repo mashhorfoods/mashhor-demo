@@ -11,7 +11,7 @@ import { assignAttribution } from './supervisor.mjs';
 import { validateUpload, storage, signedUrl, verifySignature } from './storage.mjs';
 import { enqueue } from './mailer.mjs';
 import { legalDocument } from './legal.mjs';
-import { info, warn, scrub } from './logger.mjs';
+import { info, warn, SENSITIVE } from './logger.mjs';
 import { createPaymentIntent, handleWebhookEvent, simulateDevWebhook } from './payments.mjs';
 import { searchFlights, getFlightOffer, quoteFlightOffer } from './flights.mjs';
 
@@ -229,7 +229,7 @@ export function legal(req, res, kind, url, override) {
 }
 export async function diagnostics(req, res) {
   const buf = await readBody(req, 8 * 1024); let e = null; try { e = JSON.parse(buf.toString()); } catch { /* ignored */ }
-  if (e && typeof e.event === 'string') { const safe = scrub(e); q.run('INSERT INTO diagnostics (at, event, payload_json) VALUES (?,?,?)', now(), e.event.slice(0, 60), JSON.stringify(safe)); q.run('DELETE FROM diagnostics WHERE id < (SELECT MAX(id) FROM diagnostics) - 5000'); }
+  if (e && typeof e.event === 'string') { const safe = {}; for (const [k, v] of Object.entries(e)) if (!SENSITIVE.test(k) && (typeof v === 'string' ? v.length <= 120 : typeof v === 'number' || typeof v === 'boolean')) safe[k] = v; q.run('INSERT INTO diagnostics (at, event, payload_json) VALUES (?,?,?)', now(), e.event.slice(0, 60), JSON.stringify(safe)); q.run('DELETE FROM diagnostics WHERE id < (SELECT MAX(id) FROM diagnostics) - 5000'); }
   return empty(res);
 }
 /* ---- Stage 16B: Secure Webhook → Server Verification (§8). Public — no customer/staff session exists for a
