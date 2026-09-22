@@ -207,20 +207,6 @@ export function supportSection() {
   ];
 }
 
-export function ctaBand(record) {
-  const cta = primaryActionFor(record);
-  return el('div', { class: 'c-cta-band__inner' }, [
-    el('div', { class: 'l-stack l-stack--12' }, [
-      el('h2', { class: 't-h1 c-cta-band__title', id: 'cta-title' }, t('detail.cta.title', pick(record, 'title'))),
-      el('p', { class: 't-body-lg c-cta-band__text' }, t('detail.cta.text')),
-    ]),
-    el('div', { class: 'c-cta-band__actions' }, [
-      el('a', { class: 'c-btn c-btn--primary c-btn--lg', href: cta.primary.href }, cta.primary.label),
-      el('a', { class: 'c-btn c-btn--inverse c-btn--lg', href: cta.secondary.href }, cta.secondary.label),
-    ]),
-  ]);
-}
-
 /* ---------------------------------------------------------------------------
    STATES — unknown slug, missing content, unavailable. §18
    ------------------------------------------------------------------------ */
@@ -251,7 +237,7 @@ export function mountServiceDetail({
   load = async (s) => getServiceDetail(s),
 } = {}) {
   const mount = (name) => qs(`[data-detail="${name}"]`, root);
-  const sections = ['overview', 'features', 'benefits', 'steps', 'requirements', 'related', 'support', 'cta'];
+  const sections = ['overview', 'features', 'benefits', 'steps', 'requirements', 'related', 'support'];
   const region = stateRegion(mount('hero'), {
     loading: () => el('div', { class: 'c-hero__copy', style: 'display:contents' }, [
       el('div', { class: 'l-stack' }, [
@@ -282,7 +268,6 @@ export function mountServiceDetail({
     showSection('requirements', requirementsSection(record));
     showSection('related', relatedSection(record));
     showSection('support', supportSection());
-    showSection('cta', ctaBand(record));
     qsa('.c-bottom-nav__item', root).forEach((a) => a.removeAttribute('aria-current'));
   };
 

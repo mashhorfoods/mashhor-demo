@@ -73,12 +73,10 @@ export const HOME_SERVICES = SERVICE_REGISTRY;
    person is.
    ----------------------------------------------------------------------- */
 export const HOME_JOURNEY_BAND = {
-  overlineAr: 'خدماتنا وفريقنا',
-  overlineEn: 'Services and team',
-  titleAr: 'خدماتنا تُنجز رحلتك، وفريقنا يرافقك فيها',
-  titleEn: 'Our services complete your journey — our team is with you every step',
-  textAr: 'من التذكرة والتأشيرة إلى الفندق والانتقالات، كل خدمة تصلك بإشراف منسق حقيقي من نمبرون يتابع تفاصيل رحلتك خطوة بخطوة.',
-  textEn: "From flights and visas to hotels and transport, every service comes with a real Number One coordinator following your journey's details, step by step.",
+  titleAr: 'منسّق حقيقي معك في رحلتك',
+  titleEn: 'A real coordinator, with you all the way',
+  textAr: 'من التذكرة حتى الوصول، يتابع معك كل خطوة.',
+  textEn: 'From ticket to arrival, following every step with you.',
   media: {
     src: imageSrc('home/journey'),
     altAr: 'عائلة مسافرة تراجع تذاكرها مع منسق رحلات نمبرون في صالة المطار',

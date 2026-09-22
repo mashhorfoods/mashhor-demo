@@ -90,7 +90,6 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
         trust: Array.from(document.querySelectorAll('[data-profile=trust] .c-trust-item')).map((n) => n.textContent.trim()),
         channels: document.querySelectorAll('.c-channel').length, note: !!document.querySelector('[data-profile=contact] .c-note'), request: document.querySelector('[data-profile-action=request]')?.getAttribute('href'),
         disc: { dest: document.querySelectorAll('[data-profile=discovery] .c-destination-card, [data-profile=discovery] .c-dest').length, offers: document.querySelectorAll('[data-profile=discovery] .c-offer').length, cards: document.querySelectorAll('[data-profile=discovery] .c-card').length, attributed: Array.from(document.querySelectorAll('[data-profile=discovery] .c-card__action')).every((a) => /supervisor=ahmed-mohamed/.test(a.getAttribute('href'))) },
-        cta: document.querySelector('[data-profile=cta] .c-btn--primary')?.getAttribute('href'),
         placeholders: document.querySelectorAll('a[href^="tel:"], a[href*="wa.me"], a[href^="mailto:"]').length + (/\+249|wa\.me|XXXX|example\.com/.test(document.body.innerText) ? 1 : 0),
         claims: /\d+\s?(سنوات|years)|★|⭐|تقييم|rating|reviews|مراجعات|\d{3,}\s?(عميل|customers)/i.test(document.querySelector('main').innerText),
         headerVariant: document.querySelector('header')?.dataset.variant, footerPrimary: document.querySelectorAll('footer .c-btn--primary').length,
@@ -107,7 +106,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
     ok(`${T} nothing under 12px, targets ≥ 40px`, r.small === 0 && r.targets.length === 0, `${r.small} ${r.targets.join(',')}`);
     ok(`${T} neutral name + title when the record has none`, r.h1Text === (ar ? 'منسق نمبرون' : 'Number One coordinator') && r.title === `${r.h1Text} — ${ar ? 'نمبرون للسفر و السياحة' : 'Number One Travel & Tourism'}` && !r.titleShown, `${r.h1Text} | ${r.title}`);
     ok(`${T} canonical`, r.canonical.endsWith('/mashhor-demo/supervisor/ahmed-mohamed/'));
-    ok(`${T} every section present`, r.sections.join(',') === 'about,services,trust,contact,discovery,cta', r.sections.join(','));
+    ok(`${T} every section present`, r.sections.join(',') === 'about,services,trust,contact,discovery', r.sections.join(','));
     ok(`${T} Number One branding in the hero (logo + line)`, r.logo && r.brand.includes(ar ? 'نمبرون' : 'Number One'), r.brand);
     ok(`${T} verified badge from status`, r.badge === (ar ? 'منسق معتمد' : 'Verified coordinator'), r.badge);
     ok(`${T} lead is the role line, not an invented bio`, r.lead === (ar ? 'يساعدك على اختيار الخيار المناسب، ويتابع حجزك مع فريق نمبرون من البداية إلى العودة.' : 'Helps you choose the right option and follows your booking with the Number One team, from the start until you are back.'), r.lead);
@@ -116,16 +115,15 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
     ok(`${T} primary "${ar ? 'ابدأ الحجز' : 'Start booking'}" attributed, one in the hero`, r.primaryText === (ar ? 'ابدأ الحجز' : 'Start booking') && r.primaryHref === '/mashhor-demo/book/?supervisor=ahmed-mohamed' && r.heroPrimaries === 1, `${r.primaryText} ${r.primaryHref}`);
     ok(`${T} primary reachable (first screen, ≥ 48px)`, r.primaryTop < h && r.primaryH >= 44, `${Math.round(r.primaryTop)}/${r.primaryH}`);
     ok(`${T} secondary contact action`, r.secondary === (ar ? 'تواصل مع المنسق' : 'Contact the coordinator'), r.secondary);
-    ok(`${T} red rationed in main: hero + final band`, r.mainPrimaries === 2, `${r.mainPrimaries}`);
+    ok(`${T} red rationed in main: hero only`, r.mainPrimaries === 1, `${r.mainPrimaries}`);
     ok(`${T} empty state for missing optional details`, /c-state--info/.test(r.emptyBlock) && r.emptyTitle === (ar ? 'بيانات المنسق قيد الاستكمال' : 'Profile details are being completed'), `${r.emptyBlock} ${r.emptyTitle}`);
     ok(`${T} facts: only services + public link`, r.facts.join('|') === (ar ? 'الخدمات|رابط الملف العام' : 'Services|Public profile link') && r.servicesCount === (ar ? '8 خدمات' : '8 services') && r.url.endsWith('/mashhor-demo/supervisor/ahmed-mohamed/') && r.urlReadonly, `${r.facts.join('|')} ${r.servicesCount} ${r.url}`);
     ok(`${T} 8 service cards, every action attributed, details links`, r.services === 8 && r.attributedActions && r.detailsLinks, JSON.stringify([r.services, r.attributedActions, r.detailsLinks]));
     ok(`${T} trust: 5 statements`, r.trust.length === 5 && (ar ? r.trust[0] === 'حجز وضمان باسم نمبرون للسفر و السياحة' : r.trust[0] === 'Booked and guaranteed under Number One Travel & Tourism'), r.trust.join('|'));
     ok(`${T} contact: no channels, note + attributed request`, r.channels === 0 && r.note && r.request === '/mashhor-demo/help/contact/?supervisor=ahmed-mohamed', `${r.channels} ${r.note} ${r.request}`);
     ok(`${T} discovery: 3 destinations + 3 offers, attributed`, r.disc.cards === 6 && r.disc.offers === 3 && r.disc.attributed, JSON.stringify(r.disc));
-    ok(`${T} final band attributed`, r.cta === '/mashhor-demo/book/?supervisor=ahmed-mohamed', r.cta);
     ok(`${T} no placeholder contacts, no invented claims`, r.placeholders === 0 && !r.claims);
-    ok(`${T} chrome: marketing header, footer CTA off, bottom nav neutral, skip link`, r.headerVariant === 'default' && r.footerPrimary === 0 && r.bottomCurrent === 0 && r.skip, JSON.stringify([r.headerVariant, r.footerPrimary, r.bottomCurrent]));
+    ok(`${T} chrome: marketing header, footer with its own CTA, bottom nav neutral, skip link`, r.headerVariant === 'default' && r.footerPrimary === 1 && r.bottomCurrent === 0 && r.skip, JSON.stringify([r.headerVariant, r.footerPrimary, r.bottomCurrent]));
     ok(`${T} images have alt, logical CSS only`, r.imgsNoAlt === 0 && r.physical);
     await p.screenshot({ path: shot(`sup-${tag}-${loc}.png`), fullPage: true });
     await p.close();

@@ -487,7 +487,7 @@
      gets the hero's stronger weight instead of the lighter one this band
      otherwise shares with the wide/two-tone layout above. */
   @media (max-width: 47.999em) {
-    .c-cta-band--photo .c-cta-band__media::after { background-color: rgb(11 13 15 / 0.58); }
+    .c-cta-band--photo .c-cta-band__media::after { background-color: rgb(11 13 15 / 0.68); }
   }
   @media (min-width: 48em) {
     [dir="ltr"] .c-cta-band--photo .c-cta-band__media::after { background-image: linear-gradient(to right, rgb(11 13 15 / 0.3) 0%, rgb(11 13 15 / 0) 62%); }
@@ -508,9 +508,17 @@
   .c-cta-band--photo .c-cta-band__title,
   .c-cta-band--photo .c-cta-band__text,
   .c-cta-band--photo .t-overline {
-    text-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+    text-shadow: 0 1px 6px rgb(0 0 0 / 0.55), 0 1px 2px rgb(0 0 0 / 0.6);
   }
   .c-cta-band--photo .t-overline { color: rgb(255 255 255 / 0.85); }
+  /* Small screens: --text-h1's own floor (2rem/32px, 01-tokens.css) is sized
+     for ordinary page headings, not a compact photo band — at that size a
+     short two/three-word-per-line title dominates the whole viewport. A
+     smaller, band-specific clamp keeps the title legible without crowding
+     the photo out. */
+  @media (max-width: 47.999em) {
+    .c-cta-band--photo .c-cta-band__title { font-size: clamp(1.375rem, 1.05rem + 1.6vw, 1.75rem); }
+  }
 
   /* ---- Sticky Visual Banner enhancement — tablet/desktop, motion allowed.
      A tighter reveal on tablet ("adjust sticky dimensions" per the brief),

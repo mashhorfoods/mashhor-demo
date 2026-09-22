@@ -171,19 +171,6 @@ export function discoverySection(sup) {
   ];
 }
 
-export function ctaBand(sup) {
-  return el('div', { class: 'c-cta-band__inner' }, [
-    el('div', { class: 'l-stack l-stack--12' }, [
-      el('h2', { class: 't-h1 c-cta-band__title', id: 'cta-title' }, t('sup.final.title', supervisorName(sup))),
-      el('p', { class: 't-body-lg c-cta-band__text' }, t('sup.final.text')),
-    ]),
-    el('div', { class: 'c-cta-band__actions' }, [
-      el('a', { class: 'c-btn c-btn--primary c-btn--lg', href: route(supervisorEntry(sup)) }, t('sup.cta.book')),
-      el('a', { class: 'c-btn c-btn--inverse c-btn--lg', href: route(supervisorContactUrl(sup)) }, t('sup.contact.request')),
-    ]),
-  ]);
-}
-
 /* ---------------------------------------------------------------------------
    STATES — unknown slug, inactive, error. §12
    ------------------------------------------------------------------------ */
@@ -207,7 +194,7 @@ export function mountSupervisor({
   load = async (s) => supervisorBySlug(s),
 } = {}) {
   const mount = (name) => qs(`[data-profile="${name}"]`, root);
-  const sections = ['about', 'services', 'trust', 'contact', 'discovery', 'cta'];
+  const sections = ['about', 'services', 'trust', 'contact', 'discovery'];
   const region = stateRegion(mount('hero'), {
     loading: () => el('div', { class: 'c-profile', 'aria-hidden': 'true' }, [
       el('div', { class: 'c-profile__figure' }, el('div', { class: 'c-profile__photo c-skeleton', style: 'box-shadow:none' })),

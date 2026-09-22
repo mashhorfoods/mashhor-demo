@@ -54,7 +54,6 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
         count: document.querySelector('[data-offers-count]').textContent,
         guides: document.querySelectorAll('[data-offers=help] .c-chip').length,
         guideClaims: /الأفضل|best|cheapest|الأرخص/i.test(document.querySelector('[data-offers=help]').innerText),
-        finalPrimary: document.querySelector('.c-cta-band .c-btn--primary')?.getAttribute('href'),
         placeholders: document.querySelectorAll('a[href^="tel:"], a[href*="wa.me"], a[href^="mailto:"]').length + (/\+249|wa\.me|XXXX/.test(document.body.innerText) ? 1 : 0),
         numbers: /\d{3,}\s?(ج\.س|SDG|USD|\$)|خصم|%/.test(document.querySelector('main').innerText),
         imgsNoAlt: document.querySelectorAll('img:not([alt])').length,
@@ -67,7 +66,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
     const T = `list/${tag}/${loc}`;
     ok(`${T} dir, no h-scroll, one h1, ordered headings`, r.dir === (loc === 'ar' ? 'rtl' : 'ltr') && !r.hScroll && r.h1 === 1 && r.jumps === 0, `${r.jumps}`);
     ok(`${T} title + canonical`, (loc === 'ar' ? /العروض/.test(r.title) : /Offers/.test(r.title)) && r.canonical.endsWith('/offers/'), r.title);
-    ok(`${T} red rationed (hero + final, + header)`, r.primaries.length <= 3, r.primaries.join('|'));
+    ok(`${T} red rationed (hero + footer, + header)`, r.primaries.length <= 3, r.primaries.join('|'));
     ok(`${T} 7 category chips with counts`, r.chips === 7 && r.chipCounts === '3,3,2,1,1,0,0', r.chipCounts);
     ok(`${T} one filter form, placed by width`, r.forms === 1 && (tag === 'mobile' ? (r.openButton && !r.inlineForm) : (r.inlineForm && !r.openButton)), `${r.forms} ${r.inlineForm} ${r.openButton}`);
     ok(`${T} only data-backed filters (destination, service, sort)`, r.filterNames.join() === 'destination,service,sort', r.filterNames.join());
@@ -78,10 +77,9 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
     ok(`${T} routes: title → offer detail, CTA → booking entry with offer + destination`, r.cardHrefs && r.entryHrefs);
     ok(`${T} count line`, /3|٣/.test(r.count) || /offers|عروض/.test(r.count), r.count);
     ok(`${T} 7 guide chips, no claims`, r.guides === 7 && !r.guideClaims);
-    ok(`${T} final CTA → packages request`, /\/mashhor-demo\/book\/\?vertical=packages$/.test(r.finalPrimary), `${r.finalPrimary}`);
     ok(`${T} no placeholder contacts, prices or discounts`, r.placeholders === 0 && !r.numbers);
     ok(`${T} alt / labelled media`, r.imgsNoAlt === 0 && r.mediaLabelled);
-    ok(`${T} header (menu lists categories), footer CTA off`, r.header && r.footer && !r.footerCta && r.menuOffers === 6, `${r.menuOffers}`);
+    ok(`${T} header (menu lists categories), footer with its own CTA`, r.header && r.footer && r.footerCta && r.menuOffers === 6, `${r.menuOffers}`);
     ok(`${T} no tiny text, targets ≥40`, r.small === 0 && r.targets.length === 0, `${r.small} ${r.targets.slice(0, 3).join(' ')}`);
     await p.close();
   }
@@ -242,7 +240,7 @@ for (const o of offers) {
     await api.render('istanbul-family'); out.back = !!host.querySelector('h1');
     return out;
   });
-  ok('full record: every section renders (included, excluded, itinerary, important, terms, faq, flow, related, support, cta)', ['overview', 'included', 'excluded', 'itinerary', 'important', 'terms', 'faq', 'flow', 'related', 'support', 'cta'].every((s) => r.vis.includes(s)), r.vis.join(','));
+  ok('full record: every section renders (included, excluded, itinerary, important, terms, faq, flow, related, support)', ['overview', 'included', 'excluded', 'itinerary', 'important', 'terms', 'faq', 'flow', 'related', 'support'].every((s) => r.vis.includes(s)), r.vis.join(','));
   ok('full record: real price with basis, 3 meta items, "احجز الآن", bookable badge, no placeholder note', /1,450,000/.test(r.price) && r.basis === 'لشخصين' && r.meta === 3 && r.primary === 'احجز الآن' && r.status === 'متاح للحجز' && !r.note, JSON.stringify({ p: r.price, m: r.meta, c: r.primary, s: r.status }));
   ok('full record: lists and counts', r.included === 2 && r.excluded === 1 && r.days === 1 && r.faq === 2 && r.steps === 5, JSON.stringify(r));
   ok('FAQ accordion toggles', r.faqOpen);

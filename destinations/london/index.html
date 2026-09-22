@@ -52,10 +52,6 @@
     <section class="l-section" data-dest="services" aria-labelledby="services-title" id="services" hidden><div class="l-container" data-dest-body></div></section>
     <section class="l-section l-section--subtle" data-dest="offers" aria-labelledby="offers-title" id="offers" hidden><div class="l-container" data-dest-body></div></section>
     <section class="l-section" data-dest="support" aria-labelledby="support-title" id="support" hidden><div class="l-container" data-dest-body></div></section>
-    <section class="l-section l-section--inverse c-cta-band" data-dest="cta" aria-labelledby="cta-title" hidden>
-      <span class="u-numeral-watermark" aria-hidden="true">1</span>
-      <div class="l-container" data-dest-body></div>
-    </section>
   </main>
 
   <!-- Global footer: mounted by the script below. Stage 10.3 -->
@@ -71,7 +67,6 @@
   mountPage({
     handle: "destination",
     header: { current: "destinations", onSearch: () => location.assign(route("book/")) },
-    footer: { cta: false },   // the page carries its own final CTA
     paint: () => mountDestinationDetail({ slug: "london" }),   // QA handle: no.destination.render('unknown')
   });
 </script>

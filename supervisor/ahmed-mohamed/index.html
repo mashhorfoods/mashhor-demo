@@ -51,10 +51,6 @@
     <section class="l-section l-section--subtle" data-profile="trust" aria-labelledby="trust-title" id="trust" hidden><div class="l-container" data-profile-body></div></section>
     <section class="l-section" data-profile="contact" aria-labelledby="contact-title" id="contact" hidden><div class="l-container" data-profile-body></div></section>
     <section class="l-section l-section--subtle" data-profile="discovery" aria-labelledby="discovery-title" id="discovery" hidden><div class="l-container" data-profile-body></div></section>
-    <section class="l-section l-section--inverse c-cta-band" data-profile="cta" aria-labelledby="cta-title" hidden>
-      <span class="u-numeral-watermark" aria-hidden="true">1</span>
-      <div class="l-container" data-profile-body></div>
-    </section>
   </main>
 
   <!-- Global footer: mounted by the script below. Stage 10.3 -->
@@ -70,7 +66,6 @@
   mountPage({
     handle: "supervisor",
     header: { current: null, onSearch: () => location.assign(route("book/?supervisor=ahmed-mohamed")) },
-    footer: { cta: false },   // the page carries its own final CTA
     paint: () => mountSupervisor({ slug: "ahmed-mohamed" }),   // QA handle: no.supervisor.render('unknown')
   });
 </script>

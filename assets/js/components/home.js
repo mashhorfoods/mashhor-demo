@@ -158,7 +158,6 @@ export function journeyBand(band = HOME_JOURNEY_BAND) {
   const copy = el('div', { class: 'l-container' }, [
     el('div', { class: 'c-cta-band__inner' }, [
       el('div', { class: 'l-stack l-stack--12' }, [
-        el('p', { class: 't-overline' }, pick(band, 'overline')),
         el('h2', { class: 't-h1 c-cta-band__title', id: 'journey-title' }, pick(band, 'title')),
         el('p', { class: 'c-cta-band__text' }, pick(band, 'text')),
       ]),
@@ -168,7 +167,6 @@ export function journeyBand(band = HOME_JOURNEY_BAND) {
         // newsletterCard() reaches for c-btn--secondary-brand instead, here
         // too.
         el('a', { class: 'c-btn c-btn--secondary-brand c-btn--lg', href: route('supervisors/') }, t('home.journey.cta.primary')),
-        el('a', { class: 'c-btn c-btn--inverse c-btn--lg', href: route('services/') }, t('home.journey.cta.secondary')),
       ]),
     ]),
   ]);

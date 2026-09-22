@@ -79,16 +79,16 @@ for (const s of services) {
     ok(`${T} hero CTA follows the record (${expected})`, r.heroPrimary === expected, `${r.heroPrimary}`);
     ok(`${T} hero CTA destination`, (s.primary === 'expert') ? /\/help\/contact\/$/.test(r.heroPrimaryHref) : /\/mashhor-demo\/book\/\?vertical=[a-z]+(&service=[a-z]+)?$/.test(r.heroPrimaryHref), `${r.heroPrimaryHref}`);
     ok(`${T} secondary is subordinate and differs`, !!r.heroSecondary && r.heroSecondary !== r.heroPrimary);
-    ok(`${T} one dominant action (hero + band repeat it; header global)`, r.primaries.length <= 3 && new Set(r.primaries.filter((x) => x !== r.primaries[0] || true)).size <= 2, r.primaries.join('|'));
+    ok(`${T} one dominant action (hero + footer repeat it; header global)`, r.primaries.length <= 3 && new Set(r.primaries.filter((x) => x !== r.primaries[0] || true)).size <= 2, r.primaries.join('|'));
     ok(`${T} no empty visual sections`, r.emptySections === 0, `${r.emptySections}`);
-    ok(`${T} all content sections present`, ['overview', 'features', 'benefits', 'steps', 'requirements', 'related', 'support', 'cta'].every((x) => r.visible.includes(x)), r.visible.join(','));
+    ok(`${T} all content sections present`, ['overview', 'features', 'benefits', 'steps', 'requirements', 'related', 'support'].every((x) => r.visible.includes(x)), r.visible.join(','));
     ok(`${T} features 3–4, benefits 3–4, steps 3–5`, r.features >= 3 && r.features <= 4 && r.benefits >= 3 && r.benefits <= 4 && r.steps >= 3 && r.steps <= 5, `${r.features}/${r.benefits}/${r.steps}`);
     ok(`${T} requirements: items are ours; official rules deferred`, r.reqItems >= 2 && (r.officialNote || ['flights', 'hotels', 'packages', 'transport', 'groups', 'issue', 'change', 'cancel'].includes(s.id)), `${r.reqItems}/${r.officialNote}`);
     ok(`${T} related: 1–3 other services, no self`, r.related.length >= 1 && r.related.length <= 3 && !r.related.some((h) => h.endsWith('/' + s.href)), r.related.join(','));
     ok(`${T} support block, no placeholder contacts`, r.support === 2 && r.placeholders === 0);
     ok(`${T} no superlatives, no prices`, !r.superlatives && !r.prices);
     ok(`${T} alt text, decorative hidden`, r.imgsNoAlt === 0 && !!r.mediaAlt && r.decorative, `${r.mediaAlt}`);
-    ok(`${T} header, footer (CTA off), bottom nav`, r.header && r.footer && !r.footerCta && r.bottomNav >= 4);
+    ok(`${T} header, footer with its own CTA, bottom nav`, r.header && r.footer && r.footerCta && r.bottomNav >= 4);
     await p.close();
   }
 }
@@ -144,10 +144,10 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet']]) {
     const api = m.mountServiceDetail({ slug: 'flights', load: async () => ({ ...m.getServiceDetail('flights'), detail: null }) });
     await new Promise((res) => setTimeout(res, 50));
     return { h1: !!document.querySelector('h1'), note: !!document.querySelector('[data-detail=overview] .c-note'),
-      hiddenFeatures: document.querySelector('[data-detail=features]').hidden, cta: !!document.querySelector('[data-detail=cta] .c-btn--primary'),
+      hiddenFeatures: document.querySelector('[data-detail=features]').hidden,
       related: document.querySelectorAll('[data-detail=related] .c-service-card').length };
   });
-  ok('missing detail content → hero, neutral note, related by category, CTA; no empty sections', r.h1 && r.note && r.hiddenFeatures && r.cta && r.related >= 1, JSON.stringify(r));
+  ok('missing detail content → hero, neutral note, related by category; no empty sections', r.h1 && r.note && r.hiddenFeatures && r.related >= 1, JSON.stringify(r));
   await p.evaluate(() => window.no.detail.reload()); await p.waitForTimeout(300);
   // locale switch keeps one of everything and translates the head
   await p.evaluate(async () => { const m = await import('./assets/js/foundation.js'); await m.setLocale('en'); }); await p.waitForTimeout(800);

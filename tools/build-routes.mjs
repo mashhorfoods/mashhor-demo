@@ -125,10 +125,6 @@ ${c.noindex ? '<meta name="robots" content="noindex">\n' : ''}
       <div class="l-container"><div class="${c.attr === 'profile' ? 'c-profile-hero' : 'c-hero__grid'}" data-${c.attr}="hero"></div></div>
     </section>
 ${c.sections.map((s, i) => `    <section class="l-section${i % 2 === 0 ? ' l-section--subtle' : ''}" data-${c.attr}="${s}" aria-labelledby="${s}-title" id="${s}" hidden><div class="l-container" data-${c.attr}-body></div></section>`).join('\n')}
-    <section class="l-section l-section--inverse c-cta-band" data-${c.attr}="cta" aria-labelledby="cta-title" hidden>
-      <span class="u-numeral-watermark" aria-hidden="true">1</span>
-      <div class="l-container" data-${c.attr}-body></div>
-    </section>
   </main>
 
   <!-- Global footer: mounted by the script below. Stage 10.3 -->
@@ -144,7 +140,6 @@ ${c.sections.map((s, i) => `    <section class="l-section${i % 2 === 0 ? ' l-sec
   mountPage({
     handle: ${JSON.stringify(c.handle)},
     header: { current: ${JSON.stringify(c.current)}, onSearch: () => location.assign(route(${JSON.stringify(c.search ? c.search(r) : 'book/')})) },
-    footer: { cta: false },   // the page carries its own final CTA
     paint: () => ${c.mount}({ slug: ${JSON.stringify(r.slug)} }),   // QA handle: no.${c.handle}.render('unknown')
   });
 </script>

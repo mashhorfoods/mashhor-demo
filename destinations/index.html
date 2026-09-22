@@ -119,23 +119,6 @@
     <section class="l-section l-section--tight" aria-labelledby="help-title" id="help">
       <div class="l-container"><div data-destinations="help"></div></div>
     </section>
-
-    <!-- 8 — FINAL CTA ======================================================= -->
-    <section class="l-section l-section--inverse c-cta-band" aria-labelledby="cta-title">
-      <span class="u-numeral-watermark" aria-hidden="true">1</span>
-      <div class="l-container">
-        <div class="c-cta-band__inner">
-          <div class="l-stack l-stack--12">
-            <h2 class="t-h1 c-cta-band__title" id="cta-title" data-i18n="dest.cta.title">وجهتك واضحة؟ ابدأ الحجز.</h2>
-            <p class="t-body-lg c-cta-band__text" data-i18n="dest.cta.text">وإن لم تكن، مختص من نمبرون يساعدك على الاختيار.</p>
-          </div>
-          <div class="c-cta-band__actions">
-            <a class="c-btn c-btn--primary c-btn--lg" href="book/" data-route="book/" data-i18n="dest.cta.primary">ابدأ الحجز</a>
-            <a class="c-btn c-btn--inverse c-btn--lg" href="help/contact/" data-route="help/contact/" data-i18n="dest.cta.expert">تحدث مع خبير</a>
-          </div>
-        </div>
-      </div>
-    </section>
   </main>
 
   <!-- Global footer: mounted by the script below. Stage 10.3 -->
@@ -152,7 +135,6 @@
   mountPage({
     handle: 'destinations',
     header: { current: 'destinations', onSearch: (d) => { d?.scrollTo('search'); d?.widget.no.focus({ preventScroll: true }); } },
-    footer: { cta: false },
     paint: () => {
       const destinations = mountDestinations();   // QA handle: no.destinations.regions.popular.error()
       const purpose = requested.get('purpose'); const region = requested.get('region');

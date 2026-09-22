@@ -368,25 +368,11 @@ export function supportSection() {
     supportPanels(undefined, liveChannels()),
   ];
 }
-export function ctaBand(record) {
-  const cta = offerAction(record);
-  return el('div', { class: 'c-cta-band__inner' }, [
-    el('div', { class: 'l-stack l-stack--12' }, [
-      el('h2', { class: 't-h1 c-cta-band__title', id: 'cta-title' }, t('offers.cta.title', pick(record, 'title'))),
-      el('p', { class: 't-body-lg c-cta-band__text' }, t('offers.cta.text')),
-    ]),
-    el('div', { class: 'c-cta-band__actions' }, [
-      el('a', { class: 'c-btn c-btn--primary c-btn--lg', href: cta.primary.href }, cta.primary.label),
-      el('a', { class: 'c-btn c-btn--inverse c-btn--lg', href: cta.secondary.href }, cta.secondary.label),
-    ]),
-  ]);
-}
-
 const applyHead = (record) => setPageHead({ title: `${pick(record, 'title')} — ${t('brand.name')}`, description: pick(record, 'short') });
 
 export function mountOfferDetail({ slug, root = document, load = async (s) => getOffer(s) } = {}) {
   const mount = (name) => qs(`[data-offer="${name}"]`, root);
-  const sections = ['overview', 'included', 'excluded', 'itinerary', 'important', 'terms', 'faq', 'flow', 'related', 'support', 'cta'];
+  const sections = ['overview', 'included', 'excluded', 'itinerary', 'important', 'terms', 'faq', 'flow', 'related', 'support'];
   const region = stateRegion(mount('hero'), {
     loading: () => el('div', { style: 'display:contents' }, [
       el('div', { class: 'l-stack' }, [el('div', { class: 'c-skeleton c-skeleton--text c-skeleton--line-sm' }), el('div', { class: 'c-skeleton c-skeleton--title' }), el('div', { class: 'c-skeleton c-skeleton--text c-skeleton--line-md' })]),
@@ -420,7 +406,6 @@ export function mountOfferDetail({ slug, root = document, load = async (s) => ge
     show('flow', flowSection(record));
     show('related', relatedSection(record));
     show('support', supportSection());
-    show('cta', ctaBand(record));
   };
   const api = {
     region, current: null,

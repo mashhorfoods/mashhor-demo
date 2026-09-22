@@ -53,10 +53,6 @@
     <section class="l-section l-section--subtle" data-detail="requirements" aria-labelledby="requirements-title" id="requirements" hidden><div class="l-container" data-detail-body></div></section>
     <section class="l-section" data-detail="related" aria-labelledby="related-title" id="related" hidden><div class="l-container" data-detail-body></div></section>
     <section class="l-section l-section--subtle" data-detail="support" aria-labelledby="support-title" id="support" hidden><div class="l-container" data-detail-body></div></section>
-    <section class="l-section l-section--inverse c-cta-band" data-detail="cta" aria-labelledby="cta-title" hidden>
-      <span class="u-numeral-watermark" aria-hidden="true">1</span>
-      <div class="l-container" data-detail-body></div>
-    </section>
   </main>
 
   <!-- Global footer: mounted by the script below. Stage 10.3 -->
@@ -72,7 +68,6 @@
   mountPage({
     handle: "detail",
     header: { current: "services", onSearch: () => location.assign(route("book/")) },
-    footer: { cta: false },   // the page carries its own final CTA
     paint: () => mountServiceDetail({ slug: "flights" }),   // QA handle: no.detail.render('unknown')
   });
 </script>

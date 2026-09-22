@@ -40,10 +40,6 @@
     <section class="l-section" data-offer="flow" aria-labelledby="flow-title" id="flow" hidden><div class="l-container" data-offer-body></div></section>
     <section class="l-section l-section--subtle" data-offer="related" aria-labelledby="related-title" id="related" hidden><div class="l-container" data-offer-body></div></section>
     <section class="l-section" data-offer="support" aria-labelledby="support-title" id="support" hidden><div class="l-container" data-offer-body></div></section>
-    <section class="l-section l-section--inverse c-cta-band" data-offer="cta" aria-labelledby="cta-title" hidden>
-      <span class="u-numeral-watermark" aria-hidden="true">1</span>
-      <div class="l-container" data-offer-body></div>
-    </section>
   </main>
 </div>
 
@@ -55,7 +51,6 @@
   mountPage({
     handle: 'opsOfferPreview',
     header: { current: 'offers', onSearch: () => location.assign(route('book/')) },
-    footer: { cta: false },
     paint: () => mountOpsOfferPreview({ id: new URLSearchParams(location.search).get('id') }),
   });
 </script>

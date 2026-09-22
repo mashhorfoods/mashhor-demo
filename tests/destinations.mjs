@@ -63,8 +63,6 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
         featuredLead: !!document.querySelector('[data-destinations=featured] .c-featured__lead .c-dest--large'),
         purposes: document.querySelectorAll('[data-destinations=purposes] .c-help__option').length,
         helpCta: document.querySelector('[data-destinations=help] a.c-btn')?.getAttribute('href'),
-        finalPrimary: document.querySelector('.c-cta-band .c-btn--primary')?.getAttribute('href'),
-        finalSecondary: document.querySelector('.c-cta-band .c-btn--inverse')?.getAttribute('href'),
         placeholders: document.querySelectorAll('a[href^="tel:"], a[href*="wa.me"], a[href^="mailto:"]').length + (/\+249|wa\.me|XXXX/.test(document.body.innerText) ? 1 : 0),
         claims: /الأكثر طلباً|الأفضل|الأرخص|most popular|best|cheapest|\d+\s?(ج\.س|SDG|USD)/i.test(document.querySelector('main').innerText),
         imgsNoAlt: document.querySelectorAll('img:not([alt])').length,
@@ -84,7 +82,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
     ok(`${T} one h1, ordered headings`, r.h1 === 1 && r.jumps === 0, `${r.h1}/${r.jumps}`);
     ok(`${T} title / description / canonical`, (loc === 'ar' ? /الوجهات/.test(r.title) && /وجهت/.test(r.desc) : /Destinations/.test(r.title) && /destination/i.test(r.desc)) && r.canonical.endsWith('/mashhor-demo/destinations/'), `${r.title}`);
     ok(`${T} hero CTAs`, r.heroPrimary === (loc === 'ar' ? 'استكشف الوجهات' : 'Explore destinations') && r.heroSecondary === (loc === 'ar' ? 'ساعدني في الاختيار' : 'Help me choose'), `${r.heroPrimary}|${r.heroSecondary}`);
-    ok(`${T} red rationed: hero + final (+ header)`, r.primaries.length <= 3, r.primaries.join('|'));
+    ok(`${T} red rationed: hero + footer (+ header)`, r.primaries.length <= 3, r.primaries.join('|'));
     ok(`${T} search: no tab strip, 4 fields, no optional noise, quiet submit`, r.searchTabs === 0 && r.searchFields.length === 4 && r.optionalMarks === 0 && /secondary-brand/.test(r.submitClass), `${r.searchFields.join('|')} ${r.optionalMarks}`);
     ok(`${T} search selects come from the registry (6 regions + any, 6 purposes + any)`, r.regionOptions === 7 && r.purposeOptions === 7, `${r.regionOptions}/${r.purposeOptions}`);
     ok(`${T} results hidden by default`, r.resultsHidden);
@@ -98,10 +96,9 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
     ok(`${T} featured: large lead + 2 supporting`, r.featured === 3 && r.featuredLead, `${r.featured}`);
     ok(`${T} 6 purposes`, r.purposes === 6);
     ok(`${T} help entry → services help section`, /\/services\/#help$/.test(r.helpCta), `${r.helpCta}`);
-    ok(`${T} final CTA → booking entry; secondary → expert`, /\/mashhor-demo\/book\/$/.test(r.finalPrimary) && /\/help\/contact\/$/.test(r.finalSecondary), `${r.finalPrimary} ${r.finalSecondary}`);
     ok(`${T} no placeholder contacts, no claims or prices`, r.placeholders === 0 && !r.claims);
     ok(`${T} alt / labelled media / decorative hidden`, r.imgsNoAlt === 0 && r.mediaLabelled && r.decorative);
-    ok(`${T} header (menu lists 11 destinations, no "most popular"), footer with CTA off`, r.header && r.footer && !r.footerCta && r.menuDest >= 11 && !r.menuClaim, `${r.menuDest} ${r.menuClaim}`);
+    ok(`${T} header (menu lists 11 destinations, no "most popular"), footer with its own CTA`, r.header && r.footer && r.footerCta && r.menuDest >= 11 && !r.menuClaim, `${r.menuDest} ${r.menuClaim}`);
     ok(`${T} no tiny text, targets ≥40`, r.small === 0 && r.targets.length === 0, `${r.small} ${r.targets.slice(0, 3).join(' ')}`);
     if (tag === 'mobile') ok(`${T} hero does not consume the screen`, r.heroH < 844, `${r.heroH}`);
     await p.close();
