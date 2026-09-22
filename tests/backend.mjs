@@ -1162,6 +1162,8 @@ await control('/__test/reset');
   const jarSup = new Map(); const reqSup = makeReq(API, SITE)(jarSup, 'no_supervisor_csrf');
   await reqSup('/supervisor/auth/sign-in', { method: 'POST', body: { email: 'sup1@fixture.test', password: 'password123' } });
   ok('a supervisor session cannot reach staff provisioning either', (await reqSup('/admin/staff', { method: 'POST', body: { email: 'y@fixture.test', name: 'y', role: 'ops' } })).status === 401);
+  ok('a supervisor session cannot reach the Admin Dashboard overview', (await reqSup('/admin/overview')).status === 401);
+  ok('a supervisor session cannot reach the CMS (services) admin route', (await reqSup('/services')).status === 401);
   ok('ops (no staff.manage) cannot provision, activate, or change a role — least privilege holds even for the newest lifecycle action', true);   // covered exhaustively already in Stage 14's own suite (ops-1 → 403 on /admin/staff); not re-duplicated here
   const forged = await fetch(API + '/admin/staff', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: SITE }, body: JSON.stringify({ email: 'forged@fixture.test', name: 'Forged', role: 'admin' }) });
   ok('§23: an entirely unauthenticated request to provision staff (a forged event with no session at all) is refused', forged.status === 401);
