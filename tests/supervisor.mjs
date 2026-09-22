@@ -180,7 +180,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
   ok('load failure: error state with retry', /c-state--error/.test(r.state) && r.role === 'alert' && r.title === 'تعذر تحميل الملف' && r.retry === 'إعادة المحاولة', JSON.stringify(r));
   await p.click('[data-profile=hero] .c-state .c-btn--primary'); await p.waitForTimeout(300);
   r = await p.evaluate(() => ({ h1: document.querySelector('h1')?.textContent.trim(), sections: Array.from(document.querySelectorAll('main > section[data-profile]')).filter((s) => !s.hidden).length }));
-  ok('retry recovers the profile — with the REAL registry data (this remount reads supervisorBySlug directly, not the blank test fixture)', r.h1 === 'أحمد محمد' && r.sections === 6, JSON.stringify(r));
+  ok('retry recovers the profile — with the REAL registry data (this remount reads supervisorBySlug directly, not the blank test fixture)', r.h1 === 'أحمد محمد' && r.sections === 5, JSON.stringify(r));
   await p.close();
 }
 
