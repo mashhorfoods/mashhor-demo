@@ -186,21 +186,29 @@ async function audit(page, w, loc, deep) {
   await p.waitForTimeout(500);
   for (const [c, d] of await p.evaluate(INPAGE)) add(c, page, w, loc, d);
   errs.forEach((e) => add('console', page, w, loc, e.slice(0, 120)));
-  // header controls: burger / search / help at this width
-  const controls = await p.evaluate(() => Array.from(document.querySelectorAll('header button[aria-expanded], header [aria-haspopup]')).filter((n) => n.checkVisibility()).map((n) => n.getAttribute('aria-label') || n.textContent.trim()));
-  for (const label of controls) {
-    const sel = `header button[aria-expanded]:visible, header [aria-haspopup]:visible`;
-    const btn = p.locator(sel).filter({ has: p.locator(`text="${label}"`) }).first();
-    const target = (await btn.count()) ? btn : p.locator(`header [aria-label="${label}"]`).first();
-    if (!(await target.count())) continue;
-    await target.click(); await p.waitForTimeout(350);
-    const r = await p.evaluate(() => ({ hs: document.documentElement.scrollWidth > document.documentElement.clientWidth, open: Array.from(document.querySelectorAll('header [aria-expanded="true"]')).length, bodyOv: getComputedStyle(document.body).overflow }));
-    if (r.hs) add('overflow-menu-open', page, w, loc, label);
-    if (!r.open) add('menu-not-open', page, w, loc, label);
-    await p.keyboard.press('Escape'); await p.waitForTimeout(250);
-    const after = await p.evaluate(() => ({ open: document.querySelectorAll('header [aria-expanded="true"]').length, focusedLabel: document.activeElement?.getAttribute('aria-label') || document.activeElement?.textContent.trim() }));
-    if (after.open) add('escape-no-close', page, w, loc, label);
-    if (after.focusedLabel !== label && !(after.focusedLabel ?? '').includes(label)) add('focus-not-returned', page, w, loc, `${label} → ${after.focusedLabel}`);
+  // header controls: burger / search / help at this width. Scoped per <header>
+  // element, not the whole document — styleguide.html mounts the header twice
+  // (home + booking variant, side by side for reference), and an unscoped
+  // aria-expanded query let one instance's state leak into the other's
+  // Escape/focus-return check.
+  const headerCount = await p.evaluate(() => document.querySelectorAll('header').length);
+  for (let hi = 0; hi < headerCount; hi++) {
+    const headerLoc = p.locator('header').nth(hi);
+    const controls = await headerLoc.evaluate((h) => Array.from(h.querySelectorAll('button[aria-expanded], [aria-haspopup]')).filter((n) => n.checkVisibility()).map((n) => n.getAttribute('aria-label') || n.textContent.trim()));
+    for (const label of controls) {
+      const sel = `button[aria-expanded]:visible, [aria-haspopup]:visible`;
+      const btn = headerLoc.locator(sel).filter({ has: p.locator(`text="${label}"`) }).first();
+      const target = (await btn.count()) ? btn : headerLoc.locator(`[aria-label="${label}"]`).first();
+      if (!(await target.count())) continue;
+      await target.click(); await p.waitForTimeout(350);
+      const r = await headerLoc.evaluate((h) => ({ hs: document.documentElement.scrollWidth > document.documentElement.clientWidth, open: Array.from(h.querySelectorAll('[aria-expanded="true"]')).length, bodyOv: getComputedStyle(document.body).overflow }));
+      if (r.hs) add('overflow-menu-open', page, w, loc, label);
+      if (!r.open) add('menu-not-open', page, w, loc, label);
+      await p.keyboard.press('Escape'); await p.waitForTimeout(250);
+      const after = await headerLoc.evaluate((h) => ({ open: h.querySelectorAll('[aria-expanded="true"]').length, focusedLabel: document.activeElement?.getAttribute('aria-label') || document.activeElement?.textContent.trim() }));
+      if (after.open) add('escape-no-close', page, w, loc, label);
+      if (after.focusedLabel !== label && !(after.focusedLabel ?? '').includes(label)) add('focus-not-returned', page, w, loc, `${label} → ${after.focusedLabel}`);
+    }
   }
   if (deep) {
     // focus rings on the first 30 tab stops
