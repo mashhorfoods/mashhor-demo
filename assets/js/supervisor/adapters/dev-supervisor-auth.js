@@ -22,7 +22,7 @@ const rand = (n = 24) => { const a = new Uint8Array(n); crypto.getRandomValues(a
 /** The seeded demo supervisor — matches slug 'supervisor-1' so its public profile and portal line up in QA. */
 export const DEV_SUPERVISOR = {
   id: 'supervisor-1', slug: 'supervisor-1', status: 'active',
-  nameAr: 'مشرف تجريبي (تطوير)', nameEn: 'Demo Supervisor (development)', titleAr: null, titleEn: null, bioAr: null, bioEn: null,
+  nameAr: 'منسق تجريبي (تطوير)', nameEn: 'Demo Coordinator (development)', titleAr: null, titleEn: null, bioAr: null, bioEn: null,
   image: null, languages: ['ar', 'en'], specialties: [], services: [],
   phone: '', whatsapp: '', email: 'demo-supervisor@dev.invalid', city: '',
   internalId: 'dev-demo', notificationPrefs: {}, createdAt: '2026-06-01T09:00:00.000Z', updatedAt: '2026-06-01T09:00:00.000Z', dev: true,
@@ -40,7 +40,7 @@ function issue(db) {
 
 export const DEV_SUPERVISOR_AUTH = registerSupervisorAuthProvider({
   id: 'dev-supervisor-auth', dev: true,
-  labelAr: 'مصادقة تطويرية للمشرف', labelEn: 'Development supervisor authentication',
+  labelAr: 'مصادقة تطويرية للمنسق', labelEn: 'Development coordinator authentication',
   async signIn({ email, password }) {
     await wait();
     if (String(email ?? '').trim().toLowerCase() !== DEV_SUPERVISOR.email || !password) throw new SupervisorAuthError('invalid', 'invalid credentials');

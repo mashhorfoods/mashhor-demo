@@ -59,7 +59,7 @@ export const FOOTER_COLUMNS = [
       { href: 'destinations/',   labelAr: 'الوجهات',          labelEn: 'Destinations' },
       { href: 'offers/',         labelAr: 'العروض والباقات',  labelEn: 'Offers & packages' },
       { href: 'about/',          labelAr: 'من نحن',           labelEn: 'About us' },
-      { href: 'supervisors/',    labelAr: 'مشرفو السفر',      labelEn: 'Travel supervisors' },
+      { href: 'supervisors/',    labelAr: 'منسقو السفر',      labelEn: 'Travel coordinators' },
       { href: 'help/',           labelAr: 'مركز المساعدة',    labelEn: 'Help centre' },
       { href: 'help/faq/',       labelAr: 'الأسئلة الشائعة',  labelEn: 'FAQ' },
       { href: 'help/contact/',   labelAr: 'تواصل معنا',       labelEn: 'Contact us' },

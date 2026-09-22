@@ -34,7 +34,7 @@ const NAV = [
   { id: 'destinations', group: 'website', icon: 'no-location', href: 'admin/destinations/', labelAr: 'الوجهات', labelEn: 'Destinations' },
   { id: 'offers', group: 'website', icon: 'no-price-tag', href: 'admin/offers/', labelAr: 'العروض والباقات', labelEn: 'Offers & Packages' },
   { id: 'publishing', group: 'website', icon: 'no-publish', href: 'admin/publishing/', labelAr: 'مركز النشر', labelEn: 'Publishing Center' },
-  { id: 'supervisors', group: 'website', icon: 'no-supervisor', href: 'admin/supervisors/', labelAr: 'المشرفون', labelEn: 'Supervisors', permission: 'supervisor.view' },
+  { id: 'supervisors', group: 'operations', icon: 'no-supervisor', href: 'admin/supervisors/', labelAr: 'المنسقون', labelEn: 'Coordinators', permission: 'supervisor.view' },
   { id: 'customers', group: 'business', icon: 'no-customer', href: 'admin/customers/', labelAr: 'العملاء', labelEn: 'Customers', permission: 'customer.view' },
   { id: 'leads', group: 'business', icon: 'no-lead', href: 'admin/leads/', labelAr: 'العملاء المحتملون والإسناد', labelEn: 'Leads / Attribution', permission: 'attribution.view' },
   { id: 'bookings', group: 'business', icon: 'no-ticket', href: 'admin/bookings/', labelAr: 'الحجوزات', labelEn: 'Bookings' },
@@ -46,12 +46,12 @@ const NAV = [
   { id: 'notifications', group: 'operations', icon: 'no-notification', href: 'admin/notifications/', labelAr: 'الإشعارات', labelEn: 'Notifications' },
   { id: 'reports', group: 'insights', icon: 'no-chart', href: 'admin/reports/', labelAr: 'التقارير', labelEn: 'Reports', permission: 'report.view' },
   { id: 'audit', group: 'insights', icon: 'no-documents', href: 'admin/audit/', labelAr: 'النشاط', labelEn: 'Activity' },
-  { id: 'staff', group: 'control', icon: 'no-shield', href: 'admin/staff/', labelAr: 'الموظفون والصلاحيات', labelEn: 'Staff & Permissions', permission: 'staff.manage' },
-  { id: 'rules', group: 'control', icon: 'no-settings', href: 'admin/business-rules/', labelAr: 'قواعد العمل', labelEn: 'Business Rules', permission: 'rules.view' },
-  { id: 'settings', group: 'control', icon: 'no-settings', href: 'admin/settings/', labelAr: 'الإعدادات', labelEn: 'Settings' },
-  { id: 'sign-out', group: 'control', icon: 'no-logout', href: 'admin/sign-out/', labelAr: 'تسجيل الخروج', labelEn: 'Sign out' },
+  { id: 'staff', group: 'system', icon: 'no-shield', href: 'admin/staff/', labelAr: 'الموظفون والصلاحيات', labelEn: 'Staff & Permissions', permission: 'staff.manage' },
+  { id: 'rules', group: 'system', icon: 'no-settings', href: 'admin/business-rules/', labelAr: 'قواعد العمل', labelEn: 'Business Rules', permission: 'rules.view' },
+  { id: 'settings', group: 'system', icon: 'no-settings', href: 'admin/settings/', labelAr: 'الإعدادات', labelEn: 'Settings' },
+  { id: 'sign-out', group: 'system', icon: 'no-logout', href: 'admin/sign-out/', labelAr: 'تسجيل الخروج', labelEn: 'Sign out' },
 ];
-const NAV_GROUP_LABEL = { command: 'ops.navGroup.command', website: 'ops.navGroup.website', business: 'ops.navGroup.business', operations: 'ops.navGroup.operations', insights: 'ops.navGroup.insights', control: 'ops.navGroup.control' };
+const NAV_GROUP_LABEL = { command: 'ops.navGroup.command', website: 'ops.navGroup.website', business: 'ops.navGroup.business', operations: 'ops.navGroup.operations', insights: 'ops.navGroup.insights', system: 'ops.navGroup.system' };
 function opsNav(current, staff = null) {
   const items = NAV.filter((item) => !item.permission || !staff || hasOpsPermission(staff, item.permission));
   let lastGroup = null;
