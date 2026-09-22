@@ -79,7 +79,12 @@ for (const s of services) {
     ok(`${T} hero CTA follows the record (${expected})`, r.heroPrimary === expected, `${r.heroPrimary}`);
     ok(`${T} hero CTA destination`, (s.primary === 'expert') ? /\/help\/contact\/$/.test(r.heroPrimaryHref) : /\/mashhor-demo\/book\/\?vertical=[a-z]+(&service=[a-z]+)?$/.test(r.heroPrimaryHref), `${r.heroPrimaryHref}`);
     ok(`${T} secondary is subordinate and differs`, !!r.heroSecondary && r.heroSecondary !== r.heroPrimary);
-    ok(`${T} one dominant action (hero + footer repeat it; header global)`, r.primaries.length <= 3 && new Set(r.primaries.filter((x) => x !== r.primaries[0] || true)).size <= 2, r.primaries.join('|'));
+    // Exactly one primary button per region — header (persistent nav, always
+    // generic), hero (page-specific) and footer (site-wide closing CTA).
+    // The footer's own CTA is a fixed, generic label (never mirrors the
+    // hero's page-specific wording the way the removed final-CTA-band did),
+    // so distinct wording across the three is expected, not a duplicate ask.
+    ok(`${T} one dominant action per region (header, hero, footer)`, r.primaries.length <= 3, r.primaries.join('|'));
     ok(`${T} no empty visual sections`, r.emptySections === 0, `${r.emptySections}`);
     ok(`${T} all content sections present`, ['overview', 'features', 'benefits', 'steps', 'requirements', 'related', 'support'].every((x) => r.visible.includes(x)), r.visible.join(','));
     ok(`${T} features 3–4, benefits 3–4, steps 3–5`, r.features >= 3 && r.features <= 4 && r.benefits >= 3 && r.benefits <= 4 && r.steps >= 3 && r.steps <= 5, `${r.features}/${r.benefits}/${r.steps}`);

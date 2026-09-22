@@ -229,7 +229,6 @@ export function mountSupervisor({
     showSection('trust', trustSection());
     showSection('contact', contactSection(sup));
     showSection('discovery', discoverySection(sup));
-    showSection('cta', ctaBand(sup));
     qsa('.c-bottom-nav__item', root).forEach((a) => a.removeAttribute('aria-current'));
   };
 
