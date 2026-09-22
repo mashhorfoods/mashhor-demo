@@ -11,7 +11,9 @@ import { opsData } from '../data.js';
 import { mountOpsPortal, loadRegion, pageTitle, dataTable, dateTime } from './shell.js';
 
 const RELATED_ROUTE = { booking: 'admin/bookings/', supervisor: 'admin/supervisors/', service: 'admin/services/', businessRule: 'admin/business-rules/' };
-const related = (a) => {
+// Exported so the dashboard's compact "Recent activity" widget can render
+// the same related-item link/plain-text logic without a second copy.
+export const related = (a) => {
   const label = `${a.entityType}${a.entityId ? ` · ${a.entityId}` : ''}`;
   const base = RELATED_ROUTE[a.entityType];
   return base && a.entityId ? el('a', { class: 'c-svp-link', href: route(`${base}?id=${encodeURIComponent(a.entityId)}`) }, label) : label;

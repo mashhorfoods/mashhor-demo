@@ -6,7 +6,8 @@ import { t, pick } from '../../core/i18n.js';
 import { route } from '../../data/config.js';
 import { icon } from '../../components/ui.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, loadRegion, debouncedRun, block, metricCard, opsStatusBadge, taskStatusBadge, escalationStatusBadge, dateTime } from './shell.js';
+import { mountOpsPortal, loadRegion, debouncedRun, block, metricCard, opsStatusBadge, taskStatusBadge, escalationStatusBadge, dateTime, rows } from './shell.js';
+import { related as auditRelated } from './audit.js';
 
 const QUICK_ACTIONS = [
   { key: 'services', href: 'admin/services/', icon: 'no-booking', titleKey: 'ops.services.title' },
@@ -60,6 +61,8 @@ export function mountOpsDashboard({ root = document } = {}) {
     const escHost = el('div', { dataset: { region: 'escalations' } });
     const bkHost = el('div', { dataset: { region: 'bookings' } });
     const coordHost = el('div', { dataset: { region: 'coordinator-activity' } });
+    const webHost = el('div', { dataset: { region: 'website-activity' } });
+    const recentHost = el('div', { dataset: { region: 'recent-activity' } });
     // Dashboard-refinement brief §7: page context, then key operational
     // metrics, then the priority-item regions below — metricsHost used to be
     // built (see the returned `metrics` handle) but never mounted anywhere,
@@ -67,19 +70,26 @@ export function mountOpsDashboard({ root = document } = {}) {
     // counts resolve, same async-region shape as tasks/esc/bk below.
     const metricsHost = el('div', { class: 'c-svp-metrics' });
     const quickActions = QUICK_ACTIONS.filter((a) => !a.permission || can(a.permission));
+    // Command Center home hierarchy (brief §3): welcome → needs attention →
+    // today's bookings → coordinator activity → website activity → recent
+    // activity → quick actions last. Tasks + escalations are open work that
+    // needs a human decision, so they render under one "Needs attention"
+    // head instead of two equal-weight, unlabelled blocks.
     const sections = [
       el('div', { class: 'l-stack l-stack--8' }, [el('h1', { class: 't-h1' }, t('ops.dash.welcome', pick(staff, 'name') || staff.email)), el('p', { class: 't-body t-muted' }, t('ops.dash.text'))]),
       block(t('ops.dash.search.title'), globalSearch(), { id: 'dash-search' }),
       metricsHost,
-      quickActions.length ? block(t('ops.dash.quickActions'), el('div', { class: 'l-cluster l-cluster--8' }, quickActions.map((a) =>
-        el('a', { class: 'c-btn c-btn--tertiary c-btn--sm', href: route(a.href) }, [icon(a.icon, { size: 'sm' }), el('span', {}, t(a.titleKey))]))), { id: 'dash-quick-actions' }) : null,
-      el('div', { class: 'c-acct-grid' }, [
+      block(t('ops.dash.needsAttention'), el('div', { class: 'c-acct-grid' }, [
         block(t('ops.tasks.title'), tasksHost, { id: 'dash-tasks', action: el('a', { class: 'c-btn c-btn--tertiary c-btn--sm', href: route('admin/tasks/') }, t('acct.viewAll')) }),
         block(t('ops.escalations.title'), escHost, { id: 'dash-esc', action: el('a', { class: 'c-btn c-btn--tertiary c-btn--sm', href: route('admin/escalations/') }, t('acct.viewAll')) }),
-      ]),
+      ]), { id: 'dash-needs-attention' }),
       block(t('ops.bookings.title'), bkHost, { id: 'dash-bookings', action: el('a', { class: 'c-btn c-btn--tertiary c-btn--sm', href: route('admin/bookings/') }, t('acct.viewAll')) }),
     ];
     if (can('attribution.view')) sections.push(block(t('ops.dash.coordinatorActivity'), coordHost, { id: 'dash-coordinator-activity', action: el('a', { class: 'c-btn c-btn--tertiary c-btn--sm', href: route('admin/leads/') }, t('acct.viewAll')) }));
+    sections.push(block(t('ops.dash.websiteActivity'), webHost, { id: 'dash-website-activity', action: el('a', { class: 'c-btn c-btn--tertiary c-btn--sm', href: route('admin/publishing/') }, t('acct.viewAll')) }));
+    if (can('audit.view')) sections.push(block(t('ops.dash.recentActivity'), recentHost, { id: 'dash-recent-activity', action: el('a', { class: 'c-btn c-btn--tertiary c-btn--sm', href: route('admin/audit/') }, t('acct.viewAll')) }));
+    if (quickActions.length) sections.push(block(t('ops.dash.quickActions'), el('div', { class: 'l-cluster l-cluster--8' }, quickActions.map((a) =>
+      el('a', { class: 'c-btn c-btn--tertiary c-btn--sm', href: route(a.href) }, [icon(a.icon, { size: 'sm' }), el('span', {}, t(a.titleKey))]))), { id: 'dash-quick-actions' }));
     main.replaceChildren(...sections);
     const tasks = loadRegion(tasksHost, async () => (await opsData.tasks({ status: 'open', page: 1, pageSize: 5 })).items, {
       paint: (items) => items.length
@@ -104,8 +114,43 @@ export function mountOpsDashboard({ root = document } = {}) {
           ])))
         : el('p', { class: 't-body-sm t-muted' }, t('ops.attribution.empty.title')),
     }) : null;
-    const [t1, t2, , overview] = await Promise.all([
-      tasks.run(), esc.run(), coord?.run(),
+    // "Website activity" (brief §9) — the same destinations/offers admin
+    // lists the Publishing Center (publishing.js) already reads, reduced to
+    // the two counts that actually need a decision: drafts, and published
+    // records with edits not yet republished. No new backend, no invented
+    // metric; a full item-by-item feed lives at admin/publishing/ already.
+    const web = loadRegion(webHost, async () => {
+      const [destinations, offers] = await Promise.all([
+        opsData.destinationsAdmin({ pageSize: 100 }).catch(() => ({ items: [] })),
+        opsData.offersAdmin({ pageSize: 100 }).catch(() => ({ items: [] })),
+      ]);
+      const all = [...destinations.items, ...offers.items];
+      return {
+        drafts: all.filter((x) => x.publishStatus === 'draft').length,
+        pendingChanges: all.filter((x) => x.publishStatus === 'published' && x.hasUnpublishedChanges).length,
+        published: all.filter((x) => x.publishStatus === 'published').length,
+      };
+    }, {
+      paint: (counts) => (counts.drafts || counts.pendingChanges || counts.published)
+        ? rows([
+            [t('ops.publishing.pendingChanges'), String(counts.pendingChanges)],
+            [t('ops.publishing.drafts'), String(counts.drafts)],
+            [t('ops.publishing.published'), String(counts.published)],
+          ])
+        : el('p', { class: 't-body-sm t-muted' }, t('ops.dash.websiteActivity.empty')),
+    });
+    // "Recent activity" (brief §11) — the same audit_events feed
+    // admin/audit/ shows in full, capped to 5 rows for the home page.
+    const recent = can('audit.view') ? loadRegion(recentHost, async () => (await opsData.audit({ page: 1, pageSize: 5 })).items, {
+      paint: (items) => items.length
+        ? el('ul', { class: 'c-svp-mini-list', role: 'list' }, items.slice().reverse().map((a) => el('li', {}, [
+            el('span', {}, `${a.actorId} (${a.actorRole}) — ${a.action}`),
+            el('span', { class: 't-body-sm t-muted' }, [auditRelated(a), ' · ', dateTime(a.at)]),
+          ])))
+        : el('p', { class: 't-body-sm t-muted' }, t('ops.audit.empty.title')),
+    }) : null;
+    const [t1, t2, , , , overview] = await Promise.all([
+      tasks.run(), esc.run(), coord?.run(), web.run(), recent?.run(),
       // opsData.overview() gives the true open counts (this list is capped
       // at pageSize:5 above, so its own .length would silently under-report
       // past 5) — overview() is gated on customer.view, a permission the
@@ -137,7 +182,7 @@ export function mountOpsDashboard({ root = document } = {}) {
     render(metricsHost, metrics);
     return {
       metrics,
-      regions: { tasks, esc, bk, coord },
+      regions: { tasks, esc, bk, coord, web, recent },
     };
   } });
 }

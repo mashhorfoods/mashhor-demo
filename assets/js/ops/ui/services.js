@@ -7,7 +7,7 @@ import { t, pick } from '../../core/i18n.js';
 import { route } from '../../data/config.js';
 import { icon, toast } from '../../components/ui.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, notFoundBlock, actionForm, dataTable, block, rows } from './shell.js';
+import { mountOpsPortal, loadRegion, pageTitle, notFoundBlock, actionForm, dataTable, block, rows, busyButton } from './shell.js';
 
 const columns = [
   { labelKey: 'ops.services.col.id', render: (s) => el('a', { class: 'c-svp-link', href: route(`admin/services/?id=${encodeURIComponent(s.id)}`) }, s.id) },
@@ -52,7 +52,17 @@ function mountServiceDetail({ root, id }) {
       ];
 
       if (can('service.manage')) {
-        const active = el('input', { class: 'c-choice__input', type: 'checkbox', name: 'active', ...(fresh.active ? { checked: true } : {}) });
+        // A distinct, one-click action — not a checkbox buried in the general
+        // edit form below — mirroring the supervisors screen's own
+        // activate/deactivate control (ops/ui/supervisors.js), same
+        // opsData.updateService() PATCH the old checkbox used.
+        const activeNow = fresh.active;
+        const toggle = busyButton(t(activeNow ? 'ops.services.deactivate' : 'ops.services.activate'), activeNow ? 'tertiary' : 'primary', async () => {
+          await opsData.updateService(id, { active: !activeNow });
+          toast({ title: t('ops.services.updated'), variant: 'success', duration: 3000 }); await refresh();
+        });
+        nodes.push(block(t('ops.services.manage.title'), toggle, { id: 'ops-svc-manage' }));
+
         const bookingEnabled = el('input', { class: 'c-choice__input', type: 'checkbox', name: 'bookingEnabled', ...(fresh.bookingEnabled ? { checked: true } : {}) });
         const workflowType = el('input', { id: 'ops-svc-workflowType', name: 'workflowType', class: 'c-field__control', type: 'text', value: fresh.workflowType ?? '' });
         const supplierType = el('input', { id: 'ops-svc-supplierType', name: 'supplierType', class: 'c-field__control', type: 'text', value: fresh.supplierType ?? '' });
@@ -60,11 +70,10 @@ function mountServiceDetail({ root, id }) {
         const form = actionForm({
           submitLabel: t('acct.set.save'),
           onSubmit: async (fd) => {
-            await opsData.updateService(id, { active: !!fd.get('active'), bookingEnabled: !!fd.get('bookingEnabled'), workflowType: fd.get('workflowType') || null, supplierType: fd.get('supplierType') || null, operationalRequirements: fd.get('operationalRequirements') || null });
+            await opsData.updateService(id, { bookingEnabled: !!fd.get('bookingEnabled'), workflowType: fd.get('workflowType') || null, supplierType: fd.get('supplierType') || null, operationalRequirements: fd.get('operationalRequirements') || null });
             toast({ title: t('acct.set.saved'), variant: 'success', duration: 3000 }); await refresh();
           },
           children: [
-            el('label', { class: 'c-choice' }, [active, el('span', { class: 'c-choice__text' }, t('ops.services.col.active'))]),
             el('label', { class: 'c-choice' }, [bookingEnabled, el('span', { class: 'c-choice__text' }, t('ops.services.col.bookingEnabled'))]),
             el('div', { class: 'c-field' }, [el('label', { class: 'c-field__label', for: 'ops-svc-workflowType' }, t('ops.services.col.workflowType')), workflowType]),
             el('div', { class: 'c-field' }, [el('label', { class: 'c-field__label', for: 'ops-svc-supplierType' }, t('ops.services.col.supplierType')), supplierType]),
