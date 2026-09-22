@@ -40,7 +40,13 @@ export function createApp() {
   async function handle(req, res) {
     const url = new URL(req.url, 'http://x'); const path = url.pathname; const origin = config.publicUrl || `http://${req.headers.host}`;
     res.setHeader('X-Content-Type-Options', 'nosniff'); res.setHeader('Referrer-Policy', 'no-referrer');
-    if (!path.startsWith('/files/')) res.setHeader('X-Frame-Options', 'DENY');   // files may be framed by the website only (frame-ancestors, set in routes.file)
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
+    if (!path.startsWith('/files/')) {
+      // /files/:id sets its own inline-friendly CSP (routes.mjs); every other response here is API JSON, so
+      // it never needs style/script sources — a locked-down default-src is strictly tighter than that route's.
+      res.setHeader('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none'");
+      res.setHeader('X-Frame-Options', 'DENY');
+    }
     if (config.cookie.secure) res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
     if (!cors(req, res)) { if (req.method === 'OPTIONS') return empty(res, 403); warn('cors.rejected', { origin: String(req.headers.origin).slice(0, 80) }); return fail(res, 403, 'forbidden'); }
     if (req.method === 'OPTIONS') return empty(res);

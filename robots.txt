@@ -21,4 +21,22 @@ Disallow: /booking/
 Disallow: /account/
 Disallow: /trips/
 
+# Staff portal — every route is noindex already; this is just a backstop.
+Disallow: /admin/
+
+# Supervisor portal — the coordinator's own tools, not their public profile
+# (/supervisor/<slug>/, left crawlable on purpose).
+Disallow: /supervisor/dashboard/
+Disallow: /supervisor/bookings/
+Disallow: /supervisor/customers/
+Disallow: /supervisor/leads/
+Disallow: /supervisor/performance/
+Disallow: /supervisor/revenue/
+Disallow: /supervisor/settings/
+Disallow: /supervisor/notifications/
+Disallow: /supervisor/sign-in/
+Disallow: /supervisor/sign-out/
+Disallow: /supervisor/forgot-password/
+Disallow: /supervisor/reset-password/
+
 Sitemap: https://mashhorfoods.github.io/mashhor-demo/sitemap.xml
