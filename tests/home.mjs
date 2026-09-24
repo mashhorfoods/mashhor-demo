@@ -26,6 +26,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
     const r = await p.evaluate(() => {
       const vis = (sel) => Array.from(document.querySelectorAll(sel)).filter((n) => n.checkVisibility());
       const order = Array.from(document.querySelectorAll('main > section')).map((s) => s.getAttribute('aria-labelledby'));
+      const navOrder = Array.from(document.querySelectorAll('.c-gh__list > li[data-nav-id]')).map((li) => li.dataset.navId);
       const headings = Array.from(document.querySelectorAll('h1,h2,h3')).map((h) => Number(h.tagName[1]));
       let jumps = 0; for (let i = 1; i < headings.length; i++) if (headings[i] - headings[i - 1] > 1) jumps++;
       const small = Array.from(document.querySelectorAll('main p, main a, main button, main span')).filter((n) => n.checkVisibility() && n.textContent.trim() && parseFloat(getComputedStyle(n).fontSize) < 12).length;
@@ -34,7 +35,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
         dir: document.documentElement.dir, lang: document.documentElement.lang,
         hScroll: document.documentElement.scrollWidth > document.documentElement.clientWidth,
         h1: document.querySelectorAll('h1').length, jumps,
-        order,
+        order, navOrder,
         primaries: vis('.c-btn--primary').length,
         primaryTexts: vis('.c-btn--primary').map((n) => n.textContent.trim()),
         tabs: document.querySelectorAll('.c-search__tab').length,
@@ -66,6 +67,14 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
     ok(`${T} one h1`, r.h1 === 1);
     ok(`${T} heading order`, r.jumps === 0, `${r.jumps}`);
     ok(`${T} section order`, r.order.join(',') === 'hero-title,destinations-title,services-title,journey-title,team-title,choose-title,providers-title,offers-title,newsletter-title,support-title', r.order.join(','));
+    // Header nav order must follow the homepage's own section order (the brief's explicit
+    // invariant, also documented at NAV_PRIMARY in data/navigation.js) — every nav item that
+    // has a homepage section maps to it here; items with no section (e.g. none currently)
+    // would be excluded from the comparison, not a violation.
+    const NAV_TO_SECTION = { destinations: 'destinations-title', services: 'services-title', offers: 'offers-title', help: 'support-title' };
+    const expectedFromNav = r.navOrder.filter((id) => id !== 'home').map((id) => NAV_TO_SECTION[id]).filter(Boolean);
+    const expectedFromSections = r.order.filter((s) => Object.values(NAV_TO_SECTION).includes(s));
+    ok(`${T} header nav order matches homepage section order`, expectedFromNav.join(',') === expectedFromSections.join(','), `nav:${expectedFromNav.join(',')} vs sections:${expectedFromSections.join(',')}`);
     ok(`${T} header + footer present, footer CTA on`, r.header && r.footer && r.footerCta);
     ok(`${T} 8 search categories`, r.tabs === 8, `${r.tabs}`);
     ok(`${T} trip type control`, r.segmented === 3);

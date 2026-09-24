@@ -62,8 +62,12 @@ export function mobileDrawer({ signal } = {}) {
   const buildBody = () => el('div', { class: 'c-gh__drawer-body' }, [
     el('nav', { 'aria-label': isAr ? 'القائمة الرئيسية' : 'Main menu' }, NAV_PRIMARY.map((item) => {
       const menu = item.menu && MENUS[item.menu];
-      if (menu) return accordion({ ...menu, titleAr: item.labelAr, titleEn: item.labelEn });
-      return el('div', { class: 'c-gh__m-item' }, [
+      if (menu) {
+        const node = accordion({ ...menu, titleAr: item.labelAr, titleEn: item.labelEn });
+        node.dataset.navId = item.id;
+        return node;
+      }
+      return el('div', { class: 'c-gh__m-item', dataset: { navId: item.id } }, [
         el('a', { class: 'c-gh__m-link', href: route(item.href) }, [
           el('span', {}, pick(item, 'label')),
           icon('no-chevron-end', { size: 'sm', flip: true, className: 'c-gh__chev' }),

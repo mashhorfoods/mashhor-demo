@@ -57,6 +57,10 @@
 
   <main id="main" class="l-page__main">
 
+    <!-- Section order below is the site's single source of truth: the header's
+         primary nav (assets/js/data/navigation.js NAV_PRIMARY) must follow this
+         same top-to-bottom order for destinations/services/offers/help, not the
+         other way round. tests/home.mjs asserts the two stay in sync. -->
     <!-- 01 — HERO / BOOKING ENTRY ============================================ -->
     <section class="l-section c-hero c-hero--photo c-hero--full c-hero--home" aria-labelledby="hero-title">
       <div class="l-container">

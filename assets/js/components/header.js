@@ -61,7 +61,7 @@ export function globalHeader({ current = null, variant = 'default', onSearch = n
     const active = item.id === current;
 
     if (!menu) {
-      return el('li', {}, el('a', {
+      return el('li', { dataset: { navId: item.id } }, el('a', {
         class: 'c-gh__link', href: route(item.href),
         ...(active ? { 'aria-current': 'page' } : {}),
       }, pick(item, 'label')));
@@ -83,9 +83,9 @@ export function globalHeader({ current = null, variant = 'default', onSearch = n
     // action button on the far side of the bar.
     if (menu.type === 'mega' || menu.placement === 'end') {
       megaPanels.push(panel);
-      return el('li', {}, trigger);
+      return el('li', { dataset: { navId: item.id } }, trigger);
     }
-    return el('li', { class: 'u-relative' }, [trigger, panel]);
+    return el('li', { class: 'u-relative', dataset: { navId: item.id } }, [trigger, panel]);
   });
 
   /* ---- actions ---- */

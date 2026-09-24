@@ -21,11 +21,20 @@
    PRIMARY NAVIGATION — §03. Five items, deliberately.
    Every service does NOT get a top-level slot (§04); they live in the mega
    menu. `menu` names the panel a item opens.
+
+   ORDER INVARIANT: after 'home', every item's order here must match the
+   top-to-bottom order of its section on the homepage (index.html's
+   data-home attributes, assembled by components/home.js's mountHome()) —
+   destinations before services before offers before help/support, because
+   that is the homepage's own order. The homepage is the single source of
+   truth; this list follows it, never the reverse. tests/home.mjs asserts
+   the two stay in sync, so a homepage reorder without a matching edit here
+   fails the suite instead of drifting silently.
    ----------------------------------------------------------------------- */
 export const NAV_PRIMARY = [
   { id: 'home',        href: '',                 labelAr: 'الرئيسية',        labelEn: 'Home' },
-  { id: 'services',    href: 'services/',        labelAr: 'خدماتنا',          labelEn: 'Services',    menu: 'services' },
   { id: 'destinations',href: 'destinations/',    labelAr: 'الوجهات',          labelEn: 'Destinations',menu: 'destinations' },
+  { id: 'services',    href: 'services/',        labelAr: 'خدماتنا',          labelEn: 'Services',    menu: 'services' },
   { id: 'offers',      href: 'offers/',          labelAr: 'العروض والباقات',  labelEn: 'Offers & packages', menu: 'offers' },
   { id: 'help',        href: 'help/',            labelAr: 'المساعدة',         labelEn: 'Help',        menu: 'help' },
 ];

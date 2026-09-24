@@ -8,7 +8,10 @@ p.on('pageerror',e=>errs.push(e.message)); p.on('console',m=>{if(m.type()==='err
 await p.goto(process.env.TEST_ORIGIN + '/index.html',{waitUntil:'networkidle'});
 await p.waitForTimeout(1000);
 
-const svc = p.locator('.c-gh__link[aria-haspopup]').first();
+// Identified by data-nav-id (NAV_PRIMARY's own item id), not position — the header nav order
+// follows the homepage's own section order (assets/js/data/navigation.js), so a reorder there
+// must not silently break which trigger "svc"/"dest" mean here.
+const svc = p.locator('li[data-nav-id="services"] .c-gh__link[aria-haspopup]');
 // §22 open on CLICK, not hover
 await svc.hover(); await p.waitForTimeout(350);
 ok('hover does NOT open', await svc.getAttribute('aria-expanded')==='false');
@@ -26,7 +29,7 @@ await p.mouse.click(700, 600); await p.waitForTimeout(250);
 ok('outside click closes', await svc.getAttribute('aria-expanded')==='false');
 // only one panel open at a time
 await svc.click(); await p.waitForTimeout(200);
-const dest = p.locator('.c-gh__link[aria-haspopup]').nth(1);
+const dest = p.locator('li[data-nav-id="destinations"] .c-gh__link[aria-haspopup]');
 await dest.click(); await p.waitForTimeout(250);
 ok('opening another closes the first', await svc.getAttribute('aria-expanded')==='false' && await dest.getAttribute('aria-expanded')==='true');
 await p.keyboard.press('Escape'); await p.waitForTimeout(200);
