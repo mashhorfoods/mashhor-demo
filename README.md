@@ -20,6 +20,7 @@ inherits it.
 | **Living style guide** | `styleguide.html` — every token, component and state, in RTL and LTR |
 | **Homepage** | `index.html` — the production homepage (Stage 10.4) |
 | **Brand assets** | [`assets/brand/README.md`](assets/brand/README.md) |
+| **Food-supplier template** | [`templates/food-supplier/`](templates/food-supplier/README.md) — a separate single-page demo for a rice/foodstuff supplier: no logo, no country, USD prices, placeholder contacts; images from `tools/build-food-supplier-images.mjs`; `tests/food-supplier.mjs` |
 | **Stages 11–12.1 report (PDF)** | [`docs/STAGES-11-12-12.1-REPORT-2026-09-17.pdf`](docs/STAGES-11-12-12.1-REPORT-2026-09-17.pdf) — booking engine, customer account and production integrations: built, verified, findings, security, integration status, required inputs |
 | **Programme report (PDF)** | [`docs/PROJECT-REPORT-2026-09-16.pdf`](docs/PROJECT-REPORT-2026-09-16.pdf) — the full Stage 10 report: scope, architecture, verification, cleanup, performance, remaining inputs, next stages |
 | **Status report** | [`docs/STATUS-REPORT-2026-09-16.pdf`](docs/STATUS-REPORT-2026-09-16.pdf) — what is built, how it was verified, what is still needed |

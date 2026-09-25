@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="GMP">
+  <circle cx="60" cy="60" r="56" fill="#fff" stroke="#2e7d32" stroke-width="4"/>
+  <circle cx="60" cy="60" r="46" fill="none" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <text x="60" y="58" text-anchor="middle" font-family="Poppins, Arial, sans-serif" font-weight="700" font-size="22" fill="#1e5a22">GMP</text>
+  <text x="60" y="76" text-anchor="middle" font-family="Poppins, Arial, sans-serif" font-weight="600" font-size="8.5" letter-spacing="1" fill="#ff9800">GOOD PRACTICE</text>
+</svg>
