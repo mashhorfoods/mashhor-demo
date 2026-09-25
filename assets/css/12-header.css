@@ -67,10 +67,6 @@
     background-image: linear-gradient(to bottom, rgb(0 0 0 / 0.6) 0%, rgb(0 0 0 / 0.38) 60%, rgb(0 0 0 / 0.16) 100%);
     pointer-events: none;
   }
-  /* brand.js's logo(..., { inverse: true }) opts the text wordmark into
-     swapping to light-on-dark exactly like every other dark surface already
-     does (05-primitives.css) — no new logo variant, no redesign. §09 */
-  .c-gh[data-surface="transparent"] .c-logo__text--swaps { color: var(--color-text-inverse); }
   .c-gh[data-surface="transparent"] .c-gh__link,
   .c-gh[data-surface="transparent"] .c-gh__action,
   .c-gh[data-surface="transparent"] .c-gh__secure,
@@ -108,17 +104,16 @@
        the ordinary solid bar. */
     position: relative; z-index: 1;
     display: grid;
-    /* The brand never shrinks: an `auto` track would squeeze the logo image
-       before the nav gives way (seen at 64em in English). Stage 10.11 */
-    grid-template-columns: max-content minmax(0, 1fr) max-content;
+    /* No brand column — the demo carries no logo/wordmark, so the bar is
+       just nav (or the booking "secure" line) against the actions. */
+    grid-template-columns: minmax(0, 1fr) max-content;
     align-items: center;
     gap: var(--space-16);
     padding-block: var(--header-pad-block);
     transition: padding-block var(--duration-base) var(--ease-standard);
   }
 
-  .c-gh__brand { justify-self: start; }
-  .c-gh__nav   { justify-self: center; display: none; }
+  .c-gh__nav   { justify-self: start; display: none; }
   .c-gh__actions { justify-self: end; display: flex; align-items: center; gap: var(--space-4); }
 
   @media (min-width: 64em) { .c-gh__nav { display: block; min-inline-size: 0; } }
@@ -382,7 +377,7 @@
 
   .c-gh__drawer-head {
     position: sticky; inset-block-start: 0; z-index: 1;
-    display: flex; align-items: center; justify-content: space-between; gap: var(--space-16);
+    display: flex; align-items: center; justify-content: flex-end; gap: var(--space-16);
     padding: var(--space-12) var(--space-16);
     background-color: var(--color-surface);
     border-block-end: var(--border-hairline);
@@ -443,14 +438,13 @@
      BOOKING VARIANT — §32. Navigation recedes; the booking owns the page.
      ==================================================================== */
   .c-gh[data-variant="booking"] .c-gh__nav { display: none; }
-  .c-gh[data-variant="booking"] .c-gh__bar { grid-template-columns: max-content minmax(0, 1fr) max-content; }
   .c-gh__secure {
     display: none; align-items: center; gap: var(--space-8);
     font-size: var(--text-caption); color: var(--color-text-secondary);
   }
   .c-gh[data-variant="booking"] .c-gh__secure { display: none; }
   @media (min-width: 48em) {
-    .c-gh[data-variant="booking"] .c-gh__secure { display: inline-flex; justify-self: center; }
+    .c-gh[data-variant="booking"] .c-gh__secure { display: inline-flex; justify-self: start; }
   }
   .c-gh__secure .c-icon { color: var(--color-success); }
 

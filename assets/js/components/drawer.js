@@ -9,7 +9,7 @@ import { getLocale, pick } from '../core/i18n.js';
 import { route } from '../data/config.js';
 import { NAV_PRIMARY, MENUS } from '../data/navigation.js';
 import { icon } from './ui.js';
-import { logo, bookNowButton } from './brand.js';
+import { bookNowButton } from './brand.js';
 import { supportChannelLinks } from './menus.js';
 
 /* ---------------------------------------------------------------------------
@@ -102,7 +102,7 @@ export function mobileDrawer({ signal } = {}) {
       el('div', { class: 'c-gh__drawer-scrim', 'data-gh-drawer-close': '' }),
       el('div', { class: 'c-gh__drawer-panel', role: 'dialog', 'aria-modal': 'true',
                   'aria-label': isAr ? 'القائمة' : 'Menu' }, [
-        el('div', { class: 'c-gh__drawer-head' }, [logo({ size: 'c-logo--sm' }), closeBtn]),
+        el('div', { class: 'c-gh__drawer-head' }, [closeBtn]),
         buildBody(),
         el('div', { class: 'c-gh__drawer-foot' }, bookNowButton({ block: true })),
       ]),

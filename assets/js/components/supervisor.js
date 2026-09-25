@@ -31,7 +31,6 @@ import {
 import { icon, toast, sectionHead } from './ui.js';
 import { serviceCard, destinationCard, offerCard } from './cards.js';
 import { stateRegion, stateBlock, notFoundState } from './states.js';
-import { logo } from './brand.js';
 
 /* ---------------------------------------------------------------------------
    RECORD HELPERS
@@ -55,7 +54,7 @@ export function profileHero(sup, { onContact = null } = {}) {
     el('span', { class: 'c-profile__route', 'aria-hidden': 'true' }),
   ]);
   const copy = el('div', { class: 'c-profile__copy' }, [
-    el('p', { class: 'c-profile__brand' }, [logo({ size: 'c-logo--sm', href: null }), el('span', { class: 't-overline' }, t('sup.brand'))]),
+    el('p', { class: 'c-profile__brand' }, el('span', { class: 't-overline' }, t('sup.brand'))),
     el('h1', { class: 't-display c-profile__name', id: 'profile-title' }, name),
     pick(sup, 'title') ? el('p', { class: 'c-profile__title' }, pick(sup, 'title')) : null,
     status?.id === 'active'

@@ -81,9 +81,9 @@ export function filterControls({ values = {}, onChange, onApply } = {}) {
     select('service', 'offers.filter.service', services.map((s) => ({ value: s.id, label: pick(s, 'title') })), 'offers.filter.anyService'),
     offersHave('duration') ? select('duration', 'offers.filter.duration', DURATION_BUCKETS.map((b) => ({ value: b.id, label: pick(b, 'label') })), 'offers.filter.anyDuration') : null,
     offersHave('price') ? select('price', 'offers.filter.price', [
-      { value: '0-500000', label: isAr ? 'حتى 500,000 ج.س' : 'Up to 500,000 SDG' },
-      { value: '500000-1500000', label: isAr ? '500,000 – 1,500,000 ج.س' : '500,000 – 1,500,000 SDG' },
-      { value: '1500000-', label: isAr ? 'أكثر من 1,500,000 ج.س' : 'Over 1,500,000 SDG' },
+      { value: '0-500000', label: isAr ? 'حتى 500 دولار' : 'Up to 500 USD' },
+      { value: '500000-1500000', label: isAr ? '500 – 1,500 دولار' : '500 – 1,500 USD' },
+      { value: '1500000-', label: isAr ? 'أكثر من 1,500 دولار' : 'Over 1,500 USD' },
     ], 'offers.filter.anyPrice') : null,
     offersHave('period') ? select('period', 'offers.filter.period', monthOptions(), 'offers.filter.anyPeriod') : null,
     select('sort', 'offers.sort.label', OFFER_SORTS.map((s) => ({ value: s.id, label: pick(s, 'label') }))),

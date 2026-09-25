@@ -17,12 +17,12 @@
 export const FLIGHTS = [
   {
     id: 'FL-1001',
-    airline: { code: 'MS', name: 'مصر للطيران', nameEn: 'EgyptAir' },
-    flightNumber: 'MS 852',
+    airline: { code: 'EK', name: 'طيران الإمارات', nameEn: 'Emirates' },
+    flightNumber: 'EK 852',
     recommended: true,
     recommendedReason: { ar: 'أقصر مدة سفر وأمتعة تكفي عائلة', en: 'Shortest journey and enough baggage for a family' },
     legs: [{
-      from: { code: 'KRT', city: 'الخرطوم', cityEn: 'Khartoum' },
+      from: { code: 'DXB', city: 'دبي', cityEn: 'Dubai' },
       to:   { code: 'JED', city: 'جدة',      cityEn: 'Jeddah' },
       departAt: '2026-11-12T08:40:00', arriveAt: '2026-11-12T11:05:00',
       durationMinutes: 145, stops: [],
@@ -31,7 +31,7 @@ export const FLIGHTS = [
     fare: { type: 'flex', refundable: true, changeable: true,
             labelAr: 'تذكرة مرنة — قابلة للتعديل والاسترداد',
             labelEn: 'Flexible fare — changeable and refundable' },
-    price: { amount: 385000, currency: 'SDG', perPerson: true, taxesIncluded: true },
+    price: { amount: 385, currency: 'USD', perPerson: true, taxesIncluded: true },
     seatsLeft: 4,
   },
   {
@@ -40,7 +40,7 @@ export const FLIGHTS = [
     flightNumber: 'TK 678',
     recommended: false,
     legs: [{
-      from: { code: 'KRT', city: 'الخرطوم', cityEn: 'Khartoum' },
+      from: { code: 'DXB', city: 'دبي', cityEn: 'Dubai' },
       to:   { code: 'JED', city: 'جدة',      cityEn: 'Jeddah' },
       departAt: '2026-11-12T22:15:00', arriveAt: '2026-11-13T07:50:00',
       durationMinutes: 575,
@@ -50,7 +50,7 @@ export const FLIGHTS = [
     fare: { type: 'saver', refundable: false, changeable: true,
             labelAr: 'تذكرة موفّرة — تعديل برسوم، غير قابلة للاسترداد',
             labelEn: 'Saver fare — change for a fee, non-refundable' },
-    price: { amount: 298000, currency: 'SDG', perPerson: true, taxesIncluded: true },
+    price: { amount: 298, currency: 'USD', perPerson: true, taxesIncluded: true },
     seatsLeft: 9,
   },
   {
@@ -59,7 +59,7 @@ export const FLIGHTS = [
     flightNumber: 'SV 456',
     recommended: false,
     legs: [{
-      from: { code: 'KRT', city: 'الخرطوم', cityEn: 'Khartoum' },
+      from: { code: 'DXB', city: 'دبي', cityEn: 'Dubai' },
       to:   { code: 'JED', city: 'جدة',      cityEn: 'Jeddah' },
       departAt: '2026-11-12T14:20:00', arriveAt: '2026-11-12T16:55:00',
       durationMinutes: 155, stops: [],
@@ -67,7 +67,7 @@ export const FLIGHTS = [
     baggage: { checkedKg: 23, cabinKg: 7 },
     fare: { type: 'standard', refundable: false, changeable: true,
             labelAr: 'تذكرة عادية — تعديل برسوم', labelEn: 'Standard fare — change for a fee' },
-    price: { amount: 342000, currency: 'SDG', perPerson: true, taxesIncluded: true },
+    price: { amount: 342, currency: 'USD', perPerson: true, taxesIncluded: true },
     seatsLeft: 2,
   },
 ];
@@ -80,7 +80,7 @@ export const HOTELS = [
     stars: 4, score: 8.6, reviews: 1284,
     image: null, imageAlt: { ar: 'واجهة فندق البحر الأحمر ليلاً', en: 'Red Sea Hotel frontage at night' },
     room: { nameAr: 'غرفة عائلية — سريران', nameEn: 'Family room — two beds', capacity: 4, breakfast: true },
-    price: { amount: 96000, currency: 'SDG', perNight: true, taxesIncluded: true },
+    price: { amount: 96, currency: 'USD', perNight: true, taxesIncluded: true },
     freeCancellation: true, cancellationUntil: '2026-11-09',
   },
   {
@@ -90,7 +90,7 @@ export const HOTELS = [
     stars: 3, score: 7.9, reviews: 642,
     image: null, imageAlt: { ar: 'مدخل دار الضيافة', en: 'Dar Al Diyafa entrance' },
     room: { nameAr: 'غرفة ثلاثية', nameEn: 'Triple room', capacity: 3, breakfast: false },
-    price: { amount: 61000, currency: 'SDG', perNight: true, taxesIncluded: true },
+    price: { amount: 61, currency: 'USD', perNight: true, taxesIncluded: true },
     freeCancellation: false,
   },
 ];
@@ -108,7 +108,7 @@ export const PACKAGES = [
       { ar: 'استقبال وتوديع من المطار',   en: 'Airport transfers', icon: 'no-transport' },
       { ar: 'جولتان سياحيتان',            en: 'Two guided tours', icon: 'no-tourism' },
     ],
-    price: { amount: 1450000, currency: 'SDG', from: true, basis: { ar: 'لشخصين', en: 'for two people' } },
+    price: { amount: 1450, currency: 'USD', from: true, basis: { ar: 'لشخصين', en: 'for two people' } },
   },
   {
     id: 'PK-3002',
@@ -122,7 +122,7 @@ export const PACKAGES = [
       { ar: 'تنقلات بين مكة والمدينة', en: 'Makkah–Madinah transfers', icon: 'no-transport' },
       { ar: 'مرافق ميداني من السفر والسياحة', en: 'A Travel & Tourism guide on the ground', icon: 'no-supervisor' },
     ],
-    price: { amount: 1180000, currency: 'SDG', from: true, basis: { ar: 'للفرد', en: 'per person' } },
+    price: { amount: 1180, currency: 'USD', from: true, basis: { ar: 'للفرد', en: 'per person' } },
   },
 ];
 
@@ -161,26 +161,26 @@ export const SUPERVISORS = [
  */
 export const TRIPS = [
   {
-    id: 'BK-2026-4471', reference: 'NO-4471-KRT',
+    id: 'BK-2026-4471', reference: 'BK-4471-DXB',
     status: 'confirmed',
     type: 'flights',
-    titleAr: 'الخرطوم → جدة', titleEn: 'Khartoum → Jeddah',
+    titleAr: 'دبي → جدة', titleEn: 'Dubai → Jeddah',
     departAt: '2026-11-12T08:40:00',
     passengers: 3,
     supervisorId: 'SP-01',
-    total: { amount: 1155000, currency: 'SDG' },
+    total: { amount: 1155, currency: 'USD' },
     nextStepAr: 'رفع صور الجوازات قبل 5 نوفمبر',
     nextStepEn: 'Upload passport scans before 5 November',
   },
   {
-    id: 'BK-2026-4390', reference: 'NO-4390-IST',
+    id: 'BK-2026-4390', reference: 'BK-4390-IST',
     status: 'pending',
     type: 'packages',
     titleAr: 'باقة إسطنبول — 7 ليالٍ', titleEn: 'Istanbul package — 7 nights',
     departAt: '2026-12-02T00:00:00',
     passengers: 2,
     supervisorId: 'SP-02',
-    total: { amount: 1450000, currency: 'SDG' },
+    total: { amount: 1450, currency: 'USD' },
     nextStepAr: 'بانتظار تأكيد الدفع',
     nextStepEn: 'Waiting for payment confirmation',
   },

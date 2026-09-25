@@ -74,26 +74,34 @@ const launch = (n, rec) => ({
   nameAr: rec.nameAr, nameEn: rec.nameEn, titleAr: 'منسق رحلات', titleEn: 'Travel Coordinator',
   bioAr: rec.bioAr, bioEn: rec.bioEn,
   image: { src: `assets/images/supervisors/${rec.slug}.webp`, altAr: `صورة ${rec.nameAr}`, altEn: `Photo of ${rec.nameEn}` },
-  cityAr: 'الخرطوم', cityEn: 'Khartoum',
+  // Spread across hub cities already in the destinations catalog rather than
+  // one shared city, so the demo reads as an international team, not tied
+  // to a single market. See the country-genericization update task.
+  cityAr: rec.cityAr, cityEn: rec.cityEn,
   languages: ['ar', 'en'], specialties: rec.specialties, services: rec.services,
   phone: rec.phone, whatsapp: rec.phone, email: rec.email,
   createdAt: '2026-09-16',
 });
 
 export const SUPERVISOR_REGISTRY = [
-  launch(1, { slug: 'ahmed-mohamed', nameAr: 'أحمد محمد', nameEn: 'Ahmed Mohamed', specialties: ['visit', 'tourism'], services: ['flights', 'hotels', 'packages'], phone: '+249900000001', email: 'ahmed.demo@travel-demo.example',
+  launch(1, { slug: 'ahmed-mohamed', nameAr: 'أحمد محمد', nameEn: 'Ahmed Mohamed', specialties: ['visit', 'tourism'], services: ['flights', 'hotels', 'packages'], phone: '+971900000001', email: 'ahmed.demo@travel-demo.example',
+    cityAr: 'دبي', cityEn: 'Dubai',
     bioAr: 'متخصص في مساعدة المسافرين على اختيار الرحلات والحجوزات المناسبة لاحتياجاتهم وميزانيتهم، مع التركيز على سهولة الإجراءات وسرعة المتابعة.',
     bioEn: 'Specialises in helping travellers choose flights and bookings that fit their needs and budget, focusing on simple procedures and fast follow-up.' }),
-  launch(2, { slug: 'mohamed-abdullah', nameAr: 'محمد عبدالله', nameEn: 'Mohamed Abdullah', specialties: ['study', 'work'], services: ['visa', 'study', 'work'], phone: '+249900000002', email: 'mohamed.demo@travel-demo.example',
+  launch(2, { slug: 'mohamed-abdullah', nameAr: 'محمد عبدالله', nameEn: 'Mohamed Abdullah', specialties: ['study', 'work'], services: ['visa', 'study', 'work'], phone: '+90900000002', email: 'mohamed.demo@travel-demo.example',
+    cityAr: 'إسطنبول', cityEn: 'Istanbul',
     bioAr: 'يساعد المسافرين في ترتيب متطلبات السفر والتأشيرات وخيارات الدراسة والعمل، مع تقديم إرشاد واضح خلال مراحل الرحلة.',
     bioEn: 'Helps travellers arrange visas and study or work travel requirements, with clear guidance through every stage of the journey.' }),
-  launch(3, { slug: 'sara-ahmed', nameAr: 'سارة أحمد', nameEn: 'Sara Ahmed', specialties: ['tourism', 'visit'], services: ['packages'], phone: '+249900000003', email: 'sara.demo@travel-demo.example',
+  launch(3, { slug: 'sara-ahmed', nameAr: 'سارة أحمد', nameEn: 'Sara Ahmed', specialties: ['tourism', 'visit'], services: ['packages'], phone: '+974900000003', email: 'sara.demo@travel-demo.example',
+    cityAr: 'الدوحة', cityEn: 'Doha',
     bioAr: 'متخصصة في تنظيم الرحلات السياحية والرحلات الجماعية، ومساعدة العائلات والمسافرين على الوصول إلى خيارات سفر عملية ومناسبة.',
     bioEn: 'Specialises in organising tourism and group trips, helping families and travellers reach practical, suitable travel options.' }),
-  launch(4, { slug: 'omar-hassan', nameAr: 'عمر حسن', nameEn: 'Omar Hassan', specialties: ['umrah'], services: ['umrah', 'hotels', 'flights'], phone: '+249900000004', email: 'omar.demo@travel-demo.example',
+  launch(4, { slug: 'omar-hassan', nameAr: 'عمر حسن', nameEn: 'Omar Hassan', specialties: ['umrah'], services: ['umrah', 'hotels', 'flights'], phone: '+966900000004', email: 'omar.demo@travel-demo.example',
+    cityAr: 'جدة', cityEn: 'Jeddah',
     bioAr: 'يساعد المسافرين في تنسيق رحلات العمرة وحجوزات الفنادق وتذاكر الطيران، مع متابعة تفاصيل الرحلة من الحجز حتى الاستعداد للسفر.',
     bioEn: 'Helps travellers coordinate Umrah trips, hotel bookings and flight tickets, following up on every detail from booking through departure.' }),
-  launch(5, { slug: 'maryam-ali', nameAr: 'مريم علي', nameEn: 'Maryam Ali', specialties: ['medical', 'visit'], services: ['medical', 'flights'], phone: '+249900000005', email: 'maryam.demo@travel-demo.example',
+  launch(5, { slug: 'maryam-ali', nameAr: 'مريم علي', nameEn: 'Maryam Ali', specialties: ['medical', 'visit'], services: ['medical', 'flights'], phone: '+60900000005', email: 'maryam.demo@travel-demo.example',
+    cityAr: 'كوالالمبور', cityEn: 'Kuala Lumpur',
     bioAr: 'تساعد المسافرين والعائلات في تنسيق احتياجات السفر، بما في ذلك السفر العلاجي واختيار الرحلات والحجوزات المناسبة.',
     bioEn: 'Helps travellers and families coordinate their travel needs, including medical travel and choosing the right flights and bookings.' }),
 ];

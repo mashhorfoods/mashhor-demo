@@ -26,7 +26,7 @@ import { route } from '../data/config.js';
 import { NAV_PRIMARY, MENUS } from '../data/navigation.js';
 import { icon } from './ui.js';
 import { session, sessionListeners, initials, setSession } from './session.js';
-import { logo, languageButton, bookNowButton } from './brand.js';
+import { languageButton, bookNowButton } from './brand.js';
 import { createMenuController, menuPanel, accountPanel } from './menus.js';
 import { mobileDrawer } from './drawer.js';
 export { setSession, getSession } from './session.js';
@@ -149,11 +149,6 @@ export function globalHeader({ current = null, variant = 'default', onSearch = n
   }, [
     el('div', { class: 'l-container c-gh__inner' }, [
       el('div', { class: 'c-gh__bar' }, [
-        // inverse: true renders the light/reversed lockup alongside the
-        // normal one (brand.js), so CSS can swap to it over a photo hero
-        // (§09 of the header/hero update brief) without redesigning the mark.
-        logo({ className: 'c-gh__brand', inverse: true }),
-
         isBooking
           ? el('p', { class: 'c-gh__secure' }, [
               icon('no-shield', { size: 'sm' }),
@@ -267,7 +262,7 @@ function initAutoHide(header, { menus, drawer, signal }) {
      - a ResizeObserver publishes the header's own live height as
        --gh-height, so .c-hero--full (14-home.css) can pull the photo up
        exactly behind the header — not an approximation — regardless of
-       which breakpoint's logo size is in play.
+       which breakpoint's own bar height is in play.
    ------------------------------------------------------------------------ */
 function initHeroSurface(header, { signal }) {
   let io = null;

@@ -75,12 +75,7 @@
 <header class="sg-nav">
   <div class="l-container">
     <div class="sg-nav__inner">
-      <span class="c-logo c-logo--sm">
-        <span class="c-logo__text" data-i18n="brand.name">السفر والسياحة</span>
-      </span>
-
       <nav class="sg-toc" aria-label="أقسام الدليل" data-i18n-label="sg.toc.aria">
-        <a href="#brand" data-i18n="sg.toc.brand">الهوية</a>
         <a href="#color" data-i18n="sg.toc.colour">الألوان</a>
         <a href="#type" data-i18n="sg.toc.type">الخطوط</a>
         <a href="#space" data-i18n="sg.toc.space">المسافات</a>
@@ -109,30 +104,6 @@
       هذه الصفحة هي المرجع الحي لكل ما يُبنى لاحقاً. كل صفحة وكل ميزة في المراحل القادمة
       ترث من هذا النظام ولا تعيد تعريفه.
     </p>
-  </section>
-
-  <!-- ==================== BRAND ==================== -->
-  <section class="sg-section" id="brand">
-    <div class="sg-section__head">
-      <span class="sg-ref">§02 · §29</span>
-      <h2 class="t-h2 u-mark" data-i18n="sg.toc.brand">الهوية</h2>
-    </div>
-
-    <div class="sg-demo">
-      <p class="sg-demo__label" lang="en">.c-logo — the text wordmark, on light and on dark</p>
-      <div class="l-cluster l-cluster--24">
-        <span class="c-logo c-logo--lg"><span class="c-logo__text" data-i18n="brand.name">السفر والسياحة</span></span>
-        <span class="c-logo"><span class="c-logo__text" data-i18n="brand.name">السفر والسياحة</span></span>
-        <span class="c-logo c-logo--sm"><span class="c-logo__text" data-i18n="brand.name">السفر والسياحة</span></span>
-      </div>
-      <div class="l-section--inverse" style="margin-block-start:var(--space-24);padding:var(--space-24);border-radius:var(--radius-lg)">
-        <span class="c-logo c-logo--lg"><span class="c-logo__text c-logo__text--swaps" data-i18n="brand.name">السفر والسياحة</span></span>
-      </div>
-      <p class="sg-note" style="margin-block-start:var(--space-16)" data-i18n="sg.note.brand">
-        الشعار نص فقط، بلا رمز أو صورة — ليتيح استبدال الاسم لاحقاً دون إعادة بناء المكوّن.
-        المكوّن يتحكم في الحجم والمساحة الفارغة فقط. النسخة المعكوسة للخلفيات الداكنة تبديل لون فقط.
-      </p>
-    </div>
   </section>
 
   <!-- ==================== COLOUR ==================== -->
@@ -172,11 +143,11 @@
         <div><p class="t-caption" lang="en">Overline</p><p class="t-overline" data-i18n="sg.type.overline">العروض</p></div>
         <div><p class="t-caption" lang="en">Button</p><button type="button" class="c-btn c-btn--primary" data-i18n="sg.book">احجز الآن</button></div>
         <div><p class="t-caption" lang="en">Price · Price Large</p>
-          <p class="t-price" data-i18n="sg.price1">385,000 ج.س</p><p class="t-price-lg" data-i18n="sg.price2">1,450,000 ج.س</p></div>
+          <p class="t-price" data-i18n="sg.price1">385 دولار</p><p class="t-price-lg" data-i18n="sg.price2">1,450 دولار</p></div>
         <div><p class="t-caption" lang="en">Large Number</p><p class="t-number-lg">12</p></div>
         <div><p class="t-caption" lang="en">Booking Data — tabular figures, always LTR</p>
-          <p class="t-data">NO-4471-KRT · MS 852 · 08:40 → 11:05</p>
-          <p class="t-data">NO-0390-IST · TK 678 · 22:15 → 07:50</p></div>
+          <p class="t-data">BK-4471-DXB · EK 852 · 08:40 → 11:05</p>
+          <p class="t-data">BK-4390-IST · TK 678 · 22:15 → 07:50</p></div>
       </div>
     </div>
   </section>
@@ -320,7 +291,7 @@
 
         <div class="c-field" data-state="success">
           <label class="c-field__label" for="sg-ref" data-i18n="sg.form.ref">رقم الحجز</label>
-          <input class="c-field__control u-data" id="sg-ref" type="text" value="NO-4471-KRT" dir="ltr">
+          <input class="c-field__control u-data" id="sg-ref" type="text" value="BK-4471-DXB" dir="ltr">
           <p class="c-field__success">
             <svg class="c-icon c-icon--sm" aria-hidden="true"><use href="#no-check-circle"></use></svg>
             <span data-i18n="sg.form.refOk">تم العثور على الحجز.</span>
@@ -357,7 +328,7 @@
           <label class="c-choice c-choice--boxed">
             <input class="c-choice__input" type="radio" name="sg-fare" checked>
             <span class="c-choice__text"><span data-i18n="sg.form.flex">تذكرة مرنة</span>
-              <span class="c-choice__desc" data-i18n="sg.form.flexDesc">قابلة للتعديل والاسترداد · +45,000 ج.س</span></span>
+              <span class="c-choice__desc" data-i18n="sg.form.flexDesc">قابلة للتعديل والاسترداد · +45 دولار</span></span>
           </label>
           <label class="c-choice c-choice--boxed">
             <input class="c-choice__input" type="radio" name="sg-fare">
@@ -476,7 +447,7 @@
         <div class="c-note c-note--warning">
           <svg class="c-icon" aria-hidden="true"><use href="#no-alert"></use></svg>
           <div><p class="c-note__title" data-i18n="sg.note1.title">تغيّر سعر التذكرة</p>
-            <p class="c-note__text" data-i18n="sg.note1.text">ارتفع السعر 12,000 ج.س منذ بدء الحجز. يمكنك المتابعة بالسعر الجديد أو العودة للنتائج لاختيار بديل.</p></div>
+            <p class="c-note__text" data-i18n="sg.note1.text">ارتفع السعر 12 دولاراً منذ بدء الحجز. يمكنك المتابعة بالسعر الجديد أو العودة للنتائج لاختيار بديل.</p></div>
         </div>
         <div class="c-note c-note--error">
           <svg class="c-icon" aria-hidden="true"><use href="#no-error"></use></svg>
@@ -520,7 +491,7 @@
           <li class="c-breadcrumb__sep" aria-hidden="true">/</li>
           <li><a class="c-breadcrumb__link" href="#" data-i18n="sg.flights">الطيران</a></li>
           <li class="c-breadcrumb__sep" aria-hidden="true">/</li>
-          <li aria-current="page" data-i18n="sg.route">الخرطوم → جدة</li>
+          <li aria-current="page" data-i18n="sg.route">دبي → جدة</li>
         </ol>
       </div>
       <div class="c-steps" style="margin-block-start:var(--space-24)">
@@ -547,11 +518,11 @@
       </ul>
 
       <div class="c-price-rows" style="margin-block-start:var(--space-24);max-inline-size:26rem">
-        <div class="c-price-row"><span class="c-price-row__label" data-i18n="sg.row.adult">تذكرة بالغ × 2</span><span class="c-price-row__value" data-i18n="sg.row.adultV">770,000 ج.س</span></div>
-        <div class="c-price-row"><span class="c-price-row__label" data-i18n="sg.row.child">تذكرة طفل × 1</span><span class="c-price-row__value" data-i18n="sg.row.childV">289,000 ج.س</span></div>
-        <div class="c-price-row"><span class="c-price-row__label" data-i18n="sg.row.tax">الضرائب ورسوم المطار</span><span class="c-price-row__value" data-i18n="sg.row.taxV">96,000 ج.س</span></div>
-        <div class="c-price-row"><span class="c-price-row__label" data-i18n="sg.row.fee">رسوم خدمة السفر والسياحة</span><span class="c-price-row__value" data-i18n="sg.row.feeV">0 ج.س</span></div>
-        <div class="c-price-row c-price-row--total"><span class="c-price-row__label" data-i18n="sg.row.total">الإجمالي</span><span class="c-price-row__value" data-i18n="sg.row.totalV">1,155,000 ج.س</span></div>
+        <div class="c-price-row"><span class="c-price-row__label" data-i18n="sg.row.adult">تذكرة بالغ × 2</span><span class="c-price-row__value" data-i18n="sg.row.adultV">770 دولار</span></div>
+        <div class="c-price-row"><span class="c-price-row__label" data-i18n="sg.row.child">تذكرة طفل × 1</span><span class="c-price-row__value" data-i18n="sg.row.childV">289 دولار</span></div>
+        <div class="c-price-row"><span class="c-price-row__label" data-i18n="sg.row.tax">الضرائب ورسوم المطار</span><span class="c-price-row__value" data-i18n="sg.row.taxV">96 دولار</span></div>
+        <div class="c-price-row"><span class="c-price-row__label" data-i18n="sg.row.fee">رسوم خدمة السفر والسياحة</span><span class="c-price-row__value" data-i18n="sg.row.feeV">0 دولار</span></div>
+        <div class="c-price-row c-price-row--total"><span class="c-price-row__label" data-i18n="sg.row.total">الإجمالي</span><span class="c-price-row__value" data-i18n="sg.row.totalV">1,155 دولار</span></div>
       </div>
 
       <div class="c-accordion" data-accordion="single" style="margin-block-start:var(--space-32);max-inline-size:var(--measure)">
@@ -570,7 +541,7 @@
             <svg class="c-icon c-accordion__chevron" aria-hidden="true"><use href="#no-chevron-down"></use></svg>
           </button>
           <div class="c-accordion__panel"><div class="c-accordion__inner">
-            <div class="c-accordion__content"><p data-i18n="sg.acc.rulesText">التعديل متاح حتى 24 ساعة قبل الإقلاع برسوم 45,000 ج.س. الاسترداد الكامل متاح خلال 24 ساعة من الحجز.</p></div>
+            <div class="c-accordion__content"><p data-i18n="sg.acc.rulesText">التعديل متاح حتى 24 ساعة قبل الإقلاع برسوم 45 دولاراً. الاسترداد الكامل متاح خلال 24 ساعة من الحجز.</p></div>
           </div></div>
         </div>
       </div>
@@ -603,10 +574,10 @@
       </button>
     </div>
     <div class="c-modal__body">
-      <p class="t-body"><span data-i18n="sg.modal.t1">سيتم إلغاء الحجز</span> <span class="u-data" dir="ltr">NO-4471-KRT</span> <span data-i18n="sg.modal.t2">نهائياً.</span></p>
+      <p class="t-body"><span data-i18n="sg.modal.t1">سيتم إلغاء الحجز</span> <span class="u-data" dir="ltr">BK-4471-DXB</span> <span data-i18n="sg.modal.t2">نهائياً.</span></p>
       <div class="c-note c-note--warning" style="margin-block-start:var(--space-16)">
         <svg class="c-icon" aria-hidden="true"><use href="#no-alert"></use></svg>
-        <div><p class="c-note__text" data-i18n="sg.modal.note">هذه التذكرة غير قابلة للاسترداد. سيُعاد إليك 0 ج.س.</p></div>
+        <div><p class="c-note__text" data-i18n="sg.modal.note">هذه التذكرة غير قابلة للاسترداد. سيُعاد إليك 0 دولار.</p></div>
       </div>
     </div>
     <div class="c-modal__foot">

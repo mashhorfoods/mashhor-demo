@@ -23,7 +23,6 @@ import {
   FOOTER_SOCIAL, FOOTER_LEGAL, FOOTER_CTA, LEGAL_NAME,
 } from '../data/footer.js';
 import { icon } from './ui.js';
-import { logo } from './brand.js';
 
 /* ---------------------------------------------------------------------------
    FooterLink
@@ -91,7 +90,6 @@ export function footerColumn(column, { collapsible = true } = {}) {
    ------------------------------------------------------------------------ */
 export function footerBrand() {
   return el('div', { class: 'c-gf__brand' }, [
-    logo({ variant: 'lockup', size: 'c-logo--lg', href: null, inverse: true }),
     el('p', { class: 'c-gf__statement' }, pick(FOOTER_BRAND, 'statement')),
     el('p', { class: 'c-gf__support-line' }, [
       icon('no-supervisor', { size: 'sm' }),
@@ -191,8 +189,8 @@ export function globalFooter({ variant = 'marketing', collapsible = null, cta = 
      wall still ships in the DOM and still costs the accessibility tree (§25).
 
        marketing  everything
-       booking    logo, the live support channels, legal, copyright. The page
-                  is the task; support stays one click away rather than being
+       booking    the live support channels, legal, copyright. The page is
+                  the task; support stays one click away rather than being
                   something the customer must leave the flow to find (§07).
        app        legal and copyright on a light surface. Nothing else. */
   const compact = variant !== 'marketing';
@@ -213,10 +211,7 @@ export function globalFooter({ variant = 'marketing', collapsible = null, cta = 
           : null,
 
         variant === 'booking' && contact
-          ? el('div', { class: 'c-gf__compact' }, [
-              logo({ variant: 'primary', size: 'c-logo--sm', href: null, inverse: true }),
-              contact,
-            ])
+          ? el('div', { class: 'c-gf__compact' }, [contact])
           : null,
 
         full && social

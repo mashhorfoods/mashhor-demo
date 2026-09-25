@@ -1,5 +1,10 @@
 # Website Strategic & UX Correction — Egypt Launch Market
 
+> **Superseded.** The Sudan/Egypt-specific positioning this report describes
+> was later reversed by the country-genericization update task: the site no
+> longer names a nationality or origin country anywhere, so the same copy
+> works for any market. Kept here as a historical record only.
+
 Final report, in the format requested by the master prompt (§30).
 
 ## UPDATE STATUS

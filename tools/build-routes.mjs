@@ -94,8 +94,8 @@ ${c.noindex ? '<meta name="robots" content="noindex">\n' : ''}
 <meta property="og:site_name" content="Travel &amp; Tourism">
 <meta property="og:title" content="${esc(c.title(r))} — السفر والسياحة">
 <meta property="og:description" content="${esc(c.og(r))}">
-<meta property="og:locale" content="ar_SD">
-<meta property="og:locale:alternate" content="en_GB">
+<meta property="og:locale" content="ar_SA">
+<meta property="og:locale:alternate" content="en_US">
 <meta property="og:url" content="${SITE}${c.dir}/${r.slug}/">
 <link rel="canonical" href="${SITE}${c.dir}/${r.slug}/">
 <meta property="og:image" content="${SITE}assets/brand/og-image.png">

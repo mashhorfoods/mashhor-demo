@@ -10,7 +10,7 @@ import { pick } from '../core/i18n.js';
 import { AIRLINE_PROVIDERS } from '../data/providers.js';
 
 /* A fixed max-height alone does not make logos "the same size": a wide
-   wordmark (EgyptAir) and a compact badge-plus-text mark (Badr) can share a
+   wordmark (Turkish Airlines) and a compact badge-plus-text mark (Qatar Airways) can share a
    height and still read as wildly different sizes, because one fills far
    more of the row than the other. Sizing every logo to the same on-screen
    AREA instead — height = sqrt(area / aspectRatio) — is what actually reads

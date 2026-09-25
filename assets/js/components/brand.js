@@ -1,11 +1,12 @@
 /* ============================================================================
-   COMPONENTS / BRAND — the logo lockups, the language switch and the one
-   red "book now" action. Header, drawer, footer and the supervisor profile
-   all draw from here. Stage 10.12 split out of header.js
+   COMPONENTS / BRAND — the language switch and the one red "book now"
+   action. Header, drawer and footer all draw from here. Stage 10.12 split
+   out of header.js. There is no logo component: the demo ships with no
+   mark or wordmark at all, so a buyer's own brand never has to be undone.
    ========================================================================= */
 
 import { el } from '../core/dom.js';
-import { getLocale, setLocale, t, pick } from '../core/i18n.js';
+import { getLocale, setLocale, pick } from '../core/i18n.js';
 import { route } from '../data/config.js';
 import { BOOK_CTA } from '../data/navigation.js';
 import { icon } from './ui.js';
@@ -13,24 +14,6 @@ import { icon } from './ui.js';
 /* ---------------------------------------------------------------------------
    SMALL BUILDERS
    ------------------------------------------------------------------------ */
-/**
- * A plain text wordmark — no logo mark, no image asset. Demo-template brand:
- * customisable later without touching this component (just brand.name in
- * strings/*.js). `variant` ('primary'|'lockup') is kept for call-site
- * compatibility but no longer changes what renders — both showed the same
- * name, one with an image-only descriptor line that text doesn't need.
- *
- * @param {object} o
- * @param {string|null} o.href     null renders a <span> instead of a link
- * @param {boolean} o.inverse      opt into swapping to light-on-dark text,
- *                                 same surfaces the old image swap used
- */
-export function logo({ variant = 'primary', size = '', href = '', inverse = false, className = '' } = {}) {
-  const text = el('span', { class: `c-logo__text${inverse ? ' c-logo__text--swaps' : ''}` }, t('brand.name'));
-  const cls = `c-logo ${size} ${className}`.replace(/\s+/g, ' ').trim();
-  return href === null ? el('span', { class: cls }, [text]) : el('a', { class: cls, href: route(href) }, [text]);
-}
-
 /** §06 of Stage 10.1 — Arabic and English are both first-class, so the switch
     has to be reachable from every page. Reference mockup: a single "<other
     language name> ⌄" control that lives in the bar itself at every width,

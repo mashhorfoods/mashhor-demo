@@ -34,7 +34,9 @@ this fix. See §7.
 | 4 | عمر حسن / Omar Hassan | `omar-hassan` | `/supervisor/omar-hassan/` |
 | 5 | مريم علي / Maryam Ali | `maryam-ali` | `/supervisor/maryam-ali/` |
 
-Each carries: bilingual name/title/bio, a city (Khartoum), languages
+Each carries: bilingual name/title/bio, a city (spread across international
+hub cities — Dubai, Istanbul, Doha, Jeddah, Kuala Lumpur — rather than one
+shared market, per the country-genericization update), languages
 (Arabic, English), a set of specialties and services (mapped from the
 brief's specialty text onto the existing `TRAVEL_PURPOSES`/`SERVICE_REGISTRY`
 vocabularies — no new vocabulary was invented), a fictional phone/WhatsApp

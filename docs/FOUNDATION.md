@@ -396,10 +396,10 @@ Supervisor right** is expressible today: a trip already carries its supervisor
 and its total. Nothing in the presentation layer blocks it.
 
 **Supervisor branding (§29):** a supervisor is a person *inside* Travel & Tourism,
-never a second brand. `supervisorCard` renders the Travel & Tourism logo, type,
-colour and trust language; the record carries only photo, name, role, bio,
-contact and services. The single brand flourish permitted on a person is the
-red ring on the photo.
+never a second brand. The profile hero renders the brand name, type, colour
+and trust language — no logo, since the demo carries none; the record carries
+only photo, name, role, bio, contact and services. The single brand flourish
+permitted on a person is the red ring on the photo.
 
 ---
 
@@ -432,8 +432,8 @@ component in this layer. Permission is asked, never assumed.
 
 | # | Criterion | Status |
 | --- | --- | --- |
-| 1 | Brand identity preserved | ✅ generic demo brand; a text wordmark, no invented mark |
-| 2 | Logo correctly implemented | ✅ text wordmark component (light/dark swap), favicon, apple-touch-icon, OG card |
+| 1 | Brand identity preserved | ✅ generic demo brand; no invented mark or wordmark |
+| 2 | Logo correctly implemented | ✅ deliberately absent — no logo anywhere; favicon, apple-touch-icon, OG card still carry the old artwork |
 | 3 | Colour tokens | ✅ full contract + applied roles |
 | 4 | Typography tokens | ✅ 14-step scale, AR + EN + booking data |
 | 5 | Spacing system | ✅ |
@@ -461,15 +461,15 @@ component in this layer. Permission is asked, never assumed.
 
 ### Open items — blocked on inputs that do not exist in this repository
 
-1. ~~**The official logo file.**~~ Installed. Still wanted: a **vector master**
-   (SVG/EPS/AI). Everything shipped is raster derived from a JPEG, exported at
-   1099px wide which covers every screen use including 2x, but a vector original
-   should replace it. Also wanted: an **official reversed lockup**, to replace
-   the derived one used on dark surfaces.
-2. ~~**The approved brand HEX values.**~~ Sampled from the logo and live.
+1. ~~**The official logo file.**~~ Removed. The demo now carries no logo or
+   wordmark anywhere (header, footer, drawer, supervisor profile) — a buyer
+   adds their own if they want one; the old raster artwork was deleted since
+   nothing referenced it. See assets/brand/README.md.
+2. ~~**The approved brand HEX values.**~~ Sampled from the original master and live.
 3. **Photography (§17).** Real, human, warm, authentic imagery of families,
-   travellers, airports and destinations — ideally Sudanese and African
-   travellers where appropriate. Rather than ship stock-looking filler, every
+   travellers, airports and destinations — deliberately not tied to any one
+   nationality or market, per the country-genericization update. Rather than
+   ship stock-looking filler, every
    media slot renders a neutral placeholder that reserves the exact aspect
    ratio, so dropping in the real photograph shifts nothing. Since 10.12 every
    slot has a key in `tools/images.manifest.json` and reads its file from the

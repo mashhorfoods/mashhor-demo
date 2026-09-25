@@ -379,7 +379,7 @@ export function mountHome({
   render(mount('choose'), choose);
   render(mount('providers'), providerMarquee());
   render(mount('newsletter'), newsletterCard({
-    image: { src: imageSrc('home/newsletter'), altAr: 'الخرطوم، السودان', altEn: 'Khartoum, Sudan' },
+    image: { src: imageSrc('home/newsletter'), altAr: 'أفق مدينة عند النهر ليلاً', altEn: 'City skyline by the river at night' },
   }));
 
   // ---- Dynamic regions — every one owns all five states. §15

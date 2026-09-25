@@ -75,7 +75,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
         h1: document.querySelectorAll('h1').length, h1Text: document.querySelector('h1').textContent.trim(), jumps, small, targets, title: document.title,
         canonical: document.querySelector('link[rel=canonical]').href,
         sections: Array.from(document.querySelectorAll('main > section[data-profile]')).filter((s) => !s.hidden).map((s) => s.dataset.profile),
-        brand: hero.querySelector('.c-profile__brand')?.textContent.trim(), logo: !!hero.querySelector('.c-profile__brand .c-logo .c-logo__text'),
+        brand: hero.querySelector('.c-profile__brand')?.textContent.trim(),
         badge: hero.querySelector('.c-profile__badges')?.textContent.trim(), titleShown: !!hero.querySelector('.c-profile__title'),
         lead: hero.querySelector('.c-hero__lead')?.textContent.trim(),
         photoLabelled: hero.querySelector('.c-profile__photo [role=img]')?.getAttribute('aria-label'),
@@ -107,7 +107,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
     ok(`${T} neutral name + title when the record has none`, r.h1Text === (ar ? 'منسق السفر والسياحة' : 'Travel & Tourism coordinator') && r.title === `${r.h1Text} — ${ar ? 'السفر والسياحة' : 'Travel & Tourism'}` && !r.titleShown, `${r.h1Text} | ${r.title}`);
     ok(`${T} canonical`, r.canonical.endsWith('/mashhor-demo/supervisor/ahmed-mohamed/'));
     ok(`${T} every section present`, r.sections.join(',') === 'about,services,trust,contact,discovery', r.sections.join(','));
-    ok(`${T} Travel & Tourism branding in the hero (logo + line)`, r.logo && r.brand.includes(ar ? 'السفر والسياحة' : 'Travel & Tourism'), r.brand);
+    ok(`${T} Travel & Tourism branding in the hero`, r.brand.includes(ar ? 'السفر والسياحة' : 'Travel & Tourism'), r.brand);
     ok(`${T} verified badge from status`, r.badge === (ar ? 'منسق معتمد' : 'Verified coordinator'), r.badge);
     ok(`${T} lead is the role line, not an invented bio`, r.lead === (ar ? 'يساعدك على اختيار الخيار المناسب، ويتابع حجزك مع فريق السفر والسياحة من البداية إلى العودة.' : 'Helps you choose the right option and follows your booking with the Travel & Tourism team, from the start until you are back.'), r.lead);
     ok(`${T} photo slot labelled`, r.photoLabelled === (ar ? 'لا توجد صورة بعد' : 'No photo yet'), r.photoLabelled);

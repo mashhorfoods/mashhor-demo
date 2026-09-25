@@ -277,47 +277,4 @@
   .c-badge--info    { background-color: var(--color-info-bg);    color: var(--color-info-fg); }
   .c-badge--outline { background-color: transparent; border: var(--border-hairline); color: var(--color-text-secondary); font-weight: var(--weight-medium); }
 
-  /* ======================================================================
-     LOGO — §02 / §29
-
-     Demo-template brand: a plain text wordmark, no logo mark or image asset.
-     The name comes from strings/*.js (brand.name) so it can be swapped for a
-     real client's name without touching this component or its markup.
-
-     The component only ever sets SIZE, SPACING and (opt-in) the dark-surface
-     colour swap. Supervisor pages use this exact component — there is no
-     second brand. §29
-     ==================================================================== */
-  .c-logo { display: inline-flex; align-items: center; }
-  /* A text wordmark is shorter than the old image lockup — when the logo is
-     a link (header, drawer), keep the tap target at the same 44px floor
-     every other control on the site clears (§23). */
-  a.c-logo { min-block-size: var(--touch-target); }
-  /* Text wordmark — no logo mark, no invented symbol. Sized off the same
-     --logo-size the old image used, so every existing size/breakpoint rule
-     below still applies unchanged. */
-  .c-logo__text {
-    font-family: var(--font-display);
-    font-weight: var(--weight-bold);
-    font-size: calc(var(--logo-size, 48px) * 0.36);
-    line-height: 1;
-    letter-spacing: 0.01em;
-    white-space: nowrap;
-    color: var(--color-primary);
-    /* So the header's scrolled-state logo shrink (12-header.css) reads as one
-       smooth motion with the bar's own padding transition, not a small jump. */
-    transition: font-size var(--duration-base) var(--ease-standard), color var(--duration-base) var(--ease-standard);
-  }
-  .c-logo--sm { --logo-size: 38px; }
-  .c-logo--lg { --logo-size: 84px; }
-  @media (min-width: 64em) { .c-logo { --logo-size: 56px; } }
-
-  /* Clear space: nothing may sit closer than a quarter of the mark's height. */
-  .c-logo { margin-inline-end: var(--space-8); }
-
-  /* Only a logo() call made with inverse:true opts into swapping to white on
-     a dark/photo surface (mirrors the old two-image light/inverse swap, now
-     as a color change on the one text node instead of two <img> elements). */
-  .l-section--inverse .c-logo__text--swaps,
-  [data-theme="dark"] .c-logo__text--swaps { color: var(--color-text-inverse); }
 }

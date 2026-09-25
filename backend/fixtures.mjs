@@ -53,8 +53,8 @@ export function seed() {
   // the isolation test is "supervisor-1 sees Alpha, supervisor-2 sees nothing of Alpha's".
   // Slugs match the supervisor-profiles stage's real frontend registry (assets/js/data/supervisors.js) 1:1 — a slug
   // used to validate/attribute client-side (isActiveSupervisor) must exist there, not just as a backend fixture id.
-  q.run('UPDATE supervisors SET slug = ?, name_ar = ?, name_en = ?, email = ?, phone = ?, city = ?, languages_json = ?, updated_at = ? WHERE id = ?', 'ahmed-mohamed', 'مشرف تجريبي واحد', 'Fixture Supervisor One', 'sup1@fixture.test', '', 'Khartoum', JSON.stringify(['ar', 'en']), iso(t0), 'supervisor-1');
-  q.run('UPDATE supervisors SET slug = ?, name_ar = ?, name_en = ?, email = ?, phone = ?, city = ?, languages_json = ?, updated_at = ? WHERE id = ?', 'mohamed-abdullah', 'مشرف تجريبي اثنان', 'Fixture Supervisor Two', 'sup2@fixture.test', '', 'Khartoum', JSON.stringify(['ar']), iso(t0), 'supervisor-2');
+  q.run('UPDATE supervisors SET slug = ?, name_ar = ?, name_en = ?, email = ?, phone = ?, city = ?, languages_json = ?, updated_at = ? WHERE id = ?', 'ahmed-mohamed', 'مشرف تجريبي واحد', 'Fixture Supervisor One', 'sup1@fixture.test', '', 'Dubai', JSON.stringify(['ar', 'en']), iso(t0), 'supervisor-1');
+  q.run('UPDATE supervisors SET slug = ?, name_ar = ?, name_en = ?, email = ?, phone = ?, city = ?, languages_json = ?, updated_at = ? WHERE id = ?', 'mohamed-abdullah', 'مشرف تجريبي اثنان', 'Fixture Supervisor Two', 'sup2@fixture.test', '', 'Istanbul', JSON.stringify(['ar']), iso(t0), 'supervisor-2');
   // supervisor-3/4 carry no other fixture identity (no test signs in as them), only the slug some tests attribute
   // a booking/journey through — restored here for the same reason: the wipe() above nulls it every reset.
   q.run('UPDATE supervisors SET slug = ? WHERE id = ?', 'sara-ahmed', 'supervisor-3');

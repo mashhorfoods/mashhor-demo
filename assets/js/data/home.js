@@ -20,24 +20,22 @@
    HERO — §04. One message, one supporting line.
    ----------------------------------------------------------------------- */
 export const HOME_HERO = {
-  // Egypt launch-market positioning (Sudanese residents in Egypt is the
-  // primary launch audience; Sudanese travellers worldwide is the long-term
-  // direction — see the coordinator/Egypt-launch update task). Egypt is the
-  // current market configuration, not a permanent limit on the brand.
-  overlineAr: 'منصة سفر موثوقة للسودانيين',
-  overlineEn: 'A trusted travel platform for Sudanese travellers',
-  titleAr: 'سفرك من مصر يبدأ مع السفر والسياحة',
-  titleEn: 'Your journey from Egypt starts with Travel & Tourism',
+  // Demo-template positioning: no origin country or nationality named, so
+  // the same copy sells to any market without a rewrite. See the
+  // country-genericization update task.
+  overlineAr: 'منصة سفر موثوقة لعملائنا حول العالم',
+  overlineEn: 'A trusted travel platform for customers around the world',
+  titleAr: 'سفرك يبدأ مع السفر والسياحة',
+  titleEn: 'Your journey starts with Travel & Tourism',
   /* Mobile/tablet hero optimization brief §1: the full title above wraps
-     across 4 awkward lines once the headline is sized down for small
-     screens, splitting mid-phrase ("from Egypt starts" / "with Number
-     One"). A shorter, deliberately 3-line title for those breakpoints
-     only — rendered as separate lines (title-short spans below, joined
-     with <br>), desktop keeps the full sentence unchanged. */
+     across too many awkward lines once the headline is sized down for
+     small screens. A shorter, deliberately 3-line title for those
+     breakpoints only — rendered as separate lines (title-short spans
+     below, joined with <br>), desktop keeps the full sentence unchanged. */
   titleShortAr: 'سفرك\nيبدأ مع\nالسفر والسياحة',
   titleShortEn: 'Your journey\nstarts with,\nTravel & Tourism',
-  leadAr: 'تذاكر طيران، تأشيرات، فنادق وخدمات سفر متكاملة للسودانيين المقيمين في مصر.',
-  leadEn: 'Flights, visas, hotels and complete travel services for Sudanese residents in Egypt.',
+  leadAr: 'تذاكر طيران، تأشيرات، فنادق وخدمات سفر متكاملة، أينما كنت.',
+  leadEn: 'Flights, visas, hotels and complete travel services, wherever you are.',
   /* The photography slot. `src: null` renders the neutral placeholder that
      reserves the same aspect ratio; drop the approved image in here. §04
      `focal` (hero image responsiveness brief §1/§2): this photo is a very

@@ -110,7 +110,7 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.ops.s
   ok('supervisors: development supervisors listed with a create form', await count(p, 'tbody tr') === 2 && await count(p, '#ops-sv-create') === 1);
   await p.click('tbody tr:first-child a'); await mainReady(p);
   ok('supervisor detail: composes the same scoped read models the supervisor portal itself uses', await count(p, '#ops-sv-details') === 1 && await count(p, '#ops-sv-manage') === 1);
-  ok('supervisor edit form is present and pre-filled with the current record', await count(p, '#ops-sv-edit') === 1 && await p.inputValue('#ops-sv-edit input[name=city]') === 'Khartoum' && await p.inputValue('#ops-sv-edit input[name=nameAr]') !== '');
+  ok('supervisor edit form is present and pre-filled with the current record', await count(p, '#ops-sv-edit') === 1 && await p.inputValue('#ops-sv-edit input[name=city]') === 'Dubai' && await p.inputValue('#ops-sv-edit input[name=nameAr]') !== '');
   await p.fill('#ops-sv-edit input[name=city]', 'Port Sudan');
   await p.fill('#ops-sv-edit textarea[name=bioEn]', 'Updated demo bio.');
   await p.click('#ops-sv-edit button[type=submit]'); await p.waitForTimeout(500);
