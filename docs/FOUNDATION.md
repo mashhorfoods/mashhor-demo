@@ -433,7 +433,7 @@ component in this layer. Permission is asked, never assumed.
 | # | Criterion | Status |
 | --- | --- | --- |
 | 1 | Brand identity preserved | ✅ generic demo brand; no invented mark or wordmark |
-| 2 | Logo correctly implemented | ✅ deliberately absent — no logo anywhere; favicon, apple-touch-icon, OG card still carry the old artwork |
+| 2 | Logo correctly implemented | ✅ deliberately absent — no logo anywhere, including the favicon, home-screen icon and link-preview card |
 | 3 | Colour tokens | ✅ full contract + applied roles |
 | 4 | Typography tokens | ✅ 14-step scale, AR + EN + booking data |
 | 5 | Spacing system | ✅ |
@@ -516,9 +516,9 @@ component in this layer. Permission is asked, never assumed.
 5. **Legal entity details**, for Organization JSON-LD. The homepage ships a
    `WebSite` JSON-LD block with name and URL only, and grows to `Organization`
    once these exist.
-6. ~~**Raster brand exports**~~ — `apple-touch-icon.png` (180×180) and
-   `og-image.png` (1200×630) are generated from the official artwork and wired
-   into the pages.
+6. ~~**Raster brand exports**~~ — `icon-32.png`, `icon-180.png` (180×180) and
+   `share-card.jpg` (1200×630) are logo-free and rendered by
+   `tools/build-brand-images.mjs`; they are wired into every page.
 7. **Contact channels.** Phone and WhatsApp are `href: null` in
    `data/navigation.js` (`SUPPORT_CHANNELS`) since Stage 10.4: no surface renders
    a channel without an href, so nothing placeholder-shaped reaches a customer.

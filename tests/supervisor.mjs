@@ -45,7 +45,7 @@ const FULL = {
   id: 'sup-x', slug: 'test-full-record', status: 'active', placeholder: false,
   nameAr: 'اسم تجريبي', nameEn: 'Test Name', titleAr: 'مشرف السفر — الخليج', titleEn: 'Travel supervisor — Gulf',
   bioAr: 'نبذة تجريبية عن المشرف.', bioEn: 'A test bio for the supervisor.',
-  image: { src: 'assets/brand/og-image.png', altAr: 'صورة الاسم التجريبي', altEn: 'Photo of Test Name' },
+  image: { src: 'assets/brand/share-card.jpg', altAr: 'صورة الاسم التجريبي', altEn: 'Photo of Test Name' },
   languages: ['ar', 'en'], specialties: ['umrah', 'medical'], services: ['flights', 'umrah'],
   phone: '+249 12 345 6789', whatsapp: '+249123456789', email: 'test@example.com', createdAt: '2026-09-16',
 };

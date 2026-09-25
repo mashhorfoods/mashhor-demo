@@ -98,14 +98,14 @@ ${c.noindex ? '<meta name="robots" content="noindex">\n' : ''}
 <meta property="og:locale:alternate" content="en_US">
 <meta property="og:url" content="${SITE}${c.dir}/${r.slug}/">
 <link rel="canonical" href="${SITE}${c.dir}/${r.slug}/">
-<meta property="og:image" content="${SITE}assets/brand/og-image.png">
+<meta property="og:image" content="${SITE}assets/brand/share-card.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Travel &amp; Tourism">
 <meta name="twitter:card" content="summary_large_image">
 
-<link rel="icon" href="assets/brand/favicon-32.png" sizes="32x32" type="image/png">
-<link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
+<link rel="icon" href="assets/brand/icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/brand/icon-180.png">
 <link rel="preload" href="assets/fonts/ibm-plex-sans-arabic-arabic-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/ibm-plex-sans-arabic-arabic-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/foundation.css">

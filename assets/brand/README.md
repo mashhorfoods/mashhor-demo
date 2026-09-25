@@ -8,13 +8,16 @@ logo never has to be removed first. The site's name (`brand.name` in
 
 | File | Use |
 | --- | --- |
-| `favicon-32.png` | Browser tab. Still referenced. |
-| `apple-touch-icon.png` | 180x180 home-screen icon. Still referenced. |
-| `og-image.png` | 1200x630 social card. Still referenced. |
+| `icon-32.png` | Browser tab: a red tile with the plane glyph. |
+| `icon-180.png` | 180x180 home-screen (apple-touch) icon, same design. |
+| `share-card.jpg` | 1200x630 link-preview card (`og:image`): the home hero photo with the site name as plain text. |
 
-The old logo artwork (`logo-original.jpg`, `logo-lockup*.png`, `logo-primary*.png`)
-has been deleted — nothing referenced it once the logo was removed, and there
-was no reason to keep unused binaries in the repo.
+All three are rendered by `node tools/build-brand-images.mjs` (edit the text
+or colour there and re-run). None of them is a logo. The old logo artwork and
+the images derived from it (`og-image.png`, `favicon-32.png`,
+`apple-touch-icon.png`, `logo-*`) have been deleted; the new files use new names
+so that messaging apps and social networks fetch them fresh instead of serving
+a cached copy of the old logo card.
 
 ## Colour
 
@@ -35,5 +38,5 @@ The two read as the same red side by side.
 
 Add a logo component if the buyer wants one (there is currently no `.c-logo`
 class or `logo()` builder anywhere in the codebase to build on), and/or swap
-the favicon / apple-touch-icon / og-image files above and the `brand.name`
+the icon / share-card files above and the `brand.name`
 string.
