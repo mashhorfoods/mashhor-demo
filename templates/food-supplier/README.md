@@ -1,14 +1,17 @@
 # Food supplier — demo template
 
-A single-page site for a rice and foodstuff supplier (wholesale and retail):
+A single-page site for a rice and foodstuff supplier (wholesale and retail),
+in English (`index.html`, left-to-right) and Arabic (`ar/index.html`,
+right-to-left):
 products with a WhatsApp cart, bulk-order banner, why us, certifications,
 partners, gallery, about, and contact. It was built from a real client's site
 and then made generic so that it can be shown to prospective clients:
 
 - **No logo or brand anywhere.** The header, mobile drawer and footer carry no
   brand mark, and the logo component and its CSS have been deleted. The site
-  name, *Rice & Foodstuff Trading*, appears only as plain text: in the
-  `<title>`, the social tags, the footer and the copyright line.
+  name, *Rice & Foodstuff Trading* (تجارة الأرز والمواد الغذائية), appears only
+  as plain text: in the `<title>`, the social tags, the footer and the
+  copyright line.
 - **No country or audience.** The copy says *wherever you are* instead of
   naming a market. Prices are in USD. The contact details are placeholders:
   the fictional number `+1 555 010 0199`, `sales@example.com`, and
@@ -22,32 +25,43 @@ and then made generic so that it can be shown to prospective clients:
 
 | Path | What |
 | --- | --- |
-| `index.html` | The whole site (HTML, CSS and JS in one file). |
-| `assets/img/product-1..6.jpg` | Product images: sacks labelled with the variety name only. |
-| `assets/img/slide-1..4.jpg`, `about.jpg` | Gallery and about images. |
+| `index.html` | English page (`lang="en" dir="ltr"`): markup only. |
+| `ar/index.html` | Arabic page (`lang="ar" dir="rtl"`): the same markup, translated, with `../` asset paths. |
+| `assets/site.css` | Styles for both pages. The *Arabic / right-to-left* block at the end mirrors what the design positions physically (drawers, absolute offsets, arrows) and loads the Arabic font. |
+| `assets/site.js` | Behaviour for both pages. `SITE` holds the client settings; `T` holds the strings the script shows (toasts, cart, WhatsApp and email messages) in both languages; `productsData` holds product titles and descriptions in both languages. The page's `<html lang>` picks the language. |
+| `assets/fonts/` | IBM Plex Sans Arabic (SIL Open Font License), served locally. |
+| `assets/img/product-1..6.jpg` | Product images: sacks labelled with the variety name in English and Arabic. |
+| `assets/img/slide-1..4.jpg` | Gallery images; `slide-3.jpg` is also the about image. |
 | `assets/img/cert-*.svg` | Generic certification seals. **Placeholders:** show only the certificates the client actually holds. |
-| `assets/share-card.jpg` | 1200×630 link-preview image (`og:image` / `twitter:image`). |
+| `assets/share-card.jpg`, `assets/share-card-ar.jpg` | 1200×630 link-preview images (`og:image` / `twitter:image`), one per language. |
 | `assets/icon-32.png`, `assets/icon-180.png` | Favicon and home-screen icon: a green tile with a grain stalk. |
+
+The two pages link to each other (the *English* / *العربية* switch in the
+header and the mobile menu) and declare each other with `hreflang`.
+**Keep them in step:** a change to the markup of one page must be made in the
+other too. The test fails if their ids, anchors, products, WhatsApp links or
+images differ, or if the Arabic page shows untranslated English copy.
 
 ## Adapting it for a client
 
-1. **Name and contact details.** Edit the `SITE` object near the top of the
-   `<script>` in `index.html` (name, WhatsApp number, email, currency). Then
-   search and replace the same values in the static HTML: the `wa.me/…` links,
-   `tel:` and `mailto:` links, the address, `<title>`, the meta tags, the
-   JSON-LD and the footer.
-2. **Colours.** Change `--primary` and the related variables in `:root`, and
-   the colour constants at the top of the image script.
+1. **Name and contact details.** Edit the `SITE` object at the top of
+   `assets/site.js` (name in both languages, WhatsApp number, email,
+   currency). Then search and replace the same values in both pages: the
+   `wa.me/…` links, `tel:` and `mailto:` links, the address, `<title>`, the
+   meta tags, the JSON-LD and the footer.
+2. **Colours.** Change `--primary` and the related variables in `:root` in
+   `assets/site.css`, and the colour constants at the top of the image script.
 3. **Images.** Edit the text and colours at the top of
    `tools/build-food-supplier-images.mjs`, then run
    `node tools/build-food-supplier-images.mjs`. You can also replace the files
    with the client's own photos.
 4. **Logo (optional).** There is no logo component. If the client wants one,
-   add an `<a href="#top">` before `.nav-container` in the header, and set
+   add an `<a href="#top">` before `.nav-container` in the header of both
+   pages, and set
    `.header-container { justify-content: space-between; }` so the logo sits on
-   the left and the navigation on the right.
-5. **Domain.** `canonical`, `og:url`, `og:image` and `twitter:image` hold
-   absolute URLs for the demo deployment. Point them at the client's domain,
+   the start and the navigation at the end (flexbox mirrors this in Arabic).
+5. **Domain.** `canonical`, `hreflang`, `og:url`, `og:image` and
+   `twitter:image` hold absolute URLs for the demo deployment, in both pages. Point them at the client's domain,
    and change `<meta name="robots" content="noindex">` to `index, follow`.
 6. **Prices, products, certifications, statistics and the testimonial** are
    sample content. Replace them with the client's real data.
@@ -63,13 +77,15 @@ the share image a new file name.
 node tests/food-supplier.mjs     # also part of `npm test`
 ```
 
-The test checks that no trace of the original client remains, including the
-brand, logo, country, phone code, currency, image host and analytics. It also
-checks that every asset and anchor resolves, and that the layout holds with no
-horizontal scroll at 390, 768, 1024 and 1440px. Its accessibility checks cover
+The test runs every check on both pages. It checks that no trace of the
+original client remains, including the brand, logo, country, phone code,
+currency, image host and analytics. It also checks that every asset and
+anchor resolves, and that the layout holds with no horizontal scroll at 390,
+768, 1024 and 1440px in both directions. The mobile menu must open from the
+right in English and from the left in Arabic. Its accessibility checks cover
 image alt text, names on controls and labels on fields. It also checks that
-the cart totals in USD and that checkout opens WhatsApp on the number in
-`SITE`. Screenshots are saved to `tests/.shots/food-supplier-*.png`.
+the cart totals in USD, and that checkout opens WhatsApp on the number in
+`SITE` with the order written in the page's language. Screenshots are saved to `tests/.shots/food-supplier-*.png`.
 
 The only mention of the old name that is left is the demo hosting address
 (`mashhorfoods.github.io/mashhor-demo`). It belongs to the GitHub account that

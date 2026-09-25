@@ -4,10 +4,10 @@
    client and can be re-branded by editing the constants below and re-running:
 
      templates/food-supplier/assets/img/product-{1..6}.jpg   rice sacks, variety names only
-     templates/food-supplier/assets/img/slide-{1..4}.jpg     gallery slider (1200x600)
-     templates/food-supplier/assets/img/about.jpg            about section
+     templates/food-supplier/assets/img/slide-{1..4}.jpg     gallery slider (1200x600); slide-3 is also the about image
      templates/food-supplier/assets/img/cert-*.svg           generic certification seals
-     templates/food-supplier/assets/share-card.jpg           1200x630 og:image / twitter:image
+     templates/food-supplier/assets/share-card.jpg           1200x630 og:image / twitter:image (English page)
+     templates/food-supplier/assets/share-card-ar.jpg        the same for the Arabic page (ar/)
      templates/food-supplier/assets/icon-32.png              browser tab icon
      templates/food-supplier/assets/icon-180.png             home-screen (apple-touch) icon
 
@@ -27,25 +27,30 @@ mkdirSync(join(OUT, 'img'), { recursive: true });
 
 // ---- Edit these to re-brand -------------------------------------------------
 const SITE_NAME = 'Rice & Foodstuff Trading';
+const SITE_NAME_AR = 'تجارة الأرز والمواد الغذائية';
 const TAGLINE = 'Premium Basmati & Non-Basmati rice · Wholesale & retail';
 const TAGLINE_2 = 'Delivered wherever you are';
+const TAGLINE_AR = 'أرز بسمتي وغير بسمتي فاخر · جملة وتجزئة';
+const TAGLINE_2_AR = 'يصلك أينما كنت';
 const GREEN = '#2e7d32';
 const GREEN_DARK = '#1e5a22';
 const ACCENT = '#ff9800';
-// Label text on each sack: variety, grade line, pack size, sack colour, band colour.
+// Label text on each sack (English and Arabic, so one image serves both pages): variety, grade line, pack size, colours.
 const PRODUCTS = [
-  { name: '1121 Basmati', grade: 'Extra-long grain · Aged', kg: '35 kg', sack: '#f4ead2', band: GREEN },
-  { name: '1121 Basmati', grade: 'Extra-long grain · Aged', kg: '5 kg', sack: '#f4ead2', band: GREEN, small: true },
-  { name: 'Biryani Rice', grade: 'Classic XXL grain', kg: '35 kg', sack: '#f1e4d6', band: '#8e2430' },
-  { name: 'Golden Sella', grade: '1121 Parboiled Basmati', kg: '20 kg', sack: '#f6e7bf', band: '#c9891b', grain: '#e8c472' },
-  { name: 'Matta Rice', grade: 'Palakkadan red rice', kg: '18 kg', sack: '#efe2d3', band: '#7a4a2a', grain: '#b8745a' },
-  { name: 'Sona Masoori', grade: 'Light & fluffy', kg: '18 kg', sack: '#e9eef4', band: '#2c5d8f' },
+  { ar: 'بسمتي 1121', name: '1121 Basmati', grade: 'Extra-long grain · Aged', kg: '35 kg', sack: '#f4ead2', band: GREEN },
+  { ar: 'بسمتي 1121', name: '1121 Basmati', grade: 'Extra-long grain · Aged', kg: '5 kg', sack: '#f4ead2', band: GREEN, small: true },
+  { ar: 'أرز برياني', name: 'Biryani Rice', grade: 'Classic XXL grain', kg: '35 kg', sack: '#f1e4d6', band: '#8e2430' },
+  { ar: 'سيلا ذهبي', name: 'Golden Sella', grade: '1121 Parboiled Basmati', kg: '20 kg', sack: '#f6e7bf', band: '#c9891b', grain: '#e8c472' },
+  { ar: 'أرز ماتا', name: 'Matta Rice', grade: 'Palakkadan red rice', kg: '18 kg', sack: '#efe2d3', band: '#7a4a2a', grain: '#b8745a' },
+  { ar: 'سونا مسوري', name: 'Sona Masoori', grade: 'Light & fluffy', kg: '18 kg', sack: '#e9eef4', band: '#2c5d8f' },
 ];
 // -----------------------------------------------------------------------------
 
 const b64 = (p) => readFileSync(join(ROOT, p)).toString('base64');
 const fonts = [400, 600, 700].map((w) => `@font-face { font-family: Plex; font-weight: ${w};
-  src: url(data:font/woff2;base64,${b64(`assets/fonts/ibm-plex-sans-arabic-latin-${w}.woff2`)}) format('woff2'); }`).join('');
+  src: url(data:font/woff2;base64,${b64(`assets/fonts/ibm-plex-sans-arabic-latin-${w}.woff2`)}) format('woff2'); }
+  @font-face { font-family: Plex; font-weight: ${w}; unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
+  src: url(data:font/woff2;base64,${b64(`assets/fonts/ibm-plex-sans-arabic-arabic-${w}.woff2`)}) format('woff2'); }`).join('');
 const BASE_CSS = `${fonts} * { margin: 0; box-sizing: border-box; } body { font-family: Plex, sans-serif; overflow: hidden; }`;
 
 // Seeded PRNG so every run draws the same grains.
@@ -88,6 +93,7 @@ function sack(p, { left, top, w, h, seed = 3 }) {
         border:${3 * fs}px solid ${p.band};display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:${6 * fs}px;padding:${10 * fs}px">
         <svg viewBox="0 0 120 40" style="width:58%;height:auto">${grains(9, { x: 10, y: 8, w: 100, h: 24, seed, color: p.grain ?? '#fbf6e9', edge: '#bda878', len: 20 })}</svg>
         <div style="font-size:${34 * fs}px;font-weight:700;color:${p.band};line-height:1.05">${p.name}</div>
+        <div dir="rtl" style="font-size:${22 * fs}px;font-weight:600;color:${p.band};line-height:1.2">${p.ar}</div>
         <div style="font-size:${15 * fs}px;font-weight:400;color:#555;line-height:1.2">${p.grade}</div>
         <div style="margin-top:${8 * fs}px;font-size:${22 * fs}px;font-weight:700;color:#fff;background:${p.band};border-radius:${40 * fs}px;padding:${4 * fs}px ${18 * fs}px">${p.kg}</div>
       </div>
@@ -151,17 +157,17 @@ const slides = [
   },
 ];
 
-const shareCard = () => `<!doctype html><meta charset="utf-8"><style>${BASE_CSS}
+const shareCard = (name, tag, tag2, rtl = false) => `<!doctype html><meta charset="utf-8"><style>${BASE_CSS}
   body { width:1200px; height:630px; position:relative; color:#fff; background:linear-gradient(135deg,#efe3c4,#d9c79a) }
   .bg { position:absolute; inset:0 }
   .shade { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; padding:0 88px; gap:18px;
-    background:linear-gradient(90deg, rgba(20,48,22,.94) 0%, rgba(20,48,22,.80) 55%, rgba(20,48,22,.25) 100%) }
+    background:linear-gradient(${rtl ? 270 : 90}deg, rgba(20,48,22,.94) 0%, rgba(20,48,22,.80) 55%, rgba(20,48,22,.25) 100%) }
   .bar { width:72px; height:6px; background:${ACCENT}; border-radius:3px }
   .name { font-size:70px; font-weight:700; line-height:1.1 }
   .tag { font-size:30px; font-weight:400; opacity:.92 }
 </style><svg class="bg" width="1200" height="630">${grains(1500, { w: 1240, h: 670, x: -20, y: -20, seed: 7, len: 44, color: '#fbf7ec', edge: '#c9b484' })}</svg>
-<div class="shade"><div class="bar"></div><div class="name">${SITE_NAME.replace('&', '&amp;')}</div>
-  <div class="tag">${TAGLINE}</div><div class="tag">${TAGLINE_2}</div></div>`;
+<div class="shade" dir="${rtl ? 'rtl' : 'ltr'}"><div class="bar"></div><div class="name">${name.replace('&', '&amp;')}</div>
+  <div class="tag">${tag}</div><div class="tag">${tag2}</div></div>`;
 
 // Icon: brand-green tile with a stalk of grain (a plain symbol, not a logo).
 const icon = (size) => {
@@ -204,8 +210,8 @@ async function shot(html, w, h, out, type = 'jpeg') {
 }
 for (const [i, p] of PRODUCTS.entries()) await shot(productScene(p, i), 800, 600, `img/product-${i + 1}.jpg`);
 for (const [i, s] of slides.entries()) await shot(s(), 1200, 600, `img/slide-${i + 1}.jpg`);
-await shot(slides[2](), 1200, 600, 'img/about.jpg');
-await shot(shareCard(), 1200, 630, 'share-card.jpg');
+await shot(shareCard(SITE_NAME, TAGLINE, TAGLINE_2), 1200, 630, 'share-card.jpg');
+await shot(shareCard(SITE_NAME_AR, TAGLINE_AR, TAGLINE_2_AR, true), 1200, 630, 'share-card-ar.jpg');
 await shot(icon(32), 32, 32, 'icon-32.png', 'png');
 await shot(icon(180), 180, 180, 'icon-180.png', 'png');
 await browser.close();
