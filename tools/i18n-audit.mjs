@@ -6,7 +6,8 @@
 // different lang= (a deliberate specimen) or translate="no" (a code, a token, a
 // data cell) is exempt. Exit code 1 if anything is left untranslated.
 //
-// Needs a static server and Playwright (not a repo dependency — install locally):
+// `npm test` runs it (tests/run.mjs serves the site and passes BASE). By hand it needs a static server and
+// Playwright (a devDependency — `npm ci`):
 //   python3 -m http.server 8000
 //   BASE=http://localhost:8000/ PAGES=index.html,404.html node tools/i18n-audit.mjs
 //   CHROMIUM=/path/to/chromium   # optional: use an existing browser binary

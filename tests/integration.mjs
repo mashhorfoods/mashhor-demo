@@ -60,7 +60,6 @@ async function ctx(width = 1440, height = 1000, locale = 'ar', origin = site.ori
 const mainReady = (p) => p.waitForFunction(() => document.querySelector('[data-account=main] h1') && !document.querySelector('[data-account=main] .c-loading-block'));
 const text = (p, sel) => p.locator(sel).first().textContent().then((s) => (s ?? '').replace(/\s+/g, ' ').trim()).catch(() => '');
 const count = (p, sel) => p.locator(sel).count();
-const visible = (p, sel) => p.locator(sel).first().isVisible().catch(() => false);
 const signIn = async (p, email, password = 'password123') => { await p.go('account/sign-in/', 'signIn'); await p.fill('[name=email]', email); await p.fill('[name=password]', password); await Promise.all([p.waitForURL((u) => !/sign-in/.test(u.pathname)), p.click('[data-form=sign-in] button[type=submit]')]); };
 const signOut = async (p) => { await p.go('account/sign-out/', 'signOut'); };
 const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.session') ?? 'null'));

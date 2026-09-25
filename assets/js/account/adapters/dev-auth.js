@@ -106,8 +106,6 @@ export const DEV_AUTH = registerAuthProvider({
     if (patch.phone != null) a.phone = String(patch.phone).trim();
     if (patch.locale != null) a.locale = patch.locale;
     if (patch.supervisorId && !a.supervisorId) { a.supervisorId = patch.supervisorId; a.attribution = { supervisorId: patch.supervisorId, source: 'booking', at: new Date().toISOString() }; }   // set once, never edited by the customer
-    if (patch.acceptance) a.acceptance = { ...patch.acceptance, at: new Date().toISOString() };
     save(db); return publicCustomer(a);
   },
-  async customerOf(token) { const v = await this.verify(token); return v?.customer ?? null; },
 });

@@ -334,7 +334,7 @@
      NEWSLETTER — reusable subscription card. Redesign §4. A two-zone
      surface (photo + dark content panel) built entirely from existing
      tokens: same overflow-hidden/radius/shadow language as .c-card, same
-     inverse surface .l-section--inverse already uses, --color-primary-light
+     inverse surface tokens (--color-bg-inverse), --color-primary-light
      for the one accent line instead of a new colour. No new component
      system: .c-field / .c-choice / .c-btn underneath are the same ones
      booking and account already use.

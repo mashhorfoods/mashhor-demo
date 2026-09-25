@@ -60,8 +60,9 @@ Secure Webhook → Server Verification → Booking Payment Status → Confirmati
 
 ### Payment state machine
 
-`PAYMENT_STATUSES = ['pending', 'processing', 'paid', 'failed', 'cancelled', 'refunded']`
-(`backend/payments.mjs`) — provider-neutral, independent of the binary
+A payment row's `status` is one of `pending`, `processing`, `paid`, `failed`,
+`cancelled`, `refunded` (written by `backend/payments.mjs`; the unused
+`PAYMENT_STATUSES` constant that listed them was removed on 2026-09-25) — provider-neutral, independent of the binary
 `bookings.payment_status` (unpaid/paid) that Stage 15's payment gates
 already consume. `payment_gates` itself is read from the existing Business
 Rules Register, unchanged by this stage — no new commercial policy was

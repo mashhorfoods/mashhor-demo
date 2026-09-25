@@ -223,8 +223,8 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
       return { tag: a.tagName, name: a.name || a.className.split(' ')[0], ring: ring || platformStop };
     }));
   }
-  const reachedSubmit = seen.some((s) => s.name === 'c-btn' || s.tag === 'BUTTON' && s.name.includes('c-btn'));
-  ok('keyboard reaches through the search form', seen.some((s) => s.name === 'from') && seen.some((s) => s.name === 'depart'), seen.map((s) => s.name).join('>'));
+  const reachedSubmit = seen.some((s) => s.tag === 'BUTTON' && s.name === 'c-btn');
+  ok('keyboard reaches through the search form to its submit button', seen.some((s) => s.name === 'from') && seen.some((s) => s.name === 'depart') && reachedSubmit, seen.map((s) => `${s.tag}.${s.name}`).join('>'));
   ok('every focused control shows a focus ring', seen.every((s) => s.ring), seen.filter((s) => !s.ring).map((s) => s.name).join(','));
   // chips are buttons with aria-pressed; segmented radios move with arrows
   await p.focus('.c-segmented__input:checked');

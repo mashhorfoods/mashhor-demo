@@ -22,8 +22,7 @@ const nNotification = (n) => ({ id: n.id, kind: n.kind ?? 'booking', at: n.at ??
 const q = (params = {}) => { const p = new URLSearchParams(); for (const [k, v] of Object.entries(params)) if (v != null && v !== '') p.set(k, String(v)); const s = p.toString(); return s ? `?${s}` : ''; };
 
 export const API_SUPERVISOR_DATA = registerSupervisorDataAdapter({
-  id: 'api-supervisor-data', dev: false, provider: 'customer backend API', configSource: 'API_BASE_URL',
-  capabilities: ['profile', 'customers', 'bookings', 'leads', 'leads.update', 'revenue', 'performance', 'commissions', 'notifications'],
+  id: 'api-supervisor-data', dev: false,
   async profile() { const d = await get('/supervisor/me'); return d.supervisor; },
   async updateProfile(_t, p) { const d = await patch('/supervisor/me', p); return d.supervisor; },
   async customers(_t, params = {}) { const d = await get(`/supervisor/me/customers${q(params)}`); return nPage(d, nCustomerRow, params); },

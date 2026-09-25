@@ -15,15 +15,9 @@
 import { ENV, isProduction } from '../../data/env.js';
 
 const wantsApi = !!ENV.apiBaseUrl;
-export const INSTALLED = [];
 
 if (wantsApi) {
   await import('./api-flights.js');
-  INSTALLED.push({ name: 'api-flights', provider: 'flight supplier backend API', environment: ENV.environment, status: 'implemented — NOT CONNECTED (no real supplier registered in backend/flights.mjs yet)', configSource: 'API_BASE_URL', capabilities: ['search', 'offer', 'quote', 'extras', 'book'] });
 } else if (!isProduction()) {
   await import('./dev-flights.js');   // fictional carriers, clearly labelled — never real inventory
-  INSTALLED.push({ name: 'dev-flights', provider: 'in-browser development stand-in', environment: ENV.environment, status: 'development only', configSource: 'none', capabilities: ['search', 'offer', 'quote', 'extras', 'book'] });
-} else {
-  INSTALLED.push({ name: 'request-only', provider: 'none', environment: ENV.environment, status: 'production without a configured backend: flights fall back to request-only (no live inventory, never fabricated)', configSource: 'API_BASE_URL', capabilities: [] });
 }
-if (typeof window !== 'undefined') window.no = { ...(window.no ?? {}), flightsInstalled: INSTALLED };

@@ -138,7 +138,6 @@
     --color-border:        var(--_gray-200);
     --color-border-strong: var(--_gray-300);
     --color-border-input:  var(--_gray-400);    /* 3:1 non-text contrast */
-    --color-border-brand:  var(--color-primary);
 
     --color-focus:         var(--_info-600);    /* not the brand red: a focus
                                                    ring must stay visible ON a
@@ -306,7 +305,6 @@
     --duration-slow:    400ms;
     --ease-standard: cubic-bezier(0.2, 0.6, 0.2, 1);
     --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);
-    --ease-in:       cubic-bezier(0.7, 0, 0.84, 0);
     --transition-interactive:
       color var(--duration-fast) var(--ease-standard),
       background-color var(--duration-fast) var(--ease-standard),

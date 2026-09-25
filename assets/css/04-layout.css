@@ -83,11 +83,6 @@
   .l-section { padding-block: var(--section-space); background-color: var(--color-surface); }
   .l-section--tight { padding-block: var(--section-space-tight); }
   .l-section--subtle { background-color: var(--color-bg-subtle); }
-  .l-section--inverse {
-    background-color: var(--color-bg-inverse);
-    color: var(--color-text-inverse);
-  }
-  .l-section--inverse :is(h1,h2,h3,h4) { color: var(--color-text-inverse); }
   /* A fourth, deliberately rare step in the section rhythm (white → subtle
      gray → white → …): the same red-tinted surface a brand-outlined button
      already hovers to, just as a section wash. Text stays the normal
@@ -109,7 +104,6 @@
   }
   .l-cluster--8  { --cluster-gap: var(--space-8); }
   .l-cluster--16 { --cluster-gap: var(--space-16); }
-  .l-cluster--24 { --cluster-gap: var(--space-24); }
 
   /* ---- Reading measure -------------------------------------------------- */
   .l-prose { max-inline-size: var(--measure); }

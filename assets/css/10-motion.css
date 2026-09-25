@@ -37,17 +37,6 @@
     background-repeat: repeat-x;
   }
 
-  /* A directional curve for section transitions. Subtle, single colour. */
-
-  /* The numeral used as a watermark. Deliberately low contrast: it is
-     texture, not information. */
-  .u-numeral-watermark {
-    position: absolute; inset-block-start: -0.25em; inset-inline-end: 0;
-    font-family: var(--font-display); font-size: 16rem; font-weight: var(--weight-bold);
-    line-height: 1; color: var(--color-gray-100);
-    pointer-events: none; user-select: none;
-    z-index: var(--z-base);
-  }
 
   /* ======================================================================
      SIGNATURE TRANSITION — the numeral + route above, staged as a brief
@@ -86,11 +75,4 @@
   [dir="rtl"] .c-signature__route { transform-origin: 100%; }
   .c-signature.is-visible .c-signature__num { opacity: 1; transform: translateY(0); }
   .c-signature.is-visible .c-signature__route { transform: scaleX(1); }
-  /* Inverse ground (the CTA band's photo variant, .l-section--inverse) already flips its own title/text to
-     --color-text-inverse rather than keeping them brand red, since red fights a photo's own colours — the
-     signature mark follows the same rule for the same reason. */
-  .l-section--inverse .c-signature,
-  .c-cta-band .c-signature {
-    color: var(--color-text-inverse);
-  }
 }

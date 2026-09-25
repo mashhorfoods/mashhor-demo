@@ -209,7 +209,7 @@ handles this in three places, and new code must keep doing it:
 - `.u-ltr-run` and `<bdi>` for codes, distances, references (`1.2 km` renders
   as `km 1.2` without it);
 - `.c-phone__number` and `.c-otp` force LTR — a phone number is never RTL;
-- `money()` maps the ISO currency code to a localised label (`SDG` → `ج.س`)
+- `money()` maps the ISO currency code to a localised label (`USD` → `دولار`)
   rather than printing Latin script into an Arabic price.
 
 Times use a 24-hour clock with Western digits, always. A departure time is the
@@ -341,9 +341,10 @@ Direction → route → journey, expressed as rules and paths rather than
 illustrations, so it costs almost nothing:
 
 - `.u-mark` — the single decisive stroke, marking a section heading;
-- `.u-route` — the dotted path, used as a divider and inside itineraries;
-- `.u-numeral-watermark` — a low-contrast numeral texture, unused by the
-  current demo brand (no numeral is part of its identity).
+- `.u-route` — the dotted path, used as a divider and inside itineraries.
+
+(A third primitive, `.u-numeral-watermark`, was never used by the demo brand
+and was removed on 2026-09-25.)
 
 The flight card's route line is the same idea doing real work: a drawn path
 with the stops marked on it, so "1 stop" is *visible*, not merely stated.
@@ -471,12 +472,11 @@ component in this layer. Permission is asked, never assumed.
    nationality or market, per the country-genericization update. Rather than
    ship stock-looking filler, every
    media slot renders a neutral placeholder that reserves the exact aspect
-   ratio, so dropping in the real photograph shifts nothing. Since 10.12 every
-   slot has a key in `tools/images.manifest.json` and reads its file from the
-   generated `data/images.js`; `node tools/fetch-images.mjs` fills the slots
-   with freely licensed stand-ins from Wikimedia Commons (credits written to
-   `assets/images/CREDITS.md`) on a machine with internet access — the build
-   sandbox's egress policy blocks every image host.
+   ratio, so dropping in the real photograph shifts nothing. Every slot reads
+   its file from `data/images.js`, maintained by hand: add the file under
+   `assets/images/` and update its entry there (`assets/images/CREDITS.md`
+   explains the rules). (The Stage 10.12 generator,
+   `tools/fetch-images.mjs`, and its manifest were removed in `7b52cc9`.)
 3b. **Supplier, payment and airport data (Stage 11).** The booking journey
    runs on `assets/js/booking/adapters/dev-flights.js` (fictional carriers,
    generated fares) and `DEV_PAYMENT` (a simulated provider), both labelled on

@@ -45,7 +45,6 @@ const call = async (method, ...args) => {
 };
 
 export const customer = {
-  profile: () => call('profile'),
   updateProfile: (patch) => call('updateProfile', patch),
   trips: () => call('trips'),
   trip: (id) => call('trip', id),
@@ -56,7 +55,6 @@ export const customer = {
   documentUrl: (id) => call('documentUrl', id),                    // → { url, expiresAt } — temporary, never a permanent link
   deleteDocument: (id) => call('deleteDocument', id),
   payments: (page = { page: 1 }) => call('payments', page),        // → { items, page, pageSize, total, nextPage }
-  recordAcceptance: (acceptance) => call('recordAcceptance', acceptance),
   notifications: () => call('notifications'),
   markRead: (ids = null) => call('markRead', ids),
   travellers: () => call('travellers'),

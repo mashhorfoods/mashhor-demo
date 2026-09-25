@@ -4,7 +4,7 @@
    booking's own detail screen (assets/js/ops/ui/bookings.js). No provider credentials ever appear here. Stage 15 */
 import { el } from '../../core/dom.js';
 import { t } from '../../core/i18n.js';
-import { icon, toast } from '../../components/ui.js';
+import { toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData } from '../data.js';
 import { mountOpsPortal, loadRegion, pageTitle, actionForm, dataTable, block } from './shell.js';

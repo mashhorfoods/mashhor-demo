@@ -94,6 +94,9 @@ routes back. No content was invented for them.
   `data/images.js`, and `node tools/fetch-images.mjs` on a machine with
   internet access fetches freely licensed photographs, writes the credits
   and regenerates the map. Then commit `assets/images/` and the map.
+  *(Later: the photographs were committed, and the generator and manifest
+  were removed in `7b52cc9`; `data/images.js` is now edited by hand — see
+  `assets/images/CREDITS.md`.)*
 - Contact channels (phone, WhatsApp, email) — `data/navigation.js`,
   `data/supervisors.js`.
 - Real offers (programme, price, dates, inclusions, terms) — `data/offers.js`.

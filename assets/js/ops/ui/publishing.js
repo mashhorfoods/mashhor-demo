@@ -8,7 +8,7 @@ import { route } from '../../data/config.js';
 import { toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, pageTitle, block, busyButton, publishStatusBadge, dateTime } from './shell.js';
+import { mountOpsPortal, pageTitle, block, busyButton, dateTime } from './shell.js';
 
 const KIND_ROUTE = { destination: 'admin/destinations/', offer: 'admin/offers/' };
 const KIND_PREVIEW = { destination: 'admin/destinations/preview/', offer: 'admin/offers/preview/' };

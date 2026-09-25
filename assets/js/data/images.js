@@ -1,14 +1,16 @@
 /* ============================================================================
    DATA / IMAGES — the photography map. Stage 10.12
 
-   GENERATED — do not edit by hand. One key per image slot (see
-   tools/images.manifest.json), one site-relative path per key. A slot with
-   no entry at all falls back to the neutral placeholder:
+   Maintained by hand: one key per image slot, one site-relative path per key.
+   To replace a photograph, drop the file under assets/images/ and update its
+   entry here (assets/images/CREDITS.md explains the rules). (The old
+   generator and manifest were removed in 7b52cc9.) A slot with no entry at
+   all falls back to the neutral placeholder:
 
      import { imageSrc } from './images.js';
      image: { src: imageSrc('destinations/jeddah'), altAr: …, altEn: … }
 
-   Credits for every file live in assets/images/CREDITS.md.
+   Where every file comes from: assets/images/CREDITS.md.
    ========================================================================= */
 
 export const IMAGES = {

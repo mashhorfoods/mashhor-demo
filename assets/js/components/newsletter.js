@@ -7,7 +7,7 @@
    booking review step keeps for its terms checkbox.
    ========================================================================= */
 
-import { el, qs } from '../core/dom.js';
+import { el } from '../core/dom.js';
 import { t, pick } from '../core/i18n.js';
 import { icon } from './ui.js';
 import { stateBlock } from './states.js';

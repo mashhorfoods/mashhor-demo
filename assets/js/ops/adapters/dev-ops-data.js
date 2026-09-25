@@ -120,8 +120,7 @@ const paged = (all, { page = 1, pageSize = 20 } = {}) => { const size = Math.min
 const bookingById = (id) => BOOKINGS.find((b) => b.id === id);
 
 export const DEV_OPS_DATA = registerOpsDataAdapter({
-  id: 'dev-ops-data', dev: true, provider: 'in-browser development stand-in', configSource: 'none',
-  capabilities: ['bookings.operations', 'tasks', 'escalations', 'documents.review', 'services', 'workflow', 'suppliers', 'notifications.templates', 'notifications.history', 'audit', 'admin.dashboard', 'content'],
+  id: 'dev-ops-data', dev: true,
   async bookings() { await wait(); if (isEmpty()) return paged([]); return paged(BOOKINGS); },
   async booking(_t, id) {
     await wait(); const b = bookingById(id); if (!b) return null;

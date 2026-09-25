@@ -84,6 +84,31 @@ work.
 
 ## 2. Dead code (verified unused; safe to delete)
 
+> **Phase 2 status (2026-09-25): done.** Every row below except the backend routes (Phase 3) — each claim
+> re-verified with a repo-wide search at the commit it was deleted from. Decisions and findings along the way:
+> - **Missing assertions added:** supervisor B's booking list must not contain supervisor A's booking;
+>   keyboard focus must reach the search form's submit button. Both pass.
+> - **Adapter metadata:** the ops, supervisor and flights registries and their `window.no.*Installed`
+>   globals are gone, as are `provider`/`configSource`/`capabilities` on every adapter object. The
+>   account registry (`window.no.installed`) stays: `tests/integration.mjs` reads it. It keeps
+>   `provider`/`configSource`/`status` for people inspecting a build, minus the stale `capabilities`.
+> - **Design tokens:** only `--color-border-brand` and `--ease-in` were removed. The other eleven are steps
+>   of documented scales (the red ramp, spacing, shadows, the four durations, the z-order ladder,
+>   section and container sizes) and stay, per the rule in the table.
+> - **Also removed as a result:** imports that only the deleted code used (`loadContext`,
+>   `totalDuration`, `totalStops`, `getLocale` in two files), and the dev adapter's `acceptance`
+>   branch that only `recordAcceptance` reached.
+> - **§5 items done in the same pass:** `links.mjs` regex (it immediately found a real dead link,
+>   `help/faq/`, now listed by its exact path as a planned route), README rewritten (accurate banner,
+>   all 21 docs linked, Brand section points at `assets/brand/README.md`), the brand README's
+>   re-branding claim corrected, `backend/README.md`, `CLEANUP.md`, `images.js`, `FOUNDATION.md`,
+>   `STAGE-10-QA.md`, `COORDINATOR-ROLE-UPDATE.md`, `STAGE-16B-PAYMENT-INTEGRATION.md` and the audit tool
+>   headers updated.
+> - **PDFs:** the five dated reports were deleted, not archived. `docs/` is served by GitHub Pages, so
+>   an archive folder would keep publishing the old brand. They remain in git history.
+> - **Still open from §5** (not Phase 2): the header height from `--logo-size`, the Sudan/Egypt option
+>   lists, deriving the brand name from one setting, the legacy admin route.
+
 | Item | Where | Evidence | Removal impact | Risk |
 |---|---|---|---|---|
 | ✔ Orphaned airline images `sudanair`, `egyptair`, `tarco`, `badr` | `assets/images/providers/` | No references; dropped from `data/providers.js` in `861461c` | −70 KB | None |

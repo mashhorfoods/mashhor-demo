@@ -39,26 +39,26 @@ if (wantsApi) {
   await import('./session-api-auth.js');
   await import('./api-customer.js');
   INSTALLED.push(
-    { name: 'session-api', provider: 'backend session endpoints (hosted identity behind the backend)', environment: ENV.environment, status: status('session-api', 'implemented — NOT CONNECTED (no verified deployment at API_BASE_URL yet)'), configSource: 'API_BASE_URL, AUTH_PUBLIC_CONFIG', capabilities: ['signUp', 'signIn', 'signOut', 'session', 'refresh', 'resetRequest', 'reset', 'changePassword'] },
-    { name: 'api-customer', provider: 'customer backend API', environment: ENV.environment, status: status('api-customer', 'implemented — NOT CONNECTED (no verified deployment at API_BASE_URL yet)'), configSource: 'API_BASE_URL, DOCUMENT_SERVICE_CONFIG, PAYMENT_API_CONFIG, NOTIFICATION_CONFIG', capabilities: ['profile', 'trips', 'bookings', 'travellers', 'documents', 'documents.upload', 'documents.signedUrl', 'documents.delete', 'payments.paged', 'notifications', 'bookings.claim', 'legal.acceptance'] },
+    { name: 'session-api', provider: 'backend session endpoints (hosted identity behind the backend)', environment: ENV.environment, status: status('session-api', 'implemented — NOT CONNECTED (no verified deployment at API_BASE_URL yet)'), configSource: 'API_BASE_URL, AUTH_PUBLIC_CONFIG' },
+    { name: 'api-customer', provider: 'customer backend API', environment: ENV.environment, status: status('api-customer', 'implemented — NOT CONNECTED (no verified deployment at API_BASE_URL yet)'), configSource: 'API_BASE_URL, DOCUMENT_SERVICE_CONFIG, PAYMENT_API_CONFIG, NOTIFICATION_CONFIG' },
   );
 } else if (!isProduction()) {
   await import('./dev-auth.js');
   await import('./dev-customer.js');
   INSTALLED.push(
-    { name: 'dev-auth', provider: 'in-browser development stand-in', environment: ENV.environment, status: 'development only', configSource: 'none', capabilities: ['signUp', 'signIn', 'signOut', 'session', 'resetRequest', 'reset', 'changePassword', 'devSignIn'] },
-    { name: 'dev-customer', provider: 'in-browser development stand-in', environment: ENV.environment, status: 'development only', configSource: 'none', capabilities: ['profile', 'trips', 'bookings', 'travellers', 'documents', 'documents.upload', 'documents.signedUrl', 'documents.delete', 'payments.paged', 'notifications', 'bookings.claim', 'legal.acceptance'] },
+    { name: 'dev-auth', provider: 'in-browser development stand-in', environment: ENV.environment, status: 'development only', configSource: 'none' },
+    { name: 'dev-customer', provider: 'in-browser development stand-in', environment: ENV.environment, status: 'development only', configSource: 'none' },
   );
 } else {
   await import('./not-connected.js');
-  INSTALLED.push({ name: 'not-connected', provider: 'none', environment: ENV.environment, status: 'production without a backend: every call fails safely', configSource: 'AUTH_PROVIDER, API_BASE_URL', capabilities: [] });
+  INSTALLED.push({ name: 'not-connected', provider: 'none', environment: ENV.environment, status: 'production without a backend: every call fails safely', configSource: 'AUTH_PROVIDER, API_BASE_URL' });
 }
 
 const legalReady = ENV.legal?.source === 'static' || (ENV.legal?.source === 'api' && !!ENV.apiBaseUrl);
 if (legalReady) {
   await import('./api-legal.js');
-  INSTALLED.push({ name: ENV.legal.source === 'static' ? 'static-legal' : 'api-legal', provider: ENV.legal.source === 'static' ? 'static files supplied by the business' : 'customer backend API', environment: ENV.environment, status: status('legal', 'implemented — NOT CONNECTED (documents not verified at the configured source)'), configSource: 'LEGAL_DOCUMENT_CONFIG', capabilities: ['terms', 'privacy'] });
+  INSTALLED.push({ name: ENV.legal.source === 'static' ? 'static-legal' : 'api-legal', provider: ENV.legal.source === 'static' ? 'static files supplied by the business' : 'customer backend API', environment: ENV.environment, status: status('legal', 'implemented — NOT CONNECTED (documents not verified at the configured source)'), configSource: 'LEGAL_DOCUMENT_CONFIG' });
 } else {
-  INSTALLED.push({ name: 'legal', provider: 'none', environment: ENV.environment, status: 'NOT CONNECTED — Terms of Service and Privacy Policy not supplied', configSource: 'LEGAL_DOCUMENT_CONFIG', capabilities: [] });
+  INSTALLED.push({ name: 'legal', provider: 'none', environment: ENV.environment, status: 'NOT CONNECTED — Terms of Service and Privacy Policy not supplied', configSource: 'LEGAL_DOCUMENT_CONFIG' });
 }
 if (typeof window !== 'undefined') window.no = { ...(window.no ?? {}), installed: INSTALLED };

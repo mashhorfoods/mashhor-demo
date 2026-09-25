@@ -15,8 +15,7 @@ const list = (data, key) => (Array.isArray(data) ? data : data?.[key] ?? data?.i
 const q = (params = {}) => { const p = new URLSearchParams(); for (const [k, v] of Object.entries(params)) if (v != null && v !== '') p.set(k, String(v)); const s = p.toString(); return s ? `?${s}` : ''; };
 
 export const API_OPS_DATA = registerOpsDataAdapter({
-  id: 'api-ops-data', dev: false, provider: 'customer backend API', configSource: 'API_BASE_URL',
-  capabilities: ['bookings.operations', 'tasks', 'escalations', 'documents.review', 'services', 'workflow', 'suppliers', 'notifications.templates', 'notifications.history', 'audit', 'admin.dashboard', 'content'],
+  id: 'api-ops-data', dev: false,
   async bookings(_t, params = {}) { return get(`/bookings${q(params)}`); },
   async booking(_t, id) { const d = await get(`/bookings/${encodeURIComponent(id)}`); return d.booking; },
   async transitionBooking(_t, id, status, reason) { const d = await post(`/bookings/${encodeURIComponent(id)}/status`, { status, reason }); return d.booking; },

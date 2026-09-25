@@ -31,7 +31,6 @@ const imageJson = (image) => (image && (image.src || image.altAr || image.altEn)
   : null);
 
 /* ---- draft/publish state machine, shared by both entities below ---- */
-export const PUBLISH_STATUSES = ['draft', 'published', 'archived'];
 const PUBLISH_TRANSITIONS = { draft: ['published', 'archived'], published: ['draft', 'archived'], archived: ['draft'] };
 /** Resolves the next publish_status/published_at pair for a patch, or throws 422 for an illegal transition. A
     request that doesn't ask for a transition (publishStatus omitted, or equal to the current one) is a no-op here

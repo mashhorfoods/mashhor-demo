@@ -14,8 +14,11 @@ const PAGES = ['index.html', '404.html', 'styleguide.html', 'services/index.html
   // Stage 13's authenticated portal lives in the same directory (supervisor/dashboard/, …) but is private/noindex,
   // never a public profile: it is excluded here exactly like account/* is never in this list at all.
   ...readdirSync(ROOT + 'supervisor', { withFileTypes: true }).filter((d) => d.isDirectory() && !RESERVED_SUPERVISOR_SLUGS.includes(d.name)).map((d) => `supervisor/${d.name}/index.html`)];
-// Routes that later stages own: they 404 today by design (the 404 page explains and routes back).
-const PLANNED = /^\/mashhor-demo\/(help|supervisors|destinations\/[a-z-]+|hotels\/[A-Z0-9-]+|packages\/[A-Z0-9-]+|legal|about|careers|partners|privacy|terms|cookies|faq|contact|offers\/categories)(\/|$)/;
+// Routes that later stages own: they 404 today by design (the 404 page explains and routes back). Only routes
+// with no page yet belong here — help/, supervisors/, destinations/<slug>/ and legal/ exist now, so a 404 on one
+// of them is a real dead link (review 2026-09-25 §5). help/faq/ is listed by its exact path: the FAQ page is planned,
+// the rest of help/ is not.
+const PLANNED = /^\/mashhor-demo\/(help\/faq|hotels\/[A-Z0-9-]+|packages\/[A-Z0-9-]+|about|careers|partners|privacy|terms|cookies|faq|contact|offers\/categories)(\/|$)/;
 const head = (path) => new Promise((res) => http.request({ host: new URL(process.env.TEST_ORIGIN).hostname, port: new URL(process.env.TEST_ORIGIN).port, path, method: 'HEAD' }, (r) => res(r.statusCode)).on('error', () => res(0)).end());
 const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
 const seen = new Map(); const dead = []; const external = new Set(); const heads = []; const planned = new Set();

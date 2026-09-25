@@ -3,7 +3,7 @@
    message was delivered beyond what that record says (§16). Stage 15 */
 import { el } from '../../core/dom.js';
 import { t } from '../../core/i18n.js';
-import { icon, toast } from '../../components/ui.js';
+import { toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData } from '../data.js';
 import { mountOpsPortal, loadRegion, pageTitle, actionForm, dataTable, dateTime, block } from './shell.js';

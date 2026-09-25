@@ -19,7 +19,6 @@ async function open(width, height, locale, url = URL) {
   await p.waitForTimeout(700);
   return p;
 }
-const inView = (p) => p.evaluate(() => { const r = document.activeElement.getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight; });
 
 // ---------------------------------------------------------------- structure × widths × locales
 for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1000, 'desktop']]) {

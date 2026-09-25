@@ -10,6 +10,7 @@
 // the first 30 tab stops, every header control (opens, Escape closes,
 // focus returns), and transitions under prefers-reduced-motion.
 //
+//   npm test                                                     # runs it after the suites (serves the site itself)
 //   BASE=http://localhost:8000/ node tools/a11y-audit.mjs        # everything
 //   ONLY=book/index.html node tools/a11y-audit.mjs               # one page, all widths
 //

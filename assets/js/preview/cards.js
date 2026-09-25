@@ -9,7 +9,7 @@
 
 import { el, uid } from '../core/dom.js';
 import { t, getLocale, pick } from '../core/i18n.js';
-import { money, time, duration, dateShort, dayOffset, nights } from '../core/format.js';
+import { money, time, duration, dateShort, dayOffset } from '../core/format.js';
 import { STATUSES, route } from '../data/config.js';
 import { SERVICE_REGISTRY, featuredServices } from '../data/services.js';
 import { icon } from '../components/ui.js';

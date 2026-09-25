@@ -102,7 +102,6 @@ const clone = (x) => JSON.parse(JSON.stringify(x));
 
 export const DEV_CUSTOMER_ADAPTER = registerCustomerAdapter({
   id: 'dev-customer', dev: true,
-  async profile(token) { await wait(); return (await scope(token)).customer; },
   async updateProfile(token, patch) { await wait(); await scope(token); return authProvider().updateAccount(token, patch); },
 
   async trips(token) { await wait(); return clone((await scope(token)).data.trips); },
@@ -140,7 +139,6 @@ export const DEV_CUSTOMER_ADAPTER = registerCustomerAdapter({
     const doc = s.data.documents.find((d) => d.id === id); if (!doc) throw new ApiError('notFound'); if (!doc.deletable) throw new ApiError('forbidden');
     s.data.documents = s.data.documents.filter((d) => d.id !== id); if (s.data.files) delete s.data.files[id]; s.commit(); return true;
   },
-  async recordAcceptance(token, acceptance) { await wait(); await scope(token); await authProvider().updateAccount(token, { acceptance }); return true; },
   async notifications(token) { await wait(); return clone((await scope(token)).data.notifications.sort((a, b) => b.at.localeCompare(a.at))); },
   async markRead(token, ids = null) { await wait(); const s = await scope(token); s.data.notifications.forEach((n) => { if (!ids || ids.includes(n.id)) n.read = true; }); s.commit(); return clone(s.data.notifications); },
   async travellers(token) { await wait(); return clone((await scope(token)).data.travellers); },

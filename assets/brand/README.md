@@ -2,9 +2,21 @@
 
 This demo ships with no logo or wordmark: header, footer, drawer and the
 supervisor profile carry no brand mark at all, by design, so a buyer's own
-logo never has to be removed first. The site's name (`brand.name` in
-`assets/js/core/strings/{ar,en}.js`) is still used as plain text in page
-`<title>`s and a few statements, but nothing renders it as a mark.
+logo never has to be removed first. Nothing renders the site's name as a
+mark, but the name itself — *Travel & Tourism* / *السفر والسياحة* — is
+written out as plain text in many places, not read from one setting:
+
+- `brand.name` in `assets/js/core/strings/{ar,en}.js`, and inside many other
+  strings in those two files;
+- every page's static `<title>` and meta tags (the text shown before the
+  script loads, and what search engines and link previews read);
+- `LEGAL_NAME` in `assets/js/data/footer.js` (the copyright line);
+- a few data records (`assets/js/data/home.js`, `assets/js/components/menus.js`).
+
+Re-branding therefore means a search-and-replace of both spellings across
+`assets/js/` and every `*.html` file, then `npm test` (its i18n audit catches a
+string left untranslated). Deriving the name from one setting is recorded as
+open work in `docs/CODE-QUALITY-REVIEW-2026-09-25.md` §5.
 
 | File | Use |
 | --- | --- |
@@ -37,6 +49,5 @@ The two read as the same red side by side.
 ## Customising for a real client
 
 Add a logo component if the buyer wants one (there is currently no `.c-logo`
-class or `logo()` builder anywhere in the codebase to build on), and/or swap
-the icon / share-card files above and the `brand.name`
-string.
+class or `logo()` builder anywhere in the codebase to build on), swap the icon
+and share-card files above, and replace the name as described at the top.

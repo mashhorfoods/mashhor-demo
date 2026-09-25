@@ -28,8 +28,7 @@ const nTraveller = (t) => ({ id: t.id, firstName: t.firstName ?? '', lastName: t
 const nPage = (data, page) => ({ items: list(data, 'items').map(nPayment), page: data?.page ?? page.page ?? 1, pageSize: data?.pageSize ?? page.pageSize ?? ENV.paymentApi?.pageSize ?? 20, total: data?.total ?? null, nextPage: data?.nextPage ?? null });
 
 export const API_CUSTOMER = registerCustomerAdapter({
-  id: 'api-customer', dev: false, provider: 'customer backend API', configSource: 'API_BASE_URL', capabilities: ['profile', 'trips', 'bookings', 'travellers', 'documents', 'documents.upload', 'documents.signedUrl', 'documents.delete', 'payments.paged', 'notifications', 'legal.acceptance', 'bookings.claim'],
-  async profile() { const d = await get('/me'); return nCustomer(d.customer ?? d); },
+  id: 'api-customer', dev: false,
   async updateProfile(_m, p) { const data = await patch('/me', { name: p.name, phone: p.phone, locale: p.locale }); return nCustomer(data.customer ?? data); },
   async trips() { return list(await get('/me/trips'), 'trips').map(nTrip); },
   async trip(_m, id) { const t = await notFoundNull(get(`/me/trips/${encodeURIComponent(id)}`)); return t ? { ...nTrip(t.trip ?? t), bookings: list(t.bookings ?? t.trip?.bookings, 'bookings').map(nBooking), documents: list(t.documents ?? [], 'documents').map(nDocument), payments: list(t.payments ?? [], 'payments').map(nPayment) } : null; },
@@ -60,6 +59,5 @@ export const API_CUSTOMER = registerCustomerAdapter({
     const data = await post('/me/bookings/claim', { reference: b.reference, context: journey.context, offer: journey.selection?.offer ?? null, searchId: journey.selection?.searchId ?? null, offerId: journey.selection?.offer?.id ?? null, travellers: journey.travellers ?? null, contact: journey.contact ?? null, extras: journey.extras ?? [], attribution: journey.context?.attribution ?? null });
     return nBooking(data.booking ?? data);
   },
-  async recordAcceptance(_m, acceptance) { await post('/me/legal/acceptance', acceptance); return true; },
   async createPaymentIntent(_m, bookingId, method) { return post(`/me/bookings/${encodeURIComponent(bookingId)}/payment-intent`, { method }); },
 });

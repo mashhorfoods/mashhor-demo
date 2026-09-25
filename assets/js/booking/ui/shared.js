@@ -12,7 +12,6 @@ import { stateBlock } from '../../components/states.js';
 import { summariseTravellers } from '../../core/booking.js';
 import { STEPS, stepUrl, loadJourney, attributionOf } from '../journey.js';
 import { breakdown } from '../pricing.js';
-import { totalDuration, totalStops } from '../rank.js';
 
 export const isAr = () => getLocale() === 'ar';
 export const placeName = (p) => (isAr() ? p.cityAr : p.cityEn);
@@ -107,7 +106,6 @@ export function recoveryState({ reason, back }) {
 }
 
 export const legSummary = (leg) => `${time(leg.departAt)} ${leg.from.code} → ${time(leg.arriveAt)} ${leg.to.code} · ${duration(leg.durationMinutes)} · ${leg.stops.length ? t('flight.stops', leg.stops.length) : t('flight.direct')}`;
-export const offerTitle = (o) => `${carrierName(o.carrier)} · ${routeLine(o.legs).textContent} · ${duration(totalDuration(o))} · ${totalStops(o) ? t('flight.stops', totalStops(o)) : t('flight.direct')}`;
 
 /** Every journey page sets its head the same way. */
 export const setHead = (key) => setPageHead({ title: t(key), description: t(key.replace(/\.[^.]+$/, '.description')) });

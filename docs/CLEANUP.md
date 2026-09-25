@@ -16,7 +16,7 @@ npm test -- --audits        only the audits
 
 | Phase | Change | Effect |
 | --- | --- | --- |
-| 0 | `tests/` holds the thirteen browser suites (1,900 checks) and `tests/run.mjs` serves the repository like GitHub Pages and runs them; `package.json` declares Playwright as the only dev dependency | the regression safety net is versioned; one command runs it |
+| 0 | `tests/` holds the thirteen browser suites of the time (1,900 checks; twenty today — see `SUITES` in `tests/run.mjs`) and `tests/run.mjs` serves the repository like GitHub Pages and runs them; `package.json` declares Playwright as the only dev dependency | the regression safety net is versioned; one command runs it |
 | 1 | dead exports (`MAX_LEGS`, `clearContext`, `clearAttribution`, `featuredOffers`, `activeSupervisors`, `ROLES` + `can()`), four strings, 45 CSS classes nothing referenced | −87 lines of CSS, smaller API surface |
 | 2 | `assets/js/page.js`: `boot()` + `mountPage()` wire the skip link, static links, header, footer, phone nav, language re-render and the QA handle once; every shell is a short call importing only its own component. Shared `routeGraphic`, `sectionHead`, `setPageHead`, `notFoundState`; one `bookingEntry()` behind every "book" door; the `SERVICES` alias (an import cycle) removed | six inline shell scripts and 21 generated ones collapsed to one runtime; five, three, three and two duplicate helpers gone |
 | 3 | `assets/js/preview/` + `assets/css/preview.css` hold the Stage 11/12 shapes only the style guide shows; `core/strings/ar.js` and `en.js` load per language; `header.js` split into `brand.js`, `session.js`, `menus.js`, `drawer.js` and the bar | JS per customer page 437 KB → 239–294 KB, CSS 177 → 158 KB, English strings cost nothing until asked for |
@@ -34,7 +34,7 @@ assets/js/components/           ui · cards · search · states · brand · sess
                                 header · footer · home · services · service-detail · destinations ·
                                 offers · booking · supervisor
 assets/js/preview/              cards · forms · states · samples   (style guide only)
-tests/                          the suites + run.mjs · tools/  build-routes · i18n-audit · a11y-audit · fetch-images
+tests/                          the suites + run.mjs · tools/  build-routes · i18n-audit · a11y-audit · fetch-images (removed later, 7b52cc9)
 ```
 
 ## Not changed, on purpose

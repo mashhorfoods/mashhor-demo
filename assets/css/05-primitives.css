@@ -19,7 +19,6 @@
   .t-body    { font-size: var(--text-body);    line-height: var(--leading-body); }
   .t-body-sm { font-size: var(--text-body-sm); line-height: var(--leading-body); }
   .t-caption { font-size: var(--text-caption); line-height: var(--leading-snug); color: var(--color-text-secondary); }
-  .t-label   { font-size: var(--text-label); font-weight: var(--weight-medium); line-height: var(--leading-snug); }
   .t-overline{ font-size: var(--text-overline); font-weight: var(--weight-semibold);
                letter-spacing: var(--tracking-overline); text-transform: uppercase;
                color: var(--color-text-brand); }
@@ -44,7 +43,6 @@
             line-height: var(--leading-data); font-variant-numeric: tabular-nums; }
 
   .t-muted   { color: var(--color-text-secondary); }
-  .t-brand   { color: var(--color-text-brand); }
 
   /* ======================================================================
      ICON — §15. One family, one stroke weight, drawn from a single sprite so

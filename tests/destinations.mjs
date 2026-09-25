@@ -67,7 +67,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
         claims: /الأكثر طلباً|الأفضل|الأرخص|most popular|best|cheapest|\d+\s?(ج\.س|SDG|USD)/i.test(document.querySelector('main').innerText),
         imgsNoAlt: document.querySelectorAll('img:not([alt])').length,
         mediaLabelled: Array.from(document.querySelectorAll('.c-card__media [role=img]')).every((n) => n.getAttribute('aria-label')),
-        decorative: Array.from(document.querySelectorAll('.c-hero__route, .u-numeral-watermark, .c-help__arrow')).every((n) => n.getAttribute('aria-hidden') === 'true'),
+        decorative: Array.from(document.querySelectorAll('.c-hero__route, .c-help__arrow')).every((n) => n.getAttribute('aria-hidden') === 'true'),
         header: !!document.querySelector('.c-gh'), footer: !!document.querySelector('.c-gf'), footerCta: !!document.querySelector('.c-gf__cta'),
         menuDest: document.querySelectorAll('.c-gh a[href*="/destinations/"]').length,
         menuClaim: /الأكثر طلباً|Most popular/.test(document.querySelector('.c-gh').innerText),

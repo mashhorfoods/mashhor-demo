@@ -23,7 +23,7 @@ const supervisorOf = (data) => ({ ...data.supervisor });
 const session = (data) => ({ token: MARKER, expiresAt: data.expiresAt ?? null, supervisor: supervisorOf(data) });
 
 export const API_SUPERVISOR_AUTH = registerSupervisorAuthProvider({
-  id: 'api-supervisor-auth', dev: false, provider: 'backend supervisor session endpoints', configSource: 'API_BASE_URL, AUTH_PUBLIC_CONFIG',
+  id: 'api-supervisor-auth', dev: false,
   async signIn({ email, password }) { try { return session(await post('/supervisor/auth/sign-in', { email, password })); } catch (e) { throw toAuthError(e); } },
   async signOut() { try { await post('/supervisor/auth/sign-out', {}); } catch { /* the cookie lapses server-side regardless */ } },
   async verify() {

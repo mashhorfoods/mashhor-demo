@@ -102,7 +102,7 @@
      between the photo and the text so the copy
      stays readable over any photograph; :is(h1) and the lead/overline/
      trust-row colours flip to the inverse palette already used for other
-     dark-ground sections (.l-section--inverse, .c-cta-band).
+     dark-ground sections (.c-cta-band--photo).
      ---------------------------------------------------------------------- */
   /* Fixed Hero Image scroll effect — update brief §1/§4/§5/§23: the image
      itself is what pins, never the whole .c-hero (that would take it out of
@@ -423,7 +423,6 @@
   .c-cta-band__title { max-inline-size: 18ch; }
   .c-cta-band__text { color: rgb(255 255 255 / 0.72); max-inline-size: var(--measure-short); }
   .c-cta-band__actions { display: flex; flex-wrap: wrap; gap: var(--space-12); }
-  .c-cta-band .u-numeral-watermark { color: rgb(255 255 255 / 0.06); }
   @media (min-width: 64em) {
     .c-cta-band__inner { flex-direction: row; align-items: center; justify-content: space-between; gap: var(--space-48); }
   }
@@ -501,9 +500,7 @@
   .c-cta-band--photo .c-cta-band__inner { flex-direction: column; align-items: flex-start; max-inline-size: 34rem; }
   /* 03-base.css sets color directly on every h1-h6, which always wins over
      an inherited value — .c-cta-band--photo's own inverse color on the
-     section never reaches the title without this, same reason
-     .l-section--inverse targets :is(h1,h2,h3,h4) explicitly instead of
-     relying on inheritance. */
+     section never reaches the title without this. */
   .c-cta-band--photo .c-cta-band__title { color: var(--color-text-inverse); }
   .c-cta-band--photo .c-cta-band__title,
   .c-cta-band--photo .c-cta-band__text,

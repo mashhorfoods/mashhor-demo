@@ -24,9 +24,7 @@ import { enqueue } from './mailer.mjs';
 import { config } from './config.mjs';
 import { createFlightBooking } from './flights.mjs';
 
-export const PAYMENT_STATUSES = ['pending', 'processing', 'paid', 'failed', 'cancelled', 'refunded'];
 const SYSTEM_ACTOR = { id: 'system', role: 'system' };
-const J = (s, d) => { try { return s ? JSON.parse(s) : d; } catch { return d; } };
 const hex = (n = 8) => randomBytes(n).toString('hex');
 
 /* ---- provider registry — one adapter per provider id, never referenced by name outside this file ---- */
@@ -60,7 +58,7 @@ export function createPaymentIntent({ bookingId, customerId, method, idempotency
 
   if (idempotencyKey) {
     const existing = q.get('SELECT * FROM payments WHERE idempotency_key = ?', idempotencyKey);
-    if (existing) { if (existing.booking_id !== bookingId || existing.customer_id !== customerId) throw new HttpError(409, 'conflict', { reason: 'idempotencyKeyReused' }); return { payment: nPayment(existing), client: provider.describeIntent ? provider.describeIntent(existing) : null }; }
+    if (existing) { if (existing.booking_id !== bookingId || existing.customer_id !== customerId) throw new HttpError(409, 'conflict', { reason: 'idempotencyKeyReused' }); return { payment: nPayment(existing), client: null }; }   // a replay returns the stored payment; no provider re-describes an intent
   }
 
   const id = `pay_${hex(6)}`; const t = now();

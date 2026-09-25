@@ -48,8 +48,7 @@ const saveState = (s) => { try { localStorage.setItem(KEY, JSON.stringify(s)); }
 const paged = (all, { page = 1, pageSize = 20 } = {}) => { const size = Math.min(50, Math.max(1, pageSize)); const p = Math.max(1, page); const slice = all.slice((p - 1) * size, p * size); return { items: slice, page: p, pageSize: size, total: all.length, nextPage: p * size < all.length ? p + 1 : null }; };
 
 export const DEV_SUPERVISOR_DATA = registerSupervisorDataAdapter({
-  id: 'dev-supervisor-data', dev: true, provider: 'in-browser development stand-in', configSource: 'none',
-  capabilities: ['profile', 'customers', 'bookings', 'leads', 'leads.update', 'revenue', 'performance', 'commissions', 'notifications'],
+  id: 'dev-supervisor-data', dev: true,
   async profile() { await wait(); return DEV_SUPERVISOR_AUTH._current(); },
   async updateProfile(_t, patch) { await wait(); return DEV_SUPERVISOR_AUTH._update(patch); },
   async customers(_t, params = {}) { await wait(); if (isEmpty()) return paged([], params); const search = (params.search ?? '').toLowerCase(); return paged(search ? CUSTOMERS.filter((c) => c.name.toLowerCase().includes(search) || c.email.includes(search)) : CUSTOMERS, params); },

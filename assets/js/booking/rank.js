@@ -71,14 +71,6 @@ export function sortOffers(list, key) {
   return [...list].sort((a, b) => score(a) - score(b));
 }
 
-/** Why this offer answers the chosen priority — printed under the card. */
-export function priorityReason(offer, priority, list) {
-  const labels = labelOffers(list).get(offer.id) ?? [];
-  const has = (id) => labels.find((l) => l.id === id);
-  const l = { price: has('cheapest'), stops: has('fewestStops'), duration: has('fastest'), family: has('family') }[priority];
-  return l ?? null;
-}
-
 /* ---- Filters ---------------------------------------------------------- */
 export const EMPTY_FILTERS = { maxPrice: null, stops: [], carriers: [], depart: [], arrive: [], maxDuration: null, baggage: false, airports: [] };
 const slot = (iso) => { const h = hour(iso); return h < 6 ? 'night' : h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening'; };

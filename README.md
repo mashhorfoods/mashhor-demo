@@ -1,29 +1,57 @@
 # Travel & Tourism — Website Foundation
-## السفر والسياحة · Stage 10 — COMPLETE / BUILT + VERIFIED (10.1–10.12) · Stage 11 — BUILT + VERIFIED · Stage 12 — BUILT + VERIFIED · Stage 12.1 — PARTIALLY COMPLETE · Stage 12.2 — PARTIALLY COMPLETE · Stage 13 — PARTIALLY COMPLETE (supervisor system implemented and verified locally; nothing external connected) · Stage 15 — PARTIALLY COMPLETE (operations control layer implemented and verified locally; no Stage 14 admin dashboard exists — see §0 of the Stage 15 doc)
+## السفر والسياحة
 
-The master visual, UX and frontend foundation. Every later website stage
-inherits it.
+A bilingual (Arabic RTL / English) travel-agency site with its booking engine,
+customer account, supervisor portal, operations and admin portal (Stage 14,
+`admin/`), and a Node backend. Everything is built and verified locally —
+`npm test` runs every browser suite plus the language and accessibility
+audits. **Not deployed, and no external provider (payments, flight supplier,
+e-mail) is connected**: [`docs/PRODUCTION-INTEGRATION.md`](docs/PRODUCTION-INTEGRATION.md)
+lists exactly what each one still needs.
+
+### Foundation and public site
 
 | | |
 | --- | --- |
-| **Full documentation** | [`docs/FOUNDATION.md`](docs/FOUNDATION.md) — Stage 10.1 foundation |
-| **Stages 10.2 – 10.11** | [`docs/STAGES.md`](docs/STAGES.md) — header & navigation, footer, homepage, services, service details, destinations, offers, booking entry, supervisor profile, refinement |
-| **Stage 15 — operations control** | [`docs/STAGE-15-OPERATIONS-CONTROL.md`](docs/STAGE-15-OPERATIONS-CONTROL.md) — booking lifecycle state machine, tasks & escalations, service operational catalogue, document review, supplier directory, customer/internal notes, notification templates & history, a minimal Admin/Operations Staff portal with server-enforced permissions, full audit trail; `tests/ops-portal.mjs` |
-| **Stage 13 — supervisor system** | [`docs/SUPERVISOR-SYSTEM.md`](docs/SUPERVISOR-SYSTEM.md) — supervisor accounts, portal (dashboard, customers, leads, bookings, revenue, performance, notifications, settings), server-side attribution with an audit trail, commission architecture, reassignment prepared for Stage 14; `tests/supervisor-portal.mjs` |
-| **Stage 12.2 — real backend** | [`backend/`](backend/README.md) — the deployable customer backend (Node 22, SQLite, no dependencies): sessions, CSRF, CORS, boundary, private storage + signed URLs, payments, notifications, legal seam, rate limits; `npm run test:backend` runs the browser suite against it, `npm run deploy` is the gated deployment; **not deployed, nothing external connected** — [`docs/INTEGRATION.md`](docs/INTEGRATION.md) §13 lists the inputs |
-| **Stage 12.1 — integrations** | [`docs/INTEGRATION.md`](docs/INTEGRATION.md) — backend contract, environment variables (`.env.example`, `tools/write-env.mjs`), production adapters verified against `tests/contract-server.mjs` and the real backend |
-| **Stage 12 — customer account** | [`docs/STAGES.md` §12](docs/STAGES.md#12--customer-account) — sign in / sign up / recovery on a labelled development identity adapter, dashboard, trips, trip details, bookings, travellers, documents, payments, notifications, support, settings; `tests/account.mjs` |
-| **Stage 11 — booking engine** | [`docs/STAGES.md` §11](docs/STAGES.md#11--booking-experience--booking-engine) — search → results → compare → details → travellers → extras → review → payment → confirmation on a clearly labelled development adapter; `tests/journey.mjs` |
-| **Code-quality cleanup** | [`docs/CLEANUP.md`](docs/CLEANUP.md) — what was removed, merged and split; `npm test` |
-| **Stage 10 final QA** | [`docs/STAGE-10-QA.md`](docs/STAGE-10-QA.md) — Stage 10.12 · **STAGE 10 — COMPLETE / BUILT + VERIFIED** |
-| **Photography** | `assets/images/` — business-supplied photography, see [`assets/images/CREDITS.md`](assets/images/CREDITS.md); `assets/js/data/images.js` maps each slot key to its file |
-| **Living style guide** | `styleguide.html` — every token, component and state, in RTL and LTR |
-| **Homepage** | `index.html` — the production homepage (Stage 10.4) |
-| **Brand assets** | [`assets/brand/README.md`](assets/brand/README.md) |
-| **Food-supplier template** | [`templates/food-supplier/`](templates/food-supplier/README.md) — a separate single-page demo for a rice/foodstuff supplier in English and Arabic (RTL, `ar/`): no logo, no country, USD prices, placeholder contacts; images from `tools/build-food-supplier-images.mjs`; `tests/food-supplier.mjs` |
-| **Stages 11–12.1 report (PDF)** | [`docs/STAGES-11-12-12.1-REPORT-2026-09-17.pdf`](docs/STAGES-11-12-12.1-REPORT-2026-09-17.pdf) — booking engine, customer account and production integrations: built, verified, findings, security, integration status, required inputs |
-| **Programme report (PDF)** | [`docs/PROJECT-REPORT-2026-09-16.pdf`](docs/PROJECT-REPORT-2026-09-16.pdf) — the full Stage 10 report: scope, architecture, verification, cleanup, performance, remaining inputs, next stages |
-| **Status report** | [`docs/STATUS-REPORT-2026-09-16.pdf`](docs/STATUS-REPORT-2026-09-16.pdf) — what is built, how it was verified, what is still needed |
+| [`docs/FOUNDATION.md`](docs/FOUNDATION.md) | Stage 10.1 — tokens, components, i18n, accessibility rules every page follows |
+| [`docs/STAGES.md`](docs/STAGES.md) | Stages 10.2–12 — header, footer, homepage, services, destinations, offers, booking entry, supervisor profile; §11 booking engine, §12 customer account |
+| [`docs/STAGE-10-QA.md`](docs/STAGE-10-QA.md) | Stage 10.12 final QA |
+| [`docs/SUPERVISOR-PROFILES.md`](docs/SUPERVISOR-PROFILES.md) | The five public coordinator profiles (demo data) |
+| [`docs/COORDINATOR-ROLE-UPDATE.md`](docs/COORDINATOR-ROLE-UPDATE.md) | "Supervisors" are customer-facing Travel Coordinators — the role correction |
+| `styleguide.html` | Living style guide — every token, component and state, in RTL and LTR |
+| [`assets/brand/README.md`](assets/brand/README.md) | Brand assets (logo-free) and the colour rules |
+| [`assets/images/CREDITS.md`](assets/images/CREDITS.md) | Photography; `assets/js/data/images.js` maps each slot to its file |
+
+### Portals, backend and integration
+
+| | |
+| --- | --- |
+| [`docs/SUPERVISOR-SYSTEM.md`](docs/SUPERVISOR-SYSTEM.md) | Stage 13 — supervisor accounts, portal, server-side attribution; `tests/supervisor-portal.mjs` |
+| [`docs/ADMIN-OPERATIONS-DASHBOARD.md`](docs/ADMIN-OPERATIONS-DASHBOARD.md) | Stage 14 — the admin dashboard (`admin/`) |
+| [`docs/STAGE-15-OPERATIONS-CONTROL.md`](docs/STAGE-15-OPERATIONS-CONTROL.md) | Stage 15 — booking lifecycle, tasks, escalations, documents, suppliers, notifications, audit; `tests/ops-portal.mjs` |
+| [`docs/BUSINESS-RULES.md`](docs/BUSINESS-RULES.md), [`docs/STAGE-15B-VERIFICATION.md`](docs/STAGE-15B-VERIFICATION.md) | Stage 15A/15B — the business rules register and its verification |
+| [`backend/README.md`](backend/README.md) | The backend (Node 22, SQLite, no dependencies); `npm run test:backend`, `npm run deploy` (gated) |
+| [`docs/INTEGRATION.md`](docs/INTEGRATION.md) | Stage 12.1 — backend contract, environment variables (`.env.example`, `tools/write-env.mjs`) |
+| [`docs/PRODUCTION-INTEGRATION.md`](docs/PRODUCTION-INTEGRATION.md) | Stage 16 overview — what is connected (nothing yet) and what each provider needs |
+| [`docs/STAGE-16A-INFRASTRUCTURE.md`](docs/STAGE-16A-INFRASTRUCTURE.md) · [`16B`](docs/STAGE-16B-PAYMENT-INTEGRATION.md) · [`16C`](docs/STAGE-16C-FLIGHT-SUPPLIER-INTEGRATION.md) · [`16D`](docs/STAGE-16D-NOTIFICATIONS-LEGAL-STAFF.md) | Hosting, payments, flight supplier, notifications/legal/staff provisioning |
+
+### Code quality and history
+
+| | |
+| --- | --- |
+| [`docs/CODE-QUALITY-REVIEW-2026-09-25.md`](docs/CODE-QUALITY-REVIEW-2026-09-25.md) | Latest whole-repository review and its phased cleanup plan (earlier reviews: [09-18](docs/CODE-QUALITY-REVIEW-2026-09-18.md), [09-20](docs/CODE-QUALITY-REVIEW-2026-09-20.md), [09-21](docs/CODE-QUALITY-REVIEW-2026-09-21.md)) |
+| [`docs/CLEANUP.md`](docs/CLEANUP.md) | The first code-quality cleanup — what was removed, merged and split |
+| [`docs/EGYPT-LAUNCH-POSITIONING.md`](docs/EGYPT-LAUNCH-POSITIONING.md) | Superseded; historical record of the Sudan/Egypt positioning later genericized |
+
+### Separate template
+
+| | |
+| --- | --- |
+| [`templates/food-supplier/`](templates/food-supplier/README.md) | A single-page demo for a rice/foodstuff supplier in English and Arabic (RTL, `ar/`): no logo, no country, USD prices, placeholder contacts; images from `tools/build-food-supplier-images.mjs`; `tests/food-supplier.mjs` |
+
+The dated PDF status reports (09-16 to 09-18) were removed on 2026-09-25: they
+predated the logo removal and the country genericization. They remain in git
+history (`git show 1bd3171:docs/<name>.pdf`).
 
 ## Run it
 
@@ -54,15 +82,5 @@ BASE=http://localhost:8000/ node tools/i18n-audit.mjs   # must end with TOTAL un
 
 ## Brand
 
-The official logo is installed and the brand colours are sampled from it —
-red `#FE0002`, ink `#01010B`. See [`assets/brand/README.md`](assets/brand/README.md)
-for the asset set and the rules that go with it.
-
-One thing to know: `#FE0002` measures 4.03:1 against white, and contrast is
-symmetric — so it fails AA for normal text both as red text *and* under a white
-button label. The interface therefore runs on `#E00000` (5.04:1) while the
-identity red stays on the artwork and on elements that carry no text. One line
-in `01-tokens.css` reverses that if the brand owner insists.
-
-Remaining open items — a vector logo master, photography, an official reversed
-lockup — are listed in `docs/FOUNDATION.md` § 14.
+The site ships with no logo: the name is plain text, and the colours and
+their contrast rules are documented in [`assets/brand/README.md`](assets/brand/README.md).

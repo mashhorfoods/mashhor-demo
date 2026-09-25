@@ -7,7 +7,7 @@ import { route } from '../../data/config.js';
 const normalise = (d) => (d && (d.html || d.body) ? { supplied: true, version: d.version ?? null, effectiveAt: d.effectiveAt ?? null, title: d.title ?? null, html: d.html ?? d.body } : { supplied: false });
 
 export const API_LEGAL = registerLegalAdapter({
-  id: ENV.legal?.source === 'static' ? 'static-legal' : 'api-legal', dev: false, provider: ENV.legal?.source === 'static' ? 'static files supplied by the business' : 'customer backend API', configSource: 'LEGAL_DOCUMENT_CONFIG',
+  id: ENV.legal?.source === 'static' ? 'static-legal' : 'api-legal', dev: false,
   async document(kind, locale) {
     if (ENV.legal?.source === 'api') {
       try { return normalise(await get(`/legal/${kind}?locale=${encodeURIComponent(locale)}`)); } catch (e) { if (e?.code === 'notFound') return { supplied: false }; throw e; }

@@ -120,7 +120,8 @@ i18n 0 untranslated strings · a11y 0 unique findings
 ## 9. Remaining gaps (unchanged from the prior task)
 
 Every name, phone, WhatsApp number and e-mail on the five records
-remains fictional demo data, exactly as instructed. Real photographs are
-still abstract SVG placeholders. The commission/rights business rule is
+remains fictional demo data, exactly as instructed. *(Update: the profiles
+now use photographs, `assets/images/supervisors/*.webp`, instead of the
+abstract SVG placeholders this report described.)* The commission/rights business rule is
 still `pending_business_configuration`. See `docs/SUPERVISOR-PROFILES.md`
 §10 and the replacement procedure in its §2.

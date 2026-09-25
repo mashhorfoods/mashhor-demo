@@ -1,5 +1,5 @@
 /* SIGNATURE TRANSITION — the "1 + route" motion mark from 10-motion.css's existing static graphic language
-   (.u-mark/.u-route/.u-numeral-watermark), staged as a brief arrival cue on a major section's own entry into the
+   (.u-mark/.u-route), staged as a brief arrival cue on a major section's own entry into the
    viewport. One shared IntersectionObserver, not a scroll listener: each .c-signature gets .is-visible added the
    first time it crosses the threshold, then is unobserved — an arrival, once, never a repeating scroll gimmick.
    Decorative only (the markup itself carries aria-hidden), so a slow network or JS failure never hides the real

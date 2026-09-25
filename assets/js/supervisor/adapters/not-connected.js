@@ -14,5 +14,5 @@ const dataFail = async () => { throw new ApiError('notConfigured'); };
 const AUTH_METHODS = ['signIn', 'verify', 'refresh', 'requestReset', 'resetPassword', 'changePassword'];
 const DATA_METHODS = ['profile', 'updateProfile', 'customers', 'customer', 'bookings', 'booking', 'leads', 'updateLeadStatus', 'revenue', 'performance', 'commissions', 'notifications', 'markRead'];
 
-export const NOT_CONNECTED_SUPERVISOR_AUTH = registerSupervisorAuthProvider({ id: 'not-connected', dev: false, provider: 'none', configSource: 'AUTH_PROVIDER / API_BASE_URL', signOut: async () => {}, ...Object.fromEntries(AUTH_METHODS.map((m) => [m, authFail])) });
-export const NOT_CONNECTED_SUPERVISOR_DATA = registerSupervisorDataAdapter({ id: 'not-connected', dev: false, provider: 'none', configSource: 'API_BASE_URL', capabilities: [], ...Object.fromEntries(DATA_METHODS.map((m) => [m, dataFail])) });
+export const NOT_CONNECTED_SUPERVISOR_AUTH = registerSupervisorAuthProvider({ id: 'not-connected', dev: false, signOut: async () => {}, ...Object.fromEntries(AUTH_METHODS.map((m) => [m, authFail])) });
+export const NOT_CONNECTED_SUPERVISOR_DATA = registerSupervisorDataAdapter({ id: 'not-connected', dev: false, ...Object.fromEntries(DATA_METHODS.map((m) => [m, dataFail])) });

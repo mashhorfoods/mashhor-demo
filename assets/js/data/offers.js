@@ -127,7 +127,6 @@ export const OFFER_REGISTRY = [
 
 /* ---- Selectors every surface shares ------------------------------------ */
 export const offerById = (id) => OFFER_REGISTRY.find((o) => o.id === id || o.slug === id) ?? null;
-export const offersIn = (categoryId) => OFFER_REGISTRY.filter((o) => o.categories.includes(categoryId));
 export const homeOffers = () => OFFER_REGISTRY.slice(0, 3);
 
 /** True when at least one offer carries the field — a filter shows only then. */

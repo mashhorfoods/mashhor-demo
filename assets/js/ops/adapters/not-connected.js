@@ -15,5 +15,5 @@ const DATA_METHODS = ['bookings', 'booking', 'transitionBooking', 'assignBooking
   'overview', 'search', 'customers', 'customer', 'reassignCustomer', 'supervisorsAdmin', 'supervisorAdmin', 'createSupervisorAdmin', 'updateSupervisorAdmin', 'leads', 'attributionEvents', 'payments', 'documentsAdmin', 'reportBookings', 'reportOperations', 'reportSuppliers', 'reportDocuments', 'reportNotifications', 'staffList', 'createStaff', 'setStaffActive', 'setStaffPermissions',
   'rules', 'rule', 'ruleHistory', 'updateRule', 'pendingDecisions', 'ruleMatrix'];
 
-export const NOT_CONNECTED_OPS_AUTH = registerOpsAuthProvider({ id: 'not-connected', dev: false, provider: 'none', configSource: 'AUTH_PROVIDER / API_BASE_URL', signOut: async () => {}, ...Object.fromEntries(AUTH_METHODS.map((m) => [m, authFail])) });
-export const NOT_CONNECTED_OPS_DATA = registerOpsDataAdapter({ id: 'not-connected', dev: false, provider: 'none', configSource: 'API_BASE_URL', capabilities: [], ...Object.fromEntries(DATA_METHODS.map((m) => [m, dataFail])) });
+export const NOT_CONNECTED_OPS_AUTH = registerOpsAuthProvider({ id: 'not-connected', dev: false, signOut: async () => {}, ...Object.fromEntries(AUTH_METHODS.map((m) => [m, authFail])) });
+export const NOT_CONNECTED_OPS_DATA = registerOpsDataAdapter({ id: 'not-connected', dev: false, ...Object.fromEntries(DATA_METHODS.map((m) => [m, dataFail])) });

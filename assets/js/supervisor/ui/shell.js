@@ -6,7 +6,7 @@
    supervisor is part of the Travel & Tourism brand, never a separate one).
    ========================================================================= */
 import { el, qs, render, setPageHead } from '../../core/dom.js';
-import { t, pick, getLocale } from '../../core/i18n.js';
+import { t, pick } from '../../core/i18n.js';
 import { money, dateShort } from '../../core/format.js';
 import { route } from '../../data/config.js';
 import { icon } from '../../components/ui.js';
@@ -14,7 +14,6 @@ import { stateBlock, stateRegion, loadingBlock } from '../../components/states.j
 import { restoreSupervisorSession, SupervisorAuthError } from '../auth.js';
 import { supervisorDataAdapter } from '../data.js';
 
-export const isAr = () => getLocale() === 'ar';
 export const slot = (name, root = document) => qs(`[data-portal="${name}"]`, root);
 export const put = (name, nodes, root = document) => { const s = slot(name, root); if (s) render(s, nodes); return s; };
 export const setHead = (key) => setPageHead({ title: t(key), description: t('page.supervisor.description') });

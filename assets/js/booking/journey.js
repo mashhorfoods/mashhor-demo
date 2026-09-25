@@ -10,7 +10,7 @@
    ========================================================================= */
 
 import './adapters/installed.js';
-import { loadContext, saveContext, loadAttribution } from '../core/booking.js';
+import { saveContext, loadAttribution } from '../core/booking.js';
 import { route } from '../data/config.js';
 
 const KEY = 'no.journey';
@@ -36,10 +36,6 @@ export function saveJourney(j) {
   j.updatedAt = new Date().toISOString();
   try { sessionStorage.setItem(KEY, JSON.stringify(j)); } catch { /* storage unavailable */ }
   return j;
-}
-export function resetJourney({ keepContext = true } = {}) {
-  const j = blank(); if (keepContext) j.context = loadContext();
-  return saveJourney(j);
 }
 export const update = (patch) => saveJourney({ ...loadJourney(), ...patch });
 

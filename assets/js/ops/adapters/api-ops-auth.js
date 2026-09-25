@@ -22,7 +22,7 @@ const staffOf = (data) => ({ ...data.staff });
 const session = (data) => ({ token: MARKER, expiresAt: data.expiresAt ?? null, staff: staffOf(data) });
 
 export const API_OPS_AUTH = registerOpsAuthProvider({
-  id: 'api-ops-auth', dev: false, provider: 'backend staff session endpoints', configSource: 'API_BASE_URL, AUTH_PUBLIC_CONFIG',
+  id: 'api-ops-auth', dev: false,
   async signIn({ email, password }) { try { return session(await post('/staff/auth/sign-in', { email, password })); } catch (e) { throw toAuthError(e); } },
   async signOut() { try { await post('/staff/auth/sign-out', {}); } catch { /* the cookie lapses server-side regardless */ } },
   async verify() {
