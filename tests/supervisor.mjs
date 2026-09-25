@@ -75,7 +75,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
         h1: document.querySelectorAll('h1').length, h1Text: document.querySelector('h1').textContent.trim(), jumps, small, targets, title: document.title,
         canonical: document.querySelector('link[rel=canonical]').href,
         sections: Array.from(document.querySelectorAll('main > section[data-profile]')).filter((s) => !s.hidden).map((s) => s.dataset.profile),
-        brand: hero.querySelector('.c-profile__brand')?.textContent.trim(), logo: !!hero.querySelector('.c-profile__brand .c-logo img[alt]'),
+        brand: hero.querySelector('.c-profile__brand')?.textContent.trim(), logo: !!hero.querySelector('.c-profile__brand .c-logo .c-logo__text'),
         badge: hero.querySelector('.c-profile__badges')?.textContent.trim(), titleShown: !!hero.querySelector('.c-profile__title'),
         lead: hero.querySelector('.c-hero__lead')?.textContent.trim(),
         photoLabelled: hero.querySelector('.c-profile__photo [role=img]')?.getAttribute('aria-label'),

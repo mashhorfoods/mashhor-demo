@@ -289,6 +289,10 @@
      second brand. §29
      ==================================================================== */
   .c-logo { display: inline-flex; align-items: center; }
+  /* A text wordmark is shorter than the old image lockup — when the logo is
+     a link (header, drawer), keep the tap target at the same 44px floor
+     every other control on the site clears (§23). */
+  a.c-logo { min-block-size: var(--touch-target); }
   /* Text wordmark — no logo mark, no invented symbol. Sized off the same
      --logo-size the old image used, so every existing size/breakpoint rule
      below still applies unchanged. */
