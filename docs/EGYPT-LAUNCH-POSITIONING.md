@@ -6,7 +6,7 @@ Final report, in the format requested by the master prompt (§30).
 
 **PARTIALLY COMPLETE.**
 
-The core positioning correction — hero, SEO, "Why Number One", the
+The core positioning correction — hero, SEO, "Why Travel & Tourism", the
 coordinators section, and the destinations section — is done and
 verified. Several audit areas in the master prompt's own §28 list
 (per-service and per-destination landing-page copy, the contact/support
@@ -29,8 +29,8 @@ unchanged.
 ## UPDATED AREAS
 
 1. **Homepage hero** (`assets/js/data/home.js`) — overline, headline and
-   lead rewritten: "سفرك من مصر يبدأ مع نمبرون" / "Your journey from
-   Egypt starts with Number One", with supporting copy naming the
+   lead rewritten: "سفرك من مصر يبدأ مع السفر والسياحة" / "Your journey from
+   Egypt starts with Travel & Tourism", with supporting copy naming the
    service set (flights, visas, hotels, complete travel services) for
    Sudanese residents in Egypt.
 2. **Hero CTAs** (`assets/js/components/home.js`) — a new compact action
@@ -41,7 +41,7 @@ unchanged.
    `page.index.title/description`, `page.supervisors.title/description`)
    — Egypt-launch semantic themes in the title, meta description and
    Open Graph tags, without keyword stuffing.
-4. **"Why Number One"** section head (`home.why.title/text`) reworded to
+4. **"Why Travel & Tourism"** section head (`home.why.title/text`) reworded to
    the platform's core value ("كل ما تحتاجه لرحلتك في مكان واحد" /
    "Everything your trip needs, in one place"). The four pillars under
    it (trust / smart choice / simplicity / the complete journey) already
@@ -67,7 +67,7 @@ Per the master prompt's own §24 list, all untouched:
 - Authentication, localization, RTL/LTR, accessibility
 - Existing APIs and database structures
 - Existing security controls (CSRF, sessions, rate limits)
-- The Number One visual identity (logo, red/black/white, the "1"
+- The Travel & Tourism visual identity (logo, red/black/white, the "1"
   concept) — no redesign, no new component
 
 Also explicitly not hard-coded: the booking search's origin field

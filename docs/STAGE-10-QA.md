@@ -1,5 +1,5 @@
 # Stage 10 — Final QA & Verification (10.12)
-## نمبرون للسفر و السياحة · Number One Travel & Tourism
+## السفر والسياحة · Travel & Tourism
 
 **Status: STAGE 10 — COMPLETE / BUILT + VERIFIED**
 

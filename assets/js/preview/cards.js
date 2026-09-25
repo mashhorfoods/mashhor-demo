@@ -223,7 +223,7 @@ export function packageCard(pkg) {
 
 /* ---------------------------------------------------------------------------
    SUPERVISOR CARD — §29
-   The Number One system, with a person inside it. No personal branding.
+   The Travel & Tourism system, with a person inside it. No personal branding.
    ------------------------------------------------------------------------ */
 export function supervisorCard(supervisor) {
   const titleId = uid('sup');

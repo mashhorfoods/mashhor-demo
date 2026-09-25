@@ -120,7 +120,7 @@ export const PACKAGES = [
       { ar: 'تأشيرة العمرة', en: 'Umrah visa', icon: 'no-visa' },
       { ar: 'إقامة قريبة من الحرم', en: 'Accommodation near the Haram', icon: 'no-hotel' },
       { ar: 'تنقلات بين مكة والمدينة', en: 'Makkah–Madinah transfers', icon: 'no-transport' },
-      { ar: 'مرافق ميداني من نمبرون', en: 'A Number One guide on the ground', icon: 'no-supervisor' },
+      { ar: 'مرافق ميداني من السفر والسياحة', en: 'A Travel & Tourism guide on the ground', icon: 'no-supervisor' },
     ],
     price: { amount: 1180000, currency: 'SDG', from: true, basis: { ar: 'للفرد', en: 'per person' } },
   },
@@ -128,7 +128,7 @@ export const PACKAGES = [
 
 /**
  * SUPERVISOR — §29. Note what is NOT here: no brand colour, no logo, no
- * personal theme. A supervisor is a person inside Number One, and the record
+ * personal theme. A supervisor is a person inside Travel & Tourism, and the record
  * carries only the personal facts the brief permits.
  */
 export const SUPERVISORS = [

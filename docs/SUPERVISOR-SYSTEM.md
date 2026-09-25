@@ -16,7 +16,7 @@ left as written above.)*
 
 ## 1. What this stage adds
 
-Number One already had (Stage 10) a public supervisor profile and (Stage
+Travel & Tourism already had (Stage 10) a public supervisor profile and (Stage
 10.9) attribution stored with a booking. Stage 13 makes the supervisor a
 **first-class, authenticated party** in the system:
 

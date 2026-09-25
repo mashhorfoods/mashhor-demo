@@ -26,16 +26,16 @@ export const HOME_HERO = {
   // current market configuration, not a permanent limit on the brand.
   overlineAr: 'منصة سفر موثوقة للسودانيين',
   overlineEn: 'A trusted travel platform for Sudanese travellers',
-  titleAr: 'سفرك من مصر يبدأ مع نمبرون',
-  titleEn: 'Your journey from Egypt starts with Number One',
+  titleAr: 'سفرك من مصر يبدأ مع السفر والسياحة',
+  titleEn: 'Your journey from Egypt starts with Travel & Tourism',
   /* Mobile/tablet hero optimization brief §1: the full title above wraps
      across 4 awkward lines once the headline is sized down for small
      screens, splitting mid-phrase ("from Egypt starts" / "with Number
      One"). A shorter, deliberately 3-line title for those breakpoints
      only — rendered as separate lines (title-short spans below, joined
      with <br>), desktop keeps the full sentence unchanged. */
-  titleShortAr: 'سفرك\nيبدأ مع\nنمبرون',
-  titleShortEn: 'Your journey\nstarts with,\nNumber One',
+  titleShortAr: 'سفرك\nيبدأ مع\nالسفر والسياحة',
+  titleShortEn: 'Your journey\nstarts with,\nTravel & Tourism',
   leadAr: 'تذاكر طيران، تأشيرات، فنادق وخدمات سفر متكاملة للسودانيين المقيمين في مصر.',
   leadEn: 'Flights, visas, hotels and complete travel services for Sudanese residents in Egypt.',
   /* The photography slot. `src: null` renders the neutral placeholder that
@@ -79,8 +79,8 @@ export const HOME_JOURNEY_BAND = {
   textEn: 'From ticket to arrival, following every step with you.',
   media: {
     src: imageSrc('home/journey'),
-    altAr: 'عائلة مسافرة تراجع تذاكرها مع منسق رحلات نمبرون في صالة المطار',
-    altEn: "A travelling family reviewing their tickets with a Number One travel coordinator in the airport lounge",
+    altAr: 'عائلة مسافرة تراجع تذاكرها مع منسق رحلات السفر والسياحة في صالة المطار',
+    altEn: "A travelling family reviewing their tickets with a Travel & Tourism travel coordinator in the airport lounge",
   },
 };
 

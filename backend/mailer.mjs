@@ -169,7 +169,7 @@ async function sendViaSmtp(cfg, { to, subject, text }) {
     let reader = makeLineReader(socket);
     const expect = async (...codes) => { const c = await reader.readReply(); if (!codes.includes(c)) throw new Error(`SMTP ${c}`); return c; };
     await expect(220);
-    socket.write('EHLO numberone.local\r\n'); await expect(250);
+    socket.write('EHLO travel-demo.local\r\n'); await expect(250);
     if (!cfg.secure) {
       socket.write('STARTTLS\r\n'); await expect(220);
       const plain = socket;
@@ -178,7 +178,7 @@ async function sendViaSmtp(cfg, { to, subject, text }) {
         s.once('error', reject); s.once('secureConnect', () => resolve(s));
       });
       reader = makeLineReader(socket);
-      socket.write('EHLO numberone.local\r\n'); await expect(250);
+      socket.write('EHLO travel-demo.local\r\n'); await expect(250);
     }
     socket.write('AUTH LOGIN\r\n'); await expect(334);
     socket.write(Buffer.from(cfg.user).toString('base64') + '\r\n');

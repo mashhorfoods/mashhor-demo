@@ -1,6 +1,6 @@
 /* ============================================================================
    DATA / FOOTER — Stage 10.3 §23
-   Number One Travel & Tourism — نمبرون للسفر و السياحة
+   Travel & Tourism — السفر والسياحة
 
    ════════════════════════════════════════════════════════════════════════════
    §27 CONTENT RULE — READ BEFORE EDITING
@@ -24,8 +24,8 @@ import { MENU_SERVICES, SUPPORT_CHANNELS } from './navigation.js';
 export const FOOTER_BRAND = {
   statementAr: 'نساعدك على اختيار الرحلة والخدمة الأنسب لاحتياجاتك وميزانيتك.',
   statementEn: 'We help you choose the trip and the service that fit your needs and your budget.',
-  supportAr: 'مختص من نمبرون معك في كل خطوة.',
-  supportEn: 'A Number One specialist is with you at every step.',
+  supportAr: 'مختص من السفر والسياحة معك في كل خطوة.',
+  supportEn: 'A Travel & Tourism specialist is with you at every step.',
 };
 
 /* --------------------------------------------------------------------------
@@ -137,11 +137,11 @@ export const FOOTER_CTA = {
   href: 'search/',
   labelAr: 'ابدأ رحلتك', labelEn: 'Start your journey',
   titleAr: 'جاهز للسفر؟', titleEn: 'Ready to travel?',
-  textAr: 'ابحث وقارن، ودع مختصاً من نمبرون يساعدك في الاختيار.',
-  textEn: 'Search, compare, and let a Number One specialist help you choose.',
+  textAr: 'ابحث وقارن، ودع مختصاً من السفر والسياحة يساعدك في الاختيار.',
+  textEn: 'Search, compare, and let a Travel & Tourism specialist help you choose.',
 };
 
-export const LEGAL_NAME = { ar: 'نمبرون للسفر و السياحة', en: 'Number One Travel & Tourism' };
+export const LEGAL_NAME = { ar: 'السفر والسياحة', en: 'Travel & Tourism' };
 
 /* §12 — no newsletter. It is not added until the business asks for it, and it
    would need consent handling when it is. */

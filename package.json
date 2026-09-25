@@ -1,7 +1,7 @@
 {
-  "name": "numberone-travel-site",
+  "name": "travel-demo-site",
   "private": true,
-  "description": "نمبرون للسفر و السياحة — Number One Travel & Tourism. Static site: no build step; the tooling below is for verification and content only.",
+  "description": "السفر والسياحة — Travel & Tourism. Static site: no build step; the tooling below is for verification and content only.",
   "type": "module",
   "scripts": {
     "test": "node tests/run.mjs",

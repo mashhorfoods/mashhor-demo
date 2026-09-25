@@ -157,7 +157,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet']]) {
   // locale switch keeps one of everything and translates the head
   await p.evaluate(async () => { const m = await import('./assets/js/foundation.js'); await m.setLocale('en'); }); await p.waitForTimeout(800);
   r = await p.evaluate(() => ({ h: document.querySelectorAll('.c-gh').length, f: document.querySelectorAll('.c-gf').length, h1: document.querySelectorAll('h1').length, title: document.title, desc: document.querySelector('meta[name=description]').content }));
-  ok('locale switch: one header/footer/h1, English title + description', r.h === 1 && r.f === 1 && r.h1 === 1 && /Flight tickets — Number One/.test(r.title) && /^We /.test(r.desc), JSON.stringify(r));
+  ok('locale switch: one header/footer/h1, English title + description', r.h === 1 && r.f === 1 && r.h1 === 1 && /Flight tickets — Travel & Tourism/.test(r.title) && /^We /.test(r.desc), JSON.stringify(r));
   await p.evaluate(async () => { const m = await import('./assets/js/foundation.js'); await m.setLocale('ar'); }); await p.waitForTimeout(600);
 
   // CTA links resolve: hero primary → booking entry with the right tab; related card → detail route

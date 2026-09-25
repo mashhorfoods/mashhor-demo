@@ -41,7 +41,7 @@ for (const page of PAGES) {
       for (const el of document.querySelectorAll('[aria-label],[placeholder],[alt],[title]')) {
         if (el.closest(SKIP) || effLang(el) !== locale) continue;
         for (const a of ['aria-label','placeholder','alt','title']) {
-          const v = el.getAttribute(a); if (v && wrong(v) && !/Number One/.test(v)) out.push({ where: `${el.tagName.toLowerCase()}[${a}]`, text: v.slice(0,60) });
+          const v = el.getAttribute(a); if (v && wrong(v) && !/Travel & Tourism/.test(v)) out.push({ where: `${el.tagName.toLowerCase()}[${a}]`, text: v.slice(0,60) });
         }
       }
       if (wrong(document.title)) out.push({ where: '<title>', text: document.title });

@@ -1,6 +1,6 @@
 /* ============================================================================
    01 — TOKENS
-   Number One Travel & Tourism — Website Master Foundation (Stage 10.1)
+   Travel & Tourism — Website Master Foundation (Stage 10.1)
 
    Everything downstream reads from this file. Components never hard-code a
    colour, a size, a duration or a radius; they consume a token. That is what

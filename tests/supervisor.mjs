@@ -104,12 +104,12 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
     ok(`${T} no horizontal scroll`, !r.hScroll);
     ok(`${T} one h1, no heading jumps`, r.h1 === 1 && r.jumps === 0, `${r.h1}/${r.jumps}`);
     ok(`${T} nothing under 12px, targets ≥ 40px`, r.small === 0 && r.targets.length === 0, `${r.small} ${r.targets.join(',')}`);
-    ok(`${T} neutral name + title when the record has none`, r.h1Text === (ar ? 'منسق نمبرون' : 'Number One coordinator') && r.title === `${r.h1Text} — ${ar ? 'نمبرون للسفر و السياحة' : 'Number One Travel & Tourism'}` && !r.titleShown, `${r.h1Text} | ${r.title}`);
+    ok(`${T} neutral name + title when the record has none`, r.h1Text === (ar ? 'منسق السفر والسياحة' : 'Travel & Tourism coordinator') && r.title === `${r.h1Text} — ${ar ? 'السفر والسياحة' : 'Travel & Tourism'}` && !r.titleShown, `${r.h1Text} | ${r.title}`);
     ok(`${T} canonical`, r.canonical.endsWith('/mashhor-demo/supervisor/ahmed-mohamed/'));
     ok(`${T} every section present`, r.sections.join(',') === 'about,services,trust,contact,discovery', r.sections.join(','));
-    ok(`${T} Number One branding in the hero (logo + line)`, r.logo && r.brand.includes(ar ? 'نمبرون' : 'Number One'), r.brand);
+    ok(`${T} Travel & Tourism branding in the hero (logo + line)`, r.logo && r.brand.includes(ar ? 'السفر والسياحة' : 'Travel & Tourism'), r.brand);
     ok(`${T} verified badge from status`, r.badge === (ar ? 'منسق معتمد' : 'Verified coordinator'), r.badge);
-    ok(`${T} lead is the role line, not an invented bio`, r.lead === (ar ? 'يساعدك على اختيار الخيار المناسب، ويتابع حجزك مع فريق نمبرون من البداية إلى العودة.' : 'Helps you choose the right option and follows your booking with the Number One team, from the start until you are back.'), r.lead);
+    ok(`${T} lead is the role line, not an invented bio`, r.lead === (ar ? 'يساعدك على اختيار الخيار المناسب، ويتابع حجزك مع فريق السفر والسياحة من البداية إلى العودة.' : 'Helps you choose the right option and follows your booking with the Travel & Tourism team, from the start until you are back.'), r.lead);
     ok(`${T} photo slot labelled`, r.photoLabelled === (ar ? 'لا توجد صورة بعد' : 'No photo yet'), r.photoLabelled);
     ok(`${T} hero layout ${w < 768 ? 'stacked' : 'side by side'}`, w < 768 ? r.stacked : r.sideBySide, JSON.stringify([r.stacked, r.sideBySide]));
     ok(`${T} primary "${ar ? 'ابدأ الحجز' : 'Start booking'}" attributed, one in the hero`, r.primaryText === (ar ? 'ابدأ الحجز' : 'Start booking') && r.primaryHref === '/mashhor-demo/book/?supervisor=ahmed-mohamed' && r.heroPrimaries === 1, `${r.primaryText} ${r.primaryHref}`);
@@ -119,7 +119,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
     ok(`${T} empty state for missing optional details`, /c-state--info/.test(r.emptyBlock) && r.emptyTitle === (ar ? 'بيانات المنسق قيد الاستكمال' : 'Profile details are being completed'), `${r.emptyBlock} ${r.emptyTitle}`);
     ok(`${T} facts: only services + public link`, r.facts.join('|') === (ar ? 'الخدمات|رابط الملف العام' : 'Services|Public profile link') && r.servicesCount === (ar ? '8 خدمات' : '8 services') && r.url.endsWith('/mashhor-demo/supervisor/ahmed-mohamed/') && r.urlReadonly, `${r.facts.join('|')} ${r.servicesCount} ${r.url}`);
     ok(`${T} 8 service cards, every action attributed, details links`, r.services === 8 && r.attributedActions && r.detailsLinks, JSON.stringify([r.services, r.attributedActions, r.detailsLinks]));
-    ok(`${T} trust: 5 statements`, r.trust.length === 5 && (ar ? r.trust[0] === 'حجز وضمان باسم نمبرون للسفر و السياحة' : r.trust[0] === 'Booked and guaranteed under Number One Travel & Tourism'), r.trust.join('|'));
+    ok(`${T} trust: 5 statements`, r.trust.length === 5 && (ar ? r.trust[0] === 'حجز وضمان باسم السفر والسياحة' : r.trust[0] === 'Booked and guaranteed under Travel & Tourism'), r.trust.join('|'));
     ok(`${T} contact: no channels, note + attributed request`, r.channels === 0 && r.note && r.request === '/mashhor-demo/help/contact/?supervisor=ahmed-mohamed', `${r.channels} ${r.note} ${r.request}`);
     ok(`${T} discovery: 3 destinations + 3 offers, attributed`, r.disc.cards === 6 && r.disc.offers === 3 && r.disc.attributed, JSON.stringify(r.disc));
     ok(`${T} no placeholder contacts, no invented claims`, r.placeholders === 0 && !r.claims);
@@ -286,7 +286,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [1440, 1000, 'desktop']]) {
   const href = await p.evaluate(() => document.querySelector('.c-sup-card .c-card__link').getAttribute('href'));
   await p.click('.c-sup-card .c-card__link'); await p.waitForLoadState('networkidle'); await p.waitForTimeout(500);
   let r = await p.evaluate(() => ({ path: location.pathname, h1: document.querySelector('h1')?.textContent.trim() }));
-  ok('a directory card genuinely opens that supervisor\'s real public profile', r.path === href && !!r.h1 && r.h1 !== 'منسق نمبرون', JSON.stringify(r));
+  ok('a directory card genuinely opens that supervisor\'s real public profile', r.path === href && !!r.h1 && r.h1 !== 'منسق السفر والسياحة', JSON.stringify(r));
   const bookHref = await p.evaluate(() => document.querySelector('.c-profile__actions .c-btn--primary').getAttribute('href'));
   await p.click('.c-profile__actions .c-btn--primary'); await p.waitForLoadState('networkidle'); await p.waitForTimeout(500);
   r = await p.evaluate(() => ({ path: location.pathname + location.search, chip: !!document.querySelector('.c-book__attribution') }));

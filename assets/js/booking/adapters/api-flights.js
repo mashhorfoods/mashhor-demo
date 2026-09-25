@@ -4,7 +4,7 @@
 
    The browser never talks to a supplier or holds a supplier credential:
    search, offer detail and price revalidation are all requests to THIS
-   backend (Frontend → Number One Backend → Flight Supplier Adapter →
+   backend (Frontend → Travel & Tourism Backend → Flight Supplier Adapter →
    Supplier API — backend/flights.mjs), which alone talks to the supplier.
    The searchId this adapter gets back is a server-issued cache key, not a
    claim of fact — every offer()/quote() call re-reads it on the backend,

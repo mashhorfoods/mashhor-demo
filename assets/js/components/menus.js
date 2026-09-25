@@ -197,11 +197,11 @@ export function accountPanel() {
     if (session.authenticated) {
       panel.append(el('div', { class: 'c-gh__menu-head' }, [
         el('p', { class: 'c-gh__item-title' }, session.name || (isAr ? 'حسابي' : 'My account')),
-        el('p', { class: 'c-gh__item-desc' }, isAr ? 'عميل نمبرون' : 'Number One customer'),
+        el('p', { class: 'c-gh__item-desc' }, isAr ? 'عميل السفر والسياحة' : 'Travel & Tourism customer'),
       ]));
     } else {
       panel.append(el('div', { class: 'c-gh__menu-head' }, [
-        el('p', { class: 'c-gh__item-title' }, isAr ? 'حسابك في نمبرون' : 'Your Number One account'),
+        el('p', { class: 'c-gh__item-title' }, isAr ? 'حسابك في السفر والسياحة' : 'Your Travel & Tourism account'),
         el('p', { class: 'c-gh__item-desc' },
           isAr ? 'تابع حجوزاتك ومستنداتك في مكان واحد.' : 'Track bookings and documents in one place.'),
       ]));

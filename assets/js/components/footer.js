@@ -1,6 +1,6 @@
 /* ============================================================================
    COMPONENTS / GLOBAL FOOTER — Stage 10.3
-   نمبرون للسفر و السياحة — Number One Travel & Tourism
+   السفر والسياحة — Travel & Tourism
 
    Completes the global navigation started in 10.2. Everything comes from
    data/footer.js; this file knows no label, route, number or account.

@@ -42,7 +42,7 @@ one existing idempotent trigger point gained one more side effect.
 ## 2. Integration architecture (§4, §12)
 
 ```
-Customer → Number One Backend → Flight Supplier Adapter → Supplier API
+Customer → Travel & Tourism Backend → Flight Supplier Adapter → Supplier API
 ```
 
 | Component | Implementation |

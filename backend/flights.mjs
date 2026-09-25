@@ -1,7 +1,7 @@
 // ============================================================================
 // BACKEND / FLIGHTS — Stage 16C. The flight-supplier boundary, server side.
 //
-//   Customer → Number One Backend → Flight Supplier Adapter → Supplier API
+//   Customer → Travel & Tourism Backend → Flight Supplier Adapter → Supplier API
 //
 // Mirrors backend/payments.mjs's provider registry exactly (and, through it,
 // the frontend's own booking-supplier adapter pattern in

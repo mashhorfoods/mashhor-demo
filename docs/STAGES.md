@@ -1,5 +1,5 @@
 # Stage 10 build notes — 10.2 to 10.11
-## نمبرون للسفر و السياحة · Number One Travel & Tourism
+## السفر والسياحة · Travel & Tourism
 
 One document per stage used to live in this folder; they are merged here in
 stage order, unchanged apart from the heading levels. The foundation is in
@@ -121,7 +121,7 @@ own a session.
 
 Roles beyond `customer` deliberately add **nothing** here. Supervisor and admin
 navigation are separate systems and must not be merged into this file. A
-customer visiting a supervisor's public profile sees the Number One header
+customer visiting a supervisor's public profile sees the Travel & Tourism header
 unchanged — the supervisor's identity belongs in the page content (§29).
 
 `variant: 'booking'` drops the primary nav and the CTA and shows a secure-booking
@@ -289,7 +289,7 @@ home.scrollToSearch();               // what "Start booking" and the header sear
 | --- | --- | --- | --- |
 | 01 | Hero + booking entry (since 10.9 it validates and persists the same booking context as `book/`, see `docs/STAGES.md#109--booking-entry`) | `heroCopy` `heroMedia` `heroSearch` → `searchWidget` | `HOME_HERO`, `SEARCH_VERTICALS` |
 | 02 | Services | `servicesGrid` → `serviceCard` | `HOME_SERVICES` = the 10.5 registry (12, six `featured`) |
-| 03 | Why Number One | `valueList` | `HOME_VALUES` |
+| 03 | Why Travel & Tourism | `valueList` | `HOME_VALUES` |
 | 04 | Help me choose | `chooseModule` | `HOME_PRIORITIES` |
 | 05 | Destinations | `destinationGrid` → `destinationCard` | `HOME_DESTINATIONS` = registry records flagged `home` (10.7) |
 | 06 | Offers & packages | `offerGrid` → `offerCard` | `HOME_OFFERS` = the first three registry records (10.8) |
@@ -364,7 +364,7 @@ on every page.
 | --- | --- |
 | Hero + booking entry, flights first, 8 categories | ✅ trip type, from/to, dates, travellers, cabin, search |
 | Services (12), progressive disclosure | ✅ six featured, "show all" reveals the rest |
-| Why Number One · Help Me Choose · Destinations · Offers | ✅ data-driven, no invented figures |
+| Why Travel & Tourism · Help Me Choose · Destinations · Offers | ✅ data-driven, no invented figures |
 | How We Help (4 steps) · Human support · Final CTA | ✅ |
 | Existing header, footer, design system reused | ✅ no new tokens, no parallel system |
 | Arabic · English · RTL · LTR | ✅ audit 0 untranslated; title and description switch |
@@ -996,7 +996,7 @@ Built on the 10.1–10.9 foundation: the header and footer, the card system
 (service, destination, offer), the badge, chip, trust-list, note, state and
 CTA-band primitives, the toast, the booking entry and its booking context.
 Nothing here redefines a token or a component, and nothing here is a
-supervisor's own brand: the page is **Number One + a personal supervisor**.
+supervisor's own brand: the page is **Travel & Tourism + a personal supervisor**.
 
 ```
 supervisor/<slug>/index.html         GENERATED public profiles — one per registry record
@@ -1034,7 +1034,7 @@ The five launch records are **placeholders and say so**: every personal
 field is `null`, the services list is the default set of eight, and no
 channel is set. What the customer sees for such a record:
 
-- the neutral name "مشرف نمبرون" and the role line, never an invented bio;
+- the neutral name "مشرف السفر والسياحة" and the role line, never an invented bio;
 - the neutral photo slot (labelled "no photo yet");
 - an info block in the About section saying the details are being
   completed, with the booking door beside it;
@@ -1050,10 +1050,10 @@ placeholder number can reach a customer.
 
 | | Block | Built from |
 | --- | --- | --- |
-| 1 | Hero: photo with the Number One ring, brand mark + "مشرف من نمبرون", name, title, verified badge (from `status`), bio, **"ابدأ الحجز"** (the one red action) and "تواصل مع المشرف" | `.c-profile` · `logo` · `.c-badge` |
+| 1 | Hero: photo with the Travel & Tourism ring, brand mark + "مشرف من السفر والسياحة", name, title, verified badge (from `status`), bio, **"ابدأ الحجز"** (the one red action) and "تواصل مع المشرف" | `.c-profile` · `logo` · `.c-badge` |
 | 2 | About: languages, areas of expertise, services count, public profile link with copy | `.c-facts` · `toast` |
 | 3 | Services the supervisor handles — the existing service card, every action attributed | `serviceCard` |
-| 4 | Trust: five statements that are true of the Number One journey, no numbers | `.c-trust-list` |
+| 4 | Trust: five statements that are true of the Travel & Tourism journey, no numbers | `.c-trust-list` |
 | 5 | Contact: verified channels as cards, else a note; "اطلب المساعدة" always | `.c-channel` · `.c-note` |
 | 6 | Discovery: three destinations and three offers, attributed, secondary | `destinationCard` · `offerCard` |
 | 7 | Final CTA band, attributed; the footer's own CTA is off | `.c-cta-band` |

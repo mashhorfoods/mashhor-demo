@@ -75,7 +75,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
     ok(`${T} no horizontal scroll`, !r.hScroll);
     ok(`${T} one h1, no heading jumps`, r.h1 === 1 && r.jumps === 0, `${r.h1}/${r.jumps}`);
     ok(`${T} h1 text`, r.h1Text === (loc === 'ar' ? 'أريد أن أحجز… ماذا؟' : 'What would you like to book?'), r.h1Text);
-    ok(`${T} title`, r.title === (loc === 'ar' ? 'ابدأ الحجز — نمبرون للسفر و السياحة' : 'Start booking — Number One Travel & Tourism'), r.title);
+    ok(`${T} title`, r.title === (loc === 'ar' ? 'ابدأ الحجز — السفر والسياحة' : 'Start booking — Travel & Tourism'), r.title);
     ok(`${T} nothing under 12px`, r.small === 0, `${r.small}`);
     ok(`${T} touch targets ≥ 40px`, r.targets.length === 0, r.targets.join(','));
     ok(`${T} exactly one primary CTA = search flights`, r.primaries.length === 1 && r.primaries[0] === (loc === 'ar' ? 'ابحث عن الرحلات' : 'Search Flights'), r.primaries.join('|'));

@@ -1,7 +1,7 @@
 # Coordinator Business-Role Update — Final Report
 
 Update/correction task: the five existing public "supervisor" profiles are
-**Number One Travel Coordinators** (منسقو رحلات) — customer-facing support
+**Travel Coordinators** (منسقو رحلات) — customer-facing support
 staff who help customers choose, book and follow up on their trips — not
 platform administrators, independent agents, or supervisors with their own
 dashboard. This was a customer-facing wording and presentation correction,

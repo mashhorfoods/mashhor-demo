@@ -96,7 +96,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
     // own height at the top of the hero grid now, same as every other full-bleed hero — search
     // sits a little further down than before, but still well inside the 844px mobile viewport.
     if (tag === 'mobile') ok(`${T} search within first screen`, r.searchTop < 780, `${r.searchTop}`);
-    ok(`${T} title/description localised`, loc === 'ar' ? /نمبرون/.test(r.title) && /نمبرون/.test(r.desc) : /Number One/.test(r.title) && /Number One/.test(r.desc));
+    ok(`${T} title/description localised`, loc === 'ar' ? /السفر والسياحة/.test(r.title) && /السفر والسياحة/.test(r.desc) : /Travel & Tourism/.test(r.title) && /Travel & Tourism/.test(r.desc));
     await p.close();
   }
 }
@@ -202,7 +202,7 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
     services: document.querySelectorAll('[data-home=services] .c-service-card').length,
   }));
   ok('locale switch: one header, one footer, one search', r.headers === 1 && r.footers === 1 && r.searches === 1, JSON.stringify(r));
-  ok('locale switch: English hero', /Your journey from Egypt starts with Number One/.test(r.h1), r.h1);
+  ok('locale switch: English hero', /Your journey from Egypt starts with Travel & Tourism/.test(r.h1), r.h1);
   ok('locale switch: regions re-rendered', r.services === 6);
   await p.close();
 }

@@ -1,5 +1,5 @@
-# Number One Travel & Tourism — Website Foundation
-## نمبرون للسفر و السياحة · Stage 10 — COMPLETE / BUILT + VERIFIED (10.1–10.12) · Stage 11 — BUILT + VERIFIED · Stage 12 — BUILT + VERIFIED · Stage 12.1 — PARTIALLY COMPLETE · Stage 12.2 — PARTIALLY COMPLETE · Stage 13 — PARTIALLY COMPLETE (supervisor system implemented and verified locally; nothing external connected) · Stage 15 — PARTIALLY COMPLETE (operations control layer implemented and verified locally; no Stage 14 admin dashboard exists — see §0 of the Stage 15 doc)
+# Travel & Tourism — Website Foundation
+## السفر والسياحة · Stage 10 — COMPLETE / BUILT + VERIFIED (10.1–10.12) · Stage 11 — BUILT + VERIFIED · Stage 12 — BUILT + VERIFIED · Stage 12.1 — PARTIALLY COMPLETE · Stage 12.2 — PARTIALLY COMPLETE · Stage 13 — PARTIALLY COMPLETE (supervisor system implemented and verified locally; nothing external connected) · Stage 15 — PARTIALLY COMPLETE (operations control layer implemented and verified locally; no Stage 14 admin dashboard exists — see §0 of the Stage 15 doc)
 
 The master visual, UX and frontend foundation. Every later website stage
 inherits it.

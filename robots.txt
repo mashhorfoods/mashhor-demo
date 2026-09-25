@@ -1,4 +1,4 @@
-# Number One Travel & Tourism — نمبرون للسفر و السياحة
+# Travel & Tourism — السفر والسياحة
 #
 # NOTE ON PLACEMENT: this site is a GitHub Pages PROJECT site, served from
 # https://mashhorfoods.github.io/mashhor-demo/. Crawlers only read robots.txt at

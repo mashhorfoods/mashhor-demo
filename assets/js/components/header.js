@@ -1,6 +1,6 @@
 /* ============================================================================
    COMPONENTS / GLOBAL HEADER — Stage 10.2
-   نمبرون للسفر و السياحة — Number One Travel & Tourism
+   السفر والسياحة — Travel & Tourism
 
    One header for the whole platform. Everything it renders comes from
    data/navigation.js; nothing here knows a label or a route.

@@ -4,7 +4,7 @@
 
    mountSupervisor({ slug }) reads the registry record (data/supervisors.js)
    and draws the public profile into the [data-profile="…"] mount points.
-   "Number One + a personal supervisor": the page is the Number One system
+   "Travel & Tourism + a personal supervisor": the page is the Travel & Tourism system
    with a person inside it — the brand's header, footer, cards and buttons,
    and only the personal FACTS the record carries. A field the record does
    not have is not rendered; nothing is invented to fill it.
@@ -116,7 +116,7 @@ export function servicesSection(sup) {
   ];
 }
 
-/** Trust: five statements, each true of the Number One journey. §7 */
+/** Trust: five statements, each true of the Travel & Tourism journey. §7 */
 export function trustSection() {
   const items = [
     ['no-shield', 'sup.trust.brand'], ['no-supervisor', 'sup.trust.pro'], ['no-chat', 'sup.trust.human'],

@@ -1,5 +1,5 @@
 /* ============================================================================
-   DATA / DESTINATIONS — the one registry of where Number One takes people.
+   DATA / DESTINATIONS — the one registry of where Travel & Tourism takes people.
    Stage 10.7
 
    Every surface that lists a destination reads THIS file: the destinations

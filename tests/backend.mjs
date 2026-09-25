@@ -806,7 +806,7 @@ await control('/__test/reset');
   jarP.clear(); jarAdminP.clear();
 }
 
-// ---- Stage 16C: real flight supplier integration. Frontend → Number One Backend → Flight Supplier Adapter →
+// ---- Stage 16C: real flight supplier integration. Frontend → Travel & Tourism Backend → Flight Supplier Adapter →
 // Supplier API (backend/flights.mjs) — the browser never talks to a supplier. Every test below proves either
 // server-side input validation, that a server-issued offer/searchId is the only authoritative fare source, that
 // a supplier order is created only after Stage 16B's own verified payment (and is idempotent), or one of this
@@ -1024,7 +1024,7 @@ await control('/__test/reset');
       return new Promise((resolve) => server.listen(0, '127.0.0.1', () => resolve({ server, port: server.address().port, received })));
     };
 
-    const SMTP_USER = 'no-reply@numberone.test'; const SMTP_PASS = 'CorrectHorseBattery9';
+    const SMTP_USER = 'no-reply@travel-demo.test'; const SMTP_PASS = 'CorrectHorseBattery9';
     const { server: fakeSmtp, port: fakeSmtpPort, received } = await startFakeSmtp(SMTP_USER, SMTP_PASS);
 
     const startSmtpBackend = (pass, portOffset) => {
@@ -1045,7 +1045,7 @@ await control('/__test/reset');
     const jarG = new Map(); const reqG = makeReq(APIgood, SITE)(jarG, 'no_csrf');
     const jarAdminG = new Map(); const reqAdminG = makeReq(APIgood, SITE)(jarAdminG, 'no_ops_csrf');
     await reqAdminG('/staff/auth/sign-in', { method: 'POST', body: { email: 'admin1@fixture.test', password: 'password123' } });
-    await reqAdminG('/notifications/templates', { method: 'POST', body: { event: 'welcome', channel: 'email', subjectAr: 'مرحباً بك في نمبرون', subjectEn: 'Welcome to Number One', bodyAr: 'أهلاً {{name}}، تم إنشاء حسابك.', bodyEn: 'Hello, your account was created.', variables: [] } });
+    await reqAdminG('/notifications/templates', { method: 'POST', body: { event: 'welcome', channel: 'email', subjectAr: 'مرحباً بك في السفر والسياحة', subjectEn: 'Welcome to Travel & Tourism', bodyAr: 'أهلاً {{name}}، تم إنشاء حسابك.', bodyEn: 'Hello, your account was created.', variables: [] } });
     await reqG('/auth/sign-up', { method: 'POST', body: { name: 'Zeta Fixture', email: 'zeta@fixture.test', password: 'password123', locale: 'en' } });
     const delivered = await controlGood('/__test/deliver-outbox');
     ok('§4/§10: the real SMTP client delivers — provider genuinely contacted, not simulated', delivered.attempted >= 1 && delivered.delivered >= 1);

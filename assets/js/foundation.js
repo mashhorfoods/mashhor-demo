@@ -1,6 +1,6 @@
 /* ============================================================================
-   NUMBER ONE — FOUNDATION ENTRY POINT
-   نمبرون للسفر و السياحة — Stage 10.1
+   TRAVEL & TOURISM — FOUNDATION ENTRY POINT
+   السفر والسياحة — Stage 10.1
 
    The barrel: every public part of the system from one place, for the
    style guide, the browser suites and the QA console. A PAGE imports

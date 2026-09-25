@@ -29,7 +29,7 @@ const typeNames = (list) => list.map((m) => ({ 'application/pdf': 'PDF', 'image/
 export function documentView(d) {
   const b = d.booking ?? {}; const det = b.detail ?? {};
   return el('article', { class: 'c-acct-docview', dataset: { document: d.id, type: d.type } }, [
-    el('header', { class: 'c-acct-docview__head' }, [el('p', { class: 't-overline' }, 'Number One Travel & Tourism'), el('h3', { class: 't-h3' }, typeLabel(d))]),
+    el('header', { class: 'c-acct-docview__head' }, [el('p', { class: 't-overline' }, 'Travel & Tourism'), el('h3', { class: 't-h3' }, typeLabel(d))]),
     d.dev ? el('p', { class: 'c-note c-note--warning', role: 'note', dataset: { dev: 'true' } }, [icon('no-alert', { size: 'sm' }), el('span', { class: 'c-note__text' }, t('acct.docs.devDoc'))]) : null,
     rows([
       [t('acct.reference'), el('bdi', { dir: 'ltr' }, b.id ?? '')], [t('acct.service'), serviceName(b.service)], [t('acct.trip'), d.trip ? pick(d.trip, 'title') : null],

@@ -82,7 +82,7 @@ if (adminToken && adminToken.length < 32) problems.push('BACKEND_ADMIN_TOKEN mus
 export const config = Object.freeze({
   environment, production,
   host: env.BACKEND_HOST ?? '127.0.0.1', port: num(env.BACKEND_PORT, 8930),
-  databasePath: resolve(env.BACKEND_DATABASE_PATH ?? './data/numberone.sqlite'),
+  databasePath: resolve(env.BACKEND_DATABASE_PATH ?? './data/travel-demo.sqlite'),
   signingSecret, allowedOrigins, publicUrl,
   cookie: { secure: cookieSecure, sameSite: cookieSameSite, domain: env.BACKEND_COOKIE_DOMAIN || null },
   sessionTtlMs: num(env.BACKEND_SESSION_TTL_HOURS, 12) * 3600 * 1000,

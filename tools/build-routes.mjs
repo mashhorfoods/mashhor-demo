@@ -57,7 +57,7 @@ const COLLECTIONS = [
     noindex: false,
   },
   {
-    // Stage 10.10 — one public profile per Number One Travel Coordinator (the
+    // Stage 10.10 — one public profile per Travel Coordinator (the
     // customer-facing role; internal dir/route/attribution naming stays
     // `supervisor`, unchanged by the coordinator-update task). The static
     // title is neutral until the business supplies the name; the template
@@ -68,8 +68,8 @@ const COLLECTIONS = [
     // brief §12; do not flip back to true without a reason, and re-check whether the registry still needs it if a
     // future record ever ships genuinely blank again (name/bio null).
     dir: 'supervisor', records: SUPERVISOR_REGISTRY, attr: 'profile', mount: 'mountSupervisor', module: 'supervisor', handle: 'supervisor',
-    title: (s) => s.nameAr ?? 'منسق نمبرون', description: (s) => s.bioAr ?? 'منسق رحلات من نمبرون للسفر و السياحة يساعدك على اختيار الخيار المناسب ويتابع حجزك مع فريق نمبرون.',
-    og: (s) => s.bioAr ?? 'منسق رحلات من نمبرون للسفر و السياحة.', heroLabel: 'profile-title', current: null,
+    title: (s) => s.nameAr ?? 'منسق السفر والسياحة', description: (s) => s.bioAr ?? 'منسق رحلات من السفر والسياحة يساعدك على اختيار الخيار المناسب ويتابع حجزك مع فريق السفر والسياحة.',
+    og: (s) => s.bioAr ?? 'منسق رحلات من السفر والسياحة.', heroLabel: 'profile-title', current: null,
     search: (s) => `book/?supervisor=${s.slug}`,
     sections: ['about', 'services', 'trust', 'contact', 'discovery'],
     noindex: false,
@@ -85,14 +85,14 @@ const shell = (c, r) => `<!doctype html>
      down, so <base> points every relative URL at the site root; in-page
      moves go through script, never href="#…". -->
 <base href="../../">
-<title>${esc(c.title(r))} — نمبرون للسفر و السياحة</title>
+<title>${esc(c.title(r))} — السفر والسياحة</title>
 <meta name="description" content="${esc(c.description(r))}">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#FE0002">
 ${c.noindex ? '<meta name="robots" content="noindex">\n' : ''}
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Number One Travel &amp; Tourism">
-<meta property="og:title" content="${esc(c.title(r))} — نمبرون للسفر و السياحة">
+<meta property="og:site_name" content="Travel &amp; Tourism">
+<meta property="og:title" content="${esc(c.title(r))} — السفر والسياحة">
 <meta property="og:description" content="${esc(c.og(r))}">
 <meta property="og:locale" content="ar_SD">
 <meta property="og:locale:alternate" content="en_GB">
@@ -101,7 +101,7 @@ ${c.noindex ? '<meta name="robots" content="noindex">\n' : ''}
 <meta property="og:image" content="${SITE}assets/brand/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Number One Travel &amp; Tourism">
+<meta property="og:image:alt" content="Travel &amp; Tourism">
 <meta name="twitter:card" content="summary_large_image">
 
 <link rel="icon" href="assets/brand/favicon-32.png" sizes="32x32" type="image/png">

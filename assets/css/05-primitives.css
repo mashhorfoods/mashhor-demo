@@ -280,37 +280,29 @@
   /* ======================================================================
      LOGO — §02 / §29
 
-     The supplied artwork is a complete lockup: numeral, wordmark and the
-     "Travel & Tourism" descriptor. It therefore carries the name itself, and
-     the component no longer sets the name as live text beside it — that read
-     as the brand twice over in English.
+     Demo-template brand: a plain text wordmark, no logo mark or image asset.
+     The name comes from strings/*.js (brand.name) so it can be swapped for a
+     real client's name without touching this component or its markup.
 
-     Two lockup variants, each with a reversed twin:
-       logo-primary.png   numeral + wordmark, no descriptor. The HEADER uses
-                          this: at 56px the descriptor line would render about
-                          four pixels tall and read as a smudge.
-       logo-lockup.png    the complete lockup including "Travel & Tourism".
-                          Footer, social card, anywhere with room to breathe.
-       *-inverse.png      the same artwork for dark surfaces: the ink knocks
-                          out to white and the 3D shadow darkens, the red is
-                          untouched. Swapped automatically by the rules below.
-
-     The component only ever sets SIZE and CLEAR SPACE. It never recolours,
-     rotates, crops or reconstructs the mark. Supervisor pages use this exact
-     component — there is no second brand. §29
+     The component only ever sets SIZE, SPACING and (opt-in) the dark-surface
+     colour swap. Supervisor pages use this exact component — there is no
+     second brand. §29
      ==================================================================== */
   .c-logo { display: inline-flex; align-items: center; }
-  .c-logo__img {
-    block-size: var(--logo-size, 48px);
-    inline-size: auto;
-    /* No aspect-ratio here: the two lockup variants have different proportions
-       (1.442 without the descriptor, 1.284 with it). Each <img> carries its own
-       width/height attributes, which reserve the right box per variant and stop
-       the header reflowing on first paint. */
-    object-fit: contain;
+  /* Text wordmark — no logo mark, no invented symbol. Sized off the same
+     --logo-size the old image used, so every existing size/breakpoint rule
+     below still applies unchanged. */
+  .c-logo__text {
+    font-family: var(--font-display);
+    font-weight: var(--weight-bold);
+    font-size: calc(var(--logo-size, 48px) * 0.36);
+    line-height: 1;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    color: var(--color-primary);
     /* So the header's scrolled-state logo shrink (12-header.css) reads as one
        smooth motion with the bar's own padding transition, not a small jump. */
-    transition: block-size var(--duration-base) var(--ease-standard);
+    transition: font-size var(--duration-base) var(--ease-standard), color var(--duration-base) var(--ease-standard);
   }
   .c-logo--sm { --logo-size: 38px; }
   .c-logo--lg { --logo-size: 84px; }
@@ -319,11 +311,9 @@
   /* Clear space: nothing may sit closer than a quarter of the mark's height. */
   .c-logo { margin-inline-end: var(--space-8); }
 
-  /* The reversed artwork is a separate file rather than a filter, because a
-     CSS filter would shift the red too. */
-  .c-logo__img--inverse { display: none; }
-  .l-section--inverse .c-logo__img--light,
-  [data-theme="dark"] .c-logo__img--light { display: none; }
-  .l-section--inverse .c-logo__img--inverse,
-  [data-theme="dark"] .c-logo__img--inverse { display: block; }
+  /* Only a logo() call made with inverse:true opts into swapping to white on
+     a dark/photo surface (mirrors the old two-image light/inverse swap, now
+     as a color change on the one text node instead of two <img> elements). */
+  .l-section--inverse .c-logo__text--swaps,
+  [data-theme="dark"] .c-logo__text--swaps { color: var(--color-text-inverse); }
 }

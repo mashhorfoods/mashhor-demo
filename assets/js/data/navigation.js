@@ -1,6 +1,6 @@
 /* ============================================================================
    DATA / NAVIGATION — Stage 10.2 §04
-   Number One Travel & Tourism — نمبرون للسفر و السياحة
+   Travel & Tourism — السفر والسياحة
 
    The whole information architecture lives here, as data. The header renders
    whatever this file declares; it hard-codes no label, no route and no menu.
@@ -61,8 +61,8 @@ export const MENU_SERVICES = {
   /* The mega menu ends with human help, not another link list. §08 */
   footer: {
     titleAr: 'لست متأكداً من الخدمة المناسبة؟', titleEn: 'Not sure which service you need?',
-    textAr: 'مختص من نمبرون يقارن لك الخيارات ويرشّح الأنسب لعائلتك.',
-    textEn: 'A Number One specialist compares the options and recommends one.',
+    textAr: 'مختص من السفر والسياحة يقارن لك الخيارات ويرشّح الأنسب لعائلتك.',
+    textEn: 'A Travel & Tourism specialist compares the options and recommends one.',
     ctaAr: 'تحدث مع مختص', ctaEn: 'Talk to a specialist',
     href: 'help/contact/',
   },

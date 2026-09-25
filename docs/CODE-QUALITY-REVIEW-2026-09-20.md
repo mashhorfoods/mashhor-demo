@@ -222,7 +222,7 @@ the session-based one exists, or requiring a real operator identity.
 
 - **`README.md`** still shows the "Stage 15 — PARTIALLY COMPLETE, no Stage 14 admin dashboard" banner and its doc table omits ~15 docs for work that's shipped since (Stage 14-16D, supervisor profiles, coordinator update, Egypt launch, the 09-18 review itself). Also still documents `tools/fetch-images.mjs` as the live photography pipeline — see item 1, that's actively dangerous advice. This was already flagged as a deferred item in the 09-18 review and hasn't been touched since; recommend fixing it together with the fetch-images.mjs removal.
 - **`docs/SUPERVISOR-PROFILES.md` §10.2** and **`docs/COORDINATOR-ROLE-UPDATE.md` §9** both still describe the five coordinator avatars as "generated SVG placeholders" — superseded by real business photos in commit `d7f8f35`, which only updated one of the two references.
-- **`docs/EGYPT-LAUNCH-POSITIONING.md`** describes a "Why Number One" section and a homepage "final CTA band" that were deleted in a later homepage reorganization commit.
+- **`docs/EGYPT-LAUNCH-POSITIONING.md`** describes a "Why Travel & Tourism" section and a homepage "final CTA band" that were deleted in a later homepage reorganization commit.
 - Four old status-report PDFs (`STATUS-REPORT-2026-09-16.pdf`, `PROJECT-REPORT-2026-09-16.pdf`, `STAGES-11-12-12.1-REPORT-2026-09-17.pdf`, `STAGE-15-STATUS-REPORT-2026-09-17.pdf`) are still un-archived, per the 09-18 review's own still-unactioned recommendation.
 
 ---

@@ -32,7 +32,7 @@ for (const page of PAGES) for (const loc of ['ar', 'en']) {
     imgs: Array.from(document.images).filter((i) => i.complete && i.naturalWidth === 0 && i.getAttribute('src')).map((i) => i.getAttribute('src')),
   }));
   heads.push({ page, loc, ...info, links: undefined });
-  if (!info.title || info.title.length < 10 || (loc === 'en' && !/Number One/.test(info.title)) || (loc === 'ar' && !/نمبرون/.test(info.title))) dead.push(`HEAD title ${page}/${loc}: "${info.title}"`);
+  if (!info.title || info.title.length < 10 || (loc === 'en' && !/Travel & Tourism/.test(info.title)) || (loc === 'ar' && !/السفر والسياحة/.test(info.title))) dead.push(`HEAD title ${page}/${loc}: "${info.title}"`);
   if (!info.desc) dead.push(`HEAD no description ${page}/${loc}`);
   if (page !== '404.html' && page !== 'styleguide.html' && !info.canonical.endsWith('/' + page.replace('index.html', ''))) dead.push(`HEAD canonical ${page}: ${info.canonical}`);
   if (info.lang !== loc || info.dir !== (loc === 'ar' ? 'rtl' : 'ltr')) dead.push(`HEAD lang/dir ${page}/${loc}: ${info.lang}/${info.dir}`);

@@ -1,5 +1,5 @@
 # Code-quality cleanup — after the Stage 10 gate
-## نمبرون للسفر و السياحة · Number One Travel & Tourism
+## السفر والسياحة · Travel & Tourism
 
 A review of the whole codebase after Stage 10.12 found no litter worth
 speaking of (no unused icons, four unused strings, no stray dependencies)

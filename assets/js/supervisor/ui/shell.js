@@ -2,8 +2,8 @@
    SUPERVISOR / UI / SHELL — what every supervisor portal screen shares.
    Stage 13. A SEPARATE workspace from the customer account (assets/js/
    account/ui/shell.js): its own navigation, its own guard, its own error
-   copy. The Number One global header/footer still wrap every page (the
-   supervisor is part of the Number One brand, never a separate one).
+   copy. The Travel & Tourism global header/footer still wrap every page (the
+   supervisor is part of the Travel & Tourism brand, never a separate one).
    ========================================================================= */
 import { el, qs, render, setPageHead } from '../../core/dom.js';
 import { t, pick, getLocale } from '../../core/i18n.js';

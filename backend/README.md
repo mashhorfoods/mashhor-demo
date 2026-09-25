@@ -1,4 +1,4 @@
-# Customer backend — Number One Travel & Tourism (Stages 12.2–13)
+# Customer backend — Travel & Tourism (Stages 12.2–13)
 
 The single origin the website talks to. It implements the contract in
 `docs/INTEGRATION.md` §3 (`/auth/*`, `/me/*`, `/legal/*`, `/files/*`,

@@ -27,7 +27,7 @@ const session = (data) => ({ token: MARKER, expiresAt: data.expiresAt ?? null, c
 
 export const SESSION_API_AUTH = registerAuthProvider({
   id: 'session-api', dev: false, provider: 'backend session endpoints', configSource: 'API_BASE_URL, AUTH_PUBLIC_CONFIG',
-  labelAr: 'حساب نمبرون', labelEn: 'Number One account',
+  labelAr: 'حساب السفر والسياحة', labelEn: 'Travel & Tourism account',
   async signIn({ email, password }) { try { return session(await post('/auth/sign-in', { email, password })); } catch (e) { throw toAuthError(e); } },
   async signUp({ name, email, phone = '', password, locale = 'ar', supervisorId = null, acceptance = null }) {
     try { return session(await post('/auth/sign-up', { name, email, phone, password, locale, attribution: supervisorId ? { supervisorId, source: 'link' } : null, acceptance })); } catch (e) { throw toAuthError(e); }

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true">
 <!--
-  NUMBER ONE — ICON SYSTEM (§15)
+  ICON SYSTEM (§15)
   One family. 24×24 grid, 1.75 stroke (set by CSS so it inherits the token),
   round caps and joins, no fills except where marked .c-icon--solid.
   Use: <svg class="c-icon" aria-hidden="true"><use href="sprite.svg#no-flight"/></svg>

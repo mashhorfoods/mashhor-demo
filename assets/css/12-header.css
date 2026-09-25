@@ -67,11 +67,10 @@
     background-image: linear-gradient(to bottom, rgb(0 0 0 / 0.6) 0%, rgb(0 0 0 / 0.38) 60%, rgb(0 0 0 / 0.16) 100%);
     pointer-events: none;
   }
-  /* brand.js's logo(..., { inverse: true }) renders both lockups; swap to
-     the light one exactly like every other dark surface already does
-     (05-primitives.css) — no new logo variant, no redesign. §09 */
-  .c-gh[data-surface="transparent"] .c-logo__img--light { display: none; }
-  .c-gh[data-surface="transparent"] .c-logo__img--inverse { display: block; }
+  /* brand.js's logo(..., { inverse: true }) opts the text wordmark into
+     swapping to light-on-dark exactly like every other dark surface already
+     does (05-primitives.css) — no new logo variant, no redesign. §09 */
+  .c-gh[data-surface="transparent"] .c-logo__text--swaps { color: var(--color-text-inverse); }
   .c-gh[data-surface="transparent"] .c-gh__link,
   .c-gh[data-surface="transparent"] .c-gh__action,
   .c-gh[data-surface="transparent"] .c-gh__secure,

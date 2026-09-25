@@ -1,4 +1,4 @@
--- Number One customer backend — initial schema. Applied by migrate.mjs (schema_migrations tracks versions).
+-- Travel & Tourism customer backend — initial schema. Applied by migrate.mjs (schema_migrations tracks versions).
 CREATE TABLE IF NOT EXISTS customers (
   id TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE, name TEXT NOT NULL, phone TEXT NOT NULL DEFAULT '', locale TEXT NOT NULL DEFAULT 'ar', image TEXT,
   password_salt TEXT NOT NULL, password_hash TEXT NOT NULL,

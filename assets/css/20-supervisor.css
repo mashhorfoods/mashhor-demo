@@ -1,11 +1,11 @@
 /* ============================================================================
    20 — SUPERVISOR PROFILE COMPOSITIONS  Stage 10.10
 
-   The Number One system with a person inside it. Reuses .c-hero (14-home),
+   The Travel & Tourism system with a person inside it. Reuses .c-hero (14-home),
    the card, badge, chip, trust-list, note, state and CTA-band primitives.
    New here: the profile hero layout, the photo slot, the facts list, the
    channel list and the public-link row. No personal colour or type: the
-   only flourish allowed on a person is the Number One red ring.
+   only flourish allowed on a person is the Travel & Tourism red ring.
    ========================================================================= */
 
 @layer components {

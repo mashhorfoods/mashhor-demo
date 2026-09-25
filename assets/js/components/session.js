@@ -8,7 +8,7 @@
    The header reads a session; it does not own one. Stage 12 calls setSession()
    and the account menu re-renders. Roles beyond `customer` do NOT add entries
    here: supervisor and admin navigation are separate systems (§28), and a
-   supervisor profile page still shows the Number One header (§29).
+   supervisor profile page still shows the Travel & Tourism header (§29).
    ------------------------------------------------------------------------ */
 export let session = { authenticated: false, name: '', role: 'guest' };
 export const sessionListeners = new Set();

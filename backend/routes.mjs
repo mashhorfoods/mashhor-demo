@@ -39,7 +39,7 @@ const cleanAcceptance = (a) => (a && typeof a === 'object' ? { terms: a.terms ? 
 const sanitizeTravellers = (raw) => { const out = {}; if (raw && typeof raw === 'object') for (const [id, v] of Object.entries(raw).slice(0, 9)) out[str(id, 20)] = { firstName: str(v?.firstName, 40), lastName: str(v?.lastName, 40), dob: str(v?.dob, 10), gender: str(v?.gender, 1), nationality: str(v?.nationality, 2), passport: str(v?.passport, 20), passportExpiry: str(v?.passportExpiry, 10) }; return out; };
 
 /* ---- Stage 16C: /flights/* — public (no session; search happens before sign-in), server-validated. The
-   browser never talks to a supplier directly: Frontend → Number One Backend → Flight Supplier Adapter →
+   browser never talks to a supplier directly: Frontend → Travel & Tourism Backend → Flight Supplier Adapter →
    Supplier API. Results and offers are cached under a server-issued searchId (backend/flights.mjs); nothing
    about price or availability is ever trusted back from a later client request. ---- */
 const stripInternal = (o) => { const { _devTest, ...rest } = o; return rest; };

@@ -1,5 +1,5 @@
-# Number One Travel & Tourism — Website Master Foundation
-## نمبرون للسفر و السياحة — Stage 10.1
+# Travel & Tourism — Website Master Foundation
+## السفر والسياحة — Stage 10.1
 
 This is the master visual, UX and frontend foundation. Every later website
 stage inherits it. Nothing here is re-interpreted, re-branded or re-decided
@@ -12,7 +12,7 @@ without an explicit project-level instruction.
 ## 1. Where everything lives
 
 ```
-numberone/
+travel-demo/
 ├── index.html              Foundation entry point (NOT the homepage — §01)
 ├── styleguide.html         Living style guide: every token, every component,
 │                           every state, in both RTL and LTR
@@ -337,12 +337,13 @@ sprite into the HTML removes even that gap.
 
 ## 9. Graphic language (§16)
 
-Derived from the numeral **1** → direction → route → journey. Three utilities,
-all rules and paths rather than illustrations, so they cost almost nothing:
+Direction → route → journey, expressed as rules and paths rather than
+illustrations, so it costs almost nothing:
 
 - `.u-mark` — the single decisive stroke, marking a section heading;
 - `.u-route` — the dotted path, used as a divider and inside itineraries;
-- `.u-numeral-watermark` — the numeral as low-contrast texture.
+- `.u-numeral-watermark` — a low-contrast numeral texture, unused by the
+  current demo brand (no numeral is part of its identity).
 
 The flight card's route line is the same idea doing real work: a drawn path
 with the stops marked on it, so "1 stop" is *visible*, not merely stated.
@@ -394,8 +395,8 @@ The relationship **Customer → Supervisor → Booking → Payment → Revenue �
 Supervisor right** is expressible today: a trip already carries its supervisor
 and its total. Nothing in the presentation layer blocks it.
 
-**Supervisor branding (§29):** a supervisor is a person *inside* Number One,
-never a second brand. `supervisorCard` renders the Number One logo, type,
+**Supervisor branding (§29):** a supervisor is a person *inside* Travel & Tourism,
+never a second brand. `supervisorCard` renders the Travel & Tourism logo, type,
 colour and trust language; the record carries only photo, name, role, bio,
 contact and services. The single brand flourish permitted on a person is the
 red ring on the photo.
@@ -431,9 +432,9 @@ component in this layer. Permission is asked, never assumed.
 
 | # | Criterion | Status |
 | --- | --- | --- |
-| 1 | Brand identity preserved | ✅ no new identity; numeral `1` is the mark |
-| 2 | Logo correctly implemented | ✅ official lockup installed — 4 variants (with/without descriptor × light/reversed), favicon, apple-touch-icon, OG card |
-| 3 | Colour tokens | ✅ full contract + applied roles, sampled from the official logo |
+| 1 | Brand identity preserved | ✅ generic demo brand; a text wordmark, no invented mark |
+| 2 | Logo correctly implemented | ✅ text wordmark component (light/dark swap), favicon, apple-touch-icon, OG card |
+| 3 | Colour tokens | ✅ full contract + applied roles |
 | 4 | Typography tokens | ✅ 14-step scale, AR + EN + booking data |
 | 5 | Spacing system | ✅ |
 | 6 | Grid system | ✅ 4 / 8 / 12, verified in browser |
