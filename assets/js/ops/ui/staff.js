@@ -7,9 +7,11 @@ import { t } from '../../core/i18n.js';
 import { icon, toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, actionForm, block } from './shell.js';
+import { mountOpsPortal, loadRegion, pageTitle, actionForm, block, errorText } from './shell.js';
 
-const OPS_PERMISSIONS = ['booking.view', 'booking.manage', 'booking.status.change', 'booking.assign', 'task.view', 'task.manage', 'document.review', 'supplier.view', 'supplier.manage', 'notification.send', 'notification.manage', 'service.manage', 'workflow.manage', 'report.view', 'audit.view', 'customer.view', 'supervisor.view', 'supervisor.manage', 'payment.view', 'document.view', 'attribution.view', 'staff.manage', 'rules.view', 'rules.manage'];
+// Must match backend/staff.mjs PERMISSIONS exactly (tests/ops-portal.mjs asserts it): a permission missing here has
+// no checkbox, and saving would silently revoke it.
+export const OPS_PERMISSIONS = ['booking.view', 'booking.manage', 'booking.status.change', 'booking.assign', 'task.view', 'task.manage', 'document.review', 'supplier.view', 'supplier.manage', 'notification.send', 'notification.manage', 'service.manage', 'workflow.manage', 'report.view', 'audit.view', 'customer.view', 'supervisor.view', 'supervisor.manage', 'payment.view', 'document.view', 'attribution.view', 'staff.manage', 'rules.view', 'rules.manage', 'content.manage'];
 
 export function mountOpsStaff({ root = document } = {}) {
   return mountOpsPortal({ root, id: 'staff', head: 'page.ops.staff', paint: async ({ main, can }) => {
@@ -32,7 +34,7 @@ export function mountOpsStaff({ root = document } = {}) {
 
     const row = (staff) => {
       const activeBtn = el('button', { type: 'button', class: `c-btn c-btn--sm ${staff.active ? 'c-btn--tertiary' : 'c-btn--primary'}` }, t(staff.active ? 'ops.staff.deactivate' : 'ops.staff.activate'));
-      activeBtn.addEventListener('click', async () => { activeBtn.disabled = true; try { await opsData.setStaffActive(staff.id, !staff.active); toast({ title: t('ops.staff.updated'), variant: 'success', duration: 3000 }); await region.run(); } catch { activeBtn.disabled = false; } });
+      activeBtn.addEventListener('click', async () => { activeBtn.disabled = true; try { await opsData.setStaffActive(staff.id, !staff.active); toast({ title: t('ops.staff.updated'), variant: 'success', duration: 3000 }); await region.run(); } catch (error) { activeBtn.disabled = false; toast({ title: errorText(error?.code), variant: 'error' }); } });
 
       let permsControl = null;
       if (staff.role === 'ops' && can('staff.manage')) {
@@ -42,8 +44,13 @@ export function mountOpsStaff({ root = document } = {}) {
         }));
         const saveBtn = el('button', { type: 'button', class: 'c-btn c-btn--tertiary c-btn--sm' }, t('ops.staff.savePermissions'));
         saveBtn.addEventListener('click', async () => {
-          const chosen = [...list.querySelectorAll('input[type=checkbox]:checked')].map((c) => c.value);
-          saveBtn.disabled = true; try { await opsData.setStaffPermissions(staff.id, chosen); toast({ title: t('ops.staff.updated'), variant: 'success', duration: 3000 }); } catch { /* keep the checkboxes as chosen; the backend is authoritative on retry */ } saveBtn.disabled = false;
+          // A permission this screen doesn't offer (a newer backend) is carried over untouched, never revoked by a save.
+          const kept = staff.permissions.filter((p) => !OPS_PERMISSIONS.includes(p));
+          const chosen = [...kept, ...[...list.querySelectorAll('input[type=checkbox]:checked')].map((c) => c.value)];
+          saveBtn.disabled = true;
+          try { await opsData.setStaffPermissions(staff.id, chosen); staff.permissions = chosen; toast({ title: t('ops.staff.updated'), variant: 'success', duration: 3000 }); }
+          catch (error) { toast({ title: errorText(error?.code), variant: 'error' }); } // the checkboxes keep what was chosen, so a retry is one click
+          saveBtn.disabled = false;
         });
         permsControl = el('div', { class: 'l-stack l-stack--8' }, [list, saveBtn]);
       }

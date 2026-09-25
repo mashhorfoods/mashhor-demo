@@ -12,8 +12,8 @@
 import { createServer } from 'node:http';
 import { config, assertConfig } from './config.mjs';
 import { migrate, q } from './db.mjs';
-import { cors, json, empty, fail, HttpError, cookies, rateLimit, resetRateLimits, clientIp } from './http.mjs';
-import { liveSession, customerById, sweepSessions, endAllSessions, publicCustomer } from './identity.mjs';
+import { cors, json, empty, fail, HttpError, cookies, rateLimit, resetRateLimits, clientIp, sessionFamily } from './http.mjs';
+import { liveSession, customerById, sweepSessions, endAllSessions, publicCustomer, same } from './identity.mjs';
 import { auth, me, file, legal, diagnostics, paymentsWebhook, flights } from './routes.mjs';
 import { registerDevPaymentProvider } from './payments.mjs';
 import { registerDevFlightProvider } from './flights.mjs';
@@ -118,8 +118,9 @@ export function createApp() {
     const staffSession = liveStaffSession(ck.no_ops_session); const staffMember = staffSession ? staffById(staffSession.staff_id) : null;
     const ctx = { sid: ck.no_session ?? null, session: customer ? session : null, customer, supervisorSid: ck.no_supervisor_session ?? null, supervisorSession: supervisor ? supervisorSession : null, supervisor, staffSid: ck.no_ops_session ?? null, staffSession: staffMember ? staffSession : null, staff: staffMember, ip, urlTtlMs: test?.urlTtlMs ?? undefined };
     if (['POST', 'PATCH', 'DELETE'].includes(req.method)) {
-      const live = ctx.session ?? ctx.supervisorSession ?? ctx.staffSession;
-      if (live) { const h = req.headers['x-csrf-token']; if (!h || h !== live.csrf) { warn('csrf.rejected', { path }); return fail(res, 403, 'forbidden'); } }
+      const family = sessionFamily(path);
+      const live = family === 'customer' ? ctx.session : family === 'supervisor' ? ctx.supervisorSession : family === 'staff' ? ctx.staffSession : null;
+      if (live) { const h = req.headers['x-csrf-token']; if (!h || !same(h, live.csrf)) { warn('csrf.rejected', { path, family }); return fail(res, 403, 'forbidden'); } }
     }
 
     // ---- /auth ----

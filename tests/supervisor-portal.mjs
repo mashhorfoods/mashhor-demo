@@ -46,6 +46,18 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.super
   ok('sign out: marker cleared, signed-out message', (await marker(p)) === null && /تم تسجيل الخروج|تسجيل الخروج/.test(await text(p, 'h1')));
   await go(p, 'supervisor/dashboard/'); await p.waitForFunction(() => document.querySelector('[data-portal=main] h1'));
   ok('guarded again after sign out', await count(p, '[data-action=sign-in]') === 1);
+  // ?next= returns to the page the guard interrupted (review 2026-09-25 §1.4) — and only to a page of this portal
+  await p.goto(ORIGIN + P + 'supervisor/leads/'); await p.waitForFunction(() => document.querySelector('[data-action=sign-in]'));
+  await Promise.all([p.waitForURL(/sign-in\/\?next=/), p.click('[data-action=sign-in]')]); await p.waitForFunction((h) => window.no?.[h], 'supervisorSignIn');
+  await Promise.all([p.waitForURL((u) => u.pathname.endsWith(P + 'supervisor/leads/')), p.click('[data-action=dev-sign-in]')]);
+  ok('sign-in from a guarded page returns to that page via ?next=', p.url().endsWith(P + 'supervisor/leads/'));
+  await signOut(p);
+  for (const bad of ['//evil.example/', 'https://evil.example/supervisor/', P + 'admin/dashboard/', P + 'supervisor/../admin/dashboard/']) {
+    await go(p, 'supervisor/sign-in/?next=' + encodeURIComponent(bad), 'supervisorSignIn');
+    await Promise.all([p.waitForURL(/dashboard\/$/), p.click('[data-action=dev-sign-in]')]);
+    ok(`?next=${bad} is refused → own dashboard`, p.url().endsWith(P + 'supervisor/dashboard/'));
+    await signOut(p);
+  }
   await c.close();
 }
 
@@ -206,6 +218,19 @@ await b.close();
   ok('the booking claims through the real backend', /^trip_/.test(await p1.getAttribute('[data-claimed]', 'data-claimed')));
   const zeta = (await apiState()).customers.find((x) => x.email === 'zeta@fixture.test');
   ok('the real backend recorded the attribution to supervisor-1', zeta?.attribution?.supervisorId === 'ahmed-mohamed' && zeta.attribution.source === 'link');
+  // review 2026-09-25 §1.1: the SAME browser, still holding the customer session, signs in as supervisor-1 and writes.
+  // The write must be checked against the supervisor session (no_supervisor_csrf), not the customer one found first.
+  await bgo(p1, 'supervisor/sign-in/'); await p1.fill('[name=email]', 'sup1@fixture.test'); await p1.fill('[name=password]', 'password123');
+  await Promise.all([p1.waitForURL(/dashboard\/$/), p1.click('[data-form=sign-in] button[type=submit]')]);
+  await bgo(p1, 'supervisor/leads/'); await p1.waitForSelector('[data-lead-status-select=lead_S1]');
+  const leadResp = p1.waitForResponse((r) => r.url().endsWith('/supervisor/me/leads/lead_S1') && r.request().method() === 'PATCH');
+  await p1.selectOption('[data-lead-status-select=lead_S1]', 'contacted');
+  ok('supervisor portal write (lead status) is accepted while a customer session is also live', (await leadResp).status() === 200, String((await leadResp).status()));
+  await bgo(p1, 'supervisor/leads/'); await p1.waitForSelector('[data-lead-status-select=lead_S1]');
+  ok('the lead status change persisted', (await p1.inputValue('[data-lead-status-select=lead_S1]')) === 'contacted');
+  const custResp = p1.waitForResponse((r) => r.url().endsWith('/auth/sign-out') && !r.url().includes('/supervisor/'));
+  await bgo(p1, 'account/sign-out/');
+  ok('the customer session in the same browser still writes with its own token (customer sign-out accepted)', (await custResp).status() === 204);
   await c1.close();
 
   // Supervisor-1 signs in on the SAME backend and sees the new customer + booking

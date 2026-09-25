@@ -20,7 +20,7 @@ export function mountOpsSettings({ root = document } = {}) {
     });
     main.replaceChildren(
       pageTitle('ops.settings.title', 'ops.settings.text'),
-      block(t('ops.settings.profile'), rows([[t('acct.field.email'), staff.email], [t('ops.settings.role'), t(`ops.role.${staff.role}`) || staff.role]]), { id: 'ops-settings-profile' }),
+      block(t('ops.settings.profile'), rows([[t('auth.field.email'), staff.email], [t('ops.settings.role'), t(`ops.role.${staff.role}`) || staff.role]]), { id: 'ops-settings-profile' }),
       block(t('acct.set.password'), form, { id: 'ops-settings-password' }),
     );
     return { staff };

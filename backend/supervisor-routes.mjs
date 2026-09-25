@@ -35,7 +35,7 @@ export const supervisorAuth = {
   signOut(req, res, ctx) { endSupervisorSession(ctx.supervisorSid); clearSupervisorSessionCookies(res); return empty(res); },
   async resetRequest(req, res) {
     const b = await readJson(req); const email = normEmail(b.email);
-    if (isEmail(email)) { const r = createSupervisorReset(email); if (r) enqueue({ customerId: null, template: 'supervisor-password-reset', payload: { token: r.token, locale: 'ar', supervisorId: r.supervisor.id } }); }
+    if (isEmail(email)) { const r = createSupervisorReset(email); if (r) enqueue({ recipient: r.supervisor.email, template: 'supervisor-password-reset', payload: { token: r.token, locale: 'ar', supervisorId: r.supervisor.id } }); }
     return json(res, 202, {});   // never reveals whether the address exists — same neutral answer as the customer flow
   },
   async reset(req, res) { const b = await readJson(req); consumeSupervisorReset(str(b.token, 80), b.password); info('supervisor.auth.reset', { ok: true }); return empty(res); },

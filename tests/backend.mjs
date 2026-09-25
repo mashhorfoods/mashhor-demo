@@ -50,6 +50,9 @@ const check = (extra) => new Promise((resolve) => { const c = spawn(process.exec
   ok('BACKEND_MAILER=smtp with every setting present is accepted', (await check({ BACKEND_MAILER: 'smtp', BACKEND_SMTP_HOST: 'smtp.example.test', BACKEND_SMTP_USER: 'no-reply@example.test', BACKEND_SMTP_PASS: 'x'.repeat(20), BACKEND_SMTP_FROM: 'no-reply@example.test' })).code === 0);
   ok('BACKEND_SMTP_FROM must look like a real address', /SMTP_FROM/.test((await check({ BACKEND_MAILER: 'smtp', BACKEND_SMTP_HOST: 'smtp.example.test', BACKEND_SMTP_USER: 'u', BACKEND_SMTP_PASS: 'x'.repeat(20), BACKEND_SMTP_FROM: 'not-an-address' })).out));
   ok('a payment dev secret under 32 characters is refused', /PAYMENT_DEV_SECRET/.test((await check({ BACKEND_PAYMENT_DEV_SECRET: 'short' })).out));
+  ok('NODE_ENV=production without BACKEND_ENV is refused, never a silent development start', /BACKEND_ENV must be set explicitly/.test((await check({ BACKEND_ENV: '', NODE_ENV: 'production' })).out));
+  ok('staging requires an explicit origin list (no any-origin CORS on a public host)', /ALLOWED_ORIGINS is required in staging/.test((await check({ BACKEND_ENV: 'staging', BACKEND_ALLOWED_ORIGINS: '' })).out));
+  ok('the Docker image selects production mode itself', /ENV [^\n]*BACKEND_ENV=production/.test(readFileSync(join(ROOT, 'backend/Dockerfile'), 'utf8')));
   ok('staging requires a real payment dev secret, just like the signing secret', /PAYMENT_DEV_SECRET/.test((await check({ BACKEND_ENV: 'staging', BACKEND_PAYMENT_DEV_SECRET: '' })).out));
 }
 
@@ -404,6 +407,10 @@ await control('/__test/reset');
   // ---- services / workflow ----
   const svc = await reqAdmin('/services/flights'); ok('a seeded service has a workflow the brief itself specifies (Search → … → Confirmation)', svc.status === 200);
   const wf = await reqAdmin('/services/flights/workflow'); ok('flight workflow has the six documented steps', wf.data.steps.length === 6 && wf.data.steps[0].key === 'search');
+  // review 2026-09-25 §1.7: the ops UI sends operationalRequirements; it used to be dropped silently
+  const reqPatch = await reqAdmin('/services/flights', { method: 'PATCH', body: { operationalRequirements: '  Passport valid 6+ months  ' } });
+  ok('service operational requirements are saved (trimmed) and read back', reqPatch.status === 200 && reqPatch.data.service?.operationalRequirements === 'Passport valid 6+ months' && (await reqAdmin('/services/flights')).data.service?.operationalRequirements === 'Passport valid 6+ months');
+  ok('clearing operational requirements stores null', (await reqAdmin('/services/flights', { method: 'PATCH', body: { operationalRequirements: '' } })).data.service?.operationalRequirements === null);
   const wfUnset = await reqAdmin('/services/study/workflow'); ok('a service without a brief-given example starts honestly unconfigured, not invented', wfUnset.data.steps.length === 0);
   jarAdmin.clear(); jarOps.clear(); jarCust2.clear();
 }
@@ -981,7 +988,11 @@ await control('/__test/reset');
   const tmplUp = await reqAdminN('/notifications/templates', { method: 'POST', body: { event: 'render-test', channel: 'email', subjectAr: 'مرجع {{ref}}', subjectEn: 'Ref {{ref}}', bodyAr: 'مرحباً {{name}} — المرجع {{ref}}', bodyEn: 'Hello {{name}} — ref {{ref}}', variables: ['name', 'ref'] } });
   ok('template created for rendering test', tmplUp.status === 200);
   const rendered = await import('../backend/mailer.mjs').then((m) => m.renderTemplate('Hello {{name}} — ref {{ref}} — {{missing}}', { name: '<script>alert(1)</script>', ref: 'BK-1' }));
-  ok('§7/§14: a payload value is escaped, never re-introducing markup through a placeholder; an unknown placeholder resolves empty, never fabricated text', rendered === 'Hello &lt;script&gt;alert(1)&lt;/script&gt; — ref BK-1 — ');
+  ok('§7/§14: a payload value has its tags stripped, never re-introducing markup through a placeholder; an unknown placeholder resolves empty, never fabricated text', rendered === 'Hello alert(1) — ref BK-1 — ');
+  // review 2026-09-25 §1.8: mail is text/plain, so nothing may be entity-encoded — neither the stored template nor a value
+  const plain = await reqAdminN('/notifications/templates', { method: 'POST', body: { event: 'plain-test', channel: 'email', bodyAr: 'أهلاً {{name}}', bodyEn: 'Terms & conditions: "{{name}}" <b>now</b>', variables: ['name'] } });
+  ok('a stored template keeps & and quotes as typed (tags still stripped)', plain.data.template.bodyEn === 'Terms & conditions: "{{name}}" now');
+  ok('a rendered value keeps & as typed', await import('../backend/mailer.mjs').then((m) => m.renderTemplate(plain.data.template.bodyEn, { name: 'Tom & Jerry' })) === 'Terms & conditions: "Tom & Jerry" now');
 
   jarN.clear(); jarAdminN.clear();
 }
@@ -1128,6 +1139,14 @@ await control('/__test/reset');
   ok('§16: provisioning automatically queues an invite — the new hire is never expected to already know to ask for a reset', stCreate.outbox.some((o) => o.template === 'staff-invite' && o.staff_id === newId));
   const cannotSignIn = await fetch(API + '/auth/sign-in', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: SITE }, body: JSON.stringify({ email: 'kappa@fixture.test', password: 'anything12' }) });
   ok('the new hire genuinely cannot sign in (no password exists) until they use the invite/reset flow', cannotSignIn.status === 401);
+
+  // ---- staff and supervisor password resets reach a real address (review 2026-09-25 §1.5: they were queued with
+  // no recipient, so the mailer could only ever mark them failed/noRecipient) ----
+  for (const [path, email, template] of [['/staff/auth/password/reset-request', 'admin1@fixture.test', 'staff-password-reset'], ['/supervisor/auth/password/reset-request', 'sup1@fixture.test', 'supervisor-password-reset']]) {
+    const r = await fetch(API + path, { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: SITE }, body: JSON.stringify({ email }) });
+    const row = (await fetch(API + '/__test/state').then((x) => x.json())).outbox.filter((o) => o.template === template).pop();
+    ok(`${template}: queued addressed to the account's own e-mail`, r.status === 202 && row?.recipient === email && JSON.parse(row.payload_json).token);
+  }
 
   // ---- §19 lifecycle: deactivation ends access immediately ----
   const jarK = new Map(); const reqK = makeReq(API, SITE)(jarK, 'no_ops_csrf');

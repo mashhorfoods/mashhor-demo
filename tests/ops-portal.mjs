@@ -4,7 +4,7 @@
 // any ✗.
 import { shot, makeCtx, startEphemeralBackend } from './env.mjs';
 import { chromium } from 'playwright';
-import { rmSync } from 'node:fs';
+import { rmSync, readFileSync } from 'node:fs';
 
 const ORIGIN = process.env.TEST_ORIGIN + '';
 const P = '/mashhor-demo/';
@@ -24,6 +24,15 @@ const dev = (p, key, value) => p.evaluate(([k, v]) => { if (v == null) sessionSt
 const devSignIn = async (p) => { await go(p, 'admin/sign-in/', 'opsSignIn'); await Promise.all([p.waitForURL(/dashboard\/$/), p.click('[data-action=dev-sign-in]')]); await mainReady(p); };
 const signOut = async (p) => { await go(p, 'admin/sign-out/', 'opsSignOut'); };
 const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.ops.session') ?? 'null'));
+
+// ================================================================= 0. the Staff screen offers every permission the backend enforces
+{
+  // A permission with no checkbox is revoked by every save (review 2026-09-25 §1.3): the two lists must match exactly.
+  const list = (file, re) => [...(readFileSync(new URL(file, import.meta.url), 'utf8').match(re)?.[1] ?? '').matchAll(/'([a-z.]+)'/g)].map((m) => m[1]).sort().join();
+  const ui = list('../assets/js/ops/ui/staff.js', /OPS_PERMISSIONS = \[([^\]]+)\]/);
+  const backend = list('../backend/staff.mjs', /export const PERMISSIONS = \[([\s\S]+?)\];/);
+  ok('Staff screen permission list = backend PERMISSIONS', ui && ui === backend, `ui=${ui} backend=${backend}`);
+}
 
 // ================================================================= 1. authorization: every portal route guarded, sign in / out
 {
@@ -46,6 +55,18 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.ops.s
   ok('sign out: marker cleared, signed-out message', (await marker(p)) === null && /تسجيل الخروج/.test(await text(p, 'h1')));
   await go(p, 'admin/dashboard/'); await p.waitForFunction(() => document.querySelector('[data-portal=main] h1'));
   ok('guarded again after sign out', await count(p, '[data-action=sign-in]') === 1);
+  // ?next= returns to the page the guard interrupted (review 2026-09-25 §1.4) — and only to a page of this portal
+  await p.goto(ORIGIN + P + 'admin/tasks/'); await p.waitForFunction(() => document.querySelector('[data-action=sign-in]'));
+  await Promise.all([p.waitForURL(/sign-in\/\?next=/), p.click('[data-action=sign-in]')]); await p.waitForFunction((h) => window.no?.[h], 'opsSignIn');
+  await Promise.all([p.waitForURL((u) => u.pathname.endsWith(P + 'admin/tasks/')), p.click('[data-action=dev-sign-in]')]);
+  ok('sign-in from a guarded page returns to that page via ?next=', p.url().endsWith(P + 'admin/tasks/'));
+  await signOut(p);
+  for (const bad of ['//evil.example/', 'https://evil.example/admin/', P + 'supervisor/dashboard/', P + 'admin/../supervisor/dashboard/']) {
+    await go(p, 'admin/sign-in/?next=' + encodeURIComponent(bad), 'opsSignIn');
+    await Promise.all([p.waitForURL(/dashboard\/$/), p.click('[data-action=dev-sign-in]')]);
+    ok(`?next=${bad} is refused → own dashboard`, p.url().endsWith(P + 'admin/dashboard/'));
+    await signOut(p);
+  }
   await c.close();
 }
 
@@ -308,6 +329,19 @@ await b.close();
   await bgo(p1, 'admin/bookings/?id=BK_A1'); await bMainReady(p1);
   ok('real backend: admin sees both customer and internal notes on the fixture booking', await count(p1, '#ops-bk-notes-customer li') >= 1 && await count(p1, '#ops-bk-notes-internal li') >= 1);
   ok('real backend: internal-only note text never appears in the customer notes block', !(await text(p1, '#ops-bk-notes-customer')).includes('never shown to the customer'));
+  // review 2026-09-25 §1.1: a WRITE from the staff portal carries the staff CSRF token (no_ops_csrf) and is accepted
+  const notesBefore = await count(p1, '#ops-bk-notes-internal li');
+  const noteResp = p1.waitForResponse((r) => /\/bookings\/BK_A1\/notes/.test(r.url()) && r.request().method() === 'POST');
+  await p1.fill('#ops-bk-notes-internal textarea[name=body]', 'Staff write through the real backend');
+  await p1.click('#ops-bk-notes-internal button[type=submit]');
+  ok('real backend: staff portal write (internal note) is accepted — CSRF token of the staff session', (await noteResp).status() === 201 || (await noteResp).status() === 200, String((await noteResp).status()));
+  await p1.waitForFunction((n) => document.querySelectorAll('#ops-bk-notes-internal li').length > n, notesBefore);
+  ok('real backend: the new note is shown', (await text(p1, '#ops-bk-notes-internal')).includes('Staff write through the real backend'));
+  const outResp = p1.waitForResponse((r) => r.url().endsWith('/staff/auth/sign-out'));
+  await bgo(p1, 'admin/sign-out/');
+  ok('real backend: staff sign-out (a POST) is accepted', (await outResp).status() === 204);
+  await bgo(p1, 'admin/dashboard/'); await bMainReady(p1);
+  ok('real backend: after sign-out the portal is guarded again', await count(p1, '[data-action=sign-in]') === 1);
   await c1.close();
 
   // Operations staff (staff-ops-1, role=ops, a named partial permission set with no supplier.manage/service.manage)

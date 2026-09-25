@@ -48,7 +48,7 @@ export function guardState(status, code = null) {
   if (status === 'unavailable') return [
     el('h1', { class: 't-h1' }, t(code === 'notConfigured' ? 'svp.state.notConnected.title' : 'svp.guard.unavailableTitle')),
     stateBlock({ variant: 'warning', iconName: 'no-alert', headingLevel: 2, title: code === 'notConfigured' ? errorText('notConfigured') : t('svp.guard.unavailable'),
-      actions: code === 'notConfigured' ? [{ label: t('nav.home') ?? t('brand.name'), href: route('') }] : [{ id: 'retry', label: t('acct.retry'), variant: 'c-btn--primary', onClick: () => location.reload() }] }),
+      actions: code === 'notConfigured' ? [{ label: t('notFound.home'), href: route('') }] : [{ id: 'retry', label: t('acct.retry'), variant: 'c-btn--primary', onClick: () => location.reload() }] }),
   ];
   return [
     el('h1', { class: 't-h1' }, t(expired ? 'svp.guard.expiredTitle' : 'svp.guard.title')),

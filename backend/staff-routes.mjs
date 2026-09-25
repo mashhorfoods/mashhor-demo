@@ -43,7 +43,7 @@ export const staffAuth = {
   signOut(req, res, ctx) { endStaffSession(ctx.staffSid); clearStaffSessionCookies(res); return empty(res); },
   async resetRequest(req, res) {
     const b = await readJson(req); const email = normEmail(b.email);
-    if (isEmail(email)) { const r = createStaffReset(email); if (r) enqueue({ customerId: null, template: 'staff-password-reset', payload: { token: r.token, staffId: r.staff.id } }); }
+    if (isEmail(email)) { const r = createStaffReset(email); if (r) enqueue({ staffId: r.staff.id, recipient: r.staff.email, template: 'staff-password-reset', payload: { token: r.token, staffId: r.staff.id } }); }
     return json(res, 202, {});
   },
   async reset(req, res) { const b = await readJson(req); consumeStaffReset(str(b.token, 80), b.password); return empty(res); },

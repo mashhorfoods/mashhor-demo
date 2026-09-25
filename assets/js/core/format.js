@@ -44,6 +44,11 @@ export function money(amount, currency) {
   return `${value} ${currencyLabel(currency)}`;
 }
 
+/** "October 2026" / "أكتوبر 2026" — a calendar month in the page language, Western digits. */
+export function monthYear(date) {
+  return new Intl.DateTimeFormat(`${intlLocale()}-u-nu-latn`, { month: 'long', year: 'numeric' }).format(date);
+}
+
 export function number(value) {
   return new Intl.NumberFormat(`${intlLocale()}-u-nu-latn`).format(Number(value) || 0);
 }

@@ -276,7 +276,8 @@ export function updateService(id, patch, actor) {
   const bookingEnabled = patch.bookingEnabled != null ? (patch.bookingEnabled ? 1 : 0) : r.booking_enabled;
   const workflowType = patch.workflowType !== undefined ? str(patch.workflowType, 40) || null : r.workflow_type;
   const supplierType = patch.supplierType !== undefined ? str(patch.supplierType, 40) || null : r.supplier_type;
-  q.run('UPDATE services SET active = ?, booking_enabled = ?, workflow_type = ?, supplier_type = ?, updated_at = ? WHERE id = ?', active, bookingEnabled, workflowType, supplierType, now(), id);
+  const operationalRequirements = patch.operationalRequirements !== undefined ? str(patch.operationalRequirements, 1000) || null : r.operational_requirements;
+  q.run('UPDATE services SET active = ?, booking_enabled = ?, workflow_type = ?, supplier_type = ?, operational_requirements = ?, updated_at = ? WHERE id = ?', active, bookingEnabled, workflowType, supplierType, operationalRequirements, now(), id);
   audit(actor, 'service.update', 'service', id, { patch });
   return serviceById(id);
 }
@@ -354,9 +355,10 @@ export function addBookingNote(bookingId, type, body, actor) {
 export const bookingNotes = (bookingId, type) => q.all('SELECT * FROM booking_notes WHERE booking_id = ? AND type = ? ORDER BY created_at DESC', bookingId, type).map(nNote);
 
 /* ---- notification templates (§15) — sanitised, never raw HTML/script execution --------------------------------- */
-const escapeHtml = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-/** Strips tags entirely: a template body is plain text with {{variable}} placeholders, rendered later by the channel (e-mail HTML wrapper, SMS text) — never customer-supplied markup. */
-const sanitizeTemplateBody = (s) => escapeHtml(String(s ?? '').replace(/<[^>]*>/g, '').slice(0, 4000));
+/** Strips tags entirely: a template body is plain text with {{variable}} placeholders. It is NOT entity-encoded:
+    e-mail goes out as text/plain and SMS is text, so an encoded body would reach people as a literal "&amp;". A
+    channel that ever wraps it in HTML must escape at that point, where the output format is known. */
+const sanitizeTemplateBody = (s) => String(s ?? '').replace(/<[^>]*>/g, '').slice(0, 4000);
 const nTemplate = (r) => ({ id: r.id, event: r.event, channel: r.channel, subjectAr: r.subject_ar, subjectEn: r.subject_en, bodyAr: r.body_ar, bodyEn: r.body_en, variables: J(r.variables_json, []), active: !!r.active, version: r.version, createdAt: r.created_at, updatedAt: r.updated_at });
 export const listTemplates = () => q.all('SELECT * FROM notification_templates ORDER BY event, channel').map(nTemplate);
 export function upsertTemplate({ event, channel, subjectAr = null, subjectEn = null, bodyAr, bodyEn, variables = [], active = true }, actor) {

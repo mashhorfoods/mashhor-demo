@@ -52,6 +52,20 @@ work.
 
 ## 1. Fix first — bugs and security (small, and they matter)
 
+> **Phase 1 status (2026-09-25, later the same day): fixed** — 1.1, 1.2, 1.3, 1.4, 1.5, 1.7, 1.8, 1.9, 1.10,
+> 1.11 and 1.12, each with a test that fails without the fix (1.1 was confirmed that way: with the old
+> `core/api.js`, the new supervisor write test gets a 403). 1.6 is Phase 3 and 1.13 needs a product decision.
+> Notes on what changed beyond the table's "Action" column:
+> - 1.1: `sessionFamily(path)` in `backend/http.mjs` and `csrfFamily(path)` in `assets/js/core/api.js` map
+>   each route to its session the same way; `same()` now compares byte lengths, so a non-ASCII value can no
+>   longer make `timingSafeEqual` throw.
+> - 1.2: the Dockerfile sets `BACKEND_ENV=production`; `NODE_ENV=production` without `BACKEND_ENV` is
+>   refused; staging requires `BACKEND_ALLOWED_ORIGINS`; `backend/.env.example` now names the code's real
+>   default database path.
+> - 1.3: besides adding `content.manage`, a save keeps any permission the screen doesn't list, failed
+>   saves show an error, and `tests/ops-portal.mjs` asserts the UI list equals the backend's.
+> - 1.12: a scan of every literal `t('…')` key and every `data-i18n*` attribute found no other missing key.
+
 | # | Issue | Where | Impact | Risk of fix | Action |
 |---|---|---|---|---|---|
 | 1.1 ✔ | **The staff and supervisor portals can't make changes against the real backend.** The backend sets `no_ops_csrf` and `no_supervisor_csrf`, but `core/api.js` only ever reads `no_csrf`. On top of that, `server.mjs` checks the header against the *first* live session (customer before supervisor before staff), and compares it with `!==` (not timing-safe). | `assets/js/core/api.js:30`, `backend/http.mjs:26,30`, `backend/server.mjs:120-122` | Every staff and supervisor POST/PATCH (status changes, notes, lead updates, sign-out) would get a 403. The real-backend test suites only sign in and do GETs, so nothing catches it. | Low | The front end should read the cookie for the portal it runs in. The backend should pick the session by route family and compare with `same()`. Add a real-backend browser test that makes a change. |

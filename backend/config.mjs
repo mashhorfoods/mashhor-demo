@@ -12,7 +12,10 @@ const num = (v, d) => (v == null || v === '' ? d : Number(v));
 const list = (v) => (v ?? '').split(',').map((s) => s.trim()).filter(Boolean);
 const problems = [];
 
-const environment = env.BACKEND_ENV ?? 'development';
+const environment = env.BACKEND_ENV || 'development';
+// NODE_ENV=production with no BACKEND_ENV is a deployment that forgot to choose: it would otherwise start in
+// development mode (any-origin CORS, a per-process signing secret, the dev payment provider). Refuse it.
+if (!env.BACKEND_ENV && env.NODE_ENV === 'production') problems.push('BACKEND_ENV must be set explicitly when NODE_ENV=production (production | staging)');
 if (!['development', 'staging', 'production'].includes(environment)) problems.push(`BACKEND_ENV must be development | staging | production (got ${environment})`);
 const production = environment === 'production';
 
@@ -22,6 +25,8 @@ else if (signingSecret.length < 32) problems.push('BACKEND_SIGNING_SECRET must b
 
 const allowedOrigins = list(env.BACKEND_ALLOWED_ORIGINS);
 if (allowedOrigins.includes('*')) problems.push('BACKEND_ALLOWED_ORIGINS must list exact origins, never *');
+// Staging is reachable from the internet too: with no list, CORS would echo any origin with credentials.
+if (environment === 'staging' && !allowedOrigins.length) problems.push('BACKEND_ALLOWED_ORIGINS is required in staging');
 if (production) { if (!allowedOrigins.length) problems.push('BACKEND_ALLOWED_ORIGINS is required in production'); allowedOrigins.forEach((o) => { if (!/^https:\/\//.test(o)) problems.push(`allowed origin must be https in production: ${o}`); }); }
 
 const publicUrl = (env.BACKEND_PUBLIC_URL ?? '').replace(/\/+$/, '');

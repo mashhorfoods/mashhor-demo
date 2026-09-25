@@ -18,7 +18,9 @@ import { warn } from './logger.mjs';
 // Exported so backend/supervisor.mjs (Stage 13) can hash and compare supervisor passwords with the same scrypt settings
 // without a second implementation; the credential STORE is separate (a different table), only the algorithm is shared.
 export const hash = (password, salt) => scryptSync(password, salt, 32).toString('hex');
-export const same = (a, b) => a.length === b.length && timingSafeEqual(Buffer.from(a), Buffer.from(b));
+// Byte lengths, not string lengths: timingSafeEqual throws on buffers of different sizes, and a non-ASCII value can
+// have the same number of characters as the secret but more bytes.
+export const same = (a, b) => { const x = Buffer.from(String(a)); const y = Buffer.from(String(b)); return x.length === y.length && timingSafeEqual(x, y); };
 export const normEmail = (e) => String(e ?? '').trim().toLowerCase();
 
 // Customer-facing responses expose the supervisor's PUBLIC slug, never the internal backend id — see the identical

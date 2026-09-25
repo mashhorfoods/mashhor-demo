@@ -9,10 +9,11 @@
    ========================================================================= */
 
 import { el, qs, qsa, render, scrollTo as scrollIntoView, setPageHead } from '../core/dom.js';
-import { t, pick, getLocale } from '../core/i18n.js';
+import { t, pick } from '../core/i18n.js';
 import { route } from '../data/config.js';
+import { money, monthYear } from '../core/format.js';
 import {
-  OFFER_REGISTRY, OFFER_CATEGORIES, OFFER_STATUSES, DURATION_BUCKETS, OFFER_SORTS, OFFER_GUIDES,
+  OFFER_REGISTRY, OFFER_CATEGORIES, OFFER_STATUSES, DURATION_BUCKETS, OFFER_SORTS, OFFER_GUIDES, PRICE_BUCKETS, PRICE_FILTER_CURRENCY,
   offerById, offerEntry, queryOffers, offersHave,
 } from '../data/offers.js';
 import { destinationById, DESTINATION_REGISTRY } from '../data/destinations.js';
@@ -62,7 +63,6 @@ export function categoryChips({ onSelect, current = '' } = {}) {
    Only filters the data can answer are rendered. §3
    ------------------------------------------------------------------------ */
 export function filterControls({ values = {}, onChange, onApply } = {}) {
-  const isAr = getLocale() === 'ar';
   const select = (name, labelKey, options, blankKey) => {
     const id = `flt-${name}`;
     return el('div', { class: 'c-field c-filters__field' }, [
@@ -80,11 +80,7 @@ export function filterControls({ values = {}, onChange, onApply } = {}) {
     select('destination', 'offers.filter.destination', destinations.map((d) => ({ value: d.id, label: pick(d, 'name') })), 'offers.filter.anyDestination'),
     select('service', 'offers.filter.service', services.map((s) => ({ value: s.id, label: pick(s, 'title') })), 'offers.filter.anyService'),
     offersHave('duration') ? select('duration', 'offers.filter.duration', DURATION_BUCKETS.map((b) => ({ value: b.id, label: pick(b, 'label') })), 'offers.filter.anyDuration') : null,
-    offersHave('price') ? select('price', 'offers.filter.price', [
-      { value: '0-500000', label: isAr ? 'حتى 500 دولار' : 'Up to 500 USD' },
-      { value: '500000-1500000', label: isAr ? '500 – 1,500 دولار' : '500 – 1,500 USD' },
-      { value: '1500000-', label: isAr ? 'أكثر من 1,500 دولار' : 'Over 1,500 USD' },
-    ], 'offers.filter.anyPrice') : null,
+    offersHave('price') ? select('price', 'offers.filter.price', PRICE_BUCKETS.map((b) => ({ value: b.id, label: priceBucketLabel(b) })), 'offers.filter.anyPrice') : null,
     offersHave('period') ? select('period', 'offers.filter.period', monthOptions(), 'offers.filter.anyPeriod') : null,
     select('sort', 'offers.sort.label', OFFER_SORTS.map((s) => ({ value: s.id, label: pick(s, 'label') }))),
     el('div', { class: 'c-filters__actions' }, [
@@ -94,11 +90,17 @@ export function filterControls({ values = {}, onChange, onApply } = {}) {
   ]);
   return form;
 }
-function monthOptions() {
-  const now = new Date(); const out = [];
+const priceBucketLabel = (b) => {
+  const m = (n) => money(n, PRICE_FILTER_CURRENCY);
+  return b.lo === 0 ? t('offers.filter.priceUpTo', m(b.hi)) : b.hi == null ? t('offers.filter.priceOver', m(b.lo)) : t('offers.filter.priceBetween', m(b.lo), m(b.hi));
+};
+/** The next 12 calendar months. The value is built from the LOCAL year and month: toISOString() would convert the
+    local midnight to UTC and, east of UTC, land in the previous month ("October" filtering September). */
+export function monthOptions(from = new Date()) {
+  const out = [];
   for (let i = 0; i < 12; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
-    out.push({ value: d.toISOString().slice(0, 7), label: new Intl.DateTimeFormat(getLocale() === 'ar' ? 'ar-EG-u-nu-latn' : 'en-GB', { month: 'long', year: 'numeric' }).format(d) });
+    const d = new Date(from.getFullYear(), from.getMonth() + i, 1);
+    out.push({ value: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`, label: monthYear(d) });
   }
   return out;
 }

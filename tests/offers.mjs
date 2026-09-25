@@ -22,6 +22,16 @@ async function open(url, width = 1440, height = 1000, locale = 'ar') {
   return p;
 }
 
+// ---------------------------------------------------------------- review 2026-09-25 §1.10: the travel-period months east of UTC
+{
+  const c = await b.newContext({ timezoneId: 'Asia/Dubai', viewport: { width: 1440, height: 1000 } });
+  const p = await c.newPage(); await p.goto(ORIGIN + LIST, { waitUntil: 'networkidle' });
+  const r = await p.evaluate(async () => { const m = await import('./assets/js/foundation.js'); await m.setLocale('en');
+    return m.monthOptions(new Date(2026, 9, 15)).slice(0, 3).map((o) => `${o.value}=${o.label}`); });
+  ok('month options in UTC+4: value and label name the same month', r.join('|') === '2026-10=October 2026|2026-11=November 2026|2026-12=December 2026', r.join('|'));
+  await c.close();
+}
+
 // ---------------------------------------------------------------- listing: structure × widths × locales
 for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1000, 'desktop']]) {
   for (const loc of ['ar', 'en']) {
@@ -115,6 +125,13 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1
     const priced = [{ ...m.OFFER_REGISTRY[2], price: { amount: 900, currency: 'SDG', type: 'from' } }, { ...m.OFFER_REGISTRY[0], price: { amount: 100, currency: 'SDG', type: 'from' } }, m.OFFER_REGISTRY[1]];
     return { price: m.queryOffers({ sort: 'price' }, priced).map((o) => o.id).join(','), rec: m.queryOffers({ sort: 'recommended' }, priced).map((o) => o.featured).join(','), dur: m.queryOffers({ duration: 'short' }, priced).length }; });
   ok('queryOffers: price ascending with unknown last; featured first; duration bucket excludes unknown', r.price === 'istanbul-family,dubai-break,umrah' && r.rec === 'true,true,false' && r.dur === 0, JSON.stringify(r));
+  // review 2026-09-25 §1.9: price buckets are USD amounts, and an offer in another currency never matches one
+  r = await p.evaluate(async () => { const m = await import('./assets/js/foundation.js');
+    const at = (amount, currency) => ({ ...m.OFFER_REGISTRY[0], price: { amount, currency, type: 'from' } });
+    const ids = (range, list) => m.queryOffers({ price: range }, list).length;
+    return { low: ids('0-500', [at(450, 'USD')]), mid: ids('500-1500', [at(1200, 'USD')]), high: ids('1500-', [at(2400, 'USD')]), wrongBucket: ids('0-500', [at(1200, 'USD')]),
+      otherCurrency: ids('0-500', [at(450, 'SDG')]), legacyValue: ids('0-500000', [at(450, 'USD')]), buckets: m.PRICE_BUCKETS.map((x) => x.id).join('|') }; });
+  ok('price filter: USD buckets match, other currencies and out-of-range amounts do not', r.low === 1 && r.mid === 1 && r.high === 1 && r.wrongBucket === 0 && r.otherCurrency === 0 && r.legacyValue === 0 && r.buckets === '0-500|500-1500|1500-', JSON.stringify(r));
   await p.selectOption('form.c-filters select[name=sort]', 'recommended');
   // guide chip applies filter and scrolls
   await p.click('[data-offers=help] .c-chip[data-guide=family]'); await p.waitForTimeout(900);

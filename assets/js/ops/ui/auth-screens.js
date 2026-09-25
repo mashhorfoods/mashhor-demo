@@ -7,6 +7,7 @@
 import { el, render, uid } from '../../core/dom.js';
 import { t } from '../../core/i18n.js';
 import { route } from '../../data/config.js';
+import { safeNext } from '../../account/auth.js';
 import { icon, setButtonState } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { field, applyErrors, setError } from '../../account/ui/auth-screens.js';
@@ -18,9 +19,8 @@ const statusLine = () => el('p', { class: 'c-book__status t-body-sm', role: 'sta
 const submitButton = (labelKey) => el('button', { type: 'submit', class: 'c-btn c-btn--primary c-btn--lg c-btn--block' }, [el('span', { class: 'c-btn__label' }, t(labelKey)), el('span', { class: 'c-btn__spinner', 'aria-hidden': 'true' })]);
 const authError = (error) => (error instanceof OpsAuthError ? t(`auth.err.${['invalid', 'unavailable', 'invalidToken', 'notConfigured', 'rateLimited'].includes(error.code) ? error.code : 'unavailable'}`) : t('auth.err.unavailable'));
 const wrap = (children) => el('div', { class: 'c-auth' }, children);
-const safeNext = (value) => { if (!value || /^[a-z]+:|^\/\/|\\|\.\./i.test(value)) return null; return value.startsWith('admin/') ? value : null; };
-
-function nextFrom(params) { const n = safeNext(params.get('next')); return n ? route(n) : null; }
+// Only a path inside this portal is followed after sign-in (account/auth.js safeNext: no scheme, host or traversal).
+const nextFrom = (params) => safeNext(params.get('next'), 'admin/');
 
 /* ---- Sign in ------------------------------------------------------------ */
 export async function mountOpsSignIn({ root = document, params = new URLSearchParams(location.search) } = {}) {

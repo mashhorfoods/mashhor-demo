@@ -160,7 +160,7 @@ export function queryOffers(query = {}, list = OFFER_REGISTRY) {
     (!destination || o.destination === destination) &&
     (!service || o.services.includes(service)) &&
     (!bucket || bucket.test(o.duration?.nights)) &&
-    (!price || (o.price?.amount != null && priceMatches(o.price.amount, price))) &&
+    (!price || (o.price?.amount != null && priceMatches(o.price, price))) &&
     (!period || (o.travelPeriod && periodMatches(o.travelPeriod, period))));
   const last = (v) => (v == null ? Number.POSITIVE_INFINITY : v);
   const sorters = {
@@ -171,5 +171,9 @@ export function queryOffers(query = {}, list = OFFER_REGISTRY) {
   };
   return out.slice().sort(sorters[sort] ?? sorters.recommended);
 }
-const priceMatches = (amount, range) => { const [lo, hi] = String(range).split('-').map(Number); return amount >= (lo || 0) && (!hi || amount <= hi); };
+/* Price filter buckets, in PRICE_FILTER_CURRENCY. An offer priced in another currency never falls in a bucket:
+   comparing raw amounts across currencies (SDG 500,000 vs USD 500) is exactly the bug this replaced. */
+export const PRICE_FILTER_CURRENCY = 'USD';
+export const PRICE_BUCKETS = [{ id: '0-500', lo: 0, hi: 500 }, { id: '500-1500', lo: 500, hi: 1500 }, { id: '1500-', lo: 1500, hi: null }];
+const priceMatches = (price, range) => { const b = PRICE_BUCKETS.find((x) => x.id === range); return !!b && price.currency === PRICE_FILTER_CURRENCY && price.amount >= b.lo && (b.hi == null || price.amount <= b.hi); };
 const periodMatches = (p, month) => { const m = String(month); return p.from.slice(0, 7) <= m && m <= p.to.slice(0, 7); };

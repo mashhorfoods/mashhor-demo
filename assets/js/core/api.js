@@ -5,8 +5,11 @@
      request(path, { method, body, form, signal, timeoutMs })
    - credentials: 'include' — the session is an HttpOnly cookie the backend
      sets; the browser never sees or stores a credential.
-   - CSRF: the backend's double-submit cookie (`no_csrf`, readable) is echoed
-     in X-CSRF-Token on every non-GET request.
+   - CSRF: the backend's double-submit cookie is echoed in X-CSRF-Token on
+     every non-GET request. Each session has its own cookie — `no_csrf`
+     (customer), `no_supervisor_csrf`, `no_ops_csrf` (staff) — and the one
+     echoed is the one for the route's session (csrfFamily, the same mapping
+     as backend/http.mjs sessionFamily).
    - Errors are ApiError with a customer-safe `code`; response bodies, stack
      traces and internals never reach a screen. The backend may supply its
      own code in { error: { code } } (e.g. 'exists', 'invalid', 'weak').
@@ -27,7 +30,11 @@ const CODES = { 400: 'invalid', 401: 'unauthenticated', 403: 'forbidden', 404: '
 const SAFE_BODY_CODES = new Set(['invalid', 'exists', 'weak', 'invalidToken', 'notFound', 'expired', 'unsupported', 'tooLarge', 'conflict']);
 
 export const apiBase = () => ENV.apiBaseUrl || null;
-export const csrfToken = () => (typeof document === 'undefined' ? null : (document.cookie.match(/(?:^|;\s*)no_csrf=([^;]+)/)?.[1] ?? null));
+const CSRF_COOKIE = { customer: 'no_csrf', supervisor: 'no_supervisor_csrf', staff: 'no_ops_csrf' };
+const STAFF_ROUTE = /^\/(staff|services|operations|bookings|documents|notifications|admin)(\/|$)/;
+export const csrfFamily = (path) => (path.startsWith('/supervisor/') ? 'supervisor' : STAFF_ROUTE.test(path) ? 'staff' : 'customer');
+const cookie = (name) => (typeof document === 'undefined' ? null : (document.cookie.match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`))?.[1] ?? null));
+export const csrfToken = (path = '/') => cookie(CSRF_COOKIE[csrfFamily(path.split('?')[0])]);
 
 export async function request(path, { method = 'GET', body = null, form = null, signal = null, timeoutMs = 12000, headers = {} } = {}) {
   const base = apiBase();
@@ -37,7 +44,7 @@ export async function request(path, { method = 'GET', body = null, form = null, 
   signal?.addEventListener('abort', () => controller.abort('aborted'), { once: true });
   const h = { Accept: 'application/json', ...headers };
   if (body != null) h['Content-Type'] = 'application/json';
-  if (method !== 'GET' && method !== 'HEAD') { const csrf = csrfToken(); if (csrf) h['X-CSRF-Token'] = csrf; }
+  if (method !== 'GET' && method !== 'HEAD') { const csrf = csrfToken(path); if (csrf) h['X-CSRF-Token'] = csrf; }
   let res;
   try {
     res = await fetch(`${base}${path}`, { method, headers: h, body: form ?? (body != null ? JSON.stringify(body) : null), credentials: 'include', signal: controller.signal, cache: 'no-store' });

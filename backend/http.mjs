@@ -87,3 +87,15 @@ export function rateLimit(key, { limit, windowMs }) {
   if (buckets.size > 50000) { for (const [k, v] of buckets) if (t - v.start > windowMs) buckets.delete(k); }
   return b.count > limit ? Math.ceil((b.start + windowMs - t) / 1000) : 0;
 }
+
+// Which session a route belongs to — and so which session's CSRF token a write to it must carry. The browser
+// holds up to three independent sessions (customer, supervisor, staff); a write is checked against the session of
+// the route it targets, never against whichever session happens to be live first. The same mapping lives in
+// assets/js/core/api.js (csrfFamily), which picks the matching cookie to echo; keep the two in step.
+const STAFF_ROUTE = /^\/(staff|services|operations|bookings|documents|notifications|admin)(\/|$)/;
+export const sessionFamily = (path) => {
+  if (path === '/admin/attribution/reassign') return null; // legacy bearer-token route: no cookie session
+  if (path.startsWith('/supervisor/')) return 'supervisor';
+  if (STAFF_ROUTE.test(path)) return 'staff';
+  return 'customer';
+};

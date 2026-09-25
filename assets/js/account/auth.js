@@ -107,12 +107,15 @@ export const isAuthenticated = () => getSession().authenticated;
 /* ---- Booking continuity: where to go back to after signing in --------------
    `next` is accepted only as a path inside this site: no scheme, no host, no
    protocol-relative form, no traversal. Anything else falls back to the
-   account home. */
-export function safeNext(value) {
+   account home. `area` (e.g. 'admin/', 'supervisor/') further limits it to
+   one portal; both a route ('admin/tasks/') and a full path
+   ('/mashhor-demo/admin/tasks/?x=1', what the portals' `here()` passes) are
+   accepted. */
+export function safeNext(value, area = '') {
   if (!value || typeof value !== 'string') return null;
   if (/^[a-z]+:|^\/\/|\\|\.\./i.test(value)) return null;
   let path = value.startsWith('/') ? value : route(value);
-  if (!path.startsWith(BASE)) return null;
+  if (!path.startsWith(BASE + area)) return null;
   if (!/^[\w\-./?=&%+:]*$/.test(path)) return null;
   return path;
 }

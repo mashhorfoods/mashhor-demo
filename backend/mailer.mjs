@@ -36,11 +36,13 @@ export function registerMailProvider(p) { registry.set(p.id, p); return p; }
 export function mailProviderFor(id) { return registry.get(id) ?? null; }
 
 /* ---- template rendering: substitutes {{var}} into an ALREADY-sanitised template body (staff.mjs's
-   sanitizeTemplateBody strips tags at storage time, §7/§14) — payload values are escaped too, so a
-   customer-controlled value (a name, a reason) can never reintroduce markup through a placeholder. ---- */
-const escapeHtml = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+   sanitizeTemplateBody strips tags at storage time, §7/§14). Payload values get the same treatment — tags are
+   stripped, so a customer-controlled value (a name, a reason) can never reintroduce markup through a placeholder.
+   Nothing is entity-encoded: the message is sent as text/plain (see the SMTP provider below), where "&amp;" would
+   reach the recipient literally. ---- */
+const stripTags = (s) => String(s ?? '').replace(/<[^>]*>/g, '');
 export function renderTemplate(body, payload) {
-  return String(body ?? '').replace(/\{\{(\w+)\}\}/g, (_, k) => (k in (payload ?? {}) ? escapeHtml(payload[k]) : ''));
+  return String(body ?? '').replace(/\{\{(\w+)\}\}/g, (_, k) => (k in (payload ?? {}) ? stripTags(payload[k]) : ''));
 }
 
 /* ---- enqueue: durable, optionally idempotent (§5) -------------------------------------------------------------- */
