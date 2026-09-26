@@ -10,7 +10,7 @@ import { route } from '../../data/config.js';
 import { toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, notFoundBlock, actionForm, debouncedRun, dataTable, block, rows, busyButton, publishStatusBadge, unpublishedChangesNote, dateTime } from './shell.js';
+import { mountOpsPortal, loadRegion, pageTitle, notFoundState, actionForm, debouncedRun, dataTable, block, rows, busyButton, publishStatusBadge, unpublishedChangesNote, dateTime } from './shell.js';
 
 const columns = [
   { labelKey: 'ops.destinations.col.name', render: (d) => el('a', { class: 'c-svp-link', href: route(`admin/destinations/?id=${encodeURIComponent(d.id)}`) }, d.nameEn || d.nameAr || d.id) },
@@ -62,7 +62,7 @@ export function mountOpsDestinations({ root = document, params = new URLSearchPa
 function mountDestinationDetail({ root, id }) {
   return mountOpsPortal({ root, id: 'destinations', head: 'page.ops.destinationDetail', paint: async ({ main, can }) => {
     const d = await opsData.destinationAdmin(id);
-    if (!d) { render(main, notFoundBlock(route('admin/destinations/'), t('ops.destinations.title'))); return { destination: null }; }
+    if (!d) { render(main, notFoundState(route('admin/destinations/'), t('ops.destinations.title'))); return { destination: null }; }
     const refresh = async () => render(main, await view());
 
     async function view(preloaded) {

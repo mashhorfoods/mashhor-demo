@@ -7,7 +7,7 @@ import { t } from '../../core/i18n.js';
 import { icon, toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, actionForm, block, errorText } from './shell.js';
+import { mountOpsPortal, loadRegion, pageTitle, actionForm, block, errorText, busyButton } from './shell.js';
 
 // Must match backend/staff.mjs PERMISSIONS exactly (tests/ops-portal.mjs asserts it): a permission missing here has
 // no checkbox, and saving would silently revoke it.
@@ -33,8 +33,11 @@ export function mountOpsStaff({ root = document } = {}) {
     })() : null;
 
     const row = (staff) => {
-      const activeBtn = el('button', { type: 'button', class: `c-btn c-btn--sm ${staff.active ? 'c-btn--tertiary' : 'c-btn--primary'}` }, t(staff.active ? 'ops.staff.deactivate' : 'ops.staff.activate'));
-      activeBtn.addEventListener('click', async () => { activeBtn.disabled = true; try { await opsData.setStaffActive(staff.id, !staff.active); toast({ title: t('ops.staff.updated'), variant: 'success', duration: 3000 }); await region.run(); } catch (error) { activeBtn.disabled = false; toast({ title: errorText(error?.code), variant: 'error' }); } });
+      // A failed save says why (toast) and throws on, so the button re-enables for a retry.
+      const failed = (error) => { toast({ title: errorText(error?.code), variant: 'error' }); throw error; };
+      const activeBtn = busyButton(t(staff.active ? 'ops.staff.deactivate' : 'ops.staff.activate'), staff.active ? 'tertiary' : 'primary', async () => {
+        await opsData.setStaffActive(staff.id, !staff.active).catch(failed); toast({ title: t('ops.staff.updated'), variant: 'success', duration: 3000 }); await region.run();
+      });
 
       let permsControl = null;
       if (staff.role === 'ops' && can('staff.manage')) {
@@ -42,16 +45,13 @@ export function mountOpsStaff({ root = document } = {}) {
           const checkbox = el('input', { type: 'checkbox', value: p, ...(staff.permissions.includes(p) ? { checked: true } : {}) });
           return el('li', {}, el('label', { class: 'l-cluster l-cluster--8' }, [checkbox, el('span', {}, p)]));
         }));
-        const saveBtn = el('button', { type: 'button', class: 'c-btn c-btn--tertiary c-btn--sm' }, t('ops.staff.savePermissions'));
-        saveBtn.addEventListener('click', async () => {
+        const saveBtn = busyButton(t('ops.staff.savePermissions'), 'tertiary', async () => {
           // A permission this screen doesn't offer (a newer backend) is carried over untouched, never revoked by a save.
           const kept = staff.permissions.filter((p) => !OPS_PERMISSIONS.includes(p));
           const chosen = [...kept, ...[...list.querySelectorAll('input[type=checkbox]:checked')].map((c) => c.value)];
-          saveBtn.disabled = true;
-          try { await opsData.setStaffPermissions(staff.id, chosen); staff.permissions = chosen; toast({ title: t('ops.staff.updated'), variant: 'success', duration: 3000 }); }
-          catch (error) { toast({ title: errorText(error?.code), variant: 'error' }); } // the checkboxes keep what was chosen, so a retry is one click
-          saveBtn.disabled = false;
-        });
+          // On failure the checkboxes keep what was chosen, so a retry is one click.
+          await opsData.setStaffPermissions(staff.id, chosen).catch(failed); staff.permissions = chosen; toast({ title: t('ops.staff.updated'), variant: 'success', duration: 3000 });
+        }, { reusable: true });
         permsControl = el('div', { class: 'l-stack l-stack--8' }, [list, saveBtn]);
       }
 

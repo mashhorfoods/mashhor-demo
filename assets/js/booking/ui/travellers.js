@@ -7,26 +7,17 @@
    ========================================================================= */
 
 import { el, uid } from '../../core/dom.js';
-import { t, pick } from '../../core/i18n.js';
-import { icon, setButtonState } from '../../components/ui.js';
+import { t } from '../../core/i18n.js';
+import { setButtonState } from '../../components/ui.js';
 import { loadJourney, setTravellers, stepUrl, guard, update } from '../journey.js';
 import { travellerSlots, travellerFields, CONTACT_FIELDS, validateTraveller, validateContact } from '../travellers.js';
 import { totalTravellers } from '../pricing.js';
-import { devNotice, progress, tripCard, recoveryState, put, setHead, isAr } from './shared.js';
+import { devNotice, progress, tripCard, recoveryState, put, setHead } from './shared.js';
 import { isAuthenticated } from '../../account/auth.js';
+import { specField, setError, clearErrors } from '../../core/portal-form.js';
 import { customer } from '../../account/customer.js';
 
-function field(f, prefix, value = '') {
-  const id = `${prefix}-${f.id}`;
-  const control = f.type === 'select'
-    ? el('select', { class: 'c-field__control', id, name: f.id, required: f.required }, [el('option', { value: '' }, '—'), ...f.options.map((o) => el('option', { value: o.value, selected: o.value === value }, isAr() ? o.labelAr : o.labelEn))])
-    : el('input', { class: 'c-field__control', id, name: f.id, type: f.type, value, required: f.required, autocomplete: f.autocomplete ?? 'off', ...(f.latin ? { dir: 'ltr', pattern: "[A-Za-z' -]+" } : {}), ...(f.document ? { dir: 'ltr', pattern: '[A-Za-z0-9]+' } : {}) });
-  return el('div', { class: `c-field${f.id === 'passport' ? ' is-full' : ''}`, dataset: { field: f.id } }, [
-    el('label', { class: 'c-field__label', for: id }, [t(f.label), f.required ? el('span', { class: 'c-field__required', 'aria-hidden': 'true' }, '*') : null]),
-    control,
-    (f.help || f.latin) ? el('p', { class: 'c-field__help', id: `${id}-help` }, t(f.help ?? 'bk.tr.latinHelp')) : null,
-  ]);
-}
+const field = (f, prefix, value = '') => specField(f, prefix, value, { autofill: true, patterns: true, className: f.id === 'passport' ? 'is-full' : '' });
 const readForm = (form) => Object.fromEntries(new FormData(form));
 
 export function mountTravellers({ root = document } = {}) {
@@ -62,17 +53,9 @@ export function mountTravellers({ root = document } = {}) {
   const status = el('p', { class: 'c-book__status t-body-sm', role: 'status', 'aria-live': 'polite' });
   const submit = el('button', { type: 'button', class: 'c-btn c-btn--primary c-btn--lg' }, [el('span', { class: 'c-btn__label' }, t(mode === 'search' ? 'bk.tr.continue' : 'bk.tr.continueReview')), el('span', { class: 'c-btn__spinner', 'aria-hidden': 'true' })]);
 
-  const mark = (form, fieldId, key) => {
-    const control = form.querySelector(`[name="${fieldId}"]`); if (!control) return null;
-    const host = control.closest('.c-field'); host.querySelector('.c-field__error')?.remove();
-    const id = `${control.id}-error`;
-    host.append(el('p', { class: 'c-field__error', id, role: 'alert' }, [icon('no-alert', { size: 'sm' }), el('span', {}, t(key))]));
-    control.setAttribute('aria-invalid', 'true'); control.setAttribute('aria-describedby', id);
-    return control;
-  };
-  const clearAll = () => root.querySelectorAll('.c-field__error').forEach((n) => n.remove()) || root.querySelectorAll('[aria-invalid]').forEach((n) => { n.removeAttribute('aria-invalid'); n.removeAttribute('aria-describedby'); });
+  const mark = (form, fieldId, key) => setError(form, fieldId, t(key));
   const validate = () => {
-    clearAll(); let first = null; let count = 0;
+    [...forms.map((f) => f.form), contactForm].forEach(clearErrors); let first = null; let count = 0;
     const travellers = {};
     for (const { slot, fields, form } of forms) {
       const values = readForm(form); travellers[slot.id] = { type: slot.type, ...values };

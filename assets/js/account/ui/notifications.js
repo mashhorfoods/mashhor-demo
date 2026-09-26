@@ -5,10 +5,10 @@ import { dateShort, time } from '../../core/format.js';
 import { route } from '../../data/config.js';
 import { icon, setButtonState } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
-import { customer, unreadCount } from '../customer.js';
+import { customer } from '../customer.js';
 import { ENV } from '../../data/env.js';
 import { isAuthenticated } from '../auth.js';
-import { mountAccount, loadRegion, pageTitle } from './shell.js';
+import { mountAccount, loadRegion, pageTitle, unreadCount } from './shell.js';
 
 const KIND_ICON = { booking: 'no-booking', payment: 'no-payment', trip: 'no-location', document: 'no-documents', visa: 'no-visa', support: 'no-support' };
 

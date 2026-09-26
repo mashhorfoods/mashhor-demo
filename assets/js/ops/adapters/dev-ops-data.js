@@ -10,6 +10,7 @@
    QA switches (sessionStorage): no.dev.ops = 'error' | 'slow' | 'empty'
    ========================================================================= */
 import { registerOpsDataAdapter, RULE_STATUSES } from '../data.js';
+import { paged } from '../../core/adapter-helpers.js';
 
 const read = (k) => { try { return sessionStorage.getItem(k); } catch { return null; } };
 const wait = async () => { await new Promise((r) => setTimeout(r, read('no.dev.ops') === 'slow' ? 2000 : 200)); if (read('no.dev.ops') === 'error') { const e = new Error('dev outage'); e.code = 'unavailable'; throw e; } };
@@ -116,7 +117,6 @@ let devRules = [
 ];
 let devRuleHistory = {};
 
-const paged = (all, { page = 1, pageSize = 20 } = {}) => { const size = Math.min(100, Math.max(1, pageSize)); const p = Math.max(1, page); const slice = all.slice((p - 1) * size, p * size); return { items: slice, page: p, pageSize: size, total: all.length, nextPage: p * size < all.length ? p + 1 : null }; };
 const bookingById = (id) => BOOKINGS.find((b) => b.id === id);
 
 export const DEV_OPS_DATA = registerOpsDataAdapter({

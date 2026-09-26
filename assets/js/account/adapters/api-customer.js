@@ -13,10 +13,10 @@
 
 import { registerCustomerAdapter } from '../customer.js';
 import { get, post, patch, del, upload, ApiError } from '../../core/api.js';
+import { list, pageOf } from '../../core/adapter-helpers.js';
 import { ENV } from '../../data/env.js';
 
 const notFoundNull = async (p) => { try { return await p; } catch (e) { if (e?.code === 'notFound') return null; throw e; } };
-const list = (data, key) => (Array.isArray(data) ? data : data?.[key] ?? data?.items ?? []);
 
 const nCustomer = (c) => ({ id: c.id, name: c.name ?? '', email: c.email ?? '', phone: c.phone ?? '', locale: c.locale ?? 'ar', image: c.image ?? null, supervisorId: c.supervisorId ?? c.attribution?.supervisorId ?? null, attribution: c.attribution ?? null, acceptance: c.acceptance ?? null, createdAt: c.createdAt ?? null });
 const nTrip = (t) => ({ id: t.id, customerId: t.customerId, titleAr: t.titleAr ?? t.title ?? '', titleEn: t.titleEn ?? t.title ?? '', destination: t.destination ?? { code: '', cityAr: '', cityEn: '', countryAr: '', countryEn: '' }, startDate: t.startDate ?? null, endDate: t.endDate ?? null, services: t.services ?? [], status: t.status ?? 'upcoming', bookingIds: t.bookingIds ?? [], travellers: t.travellers ?? null, supervisorId: t.supervisorId ?? null, createdAt: t.createdAt ?? null, needsPayment: !!t.needsPayment });
@@ -25,7 +25,6 @@ const nDocument = (d) => ({ id: d.id, bookingId: d.bookingId ?? null, tripId: d.
 const nPayment = (p) => ({ id: p.id, bookingId: p.bookingId ?? null, at: p.at ?? p.createdAt ?? null, amount: Number(p.amount ?? 0), currency: p.currency ?? '', status: p.status ?? 'pending', reference: p.reference ?? '', methodAr: p.methodAr ?? p.method ?? '', methodEn: p.methodEn ?? p.method ?? '' });
 const nNotification = (n) => ({ id: n.id, kind: n.kind ?? 'booking', at: n.at ?? n.createdAt ?? null, read: !!n.read, titleAr: n.titleAr ?? n.title ?? '', titleEn: n.titleEn ?? n.title ?? '', textAr: n.textAr ?? n.text ?? '', textEn: n.textEn ?? n.text ?? '', href: n.href ?? null, bookingId: n.bookingId ?? null });
 const nTraveller = (t) => ({ id: t.id, firstName: t.firstName ?? '', lastName: t.lastName ?? '', dob: t.dob ?? '', gender: t.gender ?? '', nationality: t.nationality ?? '', passport: t.passport ?? '', passportExpiry: t.passportExpiry ?? '' });
-const nPage = (data, page) => ({ items: list(data, 'items').map(nPayment), page: data?.page ?? page.page ?? 1, pageSize: data?.pageSize ?? page.pageSize ?? ENV.paymentApi?.pageSize ?? 20, total: data?.total ?? null, nextPage: data?.nextPage ?? null });
 
 export const API_CUSTOMER = registerCustomerAdapter({
   id: 'api-customer', dev: false,
@@ -43,7 +42,7 @@ export const API_CUSTOMER = registerCustomerAdapter({
   },
   async documentUrl(_m, id) { const data = await get(`/me/documents/${encodeURIComponent(id)}/url`); if (!/^https:\/\//.test(data?.url ?? '') && ENV.environment === 'production') throw new ApiError('invalid'); return { url: data.url, expiresAt: data.expiresAt ?? null }; },
   async deleteDocument(_m, id) { await del(`/me/documents/${encodeURIComponent(id)}`); return true; },
-  async payments(_m, page = { page: 1 }) { const size = page.pageSize ?? ENV.paymentApi?.pageSize ?? 20; const data = await get(`/me/payments?page=${encodeURIComponent(page.page ?? 1)}&pageSize=${encodeURIComponent(size)}`); const out = nPage(data, { ...page, pageSize: size }); out.items = out.items.map((p) => ({ ...p, booking: list(data, 'items').find((x) => x.id === p.id)?.booking ? nBooking(list(data, 'items').find((x) => x.id === p.id).booking) : null })); return out; },
+  async payments(_m, page = { page: 1 }) { const size = page.pageSize ?? ENV.paymentApi?.pageSize ?? 20; const data = await get(`/me/payments?page=${encodeURIComponent(page.page ?? 1)}&pageSize=${encodeURIComponent(size)}`); return pageOf(data, (p) => ({ ...nPayment(p), booking: p.booking ? nBooking(p.booking) : null }), { ...page, pageSize: size }); },
   async notifications() { return list(await get('/me/notifications'), 'notifications').map(nNotification); },
   async markRead(_m, ids = null) { const data = await post('/me/notifications/read', ids ? { ids } : { all: true }); return list(data, 'notifications').map(nNotification); },
   async travellers() { return list(await get('/me/travellers'), 'travellers').map(nTraveller); },

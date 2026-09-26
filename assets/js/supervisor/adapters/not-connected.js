@@ -7,12 +7,10 @@
    ========================================================================= */
 import { registerSupervisorAuthProvider, SupervisorAuthError } from '../auth.js';
 import { registerSupervisorDataAdapter } from '../data.js';
-import { ApiError } from '../../core/api.js';
+import { notConnectedAuth } from '../../core/portal-session.js';
+import { notConnectedData } from '../../core/adapter-helpers.js';
 
-const authFail = async () => { throw new SupervisorAuthError('notConfigured'); };
-const dataFail = async () => { throw new ApiError('notConfigured'); };
-const AUTH_METHODS = ['signIn', 'verify', 'refresh', 'requestReset', 'resetPassword', 'changePassword'];
 const DATA_METHODS = ['profile', 'updateProfile', 'customers', 'customer', 'bookings', 'booking', 'leads', 'updateLeadStatus', 'revenue', 'performance', 'commissions', 'notifications', 'markRead'];
 
-export const NOT_CONNECTED_SUPERVISOR_AUTH = registerSupervisorAuthProvider({ id: 'not-connected', dev: false, signOut: async () => {}, ...Object.fromEntries(AUTH_METHODS.map((m) => [m, authFail])) });
-export const NOT_CONNECTED_SUPERVISOR_DATA = registerSupervisorDataAdapter({ id: 'not-connected', dev: false, ...Object.fromEntries(DATA_METHODS.map((m) => [m, dataFail])) });
+export const NOT_CONNECTED_SUPERVISOR_AUTH = registerSupervisorAuthProvider(notConnectedAuth(SupervisorAuthError));
+export const NOT_CONNECTED_SUPERVISOR_DATA = registerSupervisorDataAdapter(notConnectedData(DATA_METHODS));

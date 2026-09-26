@@ -21,6 +21,7 @@ import { authProvider, AuthError } from '../auth.js';
 import { DEV_CUSTOMER } from './dev-auth.js';
 import { ENV } from '../../data/env.js';
 import { ApiError } from '../../core/api.js';
+import { paged } from '../../core/adapter-helpers.js';
 
 const read = (k) => { try { return sessionStorage.getItem(k); } catch { return null; } };
 const wait = async () => { await new Promise((r) => setTimeout(r, read('no.dev.account') === 'slow' ? 2500 : 200)); if (read('no.dev.account') === 'error') throw new Error('development customer data: simulated outage'); };
@@ -111,10 +112,8 @@ export const DEV_CUSTOMER_ADAPTER = registerCustomerAdapter({
   async documents(token) { await wait(); const { data } = await scope(token); return clone(data.documents.map((d) => ({ kind: 'issued', ...d, booking: data.bookings.find((b) => b.id === d.bookingId) ?? null, trip: data.trips.find((t) => t.id === d.tripId) ?? null }))); },
   async payments(token, page = { page: 1 }) {
     await wait(); const { data } = await scope(token);
-    const size = page.pageSize ?? ENV.paymentApi?.pageSize ?? 20; const n = Math.max(1, page.page ?? 1);
     const all = [...data.payments].sort((a, b) => String(b.at).localeCompare(String(a.at))).map((p) => ({ ...p, booking: data.bookings.find((b) => b.id === p.bookingId) ?? null }));
-    const items = all.slice((n - 1) * size, n * size);
-    return clone({ items, page: n, pageSize: size, total: all.length, nextPage: n * size < all.length ? n + 1 : null });
+    return clone(paged(all, { page: page.page ?? 1, pageSize: page.pageSize ?? ENV.paymentApi?.pageSize ?? 20 }, Infinity));
   },
   /* Documents a customer uploads live in this browser (development). The "signed URL" is a data: URL with an expiry the viewer honours. */
   async uploadDocument(token, { file, title, type = 'customer' }) {

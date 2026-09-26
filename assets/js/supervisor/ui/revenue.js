@@ -5,15 +5,12 @@ import { el } from '../../core/dom.js';
 import { t } from '../../core/i18n.js';
 import { stateBlock } from '../../components/states.js';
 import { supervisorData } from '../data.js';
-import { mountSupervisorPortal, loadRegion, pageTitle, metricCard, amount, block, revenueGroups } from './shell.js';
-
-const PERIODS = [['', 'svp.period.all'], ['today', 'svp.period.today'], ['week', 'svp.period.week'], ['month', 'svp.period.month']];
+import { mountSupervisorPortal, loadRegion, pageTitle, metricCard, amount, block, revenueGroups, periodSelect } from './shell.js';
 
 export function mountSupervisorRevenue({ root = document } = {}) {
   return mountSupervisorPortal({ root, id: 'revenue', head: 'page.supervisor.revenue', paint: async ({ main }) => {
     const host = el('div', { dataset: { region: 'revenue' } });
-    const filter = el('select', { class: 'c-field__control c-svp-filter__select', 'aria-label': t('svp.period.label') }, PERIODS.map(([v, k]) => el('option', { value: v }, t(k))));
-    filter.addEventListener('change', () => region.run());
+    const filter = periodSelect(() => region.run());
     main.replaceChildren(pageTitle('svp.revenue.title', 'svp.revenue.text'), el('div', { class: 'c-svp-filter' }, [filter]), host);
     const region = loadRegion(host, () => supervisorData.revenue({ period: filter.value || null }), {
       empty: () => stateBlock({ variant: 'empty', iconName: 'no-payment', headingLevel: 2, title: t('svp.revenue.empty.title'), text: t('svp.revenue.empty.text') }),

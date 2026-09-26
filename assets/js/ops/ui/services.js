@@ -7,7 +7,7 @@ import { t, pick } from '../../core/i18n.js';
 import { route } from '../../data/config.js';
 import { icon, toast } from '../../components/ui.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, notFoundBlock, actionForm, dataTable, block, rows, busyButton } from './shell.js';
+import { mountOpsPortal, loadRegion, pageTitle, notFoundState, actionForm, dataTable, block, rows, busyButton } from './shell.js';
 
 const columns = [
   { labelKey: 'ops.services.col.id', render: (s) => el('a', { class: 'c-svp-link', href: route(`admin/services/?id=${encodeURIComponent(s.id)}`) }, s.id) },
@@ -32,7 +32,7 @@ export function mountOpsServices({ root = document, params = new URLSearchParams
 function mountServiceDetail({ root, id }) {
   return mountOpsPortal({ root, id: 'services', head: 'page.ops.serviceDetail', paint: async ({ main, can }) => {
     const s = await opsData.service(id);
-    if (!s) { render(main, notFoundBlock(route('admin/services/'), t('ops.services.title'))); return { service: null }; }
+    if (!s) { render(main, notFoundState(route('admin/services/'), t('ops.services.title'))); return { service: null }; }
     const refresh = async () => render(main, await view());
 
     async function view(preloaded) {

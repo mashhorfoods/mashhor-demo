@@ -11,7 +11,7 @@ import { route } from '../../data/config.js';
 import { icon, toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData, RULE_STATUSES } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, notFoundBlock, actionForm, emptyNote, dataTable, ruleStatusBadge, dateTime, block, rows } from './shell.js';
+import { mountOpsPortal, loadRegion, pageTitle, notFoundState, actionForm, emptyNote, dataTable, ruleStatusBadge, dateTime, block, rows } from './shell.js';
 
 const columns = [
   { labelKey: 'ops.rules.col.name', render: (r) => el('a', { class: 'c-svp-link', href: route(`admin/business-rules/?id=${encodeURIComponent(r.ruleId)}`) }, r.name) },
@@ -61,7 +61,7 @@ export function mountOpsBusinessRules({ root = document, params = new URLSearchP
 function mountRuleDetail({ root, id }) {
   return mountOpsPortal({ root, id: 'rules', head: 'page.ops.ruleDetail', paint: async ({ main, can }) => {
     const r = await opsData.rule(id);
-    if (!r) { render(main, notFoundBlock(route('admin/business-rules/'), t('ops.rules.title'))); return { rule: null }; }
+    if (!r) { render(main, notFoundState(route('admin/business-rules/'), t('ops.rules.title'))); return { rule: null }; }
     const refresh = async () => render(main, await view());
 
     async function view(preloaded) {

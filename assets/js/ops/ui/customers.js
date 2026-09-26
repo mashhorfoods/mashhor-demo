@@ -8,7 +8,7 @@ import { route } from '../../data/config.js';
 import { icon, toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, notFoundBlock, actionForm, debouncedRun, emptyNote, dataTable, opsStatusBadge, payBadge, dateTime, block, rows } from './shell.js';
+import { mountOpsPortal, loadRegion, pageTitle, notFoundState, actionForm, debouncedRun, emptyNote, dataTable, opsStatusBadge, payBadge, dateTime, amount, block, rows } from './shell.js';
 
 const columns = [
   { labelKey: 'ops.customers.col.name', render: (c) => el('a', { class: 'c-svp-link', href: route(`admin/customers/?id=${encodeURIComponent(c.id)}`) }, c.name) },
@@ -38,7 +38,7 @@ export function mountOpsCustomers({ root = document, params = new URLSearchParam
 function mountCustomerDetail({ root, id }) {
   return mountOpsPortal({ root, id: 'customers', head: 'page.ops.customerDetail', paint: async ({ main, can }) => {
     const c = await opsData.customer(id);
-    if (!c) { render(main, notFoundBlock(route('admin/customers/'), t('ops.customers.title'))); return { customer: null }; }
+    if (!c) { render(main, notFoundState(route('admin/customers/'), t('ops.customers.title'))); return { customer: null }; }
     const refresh = async () => render(main, await view());
 
     async function view(preloaded) {
@@ -73,7 +73,7 @@ function mountCustomerDetail({ root, id }) {
         : emptyNote('ops.table.empty'), { id: 'ops-cus-bookings' }));
 
       if (can('payment.view')) nodes.push(block(t('ops.customers.payments.title'), fresh.payments.length
-        ? el('ul', { class: 'c-svp-mini-list', role: 'list' }, fresh.payments.map((p) => el('li', {}, [el('span', {}, `${p.amount} ${p.currency}`), payBadge(p.status), el('span', { class: 't-body-sm t-muted' }, dateTime(p.at))])))
+        ? el('ul', { class: 'c-svp-mini-list', role: 'list' }, fresh.payments.map((p) => el('li', {}, [el('span', {}, amount(p.amount, p.currency)), payBadge(p.status), el('span', { class: 't-body-sm t-muted' }, dateTime(p.at))])))
         : emptyNote('ops.table.empty'), { id: 'ops-cus-payments' }));
 
       if (can('document.view')) nodes.push(block(t('ops.customers.documents.title'), fresh.documents.length

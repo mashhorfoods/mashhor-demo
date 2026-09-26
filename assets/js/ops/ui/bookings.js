@@ -9,7 +9,7 @@ import { route } from '../../data/config.js';
 import { icon, toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData, BOOKING_SUPPLIER_STATUSES } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, notFoundBlock, actionForm, emptyNote, busyButton, dataTable, bookingStatusBadge, opsStatusBadge, payBadge, supplierStatusBadge, taskStatusBadge, amount, dateTime, block, rows } from './shell.js';
+import { mountOpsPortal, loadRegion, pageTitle, notFoundState, actionForm, emptyNote, busyButton, dataTable, bookingStatusBadge, opsStatusBadge, payBadge, supplierStatusBadge, taskStatusBadge, amount, dateTime, block, rows } from './shell.js';
 
 const columns = [
   { labelKey: 'ops.bookings.col.id', render: (b) => el('a', { class: 'c-svp-link', href: route(`admin/bookings/?id=${encodeURIComponent(b.id)}`) }, el('bdi', { dir: 'ltr' }, b.id)) },
@@ -39,7 +39,7 @@ export function mountOpsBookings({ root = document, params = new URLSearchParams
 function mountBookingDetail({ root, id }) {
   return mountOpsPortal({ root, id: 'bookings', head: 'page.ops.bookingDetail', paint: async ({ main, can }) => {
     const b = await opsData.booking(id);
-    if (!b) { render(main, notFoundBlock(route('admin/bookings/'), t('ops.bookings.title'))); return { booking: null }; }
+    if (!b) { render(main, notFoundState(route('admin/bookings/'), t('ops.bookings.title'))); return { booking: null }; }
     const refresh = async () => render(main, await view());
 
     async function view(preloaded) {

@@ -3,8 +3,9 @@
    set them; the SLA duration for any of this is one of the business decisions Stage 15 leaves unresolved (§21). Stage 15 */
 import { el } from '../../core/dom.js';
 import { t } from '../../core/i18n.js';
-import { icon, toast } from '../../components/ui.js';
+import { icon } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
+import { statusSelect } from '../../core/portal-ui.js';
 import { opsData, ESCALATION_STATUSES } from '../data.js';
 import { mountOpsPortal, loadRegion, pageTitle, actionForm, statusFilterSelect, escalationStatusBadge, dateTime, block } from './shell.js';
 
@@ -16,9 +17,8 @@ export function mountOpsEscalations({ root = document } = {}) {
     const filter = statusFilterSelect('ops.escalations.filterLabel', ESCALATION_STATUSES, 'ops.escalation.status', () => region.run());
 
     const row = (esc) => {
-      const statusSelect = el('select', { class: 'c-field__control c-field__control--sm', 'aria-label': t('ops.escalations.statusLabel'), ...(can('task.manage') ? {} : { disabled: true }) },
-        ESCALATION_STATUSES.map((s) => el('option', { value: s, ...(s === esc.status ? { selected: true } : {}) }, t(`ops.escalation.status.${s}`))));
-      statusSelect.addEventListener('change', async () => { const next = statusSelect.value; statusSelect.disabled = true; try { await opsData.updateEscalationStatus(esc.id, next); toast({ title: t('ops.escalations.updated'), variant: 'success', duration: 3000 }); } catch { toast({ title: t('ops.escalations.updateFailed'), variant: 'warning', duration: 5000 }); statusSelect.value = esc.status; } statusSelect.disabled = false; });
+      const status = statusSelect({ statuses: ESCALATION_STATUSES, current: esc.status, optionKey: (s) => `ops.escalation.status.${s}`, labelKey: 'ops.escalations.statusLabel', disabled: !can('task.manage'),
+        save: (next) => opsData.updateEscalationStatus(esc.id, next), doneKey: 'ops.escalations.updated', failKey: 'ops.escalations.updateFailed' });
       return el('article', { class: 'c-card c-svp-lead', dataset: { escalation: esc.id, escalationStatus: esc.status } }, [
         el('div', { class: 'c-svp-lead__icon' }, icon('no-alert', { size: 'lg' })),
         el('div', { class: 'c-svp-lead__body' }, [
@@ -26,7 +26,7 @@ export function mountOpsEscalations({ root = document } = {}) {
           el('p', { class: 't-body-sm t-muted' }, [esc.bookingId ? `${t('ops.bookings.col.id')}: ${esc.bookingId} · ` : '', esc.assignedTeam ? `${esc.assignedTeam} · ` : '', dateTime(esc.createdAt)]),
           el('div', { class: 'l-cluster l-cluster--8' }, [escalationStatusBadge(esc.status), el('span', { class: 'c-badge c-badge--outline', dataset: { severity: esc.severity } }, t(`ops.priority.${esc.severity}`) || esc.severity)]),
         ]),
-        statusSelect,
+        status,
       ]);
     };
 

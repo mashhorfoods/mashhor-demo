@@ -9,14 +9,14 @@ import { setSession } from '../../components/session.js';
 import { customer } from '../customer.js';
 import { changePassword } from '../auth.js';
 import { mountAccount, block, pageTitle, rows } from './shell.js';
-import { field, applyErrors, setError } from './auth-screens.js';
+import { field, applyErrors, setError, statusLine } from '../../core/portal-form.js';
 
 const PHONE = /^\+?[0-9 ()-]{7,20}$/;
 
 export function mountSettings({ root = document } = {}) {
   return mountAccount({ root, id: 'settings', head: 'page.account.settings', paint: async ({ customer: me, main }) => {
     const p = uid('st');
-    const status = el('p', { class: 'c-book__status t-body-sm', role: 'status', 'aria-live': 'polite' });
+    const status = statusLine();
     const save = el('button', { type: 'submit', class: 'c-btn c-btn--primary' }, [el('span', { class: 'c-btn__label' }, t('acct.set.save')), el('span', { class: 'c-btn__spinner', 'aria-hidden': 'true' })]);
     const lang = el('select', { class: 'c-field__control', id: `${p}-locale`, name: 'locale' }, [el('option', { value: 'ar', selected: me.locale === 'ar' }, 'العربية'), el('option', { value: 'en', selected: me.locale === 'en' }, 'English')]);
     const profile = el('form', { class: 'l-stack l-stack--16', novalidate: true, dataset: { form: 'profile' } }, [
@@ -42,7 +42,7 @@ export function mountSettings({ root = document } = {}) {
       setButtonState(save, 'idle');
     });
 
-    const pwStatus = el('p', { class: 'c-book__status t-body-sm', role: 'status', 'aria-live': 'polite' });
+    const pwStatus = statusLine();
     const pwSave = el('button', { type: 'submit', class: 'c-btn c-btn--secondary' }, [el('span', { class: 'c-btn__label' }, t('acct.set.changePassword')), el('span', { class: 'c-btn__spinner', 'aria-hidden': 'true' })]);
     const pw = el('form', { class: 'l-stack l-stack--16', novalidate: true, dataset: { form: 'password' } }, [
       field({ id: `${p}-current`, name: 'current', labelKey: 'auth.field.passwordCurrent', type: 'password', autocomplete: 'current-password', dir: 'ltr', required: false }),

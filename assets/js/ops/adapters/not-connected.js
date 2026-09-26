@@ -6,14 +6,12 @@
    ========================================================================= */
 import { registerOpsAuthProvider, OpsAuthError } from '../auth.js';
 import { registerOpsDataAdapter } from '../data.js';
-import { ApiError } from '../../core/api.js';
+import { notConnectedAuth } from '../../core/portal-session.js';
+import { notConnectedData } from '../../core/adapter-helpers.js';
 
-const authFail = async () => { throw new OpsAuthError('notConfigured'); };
-const dataFail = async () => { throw new ApiError('notConfigured'); };
-const AUTH_METHODS = ['signIn', 'verify', 'refresh', 'requestReset', 'resetPassword', 'changePassword'];
 const DATA_METHODS = ['bookings', 'booking', 'transitionBooking', 'assignBooking', 'addBookingNote', 'assignSupplierToBooking', 'updateBookingSupplier', 'tasks', 'createTask', 'assignTask', 'updateTaskStatus', 'escalations', 'createEscalation', 'updateEscalationStatus', 'reviewDocument', 'services', 'service', 'updateService', 'serviceWorkflow', 'setServiceWorkflow', 'serviceDocumentRequirements', 'addServiceDocumentRequirement', 'suppliers', 'createSupplier', 'templates', 'upsertTemplate', 'notificationHistory', 'audit',
   'overview', 'search', 'customers', 'customer', 'reassignCustomer', 'supervisorsAdmin', 'supervisorAdmin', 'createSupervisorAdmin', 'updateSupervisorAdmin', 'leads', 'attributionEvents', 'payments', 'documentsAdmin', 'reportBookings', 'reportOperations', 'reportSuppliers', 'reportDocuments', 'reportNotifications', 'staffList', 'createStaff', 'setStaffActive', 'setStaffPermissions',
   'rules', 'rule', 'ruleHistory', 'updateRule', 'pendingDecisions', 'ruleMatrix'];
 
-export const NOT_CONNECTED_OPS_AUTH = registerOpsAuthProvider({ id: 'not-connected', dev: false, signOut: async () => {}, ...Object.fromEntries(AUTH_METHODS.map((m) => [m, authFail])) });
-export const NOT_CONNECTED_OPS_DATA = registerOpsDataAdapter({ id: 'not-connected', dev: false, ...Object.fromEntries(DATA_METHODS.map((m) => [m, dataFail])) });
+export const NOT_CONNECTED_OPS_AUTH = registerOpsAuthProvider(notConnectedAuth(OpsAuthError));
+export const NOT_CONNECTED_OPS_DATA = registerOpsDataAdapter(notConnectedData(DATA_METHODS));

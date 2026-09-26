@@ -3,8 +3,9 @@
    these five, never invents one. */
 import { el } from '../../core/dom.js';
 import { t } from '../../core/i18n.js';
-import { icon, toast } from '../../components/ui.js';
+import { icon } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
+import { statusSelect } from '../../core/portal-ui.js';
 import { supervisorData, LEAD_STATUSES } from '../data.js';
 import { mountSupervisorPortal, loadRegion, pageTitle, leadStatusBadge, dateTime } from './shell.js';
 
@@ -13,14 +14,8 @@ export function mountSupervisorLeads({ root = document } = {}) {
     const host = el('div', { dataset: { region: 'leads' } });
     main.replaceChildren(pageTitle('svp.leads.title', 'svp.leads.text'), host);
     const row = (lead) => {
-      const select = el('select', { class: 'c-field__control c-field__control--sm', 'aria-label': t('svp.leads.statusLabel'), dataset: { leadStatusSelect: lead.id } },
-        LEAD_STATUSES.map((s) => el('option', { value: s, ...(s === lead.status ? { selected: true } : {}) }, t(`svp.leads.status.${s}`))));
-      select.addEventListener('change', async () => {
-        const next = select.value; select.disabled = true;
-        try { await supervisorData.updateLeadStatus(lead.id, next); toast({ title: t('svp.leads.updated'), variant: 'success', duration: 3000 }); }
-        catch { toast({ title: t('svp.leads.updateFailed'), variant: 'warning', duration: 5000 }); select.value = lead.status; }
-        select.disabled = false;
-      });
+      const select = statusSelect({ statuses: LEAD_STATUSES, current: lead.status, optionKey: (s) => `svp.leads.status.${s}`, labelKey: 'svp.leads.statusLabel', dataset: { leadStatusSelect: lead.id },
+        save: (next) => supervisorData.updateLeadStatus(lead.id, next), doneKey: 'svp.leads.updated', failKey: 'svp.leads.updateFailed' });
       return el('article', { class: 'c-card c-svp-lead', dataset: { lead: lead.id, leadStatus: lead.status } }, [
         el('div', { class: 'c-svp-lead__icon' }, icon('no-lead', { size: 'lg' })),
         el('div', { class: 'c-svp-lead__body' }, [
