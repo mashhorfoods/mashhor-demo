@@ -1,7 +1,8 @@
 /* OPS / UI / OFFERS — Command Center CMS. Admin-wide offers & packages directory: view, create, edit, and the
    draft → published → archived lifecycle (Phase 2B-i; backend/content.mjs). A real backend entity since Phase 2A
-   — the public site's own offers registry (assets/js/data/offers.js) is untouched and does not yet read from here
-   (Phase 2 scope decision: the public site stays static; staff preview it through admin/offers/preview/ instead).
+   — since Phase 6 a connected build's public offers pages show what is PUBLISHED here (GET /content/offers,
+   assets/js/data/content-source.js), the static registry (assets/js/data/offers.js) being the fallback; staff
+   preview drafts through admin/offers/preview/.
    The richer nested content (inclusions/exclusions/itinerary/terms/FAQ/travel period) is one `detail` JSON blob,
    edited as raw JSON here — the same "no dedicated UI yet" pattern the Business Rules manage form already
    established for its own raw-value editor. Editing an already-published offer never silently unpublishes it. */

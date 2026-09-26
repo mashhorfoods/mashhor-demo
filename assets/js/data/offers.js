@@ -130,7 +130,7 @@ export const offerById = (id) => OFFER_REGISTRY.find((o) => o.id === id || o.slu
 export const homeOffers = () => OFFER_REGISTRY.slice(0, 3);
 
 /** True when at least one offer carries the field — a filter shows only then. */
-export const offersHave = (field) => OFFER_REGISTRY.some((o) => {
+export const offersHave = (field, list = OFFER_REGISTRY) => list.some((o) => {
   if (field === 'price') return o.price?.amount != null;
   if (field === 'duration') return o.duration?.nights != null;
   if (field === 'period') return !!o.travelPeriod;

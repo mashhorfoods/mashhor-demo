@@ -25,6 +25,9 @@ import { staffStore, publicStaff } from './staff.mjs';
 import { staffAuth, operations, services as opsServices, dashboard } from './staff-routes.mjs';
 import { info, warn, error } from './logger.mjs';
 import { fixtureLegal } from './fixtures.mjs';
+import { publicDestinations, publicOffers } from './content.mjs';
+
+const CONTENT_CACHE = { 'Cache-Control': 'public, max-age=60' };
 
 const VERSION = '16.4';
 // The three credential stores, keyed by the route family (http.mjs sessionFamily) whose session each one holds.
@@ -113,6 +116,12 @@ export function createApp() {
     if (path === '/flights/search' && req.method === 'POST') return flights.search(req, res);
     if ((m = path.match(/^\/flights\/offers\/([^/]+)\/([^/]+)$/)) && req.method === 'GET') return flights.offer(req, res, decodeURIComponent(m[1]), decodeURIComponent(m[2]));
     if (path === '/flights/quote' && req.method === 'POST') return flights.quote(req, res);
+
+    // ---- Phase 6: /content/* — the PUBLISHED destinations and offers the public pages render (backend/content.mjs
+    // publicDestinations/publicOffers). Public, no session, the same body for every visitor, so shared caches may keep
+    // it for a minute: a publish reaches visitors within that. ----
+    if (path === '/content/destinations' && req.method === 'GET') return json(res, 200, publicDestinations(), CONTENT_CACHE);
+    if (path === '/content/offers' && req.method === 'GET') return json(res, 200, publicOffers(), CONTENT_CACHE);
 
     // ---- session + CSRF: customer, supervisor and staff sessions live in DIFFERENT cookies, and only the session of
     // the route's own family is resolved (sessionFamily, http.mjs): a customer route never even loads a staff or

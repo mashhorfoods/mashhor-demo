@@ -132,6 +132,7 @@ only a marker, never a credential. `GET /auth/session` is the authority.
 | `GET /me/notifications` · `POST /me/notifications/read` | `{ ids }` or `{ all: true }` | `{ notifications }` |
 | `POST /me/legal/acceptance` | `{ terms: { version }, privacy: { version }, locale }` | 204 |
 | `GET /legal/terms?locale=` · `GET /legal/privacy?locale=` | — | `{ version, effectiveAt, title, html }` · 404 when not published |
+| `GET /content/destinations` · `GET /content/offers` | — (public, no session) | `{ managed, items }` — only PUBLISHED Command Center records, in the shapes of `assets/js/data/destinations.js` / `offers.js` (slug as `id`, staff fields stripped); `managed: false` until the CMS has ever published that kind. `Cache-Control: public, max-age=60`. Read by `assets/js/data/content-source.js`, which falls back to the static registries when this is unreachable |
 | `POST /diagnostics` | a scrubbed event | 204 (stored scrubbed; sensitive keys dropped) |
 | `GET /health` | — | `{ ok, environment, version, storage, mailer, testControls }` |
 

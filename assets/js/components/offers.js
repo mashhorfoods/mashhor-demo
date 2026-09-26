@@ -17,6 +17,7 @@ import {
   offerById, offerEntry, queryOffers, offersHave,
 } from '../data/offers.js';
 import { destinationById, DESTINATION_REGISTRY } from '../data/destinations.js';
+import { loadOffers, loadOffer, contentConnected } from '../data/content-source.js';
 import { SERVICE_REGISTRY, serviceById } from '../data/services.js';
 import { icon, initModals, initAccordions, routeGraphic, sectionHead, heroFocalStyle } from './ui.js';
 import { offerCard, offerBadge, priceBlock, offerMeta, inclusionList, mediaPlaceholder } from './cards.js';
@@ -45,10 +46,10 @@ export function offersHero({ onBrowse = null, onHelp = null } = {}) {
 /* ---------------------------------------------------------------------------
    CATEGORY CHIPS — data-driven, with counts. §2
    ------------------------------------------------------------------------ */
-export function categoryChips({ onSelect, current = '' } = {}) {
+export function categoryChips({ onSelect, current = '', list = OFFER_REGISTRY } = {}) {
   const entries = [{ id: '' }, ...OFFER_CATEGORIES];
   const chips = entries.map((c) => {
-    const count = c.id ? OFFER_REGISTRY.filter((o) => o.categories.includes(c.id)).length : OFFER_REGISTRY.length;
+    const count = c.id ? list.filter((o) => o.categories.includes(c.id)).length : list.length;
     return el('button', {
       type: 'button', class: 'c-chip c-catnav__chip', dataset: { category: c.id }, 'aria-pressed': String(c.id === current),
       onclick: (event) => { chips.forEach((b) => b.setAttribute('aria-pressed', String(b === event.currentTarget))); onSelect?.(c.id); },
@@ -61,7 +62,7 @@ export function categoryChips({ onSelect, current = '' } = {}) {
    FILTER CONTROLS — one form; inline from tablet up, in a sheet on phones.
    Only filters the data can answer are rendered. §3
    ------------------------------------------------------------------------ */
-export function filterControls({ values = {}, onChange, onApply } = {}) {
+export function filterControls({ values = {}, onChange, onApply, list = OFFER_REGISTRY } = {}) {
   const select = (name, labelKey, options, blankKey) => {
     const id = `flt-${name}`;
     return el('div', { class: 'c-field c-filters__field' }, [
@@ -72,15 +73,17 @@ export function filterControls({ values = {}, onChange, onApply } = {}) {
       ]),
     ]);
   };
-  const destinations = DESTINATION_REGISTRY.filter((d) => OFFER_REGISTRY.some((o) => o.destination === d.id));
-  const services = SERVICE_REGISTRY.filter((s) => OFFER_REGISTRY.some((o) => o.services.includes(s.id)));
+  // The destinations the offers point at: the static registry's records, or — for CMS offers, which carry their own
+  // destinationRecord (backend/content.mjs) — those records, keyed by the same id the offer's `destination` holds.
+  const destinations = [...new Map(list.map((o) => [o.destination, o.destinationRecord ?? DESTINATION_REGISTRY.find((d) => d.id === o.destination)])).values()].filter(Boolean);
+  const services = SERVICE_REGISTRY.filter((s) => list.some((o) => o.services.includes(s.id)));
 
   const form = el('form', { class: 'c-filters', novalidate: true, onsubmit: (e) => { e.preventDefault(); onApply?.(); } }, [
     select('destination', 'offers.filter.destination', destinations.map((d) => ({ value: d.id, label: pick(d, 'name') })), 'offers.filter.anyDestination'),
     select('service', 'offers.filter.service', services.map((s) => ({ value: s.id, label: pick(s, 'title') })), 'offers.filter.anyService'),
-    offersHave('duration') ? select('duration', 'offers.filter.duration', DURATION_BUCKETS.map((b) => ({ value: b.id, label: pick(b, 'label') })), 'offers.filter.anyDuration') : null,
-    offersHave('price') ? select('price', 'offers.filter.price', PRICE_BUCKETS.map((b) => ({ value: b.id, label: priceBucketLabel(b) })), 'offers.filter.anyPrice') : null,
-    offersHave('period') ? select('period', 'offers.filter.period', monthOptions(), 'offers.filter.anyPeriod') : null,
+    offersHave('duration', list) ? select('duration', 'offers.filter.duration', DURATION_BUCKETS.map((b) => ({ value: b.id, label: pick(b, 'label') })), 'offers.filter.anyDuration') : null,
+    offersHave('price', list) ? select('price', 'offers.filter.price', PRICE_BUCKETS.map((b) => ({ value: b.id, label: priceBucketLabel(b) })), 'offers.filter.anyPrice') : null,
+    offersHave('period', list) ? select('period', 'offers.filter.period', monthOptions(), 'offers.filter.anyPeriod') : null,
     select('sort', 'offers.sort.label', OFFER_SORTS.map((s) => ({ value: s.id, label: pick(s, 'label') }))),
     el('div', { class: 'c-filters__actions' }, [
       el('button', { type: 'submit', class: 'c-btn c-btn--secondary-brand c-filters__apply' }, t('offers.filter.apply')),
@@ -139,10 +142,12 @@ export function offerGuides({ onPick } = {}) {
 /* ---------------------------------------------------------------------------
    MOUNT — listing. §9 states
    ------------------------------------------------------------------------ */
+/* `load` defaults to the content source (data/content-source.js): the static registry, or the published CMS offers on
+   a connected build. The category counts and the filter form are drawn from what `load` returned. */
 export function mountOffers({
   root = document,
-  load = async () => OFFER_REGISTRY,
-  query = async (q) => queryOffers(q),
+  load = loadOffers,
+  query = null,
   initial = {},
 } = {}) {
   const mount = (name) => qs(`[data-offers="${name}"]`, root);
@@ -152,12 +157,18 @@ export function mountOffers({
 
   render(mount('hero'), offersHero({ onBrowse: () => scrollTo('offers'), onHelp: () => scrollTo('help') }));
 
-  // ---- Filters: one form, moved between the inline host and the phone sheet
-  const form = filterControls({
-    values,
+  const runQuery = query ?? (async (q) => queryOffers(q, await load()));
+
+  // ---- Filters: one form, moved between the inline host and the phone sheet. Drawn again once the offers arrive,
+  // so its options come from the list actually shown.
+  const buildForm = (list) => filterControls({
+    values, list,
     onChange: (name, value, { silent } = {}) => { values[name] = value; if (!silent && !sheet.open) apply(); },
     onApply: () => { if (sheet.open) sheet.close('apply'); apply(); },
   });
+  // Until then: the static registry's options — or, on a connected build, none (the CMS may list something else).
+  const initialList = contentConnected() ? [] : OFFER_REGISTRY;
+  let form = buildForm(initialList);
   const inlineHost = mount('filters');
   const sheet = filterSheet();
   root.body?.append(sheet) ?? document.body.append(sheet);
@@ -174,7 +185,8 @@ export function mountOffers({
   initModals(root);
 
   // ---- Categories
-  render(mount('categories'), categoryChips({ current: values.category, onSelect: (id) => { values.category = id; apply(); } }));
+  const paintCategories = (list) => render(mount('categories'), categoryChips({ list, current: values.category, onSelect: (id) => { values.category = id; apply(); } }));
+  paintCategories(initialList);
 
   // ---- Grid + featured regions
   const regions = {
@@ -195,7 +207,7 @@ export function mountOffers({
   const apply = async () => {
     regions.grid.loading();
     let list;
-    try { list = await query({ ...values }); }
+    try { list = await runQuery({ ...values }); }
     catch (error) { console.error('[no] offers query failed', error); regions.grid.error(); return; }
     if (count) count.textContent = t('offers.count', list.length);
     qsa('.c-catnav__chip', mount('categories')).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.category === values.category)));
@@ -209,6 +221,7 @@ export function mountOffers({
   const hydrate = async () => {
     try { data = await load(); }
     catch (error) { console.error('[no] offers failed to load', error); Object.values(regions).forEach((r) => r.error()); return; }
+    if (data !== initialList) { form = buildForm(data); placeForm(); paintCategories(data); }
     const featured = data.filter((o) => o.featured);
     featured.length ? regions.featured.content(el('div', { class: 'c-featured' }, [el('div', { class: 'c-featured__lead' }, featuredOfferCard(featured[0]))])) : regions.featured.empty();
     syncForm();
@@ -216,7 +229,8 @@ export function mountOffers({
   };
 
   const api = {
-    regions, values, form, sheet,
+    regions, values, sheet,
+    get form() { return form; },
     apply, reload: hydrate, scrollTo,
     set(patch) { Object.assign(values, patch); syncForm(); return apply(); },
     reset() { FILTER_KEYS.forEach((k) => { values[k] = k === 'sort' ? 'recommended' : ''; }); syncForm(); return apply(); },
@@ -355,13 +369,15 @@ export function flowSection(record) {
   ];
 }
 export function relatedSection(record) {
-  const list = OFFER_REGISTRY.filter((o) => o.id !== record.id).slice(0, 3);
+  const list = record.related ?? OFFER_REGISTRY.filter((o) => o.id !== record.id).slice(0, 3);
   if (!list.length) return null;
   return [sectionHead({ id: 'related-title', overline: t('offers.related.overline'), title: t('offers.related.title') }), offerDeck(list)];
 }
 const applyHead = (record) => setPageHead({ title: `${pick(record, 'title')} — ${t('brand.name')}`, description: pick(record, 'short') });
 
-export function mountOfferDetail({ slug, root = document, load = async (s) => getOffer(s) } = {}) {
+/* The default `load` reads the content source (data/content-source.js): the static registry, or the published CMS
+   offers on a connected build (a slug the CMS doesn't publish → the not-found state). The admin preview passes its own. */
+export function mountOfferDetail({ slug, root = document, load = loadOffer } = {}) {
   const { mount, show, hideAll } = detailSections(root, 'offer',
     ['overview', 'included', 'excluded', 'itinerary', 'important', 'terms', 'faq', 'flow', 'related', 'support'],
     { onShow: initAccordions });

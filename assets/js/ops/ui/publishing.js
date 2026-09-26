@@ -25,6 +25,7 @@ function itemRow(item, refresh, can) {
   };
   const actions = [];
   if (can('content.manage') && item.publishStatus !== 'published') actions.push(busyButton(t('ops.content.publish'), 'primary', () => transition('published', 'ops.content.published.action')));
+  if (can('content.manage') && item.publishStatus === 'published' && item.hasUnpublishedChanges) actions.push(busyButton(t('ops.content.publishChanges'), 'primary', () => transition('published', 'ops.content.published.action')));
   if (can('content.manage') && item.publishStatus === 'published') actions.push(busyButton(t('ops.content.unpublish'), 'tertiary', () => transition('draft', 'ops.content.unpublished.action')));
   return el('li', { class: 'c-svp-lead' }, [
     el('div', { class: 'l-stack l-stack--4' }, [
