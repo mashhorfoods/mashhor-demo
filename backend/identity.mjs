@@ -37,7 +37,7 @@ export const slugLookup = () => {
 export function publicCustomer(c, slug = slugLookup()) {
   if (!c) return null;
   const supervisorId = slug(c.attribution_supervisor);
-  return { id: c.id, name: c.name, email: c.email, phone: c.phone, locale: c.locale, image: c.image ?? null,
+  return { id: c.id, name: c.name, email: c.email, phone: c.phone, locale: c.locale,
     supervisorId, attribution: c.attribution_supervisor ? { supervisorId, source: c.attribution_source, at: c.attribution_at } : null,
     acceptance: c.acceptance_json ? JSON.parse(c.acceptance_json) : null, createdAt: c.created_at };
 }

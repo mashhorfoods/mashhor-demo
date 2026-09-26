@@ -63,7 +63,7 @@ export function enqueue({ customerId = null, staffId = null, bookingId = null, r
   } else {
     q.run(`INSERT INTO outbox (${cols}) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, ...vals);
   }
-  info('mailer.queued', { channel, template, delivery: config.mailer });
+  info('mailer.queued', { eventType, channel, template, delivery: config.mailer });
   return { id, delivered: false };
 }
 
@@ -108,17 +108,17 @@ export async function deliverOutbox({ limit = 20 } = {}) {
     try {
       const result = await provider.send({ to, subject, text });
       q.run('UPDATE outbox SET status = ?, provider_message_id = ?, sent_at = ?, updated_at = ?, failure_category = NULL WHERE id = ?', 'delivered', result?.providerMessageId ?? null, now(), now(), row.id);
-      info('mailer.delivered', { template: row.template, channel: row.channel, attempt });
+      info('mailer.delivered', { eventType: row.event_type ?? null, template: row.template, channel: row.channel, attempt });
       delivered++;
     } catch (error) {
       const category = categorize(error);
       if (attempt >= MAX_ATTEMPTS) {
         q.run('UPDATE outbox SET status = ?, failure_category = ?, updated_at = ? WHERE id = ?', 'failed', category, now(), row.id);
-        warn('mailer.failed', { template: row.template, category, attempt }); failed++;
+        warn('mailer.failed', { eventType: row.event_type ?? null, template: row.template, category, attempt }); failed++;
       } else {
         const nextAt = Date.now() + BACKOFF_MS[Math.min(attempt, BACKOFF_MS.length - 1)];
         q.run('UPDATE outbox SET status = ?, failure_category = ?, next_attempt_at = ?, updated_at = ? WHERE id = ?', 'retrying', category, nextAt, now(), row.id);
-        warn('mailer.retrying', { template: row.template, category, attempt }); retrying++;
+        warn('mailer.retrying', { eventType: row.event_type ?? null, template: row.template, category, attempt }); retrying++;
       }
     }
   }

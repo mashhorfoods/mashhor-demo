@@ -7,7 +7,7 @@
 
    Shapes:
      supervisor   { id, slug, status, nameAr/En, titleAr/En, bioAr/En, image, languages[], specialties[], services[],
-                    phone, whatsapp, email, city, internalId, notificationPrefs, createdAt, updatedAt }
+                    phone, whatsapp, email, city, notificationPrefs, createdAt, updatedAt }
      customerRow  { id, name, email, phone, locale, attributionAt, createdAt, bookingsCount, lastActivityAt }
      customer     customerRow + { attribution{supervisorId,source,at}, bookings[], trips[], attributionHistory[] }
      bookingRow   { id, customerId, customerName, service, status, paymentStatus, amount, currency, createdAt, tripId }

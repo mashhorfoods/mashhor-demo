@@ -28,7 +28,7 @@ function publicSupervisor(s) {
 /** The authenticated supervisor's own view of themself: adds what they may edit and what they may only read. */
 export function privateSupervisor(s) {
   if (!s) return null;
-  return { ...publicSupervisor(s), internalId: s.internal_id ?? null, notificationPrefs: J(s.notification_prefs_json, {}), createdAt: s.created_at ?? null, updatedAt: s.updated_at ?? null };
+  return { ...publicSupervisor(s), notificationPrefs: J(s.notification_prefs_json, {}), createdAt: s.created_at ?? null, updatedAt: s.updated_at ?? null };
 }
 
 /* ---- credentials: the same stack as customers (credentials.mjs), a SEPARATE store ---------------------------------

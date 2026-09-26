@@ -75,7 +75,7 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
       loc: L.resolveLocation('jeddah')?.code, locAr: L.resolveLocation('الخرطوم')?.code, locCode: L.resolveLocation('krt')?.code, locNone: L.resolveLocation('Atlantis'),
       search: (await L.searchLocations('kha')).items.map((l) => l.code), searchShort: (await L.searchLocations('k')).items.length,
       guardNone: J.guard('travellers', { version: 1 })?.reason, steps: J.STEPS.map((s) => s.id),
-      reference: A.devReference('X'),
+      reference: A.bookingReference('X'), providers: (await import('./assets/js/booking/payment.js')).paymentProviders().map((x) => x.id),
     };
   });
   ok('round trip → 2 legs', r.rtLegs.join(',') === 'KRT-JED,JED-KRT' && r.rtErr === 0, r.rtLegs.join(','));
@@ -102,6 +102,7 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
   ok('location search matches prefix, needs 2 chars', r.search.includes('KRT') && r.searchShort === 0, r.search.join());
   ok('guard without context', r.guardNone === 'noContext'); ok('journey steps', r.steps.join() === 'search,details,travellers,extras,review,payment,confirmation', r.steps.join());
   ok('dev reference format', /^X-DEV-[A-Z0-9]{6}$/.test(r.reference), r.reference);
+  ok('development registers the development payment provider', r.providers.join() === 'dev', r.providers.join());
   await c.close();
 }
 
@@ -261,6 +262,7 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
   await p.check('#review-terms'); await next(p, /booking\/payment/); await p.waitForFunction(() => window.no?.payment);
   ok('payment: dev notice, amount, methods, no raw card fields', await visible(p, '[data-dev=true]') && await count(p, '.c-pay-amount') === 1 && await count(p, 'input[name=method]') === 2 && await count(p, 'input[autocomplete^=cc-], input[name*=card]') === 0);
   ok('pay button carries the amount', /\d/.test(await text(p, '[data-action=pay]')));
+  ok('development: no pay-later step while the dev provider is registered', await count(p, '[data-pay-later], [data-action=pay-later]') === 0);
   await p.check('#pm-dev-failure'); await p.click('[data-action=pay]');
   ok('processing state (button loading, inputs disabled)', await p.evaluate(() => document.querySelector('[data-action=pay]')?.getAttribute('data-state') === 'loading' || document.querySelector('[data-action=pay]')?.disabled) && await count(p, 'input[name=method]:disabled') === 2);
   await p.waitForSelector('.c-state--error');

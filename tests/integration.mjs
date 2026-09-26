@@ -25,6 +25,8 @@ const STAGING = stagingEnv(api.origin, { notifications: { refreshOnFocus: true, 
 // `bare`: the source checks below read files at the origin's root.
 const site = await staticServer({ prefix: PREFIX, bare: true, env: STAGING, port: Number(process.env.SITE_PORT ?? 0) });
 const prodNoApi = await staticServer({ prefix: PREFIX, bare: true, env: { ...STAGING, environment: 'production', apiBaseUrl: '' } });
+// A production build WITH a backend: no client-side payment provider exists yet, so the payment step is "pay later".
+const prodApi = await staticServer({ prefix: PREFIX, bare: true, env: { ...STAGING, environment: 'production' } });
 const P = (o) => o + PREFIX;
 
 const control = (path, body = {}) => fetch(api.origin + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then((r) => r.json());
@@ -323,7 +325,30 @@ for (const [w, h, tag] of [[390, 844, 'mobile'], [600, 900, 'intermediate'], [83
   await c.close();
 }
 
-await b.close(); await site.close(); await prodNoApi.close(); await api.close();
+// ================================================================= 9. production payment step: no dev provider, "pay later", no -DEV- reference (§1.13)
+// Only against the contract server: a real staging backend lists just SITE_PORT's origin in BACKEND_ALLOWED_ORIGINS.
+if (!process.env.BACKEND_ORIGIN) {
+  await control('/__test/reset');
+  for (const loc of ['ar', 'en']) {
+    const { c, p } = await ctx(1440, 1000, loc, prodApi.origin);
+    await p.go('search/?vertical=flights&tripType=oneway&from=KRT&to=JED&fromCode=KRT&toCode=JED&depart=2026-11-16&adults=1&cabin=economy', 'results'); await p.waitForSelector('.c-flight[data-offer]');
+    const mods = await p.evaluate(async () => { const Pm = await import('./assets/js/booking/payment.js'); const A = await import('./assets/js/booking/adapters/index.js'); return { providers: Pm.paymentProviders().map((x) => x.id), dev: Pm.DEV_PAYMENT, refs: [A.bookingReference('NO'), A.bookingReference('RQ')] }; });
+    ok(`${loc} production registers no development payment provider`, mods.providers.length === 0 && mods.dev === null, mods.providers.join());
+    ok(`${loc} production references carry no -DEV-`, mods.refs.every((r) => /^(NO|RQ)-[A-Z0-9]{8}$/.test(r) && !r.includes('-DEV-')), mods.refs.join());
+    await Promise.all([p.waitForURL(/travellers/), p.locator('[data-action=select]').first().click()]); await p.waitForFunction(() => window.no?.travellers);
+    await fillTravellers(p); await next(p, /extras/); await p.waitForFunction(() => window.no?.extras); await next(p, /review/); await p.waitForFunction(() => window.no?.review); await p.waitForSelector('#review-terms'); await p.check('#review-terms'); await next(p, /payment/); await p.waitForFunction(() => window.no?.payment);
+    const body = await p.evaluate(() => document.body.innerText);
+    ok(`${loc} production payment step: no development mode, no simulated methods`, !/Development payment mode|وضع الدفع التجريبي|Simulate|محاكاة/.test(body) && await count(p, '[id^=pm-dev], [data-action=pay]') === 0);
+    ok(`${loc} production payment step shows "pay later" with the payment-link copy`, await count(p, '[data-pay-later=true]') === 1 && await count(p, '[data-action=pay-later]') === 1 && (loc === 'ar' ? /رابط دفع آمن/.test(body) : /secure payment link/.test(body)));
+    await Promise.all([p.waitForURL(/confirmation/), p.click('[data-action=pay-later]')]); await p.waitForFunction(() => window.no?.confirmation);
+    const ref = await p.getAttribute('[data-reference]', 'data-reference'); const j = await p.evaluate(() => JSON.parse(sessionStorage.getItem('no.journey')));
+    ok(`${loc} placed as awaiting payment with a non-dev reference`, /^NO-[A-Z0-9]{8}$/.test(ref) && j.booking.payment === 'awaiting' && j.payment.status === 'awaiting' && await count(p, '[data-payment-status=awaiting]') === 1, ref);
+    ok(`${loc} no payment intent is requested for a pay-later booking`, !(await apiState()).requests.some((r) => /payment-intent/.test(r.path)));
+    await c.close();
+  }
+}
+
+await b.close(); await site.close(); await prodNoApi.close(); await prodApi.close(); await api.close();
 const filtered = errs.filter((e) => !/favicon/.test(e));
 console.log(`integration: ${pass} passed, ${fail} failed, ${filtered.length} console/network problems`);
 filtered.slice(0, 12).forEach((e) => console.log('  ✗', e));

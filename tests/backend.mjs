@@ -823,6 +823,17 @@ await control('/__test/reset');
   ok('a second, differently-identified event for an already-paid payment is rejected — an already-final payment is never re-applied', alreadyFinal.status === 200 && alreadyFinal.data.ok === true);
   const replay = await webhook(amountAttack);
   ok('replaying the EXACT same event (same provider + event id) a second time is recognised as a duplicate and safely ignored, not reprocessed', replay.status === 200 && replay.data.duplicate === true);
+  {
+    // §7: payment_events.payment_id names the payment an event was about — processed and rejected alike; only an
+    // event whose reference matches no payment has none. outbox.event_type names the business event behind a message.
+    const raw = new DatabaseSync(env.BACKEND_DATABASE_PATH, { readOnly: true });
+    const ev = Object.fromEntries(raw.prepare('SELECT provider_event_id, payment_id, status, reason FROM payment_events').all().map((r) => [r.provider_event_id, r]));
+    const payEvents = raw.prepare("SELECT event_type FROM outbox WHERE template = 'payment-successful'").all(); raw.close();
+    ok('payment_events.payment_id is written for rejected events that name a real payment', ['evt_amount_attack', 'evt_currency_attack', 'evt_already_final'].map((id) => ev[id]).every((r) => r?.status === 'rejected' && /^pay_/.test(r.payment_id ?? '')), JSON.stringify(ev.evt_currency_attack));
+    ok('payment_events.payment_id stays empty only when no payment matches the reference', ev.evt_unmatched?.status === 'rejected' && ev.evt_unmatched.payment_id === null);
+    ok('payment_events.payment_id is written for processed events', Object.values(ev).some((r) => r.status === 'processed' && /^pay_/.test(r.payment_id ?? '')));
+    ok('outbox.event_type is recorded for payment notifications', payEvents.length > 0 && payEvents.every((r) => r.event_type === 'payment.succeeded'));
+  }
   ok('none of the integrity attacks above (unmatched/amount/currency/already-final/replay) changed the payment\'s stored amount, currency or status', (await reqP('/me/bookings/BK-16B-PAY')).data.payments.find((p) => p.reference === secRef).amount === 500 && (await reqP('/me/bookings/BK-16B-PAY')).data.payments.find((p) => p.reference === secRef).currency === 'USD' && (await reqP('/me/bookings/BK-16B-PAY')).data.booking.paymentStatus === 'paid');
 
   // ---- supervisor attribution: untouched by the payment flow ----
@@ -1222,6 +1233,25 @@ await control('/__test/reset');
   const st = await fetch(API + '/__test/state').then((r) => r.json()); const e = st.events.at(-1);
   ok('diagnostics keep the event and code, drop credentials, personal data and long strings', e.event === 'api.failure' && e.code === 'unavailable' && !('password' in e) && !('token' in e) && !('email' in e) && !('note' in e));
   ok('server logs contain no passwords, tokens, cookies or e-mails', !/password123|no_session=|@fixture\.test|hunter22/.test(logs));
+}
+
+// ---- §7: /__test/reset leaves no state behind — content, payment events and business-rule history included ----
+{
+  const counts = () => { const raw = new DatabaseSync(env.BACKEND_DATABASE_PATH, { readOnly: true }); const n = Object.fromEntries(['destinations', 'offers', 'payment_events', 'business_config_history'].map((t) => [t, raw.prepare(`SELECT COUNT(*) AS n FROM ${t}`).get().n])); raw.close(); return n; };
+  // One row in each table, written straight to the database file (the server holds it in WAL mode), then a reset.
+  const w = new DatabaseSync(env.BACKEND_DATABASE_PATH); const t = new Date().toISOString();
+  w.prepare('INSERT INTO destinations (id, slug, created_at, updated_at) VALUES (?,?,?,?)').run('dst_leak', 'leak-destination', t, t);
+  w.prepare('INSERT INTO offers (id, slug, destination_id, created_at, updated_at) VALUES (?,?,?,?,?)').run('off_leak', 'leak-offer', 'dst_leak', t, t);
+  w.prepare('INSERT INTO payment_events (provider, provider_event_id, event_type, received_at) VALUES (?,?,?,?)').run('dev', 'evt_leak', 'succeeded', t);
+  w.prepare("INSERT INTO business_config_history (rule_id, category, name, description, value_json, status, source, effective_to, superseded_at) VALUES (?,?,?,?,?,?,?,?,?)").run('leak_rule', 'general', 'Leak', '', '{}', 'DRAFT', '', t, t);
+  w.close();
+  const before = counts();
+  await control('/__test/reset');
+  const after = counts();
+  ok('rows written to content, payment events and rule history before the reset', Object.values(before).every((n) => n > 0), JSON.stringify(before));
+  ok('reset clears destinations, offers, payment_events and business_config_history', Object.values(after).every((n) => n === 0), JSON.stringify(after));
+  const cols = (t) => { const raw = new DatabaseSync(env.BACKEND_DATABASE_PATH, { readOnly: true }); const c = raw.prepare(`PRAGMA table_info(${t})`).all().map((r) => r.name); raw.close(); return c; };
+  ok('migration 011 dropped the never-written customers.image and supervisors.internal_id', !cols('customers').includes('image') && !cols('supervisors').includes('internal_id'));
 }
 
 child.kill('SIGTERM'); await new Promise((r) => child.on('close', r)); rmSync(dir, { recursive: true, force: true });

@@ -92,16 +92,17 @@ export async function handleWebhookEvent(providerId, rawBody, headers) {
     const eventRow = q.get('SELECT * FROM payment_events WHERE provider = ? AND provider_event_id = ?', providerId, event.providerEventId);
     if (eventRow.status !== 'received') return { duplicate: true };   // already delivered once — safely ignored, nothing is touched a second time
 
-    const reject = (reason) => { q.run('UPDATE payment_events SET status = ?, reason = ?, processed_at = ? WHERE id = ?', 'rejected', reason, now(), eventRow.id); audit(SYSTEM_ACTOR, 'payment.webhook.rejected', 'payment', event.providerReference, { provider: providerId, reason }); return { rejected: reason }; };
+    // payment_id links the event to the payment it names, whenever that payment exists — processed or rejected.
+    const reject = (reason, paymentId = null) => { q.run('UPDATE payment_events SET status = ?, reason = ?, payment_id = ?, processed_at = ? WHERE id = ?', 'rejected', reason, paymentId, now(), eventRow.id); audit(SYSTEM_ACTOR, 'payment.webhook.rejected', 'payment', event.providerReference, { provider: providerId, reason }); return { rejected: reason }; };
 
     const payment = q.get('SELECT * FROM payments WHERE provider = ? AND provider_reference = ?', providerId, event.providerReference);
     if (!payment) return reject('paymentNotFound');
-    if (event.amount != null && Number(event.amount) !== Number(payment.amount)) return reject('amountMismatch');
-    if (event.currency != null && event.currency !== payment.currency) return reject('currencyMismatch');
-    if (['paid', 'refunded'].includes(payment.status)) return reject('paymentAlreadyFinal');   // a second, different event for an already-final payment is never applied
+    if (event.amount != null && Number(event.amount) !== Number(payment.amount)) return reject('amountMismatch', payment.id);
+    if (event.currency != null && event.currency !== payment.currency) return reject('currencyMismatch', payment.id);
+    if (['paid', 'refunded'].includes(payment.status)) return reject('paymentAlreadyFinal', payment.id);   // a second, different event for an already-final payment is never applied
 
     const nextStatus = { succeeded: 'paid', failed: 'failed', cancelled: 'cancelled' }[event.type];
-    if (!nextStatus) return reject('unknownEventType');
+    if (!nextStatus) return reject('unknownEventType', payment.id);
 
     q.run('UPDATE payments SET status = ?, verified_at = ?, failure_code = ?, updated_at = ? WHERE id = ?', nextStatus, nextStatus === 'paid' ? t : null, nextStatus === 'failed' ? (event.failureCode ?? 'declined') : null, t, payment.id);
     audit(SYSTEM_ACTOR, 'payment.status.changed', 'payment', payment.id, { provider: providerId, status: nextStatus });
@@ -111,14 +112,14 @@ export async function handleWebhookEvent(providerId, rawBody, headers) {
       q.run("UPDATE bookings SET payment_status = 'paid' WHERE id = ?", payment.booking_id);
       q.run('INSERT INTO documents (id, customer_id, booking_id, trip_id, type, kind, status, size, content_type, deletable, issued_at, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
         `doc_${hex(6)}`, payment.customer_id, payment.booking_id, q.get('SELECT trip_id FROM bookings WHERE id = ?', payment.booking_id)?.trip_id ?? null, 'receipt', 'issued', 'pending', null, null, 0, null, t);
-      enqueue({ customerId: payment.customer_id, template: 'payment-successful', payload: { bookingId: payment.booking_id, amount: payment.amount, currency: payment.currency } });
+      enqueue({ customerId: payment.customer_id, template: 'payment-successful', eventType: 'payment.succeeded', payload: { bookingId: payment.booking_id, amount: payment.amount, currency: payment.currency } });
       audit(SYSTEM_ACTOR, 'booking.paymentGate.passed', 'booking', payment.booking_id, { paymentId: payment.id });
       // Stage 16C §13: Revalidate → Payment → Supplier Booking → Confirmation — only for a flights booking claimed
       // against a server-issued offer, and only once per payment (this branch is reached once per event).
       const bkg = q.get('SELECT * FROM bookings WHERE id = ?', payment.booking_id);
       if (bkg?.service === 'flights' && bkg.flight_search_id && bkg.flight_offer_id) flight = { bookingId: bkg.id, customerId: bkg.customer_id, searchId: bkg.flight_search_id, offerId: bkg.flight_offer_id };
     } else if (nextStatus === 'failed') {
-      enqueue({ customerId: payment.customer_id, template: 'payment-failed', payload: { bookingId: payment.booking_id } });
+      enqueue({ customerId: payment.customer_id, template: 'payment-failed', eventType: 'payment.failed', payload: { bookingId: payment.booking_id } });
     }
     q.run('UPDATE payment_events SET status = ?, payment_id = ?, processed_at = ? WHERE id = ?', 'processed', payment.id, now(), eventRow.id);
     return { paymentId: payment.id, status: nextStatus, flight };

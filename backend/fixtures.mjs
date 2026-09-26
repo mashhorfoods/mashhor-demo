@@ -15,12 +15,16 @@ const day = (offset) => { const d = new Date(); d.setUTCHours(9, 0, 0, 0); d.set
 const dateOnly = (offset) => day(offset).toISOString().slice(0, 10);
 
 export function wipe() {
-  for (const t of ['diagnostics', 'outbox', 'notifications', 'payments', 'documents', 'travellers', 'bookings', 'trips', 'login_attempts', 'reset_tokens', 'sessions', 'customers',
+  for (const t of ['diagnostics', 'outbox', 'notifications', 'payment_events', 'payments', 'documents', 'travellers', 'bookings', 'trips', 'login_attempts', 'reset_tokens', 'sessions', 'customers',
     'attribution_events', 'commissions', 'leads', 'supervisor_notifications', 'supervisor_reset_tokens', 'supervisor_sessions',
     // Order matters under `PRAGMA foreign_keys = ON`: every table below with a REFERENCES clause is deleted BEFORE
     // the table it references (operation_tasks/escalations reference staff; booking_suppliers references suppliers).
     'operation_tasks', 'escalations', 'booking_suppliers', 'booking_notes', 'booking_status_history',
-    'staff_sessions', 'staff_reset_tokens', 'staff', 'suppliers', 'notification_templates', 'audit_events']) q.run(`DELETE FROM ${t}`);
+    'staff_sessions', 'staff_reset_tokens', 'staff', 'suppliers', 'notification_templates', 'audit_events',
+    // Business-rule edits archive the prior version here; the live business_config rows are migration-seeded, not test data.
+    'business_config_history',
+    // Content system (008/009): offers reference destinations, so offers go first. Nothing seeds either table.
+    'offers', 'destinations']) q.run(`DELETE FROM ${t}`);
   // Supervisor rows themselves are config-seeded (migrate()), not test data — only their PROFILE fields reset here, so
   // a run always starts from "provisioned, no profile supplied yet", exactly like production before the business fills it in.
   q.run("UPDATE supervisors SET slug = NULL, name_ar = NULL, name_en = NULL, title_ar = NULL, title_en = NULL, bio_ar = NULL, bio_en = NULL, phone = NULL, whatsapp = NULL, email = NULL, city = NULL, password_salt = NULL, password_hash = NULL, languages_json = '[]', specialties_json = '[]', services_json = '[]', notification_prefs_json = '{}'");

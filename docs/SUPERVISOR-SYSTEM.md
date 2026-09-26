@@ -46,7 +46,7 @@ it, per the brief's "do not redesign".
 
 The backend's `supervisors` table (`backend/migrations/002_supervisors.sql`)
 is a **superset** prepared for that future admin: the same public fields,
-plus `internalId`, credentials (`password_salt/hash`, never exposed),
+plus credentials (`password_salt/hash`, never exposed),
 `notification_prefs_json`, `created_at/updated_at`. It is what
 `/supervisor/me` (§25) reads and writes, and what a real backend's public
 directory would eventually serve if the profile page is ever switched to
