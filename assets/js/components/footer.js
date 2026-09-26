@@ -187,7 +187,6 @@ export function globalFooter({ variant = 'marketing', collapsible = null, cta = 
                   the task; support stays one click away rather than being
                   something the customer must leave the flow to find (§07).
        app        legal and copyright on a light surface. Nothing else. */
-  const compact = variant !== 'marketing';
 
   return el('footer', { class: 'c-gf', 'data-variant': variant }, [
     variant === 'app' ? null : el('span', { class: 'c-gf__route', 'aria-hidden': 'true' }),

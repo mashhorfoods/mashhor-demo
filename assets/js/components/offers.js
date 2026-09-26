@@ -328,7 +328,7 @@ export function importantSection(record) {
   if (!record.important?.length) return null;
   return [sectionHead({ id: 'important-title', overline: t('offers.important.overline'), title: t('offers.important.title') }), list(record.important, 'no-info')];
 }
-function accordion(id, items, labelKey) {
+function accordion(id, items) {
   const node = el('div', { class: 'c-accordion', dataset: { accordion: '' } }, items.map((item, i) => el('div', { class: 'c-accordion__item' }, [
     el('button', { type: 'button', class: 'c-accordion__trigger', 'aria-expanded': i === 0 ? 'true' : 'false', id: `${id}-t${i}` }, [
       el('span', {}, item.q), icon('no-chevron-down', { size: 'sm', className: 'c-accordion__chevron' }),
