@@ -67,6 +67,7 @@ Files:
 | `db.mjs`, `migrate.mjs`, `migrations/` | SQLite access and schema |
 | `http.mjs` | request/response helpers, cookies, CORS, `sessionFamily` |
 | `logger.mjs` | scrubbed structured logs |
+| `credentials.mjs` | the one credential stack (passwords, lockout, sessions, reset tokens, `/…/auth/*` handlers), instantiated once per role with that role's own tables and cookies |
 | `identity.mjs`, `routes.mjs` | customer accounts and sessions; the customer routes (`/auth`, `/me`, `/legal`, `/files`, flights, payments webhook) |
 | `supervisor.mjs`, `supervisor-routes.mjs` | supervisor accounts, sessions and portal data |
 | `staff.mjs`, `staff-routes.mjs` | staff accounts and permissions, operations, admin dashboard |

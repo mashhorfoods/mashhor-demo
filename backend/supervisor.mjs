@@ -9,18 +9,10 @@
 // Reassignment and slug/profile management are admin-dashboard actions
 // (Stage 14, staff-routes.mjs): this module implements the functions they call.
 // ============================================================================
-import { config } from './config.mjs';
-import { q, now, pageQuery, whereClause, placeholders } from './db.mjs';
-import { hex, HttpError, str, seenStale, loginAttempts, recordLoginFailure, clearLoginFailures } from './http.mjs';
-import { hash, same, checkPassword, normEmail } from './identity.mjs';
-import { warn } from './logger.mjs';
+import { q, now, J, registerRule, pageQuery, whereClause, placeholders } from './db.mjs';
+import { hex, HttpError, str, strArr, isSlug, imageJson, sessionCookies } from './http.mjs';
+import { makeCredentialStore, normEmail } from './credentials.mjs';
 import { audit } from './staff.mjs';
-
-const J = (s, d) => { try { return s ? JSON.parse(s) : d; } catch { return d; } };
-/** A short-string array, sanitised item by item — used for languages/specialties/services ids from an admin patch.
-    No closed vocabulary is enforced here (that list lives in the frontend registry, a separate deployable); this is
-    defense in depth against an oversized or malformed payload, not business validation. */
-const strArr = (v, max = 12, itemLen = 30) => (Array.isArray(v) ? v.slice(0, max).map((x) => str(x, itemLen)).filter(Boolean) : []);
 
 /* ---- rows → contract shapes ---------------------------------------------- */
 /** Public-safe: what the (future) public directory and the portal's own "my profile" view may show anyone. No credential, no internal id. */
@@ -38,66 +30,24 @@ export function privateSupervisor(s) {
   if (!s) return null;
   return { ...publicSupervisor(s), internalId: s.internal_id ?? null, notificationPrefs: J(s.notification_prefs_json, {}), createdAt: s.created_at ?? null, updatedAt: s.updated_at ?? null };
 }
-export const supervisorById = (id) => q.get('SELECT * FROM supervisors WHERE id = ?', id);
-export const supervisorByEmail = (email) => q.get('SELECT * FROM supervisors WHERE email = ?', normEmail(email));
+
+/* ---- credentials: the same stack as customers (credentials.mjs), a SEPARATE store ---------------------------------
+   Own tables, own cookie pair, `sv:`-prefixed lockout keys. Only an ACTIVE supervisor with a password already set
+   signs in or is sent a reset — a freshly provisioned account (no password yet) never authenticates by guessing. */
+export const supervisors = makeCredentialStore({
+  table: 'supervisors', sessionTable: 'supervisor_sessions', resetTable: 'supervisor_reset_tokens', fk: 'supervisor_id',
+  cookies: sessionCookies('no_supervisor_session', 'no_supervisor_csrf'), ctx: { sid: 'supervisorSid', session: 'supervisorSession', account: 'supervisor' },
+  lockoutPrefix: 'sv:', log: 'supervisor.auth', tokenPrefix: 'svrs', activeOnly: true,
+});
+export const { byId: supervisorById, setPassword: setSupervisorPassword } = supervisors;
 export const activeSupervisor = (id) => { const s = supervisorById(id); return s && s.active ? s : null; };
-
-/* ---- credentials (same algorithm as identity.mjs; a separate store) ------ */
-/** True only for an ACTIVE supervisor with a password already set — a freshly provisioned account (no password yet) never authenticates by guessing. */
-export function verifySupervisorPassword({ email, password, ip }) {
-  const e = normEmail(email); const keys = [`sv:e:${e}`, `sv:ip:${ip}`];
-  if (keys.some((k) => loginAttempts(k) >= config.lockout.attempts)) { warn('supervisor.auth.lockout', { ip }); throw new HttpError(429, 'rateLimited', { retryAfter: Math.ceil(config.lockout.windowMs / 1000) }); }
-  const s = supervisorByEmail(e);
-  const ok = !!s && s.active && s.password_hash && typeof password === 'string' && same(hash(password, s.password_salt), s.password_hash);
-  if (!ok) { keys.forEach(recordLoginFailure); throw new HttpError(401, 'invalid'); }
-  keys.forEach(clearLoginFailures); return s;
-}
-export function setSupervisorPassword(supervisorId, password) { checkPassword(password); const salt = hex(8); q.run('UPDATE supervisors SET password_salt = ?, password_hash = ?, updated_at = ? WHERE id = ?', salt, hash(password, salt), now(), supervisorId); }
-export function changeSupervisorPassword(supervisorId, current, next) {
-  const s = supervisorById(supervisorId); if (!s) throw new HttpError(401, 'unauthenticated');
-  if (!s.password_hash || !same(hash(String(current ?? ''), s.password_salt), s.password_hash)) throw new HttpError(422, 'invalid');
-  setSupervisorPassword(s.id, next);
-}
-
-/* ---- sessions (own table, own cookies — backend/http.mjs) ----------------- */
-export function createSupervisorSession(supervisorId) {
-  const id = hex(24); const csrf = hex(16); const t = now(); const exp = Date.now() + config.sessionTtlMs;
-  q.run('INSERT INTO supervisor_sessions (id, supervisor_id, csrf, created_at, expires_at, last_seen_at) VALUES (?,?,?,?,?,?)', id, supervisorId, csrf, t, exp, t);
-  return { id, csrf, expiresAt: new Date(exp).toISOString(), maxAge: Math.floor(config.sessionTtlMs / 1000) };
-}
-export function liveSupervisorSession(sid) {
-  if (!sid) return null; const s = q.get('SELECT * FROM supervisor_sessions WHERE id = ?', sid); if (!s) return null;
-  if (s.expires_at <= Date.now()) { q.run('DELETE FROM supervisor_sessions WHERE id = ?', sid); return null; }
-  if (seenStale(s.last_seen_at)) q.run('UPDATE supervisor_sessions SET last_seen_at = ? WHERE id = ?', now(), sid);   // at most once a minute, not a write per request
-  return s;
-}
-export const endSupervisorSession = (sid) => { if (sid) q.run('DELETE FROM supervisor_sessions WHERE id = ?', sid); };
-export const endAllSupervisorSessions = (supervisorId) => q.run('DELETE FROM supervisor_sessions WHERE supervisor_id = ?', supervisorId);
-export const sweepSupervisorSessions = () => q.run('DELETE FROM supervisor_sessions WHERE expires_at <= ?', Date.now());
-
-/* ---- password reset: neutral, single-use, time-limited (mirrors identity.mjs) */
-export function createSupervisorReset(email) {
-  const s = supervisorByEmail(email); if (!s || !s.active) return null;
-  const token = `svrs_${hex(16)}`; q.run('INSERT INTO supervisor_reset_tokens (token, supervisor_id, expires_at, created_at) VALUES (?,?,?,?)', token, s.id, Date.now() + config.resetTtlMs, now());
-  return { token, supervisor: s };
-}
-export function consumeSupervisorReset(token, password) {
-  const r = token ? q.get('SELECT * FROM supervisor_reset_tokens WHERE token = ?', token) : null;
-  if (!r || r.expires_at <= Date.now()) { if (r) q.run('DELETE FROM supervisor_reset_tokens WHERE token = ?', token); throw new HttpError(410, 'invalidToken'); }
-  setSupervisorPassword(r.supervisor_id, password); q.run('DELETE FROM supervisor_reset_tokens WHERE token = ?', token); endAllSupervisorSessions(r.supervisor_id);
-  return r.supervisor_id;
-}
 
 /* ---- attribution: business rule from business_config, server-authoritative (§9, §26, §27) ---- */
 /** Stage 15B: `.status` derived from the Business Rules Register's own status column (Stage 15A), the same
     single-source-of-truth pattern as `lifecycleConfig()`/`taskPriorityLevels()` in staff.mjs — activating this
     rule from the Admin Dashboard is reflected here immediately; `model` stays whatever value the register holds
     (null until the business supplies one — never computed or guessed here). */
-export function commissionModel() {
-  const r = q.get("SELECT value_json, status FROM business_config WHERE key = 'commission_model'");
-  const v = J(r?.value_json, { model: null });
-  return { ...v, status: r && (r.status === 'ACTIVE' || r.status === 'APPROVED') ? 'confirmed' : (v.status ?? 'pending_business_configuration') };
-}
+export const commissionModel = () => registerRule('commission_model', { model: null });
 
 function logAttribution(customerId, supervisorId, previousSupervisorId, source, actor) {
   q.run('INSERT INTO attribution_events (customer_id, supervisor_id, previous_supervisor_id, source, actor, at) VALUES (?,?,?,?,?,?)', customerId, supervisorId, previousSupervisorId, source, actor, now());
@@ -245,7 +195,7 @@ export function supervisorCommissions(supervisorId, { page = 1, pageSize = 20 } 
 // entry point (the old bearer-token route is untouched, for compatibility).
 // ============================================================================
 const RESERVED_SLUGS = ['dashboard', 'customers', 'leads', 'bookings', 'revenue', 'performance', 'notifications', 'settings', 'profile', 'sign-in', 'sign-up', 'sign-out', 'forgot-password', 'reset-password', 'admin', 'me', 'auth', 'api'];
-const isValidSlug = (slug) => typeof slug === 'string' && /^[a-z0-9]([a-z0-9-]{0,38}[a-z0-9])?$/.test(slug) && !RESERVED_SLUGS.includes(slug);
+const isValidSlug = (slug) => isSlug(slug, 40, RESERVED_SLUGS);
 
 export function listSupervisors({ search = '', page = 1, pageSize = 20 } = {}) {
   const like = search ? `%${str(search, 120)}%` : '';
@@ -278,14 +228,10 @@ export function updateSupervisor(id, patch, actor) {
   const languagesJson = patch.languages !== undefined ? JSON.stringify(strArr(patch.languages, 6, 8)) : s.languages_json;
   const specialtiesJson = patch.specialties !== undefined ? JSON.stringify(strArr(patch.specialties)) : s.specialties_json;
   const servicesJson = patch.services !== undefined ? JSON.stringify(strArr(patch.services)) : s.services_json;
-  const imageJson = patch.image !== undefined
-    ? (patch.image && (patch.image.src || patch.image.altAr || patch.image.altEn)
-        ? JSON.stringify({ src: str(patch.image.src, 300) || null, altAr: str(patch.image.altAr, 160) || null, altEn: str(patch.image.altEn, 160) || null })
-        : null)
-    : s.image_json;
+  const image = patch.image !== undefined ? imageJson(patch.image) : s.image_json;
   q.run('UPDATE supervisors SET slug = ?, name_ar = ?, name_en = ?, title_ar = ?, title_en = ?, bio_ar = ?, bio_en = ?, image_json = ?, languages_json = ?, specialties_json = ?, services_json = ?, phone = ?, whatsapp = ?, email = ?, city = ?, active = ?, updated_at = ? WHERE id = ?',
     v('slug', s.slug, 40), v('nameAr', s.name_ar), v('nameEn', s.name_en), v('titleAr', s.title_ar), v('titleEn', s.title_en), v('bioAr', s.bio_ar, 600), v('bioEn', s.bio_en, 600),
-    imageJson, languagesJson, specialtiesJson, servicesJson,
+    image, languagesJson, specialtiesJson, servicesJson,
     v('phone', s.phone, 30), v('whatsapp', s.whatsapp, 30), patch.email !== undefined ? normEmail(patch.email) || null : s.email, v('city', s.city, 60), active, now(), id);
   audit(actor, active !== s.active ? (active ? 'supervisor.activate' : 'supervisor.deactivate') : 'supervisor.update', 'supervisor', id, {});
   return privateSupervisor(supervisorById(id));

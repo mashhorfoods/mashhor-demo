@@ -16,16 +16,12 @@
 // change at all to read a real supplier's data instead of the in-browser
 // development generator it replaces.
 // ============================================================================
-import { randomBytes, createHash } from 'node:crypto';
-import { q, now } from './db.mjs';
-import { HttpError } from './http.mjs';
+import { createHash } from 'node:crypto';
+import { q, now, J } from './db.mjs';
+import { HttpError, hex } from './http.mjs';
 import { info, warn } from './logger.mjs';
-import { audit } from './staff.mjs';
+import { audit, SYSTEM_ACTOR } from './staff.mjs';
 import { enqueue } from './mailer.mjs';
-
-const SYSTEM_ACTOR = { id: 'system', role: 'system' };
-const hex = (n = 6) => randomBytes(n).toString('hex');
-const J = (s, d) => { try { return s ? JSON.parse(s) : d; } catch { return d; } };
 
 /* ---- provider registry — one adapter per supplier id, never referenced by name outside this file ---- */
 const registry = new Map();

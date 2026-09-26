@@ -15,14 +15,11 @@
 // function says so in its shape (`status: 'pending_...'`) rather than acting
 // on a guess.
 // ============================================================================
-import { config } from './config.mjs';
-import { q, now, pageQuery, whereClause, placeholders } from './db.mjs';
-import { hex, HttpError, str, isEmail, seenStale, loginAttempts, recordLoginFailure, clearLoginFailures } from './http.mjs';
-import { hash, same, checkPassword, normEmail, publicCustomer, slugLookup, customerById } from './identity.mjs';
-import { warn } from './logger.mjs';
+import { q, now, J, registerRule, pageQuery, whereClause, placeholders } from './db.mjs';
+import { hex, HttpError, str, isEmail, sessionCookies } from './http.mjs';
+import { makeCredentialStore, normEmail } from './credentials.mjs';
+import { publicCustomer, slugLookup, customerById } from './identity.mjs';
 import { enqueue } from './mailer.mjs';
-
-const J = (s, d) => { try { return s ? JSON.parse(s) : d; } catch { return d; } };
 
 /* ---- permissions ---------------------------------------------------------- */
 // The full permission vocabulary the backend actually enforces (§25) — a permission not in this list is never granted
@@ -52,54 +49,20 @@ export function publicStaff(s) {
   if (!s) return null;
   return { id: s.id, email: s.email, name: s.name, role: s.role, permissions: s.role === 'admin' ? [...PERMISSIONS] : J(s.permissions_json, []), active: !!s.active, createdAt: s.created_at, updatedAt: s.updated_at };
 }
-export const staffById = (id) => q.get('SELECT * FROM staff WHERE id = ?', id);
-export const staffByEmail = (email) => q.get('SELECT * FROM staff WHERE email = ?', normEmail(email));
 
-/* ---- credentials (same algorithm as identity.mjs; a third, separate store) ------ */
-export function verifyStaffPassword({ email, password, ip }) {
-  const e = normEmail(email); const keys = [`st:e:${e}`, `st:ip:${ip}`];
-  if (keys.some((k) => loginAttempts(k) >= config.lockout.attempts)) { warn('staff.auth.lockout', { ip }); throw new HttpError(429, 'rateLimited', { retryAfter: Math.ceil(config.lockout.windowMs / 1000) }); }
-  const s = staffByEmail(e);
-  const ok = !!s && s.active && s.password_hash && typeof password === 'string' && same(hash(password, s.password_salt), s.password_hash);
-  if (!ok) { keys.forEach(recordLoginFailure); throw new HttpError(401, 'invalid'); }
-  keys.forEach(clearLoginFailures); return s;
-}
-export function setStaffPassword(staffId, password) { checkPassword(password); const salt = hex(8); q.run('UPDATE staff SET password_salt = ?, password_hash = ?, updated_at = ? WHERE id = ?', salt, hash(password, salt), now(), staffId); }
-export function changeStaffPassword(staffId, current, next) {
-  const s = staffById(staffId); if (!s) throw new HttpError(401, 'unauthenticated');
-  if (!s.password_hash || !same(hash(String(current ?? ''), s.password_salt), s.password_hash)) throw new HttpError(422, 'invalid');
-  setStaffPassword(s.id, next);
-}
-
-/* ---- sessions -------------------------------------------------------------- */
-export function createStaffSession(staffId) {
-  const id = hex(24); const csrf = hex(16); const t = now(); const exp = Date.now() + config.sessionTtlMs;
-  q.run('INSERT INTO staff_sessions (id, staff_id, csrf, created_at, expires_at, last_seen_at) VALUES (?,?,?,?,?,?)', id, staffId, csrf, t, exp, t);
-  return { id, csrf, expiresAt: new Date(exp).toISOString(), maxAge: Math.floor(config.sessionTtlMs / 1000) };
-}
-export function liveStaffSession(sid) {
-  if (!sid) return null; const s = q.get('SELECT * FROM staff_sessions WHERE id = ?', sid); if (!s) return null;
-  if (s.expires_at <= Date.now()) { q.run('DELETE FROM staff_sessions WHERE id = ?', sid); return null; }
-  if (seenStale(s.last_seen_at)) q.run('UPDATE staff_sessions SET last_seen_at = ? WHERE id = ?', now(), sid);   // at most once a minute, not a write per request
-  return s;
-}
-export const endStaffSession = (sid) => { if (sid) q.run('DELETE FROM staff_sessions WHERE id = ?', sid); };
-export const endAllStaffSessions = (staffId) => q.run('DELETE FROM staff_sessions WHERE staff_id = ?', staffId);
-export const sweepStaffSessions = () => q.run('DELETE FROM staff_sessions WHERE expires_at <= ?', Date.now());
-
-export function createStaffReset(email) {
-  const s = staffByEmail(email); if (!s || !s.active) return null;
-  const token = `strs_${hex(16)}`; q.run('INSERT INTO staff_reset_tokens (token, staff_id, expires_at, created_at) VALUES (?,?,?,?)', token, s.id, Date.now() + config.resetTtlMs, now());
-  return { token, staff: s };
-}
-export function consumeStaffReset(token, password) {
-  const r = token ? q.get('SELECT * FROM staff_reset_tokens WHERE token = ?', token) : null;
-  if (!r || r.expires_at <= Date.now()) { if (r) q.run('DELETE FROM staff_reset_tokens WHERE token = ?', token); throw new HttpError(410, 'invalidToken'); }
-  setStaffPassword(r.staff_id, password); q.run('DELETE FROM staff_reset_tokens WHERE token = ?', token); endAllStaffSessions(r.staff_id);
-  return r.staff_id;
-}
+/* ---- credentials: the same stack as customers (credentials.mjs), a THIRD, separate store ------------------------
+   Own tables, own cookie pair, `st:`-prefixed lockout keys; only an active account with a password set signs in. */
+export const staffStore = makeCredentialStore({
+  table: 'staff', sessionTable: 'staff_sessions', resetTable: 'staff_reset_tokens', fk: 'staff_id',
+  cookies: sessionCookies('no_ops_session', 'no_ops_csrf'), ctx: { sid: 'staffSid', session: 'staffSession', account: 'staff' },
+  lockoutPrefix: 'st:', log: 'staff.auth', tokenPrefix: 'strs', activeOnly: true,
+});
+const staffById = staffStore.byId;
+export const setStaffPassword = staffStore.setPassword;
 
 /* ---- audit: server-controlled, every operational action lands here (§24, §26) -------------------------------- */
+/** The actor for an action the system takes by itself (a payment webhook, a supplier booking), not a staff member. */
+export const SYSTEM_ACTOR = { id: 'system', role: 'system' };
 export function audit(actor, action, entityType, entityId, metadata = {}) {
   q.run('INSERT INTO audit_events (actor_id, actor_role, action, entity_type, entity_id, metadata_json, at) VALUES (?,?,?,?,?,?,?)',
     actor.id, actor.role, action, entityType, entityId ?? null, JSON.stringify(metadata ?? {}), now());
@@ -116,11 +79,7 @@ const nAudit = (r) => ({ id: r.id, actorId: r.actor_id, actorRole: r.actor_role,
     truth since Stage 15A) rather than a second, independently-editable copy embedded in the JSON value — so
     activating this rule from the Admin Dashboard is immediately reflected here, and nothing can leave the two
     disagreeing about whether the graph is confirmed. */
-export function lifecycleConfig() {
-  const r = q.get("SELECT value_json, status FROM business_config WHERE key = 'booking_lifecycle'");
-  const v = J(r?.value_json, { initial: 'submitted', transitions: {} });
-  return { ...v, status: r && (r.status === 'ACTIVE' || r.status === 'APPROVED') ? 'confirmed' : (v.status ?? 'pending_business_configuration') };
-}
+export const lifecycleConfig = () => registerRule('booking_lifecycle', { initial: 'submitted', transitions: {} });
 const nBookingRow = (r) => ({ id: r.id, customerId: r.customer_id, service: r.service, status: r.status, paymentStatus: r.payment_status, amount: r.amount, currency: r.currency, supervisorId: r.supervisor_id, opsStatus: r.ops_status, assignedOperator: r.assigned_operator, createdAt: r.created_at });
 
 /** Every current valid next state from `from`, per the configured lifecycle — what the UI is allowed to offer. */
@@ -206,11 +165,7 @@ export function opsBookingDetail(bookingId) {
 /* ---- operations tasks (§06/§07) -------------------------------------------------------------------------------- */
 const TASK_STATUSES = ['open', 'in_progress', 'waiting', 'completed', 'cancelled'];
 /** Stage 15B: `.status` derived from the register's own status column, same pattern as `lifecycleConfig()` above. */
-export function taskPriorityLevels() {
-  const r = q.get("SELECT value_json, status FROM business_config WHERE key = 'task_priority_levels'");
-  const v = J(r?.value_json, { levels: ['normal'] });
-  return { ...v, status: r && (r.status === 'ACTIVE' || r.status === 'APPROVED') ? 'confirmed' : (v.status ?? 'pending_business_configuration') };
-}
+export const taskPriorityLevels = () => registerRule('task_priority_levels', { levels: ['normal'] });
 const nTask = (r) => ({ id: r.id, type: r.type, bookingId: r.booking_id, customerId: r.customer_id, supervisorId: r.supervisor_id, assignedTo: r.assigned_to, status: r.status, priority: r.priority, dueAt: r.due_at, notes: r.notes, createdBy: r.created_by, createdAt: r.created_at, updatedAt: r.updated_at, completedAt: r.completed_at });
 export function createTask({ type, bookingId = null, customerId = null, supervisorId = null, assignedTo = null, priority = 'normal', dueAt = null, notes = '' }, actor) {
   const id = `task_${hex(8)}`; const t = now();
@@ -452,7 +407,7 @@ export function createStaffAccount({ email, name, role = 'ops', permissions = []
   const e = normEmail(email);
   if (!isEmail(e) || !str(name, 120)) throw new HttpError(422, 'invalid');
   if (!['admin', 'ops'].includes(role)) throw new HttpError(422, 'invalid');
-  if (staffByEmail(e)) throw new HttpError(409, 'exists');
+  if (staffStore.byEmail(e)) throw new HttpError(409, 'exists');
   const id = `staff_${hex(8)}`; const t = now();
   const perms = role === 'admin' ? [] : (Array.isArray(permissions) ? permissions : []).filter((p) => PERMISSIONS.includes(p));
   q.run('INSERT INTO staff (id, email, name, role, permissions_json, active, created_at, updated_at) VALUES (?,?,?,?,?,1,?,?)', id, e, str(name, 120), role, JSON.stringify(perms), t, t);
@@ -460,7 +415,7 @@ export function createStaffAccount({ email, name, role = 'ops', permissions = []
   // Stage 16D §16: Provision Account → Invite/Reset Flow → Staff Sets Password → Account Active. The same
   // reset-token mechanism staffAuth.resetRequest already uses, triggered automatically now instead of waiting
   // for the new hire to somehow already know to ask for one.
-  const reset = createStaffReset(e);
+  const reset = staffStore.createReset(e);
   if (reset) enqueue({ staffId: id, recipient: e, template: 'staff-invite', eventType: 'staff.invited', payload: { token: reset.token, name: str(name, 120) }, idempotencyKey: `staff-invite:${id}` });
   return publicStaff(staffById(id));
 }
@@ -468,8 +423,8 @@ export function setStaffActive(id, active, actor) {
   if (!staffById(id)) throw new HttpError(404, 'notFound');
   q.run('UPDATE staff SET active = ?, updated_at = ? WHERE id = ?', active ? 1 : 0, now(), id);
   // §19: deactivation ends access immediately, not merely on the next permission check — every existing session
-  // is revoked the same way a password change already revokes a customer's (identity.mjs's changePassword).
-  if (!active) endAllStaffSessions(id);
+  // is revoked the same way a password reset already revokes them (credentials.mjs consumeReset).
+  if (!active) staffStore.endAllSessions(id);
   audit(actor, active ? 'staff.activate' : 'staff.deactivate', 'staff', id, {});
   return publicStaff(staffById(id));
 }

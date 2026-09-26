@@ -13,19 +13,22 @@ import { createServer } from 'node:http';
 import { config, assertConfig } from './config.mjs';
 import { migrate, q } from './db.mjs';
 import { cors, json, empty, fail, HttpError, cookies, rateLimit, resetRateLimits, clientIp, sessionFamily } from './http.mjs';
-import { liveSession, customerById, sweepSessions, endAllSessions, publicCustomer, same } from './identity.mjs';
+import { customers, publicCustomer } from './identity.mjs';
+import { same } from './credentials.mjs';
 import { auth, me, file, legal, diagnostics, paymentsWebhook, flights } from './routes.mjs';
 import { registerDevPaymentProvider } from './payments.mjs';
 import { registerDevFlightProvider } from './flights.mjs';
 import { registerSmtpProvider, deliverOutbox } from './mailer.mjs';
-import { liveSupervisorSession, supervisorById, sweepSupervisorSessions, endAllSupervisorSessions } from './supervisor.mjs';
+import { supervisors } from './supervisor.mjs';
 import { supervisorAuth, supervisorMe } from './supervisor-routes.mjs';
-import { liveStaffSession, staffById, sweepStaffSessions, endAllStaffSessions, publicStaff } from './staff.mjs';
+import { staffStore, publicStaff } from './staff.mjs';
 import { staffAuth, operations, services as opsServices, dashboard } from './staff-routes.mjs';
 import { info, warn, error } from './logger.mjs';
 import { fixtureLegal } from './fixtures.mjs';
 
 const VERSION = '16.4';
+// The three credential stores, keyed by the route family (http.mjs sessionFamily) whose session each one holds.
+const STORES = { customer: customers, supervisor: supervisors, staff: staffStore };
 
 // Stage 16B/16C/16D: the only provider ever registered is whatever config.paymentProvider/config.flightProvider/
 // config.mailer names — config.mjs already refuses an unconfigured value, so none of them can silently become
@@ -62,7 +65,7 @@ export function createApp() {
       if (path === '/__test/fault') { test.faults.push({ status: b.status, times: b.times ?? 1, match: b.path ?? null, retryAfter: b.retryAfter ?? null }); return json(res, 200, { ok: true }); }
       if (path === '/__test/legal') { test.legal = b.supplied ? { version: b.version ?? 'fixture-1' } : null; return json(res, 200, { ok: true }); }
       if (path === '/__test/url-ttl') { test.urlTtlMs = b.ttlMs; return json(res, 200, { ok: true }); }
-      if (path === '/__test/revoke') { if (b.customerId) endAllSessions(b.customerId); else if (b.supervisorId) endAllSupervisorSessions(b.supervisorId); else if (b.staffId) endAllStaffSessions(b.staffId); else { q.run('DELETE FROM sessions'); q.run('DELETE FROM supervisor_sessions'); q.run('DELETE FROM staff_sessions'); } return json(res, 200, { ok: true }); }
+      if (path === '/__test/revoke') { if (b.customerId) customers.endAllSessions(b.customerId); else if (b.supervisorId) supervisors.endAllSessions(b.supervisorId); else if (b.staffId) staffStore.endAllSessions(b.staffId); else { q.run('DELETE FROM sessions'); q.run('DELETE FROM supervisor_sessions'); q.run('DELETE FROM staff_sessions'); } return json(res, 200, { ok: true }); }
       if (path === '/__test/shorten-session') { q.run('UPDATE sessions SET expires_at = ?', Date.now() + (b.ms ?? 60000)); return json(res, 200, { ok: true }); }
       // Stage 16D: delivery runs on its own 15s interval in production; tests trigger it on demand instead of
       // waiting — the SAME deliverOutbox() the interval calls, nothing test-only about the delivery logic itself.
@@ -116,12 +119,12 @@ export function createApp() {
     // supervisor session, so a handler can't confuse them, and a request costs at most one session lookup instead
     // of three. The other families' ctx fields stay null. ----
     const ck = cookies(req); const family = sessionFamily(path);
-    const ctx = { sid: ck.no_session ?? null, session: null, customer: null, supervisorSid: ck.no_supervisor_session ?? null, supervisorSession: null, supervisor: null, staffSid: ck.no_ops_session ?? null, staffSession: null, staff: null, ip, urlTtlMs: test?.urlTtlMs ?? undefined };
-    if (family === 'customer') { const s = liveSession(ck.no_session); const c = s ? customerById(s.customer_id) : null; if (c) Object.assign(ctx, { session: s, customer: c }); }
-    else if (family === 'supervisor') { const s = liveSupervisorSession(ck.no_supervisor_session); const v = s ? supervisorById(s.supervisor_id) : null; if (v) Object.assign(ctx, { supervisorSession: s, supervisor: v }); }
-    else if (family === 'staff') { const s = liveStaffSession(ck.no_ops_session); const m = s ? staffById(s.staff_id) : null; if (m) Object.assign(ctx, { staffSession: s, staff: m }); }
+    const ctx = { ip, urlTtlMs: test?.urlTtlMs ?? undefined };
+    for (const st of Object.values(STORES)) Object.assign(ctx, { [st.ctx.sid]: ck[st.cookies.session] ?? null, [st.ctx.session]: null, [st.ctx.account]: null });
+    const store = STORES[family]; const found = store.resolve(ctx[store.ctx.sid]);
+    if (found) Object.assign(ctx, { [store.ctx.session]: found.session, [store.ctx.account]: found.account });
     if (['POST', 'PATCH', 'DELETE'].includes(req.method)) {
-      const live = ctx.session ?? ctx.supervisorSession ?? ctx.staffSession;   // at most one is set: the route family's
+      const live = found?.session;   // only the route family's own session is ever checked
       if (live) { const h = req.headers['x-csrf-token']; if (!h || !same(h, live.csrf)) { warn('csrf.rejected', { path, family }); return fail(res, 403, 'forbidden'); } }
     }
 
@@ -173,13 +176,17 @@ export function createApp() {
     // ---- Stage 15: /services, /operations, /bookings/:id/*, /documents/:id/review,
     // /notifications/templates|history — every one requires a live STAFF session; the specific permission each
     // action needs is checked inside staff-routes.mjs (backend/staff.mjs requirePermission), never here alone. ----
-    if (path === '/services' && req.method === 'GET') { if (!ctx.staffSession) return fail(res, 401, 'unauthenticated'); return opsServices.list(req, res, ctx); }
-    if ((m = path.match(/^\/services\/([^/]+)$/)) && req.method === 'GET') { if (!ctx.staffSession) return fail(res, 401, 'unauthenticated'); return opsServices.one(req, res, ctx, decodeURIComponent(m[1])); }
-    if ((m = path.match(/^\/services\/([^/]+)$/)) && req.method === 'PATCH') { if (!ctx.staffSession) return fail(res, 401, 'unauthenticated'); return opsServices.update(req, res, ctx, decodeURIComponent(m[1])); }
-    if ((m = path.match(/^\/services\/([^/]+)\/workflow$/)) && req.method === 'GET') { if (!ctx.staffSession) return fail(res, 401, 'unauthenticated'); return opsServices.workflow(req, res, ctx, decodeURIComponent(m[1])); }
-    if ((m = path.match(/^\/services\/([^/]+)\/workflow$/)) && req.method === 'POST') { if (!ctx.staffSession) return fail(res, 401, 'unauthenticated'); return opsServices.workflowUpdate(req, res, ctx, decodeURIComponent(m[1])); }
-    if ((m = path.match(/^\/services\/([^/]+)\/document-requirements$/)) && req.method === 'GET') { if (!ctx.staffSession) return fail(res, 401, 'unauthenticated'); return opsServices.documentRequirements(req, res, ctx, decodeURIComponent(m[1])); }
-    if ((m = path.match(/^\/services\/([^/]+)\/document-requirements$/)) && req.method === 'POST') { if (!ctx.staffSession) return fail(res, 401, 'unauthenticated'); return opsServices.documentRequirementAdd(req, res, ctx, decodeURIComponent(m[1])); }
+    if (path === '/services' || path.startsWith('/services/')) {
+      if (!ctx.staffSession) return fail(res, 401, 'unauthenticated');
+      if (path === '/services' && req.method === 'GET') return opsServices.list(req, res, ctx);
+      if ((m = path.match(/^\/services\/([^/]+)$/)) && req.method === 'GET') return opsServices.one(req, res, ctx, decodeURIComponent(m[1]));
+      if ((m = path.match(/^\/services\/([^/]+)$/)) && req.method === 'PATCH') return opsServices.update(req, res, ctx, decodeURIComponent(m[1]));
+      if ((m = path.match(/^\/services\/([^/]+)\/workflow$/)) && req.method === 'GET') return opsServices.workflow(req, res, ctx, decodeURIComponent(m[1]));
+      if ((m = path.match(/^\/services\/([^/]+)\/workflow$/)) && req.method === 'POST') return opsServices.workflowUpdate(req, res, ctx, decodeURIComponent(m[1]));
+      if ((m = path.match(/^\/services\/([^/]+)\/document-requirements$/)) && req.method === 'GET') return opsServices.documentRequirements(req, res, ctx, decodeURIComponent(m[1]));
+      if ((m = path.match(/^\/services\/([^/]+)\/document-requirements$/)) && req.method === 'POST') return opsServices.documentRequirementAdd(req, res, ctx, decodeURIComponent(m[1]));
+      return fail(res, 404, 'notFound');
+    }
 
     // ---- Stage 14: /admin/* — the management/oversight layer ABOVE the Stage 15 operational domain. A live staff
     // session is required for all of these; the specific permission each action needs is checked inside
@@ -298,9 +305,7 @@ if (process.argv[1]?.endsWith('server.mjs')) {
   assertConfig(); migrate();
   const server = createApp();
   server.listen(config.port, config.host, () => info('server.listening', { host: config.host, port: config.port, environment: config.environment, testControls: config.testControls }));
-  setInterval(() => sweepSessions(), 10 * 60 * 1000).unref();
-  setInterval(() => sweepSupervisorSessions(), 10 * 60 * 1000).unref();
-  setInterval(() => sweepStaffSessions(), 10 * 60 * 1000).unref();
+  setInterval(() => { for (const st of Object.values(STORES)) st.sweepSessions(); }, 10 * 60 * 1000).unref();
   // Stage 16D §4/§9: delivery runs on its own schedule, never inside the request that queued a message — a
   // provider outage here can never lose an event (it just stays 'queued'/'retrying') or affect the booking/
   // payment/document operation that triggered it. No-ops immediately when config.mailer === 'none'.

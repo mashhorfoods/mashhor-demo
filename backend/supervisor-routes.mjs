@@ -6,38 +6,28 @@
 // and a supervisor session can never reach /me/*. Reassigning a customer's
 // attribution is an admin-dashboard action (staff-routes.mjs), not a route here.
 // ============================================================================
-import { q, now } from './db.mjs';
-import { json, empty, fail, readJson, str, isEmail, pageParams, setSupervisorSessionCookies, clearSupervisorSessionCookies } from './http.mjs';
+import { q, now, markRead } from './db.mjs';
+import { json, fail, readJson, str, pageParams } from './http.mjs';
+import { authRoutes } from './credentials.mjs';
 import {
-  privateSupervisor, supervisorById, verifySupervisorPassword, changeSupervisorPassword,
-  createSupervisorSession, endSupervisorSession, createSupervisorReset, consumeSupervisorReset,
+  supervisors, privateSupervisor, supervisorById,
   supervisorCustomers, supervisorCustomer, supervisorBookings, supervisorBooking, supervisorLeads, updateLeadStatus,
   supervisorRevenue, supervisorPerformance, supervisorCommissions, nSupervisorNotification,
 } from './supervisor.mjs';
 import { enqueue } from './mailer.mjs';
-import { normEmail } from './identity.mjs';
 import { info } from './logger.mjs';
 
-const sessionAnswer = (res, s) => { const sess = createSupervisorSession(s.id); setSupervisorSessionCookies(res, sess.id, sess.csrf, sess.maxAge); return { supervisor: privateSupervisor(s), expiresAt: sess.expiresAt }; };
 const period = (url) => { const p = url.searchParams.get('period'); const days = { today: 1, week: 7, month: 30 }[p]; return days ? new Date(Date.now() - days * 864e5).toISOString() : null; };
 const page = (url) => pageParams(url, { max: 50 }).page;
 const pageSize = (url, d = 20) => pageParams(url, { def: d, max: 50 }).pageSize;
 
 /* ---- /supervisor/auth --------------------------------------------------- */
-export const supervisorAuth = {
-  // No sign-up: supervisor accounts are provisioned by the business (future Admin Dashboard, §4/§40), never self-registered.
-  async signIn(req, res, ctx) { const b = await readJson(req); const s = verifySupervisorPassword({ email: b.email, password: b.password, ip: ctx.ip }); return json(res, 200, sessionAnswer(res, s)); },
-  session(req, res, ctx) { if (!ctx.supervisorSession) return fail(res, 401, 'unauthenticated'); return json(res, 200, { supervisor: privateSupervisor(ctx.supervisor), expiresAt: new Date(ctx.supervisorSession.expires_at).toISOString() }); },
-  refresh(req, res, ctx) { if (!ctx.supervisorSession) return fail(res, 401, 'unauthenticated'); endSupervisorSession(ctx.supervisorSession.id); return json(res, 200, sessionAnswer(res, ctx.supervisor)); },
-  signOut(req, res, ctx) { endSupervisorSession(ctx.supervisorSid); clearSupervisorSessionCookies(res); return empty(res); },
-  async resetRequest(req, res) {
-    const b = await readJson(req); const email = normEmail(b.email);
-    if (isEmail(email)) { const r = createSupervisorReset(email); if (r) enqueue({ recipient: r.supervisor.email, template: 'supervisor-password-reset', payload: { token: r.token, locale: 'ar', supervisorId: r.supervisor.id } }); }
-    return json(res, 202, {});   // never reveals whether the address exists — same neutral answer as the customer flow
-  },
-  async reset(req, res) { const b = await readJson(req); consumeSupervisorReset(str(b.token, 80), b.password); info('supervisor.auth.reset', { ok: true }); return empty(res); },
-  async change(req, res, ctx) { if (!ctx.supervisorSession) return fail(res, 401, 'unauthenticated'); const b = await readJson(req); changeSupervisorPassword(ctx.supervisor.id, b.current, b.next); return empty(res); },
-};
+// No sign-up: supervisor accounts are provisioned by the business (Admin Dashboard, §4/§40), never self-registered.
+export const supervisorAuth = authRoutes(supervisors, {
+  key: 'supervisor', view: privateSupervisor,
+  onResetRequest: (r) => enqueue({ recipient: r.account.email, template: 'supervisor-password-reset', payload: { token: r.token, locale: 'ar', supervisorId: r.account.id } }),
+  onReset: () => info('supervisor.auth.reset', { ok: true }),
+}).routes;
 
 /* ---- /supervisor/me ------------------------------------------------------ */
 export const supervisorMe = {
@@ -66,5 +56,5 @@ export const supervisorMe = {
   performance(req, res, ctx, url) { return json(res, 200, supervisorPerformance(ctx.supervisor.id, { since: period(url) })); },
   commissions(req, res, ctx, url) { return json(res, 200, supervisorCommissions(ctx.supervisor.id, { page: page(url), pageSize: pageSize(url) })); },
   notifications(req, res, ctx) { return json(res, 200, { notifications: q.all('SELECT * FROM supervisor_notifications WHERE supervisor_id = ? ORDER BY at DESC', ctx.supervisor.id).map(nSupervisorNotification) }); },
-  async notificationsRead(req, res, ctx) { const b = await readJson(req); const sid = ctx.supervisor.id; if (b.all) q.run('UPDATE supervisor_notifications SET read = 1 WHERE supervisor_id = ?', sid); else for (const id of (Array.isArray(b.ids) ? b.ids : []).slice(0, 200)) q.run('UPDATE supervisor_notifications SET read = 1 WHERE id = ? AND supervisor_id = ?', String(id), sid); return json(res, 200, { notifications: q.all('SELECT * FROM supervisor_notifications WHERE supervisor_id = ? ORDER BY at DESC', sid).map(nSupervisorNotification) }); },
+  async notificationsRead(req, res, ctx) { const b = await readJson(req); const sid = ctx.supervisor.id; markRead('supervisor_notifications', 'supervisor_id', sid, b); return json(res, 200, { notifications: q.all('SELECT * FROM supervisor_notifications WHERE supervisor_id = ? ORDER BY at DESC', sid).map(nSupervisorNotification) }); },
 };

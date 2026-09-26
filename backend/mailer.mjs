@@ -19,15 +19,12 @@
 // Neither is ever silently substituted for the other: BACKEND_MAILER
 // decides, and config.mjs refuses an unconfigured 'smtp' outright.
 // ============================================================================
-import { randomBytes } from 'node:crypto';
 import { connect as netConnect } from 'node:net';
 import { connect as tlsConnect } from 'node:tls';
-import { q, now } from './db.mjs';
+import { q, now, J } from './db.mjs';
+import { hex } from './http.mjs';
 import { config } from './config.mjs';
 import { info, warn } from './logger.mjs';
-
-const hexid = (n = 8) => randomBytes(n).toString('hex');
-const J = (s, d) => { try { return s ? JSON.parse(s) : d; } catch { return d; } };
 
 /* ---- provider registry ---------------------------------------------------------------------------------------- */
 const registry = new Map();
@@ -55,7 +52,7 @@ export function renderTemplate(body, payload) {
  * pass one.
  */
 export function enqueue({ customerId = null, staffId = null, bookingId = null, recipient = null, channel = 'email', template, eventType = null, payload = {}, idempotencyKey = null }) {
-  const id = `msg_${hexid()}`; const t = now();
+  const id = `msg_${hex(8)}`; const t = now();
   const cols = 'id, customer_id, staff_id, booking_id, recipient, channel, template, event_type, payload_json, status, attempts, idempotency_key, created_at, updated_at';
   // Callers usually name the booking only in the payload; the column is what staff history filters on (indexed).
   const booking = bookingId ?? (typeof payload?.bookingId === 'string' ? payload.bookingId : null);
@@ -192,7 +189,7 @@ async function sendViaSmtp(cfg, { to, subject, text }) {
     socket.write(`MAIL FROM:<${cfg.from}>\r\n`); await expect(250);
     socket.write(`RCPT TO:<${to}>\r\n`); await expect(250, 251);
     socket.write('DATA\r\n'); await expect(354);
-    const messageId = `<${hexid(12)}@${cfg.host}>`;
+    const messageId = `<${hex(12)}@${cfg.host}>`;
     const headers = [`From: ${cfg.from}`, `To: ${to}`, `Subject: ${encodeHeaderValue(subject)}`, `Date: ${new Date().toUTCString()}`, `Message-ID: ${messageId}`, 'MIME-Version: 1.0', 'Content-Type: text/plain; charset=utf-8', 'Content-Transfer-Encoding: 8bit'];
     socket.write(headers.join('\r\n') + '\r\n\r\n' + dotStuff(text) + '\r\n.\r\n');
     await expect(250);

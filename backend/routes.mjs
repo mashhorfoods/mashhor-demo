@@ -4,9 +4,10 @@
 // URL, body or header can name another customer.
 // ============================================================================
 import { config } from './config.mjs';
-import { q, now, placeholders } from './db.mjs';
-import { json, empty, fail, HttpError, hex, readJson, readBody, parseMultipart, str, isEmail, pageParams, setSessionCookies, clearSessionCookies } from './http.mjs';
-import { publicCustomer, slugLookup, customerById, createIdentity, verifyPassword, changePassword, createSession, endSession, createReset, consumeReset, validAttribution, normEmail } from './identity.mjs';
+import { q, now, J, placeholders, markRead } from './db.mjs';
+import { json, empty, fail, HttpError, hex, readJson, readBody, parseMultipart, str, isEmail, pageParams } from './http.mjs';
+import { customers, publicCustomer, slugLookup, customerById, createIdentity, validAttribution } from './identity.mjs';
+import { authRoutes, normEmail } from './credentials.mjs';
 import { assignAttribution } from './supervisor.mjs';
 import { validateUpload, storage, signedUrl, verifySignature } from './storage.mjs';
 import { enqueue } from './mailer.mjs';
@@ -16,7 +17,6 @@ import { createPaymentIntent, handleWebhookEvent, simulateDevWebhook } from './p
 import { searchFlights, getFlightOffer, quoteFlightOffer } from './flights.mjs';
 
 /* ---- row → contract shape ---------------------------------------------- */
-const J = (s, d) => { try { return s ? JSON.parse(s) : d; } catch { return d; } };
 const nTrip = (r, byTrip = null, slug = slugLookup()) => ({ id: r.id, customerId: r.customer_id, titleAr: r.title_ar, titleEn: r.title_en, destination: J(r.destination_json, null), startDate: r.start_date, endDate: r.end_date, services: J(r.services_json, []), status: r.status, bookingIds: byTrip ? (byTrip.get(r.id) ?? []) : q.all('SELECT id FROM bookings WHERE trip_id = ? AND customer_id = ?', r.id, r.customer_id).map((b) => b.id), travellers: r.travellers, supervisorId: slug(r.supervisor_id), createdAt: r.created_at });
 const nBooking = (r, slug = slugLookup()) => ({ id: r.id, customerId: r.customer_id, tripId: r.trip_id, service: r.service, status: r.status, paymentStatus: r.payment_status, amount: r.amount, currency: r.currency, supervisorId: slug(r.supervisor_id), ticketed: !!r.ticketed, createdAt: r.created_at, detail: J(r.detail_json, {}) });
 /** trip id → its booking ids for one customer, in one query, for mapping a list of trips with nTrip(t, byTrip). */
@@ -29,7 +29,6 @@ const nTrv = (r) => ({ id: r.id, firstName: r.first_name, lastName: r.last_name,
 // the provider id, the raw supplier response, or itinerary_json (the customer-facing route/dates/flights
 // strings already come from bookings.detail_json, set at claim time).
 const nFlightBookingCustomer = (bookingId) => { const r = q.get('SELECT * FROM flight_bookings WHERE booking_id = ?', bookingId); return r ? { status: r.status, reference: r.provider_booking_id, failureReason: r.status === 'failed' ? r.failure_reason : null, updatedAt: r.updated_at } : null; };
-const sessionAnswer = (res, c) => { const s = createSession(c.id); setSessionCookies(res, s.id, s.csrf, s.maxAge); return { customer: publicCustomer(c), expiresAt: s.expiresAt }; };
 const cleanAcceptance = (a) => (a && typeof a === 'object' ? { terms: a.terms ? { version: str(a.terms.version, 40), effectiveAt: str(a.terms.effectiveAt, 20) } : null, privacy: a.privacy ? { version: str(a.privacy.version, 40), effectiveAt: str(a.privacy.effectiveAt, 20) } : null, locale: a.locale === 'en' ? 'en' : 'ar' } : null);
 // Stage 16C §20: only the passenger fields a supplier booking actually needs, at most 9 (the journey's own cap) —
 // never the internal customer/supervisor/staff records a booking's detail_json has no business carrying.
@@ -59,7 +58,13 @@ export const flights = {
 };
 
 /* ---- /auth ------------------------------------------------------------ */
+const { sessionAnswer, routes: customerAuth } = authRoutes(customers, {
+  key: 'customer', view: publicCustomer,
+  onResetRequest: (r) => enqueue({ customerId: r.account.id, template: 'password-reset', payload: { token: r.token, locale: r.account.locale } }),
+  onReset: (cid) => { info('auth.reset', { ok: true }); enqueue({ customerId: cid, template: 'password-changed', payload: {} }); },
+});
 export const auth = {
+  ...customerAuth,
   async signUp(req, res, ctx, legalOverride) {
     const b = await readJson(req);
     const name = str(b.name, 120); const email = normEmail(b.email); const phone = str(b.phone, 30); const locale = b.locale === 'en' ? 'en' : 'ar';
@@ -75,17 +80,6 @@ export const auth = {
     info('auth.signup', { attributed: !!c.attribution_supervisor });
     return json(res, 201, sessionAnswer(res, c));
   },
-  async signIn(req, res, ctx) { const b = await readJson(req); const c = verifyPassword({ email: b.email, password: b.password, ip: ctx.ip }); return json(res, 200, sessionAnswer(res, c)); },
-  session(req, res, ctx) { if (!ctx.session) return fail(res, 401, 'unauthenticated'); return json(res, 200, { customer: publicCustomer(ctx.customer), expiresAt: new Date(ctx.session.expires_at).toISOString() }); },
-  refresh(req, res, ctx) { if (!ctx.session) return fail(res, 401, 'unauthenticated'); endSession(ctx.session.id); return json(res, 200, sessionAnswer(res, ctx.customer)); },
-  signOut(req, res, ctx) { endSession(ctx.sid); clearSessionCookies(res); return empty(res); },
-  async resetRequest(req, res) {
-    const b = await readJson(req); const email = normEmail(b.email);
-    if (isEmail(email)) { const r = createReset(email); if (r) enqueue({ customerId: r.customer.id, template: 'password-reset', payload: { token: r.token, locale: r.customer.locale } }); }
-    return json(res, 202, {});   // never reveals whether the address exists
-  },
-  async reset(req, res) { const b = await readJson(req); const cid = consumeReset(str(b.token, 80), b.password); info('auth.reset', { ok: true }); enqueue({ customerId: cid, template: 'password-changed', payload: {} }); return empty(res); },
-  async change(req, res, ctx) { if (!ctx.session) return fail(res, 401, 'unauthenticated'); const b = await readJson(req); changePassword(ctx.customer.id, b.current, b.next); return empty(res); },
 };
 
 /* ---- /me ---------------------------------------------------------------- */
@@ -207,7 +201,7 @@ export const me = {
     return json(res, 200, { items, page, pageSize: size, total, nextPage: page * size < total ? page + 1 : null });
   },
   notifications(req, res, ctx) { return json(res, 200, { notifications: q.all('SELECT * FROM notifications WHERE customer_id = ? ORDER BY at DESC', ctx.customer.id).map(nNtf) }); },
-  async notificationsRead(req, res, ctx) { const b = await readJson(req); const cid = ctx.customer.id; if (b.all) q.run('UPDATE notifications SET read = 1 WHERE customer_id = ?', cid); else for (const id of (Array.isArray(b.ids) ? b.ids : []).slice(0, 200)) q.run('UPDATE notifications SET read = 1 WHERE id = ? AND customer_id = ?', String(id), cid); return json(res, 200, { notifications: q.all('SELECT * FROM notifications WHERE customer_id = ? ORDER BY at DESC', cid).map(nNtf) }); },
+  async notificationsRead(req, res, ctx) { const b = await readJson(req); const cid = ctx.customer.id; markRead('notifications', 'customer_id', cid, b); return json(res, 200, { notifications: q.all('SELECT * FROM notifications WHERE customer_id = ? ORDER BY at DESC', cid).map(nNtf) }); },
   async acceptance(req, res, ctx) { const b = cleanAcceptance(await readJson(req)); if (!b) throw new HttpError(422, 'invalid'); q.run('UPDATE customers SET acceptance_json = ?, updated_at = ? WHERE id = ?', JSON.stringify({ ...b, at: now() }), now(), ctx.customer.id); return empty(res); },
 };
 

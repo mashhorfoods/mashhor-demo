@@ -7,10 +7,10 @@
 // permissions the backend does not actually enforce" — every permission
 // named below is checked here, not just displayed in a UI).
 // ============================================================================
-import { json, empty, fail, readJson, str, isEmail, pageParams, setStaffSessionCookies, clearStaffSessionCookies } from './http.mjs';
+import { json, fail, readJson, str, pageParams } from './http.mjs';
+import { authRoutes } from './credentials.mjs';
 import {
-  publicStaff, verifyStaffPassword, changeStaffPassword, createStaffSession, endStaffSession,
-  createStaffReset, consumeStaffReset, requirePermission, hasPermission,
+  staffStore, publicStaff, requirePermission, hasPermission,
   opsBookingList, opsBookingDetail, transitionBooking, assignBookingOperator,
   createTask, listTasks, assignTask, updateTaskStatus, taskPriorityLevels,
   createEscalation, listEscalations, updateEscalationStatus,
@@ -26,29 +26,18 @@ import {
   adminLeads, adminAttributionEvents, reassignAttribution,
 } from './supervisor.mjs';
 import { listDestinations, destinationById, createDestination, updateDestination, listOffers, offerById, createOffer, updateOffer } from './content.mjs';
-import { normEmail } from './identity.mjs';
 import { enqueue } from './mailer.mjs';
 import { listBusinessRules, businessRuleById, businessRuleHistory, updateBusinessRule, activateBusinessRule, disableBusinessRule, pendingDecisions, businessRuleMatrix } from './business-rules.mjs';
 
-const sessionAnswer = (res, s) => { const sess = createStaffSession(s.id); setStaffSessionCookies(res, sess.id, sess.csrf, sess.maxAge); return { staff: publicStaff(s), expiresAt: sess.expiresAt }; };
 const page = (url) => pageParams(url, { max: 100 }).page;
 const pageSize = (url, d = 20) => pageParams(url, { def: d, max: 100 }).pageSize;
 const actorOf = (ctx) => ({ id: ctx.staff.id, role: ctx.staff.role });
 
 /* ---- /staff/auth --------------------------------------------------------- */
-export const staffAuth = {
-  async signIn(req, res, ctx) { const b = await readJson(req); const s = verifyStaffPassword({ email: b.email, password: b.password, ip: ctx.ip }); return json(res, 200, sessionAnswer(res, s)); },
-  session(req, res, ctx) { if (!ctx.staffSession) return fail(res, 401, 'unauthenticated'); return json(res, 200, { staff: publicStaff(ctx.staff), expiresAt: new Date(ctx.staffSession.expires_at).toISOString() }); },
-  refresh(req, res, ctx) { if (!ctx.staffSession) return fail(res, 401, 'unauthenticated'); endStaffSession(ctx.staffSession.id); return json(res, 200, sessionAnswer(res, ctx.staff)); },
-  signOut(req, res, ctx) { endStaffSession(ctx.staffSid); clearStaffSessionCookies(res); return empty(res); },
-  async resetRequest(req, res) {
-    const b = await readJson(req); const email = normEmail(b.email);
-    if (isEmail(email)) { const r = createStaffReset(email); if (r) enqueue({ staffId: r.staff.id, recipient: r.staff.email, template: 'staff-password-reset', payload: { token: r.token, staffId: r.staff.id } }); }
-    return json(res, 202, {});
-  },
-  async reset(req, res) { const b = await readJson(req); consumeStaffReset(str(b.token, 80), b.password); return empty(res); },
-  async change(req, res, ctx) { if (!ctx.staffSession) return fail(res, 401, 'unauthenticated'); const b = await readJson(req); changeStaffPassword(ctx.staff.id, b.current, b.next); return empty(res); },
-};
+export const staffAuth = authRoutes(staffStore, {
+  key: 'staff', view: publicStaff,
+  onResetRequest: (r) => enqueue({ staffId: r.account.id, recipient: r.account.email, template: 'staff-password-reset', payload: { token: r.token, staffId: r.account.id } }),
+}).routes;
 
 /* ---- /operations/* --------------------------------------------------------- */
 export const operations = {

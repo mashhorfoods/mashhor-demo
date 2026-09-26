@@ -118,6 +118,18 @@ export const q = {
 };
 let txDepth = 0;
 export const now = () => new Date().toISOString();
+/** A stored JSON column, parsed — or `d` when it is empty or not valid JSON. */
+export const J = (s, d) => { try { return s ? JSON.parse(s) : d; } catch { return d; } };
+/** A Business Rules Register status that counts as confirmed business policy. */
+export const ruleConfirmed = (status) => status === 'ACTIVE' || status === 'APPROVED';
+/** A register rule's value, with `.status` derived from the register's own status column (the single source of truth
+    since Stage 15A): 'confirmed' once the rule is ACTIVE or APPROVED, else whatever the value says, else pending.
+    Activating a rule from the Admin Dashboard is therefore reflected immediately by every reader. */
+export function registerRule(key, fallback) {
+  const r = q.get('SELECT value_json, status FROM business_config WHERE key = ?', key);
+  const v = J(r?.value_json, fallback);
+  return { ...v, status: r && ruleConfirmed(r.status) ? 'confirmed' : (v.status ?? 'pending_business_configuration') };
+}
 
 /** One page of `SELECT * FROM <from> ORDER BY <order>`, counted and sliced in SQL (COUNT + LIMIT/OFFSET), in the
     page/pageSize/total/nextPage shape every list read model answers with. `from` is the table plus its WHERE clause
@@ -144,3 +156,11 @@ export function whereClause(pairs) {
 
 /** `?` placeholders for a batched `IN (...)` lookup — `IN (${placeholders(ids)})`. Callers still guard `ids.length`. */
 export const placeholders = (ids) => ids.map(() => '?').join(',');
+
+/** Marks one owner's notifications read — every one (`all`), or at most 200 of the given `ids` in a single UPDATE.
+    Always scoped to the owner column, so an id belonging to someone else is simply not matched. */
+export function markRead(table, ownerCol, ownerId, { all, ids } = {}) {
+  if (all) { q.run(`UPDATE ${table} SET read = 1 WHERE ${ownerCol} = ?`, ownerId); return; }
+  const list = (Array.isArray(ids) ? ids : []).slice(0, 200).map(String);
+  if (list.length) q.run(`UPDATE ${table} SET read = 1 WHERE ${ownerCol} = ? AND id IN (${placeholders(list)})`, ownerId, ...list);
+}

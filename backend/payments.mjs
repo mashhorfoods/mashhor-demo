@@ -15,17 +15,14 @@
 // payment's status to 'paid'. Nothing else in this file — not intent
 // creation, not a route argument, not a client field — has that authority.
 // ============================================================================
-import { randomBytes, createHmac, timingSafeEqual } from 'node:crypto';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { q, now } from './db.mjs';
-import { HttpError } from './http.mjs';
+import { HttpError, hex } from './http.mjs';
 import { info, warn } from './logger.mjs';
-import { audit } from './staff.mjs';
+import { audit, SYSTEM_ACTOR } from './staff.mjs';
 import { enqueue } from './mailer.mjs';
 import { config } from './config.mjs';
 import { createFlightBooking } from './flights.mjs';
-
-const SYSTEM_ACTOR = { id: 'system', role: 'system' };
-const hex = (n = 8) => randomBytes(n).toString('hex');
 
 /* ---- provider registry — one adapter per provider id, never referenced by name outside this file ---- */
 const registry = new Map();

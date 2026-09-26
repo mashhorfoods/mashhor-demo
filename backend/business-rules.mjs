@@ -14,11 +14,10 @@
 // (services/service_workflows, suppliers) — those are read, not duplicated,
 // by pendingDecisions()/businessRuleMatrix() below (§30).
 // ============================================================================
-import { q, now, whereClause } from './db.mjs';
+import { q, now, J, ruleConfirmed, whereClause } from './db.mjs';
 import { HttpError, str } from './http.mjs';
 import { audit } from './staff.mjs';
 
-const J = (s, d) => { try { return s ? JSON.parse(s) : d; } catch { return d; } };
 
 export const RULE_STATUSES = ['DRAFT', 'PENDING', 'APPROVED', 'ACTIVE', 'DISABLED', 'SUPERSEDED'];
 
@@ -103,7 +102,7 @@ export function pendingDecisions() {
     category (service workflows, suppliers) — a plain tally of real rows, never a fabricated percentage. */
 export function businessRuleMatrix() {
   const rows = q.all('SELECT * FROM business_config ORDER BY category, key').map((r) => ({
-    category: r.category, rule: r.name, status: r.status, configured: r.status === 'ACTIVE' || r.status === 'APPROVED',
+    category: r.category, rule: r.name, status: r.status, configured: ruleConfirmed(r.status),
     source: r.source, impact: J(r.value_json, {})?.note ?? '',
   }));
   const services = q.all('SELECT id FROM services');

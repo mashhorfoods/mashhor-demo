@@ -16,19 +16,14 @@
 // showing its current content — flagged elsewhere as "unpublished changes" —
 // until someone deliberately republishes it (Phase 2 scope decision).
 // ============================================================================
-import { hex, HttpError, str } from './http.mjs';
-import { q, now, pageQuery, whereClause } from './db.mjs';
+import { hex, HttpError, str, strArr, isSlug, imageJson } from './http.mjs';
+import { q, now, J, pageQuery, whereClause } from './db.mjs';
 import { audit } from './staff.mjs';
 
-const J = (s, d) => { try { return s ? JSON.parse(s) : d; } catch { return d; } };
-/** A short-string array, sanitised item by item — same defense-in-depth shape as supervisor.mjs's strArr: no closed
-    vocabulary is enforced here (regions/purposes/categories/services ids live in the frontend registries), this
-    just guards against an oversized or malformed payload. */
-const strArr = (v, max = 12, itemLen = 40) => (Array.isArray(v) ? v.slice(0, max).map((x) => str(x, itemLen)).filter(Boolean) : []);
-const isValidSlug = (slug) => typeof slug === 'string' && /^[a-z0-9]([a-z0-9-]{0,58}[a-z0-9])?$/.test(slug);
-const imageJson = (image) => (image && (image.src || image.altAr || image.altEn)
-  ? JSON.stringify({ src: str(image.src, 300) || null, altAr: str(image.altAr, 160) || null, altEn: str(image.altEn, 160) || null })
-  : null);
+// Region/purpose/category/service ids are sanitised (http.mjs strArr), not checked against a closed vocabulary:
+// those lists live in the frontend registries.
+const ids = (v) => strArr(v, 12, 40);
+const isValidSlug = (slug) => isSlug(slug, 60);
 
 /* ---- draft/publish state machine, shared by both entities below ---- */
 const PUBLISH_TRANSITIONS = { draft: ['published', 'archived'], published: ['draft', 'archived'], archived: ['draft'] };
@@ -94,8 +89,8 @@ export function updateDestination(id, patch, actor) {
   const featured = patch.featured !== undefined ? (patch.featured ? 1 : 0) : row.featured;
   const home = patch.home !== undefined ? (patch.home ? 1 : 0) : row.home;
   const orderIndex = patch.order !== undefined ? (Number.isFinite(patch.order) ? Math.trunc(patch.order) : null) : row.order_index;
-  const purposesJson = patch.purposes !== undefined ? JSON.stringify(strArr(patch.purposes)) : row.purposes_json;
-  const servicesJson = patch.services !== undefined ? JSON.stringify(strArr(patch.services)) : row.services_json;
+  const purposesJson = patch.purposes !== undefined ? JSON.stringify(ids(patch.purposes)) : row.purposes_json;
+  const servicesJson = patch.services !== undefined ? JSON.stringify(ids(patch.services)) : row.services_json;
   const image = patch.image !== undefined ? imageJson(patch.image) : row.image_json;
   q.run(`UPDATE destinations SET slug = ?, region = ?, name_ar = ?, name_en = ?, country_ar = ?, country_en = ?, desc_ar = ?, desc_en = ?,
          purposes_json = ?, services_json = ?, image_json = ?, featured = ?, home = ?, publish_status = ?, published_at = ?, order_index = ?, updated_at = ? WHERE id = ?`,
@@ -159,8 +154,8 @@ export function updateOffer(id, patch, actor) {
   const { publishStatus, publishedAt } = resolvePublishStatus(row, patch, !!(titleAr || titleEn), t);
   const featured = patch.featured !== undefined ? (patch.featured ? 1 : 0) : row.featured;
   const placeholder = patch.placeholder !== undefined ? (patch.placeholder ? 1 : 0) : row.placeholder;
-  const categoriesJson = patch.categories !== undefined ? JSON.stringify(strArr(patch.categories)) : row.categories_json;
-  const servicesJson = patch.services !== undefined ? JSON.stringify(strArr(patch.services)) : row.services_json;
+  const categoriesJson = patch.categories !== undefined ? JSON.stringify(ids(patch.categories)) : row.categories_json;
+  const servicesJson = patch.services !== undefined ? JSON.stringify(ids(patch.services)) : row.services_json;
   const image = patch.image !== undefined ? imageJson(patch.image) : row.image_json;
   const nights = patch.duration?.nights !== undefined ? (Number.isFinite(patch.duration.nights) ? Math.trunc(patch.duration.nights) : null) : row.duration_nights;
   const price = patch.price !== undefined ? patch.price : undefined;

@@ -18,17 +18,14 @@ export const fail = (res, status, code, headers = {}) => json(res, status, { err
 
 export const cookies = (req) => Object.fromEntries((req.headers.cookie ?? '').split(';').map((c) => c.trim()).filter(Boolean).map((c) => { const i = c.indexOf('='); return [c.slice(0, i), decodeURIComponent(c.slice(i + 1))]; }));
 const attrs = (extra = '') => `Path=/; SameSite=${config.cookie.sameSite}${config.cookie.secure ? '; Secure' : ''}${config.cookie.domain ? `; Domain=${config.cookie.domain}` : ''}${extra}`;
-export const setSessionCookies = (res, sid, csrf, maxAgeSeconds) => res.setHeader('Set-Cookie', [`no_session=${sid}; HttpOnly; ${attrs(`; Max-Age=${maxAgeSeconds}`)}`, `no_csrf=${csrf}; ${attrs(`; Max-Age=${maxAgeSeconds}`)}`]);
-export const clearSessionCookies = (res) => res.setHeader('Set-Cookie', [`no_session=; HttpOnly; ${attrs('; Max-Age=0')}`, `no_csrf=; ${attrs('; Max-Age=0')}`]);
-// Stage 13 — a SEPARATE cookie pair for the supervisor portal, distinct names so a customer session and a supervisor
-// session can never be confused by either side reading the other's cookie, and so a browser holding both (e.g. QA)
-// keeps them independent.
-export const setSupervisorSessionCookies = (res, sid, csrf, maxAgeSeconds) => res.setHeader('Set-Cookie', [`no_supervisor_session=${sid}; HttpOnly; ${attrs(`; Max-Age=${maxAgeSeconds}`)}`, `no_supervisor_csrf=${csrf}; ${attrs(`; Max-Age=${maxAgeSeconds}`)}`]);
-export const clearSupervisorSessionCookies = (res) => res.setHeader('Set-Cookie', [`no_supervisor_session=; HttpOnly; ${attrs('; Max-Age=0')}`, `no_supervisor_csrf=; ${attrs('; Max-Age=0')}`]);
-// Stage 15 — a THIRD cookie pair for staff (Admin + Operations Staff share this one portal, distinguished by
-// role/permissions, never by which cookie they hold).
-export const setStaffSessionCookies = (res, sid, csrf, maxAgeSeconds) => res.setHeader('Set-Cookie', [`no_ops_session=${sid}; HttpOnly; ${attrs(`; Max-Age=${maxAgeSeconds}`)}`, `no_ops_csrf=${csrf}; ${attrs(`; Max-Age=${maxAgeSeconds}`)}`]);
-export const clearStaffSessionCookies = (res) => res.setHeader('Set-Cookie', [`no_ops_session=; HttpOnly; ${attrs('; Max-Age=0')}`, `no_ops_csrf=; ${attrs('; Max-Age=0')}`]);
+/** One role's cookie pair: the HttpOnly session id and the script-readable CSRF token. Each role (customer,
+    supervisor, staff) has its OWN names, so a session of one role is never read as another's, and a browser holding
+    several (e.g. QA) keeps them independent. The names are fixed in identity.mjs, supervisor.mjs and staff.mjs. */
+export const sessionCookies = (session, csrf) => ({
+  session, csrf,
+  set: (res, sid, token, maxAgeSeconds) => res.setHeader('Set-Cookie', [`${session}=${sid}; HttpOnly; ${attrs(`; Max-Age=${maxAgeSeconds}`)}`, `${csrf}=${token}; ${attrs(`; Max-Age=${maxAgeSeconds}`)}`]),
+  clear: (res) => res.setHeader('Set-Cookie', [`${session}=; HttpOnly; ${attrs('; Max-Age=0')}`, `${csrf}=; ${attrs('; Max-Age=0')}`]),
+});
 
 /** Exact-origin CORS with credentials; anything else gets no CORS headers at all. In development any origin is echoed. */
 export function cors(req, res) {
@@ -71,6 +68,16 @@ export function parseMultipart(buf, contentType) {
 export const clientIp = (req) => (config.trustProxy && req.headers['x-forwarded-for'] ? String(req.headers['x-forwarded-for']).split(',')[0].trim() : req.socket.remoteAddress ?? '');
 export const str = (v, max = 200) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 export const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) && v.length <= 254;
+/** A short-string array from an admin patch, sanitised item by item. No closed vocabulary is enforced here (those
+    lists live in the frontend registries, a separate deployable): this is defense in depth against an oversized or
+    malformed payload, not business validation. */
+export const strArr = (v, max = 12, itemLen = 30) => (Array.isArray(v) ? v.slice(0, max).map((x) => str(x, itemLen)).filter(Boolean) : []);
+/** A public URL slug: lowercase letters, digits and inner hyphens, at most `maxLen` characters, not a reserved word. */
+export const isSlug = (slug, maxLen, reserved = []) => typeof slug === 'string' && new RegExp(`^[a-z0-9]([a-z0-9-]{0,${maxLen - 2}}[a-z0-9])?$`).test(slug) && !reserved.includes(slug);
+/** An admin-supplied `{ src, altAr, altEn }` image, sanitised to its stored JSON — or null when every field is empty. */
+export const imageJson = (image) => (image && (image.src || image.altAr || image.altEn)
+  ? JSON.stringify({ src: str(image.src, 300) || null, altAr: str(image.altAr, 160) || null, altEn: str(image.altEn, 160) || null })
+  : null);
 /** `?page`/`?pageSize` parsing, clamped to `max` (staff/admin routes allow up to 100; supervisor/customer up to 50) — one place instead of three near-identical copies. */
 export const pageParams = (url, { def = 20, max = 20 } = {}) => ({
   page: Math.max(1, Number(url.searchParams.get('page')) || 1),
