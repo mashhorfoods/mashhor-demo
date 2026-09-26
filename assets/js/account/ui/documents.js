@@ -19,6 +19,7 @@ import { customer } from '../customer.js';
 import { AuthError, signInHref } from '../auth.js';
 import { track } from '../../core/diagnostics.js';
 import { mountAccount, loadRegion, pageTitle, rows, serviceName, statusBadge, payBadge, errorText, here } from './shell.js';
+import { setError, statusLine } from '../../core/portal-form.js';
 
 const TYPE_ICON = { eticket: 'no-ticket', confirmation: 'no-check-circle', visa: 'no-visa', receipt: 'no-payment', customer: 'no-documents' };
 const typeLabel = (d) => (d.type === 'customer' || d.kind === 'customer' ? (d.title || t('acct.docs.type.customer')) : t(`acct.docs.type.${d.type}`));
@@ -88,16 +89,16 @@ export function openDocument(d, { onDeleted = null } = {}) {
 export function uploadDialog() {
   return new Promise((resolve) => {
     const p = uid('up'); const limit = ENV.documentService?.maxBytes ?? 5 * 1048576; const accept = ENV.documentService?.accept ?? [];
-    const status = el('p', { class: 'c-book__status t-body-sm', role: 'status', 'aria-live': 'polite' });
+    const status = statusLine();
     const save = el('button', { type: 'submit', class: 'c-btn c-btn--primary' }, [el('span', { class: 'c-btn__label' }, t('acct.docs.uploadAction')), el('span', { class: 'c-btn__spinner', 'aria-hidden': 'true' })]);
     const file = el('input', { class: 'c-field__control', type: 'file', id: `${p}-file`, name: 'file', accept: accept.join(','), required: true, 'aria-describedby': `${p}-file-help` });
     const title = el('input', { class: 'c-field__control', type: 'text', id: `${p}-title`, name: 'title', maxlength: 120, autocomplete: 'off' });
-    const err = (name, message) => { const f = form.querySelector(`[data-field="${name}"]`); const e = f.querySelector('.c-field__error'); const c = f.querySelector('.c-field__control'); if (message) { f.dataset.state = 'error'; c.setAttribute('aria-invalid', 'true'); e.hidden = false; e.replaceChildren(icon('no-alert', { size: 'sm' }), el('span', {}, message)); c.focus(); } else { delete f.dataset.state; c.removeAttribute('aria-invalid'); e.hidden = true; e.replaceChildren(); } };
+    const err = (name, message) => { const c = setError(form, name, message); if (message) c?.focus(); };
     const form = el('form', { class: 'c-modal__form', method: 'dialog', novalidate: true, dataset: { form: 'upload' } }, [
       el('div', { class: 'c-modal__head' }, [el('h2', { class: 't-h3', id: `${p}-title-h` }, t('acct.docs.upload')), el('button', { type: 'button', class: 'c-btn c-btn--utility', 'aria-label': t('acct.trv.cancel'), onclick: () => dialog.close('cancel') }, icon('no-close'))]),
       el('div', { class: 'c-modal__body l-stack l-stack--16' }, [
-        el('div', { class: 'c-field', dataset: { field: 'file' } }, [el('label', { class: 'c-field__label', for: `${p}-file` }, [t('acct.docs.uploadFile'), el('span', { class: 'c-field__required', 'aria-hidden': 'true' }, '*')]), file, el('p', { class: 'c-field__help', id: `${p}-file-help` }, t('acct.docs.uploadHint', mb(limit), typeNames(accept))), el('p', { class: 'c-field__error', role: 'alert', hidden: true })]),
-        el('div', { class: 'c-field', dataset: { field: 'title' } }, [el('label', { class: 'c-field__label', for: `${p}-title` }, t('acct.docs.uploadTitle')), title, el('p', { class: 'c-field__error', role: 'alert', hidden: true })]),
+        el('div', { class: 'c-field', dataset: { field: 'file' } }, [el('label', { class: 'c-field__label', for: `${p}-file` }, [t('acct.docs.uploadFile'), el('span', { class: 'c-field__required', 'aria-hidden': 'true' }, '*')]), file, el('p', { class: 'c-field__help', id: `${p}-file-help` }, t('acct.docs.uploadHint', mb(limit), typeNames(accept))), el('p', { class: 'c-field__error', id: `${p}-file-err`, role: 'alert', hidden: true })]),
+        el('div', { class: 'c-field', dataset: { field: 'title' } }, [el('label', { class: 'c-field__label', for: `${p}-title` }, t('acct.docs.uploadTitle')), title, el('p', { class: 'c-field__error', id: `${p}-title-err`, role: 'alert', hidden: true })]),
         el('p', { class: 't-body-sm t-muted' }, t('acct.trv.privacy')), status,
       ]),
       el('div', { class: 'c-modal__foot' }, [el('button', { type: 'button', class: 'c-btn c-btn--secondary', onclick: () => dialog.close('cancel') }, t('acct.trv.cancel')), save]),

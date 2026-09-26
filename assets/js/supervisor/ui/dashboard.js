@@ -3,8 +3,8 @@ import { el } from '../../core/dom.js';
 import { t, pick } from '../../core/i18n.js';
 import { route } from '../../data/config.js';
 import { icon } from '../../components/ui.js';
-import { supervisorData, unreadCount } from '../data.js';
-import { mountSupervisorPortal, loadRegion, block, metricCard, amount, dateTime, leadStatusBadge, revenueGroups } from './shell.js';
+import { supervisorData } from '../data.js';
+import { mountSupervisorPortal, loadRegion, block, metricCard, amount, dateTime, leadStatusBadge, revenueGroups, unreadCount } from './shell.js';
 
 export function mountSupervisorDashboard({ root = document } = {}) {
   return mountSupervisorPortal({ root, id: 'dashboard', head: 'page.supervisor.dashboard', paint: async ({ supervisor, main }) => {

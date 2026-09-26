@@ -5,6 +5,7 @@ import { el } from '../../core/dom.js';
 import { t } from '../../core/i18n.js';
 import { icon, toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
+import { statusSelect } from '../../core/portal-ui.js';
 import { opsData, TASK_STATUSES } from '../data.js';
 import { mountOpsPortal, loadRegion, pageTitle, actionForm, statusFilterSelect, taskStatusBadge, priorityBadge, dateTime, block } from './shell.js';
 
@@ -17,9 +18,8 @@ export function mountOpsTasks({ root = document } = {}) {
       const assignInput = el('input', { class: 'c-field__control c-field__control--sm', type: 'text', dir: 'ltr', value: task.assignedTo ?? '', 'aria-label': t('ops.tasks.assignLabel'), ...(can('task.manage') ? {} : { disabled: true }) });
       const assignBtn = el('button', { type: 'button', class: 'c-btn c-btn--tertiary c-btn--sm', ...(can('task.manage') ? {} : { disabled: true }) }, t('ops.tasks.reassign'));
       assignBtn.addEventListener('click', async () => { assignBtn.disabled = true; try { await opsData.assignTask(task.id, assignInput.value.trim() || null); toast({ title: t('ops.tasks.reassigned'), variant: 'success', duration: 3000 }); } catch { toast({ title: t('ops.tasks.updateFailed'), variant: 'warning', duration: 5000 }); } assignBtn.disabled = false; });
-      const statusSelect = el('select', { class: 'c-field__control c-field__control--sm', 'aria-label': t('ops.tasks.statusLabel'), ...(can('task.manage') ? {} : { disabled: true }) },
-        TASK_STATUSES.map((s) => el('option', { value: s, ...(s === task.status ? { selected: true } : {}) }, t(`ops.task.status.${s}`))));
-      statusSelect.addEventListener('change', async () => { const next = statusSelect.value; statusSelect.disabled = true; try { await opsData.updateTaskStatus(task.id, next); toast({ title: t('ops.tasks.updated'), variant: 'success', duration: 3000 }); } catch { toast({ title: t('ops.tasks.updateFailed'), variant: 'warning', duration: 5000 }); statusSelect.value = task.status; } statusSelect.disabled = false; });
+      const status = statusSelect({ statuses: TASK_STATUSES, current: task.status, optionKey: (s) => `ops.task.status.${s}`, labelKey: 'ops.tasks.statusLabel', disabled: !can('task.manage'),
+        save: (next) => opsData.updateTaskStatus(task.id, next), doneKey: 'ops.tasks.updated', failKey: 'ops.tasks.updateFailed' });
       return el('article', { class: 'c-card c-svp-lead', dataset: { task: task.id, taskStatus: task.status } }, [
         el('div', { class: 'c-svp-lead__icon' }, icon('no-check', { size: 'lg' })),
         el('div', { class: 'c-svp-lead__body' }, [
@@ -28,7 +28,7 @@ export function mountOpsTasks({ root = document } = {}) {
           el('div', { class: 'l-cluster l-cluster--8' }, [taskStatusBadge(task.status), priorityBadge(task.priority)]),
           task.notes ? el('p', { class: 't-body-sm' }, task.notes) : null,
         ]),
-        el('div', { class: 'l-stack l-stack--8' }, [assignInput, assignBtn, statusSelect]),
+        el('div', { class: 'l-stack l-stack--8' }, [assignInput, assignBtn, status]),
       ]);
     };
 

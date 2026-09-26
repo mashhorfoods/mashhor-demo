@@ -17,6 +17,7 @@
    ========================================================================= */
 import { registerSupervisorDataAdapter } from '../data.js';
 import { DEV_SUPERVISOR_AUTH } from './dev-supervisor-auth.js';
+import { paged as pageSlice } from '../../core/adapter-helpers.js';
 
 const read = (k) => { try { return sessionStorage.getItem(k); } catch { return null; } };
 const wait = async () => { await new Promise((r) => setTimeout(r, read('no.dev.supervisor') === 'slow' ? 2000 : 200)); if (read('no.dev.supervisor') === 'error') { const e = new Error('dev outage'); e.code = 'unavailable'; throw e; } };
@@ -45,7 +46,7 @@ const KEY = 'no.dev.supervisor.data';
 const loadState = () => { try { return JSON.parse(localStorage.getItem(KEY) ?? 'null') ?? { leads: LEADS, notifications: NOTIFICATIONS }; } catch { return { leads: LEADS, notifications: NOTIFICATIONS }; } };
 const saveState = (s) => { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch { /* storage unavailable */ } };
 
-const paged = (all, { page = 1, pageSize = 20 } = {}) => { const size = Math.min(50, Math.max(1, pageSize)); const p = Math.max(1, page); const slice = all.slice((p - 1) * size, p * size); return { items: slice, page: p, pageSize: size, total: all.length, nextPage: p * size < all.length ? p + 1 : null }; };
+const paged = (all, params) => pageSlice(all, params, 50);
 
 export const DEV_SUPERVISOR_DATA = registerSupervisorDataAdapter({
   id: 'dev-supervisor-data', dev: true,

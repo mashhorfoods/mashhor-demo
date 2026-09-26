@@ -74,4 +74,3 @@ export function nextTrip(trips) {
   return [...trips].filter((t) => t.status === 'current' || t.status === 'upcoming').sort((a, b) => (TRIP_ORDER[a.status] - TRIP_ORDER[b.status]) || String(a.startDate).localeCompare(String(b.startDate)))[0] ?? null;
 }
 export const latestBooking = (bookings) => [...bookings].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))[0] ?? null;
-export const unreadCount = (notifications) => notifications.filter((n) => !n.read).length;

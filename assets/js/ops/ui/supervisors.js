@@ -9,7 +9,8 @@ import { icon, toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { SUPERVISOR_LANGUAGES, SUPERVISOR_SPECIALTIES } from '../../data/supervisors.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, notFoundBlock, actionForm, debouncedRun, emptyNote, dataTable, opsStatusBadge, dateTime, block, rows } from './shell.js';
+import { revenueGroups } from '../../core/portal-ui.js';
+import { mountOpsPortal, loadRegion, pageTitle, notFoundState, actionForm, debouncedRun, emptyNote, dataTable, opsStatusBadge, dateTime, amount, block, rows, busyButton } from './shell.js';
 
 const columns = [
   { labelKey: 'ops.supervisors.col.name', render: (s) => el('a', { class: 'c-svp-link', href: route(`admin/supervisors/?id=${encodeURIComponent(s.id)}`) }, s.nameEn || s.nameAr || s.id) },
@@ -55,7 +56,7 @@ export function mountOpsSupervisors({ root = document, params = new URLSearchPar
 function mountSupervisorDetail({ root, id }) {
   return mountOpsPortal({ root, id: 'supervisors', head: 'page.ops.supervisorDetail', paint: async ({ main, can }) => {
     const s = await opsData.supervisorAdmin(id);
-    if (!s) { render(main, notFoundBlock(route('admin/supervisors/'), t('ops.supervisors.title'))); return { supervisor: null }; }
+    if (!s) { render(main, notFoundState(route('admin/supervisors/'), t('ops.supervisors.title'))); return { supervisor: null }; }
     const refresh = async () => render(main, await view());
 
     async function view(preloaded) {
@@ -66,15 +67,14 @@ function mountSupervisorDetail({ root, id }) {
         block(t('ops.supervisors.detail.title'), rows([
           [t('ops.supervisors.col.customers'), String(fresh.customers.length)],
           // per currency: amounts in different currencies are never added together (backend supervisorRevenue)
-          [t('acct.total'), (fresh.revenue.byCurrency?.length ? fresh.revenue.byCurrency : [fresh.revenue]).map((g) => `${g.gross} ${g.currency}`).join(' · ')],
+          [t('acct.total'), revenueGroups(fresh.revenue).map((g) => amount(g.gross, g.currency)).join(' · ')],
           [t('ops.supervisors.detail.commission'), fresh.revenue.commission.model === null ? t('ops.supervisors.detail.commissionPending') : String(fresh.revenue.commission.model)],
         ]), { id: 'ops-sv-details' }),
       ];
 
       if (can('supervisor.manage')) {
         const active = fresh.status === 'active';
-        const btn = el('button', { type: 'button', class: `c-btn c-btn--sm ${active ? 'c-btn--tertiary' : 'c-btn--primary'}` }, t(active ? 'ops.supervisors.deactivate' : 'ops.supervisors.activate'));
-        btn.addEventListener('click', async () => { btn.disabled = true; try { await opsData.updateSupervisorAdmin(id, { active: !active }); toast({ title: t('ops.supervisors.updated'), variant: 'success', duration: 3000 }); await refresh(); } catch { btn.disabled = false; } });
+        const btn = busyButton(t(active ? 'ops.supervisors.deactivate' : 'ops.supervisors.activate'), active ? 'tertiary' : 'primary', async () => { await opsData.updateSupervisorAdmin(id, { active: !active }); toast({ title: t('ops.supervisors.updated'), variant: 'success', duration: 3000 }); await refresh(); });
         nodes.push(block(t('ops.supervisors.manage.title'), btn, { id: 'ops-sv-manage' }));
         nodes.push(block(t('ops.supervisors.edit.title'), editForm(fresh, refresh), { id: 'ops-sv-edit' }));
       }

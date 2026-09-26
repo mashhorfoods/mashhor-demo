@@ -6,7 +6,7 @@
    development notice shows while the development provider is registered.
    ========================================================================= */
 
-import { el, qs, render, uid, setPageHead } from '../../core/dom.js';
+import { el, render, uid, setPageHead } from '../../core/dom.js';
 import { t, getLocale } from '../../core/i18n.js';
 import { route } from '../../data/config.js';
 import { icon, setButtonState } from '../../components/ui.js';
@@ -16,6 +16,7 @@ import { supervisorBySlug } from '../../data/supervisors.js';
 import { authProvider, restoreSession, adoptSession, signIn, signUp, signOut, requestReset, resetPassword, nextFrom, AuthError } from '../auth.js';
 import { legalVersions } from '../legal.js';
 import { put } from './shell.js';
+import { field, setError, applyErrors, statusLine, submitButton } from '../../core/portal-form.js';
 
 const setHead = (key) => setPageHead({ title: t(key), description: t('page.account.description') });
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -23,35 +24,6 @@ const PHONE = /^\+?[0-9 ()-]{7,20}$/;
 
 export const devNotice = () => (authProvider()?.dev ? el('p', { class: 'c-note c-note--warning', role: 'note', dataset: { dev: 'true' } }, [icon('no-alert', { size: 'sm' }), el('span', { class: 'c-note__text' }, [el('strong', {}, `${t('auth.dev.title')}: `), t('auth.dev.text')])]) : null);
 
-/** One labelled field with an error slot; `password` fields get a show/hide toggle. */
-export function field({ id, name, labelKey, type = 'text', autocomplete, help, required = true, value = '', dir = null, inputmode = null }) {
-  const errId = `${id}-err`;
-  const input = el('input', { class: 'c-field__control', id, name, type, value, required, autocomplete, ...(dir ? { dir } : {}), ...(inputmode ? { inputmode } : {}), 'aria-describedby': help ? `${id}-help` : null });
-  const toggle = type === 'password' ? el('button', { type: 'button', class: 'c-btn c-btn--tertiary c-btn--sm c-auth__toggle', 'aria-pressed': 'false', 'aria-controls': id, onclick: (e) => { const show = input.type === 'password'; input.type = show ? 'text' : 'password'; e.currentTarget.setAttribute('aria-pressed', String(show)); e.currentTarget.textContent = t(show ? 'auth.hide' : 'auth.show'); } }, t('auth.show')) : null;
-  return el('div', { class: 'c-field', dataset: { field: name } }, [
-    el('label', { class: 'c-field__label', for: id }, [t(labelKey), required ? el('span', { class: 'c-field__required', 'aria-hidden': 'true' }, '*') : null]),
-    toggle ? el('div', { class: 'c-auth__pw' }, [input, toggle]) : input,
-    help ? el('p', { class: 'c-field__help', id: `${id}-help` }, t(help)) : null,
-    el('p', { class: 'c-field__error', id: errId, role: 'alert', hidden: true }),
-  ]);
-}
-export function setError(form, name, message) {
-  const f = qs(`[data-field="${name}"]`, form); if (!f) return null;
-  const c = qs('.c-field__control', f); const e = qs('.c-field__error', f);
-  if (message) { f.dataset.state = 'error'; c.setAttribute('aria-invalid', 'true'); c.setAttribute('aria-describedby', `${c.getAttribute('aria-describedby') ?? ''} ${e.id}`.trim()); e.hidden = false; e.replaceChildren(icon('no-alert', { size: 'sm' }), el('span', {}, message)); }
-  else { delete f.dataset.state; c.removeAttribute('aria-invalid'); e.hidden = true; e.replaceChildren(); }
-  return c;
-}
-export const clearErrors = (form) => form.querySelectorAll('[data-field]').forEach((f) => setError(form, f.dataset.field, null));
-export function applyErrors(form, errors, status) {
-  clearErrors(form); let first = null;
-  for (const [name, message] of Object.entries(errors)) { const c = setError(form, name, message); first ??= c; }
-  first?.focus();
-  if (status) { status.dataset.tone = 'error'; status.textContent = t('book.status.fix', Object.keys(errors).length); }
-  return !!first;
-}
-const statusLine = () => el('p', { class: 'c-book__status t-body-sm', role: 'status', 'aria-live': 'polite' });
-const submitButton = (labelKey) => el('button', { type: 'submit', class: 'c-btn c-btn--primary c-btn--lg c-btn--block' }, [el('span', { class: 'c-btn__label' }, t(labelKey)), el('span', { class: 'c-btn__spinner', 'aria-hidden': 'true' })]);
 const authError = (error) => (error instanceof AuthError ? t(`auth.err.${['invalid', 'exists', 'unavailable', 'invalidToken', 'weak', 'notConfigured', 'rateLimited'].includes(error.code) ? (error.code === 'weak' ? 'password' : error.code) : 'unavailable'}`) : t('auth.err.unavailable'));
 const wrap = (children) => el('div', { class: 'c-auth' }, children);
 const devDemoButton = (after) => (authProvider()?.devSignIn ? el('div', { class: 'c-auth__dev' }, [

@@ -10,9 +10,8 @@
    ========================================================================= */
 import { registerOpsDataAdapter } from '../data.js';
 import { get, post, patch } from '../../core/api.js';
+import { list, queryString as q } from '../../core/adapter-helpers.js';
 
-const list = (data, key) => (Array.isArray(data) ? data : data?.[key] ?? data?.items ?? []);
-const q = (params = {}) => { const p = new URLSearchParams(); for (const [k, v] of Object.entries(params)) if (v != null && v !== '') p.set(k, String(v)); const s = p.toString(); return s ? `?${s}` : ''; };
 
 export const API_OPS_DATA = registerOpsDataAdapter({
   id: 'api-ops-data', dev: false,

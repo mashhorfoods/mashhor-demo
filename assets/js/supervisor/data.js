@@ -54,5 +54,3 @@ export const supervisorData = {
   notifications: () => call('notifications'),
   markRead: (ids = null) => call('markRead', ids),
 };
-
-export const unreadCount = (notifications) => notifications.filter((n) => !n.read).length;

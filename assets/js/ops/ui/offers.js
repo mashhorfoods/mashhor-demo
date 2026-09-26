@@ -11,10 +11,10 @@ import { route } from '../../data/config.js';
 import { toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, notFoundBlock, actionForm, debouncedRun, dataTable, block, rows, publishStatusBadge, unpublishedChangesNote, dateTime } from './shell.js';
+import { mountOpsPortal, loadRegion, pageTitle, notFoundState, actionForm, debouncedRun, dataTable, block, rows, publishStatusBadge, unpublishedChangesNote, dateTime, amount } from './shell.js';
 import { publishingControls } from './destinations.js';
 
-const priceText = (p) => (p ? `${p.amount} ${p.currency ?? ''} (${p.type ?? ''})`.trim() : '—');
+const priceText = (p) => (p ? `${amount(p.amount, p.currency)} (${p.type ?? ''})` : '—');
 const columns = [
   { labelKey: 'ops.offers.col.title', render: (o) => el('a', { class: 'c-svp-link', href: route(`admin/offers/?id=${encodeURIComponent(o.id)}`) }, o.titleEn || o.titleAr || o.id) },
   { labelKey: 'ops.offers.col.slug', render: (o) => el('bdi', { dir: 'ltr' }, o.slug) },
@@ -60,7 +60,7 @@ export function mountOpsOffers({ root = document, params = new URLSearchParams(l
 function mountOfferDetail({ root, id }) {
   return mountOpsPortal({ root, id: 'offers', head: 'page.ops.offerDetail', paint: async ({ main, can }) => {
     const o = await opsData.offerAdmin(id);
-    if (!o) { render(main, notFoundBlock(route('admin/offers/'), t('ops.offers.title'))); return { offer: null }; }
+    if (!o) { render(main, notFoundState(route('admin/offers/'), t('ops.offers.title'))); return { offer: null }; }
     const refresh = async () => render(main, await view());
 
     async function view(preloaded) {

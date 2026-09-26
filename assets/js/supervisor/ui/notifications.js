@@ -4,8 +4,8 @@ import { el } from '../../core/dom.js';
 import { t, pick } from '../../core/i18n.js';
 import { icon } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
-import { supervisorData, unreadCount } from '../data.js';
-import { mountSupervisorPortal, loadRegion, pageTitle, dateTime } from './shell.js';
+import { supervisorData } from '../data.js';
+import { mountSupervisorPortal, loadRegion, pageTitle, dateTime, unreadCount } from './shell.js';
 
 const MIN_REFRESH_MS = 30000;
 
