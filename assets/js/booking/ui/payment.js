@@ -46,7 +46,7 @@ export function mountPayment({ root = document } = {}) {
       el('legend', { class: 'c-review-block__title' }, `${t('bk.pay.method')} · ${isAr() ? provider.labelAr : provider.labelEn}`),
       ...provider.methods.map((m) => el('label', { class: 'c-choice', for: `pm-${m.id}` }, [
         el('input', { class: 'c-choice__input', type: 'radio', name: 'method', id: `pm-${m.id}`, value: m.id, checked: state.method === m.id, onchange: () => { state.method = m.id; } }),
-        el('span', { class: 'c-choice__text' }, [el('strong', {}, isAr() ? m.labelAr : m.labelEn), el('span', { class: 'c-choice__desc', style: 'display:block;font-size:var(--text-caption);color:var(--color-text-secondary)' }, isAr() ? m.hintAr : m.hintEn)]),
+        el('span', { class: 'c-choice__text' }, [el('strong', {}, isAr() ? m.labelAr : m.labelEn), el('span', { class: 'c-choice__desc' }, isAr() ? m.hintAr : m.hintEn)]),
       ])),
       el('p', { class: 't-body-sm t-muted' }, [icon('no-shield', { size: 'sm' }), ' ', t('bk.pay.secure')]),
     ]);

@@ -143,6 +143,7 @@
   .c-choice__input:disabled { background-color: var(--color-gray-100); border-color: var(--color-border); cursor: not-allowed; }
   .c-choice__input:disabled + .c-choice__text { color: var(--color-text-disabled); }
   .c-choice__text { font-size: var(--text-body-sm); line-height: var(--leading-snug); }
+  .c-choice__desc { display: block; font-size: var(--text-caption); color: var(--color-text-secondary); margin-block-start: var(--space-4); }
 
   /* A boxed choice — used for fare options and payment methods. */
 

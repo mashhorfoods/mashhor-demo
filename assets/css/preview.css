@@ -110,8 +110,6 @@
     font-size: var(--text-caption); color: var(--color-success-fg);
   }
 
-  .c-choice__desc { display: block; font-size: var(--text-caption); color: var(--color-text-secondary); margin-block-start: var(--space-4); }
-
   .c-choice--boxed {
     padding: var(--space-16);
     border: var(--border-input);
