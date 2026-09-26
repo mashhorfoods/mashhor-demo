@@ -11,9 +11,9 @@ credential store, session (`no_supervisor_session`, its own CSRF token) and
 route set (`/supervisor/auth/*`, `/supervisor/me/*`), server-authoritative
 attribution with an audit trail, and customer/booking/lead/revenue/
 performance views enforced per-supervisor in SQL. See
-`docs/SUPERVISOR-SYSTEM.md`. `BACKEND_ADMIN_TOKEN` (unset by default) gates
-a legacy bearer-token route for reassigning a customer's attribution; the admin
-dashboard (below) does the same through a staff session.
+`docs/SUPERVISOR-SYSTEM.md`. Reassigning a customer's attribution is an admin
+dashboard action (below); the old bearer-token route and `BACKEND_ADMIN_TOKEN`
+were removed on 2026-09-25.
 
 A third session serves **staff** — operations staff and admins
 (`no_ops_session`, its own CSRF token): `/staff/auth/*`, the operations routes

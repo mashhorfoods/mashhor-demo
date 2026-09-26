@@ -216,7 +216,7 @@ exists, and a supervisor's own session can never call it (it is not under
 → 404 story is exercised with the token *unset* in a dedicated config
 check; with a token configured (the default in the test suite's own
 backend), wrong/missing tokens → 403, the correct token reassigns and the
-history is preserved.
+history is preserved. *(Removed 2026-09-25: reassignment is now only the admin dashboard's `POST /admin/customers/:id/reassign`, with a staff session; `BACKEND_ADMIN_TOKEN` is refused if set.)*
 
 ## 11. Customer account integration
 
@@ -283,7 +283,7 @@ backend/migrations/002_supervisors.sql   supervisors profile/credential columns,
                                           supervisor_reset_tokens, leads, attribution_events, commissions,
                                           supervisor_notifications, business_config
 backend/supervisor.mjs                   identity, sessions, attribution (assign/reassign), scoped read models
-backend/supervisor-routes.mjs            /supervisor/auth/*, /supervisor/me/*, /admin/attribution/reassign
+backend/supervisor-routes.mjs            /supervisor/auth/*, /supervisor/me/*
 backend/server.mjs                       route table, separate cookies/CSRF/rate-limit class
 backend/fixtures.mjs                     two supervisor fixtures + lead + notification + attribution event
 

@@ -65,7 +65,8 @@ function mountSupervisorDetail({ root, id }) {
         el('div', { class: 'l-stack l-stack--4' }, [el('h1', { class: 't-h1' }, fresh.nameEn || fresh.nameAr || fresh.id), el('p', { class: 't-body t-muted' }, [t(`ops.supervisors.status.${fresh.status}`), ' · ', el('bdi', { dir: 'ltr' }, fresh.slug || '—')])]),
         block(t('ops.supervisors.detail.title'), rows([
           [t('ops.supervisors.col.customers'), String(fresh.customers.length)],
-          [t('acct.total'), `${fresh.revenue.gross} ${fresh.revenue.currency}`],
+          // per currency: amounts in different currencies are never added together (backend supervisorRevenue)
+          [t('acct.total'), (fresh.revenue.byCurrency?.length ? fresh.revenue.byCurrency : [fresh.revenue]).map((g) => `${g.gross} ${g.currency}`).join(' · ')],
           [t('ops.supervisors.detail.commission'), fresh.revenue.commission.model === null ? t('ops.supervisors.detail.commissionPending') : String(fresh.revenue.commission.model)],
         ]), { id: 'ops-sv-details' }),
       ];

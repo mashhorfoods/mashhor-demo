@@ -5,7 +5,7 @@ import { el } from '../../core/dom.js';
 import { t } from '../../core/i18n.js';
 import { stateBlock } from '../../components/states.js';
 import { supervisorData } from '../data.js';
-import { mountSupervisorPortal, loadRegion, pageTitle, metricCard, amount, block } from './shell.js';
+import { mountSupervisorPortal, loadRegion, pageTitle, metricCard, amount, block, revenueGroups } from './shell.js';
 
 const PERIODS = [['', 'svp.period.all'], ['today', 'svp.period.today'], ['week', 'svp.period.week'], ['month', 'svp.period.month']];
 
@@ -18,12 +18,16 @@ export function mountSupervisorRevenue({ root = document } = {}) {
     const region = loadRegion(host, () => supervisorData.revenue({ period: filter.value || null }), {
       empty: () => stateBlock({ variant: 'empty', iconName: 'no-payment', headingLevel: 2, title: t('svp.revenue.empty.title'), text: t('svp.revenue.empty.text') }),
       paint: (r) => (r.bookingsCount === 0 ? stateBlock({ variant: 'empty', iconName: 'no-payment', headingLevel: 2, title: t('svp.revenue.empty.title'), text: t('svp.revenue.empty.text') }) : [
-        el('div', { class: 'c-svp-metrics' }, [
-          metricCard('svp.revenue.gross', amount(r.gross, r.currency), { icon: 'no-payment' }),
-          metricCard('svp.revenue.completed', amount(r.completed, r.currency), { icon: 'no-check-circle', tone: 'success' }),
-          metricCard('svp.revenue.pending', amount(r.pending, r.currency), { icon: 'no-pending', tone: 'warning' }),
-          metricCard('svp.revenue.cancelled', amount(r.cancelled, r.currency), { icon: 'no-cancelled', tone: 'muted' }),
-        ]),
+        // One set of figures per currency: bookings in different currencies are never summed into one number.
+        ...revenueGroups(r).map((g, _, all) => el('div', { class: 'l-stack l-stack--8', dataset: { currency: g.currency } }, [
+          all.length > 1 ? el('h2', { class: 't-h4' }, g.currency) : null,
+          el('div', { class: 'c-svp-metrics' }, [
+            metricCard('svp.revenue.gross', amount(g.gross, g.currency), { icon: 'no-payment' }),
+            metricCard('svp.revenue.completed', amount(g.completed, g.currency), { icon: 'no-check-circle', tone: 'success' }),
+            metricCard('svp.revenue.pending', amount(g.pending, g.currency), { icon: 'no-pending', tone: 'warning' }),
+            metricCard('svp.revenue.cancelled', amount(g.cancelled, g.currency), { icon: 'no-cancelled', tone: 'muted' }),
+          ]),
+        ])),
         block(t('svp.revenue.commission'), el('p', { class: 't-body t-muted' }, t(r.commission.model ? 'svp.revenue.commissionSet' : 'svp.revenue.commissionPending')), { id: 'rev-commission' }),
       ]),
     });

@@ -3,23 +3,20 @@
 // /supervisor/me/* mirror the shape of /auth/* and /me/* (docs/INTEGRATION.md
 // §3) but read a DIFFERENT session (supervisor_sessions, cookie
 // no_supervisor_session) so a customer session can never reach these routes
-// and a supervisor session can never reach /me/*. `admin.reassign` is the
-// one entry point prepared for the future Admin Dashboard (§27, §40); it is
-// gated by a bearer token (BACKEND_ADMIN_TOKEN) that is unset by default,
-// so the endpoint 404s until an operator explicitly configures it.
+// and a supervisor session can never reach /me/*. Reassigning a customer's
+// attribution is an admin-dashboard action (staff-routes.mjs), not a route here.
 // ============================================================================
-import { config } from './config.mjs';
 import { q, now } from './db.mjs';
-import { json, empty, fail, HttpError, readJson, str, isEmail, pageParams, setSupervisorSessionCookies, clearSupervisorSessionCookies } from './http.mjs';
+import { json, empty, fail, readJson, str, isEmail, pageParams, setSupervisorSessionCookies, clearSupervisorSessionCookies } from './http.mjs';
 import {
   privateSupervisor, supervisorById, verifySupervisorPassword, changeSupervisorPassword,
   createSupervisorSession, endSupervisorSession, createSupervisorReset, consumeSupervisorReset,
   supervisorCustomers, supervisorCustomer, supervisorBookings, supervisorBooking, supervisorLeads, updateLeadStatus,
-  supervisorRevenue, supervisorPerformance, supervisorCommissions, nSupervisorNotification, reassignAttribution, activeSupervisor,
+  supervisorRevenue, supervisorPerformance, supervisorCommissions, nSupervisorNotification,
 } from './supervisor.mjs';
 import { enqueue } from './mailer.mjs';
-import { normEmail, same } from './identity.mjs';
-import { info, warn } from './logger.mjs';
+import { normEmail } from './identity.mjs';
+import { info } from './logger.mjs';
 
 const sessionAnswer = (res, s) => { const sess = createSupervisorSession(s.id); setSupervisorSessionCookies(res, sess.id, sess.csrf, sess.maxAge); return { supervisor: privateSupervisor(s), expiresAt: sess.expiresAt }; };
 const period = (url) => { const p = url.searchParams.get('period'); const days = { today: 1, week: 7, month: 30 }[p]; return days ? new Date(Date.now() - days * 864e5).toISOString() : null; };
@@ -70,19 +67,4 @@ export const supervisorMe = {
   commissions(req, res, ctx, url) { return json(res, 200, supervisorCommissions(ctx.supervisor.id, { page: page(url), pageSize: pageSize(url) })); },
   notifications(req, res, ctx) { return json(res, 200, { notifications: q.all('SELECT * FROM supervisor_notifications WHERE supervisor_id = ? ORDER BY at DESC', ctx.supervisor.id).map(nSupervisorNotification) }); },
   async notificationsRead(req, res, ctx) { const b = await readJson(req); const sid = ctx.supervisor.id; if (b.all) q.run('UPDATE supervisor_notifications SET read = 1 WHERE supervisor_id = ?', sid); else for (const id of (Array.isArray(b.ids) ? b.ids : []).slice(0, 200)) q.run('UPDATE supervisor_notifications SET read = 1 WHERE id = ? AND supervisor_id = ?', String(id), sid); return json(res, 200, { notifications: q.all('SELECT * FROM supervisor_notifications WHERE supervisor_id = ? ORDER BY at DESC', sid).map(nSupervisorNotification) }); },
-};
-
-/* ---- /admin — prepared for Stage 14, disabled unless BACKEND_ADMIN_TOKEN is set (§27, §40) ------------------------- */
-export const admin = {
-  async reassign(req, res, ctx) {
-    if (!config.adminToken) return fail(res, 404, 'notFound');   // not configured: the endpoint does not exist as far as any caller can tell
-    const given = (req.headers.authorization ?? '').replace(/^Bearer\s+/i, '');
-    if (!same(given, config.adminToken)) { warn('admin.auth.rejected', {}); return fail(res, 403, 'forbidden'); }
-    const b = await readJson(req); const customerId = str(b.customerId, 40); const supervisorId = str(b.supervisorId, 40) || null;
-    if (!customerId) throw new HttpError(422, 'invalid');
-    if (supervisorId && !activeSupervisor(supervisorId)) throw new HttpError(422, 'invalid');
-    const result = reassignAttribution(customerId, supervisorId, 'admin');
-    info('admin.attribution.reassigned', {});
-    return json(res, 200, { attribution: result });
-  },
 };

@@ -94,8 +94,11 @@ export function rateLimit(key, { limit, windowMs }) {
 // assets/js/core/api.js (csrfFamily), which picks the matching cookie to echo; keep the two in step.
 const STAFF_ROUTE = /^\/(staff|services|operations|bookings|documents|notifications|admin)(\/|$)/;
 export const sessionFamily = (path) => {
-  if (path === '/admin/attribution/reassign') return null; // legacy bearer-token route: no cookie session
   if (path.startsWith('/supervisor/')) return 'supervisor';
   if (STAFF_ROUTE.test(path)) return 'staff';
   return 'customer';
 };
+
+/** A session's last_seen_at is informational (no idle timeout reads it): refreshing it at most once a minute keeps it
+    accurate enough without turning every authenticated GET into a database write. */
+export const seenStale = (lastSeenAt, ms = 60_000) => !lastSeenAt || Date.now() - Date.parse(lastSeenAt) > ms;

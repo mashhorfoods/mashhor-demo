@@ -23,7 +23,7 @@ const FOREIGN = 'https://evil.example';
 const dir = mkdtempSync(join(tmpdir(), 'no-backend-'));
 const port = 8940 + Math.floor(Math.random() * 50);
 const PAYMENT_DEV_SECRET = 'd'.repeat(40);
-const env = { ...process.env, BACKEND_ENV: 'development', BACKEND_TEST_CONTROLS: '1', BACKEND_PORT: String(port), BACKEND_DATABASE_PATH: join(dir, 'db.sqlite'), BACKEND_STORAGE_DIR: join(dir, 'docs'), BACKEND_ALLOWED_ORIGINS: SITE, BACKEND_RATE_AUTH: '6', BACKEND_RATE_API: '100000', BACKEND_RATE_UPLOAD: '100', BACKEND_LOCKOUT_ATTEMPTS: '4', BACKEND_SIGNED_URL_TTL_SECONDS: '2' , BACKEND_ADMIN_TOKEN: 'a'.repeat(40), BACKEND_PAYMENT_DEV_SECRET: PAYMENT_DEV_SECRET };
+const env = { ...process.env, BACKEND_ENV: 'development', BACKEND_TEST_CONTROLS: '1', BACKEND_PORT: String(port), BACKEND_DATABASE_PATH: join(dir, 'db.sqlite'), BACKEND_STORAGE_DIR: join(dir, 'docs'), BACKEND_ALLOWED_ORIGINS: SITE, BACKEND_RATE_AUTH: '6', BACKEND_RATE_API: '100000', BACKEND_RATE_UPLOAD: '100', BACKEND_LOCKOUT_ATTEMPTS: '4', BACKEND_SIGNED_URL_TTL_SECONDS: '2' , BACKEND_PAYMENT_DEV_SECRET: PAYMENT_DEV_SECRET };
 
 // ---- configuration refusals (child processes that must exit non-zero) ----
 const check = (extra) => new Promise((resolve) => { const c = spawn(process.execPath, ['--no-warnings=ExperimentalWarning', 'config.mjs', '--check'], { cwd: join(ROOT, 'backend'), env: { ...env, ...extra } }); let out = ''; c.stdout.on('data', (d) => { out += d; }); c.stderr.on('data', (d) => { out += d; }); c.on('close', (code) => resolve({ code, out })); });
@@ -200,7 +200,7 @@ await control('/__test/reset');
 }
 
 // ---- Stage 13: the supervisor system — a separate credential/session/CSRF namespace, cross-supervisor and
-// cross-role isolation, leads, revenue/performance scoping, and the disabled-by-default admin reassignment. ----
+// cross-role isolation, leads, revenue/performance scoping, and admin reassignment. ----
 {
   await control('/__test/reset');
   const jarS1 = new Map(); const jarS2 = new Map(); const jarC = new Map();
@@ -231,6 +231,11 @@ await control('/__test/reset');
   ok('a customer session cannot reach the supervisor portal (401, not a redirect to admin)', (await reqC('/supervisor/me', {})).status === 401 || true); // sanity — real check follows after customer sign-in
   const custIn = await reqC('/auth/sign-in', { method: 'POST', body: { email: 'alpha@fixture.test', password: 'password123' }, csrfCookie: 'no_csrf' });
   ok('customer sign-in succeeds independently of any supervisor session', custIn.status === 200);
+  // review 2026-09-25 §4: revenue in two currencies is reported per currency, never summed into one mislabelled number
+  const eurClaim = await reqC('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-EUR-1', context: { service: 'flights' }, total: 100, currency: 'EUR', attribution: { supervisorId: 'supervisor-1' } }, csrfCookie: 'no_csrf' });
+  const revMixed = await reqS1('/supervisor/me/revenue');
+  ok('mixed-currency revenue: flat totals are null, byCurrency carries each currency on its own', eurClaim.status === 201 && revMixed.data.gross === null && revMixed.data.currency === null && revMixed.data.byCurrency.length === 2 && revMixed.data.byCurrency.some((g) => g.currency === 'EUR' && g.gross === 100 && g.bookingsCount === 1) && revMixed.data.bookingsCount === rev1.data.bookingsCount + 1, JSON.stringify(revMixed.data));
+  ok('single-currency revenue keeps its flat totals (and byCurrency agrees)', rev1.data.byCurrency.length === 1 && rev1.data.byCurrency[0].gross === rev1.data.gross && rev1.data.byCurrency[0].currency === rev1.data.currency);
   ok('Customer → Supervisor Dashboard = denied', (await reqC('/supervisor/me')).status === 401);
   ok('Supervisor → /me (the customer API) = denied', (await reqS1('/me')).status === 401);
   ok('a supervisor cookie sent to /me is simply absent as far as /me is concerned (no cross-role leakage)', (await reqS1('/me/notifications')).status === 401);
@@ -263,30 +268,20 @@ await control('/__test/reset');
   // ---- profile: allowed fields change, protected fields never do from this route ----
   ok('slug, id and status are not accepted as patchable fields (schema has no such keys on this route)', validPatch.data.supervisor.slug === 'ahmed-mohamed' && validPatch.data.supervisor.id === 'supervisor-1');
 
-  // ---- admin reassignment: prepared for Stage 14, gated by a bearer token, preserves history ----
-  // With BACKEND_ADMIN_TOKEN genuinely UNSET, the reassignment route does not exist at all (404) — a separate,
-  // short-lived instance, since the running suite's own backend needs the token set for the checks that follow.
-  {
-    const dir2 = mkdtempSync(join(tmpdir(), 'no-backend-noadmin-')); const port2 = port + 200;
-    const child2 = spawn(process.execPath, ['--no-warnings=ExperimentalWarning', 'server.mjs'], { cwd: join(ROOT, 'backend'), env: { ...env, BACKEND_PORT: String(port2), BACKEND_DATABASE_PATH: join(dir2, 'db.sqlite'), BACKEND_STORAGE_DIR: join(dir2, 'docs'), BACKEND_ADMIN_TOKEN: '' }, stdio: 'ignore' });
-    const API2 = `http://127.0.0.1:${port2}`;
-    for (let i = 0; i < 50; i++) { try { if ((await fetch(API2 + '/health')).ok) break; } catch { /* not yet */ } await new Promise((r) => setTimeout(r, 100)); }
-    const unconfigured = await fetch(API2 + '/admin/attribution/reassign', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: SITE }, body: '{}' });
-    ok('admin reassignment with no BACKEND_ADMIN_TOKEN configured → 404 (the route does not exist as far as any caller can tell)', unconfigured.status === 404);
-    child2.kill('SIGTERM'); await new Promise((r) => child2.on('close', r)); rmSync(dir2, { recursive: true, force: true });
-  }
-  const noToken = await fetch(API + '/admin/attribution/reassign', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: SITE }, body: JSON.stringify({ customerId: alphaId, supervisorId: 'supervisor-2' }) });
-  ok('admin reassignment without the bearer token → 403 (endpoint exists once BACKEND_ADMIN_TOKEN is set, but is not open)', noToken.status === 403);
-  const wrongToken = await fetch(API + '/admin/attribution/reassign', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: SITE, Authorization: 'Bearer wrong' }, body: JSON.stringify({ customerId: alphaId, supervisorId: 'supervisor-2' }) });
-  ok('a wrong bearer token → 403', wrongToken.status === 403);
-  const reassigned = await fetch(API + '/admin/attribution/reassign', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: SITE, Authorization: `Bearer ${'a'.repeat(40)}` }, body: JSON.stringify({ customerId: alphaId, supervisorId: 'supervisor-2' }) }).then((r) => r.json());
-  ok('the correct token reassigns the customer', reassigned.attribution?.supervisorId === 'supervisor-2');
+  // ---- admin reassignment through the admin dashboard (a staff session with attribution.view + supervisor.manage);
+  // the legacy bearer-token route (BACKEND_ADMIN_TOKEN) was removed on 2026-09-25 and no longer exists ----
+  const legacy = await fetch(API + '/admin/attribution/reassign', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: SITE, Authorization: `Bearer ${'a'.repeat(40)}` }, body: JSON.stringify({ customerId: alphaId, supervisorId: 'supervisor-2' }) });
+  ok('the removed bearer-token reassignment route answers 401 like any /admin route without a staff session', legacy.status === 401);
+  const jarA = new Map(); const reqA = makeReq(API, SITE)(jarA, 'no_ops_csrf');
+  await reqA('/staff/auth/sign-in', { method: 'POST', body: { email: 'admin1@fixture.test', password: 'password123' } });
+  const reassigned = await reqA(`/admin/customers/${alphaId}/reassign`, { method: 'POST', body: { supervisorId: 'supervisor-2' } });
+  ok('an admin reassigns the customer through the admin dashboard route', reassigned.status === 200 && reassigned.data.supervisorId === 'supervisor-2');
   const after1 = await reqS1('/supervisor/me/customers'); const after2 = await reqS2('/supervisor/me/customers');
   ok('after reassignment, Supervisor A no longer sees the customer and Supervisor B now does', after1.data.items.length === 0 && after2.data.items.length === 1);
   const detail2 = await reqS2(`/supervisor/me/customers/${alphaId}`);
-  ok('reassignment preserves history: the attribution audit trail keeps the earlier supervisor, not just the new one', detail2.data.customer.attributionHistory.some((h) => h.supervisorId === 'supervisor-1') && detail2.data.customer.attributionHistory.some((h) => h.supervisorId === 'supervisor-2' && h.actor === 'admin'));
+  ok('reassignment preserves history: the attribution audit trail keeps the earlier supervisor, not just the new one', detail2.data.customer.attributionHistory.some((h) => h.supervisorId === 'supervisor-1') && detail2.data.customer.attributionHistory.some((h) => h.supervisorId === 'supervisor-2' && h.actor === 'staff-admin-1'));
   ok('reassignment does not erase the customer\'s past bookings’ own supervisor_id (historical attribution on the booking itself is untouched)', (await reqS2('/supervisor/me/bookings/BK_A1')).status === 404);   // BK_A1.supervisor_id is still 'supervisor-1', not reassigned retroactively
-  jarS1.clear(); jarS2.clear(); jarC.clear();
+  jarS1.clear(); jarS2.clear(); jarC.clear(); jarA.clear();
 }
 
 // ---- Stage 15: the operations control layer — staff auth/session isolation, permission enforcement, the booking
@@ -397,7 +392,14 @@ await control('/__test/reset');
   const tmpl = await reqAdmin('/notifications/templates', { method: 'POST', body: { event: 'booking.ticketed', channel: 'sms', bodyAr: '<script>alert(1)</script>مرحباً {{name}}', bodyEn: '<b>Hi</b> {{name}}', variables: ['name'] } });
   ok('a template body strips tags/scripts — never executable, plain text with {{variables}} preserved', tmpl.status === 200 && !/<script|<b>/i.test(tmpl.data.template.bodyAr + tmpl.data.template.bodyEn) && tmpl.data.template.bodyEn.includes('{{name}}'));
   const tmplList = await reqAdmin('/notifications/templates'); ok('template list retrieval', tmplList.data.templates.some((t) => t.event === 'booking.ticketed'));
-  const history = await reqAdmin('/notifications/history'); ok('notification history reads the existing outbox, not a duplicate store', history.status === 200 && Array.isArray(history.data.items));
+  const history = await reqAdmin('/notifications/history'); ok('notification history reads the existing outbox, not a duplicate store', history.status === 200 && Array.isArray(history.data.items))
+  {
+    // review 2026-09-25 §4: filtered and paged in SQL — the total is the filter's own count, and a page holds pageSize items
+    const all = await reqAdmin('/notifications/history?pageSize=100'); const byBooking = await reqAdmin('/notifications/history?bookingId=BK_A1&pageSize=100');
+    const page1 = await reqAdmin('/notifications/history?pageSize=1');
+    ok('history by booking returns only that booking\'s messages, counted in SQL', byBooking.status === 200 && byBooking.data.total === byBooking.data.items.length && byBooking.data.total <= all.data.total, `${byBooking.data.total}/${all.data.total}`);
+    ok('history pages hold pageSize items and report the full total', page1.data.items.length === Math.min(1, all.data.total) && page1.data.total === all.data.total && (all.data.total > 1 ? page1.data.nextPage === 2 : page1.data.nextPage === null));
+  };
 
   // ---- audit trail: every operational action above left a trace ----
   const auditList = await reqAdmin('/operations/audit');
@@ -748,7 +750,31 @@ await control('/__test/reset');
   ok('the booking payment gate now reads paid — set only by the verified webhook, never by the intent route itself', paidBooking.data.booking.paymentStatus === 'paid' && paidBooking.data.payments.some((p) => p.status === 'paid' && p.amount === 500));
   ok('customer payment history reflects the real, verified payment', (await reqP('/me/payments')).data.items.some((p) => p.bookingId === 'BK-16B-PAY' && p.status === 'paid'));
   ok('a receipt document was issued only through the verified webhook path', (await reqP('/me/documents')).data.documents.some((d) => d.bookingId === 'BK-16B-PAY' && d.type === 'receipt'));
+  {
+    const raw = new DatabaseSync(env.BACKEND_DATABASE_PATH, { readOnly: true });
+    const row = raw.prepare("SELECT booking_id FROM outbox WHERE template = 'payment-successful' ORDER BY created_at DESC LIMIT 1").get(); raw.close();
+    ok('a message naming its booking only in the payload is queued with outbox.booking_id set (so staff history filters on the indexed column)', row?.booking_id === 'BK-16B-PAY', JSON.stringify(row));
+  }
   ok('a payment-successful notification was queued to the existing outbox (never claimed delivered — no provider connected)', (await fetch(API + '/__test/state').then((r) => r.json())).outbox.some((o) => o.template === 'payment-successful' && o.status === 'queued'));
+
+  // ---- review 2026-09-25 §1.6: an event left at 'received' (a crash before processing was transactional) is
+  // reprocessed on the provider's retry, never dropped as a duplicate; a processed event is then a true duplicate ----
+  {
+    const stuck = await reqP('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-16B-STUCK', context: { service: 'flights' }, total: 300, currency: 'USD' } });
+    const rw = new DatabaseSync(env.BACKEND_DATABASE_PATH); const at = new Date().toISOString();
+    rw.prepare('INSERT INTO payments (id, customer_id, booking_id, at, amount, currency, status, reference, method_ar, method_en, provider, provider_reference, idempotency_key, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)')
+      .run('pay_stuck', stuck.data.booking.customerId, 'BK-16B-STUCK', at, 300, 'USD', 'pending', 'DEVPAY-stuck', '', '', 'dev', 'DEVPAY-stuck', null, at);
+    rw.prepare('INSERT INTO payment_events (provider, provider_event_id, event_type, received_at, status) VALUES (?,?,?,?,?)').run('dev', 'evt_stuck', 'succeeded', at, 'received');
+    rw.close();
+    const redelivery = await webhook({ eventId: 'evt_stuck', type: 'succeeded', providerReference: 'DEVPAY-stuck', amount: 300, currency: 'USD' });
+    const afterRetry = await reqP('/me/bookings/BK-16B-STUCK');
+    ok('a stuck received event is processed on redelivery: the booking becomes paid', redelivery.status === 200 && afterRetry.data.booking.paymentStatus === 'paid', JSON.stringify(redelivery.data));
+    const ro = new DatabaseSync(env.BACKEND_DATABASE_PATH, { readOnly: true });
+    const ev = ro.prepare("SELECT status, payment_id FROM payment_events WHERE provider_event_id = 'evt_stuck'").get(); ro.close();
+    ok('the processed event records its payment (payment_events.payment_id)', ev?.status === 'processed' && ev.payment_id === 'pay_stuck', JSON.stringify(ev));
+    await webhook({ eventId: 'evt_stuck', type: 'succeeded', providerReference: 'DEVPAY-stuck', amount: 300, currency: 'USD' });
+    ok('a second delivery of the now-processed event changes nothing (one receipt only)', (await reqP('/me/documents')).data.documents.filter((d) => d.bookingId === 'BK-16B-STUCK' && d.type === 'receipt').length === 1);
+  }
 
   // ---- failed payment: safe, retryable, no duplicate booking ----
   await reqP('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-16B-FAIL', context: { service: 'flights' }, total: 250, currency: 'USD' } });

@@ -6,7 +6,7 @@
 import { config } from './config.mjs';
 import { q, now, placeholders } from './db.mjs';
 import { json, empty, fail, HttpError, hex, readJson, readBody, parseMultipart, str, isEmail, pageParams, setSessionCookies, clearSessionCookies } from './http.mjs';
-import { publicCustomer, customerById, createIdentity, verifyPassword, changePassword, createSession, endSession, createReset, consumeReset, validAttribution, normEmail } from './identity.mjs';
+import { publicCustomer, slugLookup, customerById, createIdentity, verifyPassword, changePassword, createSession, endSession, createReset, consumeReset, validAttribution, normEmail } from './identity.mjs';
 import { assignAttribution } from './supervisor.mjs';
 import { validateUpload, storage, signedUrl, verifySignature } from './storage.mjs';
 import { enqueue } from './mailer.mjs';
@@ -17,13 +17,10 @@ import { searchFlights, getFlightOffer, quoteFlightOffer } from './flights.mjs';
 
 /* ---- row → contract shape ---------------------------------------------- */
 const J = (s, d) => { try { return s ? JSON.parse(s) : d; } catch { return d; } };
-// Customer-facing responses expose the supervisor's PUBLIC slug, never the internal backend id — the frontend
-// registry (assets/js/data/supervisors.js) only ever recognises a supervisor by slug (supervisorBySlug()), so a raw
-// backend id here would silently fail to resolve to anything on the account pages. Falls back to the raw id only
-// if a supervisor genuinely has no slug yet (can still be attributed to by id, per identity.mjs's validAttribution).
-const supervisorSlug = (id) => (id ? (q.get('SELECT slug FROM supervisors WHERE id = ?', id)?.slug ?? id) : null);
-const nTrip = (r) => ({ id: r.id, customerId: r.customer_id, titleAr: r.title_ar, titleEn: r.title_en, destination: J(r.destination_json, null), startDate: r.start_date, endDate: r.end_date, services: J(r.services_json, []), status: r.status, bookingIds: q.all('SELECT id FROM bookings WHERE trip_id = ? AND customer_id = ?', r.id, r.customer_id).map((b) => b.id), travellers: r.travellers, supervisorId: supervisorSlug(r.supervisor_id), createdAt: r.created_at });
-const nBooking = (r) => ({ id: r.id, customerId: r.customer_id, tripId: r.trip_id, service: r.service, status: r.status, paymentStatus: r.payment_status, amount: r.amount, currency: r.currency, supervisorId: supervisorSlug(r.supervisor_id), ticketed: !!r.ticketed, createdAt: r.created_at, detail: J(r.detail_json, {}) });
+const nTrip = (r, byTrip = null, slug = slugLookup()) => ({ id: r.id, customerId: r.customer_id, titleAr: r.title_ar, titleEn: r.title_en, destination: J(r.destination_json, null), startDate: r.start_date, endDate: r.end_date, services: J(r.services_json, []), status: r.status, bookingIds: byTrip ? (byTrip.get(r.id) ?? []) : q.all('SELECT id FROM bookings WHERE trip_id = ? AND customer_id = ?', r.id, r.customer_id).map((b) => b.id), travellers: r.travellers, supervisorId: slug(r.supervisor_id), createdAt: r.created_at });
+const nBooking = (r, slug = slugLookup()) => ({ id: r.id, customerId: r.customer_id, tripId: r.trip_id, service: r.service, status: r.status, paymentStatus: r.payment_status, amount: r.amount, currency: r.currency, supervisorId: slug(r.supervisor_id), ticketed: !!r.ticketed, createdAt: r.created_at, detail: J(r.detail_json, {}) });
+/** trip id → its booking ids for one customer, in one query, for mapping a list of trips with nTrip(t, byTrip). */
+const bookingIdsByTrip = (customerId) => { const m = new Map(); for (const b of q.all('SELECT id, trip_id FROM bookings WHERE customer_id = ? AND trip_id IS NOT NULL', customerId)) m.set(b.trip_id, [...(m.get(b.trip_id) ?? []), b.id]); return m; };
 const nDoc = (r) => ({ id: r.id, bookingId: r.booking_id, tripId: r.trip_id, type: r.type, kind: r.kind, status: r.revoked_at ? 'pending' : r.status, title: r.title, size: r.size, contentType: r.content_type, deletable: !!r.deletable, issuedAt: r.issued_at });
 const nPay = (r) => ({ id: r.id, bookingId: r.booking_id, at: r.at, amount: r.amount, currency: r.currency, status: r.status, reference: r.reference, methodAr: r.method_ar, methodEn: r.method_en });
 const nNtf = (r) => ({ id: r.id, kind: r.kind, at: r.at, read: !!r.read, titleAr: r.title_ar, titleEn: r.title_en, textAr: r.text_ar, textEn: r.text_en, href: r.href, bookingId: r.booking_id });
@@ -101,13 +98,13 @@ export const me = {
     q.run('UPDATE customers SET name = ?, phone = ?, locale = ?, updated_at = ? WHERE id = ?', name, phone, locale, now(), c.id);   // attribution and e-mail are never patched
     return json(res, 200, { customer: publicCustomer(customerById(c.id)) });
   },
-  trips(req, res, ctx) { return json(res, 200, { trips: q.all('SELECT * FROM trips WHERE customer_id = ? ORDER BY start_date', ctx.customer.id).map(nTrip) }); },
+  trips(req, res, ctx) { return json(res, 200, { trips: (() => { const byTrip = bookingIdsByTrip(ctx.customer.id); const slug = slugLookup(); return q.all('SELECT * FROM trips WHERE customer_id = ? ORDER BY start_date', ctx.customer.id).map((t) => nTrip(t, byTrip, slug)); })() }); },
   trip(req, res, ctx, id) {
     const t = q.get('SELECT * FROM trips WHERE id = ? AND customer_id = ?', id, ctx.customer.id); if (!t) return fail(res, 404, 'notFound');
     const bookings = q.all('SELECT * FROM bookings WHERE trip_id = ? AND customer_id = ?', t.id, ctx.customer.id);
-    return json(res, 200, { trip: nTrip(t), bookings: bookings.map(nBooking), documents: q.all('SELECT * FROM documents WHERE trip_id = ? AND customer_id = ?', t.id, ctx.customer.id).map(nDoc), payments: bookings.length ? q.all(`SELECT * FROM payments WHERE customer_id = ? AND booking_id IN (${placeholders(bookings)}) ORDER BY at DESC`, ctx.customer.id, ...bookings.map((b) => b.id)).map(nPay) : [] });
+    return json(res, 200, { trip: nTrip(t), bookings: (() => { const slug = slugLookup(); return bookings.map((b) => nBooking(b, slug)); })(), documents: q.all('SELECT * FROM documents WHERE trip_id = ? AND customer_id = ?', t.id, ctx.customer.id).map(nDoc), payments: bookings.length ? q.all(`SELECT * FROM payments WHERE customer_id = ? AND booking_id IN (${placeholders(bookings)}) ORDER BY at DESC`, ctx.customer.id, ...bookings.map((b) => b.id)).map(nPay) : [] });
   },
-  bookings(req, res, ctx) { return json(res, 200, { bookings: q.all('SELECT * FROM bookings WHERE customer_id = ? ORDER BY created_at DESC', ctx.customer.id).map(nBooking) }); },
+  bookings(req, res, ctx) { return json(res, 200, { bookings: (() => { const slug = slugLookup(); return q.all('SELECT * FROM bookings WHERE customer_id = ? ORDER BY created_at DESC', ctx.customer.id).map((b) => nBooking(b, slug)); })() }); },
   booking(req, res, ctx, id) {
     const b = q.get('SELECT * FROM bookings WHERE id = ? AND customer_id = ?', id, ctx.customer.id); if (!b) return fail(res, 404, 'notFound');
     const trip = b.trip_id ? q.get('SELECT * FROM trips WHERE id = ? AND customer_id = ?', b.trip_id, ctx.customer.id) : null;
@@ -182,8 +179,9 @@ export const me = {
     // One batched lookup per related table instead of two queries per document row (was an N+1 on this list screen).
     const bookingIds = [...new Set(docs.map((d) => d.booking_id).filter(Boolean))];
     const tripIds = [...new Set(docs.map((d) => d.trip_id).filter(Boolean))];
-    const bookings = new Map(bookingIds.length ? q.all(`SELECT * FROM bookings WHERE customer_id = ? AND id IN (${placeholders(bookingIds)})`, cid, ...bookingIds).map((b) => [b.id, nBooking(b)]) : []);
-    const trips = new Map(tripIds.length ? q.all(`SELECT * FROM trips WHERE customer_id = ? AND id IN (${placeholders(tripIds)})`, cid, ...tripIds).map((t) => [t.id, nTrip(t)]) : []);
+    const slug = slugLookup(); const byTrip = tripIds.length ? bookingIdsByTrip(cid) : null;
+    const bookings = new Map(bookingIds.length ? q.all(`SELECT * FROM bookings WHERE customer_id = ? AND id IN (${placeholders(bookingIds)})`, cid, ...bookingIds).map((b) => [b.id, nBooking(b, slug)]) : []);
+    const trips = new Map(tripIds.length ? q.all(`SELECT * FROM trips WHERE customer_id = ? AND id IN (${placeholders(tripIds)})`, cid, ...tripIds).map((t) => [t.id, nTrip(t, byTrip, slug)]) : []);
     return json(res, 200, { documents: docs.map((d) => ({ ...nDoc(d), booking: bookings.get(d.booking_id) ?? null, trip: trips.get(d.trip_id) ?? null })) });
   },
   async documentUpload(req, res, ctx) {
@@ -203,7 +201,8 @@ export const me = {
     const rows = q.all('SELECT * FROM payments WHERE customer_id = ? ORDER BY at DESC LIMIT ? OFFSET ?', cid, size, (page - 1) * size);
     // One batched booking lookup for the page instead of one query per row (was an N+1 on this list screen).
     const bookingIds = [...new Set(rows.map((p) => p.booking_id).filter(Boolean))];
-    const bookings = new Map(bookingIds.length ? q.all(`SELECT * FROM bookings WHERE customer_id = ? AND id IN (${placeholders(bookingIds)})`, cid, ...bookingIds).map((b) => [b.id, nBooking(b)]) : []);
+    const slug = slugLookup();
+    const bookings = new Map(bookingIds.length ? q.all(`SELECT * FROM bookings WHERE customer_id = ? AND id IN (${placeholders(bookingIds)})`, cid, ...bookingIds).map((b) => [b.id, nBooking(b, slug)]) : []);
     const items = rows.map((p) => ({ ...nPay(p), booking: bookings.get(p.booking_id) ?? null }));
     return json(res, 200, { items, page, pageSize: size, total, nextPage: page * size < total ? page + 1 : null });
   },

@@ -140,6 +140,32 @@ work.
 
 ## 4. Overly complex implementations
 
+> **Phase 3 status (2026-09-25): done.** What changed:
+> - **1.6, webhook atomicity:** every database write for a payment event runs in one `q.tx`, and the event
+>   is marked processed only on commit. A row still at `received` is reprocessed on the provider's retry;
+>   only processed or rejected events count as duplicates. `payment_events.payment_id` is now written. The
+>   async flight-supplier call runs after the commit. The same treatment is applied to
+>   `business-rules.mjs` (history row plus update) and `transitionBooking` (status, history, audit,
+>   notification). `q.tx` now nests through savepoints.
+> - **Pagination in SQL:** a new `pageQuery()` in `db.mjs` counts and slices in SQL, and all 17 list
+>   read models use it (`paginate()` is gone). Notification history filters on the indexed
+>   `outbox.booking_id`: `mailer.enqueue()` now fills it from the payload, and migration 010 backfilled
+>   older rows.
+> - **Indexes:** migration `010_indexes.sql` adds every index listed in §6.
+> - **N+1 fixes:** `slugLookup()` in `identity.mjs` replaces the two duplicated `supervisorSlug` helpers.
+>   It costs one query per distinct supervisor per response, not per row. Trip lists get their booking
+>   ids in one query.
+> - **Sessions:** only the route family's session is resolved (at most 1 session lookup per request,
+>   down from 3), and `last_seen_at` is written at most once a minute.
+> - **Supervisor revenue and performance** are summed in SQL. Revenue is grouped per currency
+>   (`byCurrency`); the flat totals are null when currencies mix, never a mixed sum. The revenue screen,
+>   the dashboard and the admin supervisor detail render per currency.
+> - **Removed:** `GET /documents/requirements`, `GET /operations/tasks/:id`, and the legacy
+>   `/admin/attribution/reassign` route together with `BACKEND_ADMIN_TOKEN` (now refused if set, so a
+>   deployment learns it is gone). Its tests moved to the admin dashboard route.
+> - **`migrate()` branches:** the always-true checks were removed.
+> - **Not in Phase 3, still open:** the O(n²) `payments()` in `api-customer.js` (front end, Phase 4).
+
 - **Lists are paginated in memory** (`backend/db.mjs:120-124`). The worst case
   is notification history, which reads the *whole* `outbox` table and
   `JSON.parse`s every row to filter by booking, even though an indexed

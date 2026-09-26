@@ -24,7 +24,7 @@ status of the stages it sits on top of, per the brief's own §1:
   (`ops_status`), tasks, escalations, service catalogue + workflow +
   document requirements, document review, supplier directory,
   customer/internal notes, notification templates + history, and the audit
-  trail (`audit_events`). Built and unchanged.
+  trail (`audit_events`). Built and unchanged. *(Removed 2026-09-25: reassignment is now only the admin dashboard's `POST /admin/customers/:id/reassign`, with a staff session; `BACKEND_ADMIN_TOKEN` is refused if set.)*
 
 **What was genuinely absent**: an admin-wide view across customers,
 supervisors, payments, and documents; supervisor account provisioning

@@ -19,7 +19,7 @@ import { registerDevPaymentProvider } from './payments.mjs';
 import { registerDevFlightProvider } from './flights.mjs';
 import { registerSmtpProvider, deliverOutbox } from './mailer.mjs';
 import { liveSupervisorSession, supervisorById, sweepSupervisorSessions, endAllSupervisorSessions } from './supervisor.mjs';
-import { supervisorAuth, supervisorMe, admin } from './supervisor-routes.mjs';
+import { supervisorAuth, supervisorMe } from './supervisor-routes.mjs';
 import { liveStaffSession, staffById, sweepStaffSessions, endAllStaffSessions, publicStaff } from './staff.mjs';
 import { staffAuth, operations, services as opsServices, dashboard } from './staff-routes.mjs';
 import { info, warn, error } from './logger.mjs';
@@ -68,7 +68,7 @@ export function createApp() {
       // waiting — the SAME deliverOutbox() the interval calls, nothing test-only about the delivery logic itself.
       if (path === '/__test/deliver-outbox') { if (b.force) q.run("UPDATE outbox SET next_attempt_at = NULL WHERE status = 'retrying'"); return json(res, 200, await deliverOutbox({ limit: b.limit ?? 20 })); }
       if (path === '/__test/enqueue') { const { enqueue } = await import('./mailer.mjs'); return json(res, 200, enqueue({ customerId: b.customerId ?? null, recipient: b.recipient ?? null, template: b.template ?? 'test', payload: b.payload ?? {}, idempotencyKey: b.idempotencyKey ?? null })); }
-      if (path === '/__test/state') return json(res, 200, { events: q.all('SELECT * FROM diagnostics ORDER BY id').map((r) => ({ ...JSON.parse(r.payload_json), event: r.event })), requests: test.requests.slice(-200), customers: q.all('SELECT * FROM customers').map(publicCustomer), sessions: q.get('SELECT COUNT(*) AS n FROM sessions').n, resets: q.all('SELECT r.token, c.email FROM reset_tokens r JOIN customers c ON c.id = r.customer_id'), outbox: q.all('SELECT * FROM outbox ORDER BY created_at'), staff: q.all('SELECT * FROM staff').map(publicStaff), auditCount: q.get('SELECT COUNT(*) AS n FROM audit_events').n });
+      if (path === '/__test/state') return json(res, 200, { events: q.all('SELECT * FROM diagnostics ORDER BY id').map((r) => ({ ...JSON.parse(r.payload_json), event: r.event })), requests: test.requests.slice(-200), customers: q.all('SELECT * FROM customers').map((c) => publicCustomer(c)), sessions: q.get('SELECT COUNT(*) AS n FROM sessions').n, resets: q.all('SELECT r.token, c.email FROM reset_tokens r JOIN customers c ON c.id = r.customer_id'), outbox: q.all('SELECT * FROM outbox ORDER BY created_at'), staff: q.all('SELECT * FROM staff').map(publicStaff), auditCount: q.get('SELECT COUNT(*) AS n FROM audit_events').n });
       return fail(res, 404, 'notFound');
     }
     if (test) {
@@ -111,15 +111,17 @@ export function createApp() {
     if ((m = path.match(/^\/flights\/offers\/([^/]+)\/([^/]+)$/)) && req.method === 'GET') return flights.offer(req, res, decodeURIComponent(m[1]), decodeURIComponent(m[2]));
     if (path === '/flights/quote' && req.method === 'POST') return flights.quote(req, res);
 
-    // ---- session + CSRF: customer and supervisor sessions are read from DIFFERENT cookies into DIFFERENT ctx fields —
-    // a route handler for one role never even receives the other's session object, so there is no field to confuse. ----
-    const ck = cookies(req); const session = liveSession(ck.no_session); const customer = session ? customerById(session.customer_id) : null;
-    const supervisorSession = liveSupervisorSession(ck.no_supervisor_session); const supervisor = supervisorSession ? supervisorById(supervisorSession.supervisor_id) : null;
-    const staffSession = liveStaffSession(ck.no_ops_session); const staffMember = staffSession ? staffById(staffSession.staff_id) : null;
-    const ctx = { sid: ck.no_session ?? null, session: customer ? session : null, customer, supervisorSid: ck.no_supervisor_session ?? null, supervisorSession: supervisor ? supervisorSession : null, supervisor, staffSid: ck.no_ops_session ?? null, staffSession: staffMember ? staffSession : null, staff: staffMember, ip, urlTtlMs: test?.urlTtlMs ?? undefined };
+    // ---- session + CSRF: customer, supervisor and staff sessions live in DIFFERENT cookies, and only the session of
+    // the route's own family is resolved (sessionFamily, http.mjs): a customer route never even loads a staff or
+    // supervisor session, so a handler can't confuse them, and a request costs at most one session lookup instead
+    // of three. The other families' ctx fields stay null. ----
+    const ck = cookies(req); const family = sessionFamily(path);
+    const ctx = { sid: ck.no_session ?? null, session: null, customer: null, supervisorSid: ck.no_supervisor_session ?? null, supervisorSession: null, supervisor: null, staffSid: ck.no_ops_session ?? null, staffSession: null, staff: null, ip, urlTtlMs: test?.urlTtlMs ?? undefined };
+    if (family === 'customer') { const s = liveSession(ck.no_session); const c = s ? customerById(s.customer_id) : null; if (c) Object.assign(ctx, { session: s, customer: c }); }
+    else if (family === 'supervisor') { const s = liveSupervisorSession(ck.no_supervisor_session); const v = s ? supervisorById(s.supervisor_id) : null; if (v) Object.assign(ctx, { supervisorSession: s, supervisor: v }); }
+    else if (family === 'staff') { const s = liveStaffSession(ck.no_ops_session); const m = s ? staffById(s.staff_id) : null; if (m) Object.assign(ctx, { staffSession: s, staff: m }); }
     if (['POST', 'PATCH', 'DELETE'].includes(req.method)) {
-      const family = sessionFamily(path);
-      const live = family === 'customer' ? ctx.session : family === 'supervisor' ? ctx.supervisorSession : family === 'staff' ? ctx.staffSession : null;
+      const live = ctx.session ?? ctx.supervisorSession ?? ctx.staffSession;   // at most one is set: the route family's
       if (live) { const h = req.headers['x-csrf-token']; if (!h || !same(h, live.csrf)) { warn('csrf.rejected', { path, family }); return fail(res, 403, 'forbidden'); } }
     }
 
@@ -141,7 +143,6 @@ export function createApp() {
     if (path === '/supervisor/auth/password/reset-request' && req.method === 'POST') return supervisorAuth.resetRequest(req, res, ctx);
     if (path === '/supervisor/auth/password/reset' && req.method === 'POST') return supervisorAuth.reset(req, res, ctx);
     if (path === '/supervisor/auth/password/change' && req.method === 'POST') return supervisorAuth.change(req, res, ctx);
-    if (path === '/admin/attribution/reassign' && req.method === 'POST') return admin.reassign(req, res, ctx);
     if (path.startsWith('/supervisor/me')) {
       if (!ctx.supervisorSession) return fail(res, 401, 'unauthenticated');
       if (path === '/supervisor/me' && req.method === 'GET') return supervisorMe.profile(req, res, ctx);
@@ -169,7 +170,7 @@ export function createApp() {
     if (path === '/staff/auth/password/reset' && req.method === 'POST') return staffAuth.reset(req, res, ctx);
     if (path === '/staff/auth/password/change' && req.method === 'POST') return staffAuth.change(req, res, ctx);
 
-    // ---- Stage 15: /services, /operations, /bookings/:id/*, /documents/:id/review, /documents/requirements,
+    // ---- Stage 15: /services, /operations, /bookings/:id/*, /documents/:id/review,
     // /notifications/templates|history — every one requires a live STAFF session; the specific permission each
     // action needs is checked inside staff-routes.mjs (backend/staff.mjs requirePermission), never here alone. ----
     if (path === '/services' && req.method === 'GET') { if (!ctx.staffSession) return fail(res, 401, 'unauthenticated'); return opsServices.list(req, res, ctx); }
@@ -182,9 +183,7 @@ export function createApp() {
 
     // ---- Stage 14: /admin/* — the management/oversight layer ABOVE the Stage 15 operational domain. A live staff
     // session is required for all of these; the specific permission each action needs is checked inside
-    // staff-routes.mjs's `dashboard` object (backend/staff.mjs requirePermission), never here alone. This is
-    // distinct from the pre-existing bearer-token '/admin/attribution/reassign' route matched above, which stays
-    // untouched at its exact path for compatibility. ----
+    // staff-routes.mjs's `dashboard` object (backend/staff.mjs requirePermission), never here alone. ----
     if (path.startsWith('/admin/')) {
       if (!ctx.staffSession) return fail(res, 401, 'unauthenticated');
       if (path === '/admin/overview' && req.method === 'GET') return dashboard.overview(req, res, ctx);
@@ -234,7 +233,6 @@ export function createApp() {
       if (path === '/operations/meta' && req.method === 'GET') return operations.meta(req, res, ctx);
       if (path === '/operations/tasks' && req.method === 'GET') return operations.tasks(req, res, ctx, url);
       if (path === '/operations/tasks' && req.method === 'POST') return operations.taskCreate(req, res, ctx);
-      if ((m = path.match(/^\/operations\/tasks\/([^/]+)$/)) && req.method === 'GET') return operations.task(req, res, ctx, decodeURIComponent(m[1]));
       if ((m = path.match(/^\/operations\/tasks\/([^/]+)\/assign$/)) && req.method === 'POST') return operations.taskAssign(req, res, ctx, decodeURIComponent(m[1]));
       if ((m = path.match(/^\/operations\/tasks\/([^/]+)\/status$/)) && req.method === 'POST') return operations.taskStatus(req, res, ctx, decodeURIComponent(m[1]));
       if (path === '/operations/escalations' && req.method === 'GET') return operations.escalations(req, res, ctx, url);
@@ -243,7 +241,6 @@ export function createApp() {
       if (path === '/operations/suppliers' && req.method === 'GET') return operations.suppliers(req, res, ctx);
       if (path === '/operations/suppliers' && req.method === 'POST') return operations.supplierCreate(req, res, ctx);
       if (path === '/operations/audit' && req.method === 'GET') return operations.audit(req, res, ctx, url);
-      if (path === '/documents/requirements' && req.method === 'GET') return operations.documentRequirements(req, res, ctx);
       if ((m = path.match(/^\/documents\/([^/]+)\/review$/)) && req.method === 'POST') return operations.documentReviewSubmit(req, res, ctx, decodeURIComponent(m[1]));
       if (path === '/notifications/templates' && req.method === 'GET') return operations.templates(req, res, ctx);
       if (path === '/notifications/templates' && req.method === 'POST') return operations.templateUpsert(req, res, ctx);

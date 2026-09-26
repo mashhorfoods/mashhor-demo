@@ -84,46 +84,58 @@ export async function handleWebhookEvent(providerId, rawBody, headers) {
   let event; try { event = provider.normalizeEvent(rawBody); } catch { warn('payment.webhook.malformed', { provider: providerId }); throw new HttpError(400, 'invalid'); }
   if (!event?.providerEventId || !event?.providerReference || !event?.type) { warn('payment.webhook.malformed', { provider: providerId }); throw new HttpError(400, 'invalid'); }
 
+  // Every database write for this event happens in ONE transaction, and the event is marked processed only as part
+  // of it: a failure anywhere rolls the whole event back (including its payment_events row), so the provider's
+  // retry is processed afresh instead of being dropped as a duplicate of a half-applied event. A row still at
+  // 'received' (left by a crash before this was transactional) is reprocessed too; only processed/rejected events
+  // are duplicates. The supplier call for a flights booking is async, so it runs after the commit.
   const t = now();
-  const inserted = q.run('INSERT OR IGNORE INTO payment_events (provider, provider_event_id, event_type, received_at, status) VALUES (?,?,?,?,?)', providerId, event.providerEventId, event.type, t, 'received');
-  if (!inserted.changes) { info('payment.webhook.duplicate', { provider: providerId, providerEventId: event.providerEventId }); return { duplicate: true }; }   // already delivered once — safely ignored, nothing is touched a second time
-  const eventRow = q.get('SELECT * FROM payment_events WHERE provider = ? AND provider_event_id = ?', providerId, event.providerEventId);
+  const outcome = q.tx(() => {
+    q.run('INSERT OR IGNORE INTO payment_events (provider, provider_event_id, event_type, received_at, status) VALUES (?,?,?,?,?)', providerId, event.providerEventId, event.type, t, 'received');
+    const eventRow = q.get('SELECT * FROM payment_events WHERE provider = ? AND provider_event_id = ?', providerId, event.providerEventId);
+    if (eventRow.status !== 'received') return { duplicate: true };   // already delivered once — safely ignored, nothing is touched a second time
 
-  const reject = (reason) => { q.run('UPDATE payment_events SET status = ?, reason = ?, processed_at = ? WHERE id = ?', 'rejected', reason, now(), eventRow.id); warn('payment.webhook.rejected', { provider: providerId, providerEventId: event.providerEventId, reason }); audit(SYSTEM_ACTOR, 'payment.webhook.rejected', 'payment', event.providerReference, { provider: providerId, reason }); return { rejected: reason }; };
+    const reject = (reason) => { q.run('UPDATE payment_events SET status = ?, reason = ?, processed_at = ? WHERE id = ?', 'rejected', reason, now(), eventRow.id); audit(SYSTEM_ACTOR, 'payment.webhook.rejected', 'payment', event.providerReference, { provider: providerId, reason }); return { rejected: reason }; };
 
-  const payment = q.get('SELECT * FROM payments WHERE provider = ? AND provider_reference = ?', providerId, event.providerReference);
-  if (!payment) return reject('paymentNotFound');
-  if (event.amount != null && Number(event.amount) !== Number(payment.amount)) return reject('amountMismatch');
-  if (event.currency != null && event.currency !== payment.currency) return reject('currencyMismatch');
-  if (['paid', 'refunded'].includes(payment.status)) return reject('paymentAlreadyFinal');   // a second, different event for an already-final payment is never applied
+    const payment = q.get('SELECT * FROM payments WHERE provider = ? AND provider_reference = ?', providerId, event.providerReference);
+    if (!payment) return reject('paymentNotFound');
+    if (event.amount != null && Number(event.amount) !== Number(payment.amount)) return reject('amountMismatch');
+    if (event.currency != null && event.currency !== payment.currency) return reject('currencyMismatch');
+    if (['paid', 'refunded'].includes(payment.status)) return reject('paymentAlreadyFinal');   // a second, different event for an already-final payment is never applied
 
-  const nextStatus = { succeeded: 'paid', failed: 'failed', cancelled: 'cancelled' }[event.type];
-  if (!nextStatus) return reject('unknownEventType');
+    const nextStatus = { succeeded: 'paid', failed: 'failed', cancelled: 'cancelled' }[event.type];
+    if (!nextStatus) return reject('unknownEventType');
 
-  q.run('UPDATE payments SET status = ?, verified_at = ?, failure_code = ?, updated_at = ? WHERE id = ?', nextStatus, nextStatus === 'paid' ? t : null, nextStatus === 'failed' ? (event.failureCode ?? 'declined') : null, t, payment.id);
-  audit(SYSTEM_ACTOR, 'payment.status.changed', 'payment', payment.id, { provider: providerId, status: nextStatus });
+    q.run('UPDATE payments SET status = ?, verified_at = ?, failure_code = ?, updated_at = ? WHERE id = ?', nextStatus, nextStatus === 'paid' ? t : null, nextStatus === 'failed' ? (event.failureCode ?? 'declined') : null, t, payment.id);
+    audit(SYSTEM_ACTOR, 'payment.status.changed', 'payment', payment.id, { provider: providerId, status: nextStatus });
 
-  if (nextStatus === 'paid') {
-    q.run("UPDATE bookings SET payment_status = 'paid' WHERE id = ?", payment.booking_id);
-    q.run('INSERT INTO documents (id, customer_id, booking_id, trip_id, type, kind, status, size, content_type, deletable, issued_at, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
-      `doc_${hex(6)}`, payment.customer_id, payment.booking_id, q.get('SELECT trip_id FROM bookings WHERE id = ?', payment.booking_id)?.trip_id ?? null, 'receipt', 'issued', 'pending', null, null, 0, null, t);
-    enqueue({ customerId: payment.customer_id, template: 'payment-successful', payload: { bookingId: payment.booking_id, amount: payment.amount, currency: payment.currency } });
-    audit(SYSTEM_ACTOR, 'booking.paymentGate.passed', 'booking', payment.booking_id, { paymentId: payment.id });
-    // Stage 16C §13: Revalidate → Payment → Supplier Booking → Confirmation. Runs only now, only once (this
-    // whole branch is itself reached only once per payment, guarded by the idempotent payment_events insert
-    // above), and only for a flights booking claimed against a server-issued offer. A supplier failure here
-    // never unwinds the payment or reports a false ticketed confirmation — see flights.mjs recordFailure().
-    const bkg = q.get('SELECT * FROM bookings WHERE id = ?', payment.booking_id);
-    if (bkg?.service === 'flights' && bkg.flight_search_id && bkg.flight_offer_id) {
-      try { await createFlightBooking({ bookingId: bkg.id, customerId: bkg.customer_id, searchId: bkg.flight_search_id, offerId: bkg.flight_offer_id }, config.flightProvider); }
-      catch (e) { warn('flight.booking.orchestrationError', { bookingId: bkg.id }); }
+    let flight = null;
+    if (nextStatus === 'paid') {
+      q.run("UPDATE bookings SET payment_status = 'paid' WHERE id = ?", payment.booking_id);
+      q.run('INSERT INTO documents (id, customer_id, booking_id, trip_id, type, kind, status, size, content_type, deletable, issued_at, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
+        `doc_${hex(6)}`, payment.customer_id, payment.booking_id, q.get('SELECT trip_id FROM bookings WHERE id = ?', payment.booking_id)?.trip_id ?? null, 'receipt', 'issued', 'pending', null, null, 0, null, t);
+      enqueue({ customerId: payment.customer_id, template: 'payment-successful', payload: { bookingId: payment.booking_id, amount: payment.amount, currency: payment.currency } });
+      audit(SYSTEM_ACTOR, 'booking.paymentGate.passed', 'booking', payment.booking_id, { paymentId: payment.id });
+      // Stage 16C §13: Revalidate → Payment → Supplier Booking → Confirmation — only for a flights booking claimed
+      // against a server-issued offer, and only once per payment (this branch is reached once per event).
+      const bkg = q.get('SELECT * FROM bookings WHERE id = ?', payment.booking_id);
+      if (bkg?.service === 'flights' && bkg.flight_search_id && bkg.flight_offer_id) flight = { bookingId: bkg.id, customerId: bkg.customer_id, searchId: bkg.flight_search_id, offerId: bkg.flight_offer_id };
+    } else if (nextStatus === 'failed') {
+      enqueue({ customerId: payment.customer_id, template: 'payment-failed', payload: { bookingId: payment.booking_id } });
     }
-  } else if (nextStatus === 'failed') {
-    enqueue({ customerId: payment.customer_id, template: 'payment-failed', payload: { bookingId: payment.booking_id } });
+    q.run('UPDATE payment_events SET status = ?, payment_id = ?, processed_at = ? WHERE id = ?', 'processed', payment.id, now(), eventRow.id);
+    return { paymentId: payment.id, status: nextStatus, flight };
+  });
+
+  if (outcome.duplicate) { info('payment.webhook.duplicate', { provider: providerId, providerEventId: event.providerEventId }); return { duplicate: true }; }
+  if (outcome.rejected) { warn('payment.webhook.rejected', { provider: providerId, providerEventId: event.providerEventId, reason: outcome.rejected }); return { rejected: outcome.rejected }; }
+  // A supplier failure never unwinds the payment or reports a false ticketed confirmation — see flights.mjs recordFailure().
+  if (outcome.flight) {
+    try { await createFlightBooking(outcome.flight, config.flightProvider); }
+    catch (e) { warn('flight.booking.orchestrationError', { bookingId: outcome.flight.bookingId }); }
   }
-  q.run('UPDATE payment_events SET status = ?, processed_at = ? WHERE id = ?', 'processed', now(), eventRow.id);
-  info('payment.webhook.verified', { provider: providerId, paymentId: payment.id, status: nextStatus });
-  return { payment: nPayment(q.get('SELECT * FROM payments WHERE id = ?', payment.id)) };
+  info('payment.webhook.verified', { provider: providerId, paymentId: outcome.paymentId, status: outcome.status });
+  return { payment: nPayment(q.get('SELECT * FROM payments WHERE id = ?', outcome.paymentId)) };
 }
 
 /** DEV-ONLY: stands in for "the real provider's own server calls our webhook a moment after the customer pays."

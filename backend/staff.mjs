@@ -16,9 +16,9 @@
 // on a guess.
 // ============================================================================
 import { config } from './config.mjs';
-import { q, now, paginate, whereClause, placeholders } from './db.mjs';
-import { hex, HttpError, str, isEmail, loginAttempts, recordLoginFailure, clearLoginFailures } from './http.mjs';
-import { hash, same, checkPassword, normEmail, publicCustomer, customerById } from './identity.mjs';
+import { q, now, pageQuery, whereClause, placeholders } from './db.mjs';
+import { hex, HttpError, str, isEmail, seenStale, loginAttempts, recordLoginFailure, clearLoginFailures } from './http.mjs';
+import { hash, same, checkPassword, normEmail, publicCustomer, slugLookup, customerById } from './identity.mjs';
 import { warn } from './logger.mjs';
 import { enqueue } from './mailer.mjs';
 
@@ -80,7 +80,8 @@ export function createStaffSession(staffId) {
 export function liveStaffSession(sid) {
   if (!sid) return null; const s = q.get('SELECT * FROM staff_sessions WHERE id = ?', sid); if (!s) return null;
   if (s.expires_at <= Date.now()) { q.run('DELETE FROM staff_sessions WHERE id = ?', sid); return null; }
-  q.run('UPDATE staff_sessions SET last_seen_at = ? WHERE id = ?', now(), sid); return s;
+  if (seenStale(s.last_seen_at)) q.run('UPDATE staff_sessions SET last_seen_at = ? WHERE id = ?', now(), sid);   // at most once a minute, not a write per request
+  return s;
 }
 export const endStaffSession = (sid) => { if (sid) q.run('DELETE FROM staff_sessions WHERE id = ?', sid); };
 export const endAllStaffSessions = (staffId) => q.run('DELETE FROM staff_sessions WHERE staff_id = ?', staffId);
@@ -105,8 +106,7 @@ export function audit(actor, action, entityType, entityId, metadata = {}) {
 }
 export function auditEvents({ entityType = '', entityId = '', page = 1, pageSize = 50 } = {}) {
   const { sql, params } = whereClause([['entity_type = ?', entityType], ['entity_id = ?', entityId]]);
-  const all = q.all(`SELECT * FROM audit_events ${sql} ORDER BY at DESC`, ...params);
-  const { slice, ...meta } = paginate(all, page, pageSize, 100);
+  const { slice, ...meta } = pageQuery(`audit_events ${sql}`, 'at DESC', params, page, pageSize, 100);
   return { items: slice.map(nAudit), ...meta };
 }
 const nAudit = (r) => ({ id: r.id, actorId: r.actor_id, actorRole: r.actor_role, action: r.action, entityType: r.entity_type, entityId: r.entity_id, metadata: J(r.metadata_json, {}), at: r.at });
@@ -151,14 +151,17 @@ export function transitionBooking(bookingId, newStatus, actor, reason = null, me
   if (!allowed.includes(newStatus)) throw new HttpError(422, 'invalid', { from: current, to: newStatus });
   if (paymentGates().has(newStatus) && b.payment_status !== 'paid') throw new HttpError(409, 'conflict', { reason: 'paymentNotConfirmed' });
   const t = now();
-  // bookings (Stage 12.2 schema) has no updated_at column — only ops_status changes here.
-  q.run('UPDATE bookings SET ops_status = ? WHERE id = ?', newStatus, bookingId);
-  const history = q.run('INSERT INTO booking_status_history (booking_id, previous_status, new_status, actor, actor_role, reason, metadata_json, at) VALUES (?,?,?,?,?,?,?,?)',
-    bookingId, current, newStatus, actor.id, actor.role, reason, JSON.stringify(metadata ?? {}), t);
-  audit(actor, 'booking.status.change', 'booking', bookingId, { from: current, to: newStatus, reason });
-  // Stage 16D §6: a real, always-existing system action (every accepted transition) — idempotent per history row,
-  // so retrying this exact call after a network failure never double-notifies the customer of the same change.
-  enqueue({ customerId: b.customer_id, bookingId, template: 'booking-status-changed', eventType: 'booking.status.changed', payload: { bookingId, from: current, to: newStatus }, idempotencyKey: `booking-status:${history.lastInsertRowid}` });
+  // The status change, its history row, the audit event and the customer notification are one unit.
+  q.tx(() => {
+    // bookings (Stage 12.2 schema) has no updated_at column — only ops_status changes here.
+    q.run('UPDATE bookings SET ops_status = ? WHERE id = ?', newStatus, bookingId);
+    const history = q.run('INSERT INTO booking_status_history (booking_id, previous_status, new_status, actor, actor_role, reason, metadata_json, at) VALUES (?,?,?,?,?,?,?,?)',
+      bookingId, current, newStatus, actor.id, actor.role, reason, JSON.stringify(metadata ?? {}), t);
+    audit(actor, 'booking.status.change', 'booking', bookingId, { from: current, to: newStatus, reason });
+    // Stage 16D §6: a real, always-existing system action (every accepted transition) — idempotent per history row,
+    // so retrying this exact call after a network failure never double-notifies the customer of the same change.
+    enqueue({ customerId: b.customer_id, bookingId, template: 'booking-status-changed', eventType: 'booking.status.changed', payload: { bookingId, from: current, to: newStatus }, idempotencyKey: `booking-status:${history.lastInsertRowid}` });
+  });
   return { bookingId, previousStatus: current, newStatus, at: t };
 }
 export function bookingStatusHistory(bookingId) {
@@ -174,8 +177,7 @@ export function assignBookingOperator(bookingId, staffId, actor) {
 }
 export function opsBookingList({ status = '', service = '', assignedTo = '', page = 1, pageSize = 20 } = {}) {
   const { sql, params } = whereClause([['ops_status = ?', status], ['service = ?', service], ['assigned_operator = ?', assignedTo]]);
-  const all = q.all(`SELECT * FROM bookings ${sql} ORDER BY created_at DESC`, ...params);
-  const { slice, ...meta } = paginate(all, page, pageSize, 100);
+  const { slice, ...meta } = pageQuery(`bookings ${sql}`, 'created_at DESC', params, page, pageSize, 100);
   // One batched count for the page instead of one query per row (was an N+1 on this list screen).
   const ids = slice.map((r) => r.id); const missing = new Map();
   if (ids.length) for (const r of q.all(`SELECT booking_id, COUNT(*) AS n FROM documents WHERE booking_id IN (${placeholders(ids)}) AND review_status != 'approved' GROUP BY booking_id`, ...ids)) missing.set(r.booking_id, r.n);
@@ -220,11 +222,9 @@ export function createTask({ type, bookingId = null, customerId = null, supervis
 }
 export function listTasks({ status = '', assignedTo = '', bookingId = '', page = 1, pageSize = 20 } = {}) {
   const { sql, params } = whereClause([['status = ?', status], ['assigned_to = ?', assignedTo], ['booking_id = ?', bookingId]]);
-  const all = q.all(`SELECT * FROM operation_tasks ${sql} ORDER BY created_at DESC`, ...params);
-  const { slice, ...meta } = paginate(all, page, pageSize, 100);
+  const { slice, ...meta } = pageQuery(`operation_tasks ${sql}`, 'created_at DESC', params, page, pageSize, 100);
   return { items: slice.map(nTask), ...meta };
 }
-export function taskById(id) { const r = q.get('SELECT * FROM operation_tasks WHERE id = ?', id); return r ? nTask(r) : null; }
 export function assignTask(id, assignedTo, actor) {
   const r = q.get('SELECT * FROM operation_tasks WHERE id = ?', id); if (!r) throw new HttpError(404, 'notFound');
   if (assignedTo && !staffById(assignedTo)) throw new HttpError(422, 'invalid');
@@ -253,8 +253,7 @@ export function createEscalation({ bookingId = null, taskId = null, reason, seve
 }
 export function listEscalations({ status = '', page = 1, pageSize = 20 } = {}) {
   const { sql, params } = whereClause([['status = ?', status]]);
-  const all = q.all(`SELECT * FROM escalations ${sql} ORDER BY created_at DESC`, ...params);
-  const { slice, ...meta } = paginate(all, page, pageSize, 100);
+  const { slice, ...meta } = pageQuery(`escalations ${sql}`, 'created_at DESC', params, page, pageSize, 100);
   return { items: slice.map(nEscalation), ...meta };
 }
 export function updateEscalationStatus(id, status, actor) {
@@ -296,7 +295,6 @@ export function addServiceDocumentRequirement(serviceId, { docType, required = t
   audit(actor, 'service.documentRequirement.add', 'service', serviceId, { docType });
   return serviceDocumentRequirements(serviceId);
 }
-export const allDocumentRequirements = () => { const services = listServices(); return services.map((s) => ({ serviceId: s.id, requirements: serviceDocumentRequirements(s.id) })).filter((s) => s.requirements.length); };
 
 /* ---- document review (extends the existing `documents` table, §10) ---------------------------------------------- */
 const nDocReview = (r) => ({ id: r.id, bookingId: r.booking_id, type: r.type, status: r.status, reviewStatus: r.review_status, reviewerId: r.reviewer_id ?? null, reviewedAt: r.reviewed_at ?? null, rejectionReason: r.rejection_reason ?? null, title: r.title, createdAt: r.created_at });
@@ -379,11 +377,11 @@ export function upsertTemplate({ event, channel, subjectAr = null, subjectEn = n
 
 /* ---- notification history — reads the EXISTING outbox table (Stage 12.2), never a duplicate (§16) --------------- */
 export function notificationHistory({ customerId = '', bookingId = '', page = 1, pageSize = 20 } = {}) {
-  let rows = customerId
-    ? q.all('SELECT * FROM outbox WHERE customer_id = ? ORDER BY created_at DESC', customerId)
-    : q.all('SELECT * FROM outbox ORDER BY created_at DESC');
-  if (bookingId) rows = rows.filter((r) => { const p = J(r.payload_json, {}); return p.bookingId === bookingId; });
-  const { slice, ...meta } = paginate(rows, page, pageSize, 100);
+  // A message belongs to a booking through its indexed booking_id column: mailer.enqueue() fills it from the
+  // payload, and migration 010 backfilled older rows — so this is filtered and paged in SQL, never by reading and
+  // parsing the whole outbox.
+  const { sql, params } = whereClause([['customer_id = ?', customerId], ['booking_id = ?', bookingId]]);
+  const { slice, ...meta } = pageQuery(`outbox ${sql}`, 'created_at DESC', params, page, pageSize, 100);
   // Stage 16D §8: attempts/failureCategory so staff can tell "still trying" from "gave up, here's why" — never
   // just a bare status string once delivery genuinely runs.
   return { items: slice.map((r) => ({ id: r.id, channel: r.channel, event: r.template, at: r.created_at, status: r.status, reference: r.id, attempts: r.attempts ?? 0, failureCategory: r.failure_category ?? null })), ...meta };
@@ -405,11 +403,11 @@ export function notificationHistory({ customerId = '', bookingId = '', page = 1,
 export function listCustomers({ search = '', page = 1, pageSize = 20 } = {}) {
   const s = search ? `%${str(search, 120)}%` : '';
   const sql = s ? 'WHERE (name LIKE ? OR email LIKE ? OR phone LIKE ? OR id LIKE ?)' : '';
-  const all = q.all(`SELECT * FROM customers ${sql} ORDER BY created_at DESC`, ...(s ? [s, s, s, s] : []));
-  const { slice, ...meta } = paginate(all, page, pageSize, 100);
+  const { slice, ...meta } = pageQuery(`customers ${sql}`, 'created_at DESC', s ? [s, s, s, s] : [], page, pageSize, 100);
   const ids = slice.map((c) => c.id); const bookingsCount = new Map();
   if (ids.length) for (const r of q.all(`SELECT customer_id, COUNT(*) AS n FROM bookings WHERE customer_id IN (${placeholders(ids)}) GROUP BY customer_id`, ...ids)) bookingsCount.set(r.customer_id, r.n);
-  return { items: slice.map((c) => ({ ...publicCustomer(c), bookingsCount: bookingsCount.get(c.id) ?? 0 })), ...meta };
+  const slug = slugLookup();
+  return { items: slice.map((c) => ({ ...publicCustomer(c, slug), bookingsCount: bookingsCount.get(c.id) ?? 0 })), ...meta };
 }
 /** The unified operational view of one customer (§7): profile, every booking, every document, every payment, recent
     notifications, and the full attribution history — nothing a booking/document/payment screen doesn't already
@@ -431,8 +429,7 @@ export function customerDetailForStaff(id) {
 const nPaymentRow = (r) => ({ id: r.id, customerId: r.customer_id, bookingId: r.booking_id, at: r.at, amount: r.amount, currency: r.currency, status: r.status, reference: r.reference, methodAr: r.method_ar, methodEn: r.method_en });
 export function listPayments({ customerId = '', bookingId = '', status = '', page = 1, pageSize = 20 } = {}) {
   const { sql, params } = whereClause([['customer_id = ?', customerId], ['booking_id = ?', bookingId], ['status = ?', status]]);
-  const all = q.all(`SELECT * FROM payments ${sql} ORDER BY at DESC`, ...params);
-  const { slice, ...meta } = paginate(all, page, pageSize, 100);
+  const { slice, ...meta } = pageQuery(`payments ${sql}`, 'at DESC', params, page, pageSize, 100);
   const ids = [...new Set(slice.map((p) => p.customer_id))]; const names = new Map();
   if (ids.length) for (const c of q.all(`SELECT id, name FROM customers WHERE id IN (${placeholders(ids)})`, ...ids)) names.set(c.id, c.name);
   return { items: slice.map((r) => ({ ...nPaymentRow(r), customerName: names.get(r.customer_id) ?? '' })), ...meta };
@@ -443,8 +440,7 @@ export function listPayments({ customerId = '', bookingId = '', status = '', pag
 const nDocumentAdmin = (r) => ({ ...nDocReview(r), customerId: r.customer_id, tripId: r.trip_id, kind: r.kind });
 export function listDocumentsAdmin({ customerId = '', bookingId = '', reviewStatus = '', page = 1, pageSize = 20 } = {}) {
   const { sql, params } = whereClause([['customer_id = ?', customerId], ['booking_id = ?', bookingId], ['review_status = ?', reviewStatus]]);
-  const all = q.all(`SELECT * FROM documents ${sql} ORDER BY created_at DESC`, ...params);
-  const { slice, ...meta } = paginate(all, page, pageSize, 100);
+  const { slice, ...meta } = pageQuery(`documents ${sql}`, 'created_at DESC', params, page, pageSize, 100);
   return { items: slice.map(nDocumentAdmin), ...meta };
 }
 

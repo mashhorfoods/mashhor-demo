@@ -12,9 +12,9 @@ import {
   publicStaff, verifyStaffPassword, changeStaffPassword, createStaffSession, endStaffSession,
   createStaffReset, consumeStaffReset, requirePermission, hasPermission,
   opsBookingList, opsBookingDetail, transitionBooking, assignBookingOperator,
-  createTask, listTasks, taskById, assignTask, updateTaskStatus, taskPriorityLevels,
+  createTask, listTasks, assignTask, updateTaskStatus, taskPriorityLevels,
   createEscalation, listEscalations, updateEscalationStatus,
-  listServices, serviceById, updateService, serviceWorkflow, setServiceWorkflow, serviceDocumentRequirements, addServiceDocumentRequirement, allDocumentRequirements,
+  listServices, serviceById, updateService, serviceWorkflow, setServiceWorkflow, serviceDocumentRequirements, addServiceDocumentRequirement,
   reviewDocument, listSuppliers, createSupplier, assignSupplierToBooking, updateBookingSupplier,
   addBookingNote, bookingNotes, listTemplates, upsertTemplate, notificationHistory, auditEvents, lifecycleConfig,
   listCustomers, customerDetailForStaff, listPayments, listDocumentsAdmin,
@@ -73,7 +73,6 @@ export const operations = {
 
   tasks(req, res, ctx, url) { requirePermission(ctx.staff, 'task.view'); return json(res, 200, listTasks({ status: str(url.searchParams.get('status') ?? '', 20), assignedTo: str(url.searchParams.get('assignedTo') ?? '', 40), bookingId: str(url.searchParams.get('bookingId') ?? '', 40), page: page(url), pageSize: pageSize(url) })); },
   async taskCreate(req, res, ctx) { requirePermission(ctx.staff, 'task.manage'); const b = await readJson(req); return json(res, 201, { task: createTask(b, actorOf(ctx)) }); },
-  task(req, res, ctx, id) { requirePermission(ctx.staff, 'task.view'); const t = taskById(id); if (!t) return fail(res, 404, 'notFound'); return json(res, 200, { task: t }); },
   async taskAssign(req, res, ctx, id) { requirePermission(ctx.staff, 'task.manage'); const b = await readJson(req); return json(res, 200, { task: assignTask(id, b.assignedTo || null, actorOf(ctx)) }); },
   async taskStatus(req, res, ctx, id) { requirePermission(ctx.staff, 'task.manage'); const b = await readJson(req); return json(res, 200, { task: updateTaskStatus(id, str(b.status, 20), actorOf(ctx)) }); },
 
@@ -82,7 +81,6 @@ export const operations = {
   async escalationStatus(req, res, ctx, id) { requirePermission(ctx.staff, 'task.manage'); const b = await readJson(req); return json(res, 200, { escalation: updateEscalationStatus(id, str(b.status, 20), actorOf(ctx)) }); },
 
   async documentReviewSubmit(req, res, ctx, id) { requirePermission(ctx.staff, 'document.review'); const b = await readJson(req); return json(res, 200, { document: reviewDocument(id, { status: str(b.status, 20), reason: b.reason }, actorOf(ctx)) }); },
-  documentRequirements(req, res, ctx) { requirePermission(ctx.staff, 'service.manage'); return json(res, 200, { requirements: allDocumentRequirements() }); },
 
   suppliers(req, res, ctx) { requirePermission(ctx.staff, 'supplier.view'); return json(res, 200, { suppliers: listSuppliers() }); },
   async supplierCreate(req, res, ctx) { requirePermission(ctx.staff, 'supplier.manage'); const b = await readJson(req); return json(res, 201, { supplier: createSupplier(b, actorOf(ctx)) }); },

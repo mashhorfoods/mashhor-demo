@@ -57,7 +57,9 @@ export function renderTemplate(body, payload) {
 export function enqueue({ customerId = null, staffId = null, bookingId = null, recipient = null, channel = 'email', template, eventType = null, payload = {}, idempotencyKey = null }) {
   const id = `msg_${hexid()}`; const t = now();
   const cols = 'id, customer_id, staff_id, booking_id, recipient, channel, template, event_type, payload_json, status, attempts, idempotency_key, created_at, updated_at';
-  const vals = [id, customerId, staffId, bookingId, recipient, channel, template, eventType, JSON.stringify(payload), 'queued', 0, idempotencyKey, t, t];
+  // Callers usually name the booking only in the payload; the column is what staff history filters on (indexed).
+  const booking = bookingId ?? (typeof payload?.bookingId === 'string' ? payload.bookingId : null);
+  const vals = [id, customerId, staffId, booking, recipient, channel, template, eventType, JSON.stringify(payload), 'queued', 0, idempotencyKey, t, t];
   if (idempotencyKey) {
     const r = q.run(`INSERT OR IGNORE INTO outbox (${cols}) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, ...vals);
     if (!r.changes) { info('mailer.duplicate', { template, idempotencyKey }); return { id: null, duplicate: true, delivered: false }; }

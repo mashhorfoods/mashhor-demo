@@ -17,7 +17,7 @@
 // until someone deliberately republishes it (Phase 2 scope decision).
 // ============================================================================
 import { hex, HttpError, str } from './http.mjs';
-import { q, now, paginate, whereClause } from './db.mjs';
+import { q, now, pageQuery, whereClause } from './db.mjs';
 import { audit } from './staff.mjs';
 
 const J = (s, d) => { try { return s ? JSON.parse(s) : d; } catch { return d; } };
@@ -68,8 +68,7 @@ export function listDestinations({ search = '', region = '', publishStatus = '',
     ['(name_ar LIKE ? OR name_en LIKE ? OR slug LIKE ?)', like && [like, like, like]],
     ['region = ?', region], ['publish_status = ?', publishStatus],
   ]);
-  const all = q.all(`SELECT * FROM destinations ${sql} ORDER BY order_index IS NULL, order_index, created_at DESC`, ...params);
-  const { slice, ...meta } = paginate(all, page, pageSize, 100);
+  const { slice, ...meta } = pageQuery(`destinations ${sql}`, 'order_index IS NULL, order_index, created_at DESC', params, page, pageSize, 100);
   return { items: slice.map(nDestination), ...meta };
 }
 export function createDestination({ slug, nameAr, nameEn }, actor) {
@@ -132,8 +131,7 @@ export function listOffers({ search = '', category = '', destinationId = '', pub
     ['(title_ar LIKE ? OR title_en LIKE ? OR slug LIKE ?)', like && [like, like, like]],
     ['category = ?', category], ['destination_id = ?', destinationId], ['publish_status = ?', publishStatus],
   ]);
-  const all = q.all(`SELECT * FROM offers ${sql} ORDER BY created_at DESC`, ...params);
-  const { slice, ...meta } = paginate(all, page, pageSize, 100);
+  const { slice, ...meta } = pageQuery(`offers ${sql}`, 'created_at DESC', params, page, pageSize, 100);
   return { items: slice.map(nOffer), ...meta };
 }
 export function createOffer({ slug, titleAr, titleEn }, actor) {

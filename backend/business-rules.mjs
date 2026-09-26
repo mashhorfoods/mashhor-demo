@@ -55,20 +55,23 @@ function applyRuleChange(id, patch, actor) {
   if (!r) throw new HttpError(404, 'notFound');
   if (patch.status !== undefined && !RULE_STATUSES.includes(patch.status)) throw new HttpError(422, 'invalid');
   const t = now();
-  q.run(
-    'INSERT INTO business_config_history (rule_id, category, name, description, value_json, allowed_values_json, status, source, effective_from, effective_to, updated_by, notes, superseded_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)',
-    r.key, r.category, r.name, r.description, r.value_json, r.allowed_values_json, r.status, r.source, r.effective_from, t, r.updated_by, r.notes, t,
-  );
-  const value = patch.value !== undefined ? JSON.stringify(patch.value) : r.value_json;
-  const allowedValues = patch.allowedValues !== undefined ? JSON.stringify(patch.allowedValues) : r.allowed_values_json;
-  const status = patch.status !== undefined ? patch.status : r.status;
-  const notes = patch.notes !== undefined ? (str(patch.notes, 2000) || null) : r.notes;
-  const effectiveFrom = (patch.status !== undefined && patch.status !== r.status) ? t : r.effective_from;
-  q.run(
-    'UPDATE business_config SET value_json = ?, allowed_values_json = ?, status = ?, notes = ?, effective_from = ?, effective_to = NULL, updated_by = ?, updated_at = ? WHERE key = ?',
-    value, allowedValues, status, notes, effectiveFrom, actor.id, t, id,
-  );
-  audit(actor, 'businessRule.update', 'businessRule', id, { status, previousStatus: r.status });
+  // The history row and the overwrite are one change: never an archived row without its update, or the reverse.
+  q.tx(() => {
+    q.run(
+      'INSERT INTO business_config_history (rule_id, category, name, description, value_json, allowed_values_json, status, source, effective_from, effective_to, updated_by, notes, superseded_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)',
+      r.key, r.category, r.name, r.description, r.value_json, r.allowed_values_json, r.status, r.source, r.effective_from, t, r.updated_by, r.notes, t,
+    );
+    const value = patch.value !== undefined ? JSON.stringify(patch.value) : r.value_json;
+    const allowedValues = patch.allowedValues !== undefined ? JSON.stringify(patch.allowedValues) : r.allowed_values_json;
+    const status = patch.status !== undefined ? patch.status : r.status;
+    const notes = patch.notes !== undefined ? (str(patch.notes, 2000) || null) : r.notes;
+    const effectiveFrom = (patch.status !== undefined && patch.status !== r.status) ? t : r.effective_from;
+    q.run(
+      'UPDATE business_config SET value_json = ?, allowed_values_json = ?, status = ?, notes = ?, effective_from = ?, effective_to = NULL, updated_by = ?, updated_at = ? WHERE key = ?',
+      value, allowedValues, status, notes, effectiveFrom, actor.id, t, id,
+    );
+    audit(actor, 'businessRule.update', 'businessRule', id, { status, previousStatus: r.status });
+  });
   return businessRuleById(id);
 }
 export const updateBusinessRule = (id, patch, actor) => applyRuleChange(id, patch, actor);

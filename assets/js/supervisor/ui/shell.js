@@ -121,6 +121,9 @@ export function leadStatusBadge(status) {
   return el('span', { class: `c-badge c-badge--${tone}`, dataset: { leadStatus: status } }, t(`svp.leads.status.${status}`));
 }
 export const amount = (n, c) => `${n < 0 ? '−' : ''}${money(Math.abs(n), c)}`;
+/** The revenue figures per currency: `byCurrency` when the backend sends it (several currencies are never summed),
+    else the flat single-currency fields (older backends, the development stand-in). */
+export const revenueGroups = (r) => (r.byCurrency?.length ? r.byCurrency : [{ currency: r.currency, gross: r.gross, completed: r.completed, pending: r.pending, cancelled: r.cancelled }]);
 export const pageTitle = (titleKey, textKey) => el('div', { class: 'l-stack l-stack--8' }, [el('h1', { class: 't-h1' }, t(titleKey)), textKey ? el('p', { class: 't-body t-muted' }, t(textKey)) : null]);
 export const block = (title, body, { id = null, action = null } = {}) => el('section', { class: 'c-review-block', ...(id ? { id, 'aria-labelledby': `${id}-title` } : {}) }, [
   el('div', { class: 'c-review-block__head' }, [el('h2', { class: 'c-review-block__title', ...(id ? { id: `${id}-title` } : {}) }, title), action]), body,

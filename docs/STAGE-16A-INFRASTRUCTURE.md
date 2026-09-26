@@ -69,7 +69,7 @@ fabricated.
 7. **A backup mechanism** — none exists today. The simplest correct option
    given a single SQLite file plus a documents directory is a scheduled
    filesystem/volume snapshot on whichever host is chosen (item 1); this
-   is a hosting-platform feature to enable, not new application code.
+   is a hosting-platform feature to enable, not new application code. *(Removed 2026-09-25: reassignment is now only the admin dashboard's `POST /admin/customers/:id/reassign`, with a staff session; `BACKEND_ADMIN_TOKEN` is refused if set.)*
 
 None of items 1–7 can be produced by writing more code in this repository.
 

@@ -12,7 +12,7 @@
 import { scryptSync, timingSafeEqual } from 'node:crypto';
 import { config } from './config.mjs';
 import { q, now } from './db.mjs';
-import { hex, HttpError, loginAttempts, recordLoginFailure, clearLoginFailures } from './http.mjs';
+import { hex, HttpError, seenStale, loginAttempts, recordLoginFailure, clearLoginFailures } from './http.mjs';
 import { warn } from './logger.mjs';
 
 // Exported so backend/supervisor.mjs (Stage 13) can hash and compare supervisor passwords with the same scrypt settings
@@ -23,13 +23,22 @@ export const hash = (password, salt) => scryptSync(password, salt, 32).toString(
 export const same = (a, b) => { const x = Buffer.from(String(a)); const y = Buffer.from(String(b)); return x.length === y.length && timingSafeEqual(x, y); };
 export const normEmail = (e) => String(e ?? '').trim().toLowerCase();
 
-// Customer-facing responses expose the supervisor's PUBLIC slug, never the internal backend id — see the identical
-// helper and comment in backend/routes.mjs (nTrip/nBooking); kept as a separate local copy rather than a shared
-// import to avoid a circular import (backend/supervisor.mjs already imports from this file).
-const supervisorSlug = (id) => (id ? (q.get('SELECT slug FROM supervisors WHERE id = ?', id)?.slug ?? id) : null);
-export function publicCustomer(c) {
+/** Customer-facing responses expose a supervisor's PUBLIC slug, never the internal backend id: the frontend registry
+    (assets/js/data/supervisors.js) only recognises a supervisor by slug. Falls back to the raw id only if a
+    supervisor genuinely has no slug yet. Returns a lookup that remembers what it resolved, so mapping a list costs
+    one query per distinct supervisor — not one per row (the N+1 the 2026-09-25 review found). Create one per
+    response, never share it across requests: an admin can change a slug at any time. */
+export const slugLookup = () => {
+  const seen = new Map();
+  return (id) => {
+    if (!id) return null;
+    if (!seen.has(id)) seen.set(id, q.get('SELECT slug FROM supervisors WHERE id = ?', id)?.slug ?? id);
+    return seen.get(id);
+  };
+};
+export function publicCustomer(c, slug = slugLookup()) {
   if (!c) return null;
-  const supervisorId = supervisorSlug(c.attribution_supervisor);
+  const supervisorId = slug(c.attribution_supervisor);
   return { id: c.id, name: c.name, email: c.email, phone: c.phone, locale: c.locale, image: c.image ?? null,
     supervisorId, attribution: c.attribution_supervisor ? { supervisorId, source: c.attribution_source, at: c.attribution_at } : null,
     acceptance: c.acceptance_json ? JSON.parse(c.acceptance_json) : null, createdAt: c.created_at };
@@ -89,7 +98,8 @@ export function createSession(customerId) {
 export function liveSession(sid) {
   if (!sid) return null; const s = q.get('SELECT * FROM sessions WHERE id = ?', sid); if (!s) return null;
   if (s.expires_at <= Date.now()) { q.run('DELETE FROM sessions WHERE id = ?', sid); return null; }
-  q.run('UPDATE sessions SET last_seen_at = ? WHERE id = ?', now(), sid); return s;
+  if (seenStale(s.last_seen_at)) q.run('UPDATE sessions SET last_seen_at = ? WHERE id = ?', now(), sid);   // at most once a minute, not a write per request
+  return s;
 }
 export const endSession = (sid) => { if (sid) q.run('DELETE FROM sessions WHERE id = ?', sid); };
 export const endAllSessions = (customerId) => q.run('DELETE FROM sessions WHERE customer_id = ?', customerId);

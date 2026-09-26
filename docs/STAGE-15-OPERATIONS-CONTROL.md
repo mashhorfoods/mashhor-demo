@@ -217,7 +217,6 @@ POST   /bookings/:id/status                                   booking.status.cha
 POST   /bookings/:id/assign                                   booking.assign
 GET/POST /bookings/:id/notes                                  booking.view / booking.manage
 POST   /bookings/:id/supplier                                 supplier.manage
-GET    /documents/requirements                                 service.manage
 POST   /documents/:id/review                                   document.review
 GET    /services | /services/:id | /services/:id/workflow | /services/:id/documents   (staff, any role)
 POST   /services/:id | /services/:id/workflow | /services/:id/documents               service.manage / workflow.manage
