@@ -7,10 +7,13 @@ import { stateBlock } from '../../components/states.js';
 import { opsData } from '../data.js';
 import { mountOpsPortal, loadRegion, pagedRegion, pageTitle, dataTable, dateTime, block } from './shell.js';
 
+/** A lead source's label; a source this screen does not know yet shows as the backend sent it. */
+const SOURCES = ['request', 'contact', 'link', 'booking'];
+const sourceLabel = (source) => (SOURCES.includes(source) ? t(`ops.leads.source.${source}`) : source || '—');
 const leadColumns = [
   { labelKey: 'ops.leads.col.name', render: (l) => l.name || '—' },
-  { labelKey: 'ops.leads.col.supervisor', render: (l) => l.supervisorId || '—' },
-  { labelKey: 'ops.leads.col.source', render: (l) => l.source },
+  { labelKey: 'ops.leads.col.supervisor', render: (l) => l.supervisorId || t('ops.leads.unassigned') },
+  { labelKey: 'ops.leads.col.source', render: (l) => sourceLabel(l.source) },
   { labelKey: 'ops.leads.col.status', render: (l) => t(`ops.leads.status.${l.status}`) || l.status },
   { labelKey: 'ops.leads.col.date', render: (l) => dateTime(l.createdAt) },
 ];

@@ -182,6 +182,8 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.ops.s
 
   await go(p, 'admin/leads/'); await mainReady(p);
   ok('leads: admin-wide leads and attribution history panels', await count(p, '#ops-leads-list') === 1 && await count(p, '#ops-leads-attribution') === 1);
+  await p.waitForSelector('#ops-leads-list tbody tr');
+  ok('leads: an unassigned lead says so and its source is a label, not a raw code', (await text(p, '#ops-leads-list tbody')).includes('غير مُسنَد') && (await text(p, '#ops-leads-list tbody')).includes('رابط المنسق') && (await text(p, '#ops-leads-list tbody')).includes('نموذج التواصل') && !/\b(link|contact)\b/.test(await text(p, '#ops-leads-list tbody')));
 
   await go(p, 'admin/payments/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap');
   ok('payments: development payment records, read-only', await count(p, 'tbody tr') === 2);
@@ -450,6 +452,8 @@ await b.close();
   await p4.click('#ops-svc-documents button[type=submit]'); ok('real backend: admin adds a document requirement', (await drResp).status() === 201);
   await bgo(p4, 'admin/services/?id=study'); await bMainReady(p4); await p4.waitForSelector('#ops-svc-workflow form[data-form=workflow]');
   ok('real backend: the workflow and requirement persist across a reload', await p4.inputValue('#ops-svc-workflow li:first-child [name=key]') === 'application' && await count(p4, '[data-doc-req=transcript]') === 1);
+  await bgo(p4, 'admin/supervisors/?id=supervisor-1'); await bMainReady(p4); await p4.waitForSelector('#ops-sv-details');
+  ok('real backend: the supervisor detail states the commission rule in words with its rate', (await text(p4, '#ops-sv-details')).includes('5%') && !(await text(p4, '#ops-sv-details')).includes('percentage'), await text(p4, '#ops-sv-details'));
   await c4.close();
 
   const { c: c5, p: p5 } = await bctx();

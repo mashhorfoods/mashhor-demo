@@ -19,6 +19,14 @@ const columns = [
   { labelKey: 'ops.supervisors.col.customers', render: (s) => String(s.customersCount) },
 ];
 
+/** The commission rule in words: pending, a percentage (with its rate when the backend sends one), or the raw model. */
+function commissionLabel(c) {
+  if (!c?.model) return t('ops.supervisors.detail.commissionPending');
+  if (c.model !== 'percentage') return String(c.model);
+  const rate = Number(c.rate);
+  return Number.isFinite(rate) && c.rate != null ? t('ops.supervisors.detail.commissionRate', `${Math.round(rate * 1000) / 10}%`) : t('ops.supervisors.detail.commissionPercentage');
+}
+
 export function mountOpsSupervisors({ root = document, params = new URLSearchParams(location.search) } = {}) {
   const id = params.get('id');
   if (id) return mountSupervisorDetail({ root, id });
@@ -69,7 +77,7 @@ function mountSupervisorDetail({ root, id }) {
           [t('ops.supervisors.col.customers'), String(fresh.customers.length)],
           // per currency: amounts in different currencies are never added together (backend supervisorRevenue)
           [t('acct.total'), revenueGroups(fresh.revenue).map((g) => amount(g.gross, g.currency)).join(' · ')],
-          [t('ops.supervisors.detail.commission'), fresh.revenue.commission.model === null ? t('ops.supervisors.detail.commissionPending') : String(fresh.revenue.commission.model)],
+          [t('ops.supervisors.detail.commission'), commissionLabel(fresh.revenue.commission)],
         ]), { id: 'ops-sv-details' }),
       ];
 

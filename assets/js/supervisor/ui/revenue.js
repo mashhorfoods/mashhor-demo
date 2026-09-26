@@ -6,7 +6,7 @@ import { el } from '../../core/dom.js';
 import { t } from '../../core/i18n.js';
 import { stateBlock } from '../../components/states.js';
 import { supervisorData } from '../data.js';
-import { mountSupervisorPortal, loadRegion, pageTitle, metricCard, amount, block, revenueGroups, periodSelect, dataTable, dateTime, commissionText, commissionStatusBadge } from './shell.js';
+import { mountSupervisorPortal, loadRegion, pagedRegion, pageTitle, metricCard, amount, block, revenueGroups, periodSelect, dataTable, dateTime, commissionText, commissionStatusBadge } from './shell.js';
 
 const commissionColumns = [
   { labelKey: 'svp.revenue.commissions.col.booking', render: (c) => el('bdi', { dir: 'ltr' }, c.bookingId) },
@@ -38,12 +38,16 @@ export function mountSupervisorRevenue({ root = document } = {}) {
           ]),
         ])))),
     });
-    // The commission rule and every commission row, independent of the period filter (a commission list is short).
-    const commissions = loadRegion(commissionsHost, () => supervisorData.commissions({ page: 1, pageSize: 50 }), {
-      paint: (page) => el('div', { class: 'l-stack l-stack--12' }, [
-        el('p', { class: 't-body t-muted', dataset: { commissionModel: page.model?.model ?? 'none' } }, commissionText(page.model)),
-        dataTable({ columns: commissionColumns, rows: page.items, rowKey: (c) => c.id, emptyKey: 'svp.revenue.commissions.empty' }),
-      ]),
+    // The commission rule and every commission row, independent of the period filter; the rows page like every list.
+    const modelLine = el('p', { class: 't-body t-muted', hidden: true }); const rowsHost = el('div');
+    commissionsHost.replaceChildren(el('div', { class: 'l-stack l-stack--12' }, [modelLine, rowsHost]));
+    const commissions = pagedRegion(rowsHost, async (q) => {
+      const page = await supervisorData.commissions(q);
+      modelLine.dataset.commissionModel = page.model?.model ?? 'none'; modelLine.textContent = commissionText(page.model); modelLine.hidden = false;
+      return page;
+    }, {
+      empty: () => el('p', { class: 't-body-sm t-muted' }, t('svp.revenue.commissions.empty')),
+      paint: (items) => dataTable({ columns: commissionColumns, rows: items, rowKey: (c) => c.id, emptyKey: 'svp.revenue.commissions.empty' }),
     });
     await Promise.all([region.run(), commissions.run()]);
     return { refresh: async () => { await region.run(); await commissions.run(); } };
