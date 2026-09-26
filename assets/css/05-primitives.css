@@ -27,7 +27,7 @@
   [lang="ar"] .t-overline { text-transform: none; letter-spacing: 0; }
 
   /* A price never wraps. "1,450,000" broken across two lines is a misread
-     waiting to happen, so the container wraps instead (.c-card__foot). */
+     waiting to happen, so the container wraps instead. */
   .t-price { font-family: var(--font-data); font-size: var(--text-price);
              font-weight: var(--weight-bold); line-height: var(--leading-data);
              font-variant-numeric: tabular-nums; letter-spacing: -0.01em;

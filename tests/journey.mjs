@@ -76,6 +76,17 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
       search: (await L.searchLocations('kha')).items.map((l) => l.code), searchShort: (await L.searchLocations('k')).items.length,
       guardNone: J.guard('travellers', { version: 1 })?.reason, steps: J.STEPS.map((s) => s.id),
       reference: A.bookingReference('X'), providers: (await import('./assets/js/booking/payment.js')).paymentProviders().map((x) => x.id),
+      // best value on a known set (see rank.js VALUE_WEIGHTS): A 1000 · D 1050×1.1=1155 · B 900×1.25×1.1=1237.5 · C 800×1.5×1.2×1.1=1584
+      ...(() => {
+        const mk = (id, total, minutes, stops, bag) => ({ id, price: { total }, baggage: { checkedPieces: bag ? 1 : 0 },
+          legs: [{ durationMinutes: minutes, stops: Array.from({ length: stops }, () => ({})), departAt: '2026-10-16T09:00:00', arriveAt: '2026-10-16T20:00:00' }] });
+        const set = [mk('C', 800, 1200, 2, false), mk('B', 900, 900, 1, true), mk('A', 1000, 600, 0, true), mk('D', 1050, 600, 0, false)];
+        const vl = R.labelOffers(set);
+        return { valueOrder: R.sortOffers(set, 'value').map((o) => o.id).join(''), valuePriceOrder: R.sortOffers(set, 'price').map((o) => o.id).join(''),
+          valueLabel: [...vl.entries()].filter(([, ls]) => ls.some((l) => l.id === 'value')).map(([id]) => id).join(),
+          defSort: [R.defaultSort('value'), R.defaultSort('family'), R.defaultSort(''), R.defaultSort('bogus')].join(),
+          valueSortListed: R.SORTS.some((x) => x.id === 'value') };
+      })(),
     };
   });
   ok('round trip → 2 legs', r.rtLegs.join(',') === 'KRT-JED,JED-KRT' && r.rtErr === 0, r.rtLegs.join(','));
@@ -89,6 +100,9 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
   ok('dev search returns offers in one currency', r.n >= 5 && r.currency === 'USD', `${r.n} ${r.currency}`);
   ok('labels: cheapest/fastest/fewestStops/recommended', ['cheapest', 'fastest', 'fewestStops', 'recommended'].every((l) => r.labelled.includes(l)), r.labelled.join());
   ok('cheapest label sits on the lowest total', r.cheapestId);
+  ok('best value sort: price weighed by extra time, stops and baggage', r.valueOrder === 'ADBC' && r.valuePriceOrder === 'CBAD', `${r.valueOrder} ${r.valuePriceOrder}`);
+  ok('best value label on the best value offer', r.valueLabel === 'A', r.valueLabel);
+  ok('help-me-choose sort picks the default sort (unknown → balanced)', r.defSort === 'value,family,recommended,recommended' && r.valueSortListed, r.defSort);
   ok('sort by price ascending', r.priceSorted); ok('sort by duration ascending', r.durSorted); ok('stops filter keeps direct only', r.directOnly);
   ok('price breakdown: base+taxes+fees+extras = total', r.bdTotal && r.bdBase, r.bdQty.join());
   ok('breakdown lines per traveller type', r.bdQty.join() === 'adult:2,child:1,infant:1', r.bdQty.join());
@@ -214,6 +228,20 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
   await c.close();
 }
 
+// ================================================================= 4b. help-me-choose priority opens the results sorted by it
+{
+  const { c, p } = await ctx();
+  // the homepage / booking-entry "help me choose" carries the priority on the search as `sort`
+  await go(p, `${SEARCH}&sort=value`, 'results'); await p.waitForSelector('.c-flight[data-offer]');
+  ok('priority=value → sort control opens on Best value, chip pressed', await p.inputValue('#results-sort') === 'value' && await p.getAttribute('.c-chip[data-priority=value]', 'aria-pressed') === 'true');
+  const ids = await p.$$eval('.c-flight[data-offer]', (els) => els.map((e) => e.dataset.offer));
+  const expected = await p.evaluate(async () => { const R = await import('./assets/js/booking/rank.js'); return R.sortOffers(window.no.results.state.offers, 'value').map((o) => o.id); });
+  ok('cards listed in best-value order, the top one explains why', ids.join() === expected.join() && await p.locator('.c-flight[data-offer]').first().locator('.c-flight__why').count() === 1, ids.join());
+  ok('the traveller can still change the sort', (await p.selectOption('#results-sort', 'price'), await p.inputValue('#results-sort')) === 'price' && await p.getAttribute('.c-chip[data-priority=value]', 'aria-pressed') === 'false');
+  await go(p, SEARCH.replace('2026-10-23', '2026-10-24') + '&sort=duration', 'results'); await p.waitForSelector('.c-flight[data-offer]');
+  ok('priority=duration → Shortest first', await p.inputValue('#results-sort') === 'duration' && await p.getAttribute('.c-chip[data-priority=duration]', 'aria-pressed') === 'true');
+  await c.close();
+}
 // ================================================================= 5. details → family travellers → extras → review → payment → confirmation
 {
   const { c, p } = await ctx(); await results(p);

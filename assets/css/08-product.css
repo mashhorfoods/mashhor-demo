@@ -23,30 +23,4 @@
                          font-size: var(--text-body-sm); font-weight: var(--weight-semibold);
                          color: var(--color-text-brand); }
   .c-service-card__cta .c-icon { transition: translate var(--duration-fast) var(--ease-standard); }
-
-  /* ======================================================================
-     HELP-ME-CHOOSE — §18.5. The component that makes the strategic promise
-     visible: we do not just list options, we mark the right one and say why.
-     ==================================================================== */
-  .c-recommend {
-    display: flex; align-items: center; gap: var(--space-8);
-    padding: var(--space-8) var(--space-16);
-    background-color: var(--color-surface-brand);
-    border-block-end: var(--border-width) solid var(--color-primary);
-    font-size: var(--text-caption); font-weight: var(--weight-semibold);
-    color: var(--color-text-brand);
-  }
-  .c-recommend .c-icon { --icon-size: var(--icon-sm); }
-
-  /* Human expertise, offered inline rather than hidden in a contact page. §18.8 */
-  .c-assist {
-    display: flex; align-items: center; gap: var(--space-16);
-    padding: var(--space-16);
-    background-color: var(--color-bg-subtle);
-    border: var(--border-hairline);
-    border-radius: var(--radius-lg);
-  }
-  .c-assist__photo { inline-size: 48px; block-size: 48px; border-radius: var(--radius-circle);
-                     object-fit: cover; flex: none; background-color: var(--color-gray-200); }
-  .c-assist__body { flex: 1; min-inline-size: 0; }
 }

@@ -12,7 +12,7 @@ import { money, time, duration, dayOffset } from '../../core/format.js';
 import { icon } from '../../components/ui.js';
 import { placeName, carrierName } from './shared.js';
 
-const LABEL_ICON = { cheapest: 'no-price-tag', fastest: 'no-processing', fewestStops: 'no-flight', family: 'no-users', recommended: 'no-sparkle' };
+const LABEL_ICON = { cheapest: 'no-price-tag', fastest: 'no-processing', fewestStops: 'no-flight', family: 'no-users', value: 'no-sparkle', recommended: 'no-sparkle' };
 
 export function legBlock(leg, { name = null } = {}) {
   const stops = leg.stops?.length ?? 0;
@@ -42,7 +42,7 @@ const legName = (offer, i) => (offer.tripType === 'return' ? t(i === 0 ? 'bk.car
  */
 export function flightResultCard(o, { labels = [], priority = null, party = 1, compared = false, canCompare = true, onSelect = null, onCompare = null, detailsHref = null, selected = false } = {}) {
   const titleId = uid('offer');
-  const why = priority ? labels.find((l) => ({ price: 'cheapest', stops: 'fewestStops', duration: 'fastest', family: 'family' }[priority] === l.id)) : labels.find((l) => l.id === 'recommended');
+  const why = priority ? labels.find((l) => ({ price: 'cheapest', stops: 'fewestStops', duration: 'fastest', family: 'family', value: 'value' }[priority] === l.id)) : labels.find((l) => l.id === 'recommended');
   const cmpId = uid('cmp');
   return el('article', { class: `c-card c-flight${selected ? ' c-flight--selected' : ''}`, 'aria-labelledby': titleId, dataset: { offer: o.id, dev: String(!!o.provider?.dev) } }, [
     labels.length ? el('div', { class: 'c-flight__labels' }, labels.map((l) => el('span', { class: `c-badge ${l.id === 'recommended' || l.id === 'family' ? 'c-badge--brand' : 'c-badge--outline'}`, dataset: { label: l.id } }, [icon(LABEL_ICON[l.id], { size: 'xs' }), el('span', {}, t(`bk.label.${l.id}`))]))) : null,

@@ -12,12 +12,19 @@ import {
   t, getLocale, applyTranslations,
   STATUSES, featuredServices,
   mountHeader, setSession, getSession, globalFooter,
-  searchWidget, stateRegion, } from './foundation.js';
+  searchWidget, stateRegion, skeletonCard,
+  serviceCard, destinationCard, offerCard, supervisorCard,
+  HOME_DESTINATIONS, HOME_OFFERS, SUPERVISOR_REGISTRY, } from './foundation.js';
 
-import { serviceGrid, flightCard, hotelCard, packageCard, supervisorCard, tripCard, statusBadge } from './preview/cards.js';
-import { skeletonList, skeletonFlight } from './preview/states.js';
+// The cards below are the live components, fed from the live registries (and the
+// development flight supplier), so the guide shows exactly what the site renders. Phase 6
+import { flightResultCard } from './booking/ui/result-card.js';
+import { labelOffers, sortOffers } from './booking/rank.js';
+import { toSearchRequest } from './booking/search.js';
+import { devOffers } from './booking/adapters/dev-flights.js';
+import { tripCard, statusBadge } from './account/ui/shell.js';
 import { initOtp, initUploads } from './preview/forms.js';
-import { FLIGHTS, HOTELS, PACKAGES, SUPERVISORS, TRIPS } from './preview/samples.js';
+import { TRIPS } from './preview/samples.js';
 import { registerStrings } from './core/i18n.js';
 
 // The guide's own copy (sg.*) is a slice of its own, so no product page downloads it. Phase 5
@@ -127,13 +134,28 @@ async function renderIcons() {
 /* ---------------------------------------------------------------------------
    COMPONENT DEMOS
    ------------------------------------------------------------------------ */
+/* Flight results come from the development supplier, the same one the search
+   page uses without a live supplier (its offers, without the simulated delay). */
+const pad = (n) => String(n).padStart(2, '0');
+const inDays = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+let flightOffers = null;
+const sampleFlights = () => (flightOffers ??= devOffers(toSearchRequest({
+  service: 'flights', tripType: 'oneway', origin: 'KRT', destination: 'JED',
+  dates: { depart: inDays(30) }, travellers: { adults: 2, children: 1, infants: 0 }, cabin: 'economy',
+}).request));
+const flightCards = (offers, count) => {
+  const labels = labelOffers(offers);
+  return sortOffers(offers, 'recommended').slice(0, count).map((o) => flightResultCard(o, { labels: labels.get(o.id) ?? [], party: 3 }));
+};
+const skeletons = (count) => el('div', { class: 'l-stack l-stack--16' }, Array.from({ length: count }, skeletonCard));
+
 function renderComponents() {
-  render(qs('#sg-services'), serviceGrid(featuredServices()));
-  render(qs('#sg-flights'), FLIGHTS.map(flightCard));
+  render(qs('#sg-services'), el('div', { class: 'l-auto-grid', style: '--min-col:18rem' }, featuredServices().map((s) => serviceCard(s))));
+  render(qs('#sg-flights'), flightCards(sampleFlights(), 3));
   render(qs('#sg-mixed'), [
-    hotelCard(HOTELS[0]),
-    packageCard(PACKAGES[0]),
-    supervisorCard(SUPERVISORS[0]),
+    destinationCard(HOME_DESTINATIONS[0]),
+    offerCard(HOME_OFFERS[0]),
+    supervisorCard(SUPERVISOR_REGISTRY.find((s) => s.status === 'active') ?? SUPERVISOR_REGISTRY[0]),
     tripCard(TRIPS[0]),
   ]);
   render(qs('#sg-status'), Object.keys(STATUSES).map(statusBadge));
@@ -192,8 +214,8 @@ function wireStates() {
 
   showState = (which) => {
     if (which === 'loading') region.loading();
-    else if (which === 'skeleton') region.loading(() => skeletonList(2, skeletonFlight));
-    else if (which === 'content') region.content(FLIGHTS.slice(0, 1).map(flightCard));
+    else if (which === 'skeleton') region.loading(() => skeletons(2));
+    else if (which === 'content') region.content(flightCards(sampleFlights(), 1));
     else if (which === 'empty') region.empty();
     else if (which === 'error') region.error();
   };
