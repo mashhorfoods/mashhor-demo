@@ -55,7 +55,7 @@ export const API_CUSTOMER = registerCustomerAdapter({
     // Stage 16C: searchId/offerId let the backend re-read its OWN server-issued flight offer (backend/flights.mjs)
     // and price the booking from a fresh revalidation — never from a client-submitted total/currency (removed
     // above for the same reason payment status was).
-    const data = await post('/me/bookings/claim', { reference: b.reference, context: journey.context, offer: journey.selection?.offer ?? null, searchId: journey.selection?.searchId ?? null, offerId: journey.selection?.offer?.id ?? null, travellers: journey.travellers ?? null, contact: journey.contact ?? null, extras: journey.extras ?? [], attribution: journey.context?.attribution ?? null });
+    const data = await post('/me/bookings/claim', { reference: b.reference, status: b.status ?? null, context: journey.context, offer: journey.selection?.offer ?? null, searchId: journey.selection?.searchId ?? null, offerId: journey.selection?.offer?.id ?? null, travellers: journey.travellers ?? null, contact: journey.contact ?? null, extras: journey.extras ?? [], attribution: journey.context?.attribution ?? null });
     return nBooking(data.booking ?? data);
   },
   async createPaymentIntent(_m, bookingId, method) { return post(`/me/bookings/${encodeURIComponent(bookingId)}/payment-intent`, { method }); },

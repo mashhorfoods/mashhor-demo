@@ -294,6 +294,36 @@ const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR
   await c.close();
 }
 
+// ================================================================= 7b. leads (Phase 6): the contact form posts to POST /contact; a request booking is claimed as 'received'
+{
+  const { c, p } = await ctx(390, 844); await control('/__test/reset');
+  await p.go('help/contact/?supervisor=omar-hassan', 'helpContact');
+  ok('contact form offered when a backend is configured', await count(p, '[data-form=contact]') === 1);
+  await p.fill('#contact-name', 'Integration Visitor'); await p.fill('#contact-email', 'visitor@example.test'); await p.fill('#contact-message', 'A question about hotels.');
+  await p.click('[data-form=contact] button[type=submit]'); await p.waitForSelector('[data-contact-sent=true]');
+  let st = await apiState();
+  ok('the message reaches POST /contact with the page\'s supervisor slug, and becomes a lead', st.requests.some((r) => r.path === '/contact') && st.leads.some((l) => l.source === 'contact' && l.supervisorId === 'omar-hassan' && l.name === 'Integration Visitor' && l.message === 'A question about hotels.'), JSON.stringify(st.leads));
+  ok('no horizontal scroll at 390px after sending', await p.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth));
+  await control('/__test/fault', { status: 500, path: '/contact' });
+  await p.go('help/contact/', 'helpContact');
+  await p.fill('#contact-name', 'X'); await p.fill('#contact-email', 'x@example.test'); await p.fill('#contact-message', 'Hi');
+  await p.click('[data-form=contact] button[type=submit]'); await p.waitForFunction(() => document.querySelector('[data-form=contact] [role=status]')?.dataset.tone === 'error');
+  ok('a backend failure keeps the form and says so, nothing lost', await count(p, '[data-form=contact]') === 1 && (await p.inputValue('#contact-message')) === 'Hi');
+  // A signed-in customer's request-mode booking is claimed with status 'received', which the backend turns into a lead.
+  await signIn(p, 'alpha@fixture.test'); await p.waitForFunction(() => window.no?.account);
+  await p.go('search/?vertical=hotels&destination=Jeddah&checkin=2026-10-16&checkout=2026-10-20&adults=1&rooms=1', 'results'); await p.waitForSelector('[data-journey=main] .c-state');
+  await Promise.all([p.waitForURL(/travellers/), p.click('[data-journey=main] .c-state .c-btn--primary')]); await p.waitForFunction(() => window.no?.travellers);
+  await fillTravellers(p); await next(p, /booking\/review/); await p.waitForFunction(() => window.no?.review);
+  await p.check('#review-terms'); await next(p, /confirmation/); await p.waitForFunction(() => window.no?.confirmation); await p.waitForSelector('[data-claimed]');
+  const ref = await text(p, '[data-reference]');
+  st = await apiState();
+  ok('the request booking is claimed as received and becomes a lead for operations or the customer\'s supervisor', st.leads.some((l) => l.source === 'request' && l.bookingId === ref), JSON.stringify(st.leads));
+  await c.close();
+  const pc = await ctx(390, 844, 'ar', prodNoApi.origin); await pc.p.go('help/contact/', 'helpContact');
+  ok('production with no backend: no contact form (nowhere to send it), the booking door stays the one red action', await count(pc.p, '[data-form=contact]') === 0 && await count(pc.p, 'main .c-btn--primary') === 1);
+  await pc.c.close();
+}
+
 // ================================================================= 8. widths × languages on the production adapters (incl. 600 / 1024 / 1200)
 for (const [w, h, tag] of [[390, 844, 'mobile'], [600, 900, 'intermediate'], [834, 1100, 'tablet'], [1024, 900, 'tablet-desktop'], [1200, 900, 'desktop-md'], [1440, 1000, 'desktop']]) for (const loc of ['ar', 'en']) {
   const { c, p } = await ctx(w, h, loc); await control('/__test/reset'); await control('/__test/legal', { supplied: true, version: 'fixture-2' });

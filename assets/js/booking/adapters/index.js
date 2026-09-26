@@ -30,6 +30,8 @@
      included: [{ ar, en }], extras: Extra[]
    ========================================================================= */
 
+import { recordDevLead } from '../../core/leads.js';
+
 const registry = new Map();
 
 export function registerAdapter(adapter) {
@@ -57,7 +59,13 @@ export const REQUEST_ADAPTER = {
   async extras() { return []; },
   async book(order) {
     await new Promise((r) => setTimeout(r, 400));
-    return { reference: devReference('RQ'), status: 'received', ticketed: false, service: order.context.service };
+    const reference = devReference('RQ');
+    // A request is a lead. With a backend it becomes one when the booking is claimed (status 'received'); in
+    // development this mirrors it into the browser's dev lead store (a no-op anywhere else). Phase 6
+    const lead = Object.values(order.travellers ?? {})[0];
+    recordDevLead({ supervisor: order.attribution?.supervisor ?? null, name: [lead?.firstName, lead?.lastName].filter(Boolean).join(' '),
+      contact: [order.contact?.email, order.contact?.phone].filter(Boolean).join(' · '), source: 'request', serviceInterest: order.context.service, bookingId: reference });
+    return { reference, status: 'received', ticketed: false, service: order.context.service };
   },
 };
 

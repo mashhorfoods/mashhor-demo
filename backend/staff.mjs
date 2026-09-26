@@ -20,6 +20,7 @@ import { hex, HttpError, str, isEmail, sessionCookies } from './http.mjs';
 import { makeCredentialStore, normEmail } from './credentials.mjs';
 import { publicCustomer, slugLookup, customerById } from './identity.mjs';
 import { enqueue } from './mailer.mjs';
+import { reverseCommission } from './commissions.mjs';
 
 /* ---- permissions ---------------------------------------------------------- */
 // The full permission vocabulary the backend actually enforces (§25) — a permission not in this list is never granted
@@ -114,6 +115,8 @@ export function transitionBooking(bookingId, newStatus, actor, reason = null, me
   q.tx(() => {
     // bookings (Stage 12.2 schema) has no updated_at column — only ops_status changes here.
     q.run('UPDATE bookings SET ops_status = ? WHERE id = ?', newStatus, bookingId);
+    // Phase 6: a booking cancelled or refunded after payment no longer earns its supervisor a commission.
+    if (newStatus === 'cancelled' || newStatus === 'refunded') reverseCommission(bookingId, t);
     const history = q.run('INSERT INTO booking_status_history (booking_id, previous_status, new_status, actor, actor_role, reason, metadata_json, at) VALUES (?,?,?,?,?,?,?,?)',
       bookingId, current, newStatus, actor.id, actor.role, reason, JSON.stringify(metadata ?? {}), t);
     audit(actor, 'booking.status.change', 'booking', bookingId, { from: current, to: newStatus, reason });

@@ -81,6 +81,16 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.super
   await firstLeadSelect.selectOption({ label: 'مغلق' }); await p.waitForTimeout(400);
   await go(p, 'supervisor/leads/'); await mainReady(p); await p.waitForSelector('.c-svp-lead');
   ok('lead status change persists after reload', await p.locator('[data-lead-status-select]').first().inputValue() === 'closed');
+  // Phase 6: a lead the public site recorded in this browser (contact form / request booking, core/leads.js) for this
+  // supervisor appears in their list; one for another supervisor, or unassigned, does not.
+  await p.evaluate(() => localStorage.setItem('no.dev.leads', JSON.stringify([
+    { id: 'dev-lead-p6', supervisorId: 'supervisor-1', customerId: null, name: 'Contact Form Visitor', contact: 'visitor@dev.invalid', source: 'contact', serviceInterest: null, status: 'new', convertedBookingId: null, bookingId: null, message: 'Hello', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), dev: true },
+    { id: 'dev-lead-other', supervisorId: null, customerId: null, name: 'Unassigned Visitor', contact: 'x@dev.invalid', source: 'contact', serviceInterest: null, status: 'new', convertedBookingId: null, bookingId: null, message: 'Hi', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), dev: true },
+  ])));
+  await go(p, 'supervisor/leads/'); await mainReady(p); await p.waitForSelector('.c-svp-lead');
+  ok('a lead from the public site (dev store) reaches its supervisor; an unassigned one does not', await count(p, '[data-lead=dev-lead-p6]') === 1 && await count(p, '[data-lead=dev-lead-other]') === 0 && await count(p, '.c-svp-lead') === 3);
+  await p.selectOption('[data-lead-status-select=dev-lead-p6]', 'contacted'); await p.waitForTimeout(400);
+  ok('its status can be changed like any other lead', (await p.evaluate(() => JSON.parse(localStorage.getItem('no.dev.leads')).find((l) => l.id === 'dev-lead-p6').status)) === 'contacted');
 
   await go(p, 'supervisor/bookings/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap');
   ok('bookings: development bookings listed with status/pay badges', await count(p, 'tbody tr') === 3);
@@ -89,7 +99,11 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.super
   ok('booking detail renders reference and amount', await count(p, '#svp-bk-details') === 1);
 
   await go(p, 'supervisor/revenue/'); await mainReady(p); await p.waitForSelector('.c-svp-metrics, .c-state--empty');
-  ok('revenue: gross/completed/pending/cancelled + commission pending notice', await count(p, '.c-svp-metrics .c-svp-metric') === 4 && /لم يُحدَّد نظام العمولة/.test(await text(p, '#rev-commission')));
+  ok('revenue: gross/completed/pending/cancelled metrics', await count(p, '.c-svp-metrics .c-svp-metric') === 4);
+  await p.waitForSelector('#rev-commission tbody tr');
+  ok('revenue: the commission rule (5%) and a commissions list — booking ref, amount, status, date', /5%/.test(await text(p, '#rev-commission [data-commission-model]')) && await count(p, '#rev-commission tbody tr') === 2 && await count(p, '#rev-commission thead th') === 4);
+  ok('commission rows: earned and reversed, with booking reference and amount', await count(p, '#rev-commission [data-commission-status=earned]') === 1 && await count(p, '#rev-commission [data-commission-status=reversed]') === 1 && /dev-bk-1/.test(await text(p, '#rev-commission tbody tr:first-child')) && /45/.test(await text(p, '#rev-commission tbody tr:first-child')));
+  ok('dashboard revenue card states the commission rule, not "not configured"', await (async () => { await go(p, 'supervisor/dashboard/'); await mainReady(p); await p.waitForSelector('#dash-rev .t-price'); return /5%/.test(await text(p, '#dash-rev')); })());
 
   await go(p, 'supervisor/performance/'); await mainReady(p); await p.waitForSelector('.c-svp-metrics');
   ok('performance: customers/leads/conversion/bookings metrics', await count(p, '.c-svp-metrics .c-svp-metric') >= 5);
@@ -99,9 +113,12 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.super
   await p.click('[data-action=markAll]'); await p.waitForTimeout(300);
   ok('mark-all-read clears the unread badge', (await p.getAttribute('[data-unread]', 'data-unread')) === '0');
 
-  await go(p, 'supervisor/settings/'); await mainReady(p);
-  await p.fill('#svp-city', 'بورتسودان'); await p.click('#svp-settings-profile button[type=submit]'); await p.waitForTimeout(400);
+  await go(p, 'supervisor/settings/'); await mainReady(p); await p.waitForSelector('#svp-city');
+  ok('settings: account details read from the profile (name, sign-in email, languages), read-only', /منسق تجريبي/.test(await text(p, '#svp-settings-account')) && /demo-supervisor@dev\.invalid/.test(await text(p, '#svp-settings-account')) && await count(p, '#svp-settings-account input') === 0);
+  await p.fill('#svp-city', 'بورتسودان'); await p.fill('#svp-bio-en', 'Coordinator for family trips.'); await p.click('#svp-settings-profile button[type=submit]'); await p.waitForTimeout(400);
   ok('settings: profile field saves without error', await count(p, '#svp-settings-profile .c-field__error:not([hidden])') === 0);
+  await go(p, 'supervisor/settings/'); await mainReady(p); await p.waitForSelector('#svp-city');
+  ok('settings: profile edits persist after reload', (await p.inputValue('#svp-city')) === 'بورتسودان' && (await p.inputValue('#svp-bio-en')) === 'Coordinator for family trips.');
   ok('settings never exposes slug, id, commission or role fields', await count(p, '#svp-settings-profile input[name=slug], #svp-settings-profile input[name=id], #svp-settings-profile input[name=commission], #svp-settings-profile input[name=role]') === 0 && !/commission|عمولة/i.test(await p.evaluate(() => document.body.innerText)));
   await c.close();
 }
@@ -227,6 +244,9 @@ await b.close();
   await bgo(p2, 'supervisor/bookings/'); await p2.waitForFunction(() => document.querySelector('[data-portal=main] h1'));
   const rows2 = await p2.locator('tbody tr').count();
   ok('supervisor-1 sees the new booking in their bookings list', rows2 >= 2);
+  // Phase 6: the booking was paid through the verified webhook, so supervisor-1 earned its commission.
+  await bgo(p2, 'supervisor/revenue/'); await p2.waitForSelector('#rev-commission tbody tr, #rev-commission .t-muted');
+  ok('the paid attributed booking shows as an earned commission on supervisor-1\'s revenue screen', await count(p2, '#rev-commission [data-commission-status=earned]') >= 1);
   await c2.close();
 
   // Supervisor-2 signs in on the SAME backend and must NOT see it

@@ -128,8 +128,29 @@ export function supervisorLeads(supervisorId, { status = '', page = 1, pageSize 
   const { slice, ...meta } = pageQuery(`leads ${sql}`, 'created_at DESC', params, page, pageSize, 50);
   return { items: slice.map(nLead), ...meta };
 }
-const nLead = (l) => ({ id: l.id, customerId: l.customer_id, name: l.name, contact: l.contact, source: l.source, serviceInterest: l.service_interest, status: l.status, convertedBookingId: l.converted_booking_id, createdAt: l.created_at, updatedAt: l.updated_at });
+const nLead = (l) => ({ id: l.id, supervisorId: l.supervisor_id ?? null, customerId: l.customer_id, name: l.name, contact: l.contact, source: l.source, serviceInterest: l.service_interest, status: l.status, convertedBookingId: l.converted_booking_id, bookingId: l.booking_id ?? null, message: l.message ?? null, createdAt: l.created_at, updatedAt: l.updated_at });
 export const LEAD_STATUSES = ['new', 'contacted', 'in_progress', 'converted', 'closed'];
+/**
+ * Phase 6 — a lead from a real customer action: a request-mode booking ('request') or the public contact form
+ * ('contact'). It goes to the customer's attributed supervisor (first-touch, customers.attribution_supervisor) when the
+ * visitor is a signed-in customer who has one; otherwise to the supervisor the visitor arrived through (`supervisorId`,
+ * checked here to be an active supervisor); otherwise it is unassigned (supervisor_id NULL) and only operations sees
+ * it. A lead tied to a booking is written once per booking (unique index, migration 012). The assigned supervisor gets
+ * a portal notification.
+ */
+export function createLead({ customerId = null, supervisorId = null, name = '', contact = '', source, serviceInterest = null, bookingId = null, message = null }) {
+  const c = customerId ? custOf(customerId) : null;
+  const sv = c?.attribution_supervisor || (supervisorId && activeSupervisor(supervisorId) ? supervisorId : null);
+  const id = `lead_${hex(8)}`; const t = now();
+  const r = q.run('INSERT OR IGNORE INTO leads (id, supervisor_id, customer_id, name, contact, source, service_interest, status, booking_id, message, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
+    id, sv, c?.id ?? null, str(name, 120), str(contact, 160), source, str(serviceInterest ?? '', 20) || null, 'new', bookingId, str(message ?? '', 2000) || null, t, t);
+  if (!r.changes) return null;   // this booking already has its lead
+  if (sv) q.run('INSERT INTO supervisor_notifications (id, supervisor_id, kind, at, read, title_ar, title_en, text_ar, text_en, href, booking_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+    `sntf_${hex(6)}`, sv, 'lead', t, 0, 'عميل محتمل جديد', 'New lead',
+    source === 'request' ? 'طلب حجز جديد بانتظار متابعتك.' : 'رسالة جديدة من نموذج التواصل.', source === 'request' ? 'A new booking request is waiting for you.' : 'A new message from the contact form.',
+    'supervisor/leads/', bookingId);
+  return nLead(q.get('SELECT * FROM leads WHERE id = ?', id));
+}
 export function updateLeadStatus(supervisorId, leadId, status) {
   if (!LEAD_STATUSES.includes(status)) throw new HttpError(422, 'invalid');
   const l = q.get('SELECT * FROM leads WHERE id = ? AND supervisor_id = ?', leadId, supervisorId); if (!l) return null;
@@ -176,10 +197,11 @@ export function supervisorPerformance(supervisorId, { since = null } = {}) {
 }
 export const nSupervisorNotification = (r) => ({ id: r.id, kind: r.kind, at: r.at, read: !!r.read, titleAr: r.title_ar, titleEn: r.title_en, textAr: r.text_ar, textEn: r.text_en, href: r.href, bookingId: r.booking_id });
 
-/** Supervisor rights / commission, scoped to this supervisor only. Empty (not fabricated) until the business configures a model; existing rows read status 'pending_configuration' with a null amount rather than a guessed figure. §18 */
+/** Supervisor rights / commission, scoped to this supervisor only. One row per paid attributed booking, written by
+    commissions.mjs at the register's rate ('earned'), marked 'reversed' if the booking is later cancelled/refunded. */
 export function supervisorCommissions(supervisorId, { page = 1, pageSize = 20 } = {}) {
   const { slice, ...meta } = pageQuery('commissions WHERE supervisor_id = ?', 'created_at DESC', [supervisorId], page, pageSize, 50);
-  return { model: commissionModel(), items: slice.map((c) => ({ id: c.id, bookingId: c.booking_id, amount: c.amount, currency: c.currency, status: c.status, period: c.period, createdAt: c.created_at })), ...meta };
+  return { model: commissionModel(), items: slice.map((c) => ({ id: c.id, bookingId: c.booking_id, amount: c.amount, currency: c.currency, status: c.status, rate: c.rate ?? null, period: c.period, createdAt: c.created_at, reversedAt: c.reversed_at ?? null })), ...meta };
 }
 
 // ============================================================================

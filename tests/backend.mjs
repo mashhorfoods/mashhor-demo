@@ -224,7 +224,7 @@ await control('/__test/reset');
   ok('Supervisor A → Booking A allowed, Supervisor B → Booking A denied (404)', bk1.data.items.some((b) => b.id === 'BK_A1') && (await reqS2('/supervisor/me/bookings/BK_A1')).status === 404 && (await reqS1('/supervisor/me/bookings/BK_A1')).status === 200);
   const rev1 = await reqS1('/supervisor/me/revenue'); const rev2 = await reqS2('/supervisor/me/revenue');
   ok('Supervisor A → Revenue A allowed (non-zero), Supervisor B → Revenue B is correctly empty, never A\'s figures', rev1.status === 200 && rev1.data.gross > 0 && rev2.status === 200 && rev2.data.gross === 0 && rev2.data.bookingsCount === 0);
-  ok('commission is reported pending configuration, never a fabricated rate or amount', rev1.data.commission.model === null && rev1.data.commission.status === 'pending_business_configuration');
+  ok('commission rule is the register\'s working default (5% of paid bookings), reported as not yet business-confirmed', rev1.data.commission.model === 'percentage' && rev1.data.commission.rate === 0.05 && rev1.data.commission.status !== 'confirmed');
   const perf2 = await reqS2('/supervisor/me/performance');
   ok('performance is correctly scoped and empty for a supervisor with nothing yet (not an error)', perf2.status === 200 && perf2.data.customers === 0 && perf2.data.bookings === 0);
 
@@ -457,7 +457,7 @@ await control('/__test/reset');
   ok('admin creates a new supervisor', svCreate.status === 201 && svCreate.data.supervisor.slug === 'sv-new');
   ok('a reserved slug is refused (422)', (await reqAdmin2('/admin/supervisors', { method: 'POST', body: { slug: 'settings', nameEn: 'x' } })).status === 422);
   const svDetail = await reqOps2(`/admin/supervisors/${svCreate.data.supervisor.id}`);
-  ok('supervisor detail composes the same scoped read models the supervisor portal itself uses (customers/bookings/leads/revenue/performance/commissions)', svDetail.status === 200 && Array.isArray(svDetail.data.supervisor.customers) && svDetail.data.supervisor.revenue.commission.model === null);
+  ok('supervisor detail composes the same scoped read models the supervisor portal itself uses (customers/bookings/leads/revenue/performance/commissions)', svDetail.status === 200 && Array.isArray(svDetail.data.supervisor.customers) && svDetail.data.supervisor.revenue.commission.model === 'percentage' && Array.isArray(svDetail.data.supervisor.commissions));
   const svUpdate = await reqAdmin2(`/admin/supervisors/${svCreate.data.supervisor.id}`, { method: 'PATCH', body: { active: false } });
   ok('admin deactivates a supervisor', svUpdate.status === 200 && svUpdate.data.supervisor.status === 'inactive');
 
@@ -564,7 +564,7 @@ await control('/__test/reset');
   // audited, versioned admin action, and every prior version survives in history. ----
   ok('ops-1 (no rules.view) → 403 listing rules', (await reqOps1b('/admin/rules')).status === 403);
   const rulesList = await reqOps2('/admin/rules');
-  ok('ops-2 (rules.view) → 200, sees the register seeded from the codebase\'s own existing PENDING/DRAFT state, nothing fabricated', rulesList.status === 200 && rulesList.data.items.some((r) => r.ruleId === 'commission_model' && r.status === 'PENDING' && r.currentValue.model === null) && rulesList.data.items.some((r) => r.ruleId === 'refund_policy' && r.currentValue.policy === null) && rulesList.data.items.some((r) => r.ruleId === 'sla_config' && r.currentValue.targets === null));
+  ok('ops-2 (rules.view) → 200, sees the register seeded from the codebase\'s own existing PENDING/DRAFT state, nothing fabricated', rulesList.status === 200 && rulesList.data.items.some((r) => r.ruleId === 'commission_model' && r.status === 'DRAFT' && r.currentValue.model === 'percentage' && r.currentValue.rate === 0.05) && rulesList.data.items.some((r) => r.ruleId === 'refund_policy' && r.currentValue.policy === null) && rulesList.data.items.some((r) => r.ruleId === 'sla_config' && r.currentValue.targets === null));
   ok('the booking lifecycle graph and attribution model are registered as DRAFT (a technical default in effect, not yet business-confirmed) — never silently marked ACTIVE', rulesList.data.items.some((r) => r.ruleId === 'booking_lifecycle' && r.status === 'DRAFT') && rulesList.data.items.some((r) => r.ruleId === 'attribution_model' && r.status === 'DRAFT'));
   const filtered = await reqOps2('/admin/rules?category=commission');
   ok('rules can be filtered by category', filtered.data.items.length === 1 && filtered.data.items[0].ruleId === 'commission_model');
@@ -588,7 +588,7 @@ await control('/__test/reset');
   const invalidStatus = await reqAdmin2('/admin/rules/task_priority_levels', { method: 'PATCH', body: { status: 'not-a-real-status' } });
   ok('an unrecognised status is rejected (422), the vocabulary is server-side', invalidStatus.status === 422);
   const valueUpdate = await reqAdmin2('/admin/rules/commission_model', { method: 'PATCH', body: { notes: 'Awaiting finance sign-off.' } });
-  ok('admin can annotate a rule with notes without inventing its value — commission_model.currentValue stays null', valueUpdate.status === 200 && valueUpdate.data.rule.notes === 'Awaiting finance sign-off.' && valueUpdate.data.rule.currentValue.model === null && valueUpdate.data.rule.status === 'PENDING');
+  ok('admin can annotate a rule with notes without changing its value — commission_model keeps its 5% draft default', valueUpdate.status === 200 && valueUpdate.data.rule.notes === 'Awaiting finance sign-off.' && valueUpdate.data.rule.currentValue.rate === 0.05 && valueUpdate.data.rule.status === 'DRAFT');
   const auditAfterRules = await reqAdmin2('/operations/audit');
   ok('every business-rule mutation left an audit trace (§18/§22)', auditAfterRules.data.items.filter((e) => e.action === 'businessRule.update').length === 3);
 
@@ -671,7 +671,7 @@ await control('/__test/reset');
   const metaBefore = await reqAdmin3('/operations/meta');
   ok('lifecycle/priority resolved status reads pending while the register rule is DRAFT (not yet approved)', metaBefore.data.lifecycle.status !== 'confirmed' && metaBefore.data.priorityLevels.status !== 'confirmed');
   const revBefore = await reqSup3('/supervisor/me/revenue');
-  ok('commission resolved status reads pending while commission_model is PENDING — no calculation, no confirmed status', revBefore.data.commission.model === null && revBefore.data.commission.status !== 'confirmed');
+  ok('commission resolved status reads pending while commission_model is DRAFT — never a confirmed status', revBefore.data.commission.status !== 'confirmed');
   await reqAdmin3('/admin/rules/booking_lifecycle/activate', { method: 'POST' });
   await reqAdmin3('/admin/rules/task_priority_levels/activate', { method: 'POST' });
   const metaAfter = await reqAdmin3('/operations/meta');
@@ -696,7 +696,7 @@ await control('/__test/reset');
 
   // ---- pending-decision protection: nothing invents a value a PENDING/unconfigured rule doesn't have ----
   const rulesNow = await reqAdmin3('/admin/rules');
-  for (const key of ['commission_model', 'refund_policy', 'cancellation_policy', 'sla_config']) {
+  for (const key of ['refund_policy', 'cancellation_policy', 'sla_config']) {
     const r = rulesNow.data.items.find((x) => x.ruleId === key);
     ok(`${key} still carries no fabricated value (PENDING protection holds)`, r.status === 'PENDING' && Object.values(r.currentValue).some((v) => v === null));
   }
@@ -828,7 +828,7 @@ await control('/__test/reset');
   // ---- supervisor attribution: untouched by the payment flow ----
   const claimAttr = await reqP('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-16B-ATTR', context: { service: 'flights' }, total: 300, currency: 'USD', attribution: { supervisorId: 'supervisor-1' } } });
   await reqP('/me/bookings/BK-16B-ATTR/payment-intent', { method: 'POST', body: { method: 'dev-success' } });
-  ok('a payment succeeding leaves the booking\'s existing supervisor attribution exactly as it was — payment integration invents no commission logic and does not touch attribution', claimAttr.data.booking.supervisorId === 'ahmed-mohamed' && (await reqP('/me/bookings/BK-16B-ATTR')).data.booking.supervisorId === 'ahmed-mohamed');
+  ok('a payment succeeding leaves the booking\'s existing supervisor attribution exactly as it was — payment does not touch attribution', claimAttr.data.booking.supervisorId === 'ahmed-mohamed' && (await reqP('/me/bookings/BK-16B-ATTR')).data.booking.supervisorId === 'ahmed-mohamed');
 
   // ---- audit trail: every payment step above left a trace, and it carries no secret ----
   const auditPay = await reqAdminP('/operations/audit');
@@ -945,7 +945,7 @@ await control('/__test/reset');
   const sAttr = await search(oneWay);
   const claimAttr = await reqF('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-16C-ATTR', context: { service: 'flights' }, searchId: sAttr.data.meta.searchId, offerId: sAttr.data.offers[0].id, attribution: { supervisorId: 'supervisor-1' } } });
   await reqF('/me/bookings/BK-16C-ATTR/payment-intent', { method: 'POST', body: { method: 'dev-success' } });
-  ok('attribution survives search → selection → claim → payment → supplier booking, unchanged — no commission logic was invented along the way', claimAttr.data.booking.supervisorId === 'ahmed-mohamed' && (await reqF('/me/bookings/BK-16C-ATTR', { csrf: false })).data.booking.supervisorId === 'ahmed-mohamed');
+  ok('attribution survives search → selection → claim → payment → supplier booking, unchanged', claimAttr.data.booking.supervisorId === 'ahmed-mohamed' && (await reqF('/me/bookings/BK-16C-ATTR', { csrf: false })).data.booking.supervisorId === 'ahmed-mohamed');
 
   // ---- §17 operations dashboard: the live flight-supplier booking is visible to staff, separate from the
   // Stage 15 manually-tracked business-partner `supplier`, and never reaches a customer-facing route by that name ----
@@ -1214,6 +1214,92 @@ await control('/__test/reset');
   ok('§23: an entirely unauthenticated request to provision staff (a forged event with no session at all) is refused', forged.status === 401);
 
   jarS.clear(); jarK.clear(); jarSup.clear();
+}
+
+// ---- Phase 6: leads come from real customer actions (request bookings, the contact form); a paid booking attributed to
+// a supervisor earns exactly one commission at the register's rate, reversed if the booking is cancelled. ----
+{
+  await control('/__test/reset');
+  const jarA = new Map(); const reqA = makeReq(API, SITE)(jarA, 'no_csrf');
+  const jarB = new Map(); const reqB = makeReq(API, SITE)(jarB, 'no_csrf');
+  const jarAnon = new Map(); const reqAnon = makeReq(API, SITE)(jarAnon, 'no_csrf');
+  const jarS1 = new Map(); const reqS1 = makeReq(API, SITE)(jarS1, 'no_supervisor_csrf');
+  const jarS2 = new Map(); const reqS2 = makeReq(API, SITE)(jarS2, 'no_supervisor_csrf');
+  const jarAd = new Map(); const reqAd = makeReq(API, SITE)(jarAd, 'no_ops_csrf');
+  await reqA('/auth/sign-in', { method: 'POST', body: { email: 'alpha@fixture.test', password: 'password123' } });
+  await reqB('/auth/sign-in', { method: 'POST', body: { email: 'beta@fixture.test', password: 'password123' } });
+  await reqS1('/supervisor/auth/sign-in', { method: 'POST', body: { email: 'sup1@fixture.test', password: 'password123' } });
+  await reqS2('/supervisor/auth/sign-in', { method: 'POST', body: { email: 'sup2@fixture.test', password: 'password123' } });
+  await reqAd('/staff/auth/sign-in', { method: 'POST', body: { email: 'admin1@fixture.test', password: 'password123' } });
+  const db = () => new DatabaseSync(env.BACKEND_DATABASE_PATH, { readOnly: true });
+  const dbAll = (sql, ...p) => { const d = db(); try { return d.prepare(sql).all(...p); } finally { d.close(); } };
+
+  // ---- request-mode booking → lead ----
+  const req1 = await reqA('/me/bookings/claim', { method: 'POST', body: { reference: 'RQ-P6-A', context: { service: 'hotels' }, status: 'received' } });
+  ok('a request-mode booking is claimed pending', req1.status === 201 && req1.data.booking.status === 'pending');
+  const s1Leads = (await reqS1('/supervisor/me/leads')).data.items;
+  const reqLead = s1Leads.find((l) => l.bookingId === 'RQ-P6-A');
+  ok('the request becomes a lead for the customer\'s attributed supervisor (Alpha → supervisor-1)', reqLead?.source === 'request' && reqLead.status === 'new' && reqLead.serviceInterest === 'hotels' && reqLead.name === 'Alpha Fixture', JSON.stringify(reqLead));
+  ok('the supervisor is notified of the new lead', (await reqS1('/supervisor/me/notifications')).data.notifications.some((n) => n.kind === 'lead' && n.bookingId === 'RQ-P6-A'));
+  await reqA('/me/bookings/claim', { method: 'POST', body: { reference: 'RQ-P6-A', context: { service: 'hotels' }, status: 'received' } });
+  ok('claiming the same request again never makes a second lead', dbAll("SELECT id FROM leads WHERE booking_id = 'RQ-P6-A'").length === 1);
+  ok('a search-mode booking (not a request) makes no lead', (await reqA('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-P6-NOLEAD', context: { service: 'flights' }, total: 10, currency: 'USD' } })).status === 201 && dbAll("SELECT id FROM leads WHERE booking_id = 'BK-P6-NOLEAD'").length === 0);
+  await reqB('/me/bookings/claim', { method: 'POST', body: { reference: 'RQ-P6-B', context: { service: 'visa' }, status: 'received' } });
+  const adminLeads = (await reqAd('/admin/leads')).data.items;
+  const unassigned = adminLeads.find((l) => l.bookingId === 'RQ-P6-B');
+  ok('an unattributed customer\'s request is an unassigned lead, visible to operations', unassigned && unassigned.supervisorId === null && unassigned.source === 'request', JSON.stringify(unassigned));
+  ok('an unassigned lead is visible to no supervisor', !(await reqS1('/supervisor/me/leads')).data.items.some((l) => l.bookingId === 'RQ-P6-B') && !(await reqS2('/supervisor/me/leads')).data.items.some((l) => l.bookingId === 'RQ-P6-B'));
+
+  // ---- contact form → lead ----
+  const c1 = await reqAnon('/contact', { method: 'POST', body: { name: 'Visitor One', email: 'visitor1@example.test', message: 'Please call me about a family trip.', attribution: { supervisor: 'mohamed-abdullah' } } });
+  ok('the public contact form is accepted without a session (201)', c1.status === 201 && c1.data.received === true);
+  const s2Lead = (await reqS2('/supervisor/me/leads')).data.items.find((l) => l.source === 'contact');
+  ok('a visitor who arrived through a supervisor\'s link is that supervisor\'s lead, with their message', s2Lead?.name === 'Visitor One' && /visitor1@example\.test/.test(s2Lead.contact) && s2Lead.message === 'Please call me about a family trip.', JSON.stringify(s2Lead));
+  await reqAnon('/contact', { method: 'POST', body: { name: 'Visitor Two', phone: '+249 900 000 000', message: 'Question about visas.' } });
+  ok('a visitor with no attribution is an unassigned lead for operations', (await reqAd('/admin/leads')).data.items.some((l) => l.name === 'Visitor Two' && l.supervisorId === null && l.source === 'contact'));
+  await reqA('/contact', { method: 'POST', body: { name: 'Alpha Fixture', email: 'alpha@fixture.test', message: 'Follow-up.', attribution: { supervisor: 'mohamed-abdullah' } } });
+  ok('a signed-in customer\'s message goes to their own attributed supervisor (first touch wins over the page\'s slug)', (await reqS1('/supervisor/me/leads')).data.items.some((l) => l.source === 'contact' && l.message === 'Follow-up.' && l.customerId) && !(await reqS2('/supervisor/me/leads')).data.items.some((l) => l.message === 'Follow-up.'));
+  ok('an unknown supervisor slug is ignored (unassigned), never trusted', (await reqAnon('/contact', { method: 'POST', body: { name: 'Visitor Three', email: 'v3@example.test', message: 'Hi', attribution: { supervisor: 'no-such-slug' } } })).status === 201 && (await reqAd('/admin/leads')).data.items.some((l) => l.name === 'Visitor Three' && l.supervisorId === null));
+  ok('a message with no way to reply (no email and no phone) is refused (422)', (await reqAnon('/contact', { method: 'POST', body: { name: 'X', message: 'Hi' } })).status === 422);
+  ok('a malformed email or an empty message is refused (422)', (await reqAnon('/contact', { method: 'POST', body: { name: 'X', email: 'nope', message: 'Hi' } })).status === 422 && (await reqAnon('/contact', { method: 'POST', body: { name: 'X', email: 'x@example.test', message: '  ' } })).status === 422);
+
+  // ---- commissions: earned once on payment, at the register rate ----
+  const claimC = await reqA('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-P6-COM', context: { service: 'flights' }, total: 400, currency: 'USD', attribution: { supervisorId: 'supervisor-1' } } });
+  ok('an attributed booking is claimed unpaid, with no commission yet', claimC.status === 201 && dbAll("SELECT id FROM commissions WHERE booking_id = 'BK-P6-COM'").length === 0);
+  const paid = await reqA('/me/bookings/BK-P6-COM/payment-intent', { method: 'POST', body: { method: 'dev-success' } });
+  const com = (await reqS1('/supervisor/me/commissions')).data;
+  const row = com.items.find((c) => c.bookingId === 'BK-P6-COM');
+  ok('the verified payment writes exactly one commission at the configured rate (5% of 400 = 20 USD), earned', paid.data.payment.status === 'paid' && com.items.filter((c) => c.bookingId === 'BK-P6-COM').length === 1 && row.amount === 20 && row.currency === 'USD' && row.status === 'earned' && row.rate === 0.05, JSON.stringify(row));
+  ok('the commission list carries the rule it was computed under', com.model.model === 'percentage' && com.model.rate === 0.05);
+  ok('supervisor-2 never sees supervisor-1\'s commission', !(await reqS2('/supervisor/me/commissions')).data.items.some((c) => c.bookingId === 'BK-P6-COM'));
+  // Replay: the same provider event again (a duplicate), and a second different success event for the same payment.
+  const payRow = dbAll("SELECT id, provider_reference FROM payments WHERE booking_id = 'BK-P6-COM' AND status = 'paid'")[0];
+  const evRow = dbAll('SELECT provider_event_id FROM payment_events WHERE payment_id = ?', payRow.id)[0];
+  const sign = (buf) => createHmac('sha256', PAYMENT_DEV_SECRET).update(buf).digest('hex');
+  const webhook = (body) => { const raw = Buffer.from(JSON.stringify(body)); return fetch(`${API}/payments/webhook/dev`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Dev-Signature': sign(raw) }, body: raw }).then(async (r) => ({ status: r.status, data: await r.json().catch(() => null) })); };
+  const dup = await webhook({ eventId: evRow.provider_event_id, type: 'succeeded', providerReference: payRow.provider_reference, amount: 400, currency: 'USD' });
+  await webhook({ eventId: 'evt_p6_second', type: 'succeeded', providerReference: payRow.provider_reference, amount: 400, currency: 'USD' });
+  ok('a replayed payment event (and a second success event for the same payment) never duplicates the commission', dup.status === 200 && dup.data.duplicate === true && dbAll("SELECT id FROM commissions WHERE booking_id = 'BK-P6-COM'").length === 1);
+  await reqB('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-P6-UNATTR', context: { service: 'flights' }, total: 300, currency: 'USD' } });
+  await reqB('/me/bookings/BK-P6-UNATTR/payment-intent', { method: 'POST', body: { method: 'dev-success' } });
+  ok('a paid booking attributed to no supervisor earns no commission', dbAll("SELECT id FROM commissions WHERE booking_id = 'BK-P6-UNATTR'").length === 0);
+  ok('the commission is audited once', dbAll("SELECT id FROM audit_events WHERE action = 'commission.earned' AND json_extract(metadata_json, '$.bookingId') = 'BK-P6-COM'").length === 1);
+
+  // ---- the rate comes from the register: a changed rate applies to new commissions only ----
+  const rule = (await reqAd('/admin/rules/commission_model')).data.rule;
+  await reqAd('/admin/rules/commission_model', { method: 'PATCH', body: { value: { ...rule.currentValue, rate: 0.1 } } });
+  await reqA('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-P6-COM2', context: { service: 'flights' }, total: 250, currency: 'USD', attribution: { supervisorId: 'supervisor-1' } } });
+  await reqA('/me/bookings/BK-P6-COM2/payment-intent', { method: 'POST', body: { method: 'dev-success' } });
+  const after = (await reqS1('/supervisor/me/commissions')).data.items;
+  ok('a rate changed in the register applies to the next commission (10% of 250 = 25), the earlier one keeps its rate', after.find((c) => c.bookingId === 'BK-P6-COM2')?.amount === 25 && after.find((c) => c.bookingId === 'BK-P6-COM')?.amount === 20);
+  await reqAd('/admin/rules/commission_model', { method: 'PATCH', body: { value: rule.currentValue } });
+
+  // ---- cancellation after payment reverses the commission ----
+  const cancel = await reqAd('/bookings/BK-P6-COM/status', { method: 'POST', body: { status: 'cancelled', reason: 'customer request' } });
+  const reversed = (await reqS1('/supervisor/me/commissions')).data.items.find((c) => c.bookingId === 'BK-P6-COM');
+  ok('cancelling a paid booking marks its commission reversed (kept, not deleted)', cancel.status === 200 && reversed?.status === 'reversed' && !!reversed.reversedAt && reversed.amount === 20, JSON.stringify(reversed));
+
+  jarA.clear(); jarB.clear(); jarAnon.clear(); jarS1.clear(); jarS2.clear(); jarAd.clear();
 }
 
 // ---- diagnostics scrubbing + logs ----

@@ -121,7 +121,7 @@ only a marker, never a credential. `GET /auth/session` is the authority.
 | `GET /me` · `PATCH /me` | `{ name, phone, locale }` | `{ customer }` — email and attribution never change here |
 | `GET /me/trips` · `GET /me/trips/:id` | — | `{ trips }` · `{ trip, bookings, documents, payments }` · 404 when not this customer's |
 | `GET /me/bookings` · `GET /me/bookings/:id` | — | `{ bookings }` · `{ booking, trip, documents, payments }` |
-| `POST /me/bookings/claim` | the Stage 11 journey record | 201 `{ booking }`; idempotent by reference; 409 when another customer holds it; sets the customer's attribution once |
+| `POST /me/bookings/claim` | the Stage 11 journey record | 201 `{ booking }`; idempotent by reference; 409 when another customer holds it; sets the customer's attribution once; `status: "received"` (a request-mode booking) also creates one lead for the attributed supervisor, or unassigned for operations |
 | `GET/POST /me/travellers` · `PATCH/DELETE /me/travellers/:id` | traveller fields | `{ travellers }` · `{ traveller }` · 204 |
 | `GET /me/documents` | — | `{ documents: [{ id, bookingId, tripId, type, kind, status, issuedAt, title, size, contentType, deletable, booking?, trip? }] }` |
 | `POST /me/documents` | multipart `file`, `title`, `type` | 201 `{ document }` · 413 · 415 (declared type AND magic bytes) |
@@ -133,6 +133,7 @@ only a marker, never a credential. `GET /auth/session` is the authority.
 | `POST /me/legal/acceptance` | `{ terms: { version }, privacy: { version }, locale }` | 204 |
 | `GET /legal/terms?locale=` · `GET /legal/privacy?locale=` | — | `{ version, effectiveAt, title, html }` · 404 when not published |
 | `POST /diagnostics` | a scrubbed event | 204 (stored scrubbed; sensitive keys dropped) |
+| `POST /contact` | `{ name, email?, phone?, message, service?, attribution?: { supervisor } }` (email or phone required) | 201 `{ received: true }` · 422 · 429 — creates a lead: the signed-in customer's supervisor, else the `attribution` slug if active, else unassigned |
 | `GET /health` | — | `{ ok, environment, version, storage, mailer, testControls }` |
 
 `customer` is `{ id, name, email, phone, locale, image, supervisorId, attribution: { supervisorId, source, at }, acceptance, createdAt }`.

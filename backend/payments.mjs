@@ -23,6 +23,7 @@ import { audit, SYSTEM_ACTOR } from './staff.mjs';
 import { enqueue } from './mailer.mjs';
 import { config } from './config.mjs';
 import { createFlightBooking } from './flights.mjs';
+import { earnCommission } from './commissions.mjs';
 
 /* ---- provider registry — one adapter per provider id, never referenced by name outside this file ---- */
 const registry = new Map();
@@ -113,6 +114,9 @@ export async function handleWebhookEvent(providerId, rawBody, headers) {
         `doc_${hex(6)}`, payment.customer_id, payment.booking_id, q.get('SELECT trip_id FROM bookings WHERE id = ?', payment.booking_id)?.trip_id ?? null, 'receipt', 'issued', 'pending', null, null, 0, null, t);
       enqueue({ customerId: payment.customer_id, template: 'payment-successful', payload: { bookingId: payment.booking_id, amount: payment.amount, currency: payment.currency } });
       audit(SYSTEM_ACTOR, 'booking.paymentGate.passed', 'booking', payment.booking_id, { paymentId: payment.id });
+      // Phase 6: the attributed supervisor's commission is earned here, in the same transaction — once per booking.
+      const commission = earnCommission(payment.booking_id, t);
+      if (commission) audit(SYSTEM_ACTOR, 'commission.earned', 'commission', commission.id, { bookingId: payment.booking_id, supervisorId: commission.supervisor_id });
       // Stage 16C §13: Revalidate → Payment → Supplier Booking → Confirmation — only for a flights booking claimed
       // against a server-issued offer, and only once per payment (this branch is reached once per event).
       const bkg = q.get('SELECT * FROM bookings WHERE id = ?', payment.booking_id);
