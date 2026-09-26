@@ -10,7 +10,7 @@ import { route } from '../../data/config.js';
 import { toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, notFoundState, actionForm, debouncedRun, dataTable, block, rows, busyButton, publishStatusBadge, unpublishedChangesNote, dateTime } from './shell.js';
+import { mountOpsPortal, loadRegion, pagedRegion, pageTitle, notFoundState, actionForm, debouncedRun, dataTable, block, rows, busyButton, publishStatusBadge, unpublishedChangesNote, dateTime } from './shell.js';
 
 const columns = [
   { labelKey: 'ops.destinations.col.name', render: (d) => el('a', { class: 'c-svp-link', href: route(`admin/destinations/?id=${encodeURIComponent(d.id)}`) }, d.nameEn || d.nameAr || d.id) },
@@ -50,7 +50,8 @@ export function mountOpsDestinations({ root = document, params = new URLSearchPa
     })() : null;
 
     main.replaceChildren(pageTitle('ops.destinations.title', 'ops.destinations.text'), createForm, el('div', { class: 'c-svp-filter' }, [search]), host);
-    const region = loadRegion(host, async () => (await opsData.destinationsAdmin({ search: search.value.trim() || undefined, page: 1, pageSize: 50 })).items, {
+    const region = pagedRegion(host, (q) => opsData.destinationsAdmin(q), {
+      filters: () => ({ search: search.value.trim() || undefined }),
       empty: () => stateBlock({ variant: 'empty', headingLevel: 2, title: t('ops.destinations.empty.title'), text: t('ops.destinations.empty.text') }),
       paint: (items) => dataTable({ columns, rows: items, rowKey: (d) => d.id, emptyKey: 'ops.destinations.empty.title' }),
     });

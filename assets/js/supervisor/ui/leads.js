@@ -7,7 +7,7 @@ import { icon } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { statusSelect } from '../../core/portal-ui.js';
 import { supervisorData, LEAD_STATUSES } from '../data.js';
-import { mountSupervisorPortal, loadRegion, pageTitle, leadStatusBadge, dateTime } from './shell.js';
+import { mountSupervisorPortal, loadRegion, pagedRegion, pageTitle, leadStatusBadge, dateTime } from './shell.js';
 
 export function mountSupervisorLeads({ root = document } = {}) {
   return mountSupervisorPortal({ root, id: 'leads', head: 'page.supervisor.leads', paint: async ({ main }) => {
@@ -26,7 +26,7 @@ export function mountSupervisorLeads({ root = document } = {}) {
         select,
       ]);
     };
-    const region = loadRegion(host, async () => (await supervisorData.leads({ page: 1, pageSize: 50 })).items, {
+    const region = pagedRegion(host, (q) => supervisorData.leads(q), {
       empty: () => stateBlock({ variant: 'empty', iconName: 'no-lead', headingLevel: 2, title: t('svp.leads.empty.title'), text: t('svp.leads.empty.text') }),
       paint: (items) => el('div', { class: 'c-acct-list' }, items.map(row)),
     });

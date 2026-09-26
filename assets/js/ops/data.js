@@ -75,7 +75,9 @@ export const opsData = {
   serviceWorkflow: (id) => call('serviceWorkflow', id),
   setServiceWorkflow: (id, steps) => call('setServiceWorkflow', id, steps),
   serviceDocumentRequirements: (id) => call('serviceDocumentRequirements', id),
-  addServiceDocumentRequirement: (id, req) => call('addServiceDocumentRequirement', id, req),
+  addServiceDocumentRequirement: (id, req) => call('addServiceDocumentRequirement', id, req),        // { docType, required, customerUpload }
+  updateServiceDocumentRequirement: (id, reqId, patch) => call('updateServiceDocumentRequirement', id, reqId, patch),
+  removeServiceDocumentRequirement: (id, reqId) => call('removeServiceDocumentRequirement', id, reqId),
 
   suppliers: () => call('suppliers'),
   createSupplier: (supplier) => call('createSupplier', supplier),

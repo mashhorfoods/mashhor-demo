@@ -7,7 +7,7 @@ import { icon, toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { statusSelect } from '../../core/portal-ui.js';
 import { opsData, TASK_STATUSES } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, actionForm, statusFilterSelect, taskStatusBadge, priorityBadge, dateTime, block } from './shell.js';
+import { mountOpsPortal, loadRegion, pagedRegion, pageTitle, actionForm, statusFilterSelect, taskStatusBadge, priorityBadge, dateTime, block } from './shell.js';
 
 export function mountOpsTasks({ root = document } = {}) {
   return mountOpsPortal({ root, id: 'tasks', head: 'page.ops.tasks', paint: async ({ main, can }) => {
@@ -49,7 +49,8 @@ export function mountOpsTasks({ root = document } = {}) {
     })() : null;
 
     main.replaceChildren(pageTitle('ops.tasks.title', 'ops.tasks.text'), createForm, el('div', { class: 'c-svp-filter' }, [filter]), host);
-    const region = loadRegion(host, async () => (await opsData.tasks({ status: filter.value || undefined, page: 1, pageSize: 50 })).items, {
+    const region = pagedRegion(host, (q) => opsData.tasks(q), {
+      filters: () => ({ status: filter.value || undefined }),
       empty: () => stateBlock({ variant: 'empty', iconName: 'no-check', headingLevel: 2, title: t('ops.tasks.empty.title'), text: t('ops.tasks.empty.text') }),
       paint: (items) => el('div', { class: 'c-acct-list' }, items.map(row)),
     });

@@ -5,7 +5,7 @@ import { route } from '../../data/config.js';
 import { icon } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { supervisorData } from '../data.js';
-import { mountSupervisorPortal, loadRegion, pageTitle, notFoundState, dataTable, bookingStatusBadge, payBadge, amount, dateTime, block, rows } from './shell.js';
+import { mountSupervisorPortal, loadRegion, pagedRegion, pageTitle, notFoundState, dataTable, bookingStatusBadge, payBadge, amount, dateTime, block, rows } from './shell.js';
 
 const columns = [
   { labelKey: 'svp.bookings.col.id', render: (b) => el('a', { class: 'c-svp-link', href: route(`supervisor/bookings/?id=${encodeURIComponent(b.id)}`) }, el('bdi', { dir: 'ltr' }, b.id)) },
@@ -26,7 +26,8 @@ export function mountSupervisorBookings({ root = document, params = new URLSearc
       STATUSES.map((s) => el('option', { value: s }, s ? t(`acct.status.${s}`) : t('svp.bookings.filterAll'))));
     filter.addEventListener('change', () => region.run());
     main.replaceChildren(pageTitle('svp.bookings.title', 'svp.bookings.text'), el('div', { class: 'c-svp-filter' }, [filter]), host);
-    const region = loadRegion(host, async () => (await supervisorData.bookings({ status: filter.value, page: 1, pageSize: 50 })).items, {
+    const region = pagedRegion(host, (q) => supervisorData.bookings(q), {
+      filters: () => ({ status: filter.value }),
       empty: () => stateBlock({ variant: 'empty', iconName: 'no-ticket', headingLevel: 2, title: t('svp.bookings.empty.title'), text: t('svp.bookings.empty.text') }),
       paint: (items) => dataTable({ columns, rows: items, rowKey: (b) => b.id, emptyKey: 'svp.bookings.empty.title' }),
     });

@@ -7,7 +7,7 @@ import { route } from '../../data/config.js';
 import { icon } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { supervisorData } from '../data.js';
-import { mountSupervisorPortal, loadRegion, pageTitle, notFoundState, dataTable, bookingStatusBadge, dateTime, block } from './shell.js';
+import { mountSupervisorPortal, loadRegion, pagedRegion, pageTitle, notFoundState, dataTable, bookingStatusBadge, dateTime, block } from './shell.js';
 
 const columns = [
   { labelKey: 'svp.customers.col.name', render: (c) => el('a', { class: 'c-svp-link', href: route(`supervisor/customers/?id=${encodeURIComponent(c.id)}`) }, c.name || c.email) },
@@ -28,7 +28,8 @@ export function mountSupervisorCustomers({ root = document, params = new URLSear
       el('button', { type: 'submit', class: 'c-btn c-btn--secondary' }, [icon('no-search', { size: 'sm' }), el('span', {}, t('nav.search'))]),
     ]);
     main.replaceChildren(pageTitle('svp.customers.title', 'svp.customers.text'), form, host);
-    const region = loadRegion(host, async () => (await supervisorData.customers({ search: form.elements.search.value.trim(), page: 1, pageSize: 50 })).items, {
+    const region = pagedRegion(host, (q) => supervisorData.customers(q), {
+      filters: () => ({ search: form.elements.search.value.trim() }),
       empty: () => stateBlock({ variant: 'empty', iconName: 'no-customer', headingLevel: 2, title: t('svp.customers.empty.title'), text: t('svp.customers.empty.text'), actions: [{ label: t('svp.dash.title'), href: route('supervisor/dashboard/'), variant: 'c-btn--primary' }] }),
       paint: (items) => dataTable({ columns, rows: items, rowKey: (c) => c.id, emptyKey: 'svp.customers.empty.title' }),
     });

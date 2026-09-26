@@ -10,7 +10,7 @@ import { stateBlock } from '../../components/states.js';
 import { SUPERVISOR_LANGUAGES, SUPERVISOR_SPECIALTIES } from '../../data/supervisors.js';
 import { opsData } from '../data.js';
 import { revenueGroups } from '../../core/portal-ui.js';
-import { mountOpsPortal, loadRegion, pageTitle, notFoundState, actionForm, debouncedRun, emptyNote, dataTable, opsStatusBadge, dateTime, amount, block, rows, busyButton } from './shell.js';
+import { mountOpsPortal, loadRegion, pagedRegion, pageTitle, notFoundState, actionForm, debouncedRun, emptyNote, dataTable, opsStatusBadge, dateTime, amount, block, rows, busyButton } from './shell.js';
 
 const columns = [
   { labelKey: 'ops.supervisors.col.name', render: (s) => el('a', { class: 'c-svp-link', href: route(`admin/supervisors/?id=${encodeURIComponent(s.id)}`) }, s.nameEn || s.nameAr || s.id) },
@@ -44,7 +44,8 @@ export function mountOpsSupervisors({ root = document, params = new URLSearchPar
     })() : null;
 
     main.replaceChildren(pageTitle('ops.supervisors.title', 'ops.supervisors.text'), createForm, el('div', { class: 'c-svp-filter' }, [search]), host);
-    const region = loadRegion(host, async () => (await opsData.supervisorsAdmin({ search: search.value.trim() || undefined, page: 1, pageSize: 50 })).items, {
+    const region = pagedRegion(host, (q) => opsData.supervisorsAdmin(q), {
+      filters: () => ({ search: search.value.trim() || undefined }),
       empty: () => stateBlock({ variant: 'empty', iconName: 'no-supervisor', headingLevel: 2, title: t('ops.supervisors.empty.title'), text: t('ops.supervisors.empty.text') }),
       paint: (items) => dataTable({ columns, rows: items, rowKey: (s) => s.id, emptyKey: 'ops.supervisors.empty.title' }),
     });

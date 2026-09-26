@@ -5,7 +5,7 @@ import { el } from '../../core/dom.js';
 import { t } from '../../core/i18n.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, dataTable, dateTime, block } from './shell.js';
+import { mountOpsPortal, loadRegion, pagedRegion, pageTitle, dataTable, dateTime, block } from './shell.js';
 
 const leadColumns = [
   { labelKey: 'ops.leads.col.name', render: (l) => l.name || '—' },
@@ -31,11 +31,11 @@ export function mountOpsLeads({ root = document } = {}) {
       block(t('ops.leads.list.title'), leadsHost, { id: 'ops-leads-list' }),
       block(t('ops.attribution.title'), eventsHost, { id: 'ops-leads-attribution' }),
     );
-    const leads = loadRegion(leadsHost, async () => (await opsData.leads({ page: 1, pageSize: 50 })).items, {
+    const leads = pagedRegion(leadsHost, (q) => opsData.leads(q), {
       empty: () => stateBlock({ variant: 'empty', iconName: 'no-lead', headingLevel: 2, title: t('ops.leads.empty.title'), text: t('ops.leads.empty.text') }),
       paint: (items) => dataTable({ columns: leadColumns, rows: items, rowKey: (l) => l.id, emptyKey: 'ops.leads.empty.title' }),
     });
-    const events = loadRegion(eventsHost, async () => (await opsData.attributionEvents({ page: 1, pageSize: 50 })).items, {
+    const events = pagedRegion(eventsHost, (q) => opsData.attributionEvents(q), {
       empty: () => stateBlock({ variant: 'empty', iconName: 'no-info', headingLevel: 2, title: t('ops.attribution.empty.title') }),
       paint: (items) => dataTable({ columns: eventColumns, rows: items, rowKey: (e) => `${e.customerId}-${e.at}`, emptyKey: 'ops.attribution.empty.title' }),
     });

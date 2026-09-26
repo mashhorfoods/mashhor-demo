@@ -6,7 +6,7 @@ import { t } from '../../core/i18n.js';
 import { toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, actionForm, dataTable, dateTime, block } from './shell.js';
+import { mountOpsPortal, loadRegion, pagedRegion, pageTitle, actionForm, dataTable, dateTime, block } from './shell.js';
 
 const CHANNELS = ['email', 'sms', 'push'];
 
@@ -49,7 +49,7 @@ export function mountOpsNotifications({ root = document } = {}) {
         { labelKey: 'ops.notifications.col.version', render: (m) => String(m.version) },
       ], rows: items, rowKey: (m) => m.id }),
     });
-    const hist = loadRegion(histHost, async () => (await opsData.notificationHistory({ page: 1, pageSize: 50 })).items, {
+    const hist = pagedRegion(histHost, (q) => opsData.notificationHistory(q), {
       empty: () => stateBlock({ variant: 'empty', headingLevel: 3, title: t('ops.notifications.history.empty') }),
       paint: (items) => dataTable({ columns: [
         { labelKey: 'ops.notifications.col.event', render: (m) => m.event },

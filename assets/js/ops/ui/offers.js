@@ -11,7 +11,7 @@ import { route } from '../../data/config.js';
 import { toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, notFoundState, actionForm, debouncedRun, dataTable, block, rows, publishStatusBadge, unpublishedChangesNote, dateTime, amount } from './shell.js';
+import { mountOpsPortal, loadRegion, pagedRegion, pageTitle, notFoundState, actionForm, debouncedRun, dataTable, block, rows, publishStatusBadge, unpublishedChangesNote, dateTime, amount } from './shell.js';
 import { publishingControls } from './destinations.js';
 
 const priceText = (p) => (p ? `${amount(p.amount, p.currency)} (${p.type ?? ''})` : '—');
@@ -48,7 +48,8 @@ export function mountOpsOffers({ root = document, params = new URLSearchParams(l
     })() : null;
 
     main.replaceChildren(pageTitle('ops.offers.title', 'ops.offers.text'), createForm, el('div', { class: 'c-svp-filter' }, [search]), host);
-    const region = loadRegion(host, async () => (await opsData.offersAdmin({ search: search.value.trim() || undefined, page: 1, pageSize: 50 })).items, {
+    const region = pagedRegion(host, (q) => opsData.offersAdmin(q), {
+      filters: () => ({ search: search.value.trim() || undefined }),
       empty: () => stateBlock({ variant: 'empty', headingLevel: 2, title: t('ops.offers.empty.title'), text: t('ops.offers.empty.text') }),
       paint: (items) => dataTable({ columns, rows: items, rowKey: (o) => o.id, emptyKey: 'ops.offers.empty.title' }),
     });

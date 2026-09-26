@@ -236,18 +236,47 @@ export function updateService(id, patch, actor) {
   return serviceById(id);
 }
 export const serviceWorkflow = (serviceId) => q.all('SELECT * FROM service_workflows WHERE service_id = ? ORDER BY step_order', serviceId).map((r) => ({ order: r.step_order, key: r.step_key, labelAr: r.label_ar, labelEn: r.label_en }));
+/** A workflow step key and a document type: lower-case letters, digits and underscores. */
+const OPS_KEY = /^[a-z0-9_]{1,40}$/;
+/** Replaces a service's ordered workflow. Every step needs a unique key and both labels; at most 30 steps. A bad
+    list is refused whole (400 invalid), never half-saved. */
 export function setServiceWorkflow(serviceId, steps, actor) {
   if (!serviceById(serviceId)) throw new HttpError(404, 'notFound');
-  q.tx(() => { q.run('DELETE FROM service_workflows WHERE service_id = ?', serviceId); steps.forEach((s, i) => q.run('INSERT INTO service_workflows (service_id, step_order, step_key, label_ar, label_en) VALUES (?,?,?,?,?)', serviceId, i, str(s.key, 40), str(s.labelAr, 80), str(s.labelEn, 80))); });
-  audit(actor, 'workflow.update', 'service', serviceId, { steps: steps.length });
+  const clean = steps.map((s) => ({ key: str(s?.key, 40), labelAr: str(s?.labelAr, 80), labelEn: str(s?.labelEn, 80) }));
+  if (clean.length > 30 || new Set(clean.map((s) => s.key)).size !== clean.length || clean.some((s) => !OPS_KEY.test(s.key) || !s.labelAr || !s.labelEn)) throw new HttpError(400, 'invalid');
+  const before = serviceWorkflow(serviceId).map((s) => s.key);
+  q.tx(() => { q.run('DELETE FROM service_workflows WHERE service_id = ?', serviceId); clean.forEach((s, i) => q.run('INSERT INTO service_workflows (service_id, step_order, step_key, label_ar, label_en) VALUES (?,?,?,?,?)', serviceId, i, s.key, s.labelAr, s.labelEn)); });
+  audit(actor, 'workflow.update', 'service', serviceId, { steps: clean.length, from: before, to: clean.map((s) => s.key) });
   return serviceWorkflow(serviceId);
 }
-export const serviceDocumentRequirements = (serviceId) => q.all('SELECT * FROM service_document_requirements WHERE service_id = ?', serviceId).map((r) => ({ id: r.id, docType: r.doc_type, required: !!r.required, customerUpload: !!r.customer_upload }));
-export function addServiceDocumentRequirement(serviceId, { docType, required = true, customerUpload = true }, actor) {
+export const serviceDocumentRequirements = (serviceId) => q.all('SELECT * FROM service_document_requirements WHERE service_id = ? ORDER BY id', serviceId).map((r) => ({ id: r.id, docType: r.doc_type, required: !!r.required, customerUpload: !!r.customer_upload }));
+export function addServiceDocumentRequirement(serviceId, { docType, required = true, customerUpload = true } = {}, actor) {
   if (!serviceById(serviceId)) throw new HttpError(404, 'notFound');
+  const type = str(docType, 40);
+  if (!OPS_KEY.test(type)) throw new HttpError(400, 'invalid');
+  if (q.get('SELECT 1 AS x FROM service_document_requirements WHERE service_id = ? AND doc_type = ?', serviceId, type)) throw new HttpError(409, 'conflict');
   const t = now();
-  q.run('INSERT INTO service_document_requirements (service_id, doc_type, required, customer_upload, created_at, updated_at) VALUES (?,?,?,?,?,?)', serviceId, str(docType, 40), required ? 1 : 0, customerUpload ? 1 : 0, t, t);
-  audit(actor, 'service.documentRequirement.add', 'service', serviceId, { docType });
+  q.run('INSERT INTO service_document_requirements (service_id, doc_type, required, customer_upload, created_at, updated_at) VALUES (?,?,?,?,?,?)', serviceId, type, required ? 1 : 0, customerUpload ? 1 : 0, t, t);
+  audit(actor, 'service.documentRequirement.add', 'service', serviceId, { docType: type, required: !!required, customerUpload: !!customerUpload });
+  return serviceDocumentRequirements(serviceId);
+}
+const requirementOf = (serviceId, reqId) => {
+  const r = q.get('SELECT * FROM service_document_requirements WHERE id = ? AND service_id = ?', Number(reqId) || 0, serviceId);
+  if (!r) throw new HttpError(404, 'notFound');
+  return r;
+};
+/** One requirement's required / customer-upload flags. Its document type is its identity: remove and add to change it. */
+export function updateServiceDocumentRequirement(serviceId, reqId, { required, customerUpload } = {}, actor) {
+  const r = requirementOf(serviceId, reqId);
+  const req = required != null ? (required ? 1 : 0) : r.required; const upload = customerUpload != null ? (customerUpload ? 1 : 0) : r.customer_upload;
+  q.run('UPDATE service_document_requirements SET required = ?, customer_upload = ?, updated_at = ? WHERE id = ?', req, upload, now(), r.id);
+  audit(actor, 'service.documentRequirement.update', 'service', serviceId, { docType: r.doc_type, required: !!req, customerUpload: !!upload });
+  return serviceDocumentRequirements(serviceId);
+}
+export function removeServiceDocumentRequirement(serviceId, reqId, actor) {
+  const r = requirementOf(serviceId, reqId);
+  q.run('DELETE FROM service_document_requirements WHERE id = ?', r.id);
+  audit(actor, 'service.documentRequirement.remove', 'service', serviceId, { docType: r.doc_type });
   return serviceDocumentRequirements(serviceId);
 }
 

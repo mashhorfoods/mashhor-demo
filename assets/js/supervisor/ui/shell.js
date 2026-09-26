@@ -42,7 +42,7 @@ function portalNav(current) {
  * mountSupervisorPortal({ root, id, head, paint }): `id` marks the nav, `head` is the page.* key, and
  * `paint({ supervisor, main })` renders the screen into the main slot.
  */
-export const { put, setHead, devNotice, errorText, notFoundState, loadRegion, dataTable, mount: mountSupervisorPortal } = createStaffPortal({
+export const { put, setHead, devNotice, errorText, notFoundState, loadRegion, pagedRegion, dataTable, mount: mountSupervisorPortal } = createStaffPortal({
   attr: 'portal', page: 'supervisor', prefix: 'svp', label: 'supervisor', area: 'supervisor/', entity: 'supervisor', datasetKey: 'supervisorPortal',
   isDev: () => !!supervisorDataAdapter()?.dev, ErrorClass: SupervisorAuthError, restore: restoreSupervisorSession, nav: portalNav,
   homeLabelKey: 'notFound.home', guardIcon: 'no-supervisor',

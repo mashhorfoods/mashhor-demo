@@ -185,6 +185,8 @@ export function createApp() {
       if ((m = path.match(/^\/services\/([^/]+)\/workflow$/)) && req.method === 'POST') return opsServices.workflowUpdate(req, res, ctx, decodeURIComponent(m[1]));
       if ((m = path.match(/^\/services\/([^/]+)\/document-requirements$/)) && req.method === 'GET') return opsServices.documentRequirements(req, res, ctx, decodeURIComponent(m[1]));
       if ((m = path.match(/^\/services\/([^/]+)\/document-requirements$/)) && req.method === 'POST') return opsServices.documentRequirementAdd(req, res, ctx, decodeURIComponent(m[1]));
+      if ((m = path.match(/^\/services\/([^/]+)\/document-requirements\/([^/]+)$/)) && req.method === 'PATCH') return opsServices.documentRequirementUpdate(req, res, ctx, decodeURIComponent(m[1]), decodeURIComponent(m[2]));
+      if ((m = path.match(/^\/services\/([^/]+)\/document-requirements\/([^/]+)$/)) && req.method === 'DELETE') return opsServices.documentRequirementRemove(req, res, ctx, decodeURIComponent(m[1]), decodeURIComponent(m[2]));
       return fail(res, 404, 'notFound');
     }
 
