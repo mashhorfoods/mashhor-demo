@@ -18,11 +18,10 @@ import {
 } from '../data/offers.js';
 import { destinationById, DESTINATION_REGISTRY } from '../data/destinations.js';
 import { SERVICE_REGISTRY, serviceById } from '../data/services.js';
-import { liveChannels } from '../data/navigation.js';
 import { icon, initModals, initAccordions, routeGraphic, sectionHead, heroFocalStyle } from './ui.js';
 import { offerCard, offerBadge, priceBlock, offerMeta, inclusionList, mediaPlaceholder } from './cards.js';
-import { stateRegion, stateBlock, skeletonCard } from './states.js';
-import { supportPanels, journeySteps } from './home.js';
+import { stateRegion, stateBlock, skeletonCard, detailSections } from './states.js';
+import { supportSection, journeySteps } from './home.js';
 
 const FILTER_KEYS = ['category', 'destination', 'service', 'duration', 'price', 'period', 'sort'];
 
@@ -336,7 +335,7 @@ function accordion(id, items, labelKey) {
     ]),
     el('div', { class: 'c-accordion__panel' }, el('div', { class: 'c-accordion__inner' }, el('div', { class: 'c-accordion__content' }, item.a))),
   ])));
-  return node;   // show() runs initAccordions on the section once it is in the DOM
+  return node;   // detailSections' onShow runs initAccordions once the section is in the DOM
 }
 export function termsSection(record) {
   if (!record.terms?.length) return null;
@@ -360,21 +359,12 @@ export function relatedSection(record) {
   if (!list.length) return null;
   return [sectionHead({ id: 'related-title', overline: t('offers.related.overline'), title: t('offers.related.title') }), offerDeck(list)];
 }
-export function supportSection() {
-  return [
-    el('div', { class: 'l-section-head' }, [
-      el('p', { class: 't-overline' }, t('home.support.overline')),
-      el('h2', { class: 't-h2', id: 'support-title' }, t('detail.support.title')),
-      el('p', { class: 't-body-lg t-muted' }, t('detail.support.text')),
-    ]),
-    supportPanels(undefined, liveChannels()),
-  ];
-}
 const applyHead = (record) => setPageHead({ title: `${pick(record, 'title')} — ${t('brand.name')}`, description: pick(record, 'short') });
 
 export function mountOfferDetail({ slug, root = document, load = async (s) => getOffer(s) } = {}) {
-  const mount = (name) => qs(`[data-offer="${name}"]`, root);
-  const sections = ['overview', 'included', 'excluded', 'itinerary', 'important', 'terms', 'faq', 'flow', 'related', 'support'];
+  const { mount, show, hideAll } = detailSections(root, 'offer',
+    ['overview', 'included', 'excluded', 'itinerary', 'important', 'terms', 'faq', 'flow', 'related', 'support'],
+    { onShow: initAccordions });
   const region = stateRegion(mount('hero'), {
     loading: () => el('div', { style: 'display:contents' }, [
       el('div', { class: 'l-stack' }, [el('div', { class: 'c-skeleton c-skeleton--text c-skeleton--line-sm' }), el('div', { class: 'c-skeleton c-skeleton--title' }), el('div', { class: 'c-skeleton c-skeleton--text c-skeleton--line-md' })]),
@@ -385,12 +375,6 @@ export function mountOfferDetail({ slug, root = document, load = async (s) => ge
       { label: t('offers.cta.expert'), href: route('help/contact/') },
     ] }),
   });
-  const show = (name, content) => {
-    const section = mount(name); if (!section) return;
-    const body = qs('[data-offer-body]', section) ?? section;
-    if (content) { render(body, content); section.hidden = false; initAccordions(section); }
-    else { render(body, []); section.hidden = true; }
-  };
   const paint = (record) => {
     applyHead(record);
     region.content(offerHero(record));
@@ -412,7 +396,7 @@ export function mountOfferDetail({ slug, root = document, load = async (s) => ge
   const api = {
     region, current: null,
     async render(nextSlug = slug) {
-      region.loading(); sections.forEach((s) => show(s, null));
+      region.loading(); hideAll();
       let record;
       try { record = await load(nextSlug); }
       catch (error) { console.error('[no] offer failed to load', error); region.error(); return null; }

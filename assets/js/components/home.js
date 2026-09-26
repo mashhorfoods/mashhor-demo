@@ -342,6 +342,19 @@ export function supportPanels(support = HOME_SUPPORT, channels = liveChannels())
   ]);
 }
 
+/** The detail pages' closing section (destination, service, offer): the
+    support head over the same two panels as the homepage. */
+export function supportSection() {
+  return [
+    el('div', { class: 'l-section-head' }, [
+      el('p', { class: 't-overline' }, t('home.support.overline')),
+      el('h2', { class: 't-h2', id: 'support-title' }, t('detail.support.title')),
+      el('p', { class: 't-body-lg t-muted' }, t('detail.support.text')),
+    ]),
+    supportPanels(),
+  ];
+}
+
 /* ---------------------------------------------------------------------------
    MOUNT — wire every section into the page and return the controllers.
    Each dynamic region is a stateRegion so the page can show loading, empty

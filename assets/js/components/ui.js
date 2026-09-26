@@ -8,7 +8,7 @@
    ========================================================================= */
 
 import { qs, qsa, el, uid, lockScroll, unlockScroll } from '../core/dom.js';
-import { t } from '../core/i18n.js';
+import { t, pick } from '../core/i18n.js';
 
 /* ---------------------------------------------------------------------------
    ICON — §15
@@ -122,6 +122,27 @@ export function setButtonState(button, state, { announce = true } = {}) {
 }
 
 /* ---------------------------------------------------------------------------
+   COLLAPSE — one disclosure: aria-expanded on the trigger, data-collapsed on
+   the panel (the grid-rows transition in 07-components.css). The accordion
+   below, the search form's advanced fields, the drawer and the footer
+   columns all open and close through these two.
+   ------------------------------------------------------------------------ */
+export function setExpanded(trigger, panel, open) {
+  trigger.setAttribute('aria-expanded', String(open));
+  panel.dataset.collapsed = String(!open);
+}
+
+/** Toggle `panel` from `trigger`; `onToggle(open)` runs after each change. */
+export function bindCollapse(trigger, panel, onToggle = null) {
+  trigger.addEventListener('click', () => {
+    const open = trigger.getAttribute('aria-expanded') !== 'true';
+    setExpanded(trigger, panel, open);
+    onToggle?.(open);
+  });
+  return trigger;
+}
+
+/* ---------------------------------------------------------------------------
    ACCORDION — button[aria-expanded] + a grid-rows transition.
    ------------------------------------------------------------------------ */
 export function initAccordions(root = document) {
@@ -135,22 +156,17 @@ export function initAccordions(root = document) {
       if (!panel.id) panel.id = uid('panel');
       trigger.setAttribute('aria-controls', panel.id);
 
-      const expanded = trigger.getAttribute('aria-expanded') === 'true';
-      trigger.setAttribute('aria-expanded', String(expanded));
-      panel.dataset.collapsed = String(!expanded);
+      setExpanded(trigger, panel, trigger.getAttribute('aria-expanded') === 'true');
 
       trigger.addEventListener('click', () => {
         const isOpen = trigger.getAttribute('aria-expanded') === 'true';
 
         if (single && !isOpen) {
-          qsa('.c-accordion__trigger[aria-expanded="true"]', accordion).forEach((other) => {
-            other.setAttribute('aria-expanded', 'false');
-            other.nextElementSibling.dataset.collapsed = 'true';
-          });
+          qsa('.c-accordion__trigger[aria-expanded="true"]', accordion).forEach((other) =>
+            setExpanded(other, other.nextElementSibling, false));
         }
 
-        trigger.setAttribute('aria-expanded', String(!isOpen));
-        panel.dataset.collapsed = String(isOpen);
+        setExpanded(trigger, panel, !isOpen);
       });
     });
   });
@@ -404,4 +420,21 @@ export function sectionHead({ id, overline = '', title, text = '', mark = true }
     el('h2', { class: mark ? 't-h2 u-mark' : 't-h2', id }, title),
     text ? el('p', { class: 't-body t-muted' }, text) : null,
   ]);
+}
+
+/* ---------------------------------------------------------------------------
+   CHANNEL LIST — the live support channels (whatsapp/call) as rows, or, until
+   the business supplies one, a note: never a fabricated number. `meta` is the
+   line under each label (default: the channel's own), `emptyKey` the note.
+   help/contact/ and the supervisor profile's contact section.
+   ------------------------------------------------------------------------ */
+export function channelList(channels, { meta = null, emptyKey = 'home.support.channelsSoon' } = {}) {
+  if (!channels.length) {
+    return el('p', { class: 'c-note', role: 'note' }, [icon('no-info', { size: 'sm' }), el('span', { class: 'c-note__text' }, t(emptyKey))]);
+  }
+  return el('div', { class: 'c-channels' }, channels.map((c) =>
+    el('a', { class: 'c-channel', href: c.href, ...(c.external ? { target: '_blank', rel: 'noopener' } : {}), dataset: { channel: c.id } }, [
+      el('span', { class: 'c-channel__icon' }, icon(c.icon, { size: 'md' })),
+      el('span', {}, [el('span', { class: 'c-channel__label' }, pick(c, 'label')), el('span', { class: 'c-channel__meta' }, meta ?? pick(c, 'meta'))]),
+    ])));
 }

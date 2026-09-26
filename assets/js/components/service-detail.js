@@ -12,18 +12,17 @@
    Exposed as `window.no.detail` for QA.
    ========================================================================= */
 
-import { el, qs, qsa, render, setPageHead } from '../core/dom.js';
+import { el, qsa, setPageHead } from '../core/dom.js';
 import { t, pick, getLocale } from '../core/i18n.js';
 import { route } from '../data/config.js';
-import { liveChannels } from '../data/navigation.js';
 import {
   SERVICE_REGISTRY, SERVICE_CATEGORIES, SERVICE_KINDS, serviceById, serviceEntry,
 } from '../data/services.js';
 import { SERVICE_DETAILS, SERVICE_BENEFITS } from '../data/service-details.js';
 import { icon, routeGraphic, sectionHead } from './ui.js';
 import { serviceCard, mediaPlaceholder } from './cards.js';
-import { stateRegion, notFoundState } from './states.js';
-import { supportPanels, journeySteps } from './home.js';
+import { stateRegion, notFoundState, detailSections } from './states.js';
+import { supportSection, journeySteps } from './home.js';
 
 /* ---------------------------------------------------------------------------
    RECORD — registry identity + page content, merged. Returns null for an
@@ -196,17 +195,6 @@ export function relatedSection(record) {
   ];
 }
 
-export function supportSection() {
-  return [
-    el('div', { class: 'l-section-head' }, [
-      el('p', { class: 't-overline' }, t('home.support.overline')),
-      el('h2', { class: 't-h2', id: 'support-title' }, t('detail.support.title')),
-      el('p', { class: 't-body-lg t-muted' }, t('detail.support.text')),
-    ]),
-    supportPanels(undefined, liveChannels()),
-  ];
-}
-
 /* ---------------------------------------------------------------------------
    STATES — unknown slug, missing content, unavailable. §18
    ------------------------------------------------------------------------ */
@@ -236,8 +224,7 @@ export function mountServiceDetail({
   root = document,
   load = async (s) => getServiceDetail(s),
 } = {}) {
-  const mount = (name) => qs(`[data-detail="${name}"]`, root);
-  const sections = ['overview', 'features', 'benefits', 'steps', 'requirements', 'related', 'support'];
+  const { mount, show: showSection, hideAll } = detailSections(root, 'detail', ['overview', 'features', 'benefits', 'steps', 'requirements', 'related', 'support']);
   const region = stateRegion(mount('hero'), {
     loading: () => el('div', { class: 'c-hero__copy', style: 'display:contents' }, [
       el('div', { class: 'l-stack' }, [
@@ -249,14 +236,6 @@ export function mountServiceDetail({
     ]),
     empty: unknownState,
   });
-
-  const showSection = (name, content) => {
-    const section = mount(name);
-    if (!section) return;
-    const body = qs('[data-detail-body]', section) ?? section;
-    if (content) { render(body, content); section.hidden = false; }
-    else { render(body, []); section.hidden = true; }
-  };
 
   const paint = (record) => {
     applyHead(record);
@@ -275,7 +254,7 @@ export function mountServiceDetail({
     region, current: null,
     async render(nextSlug = slug) {
       region.loading();
-      sections.forEach((s) => showSection(s, null));
+      hideAll();
       let record;
       try { record = await load(nextSlug); }
       catch (error) {
