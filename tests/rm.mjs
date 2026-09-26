@@ -1,7 +1,6 @@
 // Stage 10.11 — reduced motion + keyboard traps + Escape/focus return on every overlay.
-import './env.mjs';
-import { chromium } from 'playwright';
-const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
+import { launch } from './env.mjs';
+const b = await launch();
 let pass = 0, fail = 0; const ok = (n, c, note = '') => { if (c) pass++; else { fail++; console.log(`  ✗ ${n} ${note}`); } };
 const errs = [];
 const open = async (url, w, h, reduce, loc = 'ar') => { const p = await b.newPage({ viewport: { width: w, height: h }, reducedMotion: reduce ? 'reduce' : 'no-preference' }); p.on('pageerror', (e) => errs.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') errs.push(m.text()); }); await p.goto(process.env.TEST_ORIGIN + '/mashhor-demo/' + url, { waitUntil: 'networkidle' }); if (loc !== 'ar') await p.evaluate(async (l) => { const m = await import('./assets/js/foundation.js'); await m.setLocale(l); }, loc); await p.waitForTimeout(500); return p; };

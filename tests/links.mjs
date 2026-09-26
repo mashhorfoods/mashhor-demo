@@ -1,26 +1,18 @@
 // Stage 10.12 — every link on every page, both languages, resolved against the
 // local server; plus the SEO head of every page. Prints dead links (not
 // existing, not a planned future route) and head problems.
-import './env.mjs';
-import { chromium } from 'playwright';
-import { readdirSync } from 'node:fs';
+import { launch } from './env.mjs';
 import http from 'node:http';
-import { RESERVED_SUPERVISOR_SLUGS } from '../assets/js/data/supervisors.js';
+// The public, indexable pages only (the customer flow, the account area and the supervisor portal are noindex).
+import { PUBLIC as PAGES } from './pages.mjs';
 const ORIGIN = process.env.TEST_ORIGIN + ''; const BASE = '/mashhor-demo/';
-const ROOT = new URL('../', import.meta.url).pathname;
-const PAGES = ['index.html', '404.html', 'styleguide.html', 'services/index.html', 'destinations/index.html', 'offers/index.html', 'book/index.html', 'help/index.html', 'help/contact/index.html',
-  ...readdirSync(ROOT + 'services', { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => `services/${d.name}/index.html`),
-  ...readdirSync(ROOT + 'offers', { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => `offers/${d.name}/index.html`),
-  // Stage 13's authenticated portal lives in the same directory (supervisor/dashboard/, …) but is private/noindex,
-  // never a public profile: it is excluded here exactly like account/* is never in this list at all.
-  ...readdirSync(ROOT + 'supervisor', { withFileTypes: true }).filter((d) => d.isDirectory() && !RESERVED_SUPERVISOR_SLUGS.includes(d.name)).map((d) => `supervisor/${d.name}/index.html`)];
 // Routes that later stages own: they 404 today by design (the 404 page explains and routes back). Only routes
 // with no page yet belong here — help/, supervisors/, destinations/<slug>/ and legal/ exist now, so a 404 on one
 // of them is a real dead link (review 2026-09-25 §5). help/faq/ is listed by its exact path: the FAQ page is planned,
 // the rest of help/ is not.
 const PLANNED = /^\/mashhor-demo\/(help\/faq|hotels\/[A-Z0-9-]+|packages\/[A-Z0-9-]+|about|careers|partners|privacy|terms|cookies|faq|contact|offers\/categories)(\/|$)/;
 const head = (path) => new Promise((res) => http.request({ host: new URL(process.env.TEST_ORIGIN).hostname, port: new URL(process.env.TEST_ORIGIN).port, path, method: 'HEAD' }, (r) => res(r.statusCode)).on('error', () => res(0)).end());
-const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
+const b = await launch();
 const seen = new Map(); const dead = []; const external = new Set(); const heads = []; const planned = new Set();
 for (const page of PAGES) for (const loc of ['ar', 'en']) {
   const p = await b.newPage({ viewport: { width: 1440, height: 1000 } });

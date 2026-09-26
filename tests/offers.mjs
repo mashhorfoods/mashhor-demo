@@ -1,21 +1,19 @@
 // Stage 10.8 offers verification — listing (filters, sort, categories, sheet,
 // states, help chips), every detail route, CTA logic, a full-record template
 // render, deep links, a11y, three widths, both directions. Exits 1 on any ✗.
-import './env.mjs';
-import { chromium } from 'playwright';
+import { launch, makeCtx } from './env.mjs';
 const ORIGIN = process.env.TEST_ORIGIN + '';
 const LIST = '/mashhor-demo/offers/';
-const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
+const b = await launch();
 let pass = 0, fail = 0;
 const ok = (name, cond, note = '') => { if (cond) pass++; else { fail++; console.log(`  ✗ ${name} ${note}`); } };
 const errs = [];
 
+// The failing-search test throws "boom" on purpose; the page logs it as it should.
+const ctx = makeCtx(b, errs, { ignore: /boom/, requestFailed: true });
+// Loads in Arabic, then switches language at runtime (what the header's language control does).
 async function open(url, width = 1440, height = 1000, locale = 'ar') {
-  const p = await b.newPage({ viewport: { width, height } });
-  p.on('pageerror', e => errs.push(`${url}@${width}/${locale} pageerror: ${e.message}`));
-  p.on('console', m => { if ((m.type() === 'error' || m.type() === 'warning') && !m.text().includes('boom')) errs.push(`${url}@${width} console: ${m.text()}`); });
-  p.on('requestfailed', r => errs.push(`${url}@${width} reqfail: ${r.url()}`));
-  p.on('response', r => { if (r.status() >= 400) errs.push(`${url}@${width} HTTP ${r.status()} ${r.url()}`); });
+  const { p } = await ctx(width, height);
   await p.goto(ORIGIN + url, { waitUntil: 'networkidle' });
   await p.evaluate(async (l) => { const m = await import('./assets/js/foundation.js'); await m.setLocale(l); }, locale);
   await p.waitForTimeout(700);

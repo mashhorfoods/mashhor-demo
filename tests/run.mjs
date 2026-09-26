@@ -4,31 +4,14 @@
 //
 //   npm test                    everything
 //   npm test -- home booking    only these suites (no audits)
-//   npm test -- --audits        only the audits
-import { createServer } from 'node:http';
-import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
+//   npm test -- --audits        only the audits (npm run audit)
 import { spawn } from 'node:child_process';
-import { extname, join } from 'node:path';
-import './env.mjs';
+import { join } from 'node:path';
+import { staticServer, REPO_ROOT as ROOT } from './env.mjs';
 
-const ROOT = new URL('../', import.meta.url).pathname;
 const PREFIX = '/mashhor-demo/';
-const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.mjs': 'text/javascript', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.woff2': 'font/woff2', '.json': 'application/json', '.xml': 'application/xml', '.txt': 'text/plain', '.pdf': 'application/pdf', '.md': 'text/markdown' };
-
-const server = createServer((req, res) => {
-  let path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
-  if (path.startsWith(PREFIX)) path = path.slice(PREFIX.length - 1);
-  if (path.endsWith('/')) path += 'index.html';
-  const file = join(ROOT, path);
-  if (!file.startsWith(ROOT) || !existsSync(file) || statSync(file).isDirectory()) {
-    res.writeHead(404, { 'Content-Type': MIME['.html'] }); res.end(readFileSync(join(ROOT, '404.html'))); return;
-  }
-  res.writeHead(200, { 'Content-Type': MIME[extname(file)] ?? 'application/octet-stream' });
-  res.end(req.method === 'HEAD' ? '' : readFileSync(file));
-});
-await new Promise((r) => server.listen(0, '127.0.0.1', r));
-const origin = `http://127.0.0.1:${server.address().port}`;
-const env = { ...process.env, TEST_ORIGIN: origin, BASE: `${origin}${PREFIX}` };
+const site = await staticServer({ prefix: PREFIX, bare: true });
+const env = { ...process.env, TEST_ORIGIN: site.origin, BASE: `${site.origin}${PREFIX}` };
 
 const args = process.argv.slice(2);
 const SUITES = ['final', 'ghx', 'ghm', 'gfx', 'home', 'services', 'detail', 'destinations', 'offers', 'booking', 'supervisor', 'journey', 'account', 'integration', 'backend', 'supervisor-portal', 'ops-portal', 'rm', 'links', 'food-supplier'];
@@ -57,14 +40,11 @@ const run = async (label, file, extra = {}) => {
 };
 for (const s of suites) await run(s, join(ROOT, 'tests', `${s}.mjs`));
 if (audits) {
-  const pages = ['index.html', '404.html', 'styleguide.html', 'services/index.html', 'destinations/index.html', 'offers/index.html', 'book/index.html'];
-  for (const dir of ['services', 'offers', 'supervisor', 'destinations']) for (const d of readdirSync(join(ROOT, dir), { withFileTypes: true })) if (d.isDirectory()) pages.push(`${dir}/${d.name}/index.html`);
-  pages.push('search/index.html'); for (const d of readdirSync(join(ROOT, 'booking'), { withFileTypes: true })) if (d.isDirectory()) pages.push(`booking/${d.name}/index.html`);
-  pages.push('trips/index.html', 'account/index.html', 'legal/terms/index.html', 'legal/privacy/index.html'); for (const d of readdirSync(join(ROOT, 'account'), { withFileTypes: true })) if (d.isDirectory()) pages.push(`account/${d.name}/index.html`);
-  await run('i18n', join(ROOT, 'tools/i18n-audit.mjs'), { PAGES: pages.join(',') });
+  // Both audits take their page lists from tests/pages.mjs.
+  await run('i18n', join(ROOT, 'tools/i18n-audit.mjs'));
   await run('a11y', join(ROOT, 'tools/a11y-audit.mjs'));
 }
-server.close();
+site.close();
 console.log(rows.join('\n'));
 console.log(failed ? `\n${failed} failed` : '\nall green');
 process.exit(failed ? 1 : 0);

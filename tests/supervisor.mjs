@@ -2,11 +2,10 @@
 // attribution hand-off into the booking entry and the homepage, contact
 // actions, states (skeleton, unknown, inactive, error, empty, full record),
 // a11y, three widths, both directions. Exits 1 on any ✗.
-import { shot } from './env.mjs';
-import { chromium } from 'playwright';
+import { shot, launch } from './env.mjs';
 const ORIGIN = process.env.TEST_ORIGIN + '';
 const PAGE = '/mashhor-demo/supervisor/ahmed-mohamed/';
-const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
+const b = await launch();
 let pass = 0, fail = 0;
 const ok = (name, cond, note = '') => { if (cond) pass++; else { fail++; console.log(`  ✗ ${name} ${note}`); } };
 const errs = [];

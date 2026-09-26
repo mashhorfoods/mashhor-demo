@@ -1,6 +1,5 @@
-import './env.mjs';
-import { chromium } from 'playwright';
-const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
+import { launch } from './env.mjs';
+const b = await launch();
 const errs = [];
 let checks = 0, fails = 0;
 const ok = (name, cond, extra='') => { checks++; if(!cond){fails++; console.log('  ✗', name, extra);} };

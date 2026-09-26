@@ -1,9 +1,9 @@
 // Generates the thin route shells that make each registry record a real
-// directory on the static host — services/<slug>/ and offers/<slug>/ — and
-// refreshes their blocks in sitemap.xml.
+// directory on the static host — services/<slug>/, offers/<slug>/ and
+// destinations/<slug>/ — and refreshes their blocks in sitemap.xml.
 //
 // There is no build step for the site; this is a content tool, run once
-// after a service or offer is added, renamed or retired:
+// after a service, offer or destination is added, renamed or retired:
 //
 //   node tools/build-routes.mjs
 //
