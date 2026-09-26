@@ -23,7 +23,7 @@
 import { el, uid } from '../core/dom.js';
 import { t, getLocale } from '../core/i18n.js';
 import { SEARCH_VERTICALS } from '../data/config.js';
-import { icon, stepper, initPopovers, initTabs } from './ui.js';
+import { icon, stepper, initPopovers, initTabs, bindCollapse } from './ui.js';
 import { locationField } from '../booking/ui/location-field.js';
 
 /* ---------------------------------------------------------------------------
@@ -214,17 +214,12 @@ function verticalPanel(vertical) {
   ]) : null;
 
   const toggleLabel = el('span', {}, t('search.more'));
-  const toggle = advanced.length ? el('button', {
+  const toggle = advanced.length ? bindCollapse(el('button', {
     type: 'button', class: 'c-btn c-btn--tertiary c-btn--sm c-search__more',
     'aria-expanded': 'false', 'aria-controls': advancedId,
-    onclick: (event) => {
-      const button = event.currentTarget;
-      const open = button.getAttribute('aria-expanded') === 'true';
-      button.setAttribute('aria-expanded', String(!open));
-      advancedBlock.dataset.collapsed = String(open);
-      toggleLabel.textContent = open ? t('search.more') : t('search.less');
-    },
-  }, [toggleLabel, icon('no-chevron-down', { size: 'sm' })]) : null;
+  }, [toggleLabel, icon('no-chevron-down', { size: 'sm' })]), advancedBlock, (open) => {
+    toggleLabel.textContent = open ? t('search.less') : t('search.more');
+  }) : null;
 
   const submitIcon = vertical.submitIcon ?? (vertical.submit ? 'no-arrow-end' : 'no-search');
   return el('div', { class: 'c-search__panel' }, [

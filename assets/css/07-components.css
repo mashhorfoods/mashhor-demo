@@ -84,10 +84,15 @@
   .c-accordion__trigger:hover { color: var(--color-text-brand); }
   .c-accordion__chevron { transition: rotate var(--duration-fast) var(--ease-standard); color: var(--color-text-secondary); }
   .c-accordion__trigger[aria-expanded="true"] .c-accordion__chevron { rotate: 180deg; }
-  /* grid-template-rows 1fr→0fr animates to auto height without JS measuring */
-  .c-accordion__panel { display: grid; grid-template-rows: 1fr; transition: grid-template-rows var(--duration-base) var(--ease-out); }
-  .c-accordion__panel[data-collapsed="true"] { grid-template-rows: 0fr; }
-  .c-accordion__inner { overflow: hidden; min-block-size: 0; }
+  /* COLLAPSE — every disclosure panel (the accordion, the search form's
+     advanced fields, the drawer's and the footer's columns): the panel
+     carries data-collapsed (ui.js setExpanded), its one child clips.
+     grid-template-rows 1fr→0fr animates to auto height without JS measuring. */
+  :is(.c-accordion__panel, .c-search__advanced, .c-gh__m-panel, .c-gf__acc-panel) {
+    display: grid; grid-template-rows: 1fr; transition: grid-template-rows var(--duration-base) var(--ease-out);
+  }
+  :is(.c-accordion__panel, .c-search__advanced, .c-gh__m-panel, .c-gf__acc-panel)[data-collapsed="true"] { grid-template-rows: 0fr; }
+  :is(.c-accordion__inner, .c-search__advanced-inner, .c-gh__m-panel-inner, .c-gf__acc-inner) { overflow: hidden; min-block-size: 0; }
   .c-accordion__content { padding-block-end: var(--space-24); color: var(--color-text-secondary); max-inline-size: var(--measure); }
 
   /* ======================================================================
@@ -171,9 +176,6 @@
   .c-search__submit { margin-block-start: var(--space-16); }
   @media (min-width: 64em) { .c-search__submit { margin-block-start: var(--space-24); } }
   .c-search__more { margin-block-start: var(--space-16); }
-  .c-search__advanced { display: grid; grid-template-rows: 1fr; transition: grid-template-rows var(--duration-base) var(--ease-out); }
-  .c-search__advanced[data-collapsed="true"] { grid-template-rows: 0fr; }
-  .c-search__advanced-inner { overflow: hidden; min-block-size: 0; }
 
   /* The passenger/occupancy popover */
   .c-stepper-row {

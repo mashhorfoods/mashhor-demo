@@ -1,17 +1,21 @@
 /* ============================================================================
    12 — GLOBAL HEADER & NAVIGATION   Stage 10.2
 
-   Height is not a magic number (§31): it comes from the logo, the control
-   height and the vertical padding, so changing the logo size changes the
-   header and nothing breaks.
+   Height is not a magic number (§31): it is the bar's row (the tallest
+   control it holds) plus the vertical padding, so changing either token
+   changes the header, its placeholder and the bar together.
    ========================================================================= */
 
 @layer components {
   :root {
     --header-pad-block: var(--space-12);
-    --header-shell: calc(var(--logo-size, 48px) + (var(--header-pad-block) * 2));
+    /* The row is a touch target on a phone; from 64em the Book-now button
+       (a control-height .c-btn) sits in the bar and sets it. */
+    --header-row: var(--touch-target);
+    --header-shell: calc(var(--header-row) + (var(--header-pad-block) * 2));
     --menu-max: 72rem;
   }
+  @media (min-width: 64em) { :root { --header-row: var(--control-height); } }
 
   /* ======================================================================
      SHELL — §14. Smart auto-hide: sticky at the top so it can slide off and
@@ -87,11 +91,10 @@
   .c-gh[data-surface="transparent"] .c-gh__panel { color: var(--color-text); }
 
   /* The shell's space is reserved before the script mounts the header, so
-     the page never shifts down when it arrives (Stage 10.12). The size
-     mirrors the real bar: the logo primitive's height (05-primitives) plus
-     the bar padding, plus the hairline. */
-  .c-gh--placeholder { --logo-size: 48px; block-size: calc(var(--header-shell) + var(--border-width)); }
-  @media (min-width: 64em) { .c-gh--placeholder { --logo-size: 56px; } }
+     the page never shifts down when it arrives (Stage 10.12). The bar's
+     min-block-size below is the same --header-shell, so the two cannot
+     drift: shell plus the hairline. */
+  .c-gh--placeholder { block-size: calc(var(--header-shell) + var(--border-width)); }
   /* A page with a full-bleed hero (build-routes.mjs's heroClass) starts the
      placeholder transparent too, so there is no flash of a solid bar over
      the photo in the moment before the script mounts the real header and
@@ -109,6 +112,7 @@
     grid-template-columns: minmax(0, 1fr) max-content;
     align-items: center;
     gap: var(--space-16);
+    min-block-size: var(--header-shell);
     padding-block: var(--header-pad-block);
     transition: padding-block var(--duration-base) var(--ease-standard);
   }
@@ -409,10 +413,6 @@
   .c-gh__m-trigger .c-gh__chev { transition: rotate var(--duration-fast) var(--ease-standard); }
   .c-gh__m-trigger[aria-expanded="true"] .c-gh__chev { rotate: 180deg; }
 
-  .c-gh__m-panel { display: grid; grid-template-rows: 1fr;
-                   transition: grid-template-rows var(--duration-base) var(--ease-out); }
-  .c-gh__m-panel[data-collapsed="true"] { grid-template-rows: 0fr; }
-  .c-gh__m-panel-inner { overflow: hidden; min-block-size: 0; }
   .c-gh__m-sub { padding-block-end: var(--space-12); }
   .c-gh__m-group-title { font-size: var(--text-overline); font-weight: var(--weight-bold);
                          letter-spacing: var(--tracking-overline); text-transform: uppercase;
@@ -442,7 +442,6 @@
     display: none; align-items: center; gap: var(--space-8);
     font-size: var(--text-caption); color: var(--color-text-secondary);
   }
-  .c-gh[data-variant="booking"] .c-gh__secure { display: none; }
   @media (min-width: 48em) {
     .c-gh[data-variant="booking"] .c-gh__secure { display: inline-flex; justify-self: start; }
   }

@@ -28,9 +28,9 @@ import {
   SUPERVISOR_REGISTRY, SUPERVISOR_STATUSES, supervisorBySlug, supervisorServices, supervisorLanguages, supervisorSpecialties,
   supervisorChannels, supervisorHasDetails, supervisorUrl, supervisorEntry, supervisorContactUrl, attributed,
 } from '../data/supervisors.js';
-import { icon, toast, sectionHead } from './ui.js';
+import { icon, toast, sectionHead, channelList } from './ui.js';
 import { serviceCard, destinationCard, offerCard } from './cards.js';
-import { stateRegion, stateBlock, notFoundState } from './states.js';
+import { stateRegion, stateBlock, notFoundState, detailSections } from './states.js';
 
 /* ---------------------------------------------------------------------------
    RECORD HELPERS
@@ -135,13 +135,7 @@ export function contactSection(sup) {
   return [
     sectionHead({ id: 'contact-title', overline: t('sup.contact.overline'), title: t('sup.contact.title', name), text: t('sup.contact.text') }),
     el('div', { class: 'c-contact' }, [
-      channels.length
-        ? el('div', { class: 'c-channels' }, channels.map((c) =>
-            el('a', { class: 'c-channel', href: c.href, ...(c.external ? { target: '_blank', rel: 'noopener' } : {}), dataset: { channel: c.id } }, [
-              el('span', { class: 'c-channel__icon' }, icon(c.icon, { size: 'md' })),
-              el('span', {}, [el('span', { class: 'c-channel__label' }, pick(c, 'label')), el('span', { class: 'c-channel__meta' }, name)]),
-            ])))
-        : el('p', { class: 'c-note', role: 'note' }, [icon('no-info', { size: 'sm' }), el('span', { class: 'c-note__text' }, t('sup.contact.none'))]),
+      channelList(channels, { meta: name, emptyKey: 'sup.contact.none' }),
       el('div', { class: 'l-cluster l-cluster--12' }, [
         el('a', { class: 'c-btn c-btn--secondary-brand', href: route(supervisorContactUrl(sup)), dataset: { profileAction: 'request' } }, [icon('no-support', { size: 'sm' }), el('span', {}, t('sup.contact.request'))]),
       ]),
@@ -192,8 +186,7 @@ export function mountSupervisor({
   root = document,
   load = async (s) => supervisorBySlug(s),
 } = {}) {
-  const mount = (name) => qs(`[data-profile="${name}"]`, root);
-  const sections = ['about', 'services', 'trust', 'contact', 'discovery'];
+  const { mount, show: showSection, hideAll } = detailSections(root, 'profile', ['about', 'services', 'trust', 'contact', 'discovery']);
   const region = stateRegion(mount('hero'), {
     loading: () => el('div', { class: 'c-profile', 'aria-hidden': 'true' }, [
       el('div', { class: 'c-profile__figure' }, el('div', { class: 'c-profile__photo c-skeleton', style: 'box-shadow:none' })),
@@ -211,13 +204,6 @@ export function mountSupervisor({
     ] }),
   });
 
-  const showSection = (name, content) => {
-    const section = mount(name);
-    if (!section) return;
-    const body = qs('[data-profile-body]', section) ?? section;
-    if (content) { render(body, content); section.hidden = false; }
-    else { render(body, []); section.hidden = true; }
-  };
   const scrollTo = (id) => { const s = qs(`#${id}`, root); if (s) scrollIntoView(s, { focus: qs('a, button', s) }); };
 
   const paint = (sup) => {
@@ -235,7 +221,7 @@ export function mountSupervisor({
     region, current: null,
     async render(nextSlug = slug) {
       region.loading();
-      sections.forEach((s) => showSection(s, null));
+      hideAll();
       let record;
       try { record = await load(nextSlug); }
       catch (error) {

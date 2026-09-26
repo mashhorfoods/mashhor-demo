@@ -9,10 +9,9 @@
    mountDestinationDetail({ slug }) → window.no.destination for QA.
    ========================================================================= */
 
-import { el, qs, render, setPageHead } from '../core/dom.js';
+import { el, qs, setPageHead } from '../core/dom.js';
 import { t, pick } from '../core/i18n.js';
 import { route } from '../data/config.js';
-import { liveChannels } from '../data/navigation.js';
 import {
   DESTINATION_REGIONS, TRAVEL_PURPOSES, destinationById, destinationEntry,
 } from '../data/destinations.js';
@@ -21,8 +20,8 @@ import { OFFER_REGISTRY } from '../data/offers.js';
 import { icon, sectionHead, heroFocalStyle } from './ui.js';
 import { serviceCard, mediaPlaceholder } from './cards.js';
 import { offerDeck } from './offers.js';
-import { stateRegion, notFoundState } from './states.js';
-import { supportPanels } from './home.js';
+import { stateRegion, notFoundState, detailSections } from './states.js';
+import { supportSection } from './home.js';
 
 /* ---------------------------------------------------------------------------
    RECORD — the registry entry, by id or slug. §19: DESTINATION_REGISTRY
@@ -138,17 +137,6 @@ export function relatedOffersSection(record) {
   ];
 }
 
-export function supportSection() {
-  return [
-    el('div', { class: 'l-section-head' }, [
-      el('p', { class: 't-overline' }, t('home.support.overline')),
-      el('h2', { class: 't-h2', id: 'support-title' }, t('detail.support.title')),
-      el('p', { class: 't-body-lg t-muted' }, t('detail.support.text')),
-    ]),
-    supportPanels(undefined, liveChannels()),
-  ];
-}
-
 const unknownState = () => notFoundState({
   title: t('dest.detail.unknown.title'), text: t('dest.detail.unknown.text'),
   actions: [
@@ -163,8 +151,7 @@ const applyHead = (record) => setPageHead({ title: `${pick(record, 'name')} — 
    MOUNT
    ------------------------------------------------------------------------ */
 export function mountDestinationDetail({ slug, root = document, load = async (s) => getDestination(s) } = {}) {
-  const mount = (name) => qs(`[data-dest="${name}"]`, root);
-  const sections = ['overview', 'why', 'travel', 'services', 'offers', 'support'];
+  const { mount, show, hideAll } = detailSections(root, 'dest', ['overview', 'why', 'travel', 'services', 'offers', 'support']);
   const region = stateRegion(mount('hero'), {
     loading: () => el('div', { style: 'display:contents' }, [
       el('div', { class: 'l-stack' }, [el('div', { class: 'c-skeleton c-skeleton--text c-skeleton--line-sm' }), el('div', { class: 'c-skeleton c-skeleton--title' }), el('div', { class: 'c-skeleton c-skeleton--text c-skeleton--line-md' })]),
@@ -172,12 +159,6 @@ export function mountDestinationDetail({ slug, root = document, load = async (s)
     ]),
     empty: unknownState,
   });
-  const show = (name, content) => {
-    const section = mount(name); if (!section) return;
-    const body = qs('[data-dest-body]', section) ?? section;
-    if (content) { render(body, content); section.hidden = false; }
-    else { render(body, []); section.hidden = true; }
-  };
   const paint = (record) => {
     applyHead(record);
     region.content(destHero(record));
@@ -195,7 +176,7 @@ export function mountDestinationDetail({ slug, root = document, load = async (s)
   const api = {
     region, current: null,
     async render(nextSlug = slug) {
-      region.loading(); sections.forEach((s) => show(s, null));
+      region.loading(); hideAll();
       let record;
       try { record = await load(nextSlug); }
       catch (error) { console.error('[no] destination failed to load', error); region.error(); return null; }

@@ -8,7 +8,7 @@
    `stateBlock` will not render an error without an action.
    ========================================================================= */
 
-import { el, render, uid } from '../core/dom.js';
+import { el, qs, render, uid } from '../core/dom.js';
 import { t } from '../core/i18n.js';
 import { icon } from './ui.js';
 
@@ -154,6 +154,25 @@ export function stateRegion(target, {
   };
 
   return api;
+}
+
+/* ---------------------------------------------------------------------------
+   DETAIL SECTIONS — the named mount points of a one-template detail page
+   (destination, service, offer, supervisor profile): `[data-<key>="name"]`,
+   drawn into its `[data-<key>-body]` when it has one. A section without
+   content is emptied and hidden, never left as an empty band. `onShow(section)`
+   runs once a section is painted and visible.
+   ------------------------------------------------------------------------ */
+export function detailSections(root, key, names, { onShow = null } = {}) {
+  const mount = (name) => qs(`[data-${key}="${name}"]`, root);
+  const show = (name, content) => {
+    const section = mount(name);
+    if (!section) return;
+    render(qs(`[data-${key}-body]`, section) ?? section, content || []);
+    section.hidden = !content;
+    if (content) onShow?.(section);
+  };
+  return { mount, show, hideAll: () => names.forEach((name) => show(name, null)) };
 }
 
 /** A route the registry does not know: the empty state with a way back. */

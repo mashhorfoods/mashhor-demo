@@ -175,13 +175,9 @@
   .c-gf__acc-trigger .c-icon { transition: rotate var(--duration-fast) var(--ease-standard);
                                color: rgb(255 255 255 / 0.6); }
   .c-gf__acc-trigger[aria-expanded="true"] .c-icon { rotate: 180deg; }
-  .c-gf__acc-panel { display: grid; grid-template-rows: 1fr;
-                     transition: grid-template-rows var(--duration-base) var(--ease-out); }
-  .c-gf__acc-panel[data-collapsed="true"] { grid-template-rows: 0fr; }
-  .c-gf__acc-inner { overflow: hidden; min-block-size: 0; }
 
   @media (max-width: 47.999em) {
-    /* §16 order: logo, statement, CTA, contact, then the accordions.
+    /* §16 order: statement, CTA, contact, then the accordions.
        The CTA is a sibling of .c-gf__main in the DOM — correct for desktop,
        where it is a full-width band above the columns. On a phone the wrapper
        levels are flattened with `display: contents` so brand, CTA, contact and

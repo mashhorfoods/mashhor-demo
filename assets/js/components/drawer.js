@@ -8,7 +8,7 @@ import { el, qs, qsa, uid, lockScroll, unlockScroll, trapFocus } from '../core/d
 import { getLocale, pick } from '../core/i18n.js';
 import { route } from '../data/config.js';
 import { NAV_PRIMARY, MENUS } from '../data/navigation.js';
-import { icon } from './ui.js';
+import { icon, bindCollapse } from './ui.js';
 import { bookNowButton } from './brand.js';
 import { supportChannelLinks } from './menus.js';
 
@@ -50,13 +50,7 @@ export function mobileDrawer({ signal } = {}) {
     const panel = el('div', { class: 'c-gh__m-panel', id: panelId, dataset: { collapsed: 'true' } },
       el('div', { class: 'c-gh__m-panel-inner' }, inner));
 
-    trigger.addEventListener('click', () => {
-      const open = trigger.getAttribute('aria-expanded') === 'true';
-      trigger.setAttribute('aria-expanded', String(!open));
-      panel.dataset.collapsed = String(open);
-    });
-
-    return el('div', { class: 'c-gh__m-item' }, [trigger, panel]);
+    return el('div', { class: 'c-gh__m-item' }, [bindCollapse(trigger, panel), panel]);
   };
 
   const buildBody = () => el('div', { class: 'c-gh__drawer-body' }, [

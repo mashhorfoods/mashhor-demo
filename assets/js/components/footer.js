@@ -22,7 +22,7 @@ import {
   FOOTER_BRAND, FOOTER_TRUST, FOOTER_COLUMNS, FOOTER_CONTACT,
   FOOTER_SOCIAL, FOOTER_LEGAL, FOOTER_CTA, LEGAL_NAME,
 } from '../data/footer.js';
-import { icon } from './ui.js';
+import { icon, bindCollapse } from './ui.js';
 
 /* ---------------------------------------------------------------------------
    FooterLink
@@ -76,13 +76,7 @@ export function footerColumn(column, { collapsible = true } = {}) {
     class: 'c-gf__acc-panel', id: panelId, dataset: { collapsed: 'true' },
   }, el('div', { class: 'c-gf__acc-inner' }, links));
 
-  trigger.addEventListener('click', () => {
-    const open = trigger.getAttribute('aria-expanded') === 'true';
-    trigger.setAttribute('aria-expanded', String(!open));
-    panel.dataset.collapsed = String(open);
-  });
-
-  return el('div', { class: 'c-gf__group', dataset: { col: column.id } }, [trigger, panel]);
+  return el('div', { class: 'c-gf__group', dataset: { col: column.id } }, [bindCollapse(trigger, panel), panel]);
 }
 
 /* ---------------------------------------------------------------------------

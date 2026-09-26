@@ -29,7 +29,6 @@ import { session, sessionListeners, initials, setSession } from './session.js';
 import { languageButton, bookNowButton } from './brand.js';
 import { createMenuController, menuPanel, accountPanel } from './menus.js';
 import { mobileDrawer } from './drawer.js';
-export { setSession, getSession } from './session.js';
 
 /* ---------------------------------------------------------------------------
    GLOBAL HEADER — the assembly. §27

@@ -1,8 +1,8 @@
 /* ============================================================================
    COMPONENTS / HELP — the public help centre (help/) and contact door
    (help/contact/). Both reuse existing pieces rather than inventing new
-   ones: supportPanels() (home.js) for "what kind of help", the shared
-   attributionChip() (booking.js) for "who brought you here", and the
+   ones: supportPanels() (home.js) for "what kind of help", channelList()
+   (ui.js) for the live channels, the shared attributionChip() (booking.js) for "who brought you here", and the
    MENU_HELP/BOOK_CTA data records (navigation.js) for the quick-link
    cards — one source of truth for labels, shared with the header menu
    and footer that already point here.
@@ -13,7 +13,7 @@ import { t, pick } from '../core/i18n.js';
 import { route, bookingEntry } from '../data/config.js';
 import { BOOK_CTA, MENU_HELP, liveChannels } from '../data/navigation.js';
 import { HOME_SUPPORT } from '../data/home.js';
-import { icon } from './ui.js';
+import { icon, channelList } from './ui.js';
 import { supportPanels } from './home.js';
 import { attributionChip } from './booking.js';
 import { attributionFrom } from '../core/booking.js';
@@ -51,17 +51,6 @@ export function mountHelp({ root = document } = {}) {
   ]);
   return {};
 }
-
-/* A live channel (whatsapp/call) or, until the business supplies one, the
-   same "channels coming soon" note home.js and supervisor.js already show —
-   never a fabricated number. */
-const channelList = (channels) => (channels.length
-  ? el('div', { class: 'c-channels' }, channels.map((c) =>
-      el('a', { class: 'c-channel', href: c.href, ...(c.external ? { target: '_blank', rel: 'noopener' } : {}), dataset: { channel: c.id } }, [
-        el('span', { class: 'c-channel__icon' }, icon(c.icon, { size: 'md' })),
-        el('span', {}, [el('span', { class: 'c-channel__label' }, pick(c, 'label')), el('span', { class: 'c-channel__meta' }, pick(c, 'meta'))]),
-      ])))
-  : el('p', { class: 'c-note', role: 'note' }, [icon('no-info', { size: 'sm' }), el('span', { class: 'c-note__text' }, t('home.support.channelsSoon'))]));
 
 /** help/contact/ — reads ?supervisor=<slug> the same way book/ does, and
     keeps that coordinator attached to the booking CTA below. */
