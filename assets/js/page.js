@@ -28,11 +28,6 @@ import { mountFooter } from './components/footer.js';
 import { initSignatureMarks } from './components/signature.js';
 import './account/adapters/installed.js';
 import { restoreSession } from './account/auth.js';
-// Stage 13 — the supervisor portal's own adapter registry, registered the same way and gated by the same ENV; a
-// customer-facing page never calls restoreSupervisorSession() itself, so registering it here costs nothing there.
-import './supervisor/adapters/installed.js';
-// Stage 15 — the operations portal's own adapter registry, same pattern again.
-import './ops/adapters/installed.js';
 
 /**
  * Wire the document: sprite, language, and the behaviours every page shares.

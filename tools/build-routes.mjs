@@ -19,6 +19,7 @@ import { SERVICE_REGISTRY } from '../assets/js/data/services.js';
 import { OFFER_REGISTRY } from '../assets/js/data/offers.js';
 import { DESTINATION_REGISTRY } from '../assets/js/data/destinations.js';
 import { SUPERVISOR_REGISTRY, RESERVED_SUPERVISOR_SLUGS } from '../assets/js/data/supervisors.js';
+import { stylesheetBlock } from './lib/stylesheets.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = 'https://mashhorfoods.github.io/mashhor-demo/';
@@ -108,7 +109,7 @@ ${c.noindex ? '<meta name="robots" content="noindex">\n' : ''}
 <link rel="apple-touch-icon" href="assets/brand/icon-180.png">
 <link rel="preload" href="assets/fonts/ibm-plex-sans-arabic-arabic-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/ibm-plex-sans-arabic-arabic-700.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/css/foundation.css">
+${stylesheetBlock()}
 </head>
 
 <body>

@@ -18,6 +18,13 @@ import { serviceGrid, flightCard, hotelCard, packageCard, supervisorCard, tripCa
 import { skeletonList, skeletonFlight } from './preview/states.js';
 import { initOtp, initUploads } from './preview/forms.js';
 import { FLIGHTS, HOTELS, PACKAGES, SUPERVISORS, TRIPS } from './preview/samples.js';
+import { registerStrings } from './core/i18n.js';
+
+// The guide's own copy (sg.*) is a slice of its own, so no product page downloads it. Phase 5
+await registerStrings('styleguide', {
+  ar: () => import('./core/strings/ar-styleguide.js'),
+  en: () => import('./core/strings/en-styleguide.js'),
+});
 
 /* ---------------------------------------------------------------------------
    COLOUR — read the real computed token values, and compute the real contrast

@@ -254,6 +254,34 @@ work.
   re-fetches the list that `markRead()` already returned. The services screen
   fetches two independent lists one after the other.
 
+> **Phase 5 status (2026-09-26): done.**
+> - **Portal adapters:** `page.js` no longer imports the ops or supervisor adapter registries. They are
+>   imported by the portals' own entry modules (`ops/ui/shell.js`, `ops/ui/preview.js`,
+>   `supervisor/ui/shell.js`), which still evaluate before any `restore*Session()` call. Public pages
+>   no longer load about 73 KB of dev data, auth and portal data modules. The customer account
+>   registry stays in `page.js`, because `boot()` restores the customer session on every page.
+> - **Strings:** `core/strings/{ar,en}.js` keep the shared table: 132 → 77 KB for Arabic and
+>   107 → 63 KB for English. The operations portal (`ops.*`, `page.ops.*`), the supervisor portal
+>   (`svp.*`, `page.supervisor.*`) and the styleguide (`sg.*`) moved to their own slices,
+>   `{ar,en}-ops.js`, `-supervisor.js` and `-styleguide.js`. The area's entry module registers its
+>   slice with `registerStrings()` (`ops/strings.js`, `supervisor/strings.js`, `styleguide.js`),
+>   which merges the Arabic fallback and the current language before the page paints. It also loads
+>   the other language on a switch. The split was checked key by key: 1,838 keys per language
+>   before and after. `acct.`, `auth.` and `bk.` stay shared, because the header, the search widget
+>   and the booking flow use them on public pages.
+> - **Stylesheets:** `foundation.css` and its 26 `@import`s are gone. Every page carries a
+>   `<style>@layer …</style>` declaration and then one `<link>` per file, so the browser fetches
+>   every file as soon as it parses the HTML. `tools/lib/stylesheets.mjs` holds the one ordered
+>   list. `tools/css-links.mjs` writes it into the hand-written pages, and `build-routes.mjs`
+>   writes it into the generated shells. `npm test` runs `css-links --check` first. The two
+>   staff-portal sheets (23, 24) go only to pages that load `ops/ui/` or `supervisor/ui/` (the
+>   38 admin and supervisor-portal pages). 19-booking, 21-journey and 22-account are not scoped,
+>   because shared components (search, cards, the header's account menu) use their classes on
+>   public pages too.
+> - **Verified:** full `npm test` green: css-links 103 pages, ops-portal 934, supervisor-portal 513,
+>   account 782, journey 512, integration 518, backend 380, links 0 problems, i18n 0 untranslated,
+>   a11y 0 findings.
+
 ## 7. Disconnected features (need a product decision; don't delete)
 
 - **The content system edits tables that no public page reads.** Public pages

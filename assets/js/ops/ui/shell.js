@@ -12,6 +12,9 @@ import { t, pick } from '../../core/i18n.js';
 import { route } from '../../data/config.js';
 import { icon, setButtonState } from '../../components/ui.js';
 import { createStaffPortal } from '../../core/portal-ui.js';
+// The portal's adapters and strings register here, not in page.js, so public pages never load them. Phase 5
+import '../adapters/installed.js';
+import '../strings.js';
 import { restoreOpsSession, OpsAuthError, hasOpsPermission } from '../auth.js';
 import { opsDataAdapter } from '../data.js';
 

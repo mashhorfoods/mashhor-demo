@@ -21,14 +21,14 @@ const audits = !wanted.length;
 const rows = []; let failed = 0;
 // The suites run one at a time, asynchronously: the server lives in this
 // process, so a blocking spawn would starve it and every page would time out.
-const exec = (file, extra) => new Promise((resolve) => {
-  const child = spawn(process.execPath, [file], { env: { ...env, ...extra } });
+const exec = (file, extra, argv = []) => new Promise((resolve) => {
+  const child = spawn(process.execPath, [file, ...argv], { env: { ...env, ...extra } });
   let out = ''; child.stdout.on('data', (d) => { out += d; }); child.stderr.on('data', (d) => { out += d; });
   child.on('close', (status) => resolve({ status, out }));
 });
-const run = async (label, file, extra = {}) => {
+const run = async (label, file, extra = {}, argv = []) => {
   const t = Date.now();
-  const r = await exec(file, extra);
+  const r = await exec(file, extra, argv);
   const out = r.out;
   const summary = out.split('\n').filter((l) => /passed|untranslated strings|unique findings|problems$/.test(l)).pop() ?? out.trim().split('\n').pop();
   const bad = out.split('\n').filter((l) => /✗|pageerror|Error:/.test(l)).slice(0, 8);
@@ -38,7 +38,9 @@ const run = async (label, file, extra = {}) => {
   rows.push(`${ok ? '✓' : '✗'} ${label.padEnd(12)} ${String(Math.round((Date.now() - t) / 1000) + 's').padStart(5)}  ${summary?.trim() ?? ''}`);
   if (!ok) rows.push(...bad.map((l) => '    ' + l.trim()));
 };
-for (const s of suites) await run(s, join(ROOT, 'tests', `${s}.mjs`));
+// The stylesheet <link> blocks must match tools/lib/stylesheets.mjs (instant; no browser).
+if (!wanted.length || wanted.includes('css-links')) await run('css-links', join(ROOT, 'tools/css-links.mjs'), {}, ['--check']);
+for (const s of suites.filter((x) => x !== 'css-links')) await run(s, join(ROOT, 'tests', `${s}.mjs`));
 if (audits) {
   // Both audits take their page lists from tests/pages.mjs.
   await run('i18n', join(ROOT, 'tools/i18n-audit.mjs'));

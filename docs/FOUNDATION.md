@@ -22,7 +22,6 @@ travel-demo/
     ├── fonts/              IBM Plex Sans Arabic (12) + Inter (4), self-hosted
     ├── icons/sprite.svg    61 icons, one family
     ├── css/
-    │   ├── foundation.css  ← the only file a page imports
     │   ├── 00-fonts.css    @font-face, split by unicode-range
     │   ├── 01-tokens.css   ← the single source of truth
     │   ├── 02-reset.css    03-base.css      04-layout.css
@@ -37,10 +36,13 @@ travel-demo/
         └── components/     ui.js · cards.js · search.js · states.js
 ```
 
-Two imports, and a page has the whole system:
+A page links the stylesheets and imports one module:
 
 ```html
-<link rel="stylesheet" href="assets/css/foundation.css">
+<!-- the stylesheet block, written by `node tools/css-links.mjs` from tools/lib/stylesheets.mjs -->
+<style>@layer reset, tokens, base, layout, primitives, components, motion, utilities;</style>
+<link rel="stylesheet" href="assets/css/00-fonts.css">
+<!-- … one <link> per file, in order; portal pages also get 23 and 24 … -->
 <script type="module">
   import { boot } from './assets/js/foundation.js';
   boot({ sprite: 'assets/icons/sprite.svg' });
@@ -55,7 +57,8 @@ Two imports, and a page has the whole system:
 FOUNDATION → TOKENS → PRIMITIVES → COMPONENTS → PRODUCT COMPONENTS → PAGES
 ```
 
-The CSS enforces this with cascade layers, declared once in `foundation.css`:
+The CSS enforces this with cascade layers, declared once at the top of every
+page's stylesheet block (`tools/lib/stylesheets.mjs`), before any file loads:
 
 ```css
 @layer reset, tokens, base, layout, primitives, components, motion, utilities;

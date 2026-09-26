@@ -7,6 +7,9 @@
 import { route } from '../../data/config.js';
 import { t } from '../../core/i18n.js';
 import { el } from '../../core/dom.js';
+// The portal's adapters and strings register here, not in page.js, so public pages never load them. Phase 5
+import '../adapters/installed.js';
+import '../strings.js';
 import { restoreOpsSession } from '../auth.js';
 import { opsData } from '../data.js';
 

@@ -23,8 +23,39 @@ import ar from './strings/ar.js';
    language never pays for the other. */
 const STRINGS = { ar, en: null };
 const LOADERS = { en: () => import('./strings/en.js') };
+
+/* Areas that only some pages need (the two staff portals, the styleguide)
+   keep their strings in their own slices, registered by the area's entry
+   module with registerStrings(), so public pages never download them. Phase 5 */
+const AREAS = new Map();   // area name -> { ar: loader, en: loader }
+const pending = new Map(); // `${code}:${area}` -> promise that merges that slice
+
+function loadArea(code, area) {
+  const id = `${code}:${area}`;
+  if (!pending.has(id)) {
+    pending.set(id, AREAS.get(area)[code]().then((m) => { Object.assign(STRINGS[code], m.default); }));
+  }
+  return pending.get(id);
+}
+
+const coreLoads = {}; // code -> promise, so two callers never build the table twice
 async function ensureStrings(code) {
-  if (!STRINGS[code] && LOADERS[code]) STRINGS[code] = (await LOADERS[code]()).default;
+  if (!STRINGS[code] && LOADERS[code]) {
+    coreLoads[code] ??= LOADERS[code]().then((m) => { STRINGS[code] ??= { ...m.default }; });
+    await coreLoads[code];
+  }
+  await Promise.all([...AREAS.keys()].map((area) => loadArea(code, area)));
+}
+
+/**
+ * Add an area's strings: `loaders` maps each locale code to a dynamic
+ * import of that language's slice. Resolves once the slice for Arabic (the
+ * fallback t() uses) and for the current language are merged, so an entry
+ * module can `await` it at the top level and render straight after.
+ */
+export async function registerStrings(area, loaders) {
+  if (!AREAS.has(area)) AREAS.set(area, loaders);
+  await Promise.all([...new Set(['ar', current])].map((code) => ensureStrings(code)));
 }
 
 let current = 'ar';

@@ -71,9 +71,18 @@ link check and both audits visit lives in one place, `tests/pages.mjs`.
 
 ## Use it in a page
 
+Stylesheets are plain `<link>` tags, one per file in `assets/css/`, written into
+each page by `node tools/css-links.mjs` from the list in
+`tools/lib/stylesheets.mjs`: put `<!-- stylesheets -->` in a new page's `<head>` and
+run it (`npm test` fails if a page is out of date). The
+staff-portal sheets go only to pages whose script loads `assets/js/ops/ui/` or
+`assets/js/supervisor/ui/`. Strings for the two portals and the styleguide are
+separate slices (`assets/js/core/strings/{ar,en}-*.js`) that the area's entry
+module registers with `registerStrings()`, so public pages never download them.
+
 ```html
 <html lang="ar" dir="rtl">
-<link rel="stylesheet" href="assets/css/foundation.css">
+<!-- stylesheets -->
 <script type="module">
   import { boot } from './assets/js/foundation.js';
   boot({ sprite: 'assets/icons/sprite.svg' });
