@@ -15,7 +15,7 @@ import { migrate, q } from './db.mjs';
 import { cors, json, empty, fail, HttpError, cookies, rateLimit, resetRateLimits, clientIp, sessionFamily } from './http.mjs';
 import { customers, publicCustomer } from './identity.mjs';
 import { same } from './credentials.mjs';
-import { auth, me, file, legal, diagnostics, paymentsWebhook, flights } from './routes.mjs';
+import { auth, me, file, legal, diagnostics, contact, paymentsWebhook, flights } from './routes.mjs';
 import { registerDevPaymentProvider } from './payments.mjs';
 import { registerDevFlightProvider } from './flights.mjs';
 import { registerSmtpProvider, deliverOutbox } from './mailer.mjs';
@@ -25,6 +25,9 @@ import { staffStore, publicStaff } from './staff.mjs';
 import { staffAuth, operations, services as opsServices, dashboard } from './staff-routes.mjs';
 import { info, warn, error } from './logger.mjs';
 import { fixtureLegal } from './fixtures.mjs';
+import { publicDestinations, publicOffers } from './content.mjs';
+
+const CONTENT_CACHE = { 'Cache-Control': 'public, max-age=60' };
 
 const VERSION = '16.4';
 // The three credential stores, keyed by the route family (http.mjs sessionFamily) whose session each one holds.
@@ -94,6 +97,7 @@ export function createApp() {
     const cls = path.startsWith('/auth/') || path.startsWith('/supervisor/auth/') || path.startsWith('/staff/auth/') ? 'auth'
       : path === '/me/documents' && req.method === 'POST' ? 'upload'
       : path === '/diagnostics' && req.method === 'POST' ? 'diagnostics'
+      : path === '/contact' && req.method === 'POST' ? 'contact'
       : 'api';
     const wait = rateLimit(`${cls}:${ip}`, config.rateLimits[cls]);
     if (wait) { warn('ratelimit.hit', { cls }); return fail(res, 429, 'rateLimited', { 'Retry-After': String(wait) }); }
@@ -114,6 +118,12 @@ export function createApp() {
     if ((m = path.match(/^\/flights\/offers\/([^/]+)\/([^/]+)$/)) && req.method === 'GET') return flights.offer(req, res, decodeURIComponent(m[1]), decodeURIComponent(m[2]));
     if (path === '/flights/quote' && req.method === 'POST') return flights.quote(req, res);
 
+    // ---- Phase 6: /content/* — the PUBLISHED destinations and offers the public pages render (backend/content.mjs
+    // publicDestinations/publicOffers). Public, no session, the same body for every visitor, so shared caches may keep
+    // it for a minute: a publish reaches visitors within that. ----
+    if (path === '/content/destinations' && req.method === 'GET') return json(res, 200, publicDestinations(), CONTENT_CACHE);
+    if (path === '/content/offers' && req.method === 'GET') return json(res, 200, publicOffers(), CONTENT_CACHE);
+
     // ---- session + CSRF: customer, supervisor and staff sessions live in DIFFERENT cookies, and only the session of
     // the route's own family is resolved (sessionFamily, http.mjs): a customer route never even loads a staff or
     // supervisor session, so a handler can't confuse them, and a request costs at most one session lookup instead
@@ -127,6 +137,10 @@ export function createApp() {
       const live = found?.session;   // only the route family's own session is ever checked
       if (live) { const h = req.headers['x-csrf-token']; if (!h || !same(h, live.csrf)) { warn('csrf.rejected', { path, family }); return fail(res, 403, 'forbidden'); } }
     }
+
+    // ---- Phase 6: the public contact form — no session required; a signed-in customer's session (resolved and
+    // CSRF-checked just above) ties the lead to them. ----
+    if (path === '/contact' && req.method === 'POST') return contact(req, res, ctx);
 
     // ---- /auth ----
     if (path === '/auth/sign-up' && req.method === 'POST') return auth.signUp(req, res, ctx, legalOverride);

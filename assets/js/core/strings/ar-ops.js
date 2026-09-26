@@ -79,6 +79,7 @@ export default {
     'ops.content.publishStatus.archived': 'مؤرشف',
     'ops.content.hasUnpublishedChanges': 'تغييرات غير منشورة',
     'ops.content.publish': 'نشر',
+    'ops.content.publishChanges': 'نشر التغييرات',
     'ops.content.unpublish': 'إلغاء النشر',
     'ops.content.archive': 'أرشفة',
     'ops.content.restoreToDraft': 'إعادة إلى مسودة',

@@ -54,6 +54,15 @@ export function leadStatusBadge(status) {
   return el('span', { class: `c-badge c-badge--${tone}`, dataset: { leadStatus: status } }, t(`svp.leads.status.${status}`));
 }
 
+/** The commission rule in one sentence: the configured rate, or "not configured" (Phase 6). */
+export const commissionText = (model) => (model?.model === 'percentage' && Number.isFinite(Number(model.rate))
+  ? t('svp.revenue.commissionRate', `${Math.round(Number(model.rate) * 1000) / 10}%`)
+  : t('svp.revenue.commissionPending'));
+export function commissionStatusBadge(status) {
+  const tone = { earned: 'success', reversed: 'outline' }[status] ?? 'warning';
+  return el('span', { class: `c-badge c-badge--${tone}`, dataset: { commissionStatus: status } }, t(`svp.revenue.commissions.status.${status === 'earned' || status === 'reversed' ? status : 'pending'}`));
+}
+
 const PERIODS = [['', 'svp.period.all'], ['today', 'svp.period.today'], ['week', 'svp.period.week'], ['month', 'svp.period.month']];
 /** The revenue/performance period filter; `run` re-loads on change. */
 export function periodSelect(run) {

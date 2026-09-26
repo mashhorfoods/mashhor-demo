@@ -25,7 +25,7 @@ export const DEV_SUPERVISOR = {
   nameAr: 'منسق تجريبي (تطوير)', nameEn: 'Demo Coordinator (development)', titleAr: null, titleEn: null, bioAr: null, bioEn: null,
   image: null, languages: ['ar', 'en'], specialties: [], services: [],
   phone: '', whatsapp: '', email: 'demo-supervisor@dev.invalid', city: '',
-  internalId: 'dev-demo', notificationPrefs: {}, createdAt: '2026-06-01T09:00:00.000Z', updatedAt: '2026-06-01T09:00:00.000Z', dev: true,
+  notificationPrefs: {}, createdAt: '2026-06-01T09:00:00.000Z', updatedAt: '2026-06-01T09:00:00.000Z', dev: true,
 };
 
 const KEY = 'no.dev.supervisor.auth';

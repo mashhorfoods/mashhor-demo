@@ -2,7 +2,9 @@
    BOOKING / UI / PAYMENT — review → pay → processing → success | failure.
    Stage 11. No card field lives here: a provider brings its own (hosted
    fields, redirect) and this page only asks it to pay and reports. The
-   development provider says so on screen and charges nothing.
+   development provider says so on screen and charges nothing. With no
+   provider at all (production today) the step is "pay later": the booking
+   is placed awaiting payment and a coordinator sends a secure payment link.
    ========================================================================= */
 
 import { el, render } from '../../core/dom.js';
@@ -32,10 +34,14 @@ export function mountPayment({ root = document } = {}) {
   const state = { status: 'idle', attempt: attempts, method: j.payment?.method ?? provider?.methods?.[0]?.id ?? '' };
   const main = el('div', { class: 'l-stack l-stack--24' });
   const status = el('p', { class: 'c-book__status t-body', role: 'status', 'aria-live': 'assertive' });
-  const api = { state, pay, get status() { return state.status; } };
+  const api = { state, pay, placeUnpaid, get status() { return state.status; } };
 
   function methodForm() {
-    if (!provider) return stateBlock({ variant: 'info', title: t('bk.pay.method'), text: t('bk.pay.noProvider'), actions: [{ label: t('bk.pay.backReview'), href: stepUrl('review'), variant: 'c-btn--primary' }] });
+    if (!provider) return el('div', { class: 'l-stack l-stack--8', dataset: { payLater: 'true' } }, [
+      el('h2', { class: 'c-review-block__title' }, t('bk.pay.later.title')),
+      el('p', { class: 't-body' }, t('bk.pay.later.text')),
+      el('p', { class: 't-body-sm t-muted' }, [icon('no-shield', { size: 'sm' }), ' ', t('bk.pay.later.note')]),
+    ]);
     return el('fieldset', { class: 'c-pay-method' }, [
       el('legend', { class: 'c-review-block__title' }, `${t('bk.pay.method')} · ${isAr() ? provider.labelAr : provider.labelEn}`),
       ...provider.methods.map((m) => el('label', { class: 'c-choice', for: `pm-${m.id}` }, [
@@ -45,12 +51,14 @@ export function mountPayment({ root = document } = {}) {
       el('p', { class: 't-body-sm t-muted' }, [icon('no-shield', { size: 'sm' }), ' ', t('bk.pay.secure')]),
     ]);
   }
-  const payBtn = el('button', { type: 'button', class: 'c-btn c-btn--primary c-btn--lg', dataset: { action: 'pay' }, onclick: () => pay() }, [el('span', { class: 'c-btn__label' }, t('bk.pay.pay', money(bd.total, bd.currency))), el('span', { class: 'c-btn__spinner', 'aria-hidden': 'true' })]);
+  const payBtn = provider
+    ? el('button', { type: 'button', class: 'c-btn c-btn--primary c-btn--lg', dataset: { action: 'pay' }, onclick: () => pay() }, [el('span', { class: 'c-btn__label' }, t('bk.pay.pay', money(bd.total, bd.currency))), el('span', { class: 'c-btn__spinner', 'aria-hidden': 'true' })])
+    : el('button', { type: 'button', class: 'c-btn c-btn--primary c-btn--lg', dataset: { action: 'pay-later' }, onclick: () => placeUnpaid() }, [el('span', { class: 'c-btn__label' }, t('bk.pay.later.action')), el('span', { class: 'c-btn__spinner', 'aria-hidden': 'true' })]);
 
   function paintIdle() {
     state.status = 'idle'; setButtonState(payBtn, 'idle'); status.textContent = '';
     render(main, [
-      el('div', { class: 'l-stack l-stack--8' }, [el('h1', { class: 't-h1' }, t('bk.pay.title')), el('p', { class: 't-body t-muted' }, t('bk.pay.text'))]),
+      el('div', { class: 'l-stack l-stack--8' }, [el('h1', { class: 't-h1' }, t('bk.pay.title')), el('p', { class: 't-body t-muted' }, t(provider ? 'bk.pay.text' : 'bk.pay.later.lead'))]),
       el('div', { class: 'c-pay-amount' }, [el('span', {}, t('bk.pay.amount')), el('span', { class: 't-price' }, money(bd.total, bd.currency))]),
       el('section', { class: 'c-review-block', 'aria-label': t('bk.details.price') }, priceRows(bd, { compact: true })),
       el('section', { class: 'c-review-block' }, methodForm()),
@@ -65,6 +73,24 @@ export function mountPayment({ root = document } = {}) {
       stateBlock({ variant: 'error', iconName: 'no-error', title: t('bk.pay.failed.title'), text: `${t('bk.pay.failed.text')} ${reason ? `(${reason})` : ''} · ${t('bk.pay.attempt', state.attempt)}`,
         actions: [{ id: 'retry', label: t('bk.pay.retry'), variant: 'c-btn--primary', onClick: () => pay() }, { id: 'change-method', label: t('bk.pay.changeMethod'), onClick: () => { state.status = 'idle'; paintIdle(); main.querySelector('input[name=method]')?.focus(); } }, { label: t('bk.pay.backReview'), href: stepUrl('review') }] }),
     ]);
+  }
+  /** No payment provider: place the booking awaiting payment. Nothing is charged; a coordinator sends a secure payment link. */
+  async function placeUnpaid() {
+    if (provider || state.status === 'processing') return null;
+    state.status = 'processing'; setButtonState(payBtn, 'loading'); status.textContent = t('bk.pay.later.placing'); status.dataset.tone = '';
+    setPayment({ status: 'awaiting', method: 'later', attempts: 0, at: new Date().toISOString() });
+    try {
+      const booking = await adapterFor(ctx.service).book({ context: ctx, offer, travellers: j.travellers, contact: j.contact, extras: j.extras, total: bd.total, currency: bd.currency, attribution: attributionOf(j), payment: { later: true } });
+      setBooking({ ...booking, at: new Date().toISOString(), total: bd.total, currency: bd.currency, payment: 'awaiting' });
+      state.status = 'booked';
+      location.assign(stepUrl('confirmation'));
+      return booking;
+    } catch (error) {
+      console.warn('[no] booking could not be placed', error);
+      setPayment(null);
+      state.status = 'idle'; setButtonState(payBtn, 'idle'); status.textContent = t('bk.pay.later.failed'); status.dataset.tone = 'error';
+      return null;
+    }
   }
   async function pay(method = state.method) {
     if (!provider || state.status === 'processing') return null;

@@ -35,7 +35,10 @@ export function mountConfirmation({ root = document } = {}) {
   // Stage 16B: never rendered as "paid" from local journey state — only a server-verified payment can say that.
   // Starts as "confirming" for any payable booking and is updated once claim() + the real payment intent resolve.
   const payable = !request && !!b.total;
-  const paymentDd = el('dd', { dataset: { paymentStatus: 'pending' } }, payable ? t('bk.confirm.paymentPending') : t('bk.confirm.notCharged'));
+  // Placed with no payment provider ("pay later", ui/payment.js): awaiting payment, no intent is created here —
+  // a coordinator sends the customer a secure payment link.
+  const awaiting = payable && b.payment === 'awaiting';
+  const paymentDd = el('dd', { dataset: { paymentStatus: awaiting ? 'awaiting' : 'pending' } }, awaiting ? t('bk.confirm.paymentAwaiting') : payable ? t('bk.confirm.paymentPending') : t('bk.confirm.notCharged'));
   const paymentRow = el('div', { class: 'c-rules__row' }, [el('dt', {}, t('bk.confirm.paymentStatus')), paymentDd]);
   // Stage 16C: ticketing is a supplier fact, never local journey state — b.ticketed here is only ever `false`
   // (the client-side book() step never claims otherwise; see adapters/api-flights.js). This row starts pending
@@ -87,7 +90,7 @@ export function mountConfirmation({ root = document } = {}) {
       if (rec) { update({ booking: { ...loadJourney().booking, claimed: true, tripId: rec.tripId } }); viewTrip.href = route(`trips/?id=${encodeURIComponent(rec.tripId)}`); viewTrip.removeAttribute('title');
         accountHost.replaceChildren(el('p', { class: 'c-note', role: 'status', dataset: { claimed: rec.tripId } }, [icon('no-check-circle', { size: 'sm' }), el('span', { class: 'c-note__text' }, [t('acct.claim.done'), ' ', el('a', { href: viewTrip.href }, t('acct.claim.view'))])])); }
       // Stage 16B: the payment row only ever reflects what the backend verified — never local journey state.
-      if (rec && payable && rec.paymentStatus !== 'paid') {
+      if (rec && payable && !awaiting && rec.paymentStatus !== 'paid') {
         try {
           const intent = await customer.createPaymentIntent(rec.id, j.payment?.method);
           const status = intent?.payment?.status ?? 'pending';

@@ -30,6 +30,9 @@
      included: [{ ar, en }], extras: Extra[]
    ========================================================================= */
 
+import { isProduction } from '../../data/env.js';
+import { recordDevLead } from '../../core/leads.js';
+
 const registry = new Map();
 
 export function registerAdapter(adapter) {
@@ -57,14 +60,22 @@ export const REQUEST_ADAPTER = {
   async extras() { return []; },
   async book(order) {
     await new Promise((r) => setTimeout(r, 400));
-    return { reference: devReference('RQ'), status: 'received', ticketed: false, service: order.context.service };
+    const reference = bookingReference('RQ');
+    // A request is a lead. With a backend it becomes one when the booking is claimed (status 'received'); in
+    // development this mirrors it into the browser's dev lead store (a no-op anywhere else). Phase 6
+    const lead = Object.values(order.travellers ?? {})[0];
+    recordDevLead({ supervisor: order.attribution?.supervisor ?? null, name: [lead?.firstName, lead?.lastName].filter(Boolean).join(' '),
+      contact: [order.contact?.email, order.contact?.phone].filter(Boolean).join(' · '), source: 'request', serviceInterest: order.context.service, bookingId: reference });
+    return { reference, status: 'received', ticketed: false, service: order.context.service };
   },
 };
 
-/** A development reference: obviously not a supplier's PNR. */
-export function devReference(prefix = 'NO') {
+/** A local booking reference — never a supplier's PNR. Outside production it carries `-DEV-` so development
+    bookings are obvious at a glance; a production reference is the same prefix plus eight random characters. */
+export function bookingReference(prefix = 'NO') {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const prod = isProduction();
   let s = '';
-  for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)];
-  return `${prefix}-DEV-${s}`;
+  for (let i = 0; i < (prod ? 8 : 6); i++) s += chars[Math.floor(Math.random() * chars.length)];
+  return prod ? `${prefix}-${s}` : `${prefix}-DEV-${s}`;
 }

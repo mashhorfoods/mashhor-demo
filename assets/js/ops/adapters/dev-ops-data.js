@@ -13,6 +13,7 @@
    ========================================================================= */
 import { registerOpsDataAdapter, RULE_STATUSES } from '../data.js';
 import { paged } from '../../core/adapter-helpers.js';
+import { devLeads as storedDevLeads } from '../../core/leads.js';
 
 const read = (k) => { try { return sessionStorage.getItem(k); } catch { return null; } };
 const wait = async () => { await new Promise((r) => setTimeout(r, read('no.dev.ops') === 'slow' ? 2000 : 200)); if (read('no.dev.ops') === 'error') { const e = new Error('dev outage'); e.code = 'unavailable'; throw e; } };
@@ -73,10 +74,10 @@ let customers = [
   { id: 'dev-cus-2', name: 'Development Customer Two', email: 'dev-cus-2@example.test', phone: '', locale: 'ar', image: null, supervisorId: null, attribution: null, acceptance: null, createdAt: iso(10), bookingsCount: 1, dev: true },
 ];
 let supervisorsAdmin = [
-  { id: 'supervisor-1', slug: 'supervisor-1', status: 'active', nameAr: 'منسق تطوير واحد', nameEn: 'Development Coordinator One', titleAr: null, titleEn: null, bioAr: null, bioEn: null, image: null, languages: ['ar', 'en'], specialties: [], services: [], phone: '', whatsapp: null, email: 'dev-sup-1@example.test', city: 'Dubai', internalId: null, notificationPrefs: {}, createdAt: iso(90), updatedAt: iso(30), customersCount: 1, dev: true },
-  { id: 'supervisor-2', slug: 'supervisor-2', status: 'active', nameAr: 'منسق تطوير اثنان', nameEn: 'Development Coordinator Two', titleAr: null, titleEn: null, bioAr: null, bioEn: null, image: null, languages: ['ar'], specialties: [], services: [], phone: '', whatsapp: null, email: 'dev-sup-2@example.test', city: 'Istanbul', internalId: null, notificationPrefs: {}, createdAt: iso(90), updatedAt: iso(30), customersCount: 0, dev: true },
+  { id: 'supervisor-1', slug: 'supervisor-1', status: 'active', nameAr: 'منسق تطوير واحد', nameEn: 'Development Coordinator One', titleAr: null, titleEn: null, bioAr: null, bioEn: null, image: null, languages: ['ar', 'en'], specialties: [], services: [], phone: '', whatsapp: null, email: 'dev-sup-1@example.test', city: 'Dubai', notificationPrefs: {}, createdAt: iso(90), updatedAt: iso(30), customersCount: 1, dev: true },
+  { id: 'supervisor-2', slug: 'supervisor-2', status: 'active', nameAr: 'منسق تطوير اثنان', nameEn: 'Development Coordinator Two', titleAr: null, titleEn: null, bioAr: null, bioEn: null, image: null, languages: ['ar'], specialties: [], services: [], phone: '', whatsapp: null, email: 'dev-sup-2@example.test', city: 'Istanbul', notificationPrefs: {}, createdAt: iso(90), updatedAt: iso(30), customersCount: 0, dev: true },
 ];
-let devLeads = [{ id: 'dev-lead-1', customerId: null, name: 'Development Lead', contact: 'lead@example.test', source: 'link', serviceInterest: 'flights', status: 'new', convertedBookingId: null, createdAt: iso(5), updatedAt: iso(5) }];
+let devLeads = [{ id: 'dev-lead-1', supervisorId: 'supervisor-1', customerId: null, name: 'Development Lead', contact: 'lead@example.test', source: 'link', serviceInterest: 'flights', status: 'new', convertedBookingId: null, createdAt: iso(5), updatedAt: iso(5) }];
 let devAttributionEvents = [{ customerId: 'dev-cus-1', supervisorId: 'supervisor-1', previousSupervisorId: null, source: 'link', actor: 'customer', at: iso(30) }];
 let devPayments = [
   { id: 'dev-pay-1', customerId: 'dev-cus-1', bookingId: 'dev-bk-1', at: iso(3), amount: 900, currency: 'USD', status: 'paid', reference: 'DEVTX-0001', methodAr: 'مزوّد دفع تطوير', methodEn: 'Development payment provider', customerName: 'Development Customer One' },
@@ -99,8 +100,13 @@ let devOffers = [
 ];
 const CONTENT_TRANSITIONS = { draft: ['published', 'archived'], published: ['draft', 'archived'], archived: ['draft'] };
 /** Mirrors backend/content.mjs's resolvePublishStatus closely enough for the dev stand-in: a same-state or
-    omitted publishStatus is a no-op; an illegal transition or a publish with no name/title throws 'invalid'. */
+    omitted publishStatus is a no-op, except 'published' on a published record, which republishes it (publishedAt
+    moves); an illegal transition or a publish with no name/title throws 'invalid'. */
 function applyPublishTransition(row, patch, hasContent, t) {
+  if (patch.publishStatus === 'published' && row.publishStatus === 'published') {
+    if (!hasContent) { const e = new Error('nothing to publish'); e.code = 'invalid'; throw e; }
+    row.publishedAt = t; return;
+  }
   if (patch.publishStatus === undefined || patch.publishStatus === row.publishStatus) return;
   if (!CONTENT_TRANSITIONS[row.publishStatus]?.includes(patch.publishStatus)) { const e = new Error('invalid transition'); e.code = 'invalid'; throw e; }
   if (patch.publishStatus === 'published' && !hasContent) { const e = new Error('nothing to publish'); e.code = 'invalid'; throw e; }
@@ -248,7 +254,7 @@ export const DEV_OPS_DATA = registerOpsDataAdapter({
     return { ...sv, customers: customers.filter((c) => c.supervisorId === id), bookings: BOOKINGS.filter((b) => b.supervisorId === id), leads: devLeads, revenue: { currency: 'USD', gross: 0, completed: 0, pending: 0, cancelled: 0, bookingsCount: 0, commission: { model: null, status: 'pending_business_configuration' } }, performance: { customers: 0, leads: 0, leadsConverted: 0, conversionRate: null, bookings: 0, bookingsConfirmed: 0, bookingsCancelled: 0 }, commissions: [] };
   },
   async createSupervisorAdmin(_t, supervisor) {
-    await wait(); const sv = { id: `dev-sv-${Date.now()}`, slug: supervisor.slug, status: 'active', nameAr: supervisor.nameAr ?? null, nameEn: supervisor.nameEn ?? null, titleAr: null, titleEn: null, bioAr: null, bioEn: null, image: null, languages: [], specialties: [], services: [], phone: supervisor.phone ?? null, whatsapp: null, email: supervisor.email ?? null, city: supervisor.city ?? null, internalId: null, notificationPrefs: {}, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), customersCount: 0, dev: true };
+    await wait(); const sv = { id: `dev-sv-${Date.now()}`, slug: supervisor.slug, status: 'active', nameAr: supervisor.nameAr ?? null, nameEn: supervisor.nameEn ?? null, titleAr: null, titleEn: null, bioAr: null, bioEn: null, image: null, languages: [], specialties: [], services: [], phone: supervisor.phone ?? null, whatsapp: null, email: supervisor.email ?? null, city: supervisor.city ?? null, notificationPrefs: {}, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), customersCount: 0, dev: true };
     supervisorsAdmin = [sv, ...supervisorsAdmin]; return sv;
   },
   async updateSupervisorAdmin(_t, id, patchBody) {
@@ -287,7 +293,8 @@ export const DEV_OPS_DATA = registerOpsDataAdapter({
     return { ...o };
   },
 
-  async leads(_t, params = {}) { await wait(); return paged(filterBy(devLeads, params, ['status']), params); },
+  // Phase 6: leads the public site recorded in this browser (contact form, request bookings) come first, newest first.
+  async leads(_t, params = {}) { await wait(); return paged(filterBy([...storedDevLeads(), ...devLeads], params, ['status']), params); },
   async attributionEvents(_t, params = {}) { await wait(); return paged(filterBy(devAttributionEvents, params, ['supervisorId', 'customerId']), params); },
 
   async payments(_t, params = {}) { await wait(); return paged(filterBy(devPayments, params, ['customerId', 'bookingId', 'status']), params); },

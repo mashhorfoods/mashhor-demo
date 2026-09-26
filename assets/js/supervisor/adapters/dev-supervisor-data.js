@@ -20,6 +20,7 @@
 import { registerSupervisorDataAdapter } from '../data.js';
 import { DEV_SUPERVISOR_AUTH } from './dev-supervisor-auth.js';
 import { paged as pageSlice } from '../../core/adapter-helpers.js';
+import { devLeads, updateDevLead } from '../../core/leads.js';
 
 const read = (k) => { try { return sessionStorage.getItem(k); } catch { return null; } };
 const wait = async () => { await new Promise((r) => setTimeout(r, read('no.dev.supervisor') === 'slow' ? 2000 : 200)); if (read('no.dev.supervisor') === 'error') { const e = new Error('dev outage'); e.code = 'unavailable'; throw e; } };
@@ -53,11 +54,20 @@ for (let i = 1; i <= BULK; i++) {
   BULK_LEADS.push({ id: `dev-lead-bulk-${i}`, customerId: null, name: `Demo Lead ${i + 2}`, contact: `lead${i}@dev.invalid`, source: 'link', serviceInterest: 'hotels', status: 'new', convertedBookingId: null, createdAt: iso(10), updatedAt: iso(10), dev: true });
 }
 
+// Mirrors the backend's default rule (commission_model: 5% of the paid booking amount, reversed on cancellation/refund).
+const COMMISSION_MODEL = { model: 'percentage', rate: 0.05, basis: 'booking_amount', trigger: 'booking_paid', onCancellation: 'reversed', status: 'technical_default_pending_business_confirmation' };
+const COMMISSIONS = [
+  { id: 'dev-com-1', bookingId: 'dev-bk-1', amount: 45, currency: 'USD', status: 'earned', rate: 0.05, period: iso(3).slice(0, 7), createdAt: iso(3), reversedAt: null, dev: true },
+  { id: 'dev-com-2', bookingId: 'dev-bk-3', amount: 6, currency: 'USD', status: 'reversed', rate: 0.05, period: iso(1).slice(0, 7), createdAt: iso(2), reversedAt: iso(1), dev: true },
+];
+
 const KEY = 'no.dev.supervisor.data';
 const loadState = () => { try { return JSON.parse(localStorage.getItem(KEY) ?? 'null') ?? { leads: LEADS, notifications: NOTIFICATIONS }; } catch { return { leads: LEADS, notifications: NOTIFICATIONS }; } };
 const saveState = (s) => { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch { /* storage unavailable */ } };
 
 const paged = (all, params) => pageSlice(all, params, 50);
+/** Phase 6: leads the public site recorded in this browser for this supervisor (contact form, request bookings), then the fixed ones. */
+const allLeads = () => { const slug = DEV_SUPERVISOR_AUTH._current()?.slug; return [...devLeads().filter((l) => l.supervisorId && l.supervisorId === slug), ...loadState().leads]; };
 
 export const DEV_SUPERVISOR_DATA = registerSupervisorDataAdapter({
   id: 'dev-supervisor-data', dev: true,
@@ -67,14 +77,15 @@ export const DEV_SUPERVISOR_DATA = registerSupervisorDataAdapter({
   async customer(_t, id) { await wait(); const c = CUSTOMERS.find((x) => x.id === id); if (!c) return null; return { ...c, attribution: { supervisorId: 'supervisor-1', source: 'link', at: c.attributionAt }, bookings: BOOKINGS.filter((b) => b.customerId === id), trips: [], attributionHistory: [{ supervisorId: 'supervisor-1', previousSupervisorId: null, source: 'link', actor: 'customer', at: c.attributionAt }] }; },
   async bookings(_t, params = {}) { await wait(); if (isEmpty()) return paged([], params); let items = BOOKINGS; if (params.status) items = items.filter((b) => b.status === params.status); if (params.service) items = items.filter((b) => b.service === params.service); return paged(items, params); },
   async booking(_t, id) { await wait(); const b = BOOKINGS.find((x) => x.id === id); return b ? { ...b, detail: { dev: true } } : null; },
-  async leads(_t, params = {}) { await wait(); if (isEmpty()) return paged([], params); const all = [...loadState().leads, ...BULK_LEADS]; return paged(params.status ? all.filter((l) => l.status === params.status) : all, params); },
+  async leads(_t, params = {}) { await wait(); if (isEmpty()) return paged([], params); const all = [...allLeads(), ...BULK_LEADS]; return paged(params.status ? all.filter((l) => l.status === params.status) : all, params); },
   async updateLeadStatus(_t, id, status) {
-    await wait(); const state = loadState(); const l = state.leads.find((x) => x.id === id); if (!l) return null;
+    await wait(); const shared = updateDevLead(id, { status }); if (shared) return shared;
+    const state = loadState(); const l = state.leads.find((x) => x.id === id); if (!l) return null;
     l.status = status; l.updatedAt = new Date().toISOString(); saveState(state); return { ...l };
   },
-  async revenue() { await wait(); if (isEmpty()) return { currency: 'USD', gross: 0, completed: 0, pending: 0, cancelled: 0, bookingsCount: 0, commission: { model: null, status: 'pending_business_configuration' } }; return { currency: 'USD', gross: 780, completed: 900, pending: 0, cancelled: -120, bookingsCount: BOOKINGS.length, commission: { model: null, status: 'pending_business_configuration' } }; },
-  async performance() { await wait(); if (isEmpty()) return { customers: 0, leads: 0, leadsConverted: 0, conversionRate: null, bookings: 0, bookingsConfirmed: 0, bookingsCancelled: 0 }; const leads = loadState().leads; return { customers: CUSTOMERS.length, leads: leads.length, leadsConverted: leads.filter((l) => l.status === 'converted').length, conversionRate: leads.filter((l) => l.status === 'converted').length / leads.length, bookings: BOOKINGS.length, bookingsConfirmed: BOOKINGS.filter((b) => b.status === 'confirmed').length, bookingsCancelled: BOOKINGS.filter((b) => b.status === 'cancelled').length }; },
-  async commissions(_t, params = {}) { await wait(); return { ...paged([], params), model: { model: null, status: 'pending_business_configuration' } }; },
+  async revenue() { await wait(); if (isEmpty()) return { currency: 'USD', gross: 0, completed: 0, pending: 0, cancelled: 0, bookingsCount: 0, commission: COMMISSION_MODEL }; return { currency: 'USD', gross: 780, completed: 900, pending: 0, cancelled: -120, bookingsCount: BOOKINGS.length, commission: COMMISSION_MODEL }; },
+  async performance() { await wait(); if (isEmpty()) return { customers: 0, leads: 0, leadsConverted: 0, conversionRate: null, bookings: 0, bookingsConfirmed: 0, bookingsCancelled: 0 }; const leads = allLeads(); return { customers: CUSTOMERS.length, leads: leads.length, leadsConverted: leads.filter((l) => l.status === 'converted').length, conversionRate: leads.filter((l) => l.status === 'converted').length / leads.length, bookings: BOOKINGS.length, bookingsConfirmed: BOOKINGS.filter((b) => b.status === 'confirmed').length, bookingsCancelled: BOOKINGS.filter((b) => b.status === 'cancelled').length }; },
+  async commissions(_t, params = {}) { await wait(); return { ...paged(isEmpty() ? [] : COMMISSIONS, params), model: COMMISSION_MODEL }; },
   async notifications() { await wait(); if (isEmpty()) return []; return loadState().notifications.map((n) => ({ ...n })); },
   async markRead(_t, ids = null) {
     await wait(); const state = loadState();

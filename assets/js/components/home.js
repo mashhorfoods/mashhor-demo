@@ -30,6 +30,7 @@ import { stateRegion, stateBlock, skeletonService, skeletonCard } from './states
 import { newsletterCard } from './newsletter.js';
 import { providerMarquee } from './providers.js';
 import { imageSrc } from '../data/images.js';
+import { contentList } from '../data/content-source.js';
 
 /* ---------------------------------------------------------------------------
    HERO — copy, media slot, booking entry. §04
@@ -359,12 +360,22 @@ export function supportSection() {
    MOUNT — wire every section into the page and return the controllers.
    Each dynamic region is a stateRegion so the page can show loading, empty
    and error states from one API. Data arrives through `load`, which today
-   resolves the static records and tomorrow calls the API. §15
+   resolves the static records and — for destinations and offers on a
+   connected build — the published CMS records (data/content-source.js). §15
    ------------------------------------------------------------------------ */
+/** The homepage's destinations and offers: the static selections (HOME_DESTINATIONS / HOME_OFFERS) unless the content
+    source is serving the CMS, whose records get the same selection rules (`home` flag; the first three offers). */
+async function homeContent() {
+  const [dests, offers] = await Promise.all([contentList('destinations'), contentList('offers')]);
+  return {
+    destinations: dests.source === 'cms' ? dests.items.filter((d) => d.home) : HOME_DESTINATIONS,
+    offers: offers.source === 'cms' ? offers.items.slice(0, 3) : HOME_OFFERS,
+  };
+}
 export function mountHome({
   root = document,
   load = async () => ({
-    services: HOME_SERVICES, destinations: HOME_DESTINATIONS, offers: HOME_OFFERS,
+    services: HOME_SERVICES, ...(await homeContent()),
     team: SUPERVISOR_REGISTRY.filter((s) => s.status === 'active'),
     support: HOME_SUPPORT, channels: liveChannels(),
   }),

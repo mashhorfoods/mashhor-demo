@@ -15,7 +15,7 @@
      no.dev.quote  = 'changed' | 'unavailable'
    ========================================================================= */
 
-import { registerAdapter, devReference } from './index.js';
+import { registerAdapter, bookingReference } from './index.js';
 import { locationByCode } from '../locations.js';
 
 const CARRIERS = [
@@ -130,7 +130,7 @@ export const DEV_FLIGHTS = registerAdapter({
   async book(order) {
     await new Promise((r) => setTimeout(r, 900));
     if (read('no.dev.book') === 'error') throw new Error('development supplier: booking could not be created');
-    return { reference: devReference('NO'), status: 'confirmed', ticketed: false, service: 'flights',
+    return { reference: bookingReference('NO'), status: 'confirmed', ticketed: false, service: 'flights',
              messageAr: 'تم تأكيد الحجز مع المزوّد التجريبي. تُصدر التذكرة بعد تأكيد المزوّد الحقيقي.', messageEn: 'Booking confirmed with the development supplier. The ticket is issued once a real supplier confirms.' };
   },
 });

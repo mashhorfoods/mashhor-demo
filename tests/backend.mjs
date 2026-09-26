@@ -224,7 +224,7 @@ await control('/__test/reset');
   ok('Supervisor A → Booking A allowed, Supervisor B → Booking A denied (404)', bk1.data.items.some((b) => b.id === 'BK_A1') && (await reqS2('/supervisor/me/bookings/BK_A1')).status === 404 && (await reqS1('/supervisor/me/bookings/BK_A1')).status === 200);
   const rev1 = await reqS1('/supervisor/me/revenue'); const rev2 = await reqS2('/supervisor/me/revenue');
   ok('Supervisor A → Revenue A allowed (non-zero), Supervisor B → Revenue B is correctly empty, never A\'s figures', rev1.status === 200 && rev1.data.gross > 0 && rev2.status === 200 && rev2.data.gross === 0 && rev2.data.bookingsCount === 0);
-  ok('commission is reported pending configuration, never a fabricated rate or amount', rev1.data.commission.model === null && rev1.data.commission.status === 'pending_business_configuration');
+  ok('commission rule is the register\'s working default (5% of paid bookings), reported as not yet business-confirmed', rev1.data.commission.model === 'percentage' && rev1.data.commission.rate === 0.05 && rev1.data.commission.status !== 'confirmed');
   const perf2 = await reqS2('/supervisor/me/performance');
   ok('performance is correctly scoped and empty for a supervisor with nothing yet (not an error)', perf2.status === 200 && perf2.data.customers === 0 && perf2.data.bookings === 0);
 
@@ -477,12 +477,17 @@ await control('/__test/reset');
   ok('admin creates a new supervisor', svCreate.status === 201 && svCreate.data.supervisor.slug === 'sv-new');
   ok('a reserved slug is refused (422)', (await reqAdmin2('/admin/supervisors', { method: 'POST', body: { slug: 'settings', nameEn: 'x' } })).status === 422);
   const svDetail = await reqOps2(`/admin/supervisors/${svCreate.data.supervisor.id}`);
-  ok('supervisor detail composes the same scoped read models the supervisor portal itself uses (customers/bookings/leads/revenue/performance/commissions)', svDetail.status === 200 && Array.isArray(svDetail.data.supervisor.customers) && svDetail.data.supervisor.revenue.commission.model === null);
+  ok('supervisor detail composes the same scoped read models the supervisor portal itself uses (customers/bookings/leads/revenue/performance/commissions)', svDetail.status === 200 && Array.isArray(svDetail.data.supervisor.customers) && svDetail.data.supervisor.revenue.commission.model === 'percentage' && Array.isArray(svDetail.data.supervisor.commissions));
   const svUpdate = await reqAdmin2(`/admin/supervisors/${svCreate.data.supervisor.id}`, { method: 'PATCH', body: { active: false } });
   ok('admin deactivates a supervisor', svUpdate.status === 200 && svUpdate.data.supervisor.status === 'inactive');
 
   // ---- content: destinations & offers, admin-wide (Command Center CMS Phase 2A/2B-i) — viewing is ungated like
   // services' own list/one; only creating/editing/publishing needs content.manage. ----
+  // ---- Phase 6: the PUBLIC content read (GET /content/*) — unauthenticated, cacheable, published records only ----
+  const pub = (kind) => fetch(`${API}/content/${kind}`, { headers: { Origin: SITE } }).then(async (r) => ({ status: r.status, headers: r.headers, data: await r.json().catch(() => null), text: '' }));
+  const pubBefore = await pub('destinations');
+  ok('public content: before anything was ever published the CMS reports managed:false (the site keeps its static registry)', pubBefore.status === 200 && pubBefore.data.managed === false && pubBefore.data.items.length === 0, JSON.stringify(pubBefore.data));
+
   const destList0 = await reqOps1b('/admin/destinations');
   ok('destinations list is ungated, like services — any signed-in staff member can view', destList0.status === 200 && Array.isArray(destList0.data.items));
   ok('ops-1 (no content.manage) → 403 creating a destination', (await reqOps1b('/admin/destinations', { method: 'POST', body: { slug: 'test-destination', nameEn: 'Test Destination' } })).status === 403);
@@ -530,6 +535,38 @@ await control('/__test/reset');
 
   const publishedDst = await reqOps1b('/admin/destinations?publishStatus=published');
   ok('the destinations list can be filtered by publishStatus (the Publishing Center\'s own read model)', publishedDst.status === 200 && publishedDst.data.items.every((d) => d.publishStatus === 'published') && publishedDst.data.items.some((d) => d.id === dstId));
+
+  // ---- Phase 6: the public read of what was just published above ----
+  const DEST_KEYS = 'countryAr,countryEn,descAr,descEn,featured,home,id,image,nameAr,nameEn,purposes,region,services,slug,status';
+  const OFFER_KEYS = 'bookingMode,categories,category,descAr,descEn,destination,destinationRecord,duration,exclusions,faq,featured,id,image,important,inclusions,itinerary,placeholder,price,publishedAt,services,shortAr,shortEn,slug,status,terms,titleAr,titleEn,travelPeriod';
+  const STAFF_FIELDS = /publishStatus|hasUnpublishedChanges|createdAt|updatedAt|destinationId|published_json|"dst_|"off_/;
+  const pd = await pub('destinations');
+  ok('public destinations: 200 with no session at all, shared-cacheable', pd.status === 200 && /public/.test(pd.headers.get('cache-control')) && /max-age=\d+/.test(pd.headers.get('cache-control')) && !pd.headers.get('set-cookie'), pd.headers.get('cache-control'));
+  ok('public destinations: only published records — the draft is not listed', pd.data.managed === true && pd.data.items.some((d) => d.slug === 'test-destination') && !pd.data.items.some((d) => d.slug === 'test-destination-blank'));
+  const pdItem = pd.data.items.find((d) => d.slug === 'test-destination');
+  ok('public destinations: the static registry\'s shape exactly (slug as the public id), staff-only fields stripped', Object.keys(pdItem).sort().join(',') === DEST_KEYS && pdItem.id === 'test-destination' && pdItem.region === 'asia' && pdItem.featured === true && pdItem.status === 'available' && Array.isArray(pdItem.purposes) && typeof pdItem.image === 'object' && !STAFF_FIELDS.test(JSON.stringify(pd.data)), Object.keys(pdItem).sort().join(','));
+  ok('public destinations: GET only', (await fetch(`${API}/content/destinations`, { method: 'POST', headers: { Origin: SITE } })).status !== 200);
+  // edits to a live record are "unpublished changes": visitors keep the published snapshot until someone republishes
+  const liveDesc = pdItem.descEn;
+  const pendingEdit = await reqAdmin2(`/admin/destinations/${dstId}`, { method: 'PATCH', body: { descEn: 'Edited, not yet republished' } });
+  ok('public destinations: an edit to a published record stays off the public read (unpublished changes)', pendingEdit.data.destination.hasUnpublishedChanges === true && (await pub('destinations')).data.items.find((d) => d.slug === 'test-destination').descEn === liveDesc);
+  const republish = await reqAdmin2(`/admin/destinations/${dstId}`, { method: 'PATCH', body: { publishStatus: 'published' } });
+  ok('republishing a published record (publishStatus: published again) moves publishedAt and clears the pending flag', republish.status === 200 && republish.data.destination.publishStatus === 'published' && republish.data.destination.hasUnpublishedChanges === false && republish.data.destination.publishedAt > pendingEdit.data.destination.publishedAt);
+  ok('…and the public read now carries the edit', (await pub('destinations')).data.items.find((d) => d.slug === 'test-destination').descEn === 'Edited, not yet republished');
+  ok('republishing with no name in either language is refused (422)', (await reqAdmin2(`/admin/destinations/${dstId}`, { method: 'PATCH', body: { nameAr: '', nameEn: '', publishStatus: 'published' } })).status === 422);
+
+  const po0 = await pub('offers');
+  ok('public offers: an unpublished offer is not listed, but the kind stays CMS-managed once anything was ever published', po0.status === 200 && po0.data.managed === true && !po0.data.items.some((o) => o.slug === 'test-offer'));
+  await reqAdmin2(`/admin/offers/${offCreate.data.offer.id}`, { method: 'PATCH', body: { publishStatus: 'published' } });
+  const po = await pub('offers'); const poItem = po.data.items.find((o) => o.slug === 'test-offer');
+  ok('public offers: published offer listed in the registry shape — detail flattened, destination by public slug, staff fields stripped', !!poItem && Object.keys(poItem).sort().join(',') === OFFER_KEYS && poItem.id === 'test-offer' && poItem.destination === 'test-destination' && poItem.destinationRecord?.slug === 'test-destination' && poItem.price.amount === 450 && poItem.inclusions[0]?.en === 'Flight ticket' && poItem.status === 'available' && !STAFF_FIELDS.test(JSON.stringify(po.data)), poItem && Object.keys(poItem).sort().join(','));
+  ok('public offers: shared-cacheable too', /public/.test(po.headers.get('cache-control')));
+  await reqAdmin2(`/admin/destinations/${dstId}`, { method: 'PATCH', body: { publishStatus: 'archived' } });
+  const po2 = await pub('offers');
+  ok('public offers: a destination that is no longer published is never referenced (no draft slug leaks)', po2.data.items.find((o) => o.slug === 'test-offer')?.destination === null && po2.data.items.find((o) => o.slug === 'test-offer')?.destinationRecord === null);
+  ok('public destinations: archiving removes it from the public read; managed stays true (an empty CMS list is authoritative)', !(await pub('destinations')).data.items.some((d) => d.slug === 'test-destination') && (await pub('destinations')).data.managed === true);
+  await reqAdmin2(`/admin/offers/${offCreate.data.offer.id}`, { method: 'PATCH', body: { publishStatus: 'archived' } });
+  ok('public offers: archiving removes it from the public read', !(await pub('offers')).data.items.some((o) => o.slug === 'test-offer'));
 
   // ---- leads / attribution, admin-wide ----
   ok('ops-1 (no attribution.view) → 403 on admin-wide leads', (await reqOps1b('/admin/leads')).status === 403);
@@ -584,7 +621,7 @@ await control('/__test/reset');
   // audited, versioned admin action, and every prior version survives in history. ----
   ok('ops-1 (no rules.view) → 403 listing rules', (await reqOps1b('/admin/rules')).status === 403);
   const rulesList = await reqOps2('/admin/rules');
-  ok('ops-2 (rules.view) → 200, sees the register seeded from the codebase\'s own existing PENDING/DRAFT state, nothing fabricated', rulesList.status === 200 && rulesList.data.items.some((r) => r.ruleId === 'commission_model' && r.status === 'PENDING' && r.currentValue.model === null) && rulesList.data.items.some((r) => r.ruleId === 'refund_policy' && r.currentValue.policy === null) && rulesList.data.items.some((r) => r.ruleId === 'sla_config' && r.currentValue.targets === null));
+  ok('ops-2 (rules.view) → 200, sees the register seeded from the codebase\'s own existing PENDING/DRAFT state, nothing fabricated', rulesList.status === 200 && rulesList.data.items.some((r) => r.ruleId === 'commission_model' && r.status === 'DRAFT' && r.currentValue.model === 'percentage' && r.currentValue.rate === 0.05) && rulesList.data.items.some((r) => r.ruleId === 'refund_policy' && r.currentValue.policy === null) && rulesList.data.items.some((r) => r.ruleId === 'sla_config' && r.currentValue.targets === null));
   ok('the booking lifecycle graph and attribution model are registered as DRAFT (a technical default in effect, not yet business-confirmed) — never silently marked ACTIVE', rulesList.data.items.some((r) => r.ruleId === 'booking_lifecycle' && r.status === 'DRAFT') && rulesList.data.items.some((r) => r.ruleId === 'attribution_model' && r.status === 'DRAFT'));
   const filtered = await reqOps2('/admin/rules?category=commission');
   ok('rules can be filtered by category', filtered.data.items.length === 1 && filtered.data.items[0].ruleId === 'commission_model');
@@ -608,7 +645,7 @@ await control('/__test/reset');
   const invalidStatus = await reqAdmin2('/admin/rules/task_priority_levels', { method: 'PATCH', body: { status: 'not-a-real-status' } });
   ok('an unrecognised status is rejected (422), the vocabulary is server-side', invalidStatus.status === 422);
   const valueUpdate = await reqAdmin2('/admin/rules/commission_model', { method: 'PATCH', body: { notes: 'Awaiting finance sign-off.' } });
-  ok('admin can annotate a rule with notes without inventing its value — commission_model.currentValue stays null', valueUpdate.status === 200 && valueUpdate.data.rule.notes === 'Awaiting finance sign-off.' && valueUpdate.data.rule.currentValue.model === null && valueUpdate.data.rule.status === 'PENDING');
+  ok('admin can annotate a rule with notes without changing its value — commission_model keeps its 5% draft default', valueUpdate.status === 200 && valueUpdate.data.rule.notes === 'Awaiting finance sign-off.' && valueUpdate.data.rule.currentValue.rate === 0.05 && valueUpdate.data.rule.status === 'DRAFT');
   const auditAfterRules = await reqAdmin2('/operations/audit');
   ok('every business-rule mutation left an audit trace (§18/§22)', auditAfterRules.data.items.filter((e) => e.action === 'businessRule.update').length === 3);
 
@@ -691,7 +728,7 @@ await control('/__test/reset');
   const metaBefore = await reqAdmin3('/operations/meta');
   ok('lifecycle/priority resolved status reads pending while the register rule is DRAFT (not yet approved)', metaBefore.data.lifecycle.status !== 'confirmed' && metaBefore.data.priorityLevels.status !== 'confirmed');
   const revBefore = await reqSup3('/supervisor/me/revenue');
-  ok('commission resolved status reads pending while commission_model is PENDING — no calculation, no confirmed status', revBefore.data.commission.model === null && revBefore.data.commission.status !== 'confirmed');
+  ok('commission resolved status reads pending while commission_model is DRAFT — never a confirmed status', revBefore.data.commission.status !== 'confirmed');
   await reqAdmin3('/admin/rules/booking_lifecycle/activate', { method: 'POST' });
   await reqAdmin3('/admin/rules/task_priority_levels/activate', { method: 'POST' });
   const metaAfter = await reqAdmin3('/operations/meta');
@@ -716,7 +753,7 @@ await control('/__test/reset');
 
   // ---- pending-decision protection: nothing invents a value a PENDING/unconfigured rule doesn't have ----
   const rulesNow = await reqAdmin3('/admin/rules');
-  for (const key of ['commission_model', 'refund_policy', 'cancellation_policy', 'sla_config']) {
+  for (const key of ['refund_policy', 'cancellation_policy', 'sla_config']) {
     const r = rulesNow.data.items.find((x) => x.ruleId === key);
     ok(`${key} still carries no fabricated value (PENDING protection holds)`, r.status === 'PENDING' && Object.values(r.currentValue).some((v) => v === null));
   }
@@ -843,12 +880,23 @@ await control('/__test/reset');
   ok('a second, differently-identified event for an already-paid payment is rejected — an already-final payment is never re-applied', alreadyFinal.status === 200 && alreadyFinal.data.ok === true);
   const replay = await webhook(amountAttack);
   ok('replaying the EXACT same event (same provider + event id) a second time is recognised as a duplicate and safely ignored, not reprocessed', replay.status === 200 && replay.data.duplicate === true);
+  {
+    // §7: payment_events.payment_id names the payment an event was about — processed and rejected alike; only an
+    // event whose reference matches no payment has none. outbox.event_type names the business event behind a message.
+    const raw = new DatabaseSync(env.BACKEND_DATABASE_PATH, { readOnly: true });
+    const ev = Object.fromEntries(raw.prepare('SELECT provider_event_id, payment_id, status, reason FROM payment_events').all().map((r) => [r.provider_event_id, r]));
+    const payEvents = raw.prepare("SELECT event_type FROM outbox WHERE template = 'payment-successful'").all(); raw.close();
+    ok('payment_events.payment_id is written for rejected events that name a real payment', ['evt_amount_attack', 'evt_currency_attack', 'evt_already_final'].map((id) => ev[id]).every((r) => r?.status === 'rejected' && /^pay_/.test(r.payment_id ?? '')), JSON.stringify(ev.evt_currency_attack));
+    ok('payment_events.payment_id stays empty only when no payment matches the reference', ev.evt_unmatched?.status === 'rejected' && ev.evt_unmatched.payment_id === null);
+    ok('payment_events.payment_id is written for processed events', Object.values(ev).some((r) => r.status === 'processed' && /^pay_/.test(r.payment_id ?? '')));
+    ok('outbox.event_type is recorded for payment notifications', payEvents.length > 0 && payEvents.every((r) => r.event_type === 'payment.succeeded'));
+  }
   ok('none of the integrity attacks above (unmatched/amount/currency/already-final/replay) changed the payment\'s stored amount, currency or status', (await reqP('/me/bookings/BK-16B-PAY')).data.payments.find((p) => p.reference === secRef).amount === 500 && (await reqP('/me/bookings/BK-16B-PAY')).data.payments.find((p) => p.reference === secRef).currency === 'USD' && (await reqP('/me/bookings/BK-16B-PAY')).data.booking.paymentStatus === 'paid');
 
   // ---- supervisor attribution: untouched by the payment flow ----
   const claimAttr = await reqP('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-16B-ATTR', context: { service: 'flights' }, total: 300, currency: 'USD', attribution: { supervisorId: 'supervisor-1' } } });
   await reqP('/me/bookings/BK-16B-ATTR/payment-intent', { method: 'POST', body: { method: 'dev-success' } });
-  ok('a payment succeeding leaves the booking\'s existing supervisor attribution exactly as it was — payment integration invents no commission logic and does not touch attribution', claimAttr.data.booking.supervisorId === 'ahmed-mohamed' && (await reqP('/me/bookings/BK-16B-ATTR')).data.booking.supervisorId === 'ahmed-mohamed');
+  ok('a payment succeeding leaves the booking\'s existing supervisor attribution exactly as it was — payment does not touch attribution', claimAttr.data.booking.supervisorId === 'ahmed-mohamed' && (await reqP('/me/bookings/BK-16B-ATTR')).data.booking.supervisorId === 'ahmed-mohamed');
 
   // ---- audit trail: every payment step above left a trace, and it carries no secret ----
   const auditPay = await reqAdminP('/operations/audit');
@@ -965,7 +1013,7 @@ await control('/__test/reset');
   const sAttr = await search(oneWay);
   const claimAttr = await reqF('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-16C-ATTR', context: { service: 'flights' }, searchId: sAttr.data.meta.searchId, offerId: sAttr.data.offers[0].id, attribution: { supervisorId: 'supervisor-1' } } });
   await reqF('/me/bookings/BK-16C-ATTR/payment-intent', { method: 'POST', body: { method: 'dev-success' } });
-  ok('attribution survives search → selection → claim → payment → supplier booking, unchanged — no commission logic was invented along the way', claimAttr.data.booking.supervisorId === 'ahmed-mohamed' && (await reqF('/me/bookings/BK-16C-ATTR', { csrf: false })).data.booking.supervisorId === 'ahmed-mohamed');
+  ok('attribution survives search → selection → claim → payment → supplier booking, unchanged', claimAttr.data.booking.supervisorId === 'ahmed-mohamed' && (await reqF('/me/bookings/BK-16C-ATTR', { csrf: false })).data.booking.supervisorId === 'ahmed-mohamed');
 
   // ---- §17 operations dashboard: the live flight-supplier booking is visible to staff, separate from the
   // Stage 15 manually-tracked business-partner `supplier`, and never reaches a customer-facing route by that name ----
@@ -1236,12 +1284,117 @@ await control('/__test/reset');
   jarS.clear(); jarK.clear(); jarSup.clear();
 }
 
+// ---- Phase 6: leads come from real customer actions (request bookings, the contact form); a paid booking attributed to
+// a supervisor earns exactly one commission at the register's rate, reversed if the booking is cancelled. ----
+{
+  await control('/__test/reset');
+  const jarA = new Map(); const reqA = makeReq(API, SITE)(jarA, 'no_csrf');
+  const jarB = new Map(); const reqB = makeReq(API, SITE)(jarB, 'no_csrf');
+  const jarAnon = new Map(); const reqAnon = makeReq(API, SITE)(jarAnon, 'no_csrf');
+  const jarS1 = new Map(); const reqS1 = makeReq(API, SITE)(jarS1, 'no_supervisor_csrf');
+  const jarS2 = new Map(); const reqS2 = makeReq(API, SITE)(jarS2, 'no_supervisor_csrf');
+  const jarAd = new Map(); const reqAd = makeReq(API, SITE)(jarAd, 'no_ops_csrf');
+  await reqA('/auth/sign-in', { method: 'POST', body: { email: 'alpha@fixture.test', password: 'password123' } });
+  await reqB('/auth/sign-in', { method: 'POST', body: { email: 'beta@fixture.test', password: 'password123' } });
+  await reqS1('/supervisor/auth/sign-in', { method: 'POST', body: { email: 'sup1@fixture.test', password: 'password123' } });
+  await reqS2('/supervisor/auth/sign-in', { method: 'POST', body: { email: 'sup2@fixture.test', password: 'password123' } });
+  await reqAd('/staff/auth/sign-in', { method: 'POST', body: { email: 'admin1@fixture.test', password: 'password123' } });
+  const db = () => new DatabaseSync(env.BACKEND_DATABASE_PATH, { readOnly: true });
+  const dbAll = (sql, ...p) => { const d = db(); try { return d.prepare(sql).all(...p); } finally { d.close(); } };
+
+  // ---- request-mode booking → lead ----
+  const req1 = await reqA('/me/bookings/claim', { method: 'POST', body: { reference: 'RQ-P6-A', context: { service: 'hotels' }, status: 'received' } });
+  ok('a request-mode booking is claimed pending', req1.status === 201 && req1.data.booking.status === 'pending');
+  const s1Leads = (await reqS1('/supervisor/me/leads')).data.items;
+  const reqLead = s1Leads.find((l) => l.bookingId === 'RQ-P6-A');
+  ok('the request becomes a lead for the customer\'s attributed supervisor (Alpha → supervisor-1)', reqLead?.source === 'request' && reqLead.status === 'new' && reqLead.serviceInterest === 'hotels' && reqLead.name === 'Alpha Fixture', JSON.stringify(reqLead));
+  ok('the supervisor is notified of the new lead', (await reqS1('/supervisor/me/notifications')).data.notifications.some((n) => n.kind === 'lead' && n.bookingId === 'RQ-P6-A'));
+  await reqA('/me/bookings/claim', { method: 'POST', body: { reference: 'RQ-P6-A', context: { service: 'hotels' }, status: 'received' } });
+  ok('claiming the same request again never makes a second lead', dbAll("SELECT id FROM leads WHERE booking_id = 'RQ-P6-A'").length === 1);
+  ok('a search-mode booking (not a request) makes no lead', (await reqA('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-P6-NOLEAD', context: { service: 'flights' }, total: 10, currency: 'USD' } })).status === 201 && dbAll("SELECT id FROM leads WHERE booking_id = 'BK-P6-NOLEAD'").length === 0);
+  await reqB('/me/bookings/claim', { method: 'POST', body: { reference: 'RQ-P6-B', context: { service: 'visa' }, status: 'received' } });
+  const adminLeads = (await reqAd('/admin/leads')).data.items;
+  const unassigned = adminLeads.find((l) => l.bookingId === 'RQ-P6-B');
+  ok('an unattributed customer\'s request is an unassigned lead, visible to operations', unassigned && unassigned.supervisorId === null && unassigned.source === 'request', JSON.stringify(unassigned));
+  ok('an unassigned lead is visible to no supervisor', !(await reqS1('/supervisor/me/leads')).data.items.some((l) => l.bookingId === 'RQ-P6-B') && !(await reqS2('/supervisor/me/leads')).data.items.some((l) => l.bookingId === 'RQ-P6-B'));
+
+  // ---- contact form → lead ----
+  const c1 = await reqAnon('/contact', { method: 'POST', body: { name: 'Visitor One', email: 'visitor1@example.test', message: 'Please call me about a family trip.', attribution: { supervisor: 'mohamed-abdullah' } } });
+  ok('the public contact form is accepted without a session (201)', c1.status === 201 && c1.data.received === true);
+  const s2Lead = (await reqS2('/supervisor/me/leads')).data.items.find((l) => l.source === 'contact');
+  ok('a visitor who arrived through a supervisor\'s link is that supervisor\'s lead, with their message', s2Lead?.name === 'Visitor One' && /visitor1@example\.test/.test(s2Lead.contact) && s2Lead.message === 'Please call me about a family trip.', JSON.stringify(s2Lead));
+  await reqAnon('/contact', { method: 'POST', body: { name: 'Visitor Two', phone: '+249 900 000 000', message: 'Question about visas.' } });
+  ok('a visitor with no attribution is an unassigned lead for operations', (await reqAd('/admin/leads')).data.items.some((l) => l.name === 'Visitor Two' && l.supervisorId === null && l.source === 'contact'));
+  await reqA('/contact', { method: 'POST', body: { name: 'Alpha Fixture', email: 'alpha@fixture.test', message: 'Follow-up.', attribution: { supervisor: 'mohamed-abdullah' } } });
+  ok('a signed-in customer\'s message goes to their own attributed supervisor (first touch wins over the page\'s slug)', (await reqS1('/supervisor/me/leads')).data.items.some((l) => l.source === 'contact' && l.message === 'Follow-up.' && l.customerId) && !(await reqS2('/supervisor/me/leads')).data.items.some((l) => l.message === 'Follow-up.'));
+  ok('an unknown supervisor slug is ignored (unassigned), never trusted', (await reqAnon('/contact', { method: 'POST', body: { name: 'Visitor Three', email: 'v3@example.test', message: 'Hi', attribution: { supervisor: 'no-such-slug' } } })).status === 201 && (await reqAd('/admin/leads')).data.items.some((l) => l.name === 'Visitor Three' && l.supervisorId === null));
+  ok('a message with no way to reply (no email and no phone) is refused (422)', (await reqAnon('/contact', { method: 'POST', body: { name: 'X', message: 'Hi' } })).status === 422);
+  ok('a malformed email or an empty message is refused (422)', (await reqAnon('/contact', { method: 'POST', body: { name: 'X', email: 'nope', message: 'Hi' } })).status === 422 && (await reqAnon('/contact', { method: 'POST', body: { name: 'X', email: 'x@example.test', message: '  ' } })).status === 422);
+
+  // ---- commissions: earned once on payment, at the register rate ----
+  const claimC = await reqA('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-P6-COM', context: { service: 'flights' }, total: 400, currency: 'USD', attribution: { supervisorId: 'supervisor-1' } } });
+  ok('an attributed booking is claimed unpaid, with no commission yet', claimC.status === 201 && dbAll("SELECT id FROM commissions WHERE booking_id = 'BK-P6-COM'").length === 0);
+  const paid = await reqA('/me/bookings/BK-P6-COM/payment-intent', { method: 'POST', body: { method: 'dev-success' } });
+  const com = (await reqS1('/supervisor/me/commissions')).data;
+  const row = com.items.find((c) => c.bookingId === 'BK-P6-COM');
+  ok('the verified payment writes exactly one commission at the configured rate (5% of 400 = 20 USD), earned', paid.data.payment.status === 'paid' && com.items.filter((c) => c.bookingId === 'BK-P6-COM').length === 1 && row.amount === 20 && row.currency === 'USD' && row.status === 'earned' && row.rate === 0.05, JSON.stringify(row));
+  ok('the commission list carries the rule it was computed under', com.model.model === 'percentage' && com.model.rate === 0.05);
+  ok('supervisor-2 never sees supervisor-1\'s commission', !(await reqS2('/supervisor/me/commissions')).data.items.some((c) => c.bookingId === 'BK-P6-COM'));
+  // Replay: the same provider event again (a duplicate), and a second different success event for the same payment.
+  const payRow = dbAll("SELECT id, provider_reference FROM payments WHERE booking_id = 'BK-P6-COM' AND status = 'paid'")[0];
+  const evRow = dbAll('SELECT provider_event_id FROM payment_events WHERE payment_id = ?', payRow.id)[0];
+  const sign = (buf) => createHmac('sha256', PAYMENT_DEV_SECRET).update(buf).digest('hex');
+  const webhook = (body) => { const raw = Buffer.from(JSON.stringify(body)); return fetch(`${API}/payments/webhook/dev`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Dev-Signature': sign(raw) }, body: raw }).then(async (r) => ({ status: r.status, data: await r.json().catch(() => null) })); };
+  const dup = await webhook({ eventId: evRow.provider_event_id, type: 'succeeded', providerReference: payRow.provider_reference, amount: 400, currency: 'USD' });
+  await webhook({ eventId: 'evt_p6_second', type: 'succeeded', providerReference: payRow.provider_reference, amount: 400, currency: 'USD' });
+  ok('a replayed payment event (and a second success event for the same payment) never duplicates the commission', dup.status === 200 && dup.data.duplicate === true && dbAll("SELECT id FROM commissions WHERE booking_id = 'BK-P6-COM'").length === 1);
+  await reqB('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-P6-UNATTR', context: { service: 'flights' }, total: 300, currency: 'USD' } });
+  await reqB('/me/bookings/BK-P6-UNATTR/payment-intent', { method: 'POST', body: { method: 'dev-success' } });
+  ok('a paid booking attributed to no supervisor earns no commission', dbAll("SELECT id FROM commissions WHERE booking_id = 'BK-P6-UNATTR'").length === 0);
+  ok('the commission is audited once', dbAll("SELECT id FROM audit_events WHERE action = 'commission.earned' AND json_extract(metadata_json, '$.bookingId') = 'BK-P6-COM'").length === 1);
+
+  // ---- the rate comes from the register: a changed rate applies to new commissions only ----
+  const rule = (await reqAd('/admin/rules/commission_model')).data.rule;
+  await reqAd('/admin/rules/commission_model', { method: 'PATCH', body: { value: { ...rule.currentValue, rate: 0.1 } } });
+  await reqA('/me/bookings/claim', { method: 'POST', body: { reference: 'BK-P6-COM2', context: { service: 'flights' }, total: 250, currency: 'USD', attribution: { supervisorId: 'supervisor-1' } } });
+  await reqA('/me/bookings/BK-P6-COM2/payment-intent', { method: 'POST', body: { method: 'dev-success' } });
+  const after = (await reqS1('/supervisor/me/commissions')).data.items;
+  ok('a rate changed in the register applies to the next commission (10% of 250 = 25), the earlier one keeps its rate', after.find((c) => c.bookingId === 'BK-P6-COM2')?.amount === 25 && after.find((c) => c.bookingId === 'BK-P6-COM')?.amount === 20);
+  await reqAd('/admin/rules/commission_model', { method: 'PATCH', body: { value: rule.currentValue } });
+
+  // ---- cancellation after payment reverses the commission ----
+  const cancel = await reqAd('/bookings/BK-P6-COM/status', { method: 'POST', body: { status: 'cancelled', reason: 'customer request' } });
+  const reversed = (await reqS1('/supervisor/me/commissions')).data.items.find((c) => c.bookingId === 'BK-P6-COM');
+  ok('cancelling a paid booking marks its commission reversed (kept, not deleted)', cancel.status === 200 && reversed?.status === 'reversed' && !!reversed.reversedAt && reversed.amount === 20, JSON.stringify(reversed));
+
+  jarA.clear(); jarB.clear(); jarAnon.clear(); jarS1.clear(); jarS2.clear(); jarAd.clear();
+}
+
 // ---- diagnostics scrubbing + logs ----
 {
   await fetch(API + '/diagnostics', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: SITE }, body: JSON.stringify({ event: 'api.failure', code: 'unavailable', password: 'hunter22', token: 'abcdef0123456789abcdef0123456789abcdef', email: 'x@y.z', note: 'x'.repeat(500) }) });
   const st = await fetch(API + '/__test/state').then((r) => r.json()); const e = st.events.at(-1);
   ok('diagnostics keep the event and code, drop credentials, personal data and long strings', e.event === 'api.failure' && e.code === 'unavailable' && !('password' in e) && !('token' in e) && !('email' in e) && !('note' in e));
   ok('server logs contain no passwords, tokens, cookies or e-mails', !/password123|no_session=|@fixture\.test|hunter22/.test(logs));
+}
+
+// ---- §7: /__test/reset leaves no state behind — content, payment events and business-rule history included ----
+{
+  const counts = () => { const raw = new DatabaseSync(env.BACKEND_DATABASE_PATH, { readOnly: true }); const n = Object.fromEntries(['destinations', 'offers', 'payment_events', 'business_config_history'].map((t) => [t, raw.prepare(`SELECT COUNT(*) AS n FROM ${t}`).get().n])); raw.close(); return n; };
+  // One row in each table, written straight to the database file (the server holds it in WAL mode), then a reset.
+  const w = new DatabaseSync(env.BACKEND_DATABASE_PATH); const t = new Date().toISOString();
+  w.prepare('INSERT INTO destinations (id, slug, created_at, updated_at) VALUES (?,?,?,?)').run('dst_leak', 'leak-destination', t, t);
+  w.prepare('INSERT INTO offers (id, slug, destination_id, created_at, updated_at) VALUES (?,?,?,?,?)').run('off_leak', 'leak-offer', 'dst_leak', t, t);
+  w.prepare('INSERT INTO payment_events (provider, provider_event_id, event_type, received_at) VALUES (?,?,?,?)').run('dev', 'evt_leak', 'succeeded', t);
+  w.prepare("INSERT INTO business_config_history (rule_id, category, name, description, value_json, status, source, effective_to, superseded_at) VALUES (?,?,?,?,?,?,?,?,?)").run('leak_rule', 'general', 'Leak', '', '{}', 'DRAFT', '', t, t);
+  w.close();
+  const before = counts();
+  await control('/__test/reset');
+  const after = counts();
+  ok('rows written to content, payment events and rule history before the reset', Object.values(before).every((n) => n > 0), JSON.stringify(before));
+  ok('reset clears destinations, offers, payment_events and business_config_history', Object.values(after).every((n) => n === 0), JSON.stringify(after));
+  const cols = (t) => { const raw = new DatabaseSync(env.BACKEND_DATABASE_PATH, { readOnly: true }); const c = raw.prepare(`PRAGMA table_info(${t})`).all().map((r) => r.name); raw.close(); return c; };
+  ok('migration 011 dropped the never-written customers.image and supervisors.internal_id', !cols('customers').includes('image') && !cols('supervisors').includes('internal_id'));
 }
 
 child.kill('SIGTERM'); await new Promise((r) => child.on('close', r)); rmSync(dir, { recursive: true, force: true });

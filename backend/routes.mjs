@@ -8,7 +8,7 @@ import { q, now, J, placeholders, markRead } from './db.mjs';
 import { json, empty, fail, HttpError, hex, readJson, readBody, parseMultipart, str, isEmail, pageParams } from './http.mjs';
 import { customers, publicCustomer, slugLookup, customerById, createIdentity, validAttribution } from './identity.mjs';
 import { authRoutes, normEmail } from './credentials.mjs';
-import { assignAttribution } from './supervisor.mjs';
+import { assignAttribution, createLead } from './supervisor.mjs';
 import { validateUpload, storage, signedUrl, verifySignature } from './storage.mjs';
 import { enqueue } from './mailer.mjs';
 import { legalDocument } from './legal.mjs';
@@ -136,6 +136,13 @@ export const me = {
       q.run('INSERT INTO bookings (id, customer_id, trip_id, service, status, payment_status, amount, currency, supervisor_id, ticketed, detail_json, flight_search_id, flight_offer_id, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)', ref, cid, tripId, str(ctxB.service ?? 'flights', 20), b.status === 'received' ? 'pending' : 'confirmed', 'unpaid', amount, currency, attribution?.supervisorId ?? null, 0, JSON.stringify(detail), flightSearchId, flightOfferId, t);
       q.run('INSERT INTO notifications (id, customer_id, kind, at, read, title_ar, title_en, text_ar, text_en, href, booking_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)', `ntf_${hex(6)}`, cid, 'booking', t, 0, b.status === 'received' ? 'استلمنا طلبك' : 'تم تأكيد حجزك', b.status === 'received' ? 'Request received' : 'Booking confirmed', `المرجع ${ref}.`, `Reference ${ref}.`, `account/bookings/?id=${ref}`, ref);
       if (attribution) assignAttribution(cid, attribution.supervisorId, 'booking', 'customer', t);
+      // Phase 6: a request-mode booking (a service with no live supplier) is a lead: someone has to come back to the
+      // customer with options and a price. It goes to the customer's attributed supervisor, else to operations.
+      if (b.status === 'received') {
+        const c = ctx.customer;
+        createLead({ customerId: cid, supervisorId: attribution?.supervisorId ?? null, name: c.name ?? '', contact: [c.email, c.phone].filter(Boolean).join(' · ') || str(b.contact?.email ?? '', 160),
+          source: 'request', serviceInterest: str(ctxB.service ?? '', 20), bookingId: ref });
+      }
       return q.get('SELECT * FROM bookings WHERE id = ?', ref);
     });
     // Stage 16D §6: a genuinely new booking, once — the early return above for an already-claimed reference
@@ -224,6 +231,20 @@ export async function diagnostics(req, res) {
   const buf = await readBody(req, 8 * 1024); let e = null; try { e = JSON.parse(buf.toString()); } catch { /* ignored */ }
   if (e && typeof e.event === 'string') { const safe = {}; for (const [k, v] of Object.entries(e)) if (!SENSITIVE.test(k) && (typeof v === 'string' ? v.length <= 120 : typeof v === 'number' || typeof v === 'boolean')) safe[k] = v; q.run('INSERT INTO diagnostics (at, event, payload_json) VALUES (?,?,?)', now(), e.event.slice(0, 60), JSON.stringify(safe)); q.run('DELETE FROM diagnostics WHERE id < (SELECT MAX(id) FROM diagnostics) - 5000'); }
   return empty(res);
+}
+/* ---- Phase 6: POST /contact — the public contact form (help/contact/). Public (no sign-in needed) and rate-limited
+   on its own class. Becomes a lead: for a signed-in customer, attributed to their supervisor; otherwise to the
+   supervisor the visitor arrived through (the page sends the session's ?supervisor= slug, checked here to be an
+   active supervisor); otherwise unassigned, for operations. ---- */
+export async function contact(req, res, ctx) {
+  const b = await readJson(req);
+  const name = str(b.name, 120); const email = str(b.email, 254).toLowerCase(); const phone = str(b.phone, 30); const message = str(b.message, 2000);
+  if (!name || !message || (!email && !phone) || (email && !isEmail(email)) || (phone && !/^\+?[0-9 ()-]{6,30}$/.test(phone))) throw new HttpError(422, 'invalid');
+  const attribution = validAttribution({ supervisorId: b.attribution?.supervisor ?? b.attribution?.supervisorId, source: 'link' });
+  const lead = createLead({ customerId: ctx.customer?.id ?? null, supervisorId: attribution?.supervisorId ?? null, name, contact: [email, phone].filter(Boolean).join(' · '),
+    source: 'contact', serviceInterest: str(b.service, 20) || null, message });
+  info('lead.contact', { assigned: !!lead?.supervisorId });
+  return json(res, 201, { received: true });
 }
 /* ---- Stage 16B: Secure Webhook → Server Verification (§8). Public — no customer/staff session exists for a
    provider's own server calling us — authenticated entirely by the provider's signature over the RAW body.

@@ -1,8 +1,8 @@
 /* OPS / UI / DESTINATIONS — Command Center CMS. Admin-wide destination directory: view, create, edit, and the
    draft → published → archived lifecycle (Phase 2B-i; backend/content.mjs). A real backend entity since Phase 2A
-   — the public site's own destinations registry (assets/js/data/destinations.js) is untouched and does not yet
-   read from here (Phase 2 scope decision: the public site stays static; staff preview it through
-   admin/destinations/preview/ instead). Editing an already-published destination never silently unpublishes it —
+   — since Phase 6 a connected build's public destinations pages show what is PUBLISHED here (GET
+   /content/destinations, assets/js/data/content-source.js), the static registry (assets/js/data/destinations.js)
+   being the fallback; staff preview drafts through admin/destinations/preview/. Editing an already-published destination never silently unpublishes it —
    it stays live, flagged as having unpublished changes, until someone explicitly republishes. */
 import { el, render } from '../../core/dom.js';
 import { t } from '../../core/i18n.js';
@@ -106,6 +106,8 @@ function publishingControls(fresh, refresh, kind) {
   const buttons = [];
   const next = NEXT_STATES[fresh.publishStatus] ?? [];
   if (next.includes('published')) buttons.push(busyButton(t('ops.content.publish'), 'primary', () => transition('published', 'ops.content.published.action')));
+  // Edits to a live record stay off the public site until they are published (backend/content.mjs snapshot).
+  if (fresh.publishStatus === 'published' && fresh.hasUnpublishedChanges) buttons.push(busyButton(t('ops.content.publishChanges'), 'primary', () => transition('published', 'ops.content.published.action')));
   if (fresh.publishStatus === 'published' && next.includes('draft')) buttons.push(busyButton(t('ops.content.unpublish'), 'tertiary', () => transition('draft', 'ops.content.unpublished.action')));
   if (fresh.publishStatus === 'archived' && next.includes('draft')) buttons.push(busyButton(t('ops.content.restoreToDraft'), 'tertiary', () => transition('draft', 'ops.content.restored.action')));
   if (next.includes('archived')) buttons.push(busyButton(t('ops.content.archive'), 'tertiary', () => transition('archived', 'ops.content.archived.action')));

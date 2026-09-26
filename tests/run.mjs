@@ -14,7 +14,7 @@ const site = await staticServer({ prefix: PREFIX, bare: true });
 const env = { ...process.env, TEST_ORIGIN: site.origin, BASE: `${site.origin}${PREFIX}` };
 
 const args = process.argv.slice(2);
-const SUITES = ['final', 'ghx', 'ghm', 'gfx', 'home', 'services', 'detail', 'destinations', 'offers', 'booking', 'supervisor', 'journey', 'account', 'integration', 'backend', 'supervisor-portal', 'ops-portal', 'rm', 'links', 'food-supplier'];
+const SUITES = ['final', 'ghx', 'ghm', 'gfx', 'home', 'services', 'detail', 'destinations', 'offers', 'booking', 'supervisor', 'journey', 'account', 'integration', 'backend', 'supervisor-portal', 'ops-portal', 'public-content', 'rm', 'links', 'food-supplier'];
 const wanted = args.filter((a) => !a.startsWith('--'));
 const suites = wanted.length ? wanted : (args.includes('--audits') ? [] : SUITES);
 const audits = !wanted.length;

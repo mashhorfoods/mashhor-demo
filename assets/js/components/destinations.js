@@ -10,11 +10,12 @@ import { el, qs, qsa, render, scrollTo as scrollIntoView } from '../core/dom.js'
 import { t, pick } from '../core/i18n.js';
 import { route } from '../data/config.js';
 import {
-  DESTINATION_REGISTRY, DESTINATION_REGIONS, TRAVEL_PURPOSES,
+  DESTINATION_REGIONS, TRAVEL_PURPOSES,
   destinationsIn, destinationsFor, featuredDestinations, regionsWithDestinations,
   destinationEntry, searchDestinations,
 } from '../data/destinations.js';
 import { serviceById } from '../data/services.js';
+import { loadDestinations, contentConnected } from '../data/content-source.js';
 import { icon, routeGraphic } from './ui.js';
 import { destinationCard, mediaPlaceholder } from './cards.js';
 import { searchWidget } from './search.js';
@@ -87,11 +88,11 @@ export function destinationGridDisclosed(list, { first = 6 } = {}) {
 /* ---------------------------------------------------------------------------
    REGION NAV — chips for the regions that contain something (+ all). §7
    ------------------------------------------------------------------------ */
-export function regionNav({ onSelect, current, regions = DESTINATION_REGIONS } = {}) {
+export function regionNav({ onSelect, current, regions = DESTINATION_REGIONS, list = null } = {}) {
   // One chip per structural region, with its count. The full list already
   // lives in the section above, so there is no "all" here.
   const chips = regions.map((r) => {
-    const count = destinationsIn(r.id).length;
+    const count = list ? list.filter((d) => d.region === r.id).length : destinationsIn(r.id).length;
     return el('button', {
       type: 'button', class: 'c-chip c-catnav__chip', dataset: { region: r.id }, 'aria-pressed': String(r.id === current),
       onclick: (event) => { chips.forEach((b) => b.setAttribute('aria-pressed', String(b === event.currentTarget))); onSelect?.(r.id); },
@@ -118,9 +119,9 @@ export function featuredBlock(list = featuredDestinations()) {
 /* ---------------------------------------------------------------------------
    TRAVEL PURPOSE — tiles that run a purpose search. §9
    ------------------------------------------------------------------------ */
-export function purposeTiles({ onPick } = {}) {
+export function purposeTiles({ onPick, list = null } = {}) {
   return el('ul', { class: 'l-grid c-help', role: 'list' }, TRAVEL_PURPOSES.map((p) => {
-    const count = destinationsFor(p.id).length;
+    const count = list ? list.filter((d) => d.purposes.includes(p.id)).length : destinationsFor(p.id).length;
     const service = serviceById(p.service);
     return el('li', { class: 'l-span-4@md l-span-4@lg' }, el('button', {
       type: 'button', class: 'c-help__option', dataset: { purpose: p.id }, onclick: () => onPick?.(p.id),
@@ -157,10 +158,12 @@ export function helpBand() {
 /* ---------------------------------------------------------------------------
    MOUNT
    ------------------------------------------------------------------------ */
+/* `load` defaults to the content source (data/content-source.js): the static registry, or the published CMS
+   destinations on a connected build. Search, region counts and purpose counts run over what `load` returned. */
 export function mountDestinations({
   root = document,
-  load = async () => DESTINATION_REGISTRY,
-  search = async (query) => searchDestinations(query),
+  load = loadDestinations,
+  search = null,
 } = {}) {
   const mount = (name) => qs(`[data-destinations="${name}"]`, root);
   const scrollTo = (id) => scrollIntoView(qs(`#${id}`, root));
@@ -182,7 +185,7 @@ export function mountDestinations({
     resultsSection.hidden = false;
     regions.results.loading();
     let list;
-    try { list = await search(query); }
+    try { list = await (search ?? (async (q) => searchDestinations(q, await load())))(query); }
     catch (error) { console.error('[no] destination search failed', error); regions.results.error(); return; }
     const title = qs('[data-destinations-results-title]', resultsSection);
     if (title) title.textContent = t('dest.results.title', list.length);
@@ -202,7 +205,8 @@ export function mountDestinations({
   });
 
   // ---- By region — opens on the first region that contains something
-  let currentRegion = regionsWithDestinations()[0]?.id ?? DESTINATION_REGIONS[0].id;
+  const firstRegion = (list) => DESTINATION_REGIONS.find((r) => list.some((d) => d.region === r.id))?.id ?? DESTINATION_REGIONS[0].id;
+  let currentRegion = contentConnected() ? DESTINATION_REGIONS[0].id : (regionsWithDestinations()[0]?.id ?? DESTINATION_REGIONS[0].id);
   regions.region = stateRegion(mount('region-grid'), {
     loading: grid3,
     empty: emptyWith('dest.region.empty.title', 'dest.region.empty.text', [
@@ -222,10 +226,12 @@ export function mountDestinations({
   });
 
   // ---- Purposes + help
-  render(mount('purposes'), purposeTiles({ onPick: (purposeId) => api.searchPurpose(purposeId) }));
+  const paintPurposes = (list) => render(mount('purposes'), purposeTiles({ list, onPick: (purposeId) => api.searchPurpose(purposeId) }));
+  paintPurposes(contentConnected() ? [] : null);
   render(mount('help'), helpBand());
 
   let data = [];
+  let regionPicked = false;
   Object.values(regions).forEach((r) => r.loading());
   resultsSection.hidden = true;
 
@@ -236,8 +242,10 @@ export function mountDestinations({
       ['popular', 'region', 'featured'].forEach((k) => regions[k].error());
       return;
     }
+    if (!regionPicked && !data.some((d) => d.region === currentRegion)) currentRegion = firstRegion(data);
+    paintPurposes(data);
     data.length ? regions.popular.content(destinationGridDisclosed(data)) : regions.popular.empty();
-    render(mount('region-nav'), regionNav({ onSelect: (id) => api.filterRegion(id), current: currentRegion }));
+    render(mount('region-nav'), regionNav({ list: data, onSelect: (id) => api.filterRegion(id), current: currentRegion }));
     paintRegion(data);
     const featured = data.filter((d) => d.featured);
     featured.length ? regions.featured.content(featuredBlock(featured)) : regions.featured.empty();
@@ -247,7 +255,7 @@ export function mountDestinations({
     regions, widget,
     get region() { return currentRegion; },
     filterRegion(id) {
-      currentRegion = id;
+      currentRegion = id; regionPicked = true;
       qsa('.c-catnav__chip', mount('region-nav')).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.region === id)));
       paintRegion(data);
     },

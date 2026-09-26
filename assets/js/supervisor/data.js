@@ -7,14 +7,14 @@
 
    Shapes:
      supervisor   { id, slug, status, nameAr/En, titleAr/En, bioAr/En, image, languages[], specialties[], services[],
-                    phone, whatsapp, email, city, internalId, notificationPrefs, createdAt, updatedAt }
+                    phone, whatsapp, email, city, notificationPrefs, createdAt, updatedAt }
      customerRow  { id, name, email, phone, locale, attributionAt, createdAt, bookingsCount, lastActivityAt }
      customer     customerRow + { attribution{supervisorId,source,at}, bookings[], trips[], attributionHistory[] }
      bookingRow   { id, customerId, customerName, service, status, paymentStatus, amount, currency, createdAt, tripId }
      lead         { id, customerId, name, contact, source, serviceInterest, status, convertedBookingId, createdAt, updatedAt }
      revenue      { currency, gross, completed, pending, cancelled, bookingsCount, commission{model,status} }
      performance  { customers, leads, leadsConverted, conversionRate, bookings, bookingsConfirmed, bookingsCancelled }
-     commission   { id, bookingId, amount, currency, status, period, createdAt } — commissions().items
+     commission   { id, bookingId, amount, currency, status ('earned'|'reversed'), rate, period, createdAt, reversedAt } — commissions().items
      notification { id, kind, at, read, titleAr/En, textAr/En, href, bookingId }
      A paged list answers { items, page, pageSize, total, nextPage }.
    ========================================================================= */

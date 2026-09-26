@@ -46,7 +46,7 @@ it, per the brief's "do not redesign".
 
 The backend's `supervisors` table (`backend/migrations/002_supervisors.sql`)
 is a **superset** prepared for that future admin: the same public fields,
-plus `internalId`, credentials (`password_salt/hash`, never exposed),
+plus credentials (`password_salt/hash`, never exposed),
 `notification_prefs_json`, `created_at/updated_at`. It is what
 `/supervisor/me` (§25) reads and writes, and what a real backend's public
 directory would eventually serve if the profile page is ever switched to
@@ -165,10 +165,10 @@ private, guarded — §8):
 | `supervisor/customers/` (+`?id=`) | My customers: search, list, detail with bookings and attribution history |
 | `supervisor/leads/` | Leads: list, status change (new → contacted → in_progress → converted/closed) |
 | `supervisor/bookings/` (+`?id=`) | Bookings: filter by status, list, detail |
-| `supervisor/revenue/` | Gross / completed / pending / cancelled, period filter, commission status |
+| `supervisor/revenue/` | Gross / completed / pending / cancelled, period filter, the commission rule and a commissions list (booking, amount, status, date) |
 | `supervisor/performance/` | Customers, leads, conversion rate, bookings, period filter |
 | `supervisor/notifications/` | A separate feed from the customer's, quiet refresh on focus |
-| `supervisor/settings/` | Bio, phone, WhatsApp, city, password — nothing else |
+| `supervisor/settings/` | Account details (name, sign-in email, languages; read-only), Arabic/English bio, phone, WhatsApp, city, password — nothing else |
 | `supervisor/sign-out/` | Sign out |
 
 No admin, no operations dashboard, no commission payout screen — out of
@@ -185,19 +185,33 @@ frontend guard is UX, the backend check is authorization (§5/§6). Verified:
 every portal route blocked for a guest, a customer session on a supervisor
 route (401), a supervisor session on a customer route (401).
 
-## 9. Commission / supervisor rights — architecture, not a rule
+## 9. Leads and commissions (Phase 6)
 
-`commissions` table: `id, supervisor_id, booking_id, amount, currency,
-status, period, rule_version, created_at`. `business_config`'s
-`commission_model` row starts `{ "model": null, "status":
-"pending_business_configuration" }`. `GET /supervisor/me/commissions`
-always answers with that model alongside whatever rows exist (none today);
-the revenue screen shows the same honest sentence rather than a number.
-**No percentage, fixed amount, service-specific or hybrid rule is
-calculated anywhere** — implementing one is a data change (`business_config`
-+ a job that inserts `commissions` rows when a booking is billable), not an
-architecture change. A supervisor cannot edit their own commission: it is
-not a field `PATCH /supervisor/me` accepts.
+**Leads** come from real customer actions. A request-mode booking (a service
+with no live supplier, claimed with `status: "received"`) and a message sent
+through the public contact form (`POST /contact`, help/contact/) each create
+one lead (`createLead`, `backend/supervisor.mjs`). It goes to the customer's
+attributed supervisor (first touch, `customers.attribution_supervisor`); for a
+visitor who is not signed in, to the supervisor slug the page carries from
+`?supervisor=` (checked to be active); otherwise it is unassigned
+(`supervisor_id` NULL), which only operations sees on its leads screen. The
+supervisor gets a `lead` notification. In development, with no backend, both
+actions are mirrored into the browser's dev lead store (`core/leads.js`),
+which the dev supervisor and ops adapters read.
+
+**Commissions** (`backend/commissions.mjs`). When the verified payment webhook
+marks a booking paid and the booking is attributed to a supervisor
+(`bookings.supervisor_id`), one `commissions` row is written in the same
+transaction: amount = booking amount × `commission_model.rate`, status
+`earned`, with the rate and the rule's version stored on the row. A unique
+index on `booking_id` makes a replayed event harmless. Moving the booking to
+`cancelled` or `refunded` marks the row `reversed` (kept, not deleted). The
+rate lives in the Business Rules Register's `commission_model` row: migration
+012 set a working default of 5% of the paid amount, status DRAFT (a technical
+default, not a confirmed business decision). Admins change it under Business
+Rules; a new rate applies to new commissions only. A register value with no
+percentage model or no rate writes nothing. A supervisor cannot edit their
+own commission: it is not a field `PATCH /supervisor/me` accepts.
 
 ## 10. Reassignment and audit trail
 
@@ -268,13 +282,13 @@ itself to a table cell.
 | Item | Status |
 | --- | --- |
 | Attribution rule (first / last / manual / hybrid) | First-attribution in place, marked `pending_business_confirmation` |
-| Commission model (percentage / fixed / service-specific / hybrid) | Architecture ready, no rule configured |
-| Commission rates | Not set |
+| Commission model (percentage / fixed / service-specific / hybrid) | Percentage in effect as a DRAFT default (migration 012), not confirmed |
+| Commission rates | 5% default, not confirmed; editable under Business Rules |
 | Supervisor permissions beyond this stage's fields | Not requested |
 | Reassignment policy (who besides a future admin) | Not requested; only the prepared admin-token endpoint exists |
 | Real supervisor identities (name, photo, contact) | Placeholders remain (Stage 10) |
 | Real supervisor login credentials | Not provisioned — `password_hash` is null until a reset/admin flow sets one |
-| Lead source taxonomy beyond `link`/`booking` | Not requested |
+| Lead source taxonomy beyond `request`/`contact` (Phase 6) | Not requested |
 
 ## 15. Files
 

@@ -15,6 +15,19 @@ performance views enforced per-supervisor in SQL. See
 dashboard action (below); the old bearer-token route and `BACKEND_ADMIN_TOKEN`
 were removed on 2026-09-25.
 
+**Leads and commissions** (Phase 6, migration 012). A lead is created by a
+request-mode booking (`POST /me/bookings/claim` with `status: "received"`)
+and by the public contact form (`POST /contact`, its own rate-limit class,
+`BACKEND_RATE_CONTACT`). It goes to the customer's attributed supervisor,
+else to the supervisor slug the visitor arrived through (active only), else
+it is unassigned (`supervisor_id` NULL) and only operations sees it. When a
+booking attributed to a supervisor is marked paid (only the verified payment
+webhook does that), `commissions.mjs` writes one `earned` commission at the
+rate in the Business Rules Register's `commission_model` row (a 5% DRAFT
+default seeded by migration 012; admins change it under Business Rules); the
+rate used is stored on the row. Moving the booking to `cancelled` or
+`refunded` marks it `reversed`.
+
 A third session serves **staff** — operations staff and admins
 (`no_ops_session`, its own CSRF token): `/staff/auth/*`, the operations routes
 (`/operations/*`, `/bookings/*`, `/documents/*`, `/notifications/*`,

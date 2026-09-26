@@ -2,8 +2,9 @@
    COMPONENTS / DESTINATION DETAIL — one template, every destination.
 
    Mirrors the offer detail template (offers.js): a single reusable page,
-   painted from whatever the DESTINATION_REGISTRY record (data/destinations.js)
-   actually carries. A section renders only when its data exists — nothing
+   painted from whatever the destination record actually carries — from
+   data/content-source.js (the static DESTINATION_REGISTRY, or the published
+   CMS records on a connected build). A section renders only when its data exists — nothing
    here invents a price, a schedule or a visa rule the registry doesn't have.
 
    mountDestinationDetail({ slug }) → window.no.destination for QA.
@@ -17,6 +18,7 @@ import {
 } from '../data/destinations.js';
 import { serviceById } from '../data/services.js';
 import { OFFER_REGISTRY } from '../data/offers.js';
+import { loadDestination } from '../data/content-source.js';
 import { icon, sectionHead, heroFocalStyle } from './ui.js';
 import { serviceCard, mediaPlaceholder } from './cards.js';
 import { offerDeck } from './offers.js';
@@ -127,9 +129,10 @@ export function relatedServicesSection(record) {
   ];
 }
 
-/** Only offers the registry actually associates with this destination. §13 */
+/** Only offers the registry actually associates with this destination. §13 A record from the content source
+    (data/content-source.js) carries its own `offers`, from the same source it came from. */
 export function relatedOffersSection(record) {
-  const list = OFFER_REGISTRY.filter((o) => o.destination === record.id);
+  const list = record.offers ?? OFFER_REGISTRY.filter((o) => o.destination === record.id);
   if (!list.length) return null;
   return [
     sectionHead({ id: 'offers-title', overline: t('dest.detail.offers.overline'), title: t('dest.detail.offers.title', pick(record, 'name')) }),
@@ -150,7 +153,9 @@ const applyHead = (record) => setPageHead({ title: `${pick(record, 'name')} — 
 /* ---------------------------------------------------------------------------
    MOUNT
    ------------------------------------------------------------------------ */
-export function mountDestinationDetail({ slug, root = document, load = async (s) => getDestination(s) } = {}) {
+/* The default `load` reads the content source: the static registry, or the published CMS records on a connected
+   build (a slug the CMS doesn't publish → the not-found state). The admin preview passes its own `load`. */
+export function mountDestinationDetail({ slug, root = document, load = loadDestination } = {}) {
   const { mount, show, hideAll } = detailSections(root, 'dest', ['overview', 'why', 'travel', 'services', 'offers', 'support']);
   const region = stateRegion(mount('hero'), {
     loading: () => el('div', { style: 'display:contents' }, [

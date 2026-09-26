@@ -25,7 +25,7 @@
    refused in production — see backend/config.mjs).
    ========================================================================= */
 
-import { registerAdapter, devReference } from './index.js';
+import { registerAdapter, bookingReference } from './index.js';
 import { get, post } from '../../core/api.js';
 
 export const API_FLIGHTS = registerAdapter({
@@ -47,7 +47,7 @@ export const API_FLIGHTS = registerAdapter({
   async book(order) {
     // Not yet a supplier reservation — see this file's header. The real order is created server-side once
     // Stage 16B's verified payment lands; see confirmation.js reading GET /me/bookings/:id's flightBooking field.
-    return { reference: devReference('NO'), status: 'confirmed', ticketed: false, service: 'flights',
+    return { reference: bookingReference('NO'), status: 'confirmed', ticketed: false, service: 'flights',
       messageAr: 'تم استلام طلب حجزك. يُنشأ الحجز الفعلي مع المزوّد بعد إتمام الدفع.',
       messageEn: 'Your booking request was received. The actual supplier reservation is created once payment is complete.' };
   },
