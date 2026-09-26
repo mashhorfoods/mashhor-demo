@@ -125,6 +125,29 @@ work.
 
 ## 3. Duplicate logic to consolidate
 
+> **Phase 4 status (2026-09-26): done.** Four parallel branches, merged and verified together:
+> - **Test infrastructure:** one `staticServer`, `MIME`, `stagingEnv` and `launch()` in `tests/env.mjs`;
+>   `tools/lib/browser.mjs` for the image builders and audits. One page list, `tests/pages.mjs`, used by
+>   links, i18n and a11y. It surfaced one real finding (headings skipping h1→h3 on `help/`, fixed with a
+>   visually hidden h2). `npm run serve` serves the site as the suites expect; `audit:a11y` is renamed `audit`.
+> - **Portals:** `core/portal-session.js`, `core/portal-auth-screens.js`, `core/portal-ui.js`,
+>   `core/portal-form.js` and `core/adapter-helpers.js` replace the per-portal copies (sessions, sign-in
+>   screens, shell helpers, form fields, status selects, list/query/paging helpers); `unreadCount` and
+>   `PERIODS` are defined once. Ops amounts go through `money()`. The customer `payments()` O(n²) is fixed.
+> - **Backend:** `backend/credentials.mjs` `makeCredentialStore()` is the single credential stack for all
+>   three roles (each keeps its own tables, cookies, lockout keys and reset prefix); one `sessionCookies()`
+>   helper; one sweep interval. The small helpers (`J`, `hex`, `SYSTEM_ACTOR`, `strArr`/`isSlug`/`imageJson`,
+>   the "confirmed" rule check, `markRead`) are each defined once, and `/services` has one guard.
+> - **Public components:** one `supportSection()`, `channelList()`, `detailSections()`, and collapse
+>   helpers `setExpanded`/`bindCollapse` with one shared CSS rule set. The header placeholder is sized from
+>   the real bar (`--header-row`), not the deleted logo, which removes the 4px layout shift. As a result,
+>   booking pages from 64em up render the bar at 73px instead of 69px.
+> - **Deliberately kept separate:** the account shell's own guard/mount/amount (it adds support entry,
+>   sign-up and "(refunded)"), `session-api-auth.js` (sign-up and the customer shape), and the supervisor
+>   settings forms.
+> - **Still open:** `--header-height: 72px` in `01-tokens.css` (scroll margins and sticky offsets) no
+>   longer matches the real header (69px on phones, 73px on desktop).
+
 | Duplication | Copies | Lines saved | Risk | Plan |
 |---|---|---|---|---|
 | **Portal session and sign-in screens.** `ops/auth.js` and `supervisor/auth.js` differ only in names; the two `auth-screens.js` differ only in path prefix; same for `api-*-auth.js` and `not-connected.js`. | 3 portals | ~350 | Medium: storage keys, cookie names and return shapes must stay distinct | `createPortalSession({key, ErrorClass, entity})` and `createPortalAuthScreens({prefix, auth})`. This fixes 1.1 and 1.4 structurally. |

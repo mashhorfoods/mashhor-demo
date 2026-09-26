@@ -55,19 +55,19 @@ history (`git show 1bd3171:docs/<name>.pdf`).
 
 ## Run it
 
-No build step. Any static server works, but it must be **`http://`, not
-`file://`** — the icon sprite is fetched at runtime.
+No build step. It must be served over **`http://`, not `file://`** — the icon
+sprite is fetched at runtime. `npm ci` once (Playwright, for the tests), then:
 
 ```bash
-python3 -m http.server 8000     # then open http://localhost:8000/
+npm run serve    # the site at http://localhost:8919/mashhor-demo/, as GitHub Pages serves it
+npm test         # every browser suite, then the language and accessibility audits (~40 min)
+npm run audit    # only the two audits
 ```
 
 Before a page ships, it must be fully translated in both locales
-(`docs/FOUNDATION.md` §5). Prove it with the audit (needs Playwright):
-
-```bash
-BASE=http://localhost:8000/ node tools/i18n-audit.mjs   # must end with TOTAL untranslated strings: 0
-```
+(`docs/FOUNDATION.md` §5): `npm run audit` must end with
+`TOTAL untranslated strings: 0` and `0 unique findings`. The list of pages the
+link check and both audits visit lives in one place, `tests/pages.mjs`.
 
 ## Use it in a page
 
