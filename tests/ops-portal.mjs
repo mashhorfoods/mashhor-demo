@@ -182,6 +182,8 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.ops.s
 
   await go(p, 'admin/leads/'); await mainReady(p);
   ok('leads: admin-wide leads and attribution history panels', await count(p, '#ops-leads-list') === 1 && await count(p, '#ops-leads-attribution') === 1);
+  await p.waitForSelector('#ops-leads-list tbody tr');
+  ok('leads: an unassigned lead says so and its source is a label, not a raw code', (await text(p, '#ops-leads-list tbody')).includes('غير مُسنَد') && (await text(p, '#ops-leads-list tbody')).includes('رابط المنسق') && (await text(p, '#ops-leads-list tbody')).includes('نموذج التواصل') && !/\b(link|contact)\b/.test(await text(p, '#ops-leads-list tbody')));
 
   await go(p, 'admin/payments/'); await mainReady(p); await p.waitForSelector('.c-svp-table, .c-svp-table-wrap');
   ok('payments: development payment records, read-only', await count(p, 'tbody tr') === 2);
@@ -207,6 +209,61 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.ops.s
   ok('an invalid JSON value is caught client-side with an inline error, never sent to the backend', await visible(p, '#ops-rule-manage .c-field__error'));
   await p.fill('#ops-rule-manage textarea[name=value]', '{"levels":["low","normal","high","urgent","critical"]}'); await p.click('#ops-rule-manage button[type=submit]'); await p.waitForTimeout(500);
   ok('a valid JSON value is applied and re-rendered', (await text(p, '#ops-rule-value')).includes('critical'));
+  await c.close();
+}
+
+// ================================================================= 2c. Phase 6: pagination + workflow editing (development stand-in, both languages, 390px)
+for (const loc of ['ar', 'en']) {
+  const { c, p } = await ctx(390, 844, loc); await devSignIn(p); await dev(p, 'no.dev.ops.bulk', '60');
+  const status = (n, total) => (loc === 'ar' ? `يُعرض ${n} من ${total}` : `Showing ${n} of ${total}`);
+  const hScroll = () => p.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+  for (const [url, rowSel] of [['admin/bookings/', 'tbody tr'], ['admin/tasks/', '.c-svp-lead']]) {
+    await go(p, url); await mainReady(p); await p.waitForSelector(rowSel);
+    ok(`${loc}/${url}: first page holds 50 of 62 rows, a polite status line and Load more`, await count(p, rowSel) === 50 && await text(p, '[data-pager-status]') === status(50, 62) && await p.getAttribute('[data-pager-status]', 'aria-live') === 'polite' && await visible(p, '[data-action=load-more]'), `${await count(p, rowSel)} · ${await text(p, '[data-pager-status]')}`);
+    ok(`${loc}/${url}: no horizontal scroll at 390px with the pager`, !(await hScroll()));
+    await p.click('[data-action=load-more]'); await p.waitForFunction((sel) => document.querySelectorAll(sel).length === 62, rowSel);
+    ok(`${loc}/${url}: Load more appends the last 12, the count follows, the button goes`, await text(p, '[data-pager-status]') === status(62, 62) && !(await visible(p, '[data-action=load-more]')));
+  }
+  // a filter change starts again at page 1 (the pager follows the new total)
+  await p.selectOption('[data-portal=main] .c-svp-filter select', 'completed'); await p.waitForTimeout(800);
+  ok(`${loc}: a filter with no matches hides the pager`, !(await visible(p, '[data-pager]')));
+  await dev(p, 'no.dev.ops.bulk', null);
+
+  // workflow editing (the dev admin holds workflow.manage)
+  await go(p, 'admin/services/?id=flights'); await mainReady(p); await p.waitForSelector('#ops-svc-workflow form[data-form=workflow]');
+  const keys = () => p.$$eval('#ops-svc-workflow [name=key]', (xs) => xs.map((x) => x.value).join());
+  ok(`${loc}: workflow editor lists the six steps with both labels`, await keys() === 'search,select,passengers,payment,ticketing,confirmation' && await p.inputValue('#ops-svc-workflow li:first-child [name=labelAr]') === 'البحث');
+  ok(`${loc}: the first step cannot move up, the last cannot move down`, await p.isDisabled('#ops-svc-workflow li:first-child [data-step-action=up]') && await p.isDisabled('#ops-svc-workflow li:last-child [data-step-action=down]'));
+  await p.click('#ops-svc-workflow li:nth-child(2) [data-step-action=up]');
+  ok(`${loc}: moving a step up reorders it and keeps focus on the control`, (await keys()).startsWith('select,search,') && await p.evaluate(() => document.activeElement?.dataset.stepAction === 'down'));
+  await p.click('#ops-svc-workflow li:last-child [data-step-action=remove]');
+  await p.click('#ops-svc-workflow [data-action=add-step]');
+  ok(`${loc}: add focuses the new step's key`, await p.evaluate(() => document.activeElement?.name === 'key'));
+  await p.click('#ops-svc-workflow button[type=submit]'); await p.waitForTimeout(300);
+  ok(`${loc}: an incomplete step is refused inline, nothing saved`, await visible(p, '#ops-svc-workflow .c-field__error') && await count(p, '#ops-svc-workflow [aria-invalid=true]') === 3);
+  await p.fill('#ops-svc-workflow li:last-child [name=key]', 'handover'); await p.fill('#ops-svc-workflow li:last-child [name=labelAr]', 'التسليم'); await p.fill('#ops-svc-workflow li:last-child [name=labelEn]', 'Handover');
+  await p.fill('#ops-svc-workflow li:first-child [name=labelEn]', 'Choose');
+  const stored = () => p.evaluate(async () => (await import(new URL('assets/js/ops/data.js', document.baseURI.replace(/admin\/.*$/, '')).href)).opsData.serviceWorkflow('flights').then((xs) => xs.map((x) => `${x.key}:${x.labelEn}`).join()));
+  await p.click('#ops-svc-workflow button[type=submit]');
+  await p.waitForFunction(() => document.querySelector('#ops-svc-workflow button[type=submit]')?.dataset.state !== 'loading' && !document.querySelector('#ops-svc-workflow [aria-invalid]') && document.querySelector('#ops-svc-workflow li:last-child [name=key]')?.value === 'handover');
+  await p.waitForTimeout(1000); await p.waitForSelector('#ops-svc-workflow form[data-form=workflow]');
+  ok(`${loc}: the workflow is saved in its new order with the new labels`, (await stored()) === 'select:Choose,search:Search,passengers:Passenger data,payment:Payment,ticketing:Ticketing,handover:Handover', await stored());
+  ok(`${loc}: and re-renders that way`, await keys() === 'select,search,passengers,payment,ticketing,handover' && await p.inputValue('#ops-svc-workflow li:first-child [name=labelEn]') === 'Choose');
+  ok(`${loc}: no horizontal scroll at 390px with the workflow editor`, !(await hScroll()));
+
+  // document requirements (visa has two in the stand-in)
+  await go(p, 'admin/services/?id=visa'); await mainReady(p); await p.waitForSelector('#ops-svc-documents form[data-form=doc-requirement]');
+  ok(`${loc}: document requirements listed with their required flag`, await count(p, '#ops-svc-documents [data-doc-req]') === 2 && await p.isChecked('[data-doc-req=passport] input[type=checkbox]'));
+  await p.fill('#ops-req-docType', 'ticket'); await p.click('#ops-svc-documents button[type=submit]'); await p.waitForSelector('[data-doc-req=ticket]');
+  ok(`${loc}: a new requirement is added`, await count(p, '#ops-svc-documents [data-doc-req]') === 3);
+  await p.fill('#ops-req-docType', 'passport'); await p.click('#ops-svc-documents button[type=submit]'); await p.waitForTimeout(500);
+  ok(`${loc}: the same document type twice is refused with its own message`, (await text(p, '#ops-svc-documents .c-field__error')).length > 0 && await count(p, '#ops-svc-documents [data-doc-req]') === 3);
+  await p.uncheck('[data-doc-req=passport] input[type=checkbox]'); await p.waitForFunction(() => document.querySelector('[data-doc-req=passport] input[type=checkbox]') && !document.querySelector('[data-doc-req=passport] input[type=checkbox]').checked && !document.querySelector('[data-doc-req=passport] input[type=checkbox]').disabled);
+  ok(`${loc}: unticking required saves and survives the re-render`, !(await p.isChecked('[data-doc-req=passport] input[type=checkbox]')));
+  await p.click('[data-doc-req=photo] [data-action=remove-requirement]'); await p.waitForFunction(() => !document.querySelector('[data-doc-req=photo]'));
+  ok(`${loc}: a requirement is removed`, await count(p, '#ops-svc-documents [data-doc-req]') === 2);
+  ok(`${loc}: no horizontal scroll at 390px with the requirements editor`, !(await hScroll()));
+  if (loc === 'en') ok('en: the service editors are fully English', !AR.test(await p.evaluate(() => [...document.querySelectorAll('#ops-svc-workflow label, #ops-svc-workflow legend, #ops-svc-workflow button, #ops-svc-workflow p, #ops-svc-documents label, #ops-svc-documents button, #ops-svc-documents p')].map((n) => `${n.textContent} ${n.getAttribute('aria-label') ?? ''}`).join('\n'))));
   await c.close();
 }
 
@@ -359,6 +416,54 @@ await b.close();
   await p3.click('#ops-rules-register tbody tr:first-child a'); await bMainReady(p3);
   ok('real backend: ops-2 (rules.view but no rules.manage) sees the rule\'s details but never the change-status form', await count(p3, '#ops-rule-details') === 1 && await count(p3, '#ops-rule-manage') === 0);
   await c3.close();
+
+  // Phase 6 against the real backend: the pager asks for page 2 with the filter; workflow edits persist; a staff
+  // member without workflow.manage gets no editor, and the API refuses the write (403) all the same.
+  const staffApi = (p) => (path, method = 'GET', body = null) => p.evaluate(async ([path, method, body]) => {
+    const api = await import(new URL('assets/js/core/api.js', document.baseURI).href);
+    try { return { ok: true, data: await api.request(path, { method, body }) }; } catch (e) { return { ok: false, code: e.code }; }
+  }, [path, method, body]);
+  const { c: c4, p: p4 } = await bctx(); const admin = staffApi(p4);
+  await bgo(p4, 'admin/sign-in/'); await p4.fill('[name=email]', 'admin1@fixture.test'); await p4.fill('[name=password]', 'password123');
+  await Promise.all([p4.waitForURL(/dashboard\/$/), p4.click('[data-form=sign-in] button[type=submit]')]); await bMainReady(p4);
+  for (let i = 0; i < 56; i++) await admin('/operations/tasks', 'POST', { type: `bulk_${i}`, priority: 'normal' });
+  for (const task of (await admin('/operations/tasks?pageSize=3')).data.items) await admin(`/operations/tasks/${encodeURIComponent(task.id)}/status`, 'POST', { status: 'completed' });
+  const openTotal = (await admin('/operations/tasks?status=open&pageSize=1')).data.total;
+  const allTotal = (await admin('/operations/tasks?pageSize=1')).data.total;
+  await bgo(p4, 'admin/tasks/'); await bMainReady(p4); await p4.waitForSelector('.c-svp-lead');
+  ok('real backend: tasks list pages at 50 with the full total', await count(p4, '.c-svp-lead') === 50 && await text(p4, '[data-pager-status]') === `يُعرض 50 من ${allTotal}`, await text(p4, '[data-pager-status]'));
+  await p4.selectOption('[data-portal=main] .c-svp-filter select', 'open'); await p4.waitForFunction((n) => document.querySelector('[data-pager-status]')?.textContent.includes(String(n)) && !document.querySelector('[data-pager][hidden]'), openTotal);
+  const nextReq = p4.waitForRequest((r) => /\/operations\/tasks\?/.test(r.url()) && /[?&]page=2/.test(r.url()));
+  await p4.click('[data-action=load-more]'); const nextUrl = (await nextReq).url();
+  ok('real backend: Load more asks for page 2 with the same filter and page size', /[?&]status=open/.test(nextUrl) && /[?&]pageSize=50/.test(nextUrl), nextUrl);
+  await p4.waitForFunction((n) => document.querySelectorAll('.c-svp-lead').length === n, openTotal);
+  ok('real backend: the filtered list ends at its own total, every row matching, no Load more left', allTotal > openTotal && await p4.evaluate(() => [...document.querySelectorAll('.c-svp-lead')].every((r) => r.dataset.taskStatus === 'open')) && !(await visible(p4, '[data-action=load-more]')) && await text(p4, '[data-pager-status]') === `يُعرض ${openTotal} من ${openTotal}`);
+
+  await bgo(p4, 'admin/services/?id=study'); await bMainReady(p4); await p4.waitForSelector('#ops-svc-workflow form[data-form=workflow]');
+  await p4.click('#ops-svc-workflow [data-action=add-step]');
+  await p4.fill('#ops-svc-workflow li:last-child [name=key]', 'application'); await p4.fill('#ops-svc-workflow li:last-child [name=labelAr]', 'الطلب'); await p4.fill('#ops-svc-workflow li:last-child [name=labelEn]', 'Application');
+  const wfResp = p4.waitForResponse((r) => r.url().endsWith('/services/study/workflow') && r.request().method() === 'POST');
+  await p4.evaluate(() => { document.querySelector('#ops-svc-documents form').dataset.stale = '1'; });
+  await p4.click('#ops-svc-workflow button[type=submit]');
+  ok('real backend: admin saves a workflow (CSRF-carrying POST accepted)', (await wfResp).status() === 200);
+  await p4.waitForFunction(() => { const f = document.querySelector('#ops-svc-documents form'); return f && !f.dataset.stale; });
+  await p4.fill('#ops-req-docType', 'transcript');
+  const drResp = p4.waitForResponse((r) => r.url().endsWith('/services/study/document-requirements') && r.request().method() === 'POST');
+  await p4.click('#ops-svc-documents button[type=submit]'); ok('real backend: admin adds a document requirement', (await drResp).status() === 201);
+  await bgo(p4, 'admin/services/?id=study'); await bMainReady(p4); await p4.waitForSelector('#ops-svc-workflow form[data-form=workflow]');
+  ok('real backend: the workflow and requirement persist across a reload', await p4.inputValue('#ops-svc-workflow li:first-child [name=key]') === 'application' && await count(p4, '[data-doc-req=transcript]') === 1);
+  await bgo(p4, 'admin/supervisors/?id=supervisor-1'); await bMainReady(p4); await p4.waitForSelector('#ops-sv-details');
+  ok('real backend: the supervisor detail states the commission rule in words with its rate', (await text(p4, '#ops-sv-details')).includes('5%') && !(await text(p4, '#ops-sv-details')).includes('percentage'), await text(p4, '#ops-sv-details'));
+  await c4.close();
+
+  const { c: c5, p: p5 } = await bctx();
+  await bgo(p5, 'admin/sign-in/'); await p5.fill('[name=email]', 'ops1@fixture.test'); await p5.fill('[name=password]', 'password123');
+  await Promise.all([p5.waitForURL(/dashboard\/$/), p5.click('[data-form=sign-in] button[type=submit]')]); await bMainReady(p5);
+  await bgo(p5, 'admin/services/?id=study'); await bMainReady(p5); await p5.waitForSelector('#ops-svc-workflow');
+  ok('real backend: ops-1 (no workflow.manage) reads the workflow but gets no editor controls', await count(p5, '#ops-svc-workflow form, #ops-svc-documents form, [data-step-action], [data-action=remove-requirement]') === 0 && (await text(p5, '#ops-svc-workflow')).includes('الطلب'));
+  const denied = await staffApi(p5)('/services/study/workflow', 'POST', { steps: [] });
+  ok('real backend: ops-1 writing the workflow anyway is refused (403 forbidden)', !denied.ok && denied.code === 'forbidden', JSON.stringify(denied));
+  await c5.close();
 
   await b2.close(); await site.close();
   backend.kill('SIGTERM'); await new Promise((r) => backend.on('close', r)); rmSync(dir, { recursive: true, force: true });

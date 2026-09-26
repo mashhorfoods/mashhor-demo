@@ -9,7 +9,7 @@
    exists at API_BASE_URL (see adapters/installed.js).
    ========================================================================= */
 import { registerOpsDataAdapter } from '../data.js';
-import { get, post, patch } from '../../core/api.js';
+import { get, post, patch, del } from '../../core/api.js';
 import { list, queryString as q } from '../../core/adapter-helpers.js';
 
 
@@ -41,6 +41,8 @@ export const API_OPS_DATA = registerOpsDataAdapter({
   async setServiceWorkflow(_t, id, steps) { const d = await post(`/services/${encodeURIComponent(id)}/workflow`, { steps }); return d.steps; },
   async serviceDocumentRequirements(_t, id) { const d = await get(`/services/${encodeURIComponent(id)}/document-requirements`); return d.requirements; },
   async addServiceDocumentRequirement(_t, id, req) { const d = await post(`/services/${encodeURIComponent(id)}/document-requirements`, req); return d.requirements; },
+  async updateServiceDocumentRequirement(_t, id, reqId, patchBody) { const d = await patch(`/services/${encodeURIComponent(id)}/document-requirements/${encodeURIComponent(reqId)}`, patchBody); return d.requirements; },
+  async removeServiceDocumentRequirement(_t, id, reqId) { const d = await del(`/services/${encodeURIComponent(id)}/document-requirements/${encodeURIComponent(reqId)}`); return d.requirements; },
 
   async suppliers() { const d = await get('/operations/suppliers'); return list(d, 'suppliers'); },
   async createSupplier(_t, supplier) { const d = await post('/operations/suppliers', supplier); return d.supplier; },

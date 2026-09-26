@@ -6,7 +6,7 @@ import { t } from '../../core/i18n.js';
 import { route } from '../../data/config.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, statusFilterSelect, dataTable, payBadge, amount, dateTime } from './shell.js';
+import { mountOpsPortal, loadRegion, pagedRegion, pageTitle, statusFilterSelect, dataTable, payBadge, amount, dateTime } from './shell.js';
 
 const columns = [
   { labelKey: 'ops.payments.col.reference', render: (p) => el('bdi', { dir: 'ltr' }, p.reference || p.id) },
@@ -22,7 +22,8 @@ export function mountOpsPayments({ root = document } = {}) {
     const host = el('div', { dataset: { region: 'payments' } });
     const status = statusFilterSelect('ops.payments.filterLabel', ['paid', 'unpaid', 'failed', 'refunded'], 'acct.pay', () => region.run());
     main.replaceChildren(pageTitle('ops.payments.title', 'ops.payments.text'), el('div', { class: 'c-svp-filter' }, [status]), host);
-    const region = loadRegion(host, async () => (await opsData.payments({ status: status.value || undefined, page: 1, pageSize: 50 })).items, {
+    const region = pagedRegion(host, (q) => opsData.payments(q), {
+      filters: () => ({ status: status.value || undefined }),
       empty: () => stateBlock({ variant: 'empty', iconName: 'no-payment', headingLevel: 2, title: t('ops.payments.empty.title'), text: t('ops.payments.empty.text') }),
       paint: (items) => dataTable({ columns, rows: items, rowKey: (p) => p.id, emptyKey: 'ops.payments.empty.title' }),
     });

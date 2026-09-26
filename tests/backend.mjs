@@ -414,6 +414,26 @@ await control('/__test/reset');
   ok('service operational requirements are saved (trimmed) and read back', reqPatch.status === 200 && reqPatch.data.service?.operationalRequirements === 'Passport valid 6+ months' && (await reqAdmin('/services/flights')).data.service?.operationalRequirements === 'Passport valid 6+ months');
   ok('clearing operational requirements stores null', (await reqAdmin('/services/flights', { method: 'PATCH', body: { operationalRequirements: '' } })).data.service?.operationalRequirements === null);
   const wfUnset = await reqAdmin('/services/study/workflow'); ok('a service without a brief-given example starts honestly unconfigured, not invented', wfUnset.data.steps.length === 0);
+  // Phase 6: workflow and document-requirement editing, gated by workflow.manage (ops-1 does not hold it)
+  const steps = [{ key: 'application', labelAr: 'الطلب', labelEn: 'Application' }, { key: 'offer', labelAr: 'القبول', labelEn: 'Offer' }];
+  const wfDenied = await reqOps('/services/study/workflow', { method: 'POST', body: { steps } });
+  ok('ops-1 (no workflow.manage) → 403 replacing a workflow, nothing written', wfDenied.status === 403 && wfDenied.data?.error?.code === 'forbidden' && (await reqAdmin('/services/study/workflow')).data.steps.length === 0);
+  const wfSet = await reqAdmin('/services/study/workflow', { method: 'POST', body: { steps } });
+  ok('admin replaces a workflow: order, keys and both labels read back', wfSet.status === 200 && (await reqAdmin('/services/study/workflow')).data.steps.map((s) => `${s.order}:${s.key}:${s.labelEn}`).join() === '0:application:Application,1:offer:Offer');
+  ok('a workflow with a duplicate key, a missing label or a bad key is refused whole (400)', (await reqAdmin('/services/study/workflow', { method: 'POST', body: { steps: [...steps, steps[0]] } })).status === 400 && (await reqAdmin('/services/study/workflow', { method: 'POST', body: { steps: [{ key: 'x', labelAr: 'س', labelEn: '' }] } })).status === 400 && (await reqAdmin('/services/study/workflow', { method: 'POST', body: { steps: [{ key: 'Bad Key', labelAr: 'س', labelEn: 'X' }] } })).status === 400 && (await reqAdmin('/services/study/workflow')).data.steps.length === 2);
+  ok('ops-1 (no workflow.manage) → 403 adding a document requirement', (await reqOps('/services/study/document-requirements', { method: 'POST', body: { docType: 'passport' } })).status === 403);
+  const drAdd = await reqAdmin('/services/study/document-requirements', { method: 'POST', body: { docType: 'passport', required: true } });
+  const drId = drAdd.data?.requirements?.[0]?.id;
+  ok('admin adds a document requirement', drAdd.status === 201 && drAdd.data.requirements.length === 1 && drAdd.data.requirements[0].docType === 'passport' && drAdd.data.requirements[0].required === true);
+  ok('the same document type twice → 409', (await reqAdmin('/services/study/document-requirements', { method: 'POST', body: { docType: 'passport' } })).status === 409);
+  ok('ops-1 → 403 changing or removing a requirement', (await reqOps(`/services/study/document-requirements/${drId}`, { method: 'PATCH', body: { required: false } })).status === 403 && (await reqOps(`/services/study/document-requirements/${drId}`, { method: 'DELETE' })).status === 403);
+  const drPatch = await reqAdmin(`/services/study/document-requirements/${drId}`, { method: 'PATCH', body: { required: false } });
+  ok('admin marks a requirement optional', drPatch.status === 200 && drPatch.data.requirements[0].required === false);
+  ok('a requirement of another service is not found here (404)', (await reqAdmin(`/services/flights/document-requirements/${drId}`, { method: 'DELETE' })).status === 404);
+  const drDel = await reqAdmin(`/services/study/document-requirements/${drId}`, { method: 'DELETE' });
+  ok('admin removes a requirement', drDel.status === 200 && drDel.data.requirements.length === 0);
+  const wfAudit = (await reqAdmin('/operations/audit?entityType=service&entityId=study')).data.items.map((e) => e.action);
+  ok('workflow and requirement changes are audit-logged', ['workflow.update', 'service.documentRequirement.add', 'service.documentRequirement.update', 'service.documentRequirement.remove'].every((a) => wfAudit.includes(a)));
   jarAdmin.clear(); jarOps.clear(); jarCust2.clear();
 }
 

@@ -14,7 +14,7 @@ import { el, qs, render, setPageHead } from './dom.js';
 import { t } from './i18n.js';
 import { money, dateShort } from './format.js';
 import { route } from '../data/config.js';
-import { icon, toast } from '../components/ui.js';
+import { icon, toast, setButtonState } from '../components/ui.js';
 import { stateBlock, stateRegion, loadingBlock } from '../components/states.js';
 
 /* ---- Display pieces every portal shares ----------------------------------- */
@@ -61,6 +61,9 @@ export function statusSelect({ statuses, current, optionKey, labelKey, save, don
   });
   return select;
 }
+
+/** Rows per page in every staff-portal list (the backend caps a page at 100). */
+export const PAGE_SIZE = 50;
 
 const ERROR_CODES = ['unavailable', 'network', 'timeout', 'forbidden', 'notFound', 'rateLimited', 'notConfigured', 'invalid'];
 
@@ -119,6 +122,55 @@ export function createPortalUi({ attr, page, prefix, label, isDev, ErrorClass, s
     return { region, run };
   }
 
+  /**
+   * A paged list region: page 1, then a "Load more" button that fetches the next page and appends its rows, under
+   * a polite "Showing X of Y" line. The footer is hidden while there is nothing listed; the button is hidden once
+   * the backend says there is no next page. `filters()` is read once per run (page 1) and the same snapshot goes
+   * with every Load more, so a filter change re-runs from page 1 and Load more never mixes two filter states.
+   * `fetchPage({ ...filters, page, pageSize })` answers the adapter's { items, total, nextPage }. `paint(items)` must
+   * return one element — a dataTable (rows are appended to its <tbody>) or a list container (children appended).
+   */
+  function pagedRegion(host, fetchPage, { filters = () => ({}), empty, paint, pageSize = PAGE_SIZE, minHeight } = {}) {
+    const listHost = el('div', { class: 'c-pager__list' });
+    const status = el('p', { class: 'c-pager__status t-body-sm t-muted', role: 'status', 'aria-live': 'polite', tabindex: '-1', dataset: { pagerStatus: '' } });
+    const more = el('button', { type: 'button', class: 'c-btn c-btn--secondary c-btn--sm', dataset: { action: 'load-more' } }, [el('span', { class: 'c-btn__label' }, t('portal.pager.more')), el('span', { class: 'c-btn__spinner', 'aria-hidden': 'true' })]);
+    const footer = el('div', { class: 'c-pager', hidden: true, dataset: { pager: '' } }, [status, more]);
+    host.replaceChildren(listHost, footer);
+    let shown = 0; let total = null; let next = null; let list = null; let generation = 0; let busy = false; let query = {};
+    const sync = () => {
+      footer.hidden = !shown;
+      status.textContent = total == null ? t('portal.pager.shown', shown) : t('portal.pager.status', shown, total);
+      more.hidden = !next;
+    };
+    const first = loadRegion(listHost, async () => {
+      const gen = ++generation; shown = 0; next = null; footer.hidden = true; query = filters();
+      const pg = await fetchPage({ ...query, page: 1, pageSize });
+      if (gen === generation) { shown = pg.items.length; total = pg.total ?? null; next = pg.nextPage ?? null; }
+      return pg.items;
+    }, { empty, minHeight, paint: (items) => (list = paint(items)) });
+    const run = async () => { const data = await first.run(); sync(); return data; };
+    async function loadMore() {
+      if (!next || busy) return;
+      const gen = generation; busy = true; setButtonState(more, 'loading');
+      try {
+        const pg = await fetchPage({ ...query, page: next, pageSize });
+        if (gen !== generation) return;
+        const fresh = paint(pg.items);
+        const target = list.querySelector('tbody') ?? list; const source = fresh.querySelector('tbody') ?? fresh;
+        target.append(...source.children);
+        shown += pg.items.length; total = pg.total ?? total; next = pg.nextPage ?? null;
+      } catch (error) {
+        if (error instanceof ErrorClass) { location.assign(signInHref()); return; }
+        console.warn(`[no] ${label} next page failed`, error?.code ?? error?.name);
+        toast({ title: t('portal.pager.failed'), variant: 'warning', duration: 5000 });
+      } finally { busy = false; setButtonState(more, 'idle'); }
+      sync();
+      if (more.hidden) status.focus();
+    }
+    more.addEventListener('click', loadMore);
+    return { region: first.region, run, loadMore };
+  }
+
   /** A simple responsive table: a real <table> at wide widths, cards at narrow ones (CSS handles the switch, §31). */
   function dataTable({ columns, rows: dataRows, rowKey, emptyKey = `${prefix}.table.empty` }) {
     if (!dataRows.length) return el('p', { class: 't-body-sm t-muted' }, t(emptyKey));
@@ -128,7 +180,7 @@ export function createPortalUi({ attr, page, prefix, label, isDev, ErrorClass, s
     ]));
   }
 
-  return { slot, put, setHead, devNotice, errorText, errorState, notFoundState, loadRegion, dataTable };
+  return { slot, put, setHead, devNotice, errorText, errorState, notFoundState, loadRegion, pagedRegion, dataTable };
 }
 
 /**

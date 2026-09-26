@@ -146,6 +146,31 @@ const marker = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('no.super
   await c.close();
 }
 
+// ================================================================= 3b. pagination: "Showing X of Y" + Load more (development stand-in, 60 extra rows)
+for (const loc of ['ar', 'en']) {
+  const { c, p } = await ctx(390, 844, loc); await devSignIn(p); await dev(p, 'no.dev.supervisor.bulk', '60');
+  const status = (n, total) => (loc === 'ar' ? `يُعرض ${n} من ${total}` : `Showing ${n} of ${total}`);
+  const hScroll = () => p.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+  for (const [url, rowSel, total] of [['supervisor/customers/', 'tbody tr', 62], ['supervisor/bookings/', 'tbody tr', 63], ['supervisor/leads/', '.c-svp-lead', 62]]) {
+    await go(p, url); await mainReady(p); await p.waitForSelector(rowSel);
+    ok(`${loc}/${url}: first page holds 50 rows, the status line says so (polite), Load more offered`, await count(p, rowSel) === 50 && await text(p, '[data-pager-status]') === status(50, total) && await p.getAttribute('[data-pager-status]', 'aria-live') === 'polite' && await visible(p, '[data-action=load-more]'), `${await count(p, rowSel)} · ${await text(p, '[data-pager-status]')}`);
+    ok(`${loc}/${url}: no horizontal scroll at 390px with the pager`, !(await hScroll()));
+    await p.click('[data-action=load-more]'); await p.waitForFunction(([sel, n]) => document.querySelectorAll(sel).length === n, [rowSel, total]);
+    ok(`${loc}/${url}: Load more appends the rest, the count follows, the button goes at the end`, await text(p, '[data-pager-status]') === status(total, total) && !(await visible(p, '[data-action=load-more]')) && await p.evaluate(() => document.activeElement?.hasAttribute('data-pager-status')));
+    ok(`${loc}/${url}: rows are appended, not repeated`, await p.evaluate((sel) => { const keys = [...document.querySelectorAll(sel)].map((r) => r.dataset.row ?? r.dataset.lead); return new Set(keys).size === keys.length; }, rowSel));
+  }
+  // a search re-runs from page 1 with the filter, and Load more keeps it
+  await go(p, 'supervisor/customers/'); await mainReady(p); await p.waitForSelector('tbody tr');
+  await p.fill('#svp-cust-search', 'bulk'); await p.click('[data-portal=main] form[role=search] button[type=submit]');
+  await p.waitForFunction(() => document.querySelector('[data-pager-status]')?.textContent.includes('60'));
+  await p.click('[data-action=load-more]'); await p.waitForFunction(() => document.querySelectorAll('tbody tr').length === 60);
+  ok(`${loc}: Load more keeps the search in force (only matching customers appended)`, await p.evaluate(() => [...document.querySelectorAll('tbody tr')].every((r) => r.dataset.row.startsWith('dev-cus-bulk-'))));
+  await dev(p, 'no.dev.supervisor.bulk', null);
+  await go(p, 'supervisor/customers/'); await mainReady(p); await p.waitForSelector('tbody tr');
+  ok(`${loc}: a list that fits one page shows its count and no Load more`, await text(p, '[data-pager-status]') === status(2, 2) && !(await visible(p, '[data-action=load-more]')));
+  await c.close();
+}
+
 // ================================================================= 4. widths × languages
 for (const [w, h, tag] of [[390, 844, 'mobile'], [834, 1100, 'tablet'], [1440, 1000, 'desktop']]) for (const loc of ['ar', 'en']) {
   const { c, p } = await ctx(w, h, loc);

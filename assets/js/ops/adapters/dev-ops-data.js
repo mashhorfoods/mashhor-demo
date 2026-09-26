@@ -7,7 +7,9 @@
    Mirrors the same booking lifecycle the backend's business_config seeds
    (a technical example, not a business decision made here).
 
-   QA switches (sessionStorage): no.dev.ops = 'error' | 'slow' | 'empty'
+   QA switches (sessionStorage): no.dev.ops = 'error' | 'slow' | 'empty';
+   no.dev.ops.bulk = N adds N generated bookings and N generated tasks, so a
+   list runs past one page (the pager's Load more).
    ========================================================================= */
 import { registerOpsDataAdapter, RULE_STATUSES } from '../data.js';
 import { paged } from '../../core/adapter-helpers.js';
@@ -40,6 +42,11 @@ const WORKFLOWS = {
   hotels: [['search', 'البحث', 'Search'], ['select', 'الاختيار', 'Selection'], ['payment', 'الدفع', 'Payment'], ['supplier_confirmation', 'تأكيد المزود', 'Supplier confirmation'], ['customer_confirmation', 'تأكيد العميل', 'Customer confirmation']],
   medical: [['request', 'الطلب', 'Request'], ['information', 'المعلومات', 'Information'], ['review', 'المراجعة', 'Review'], ['provider_coordination', 'التنسيق مع المزود', 'Provider coordination'], ['confirmation', 'التأكيد', 'Confirmation']],
 };
+// Document requirements per service (the backend's shape: { id, docType, required, customerUpload }).
+const DOC_REQS = { visa: [{ id: 1, docType: 'passport', required: true, customerUpload: true }, { id: 2, docType: 'photo', required: true, customerUpload: true }] };
+let docReqSeq = 3;
+const docReqs = (id) => (DOC_REQS[id] ?? []).map((r) => ({ ...r }));
+const devError = (code) => { const e = new Error(code); e.code = code; return e; };
 const workflowSteps = (id) => (WORKFLOWS[id] ?? []).map(([key, ar, en], i) => ({ order: i, key, labelAr: ar, labelEn: en }));
 
 const BOOKINGS = [
@@ -70,7 +77,8 @@ let supervisorsAdmin = [
   { id: 'supervisor-1', slug: 'supervisor-1', status: 'active', nameAr: 'منسق تطوير واحد', nameEn: 'Development Coordinator One', titleAr: null, titleEn: null, bioAr: null, bioEn: null, image: null, languages: ['ar', 'en'], specialties: [], services: [], phone: '', whatsapp: null, email: 'dev-sup-1@example.test', city: 'Dubai', notificationPrefs: {}, createdAt: iso(90), updatedAt: iso(30), customersCount: 1, dev: true },
   { id: 'supervisor-2', slug: 'supervisor-2', status: 'active', nameAr: 'منسق تطوير اثنان', nameEn: 'Development Coordinator Two', titleAr: null, titleEn: null, bioAr: null, bioEn: null, image: null, languages: ['ar'], specialties: [], services: [], phone: '', whatsapp: null, email: 'dev-sup-2@example.test', city: 'Istanbul', notificationPrefs: {}, createdAt: iso(90), updatedAt: iso(30), customersCount: 0, dev: true },
 ];
-let devLeads = [{ id: 'dev-lead-1', supervisorId: 'supervisor-1', customerId: null, name: 'Development Lead', contact: 'lead@example.test', source: 'link', serviceInterest: 'flights', status: 'new', convertedBookingId: null, createdAt: iso(5), updatedAt: iso(5) }];
+let devLeads = [{ id: 'dev-lead-1', supervisorId: 'supervisor-1', customerId: null, name: 'Development Lead', contact: 'lead@example.test', source: 'link', serviceInterest: 'flights', status: 'new', convertedBookingId: null, createdAt: iso(5), updatedAt: iso(5) },
+  { id: 'dev-lead-2', supervisorId: null, customerId: null, name: 'Development Contact', contact: 'contact@example.test', source: 'contact', serviceInterest: null, status: 'new', convertedBookingId: null, createdAt: iso(6), updatedAt: iso(6) }];
 let devAttributionEvents = [{ customerId: 'dev-cus-1', supervisorId: 'supervisor-1', previousSupervisorId: null, source: 'link', actor: 'customer', at: iso(30) }];
 let devPayments = [
   { id: 'dev-pay-1', customerId: 'dev-cus-1', bookingId: 'dev-bk-1', at: iso(3), amount: 900, currency: 'USD', status: 'paid', reference: 'DEVTX-0001', methodAr: 'مزوّد دفع تطوير', methodEn: 'Development payment provider', customerName: 'Development Customer One' },
@@ -123,11 +131,19 @@ let devRules = [
 ];
 let devRuleHistory = {};
 
+// no.dev.ops.bulk: N generated rows after the fixed ones (a new module per page load, so this runs once per page).
+const BULK = Math.min(500, Math.max(0, Number(read('no.dev.ops.bulk')) || 0));
+for (let i = 1; i <= BULK; i++) {
+  BOOKINGS.push({ id: `dev-bk-bulk-${i}`, customerId: 'dev-cus-1', service: 'hotels', status: 'pending', paymentStatus: 'unpaid', amount: 0, currency: 'USD', supervisorId: null, opsStatus: 'submitted', assignedOperator: null, createdAt: iso(5 + i / 100), missingDocuments: 0, dev: true });
+  tasks.push({ id: `dev-task-bulk-${i}`, type: 'general', bookingId: null, customerId: null, supervisorId: null, assignedTo: null, status: 'open', priority: 'normal', dueAt: null, notes: '', createdBy: 'staff-dev-demo', createdAt: iso(5 + i / 100), updatedAt: iso(5 + i / 100), completedAt: null });
+}
+const filterBy = (items, params, keys) => keys.reduce((acc, k) => (params[k] ? acc.filter((x) => x[k] === params[k]) : acc), items);
+
 const bookingById = (id) => BOOKINGS.find((b) => b.id === id);
 
 export const DEV_OPS_DATA = registerOpsDataAdapter({
   id: 'dev-ops-data', dev: true,
-  async bookings() { await wait(); if (isEmpty()) return paged([]); return paged(BOOKINGS); },
+  async bookings(_t, params = {}) { await wait(); if (isEmpty()) return paged([], params); return paged(filterBy(BOOKINGS, { ...params, opsStatus: params.status }, ['opsStatus', 'service', 'assignedTo']), params); },
   async booking(_t, id) {
     await wait(); const b = bookingById(id); if (!b) return null;
     const allowed = LIFECYCLE.transitions[b.opsStatus ?? LIFECYCLE.initial] ?? [];
@@ -161,9 +177,24 @@ export const DEV_OPS_DATA = registerOpsDataAdapter({
   async service(_t, id) { await wait(); return SERVICES.find((s) => s.id === id) ?? null; },
   async updateService(_t, id, patch) { await wait(); const s = SERVICES.find((x) => x.id === id); if (!s) return null; Object.assign(s, patch, { updatedAt: new Date().toISOString() }); return { ...s }; },
   async serviceWorkflow(_t, id) { await wait(); return workflowSteps(id); },
-  async setServiceWorkflow(_t, id, steps) { await wait(); WORKFLOWS[id] = steps.map((s) => [s.key, s.labelAr, s.labelEn]); return workflowSteps(id); },
-  async serviceDocumentRequirements() { await wait(); return []; },
-  async addServiceDocumentRequirement() { await wait(); return []; },
+  async setServiceWorkflow(_t, id, steps) {
+    await wait();
+    // The backend's own rule: unique a-z0-9_ keys, both labels, at most 30 steps — else the whole list is refused.
+    if (steps.length > 30 || new Set(steps.map((s) => s.key)).size !== steps.length || steps.some((s) => !/^[a-z0-9_]{1,40}$/.test(s.key ?? '') || !s.labelAr?.trim() || !s.labelEn?.trim())) throw devError('invalid');
+    WORKFLOWS[id] = steps.map((s) => [s.key, s.labelAr.trim(), s.labelEn.trim()]); return workflowSteps(id);
+  },
+  async serviceDocumentRequirements(_t, id) { await wait(); return docReqs(id); },
+  async addServiceDocumentRequirement(_t, id, req = {}) {
+    await wait(); const docType = (req.docType ?? '').trim();
+    if (!/^[a-z0-9_]{1,40}$/.test(docType)) throw devError('invalid');
+    if ((DOC_REQS[id] ?? []).some((r) => r.docType === docType)) throw devError('conflict');
+    (DOC_REQS[id] ??= []).push({ id: docReqSeq++, docType, required: req.required ?? true, customerUpload: req.customerUpload ?? true }); return docReqs(id);
+  },
+  async updateServiceDocumentRequirement(_t, id, reqId, patch = {}) {
+    await wait(); const r = (DOC_REQS[id] ?? []).find((x) => x.id === Number(reqId)); if (!r) throw devError('notFound');
+    if (patch.required != null) r.required = !!patch.required; if (patch.customerUpload != null) r.customerUpload = !!patch.customerUpload; return docReqs(id);
+  },
+  async removeServiceDocumentRequirement(_t, id, reqId) { await wait(); if (!(DOC_REQS[id] ?? []).some((x) => x.id === Number(reqId))) throw devError('notFound'); DOC_REQS[id] = DOC_REQS[id].filter((x) => x.id !== Number(reqId)); return docReqs(id); },
 
   async suppliers() { await wait(); return suppliers; },
   async createSupplier(_t, supplier) { await wait(); const s = { id: `dev-sup-${Date.now()}`, name: supplier.name, type: supplier.type, services: supplier.services ?? [], status: supplier.status ?? 'active', integrationStatus: 'not_connected', supportedOperations: supplier.supportedOperations ?? [], contact: supplier.contact ?? {}, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }; suppliers = [s, ...suppliers]; return s; },
@@ -264,11 +295,11 @@ export const DEV_OPS_DATA = registerOpsDataAdapter({
   },
 
   // Phase 6: leads the public site recorded in this browser (contact form, request bookings) come first, newest first.
-  async leads(_t, params = {}) { await wait(); return paged([...storedDevLeads(), ...devLeads], params); },
-  async attributionEvents(_t, params = {}) { await wait(); return paged(devAttributionEvents, params); },
+  async leads(_t, params = {}) { await wait(); return paged(filterBy([...storedDevLeads(), ...devLeads], params, ['status']), params); },
+  async attributionEvents(_t, params = {}) { await wait(); return paged(filterBy(devAttributionEvents, params, ['supervisorId', 'customerId']), params); },
 
-  async payments(_t, params = {}) { await wait(); let items = devPayments; if (params.customerId) items = items.filter((p) => p.customerId === params.customerId); return paged(items, params); },
-  async documentsAdmin(_t, params = {}) { await wait(); let items = devDocumentsAdmin; if (params.customerId) items = items.filter((d) => d.customerId === params.customerId); return paged(items, params); },
+  async payments(_t, params = {}) { await wait(); return paged(filterBy(devPayments, params, ['customerId', 'bookingId', 'status']), params); },
+  async documentsAdmin(_t, params = {}) { await wait(); return paged(filterBy(devDocumentsAdmin, params, ['customerId', 'bookingId', 'reviewStatus']), params); },
 
   async reportBookings() { await wait(); return { total: BOOKINGS.length, byOperationalStatus: [{ status: 'submitted', n: BOOKINGS.length }], byService: [{ service: 'flights', n: 1 }, { service: 'visa', n: 1 }], byPaymentStatus: [{ status: 'paid', n: 1 }, { status: 'unpaid', n: 1 }] }; },
   async reportOperations() { await wait(); return { tasksByStatus: [{ status: 'open', n: tasks.filter((x) => x.status === 'open').length }], tasksByPriority: [{ priority: 'normal', n: 1 }, { priority: 'high', n: 1 }], escalationsByStatus: [{ status: 'open', n: escalations.length }], escalationsBySeverity: [{ severity: 'high', n: 1 }] }; },

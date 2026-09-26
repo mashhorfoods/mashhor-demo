@@ -8,7 +8,7 @@ import { t } from '../../core/i18n.js';
 import { route } from '../../data/config.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, dataTable, dateTime } from './shell.js';
+import { mountOpsPortal, loadRegion, pagedRegion, pageTitle, dataTable, dateTime } from './shell.js';
 
 const RELATED_ROUTE = { booking: 'admin/bookings/', supervisor: 'admin/supervisors/', service: 'admin/services/', businessRule: 'admin/business-rules/' };
 // Exported so the dashboard's compact "Recent activity" widget can render
@@ -29,9 +29,9 @@ export function mountOpsAudit({ root = document } = {}) {
   return mountOpsPortal({ root, id: 'audit', head: 'page.ops.audit', paint: async ({ main }) => {
     const host = el('div', { dataset: { region: 'audit' } });
     main.replaceChildren(pageTitle('ops.audit.title', 'ops.audit.text'), host);
-    const region = loadRegion(host, async () => (await opsData.audit({ page: 1, pageSize: 100 })).items, {
+    const region = pagedRegion(host, (q) => opsData.audit(q), {
       empty: () => stateBlock({ variant: 'empty', headingLevel: 2, title: t('ops.audit.empty.title'), text: t('ops.audit.empty.text') }),
-      paint: (items) => dataTable({ columns, rows: items.slice().reverse(), rowKey: (a) => a.id }),
+      paint: (items) => dataTable({ columns, rows: items, rowKey: (a) => a.id }),
     });
     await region.run();
     return { refresh: region.run };

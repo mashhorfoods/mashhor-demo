@@ -10,7 +10,7 @@ import { stateBlock } from '../../components/states.js';
 import { SUPERVISOR_LANGUAGES, SUPERVISOR_SPECIALTIES } from '../../data/supervisors.js';
 import { opsData } from '../data.js';
 import { revenueGroups } from '../../core/portal-ui.js';
-import { mountOpsPortal, loadRegion, pageTitle, notFoundState, actionForm, debouncedRun, emptyNote, dataTable, opsStatusBadge, dateTime, amount, block, rows, busyButton } from './shell.js';
+import { mountOpsPortal, loadRegion, pagedRegion, pageTitle, notFoundState, actionForm, debouncedRun, emptyNote, dataTable, opsStatusBadge, dateTime, amount, block, rows, busyButton } from './shell.js';
 
 const columns = [
   { labelKey: 'ops.supervisors.col.name', render: (s) => el('a', { class: 'c-svp-link', href: route(`admin/supervisors/?id=${encodeURIComponent(s.id)}`) }, s.nameEn || s.nameAr || s.id) },
@@ -18,6 +18,14 @@ const columns = [
   { labelKey: 'ops.supervisors.col.status', render: (s) => t(`ops.supervisors.status.${s.status}`) },
   { labelKey: 'ops.supervisors.col.customers', render: (s) => String(s.customersCount) },
 ];
+
+/** The commission rule in words: pending, a percentage (with its rate when the backend sends one), or the raw model. */
+function commissionLabel(c) {
+  if (!c?.model) return t('ops.supervisors.detail.commissionPending');
+  if (c.model !== 'percentage') return String(c.model);
+  const rate = Number(c.rate);
+  return Number.isFinite(rate) && c.rate != null ? t('ops.supervisors.detail.commissionRate', `${Math.round(rate * 1000) / 10}%`) : t('ops.supervisors.detail.commissionPercentage');
+}
 
 export function mountOpsSupervisors({ root = document, params = new URLSearchParams(location.search) } = {}) {
   const id = params.get('id');
@@ -44,7 +52,8 @@ export function mountOpsSupervisors({ root = document, params = new URLSearchPar
     })() : null;
 
     main.replaceChildren(pageTitle('ops.supervisors.title', 'ops.supervisors.text'), createForm, el('div', { class: 'c-svp-filter' }, [search]), host);
-    const region = loadRegion(host, async () => (await opsData.supervisorsAdmin({ search: search.value.trim() || undefined, page: 1, pageSize: 50 })).items, {
+    const region = pagedRegion(host, (q) => opsData.supervisorsAdmin(q), {
+      filters: () => ({ search: search.value.trim() || undefined }),
       empty: () => stateBlock({ variant: 'empty', iconName: 'no-supervisor', headingLevel: 2, title: t('ops.supervisors.empty.title'), text: t('ops.supervisors.empty.text') }),
       paint: (items) => dataTable({ columns, rows: items, rowKey: (s) => s.id, emptyKey: 'ops.supervisors.empty.title' }),
     });
@@ -68,7 +77,7 @@ function mountSupervisorDetail({ root, id }) {
           [t('ops.supervisors.col.customers'), String(fresh.customers.length)],
           // per currency: amounts in different currencies are never added together (backend supervisorRevenue)
           [t('acct.total'), revenueGroups(fresh.revenue).map((g) => amount(g.gross, g.currency)).join(' · ')],
-          [t('ops.supervisors.detail.commission'), fresh.revenue.commission.model === null ? t('ops.supervisors.detail.commissionPending') : String(fresh.revenue.commission.model)],
+          [t('ops.supervisors.detail.commission'), commissionLabel(fresh.revenue.commission)],
         ]), { id: 'ops-sv-details' }),
       ];
 

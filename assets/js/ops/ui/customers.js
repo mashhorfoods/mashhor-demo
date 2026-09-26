@@ -8,7 +8,7 @@ import { route } from '../../data/config.js';
 import { icon, toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, notFoundState, actionForm, debouncedRun, emptyNote, dataTable, opsStatusBadge, payBadge, dateTime, amount, block, rows } from './shell.js';
+import { mountOpsPortal, loadRegion, pagedRegion, pageTitle, notFoundState, actionForm, debouncedRun, emptyNote, dataTable, opsStatusBadge, payBadge, dateTime, amount, block, rows } from './shell.js';
 
 const columns = [
   { labelKey: 'ops.customers.col.name', render: (c) => el('a', { class: 'c-svp-link', href: route(`admin/customers/?id=${encodeURIComponent(c.id)}`) }, c.name) },
@@ -26,7 +26,8 @@ export function mountOpsCustomers({ root = document, params = new URLSearchParam
     const search = el('input', { class: 'c-field__control c-svp-filter__select', type: 'search', placeholder: t('ops.customers.searchPlaceholder'), 'aria-label': t('ops.customers.searchPlaceholder') });
     debouncedRun(search, () => region.run());
     main.replaceChildren(pageTitle('ops.customers.title', 'ops.customers.text'), el('div', { class: 'c-svp-filter' }, [search]), host);
-    const region = loadRegion(host, async () => (await opsData.customers({ search: search.value.trim() || undefined, page: 1, pageSize: 50 })).items, {
+    const region = pagedRegion(host, (q) => opsData.customers(q), {
+      filters: () => ({ search: search.value.trim() || undefined }),
       empty: () => stateBlock({ variant: 'empty', iconName: 'no-customer', headingLevel: 2, title: t('ops.customers.empty.title'), text: t('ops.customers.empty.text') }),
       paint: (items) => dataTable({ columns, rows: items, rowKey: (c) => c.id, emptyKey: 'ops.customers.empty.title' }),
     });

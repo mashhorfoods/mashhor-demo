@@ -9,7 +9,7 @@ import { route } from '../../data/config.js';
 import { icon, toast } from '../../components/ui.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData, BOOKING_SUPPLIER_STATUSES } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, notFoundState, actionForm, emptyNote, busyButton, dataTable, bookingStatusBadge, opsStatusBadge, payBadge, supplierStatusBadge, taskStatusBadge, amount, dateTime, block, rows } from './shell.js';
+import { mountOpsPortal, loadRegion, pagedRegion, pageTitle, notFoundState, actionForm, emptyNote, busyButton, dataTable, bookingStatusBadge, opsStatusBadge, payBadge, supplierStatusBadge, taskStatusBadge, amount, dateTime, block, rows } from './shell.js';
 
 const columns = [
   { labelKey: 'ops.bookings.col.id', render: (b) => el('a', { class: 'c-svp-link', href: route(`admin/bookings/?id=${encodeURIComponent(b.id)}`) }, el('bdi', { dir: 'ltr' }, b.id)) },
@@ -27,7 +27,7 @@ export function mountOpsBookings({ root = document, params = new URLSearchParams
   return mountOpsPortal({ root, id: 'bookings', head: 'page.ops.bookings', paint: async ({ main }) => {
     const host = el('div', { dataset: { region: 'bookings' } });
     main.replaceChildren(pageTitle('ops.bookings.title', 'ops.bookings.text'), host);
-    const region = loadRegion(host, async () => (await opsData.bookings({ page: 1, pageSize: 50 })).items, {
+    const region = pagedRegion(host, (q) => opsData.bookings(q), {
       empty: () => stateBlock({ variant: 'empty', iconName: 'no-ticket', headingLevel: 2, title: t('ops.bookings.empty.title'), text: t('ops.bookings.empty.text') }),
       paint: (items) => dataTable({ columns, rows: items, rowKey: (b) => b.id, emptyKey: 'ops.bookings.empty.title' }),
     });

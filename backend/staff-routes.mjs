@@ -15,6 +15,7 @@ import {
   createTask, listTasks, assignTask, updateTaskStatus, taskPriorityLevels,
   createEscalation, listEscalations, updateEscalationStatus,
   listServices, serviceById, updateService, serviceWorkflow, setServiceWorkflow, serviceDocumentRequirements, addServiceDocumentRequirement,
+  updateServiceDocumentRequirement, removeServiceDocumentRequirement,
   reviewDocument, listSuppliers, createSupplier, assignSupplierToBooking, updateBookingSupplier,
   addBookingNote, bookingNotes, listTemplates, upsertTemplate, notificationHistory, auditEvents, lifecycleConfig,
   listCustomers, customerDetailForStaff, listPayments, listDocumentsAdmin,
@@ -90,7 +91,11 @@ export const services = {
   workflow(req, res, ctx, id) { return json(res, 200, { steps: serviceWorkflow(id) }); },
   async workflowUpdate(req, res, ctx, id) { requirePermission(ctx.staff, 'workflow.manage'); const b = await readJson(req); return json(res, 200, { steps: setServiceWorkflow(id, Array.isArray(b.steps) ? b.steps : [], actorOf(ctx)) }); },
   documentRequirements(req, res, ctx, id) { return json(res, 200, { requirements: serviceDocumentRequirements(id) }); },
-  async documentRequirementAdd(req, res, ctx, id) { requirePermission(ctx.staff, 'service.manage'); const b = await readJson(req); return json(res, 201, { requirements: addServiceDocumentRequirement(id, b, actorOf(ctx)) }); },
+  // The workflow and its document requirements are one permission, workflow.manage (service.manage covers the
+  // service's own settings above).
+  async documentRequirementAdd(req, res, ctx, id) { requirePermission(ctx.staff, 'workflow.manage'); const b = await readJson(req); return json(res, 201, { requirements: addServiceDocumentRequirement(id, b, actorOf(ctx)) }); },
+  async documentRequirementUpdate(req, res, ctx, id, reqId) { requirePermission(ctx.staff, 'workflow.manage'); const b = await readJson(req); return json(res, 200, { requirements: updateServiceDocumentRequirement(id, reqId, b, actorOf(ctx)) }); },
+  documentRequirementRemove(req, res, ctx, id, reqId) { requirePermission(ctx.staff, 'workflow.manage'); return json(res, 200, { requirements: removeServiceDocumentRequirement(id, reqId, actorOf(ctx)) }); },
 };
 
 /* ---- /admin/* — Stage 14, the management/oversight layer ABOVE the Stage 15 operational domain (§29/§30). Every

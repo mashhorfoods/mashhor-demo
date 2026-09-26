@@ -13,7 +13,9 @@
    a full navigation, a fresh module instance, so anything held only in
    memory would silently reset on the very next page load.
 
-   QA switches (sessionStorage): no.dev.supervisor = 'error' | 'slow' | 'empty'
+   QA switches (sessionStorage): no.dev.supervisor = 'error' | 'slow' | 'empty';
+   no.dev.supervisor.bulk = N adds N generated customers, bookings and leads,
+   so a list runs past one page (the pager's Load more).
    ========================================================================= */
 import { registerSupervisorDataAdapter } from '../data.js';
 import { DEV_SUPERVISOR_AUTH } from './dev-supervisor-auth.js';
@@ -43,6 +45,15 @@ const NOTIFICATIONS = [
   { id: 'dev-ntf-2', kind: 'lead', at: iso(4), read: true, titleAr: 'عميل محتمل جديد (تطوير)', titleEn: 'New lead (development)', textAr: 'عميل محتمل تجريبي.', textEn: 'A development lead.', href: null, bookingId: null, dev: true },
 ];
 
+// no.dev.supervisor.bulk: N generated rows after the fixed ones (a new module per page load, so this runs once).
+const BULK = Math.min(500, Math.max(0, Number(read('no.dev.supervisor.bulk')) || 0));
+const BULK_LEADS = [];
+for (let i = 1; i <= BULK; i++) {
+  CUSTOMERS.push({ id: `dev-cus-bulk-${i}`, name: `Demo Customer ${i + 2}`, email: `bulk${i}@dev.invalid`, phone: '', locale: 'ar', attributionAt: iso(30), createdAt: iso(30), bookingsCount: 1, lastActivityAt: iso(10), dev: true });
+  BOOKINGS.push({ id: `dev-bk-bulk-${i}`, customerId: `dev-cus-bulk-${i}`, customerName: `Demo Customer ${i + 2}`, service: 'hotels', status: 'pending', paymentStatus: 'unpaid', amount: 0, currency: 'USD', createdAt: iso(10), tripId: null, dev: true });
+  BULK_LEADS.push({ id: `dev-lead-bulk-${i}`, customerId: null, name: `Demo Lead ${i + 2}`, contact: `lead${i}@dev.invalid`, source: 'link', serviceInterest: 'hotels', status: 'new', convertedBookingId: null, createdAt: iso(10), updatedAt: iso(10), dev: true });
+}
+
 // Mirrors the backend's default rule (commission_model: 5% of the paid booking amount, reversed on cancellation/refund).
 const COMMISSION_MODEL = { model: 'percentage', rate: 0.05, basis: 'booking_amount', trigger: 'booking_paid', onCancellation: 'reversed', status: 'technical_default_pending_business_confirmation' };
 const COMMISSIONS = [
@@ -66,7 +77,7 @@ export const DEV_SUPERVISOR_DATA = registerSupervisorDataAdapter({
   async customer(_t, id) { await wait(); const c = CUSTOMERS.find((x) => x.id === id); if (!c) return null; return { ...c, attribution: { supervisorId: 'supervisor-1', source: 'link', at: c.attributionAt }, bookings: BOOKINGS.filter((b) => b.customerId === id), trips: [], attributionHistory: [{ supervisorId: 'supervisor-1', previousSupervisorId: null, source: 'link', actor: 'customer', at: c.attributionAt }] }; },
   async bookings(_t, params = {}) { await wait(); if (isEmpty()) return paged([], params); let items = BOOKINGS; if (params.status) items = items.filter((b) => b.status === params.status); if (params.service) items = items.filter((b) => b.service === params.service); return paged(items, params); },
   async booking(_t, id) { await wait(); const b = BOOKINGS.find((x) => x.id === id); return b ? { ...b, detail: { dev: true } } : null; },
-  async leads(_t, params = {}) { await wait(); if (isEmpty()) return paged([], params); const all = allLeads(); return paged(params.status ? all.filter((l) => l.status === params.status) : all, params); },
+  async leads(_t, params = {}) { await wait(); if (isEmpty()) return paged([], params); const all = [...allLeads(), ...BULK_LEADS]; return paged(params.status ? all.filter((l) => l.status === params.status) : all, params); },
   async updateLeadStatus(_t, id, status) {
     await wait(); const shared = updateDevLead(id, { status }); if (shared) return shared;
     const state = loadState(); const l = state.leads.find((x) => x.id === id); if (!l) return null;

@@ -6,7 +6,7 @@ import { t } from '../../core/i18n.js';
 import { route } from '../../data/config.js';
 import { stateBlock } from '../../components/states.js';
 import { opsData } from '../data.js';
-import { mountOpsPortal, loadRegion, pageTitle, statusFilterSelect, dataTable, dateTime } from './shell.js';
+import { mountOpsPortal, loadRegion, pagedRegion, pageTitle, statusFilterSelect, dataTable, dateTime } from './shell.js';
 
 const REVIEW_STATUSES = ['pending', 'approved', 'rejected'];
 const columns = [
@@ -22,7 +22,8 @@ export function mountOpsDocuments({ root = document } = {}) {
     const host = el('div', { dataset: { region: 'documents' } });
     const status = statusFilterSelect('ops.documents.filterLabel', REVIEW_STATUSES, 'ops.documents.reviewStatus', () => region.run());
     main.replaceChildren(pageTitle('ops.documents.title', 'ops.documents.text'), el('div', { class: 'c-svp-filter' }, [status]), host);
-    const region = loadRegion(host, async () => (await opsData.documentsAdmin({ reviewStatus: status.value || undefined, page: 1, pageSize: 50 })).items, {
+    const region = pagedRegion(host, (q) => opsData.documentsAdmin(q), {
+      filters: () => ({ reviewStatus: status.value || undefined }),
       empty: () => stateBlock({ variant: 'empty', iconName: 'no-documents', headingLevel: 2, title: t('ops.documents.empty.title'), text: t('ops.documents.empty.text') }),
       paint: (items) => dataTable({ columns, rows: items, rowKey: (d) => d.id, emptyKey: 'ops.documents.empty.title' }),
     });

@@ -24,6 +24,11 @@
   .c-svp-filter { display: flex; flex-wrap: wrap; gap: var(--space-8); align-items: center; }
   .c-svp-filter__select { max-inline-size: 14rem; }
 
+  /* ---- Pager: "Showing X of Y" and Load more under a paged list (core/portal-ui.js pagedRegion) ---- */
+  .c-pager { display: flex; flex-wrap: wrap; gap: var(--space-8) var(--space-12); align-items: center; justify-content: space-between; margin-block-start: var(--space-12); }
+  .c-pager[hidden] { display: none; }
+  .c-pager__status { margin: 0; font-variant-numeric: tabular-nums; }
+
   /* ---- Responsive table: a real table on wide screens, stacked cards on narrow ones ---- */
   .c-svp-table-wrap { overflow-x: auto; }
   .c-svp-table { inline-size: 100%; border-collapse: collapse; }

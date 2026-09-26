@@ -28,6 +28,21 @@
   #ops-svc-workflow ol { counter-reset: none; }
   #ops-svc-workflow li { font-variant-numeric: tabular-nums; }
 
+  /* ---- Workflow editor (workflow.manage): one bordered card per step, its three
+     fields side by side where they fit and stacked where they don't ---- */
+  .c-wf-steps { display: grid; gap: var(--space-12); margin: 0; padding: 0; list-style: none; }
+  .c-wf-step { border: var(--border-hairline); border-radius: var(--radius-md); padding: var(--space-12); }
+  .c-wf-step__set { display: grid; gap: var(--space-8); min-inline-size: 0; margin: 0; padding: 0; border: 0; }
+  .c-wf-step__legend { padding: 0; font-weight: var(--weight-semibold); font-size: var(--text-body-sm); }
+  .c-wf-step__fields { display: grid; gap: var(--space-8); grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); }
+  .c-wf-step__actions { display: flex; flex-wrap: wrap; gap: var(--space-4); }
+  .c-wf-step__btn--up .c-icon { rotate: 180deg; }
+
+  /* ---- Document requirements: type, required toggle, remove on one wrapping line ---- */
+  .c-wf-reqs { display: grid; gap: var(--space-8); margin: 0; padding: 0; list-style: none; }
+  .c-wf-req { display: flex; flex-wrap: wrap; gap: var(--space-8) var(--space-16); align-items: center; padding-block: var(--space-4); border-block-end: var(--border-hairline); }
+  .c-wf-req__type { font-family: var(--font-data); font-weight: var(--weight-semibold); min-inline-size: 8rem; }
+
   /* ---- Audit trail: actor/entity read as data, not prose ---- */
   #ops-bk-history li span:first-child,
   .c-svp-table td[data-label] bdi { font-family: var(--font-data); }

@@ -69,7 +69,7 @@ function opsNav(current, staff = null) {
 
 const forbiddenNote = () => el('p', { class: 'c-note c-note--warning', role: 'note' }, [icon('no-shield', { size: 'sm' }), el('span', { class: 'c-note__text' }, t('ops.forbidden.text'))]);
 
-export const { put, setHead, devNotice, errorText, notFoundState, loadRegion, dataTable, mount: mountOpsPortal } = createStaffPortal({
+export const { put, setHead, devNotice, errorText, notFoundState, loadRegion, pagedRegion, dataTable, mount: mountOpsPortal } = createStaffPortal({
   attr: 'portal', page: 'ops', prefix: 'ops', label: 'ops', area: 'admin/', entity: 'staff', datasetKey: 'opsPortal',
   isDev: () => !!opsDataAdapter()?.dev, ErrorClass: OpsAuthError, restore: restoreOpsSession, nav: opsNav,
   homeLabelKey: 'brand.name', guardIcon: 'no-shield',
