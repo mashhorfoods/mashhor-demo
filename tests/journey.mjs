@@ -315,6 +315,25 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
   ok('request review: no price rows, submit request CTA', await count(p, '.c-price-rows') === 0 && await p.locator('.c-journey__actions .c-btn--primary').isEnabled());
   await p.check('#review-terms'); await next(p, /confirmation/); await p.waitForFunction(() => window.no?.confirmation);
   ok('request confirmation: received status, nothing charged, reference', /استلام|received/i.test(await text(p, 'h1')) && /^RQ-DEV-/.test(await text(p, '[data-reference]')) && /لم يُحصَّل|Nothing charged/i.test(await text(p, '[data-journey=main]')));
+  // Phase 6: a request is a lead. In development it is mirrored into the browser's dev lead store (core/leads.js),
+  // which the dev supervisor/ops portals read; with a backend it becomes one when the booking is claimed.
+  const ref = await text(p, '[data-reference]');
+  const lead = await p.evaluate((r) => JSON.parse(localStorage.getItem('no.dev.leads') ?? '[]').find((l) => l.bookingId === r) ?? null, ref);
+  ok('request booking → one lead (source request, service, contact, traveller name), unassigned without a supervisor', lead?.source === 'request' && lead.serviceInterest === 'hotels' && /test@example\.com/.test(lead.contact) && lead.name === 'Test Traveller' && lead.supervisorId === null && lead.status === 'new', JSON.stringify(lead));
+  await c.close();
+}
+
+// ================================================================= 7b. the contact form (help/contact/) → a lead (development store)
+for (const loc of ['ar', 'en']) {
+  const { c, p } = await ctx(390, 844, loc); await go(p, 'help/contact/?supervisor=ahmed-mohamed', 'helpContact');
+  ok(`${loc} contact: form offered, one dominant CTA, no horizontal scroll at 390px`, await count(p, '[data-form=contact]') === 1 && await count(p, 'main .c-btn--primary') === 1 && await noHScroll(p));
+  if (loc === 'en') ok('en contact: form fully English', !AR.test(await text(p, '[data-contact-form]')), (await text(p, '[data-contact-form]')).slice(0, 80));
+  await p.click('[data-form=contact] button[type=submit]');
+  ok(`${loc} contact: empty submit → name, reach and message errors, nothing sent`, await count(p, '[data-form=contact] [data-state=error]') === 3 && (await p.evaluate(() => localStorage.getItem('no.dev.leads'))) === null);
+  await p.fill('#contact-name', 'Test Visitor'); await p.fill('#contact-phone', '+249 912 345 678'); await p.fill('#contact-message', 'Please call me about Umrah.');
+  await p.click('[data-form=contact] button[type=submit]'); await p.waitForSelector('[data-contact-sent=true]');
+  const lead = await p.evaluate(() => JSON.parse(localStorage.getItem('no.dev.leads') ?? '[]')[0] ?? null);
+  ok(`${loc} contact: sent → confirmation state, one lead attributed to the page's supervisor`, await count(p, '[data-contact-form] .c-state--success') === 1 && lead?.source === 'contact' && lead.supervisorId === 'ahmed-mohamed' && lead.message === 'Please call me about Umrah.' && /249/.test(lead.contact), JSON.stringify(lead));
   await c.close();
 }
 

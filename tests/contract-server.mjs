@@ -29,8 +29,8 @@ const hash = (password, salt) => scryptSync(password, salt, 32).toString('hex');
 const sign = (s) => createHmac('sha256', SECRET).update(s).digest('hex');
 
 export function startContractServer({ allowOrigin = null, port = 0, urlTtlMs = 5 * 60 * 1000 } = {}) {
-  const state = { accounts: new Map(), sessions: new Map(), resets: new Map(), csrf: new Map(), customers: new Map(), files: new Map(), faults: [], legal: { supplied: false, version: 'fixture-1' }, urlTtlMs, events: [], requests: [], flightSearches: new Map() };
-  const reset = () => { state.accounts.clear(); state.sessions.clear(); state.resets.clear(); state.customers.clear(); state.files.clear(); state.faults = []; state.legal = { supplied: false, version: 'fixture-1' }; state.urlTtlMs = urlTtlMs; state.events = []; state.requests = []; state.flightSearches.clear(); seed(); };
+  const state = { accounts: new Map(), sessions: new Map(), resets: new Map(), csrf: new Map(), customers: new Map(), files: new Map(), faults: [], legal: { supplied: false, version: 'fixture-1' }, urlTtlMs, events: [], requests: [], flightSearches: new Map(), leads: [] };
+  const reset = () => { state.accounts.clear(); state.sessions.clear(); state.resets.clear(); state.customers.clear(); state.files.clear(); state.faults = []; state.legal = { supplied: false, version: 'fixture-1' }; state.urlTtlMs = urlTtlMs; state.events = []; state.requests = []; state.flightSearches.clear(); state.leads = []; seed(); };
 
   const emptyData = () => ({ trips: [], bookings: [], travellers: [], documents: [], payments: [], notifications: [] });
   function createCustomer({ name, email, phone = '', locale = 'ar', password, attribution = null, acceptance = null }) {
@@ -119,7 +119,7 @@ export function startContractServer({ allowOrigin = null, port = 0, urlTtlMs = 5
       if (path === '/__test/url-ttl') { state.urlTtlMs = body.ttlMs; return json(res, 200, { ok: true }); }
       if (path === '/__test/revoke') { for (const [sid, s] of state.sessions) if (!body.customerId || s.customerId === body.customerId) state.sessions.delete(sid); return json(res, 200, { ok: true }); }
       if (path === '/__test/shorten-session') { for (const s of state.sessions.values()) s.expiresAt = now() + (body.ms ?? 60000); return json(res, 200, { ok: true }); }
-      if (path === '/__test/state') return json(res, 200, { events: state.events, requests: state.requests.slice(-200), customers: [...state.customers.values()].map((c) => c.profile), sessions: state.sessions.size, resets: [...state.resets.entries()].map(([t, r]) => ({ token: t, email: r.email })) });
+      if (path === '/__test/state') return json(res, 200, { events: state.events, requests: state.requests.slice(-200), customers: [...state.customers.values()].map((c) => c.profile), sessions: state.sessions.size, resets: [...state.resets.entries()].map(([t, r]) => ({ token: t, email: r.email })), leads: state.leads });
       return fail(res, 404, 'notFound');
     }
     // ---- fault injection ----
@@ -156,6 +156,14 @@ export function startContractServer({ allowOrigin = null, port = 0, urlTtlMs = 5
     // CSRF on every state change: the readable cookie must be echoed in the header.
     if (['POST', 'PATCH', 'DELETE'].includes(req.method) && live) { const h = req.headers['x-csrf-token']; if (!h || h !== live.csrf) return fail(res, 403, 'forbidden'); }
 
+    // ---- Phase 6: POST /contact — public; a lead attributed to the signed-in customer's supervisor, else the page's slug ----
+    if (path === '/contact' && req.method === 'POST') {
+      const b = parse(); const email = String(b.email ?? '').trim(); const phone = String(b.phone ?? '').trim();
+      if (!String(b.name ?? '').trim() || !String(b.message ?? '').trim() || (!email && !phone)) return fail(res, 422, 'invalid');
+      const cust = live ? state.customers.get(live.customerId) : null;
+      state.leads.push({ id: `lead_${hex(4)}`, source: 'contact', supervisorId: cust?.profile.attribution?.supervisorId ?? b.attribution?.supervisor ?? null, customerId: cust?.profile.id ?? null, name: b.name, contact: [email, phone].filter(Boolean).join(' · '), message: b.message, service: b.service ?? null });
+      return json(res, 201, { received: true });
+    }
     // ---- Stage 16C: /flights/* — public, no session (mirrors backend/flights.mjs's own route placement) ----
     if (path === '/flights/search' && req.method === 'POST') {
       const b = parse();
@@ -215,9 +223,10 @@ export function startContractServer({ allowOrigin = null, port = 0, urlTtlMs = 5
       D.trips.push({ id: tripId, customerId: me.profile.id, titleAr: dest?.cityAr ?? b.context?.destination ?? 'رحلة', titleEn: dest?.cityEn ?? b.context?.destination ?? 'Trip', destination: dest ? { code: dest.code, cityAr: dest.cityAr, cityEn: dest.cityEn, countryAr: dest.countryAr ?? '', countryEn: dest.countryEn ?? '' } : { code: '', cityAr: '', cityEn: '', countryAr: '', countryEn: '' }, startDate: b.offer?.legs?.[0]?.departAt?.slice(0, 10) ?? b.context?.dates?.depart ?? null, endDate: b.offer?.legs?.at(-1)?.arriveAt?.slice(0, 10) ?? b.context?.dates?.return ?? null, services: [b.context?.service ?? 'flights'], status: 'upcoming', bookingIds: [b.reference], travellers: (b.context?.travellers?.adults ?? 1) + (b.context?.travellers?.children ?? 0) + (b.context?.travellers?.infants ?? 0), supervisorId, createdAt: iso(now()) });
       // Stage 16C: the offer's own revalidated price is the authoritative amount, same as the real backend —
       // never a client-submitted total. Stage 16B: payment status is never read from the client either.
-      const booking = { id: b.reference, customerId: me.profile.id, tripId, service: b.context?.service ?? 'flights', status: 'confirmed', paymentStatus: 'unpaid', amount: b.offer?.price?.total ?? 0, currency: b.offer?.price?.currency ?? 'USD', supervisorId, ticketed: false, createdAt: iso(now()), detail: { route: b.offer ? b.offer.legs.map((l) => `${l.from.code} → ${l.to.code}`).join(' · ') : '', travellers: 1 } };
+      const booking = { id: b.reference, customerId: me.profile.id, tripId, service: b.context?.service ?? 'flights', status: b.status === 'received' ? 'pending' : 'confirmed', paymentStatus: 'unpaid', amount: b.offer?.price?.total ?? 0, currency: b.offer?.price?.currency ?? 'USD', supervisorId, ticketed: false, createdAt: iso(now()), detail: { route: b.offer ? b.offer.legs.map((l) => `${l.from.code} → ${l.to.code}`).join(' · ') : '', travellers: 1 } };
       D.bookings.push(booking);
       if (supervisorId && !me.profile.attribution) me.profile.attribution = { supervisorId, source: 'booking', at: iso(now()) };   // backend-owned attribution, set once
+      if (b.status === 'received') state.leads.push({ id: `lead_${hex(4)}`, source: 'request', supervisorId: me.profile.attribution?.supervisorId ?? null, customerId: me.profile.id, bookingId: b.reference, service: booking.service });
       return json(res, 201, { booking });
     }
     // ---- Stage 16B/16C: a minimal, always-succeeding payment intent + supplier booking, the same reason the

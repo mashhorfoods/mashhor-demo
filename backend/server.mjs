@@ -15,7 +15,7 @@ import { migrate, q } from './db.mjs';
 import { cors, json, empty, fail, HttpError, cookies, rateLimit, resetRateLimits, clientIp, sessionFamily } from './http.mjs';
 import { customers, publicCustomer } from './identity.mjs';
 import { same } from './credentials.mjs';
-import { auth, me, file, legal, diagnostics, paymentsWebhook, flights } from './routes.mjs';
+import { auth, me, file, legal, diagnostics, contact, paymentsWebhook, flights } from './routes.mjs';
 import { registerDevPaymentProvider } from './payments.mjs';
 import { registerDevFlightProvider } from './flights.mjs';
 import { registerSmtpProvider, deliverOutbox } from './mailer.mjs';
@@ -97,6 +97,7 @@ export function createApp() {
     const cls = path.startsWith('/auth/') || path.startsWith('/supervisor/auth/') || path.startsWith('/staff/auth/') ? 'auth'
       : path === '/me/documents' && req.method === 'POST' ? 'upload'
       : path === '/diagnostics' && req.method === 'POST' ? 'diagnostics'
+      : path === '/contact' && req.method === 'POST' ? 'contact'
       : 'api';
     const wait = rateLimit(`${cls}:${ip}`, config.rateLimits[cls]);
     if (wait) { warn('ratelimit.hit', { cls }); return fail(res, 429, 'rateLimited', { 'Retry-After': String(wait) }); }
@@ -136,6 +137,10 @@ export function createApp() {
       const live = found?.session;   // only the route family's own session is ever checked
       if (live) { const h = req.headers['x-csrf-token']; if (!h || !same(h, live.csrf)) { warn('csrf.rejected', { path, family }); return fail(res, 403, 'forbidden'); } }
     }
+
+    // ---- Phase 6: the public contact form — no session required; a signed-in customer's session (resolved and
+    // CSRF-checked just above) ties the lead to them. ----
+    if (path === '/contact' && req.method === 'POST') return contact(req, res, ctx);
 
     // ---- /auth ----
     if (path === '/auth/sign-up' && req.method === 'POST') return auth.signUp(req, res, ctx, legalOverride);

@@ -4,7 +4,7 @@ import { t, pick } from '../../core/i18n.js';
 import { route } from '../../data/config.js';
 import { icon } from '../../components/ui.js';
 import { supervisorData } from '../data.js';
-import { mountSupervisorPortal, loadRegion, block, metricCard, amount, dateTime, leadStatusBadge, revenueGroups, unreadCount } from './shell.js';
+import { mountSupervisorPortal, loadRegion, block, metricCard, amount, dateTime, leadStatusBadge, revenueGroups, unreadCount, commissionText } from './shell.js';
 
 export function mountSupervisorDashboard({ root = document } = {}) {
   return mountSupervisorPortal({ root, id: 'dashboard', head: 'page.supervisor.dashboard', paint: async ({ supervisor, main }) => {
@@ -29,7 +29,7 @@ export function mountSupervisorDashboard({ root = document } = {}) {
     const rev = loadRegion(revHost, () => supervisorData.revenue(), {
       paint: (r) => el('div', { class: 'l-stack l-stack--8' }, [
         ...revenueGroups(r).map((g) => el('p', { class: 't-price' }, amount(g.gross, g.currency))),
-        el('p', { class: 't-body-sm t-muted' }, t('svp.revenue.commissionPending')),
+        el('p', { class: 't-body-sm t-muted' }, commissionText(r.commission)),
       ]),
     });
     const leads = loadRegion(leadsHost, () => supervisorData.leads({ page: 1, pageSize: 3 }), {

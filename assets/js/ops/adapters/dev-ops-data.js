@@ -11,6 +11,7 @@
    ========================================================================= */
 import { registerOpsDataAdapter, RULE_STATUSES } from '../data.js';
 import { paged } from '../../core/adapter-helpers.js';
+import { devLeads as storedDevLeads } from '../../core/leads.js';
 
 const read = (k) => { try { return sessionStorage.getItem(k); } catch { return null; } };
 const wait = async () => { await new Promise((r) => setTimeout(r, read('no.dev.ops') === 'slow' ? 2000 : 200)); if (read('no.dev.ops') === 'error') { const e = new Error('dev outage'); e.code = 'unavailable'; throw e; } };
@@ -69,7 +70,7 @@ let supervisorsAdmin = [
   { id: 'supervisor-1', slug: 'supervisor-1', status: 'active', nameAr: 'منسق تطوير واحد', nameEn: 'Development Coordinator One', titleAr: null, titleEn: null, bioAr: null, bioEn: null, image: null, languages: ['ar', 'en'], specialties: [], services: [], phone: '', whatsapp: null, email: 'dev-sup-1@example.test', city: 'Dubai', notificationPrefs: {}, createdAt: iso(90), updatedAt: iso(30), customersCount: 1, dev: true },
   { id: 'supervisor-2', slug: 'supervisor-2', status: 'active', nameAr: 'منسق تطوير اثنان', nameEn: 'Development Coordinator Two', titleAr: null, titleEn: null, bioAr: null, bioEn: null, image: null, languages: ['ar'], specialties: [], services: [], phone: '', whatsapp: null, email: 'dev-sup-2@example.test', city: 'Istanbul', notificationPrefs: {}, createdAt: iso(90), updatedAt: iso(30), customersCount: 0, dev: true },
 ];
-let devLeads = [{ id: 'dev-lead-1', customerId: null, name: 'Development Lead', contact: 'lead@example.test', source: 'link', serviceInterest: 'flights', status: 'new', convertedBookingId: null, createdAt: iso(5), updatedAt: iso(5) }];
+let devLeads = [{ id: 'dev-lead-1', supervisorId: 'supervisor-1', customerId: null, name: 'Development Lead', contact: 'lead@example.test', source: 'link', serviceInterest: 'flights', status: 'new', convertedBookingId: null, createdAt: iso(5), updatedAt: iso(5) }];
 let devAttributionEvents = [{ customerId: 'dev-cus-1', supervisorId: 'supervisor-1', previousSupervisorId: null, source: 'link', actor: 'customer', at: iso(30) }];
 let devPayments = [
   { id: 'dev-pay-1', customerId: 'dev-cus-1', bookingId: 'dev-bk-1', at: iso(3), amount: 900, currency: 'USD', status: 'paid', reference: 'DEVTX-0001', methodAr: 'مزوّد دفع تطوير', methodEn: 'Development payment provider', customerName: 'Development Customer One' },
@@ -262,7 +263,8 @@ export const DEV_OPS_DATA = registerOpsDataAdapter({
     return { ...o };
   },
 
-  async leads(_t, params = {}) { await wait(); return paged(devLeads, params); },
+  // Phase 6: leads the public site recorded in this browser (contact form, request bookings) come first, newest first.
+  async leads(_t, params = {}) { await wait(); return paged([...storedDevLeads(), ...devLeads], params); },
   async attributionEvents(_t, params = {}) { await wait(); return paged(devAttributionEvents, params); },
 
   async payments(_t, params = {}) { await wait(); let items = devPayments; if (params.customerId) items = items.filter((p) => p.customerId === params.customerId); return paged(items, params); },

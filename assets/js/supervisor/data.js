@@ -14,7 +14,7 @@
      lead         { id, customerId, name, contact, source, serviceInterest, status, convertedBookingId, createdAt, updatedAt }
      revenue      { currency, gross, completed, pending, cancelled, bookingsCount, commission{model,status} }
      performance  { customers, leads, leadsConverted, conversionRate, bookings, bookingsConfirmed, bookingsCancelled }
-     commission   { id, bookingId, amount, currency, status, period, createdAt } — commissions().items
+     commission   { id, bookingId, amount, currency, status ('earned'|'reversed'), rate, period, createdAt, reversedAt } — commissions().items
      notification { id, kind, at, read, titleAr/En, textAr/En, href, bookingId }
      A paged list answers { items, page, pageSize, total, nextPage }.
    ========================================================================= */
