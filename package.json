@@ -6,14 +6,14 @@
   "scripts": {
     "test": "node tests/run.mjs",
     "test:backend": "node tests/run-backend.mjs",
-    "audit:a11y": "node tests/run.mjs --audits",
+    "audit": "node tests/run.mjs --audits",
     "backend:start": "npm --prefix backend start",
     "backend:migrate": "npm --prefix backend run migrate",
     "backend:check": "npm --prefix backend run check",
     "smoke": "node tools/smoke.mjs",
     "deploy": "node tools/deploy.mjs",
     "routes": "node tools/build-routes.mjs",
-    "serve": "python3 -m http.server 8916"
+    "serve": "node tools/serve.mjs"
   },
   "devDependencies": {
     "playwright": "^1.49.0"

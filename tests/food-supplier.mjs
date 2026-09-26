@@ -7,12 +7,9 @@
 // copy, the layout holds from 390 to 1440px in both directions, basic
 // accessibility holds, and the cart totals in the template currency.
 // Serves the template itself, so it runs standalone:  node tests/food-supplier.mjs
-import './env.mjs';
-import { shot } from './env.mjs';
-import { chromium } from 'playwright';
-import { createServer } from 'node:http';
+import { shot, launch, staticServer } from './env.mjs';
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
-import { extname, join, dirname } from 'node:path';
+import { join, dirname } from 'node:path';
 
 const DIR = new URL('../templates/food-supplier/', import.meta.url).pathname;
 const DEPLOY = 'https://mashhorfoods.github.io/mashhor-demo/templates/food-supplier/';
@@ -81,16 +78,10 @@ for (const pg of PAGES) {
 for (const k of Object.keys(shape.en)) ok(`en and ar pages have the same ${k}`, String(shape.en[k]) === String(shape.ar[k]), `${shape.en[k]} vs ${shape.ar[k]}`);
 
 // ---- 3. in the browser -------------------------------------------------------
-const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.jpg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml', '.woff2': 'font/woff2' };
-const server = createServer((req, res) => {
-  let p = decodeURIComponent(new URL(req.url, 'http://x').pathname); if (p.endsWith('/')) p += 'index.html';
-  const f = join(DIR, p);
-  if (!f.startsWith(DIR) || !existsSync(f) || statSync(f).isDirectory()) { res.writeHead(404); res.end(); return; }
-  res.writeHead(200, { 'Content-Type': MIME[extname(f)] ?? 'application/octet-stream' }); res.end(readFileSync(f));
-});
-await new Promise((r) => server.listen(0, '127.0.0.1', r));
-const origin = `http://127.0.0.1:${server.address().port}/`;
-const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
+// The template is served on its own at `/` (its pages link relative to themselves); a miss is an empty 404.
+const server = await staticServer({ root: DIR, prefix: '/', notFound: null });
+const origin = `${server.origin}/`;
+const b = await launch();
 const errs = [];
 for (const pg of PAGES) for (const width of [390, 768, 1024, 1440]) {
   const tag = `${pg.lang}@${width}`;

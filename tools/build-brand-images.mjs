@@ -8,7 +8,7 @@
    is a logo, so a buyer only has to edit the text below (or swap the files).
 
    node tools/build-brand-images.mjs   (CHROMIUM=/path/to/chromium optional) */
-import { chromium } from 'playwright';
+import { launch, renderTo } from './lib/browser.mjs';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -53,16 +53,8 @@ const icon = (size) => `<!doctype html><style>* { margin: 0; }
 </style><div><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="${size >= 64 ? 1.6 : 2.2}"
   stroke-linecap="round" stroke-linejoin="round">${PLANE}</svg></div>`;
 
-const browser = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
-async function shot(html, w, h, out, type) {
-  const page = await browser.newPage({ viewport: { width: w, height: h } });
-  await page.setContent(html);
-  await page.evaluate(() => document.fonts.ready);
-  await page.screenshot({ path: join(ROOT, out), type, ...(type === 'jpeg' ? { quality: 86 } : { omitBackground: true }) });
-  await page.close();
-  console.log('wrote', out);
-}
-await shot(card, 1200, 630, 'assets/brand/share-card.jpg', 'jpeg');
-await shot(icon(32), 32, 32, 'assets/brand/icon-32.png', 'png');
-await shot(icon(180), 180, 180, 'assets/brand/icon-180.png', 'png');
+const browser = await launch();
+await renderTo(browser, card, 1200, 630, join(ROOT, 'assets/brand/share-card.jpg'), 'jpeg', 86);
+await renderTo(browser, icon(32), 32, 32, join(ROOT, 'assets/brand/icon-32.png'), 'png');
+await renderTo(browser, icon(180), 180, 180, join(ROOT, 'assets/brand/icon-180.png'), 'png');
 await browser.close();

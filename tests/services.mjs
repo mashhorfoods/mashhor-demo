@@ -1,9 +1,8 @@
 // Stage 10.5 services page verification — structure, states, interaction,
 // a11y, three widths, both directions, plus the homepage deep link. Exits 1 on any ✗.
-import './env.mjs';
-import { chromium } from 'playwright';
+import { launch } from './env.mjs';
 const URL = process.env.TEST_ORIGIN + '/mashhor-demo/services/';
-const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
+const b = await launch();
 let pass = 0, fail = 0;
 const ok = (name, cond, note = '') => { if (cond) pass++; else { fail++; console.log(`  ✗ ${name} ${note}`); } };
 const errs = [];

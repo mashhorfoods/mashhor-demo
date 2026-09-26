@@ -2,13 +2,12 @@
 // dashboard end to end against the REAL backend; the supervisor portal's screens (dashboard, customers, leads,
 // bookings, revenue, performance, notifications, settings) against the development stand-in; guard/authorization,
 // empty/error/slow states, and the responsive + RTL/LTR matrix. Exits 1 on any ✗.
-import { shot, makeCtx, startEphemeralBackend } from './env.mjs';
-import { chromium } from 'playwright';
+import { shot, makeCtx, startEphemeralBackend, launch, staticServer, stagingEnv } from './env.mjs';
 import { rmSync } from 'node:fs';
 
 const ORIGIN = process.env.TEST_ORIGIN + '';
 const P = '/mashhor-demo/';
-const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
+const b = await launch();
 let pass = 0, fail = 0;
 const ok = (name, cond, note = '') => { if (cond) pass++; else { fail++; console.log(`  ✗ ${name} ${note}`); } };
 const errs = [];
@@ -168,30 +167,15 @@ await b.close();
 
 // ================================================================= 5. real backend: public profile → attribution → booking → supervisor visibility
 {
-  const ROOT = new URL('../', import.meta.url).pathname;
   const { dir, backend, origin: API } = await startEphemeralBackend({ prefix: 'no-sup-backend-', portBase: 8990, portSpread: 9 });
   const control = (path, body = {}) => fetch(API + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then((r) => r.json());
   const apiState = () => fetch(API + '/__test/state').then((r) => r.json());
   await control('/__test/reset');
 
-  const { createServer } = await import('node:http');
-  const { readFileSync, statSync, existsSync } = await import('node:fs');
-  const { extname, join: pjoin } = await import('node:path');
-  const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.mjs': 'text/javascript', '.svg': 'image/svg+xml', '.png': 'image/png', '.woff2': 'font/woff2', '.json': 'application/json' };
-  const envModule = (env) => `export const ENV = Object.freeze(${JSON.stringify(env)});\nexport const isProduction = () => ENV.environment === 'production';\n`;
-  const STAGING = { environment: 'staging', authProvider: 'session-api', authPublicConfig: { sessionRefreshMinutes: 10 }, apiBaseUrl: API, documentService: { maxBytes: 5 * 1024 * 1024, accept: ['application/pdf', 'image/jpeg', 'image/png'] }, paymentApi: { pageSize: 10 }, notifications: { refreshOnFocus: true, refreshMinSeconds: 30 }, legal: { source: null, termsPath: null, privacyPath: null }, diagnostics: { endpoint: null }, verified: null };
-  const site = createServer((req, res) => {
-    let path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
-    if (path.startsWith(P)) path = path.slice(P.length - 1); if (path.endsWith('/')) path += 'index.html';
-    if (path === '/assets/js/data/env.js') { res.writeHead(200, { 'Content-Type': MIME['.js'], 'Cache-Control': 'no-store' }); res.end(envModule(STAGING)); return; }
-    const file = pjoin(ROOT, path);
-    if (!file.startsWith(ROOT) || !existsSync(file) || statSync(file).isDirectory()) { res.writeHead(404, { 'Content-Type': MIME['.html'] }); res.end(readFileSync(pjoin(ROOT, '404.html'))); return; }
-    res.writeHead(200, { 'Content-Type': MIME[extname(file)] ?? 'application/octet-stream' }); res.end(readFileSync(file));
-  });
-  await new Promise((r) => site.listen(0, '127.0.0.1', r));
-  const siteOrigin = `http://127.0.0.1:${site.address().port}`;
+  const site = await staticServer({ prefix: P, env: stagingEnv(API) });
+  const siteOrigin = site.origin;
 
-  const b2 = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
+  const b2 = await launch();
   const bctx = async () => { const c = await b2.newContext({ viewport: { width: 1440, height: 1000 } }); const p = await c.newPage(); p.setDefaultTimeout(10000); return { c, p }; };
   const bgo = async (p, url, handle) => { await p.goto(siteOrigin + P + url); if (handle) await p.waitForFunction((h) => window.no?.[h], handle); };
 
@@ -255,7 +239,7 @@ await b.close();
   ok('direct id access to another supervisor\'s customer → not-found, not the record', /غير موجود/.test(await text(p3, 'h1')));
   await c3.close();
 
-  await b2.close(); await new Promise((r) => site.close(r));
+  await b2.close(); await site.close();
   backend.kill('SIGTERM'); await new Promise((r) => backend.on('close', r)); rmSync(dir, { recursive: true, force: true });
 }
 

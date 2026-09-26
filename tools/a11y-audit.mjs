@@ -10,26 +10,24 @@
 // the first 30 tab stops, every header control (opens, Escape closes,
 // focus returns), and transitions under prefers-reduced-motion.
 //
-//   npm test                                                     # runs it after the suites (serves the site itself)
-//   BASE=http://localhost:8000/ node tools/a11y-audit.mjs        # everything
-//   ONLY=book/index.html node tools/a11y-audit.mjs               # one page, all widths
+//   npm test / npm run audit                         # runs it (serves the site itself)
+//   npm run serve & node tools/a11y-audit.mjs        # by hand; BASE defaults to http://localhost:8919/mashhor-demo/
+//   ONLY=book/index.html node tools/a11y-audit.mjs   # one page, all widths
 //
 // Needs playwright and the bundled Chromium (see tools/i18n-audit.mjs).
 // Prints one line per unique finding and exits 1 when anything is found.
-import { chromium } from 'playwright';
-import { readdirSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
-const ORIGIN = process.env.BASE || 'http://localhost:8000/';
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..') + '/';
+import { launch } from './lib/browser.mjs';
+import { ALL, PUBLIC, SUPERVISOR_PORTAL } from '../tests/pages.mjs';
+const ORIGIN = process.env.BASE || 'http://localhost:8919/mashhor-demo/';
+// KEY: one page of every kind, at every width in both languages. REST: every other public page and the
+// supervisor portal's pages, at 390 and 1440 in Arabic. Both come from tests/pages.mjs.
 const KEY = ['index.html', '404.html', 'styleguide.html', 'services/index.html', 'destinations/index.html', 'offers/index.html', 'book/index.html', 'services/flights/index.html', 'offers/umrah/index.html', 'destinations/dubai/index.html', 'supervisor/ahmed-mohamed/index.html', 'supervisors/index.html', 'search/index.html', 'booking/travellers/index.html', 'booking/review/index.html', 'booking/payment/index.html', 'booking/confirmation/index.html', 'account/sign-in/index.html', 'account/sign-up/index.html', 'account/index.html', 'legal/terms/index.html'];
-const REST = [...readdirSync(ROOT + 'services', { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== 'flights').map((d) => `services/${d.name}/index.html`),
-  ...readdirSync(ROOT + 'offers', { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== 'umrah').map((d) => `offers/${d.name}/index.html`),
-  ...readdirSync(ROOT + 'destinations', { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== 'dubai').map((d) => `destinations/${d.name}/index.html`),
-  ...readdirSync(ROOT + 'supervisor', { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== 'ahmed-mohamed').map((d) => `supervisor/${d.name}/index.html`)];
+const missing = KEY.filter((k) => !ALL.includes(k));
+if (missing.length) { console.error(`KEY pages not in tests/pages.mjs: ${missing.join(', ')}`); process.exit(1); }
+const REST = [...PUBLIC, ...SUPERVISOR_PORTAL].filter((pg) => !KEY.includes(pg));
 const WIDTHS = [390, 600, 834, 1024, 1200, 1440];
 const ONLY = process.env.ONLY ? process.env.ONLY.split(',') : null;
-const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
+const b = await launch();
 const findings = new Map();
 const add = (check, page, w, loc, detail) => { const k = `${check} | ${detail}`; const e = findings.get(k) ?? { where: new Set() }; e.where.add(`${page}@${w}/${loc}`); findings.set(k, e); };
 

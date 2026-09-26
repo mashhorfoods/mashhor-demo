@@ -47,6 +47,9 @@ export function mountHelp({ root = document } = {}) {
   render(host, [
     pageHead({ id: 'help-title', overline: t('help.overline'), title: t('help.title'), text: t('help.lead') }),
     quickLinks(),
+    // supportPanels() titles its two panels with <h3>s (elsewhere they sit under a section's <h2>): give them
+    // their <h2> here too, for screen readers only, so the outline doesn't jump from the page's <h1>.
+    el('h2', { class: 'u-visually-hidden' }, t('home.support.title')),
     supportPanels(HOME_SUPPORT, liveChannels()),
   ]);
   return {};

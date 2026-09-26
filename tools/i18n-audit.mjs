@@ -6,15 +6,17 @@
 // different lang= (a deliberate specimen) or translate="no" (a code, a token, a
 // data cell) is exempt. Exit code 1 if anything is left untranslated.
 //
-// `npm test` runs it (tests/run.mjs serves the site and passes BASE). By hand it needs a static server and
-// Playwright (a devDependency — `npm ci`):
-//   python3 -m http.server 8000
-//   BASE=http://localhost:8000/ PAGES=index.html,404.html node tools/i18n-audit.mjs
-//   CHROMIUM=/path/to/chromium   # optional: use an existing browser binary
-import { chromium } from 'playwright';
-const BASE = process.env.BASE || 'http://localhost:8000/';
-const PAGES = (process.env.PAGES || 'index.html,404.html,styleguide.html').split(',');
-const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
+// Every page in tests/pages.mjs (ALL) unless PAGES narrows it. `npm test` and `npm run audit` run it
+// (tests/run.mjs serves the site and passes BASE). By hand it needs Playwright (a devDependency — `npm ci`)
+// and the site served under /mashhor-demo/:
+//   npm run serve                                   # http://localhost:8919/mashhor-demo/, the default BASE
+//   PAGES=index.html,404.html node tools/i18n-audit.mjs
+//   CHROMIUM=/path/to/chromium                      # optional: use an existing browser binary
+import { launch } from './lib/browser.mjs';
+import { ALL } from '../tests/pages.mjs';
+const BASE = process.env.BASE || 'http://localhost:8919/mashhor-demo/';
+const PAGES = process.env.PAGES ? process.env.PAGES.split(',') : ALL;
+const b = await launch();
 let total = 0;
 for (const page of PAGES) {
   const p = await b.newPage({ viewport: { width: 1440, height: 1000 } });

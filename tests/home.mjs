@@ -1,18 +1,16 @@
 // Stage 10.4 homepage verification — structure, states, interaction, a11y,
 // three widths, both directions. Exits 1 on any ✗.
-import './env.mjs';
-import { chromium } from 'playwright';
+import { launch, makeCtx } from './env.mjs';
 const URL = process.env.TEST_ORIGIN + '/mashhor-demo/index.html';
-const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
+const b = await launch();
 let pass = 0, fail = 0;
 const ok = (name, cond, note = '') => { if (cond) pass++; else { fail++; console.log(`  ✗ ${name} ${note}`); } };
 const errs = [];
 
+const ctx = makeCtx(b, errs, { requestFailed: true });
+// Loads in Arabic, then switches language at runtime (what the header's language control does).
 async function open(width, height, locale) {
-  const p = await b.newPage({ viewport: { width, height } });
-  p.on('pageerror', e => errs.push(`${width}/${locale} pageerror: ${e.message}`));
-  p.on('console', m => { if (m.type() === 'error' || m.type() === 'warning') errs.push(`${width}/${locale} console: ${m.text()}`); });
-  p.on('requestfailed', r => errs.push(`${width}/${locale} reqfail: ${r.url()}`));
+  const { p } = await ctx(width, height);
   await p.goto(URL, { waitUntil: 'networkidle' });
   await p.evaluate(async (l) => { const m = await import('./assets/js/foundation.js'); await m.setLocale(l); }, locale);
   await p.waitForTimeout(700);

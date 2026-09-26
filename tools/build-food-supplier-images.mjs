@@ -16,8 +16,8 @@
    only.
 
    node tools/build-food-supplier-images.mjs   (CHROMIUM=/path/to/chromium optional) */
-import { chromium } from 'playwright';
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { launch, renderTo } from './lib/browser.mjs';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -198,16 +198,8 @@ const seal = (title, sub) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0
 `;
 for (const [file, title, sub] of CERTS) { writeFileSync(join(OUT, 'img', `cert-${file}.svg`), seal(title, sub)); console.log(`wrote img/cert-${file}.svg`); }
 
-const exe = process.env.CHROMIUM ?? (existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined);
-const browser = await chromium.launch(exe ? { executablePath: exe } : {});
-async function shot(html, w, h, out, type = 'jpeg') {
-  const page = await browser.newPage({ viewport: { width: w, height: h } });
-  await page.setContent(html);
-  await page.evaluate(() => document.fonts.ready);
-  await page.screenshot({ path: join(OUT, out), type, ...(type === 'jpeg' ? { quality: 84 } : { omitBackground: true }) });
-  await page.close();
-  console.log('wrote', out);
-}
+const browser = await launch();
+const shot = (html, w, h, out, type = 'jpeg') => renderTo(browser, html, w, h, join(OUT, out), type, 84);
 for (const [i, p] of PRODUCTS.entries()) await shot(productScene(p, i), 800, 600, `img/product-${i + 1}.jpg`);
 for (const [i, s] of slides.entries()) await shot(s(), 1200, 600, `img/slide-${i + 1}.jpg`);
 await shot(shareCard(SITE_NAME, TAGLINE, TAGLINE_2), 1200, 630, 'share-card.jpg');

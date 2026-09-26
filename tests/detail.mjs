@@ -1,9 +1,8 @@
 // Stage 10.6 service detail verification — every route, both locales, three
 // widths on a sample, CTA logic, states, invalid route, a11y. Exits 1 on any ✗.
-import './env.mjs';
-import { chromium } from 'playwright';
+import { launch } from './env.mjs';
 const ORIGIN = process.env.TEST_ORIGIN + '';
-const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
+const b = await launch();
 let pass = 0, fail = 0;
 const ok = (name, cond, note = '') => { if (cond) pass++; else { fail++; console.log(`  ✗ ${name} ${note}`); } };
 const errs = [];
