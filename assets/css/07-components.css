@@ -231,43 +231,13 @@
   @media (min-width: 48em) { .c-card__body { padding: var(--space-24); } }
   .c-card__title { font-size: var(--text-h4); font-weight: var(--weight-semibold); }
   .c-card__text { font-size: var(--text-body-sm); color: var(--color-text-secondary); }
-  .c-card__foot {
-    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-16);
-    padding: var(--space-16); border-block-start: var(--border-hairline);
-    background-color: var(--color-bg-subtle);
-  }
-  @media (min-width: 48em) { .c-card__foot { padding-inline: var(--space-24); } }
   /* The whole card is clickable but only the title is a link, so the
      accessible name stays meaningful and text remains selectable. §23 */
   .c-card__link::after { content: ""; position: absolute; inset: 0; }
   /* A second control inside a card (a CTA, a details link) must paint above
      the stretched title link, or it can never be clicked. */
-  .c-card__action, .c-card__foot .c-btn { position: relative; z-index: var(--z-raised); }
+  .c-card__action { position: relative; z-index: var(--z-raised); }
   .c-card { position: relative; }
-
-  /* ======================================================================
-     STATUS — §20. Icon + word + tint. Never colour alone.
-     ==================================================================== */
-  .c-status {
-    display: inline-flex; align-items: center; gap: var(--space-8);
-    padding-inline: var(--space-12); padding-block: var(--space-4);
-    font-size: var(--text-caption); font-weight: var(--weight-semibold);
-    line-height: 1.4;
-    border-radius: var(--radius-pill);
-    background-color: var(--status-bg, var(--color-gray-100));
-    color: var(--status-fg, var(--color-text));
-    white-space: nowrap;
-  }
-  .c-status .c-icon { --icon-size: var(--icon-sm); }
-  .c-status[data-status="pending"]    { --status-bg: var(--color-warning-bg); --status-fg: var(--color-warning-fg); }
-  .c-status[data-status="processing"] { --status-bg: var(--color-info-bg);    --status-fg: var(--color-info-fg); }
-  .c-status[data-status="confirmed"]  { --status-bg: var(--color-success-bg); --status-fg: var(--color-success-fg); }
-  .c-status[data-status="completed"]  { --status-bg: var(--color-gray-100);   --status-fg: var(--color-gray-800); }
-  .c-status[data-status="cancelled"]  { --status-bg: var(--color-gray-100);   --status-fg: var(--color-gray-700); }
-  .c-status[data-status="failed"]     { --status-bg: var(--color-error-bg);   --status-fg: var(--color-error-fg); }
-  .c-status[data-status="expired"]    { --status-bg: var(--color-gray-100);   --status-fg: var(--color-gray-700); }
-  /* Cancelled and expired share a tint deliberately — the icon and the word
-     carry the difference, which is the rule the brief sets. */
 
   /* ======================================================================
      TRUST — §19. Pricing, baggage, rules, support: visible, not buried.

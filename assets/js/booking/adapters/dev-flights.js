@@ -100,14 +100,17 @@ function makeOffer(request, n, r) {
 
 const cache = new Map();   // searchId → { request, offers }
 
+/** The nine offers the development supplier returns for a request — deterministic per request, no delay (the style guide renders them). */
+export const devOffers = (request) => { const r = rng(hash(request.key)); return Array.from({ length: 9 }, (_, n) => makeOffer(request, n, r)); };
+
 export const DEV_FLIGHTS = registerAdapter({
   id: 'dev-flights', dev: true, mode: 'search', services: ['flights'],
   async search(request) {
     const sw = read('no.dev.search');
     await new Promise((r) => setTimeout(r, sw === 'slow' ? 2500 : 700));
     if (sw === 'error') throw new Error('development supplier: simulated outage');
-    const key = request.key; const r = rng(hash(key));
-    const offers = sw === 'empty' ? [] : Array.from({ length: 9 }, (_, n) => makeOffer(request, n, r));
+    const key = request.key;
+    const offers = sw === 'empty' ? [] : devOffers(request);
     const searchId = `S-${hash(key + Date.now()).toString(36)}`;
     cache.set(searchId, { request, offers });
     try { sessionStorage.setItem(`no.dev.search.${searchId}`, JSON.stringify({ request, offers })); } catch { /* storage unavailable */ }

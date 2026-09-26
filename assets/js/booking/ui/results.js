@@ -19,7 +19,7 @@ import { stateRegion, stateBlock, skeletonCard } from '../../components/states.j
 import { runSearch, toSearchRequest } from '../search.js';
 import { adapterFor } from '../adapters/index.js';
 import { loadJourney, selectOffer, stepUrl, searchExpired } from '../journey.js';
-import { SORTS, PRIORITIES, EMPTY_FILTERS, TIME_SLOTS, sortOffers, applyFilters, facetsOf, labelOffers, activeFilterCount, totalDuration, totalStops } from '../rank.js';
+import { SORTS, PRIORITIES, defaultSort, EMPTY_FILTERS, TIME_SLOTS, sortOffers, applyFilters, facetsOf, labelOffers, activeFilterCount, totalDuration, totalStops } from '../rank.js';
 import { totalTravellers } from '../pricing.js';
 import { flightResultCard } from './result-card.js';
 import { devNotice, progress, tripCard, recoveryState, put, slot, setHead, carrierName, isAr, placeName } from './shared.js';
@@ -40,7 +40,9 @@ export function contextForPage(params = new URLSearchParams(location.search)) {
 export function mountResults({ root = document, params = new URLSearchParams(location.search), search = runSearch } = {}) {
   setHead('page.search.title');
   const ctx = contextForPage(params);
-  const state = { offers: null, sort: 'recommended', priority: '', filters: { ...EMPTY_FILTERS }, compare: [], adapter: null, errors: [] };
+  // "help me choose" (homepage or booking entry) carries the priority as `sort`; it picks the opening sort.
+  const sort = defaultSort(ctx?.options?.sort);
+  const state = { offers: null, sort, priority: PRIORITIES.find((p) => p.sort === sort)?.id ?? '', filters: { ...EMPTY_FILTERS }, compare: [], adapter: null, errors: [] };
   const api = { state, ctx, region: null, refresh, setSort, setPriority, setFilters, compare: toggleCompare, run };
 
   if (!ctx) {
@@ -104,7 +106,7 @@ export function mountResults({ root = document, params = new URLSearchParams(loc
         openFilters,
         el('div', { class: 'c-results-bar__sort' }, [
           el('label', { class: 'c-field__label', for: sortId }, t('bk.sort.label')),
-          el('select', { class: 'c-field__control', id: sortId, onchange: (e) => setSort(e.currentTarget.value) }, SORTS.map((s) => el('option', { value: s.id, selected: s.id === state.sort }, isAr() ? s.labelAr : s.labelEn))),
+          el('select', { class: 'c-field__control', id: sortId, onchange: (e) => setSort(e.currentTarget.value) }, SORTS.map((s) => el('option', { value: s.id, selected: s.id === state.sort }, t(s.label)))),
         ]),
       ]),
     ]);

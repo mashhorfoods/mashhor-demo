@@ -15,21 +15,56 @@ const hour = (iso) => new Date(iso).getHours();
 export const hasNightLeg = (o) => legsOf(o).some((l) => { const d = hour(l.departAt); const a = hour(l.arriveAt); return d >= 22 || d < 6 || a < 6; });
 const familyFriendly = (o) => (o.baggage?.checkedPieces ?? 0) >= 1 && !hasNightLeg(o) && totalStops(o) <= 1;
 
+/** The results page sort control. `label` is a string key (bk.sort.*). */
 export const SORTS = [
-  { id: 'recommended', labelAr: 'الأنسب (متوازن)', labelEn: 'Best balance' },
-  { id: 'price',       labelAr: 'الأرخص أولاً',    labelEn: 'Cheapest first' },
-  { id: 'duration',    labelAr: 'الأقصر مدة',      labelEn: 'Shortest first' },
-  { id: 'stops',       labelAr: 'أقل توقفات',      labelEn: 'Fewest stops' },
-  { id: 'departure',   labelAr: 'المغادرة الأبكر',  labelEn: 'Earliest departure' },
+  { id: 'recommended', label: 'bk.sort.recommended' },
+  { id: 'value',       label: 'bk.sort.value' },
+  { id: 'price',       label: 'bk.sort.price' },
+  { id: 'duration',    label: 'bk.sort.duration' },
+  { id: 'stops',       label: 'bk.sort.stops' },
+  { id: 'family',      label: 'bk.sort.family' },
+  { id: 'departure',   label: 'bk.sort.departure' },
 ];
 
-/** The four "help me choose" priorities of the homepage, mapped onto the ranking. */
+/** The "help me choose" priorities (the homepage's HOME_PRIORITIES carry the same `sort` keys), mapped onto the ranking. */
 export const PRIORITIES = [
   { id: 'price',    sort: 'price',    label: 'bk.priority.price' },
   { id: 'stops',    sort: 'stops',    label: 'bk.priority.stops' },
   { id: 'duration', sort: 'duration', label: 'bk.priority.duration' },
   { id: 'family',   sort: 'family',   label: 'bk.priority.family' },
+  { id: 'value',    sort: 'value',    label: 'bk.priority.value' },
 ];
+
+/**
+ * The sort the results page opens with: the priority the traveller picked in
+ * "help me choose" (carried on the search as `sort`), or the balanced
+ * default. The traveller can still change it on the page.
+ */
+export const defaultSort = (sort) => (SORTS.some((s) => s.id === sort) ? sort : 'recommended');
+
+/**
+ * BEST VALUE — the price a traveller effectively pays once the trip's
+ * comfort is weighed in. Lower is better. Every weight is fixed and stated:
+ *
+ *   value = total price
+ *         × (1 + 0.5 × extra time)   extra time = (duration − fastest in these results) ÷ fastest
+ *         × (1 + 0.1 × stops)        each stop (all legs) adds 10 %
+ *         × (checked bag ? 1 : 1.1)  no checked baggage adds 10 %
+ *
+ * So a flight twice as long as the fastest costs 50 % more "in value", and a
+ * non-stop flight with a bag is judged on its price alone. Ties go to the
+ * cheaper total. Relative to the result set, like the labels.
+ */
+export const VALUE_WEIGHTS = { extraTime: 0.5, perStop: 0.1, noBaggage: 0.1 };
+export function valueScores(list) {
+  const fastest = Math.max(1, Math.min(...list.map(totalDuration)));
+  const W = VALUE_WEIGHTS;
+  return new Map(list.map((o) => [o.id,
+    o.price.total
+      * (1 + W.extraTime * (totalDuration(o) - fastest) / fastest)
+      * (1 + W.perStop * totalStops(o))
+      * ((o.baggage?.checkedPieces ?? 0) >= 1 ? 1 : 1 + W.noBaggage)]));
+}
 
 /** 1-based rank of every offer on one axis (ties share a rank). */
 function ranks(list, value) {
@@ -39,7 +74,7 @@ function ranks(list, value) {
 
 /**
  * Labels every offer can earn, each with its rule spelled out:
- *   cheapest · fastest · fewestStops · family · recommended (balanced)
+ *   cheapest · fastest · fewestStops · family · value · recommended (balanced)
  * "Recommended" is the offer with the lowest SUM of its price, duration and
  * stop ranks — the rule is printed on the card, and it never claims "best".
  */
@@ -56,6 +91,9 @@ export function labelOffers(list) {
   first(stops).forEach((id) => add(id, { id: 'fewestStops', ruleAr: totalStops(list.find((o) => o.id === id)) === 0 ? 'بلا توقف' : 'أقل عدد توقفات بين النتائج', ruleEn: totalStops(list.find((o) => o.id === id)) === 0 ? 'Non-stop' : 'Fewest stops in these results' }));
   const fam = list.filter(familyFriendly).sort((a, b) => a.price.total - b.price.total)[0];
   if (fam) add(fam.id, { id: 'family', ruleAr: 'أمتعة مسجّلة لكل مسافر، بلا رحلات ليلية، توقف واحد على الأكثر — والأرخص بين هذه', ruleEn: 'Checked baggage for everyone, no night legs, at most one stop — and the cheapest of those' });
+  const value = valueScores(list);
+  const best = [...list].sort((a, b) => value.get(a.id) - value.get(b.id) || a.price.total - b.price.total)[0];
+  add(best.id, { id: 'value', ruleAr: 'أقل سعر بعد احتساب مدة السفر وعدد التوقفات والأمتعة المسجّلة', ruleEn: 'Lowest price once travel time, stops and checked baggage are weighed in' });
   const balanced = [...list].sort((a, b) => (price.get(a.id) + dur.get(a.id) + stops.get(a.id)) - (price.get(b.id) + dur.get(b.id) + stops.get(b.id)))[0];
   add(balanced.id, { id: 'recommended',
     ruleAr: `أفضل توازن: الترتيب ${price.get(balanced.id)} سعراً، ${dur.get(balanced.id)} مدةً، ${stops.get(balanced.id)} توقفاً`,
@@ -65,10 +103,11 @@ export function labelOffers(list) {
 
 export function sortOffers(list, key) {
   const labels = key === 'recommended' ? labelOffers(list) : null;
-  const score = { price: (o) => o.price.total, duration: totalDuration, stops: (o) => totalStops(o) * 10000 + o.price.total,
+  const value = key === 'value' ? valueScores(list) : null;
+  const score = { value: (o) => value.get(o.id), price: (o) => o.price.total, duration: totalDuration, stops: (o) => totalStops(o) * 10000 + o.price.total,
     departure: (o) => new Date(o.legs[0]?.departAt).valueOf(), family: (o) => (familyFriendly(o) ? 0 : 1) * 1e6 + o.price.total,
     recommended: (o) => (labels.get(o.id).some((l) => l.id === 'recommended') ? 0 : 1) * 1e6 + o.price.total }[key] ?? ((o) => o.price.total);
-  return [...list].sort((a, b) => score(a) - score(b));
+  return [...list].sort((a, b) => score(a) - score(b) || a.price.total - b.price.total);
 }
 
 /* ---- Filters ---------------------------------------------------------- */

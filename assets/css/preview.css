@@ -1,62 +1,11 @@
 /* ============================================================================
-   PREVIEW — the Stage 11/12 parts the style guide shows before their stage
-   ships: product cards, the assist card, the toggle, phone, OTP, upload,
-   fieldset and form grid, price rows and progress steps. Loaded by
+   PREVIEW — the form parts the style guide shows before a page uses them:
+   the toggle, phone, OTP, upload, fieldset and form grid. Loaded by
    styleguide.html only; no customer page carries these bytes. Stage 10.12
+   (The Stage-10 card prototypes are gone: the guide renders the live cards.)
    ========================================================================= */
 
 @layer components {
-  /* ======================================================================
-     HOTEL CARD
-     ==================================================================== */
-  .c-hotel__location { display: flex; align-items: center; gap: var(--space-4);
-                       font-size: var(--text-caption); color: var(--color-text-secondary); }
-  .c-rating__stars { display: inline-flex; gap: 1px; color: var(--_warning-accent); }
-  .c-rating__score {
-    display: inline-flex; align-items: center; justify-content: center;
-    min-inline-size: 2.5rem; padding-inline: var(--space-8); padding-block: var(--space-4);
-    font-family: var(--font-data); font-size: var(--text-caption); font-weight: var(--weight-bold);
-    background-color: var(--color-info-bg); color: var(--color-info-fg);
-    border-radius: var(--radius-sm);
-  }
-
-  /* ======================================================================
-     PACKAGE CARD
-     ==================================================================== */
-  .c-package__includes { display: flex; flex-direction: column; gap: var(--space-4); }
-  .c-package__include { display: flex; align-items: center; gap: var(--space-8); font-size: var(--text-caption); }
-  .c-package__include .c-icon { color: var(--color-success); --icon-size: var(--icon-sm); }
-
-  /* ======================================================================
-     SUPERVISOR CARD — §29
-     A Travel & Tourism person, presented in the Travel & Tourism system. The only
-     personal elements are the photo, the name, the bio and the contact.
-     No personal colour, no personal logo, no personal type.
-     ==================================================================== */
-  .c-supervisor { align-items: center; text-align: center; padding: var(--space-24); }
-  .c-supervisor__photo {
-    inline-size: 88px; block-size: 88px;
-    border-radius: var(--radius-circle);
-    object-fit: cover;
-    background-color: var(--color-gray-100);
-    /* The one brand flourish allowed on a person: the Travel & Tourism red ring. */
-    box-shadow: 0 0 0 3px var(--color-surface), 0 0 0 5px var(--color-primary);
-  }
-  .c-supervisor__name { font-size: var(--text-h4); font-weight: var(--weight-semibold); }
-  .c-supervisor__role { font-size: var(--text-caption); color: var(--color-text-brand); font-weight: var(--weight-semibold); }
-  .c-supervisor__services { display: flex; flex-wrap: wrap; gap: var(--space-4); justify-content: center; }
-  .c-supervisor__verified { display: inline-flex; align-items: center; gap: var(--space-4);
-                            font-size: var(--text-caption); color: var(--color-success-fg); }
-
-  /* ======================================================================
-     TRIP CARD — Stage 12 lives on this. §28
-     ==================================================================== */
-  .c-trip__head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-16); }
-  .c-trip__ref { font-family: var(--font-data); font-size: var(--text-caption);
-                 color: var(--color-text-secondary); letter-spacing: 0.04em; }
-  .c-trip__route { display: flex; align-items: center; gap: var(--space-8);
-                   font-size: var(--text-h4); font-weight: var(--weight-semibold); }
-
   /* --- Toggle ----------------------------------------------------------- */
   .c-toggle { display: flex; align-items: center; gap: var(--space-12); min-block-size: var(--touch-target); cursor: pointer; }
   .c-toggle__input { position: absolute; opacity: 0; pointer-events: none; }

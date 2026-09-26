@@ -33,7 +33,7 @@ assets/js/data/                 config · services · service-details · destina
 assets/js/components/           ui · cards · search · states · brand · session · menus · drawer ·
                                 header · footer · home · services · service-detail · destinations ·
                                 offers · booking · supervisor
-assets/js/preview/              cards · forms · states · samples   (style guide only)
+assets/js/preview/              forms · samples                    (style guide only)
 tests/                          the suites + run.mjs · tools/  build-routes · i18n-audit · a11y-audit · fetch-images (removed later, 7b52cc9)
 ```
 
