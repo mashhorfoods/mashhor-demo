@@ -3,10 +3,14 @@
 // admin-manageable entities — genuinely absent before Phase 2A: both were pure
 // hardcoded frontend registries (assets/js/data/destinations.js, offers.js)
 // with no backend representation at all. Field shapes mirror those registries'
-// own documented contracts so a later phase can feed the public pages from
-// here without a reshape; that wiring does not happen here — the public site
-// stays on its static registries (Phase 2 scope decision: static site + a
-// staff-only preview route, not a live backend-driven public page).
+// own documented contracts, and since Phase 6 the public site reads them: the
+// unauthenticated GET /content/destinations and /content/offers (server.mjs)
+// return the PUBLISHED records in the registries' own shapes (publicDestinations
+// / publicOffers at the end of this file, staff-only fields stripped), and a
+// connected build's public pages render those instead of the static registries
+// (assets/js/data/content-source.js). The static registries stay as the
+// SEO/offline fallback: a build with no backend, a backend that can't be
+// reached, or a CMS that has never published anything of that kind.
 //
 // Phase 2B-i adds the draft → published → archived lifecycle on top of
 // Phase 2A's plain `active` boolean (removed by migration 009 — publish_status
@@ -17,7 +21,7 @@
 // until someone deliberately republishes it (Phase 2 scope decision).
 // ============================================================================
 import { hex, HttpError, str, strArr, isSlug, imageJson } from './http.mjs';
-import { q, now, J, pageQuery, whereClause } from './db.mjs';
+import { q, now, J, pageQuery, whereClause, placeholders } from './db.mjs';
 import { audit } from './staff.mjs';
 
 // Region/purpose/category/service ids are sanitised (http.mjs strArr), not checked against a closed vocabulary:
@@ -29,17 +33,29 @@ const isValidSlug = (slug) => isSlug(slug, 60);
 const PUBLISH_TRANSITIONS = { draft: ['published', 'archived'], published: ['draft', 'archived'], archived: ['draft'] };
 /** Resolves the next publish_status/published_at pair for a patch, or throws 422 for an illegal transition. A
     request that doesn't ask for a transition (publishStatus omitted, or equal to the current one) is a no-op here
-    — the caller's own content patch still applies, publish state just doesn't move. `hasContent` gates the one
-    real rule: nothing goes live with no name/title in either language. */
+    — the caller's own content patch still applies, publish state just doesn't move. The one exception is asking for
+    'published' on a record that is already published: that REPUBLISHES it (Phase 6) — publishedAt moves and the
+    public snapshot is retaken, which is how "unpublished changes" reach visitors. `published` in the result says a
+    snapshot is due. `hasContent` gates the one real rule: nothing goes live with no name/title in either language. */
 function resolvePublishStatus(row, patch, hasContent, t) {
+  if (patch.publishStatus === 'published' && row.publish_status === 'published') {
+    if (!hasContent) throw new HttpError(422, 'invalid');
+    return { publishStatus: 'published', publishedAt: t, published: true };
+  }
   if (patch.publishStatus === undefined || patch.publishStatus === row.publish_status) return { publishStatus: row.publish_status, publishedAt: row.published_at };
   if (!PUBLISH_TRANSITIONS[row.publish_status]?.includes(patch.publishStatus)) throw new HttpError(422, 'invalid');
   if (patch.publishStatus === 'published' && !hasContent) throw new HttpError(422, 'invalid');
   // published_at marks the most recent time this item WENT live — it is set once on the transition into
   // 'published' and otherwise left as-is (never cleared on unpublish/archive), so "last published" stays visible.
-  return { publishStatus: patch.publishStatus, publishedAt: patch.publishStatus === 'published' ? t : row.published_at };
+  return { publishStatus: patch.publishStatus, publishedAt: patch.publishStatus === 'published' ? t : row.published_at, published: patch.publishStatus === 'published' };
 }
-const publishAuditAction = (kind, from, to) => (from === to ? `${kind}.update` : { published: `${kind}.publish`, draft: `${kind}.unpublish`, archived: `${kind}.archive` }[to] ?? `${kind}.update`);
+const publishAuditAction = (kind, from, to, published) => (published ? `${kind}.publish` : from === to ? `${kind}.update` : { published: `${kind}.publish`, draft: `${kind}.unpublish`, archived: `${kind}.archive` }[to] ?? `${kind}.update`);
+/** The public snapshot (published_json): the row exactly as it was published, so edits made while it is live stay
+    unpublished changes until the next publish. Taken after the UPDATE, from the stored row itself. */
+function snapshot(table, id) {
+  const { published_json: _ignored, ...row } = q.get(`SELECT * FROM ${table} WHERE id = ?`, id);
+  q.run(`UPDATE ${table} SET published_json = ? WHERE id = ?`, JSON.stringify(row), id);
+}
 
 /* ============================================================================
    DESTINATIONS
@@ -85,7 +101,7 @@ export function updateDestination(id, patch, actor) {
   const t = now();
   const v = (k, cur, n = 120) => (patch[k] !== undefined ? str(patch[k], n) || null : cur);
   const nameAr = v('nameAr', row.name_ar); const nameEn = v('nameEn', row.name_en);
-  const { publishStatus, publishedAt } = resolvePublishStatus(row, patch, !!(nameAr || nameEn), t);
+  const { publishStatus, publishedAt, published } = resolvePublishStatus(row, patch, !!(nameAr || nameEn), t);
   const featured = patch.featured !== undefined ? (patch.featured ? 1 : 0) : row.featured;
   const home = patch.home !== undefined ? (patch.home ? 1 : 0) : row.home;
   const orderIndex = patch.order !== undefined ? (Number.isFinite(patch.order) ? Math.trunc(patch.order) : null) : row.order_index;
@@ -97,7 +113,8 @@ export function updateDestination(id, patch, actor) {
     v('slug', row.slug, 60), v('region', row.region, 30), nameAr, nameEn,
     v('countryAr', row.country_ar), v('countryEn', row.country_en), v('descAr', row.desc_ar, 300), v('descEn', row.desc_en, 300),
     purposesJson, servicesJson, image, featured, home, publishStatus, publishedAt, orderIndex, t, id);
-  audit(actor, publishAuditAction('destination', row.publish_status, publishStatus), 'destination', id, {});
+  if (published) snapshot('destinations', id);
+  audit(actor, publishAuditAction('destination', row.publish_status, publishStatus, published), 'destination', id, {});
   return destinationById(id);
 }
 
@@ -151,7 +168,7 @@ export function updateOffer(id, patch, actor) {
   const t = now();
   const v = (k, cur, n = 120) => (patch[k] !== undefined ? str(patch[k], n) || null : cur);
   const titleAr = v('titleAr', row.title_ar); const titleEn = v('titleEn', row.title_en);
-  const { publishStatus, publishedAt } = resolvePublishStatus(row, patch, !!(titleAr || titleEn), t);
+  const { publishStatus, publishedAt, published } = resolvePublishStatus(row, patch, !!(titleAr || titleEn), t);
   const featured = patch.featured !== undefined ? (patch.featured ? 1 : 0) : row.featured;
   const placeholder = patch.placeholder !== undefined ? (patch.placeholder ? 1 : 0) : row.placeholder;
   const categoriesJson = patch.categories !== undefined ? JSON.stringify(ids(patch.categories)) : row.categories_json;
@@ -180,6 +197,68 @@ export function updateOffer(id, patch, actor) {
     nights, priceAmount, priceCurrency, priceType, priceBasisAr, priceBasisEn,
     v('status', row.status, 10), v('bookingMode', row.booking_mode, 10),
     featured, placeholder, servicesJson, image, detailJson, publishStatus, publishedAt, t, id);
-  audit(actor, publishAuditAction('offer', row.publish_status, publishStatus), 'offer', id, {});
+  if (published) snapshot('offers', id);
+  audit(actor, publishAuditAction('offer', row.publish_status, publishStatus, published), 'offer', id, {});
   return offerById(id);
+}
+
+/* ============================================================================
+   PUBLIC READ — Phase 6. What visitors see: only publish_status = 'published', in the static registries' own shapes
+   (assets/js/data/destinations.js, offers.js), keyed by slug — the public id space. Nothing staff-only leaves here:
+   no internal id, publish state, unpublished-changes flag, created/updated stamps or raw destinationId.
+   `managed` is false until the CMS has published at least one record of that kind (published_at is set on the first
+   publish and never cleared): until then the public site keeps its static registry, so a fresh deployment is never
+   blanked by an empty CMS. From then on the CMS is authoritative — archiving everything really does empty the page.
+   Content comes from each row's publish snapshot (published_json), never from edits made since; a row published before
+   migration 013 has no snapshot and shows its current content until it is next published.
+   ========================================================================= */
+const asPublished = (row) => ({ ...row, ...(J(row.published_json, null) ?? {}) });
+const PUBLIC_LIMIT = 500;
+const hasEverPublished = (table) => !!q.get(`SELECT 1 AS x FROM ${table} WHERE published_at IS NOT NULL LIMIT 1`);
+const publicImage = (json) => { const i = J(json, null); return { src: i?.src ?? null, altAr: i?.altAr ?? null, altEn: i?.altEn ?? null }; };
+const list = (v) => (Array.isArray(v) ? v : []);
+function pubDestination(d) {
+  return {
+    id: d.slug, slug: d.slug, region: d.region ?? 'other', featured: !!d.featured, home: !!d.home,
+    // `status` (available | soon) is a registry field the CMS doesn't model yet; a published destination is bookable.
+    status: 'available',
+    nameAr: d.name_ar ?? d.name_en ?? '', nameEn: d.name_en ?? d.name_ar ?? '', countryAr: d.country_ar ?? '', countryEn: d.country_en ?? '',
+    descAr: d.desc_ar ?? '', descEn: d.desc_en ?? '',
+    purposes: J(d.purposes_json, []), services: J(d.services_json, []), image: publicImage(d.image_json),
+  };
+}
+export function publicDestinations() {
+  const rows = q.all(`SELECT * FROM destinations WHERE publish_status = 'published' ORDER BY order_index IS NULL, order_index, created_at LIMIT ${PUBLIC_LIMIT}`);
+  return { managed: rows.length > 0 || hasEverPublished('destinations'), items: rows.map(asPublished).map(pubDestination) };
+}
+function pubOffer(o, dest) {
+  const detail = J(o.detail_json, {}) ?? {};
+  const categories = J(o.categories_json, []);
+  const tp = detail.travelPeriod;
+  return {
+    id: o.slug, slug: o.slug, category: o.category ?? categories[0] ?? null,
+    categories: categories.length ? categories : (o.category ? [o.category] : []),
+    // The destination reference is that destination's public slug — and only while the destination is published itself.
+    destination: dest ? dest.slug : null, destinationRecord: dest ? pubDestination(dest) : null,
+    featured: !!o.featured, placeholder: !!o.placeholder,
+    status: OFFER_STATUSES.includes(o.status) ? o.status : 'request', bookingMode: o.booking_mode === 'online' ? 'online' : 'request',
+    titleAr: o.title_ar ?? o.title_en ?? '', titleEn: o.title_en ?? o.title_ar ?? '',
+    shortAr: o.short_ar ?? '', shortEn: o.short_en ?? '', descAr: o.desc_ar ?? '', descEn: o.desc_en ?? '',
+    duration: { nights: o.duration_nights ?? null },
+    price: o.price_amount != null ? { amount: o.price_amount, currency: o.price_currency, type: o.price_type ?? 'from', basisAr: o.price_basis_ar ?? null, basisEn: o.price_basis_en ?? null } : null,
+    travelPeriod: tp && typeof tp.from === 'string' && typeof tp.to === 'string' ? { from: tp.from, to: tp.to } : null,
+    publishedAt: o.published_at ?? null,
+    services: J(o.services_json, []),
+    inclusions: list(detail.inclusions), exclusions: list(detail.exclusions), itinerary: list(detail.itinerary),
+    important: list(detail.important), terms: list(detail.terms), faq: list(detail.faq),
+    image: publicImage(o.image_json),
+  };
+}
+export function publicOffers() {
+  const rows = q.all(`SELECT * FROM offers WHERE publish_status = 'published' ORDER BY created_at LIMIT ${PUBLIC_LIMIT}`).map(asPublished);
+  const destIds = [...new Set(rows.map((o) => o.destination_id).filter(Boolean))];
+  const dests = new Map(destIds.length
+    ? q.all(`SELECT * FROM destinations WHERE publish_status = 'published' AND id IN (${placeholders(destIds)})`, ...destIds).map(asPublished).map((d) => [d.id, d])
+    : []);
+  return { managed: rows.length > 0 || hasEverPublished('offers'), items: rows.map((o) => pubOffer(o, dests.get(o.destination_id) ?? null)) };
 }

@@ -92,8 +92,13 @@ let devOffers = [
 ];
 const CONTENT_TRANSITIONS = { draft: ['published', 'archived'], published: ['draft', 'archived'], archived: ['draft'] };
 /** Mirrors backend/content.mjs's resolvePublishStatus closely enough for the dev stand-in: a same-state or
-    omitted publishStatus is a no-op; an illegal transition or a publish with no name/title throws 'invalid'. */
+    omitted publishStatus is a no-op, except 'published' on a published record, which republishes it (publishedAt
+    moves); an illegal transition or a publish with no name/title throws 'invalid'. */
 function applyPublishTransition(row, patch, hasContent, t) {
+  if (patch.publishStatus === 'published' && row.publishStatus === 'published') {
+    if (!hasContent) { const e = new Error('nothing to publish'); e.code = 'invalid'; throw e; }
+    row.publishedAt = t; return;
+  }
   if (patch.publishStatus === undefined || patch.publishStatus === row.publishStatus) return;
   if (!CONTENT_TRANSITIONS[row.publishStatus]?.includes(patch.publishStatus)) { const e = new Error('invalid transition'); e.code = 'invalid'; throw e; }
   if (patch.publishStatus === 'published' && !hasContent) { const e = new Error('nothing to publish'); e.code = 'invalid'; throw e; }

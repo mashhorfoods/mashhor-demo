@@ -1,9 +1,8 @@
-/* OPS / UI / PREVIEW — Command Center CMS. Phase 2B-i's answer to "what does this draft look like?" without
-   making the public site backend-driven (Phase 2 scope decision, restated in destinations.js/offers.js): a
+/* OPS / UI / PREVIEW — Command Center CMS. Phase 2B-i's answer to "what does this draft look like?": a
    staff-only route that renders the SAME public detail components (destination-detail.js, offers.js) the live
-   pages use, fed by a custom `load` that reads the draft straight from the admin API instead of the static
-   registry those components default to. No public-facing file changes — the `load` override both components
-   already accept is the whole seam. */
+   pages use, fed by a custom `load` that reads the record — draft or not — straight from the admin API instead of
+   the public content source those components default to (data/content-source.js, which since Phase 6 serves
+   only PUBLISHED records on a connected build). The `load` override both components accept is the whole seam. */
 import { route } from '../../data/config.js';
 import { t } from '../../core/i18n.js';
 import { el } from '../../core/dom.js';
@@ -41,14 +40,12 @@ function mapDestination(record) {
 
 /** offers.js's registry shape flattens `detail` (inclusions/exclusions/itinerary/important/terms/faq/
     travelPeriod) onto the record and calls the destination reference `destination` (a slug), not
-    `destinationId` — the two entities live in different id spaces post-Phase-2A (the offer's destinationId is a
-    backend id; the public destination pages still key off the static registry's own short ids), so a
-    destinationId with no matching registry slug just previews without a resolvable destination link, same as
-    any offer record whose destination reference the registry doesn't recognise today. */
+    `destinationId` (a backend id) — the same mapping backend/content.mjs publicOffers() applies for the public
+    pages, which also embed the destination as `destinationRecord`. */
 async function mapOffer(record) {
   const dest = record.destinationId ? await loadOrNull(opsData.destinationAdmin, record.destinationId).catch(() => null) : null;
   const { detail, destinationId, ...rest } = record;
-  return { ...rest, ...detail, destination: dest?.slug ?? null };
+  return { ...rest, ...detail, destination: dest?.slug ?? null, destinationRecord: dest ? mapDestination(dest) : null };
 }
 
 export async function mountOpsDestinationPreview({ id, root = document } = {}) {

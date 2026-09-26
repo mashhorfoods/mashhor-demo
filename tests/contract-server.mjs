@@ -139,6 +139,8 @@ export function startContractServer({ allowOrigin = null, port = 0, urlTtlMs = 5
       const f = state.files.get(id); res.writeHead(200, { 'Content-Type': f.contentType, 'Cache-Control': 'private, no-store', 'Content-Disposition': 'inline' }); res.end(f.body); return;
     }
     if (path === '/diagnostics' && req.method === 'POST') { try { const e = JSON.parse((await readBody(req)).toString()); state.events.push(e); } catch { /* ignore */ } res.writeHead(204); res.end(); return; }
+    // Phase 6: the public CMS read. The contract server has no CMS: nothing was ever published, so the site keeps its static registries.
+    if ((path === '/content/destinations' || path === '/content/offers') && req.method === 'GET') return json(res, 200, { managed: false, items: [] });
     if (path.startsWith('/legal/')) {
       const kind = path.slice(7);
       if (!['terms', 'privacy'].includes(kind) || !state.legal.supplied) return fail(res, 404, 'notFound');

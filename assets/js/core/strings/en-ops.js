@@ -79,6 +79,7 @@ export default {
     'ops.content.publishStatus.archived': 'Archived',
     'ops.content.hasUnpublishedChanges': 'Unpublished changes',
     'ops.content.publish': 'Publish',
+    'ops.content.publishChanges': 'Publish changes',
     'ops.content.unpublish': 'Unpublish',
     'ops.content.archive': 'Archive',
     'ops.content.restoreToDraft': 'Restore to draft',

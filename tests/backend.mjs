@@ -463,6 +463,11 @@ await control('/__test/reset');
 
   // ---- content: destinations & offers, admin-wide (Command Center CMS Phase 2A/2B-i) — viewing is ungated like
   // services' own list/one; only creating/editing/publishing needs content.manage. ----
+  // ---- Phase 6: the PUBLIC content read (GET /content/*) — unauthenticated, cacheable, published records only ----
+  const pub = (kind) => fetch(`${API}/content/${kind}`, { headers: { Origin: SITE } }).then(async (r) => ({ status: r.status, headers: r.headers, data: await r.json().catch(() => null), text: '' }));
+  const pubBefore = await pub('destinations');
+  ok('public content: before anything was ever published the CMS reports managed:false (the site keeps its static registry)', pubBefore.status === 200 && pubBefore.data.managed === false && pubBefore.data.items.length === 0, JSON.stringify(pubBefore.data));
+
   const destList0 = await reqOps1b('/admin/destinations');
   ok('destinations list is ungated, like services — any signed-in staff member can view', destList0.status === 200 && Array.isArray(destList0.data.items));
   ok('ops-1 (no content.manage) → 403 creating a destination', (await reqOps1b('/admin/destinations', { method: 'POST', body: { slug: 'test-destination', nameEn: 'Test Destination' } })).status === 403);
@@ -510,6 +515,38 @@ await control('/__test/reset');
 
   const publishedDst = await reqOps1b('/admin/destinations?publishStatus=published');
   ok('the destinations list can be filtered by publishStatus (the Publishing Center\'s own read model)', publishedDst.status === 200 && publishedDst.data.items.every((d) => d.publishStatus === 'published') && publishedDst.data.items.some((d) => d.id === dstId));
+
+  // ---- Phase 6: the public read of what was just published above ----
+  const DEST_KEYS = 'countryAr,countryEn,descAr,descEn,featured,home,id,image,nameAr,nameEn,purposes,region,services,slug,status';
+  const OFFER_KEYS = 'bookingMode,categories,category,descAr,descEn,destination,destinationRecord,duration,exclusions,faq,featured,id,image,important,inclusions,itinerary,placeholder,price,publishedAt,services,shortAr,shortEn,slug,status,terms,titleAr,titleEn,travelPeriod';
+  const STAFF_FIELDS = /publishStatus|hasUnpublishedChanges|createdAt|updatedAt|destinationId|published_json|"dst_|"off_/;
+  const pd = await pub('destinations');
+  ok('public destinations: 200 with no session at all, shared-cacheable', pd.status === 200 && /public/.test(pd.headers.get('cache-control')) && /max-age=\d+/.test(pd.headers.get('cache-control')) && !pd.headers.get('set-cookie'), pd.headers.get('cache-control'));
+  ok('public destinations: only published records — the draft is not listed', pd.data.managed === true && pd.data.items.some((d) => d.slug === 'test-destination') && !pd.data.items.some((d) => d.slug === 'test-destination-blank'));
+  const pdItem = pd.data.items.find((d) => d.slug === 'test-destination');
+  ok('public destinations: the static registry\'s shape exactly (slug as the public id), staff-only fields stripped', Object.keys(pdItem).sort().join(',') === DEST_KEYS && pdItem.id === 'test-destination' && pdItem.region === 'asia' && pdItem.featured === true && pdItem.status === 'available' && Array.isArray(pdItem.purposes) && typeof pdItem.image === 'object' && !STAFF_FIELDS.test(JSON.stringify(pd.data)), Object.keys(pdItem).sort().join(','));
+  ok('public destinations: GET only', (await fetch(`${API}/content/destinations`, { method: 'POST', headers: { Origin: SITE } })).status !== 200);
+  // edits to a live record are "unpublished changes": visitors keep the published snapshot until someone republishes
+  const liveDesc = pdItem.descEn;
+  const pendingEdit = await reqAdmin2(`/admin/destinations/${dstId}`, { method: 'PATCH', body: { descEn: 'Edited, not yet republished' } });
+  ok('public destinations: an edit to a published record stays off the public read (unpublished changes)', pendingEdit.data.destination.hasUnpublishedChanges === true && (await pub('destinations')).data.items.find((d) => d.slug === 'test-destination').descEn === liveDesc);
+  const republish = await reqAdmin2(`/admin/destinations/${dstId}`, { method: 'PATCH', body: { publishStatus: 'published' } });
+  ok('republishing a published record (publishStatus: published again) moves publishedAt and clears the pending flag', republish.status === 200 && republish.data.destination.publishStatus === 'published' && republish.data.destination.hasUnpublishedChanges === false && republish.data.destination.publishedAt > pendingEdit.data.destination.publishedAt);
+  ok('…and the public read now carries the edit', (await pub('destinations')).data.items.find((d) => d.slug === 'test-destination').descEn === 'Edited, not yet republished');
+  ok('republishing with no name in either language is refused (422)', (await reqAdmin2(`/admin/destinations/${dstId}`, { method: 'PATCH', body: { nameAr: '', nameEn: '', publishStatus: 'published' } })).status === 422);
+
+  const po0 = await pub('offers');
+  ok('public offers: an unpublished offer is not listed, but the kind stays CMS-managed once anything was ever published', po0.status === 200 && po0.data.managed === true && !po0.data.items.some((o) => o.slug === 'test-offer'));
+  await reqAdmin2(`/admin/offers/${offCreate.data.offer.id}`, { method: 'PATCH', body: { publishStatus: 'published' } });
+  const po = await pub('offers'); const poItem = po.data.items.find((o) => o.slug === 'test-offer');
+  ok('public offers: published offer listed in the registry shape — detail flattened, destination by public slug, staff fields stripped', !!poItem && Object.keys(poItem).sort().join(',') === OFFER_KEYS && poItem.id === 'test-offer' && poItem.destination === 'test-destination' && poItem.destinationRecord?.slug === 'test-destination' && poItem.price.amount === 450 && poItem.inclusions[0]?.en === 'Flight ticket' && poItem.status === 'available' && !STAFF_FIELDS.test(JSON.stringify(po.data)), poItem && Object.keys(poItem).sort().join(','));
+  ok('public offers: shared-cacheable too', /public/.test(po.headers.get('cache-control')));
+  await reqAdmin2(`/admin/destinations/${dstId}`, { method: 'PATCH', body: { publishStatus: 'archived' } });
+  const po2 = await pub('offers');
+  ok('public offers: a destination that is no longer published is never referenced (no draft slug leaks)', po2.data.items.find((o) => o.slug === 'test-offer')?.destination === null && po2.data.items.find((o) => o.slug === 'test-offer')?.destinationRecord === null);
+  ok('public destinations: archiving removes it from the public read; managed stays true (an empty CMS list is authoritative)', !(await pub('destinations')).data.items.some((d) => d.slug === 'test-destination') && (await pub('destinations')).data.managed === true);
+  await reqAdmin2(`/admin/offers/${offCreate.data.offer.id}`, { method: 'PATCH', body: { publishStatus: 'archived' } });
+  ok('public offers: archiving removes it from the public read', !(await pub('offers')).data.items.some((o) => o.slug === 'test-offer'));
 
   // ---- leads / attribution, admin-wide ----
   ok('ops-1 (no attribution.view) → 403 on admin-wide leads', (await reqOps1b('/admin/leads')).status === 403);
