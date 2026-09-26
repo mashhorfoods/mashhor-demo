@@ -14,6 +14,15 @@
 //   CHROMIUM=/path/to/chromium                      # optional: use an existing browser binary
 import { launch } from './lib/browser.mjs';
 import { ALL } from '../tests/pages.mjs';
+
+/* Switch the page's language. The switch is started in the page and awaited from here through a marker, not
+   by awaiting setLocale() inside page.evaluate: under the audit's long-running browser, Playwright could lose
+   that page-side promise ("Resulting promise was garbage collected") and abort the whole audit. A switch that
+   really never finishes still fails, with a timeout naming the page. */
+async function switchLocale(page, locale) {
+  await page.evaluate((l) => { delete document.documentElement.dataset.auditLocale; import('./assets/js/foundation.js').then((m) => m.setLocale(l)).then(() => { document.documentElement.dataset.auditLocale = l; }); }, locale);
+  await page.waitForFunction((l) => document.documentElement.dataset.auditLocale === l, locale, { timeout: 30000 });
+}
 const BASE = process.env.BASE || 'http://localhost:8919/mashhor-demo/';
 const PAGES = process.env.PAGES ? process.env.PAGES.split(',') : ALL;
 const b = await launch();
@@ -22,7 +31,7 @@ for (const page of PAGES) {
   const p = await b.newPage({ viewport: { width: 1440, height: 1000 } });
   await p.goto(BASE + page, { waitUntil: 'networkidle' }); await p.waitForTimeout(900);
   for (const locale of ['ar', 'en']) {
-    await p.evaluate(async (l) => { const m = await import('./assets/js/foundation.js'); await m.setLocale(l); }, locale);
+    await switchLocale(p, locale);
     await p.waitForTimeout(800);
     const found = await p.evaluate((locale) => {
       const AR = /[؀-ۿ]/, LAT = /[A-Za-z]{2,}/;

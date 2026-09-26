@@ -80,7 +80,7 @@ work.
 | 1.10 | **The offers month filter is off by one month east of UTC.** It uses `toISOString()` on a local date. | `assets/js/components/offers.js:101` | Hidden today. In the target time zones (UTC+2 to +4), picking "October" filters September. | None | Build the value from `getFullYear()` and `getMonth()`. |
 | 1.11 | **The search page's meta description uses the wrong string key** (`page.booking.description`). | `search/index.html:10` | The page gets the wrong description, and `page.search.description` is the only unused string key. | None | One-line fix. |
 | 1.12 | **Two string keys don't exist, so the raw key is shown:** `nav.home` (the `??` fallback never runs, because `t()` returns the key rather than null) and `acct.field.email`. | `supervisor/ui/shell.js:51`, `ops/ui/settings.js` | The UI literally shows "nav.home". | None | Use existing keys. |
-| 1.13 | **The payment step shows the development payment in every environment.** `DEV_PAYMENT` is registered with no environment check, unlike every other dev adapter. | `assets/js/booking/payment.js:16`, `booking/adapters/index.js:58-60` | Production shows "Development payment mode", and booking references contain `-DEV-`. | Needs a product decision | At least hide it when `isProduction()`. Decide what the production client-side payment step looks like. |
+| 1.13 | **(Fixed in Phase 6.) The payment step showed the development payment in every environment.** `DEV_PAYMENT` is registered with no environment check, unlike every other dev adapter. | `assets/js/booking/payment.js:16`, `booking/adapters/index.js:58-60` | Production shows "Development payment mode", and booking references contain `-DEV-`. | Needs a product decision | At least hide it when `isProduction()`. Decide what the production client-side payment step looks like. |
 
 ## 2. Dead code (verified unused; safe to delete)
 
@@ -305,6 +305,59 @@ work.
 - The test reset (`fixtures.mjs wipe()`) doesn't clear `destinations`,
   `offers`, `payment_events` or the business config history, so state leaks
   between test runs.
+
+> **Phase 6 status (2026-09-26): done.** These were product decisions. The defaults below were
+> chosen and implemented; each one is easy to revisit.
+> - **§1.13 production payment:** the development provider registers only outside production.
+>   With no real provider, the payment step is an honest "Pay later": the booking is placed as
+>   awaiting payment, and the copy says a coordinator will send a secure payment link. Production
+>   references no longer contain `-DEV-` (`bookingReference()`).
+> - **Content system → public pages:** new public `GET /content/destinations` and `/content/offers`
+>   return published records only, in the static registries' shape. `data/content-source.js` feeds
+>   the listings, detail pages and homepage from them when the backend is connected. It falls back
+>   to the static registries on any error, and before anything has been published.
+>   - Once content is managed, the CMS is authoritative: archived items disappear, and unknown
+>     slugs show not-found.
+>   - Migration 013 snapshots a record on publish, so edits stay "unpublished changes" until
+>     "Publish changes" is pressed.
+>   - The supervisor-profile discovery section and the header menus still read the static data.
+> - **Pagination:** a shared `pagedRegion()` in `core/portal-ui.js` shows "Showing X of Y" and a
+>   Load more button on every paginated ops and supervisor list. The dev adapters now honour
+>   `page` and the filters.
+> - **Workflow editing:** the ops services screen edits the workflow steps and document
+>   requirements, but only for `workflow.manage`. The backend enforces the same permission (403)
+>   and audit-logs every change. There are new PATCH and DELETE routes for requirements.
+> - **Leads:**
+>   - A signed-in customer's request booking creates a lead, and so does the new help/contact form
+>     (`POST /contact`, rate-limited).
+>   - A lead is attributed to the customer's supervisor, then to a valid `?supervisor=` link;
+>     otherwise it is unassigned and only ops sees it.
+>   - Migration 012 lets `leads.supervisor_id` be null and adds `booking_id` and `message`.
+> - **Commissions:**
+>   - One row per attributed booking is written in the same step that marks the payment paid, so it
+>     is idempotent.
+>   - The rate comes from the Business Rules `commission_model` row (5% of the booking amount, set
+>     as a DRAFT default), and each row stores the rate it used.
+>   - Cancelling or refunding the booking marks the commission `reversed`.
+>   - Supervisors now see their profile, which they can edit in Settings, and their commissions on
+>     Revenue.
+> - **Columns:** `payment_events.payment_id` is written for every event that names a payment;
+>   `outbox.event_type` is written and logged. Migration 011 drops `customers.image` and
+>   `supervisors.internal_id`.
+> - **Ranking:** a transparent "Best value" sort (`rank.js` `VALUE_WEIGHTS`), plus a "Best for
+>   families" sort. The "help me choose" priority now sets the results page's default sort.
+> - **Styleguide:** it renders the real components. `preview/cards.js`, `preview/states.js`, their
+>   CSS (`.c-status`, `.c-assist*`, `.c-recommend`, …) and their unused strings are deleted.
+>   `.c-choice__desc`, used on the live payment page, moved from `preview.css` to `06-forms.css`.
+> - **Test reset:** `wipe()` also clears `destinations`, `offers`, `payment_events` and
+>   `business_config_history`.
+> - **Audits:** the i18n and a11y audits now switch language through `switchLocale()`. It starts the
+>   switch in the page and waits for a marker, instead of awaiting `setLocale()` inside
+>   `page.evaluate`. Under the long audit run, Playwright intermittently lost that page-side promise
+>   ("Resulting promise was garbage collected") and aborted the a11y audit.
+> - **Verified:** every suite is green: ops-portal 987, supervisor-portal 549, account 782, journey 529,
+>   integration 536, backend 435 and the new public-content 30. Links: 0 problems. The audits, re-run
+>   after the `switchLocale()` fix: i18n 0 untranslated, a11y 0 findings.
 
 ## 8. Cleanup plan
 

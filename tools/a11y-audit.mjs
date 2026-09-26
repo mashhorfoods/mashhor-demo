@@ -18,6 +18,15 @@
 // Prints one line per unique finding and exits 1 when anything is found.
 import { launch } from './lib/browser.mjs';
 import { ALL, PUBLIC, SUPERVISOR_PORTAL } from '../tests/pages.mjs';
+
+/* Switch the page's language. The switch is started in the page and awaited from here through a marker, not
+   by awaiting setLocale() inside page.evaluate: under the audit's long-running browser, Playwright could lose
+   that page-side promise ("Resulting promise was garbage collected") and abort the whole audit. A switch that
+   really never finishes still fails, with a timeout naming the page. */
+async function switchLocale(page, locale) {
+  await page.evaluate((l) => { delete document.documentElement.dataset.auditLocale; import('./assets/js/foundation.js').then((m) => m.setLocale(l)).then(() => { document.documentElement.dataset.auditLocale = l; }); }, locale);
+  await page.waitForFunction((l) => document.documentElement.dataset.auditLocale === l, locale, { timeout: 30000 });
+}
 const ORIGIN = process.env.BASE || 'http://localhost:8919/mashhor-demo/';
 // KEY: one page of every kind, at every width in both languages. REST: every other public page and the
 // supervisor portal's pages, at 390 and 1440 in Arabic. Both come from tests/pages.mjs.
@@ -181,7 +190,7 @@ async function audit(page, w, loc, deep) {
   const errs = [];
   p.on('pageerror', (e) => errs.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') errs.push(m.text()); });
   await p.goto(ORIGIN + page, { waitUntil: 'networkidle' });
-  if (loc !== 'ar') await p.evaluate(async (l) => { const m = await import('./assets/js/foundation.js'); await m.setLocale(l); }, loc);
+  if (loc !== 'ar') await switchLocale(p, loc);
   await p.waitForTimeout(500);
   for (const [c, d] of await p.evaluate(INPAGE)) add(c, page, w, loc, d);
   errs.forEach((e) => add('console', page, w, loc, e.slice(0, 120)));
