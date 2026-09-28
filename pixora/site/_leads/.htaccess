@@ -1,0 +1,9 @@
+# Fallback storage for lead.php, used only when the host does not allow a
+# folder outside the web root. Nothing in here is ever served.
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+  Order allow,deny
+  Deny from all
+</IfModule>

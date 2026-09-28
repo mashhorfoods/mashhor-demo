@@ -1,0 +1,4 @@
+# lead.php runtime data — personal data, never committed
+pixora-leads/
+site/_leads/*
+!site/_leads/.htaccess

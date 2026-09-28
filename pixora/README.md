@@ -1,0 +1,100 @@
+# Pixora — website + campaign landing
+
+`site/` is the deployable web root, exactly as supplied in `pixora-site.zip`,
+plus the campaign experience described below. Upload the **contents** of
+`site/` to `public_html` on Hostinger (the existing `.htaccess` already serves
+`/go` for `go.html`).
+
+## The campaign flow
+
+```
+Ad  →  /go (hero)  →  "شوف أعمالنا"  →  /go#work     →  تواصل معنا / WhatsApp
+                    →  "تواصل معنا"   →  /go#contact  →  WhatsApp  or  5-field form  →  /go#sent
+```
+
+| File | What it is |
+| --- | --- |
+| `site/go.html` | The landing page. One document, four views (`#top`, `#work`, `#contact`, `#sent`); Back always works; without JavaScript the views stack. Arabic, RTL, `noindex`, not in the sitemap. |
+| `site/assets/go.js` | Views, WhatsApp messages, the form, attribution. External so the site's CSP needs no new hash. |
+| `site/lead.php` | Receives the form: validates, stores a CSV row, emails `muhalabsalah@gmail.com`. Answers "ok" only when the lead is actually held — otherwise the page offers WhatsApp with the details pre-written. |
+| `site/_leads/.htaccess` | Refuses all web access to the fallback storage folder. |
+| `tools/sync-shared-styles.py` | Copies `index.html`'s stylesheet into `go.html` verbatim. **Run it after every site rebuild.** |
+| `tests/campaign.mjs` | End-to-end checks (99): routes, devices, WhatsApp links, validation, submission, tracking, fallback, and the existing pages. |
+
+Nothing outside the campaign was changed except `privacy.html` (it said the
+site's only form has no server — now it describes the campaign form too) and
+`robots.txt` (keeps `lead.php` out of search). Both are build outputs of
+`tools/build-deploy.js`, which was not supplied: carry these edits into the
+generator's sources, or they will be lost on the next build.
+
+## Ad URLs
+
+Use standard UTM parameters. Everything is optional; the page works with none.
+
+```
+https://zaokalyamamah.online/go?utm_source=snapchat&utm_medium=paid&utm_campaign=launch-q4&utm_content=video-a
+https://zaokalyamamah.online/go?utm_source=instagram&utm_campaign=launch-q4#work      ← opens on the portfolio
+https://zaokalyamamah.online/go?utm_source=tiktok&utm_campaign=launch-q4&v=contact     ← opens on contact (for platforms that drop #)
+```
+
+`utm_source` values the WhatsApp greeting turns into words: `snapchat`,
+`instagram`, `facebook`, `meta`, `tiktok`, `x`, `google`, `youtube`,
+`linkedin`. Ads with no UTM tags are still recognised from their click id
+(`gclid`, `fbclid`, `ttclid`, `ScCid`, `twclid`).
+
+After Plausible records the visit, the parameters are removed from the
+address bar, so a visitor never sees or shares a tracking link.
+
+## What is tracked, and where to see it
+
+**Plausible** (already on the site) records source / medium / campaign /
+device / entry page from the landing URL on its own. On top of that, go.js
+sends these custom events — add them as Goals in Plausible to see them:
+
+| Event | When | Properties |
+| --- | --- | --- |
+| `lp_view` | page loaded | `entry` (home/work/contact), `device`, `source`, `medium`, `campaign`, `content`, `ref` |
+| `lp_cta` | a CTA pressed | `cta` (work/contact), `placement` (hero, header, work_end, work_dock, sent) |
+| `lp_step` | a view shown | `step`, `path` (portfolio, contact, portfolio>contact, …) |
+| `channel_tap` | WhatsApp opened | `channel`, `placement`, `path` |
+| `enquiry_started` / `enquiry_sent` / `enquiry_failed` | form | `service`, `path` |
+
+Every event also carries `source`, `campaign`, `device`, `entry` and `ref`.
+Nothing typed into the form is ever sent to analytics.
+
+**Each lead** (email + CSV) carries the same context: source, medium,
+campaign, content, term, landing page, entry view, device, path and reference.
+
+**WhatsApp conversations** end with a reference such as `رقم المرجع: PX-7K2QM`.
+Filter Plausible by the `ref` property to see which ad and path that chat
+came from. That code is the only tracking a customer ever sees; the rest of
+the message is plain language ("وصلت إليكم من إعلانكم على سناب شات واطّلعت
+على أعمالكم…").
+
+To have a campaign named in the greeting, map its code in `go.js`:
+
+```js
+campaigns: { 'launch-q4': 'عرض الإطلاق' },   // → "…على سناب شات بخصوص عرض الإطلاق…"
+```
+
+## Where leads go
+
+1. Email to `muhalabsalah@gmail.com` via PHP `mail()` (from `no-reply@<domain>`).
+   Worth sending one test from the live site: Hostinger mail can land in spam
+   until the domain has SPF/DKIM set in hPanel.
+2. `leads.csv` in `../pixora-leads/` — the folder **above** `public_html`,
+   which the web cannot reach. If the host does not allow that, it falls back
+   to `public_html/_leads/`, which its `.htaccess` locks. Opens in Excel with
+   the Arabic intact.
+
+Spam protection: a hidden honeypot field and 5 requests per IP per 10 minutes
+(the IP is stored only as a hash).
+
+## Verify locally
+
+```bash
+php -S 127.0.0.1:8099 -t pixora/site pixora/tests/router.php &
+BASE=http://127.0.0.1:8099 node pixora/tests/campaign.mjs
+# if the installed Playwright wants a browser it cannot download:
+CHROMIUM=/path/to/chrome BASE=http://127.0.0.1:8099 node pixora/tests/campaign.mjs
+```
