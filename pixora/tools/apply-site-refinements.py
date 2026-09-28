@@ -57,6 +57,10 @@ CSS = CSS_START + """
 .c-wa-fab svg{inline-size:26px;block-size:26px}
 @media (min-width:64em){.c-wa-fab{display:none}}
 @media print{.c-wa-fab{display:none}}
+@media (min-width:64em){.c-hero__headline{font-size:max(2.75rem,min(var(--text-hero),12.5cqw))}}
+.c-hero__actions{margin-block-start:var(--space-16)}
+.c-hero__action{justify-content:center}
+.c-hero__tease{color:var(--color-text-primary)}
 }
 """ + CSS_END
 
@@ -81,7 +85,18 @@ TEXT = [
      '<span data-lang-copy="en">Visual Communications Designer</span><span data-lang-copy="ar" lang="ar">مصمم اتصال بصري</span>'),
     ('<strong>Muhalab Salah</strong>', '<strong>Muhalab Basheir</strong>'),
     ('<strong>مهلب صلاح</strong>', '<strong>مهلب بشير</strong>'),
+    # Hero lead: shorter, and it leaves something to discover.
+    ('''<p class="t-body-lg c-hero__lead"><span data-lang-copy="en">We build brands, websites and digital experiences —
+              then connect them with content, social media and performance
+              marketing to help your business grow.</span><span data-lang-copy="ar" lang="ar">نبني العلامات والمواقع والتجارب الرقمية، ثم نربطها بالمحتوى ووسائل التواصل والتسويق الأدائي لينمو عملك.</span></p>''',
+     '''<p class="t-body-lg c-hero__lead"><span data-lang-copy="en">Brand, website, content and ads — from one team.<br /><span class="c-hero__tease">The difference? You'll see it at first glance.</span></span><span data-lang-copy="ar" lang="ar">هوية، موقع، محتوى وإعلانات — من فريق واحد.<br /><span class="c-hero__tease">والفرق؟ ستلاحظه من أول نظرة.</span></span></p>'''),
 ]
+
+# A second hero action that answers the teaser: straight to the work.
+HERO_WORK = '''<!-- HERO-WORK -->
+              <a class="c-btn c-btn--secondary c-hero__action" href="#branding">
+                <span data-lang-copy="en">See the work</span><span data-lang-copy="ar" lang="ar">شوف أعمالنا</span>
+              </a>'''
 
 
 def between(text, start, end, block):
@@ -114,6 +129,12 @@ for name in PAGES:
         text = text[:close] + "  " + FAB + "\n  " + text[close:]
     else:
         text = replaced
+
+    # 3b. Hero: add "See the work" after the primary action (index only).
+    actions = text.find('<div class="c-hero__actions">')
+    if actions >= 0 and "<!-- HERO-WORK -->" not in text:
+        end = text.find("</a>", actions) + len("</a>")
+        text = text[:end] + "\n              " + HERO_WORK + text[end:]
 
     # 4. Profile.
     for old, new in TEXT:

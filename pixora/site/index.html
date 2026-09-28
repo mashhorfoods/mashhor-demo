@@ -97,6 +97,10 @@ calc(var(--d,0) * 60ms + 160ms)}.c-chapter__text>*{opacity:0;translate:0 var(--s
 .c-wa-fab svg{inline-size:26px;block-size:26px}
 @media (min-width:64em){.c-wa-fab{display:none}}
 @media print{.c-wa-fab{display:none}}
+@media (min-width:64em){.c-hero__headline{font-size:max(2.75rem,min(var(--text-hero),12.5cqw))}}
+.c-hero__actions{margin-block-start:var(--space-16)}
+.c-hero__action{justify-content:center}
+.c-hero__tease{color:var(--color-text-primary)}
 }
 /* REFINEMENTS:END */</style>
 
@@ -1341,9 +1345,7 @@ if (document.readyState === 'loading') {
               Your Digital <br class="c-hero__br" />Presence.<br />
               <span class="c-hero__accent">One Partner.</span></span><span data-lang-copy="ar" lang="ar">علامتك.<br /> حضورك الرقمي.<br /> <span class="c-hero__accent">شريك واحد.</span></span></h1>
 
-            <p class="t-body-lg c-hero__lead"><span data-lang-copy="en">We build brands, websites and digital experiences —
-              then connect them with content, social media and performance
-              marketing to help your business grow.</span><span data-lang-copy="ar" lang="ar">نبني العلامات والمواقع والتجارب الرقمية، ثم نربطها بالمحتوى ووسائل التواصل والتسويق الأدائي لينمو عملك.</span></p>
+            <p class="t-body-lg c-hero__lead"><span data-lang-copy="en">Brand, website, content and ads — from one team.<br /><span class="c-hero__tease">The difference? You'll see it at first glance.</span></span><span data-lang-copy="ar" lang="ar">هوية، موقع، محتوى وإعلانات — من فريق واحد.<br /><span class="c-hero__tease">والفرق؟ ستلاحظه من أول نظرة.</span></span></p>
 
             <div class="c-hero__actions">
               <a
@@ -1366,6 +1368,10 @@ if (document.readyState === 'loading') {
                     stroke-linecap="square"
                   />
                 </svg>
+              </a>
+              <!-- HERO-WORK -->
+              <a class="c-btn c-btn--secondary c-hero__action" href="#branding">
+                <span data-lang-copy="en">See the work</span><span data-lang-copy="ar" lang="ar">شوف أعمالنا</span>
               </a>
             </div>
           </div>
