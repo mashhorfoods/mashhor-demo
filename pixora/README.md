@@ -99,3 +99,27 @@ BASE=http://127.0.0.1:8099 node pixora/tests/campaign.mjs
 # if the installed Playwright wants a browser it cannot download:
 CHROMIUM=/path/to/chrome BASE=http://127.0.0.1:8099 node pixora/tests/campaign.mjs
 ```
+
+## Admin — /admin/
+
+A password-protected page for the campaign requests: totals, search, filters
+(status, source, campaign, service), a WhatsApp reply button with a ready
+greeting, call, status (جديد / تم التواصل / تم الاتفاق / غير مهتم), an internal
+note, and export to Excel. It reads the same `leads.csv` that `lead.php`
+writes and keeps statuses and notes in `admin-state.json` beside it.
+
+**First use (once):**
+1. Upload the site, then open `https://zaokalyamamah.online/admin/`.
+2. The setup screen asks for the password you want (10+ characters) and
+   shows one line, `const ADMIN_PASSWORD_HASH = '…';`. Nothing is saved.
+3. In hPanel → File Manager, open `public_html/admin/config.php`, replace the
+   `const ADMIN_PASSWORD_HASH = '';` line with it, and save.
+4. Reload `/admin/` and sign in. To change the password later, empty that
+   line again and repeat.
+
+Protection: 5 wrong passwords lock the address out for 15 minutes; the
+session cookie is HttpOnly, SameSite=Strict and Secure on HTTPS; every change
+carries a CSRF token; sessions end after 2 idle hours; `config.php` is
+blocked from direct access; the page is `noindex` and out of `robots.txt`.
+
+Test: `node pixora/tests/admin.mjs` (self-contained; starts its own server).

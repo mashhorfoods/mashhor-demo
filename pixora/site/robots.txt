@@ -7,5 +7,6 @@ Disallow: /404.html
 # crawlable so ad platforms can review it; it carries its own noindex.
 Disallow: /lead.php
 Disallow: /_leads/
+Disallow: /admin/
 
 Sitemap: https://zaokalyamamah.online/sitemap.xml
