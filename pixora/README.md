@@ -18,10 +18,11 @@ Ad  →  /go (hero)  →  "شوف أعمالنا"  →  /go#work     →  توا
 | `site/assets/go.js` | Views, WhatsApp messages, the form, attribution. External so the site's CSP needs no new hash. |
 | `site/lead.php` | Receives the form: validates, stores a CSV row, emails `muhalabsalah@gmail.com`. Answers "ok" only when the lead is actually held — otherwise the page offers WhatsApp with the details pre-written. |
 | `site/_leads/.htaccess` | Refuses all web access to the fallback storage folder. |
+| `tools/apply-site-refinements.py` | Site-wide design refinements on all six pages: more generous spacing, one pill-shaped 52px button, softer fields, a floating WhatsApp button on phones, and the profile (Muhalab Basheir, Visual Communications Designer). CSS and markup only — the inline scripts and their CSP hashes are untouched. **Idempotent; run it after every site rebuild, then the sync below.** |
 | `tools/sync-shared-styles.py` | Copies `index.html`'s stylesheet into `go.html` verbatim. **Run it after every site rebuild.** |
 | `tests/campaign.mjs` | End-to-end checks (99): routes, devices, WhatsApp links, validation, submission, tracking, fallback, and the existing pages. |
 
-Nothing outside the campaign was changed except `privacy.html` (it said the
+Outside the campaign, the pages carry the refinements above, and `privacy.html` (it said the
 site's only form has no server — now it describes the campaign form too) and
 `robots.txt` (keeps `lead.php` out of search). Both are build outputs of
 `tools/build-deploy.js`, which was not supplied: carry these edits into the

@@ -260,6 +260,31 @@ for (const page of ['index.html', 'pricing.html', 'about.html', 'story.html', 'p
   await context.close();
 }
 
+/* ---- 7. Main-site refinements -------------------------------------------- */
+for (const kind of ['mobile', 'desktop']) {
+  const context = await browser.newContext(VIEWPORTS[kind]);
+  await context.route('https://plausible.io/**', (route) => route.fulfill({ status: 200, body: '' }));
+  await context.addInitScript(() => { try { localStorage.setItem('site-lang', 'ar'); } catch {} });
+  const p = await context.newPage();
+  for (const page of ['index.html', 'pricing.html', 'about.html']) {
+    await p.goto(`${BASE}/${page}`);
+    await p.waitForTimeout(150);
+    const shapes = await p.$$eval('.c-btn', (els) => [...new Set(els.filter((e) => e.offsetParent)
+      .map((e) => `${getComputedStyle(e).borderRadius}/${getComputedStyle(e).minHeight}`))]);
+    check(shapes.length === 1 && shapes[0] === '999px/52px', `[${kind}] ${page}: every button is a 52px pill`, shapes.join(','));
+  }
+  await p.goto(`${BASE}/index.html`);
+  await p.waitForTimeout(150);
+  check(await p.locator('.c-verify__name').textContent() === 'Muhalab Basheir', `[${kind}] profile name is Muhalab Basheir`);
+  const fab = p.locator('.c-wa-fab');
+  check(await fab.isVisible() === (kind === 'mobile'), `[${kind}] floating WhatsApp button ${kind === 'mobile' ? 'shown' : 'hidden'}`);
+  if (kind === 'mobile') {
+    const href = await fab.getAttribute('href');
+    check(/wa\.me\/249962672192/.test(href) && decodeURIComponent(href).includes('مرحبًا بيكسورا'), 'floating WhatsApp message follows the Arabic language choice');
+  }
+  await context.close();
+}
+
 await browser.close();
 console.log(failures ? `\n${failures} check(s) FAILED` : '\nAll checks passed');
 process.exit(failures ? 1 : 0);
