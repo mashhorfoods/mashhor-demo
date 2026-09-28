@@ -91,24 +91,33 @@ calc(var(--d,0) * 60ms + 160ms)}.c-chapter__text>*{opacity:0;translate:0 var(--s
         }
         .g-view { position: relative; }
         .g-page {
-          padding-block: calc(var(--header-height) + var(--space-32)) var(--section-space-tight);
+          padding-block: calc(var(--header-height) + var(--space-48)) var(--section-space);
         }
         .g-view :is(h1, h2)[tabindex="-1"]:focus { box-shadow: none; }
+
+        /* ---- Buttons: one shape, everywhere on this page ------------- */
+        .c-btn { border-radius: var(--radius-pill); padding-inline: var(--space-32); }
+        .c-btn--lg { min-block-size: var(--control-height-lg); padding-inline: var(--space-40); font-size: var(--text-body); }
+        .c-btn--icon { padding: 0; aspect-ratio: 1; }
+        .c-btn:active { transform: scale(0.98); }
+        .c-field__control { border-radius: var(--radius-md); }
 
         /* ---- Header ------------------------------------------------- */
         .g-header__inner { display: flex; justify-content: space-between; gap: var(--space-12); }
         .g-header__end { display: flex; align-items: center; gap: var(--space-12); }
-        .g-header__cta { display: none; min-block-size: var(--control-height-sm); padding-inline: var(--space-24); }
+        .g-header__cta { display: none; }
         @media (min-width: 48em) { .g-header__cta { display: inline-flex; } }
         [data-route="contact"] .g-header__cta,
         [data-route="sent"] .g-header__cta { display: none; }
         .g-icon { inline-size: var(--icon-md); block-size: var(--icon-md); flex-shrink: 0; }
-        .g-wa-btn { --_border: var(--color-border-strong); border-radius: var(--radius-pill); }
+        .g-wa-btn { --_border: var(--color-border-strong); }
         .g-wa-btn .g-icon { inline-size: 22px; block-size: 22px; }
 
         /* ---- Hero --------------------------------------------------- */
         .g-hero { min-block-size: 100svh; display: grid; align-content: center; }
-        .g-hero .c-hero__actions { max-inline-size: 26rem; }
+        .g-hero .c-hero__actions { max-inline-size: 26rem; margin-block-start: var(--space-24); gap: var(--space-16); }
+        .g-hero .c-hero__content { gap: var(--space-24); }
+        .g-hero__note { margin-block-start: var(--space-8); }
         .g-hero .c-hero__action { justify-content: center; }
         .g-hero__note {
           display: flex; align-items: center; gap: var(--space-8);
@@ -140,25 +149,26 @@ calc(var(--d,0) * 60ms + 160ms)}.c-chapter__text>*{opacity:0;translate:0 var(--s
         /* ---- Section heads (work, contact) -------------------------- */
         .g-back {
           display: inline-flex; align-items: center; gap: var(--space-8);
-          min-block-size: var(--touch-target-min); margin-block-end: var(--space-16);
+          min-block-size: var(--touch-target-min); margin-block-end: var(--space-32);
           color: var(--color-text-muted); text-decoration: none; font-size: var(--text-small);
           transition: color var(--duration-fast) var(--ease-standard);
         }
         .g-back:hover { color: var(--color-accent); }
         .g-back .g-icon { inline-size: var(--icon-sm); block-size: var(--icon-sm); }
-        .g-head { display: grid; gap: var(--space-16); margin-block-end: var(--space-40); }
+        .g-head { display: grid; gap: var(--space-24); margin-block-end: var(--space-64); }
         @media (min-width: 64em) {
-          .g-head { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); align-items: end; gap: var(--grid-gutter); margin-block-end: var(--space-64); }
+          .g-head { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); align-items: end; gap: var(--grid-gutter); margin-block-end: var(--space-120); }
         }
         .g-head__title { font-size: var(--text-h1); font-weight: var(--weight-bold); line-height: var(--leading-heading); }
         .g-accent { color: var(--color-accent); }
-        .g-eyebrow { display: flex; align-items: center; gap: var(--space-12); color: var(--color-accent); margin-block-end: var(--space-12); }
+        .g-eyebrow { display: flex; align-items: center; gap: var(--space-12); color: var(--color-accent); margin-block-end: var(--space-24); }
         .g-eyebrow::after { content: ""; inline-size: var(--rule-width); block-size: var(--border-width-strong); background-color: currentcolor; }
 
         /* ---- Portfolio ---------------------------------------------- */
-        .g-work { display: grid; gap: var(--space-24); margin: 0; padding: 0; list-style: none; }
-        @media (min-width: 48em) { .g-work { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-32) var(--grid-gutter); } }
-        .g-project { margin: 0; display: grid; gap: var(--space-16); }
+        .g-work { display: grid; gap: var(--space-64); margin: 0; padding: 0; list-style: none; }
+        @media (min-width: 48em) { .g-work { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-80) var(--space-48); } }
+        @media (min-width: 64em) { .g-work { gap: var(--space-96) var(--space-64); } }
+        .g-project { margin: 0; display: grid; gap: var(--space-24); }
         .g-project__frame {
           display: flex; align-items: center; justify-content: center; gap: var(--space-12);
           aspect-ratio: 5 / 4; padding: var(--space-16); overflow: hidden;
@@ -181,11 +191,11 @@ calc(var(--d,0) * 60ms + 160ms)}.c-chapter__text>*{opacity:0;translate:0 var(--s
         .g-project__client { font-family: "Poppins", var(--font-arabic); font-size: var(--text-label); letter-spacing: 0.16em; color: var(--color-text-muted); direction: ltr; unicode-bidi: isolate; }
 
         .g-next {
-          display: grid; gap: var(--space-24); align-items: center;
-          margin-block-start: var(--section-space-tight); padding: var(--space-32);
+          display: grid; gap: var(--space-32); align-items: center;
+          margin-block-start: var(--section-space); padding: var(--space-40) var(--space-32);
           border: var(--border-hairline); border-radius: var(--radius-lg); background-color: var(--color-bg-sunken);
         }
-        @media (min-width: 64em) { .g-next { grid-template-columns: 1fr auto; padding: var(--space-48); } }
+        @media (min-width: 64em) { .g-next { grid-template-columns: 1fr auto; padding: var(--space-80); } }
         .g-next__title { font-size: var(--text-h2); font-weight: var(--weight-bold); line-height: var(--leading-heading); }
         .g-next__actions { display: flex; flex-wrap: wrap; gap: var(--space-12); }
         @media (max-width: 47.99em) { .g-next__actions .c-btn { flex: 1 1 100%; } }
@@ -206,14 +216,14 @@ calc(var(--d,0) * 60ms + 160ms)}.c-chapter__text>*{opacity:0;translate:0 var(--s
         }
 
         /* ---- Contact ------------------------------------------------ */
-        .g-options { display: grid; gap: var(--space-24); align-items: stretch; }
-        @media (min-width: 56em) { .g-options { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--grid-gutter); } }
+        .g-options { display: grid; gap: var(--space-32); align-items: stretch; }
+        @media (min-width: 56em) { .g-options { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-48); } }
         .g-option {
-          display: flex; flex-direction: column; gap: var(--space-16);
-          padding: var(--space-24); border: var(--border-hairline); border-radius: var(--radius-lg);
+          display: flex; flex-direction: column; gap: var(--space-24);
+          padding: var(--space-32) var(--space-24); border: var(--border-hairline); border-radius: var(--radius-lg);
           background-color: var(--color-bg-sunken);
         }
-        @media (min-width: 48em) { .g-option { padding: var(--space-40); } }
+        @media (min-width: 48em) { .g-option { padding: var(--space-48); } }
         .g-option__badge {
           display: grid; place-items: center; inline-size: 52px; block-size: 52px;
           border-radius: var(--radius-circle); background-color: var(--color-accent-subtle); color: var(--color-accent);
@@ -233,11 +243,26 @@ calc(var(--d,0) * 60ms + 160ms)}.c-chapter__text>*{opacity:0;translate:0 var(--s
         .g-bubble__meta { display: block; margin-block-start: var(--space-4); font-size: var(--text-label); color: var(--color-text-muted); }
         .g-option--wa { border-color: var(--color-border-strong); }
 
-        .g-form { display: grid; gap: var(--space-16); }
-        @media (min-width: 30em) { .g-form__row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-16); } }
+        .g-form { display: grid; gap: var(--space-24); }
         .g-form .c-field__control[dir="ltr"] { text-align: end; }
         .g-form .c-field__control[dir="ltr"]:placeholder-shown { text-align: end; }
         .g-form textarea.c-field__control { min-block-size: calc(var(--control-height) * 1.8); }
+        .g-chips { border: 0; padding: 0; margin: 0; min-inline-size: 0; }
+        .g-chips legend { padding: 0; margin-block-end: var(--space-12); }
+        .g-chips__list { display: flex; flex-wrap: wrap; gap: var(--space-8); }
+        .g-chip { position: relative; cursor: pointer; }
+        .g-chip input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+        .g-chip span {
+          display: inline-flex; align-items: center; min-block-size: var(--touch-target-min);
+          padding-inline: var(--space-16); border-radius: var(--radius-pill);
+          border: var(--border-width) solid var(--color-border-strong); background-color: var(--color-surface);
+          font-size: var(--text-body-sm); color: var(--color-text-secondary);
+          transition: var(--transition-interactive);
+        }
+        .g-chip:hover span { border-color: var(--color-text-muted); color: var(--color-text-primary); }
+        .g-chip input:checked + span { background-color: var(--color-accent-subtle); border-color: var(--color-accent); color: var(--color-accent); }
+        .g-chip input:focus-visible + span { box-shadow: var(--focus-ring); }
+        .g-chips[data-invalid="true"] .g-chip span { border-color: var(--color-danger); }
         .g-form__optional { color: var(--color-text-muted); font-weight: var(--weight-regular); }
         .g-form__error:empty { display: none; }
         .g-form .c-btn[aria-busy="true"] { opacity: 0.72; pointer-events: none; }
@@ -246,17 +271,19 @@ calc(var(--d,0) * 60ms + 160ms)}.c-chapter__text>*{opacity:0;translate:0 var(--s
         .g-form__status[hidden] { display: none; }
 
         .g-trust {
-          display: grid; gap: var(--space-16); margin-block-start: var(--space-40);
-          padding-block-start: var(--space-24); border-block-start: var(--border-hairline);
+          display: grid; gap: var(--space-32); margin-block-start: var(--space-96);
+          padding-block-start: var(--space-40); border-block-start: var(--border-hairline);
           font-size: var(--text-body-sm); color: var(--color-text-secondary);
         }
         @media (min-width: 48em) { .g-trust { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
         .g-trust strong { display: block; color: var(--color-text-primary); }
+        .g-trust__role { display: block; direction: ltr; unicode-bidi: isolate; text-align: end; font-family: "Poppins", var(--font-arabic); }
+        [dir="rtl"] .g-trust__role { text-align: right; }
         .g-trust__name { font-family: "Poppins", var(--font-arabic); direction: ltr; unicode-bidi: isolate; }
 
         /* ---- Sent --------------------------------------------------- */
         .g-sent { min-block-size: 100svh; display: grid; align-content: center; text-align: center; }
-        .g-sent__inner { display: grid; justify-items: center; gap: var(--space-24); max-inline-size: 36rem; margin-inline: auto; }
+        .g-sent__inner { display: grid; justify-items: center; gap: var(--space-32); max-inline-size: 36rem; margin-inline: auto; }
         .g-sent__mark {
           display: grid; place-items: center; inline-size: 72px; block-size: 72px;
           border-radius: var(--radius-circle); background-color: var(--color-accent); color: var(--color-text-on-accent);
@@ -265,7 +292,7 @@ calc(var(--d,0) * 60ms + 160ms)}.c-chapter__text>*{opacity:0;translate:0 var(--s
         .g-sent__actions { display: grid; gap: var(--space-12); inline-size: 100%; max-inline-size: 24rem; }
 
         /* ---- Footer ------------------------------------------------- */
-        .g-footer { padding-block: var(--space-32) calc(var(--space-32) + env(safe-area-inset-bottom)); border-block-start: var(--border-hairline); }
+        .g-footer { padding-block: var(--space-48) calc(var(--space-48) + env(safe-area-inset-bottom)); border-block-start: var(--border-hairline); }
         .g-footer__inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-16); font-size: var(--text-small); color: var(--color-text-muted); }
         .g-footer__links { display: flex; flex-wrap: wrap; gap: var(--space-24); }
         .g-footer__links a { color: var(--color-text-secondary); min-block-size: var(--touch-target-min); display: inline-flex; align-items: center; }
@@ -308,7 +335,7 @@ calc(var(--d,0) * 60ms + 160ms)}.c-chapter__text>*{opacity:0;translate:0 var(--s
           </span>
         </a>
         <div class="g-header__end">
-          <a class="c-btn c-btn--primary c-btn--sm g-header__cta" href="#contact" data-cta="contact" data-placement="header">تواصل معنا</a>
+          <a class="c-btn c-btn--primary g-header__cta" href="#contact" data-cta="contact" data-placement="header">تواصل معنا</a>
           <a class="c-btn c-btn--icon g-wa-btn" href="https://wa.me/249962672192" target="_blank" rel="noopener"
             data-wa data-placement="header" aria-label="محادثة على واتساب (تفتح في نافذة جديدة)">
             <svg class="g-icon" aria-hidden="true" focusable="false"><use href="#i-wa" /></svg>
@@ -508,37 +535,34 @@ calc(var(--d,0) * 60ms + 160ms)}.c-chapter__text>*{opacity:0;translate:0 var(--s
               <form class="g-form" action="./lead.php" method="post" data-lead-form aria-labelledby="opt-form-title">
                 <p class="c-field">
                   <label class="c-field__label" for="f-name">الاسم</label>
-                  <input class="c-field__control" id="f-name" name="name" type="text" autocomplete="name"
+                  <input class="c-field__control" id="f-name" name="name" type="text" autocomplete="name" enterkeyhint="next"
                     maxlength="80" required aria-describedby="f-name-err" />
                   <span class="c-field__error g-form__error" id="f-name-err"></span>
                 </p>
                 <p class="c-field">
                   <label class="c-field__label" for="f-wa">رقم WhatsApp</label>
                   <input class="c-field__control" id="f-wa" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel"
-                    dir="ltr" maxlength="22" placeholder="+966 5X XXX XXXX" required aria-describedby="f-wa-err" />
+                    dir="ltr" enterkeyhint="next" maxlength="22" placeholder="+966 5X XXX XXXX" required aria-describedby="f-wa-err" />
                   <span class="c-field__error g-form__error" id="f-wa-err"></span>
                 </p>
-                <div class="g-form__row">
-                  <p class="c-field">
-                    <label class="c-field__label" for="f-city">الدولة / المدينة</label>
-                    <input class="c-field__control" id="f-city" name="location" type="text" list="gulf-places"
-                      autocomplete="address-level2" maxlength="80" placeholder="مثال: الرياض" required aria-describedby="f-city-err" />
-                    <span class="c-field__error g-form__error" id="f-city-err"></span>
-                  </p>
-                  <p class="c-field">
-                    <label class="c-field__label" for="f-service">نوع الخدمة المطلوبة</label>
-                    <select class="c-field__control c-field__select" id="f-service" name="service" required aria-describedby="f-service-err">
-                      <option value="" selected disabled>اختر الخدمة</option>
-                      <option value="branding">الهوية والتصميم</option>
-                      <option value="websites">المواقع الإلكترونية</option>
-                      <option value="social">إدارة وسائل التواصل</option>
-                      <option value="marketing">التسويق الرقمي والإعلانات</option>
-                      <option value="integrated">الحلول الرقمية المتكاملة</option>
-                      <option value="unsure">لست متأكدًا — أحتاج استشارة</option>
-                    </select>
-                    <span class="c-field__error g-form__error" id="f-service-err"></span>
-                  </p>
-                </div>
+                <p class="c-field">
+                  <label class="c-field__label" for="f-city">الدولة / المدينة</label>
+                  <input class="c-field__control" id="f-city" name="location" type="text" list="gulf-places"
+                    autocomplete="address-level2" enterkeyhint="next" maxlength="80" placeholder="مثال: السعودية — الرياض" required aria-describedby="f-city-err" />
+                  <span class="c-field__error g-form__error" id="f-city-err"></span>
+                </p>
+                <fieldset class="c-field g-chips" aria-describedby="f-service-err">
+                  <legend class="c-field__label">نوع الخدمة المطلوبة</legend>
+                  <div class="g-chips__list">
+                    <label class="g-chip"><input type="radio" name="service" value="branding" required /><span>الهوية والتصميم</span></label>
+                    <label class="g-chip"><input type="radio" name="service" value="websites" /><span>موقع إلكتروني</span></label>
+                    <label class="g-chip"><input type="radio" name="service" value="social" /><span>إدارة التواصل الاجتماعي</span></label>
+                    <label class="g-chip"><input type="radio" name="service" value="marketing" /><span>إعلانات رقمية</span></label>
+                    <label class="g-chip"><input type="radio" name="service" value="integrated" /><span>حل متكامل</span></label>
+                    <label class="g-chip"><input type="radio" name="service" value="unsure" /><span>لست متأكدًا</span></label>
+                  </div>
+                  <span class="c-field__error g-form__error" id="f-service-err"></span>
+                </fieldset>
                 <datalist id="gulf-places">
                   <option value="السعودية — الرياض"></option>
                   <option value="السعودية — جدة"></option>
@@ -578,7 +602,7 @@ calc(var(--d,0) * 60ms + 160ms)}.c-chapter__text>*{opacity:0;translate:0 var(--s
           </div>
 
           <div class="g-trust">
-            <p><strong><bdi class="g-trust__name">Muhalab Salah</bdi></strong> المؤسس — تصميم الهوية والمواقع</p>
+            <p><strong><bdi class="g-trust__name">Muhalab Basheir</bdi></strong> <bdi class="g-trust__role">Visual Communications Designer</bdi></p>
             <p><strong>نردّ خلال ساعتين في أوقات العمل</strong> من الأحد إلى الخميس</p>
             <p><strong>نعمل عن بُعد</strong> مع عملاء في الخليج ومصر</p>
           </div>
@@ -600,7 +624,7 @@ calc(var(--d,0) * 60ms + 160ms)}.c-chapter__text>*{opacity:0;translate:0 var(--s
                 <svg class="g-icon" aria-hidden="true" focusable="false"><use href="#i-wa" /></svg>
                 <span>تابع المحادثة على واتساب الآن</span>
               </a>
-              <a class="c-btn c-btn--ghost" href="#work" data-cta="work" data-placement="sent">شوف أعمالنا</a>
+              <a class="c-btn c-btn--ghost c-btn--lg c-btn--block" href="#work" data-cta="work" data-placement="sent">شوف أعمالنا</a>
             </div>
           </div>
         </div>

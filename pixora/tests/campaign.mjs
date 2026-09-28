@@ -76,6 +76,8 @@ for (const kind of Object.keys(VIEWPORTS)) {
     const box = await page.locator('#top .c-hero__actions a', { hasText: name }).boundingBox();
     check(box && box.y + box.height <= fold, `[${kind}] "${name}" above the fold`);
   }
+  const radii = await page.$$eval('.c-btn', (els) => [...new Set(els.filter((e) => e.offsetParent).map((e) => getComputedStyle(e).borderRadius))]);
+  check(radii.length === 1 && parseFloat(radii[0]) >= 100, `[${kind}] every visible button is a pill`, radii.join(','));
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   check(overflow <= 0, `[${kind}] no horizontal scroll`, String(overflow));
 
@@ -101,6 +103,8 @@ for (const kind of Object.keys(VIEWPORTS)) {
   await page.locator('#work .g-next a[data-cta="contact"]').click();
   await page.waitForTimeout(100);
   check(await active(page) === 'contact', `[${kind}] portfolio → contact`);
+  check(/Muhalab Basheir/.test(await page.locator('.g-trust').textContent()) && /Visual Communications Designer/.test(await page.locator('.g-trust').textContent()),
+    `[${kind}] profile reads Muhalab Basheir, Visual Communications Designer`);
   const wa = await waText(page, '#contact a[data-wa]');
   check(wa.host === 'wa.me' && wa.path === '/249962672192', `[${kind}] WhatsApp link targets the approved number`);
   check(/سناب شات/.test(wa.text) && /اطّلعت على أعمالكم/.test(wa.text) && /PX-[A-Z0-9]{5}/.test(wa.text),
@@ -166,13 +170,16 @@ for (const kind of Object.keys(VIEWPORTS)) {
   check(await active(page) === 'contact', 'invalid form does not submit');
 
   await form.locator('#f-name').fill('سارة');
+  await form.locator('#f-name').press('Enter');
+  check(await page.evaluate(() => document.activeElement?.name) === 'whatsapp' && await active(page) === 'contact',
+    'Enter moves to the next field instead of submitting');
   await form.locator('#f-wa').fill('12');
   await form.locator('#f-wa').blur();
   check(await form.locator('#f-wa-err').textContent().then((t) => /رمز الدولة/.test(t)), 'short number rejected with a helpful message');
   await form.locator('#f-wa').fill('٠٠٩٦٦ ٥٠ ١٢٣ ٤٥٦٧');
   check(await form.locator('#f-wa').inputValue() === '00966 50 123 4567', 'Arabic-Indic digits converted as typed');
   await form.locator('#f-city').fill('السعودية — الرياض');
-  await form.locator('#f-service').selectOption('websites');
+  await form.locator('.g-chip', { hasText: 'موقع إلكتروني' }).click();
   await form.locator('#f-note').fill('نحتاج موقع لمتجر عطور');
   const started = (await events(page)).some((e) => e.name === 'enquiry_started');
   check(started, 'enquiry_started tracked');
@@ -212,7 +219,7 @@ for (const kind of Object.keys(VIEWPORTS)) {
   await page.fill('#f-name', 'Omar');
   await page.fill('#f-wa', '+971 50 123 4567');
   await page.fill('#f-city', 'دبي');
-  await page.selectOption('#f-service', 'social');
+  await page.click('.g-chip:has(input[value="social"])');
   await page.click('[data-submit]');
   await page.waitForTimeout(250);
   check(await active(page) === 'contact', 'failed submission never claims success');

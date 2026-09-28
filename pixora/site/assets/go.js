@@ -311,15 +311,21 @@
     service: (v) => (v ? '' : 'اختر نوع الخدمة المطلوبة.'),
   };
 
-  function validateField(field) {
-    const rule = RULES[field.name];
-    if (!rule) return true;
-    const message = rule(field.value);
-    const wrapper = field.closest('.c-field');
+  // By name, not by element: the service is a group of radio chips, and
+  // RadioNodeList.value gives the checked one's value like any other field.
+  function controlsOf(name) {
+    const el = form.elements[name];
+    return el instanceof RadioNodeList ? [...el] : [el];
+  }
+
+  function validateName(name) {
+    const message = RULES[name](form.elements[name].value || '');
+    const controls = controlsOf(name);
+    const wrapper = controls[0].closest('.c-field');
     const error = wrapper?.querySelector('.c-field__error');
     if (error) error.textContent = message;
     if (wrapper) wrapper.dataset.invalid = String(Boolean(message));
-    field.setAttribute('aria-invalid', String(Boolean(message)));
+    controls.forEach((control) => control.setAttribute('aria-invalid', String(Boolean(message))));
     return !message;
   }
 
@@ -327,8 +333,7 @@
     if (!form) return;
     form.noValidate = true; // our Arabic messages, not the browser's
     syncHiddenFields();
-    const fields = [...form.querySelectorAll('input[name], select[name], textarea[name]')]
-      .filter((f) => f.name in RULES);
+    const names = Object.keys(RULES);
     const phone = form.elements.whatsapp;
     const submit = form.querySelector('[data-submit]');
     const label = form.querySelector('[data-submit-label]');
@@ -338,11 +343,27 @@
       const latin = toLatinDigits(phone.value);
       if (latin !== phone.value) phone.value = latin;
     });
-    // Validate after the first visit to a field, not on every keystroke before.
-    fields.forEach((field) => {
-      field.addEventListener('blur', () => { if (field.value) validateField(field); });
-      field.addEventListener(field.tagName === 'SELECT' ? 'change' : 'input', () => {
-        if (field.closest('.c-field')?.dataset.invalid === 'true') validateField(field);
+    // Validate after the first visit to a field, not on every keystroke before;
+    // once a field has shown an error, clear it the moment it is fixed.
+    names.forEach((name) => {
+      controlsOf(name).forEach((control) => {
+        if (control.type !== 'radio') {
+          control.addEventListener('blur', () => { if (control.value) validateName(name); });
+        }
+        control.addEventListener(control.type === 'radio' ? 'change' : 'input', () => {
+          if (control.closest('.c-field')?.dataset.invalid === 'true') validateName(name);
+        });
+      });
+    });
+    // "Next" on a phone keyboard moves to the next field instead of submitting
+    // a half-filled form.
+    const order = ['name', 'whatsapp', 'location'];
+    order.forEach((name, i) => {
+      form.elements[name].addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' || event.isComposing) return;
+        event.preventDefault();
+        const next = order[i + 1] ? form.elements[order[i + 1]] : form.querySelector('input[name="service"]:checked') || controlsOf('service')[0];
+        next.focus();
       });
     });
     form.addEventListener('focusin', () => {
@@ -351,9 +372,11 @@
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
-      const invalid = fields.filter((field) => !validateField(field));
+      const invalid = names.filter((name) => !validateName(name));
       if (invalid.length) {
-        invalid[0].focus();
+        const first = controlsOf(invalid[0])[0];
+        first.focus();
+        first.closest('.c-field')?.scrollIntoView({ block: 'center', behavior: 'smooth' });
         return;
       }
       phone.value = normalisePhone(phone.value);
