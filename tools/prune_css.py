@@ -32,6 +32,17 @@ DEAD = {
     "c-orbit__spark", "c-orbit__spark--slow",
     # The phones' floating "Start your project" bar (removed; WhatsApp stays).
     "c-phone-cta",
+    # The service pages' sample boards, replaced by the work slideshows
+    # (build_services.py SHOWCASE).
+    "c-brandboard", "c-brandboard__image", "c-brandboard__panel",
+    "c-modules", "c-modules__image", "c-modules__item", "c-modules__item--lead", "c-modules__module",
+    "c-devices", "c-device", "c-device--desktop", "c-device__image",
+    # The supplied About layout, replaced by about_page.py (c-split__figure
+    # stays: the new About figures use it).
+    "c-split", "c-split__coda", "c-split__image", "c-split__row", "c-split__text",
+    # Parts of the supplied markup that no page has any more.
+    "c-card", "c-contact__next", "c-detail__action", "c-field__help", "c-field__required",
+    "c-header__cta", "c-page__h2",
 }
 GROUPING = ("@media", "@supports", "@container", "@layer", "@document", "@starting-style")
 
