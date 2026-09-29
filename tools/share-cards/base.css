@@ -1,3 +1,8 @@
+/* One design for every link-preview card (1200×630), Arabic first:
+   the brand, an eyebrow, the page's own headline (its accent in yellow),
+   the English line, and a foot of facts; the page's address in the corner.
+   The visual sits opposite the text: work laid out like prints on a table
+   (the Story hero's language), or a page's cover photograph. */
 @font-face{font-family:Cairo;src:url(../../source/assets/fonts/cairo-arabic-var.woff2) format('woff2');font-weight:200 1000}
 @font-face{font-family:Poppins;src:url(../../source/assets/fonts/poppins-latin-500.woff2) format('woff2');font-weight:500}
 @font-face{font-family:Poppins;src:url(../../source/assets/fonts/poppins-latin-600.woff2) format('woff2');font-weight:600}
@@ -5,14 +10,29 @@
 *{box-sizing:border-box;margin:0}
 html,body{width:1200px;height:630px;overflow:hidden}
 body{background:#141414;color:#fff;font-family:Cairo,Poppins,sans-serif;position:relative}
-.glow{position:absolute;inset:0;background:radial-gradient(600px 420px at 78% 38%,rgba(244,209,63,.18),transparent 70%),radial-gradient(500px 200px at 70% 105%,rgba(244,209,63,.14),transparent 70%)}
-.brand{font-family:Poppins;font-weight:700;font-size:40px;letter-spacing:.02em;line-height:1}
+.glow{position:absolute;inset:0;background:radial-gradient(520px 420px at 24% 50%,var(--glow,rgba(244,209,63,.16)),transparent 72%)}
+.edge{position:absolute;inset:0;border:1px solid rgba(255,255,255,.06);pointer-events:none}
+.text{position:absolute;inset-block:56px 52px;inset-inline-start:72px;width:var(--text-w,540px);display:flex;flex-direction:column}
+.brand{font-family:Poppins;font-weight:700;font-size:36px;letter-spacing:.02em;line-height:1;direction:ltr;text-align:right}
 .brand b{color:#f4d13f}
-.tag{font-family:Poppins;font-weight:500;font-size:13px;letter-spacing:.3em;color:rgba(255,255,255,.5);margin-top:8px;text-transform:uppercase}
-.acc{color:#f4d13f}
-.pill{display:inline-flex;align-items:center;gap:10px;height:54px;padding:0 30px;border-radius:999px;background:#f4d13f;color:#202020;font-weight:700;font-size:22px}
-.pill--ghost{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.3)}
-.frame{border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.12);background:#0e0e0e;box-shadow:0 30px 60px -20px rgba(0,0,0,.7)}
-.frame img{display:block;width:100%;height:100%;object-fit:cover}
-.meta{display:flex;gap:26px;font-size:18px;color:rgba(255,255,255,.72);font-weight:600}
-.meta span::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#f4d13f;margin-inline-end:10px;vertical-align:middle}
+.tag{font-family:Poppins;font-weight:500;font-size:12px;letter-spacing:.32em;color:rgba(255,255,255,.5);margin-top:8px;text-transform:uppercase;direction:ltr;text-align:right}
+.mid{margin-block:auto}
+.eyebrow{display:flex;align-items:center;gap:14px;color:#f4d13f;font-weight:700;font-size:22px}
+.eyebrow::after{content:"";width:40px;height:2px;background:currentColor}
+h1{font-size:var(--h1,58px);line-height:1.22;font-weight:800;margin-top:14px;text-wrap:balance}
+h1 .acc,h1 .c-detail__accent{color:#f4d13f}
+.en{font-family:Poppins;font-weight:600;font-size:19px;line-height:1.45;color:rgba(255,255,255,.62);margin-top:16px;direction:ltr;text-align:right}
+.foot{display:flex;gap:24px;font-size:17px;color:rgba(255,255,255,.72);font-weight:600}
+.foot span::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#f4d13f;margin-inline-end:10px;vertical-align:middle}
+.url{position:absolute;bottom:40px;left:64px;font-family:Poppins;font-weight:500;font-size:15px;letter-spacing:.02em;color:rgba(255,255,255,.46);direction:ltr}
+.url b{color:rgba(255,255,255,.8);font-weight:600}
+/* Prints on a table. */
+.prints{position:absolute;top:0;bottom:0;left:0;width:600px}
+.print{position:absolute;left:var(--x);top:var(--y);width:var(--w);height:var(--h,auto);rotate:var(--r,0deg);z-index:var(--z,1);border-radius:12px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 30px 60px -22px rgba(0,0,0,.85)}
+.print img{display:block;width:100%;height:100%;object-fit:cover;object-position:var(--pos,center)}
+.chip{position:absolute;z-index:9;display:inline-flex;align-items:center;gap:10px;background:rgba(20,20,20,.9);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:11px 20px;font-size:17px;font-weight:700}
+.chip::before{content:"";width:9px;height:9px;border-radius:50%;background:#7bc47f}
+/* A cover photograph behind the text. */
+.cover{position:absolute;inset:0}
+.cover img{width:100%;height:100%;object-fit:cover;object-position:var(--focus,center)}
+.shade{position:absolute;inset:0;background:linear-gradient(to left,rgba(14,14,14,.97) 0%,rgba(14,14,14,.9) 40%,rgba(14,14,14,.35) 68%,rgba(14,14,14,.12) 100%),linear-gradient(to top,rgba(14,14,14,.7),transparent 34%)}

@@ -114,10 +114,6 @@ TEXT = [
      '<span data-lang-copy="en">Visual Communications Designer</span><span data-lang-copy="ar" lang="ar">مصمم اتصال بصري</span>'),
     ("Muhalab Salah", "Muhalab Basheir"),
     ("مهلب صلاح", "مهلب بشير"),
-    # Link preview: the homepage card (tools/share-cards/home.html).
-    ("https://zaokalyamamah.online/assets/share-card.jpg", "https://zaokalyamamah.online/assets/share-home.jpg"),
-    ('<meta property="og:image:alt" content="Pixora — your brand, your digital presence, one partner" />',
-     '<meta property="og:image:alt" content="Pixora — علامتك. حضورك الرقمي. شريك واحد. Your brand, your digital presence, one partner." />'),
     # Hero: shorter, and it leaves something to discover.
     ('''<p class="t-body-lg c-hero__lead"><span data-lang-copy="en">A remote studio for the Gulf and Egypt.
               We build brands, websites and digital experiences —
@@ -125,6 +121,17 @@ TEXT = [
               marketing to help your business grow.</span><span data-lang-copy="ar" lang="ar">استوديو يعمل عن بُعد في الخليج ومصر. نبني العلامات والمواقع والتجارب الرقمية، ثم نربطها بالمحتوى ووسائل التواصل والتسويق الأدائي لينمو عملك.</span></p>''',
      '''<p class="t-body-lg c-hero__lead"><span data-lang-copy="en">Brand, website, content and ads — from one team.<br /><span class="c-hero__tease">The difference? You'll see it at first glance.</span></span><span data-lang-copy="ar" lang="ar">هوية، موقع، محتوى وإعلانات — من فريق واحد.<br /><span class="c-hero__tease">والفرق؟ ستلاحظه من أول نظرة.</span></span></p>'''),
 ]
+
+# Link previews (tools/share-cards): each page its own card; the pages
+# without one (privacy, terms, accessibility, 404) show the homepage's.
+SHARE_OLD = "https://zaokalyamamah.online/assets/share-card.jpg"
+ALT_OLD = '<meta property="og:image:alt" content="Pixora — your brand, your digital presence, one partner" />'
+SHARE = {
+    "story.html": ("share-story.jpg", "Al Mada — one brand, four surfaces / هوية واحدة، أربع واجهات"),
+    "about.html": ("share-about.jpg", "Pixora — a remote studio for the Gulf and Egypt / استوديو يعمل عن بُعد في الخليج ومصر"),
+    "pricing.html": ("share-pricing.jpg", "Pixora pricing — every package and its price / كم يكلّف المشروع، وما الذي يغيّر السعر"),
+}
+HOME_CARD = ("share-home.jpg", "Pixora — علامتك. حضورك الرقمي. شريك واحد. Your brand, your digital presence, one partner.")
 
 # Privacy: the campaign form (go.html → lead.php) does reach a server.
 PRIVACY = [
@@ -186,6 +193,10 @@ for name in PAGES:
     text = replace_all(text, TEXT[:1], name, required=True)
     if name == "index.html":
         text = replace_all(text, TEXT[3:], name, required=True)
+    if not name.startswith("services/") and SHARE_OLD in text:
+        card, alt = SHARE.get(name, HOME_CARD)
+        text = text.replace(SHARE_OLD, f"https://zaokalyamamah.online/assets/{card}")
+        text = replace_all(text, [(ALT_OLD, f'<meta property="og:image:alt" content="{alt}" />')], name, required=True)
     if name == "privacy.html":
         text = replace_all(text, PRIVACY, name, required=True)
     text = clean_links(text)
@@ -206,6 +217,10 @@ for name in PAGES:
 
     path.write_text(text, encoding="utf-8")
 print(f"refinements: {len(PAGES)} pages")
+# The supplied generic preview card: every page now names its own.
+if any(SHARE_OLD in (SITE / n).read_text(encoding="utf-8") for n in PAGES):
+    sys.exit("refinements: a page still uses share-card.jpg")
+(SITE / "assets" / "share-card.jpg").unlink()
 
 # robots.txt: private endpoints stay out of search.
 robots = SITE / "robots.txt"

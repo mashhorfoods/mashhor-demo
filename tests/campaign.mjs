@@ -350,6 +350,15 @@ for (const kind of ['mobile', 'desktop']) {
   check(await p.locator('#branding, #websites, #social, #marketing, #add-ons, .c-tier').count() === 0, 'home: no duplicated service details or packages');
   const covers = await p.$$eval('#services .c-svc-card__media', (els) => els.map((e) => [e.style.viewTransitionName, e.querySelector('img')?.getAttribute('src')]));
   check(covers.length === 5 && covers.every(([n, src]) => src === `/assets/${n}.webp`), 'home: every service card carries its cover, named for the transition', JSON.stringify(covers));
+  // Every page's link preview is its own card (or the homepage's), and it is on the site.
+  for (const [page, card] of [['/', 'home'], ['/go', 'go'], ['/story', 'story'], ['/about', 'about'], ['/pricing', 'pricing'], ['/privacy', 'home'], ['/terms', 'home'], ['/accessibility', 'home']]) {
+    const html = await (await fetch(`${BASE}${page}`)).text();
+    const og = (html.match(/property="og:image" content="([^"]+)"/) || [])[1];
+    const tw = (html.match(/name="twitter:image" content="([^"]+)"/) || [])[1];
+    const file = await fetch(`${BASE}/assets/share-${card}.jpg`);
+    check(og === `https://zaokalyamamah.online/assets/share-${card}.jpg` && tw === og && file.ok && (await file.arrayBuffer()).byteLength > 20000,
+      `${page}: link preview is share-${card}.jpg`, String(og));
+  }
   for (const [sid, tiers] of [['branding', 3], ['websites', 3], ['social', 3], ['marketing', 3], ['integrated', 0]]) {
     await p.goto(`${BASE}/services/${sid}`);
     await p.waitForTimeout(100);

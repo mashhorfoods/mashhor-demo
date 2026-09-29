@@ -1,26 +1,29 @@
 <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><link rel="stylesheet" href="base.css"><style>
-.text{position:absolute;inset-block:60px 56px;inset-inline-start:72px;width:590px;display:flex;flex-direction:column}
-.eyebrow{display:flex;align-items:center;gap:14px;color:#f4d13f;font-weight:700;font-size:22px;margin-top:40px}
-.eyebrow::after{content:"";width:44px;height:2px;background:currentColor}
-h1{font-size:54px;line-height:1.25;font-weight:800;margin-top:16px}
-.tease{font-size:28px;font-weight:700;margin-top:18px}
-.ctas{display:flex;gap:14px;margin-top:auto}
-.visual{position:absolute;inset-inline-end:56px;top:70px;width:470px;height:490px}
-.big{position:absolute;inset:0 0 110px 0}
-.small{position:absolute;width:210px;height:250px;bottom:0;inset-inline-end:-10px;transform:rotate(4deg)}
-.badge{position:absolute;bottom:26px;inset-inline-start:20px;background:rgba(20,20,20,.92);border:1px solid rgba(255,255,255,.15);border-radius:999px;padding:12px 22px;font-size:18px;font-weight:700;display:flex;align-items:center;gap:10px}
-.badge::before{content:"";width:10px;height:10px;border-radius:50%;background:#7bc47f}
+body{--h1:52px;--text-w:580px}
+.p1{--x:40px;--y:52px;--w:360px;--r:-3deg;--z:1}
+.p2{--x:330px;--y:96px;--w:230px;--r:4deg;--z:2}
+.p3{--x:96px;--y:318px;--w:250px;--r:2deg;--z:3}
+.p4{--x:320px;--y:330px;--w:230px;--r:-2deg;--z:4}
+.chip{left:60px;bottom:96px}
+.ctas{display:flex;gap:14px}
+.pill{display:inline-flex;align-items:center;height:52px;padding:0 28px;border-radius:999px;background:#f4d13f;color:#202020;font-weight:700;font-size:21px}
+.pill--ghost{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.3)}
 </style></head><body><div class="glow"></div>
-<div class="visual">
- <div class="frame big"><img src="../../source/assets/al-mada-identity-tile.webp"></div>
- <div class="frame small"><img src="../../source/assets/al-mada-campaign-tile.webp" style="object-position:top"></div>
- <div class="badge">نردّ خلال ساعتين</div>
+<div class="prints">
+ <div class="print p1"><img src="../../source/assets/al-mada-website-tile.webp"></div>
+ <div class="print p2"><img src="../../source/assets/work-4.webp"></div>
+ <div class="print p3"><img src="../../source/assets/work-3.webp"></div>
+ <div class="print p4"><img src="../../source/assets/work-5.webp"></div>
+ <span class="chip">نردّ خلال ساعتين</span>
 </div>
 <div class="text">
  <div><div class="brand">PI<b>X</b>ORA</div><div class="tag">Digital Agency</div></div>
- <p class="eyebrow">شريكك الرقمي الإبداعي</p>
- <h1>هوية، موقع، محتوى وإعلانات<br><span class="acc">من فريق واحد.</span></h1>
- <p class="tease">والفرق؟ ستلاحظه من أول نظرة.</p>
+ <div class="mid">
+  <p class="eyebrow">شريكك الرقمي الإبداعي</p>
+  <h1>هوية، موقع، محتوى وإعلانات<br><span class="acc">من فريق واحد.</span></h1>
+  <p class="en">Brand, website, content and ads — from one team.</p>
+ </div>
  <div class="ctas"><span class="pill">شوف أعمالنا ←</span><span class="pill pill--ghost">تواصل على واتساب</span></div>
 </div>
+<p class="url"><b>zaokalyamamah.online</b>/go</p><div class="edge"></div>
 </body></html>

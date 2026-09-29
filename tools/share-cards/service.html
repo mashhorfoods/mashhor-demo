@@ -1,22 +1,16 @@
 <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><link rel="stylesheet" href="base.css"><style>
 /* One card per service: its cover, its name and its headline (filled in by render.mjs from the built page). */
-.cover{position:absolute;inset:0}
-.cover img{width:100%;height:100%;object-fit:cover;object-position:var(--focus,center)}
-.shade{position:absolute;inset:0;background:linear-gradient(to left,rgba(14,14,14,.96) 0%,rgba(14,14,14,.88) 38%,rgba(14,14,14,.35) 66%,rgba(14,14,14,.1) 100%),linear-gradient(to top,rgba(14,14,14,.55),transparent 40%)}
-.text{position:absolute;inset-block:58px 54px;inset-inline-start:72px;width:560px;display:flex;flex-direction:column}
-.eyebrow{display:flex;align-items:center;gap:14px;color:#f4d13f;font-weight:700;font-size:24px;margin-top:44px}
-.eyebrow::after{content:"";width:44px;height:2px;background:currentColor}
-h1{font-size:60px;line-height:1.22;font-weight:800;margin-top:14px}
-h1 .c-detail__accent{color:#f4d13f}
-.en{font-family:Poppins;font-weight:600;font-size:22px;color:rgba(255,255,255,.7);margin-top:18px;direction:ltr;text-align:right}
-.meta{margin-top:auto}
+body{--text-w:560px}
 </style></head><body>
 <div class="cover"><img id="img"></div><div class="shade"></div>
 <div class="text">
  <div><div class="brand">PI<b>X</b>ORA</div><div class="tag">Digital Agency</div></div>
- <p class="eyebrow" id="name"></p>
- <h1 id="h1"></h1>
- <p class="en" id="en"></p>
- <div class="meta"><span>الباقات والأسعار</span><span>نردّ خلال ساعتين</span><span>عربي / English</span></div>
+ <div class="mid">
+  <p class="eyebrow" id="name"></p>
+  <h1 id="h1"></h1>
+  <p class="en" id="en"></p>
+ </div>
+ <div class="foot"><span id="from"></span><span>نردّ خلال ساعتين</span><span>عربي / English</span></div>
 </div>
+<p class="url"><b>zaokalyamamah.online</b><span id="path"></span></p><div class="edge"></div>
 </body></html>
