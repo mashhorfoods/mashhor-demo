@@ -103,6 +103,17 @@ The site shows no sequence numbering (01, 02/07 …): the rule is in the
 refinements stylesheet; prices, counts and the brand challenge's steps keep
 their numbers. A test fails if an "01"-style label shows on any page.
 
+## About page
+
+`tools/about_page.py` rewrites About around Pixora and its team, from the
+site's own parts: a hero like the service pages', who we are, four
+principles, the six stages of a project (their line draws in as it
+arrives), the five service cards (copied from the homepage), the promises
+and a closing call to action. The site speaks as Pixora everywhere: no
+founder links or mentions (the build stops if one returns); the contact
+card keeps the name of the person you reach, in both languages —
+Muhalab Basheir, Visual Communications Designer / مهلب بشير، مصمم المحتوى البصري.
+
 ## Link previews
 
 What WhatsApp, X and the rest show when a page is shared: one 1200×630 card

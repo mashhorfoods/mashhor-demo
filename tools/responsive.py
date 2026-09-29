@@ -26,8 +26,9 @@ IMAGES = {
     "about2.webp": (1672, *ABOUT),
     "about4.webp": (1672, *ABOUT),
 }
-# The About page's first photo is its largest paint: fetch it first, not lazily.
-EAGER = {"about.html": "about1.webp"}
+# A page's largest paint, fetched first rather than lazily (About's hero
+# photo is written eager, with its own srcset, by about_page.py).
+EAGER = {}
 
 
 def variant(name, w):

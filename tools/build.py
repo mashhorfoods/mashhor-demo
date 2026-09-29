@@ -13,6 +13,7 @@ Steps, in order:
     2. build_services.py          one page per service; home and pricing unified
        streamline.py              order, repetition, placeholders, shorter copy
        story_hero.py              the case study's hero (its four surfaces)
+       about_page.py              the About page, about Pixora and its team
     3. apply-site-refinements.py  spacing, pills, WhatsApp button, hero,
                                   profile, privacy, clean links, CSP
     4. motion.py                  the "quiet luxury" motion layer (CSS half)
@@ -82,6 +83,9 @@ print("streamline: sections reordered, repetition and placeholders removed")
 import story_hero  # noqa: E402
 story_hero.build(SITE)
 print("story: hero added")
+import about_page  # noqa: E402
+about_page.build(SITE)
+print("about: page rewritten around the team")
 
 subprocess.run([sys.executable, str(TOOLS / "apply-site-refinements.py")], check=True)
 

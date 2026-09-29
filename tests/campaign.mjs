@@ -104,8 +104,8 @@ for (const kind of Object.keys(VIEWPORTS)) {
   await page.locator('#work .g-next a[data-cta="contact"]').click();
   await page.waitForTimeout(100);
   check(await active(page) === 'contact', `[${kind}] portfolio → contact`);
-  check(/Muhalab Basheir/.test(await page.locator('.g-trust').textContent()) && /Visual Communications Designer/.test(await page.locator('.g-trust').textContent()),
-    `[${kind}] profile reads Muhalab Basheir, Visual Communications Designer`);
+  check(/مهلب بشير/.test(await page.locator('.g-trust').textContent()) && /مصمم المحتوى البصري/.test(await page.locator('.g-trust').textContent()),
+    `[${kind}] profile reads مهلب بشير, مصمم المحتوى البصري`);
   const wa = await waText(page, '#contact a[data-wa]');
   check(wa.host === 'wa.me' && wa.path === `/${WHATSAPP}`, `[${kind}] WhatsApp link targets the approved number`);
   check(/سناب شات/.test(wa.text) && /اطّلعت على أعمالكم/.test(wa.text) && /PX-[A-Z0-9]{5}/.test(wa.text),
@@ -276,7 +276,7 @@ for (const kind of ['mobile', 'desktop']) {
   }
   await p.goto(`${BASE}/index.html`);
   await p.waitForTimeout(150);
-  check(await p.locator('.c-verify__name').textContent() === 'Muhalab Basheir', `[${kind}] profile name is Muhalab Basheir`);
+  check(await p.locator('.c-verify__name').innerText() === 'مهلب بشير', `[${kind}] profile name reads in Arabic when the page is Arabic`);
   const fab = p.locator('.c-wa-fab');
   check(await fab.isVisible() === (kind === 'mobile'), `[${kind}] floating WhatsApp button ${kind === 'mobile' ? 'shown' : 'hidden'}`);
   if (kind === 'mobile') {
@@ -465,6 +465,35 @@ for (const kind of ['mobile', 'desktop']) {
     const top = await hp.$eval('#story-transformation', (e) => Math.round(e.getBoundingClientRect().top));
     check(top >= 0 && top < 400, '/story: a hero card scrolls to its chapter', String(top));
     await hc.close();
+  }
+  // About speaks as Pixora: no founder anywhere; the contact card's name follows the language.
+  {
+    const ac = await browser.newContext({ ...VIEWPORTS.desktop });
+    const ap = await ac.newPage();
+    await ap.goto(`${BASE}/about`, { waitUntil: 'networkidle' });
+    const about = await ap.evaluate(() => ({
+      values: document.querySelectorAll('.c-about-value').length,
+      stages: document.querySelectorAll('.c-about-stage').length,
+      cards: document.querySelectorAll('.c-about .c-svc-card').length,
+      person: /Muhalab|مهلب|founder|المؤسس/i.test(document.querySelector('main').textContent),
+      hero: !!document.querySelector('.c-about-hero h1') && document.querySelector('.c-about-hero img').complete,
+    }));
+    check(about.values === 4 && about.stages === 6 && about.cards === 5 && !about.person && about.hero,
+      '/about: hero, principles, process and services — about Pixora, no founder', JSON.stringify(about));
+    const card = () => ap.$eval('.c-verify', (s) => [...s.querySelectorAll('.c-verify__name, .c-verify__role')].map((e) => e.innerText.trim()).join(' | '));
+    const en = await card();
+    await ap.locator('button[data-lang="ar"]:visible').first().click();
+    await ap.waitForTimeout(300);
+    const ar = await card();
+    check(en === 'Muhalab Basheir | Visual Communications Designer' && ar === 'مهلب بشير | مصمم المحتوى البصري',
+      'contact card: name and role switch to Arabic with the language', `${en} → ${ar}`);
+    await ac.close();
+    const founder = [];
+    for (const f of readdirSync(path.join(here, '..', 'site'), { recursive: true }).map(String).filter((f) => /\.(html|js)$/.test(f) && !f.startsWith('admin'))) {
+      const s = readFileSync(path.join(here, '..', 'site', f), 'utf8');
+      if (/Founder's portfolio|Founder&#39;s|أعمال المؤسس|موقع المؤسس|muhalabsalah\.github\.io|"founder"/.test(s)) founder.push(f);
+    }
+    check(founder.length === 0, 'no page or script points to a founder', founder.join());
   }
   // Every inline script is covered by a hash in the CSP the server sends.
   {

@@ -269,9 +269,7 @@
         }
         @media (min-width: 48em) { .g-trust { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
         .g-trust strong { display: block; color: var(--color-text-primary); }
-        .g-trust__role { display: block; direction: ltr; unicode-bidi: isolate; text-align: end; font-family: "Poppins", var(--font-arabic); }
-        [dir="rtl"] .g-trust__role { text-align: right; }
-        .g-trust__name { font-family: "Poppins", var(--font-arabic); direction: ltr; unicode-bidi: isolate; }
+        .g-trust__role { display: block; }
 
         /* ---- Sent --------------------------------------------------- */
         .g-sent { min-block-size: 100svh; display: grid; align-content: center; text-align: center; }
@@ -610,7 +608,7 @@
           </div>
 
           <div class="g-trust">
-            <p><strong><bdi class="g-trust__name">Muhalab Basheir</bdi></strong> <bdi class="g-trust__role">Visual Communications Designer</bdi></p>
+            <p><strong>مهلب بشير</strong> <span class="g-trust__role">مصمم المحتوى البصري</span></p>
             <p><strong>نردّ خلال ساعتين في أوقات العمل</strong> من الأحد إلى الخميس</p>
             <p><strong>نعمل عن بُعد</strong> مع عملاء في الخليج ومصر</p>
           </div>

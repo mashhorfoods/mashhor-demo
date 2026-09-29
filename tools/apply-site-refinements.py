@@ -111,7 +111,7 @@ FAB = f"""{FAB_START}
 TEXT = [
     # Profile.
     ('<span data-lang-copy="en">Founder — brand and web design</span><span data-lang-copy="ar" lang="ar">المؤسس — تصميم الهوية والمواقع</span>',
-     '<span data-lang-copy="en">Visual Communications Designer</span><span data-lang-copy="ar" lang="ar">مصمم اتصال بصري</span>'),
+     '<span data-lang-copy="en">Visual Communications Designer</span><span data-lang-copy="ar" lang="ar">مصمم المحتوى البصري</span>'),
     ("Muhalab Salah", "Muhalab Basheir"),
     ("مهلب صلاح", "مهلب بشير"),
     # Hero: shorter, and it leaves something to discover.
@@ -128,10 +128,27 @@ SHARE_OLD = "https://zaokalyamamah.online/assets/share-card.jpg"
 ALT_OLD = '<meta property="og:image:alt" content="Pixora — your brand, your digital presence, one partner" />'
 SHARE = {
     "story.html": ("share-story.jpg", "Al Mada — one brand, four surfaces / هوية واحدة، أربع واجهات"),
-    "about.html": ("share-about.jpg", "Pixora — a remote studio for the Gulf and Egypt / استوديو يعمل عن بُعد في الخليج ومصر"),
+    "about.html": ("share-about.jpg", "Pixora — one team, your whole brand / فريق واحد لعلامتك كاملة"),
     "pricing.html": ("share-pricing.jpg", "Pixora pricing — every package and its price / كم يكلّف المشروع، وما الذي يغيّر السعر"),
 }
 HOME_CARD = ("share-home.jpg", "Pixora — علامتك. حضورك الرقمي. شريك واحد. Your brand, your digital presence, one partner.")
+
+# The site speaks as Pixora, the team: no "founder" anywhere. The contact
+# card keeps the name of the person you reach, in both languages.
+TEAM = [
+    ('<p class="c-verify__name">Muhalab Basheir</p>',
+     '<p class="c-verify__name"><span data-lang-copy="en">Muhalab Basheir</span><span data-lang-copy="ar" lang="ar">مهلب بشير</span></p>'),
+    # The founder's portfolio link: footer, contact section, and the list the site script renders.
+    ("""  { label: "Founder's portfolio", labelAr: 'أعمال المؤسس', href: 'https://muhalabsalah.github.io/muhalabsalah/' },\n""", ""),
+    ('\n              <li><a href="https://muhalabsalah.github.io/muhalabsalah/" target="_blank" rel="noopener noreferrer"><span data-lang-copy="en">Founder\'s portfolio</span><span data-lang-copy="ar" lang="ar">أعمال المؤسس</span><span class="u-visually-hidden"><span data-lang-copy="en"> (opens in a new tab)</span><span data-lang-copy="ar" lang="ar"> (يفتح في نافذة جديدة)</span></span></a></li>', ""),
+]
+TEAM_HOME = [
+    (',"founder":{"@type":"Person","name":"Muhalab Basheir"}', ""),
+]
+TEAM_TERMS = [
+    ("Pixora is a studio run by <strong>Muhalab Basheir</strong>, working remotely", "Pixora is a studio working remotely"),
+    ("بيكسورا استوديو يديره <strong>مهلب بشير</strong>، ويعمل عن بُعد", "بيكسورا استوديو يعمل عن بُعد"),
+]
 
 # Privacy: the campaign form (go.html → lead.php) does reach a server.
 PRIVACY = [
@@ -199,6 +216,16 @@ for name in PAGES:
         text = replace_all(text, [(ALT_OLD, f'<meta property="og:image:alt" content="{alt}" />')], name, required=True)
     if name == "privacy.html":
         text = replace_all(text, PRIVACY, name, required=True)
+    text = replace_all(text, TEAM[:1], name, required=True)
+    text = replace_all(text, TEAM[1:], name, required=False)
+    if name == "index.html":
+        text = replace_all(text, TEAM_HOME, name, required=True)
+        # The contact section's link to the founder's portfolio.
+        text, n = re.subn(r'\s*<li>\s*<a class="c-elsewhere__link" href="https://muhalabsalah\.github\.io/muhalabsalah/".*?</li>', "", text, count=1, flags=re.S)
+        if n != 1:
+            sys.exit("index.html: founder's portfolio link not found")
+    if name == "terms.html":
+        text = replace_all(text, TEAM_TERMS, name, required=True)
     text = clean_links(text)
     # Phones: the WhatsApp button is the one floating action. The supplied
     # "Start your project" bar, which came and went with the scroll, goes
@@ -217,6 +244,9 @@ for name in PAGES:
 
     path.write_text(text, encoding="utf-8")
 print(f"refinements: {len(PAGES)} pages")
+for n in PAGES:
+    if re.search(r"Founder's portfolio|Founder&#39;s|أعمال المؤسس|موقع المؤسس|muhalabsalah\.github\.io|\"founder\"|run by <strong>", (SITE / n).read_text(encoding="utf-8")):
+        sys.exit(f"refinements: {n} still refers to a founder")
 # The supplied generic preview card: every page now names its own.
 if any(SHARE_OLD in (SITE / n).read_text(encoding="utf-8") for n in PAGES):
     sys.exit("refinements: a page still uses share-card.jpg")
