@@ -99,6 +99,17 @@ HERO_WORK = '''<!-- HERO-WORK -->
               </a>'''
 
 
+PAGE_SLUGS = ["pricing", "about", "story", "privacy"]
+
+
+def clean_links(text):
+    text = text.replace("./index.html#", "/#").replace('"./index.html"', '"/"').replace("'./index.html'", "'/'")
+    for slug in PAGE_SLUGS:
+        text = text.replace(f"./{slug}.html", f"/{slug}")
+        text = text.replace(f"https://zaokalyamamah.online/{slug}.html", f"https://zaokalyamamah.online/{slug}")
+    return text
+
+
 def between(text, start, end, block):
     """Replace start…end with block, or return None if the markers are absent."""
     a, b = text.find(start), text.find(end)
@@ -140,6 +151,54 @@ for name in PAGES:
     for old, new in TEXT:
         text = text.replace(old, new)
 
+    # 5. Clean links: root-based and without ".html". Root-based matters most on
+    #    404.html, which is served at whatever wrong address was typed, so a
+    #    relative "./x" link there would point under that wrong address.
+    text = clean_links(text)
+
     if text != before:
         path.write_text(text, encoding="utf-8")
     print(f"{name}: {'updated' if text != before else 'already current'}")
+
+
+# 6. Everything that points at a page by its .html name follows it.
+sitemap = SITE / "sitemap.xml"
+text = sitemap.read_text(encoding="utf-8")
+updated = clean_links(text)
+if updated != text:
+    sitemap.write_text(updated, encoding="utf-8")
+print(f"sitemap.xml: {'updated' if updated != text else 'already current'}")
+
+# 7. .htaccess: old .html addresses redirect (301) to the clean ones, and the
+#    Content-Security-Policy lists the hash of every inline script as it is
+#    now — step 5 edits the site script, so its hash changes.
+import base64
+import hashlib
+
+htaccess = SITE / ".htaccess"
+text = htaccess.read_text(encoding="utf-8")
+hashes = []
+for name in PAGES + ["go.html"]:
+    page = (SITE / name).read_text(encoding="utf-8")
+    for body in re.findall(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>", page, re.S):
+        digest = "'sha256-" + base64.b64encode(hashlib.sha256(body.encode("utf-8")).digest()).decode() + "'"
+        if digest not in hashes:
+            hashes.append(digest)
+updated = re.sub(r"(script-src 'self' https://plausible\.io)(?: '[^']+')+", lambda m: m.group(1) + " " + " ".join(hashes), text)
+
+REDIRECTS = """  # Clean addresses: /pricing.html → /pricing, /index.html → /. THE_REQUEST
+  # is what the browser asked for, so the internal rewrite below (and the
+  # 404 page) can never loop back through these.
+  RewriteCond %{THE_REQUEST} \\s/+(.*/)?index\\.html[\\s?] [NC]
+  RewriteRule ^ /%1 [R=301,L]
+  RewriteCond %{THE_REQUEST} \\s/+([^\\s?]+?)\\.html[\\s?] [NC]
+  RewriteCond %1 !^404$
+  RewriteRule ^ /%1 [R=301,L]
+
+"""
+anchor = "  # Serve /story for /story.html"
+if "# Clean addresses:" not in updated and anchor in updated:
+    updated = updated.replace(anchor, REDIRECTS + anchor)
+if updated != text:
+    htaccess.write_text(updated, encoding="utf-8")
+print(f".htaccess: {'updated' if updated != text else 'already current'}")

@@ -55,8 +55,8 @@ function finish(int $status, array $body, bool $json, string $redirect): void
 }
 
 $base = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
-$sentUrl = $base . '/go.html#sent';
-$formUrl = $base . '/go.html?error=1#contact';
+$sentUrl = $base . '/go#sent';
+$formUrl = $base . '/go?error=1#contact';
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     header('Allow: POST');

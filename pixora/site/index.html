@@ -120,10 +120,10 @@ const SERVICE_LINKS = [
 const SECTIONS = [
   { id: 'home', label: 'Home', labelAr: 'الرئيسية' },
   { id: 'services', label: 'Services', labelAr: 'خدماتنا', children: SERVICE_LINKS },
-  { id: 'pricing', label: 'Pricing', labelAr: 'الأسعار', href: './pricing.html' },
-  { id: 'story', label: 'Story', labelAr: 'القصة', href: './story.html' },
+  { id: 'pricing', label: 'Pricing', labelAr: 'الأسعار', href: '/pricing' },
+  { id: 'story', label: 'Story', labelAr: 'القصة', href: '/story' },
   { id: 'process', label: 'Process', labelAr: 'آلية العمل', inNav: false, inMenu: true },
-  { id: 'about', label: 'About', labelAr: 'من نحن', href: './about.html' },
+  { id: 'about', label: 'About', labelAr: 'من نحن', href: '/about' },
   // Reached through the primary CTA rather than a sixth nav link, so the
   // header keeps one unambiguous conversion action (§11, §19). It still
   // appears in the footer quick links.
@@ -306,7 +306,7 @@ function resolveCrossPageAnchors() {
     link.setAttribute('href', `${HOME}#${id}`);
   });
 }
-const HOME = document.getElementById('home') ? '' : './index.html';
+const HOME = document.getElementById('home') ? '' : '/';
 function renderSurfaces() {
   document.querySelectorAll('[data-nav-render]').forEach((container) => {
     const kind = container.dataset.navRender;
@@ -3472,7 +3472,7 @@ if (document.readyState === 'loading') {
                second CTA: the section already has its packages below it and
                §11 of the CTA hierarchy allows one action per surface. -->
           <p class="c-detail__more" data-reveal>
-            <a class="c-link" href="./story.html">
+            <a class="c-link" href="/story">
               <span data-lang-copy="en">Read the story behind this</span><span data-lang-copy="ar" lang="ar">اقرأ القصة وراء ذلك</span>
               <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="u-flip-rtl">
                 <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="square" fill="none" />
@@ -4127,7 +4127,7 @@ if (document.readyState === 'loading') {
           <p class="c-footer__copyright">
             © <span class="c-footer__year" data-year>2026</span> Pixora.
             <span data-i18n="rights">All rights reserved.</span>
-            <a class="c-link c-footer__legal" href="./privacy.html"><span data-lang-copy="en">Privacy</span><span data-lang-copy="ar" lang="ar">الخصوصية</span></a>
+            <a class="c-link c-footer__legal" href="/privacy"><span data-lang-copy="en">Privacy</span><span data-lang-copy="ar" lang="ar">الخصوصية</span></a>
           </p>
           <!-- An anchor, not a button: it works without JavaScript, is
                keyboard-reachable for free, and the smooth scroll is the

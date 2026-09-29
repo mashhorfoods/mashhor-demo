@@ -122,10 +122,10 @@ const SERVICE_LINKS = [
 const SECTIONS = [
   { id: 'home', label: 'Home', labelAr: 'الرئيسية' },
   { id: 'services', label: 'Services', labelAr: 'خدماتنا', children: SERVICE_LINKS },
-  { id: 'pricing', label: 'Pricing', labelAr: 'الأسعار', href: './pricing.html' },
-  { id: 'story', label: 'Story', labelAr: 'القصة', href: './story.html' },
+  { id: 'pricing', label: 'Pricing', labelAr: 'الأسعار', href: '/pricing' },
+  { id: 'story', label: 'Story', labelAr: 'القصة', href: '/story' },
   { id: 'process', label: 'Process', labelAr: 'آلية العمل', inNav: false, inMenu: true },
-  { id: 'about', label: 'About', labelAr: 'من نحن', href: './about.html' },
+  { id: 'about', label: 'About', labelAr: 'من نحن', href: '/about' },
   // Reached through the primary CTA rather than a sixth nav link, so the
   // header keeps one unambiguous conversion action (§11, §19). It still
   // appears in the footer quick links.
@@ -308,7 +308,7 @@ function resolveCrossPageAnchors() {
     link.setAttribute('href', `${HOME}#${id}`);
   });
 }
-const HOME = document.getElementById('home') ? '' : './index.html';
+const HOME = document.getElementById('home') ? '' : '/';
 function renderSurfaces() {
   document.querySelectorAll('[data-nav-render]').forEach((container) => {
     const kind = container.dataset.navRender;
@@ -1144,7 +1144,7 @@ if (document.readyState === 'loading') {
   </head>
 
   <body>
-    <a class="c-skip-link" href="./index.html#main">Skip to content</a>
+    <a class="c-skip-link" href="/#main">Skip to content</a>
 
     <!-- =================================================================
          HEADER — global component (§24). Identical markup serves every
@@ -1156,7 +1156,7 @@ if (document.readyState === 'loading') {
         <div class="c-header__zone">
           <a
             class="c-header__brand"
-            href="./index.html#home"
+            href="/#home"
             aria-label="Pixora, Digital Agency — home"
             data-i18n-label="brandHome"
           >
@@ -1180,9 +1180,9 @@ if (document.readyState === 'loading') {
                navigation-map.js on boot and on language change. A test
                asserts the seed and the map agree. -->
           <ul class="c-nav__list" data-nav-render="nav">
-            <li><a class="c-nav__link" href="./index.html#home" data-nav-link>Home</a></li>
-            <li><a class="c-nav__link" href="./index.html#services" data-nav-link>Services</a></li>
-            <li><a class="c-nav__link" href="./index.html#process" data-nav-link>Process</a></li>
+            <li><a class="c-nav__link" href="/#home" data-nav-link>Home</a></li>
+            <li><a class="c-nav__link" href="/#services" data-nav-link>Services</a></li>
+            <li><a class="c-nav__link" href="/#process" data-nav-link>Process</a></li>
           </ul>
         </nav>
 
@@ -1212,7 +1212,7 @@ if (document.readyState === 'loading') {
             </button>
           </div>
 
-          <a class="c-btn c-btn--primary c-header__cta" href="./index.html#contact" data-cta-link>
+          <a class="c-btn c-btn--primary c-header__cta" href="/#contact" data-cta-link>
             <span data-cta-label>Start Your Project</span>
             <svg
               class="c-btn__icon u-flip-rtl"
@@ -1266,7 +1266,7 @@ if (document.readyState === 'loading') {
         <div class="c-drawer__foot" style="--i: 5">
           <a
             class="c-btn c-btn--primary c-btn--lg c-btn--block"
-            href="./index.html#contact"
+            href="/#contact"
             data-cta-link
           >
             <span data-cta-label>Start Your Project</span>
@@ -1337,16 +1337,16 @@ if (document.readyState === 'loading') {
       </p>
 
       <nav class="c-notfound__links" aria-label="Main destinations">
-        <a class="c-btn c-btn--primary" href="./index.html">
+        <a class="c-btn c-btn--primary" href="/">
           <span data-lang-copy="en">Go to the homepage</span><span data-lang-copy="ar" lang="ar">إلى الصفحة الرئيسية</span>
         </a>
-        <a class="c-link" href="./index.html#services">
+        <a class="c-link" href="/#services">
           <span data-lang-copy="en">Services</span><span data-lang-copy="ar" lang="ar">خدماتنا</span>
         </a>
-        <a class="c-link" href="./story.html">
+        <a class="c-link" href="/story">
           <span data-lang-copy="en">Story</span><span data-lang-copy="ar" lang="ar">القصة</span>
         </a>
-        <a class="c-link" href="./index.html#contact">
+        <a class="c-link" href="/#contact">
           <span data-lang-copy="en">Contact</span><span data-lang-copy="ar" lang="ar">تواصل معنا</span>
         </a>
       </nav>
@@ -1417,7 +1417,7 @@ if (document.readyState === 'loading') {
       <div class="l-container">
         <div class="c-footer__top" data-reveal-group>
           <div class="c-footer__brand">
-            <a class="c-header__brand" href="./index.html#home"
+            <a class="c-header__brand" href="/#home"
               aria-label="Pixora, Digital Agency — home" data-i18n-label="brandHome">
               <span class="c-brand" aria-hidden="true">
                 <span class="c-brand__word">PI<span class="c-brand__accent">X</span>ORA</span>
@@ -1430,27 +1430,27 @@ if (document.readyState === 'loading') {
           <nav class="c-footer__group" aria-label="Quick links" data-i18n-label="footerNav">
             <h2 class="t-label c-footer__heading" data-i18n="footerNav">Quick links</h2>
             <ul class="c-footer__list" data-nav-render="footer">
-              <li><a class="c-link" href="./index.html#home" data-nav-link>Home</a></li>
-              <li><a class="c-link" href="./index.html#services" data-nav-link>Services</a></li>
-              <li><a class="c-link" href="./index.html#process" data-nav-link>Process</a></li>
-              <li><a class="c-link" href="./index.html#contact" data-nav-link>Contact</a></li>
+              <li><a class="c-link" href="/#home" data-nav-link>Home</a></li>
+              <li><a class="c-link" href="/#services" data-nav-link>Services</a></li>
+              <li><a class="c-link" href="/#process" data-nav-link>Process</a></li>
+              <li><a class="c-link" href="/#contact" data-nav-link>Contact</a></li>
             </ul>
           </nav>
 
           <nav class="c-footer__group" aria-label="Services" data-i18n-label="footerServices">
             <h2 class="t-label c-footer__heading" data-i18n="footerServices">Services</h2>
             <ul class="c-footer__list" data-nav-render="services">
-              <li><a class="c-link" href="./index.html#branding" data-nav-link><span data-lang-copy="en">Branding &amp; Design</span><span data-lang-copy="ar" lang="ar">الهوية والتصميم</span></a></li>
-              <li><a class="c-link" href="./index.html#websites" data-nav-link><span data-lang-copy="en">Websites</span><span data-lang-copy="ar" lang="ar">المواقع الإلكترونية</span></a></li>
-              <li><a class="c-link" href="./index.html#social" data-nav-link><span data-lang-copy="en">Social Media Management</span><span data-lang-copy="ar" lang="ar">إدارة وسائل التواصل</span></a></li>
-              <li><a class="c-link" href="./index.html#marketing" data-nav-link><span data-lang-copy="en">Digital Marketing &amp; Advertising</span><span data-lang-copy="ar" lang="ar">التسويق الرقمي والإعلانات</span></a></li>
-              <li><a class="c-link" href="./index.html#integrated" data-nav-link><span data-lang-copy="en">Integrated Digital Solutions</span><span data-lang-copy="ar" lang="ar">الحلول الرقمية المتكاملة</span></a></li>
+              <li><a class="c-link" href="/#branding" data-nav-link><span data-lang-copy="en">Branding &amp; Design</span><span data-lang-copy="ar" lang="ar">الهوية والتصميم</span></a></li>
+              <li><a class="c-link" href="/#websites" data-nav-link><span data-lang-copy="en">Websites</span><span data-lang-copy="ar" lang="ar">المواقع الإلكترونية</span></a></li>
+              <li><a class="c-link" href="/#social" data-nav-link><span data-lang-copy="en">Social Media Management</span><span data-lang-copy="ar" lang="ar">إدارة وسائل التواصل</span></a></li>
+              <li><a class="c-link" href="/#marketing" data-nav-link><span data-lang-copy="en">Digital Marketing &amp; Advertising</span><span data-lang-copy="ar" lang="ar">التسويق الرقمي والإعلانات</span></a></li>
+              <li><a class="c-link" href="/#integrated" data-nav-link><span data-lang-copy="en">Integrated Digital Solutions</span><span data-lang-copy="ar" lang="ar">الحلول الرقمية المتكاملة</span></a></li>
             </ul>
           </nav>
 
           <div class="c-footer__action">
             <h2 class="t-label c-footer__heading" data-i18n="footerStart">Start</h2>
-            <a class="c-btn c-btn--primary" href="./index.html#contact" data-cta-link>
+            <a class="c-btn c-btn--primary" href="/#contact" data-cta-link>
               <span data-cta-label>Start Your Project</span>
               <svg class="c-btn__icon u-flip-rtl" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                 <path d="M7 17 17 7M8 7h9v9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" />
@@ -1476,14 +1476,14 @@ if (document.readyState === 'loading') {
           <p class="c-footer__copyright">
             © <span class="c-footer__year" data-year>2026</span> Pixora.
             <span data-i18n="rights">All rights reserved.</span>
-            <a class="c-link c-footer__legal" href="./privacy.html"><span data-lang-copy="en">Privacy</span><span data-lang-copy="ar" lang="ar">الخصوصية</span></a>
+            <a class="c-link c-footer__legal" href="/privacy"><span data-lang-copy="en">Privacy</span><span data-lang-copy="ar" lang="ar">الخصوصية</span></a>
           </p>
           <!-- An anchor, not a button: it works without JavaScript, is
                keyboard-reachable for free, and the smooth scroll is the
                document's own (already disabled under reduced motion).
                The chevron points UP — not an inline direction — so it
                deliberately carries no u-flip-rtl. -->
-          <a class="c-link c-footer__top-link" href="./index.html#home">
+          <a class="c-link c-footer__top-link" href="/#home">
             <span data-i18n="backToTop">Back to top</span>
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="square" />

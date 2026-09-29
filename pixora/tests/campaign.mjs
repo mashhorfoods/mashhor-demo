@@ -243,7 +243,7 @@ for (const kind of Object.keys(VIEWPORTS)) {
   r = await fetch(`${BASE}/lead.php`);
   check(r.status === 405, 'GET is refused');
   r = await fetch(`${BASE}/lead.php`, { method: 'POST', body: new URLSearchParams({ name: 'NoJS', whatsapp: '+97455512345', location: 'الدوحة', service: 'branding' }), redirect: 'manual' });
-  check(r.status === 303 && /go\.html#sent$/.test(r.headers.get('location') || ''), 'no-JS post redirects to the confirmation', r.headers.get('location'));
+  check(r.status === 303 && /\/go#sent$/.test(r.headers.get('location') || ''), 'no-JS post redirects to the confirmation', r.headers.get('location'));
 }
 
 /* ---- 6. The existing site is untouched and still works ------------------- */
@@ -282,6 +282,48 @@ for (const kind of ['mobile', 'desktop']) {
     const href = await fab.getAttribute('href');
     check(/wa\.me\/249962672192/.test(href) && decodeURIComponent(href).includes('مرحبًا بيكسورا'), 'floating WhatsApp message follows the Arabic language choice');
   }
+  await context.close();
+}
+
+/* ---- 8. Links: clean, root-based, and every one of them lands -------------- */
+{
+  const context = await browser.newContext(VIEWPORTS.desktop);
+  await context.route('https://plausible.io/**', (route) => route.fulfill({ status: 200, body: '' }));
+  const p = await context.newPage();
+  const internal = new Map(); // href → first page it was seen on
+  const pages = ['/', '/pricing', '/about', '/story', '/privacy', '/go', '/404.html'];
+  for (const url of pages) {
+    const res = await p.goto(`${BASE}${url}`);
+    await p.waitForTimeout(150);
+    check(res.ok() || url === '/404.html', `${url} is served at its clean address`);
+    // After the site script has rendered the menus, so its links count too.
+    const hrefs = await p.$$eval('a[href], link[rel=canonical], meta[property="og:url"]', (els) => els.map((e) => e.getAttribute('href') || e.getAttribute('content')));
+    for (const href of hrefs) {
+      if (/^(https?:|mailto:|tel:)/.test(href) && !href.includes('zaokalyamamah.online')) continue;
+      if (href.startsWith('#')) {
+        const id = decodeURIComponent(href.slice(1));
+        const ok = await p.evaluate((i) => Boolean(document.getElementById(i)), id);
+        if (!ok) check(false, `${url}: in-page link ${href} has a target`);
+        continue;
+      }
+      if (!internal.has(href)) internal.set(href, url);
+    }
+  }
+  const unclean = [...internal.keys()].filter((h) => /\.html\b/.test(h) || h.startsWith('./'));
+  check(unclean.length === 0, 'no link ends in .html or is relative', unclean.join(' '));
+  for (const [href, from] of internal) {
+    const target = new URL(href, `${BASE}/`);
+    const path = target.pathname.replace('https://zaokalyamamah.online', '');
+    const res = await p.goto(`${BASE}${path}`);
+    let ok = res.ok();
+    if (ok && target.hash.length > 1) {
+      await p.waitForTimeout(50);
+      ok = await p.evaluate((i) => Boolean(document.getElementById(i)), decodeURIComponent(target.hash.slice(1)));
+    }
+    check(ok, `link ${href} (from ${from}) lands`);
+  }
+  const sitemap = readFileSync(path.join(here, '..', 'site', 'sitemap.xml'), 'utf8');
+  check(!sitemap.includes('.html'), 'sitemap lists clean addresses');
   await context.close();
 }
 

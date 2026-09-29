@@ -28,7 +28,7 @@
   const CONFIG = {
     // The approved business number, digits only, as in the main site's links.
     whatsapp: '249962672192',
-    endpoint: './lead.php',
+    endpoint: '/lead.php',
     // Optional: campaign code (lower case) → the words a customer would use. When a code is
     // listed here, the WhatsApp greeting mentions it ("بخصوص عرض الإطلاق").
     // Unlisted codes never appear in the message.
