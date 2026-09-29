@@ -97,6 +97,10 @@ TEXT = [
      '<span data-lang-copy="en">Visual Communications Designer</span><span data-lang-copy="ar" lang="ar">مصمم اتصال بصري</span>'),
     ("Muhalab Salah", "Muhalab Basheir"),
     ("مهلب صلاح", "مهلب بشير"),
+    # Link preview: the homepage card (tools/share-cards/home.html).
+    ("https://zaokalyamamah.online/assets/share-card.jpg", "https://zaokalyamamah.online/assets/share-home.jpg"),
+    ('<meta property="og:image:alt" content="Pixora — your brand, your digital presence, one partner" />',
+     '<meta property="og:image:alt" content="Pixora — علامتك. حضورك الرقمي. شريك واحد. Your brand, your digital presence, one partner." />'),
     # Hero: shorter, and it leaves something to discover.
     ('''<p class="t-body-lg c-hero__lead"><span data-lang-copy="en">A remote studio for the Gulf and Egypt.
               We build brands, websites and digital experiences —

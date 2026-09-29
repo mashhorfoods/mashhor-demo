@@ -1,0 +1,18 @@
+@font-face{font-family:Cairo;src:url(../../source/assets/fonts/cairo-arabic-var.woff2) format('woff2');font-weight:200 1000}
+@font-face{font-family:Poppins;src:url(../../source/assets/fonts/poppins-latin-500.woff2) format('woff2');font-weight:500}
+@font-face{font-family:Poppins;src:url(../../source/assets/fonts/poppins-latin-600.woff2) format('woff2');font-weight:600}
+@font-face{font-family:Poppins;src:url(../../source/assets/fonts/poppins-latin-700.woff2) format('woff2');font-weight:700}
+*{box-sizing:border-box;margin:0}
+html,body{width:1200px;height:630px;overflow:hidden}
+body{background:#141414;color:#fff;font-family:Cairo,Poppins,sans-serif;position:relative}
+.glow{position:absolute;inset:0;background:radial-gradient(600px 420px at 78% 38%,rgba(244,209,63,.18),transparent 70%),radial-gradient(500px 200px at 70% 105%,rgba(244,209,63,.14),transparent 70%)}
+.brand{font-family:Poppins;font-weight:700;font-size:40px;letter-spacing:.02em;line-height:1}
+.brand b{color:#f4d13f}
+.tag{font-family:Poppins;font-weight:500;font-size:13px;letter-spacing:.3em;color:rgba(255,255,255,.5);margin-top:8px;text-transform:uppercase}
+.acc{color:#f4d13f}
+.pill{display:inline-flex;align-items:center;gap:10px;height:54px;padding:0 30px;border-radius:999px;background:#f4d13f;color:#202020;font-weight:700;font-size:22px}
+.pill--ghost{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.3)}
+.frame{border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.12);background:#0e0e0e;box-shadow:0 30px 60px -20px rgba(0,0,0,.7)}
+.frame img{display:block;width:100%;height:100%;object-fit:cover}
+.meta{display:flex;gap:26px;font-size:18px;color:rgba(255,255,255,.72);font-weight:600}
+.meta span::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#f4d13f;margin-inline-end:10px;vertical-align:middle}
