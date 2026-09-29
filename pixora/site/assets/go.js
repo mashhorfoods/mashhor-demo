@@ -455,6 +455,9 @@
   }
 
   function boot() {
+    // Tell the site's reveal failsafe (inline in <head>) that scripts are
+    // running, so it leaves the .js class — and the views — in place.
+    document.documentElement.setAttribute('data-motion-ready', '');
     const params = new URLSearchParams(location.search);
     // ?v=work|contact deep-links a view for ad platforms that drop fragments.
     const requested = routeFromHash() || ROUTES[params.get('v') || ''] || 'home';

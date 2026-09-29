@@ -1,5 +1,8 @@
 # Pixora
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /lead.php
+Disallow: /_leads/
 
 Sitemap: https://zaokalyamamah.online/sitemap.xml

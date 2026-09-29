@@ -247,7 +247,7 @@ for (const kind of Object.keys(VIEWPORTS)) {
 }
 
 /* ---- 6. The existing site is untouched and still works ------------------- */
-for (const page of ['index.html', 'pricing.html', 'about.html', 'story.html', 'privacy.html', '404.html']) {
+for (const page of ['index.html', 'pricing.html', 'about.html', 'story.html', 'privacy.html', 'terms.html', 'accessibility.html', '404.html']) {
   const context = await browser.newContext(VIEWPORTS.desktop);
   await context.route('https://plausible.io/**', (route) => route.fulfill({ status: 200, body: '' }));
   const p = await context.newPage();
@@ -291,7 +291,7 @@ for (const kind of ['mobile', 'desktop']) {
   await context.route('https://plausible.io/**', (route) => route.fulfill({ status: 200, body: '' }));
   const p = await context.newPage();
   const internal = new Map(); // href → first page it was seen on
-  const pages = ['/', '/pricing', '/about', '/story', '/privacy', '/go', '/404.html'];
+  const pages = ['/', '/pricing', '/about', '/story', '/privacy', '/terms', '/accessibility', '/go', '/404.html'];
   for (const url of pages) {
     const res = await p.goto(`${BASE}${url}`);
     await p.waitForTimeout(150);
@@ -300,6 +300,7 @@ for (const kind of ['mobile', 'desktop']) {
     const hrefs = await p.$$eval('a[href], link[rel=canonical], meta[property="og:url"]', (els) => els.map((e) => e.getAttribute('href') || e.getAttribute('content')));
     for (const href of hrefs) {
       if (/^(https?:|mailto:|tel:)/.test(href) && !href.includes('zaokalyamamah.online')) continue;
+      if (href === '#') continue; // script-handled controls (e.g. the quiz's share link)
       if (href.startsWith('#')) {
         const id = decodeURIComponent(href.slice(1));
         const ok = await p.evaluate((i) => Boolean(document.getElementById(i)), id);

@@ -1,7 +1,9 @@
 # Pixora — website + campaign landing
 
-`site/` is the deployable web root, exactly as supplied in `pixora-site.zip`,
-plus the campaign experience described below. Upload the **contents** of
+`site/` is the deployable web root: the latest supplied version of the site
+(`pixora-site-61f4ae2`), plus the campaign experience, lead endpoint and admin
+page described below, with the refinements applied by
+`tools/apply-site-refinements.py`. Upload the **contents** of
 `site/` to `public_html` on Hostinger (the existing `.htaccess` already serves
 `/go` for `go.html`).
 
