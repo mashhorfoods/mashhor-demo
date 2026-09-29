@@ -103,6 +103,18 @@ The site shows no sequence numbering (01, 02/07 …): the rule is in the
 refinements stylesheet; prices, counts and the brand challenge's steps keep
 their numbers. A test fails if an "01"-style label shows on any page.
 
+## Image viewer
+
+Every work image (slideshows, the homepage gallery, the work page, Story and
+About photos) opens up close in a viewer (`overlay/assets/viewer.js`, styles
+in `tools/motion.py` `VIEWER_CSS`): it grows out of the image tapped and
+shrinks back into it. Zoom with the + / − buttons, the wheel, a pinch or a
+double tap (up to 4×); drag to look around; move between the images of the
+same section with the arrows, a swipe or the arrow keys (mirrored in Arabic);
+Escape or a tap beside the image closes it. Images inside links or buttons
+keep their link. Which images browse together is `GROUPS` in viewer.js.
+Slideshows and the gallery pause while it is open.
+
 ## Ad URLs
 
 Use standard UTM parameters. Everything is optional; the page works with none.

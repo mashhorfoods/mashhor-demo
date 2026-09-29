@@ -32,6 +32,8 @@
   let cursorX = null;
   let cursorY = null;
   document.addEventListener('pointermove', (e) => { cursorX = e.clientX; cursorY = e.clientY; }, { passive: true });
+  // The image viewer (viewer.js) is open: nothing behind it moves.
+  const viewing = () => document.documentElement.classList.contains('is-viewing');
   const reachFor = (el, pause, resume) => {
     el.addEventListener('wheel', (e) => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) pause(4000); }, { passive: true });
     let hovering = false;
@@ -92,7 +94,7 @@
     const run = (delay = INTERVAL) => {
       clearTimeout(timer);
       box.classList.remove('is-playing');
-      if (fits || reduce.matches || !visible || paused || document.hidden) return;
+      if (fits || reduce.matches || !visible || paused || document.hidden || viewing()) return;
       box.style.setProperty('--slides-interval', `${delay}ms`);
       void bar.offsetWidth; // restart the progress line
       box.classList.add('is-playing');
@@ -128,6 +130,7 @@
       run(FIRST);
     }, { threshold: 0.25 }).observe(track);
     document.addEventListener('visibilitychange', () => run(FIRST));
+    document.addEventListener('viewerclose', () => run(FIRST));
   });
 
   if (reduce.matches) return;
@@ -217,6 +220,7 @@
       const step = (now) => {
         raf = 0;
         if (!visible || document.hidden) { release(); return; }
+        if (viewing()) { release(); return; } // resumes on 'viewerclose'
         const dt = last ? Math.min(now - last, 50) : 0;
         last = now;
         if (now > heldUntil && max > 4) {
@@ -245,6 +249,7 @@
       new MutationObserver(measure).observe(document.documentElement, { attributes: true, attributeFilter: ['dir'] });
       new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; start(); }, { threshold: 0.2 }).observe(gallery);
       document.addEventListener('visibilitychange', start);
+      document.addEventListener('viewerclose', start);
       measure();
       dir = rtl ? -1 : 1;
     });

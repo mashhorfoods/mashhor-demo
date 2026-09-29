@@ -405,6 +405,23 @@ for (const kind of ['mobile', 'desktop']) {
   }
   check(numbered.length === 0, 'no sequence numbering on any page', numbered.join(' | '));
 
+  // Image viewer: open, zoom, pan, next, Escape back to the thumbnail.
+  await p.goto(`${BASE}/services/branding`, { waitUntil: 'networkidle' });
+  await p.$eval('.c-slides', (e) => e.scrollIntoView({ block: 'center' })); await p.waitForTimeout(400);
+  await p.click('.c-slides__slide:nth-child(2) img'); await p.waitForTimeout(700);
+  const v = () => p.evaluate(() => ({ open: document.querySelector('.c-viewer')?.open, src: document.querySelector('.c-viewer__img')?.src.split('/').pop(), tf: document.querySelector('.c-viewer__img')?.style.transform, cap: document.querySelector('.c-viewer__caption')?.textContent }));
+  const v1 = await v();
+  check(v1.open && v1.src === 'work-1.webp' && ['Monogram, embossed', 'شعار مطبوع بارزًا'].includes(v1.cap), 'viewer: a slideshow image opens full screen with its caption', JSON.stringify(v1));
+  await p.click('.c-viewer [data-v="in"]'); await p.waitForTimeout(400);
+  check(/scale\(1\.6\)/.test((await v()).tf), 'viewer: zoom in');
+  const fwd = (await p.evaluate(() => document.documentElement.dir)) === 'rtl' ? 'ArrowLeft' : 'ArrowRight';
+  await p.keyboard.press('0'); await p.keyboard.press(fwd); await p.waitForTimeout(700);
+  check((await v()).src === 'work-2.webp', 'viewer: next image with the arrow key (mirrored in Arabic)');
+  await p.keyboard.press('Escape'); await p.waitForTimeout(600);
+  const back = await p.evaluate(() => ({ open: document.querySelector('.c-viewer').open, focus: document.activeElement.getAttribute('src') }));
+  check(!back.open && back.focus === '/assets/work-2.webp', 'viewer: Escape closes it and focus returns to the image', JSON.stringify(back));
+  check(await p.$$eval('a img.is-zoomable', (els) => els.length) === 0, 'viewer: images that are links stay links');
+
   // /go shows one view even when every inline script is blocked (a CDN that
   // rewrites them breaks their CSP hashes): its own script sets html.js.
   const strict = await browser.newContext(VIEWPORTS.desktop);

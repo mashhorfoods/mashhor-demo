@@ -57,6 +57,31 @@ SPARKS = [  # (circle as supplied, x, y, diameter, slow)
     ('<circle class="c-orbit__spark" cx="90" cy="48" r="0.9" />', 90, 48, 1.8, False),
     ('<circle class="c-orbit__spark c-orbit__spark--slow" cx="52" cy="22" r="0.7" />', 52, 22, 1.4, True),
 ]
+VIEWER_CSS = """
+/* Image viewer (overlay/assets/viewer.js). */
+.is-zoomable{cursor:zoom-in}
+.is-zoomable:focus-visible{outline:2px solid var(--color-accent);outline-offset:3px}
+html.is-viewing{overflow:hidden}
+.c-viewer{--v-top:clamp(64px,9vh,96px);--v-side:clamp(12px,7vw,112px);--v-bottom:clamp(132px,18vh,160px);position:fixed;inset:0;inline-size:100%;block-size:100%;max-inline-size:none;max-block-size:none;margin:0;padding:0;border:0;overflow:hidden;background-color:rgba(12,12,12,0.94);color:var(--color-text-primary)}
+.c-viewer::backdrop{background-color:rgba(12,12,12,0.5);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.c-viewer__stage{position:absolute;inset:0;display:grid;place-items:center;padding:var(--v-top) var(--v-side) var(--v-bottom);touch-action:none;user-select:none}
+.c-viewer.is-zoomed .c-viewer__stage{cursor:grab}
+.c-viewer.is-zoomed .c-viewer__stage:active{cursor:grabbing}
+.c-viewer__img{display:block;max-inline-size:calc(100vw - var(--v-side) * 2);max-block-size:calc(100dvh - var(--v-top) - var(--v-bottom));object-fit:contain;border-radius:var(--radius-md);box-shadow:0 40px 90px -40px rgba(0,0,0,0.9);transform-origin:center;will-change:transform;-webkit-user-drag:none}
+.c-viewer__caption{position:absolute;inset-inline:0;inset-block-end:calc(84px + env(safe-area-inset-bottom));margin:0;padding-inline:var(--space-24);text-align:center;font-size:var(--text-body-sm);color:var(--color-text-secondary);pointer-events:none}
+.c-viewer__btn{display:inline-grid;place-items:center;inline-size:48px;block-size:48px;border:var(--border-width) solid rgba(255,255,255,0.18);border-radius:var(--radius-pill);background-color:rgba(24,24,24,0.72);color:var(--color-text-primary);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);cursor:pointer;transition:border-color var(--duration-fast) var(--ease-standard),color var(--duration-fast) var(--ease-standard),opacity var(--duration-fast) var(--ease-standard)}
+.c-viewer__btn:hover,.c-viewer__btn:focus-visible{border-color:var(--color-border-accent);color:var(--color-accent)}
+.c-viewer__btn:disabled{opacity:0.35;cursor:default}
+.c-viewer__btn[hidden]{display:none}
+.c-viewer__btn svg{inline-size:20px;block-size:20px}
+.c-viewer__close{position:absolute;inset-block-start:calc(16px + env(safe-area-inset-top));inset-inline-end:16px}
+.c-viewer__nav{position:absolute;inset-block-start:50%;translate:0 -50%}
+.c-viewer__prev{inset-inline-start:16px}
+.c-viewer__next{inset-inline-end:16px}
+.c-viewer__zoom{position:absolute;inset-block-end:calc(20px + env(safe-area-inset-bottom));inset-inline-start:50%;translate:-50% 0;display:flex;gap:var(--space-12)}
+[dir="rtl"] .c-viewer__zoom{translate:50% 0}
+@media (max-width:47.99em){.c-viewer__nav{inset-block-start:auto;inset-block-end:calc(20px + env(safe-area-inset-bottom));translate:none}}
+"""
 SPARK_CSS = """
 /* Orbit points (see motion.py SPARKS): turn round the drawing's centre, 52 48. */
 .m-spin{display:none}
@@ -92,7 +117,7 @@ def build(site: pathlib.Path):
             continue
         text = path.read_text(encoding="utf-8")
         # One shared stylesheet for every page, so the spark rules go everywhere.
-        new = inject_css(text, CSS + SPARK_CSS)
+        new = inject_css(text, CSS + SPARK_CSS + VIEWER_CSS)
         if path.name == "index.html":
             new = sparks(new)
         if new != text:
