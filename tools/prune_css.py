@@ -30,8 +30,10 @@ DEAD = {
     "c-counter", "c-track",
     # The orbit's SVG sparks, now HTML elements (motion.py SPARKS).
     "c-orbit__spark", "c-orbit__spark--slow",
+    # The phones' floating "Start your project" bar (removed; WhatsApp stays).
+    "c-phone-cta",
 }
-GROUPING = ("@media", "@supports", "@container", "@layer", "@document")
+GROUPING = ("@media", "@supports", "@container", "@layer", "@document", "@starting-style")
 
 
 def _block_end(css, i):
