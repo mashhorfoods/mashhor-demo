@@ -20,11 +20,37 @@
 
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
   const fine = window.matchMedia('(pointer: fine)');
+  /* Real interaction, shared by the slideshows and the galleries --------- */
+  // What pauses a moving strip is a person reaching for it: a sideways wheel
+  // or trackpad swipe, a mouse that actually moves over it, keyboard focus.
+  // Scrolling the page past it is none of these — a vertical wheel over it,
+  // or the page carrying it under a still cursor, must not stop it.
+  // (A finger or trackpad dragging the strip itself is caught by each
+  // strip from its own scroll position.)
+  // Where the cursor last was on screen: the page scrolling under a still
+  // cursor fires pointer events at the same screen point; a hand does not.
+  let cursorX = null;
+  let cursorY = null;
+  document.addEventListener('pointermove', (e) => { cursorX = e.clientX; cursorY = e.clientY; }, { passive: true });
+  const reachFor = (el, pause, resume) => {
+    el.addEventListener('wheel', (e) => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) pause(4000); }, { passive: true });
+    let hovering = false;
+    el.addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse' || hovering || (e.clientX === cursorX && e.clientY === cursorY)) return;
+      hovering = true;
+      pause();
+    }, { passive: true });
+    el.addEventListener('pointerleave', () => { if (hovering) { hovering = false; resume(); } });
+    el.addEventListener('focusin', (e) => { if (e.target.matches(':focus-visible')) pause(); });
+    el.addEventListener('focusout', (e) => { if (!el.contains(e.relatedTarget)) resume(); });
+  };
+
   /* 0. Slideshows of work (service pages) -------------------------------- */
   // They work under reduced motion too — arrows, swipe and keys — they just
   // do not advance on their own. Without this script the strip still scrolls.
   document.querySelectorAll('[data-slides]').forEach((box) => {
-    const INTERVAL = 4500;
+    const FIRST = 1200; // the first step comes soon after it scrolls into view
+    const INTERVAL = 4000;
     const track = box.querySelector('.c-slides__track');
     const slides = [...track.children];
     const bar = box.querySelector('[data-slides-bar]');
@@ -42,9 +68,11 @@
       return best;
     };
     const atEnd = () => track.scrollWidth - track.clientWidth - Math.abs(track.scrollLeft) < 4;
+    let movedAt = 0; // when this script last moved the strip
     const go = (i) => {
       const t = track.getBoundingClientRect();
       const r = slides[i].getBoundingClientRect();
+      movedAt = performance.now();
       track.scrollBy({ left: rtl() ? r.right - t.right : r.left - t.left, behavior: reduce.matches ? 'auto' : 'smooth' });
     };
     const step = (dir) => {
@@ -55,46 +83,51 @@
 
     let timer = 0;
     let visible = false;
-    let held = false;
-    let resume = 0;
+    let paused = false;
+    let resumeAt = 0;
     // When every slide already fits, there is nothing to move: no controls.
-    let fits = false;
-    const measure = () => {
-      fits = track.scrollWidth - track.clientWidth < 4;
-      bar.hidden = fits;
-    };
-    const play = () => {
+    let fits = null;
+    // Schedule the next step in `delay` ms (the progress line fills over it),
+    // or stop when it should not move.
+    const run = (delay = INTERVAL) => {
       clearTimeout(timer);
       box.classList.remove('is-playing');
-      if (fits || reduce.matches || !visible || held || document.hidden) return;
+      if (fits || reduce.matches || !visible || paused || document.hidden) return;
+      box.style.setProperty('--slides-interval', `${delay}ms`);
       void bar.offsetWidth; // restart the progress line
       box.classList.add('is-playing');
-      timer = setTimeout(() => { step(1); play(); }, INTERVAL);
+      timer = setTimeout(() => { step(1); run(); }, delay);
     };
-    const hold = (ms) => {
-      held = true;
-      play();
-      clearTimeout(resume);
-      if (ms) resume = setTimeout(() => { held = false; play(); }, ms);
+    const resume = () => { clearTimeout(resumeAt); paused = false; run(FIRST); };
+    const pause = (ms) => {
+      paused = true;
+      run();
+      clearTimeout(resumeAt);
+      if (ms) resumeAt = setTimeout(resume, ms);
     };
 
-    box.style.setProperty('--slides-interval', `${INTERVAL}ms`);
-    new ResizeObserver(() => { measure(); play(); }).observe(track);
-    box.querySelector('[data-slides-prev]').addEventListener('click', () => { step(-1); play(); });
-    box.querySelector('[data-slides-next]').addEventListener('click', () => { step(1); play(); });
+    new ResizeObserver(() => {
+      const was = fits;
+      fits = track.scrollWidth - track.clientWidth < 4;
+      bar.hidden = fits;
+      if (fits !== was) run(FIRST);
+    }).observe(track);
+    box.querySelector('[data-slides-prev]').addEventListener('click', () => { step(-1); run(); });
+    box.querySelector('[data-slides-next]').addEventListener('click', () => { step(1); run(); });
     track.addEventListener('keydown', (e) => {
       const fwd = rtl() ? 'ArrowLeft' : 'ArrowRight';
       const back = rtl() ? 'ArrowRight' : 'ArrowLeft';
-      if (e.key === fwd || e.key === back) { e.preventDefault(); step(e.key === fwd ? 1 : -1); }
+      if (e.key === fwd || e.key === back) { e.preventDefault(); step(e.key === fwd ? 1 : -1); run(); }
     });
-    track.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') hold(0); });
-    track.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') { held = false; play(); } });
-    track.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse') hold(6000); }, { passive: true });
-    track.addEventListener('wheel', () => hold(5000), { passive: true });
-    box.addEventListener('focusin', () => hold(0));
-    box.addEventListener('focusout', (e) => { if (!box.contains(e.relatedTarget)) { held = false; play(); } });
-    new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; play(); }, { threshold: 0.5 }).observe(track);
-    document.addEventListener('visibilitychange', play);
+    reachFor(box, pause, resume);
+    // A sideways scroll this script did not start is a person swiping it.
+    track.addEventListener('scroll', () => { if (performance.now() - movedAt > 900) pause(5000); }, { passive: true });
+    new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting === visible) return;
+      visible = entry.isIntersecting;
+      run(FIRST);
+    }, { threshold: 0.25 }).observe(track);
+    document.addEventListener('visibilitychange', () => run(FIRST));
   });
 
   if (reduce.matches) return;
@@ -189,10 +222,14 @@
         if (now > heldUntil && max > 4) {
           const lo = rtl ? -max : 0;
           const hi = rtl ? 0 : max;
-          if (pos === null || Math.abs(pos - gallery.scrollLeft) > 2) pos = gallery.scrollLeft;
+          // Moved by someone else (a finger, a trackpad): let them, then carry on.
+          if (pos !== null && Math.abs(pos - gallery.scrollLeft) > 2) { pos = null; hold(4000); raf = requestAnimationFrame(step); return; }
+          if (pos === null) pos = gallery.scrollLeft;
           pos += dir * SPEED * dt;
-          if (pos >= hi) { pos = hi; dir = -1; hold(1800); }
-          if (pos <= lo) { pos = lo; dir = 1; hold(1800); }
+          // Turn back at an end — only on arriving there, so a gallery that
+          // starts at one end sets off at once instead of pausing first.
+          if (dir > 0 && pos >= hi) { pos = hi; dir = -1; hold(1800); }
+          if (dir < 0 && pos <= lo) { pos = lo; dir = 1; hold(1800); }
           if (!gliding) { gallery.style.scrollSnapType = 'none'; gliding = true; }
           gallery.scrollLeft = pos;
         } else {
@@ -202,13 +239,11 @@
       };
       const start = () => { if (!raf && visible && !document.hidden) { last = 0; raf = requestAnimationFrame(step); } };
 
-      ['pointerenter', 'pointerdown', 'focusin', 'wheel', 'touchstart', 'keydown'].forEach((type) => {
-        gallery.addEventListener(type, () => hold(type === 'pointerenter' || type === 'focusin' ? 1e9 : 4000), { passive: true });
-      });
-      ['pointerleave', 'focusout'].forEach((type) => gallery.addEventListener(type, () => hold(1500), { passive: true }));
+      reachFor(gallery, (ms) => hold(ms || 1e9), () => hold(600));
+      gallery.addEventListener('keydown', () => hold(4000));
       new ResizeObserver(measure).observe(gallery);
       new MutationObserver(measure).observe(document.documentElement, { attributes: true, attributeFilter: ['dir'] });
-      new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; start(); }, { threshold: 0.35 }).observe(gallery);
+      new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; start(); }, { threshold: 0.2 }).observe(gallery);
       document.addEventListener('visibilitychange', start);
       measure();
       dir = rtl ? -1 : 1;

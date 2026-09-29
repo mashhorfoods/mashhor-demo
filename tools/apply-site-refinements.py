@@ -84,6 +84,13 @@ CSS = CSS_START + """
 .c-pipeline__step{grid-template-columns:minmax(0,1fr)}
 .c-pipeline__step>:nth-child(n + 3){grid-column:auto}
 .c-eco__marker::before{content:"";inline-size:8px;block-size:8px;border-radius:50%;background-color:currentColor}
+/* The featured package card sits on a lighter surface: its muted text is
+   lifted to keep 4.5:1 ("From", "Delivery", …). */
+.c-tier--featured{--color-text-muted:rgba(255,255,255,0.62)}
+.c-footer__mark::before{content:attr(data-mark)}
+/* The story's chapter text waits for the site script to reveal it; without
+   the script (blocked, failed, or off) it must simply be there. */
+:root:not(.js) .c-chapter__text>*{opacity:1;translate:none}
 """ + CSS_END
 
 FAB_START, FAB_END = "<!-- WA-FAB:START -->", "<!-- WA-FAB:END -->"
@@ -168,8 +175,12 @@ for name in PAGES:
     text = path.read_text(encoding="utf-8")
 
     text = inject_css(text, CSS)
-    close = text.rfind("</body>")
-    text = text[:close] + "  " + FAB + "\n  " + text[close:]
+    # Inside the footer landmark (it is fixed in place, so nothing moves), so
+    # that assistive tech finds it in a region like everything else.
+    close = text.rfind("</footer>")
+    if close < 0:
+        sys.exit(f"{name}: no footer for the WhatsApp button")
+    text = text[:close] + "  " + FAB + "\n    " + text[close:]
 
     text = replace_all(text, TEXT[1:3], name, required=False)
     text = replace_all(text, TEXT[:1], name, required=True)
@@ -184,6 +195,12 @@ for name in PAGES:
     text, n = re.subn(r'\s*<div class="c-phone-cta" data-phone-cta>.*?</div>', "", text, count=1, flags=re.S)
     if n != 1:
         sys.exit(f"{name}: phone call-to-action bar not found")
+    # A phone number never breaks across lines.
+    text = text.replace('<span class="c-channel__value">+249 119005441</span>', '<span class="c-channel__value">+249&nbsp;119005441</span>')
+    # The footer's giant wordmark is decoration: drawn by CSS, it is no longer
+    # text for readers or contrast checks to trip on (it looks the same).
+    text = text.replace('<p class="c-footer__mark" aria-hidden="true">PIXORA</p>',
+                        '<p class="c-footer__mark" aria-hidden="true" data-mark="PIXORA"></p>')
     # The service diagram's markers carry numbers; they become plain dots.
     text = re.sub(r'(<span class="c-eco__marker"[^>]*>)\d+(</span>)', r"\1\2", text)
 

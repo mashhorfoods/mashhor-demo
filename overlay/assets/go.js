@@ -25,6 +25,14 @@
 (() => {
   'use strict';
 
+  // The views rely on html.js (only the active view shows). The inline
+  // failsafe sets it too, but an inline script can be blocked — a server
+  // or CDN that rewrites it no longer matches its CSP hash — and then every
+  // view would show at once. This file is allowed by 'self', so it sets the
+  // class itself and the page never depends on the inline copy.
+  document.documentElement.classList.remove('no-js');
+  document.documentElement.classList.add('js');
+
   const CONFIG = {
     // The business number, digits only — filled in by tools/build.py from tools/config.json.
     whatsapp: '{{WHATSAPP}}',

@@ -194,11 +194,11 @@ def slideshow(images, work):
         w = work[name]
         small = SMALLER.get(name)
         srcset = f' srcset="/assets/{small[0]} {small[1]}w, /assets/{name} {small[2]}w"' if small else ""
-        slides.append(f'''            <figure class="c-slides__slide" role="group" aria-roledescription="slide" aria-label="{i} / {n}">
+        slides.append(f'''            <div class="c-slides__slide" role="group" aria-roledescription="slide" aria-label="{i} / {n}"><figure class="c-slides__figure">
               <span class="c-slides__frame{' c-slides__frame--top' if name in TOP else ''}"><img src="/assets/{name}"{srcset} sizes="(min-width: 64em) 26rem, (min-width: 48em) 46vw, 84vw"
                 alt="{w["alt"][0]}" data-alt-en="{w["alt"][0]}" data-alt-ar="{w["alt"][1]}" loading="lazy" decoding="async" /></span>
               <figcaption class="c-slides__caption">{bi(*w["caption"])}</figcaption>
-            </figure>''')
+            </figure></div>''')
     prev = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" fill="none" /></svg>'
     nxt = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" fill="none" /></svg>'
     return f'''<section class="c-slides" aria-roledescription="carousel" aria-label="Selected work — أعمال مختارة" data-slides>
@@ -493,7 +493,8 @@ CSS = CSS_START + """
 .c-slides__track::-webkit-scrollbar{display:none}
 @media (min-width:48em){.c-slides__track{grid-auto-columns:calc((100% - var(--space-24)) / 2);gap:var(--space-24)}}
 @media (min-width:64em){.c-slides__track{grid-auto-columns:calc((100% - var(--space-24) * 2) / 3)}}
-.c-slides__slide{display:grid;gap:var(--space-12);margin:0;scroll-snap-align:start}
+.c-slides__slide{scroll-snap-align:start}
+.c-slides__figure{display:grid;gap:var(--space-12);margin:0}
 .c-slides__frame{display:block;aspect-ratio:4 / 3;overflow:hidden;border:var(--border-hairline);border-radius:var(--radius-lg);background-color:var(--_charcoal-900)}
 .c-slides__frame img{display:block;inline-size:100%;block-size:100%;object-fit:cover;transition:scale 900ms var(--ease-out)}
 .c-slides__frame--top img{object-position:center top}

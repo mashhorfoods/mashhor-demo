@@ -90,9 +90,12 @@ boards: add it to `SHOWCASE` in `tools/build_services.py` — the block it
 replaces and the images, in order. Captions and alt text are taken from where
 each image already appears on the homepage (the work gallery), so a new image
 goes into the gallery first. Frames are uniform (4:3; three per view on
-desktop, two on tablets, one and a bit on phones); it advances every 4.5 s,
-pauses on hover, touch or focus and off screen, and under reduced motion
-moves only by its arrows, swipe or the arrow keys; when every slide fits it
+desktop, two on tablets, one and a bit on phones); its first step comes
+1.2 s after it scrolls into view, then every 4 s. It pauses only when a
+person reaches for it — a sideways swipe or wheel, a mouse that moves over
+it, keyboard focus — never because the page scrolls past it (the homepage
+gallery follows the same rule, in motion.js `reachFor`), and under reduced
+motion it moves only by its arrows, swipe or the arrow keys; when every slide fits it
 shows no controls. The replaced block's images leave the upload. Every
 service page opens its content with one (real client work first).
 

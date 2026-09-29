@@ -378,11 +378,16 @@ for (const kind of ['mobile', 'desktop']) {
   check(show.srcs.length === 8 && show.srcs.every((s) => /^(work-\d|al-mada-identity)\.webp$/.test(s)) && show.boards === 0,
     '/services/branding: slideshow of portfolio work replaces the sample boards', show.srcs.join(', '));
   check(show.sizes.length === 1 && show.bar, '/services/branding: every slide frame the same size, controls shown', show.sizes.join(' '));
-  await p.mouse.move(2, 2);
-  await p.evaluate(() => document.querySelector('.c-slides').scrollIntoView({ block: 'center' }));
   const at = () => p.$eval('.c-slides__track', (tr) => Math.round(Math.abs(tr.scrollLeft)));
-  const s0 = await at(); await p.waitForTimeout(5200); const s1 = await at();
-  check(s1 > s0, '/services/branding: slideshow advances on its own', `${s0} → ${s1}`);
+  // Arrive the way people do — the wheel, with the cursor resting mid-screen —
+  // and keep scrolling the page over it: it must start soon and not stop.
+  await p.evaluate(() => scrollTo(0, 0)); await p.mouse.move(720, 450);
+  const target = await p.$eval('.c-slides__track', (tr) => tr.getBoundingClientRect().top + scrollY - 300);
+  for (let y = 0; y < target; y += 200) { await p.mouse.wheel(0, 200); await p.waitForTimeout(30); }
+  const s0 = await at(); await p.waitForTimeout(2000); const s1 = await at();
+  check(s1 > s0, '/services/branding: slideshow starts within 2 s of arriving', `${s0} → ${s1}`);
+  for (let i = 0; i < 25; i++) { await p.mouse.wheel(0, i % 2 ? 40 : -40); await p.waitForTimeout(200); }
+  check(await at() > s1, '/services/branding: slideshow keeps going while the page scrolls over it');
   await p.click('[data-slides-next]'); await p.waitForTimeout(800);
   check(await at() > s1, '/services/branding: next arrow moves one slide');
   for (const sid of ['websites', 'social', 'marketing', 'integrated']) {
@@ -399,6 +404,41 @@ for (const kind of ['mobile', 'desktop']) {
     if (r.length) numbered.push(`${path}: ${r.join(', ')}`);
   }
   check(numbered.length === 0, 'no sequence numbering on any page', numbered.join(' | '));
+
+  // /go shows one view even when every inline script is blocked (a CDN that
+  // rewrites them breaks their CSP hashes): its own script sets html.js.
+  const strict = await browser.newContext(VIEWPORTS.desktop);
+  await strict.route(`${BASE}/go`, async (route) => {
+    const res = await route.fetch();
+    await route.fulfill({ response: res, headers: { ...res.headers(), 'content-security-policy': "script-src 'self'" } });
+  });
+  const sp = await strict.newPage();
+  await sp.goto(`${BASE}/go`, { waitUntil: 'networkidle' });
+  const shown = await sp.$$eval('[data-view]', (vs) => vs.filter((v) => getComputedStyle(v).display !== 'none').map((v) => v.dataset.view));
+  check(shown.join() === 'home', '/go: one view at a time even with inline scripts blocked', shown.join());
+  await strict.close();
+  // Without JavaScript every page is still readable (the story's chapters too).
+  const nojs = await browser.newContext({ ...VIEWPORTS.desktop, javaScriptEnabled: false });
+  const np = await nojs.newPage();
+  await np.goto(`${BASE}/story`);
+  const hiddenChapters = await np.$$eval('.c-chapter__text > *', (els) => els.filter((e) => +getComputedStyle(e).opacity < 0.95).length);
+  check(hiddenChapters === 0, '/story: chapter text shows without JavaScript', String(hiddenChapters));
+  await nojs.close();
+  // Every inline script is covered by a hash in the CSP the server sends.
+  {
+    const { createHash } = await import('node:crypto');
+    const csp = readFileSync(path.join(here, '..', 'site', '.htaccess'), 'utf8').match(/Content-Security-Policy "[^"]*?script-src ([^;"]+)/)[1];
+    const missing = [];
+    for (const f of readdirSync(path.join(here, '..', 'site'), { recursive: true }).map(String).filter((f) => f.endsWith('.html') && !f.startsWith('admin'))) {
+      const html = readFileSync(path.join(here, '..', 'site', f), 'utf8');
+      for (const [, attrs, body] of html.matchAll(/<script(?![^>]*\bsrc=)([^>]*)>([\s\S]*?)<\/script>/g)) {
+        if (/application\/ld\+json/.test(attrs)) continue;
+        const h = `'sha256-${createHash('sha256').update(body).digest('base64')}'`;
+        if (!csp.includes(h)) missing.push(f);
+      }
+    }
+    check(missing.length === 0, 'CSP: every inline script is allowed by its hash', [...new Set(missing)].join(', '));
+  }
 
   await p.goto(`${BASE}/pricing`);
   check(await p.locator('.c-tier').count() === 0 && await p.locator('#add-ons .c-addon').count() >= 11 && await p.locator('#build').count() === 1,
