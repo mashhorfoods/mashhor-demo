@@ -43,6 +43,18 @@ ADDONS_FOR = {
 HAS_OWN_LIST = {"websites", "marketing", "integrated"}
 # Cover subjects that are off-centre (default: centre).
 FOCUS = {"social": "40% 50%"}
+# Service pages whose sample boards give way to a slideshow of real work
+# from the portfolio: service → (the block it replaces, its tag, the images).
+# Captions and alt text come from where each image already appears on the
+# homepage (the work gallery, the Al Mada tiles), so they are written once.
+SHOWCASE = {
+    "branding": (r'<div class="c-brandboard"', "div",
+                 ["al-mada-identity.webp", "work-1.webp", "work-2.webp", "work-3.webp",
+                  "work-4.webp", "work-5.webp", "work-6.webp", "work-7.webp"]),
+}
+REPLACED = set()  # images of the blocks a slideshow replaced
+# Images that have a smaller copy the slideshow can offer phones.
+SMALLER = {"al-mada-identity.webp": ("al-mada-identity-tile.webp", 900, 1400)}
 WA = common.WA + "?text="
 
 
@@ -124,6 +136,56 @@ def read_services(home, pricing):
     return data
 
 
+def read_work(home):
+    """Every portfolio image on the homepage → its alt text and caption (EN, AR)."""
+    work = {}
+    for m in re.finditer(r'<li class="c-gallery__item">.*?</li>', home, re.S):
+        item = m.group(0)
+        name = re.search(r'src="(?:\./|/)?assets/([^"]+)"', item).group(1)
+        cap = re.search(r'<figcaption.*?</figcaption>', item, re.S).group(0)
+        work[name] = {
+            "alt": (re.search(r'data-alt-en="([^"]*)"', item).group(1), re.search(r'data-alt-ar="([^"]*)"', item).group(1)),
+            "caption": (re.search(r'data-lang-copy="en">(.*?)</span>', cap, re.S).group(1),
+                        re.search(r'data-lang-copy="ar" lang="ar">(.*?)</span>', cap, re.S).group(1)),
+        }
+    tile = re.search(r'<img[^>]*al-mada-identity-tile\.webp[^>]*>', home, re.S).group(0)
+    work["al-mada-identity.webp"] = {
+        "alt": (re.search(r'data-alt-en="([^"]*)"', tile).group(1), re.search(r'data-alt-ar="([^"]*)"', tile).group(1)),
+        "caption": ("Al Mada — the full identity", "المدى — الهوية كاملة"),
+    }
+    return work
+
+
+def slideshow(images, work):
+    """A slideshow of real work: uniform 4:3 frames, three / two / one-and-a-bit
+    per view, advancing on its own (overlay/assets/motion.js, section 0)."""
+    n = len(images)
+    slides = []
+    for i, name in enumerate(images, 1):
+        w = work[name]
+        small = SMALLER.get(name)
+        srcset = f' srcset="/assets/{small[0]} {small[1]}w, /assets/{name} {small[2]}w"' if small else ""
+        slides.append(f'''            <figure class="c-slides__slide" role="group" aria-roledescription="slide" aria-label="{i} / {n}">
+              <span class="c-slides__frame"><img src="/assets/{name}"{srcset} sizes="(min-width: 64em) 26rem, (min-width: 48em) 46vw, 84vw"
+                alt="{w["alt"][0]}" data-alt-en="{w["alt"][0]}" data-alt-ar="{w["alt"][1]}" loading="lazy" decoding="async" /></span>
+              <figcaption class="c-slides__caption"><span class="c-slides__num" aria-hidden="true">{i:02d}</span>{bi(*w["caption"])}</figcaption>
+            </figure>''')
+    prev = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" fill="none" /></svg>'
+    nxt = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" fill="none" /></svg>'
+    return f'''<section class="c-slides" aria-roledescription="carousel" aria-label="Selected work — أعمال مختارة" data-slides>
+          <h2 class="t-label c-detail__subhead">{bi("Selected work", "أعمال مختارة")}</h2>
+          <div class="c-slides__track" tabindex="0">
+{chr(10).join(slides)}
+          </div>
+          <div class="c-slides__bar" data-slides-bar hidden>
+            <span class="c-slides__count" aria-hidden="true"><b data-slides-current>01</b> / {n:02d}</span>
+            <span class="c-slides__progress" aria-hidden="true"><i></i></span>
+            <button class="c-slides__btn u-flip-rtl" type="button" data-slides-prev aria-label="Previous — السابق">{prev}</button>
+            <button class="c-slides__btn u-flip-rtl" type="button" data-slides-next aria-label="Next — التالي">{nxt}</button>
+          </div>
+        </section>'''
+
+
 def read_addons(home):
     a, b = find(home, r'<section id="add-ons"', "section")
     section = home[a:b]
@@ -195,7 +257,7 @@ def wa_link(s):
             f'<span class="u-visually-hidden">{bi(" (opens in a new tab)", " (يفتح في نافذة جديدة)")}</span></a>')
 
 
-def service_main(s, data, addon_groups):
+def service_main(s, data, addon_groups, work):
     sid = s["id"]
     detail = s["detail"]
     container = inner(detail[slice(*find(detail, r'<div class="l-container">', "div"))])
@@ -205,6 +267,11 @@ def service_main(s, data, addon_groups):
     body = container[:ha] + container[hb:]
     # The page's own packages, actions and "see the packages" link replace these.
     body = cut(body, r'<p class="c-detail__packages"', "p")
+    if sid in SHOWCASE:
+        pattern, tag, images = SHOWCASE[sid]
+        a, b = find(body, pattern, tag)
+        REPLACED.update(re.findall(r'src="(?:\./|/)?assets/([^"]+)"', body[a:b]))
+        body = body[:a] + slideshow(images, work) + body[b:]
     body = cut(body, r'<a class="c-btn c-btn--primary c-detail__action"', "a")
     if sid != "integrated":
         body = cut(body, r'<p class="c-detail__more"', "p")
@@ -385,6 +452,32 @@ CSS = CSS_START + """
 .c-svc-hero .c-crumbs__list a,.c-svc-hero .c-detail__lead{text-shadow:0 1px 18px rgba(0,0,0,0.5)}
 @media (max-width:47.99em){.c-svc-hero{min-block-size:clamp(30rem,82svh,44rem)}.c-svc-hero__media::after{background:linear-gradient(to top,var(--color-bg) 0%,rgba(32,32,32,0.86) 46%,rgba(32,32,32,0.4) 76%,rgba(20,20,20,0.6) 100%)}}
 .c-svc__lead-in{padding-block:var(--space-8) var(--space-48)}
+/* Slideshow of real work (SHOWCASE): uniform 4:3 frames, 1.2 / 2 / 3 per view. */
+.c-slides{display:grid;gap:var(--space-24);margin-block-end:var(--space-48)}
+.c-slides .c-detail__subhead{margin:0}
+.c-slides__track{display:grid;grid-auto-flow:column;grid-auto-columns:84%;gap:var(--space-16);overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scrollbar-width:none;outline-offset:6px}
+.c-slides__track::-webkit-scrollbar{display:none}
+@media (min-width:48em){.c-slides__track{grid-auto-columns:calc((100% - var(--space-24)) / 2);gap:var(--space-24)}}
+@media (min-width:64em){.c-slides__track{grid-auto-columns:calc((100% - var(--space-24) * 2) / 3)}}
+.c-slides__slide{display:grid;gap:var(--space-12);margin:0;scroll-snap-align:start}
+.c-slides__frame{display:block;aspect-ratio:4 / 3;overflow:hidden;border:var(--border-hairline);border-radius:var(--radius-lg);background-color:var(--_charcoal-900)}
+.c-slides__frame img{display:block;inline-size:100%;block-size:100%;object-fit:cover;transition:scale 900ms var(--ease-out)}
+.c-slides__slide:hover .c-slides__frame img{scale:1.04}
+.c-slides__caption{display:flex;align-items:baseline;gap:var(--space-12);font-size:var(--text-body-sm);color:var(--color-text-secondary)}
+.c-slides__num{font-family:var(--font-display);font-size:var(--text-label);letter-spacing:var(--tracking-label);color:var(--color-accent)}
+.c-slides__bar{display:flex;align-items:center;gap:var(--space-16)}
+.c-slides__bar[hidden]{display:none}
+.c-slides__count{direction:ltr;font-family:var(--font-display);font-size:var(--text-small);font-variant-numeric:tabular-nums;color:var(--color-text-muted)}
+.c-slides__count b{font-weight:var(--weight-semibold);color:var(--color-text-primary)}
+.c-slides__progress{flex:1;block-size:2px;overflow:hidden;border-radius:2px;background-color:var(--color-border)}
+.c-slides__progress i{display:block;block-size:100%;background-color:var(--color-accent);transform:scaleX(0);transform-origin:left center}
+[dir="rtl"] .c-slides__progress i{transform-origin:right center}
+.c-slides.is-playing .c-slides__progress i{animation:c-slides-fill var(--slides-interval,4500ms) linear forwards}
+@keyframes c-slides-fill{to{transform:scaleX(1)}}
+.c-slides__btn{display:inline-grid;place-items:center;inline-size:var(--touch-target-min);block-size:var(--touch-target-min);border:var(--border-hairline);border-radius:var(--radius-pill);color:var(--color-text-primary);transition:var(--transition-interactive)}
+.c-slides__btn:hover,.c-slides__btn:focus-visible{border-color:var(--color-border-accent);color:var(--color-accent)}
+.c-slides__btn svg{inline-size:20px;block-size:20px}
+@media (prefers-reduced-motion:reduce){.c-slides__frame img{transition:none}}
 /* The cover travels from the card into the hero: both keep their crop. */
 ::view-transition-group(*.svc-cover){overflow:hidden;animation-duration:720ms}
 ::view-transition-old(*.svc-cover),::view-transition-new(*.svc-cover){block-size:100%;inline-size:100%;object-fit:cover}
@@ -419,6 +512,7 @@ def build(site: pathlib.Path):
     pricing = (site / "pricing.html").read_text(encoding="utf-8")
     data = read_services(home, pricing)
     addons_section, addon_groups = read_addons(home)
+    work = read_work(home)
 
     # 1. Service pages, built on the pricing page's shell (head, header,
     #    verification band, footer, script) so they are the site's own pages.
@@ -427,7 +521,7 @@ def build(site: pathlib.Path):
     (site / "services").mkdir(exist_ok=True)
     for sid in SERVICES:
         s = data[sid]
-        page = page_head(pricing[:main_a], s) + service_main(s, data, addon_groups) + "    " + pricing[main_b:]
+        page = page_head(pricing[:main_a], s) + service_main(s, data, addon_groups, work) + "    " + pricing[main_b:]
         page = page.replace('id="pricing-title"', 'id="svc-page-title"')
         (site / "services" / f"{sid}.html").write_text(page, encoding="utf-8")
 
@@ -500,6 +594,12 @@ def build(site: pathlib.Path):
         text = inject_css(text, CSS)  # the service cards and pages styles, once per page
         if text != before:
             path.write_text(text, encoding="utf-8")
+
+    # The replaced blocks' images leave site/ — unless a page still uses one.
+    pages = "".join(p.read_text(encoding="utf-8") for p in list(site.glob("*.html")) + list(site.glob("services/*.html")))
+    for name in sorted(REPLACED):
+        if name not in pages and (site / "assets" / name).exists():
+            (site / "assets" / name).unlink()
 
     # 5. Sitemap: the five pages.
     sitemap = site / "sitemap.xml"

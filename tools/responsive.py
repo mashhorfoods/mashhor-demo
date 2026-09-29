@@ -2,9 +2,8 @@
 """Smaller copies of the supplied site's oversized images, and the srcset
 that lets each browser take the one it needs.
 
-The About photos are 1672 px wide but never shown wider than ~615 px; the
-branding showcase boards are 740–870 px shown at ~280 px (measured on every
-page at 390, 1024 and 1440 px wide).
+The About photos are 1672 px wide but never shown wider than ~615 px
+(measured at 390, 1024 and 1440 px wide).
 
     python3 tools/responsive.py --make   # once, when an image here changes:
                                          # writes overlay/assets/<name>-<w>.webp
@@ -22,15 +21,10 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 # name → (full width, smaller widths, sizes)
 ABOUT = ((640, 1280), "(min-width: 64em) 43vw, 92vw")
-BOARD = ((400,), "(min-width: 64em) 20vw, (min-width: 48em) 28vw, 68vw")
 IMAGES = {
     "about1.webp": (1672, *ABOUT),
     "about2.webp": (1672, *ABOUT),
     "about4.webp": (1672, *ABOUT),
-    "B1.webp": (740, *BOARD),
-    "B2.webp": (752, *BOARD),
-    "B3.webp": (624, *BOARD),
-    "B4.webp": (868, *BOARD),
 }
 # The About page's first photo is its largest paint: fetch it first, not lazily.
 EAGER = {"about.html": "about1.webp"}

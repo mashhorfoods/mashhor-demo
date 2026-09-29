@@ -369,6 +369,24 @@ for (const kind of ['mobile', 'desktop']) {
     const current = await p.$eval('[data-nav-link][aria-current="page"]', (e) => e.getAttribute('href')).catch(() => null);
     check(current === `/services/${sid}` || current === null, `/services/${sid}: menu marks the page`, String(current));
   }
+  // Branding: a slideshow of real portfolio work in place of the sample boards.
+  await p.goto(`${BASE}/services/branding`, { waitUntil: 'networkidle' });
+  const show = await p.$eval('[data-slides]', (box) => ({
+    srcs: [...box.querySelectorAll('.c-slides__frame img')].map((i) => i.getAttribute('src').split('/').pop()),
+    sizes: [...new Set([...box.querySelectorAll('.c-slides__frame')].map((f) => { const r = f.getBoundingClientRect(); return `${Math.round(r.width)}x${Math.round(r.height)}`; }))],
+    bar: !box.querySelector('[data-slides-bar]').hidden,
+    boards: document.querySelectorAll('.c-brandboard').length,
+  }));
+  check(show.srcs.length === 8 && show.srcs.every((s) => /^(work-\d|al-mada-identity)\.webp$/.test(s)) && show.boards === 0,
+    '/services/branding: slideshow of portfolio work replaces the sample boards', show.srcs.join(', '));
+  check(show.sizes.length === 1 && show.bar, '/services/branding: every slide frame the same size, controls shown', show.sizes.join(' '));
+  await p.mouse.move(2, 2);
+  await p.evaluate(() => document.querySelector('.c-slides').scrollIntoView({ block: 'center' }));
+  await p.waitForTimeout(5200);
+  check(await p.$eval('[data-slides-current]', (e) => e.textContent) === '02', '/services/branding: slideshow advances on its own');
+  await p.click('[data-slides-next]'); await p.waitForTimeout(800);
+  check(await p.$eval('[data-slides-current]', (e) => e.textContent) === '03', '/services/branding: next arrow moves one slide');
+
   await p.goto(`${BASE}/pricing`);
   check(await p.locator('.c-tier').count() === 0 && await p.locator('#add-ons .c-addon').count() >= 11 && await p.locator('#build').count() === 1,
     'pricing: no duplicated packages; every add-on and the builder are here');

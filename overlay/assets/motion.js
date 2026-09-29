@@ -20,6 +20,83 @@
 
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
   const fine = window.matchMedia('(pointer: fine)');
+  /* 0. Slideshows of work (service pages) -------------------------------- */
+  // They work under reduced motion too — arrows, swipe and keys — they just
+  // do not advance on their own. Without this script the strip still scrolls.
+  document.querySelectorAll('[data-slides]').forEach((box) => {
+    const INTERVAL = 4500;
+    const track = box.querySelector('.c-slides__track');
+    const slides = [...track.children];
+    const bar = box.querySelector('[data-slides-bar]');
+    const current = box.querySelector('[data-slides-current]');
+    const rtl = () => document.documentElement.dir === 'rtl';
+    const pad = (n) => String(n).padStart(2, '0');
+    // The slide whose start edge sits nearest the strip's start edge.
+    const index = () => {
+      const t = track.getBoundingClientRect();
+      let best = 0;
+      let gap = Infinity;
+      slides.forEach((s, i) => {
+        const r = s.getBoundingClientRect();
+        const d = Math.abs(rtl() ? t.right - r.right : r.left - t.left);
+        if (d < gap) { gap = d; best = i; }
+      });
+      return best;
+    };
+    const atEnd = () => track.scrollWidth - track.clientWidth - Math.abs(track.scrollLeft) < 4;
+    const go = (i) => {
+      const t = track.getBoundingClientRect();
+      const r = slides[i].getBoundingClientRect();
+      track.scrollBy({ left: rtl() ? r.right - t.right : r.left - t.left, behavior: reduce.matches ? 'auto' : 'smooth' });
+    };
+    const step = (dir) => {
+      const i = index();
+      if (dir > 0) go(atEnd() ? 0 : Math.min(i + 1, slides.length - 1));
+      else go(i === 0 ? slides.length - 1 : i - 1);
+    };
+
+    let timer = 0;
+    let visible = false;
+    let held = false;
+    let resume = 0;
+    const play = () => {
+      clearTimeout(timer);
+      box.classList.remove('is-playing');
+      if (reduce.matches || !visible || held || document.hidden) return;
+      void bar.offsetWidth; // restart the progress line
+      box.classList.add('is-playing');
+      timer = setTimeout(() => { step(1); play(); }, INTERVAL);
+    };
+    const hold = (ms) => {
+      held = true;
+      play();
+      clearTimeout(resume);
+      if (ms) resume = setTimeout(() => { held = false; play(); }, ms);
+    };
+
+    box.style.setProperty('--slides-interval', `${INTERVAL}ms`);
+    bar.hidden = false;
+    box.querySelector('[data-slides-prev]').addEventListener('click', () => { step(-1); play(); });
+    box.querySelector('[data-slides-next]').addEventListener('click', () => { step(1); play(); });
+    track.addEventListener('keydown', (e) => {
+      const fwd = rtl() ? 'ArrowLeft' : 'ArrowRight';
+      const back = rtl() ? 'ArrowRight' : 'ArrowLeft';
+      if (e.key === fwd || e.key === back) { e.preventDefault(); step(e.key === fwd ? 1 : -1); }
+    });
+    track.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') hold(0); });
+    track.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') { held = false; play(); } });
+    track.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse') hold(6000); }, { passive: true });
+    track.addEventListener('wheel', () => hold(5000), { passive: true });
+    box.addEventListener('focusin', () => hold(0));
+    box.addEventListener('focusout', (e) => { if (!box.contains(e.relatedTarget)) { held = false; play(); } });
+    let raf = 0;
+    track.addEventListener('scroll', () => {
+      if (!raf) raf = requestAnimationFrame(() => { raf = 0; current.textContent = pad(index() + 1); });
+    }, { passive: true });
+    new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; play(); }, { threshold: 0.5 }).observe(track);
+    document.addEventListener('visibilitychange', play);
+  });
+
   if (reduce.matches) return;
 
   /* 1. Hero headline, line by line --------------------------------------- */

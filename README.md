@@ -83,6 +83,18 @@ To replace one: save it (16:10, at least 1600 wide) as
 `FFMPEG=ffmpeg tools/service-covers/encode.sh`, and rebuild. The originals in
 `out/` stay out of git; the encoded covers in `overlay/assets/` are what count.
 
+## Work slideshows on service pages
+
+A service page can show a slideshow of real work in place of its sample
+boards: add it to `SHOWCASE` in `tools/build_services.py` — the block it
+replaces and the images, in order. Captions and alt text are taken from where
+each image already appears on the homepage (the work gallery), so a new image
+goes into the gallery first. Frames are uniform (4:3; three per view on
+desktop, two on tablets, one and a bit on phones); it advances every 4.5 s,
+pauses on hover, touch or focus and off screen, and under reduced motion
+moves only by its arrows, swipe or the arrow keys. The replaced block's
+images leave the upload. Now: Branding (Al Mada + the seven gallery pieces).
+
 ## Ad URLs
 
 Use standard UTM parameters. Everything is optional; the page works with none.
