@@ -495,6 +495,33 @@ for (const kind of ['mobile', 'desktop']) {
     }
     check(founder.length === 0, 'no page or script points to a founder', founder.join());
   }
+  // UX pass: fixes that must stay fixed.
+  {
+    const uc = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    await uc.route('https://plausible.io/**', (r) => r.fulfill({ status: 200, body: '' }));
+    await uc.addInitScript(() => { try { localStorage.setItem('site-lang', 'ar'); } catch {} });
+    const up = await uc.newPage();
+    for (const path of ['/about', '/story', '/services/branding', '/404.html']) {
+      await up.goto(`${BASE}${path}`, { waitUntil: 'networkidle' });
+      await up.evaluate(() => scrollTo(0, document.body.scrollHeight)); await up.waitForTimeout(300);
+      await up.locator('.c-footer__top-link').click(); await up.waitForTimeout(1200);
+      const at = new URL(up.url()).pathname;
+      check(at === path && await up.evaluate(() => scrollY) < 5, `${path}: "Back to top" stays on the page and scrolls up`, `${at} ${await up.evaluate(() => Math.round(scrollY))}`);
+    }
+    await up.goto(`${BASE}/services/websites`, { waitUntil: 'networkidle' }); await up.waitForTimeout(2000);
+    const deal = await up.$eval('.c-svc__deal', (e) => ({ top: Math.round(e.getBoundingClientRect().top), revealed: e.classList.contains('is-revealed') }));
+    check(deal.revealed || deal.top > 844 * 0.92, 'a block already at the fold on load is revealed, not left blurred', JSON.stringify(deal));
+    await up.goto(`${BASE}/`, { waitUntil: 'networkidle' });
+    const q = up.locator('.c-faq__q').first(); await q.scrollIntoViewIfNeeded(); await up.waitForTimeout(600);
+    const mark = await q.evaluate((s) => { const m = s.querySelector('.c-faq__mark').getBoundingClientRect(); const bar = getComputedStyle(s.querySelector('.c-faq__mark'), '::before'); return { markLeft: m.left, markRight: m.right, left: bar.left, width: bar.width }; });
+    check(Math.abs(parseFloat(mark.left) - (mark.markRight - mark.markLeft) / 2) < 1, 'FAQ +/− mark stays inside its box in Arabic', JSON.stringify(mark));
+    const form = up.locator('[data-contact-form]'); await form.scrollIntoViewIfNeeded();
+    await form.locator('.c-btn--primary').first().click(); await up.waitForTimeout(300);
+    check(await form.locator('input[name=name]').evaluate((e) => e.validationMessage) === 'هذا الحقل مطلوب.', 'contact form: validation messages in the page language');
+    await up.waitForTimeout(500);
+    check(await up.$eval('.c-wa-fab', (e) => e.classList.contains('is-aside') && getComputedStyle(e).visibility === 'hidden'), 'floating WhatsApp steps aside over the contact section');
+    await uc.close();
+  }
   // Every inline script is covered by a hash in the CSP the server sends.
   {
     const { createHash } = await import('node:crypto');

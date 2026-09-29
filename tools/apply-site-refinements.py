@@ -70,6 +70,10 @@ CSS = CSS_START + """
 .c-wa-fab:active{transform:scale(0.96)}
 .c-wa-fab svg{inline-size:26px;block-size:26px}
 @media (min-width:64em){.c-wa-fab{display:none}}
+/* Where WhatsApp is already on screen (contact, footer) it steps aside
+   (motion.js adds .is-aside). */
+.c-wa-fab.is-aside{opacity:0;scale:0.8;visibility:hidden}
+@media (prefers-reduced-motion:no-preference){.c-wa-fab{transition:var(--transition-interactive),inset-block-end var(--duration-base) var(--ease-out),opacity var(--duration-base) var(--ease-out),scale var(--duration-base) var(--ease-out),visibility var(--duration-base)}}
 @media print{.c-wa-fab{display:none}}
 }
 
@@ -91,6 +95,14 @@ CSS = CSS_START + """
 /* The story's chapter text waits for the site script to reveal it; without
    the script (blocked, failed, or off) it must simply be there. */
 :root:not(.js) .c-chapter__text>*{opacity:1;translate:none}
+/* Plus/minus marks centred with physical left: inset-inline-start:50% plus
+   translate:-50% pushed them a whole mark sideways, onto the text, in Arabic. */
+.c-faq__mark::before,.c-faq__mark::after,.c-addons__mark::before,.c-addons__mark::after,
+.c-challenge__why-mark::before,.c-challenge__why-mark::after{inset-inline-start:auto;left:50%}
+/* An email address reads left to right, in Arabic too. */
+:root[dir="rtl"] input[type="email"]{direction:ltr;text-align:right}
+/* Breadcrumb links: a finger-sized target without moving the text. */
+.c-crumbs__list a{display:inline-block;padding-block:12px;margin-block:-12px;padding-inline:4px;margin-inline:-4px}
 """ + CSS_END
 
 FAB_START, FAB_END = "<!-- WA-FAB:START -->", "<!-- WA-FAB:END -->"
@@ -216,6 +228,12 @@ for name in PAGES:
         text = replace_all(text, [(ALT_OLD, f'<meta property="og:image:alt" content="{alt}" />')], name, required=True)
     if name == "privacy.html":
         text = replace_all(text, PRIVACY, name, required=True)
+    # Reveal-on-scroll: a tall block (a price box, a card) at the fold waited
+    # for a tenth of itself to clear a band 12% above the bottom, so it sat
+    # blurred and invisible on phones until the visitor scrolled. Any part of
+    # it in view now starts the reveal.
+    text = replace_all(text, [("{ rootMargin: '0px 0px -12% 0px', threshold: 0.1 }",
+                               "{ rootMargin: '0px 0px -8% 0px', threshold: 0 }")], name, required=True)
     text = replace_all(text, TEAM[:1], name, required=True)
     text = replace_all(text, TEAM[1:], name, required=False)
     if name == "index.html":
@@ -233,6 +251,20 @@ for name in PAGES:
     text, n = re.subn(r'\s*<div class="c-phone-cta" data-phone-cta>.*?</div>', "", text, count=1, flags=re.S)
     if n != 1:
         sys.exit(f"{name}: phone call-to-action bar not found")
+    # "Back to top" scrolls this page to its top. It pointed at the homepage's
+    # #home, which the site script sends to "/" on every other page.
+    text, n = re.subn(r'(<a class="c-link c-footer__top-link" href=")[^"]*(")', r"\1#top\2", text, count=1)
+    if n != 1:
+        sys.exit(f"{name}: back-to-top link not found")
+    text = text.replace("<body>", '<body id="top">', 1)
+    # Away from the homepage, the logo and "Home" go to "/", not "/#home".
+    if name != "index.html":
+        text = re.sub(r'href="(?:\./|/)?#home"', 'href="/"', text)
+    text = replace_all(text, [("return entry.href ?? `${HOME}#${entry.id}`;",
+                               "return entry.href ?? (entry.id === 'home' && HOME ? HOME : `${HOME}#${entry.id}`);")], name, required=True)
+    # 404.html's <base href="/"> made every fragment link (Back to top) lead
+    # home; its links are all root-based now, so it has nothing left to do.
+    text = text.replace('<base href="/" />', "")
     # A phone number never breaks across lines.
     text = text.replace('<span class="c-channel__value">+249 119005441</span>', '<span class="c-channel__value">+249&nbsp;119005441</span>')
     # The footer's giant wordmark is decoration: drawn by CSS, it is no longer

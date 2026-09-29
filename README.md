@@ -152,6 +152,21 @@ Escape or a tap beside the image closes it. Images inside links or buttons
 keep their link. Which images browse together is `GROUPS` in viewer.js.
 Slideshows and the gallery pause while it is open.
 
+## Details that keep the experience smooth
+
+Kept by tests in `tests/campaign.mjs` ("UX pass"):
+- "Back to top" scrolls the page it is on (every page has `<body id="top">`;
+  it used to lead to the homepage from every other page), and the logo and
+  "Home" go to `/` away from the homepage.
+- A block already at the fold when a page opens is revealed straight away
+  (the reveal starts as soon as any of it is in view).
+- The FAQ, add-on and brand-challenge +/− marks sit in their box in Arabic.
+- Form messages follow the page's language (`overlay/assets/forms.js`);
+  email addresses are typed left to right in Arabic too.
+- On phones the floating WhatsApp button steps aside over the contact
+  section and the footer, where WhatsApp is already on screen.
+- Breadcrumb links have finger-sized targets.
+
 ## Ad URLs
 
 Use standard UTM parameters. Everything is optional; the page works with none.

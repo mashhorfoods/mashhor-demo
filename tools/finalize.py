@@ -43,7 +43,7 @@ def build(site: pathlib.Path):
 
     # Rules for components no page uses any more (see prune_css.py).
     uses = "".join(re.sub(r"<style>.*?</style>", "", t, flags=re.S) for t in texts.values()) + js
-    for extra in ("go.html", "assets/go.js", "assets/motion.js", "assets/viewer.js", "admin/index.php", "admin/admin.js"):
+    for extra in ("go.html", "assets/go.js", "assets/motion.js", "assets/viewer.js", "assets/forms.js", "admin/index.php", "admin/admin.js"):
         uses += re.sub(r"<style>.*?</style>", "", (site / extra).read_text(encoding="utf-8"), flags=re.S)
     prune_css.check_unused(uses)
     before_css = len(css)
@@ -57,10 +57,10 @@ def build(site: pathlib.Path):
     # /go is Arabic: its text font, requested with the stylesheet instead of
     # after it (the other pages already preload theirs).
     go_fonts = '<link rel="preload" href="/assets/fonts/cairo-arabic-var.woff2" as="font" type="font/woff2" crossorigin />'
-    # The project's own scripts on every page — the motion layer and the image
-    # viewer (overlay/assets/) — ship hashed the same way.
+    # The project's own scripts on every page — the motion layer, the image
+    # viewer and the form messages (overlay/assets/) — ship hashed the same way.
     tags = []
-    for name in ("motion", "viewer"):
+    for name in ("motion", "viewer", "forms"):
         src = site / "assets" / f"{name}.js"
         body = src.read_text(encoding="utf-8")
         hashed = f"{name}.{digest(body)}.js"
@@ -81,7 +81,7 @@ def build(site: pathlib.Path):
     if a < 0 or b < 0:
         sys.exit("finalize: SHARED-STYLES markers missing in go.html")
     text = text[:a] + f"{START}\n    {go_fonts}\n    {link}\n{END}" + text[b + len(END):]
-    text = re.sub(r'\s*<script type="module" src="/assets/(?:motion|viewer)\.[a-f0-9]+\.js"></script>', "", text)
+    text = re.sub(r'\s*<script type="module" src="/assets/(?:motion|viewer|forms)\.[a-f0-9]+\.js"></script>', "", text)
     text = text.replace("</head>", f"    {motion}\n  </head>", 1)
     go.write_text(text, encoding="utf-8")
 

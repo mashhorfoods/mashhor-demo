@@ -9,7 +9,9 @@
      3. a faint gold light follows the pointer across cards;
      4. galleries glide on their own, slowly, and stop the moment a person
         touches, hovers, focuses or scrolls them;
-     5. running totals in the package builder count to their new value.
+     5. running totals in the package builder count to their new value;
+     6. the phones' floating WhatsApp button steps aside where WhatsApp is
+        already on screen (this one runs under reduced motion too).
 
    Page-to-page transitions are pure CSS (@view-transition). Everything here
    is skipped under prefers-reduced-motion, and nothing is hidden waiting for
@@ -132,6 +134,20 @@
     document.addEventListener('visibilitychange', () => run(FIRST));
     document.addEventListener('viewerclose', () => run(FIRST));
   });
+
+  /* The floating WhatsApp button steps aside ------------------------------ */
+  // Where WhatsApp is already on screen — the contact section, the footer —
+  // the phones' floating button would only cover the text beneath it.
+  const fab = document.querySelector('.c-wa-fab');
+  const covered = [...document.querySelectorAll('#contact, .c-footer')];
+  if (fab && covered.length && 'IntersectionObserver' in window) {
+    const onScreen = new Set();
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => (e.isIntersecting ? onScreen.add(e.target) : onScreen.delete(e.target)));
+      fab.classList.toggle('is-aside', onScreen.size > 0);
+    }, { rootMargin: '0px 0px -15% 0px' });
+    covered.forEach((el) => io.observe(el));
+  }
 
   if (reduce.matches) return;
 
