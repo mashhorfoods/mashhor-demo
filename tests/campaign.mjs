@@ -382,10 +382,25 @@ for (const kind of ['mobile', 'desktop']) {
   check(show.sizes.length === 1 && show.bar, '/services/branding: every slide frame the same size, controls shown', show.sizes.join(' '));
   await p.mouse.move(2, 2);
   await p.evaluate(() => document.querySelector('.c-slides').scrollIntoView({ block: 'center' }));
-  await p.waitForTimeout(5200);
-  check(await p.$eval('[data-slides-current]', (e) => e.textContent) === '02', '/services/branding: slideshow advances on its own');
+  const at = () => p.$eval('.c-slides__track', (tr) => Math.round(Math.abs(tr.scrollLeft)));
+  const s0 = await at(); await p.waitForTimeout(5200); const s1 = await at();
+  check(s1 > s0, '/services/branding: slideshow advances on its own', `${s0} → ${s1}`);
   await p.click('[data-slides-next]'); await p.waitForTimeout(800);
-  check(await p.$eval('[data-slides-current]', (e) => e.textContent) === '03', '/services/branding: next arrow moves one slide');
+  check(await at() > s1, '/services/branding: next arrow moves one slide');
+  for (const sid of ['websites', 'social', 'marketing', 'integrated']) {
+    await p.goto(`${BASE}/services/${sid}`, { waitUntil: 'networkidle' });
+    const first = await p.$eval('.c-svc__body .l-container', (c) => c.firstElementChild.matches('.c-slides') || c.children[0]?.matches?.('.c-slides'));
+    const n = await p.locator('.c-slides__slide').count();
+    check(first && n >= 4, `/services/${sid}: opens with the same work slideshow`, `${n} slides`);
+  }
+  // No sequence numbering ("01", "02/07") shown anywhere.
+  const numbered = [];
+  for (const path of ['/', '/pricing', '/about', '/story', '/go', '/services/branding', '/services/websites', '/services/social', '/services/marketing', '/services/integrated']) {
+    await p.goto(`${BASE}${path}`, { waitUntil: 'networkidle' });
+    const r = await p.evaluate(() => [...document.querySelectorAll('body *')].filter((e) => e.children.length === 0 && /^\s*0\d(\s*\/\s*\d+)?\s*$/.test(e.textContent) && e.getClientRects().length).map((e) => e.className));
+    if (r.length) numbered.push(`${path}: ${r.join(', ')}`);
+  }
+  check(numbered.length === 0, 'no sequence numbering on any page', numbered.join(' | '));
 
   await p.goto(`${BASE}/pricing`);
   check(await p.locator('.c-tier').count() === 0 && await p.locator('#add-ons .c-addon').count() >= 11 && await p.locator('#build').count() === 1,

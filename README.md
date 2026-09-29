@@ -92,8 +92,13 @@ each image already appears on the homepage (the work gallery), so a new image
 goes into the gallery first. Frames are uniform (4:3; three per view on
 desktop, two on tablets, one and a bit on phones); it advances every 4.5 s,
 pauses on hover, touch or focus and off screen, and under reduced motion
-moves only by its arrows, swipe or the arrow keys. The replaced block's
-images leave the upload. Now: Branding (Al Mada + the seven gallery pieces).
+moves only by its arrows, swipe or the arrow keys; when every slide fits it
+shows no controls. The replaced block's images leave the upload. Every
+service page opens its content with one (real client work first).
+
+The site shows no sequence numbering (01, 02/07 …): the rule is in the
+refinements stylesheet; prices, counts and the brand challenge's steps keep
+their numbers. A test fails if an "01"-style label shows on any page.
 
 ## Ad URLs
 

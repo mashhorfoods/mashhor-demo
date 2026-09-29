@@ -74,6 +74,18 @@ CSS = CSS_START + """
 @media (min-width:64em){.c-wa-fab{display:none}}
 @media print{.c-wa-fab{display:none}}
 }
+
+/* No sequence numbers anywhere: sections, service cards, the menu, add-ons,
+   service steps, story chapters, portfolio tiles and galleries are not
+   numbered. (Prices, counts and the brand challenge's steps — which say
+   where you are — keep theirs.) */
+.c-detail__number,.c-svc-card__index,.c-drawer__index,.c-addon__index,.c-pipeline__index,
+.c-chapter__num,.c-bento__index,.c-gallery__count{display:none}
+.c-addon{grid-template-columns:1fr}
+/* Steps kept a narrow first column for their number on small phones. */
+.c-pipeline__step{grid-template-columns:minmax(0,1fr)}
+.c-pipeline__step>:nth-child(n + 3){grid-column:auto}
+.c-eco__marker::before{content:"";inline-size:8px;block-size:8px;border-radius:50%;background-color:currentColor}
 """ + CSS_END
 
 FAB_START, FAB_END = "<!-- WA-FAB:START -->", "<!-- WA-FAB:END -->"
@@ -168,6 +180,8 @@ for name in PAGES:
     if name == "privacy.html":
         text = replace_all(text, PRIVACY, name, required=True)
     text = clean_links(text)
+    # The service diagram's markers carry numbers; they become plain dots.
+    text = re.sub(r'(<span class="c-eco__marker"[^>]*>)\d+(</span>)', r"\1\2", text)
 
     path.write_text(text, encoding="utf-8")
 print(f"refinements: {len(PAGES)} pages")

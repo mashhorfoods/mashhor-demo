@@ -28,9 +28,7 @@
     const track = box.querySelector('.c-slides__track');
     const slides = [...track.children];
     const bar = box.querySelector('[data-slides-bar]');
-    const current = box.querySelector('[data-slides-current]');
     const rtl = () => document.documentElement.dir === 'rtl';
-    const pad = (n) => String(n).padStart(2, '0');
     // The slide whose start edge sits nearest the strip's start edge.
     const index = () => {
       const t = track.getBoundingClientRect();
@@ -59,10 +57,16 @@
     let visible = false;
     let held = false;
     let resume = 0;
+    // When every slide already fits, there is nothing to move: no controls.
+    let fits = false;
+    const measure = () => {
+      fits = track.scrollWidth - track.clientWidth < 4;
+      bar.hidden = fits;
+    };
     const play = () => {
       clearTimeout(timer);
       box.classList.remove('is-playing');
-      if (reduce.matches || !visible || held || document.hidden) return;
+      if (fits || reduce.matches || !visible || held || document.hidden) return;
       void bar.offsetWidth; // restart the progress line
       box.classList.add('is-playing');
       timer = setTimeout(() => { step(1); play(); }, INTERVAL);
@@ -75,7 +79,7 @@
     };
 
     box.style.setProperty('--slides-interval', `${INTERVAL}ms`);
-    bar.hidden = false;
+    new ResizeObserver(() => { measure(); play(); }).observe(track);
     box.querySelector('[data-slides-prev]').addEventListener('click', () => { step(-1); play(); });
     box.querySelector('[data-slides-next]').addEventListener('click', () => { step(1); play(); });
     track.addEventListener('keydown', (e) => {
@@ -89,10 +93,6 @@
     track.addEventListener('wheel', () => hold(5000), { passive: true });
     box.addEventListener('focusin', () => hold(0));
     box.addEventListener('focusout', (e) => { if (!box.contains(e.relatedTarget)) { held = false; play(); } });
-    let raf = 0;
-    track.addEventListener('scroll', () => {
-      if (!raf) raf = requestAnimationFrame(() => { raf = 0; current.textContent = pad(index() + 1); });
-    }, { passive: true });
     new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; play(); }, { threshold: 0.5 }).observe(track);
     document.addEventListener('visibilitychange', play);
   });

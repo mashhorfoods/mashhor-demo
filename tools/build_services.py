@@ -43,18 +43,45 @@ ADDONS_FOR = {
 HAS_OWN_LIST = {"websites", "marketing", "integrated"}
 # Cover subjects that are off-centre (default: centre).
 FOCUS = {"social": "40% 50%"}
-# Service pages whose sample boards give way to a slideshow of real work
-# from the portfolio: service → (the block it replaces, its tag, the images).
-# Captions and alt text come from where each image already appears on the
-# homepage (the work gallery, the Al Mada tiles), so they are written once.
+# Every service page opens its content with the same slideshow of work:
+# service → (the sample block it replaces, or None to add it on top; that
+# block's tag; the images, real client work first). Alt text comes from
+# where each image already appears on the homepage; captions from the work
+# gallery or CAPTIONS below.
 SHOWCASE = {
     "branding": (r'<div class="c-brandboard"', "div",
                  ["al-mada-identity.webp", "work-1.webp", "work-2.webp", "work-3.webp",
                   "work-4.webp", "work-5.webp", "work-6.webp", "work-7.webp"]),
+    "websites": (r'<div class="c-devices"', "div",
+                 ["al-mada-website.webp", "d01.webp", "t01.webp", "mo1.webp"]),
+    "social": (r'<ul class="c-modules"', "ul",
+               ["al-mada-campaign.webp", "c01.webp", "c02.webp", "c03.webp", "c04.webp", "c05.webp"]),
+    "marketing": (None, None, ["al-mada-campaign.webp", "c02.webp", "c04.webp", "c05.webp"]),
+    "integrated": (None, None, ["al-mada-identity.webp", "al-mada-website.webp",
+                                "al-mada-campaign.webp", "al-mada-profile.webp"]),
 }
+CAPTIONS = {
+    "al-mada-identity.webp": ("Al Mada — the full identity", "المدى — الهوية كاملة"),
+    "al-mada-website.webp": ("Al Mada — the website", "المدى — الموقع الإلكتروني"),
+    "al-mada-campaign.webp": ("Al Mada — the Umrah campaign", "المدى — حملة العمرة"),
+    "al-mada-profile.webp": ("Al Mada — the company profile", "المدى — الملف التعريفي"),
+    "d01.webp": ("Website design — desktop", "تصميم موقع — شاشة مكتبية"),
+    "t01.webp": ("Website design — tablet", "تصميم موقع — جهاز لوحي"),
+    "mo1.webp": ("Website design — phone", "تصميم موقع — جوال"),
+    "c01.webp": ("Content calendar", "روزنامة المحتوى"),
+    "c02.webp": ("Post design", "تصميم منشور"),
+    "c03.webp": ("Reel design", "تصميم ريلز"),
+    "c04.webp": ("Story design", "تصميم قصة"),
+    "c05.webp": ("Monthly performance report", "تقرير الأداء الشهري"),
+}
+# Screens and posters are tall: their frame shows the top (the headline).
+TOP = {"d01.webp", "t01.webp", "mo1.webp", "c01.webp", "c02.webp", "c03.webp", "c04.webp", "c05.webp", "al-mada-campaign.webp"}
 REPLACED = set()  # images of the blocks a slideshow replaced
 # Images that have a smaller copy the slideshow can offer phones.
-SMALLER = {"al-mada-identity.webp": ("al-mada-identity-tile.webp", 900, 1400)}
+SMALLER = {"al-mada-identity.webp": ("al-mada-identity-tile.webp", 900, 1400),
+           "al-mada-website.webp": ("al-mada-website-tile.webp", 900, 1200),
+           "al-mada-campaign.webp": ("al-mada-campaign-tile.webp", 560, 900),
+           "al-mada-profile.webp": ("al-mada-profile-tile.webp", 560, 1200)}
 WA = common.WA + "?text="
 
 
@@ -148,11 +175,13 @@ def read_work(home):
             "caption": (re.search(r'data-lang-copy="en">(.*?)</span>', cap, re.S).group(1),
                         re.search(r'data-lang-copy="ar" lang="ar">(.*?)</span>', cap, re.S).group(1)),
         }
-    tile = re.search(r'<img[^>]*al-mada-identity-tile\.webp[^>]*>', home, re.S).group(0)
-    work["al-mada-identity.webp"] = {
-        "alt": (re.search(r'data-alt-en="([^"]*)"', tile).group(1), re.search(r'data-alt-ar="([^"]*)"', tile).group(1)),
-        "caption": ("Al Mada — the full identity", "المدى — الهوية كاملة"),
-    }
+    # The other images: alt text from wherever the homepage shows them (the
+    # service sections, the Al Mada tiles), captions from CAPTIONS.
+    for m in re.finditer(r'<img\b[^>]*?src="(?:\./|/)?assets/([^"]+)"[^>]*>', home, re.S):
+        name = m.group(1).replace("-tile.webp", ".webp")
+        en, ar = re.search(r'data-alt-en="([^"]*)"', m.group(0)), re.search(r'data-alt-ar="([^"]*)"', m.group(0))
+        if name in CAPTIONS and name not in work and en and ar:
+            work[name] = {"alt": (en.group(1), ar.group(1)), "caption": CAPTIONS[name]}
     return work
 
 
@@ -166,9 +195,9 @@ def slideshow(images, work):
         small = SMALLER.get(name)
         srcset = f' srcset="/assets/{small[0]} {small[1]}w, /assets/{name} {small[2]}w"' if small else ""
         slides.append(f'''            <figure class="c-slides__slide" role="group" aria-roledescription="slide" aria-label="{i} / {n}">
-              <span class="c-slides__frame"><img src="/assets/{name}"{srcset} sizes="(min-width: 64em) 26rem, (min-width: 48em) 46vw, 84vw"
+              <span class="c-slides__frame{' c-slides__frame--top' if name in TOP else ''}"><img src="/assets/{name}"{srcset} sizes="(min-width: 64em) 26rem, (min-width: 48em) 46vw, 84vw"
                 alt="{w["alt"][0]}" data-alt-en="{w["alt"][0]}" data-alt-ar="{w["alt"][1]}" loading="lazy" decoding="async" /></span>
-              <figcaption class="c-slides__caption"><span class="c-slides__num" aria-hidden="true">{i:02d}</span>{bi(*w["caption"])}</figcaption>
+              <figcaption class="c-slides__caption">{bi(*w["caption"])}</figcaption>
             </figure>''')
     prev = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" fill="none" /></svg>'
     nxt = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" fill="none" /></svg>'
@@ -178,7 +207,6 @@ def slideshow(images, work):
 {chr(10).join(slides)}
           </div>
           <div class="c-slides__bar" data-slides-bar hidden>
-            <span class="c-slides__count" aria-hidden="true"><b data-slides-current>01</b> / {n:02d}</span>
             <span class="c-slides__progress" aria-hidden="true"><i></i></span>
             <button class="c-slides__btn u-flip-rtl" type="button" data-slides-prev aria-label="Previous — السابق">{prev}</button>
             <button class="c-slides__btn u-flip-rtl" type="button" data-slides-next aria-label="Next — التالي">{nxt}</button>
@@ -269,9 +297,15 @@ def service_main(s, data, addon_groups, work):
     body = cut(body, r'<p class="c-detail__packages"', "p")
     if sid in SHOWCASE:
         pattern, tag, images = SHOWCASE[sid]
-        a, b = find(body, pattern, tag)
-        REPLACED.update(re.findall(r'src="(?:\./|/)?assets/([^"]+)"', body[a:b]))
-        body = body[:a] + slideshow(images, work) + body[b:]
+        missing = [n for n in images if n not in work]
+        if missing:
+            raise SystemExit(f"build_services: {sid}: no alt text / caption for {missing}")
+        if pattern:
+            a, b = find(body, pattern, tag)
+            REPLACED.update(re.findall(r'src="(?:\./|/)?assets/([^"]+)"', body[a:b]))
+            body = body[:a] + slideshow(images, work) + body[b:]
+        else:
+            body = "\n          " + slideshow(images, work) + body
     body = cut(body, r'<a class="c-btn c-btn--primary c-detail__action"', "a")
     if sid != "integrated":
         body = cut(body, r'<p class="c-detail__more"', "p")
@@ -462,13 +496,11 @@ CSS = CSS_START + """
 .c-slides__slide{display:grid;gap:var(--space-12);margin:0;scroll-snap-align:start}
 .c-slides__frame{display:block;aspect-ratio:4 / 3;overflow:hidden;border:var(--border-hairline);border-radius:var(--radius-lg);background-color:var(--_charcoal-900)}
 .c-slides__frame img{display:block;inline-size:100%;block-size:100%;object-fit:cover;transition:scale 900ms var(--ease-out)}
+.c-slides__frame--top img{object-position:center top}
 .c-slides__slide:hover .c-slides__frame img{scale:1.04}
-.c-slides__caption{display:flex;align-items:baseline;gap:var(--space-12);font-size:var(--text-body-sm);color:var(--color-text-secondary)}
-.c-slides__num{font-family:var(--font-display);font-size:var(--text-label);letter-spacing:var(--tracking-label);color:var(--color-accent)}
+.c-slides__caption{font-size:var(--text-body-sm);color:var(--color-text-secondary)}
 .c-slides__bar{display:flex;align-items:center;gap:var(--space-16)}
 .c-slides__bar[hidden]{display:none}
-.c-slides__count{direction:ltr;font-family:var(--font-display);font-size:var(--text-small);font-variant-numeric:tabular-nums;color:var(--color-text-muted)}
-.c-slides__count b{font-weight:var(--weight-semibold);color:var(--color-text-primary)}
 .c-slides__progress{flex:1;block-size:2px;overflow:hidden;border-radius:2px;background-color:var(--color-border)}
 .c-slides__progress i{display:block;block-size:100%;background-color:var(--color-accent);transform:scaleX(0);transform-origin:left center}
 [dir="rtl"] .c-slides__progress i{transform-origin:right center}
@@ -491,6 +523,7 @@ CSS = CSS_START + """
 @media (max-width:47.99em){.c-svc__actions .c-btn{flex:1 1 100%}}
 .c-svc__head{display:grid;gap:var(--space-12);margin-block-end:var(--space-48)}
 .c-svc__h2{font-family:var(--font-display);font-size:var(--text-h2);font-weight:var(--weight-bold);line-height:var(--leading-heading)}
+.c-svc__body .c-platforms__scope{margin-block-end:var(--space-64)}
 .c-svc__covers{display:grid;gap:var(--space-24);margin-block-start:var(--space-64)}
 .c-svc__caps{display:flex;flex-wrap:wrap;gap:var(--space-12);margin:0;padding:0;list-style:none}
 .c-svc__caps .c-service__cap{display:inline-flex;align-items:center;min-block-size:44px;padding-inline:var(--space-24);border:var(--border-hairline);border-radius:var(--radius-pill);background-color:var(--color-bg-sunken)}
