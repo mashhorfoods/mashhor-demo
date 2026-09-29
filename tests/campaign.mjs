@@ -339,6 +339,13 @@ for (const kind of ['mobile', 'desktop']) {
   const context = await browser.newContext(VIEWPORTS.desktop);
   await context.route('https://plausible.io/**', (route) => route.fulfill({ status: 200, body: '' }));
   const p = await context.newPage();
+  // Every file a page asks for exists — fonts, images and scripts included.
+  const missing = new Set();
+  p.on('response', (r) => { if (r.url().startsWith(BASE) && r.status() >= 400 && !r.url().includes('/nope')) missing.add(`${r.status()} ${r.url().replace(BASE, '')}`); });
+  for (const path of ['/', '/go', '/pricing', '/about', '/story', '/privacy', '/terms', '/accessibility', '/services/branding', '/services/websites', '/services/social', '/services/marketing', '/services/integrated']) {
+    await p.goto(`${BASE}${path}`, { waitUntil: 'networkidle' });
+  }
+  check(missing.size === 0, 'every page: no request for a missing file', [...missing].join(', '));
   await p.goto(`${BASE}/`);
   const cards = await p.$$eval('#services .c-svc-card__link', (els) => els.map((e) => e.getAttribute('href')));
   check(cards.join() === '/services/branding,/services/websites,/services/social,/services/marketing,/services/integrated', 'home: one card per service, linking to its page', cards.join());
@@ -387,8 +394,10 @@ for (const kind of ['mobile', 'desktop']) {
     check(reduced ? lines === 0 : lines === 3, `[${tag}] hero headline ${reduced ? 'stays whole' : 'rises in 3 lines'}`, String(lines));
     check(await p.$eval('.c-hero__headline', (e) => getComputedStyle(e).opacity) === '1', `[${tag}] hero headline visible`);
     if (!reduced) {
+      await p.waitForSelector('html[data-motion="ready"]', { timeout: 5000 });
       await p.evaluate(() => document.querySelector('#work').scrollIntoView({ block: 'center' }));
-      await p.waitForTimeout(300);
+      // It glides only while on screen, after the 1.8 s pause it keeps at each end.
+      await p.waitForTimeout(2200);
       const a = await p.$eval('.c-gallery', (g) => g.scrollLeft);
       await p.waitForTimeout(1500);
       const b = await p.$eval('.c-gallery', (g) => g.scrollLeft);

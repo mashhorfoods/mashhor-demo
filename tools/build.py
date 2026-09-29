@@ -15,6 +15,7 @@ Steps, in order:
     3. apply-site-refinements.py  spacing, pills, WhatsApp button, hero,
                                   profile, privacy, clean links, CSP
     4. motion.py                  the "quiet luxury" motion layer (CSS half)
+       responsive.py              srcset for the supplied site's oversized images
     5. finalize.py                one shared stylesheet + script for every page
                                   (go.html and /admin/ included), CSP, caching
 
@@ -84,6 +85,10 @@ import motion  # noqa: E402
 
 motion.build(SITE)
 print("motion: quiet-luxury layer added")
+
+import responsive  # noqa: E402
+
+responsive.build(SITE)
 
 import finalize  # noqa: E402
 

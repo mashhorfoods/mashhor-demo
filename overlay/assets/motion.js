@@ -35,101 +35,132 @@
   }
   document.querySelectorAll('.c-hero__headline').forEach(splitLines);
 
-  /* 2. Magnetic primary buttons ------------------------------------------ */
-  if (fine.matches) {
-    document.querySelectorAll('.c-btn--primary, .c-wa-fab').forEach((btn) => {
-      btn.addEventListener('pointermove', (e) => {
-        const r = btn.getBoundingClientRect();
-        const x = (e.clientX - r.left - r.width / 2) * 0.18;
-        const y = (e.clientY - r.top - r.height / 2) * 0.3;
-        btn.style.translate = `${x.toFixed(1)}px ${y.toFixed(1)}px`;
+  // Everything below waits until the page has painted: none of it is needed
+  // for the first view, and its setup should not delay it.
+  const later = window.requestIdleCallback ? (fn) => requestIdleCallback(fn, { timeout: 1200 }) : (fn) => setTimeout(fn, 200);
+  later(() => {
+
+    /* 2. Magnetic primary buttons ------------------------------------------ */
+    if (fine.matches) {
+      document.querySelectorAll('.c-btn--primary, .c-wa-fab').forEach((btn) => {
+        btn.addEventListener('pointermove', (e) => {
+          const r = btn.getBoundingClientRect();
+          const x = (e.clientX - r.left - r.width / 2) * 0.18;
+          const y = (e.clientY - r.top - r.height / 2) * 0.3;
+          btn.style.translate = `${x.toFixed(1)}px ${y.toFixed(1)}px`;
+        });
+        btn.addEventListener('pointerleave', () => { btn.style.translate = ''; });
       });
-      btn.addEventListener('pointerleave', () => { btn.style.translate = ''; });
-    });
-  }
+    }
 
-  /* 3. Light that follows the pointer ------------------------------------ */
-  if (fine.matches) {
-    const GLOW = '.c-svc-card__link, .c-tier, .c-bento__link, .c-addon, .c-index__link, .g-option, .g-project__frame, .a-lead';
-    document.addEventListener('pointermove', (e) => {
-      const card = e.target.closest?.(GLOW);
-      if (!card) return;
-      const r = card.getBoundingClientRect();
-      card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-      card.style.setProperty('--my', `${e.clientY - r.top}px`);
-      card.classList.add('m-lit');
-    }, { passive: true });
-    document.addEventListener('pointerout', (e) => {
-      const card = e.target.closest?.(GLOW);
-      if (card && !card.contains(e.relatedTarget)) card.classList.remove('m-lit');
-    }, { passive: true });
-  }
+    /* 3. Light that follows the pointer ------------------------------------ */
+    if (fine.matches) {
+      const GLOW = '.c-svc-card__link, .c-tier, .c-bento__link, .c-addon, .c-index__link, .g-option, .g-project__frame, .a-lead';
+      document.addEventListener('pointermove', (e) => {
+        const card = e.target.closest?.(GLOW);
+        if (!card) return;
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+        card.style.setProperty('--my', `${e.clientY - r.top}px`);
+        card.classList.add('m-lit');
+      }, { passive: true });
+      document.addEventListener('pointerout', (e) => {
+        const card = e.target.closest?.(GLOW);
+        if (card && !card.contains(e.relatedTarget)) card.classList.remove('m-lit');
+      }, { passive: true });
+    }
 
-  /* 4. Galleries that glide on their own --------------------------------- */
-  document.querySelectorAll('.c-gallery').forEach((gallery) => {
-    let dir = getComputedStyle(gallery).direction === 'rtl' ? -1 : 1;
-    let visible = false;
-    let heldUntil = 0;
-    let last = 0;
-    const SPEED = 0.028; // px per ms — about 28 px a second
-    const hold = (ms) => { heldUntil = performance.now() + ms; };
-    ['pointerenter', 'pointerdown', 'focusin', 'wheel', 'touchstart', 'keydown'].forEach((type) => {
-      gallery.addEventListener(type, () => hold(type === 'pointerenter' || type === 'focusin' ? 1e9 : 4000), { passive: true });
-    });
-    ['pointerleave', 'focusout'].forEach((type) => gallery.addEventListener(type, () => hold(1500), { passive: true }));
-    new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; }, { threshold: 0.35 }).observe(gallery);
+    /* 4. Galleries that glide on their own --------------------------------- */
+    // The loop runs only while the gallery is on screen and the tab is shown.
+    // Size and direction are measured when they change (resize, language
+    // switch), never inside the loop, so a frame only writes scrollLeft.
+    document.querySelectorAll('.c-gallery').forEach((gallery) => {
+      const SPEED = 0.028; // px per ms — about 28 px a second
+      let dir = 1;
+      let rtl = false;
+      let max = 0;
+      let visible = false;
+      let heldUntil = 0;
+      let last = 0;
+      let raf = 0;
+      // Position kept as a float: browsers round scrollLeft, and a slow glide
+      // made of sub-pixel steps would otherwise never move. RTL scrolls from 0
+      // towards -max, LTR from 0 towards +max; the glide runs in reading order
+      // and turns back at each end after a pause.
+      let pos = null;
 
-    // Position kept as a float: browsers round scrollLeft, and a slow glide
-    // made of sub-pixel steps would otherwise never move. RTL scrolls from 0
-    // towards -max, LTR from 0 towards +max; the glide runs in reading order
-    // and turns back at each end after a pause.
-    let pos = null;
-    const step = (now) => {
-      const dt = last ? Math.min(now - last, 50) : 0;
-      last = now;
-      const max = gallery.scrollWidth - gallery.clientWidth;
-      if (visible && now > heldUntil && !document.hidden && max > 4) {
-        const rtl = getComputedStyle(gallery).direction === 'rtl';
-        const lo = rtl ? -max : 0;
-        const hi = rtl ? 0 : max;
-        if (pos === null || Math.abs(pos - gallery.scrollLeft) > 2) pos = gallery.scrollLeft;
-        pos += dir * SPEED * dt;
-        if (pos >= hi) { pos = hi; dir = -1; hold(1800); }
-        if (pos <= lo) { pos = lo; dir = 1; hold(1800); }
-        // The gallery snaps to each piece when a person scrolls it; snapping
-        // would pull every small glide step back, so it is off while gliding.
-        gallery.style.scrollSnapType = 'none';
-        gallery.scrollLeft = pos;
-      } else {
+      const measure = () => {
+        rtl = document.documentElement.dir === 'rtl';
+        max = gallery.scrollWidth - gallery.clientWidth;
         pos = null;
-        if (gallery.style.scrollSnapType) gallery.style.scrollSnapType = '';
-      }
-      requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  });
-
-  /* 5. Totals that count to their new value ------------------------------ */
-  document.querySelectorAll('[data-build-once-amount], [data-build-monthly-amount]').forEach((el) => {
-    let shown = Number(el.textContent.replace(/[^\d.]/g, '')) || 0;
-    let writing = false;
-    new MutationObserver(() => {
-      if (writing) return;
-      const target = Number(el.textContent.replace(/[^\d.]/g, '')) || 0;
-      if (target === shown) return;
-      const from = shown;
-      const start = performance.now();
-      const fmt = (n) => Math.round(n).toLocaleString('en-US');
-      const tick = (now) => {
-        const t = Math.min((now - start) / 480, 1);
-        const v = from + (target - from) * (1 - (1 - t) ** 4);
-        writing = true;
-        el.textContent = fmt(v);
-        writing = false;
-        if (t < 1) requestAnimationFrame(tick);
       };
-      shown = target;
-      requestAnimationFrame(tick);
-    }).observe(el, { childList: true, characterData: true, subtree: true });
+      const hold = (ms) => { heldUntil = performance.now() + ms; };
+      // The gallery snaps to each piece when a person scrolls it; snapping
+      // would pull every small glide step back, so it is off while gliding.
+      // Switched once per glide, not per frame (a style write per frame costs
+      // a style pass per frame).
+      let gliding = false;
+      const release = () => {
+        pos = null;
+        if (gliding) { gallery.style.scrollSnapType = ''; gliding = false; }
+      };
+      const step = (now) => {
+        raf = 0;
+        if (!visible || document.hidden) { release(); return; }
+        const dt = last ? Math.min(now - last, 50) : 0;
+        last = now;
+        if (now > heldUntil && max > 4) {
+          const lo = rtl ? -max : 0;
+          const hi = rtl ? 0 : max;
+          if (pos === null || Math.abs(pos - gallery.scrollLeft) > 2) pos = gallery.scrollLeft;
+          pos += dir * SPEED * dt;
+          if (pos >= hi) { pos = hi; dir = -1; hold(1800); }
+          if (pos <= lo) { pos = lo; dir = 1; hold(1800); }
+          if (!gliding) { gallery.style.scrollSnapType = 'none'; gliding = true; }
+          gallery.scrollLeft = pos;
+        } else {
+          release();
+        }
+        raf = requestAnimationFrame(step);
+      };
+      const start = () => { if (!raf && visible && !document.hidden) { last = 0; raf = requestAnimationFrame(step); } };
+
+      ['pointerenter', 'pointerdown', 'focusin', 'wheel', 'touchstart', 'keydown'].forEach((type) => {
+        gallery.addEventListener(type, () => hold(type === 'pointerenter' || type === 'focusin' ? 1e9 : 4000), { passive: true });
+      });
+      ['pointerleave', 'focusout'].forEach((type) => gallery.addEventListener(type, () => hold(1500), { passive: true }));
+      new ResizeObserver(measure).observe(gallery);
+      new MutationObserver(measure).observe(document.documentElement, { attributes: true, attributeFilter: ['dir'] });
+      new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; start(); }, { threshold: 0.35 }).observe(gallery);
+      document.addEventListener('visibilitychange', start);
+      measure();
+      dir = rtl ? -1 : 1;
+    });
+
+    /* 5. Totals that count to their new value ------------------------------ */
+    document.querySelectorAll('[data-build-once-amount], [data-build-monthly-amount]').forEach((el) => {
+      let shown = Number(el.textContent.replace(/[^\d.]/g, '')) || 0;
+      let writing = false;
+      new MutationObserver(() => {
+        if (writing) return;
+        const target = Number(el.textContent.replace(/[^\d.]/g, '')) || 0;
+        if (target === shown) return;
+        const from = shown;
+        const start = performance.now();
+        const fmt = (n) => Math.round(n).toLocaleString('en-US');
+        const tick = (now) => {
+          const t = Math.min((now - start) / 480, 1);
+          const v = from + (target - from) * (1 - (1 - t) ** 4);
+          writing = true;
+          el.textContent = fmt(v);
+          writing = false;
+          if (t < 1) requestAnimationFrame(tick);
+        };
+        shown = target;
+        requestAnimationFrame(tick);
+      }).observe(el, { childList: true, characterData: true, subtree: true });
+    });
+
+    document.documentElement.dataset.motion = 'ready';
   });
 })();

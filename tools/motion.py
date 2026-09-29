@@ -47,12 +47,54 @@ CSS = START + """
 """ + END
 
 
+# The two gold points travelling round the hero's orbit. The supplied site
+# rotates them as SVG circles, which costs a style + layout pass on every
+# frame for as long as the page is open (~380 ms of main-thread work every
+# 5 s on desktop, even scrolled away). As HTML elements turning with `rotate`
+# they animate on the compositor instead: same path, same speeds, no main-
+# thread work. Positions are in the drawing's 0–100 viewBox, i.e. percent.
+SPARKS = [  # (circle as supplied, x, y, diameter, slow)
+    ('<circle class="c-orbit__spark" cx="90" cy="48" r="0.9" />', 90, 48, 1.8, False),
+    ('<circle class="c-orbit__spark c-orbit__spark--slow" cx="52" cy="22" r="0.7" />', 52, 22, 1.4, True),
+]
+SPARK_CSS = """
+/* Orbit points (see motion.py SPARKS): turn round the drawing's centre, 52 48. */
+.m-spin{display:none}
+@media (min-width:48em){
+.m-spin{display:block;position:absolute;inset:0;pointer-events:none;transform-origin:52% 48%;animation:orbit-travel 26s linear infinite}
+.m-spin--slow{animation-duration:38s;animation-direction:reverse;opacity:0.7}
+.m-spin i{position:absolute;left:calc(var(--x) - var(--d) / 2);top:calc(var(--y) - var(--d) / 2);inline-size:var(--d);aspect-ratio:1;border-radius:50%;background-color:var(--color-accent)}
+/* The rings are mirrored in Arabic (scaleX(-1) about the centre): so are these. */
+[dir="rtl"] .m-spin{transform-origin:48% 48%;animation-direction:reverse}
+[dir="rtl"] .m-spin--slow{animation-direction:normal}
+[dir="rtl"] .m-spin i{left:calc(100% - var(--x) - var(--d) / 2)}
+}
+@media (prefers-reduced-motion:reduce){.m-spin{animation:none}}
+"""
+
+
+def sparks(home):
+    """The orbit's SVG sparks → compositor-animated HTML (see SPARKS)."""
+    spans = []
+    for circle, x, y, d, slow in SPARKS:
+        if home.count(circle) != 1:
+            raise SystemExit(f"motion: orbit spark not found as expected: {circle}")
+        home = home.replace(circle, "", 1)
+        cls = "m-spin m-spin--slow" if slow else "m-spin"
+        spans.append(f'<span class="{cls}" aria-hidden="true"><i style="--x:{x}%;--y:{y}%;--d:{d}%"></i></span>')
+    end = home.index("</svg>", home.index('class="c-orbit__rings"')) + len("</svg>")
+    return home[:end] + "\n              " + "\n              ".join(spans) + home[end:]
+
+
 def build(site: pathlib.Path):
     for path in list(site.glob("*.html")) + list(site.glob("services/*.html")):
         if path.name == "go.html":
             continue
         text = path.read_text(encoding="utf-8")
-        new = inject_css(text, CSS)
+        # One shared stylesheet for every page, so the spark rules go everywhere.
+        new = inject_css(text, CSS + SPARK_CSS)
+        if path.name == "index.html":
+            new = sparks(new)
         if new != text:
             path.write_text(new, encoding="utf-8")
 

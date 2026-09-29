@@ -54,6 +54,9 @@ def build(site: pathlib.Path):
     (site / "assets" / css_name).write_text(css.strip() + "\n", encoding="utf-8")
     (site / "assets" / js_name).write_text(js.strip() + "\n", encoding="utf-8")
     link = f'<link rel="stylesheet" href="/assets/{css_name}" />'
+    # /go is Arabic: its text font, requested with the stylesheet instead of
+    # after it (the other pages already preload theirs).
+    go_fonts = '<link rel="preload" href="/assets/fonts/cairo-arabic-var.woff2" as="font" type="font/woff2" crossorigin />'
     # The motion layer (overlay/assets/motion.js) ships hashed the same way.
     motion_src = site / "assets" / "motion.js"
     motion_js = motion_src.read_text(encoding="utf-8")
@@ -73,7 +76,7 @@ def build(site: pathlib.Path):
     a, b = text.find(START), text.find(END)
     if a < 0 or b < 0:
         sys.exit("finalize: SHARED-STYLES markers missing in go.html")
-    text = text[:a] + f"{START}\n    {link}\n{END}" + text[b + len(END):]
+    text = text[:a] + f"{START}\n    {go_fonts}\n    {link}\n{END}" + text[b + len(END):]
     text = re.sub(r'\s*<script type="module" src="/assets/motion\.[a-f0-9]+\.js"></script>', "", text)
     text = text.replace("</head>", f"    {motion}\n  </head>", 1)
     go.write_text(text, encoding="utf-8")

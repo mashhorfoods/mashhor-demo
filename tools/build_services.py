@@ -174,12 +174,12 @@ def cards(data, skip=None):
 
 def cover(sid, lazy):
     """The service's cover image: the card's thumbnail and its page's hero.
-    Two sizes (tools/service-covers/encode.sh makes both); phones take 1200."""
+    Three sizes (tools/service-covers/encode.sh makes them); each screen takes the one it needs."""
     load = 'loading="lazy" decoding="async"' if lazy else 'fetchpriority="high" decoding="async"'
     sizes = "(min-width: 64em) 40rem, 100vw" if lazy else "100vw"
     # Where the subject sits, for the narrow crop phones show of the hero.
     focus = f' style="object-position: {FOCUS[sid]}"' if sid in FOCUS else ""
-    return (f'<img src="/assets/svc-{sid}.webp" srcset="/assets/svc-{sid}-1200.webp 1200w, /assets/svc-{sid}.webp 1600w" '
+    return (f'<img src="/assets/svc-{sid}.webp" srcset="/assets/svc-{sid}-800.webp 800w, /assets/svc-{sid}-1200.webp 1200w, /assets/svc-{sid}.webp 1600w" '
             f'sizes="{sizes}" alt="" width="1600" height="1000"{focus} {load} />')
 
 

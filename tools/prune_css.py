@@ -28,6 +28,8 @@ DEAD = {
     # Controls in the supplied stylesheet that no page has.
     "c-choice", "c-choice__input", "c-choice__label", "c-segmented", "c-segmented__option",
     "c-counter", "c-track",
+    # The orbit's SVG sparks, now HTML elements (motion.py SPARKS).
+    "c-orbit__spark", "c-orbit__spark--slow",
 }
 GROUPING = ("@media", "@supports", "@container", "@layer", "@document")
 

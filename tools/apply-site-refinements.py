@@ -136,6 +136,8 @@ PRIVACY = [
 def clean_links(text):
     """Every "./x" link, asset, font and script path becomes root-based "/x"."""
     text = re.sub(r"""(["'(])\./""", r"\1/", text)
+    # Bare "assets/…" too: on /services/* it would resolve to /services/assets/.
+    text = re.sub(r'((?:href|src)=")assets/', r"\1/assets/", text)
     text = text.replace("url(assets/", "url(/assets/")
     return text
 
