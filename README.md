@@ -32,7 +32,7 @@ overlay/     what this project adds: go.html, lead.php, admin/, _lib/ (PHP share
              by lead.php and admin, never served), _leads/, assets/ (go.js,
              motion.js, viewer.js, forms.js, images)
 tools/css/   the project's stylesheets, one per build step (services, story-hero,
-             about, refinements, motion, sparks, viewer), injected in that order
+             about, cases, refinements, motion, sparks, viewer), injected in that order
 tools/build.py   →   site/
 ```
 
@@ -42,11 +42,12 @@ tools/build.py   →   site/
 | Step | Script | What it does |
 | --- | --- | --- |
 | 1 | `build_services.py`, `streamline.py` | One page per service at `/services/<id>` (details, showcase, what it covers, packages and prices, related add-ons, other services). The homepage gets a single services section of cards; the old accordion, the five detail sections and the add-ons leave it. `/pricing` keeps only pricing matters: what moves a price, an index linking to the service pages, every add-on, the build-your-own estimator and billing. |
+| 1b | `story_hero.py`, `about_page.py`, `cases.py` | The Story page's hero, the About page, and the case studies (`/work`, `/work/<slug>` — see below). |
 | 2 | `refinements.py` | Spacing, pill buttons, WhatsApp button on phones, hero copy, profile, privacy note, root-based clean links, 301s from `.html`. |
 | 3 | `motion.py` | "Quiet luxury" motion layer, stylesheet half: one rhythm (480/900 ms, expo ease-out) with a light blur on the site's own reveal; page-to-page cross-fades with the header held still and each service card growing into its page (`@view-transition`); long text and the campaign page surfacing with the scroll (scroll-driven CSS); hero lines rising; pointer light on cards. Script half: `overlay/assets/motion.js` (line split, magnetic primary buttons, pointer light, self-gliding galleries that stop when touched, counting totals). All off under reduced motion; nothing hidden without it. |
 | 4 | `finalize.py`, `prune_css.py` | One shared, content-hashed `site.<hash>.css` / `.js` / `motion.<hash>.js` for every page (go and admin included), long caching, CSP hashes. The stylesheet loses the rules of components no page uses (listed by exact class name in `prune_css.py`; the build stops if a page uses one again). |
 
-Photographs are encoded once with `python3 tools/images.py covers|about`
+Photographs are encoded once with `python3 tools/images.py covers|about|board|cases`
 (the results are committed; the build never encodes). Shared helpers live in
 `tools/common.py`: the page list, CSS injection, `drop()` for supplied files
 that no longer ship.
@@ -145,11 +146,39 @@ What WhatsApp, X and the rest show when a page is shared: one 1200×630 card
 per page, all in one design (`tools/share-cards/base.css`) — the brand, the
 page's own headline in Arabic with its accent in yellow, the English line,
 a few facts and the page's address. Home, /go, Story, About, Pricing and
-each service have their own; privacy, terms and accessibility use the
+each service, /work and each case study have their own; privacy, terms and accessibility use the
 homepage's. The pricing card's prices and each service card's headline and
 starting price are read from the built site, so run the build, then
 `node tools/share-cards/render.mjs`, whenever those change (the cards land
 in `overlay/assets/share-*.jpg`).
+
+## Case studies — /work
+
+`tools/cases.py` holds the studies (identity systems, editorial, information
+design, Talk About Sudan, digital campaigns), each in English and Arabic and
+told as Pixora's team: overview, challenge, what we did, how it ran, key
+decisions, outcome, impact. No numbers the studies cannot prove. From it the
+build writes:
+
+- `/work` — the hub: the Al Mada story as the featured card, then one card
+  per study, filtered by discipline (identity, editorial, information,
+  digital) without reloading — plain radio buttons and CSS, so it works
+  without JavaScript too. The menu's "Case studies" and the homepage's
+  "All case studies" link lead here.
+- `/work/<slug>` — one page per study: its cover beside the title (the card's
+  cover grows into it between pages), a contents list that stays beside the
+  text on wide screens (a row of links on phones) and marks the section being
+  read, then two more studies and the contact call.
+
+The covers are HTML scenes in the site's colours
+(`tools/share-cards/case-cover.html?s=<slug>`), rendered and encoded with
+
+    node tools/share-cards/render.mjs covers && python3 tools/images.py cases
+
+To use real photographs instead, save them as
+`tools/share-cards/out/case-<slug>.png` (16:10) and run only the second
+command. To add a study, add an entry to `CASES` with a new slug and a scene
+(or a photograph) for its cover.
 
 ## Case study hero
 

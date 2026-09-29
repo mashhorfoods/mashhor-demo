@@ -25,7 +25,7 @@ SITE, OUT = ROOT / "site", ROOT / "dist" / "pages"
 LEAVE_OUT = {"lead.php", "admin", "_leads", ".htaccess"}
 # The site's own top-level paths; anything else starting with "/" is text
 # ("/month") or protocol-relative ("//") and stays as it is.
-ROUTE = r"(?=assets/|services/|pricing|about|story|privacy|terms|accessibility|go\b|#)"
+ROUTE = r"(?=assets/|services/|work\b|pricing|about|story|privacy|terms|accessibility|go\b|#)"
 
 
 def rebase(text, base, kind):

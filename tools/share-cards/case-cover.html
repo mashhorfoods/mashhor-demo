@@ -1,0 +1,107 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="base.css"><style>
+/* A case study's cover (1600×1000), drawn from the identity: charcoal, gold,
+   the site's type. render.mjs opens it with ?s=<slug>; the matching scene shows. */
+html,body{width:1600px;height:1000px}
+body{background:#141414;overflow:hidden}
+.bg{position:absolute;inset:0;background:radial-gradient(900px 620px at 50% 46%,rgba(244,209,63,.14),transparent 70%),radial-gradient(1200px 380px at 50% 112%,rgba(244,209,63,.07),transparent 70%)}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:80px 80px;mask-image:radial-gradient(circle at 50% 50%,#000 30%,transparent 75%)}
+.scene{position:absolute;inset:0;display:none}
+.p{position:absolute;border-radius:18px;box-shadow:0 40px 80px -30px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.07)}
+.gold{background:#f4d13f}.ink{background:#1c1c1c}.paper{background:#efe9dc}
+.line{position:absolute;height:10px;border-radius:5px;background:rgba(255,255,255,.14)}
+.pline{position:absolute;height:9px;border-radius:5px;background:rgba(20,20,20,.18)}
+.word{font-family:Poppins;font-weight:700;color:#fff;letter-spacing:.02em}.word b{color:#f4d13f}
+/* Brand systems */
+#brand-identity-systems .mono{left:590px;top:250px;width:420px;height:420px;border-radius:64px;display:grid;place-items:center;background:#1a1a1a;border:1px solid rgba(244,209,63,.4)}
+#brand-identity-systems .mono span{font-family:Poppins;font-weight:700;font-size:250px;color:#f4d13f;line-height:1}
+#brand-identity-systems .sw{width:150px;height:300px;top:300px;border-radius:22px}
+#brand-identity-systems .card{width:380px;height:220px;border-radius:18px;display:grid;place-items:center}
+/* Editorial */
+#editorial-publication-design .spread{left:330px;top:210px;width:940px;height:600px;display:flex;border-radius:10px;overflow:hidden;transform:rotate(-3deg)}
+#editorial-publication-design .page{flex:1;position:relative;background:#efe9dc}
+#editorial-publication-design .page + .page{background:#e8e1d2;box-shadow:inset 18px 0 30px -18px rgba(0,0,0,.35)}
+/* Information */
+#information-design .panel{background:#1c1c1c;border-radius:22px}
+#information-design .bar{position:absolute;bottom:60px;width:56px;border-radius:10px 10px 4px 4px}
+/* Digital */
+#digital-campaigns .phone{width:300px;height:600px;border-radius:44px;background:#0d0d0d;border:5px solid #2e2e2e;padding:16px}
+#digital-campaigns .scr{width:100%;height:100%;border-radius:30px;overflow:hidden;background:#1b1b1b;position:relative}
+</style></head><body><div class="bg"></div><div class="grid"></div>
+
+<!-- Brand identity systems: a monogram, a fan of swatches, business cards -->
+<div class="scene" id="brand-identity-systems">
+ <div class="p sw" style="left:250px;background:#f8e07a;transform:rotate(-14deg)"></div>
+ <div class="p sw" style="left:300px;background:#f4d13f;transform:rotate(-7deg)"></div>
+ <div class="p sw" style="left:350px;background:#b9991f;transform:rotate(0deg)"></div>
+ <div class="p sw" style="left:400px;background:#262626;transform:rotate(7deg)"></div>
+ <div class="p mono"><span>Aa</span></div>
+ <div class="p card gold" style="left:1080px;top:250px;transform:rotate(8deg)"><div style="position:absolute;left:34px;right:34px;bottom:40px"><div class="pline" style="position:static;width:60%;margin-bottom:12px"></div><div class="pline" style="position:static;width:40%"></div></div></div>
+ <div class="p card ink" style="left:1040px;top:470px;transform:rotate(-5deg);border:1px solid rgba(244,209,63,.35)"><div style="width:74px;height:74px;border-radius:18px;background:#f4d13f"></div></div>
+</div>
+
+<!-- Editorial & publication design: an open report spread -->
+<div class="scene" id="editorial-publication-design">
+ <div class="p ink" style="left:1080px;top:160px;width:360px;height:500px;transform:rotate(7deg);border-radius:10px;overflow:hidden"><div style="position:absolute;inset:0 0 55% 0;background:#f4d13f"></div><div class="line" style="left:34px;top:300px;width:220px;height:22px;background:rgba(255,255,255,.7)"></div><div class="line" style="left:34px;top:340px;width:160px"></div></div>
+ <div class="p spread">
+  <div class="page">
+   <div style="position:absolute;left:44px;top:50px;width:120px;height:14px;border-radius:7px;background:#b9991f"></div>
+   <div style="position:absolute;left:44px;top:90px;width:360px;height:40px;border-radius:8px;background:#1c1c1c"></div>
+   <div style="position:absolute;left:44px;top:144px;width:280px;height:40px;border-radius:8px;background:#1c1c1c"></div>
+   <div style="position:absolute;left:44px;top:220px;width:382px;height:190px;border-radius:10px;background:#f4d13f"></div>
+   <div class="pline" style="left:44px;top:440px;width:382px"></div><div class="pline" style="left:44px;top:466px;width:382px"></div><div class="pline" style="left:44px;top:492px;width:300px"></div><div class="pline" style="left:44px;top:518px;width:340px"></div>
+  </div>
+  <div class="page">
+   <div class="pline" style="left:44px;top:60px;width:180px"></div><div class="pline" style="left:44px;top:86px;width:180px"></div><div class="pline" style="left:44px;top:112px;width:150px"></div><div class="pline" style="left:44px;top:138px;width:180px"></div><div class="pline" style="left:44px;top:164px;width:120px"></div>
+   <div class="pline" style="left:250px;top:60px;width:180px"></div><div class="pline" style="left:250px;top:86px;width:180px"></div><div class="pline" style="left:250px;top:112px;width:160px"></div><div class="pline" style="left:250px;top:138px;width:180px"></div>
+   <div style="position:absolute;left:44px;top:220px;width:386px;height:140px;border-radius:10px;background:#1c1c1c;display:flex;align-items:flex-end;gap:14px;padding:22px"><i style="flex:1;height:40%;background:#f4d13f;border-radius:4px"></i><i style="flex:1;height:70%;background:#f4d13f;border-radius:4px"></i><i style="flex:1;height:55%;background:#b9991f;border-radius:4px"></i><i style="flex:1;height:90%;background:#f4d13f;border-radius:4px"></i></div>
+   <div style="position:absolute;left:44px;top:396px;width:92px;height:92px;border-radius:50%;border:14px solid #1c1c1c;border-right-color:#b9991f"></div><div class="pline" style="left:160px;top:420px;width:220px"></div><div class="pline" style="left:160px;top:446px;width:160px"></div>
+   <div class="pline" style="left:44px;top:500px;width:300px"></div><div class="pline" style="left:44px;top:526px;width:240px"></div>
+  </div>
+ </div>
+</div>
+
+<!-- Information design: charts that answer a question -->
+<div class="scene" id="information-design">
+ <div class="p panel" style="left:190px;top:230px;width:560px;height:540px">
+  <div class="line" style="left:44px;top:50px;width:200px;height:14px;background:#f4d13f"></div><div class="line" style="left:44px;top:80px;width:300px"></div>
+  <div class="bar" style="left:60px;height:120px;background:#b9991f"></div><div class="bar" style="left:140px;height:190px;background:#f4d13f"></div><div class="bar" style="left:220px;height:150px;background:#b9991f"></div><div class="bar" style="left:300px;height:270px;background:#f4d13f"></div><div class="bar" style="left:380px;height:220px;background:#b9991f"></div><div class="bar" style="left:460px;height:330px;background:#f4d13f"></div>
+ </div>
+ <div class="p panel" style="left:800px;top:170px;width:430px;height:360px;display:grid;place-items:center">
+  <svg width="260" height="260" viewBox="0 0 42 42"><circle cx="21" cy="21" r="15.9" fill="none" stroke="#2e2e2e" stroke-width="5"/><circle cx="21" cy="21" r="15.9" fill="none" stroke="#f4d13f" stroke-width="5" stroke-dasharray="62 38" stroke-dashoffset="25" stroke-linecap="round"/><circle cx="21" cy="21" r="15.9" fill="none" stroke="#b9991f" stroke-width="5" stroke-dasharray="18 82" stroke-dashoffset="-37" stroke-linecap="round"/></svg>
+ </div>
+ <div class="p panel" style="left:800px;top:570px;width:620px;height:230px">
+  <svg style="position:absolute;inset:30px 40px" width="540" height="170" viewBox="0 0 540 170"><polyline points="0,150 90,120 180,130 270,70 360,90 450,30 540,45" fill="none" stroke="#f4d13f" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/><g fill="#141414" stroke="#f4d13f" stroke-width="4"><circle cx="90" cy="120" r="9"/><circle cx="270" cy="70" r="9"/><circle cx="450" cy="30" r="9"/></g></svg>
+ </div>
+ <div class="p" style="left:1270px;top:170px;width:150px;height:360px;background:#f4d13f;border-radius:22px;display:grid;place-items:center"><span class="word" style="color:#141414;font-size:64px;writing-mode:vertical-rl;transform:rotate(180deg)">DATA</span></div>
+</div>
+
+<!-- Talk About Sudan: a field of dots, the evidence highlighted, editorial cards -->
+<div class="scene" id="talk-about-sudan">
+ <svg style="position:absolute;left:140px;top:150px" width="700" height="700" viewBox="0 0 700 700" id="dots"></svg>
+ <div class="p ink" style="left:900px;top:190px;width:500px;height:300px;border:1px solid rgba(255,255,255,.08)"><div style="position:absolute;left:40px;top:40px;width:90px;height:12px;border-radius:6px;background:#f4d13f"></div><div class="line" style="left:40px;top:80px;width:380px;height:26px;background:rgba(255,255,255,.75)"></div><div class="line" style="left:40px;top:120px;width:300px;height:26px;background:rgba(255,255,255,.75)"></div><div class="line" style="left:40px;top:180px;width:410px"></div><div class="line" style="left:40px;top:204px;width:360px"></div><div class="line" style="left:40px;top:228px;width:390px"></div></div>
+ <div class="p gold" style="left:960px;top:530px;width:440px;height:260px;transform:rotate(-3deg)"><svg style="position:absolute;left:40px;top:34px" width="84" height="104" viewBox="0 0 24 30"><path d="M12 29s10-10.2 10-17A10 10 0 0 0 2 12c0 6.8 10 17 10 17z" fill="#141414"/><circle cx="12" cy="12" r="4" fill="#f4d13f"/></svg><div class="pline" style="left:150px;top:60px;width:230px;height:18px;background:rgba(20,20,20,.55)"></div><div class="pline" style="left:150px;top:92px;width:170px;height:18px;background:rgba(20,20,20,.55)"></div><div class="pline" style="left:40px;top:160px;width:300px;background:rgba(20,20,20,.35)"></div><div class="pline" style="left:40px;top:186px;width:220px;background:rgba(20,20,20,.35)"></div></div>
+</div>
+
+<!-- Digital communication campaigns: phones, posts, motion -->
+<div class="scene" id="digital-campaigns">
+ <div class="p phone" style="left:360px;top:230px;transform:rotate(-10deg)"><div class="scr" style="background:linear-gradient(160deg,#262626,#141414)"><div style="position:absolute;inset:40px 26px auto;height:230px;border-radius:18px;background:#f4d13f"></div><div class="line" style="left:26px;top:300px;width:200px;height:18px;background:rgba(255,255,255,.75)"></div><div class="line" style="left:26px;top:334px;width:150px"></div></div></div>
+ <div class="p phone" style="left:650px;top:170px;z-index:2"><div class="scr"><div style="position:absolute;inset:0;background:radial-gradient(240px 200px at 50% 40%,rgba(244,209,63,.35),transparent 70%)"></div><div style="position:absolute;left:50%;top:44%;width:110px;height:110px;margin:-55px 0 0 -55px;border-radius:50%;background:#f4d13f;display:grid;place-items:center"><div style="width:0;height:0;border-left:34px solid #141414;border-top:22px solid transparent;border-bottom:22px solid transparent;margin-left:10px"></div></div><div style="position:absolute;left:26px;right:26px;bottom:40px;height:8px;border-radius:4px;background:rgba(255,255,255,.18)"><i style="display:block;width:62%;height:100%;border-radius:4px;background:#f4d13f"></i></div></div></div>
+ <div class="p phone" style="left:940px;top:230px;transform:rotate(10deg)"><div class="scr"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:20px"><i style="aspect-ratio:1;border-radius:10px;background:#f4d13f"></i><i style="aspect-ratio:1;border-radius:10px;background:#2e2e2e"></i><i style="aspect-ratio:1;border-radius:10px;background:#2e2e2e"></i><i style="aspect-ratio:1;border-radius:10px;background:#b9991f"></i><i style="aspect-ratio:1;border-radius:10px;background:#b9991f"></i><i style="aspect-ratio:1;border-radius:10px;background:#f4d13f"></i><i style="aspect-ratio:1;border-radius:10px;background:#2e2e2e"></i><i style="aspect-ratio:1;border-radius:10px;background:#f4d13f"></i></div></div></div>
+</div>
+
+<script>
+const scene = document.getElementById(new URLSearchParams(location.search).get('s'));
+if (scene) scene.style.display = 'block';
+const dots = document.getElementById('dots');
+if (dots) {
+  // A deterministic field of dots, with a gold cluster: the evidence the series draws out.
+  let s = 7; const rnd = () => (s = (s * 9301 + 49297) % 233280) / 233280;
+  for (let y = 20; y < 700; y += 34) for (let x = 20; x < 700; x += 34) {
+    const d = Math.hypot(x - 350, y - 360);
+    if (d > 330 + rnd() * 40) continue;
+    const hot = Math.hypot(x - 420, y - 300) < 120 && rnd() > 0.25;
+    dots.insertAdjacentHTML('beforeend', `<circle cx="${x}" cy="${y}" r="${hot ? 9 : 5}" fill="${hot ? '#f4d13f' : 'rgba(255,255,255,.22)'}"/>`);
+  }
+}
+</script>
+</body></html>

@@ -303,6 +303,26 @@
       }).observe(el, { childList: true, characterData: true, subtree: true });
     });
 
+    /* 6. A case study's contents follow the reading ------------------------ */
+    // The section being read is marked in the contents beside it (aria-current).
+    const toc = document.querySelector('.c-case__toc');
+    if (toc) {
+      // The last section whose top has passed a third of the way down the screen.
+      const entries = [...toc.querySelectorAll('a[href^="#"]')]
+        .map((a) => [a, document.getElementById(a.getAttribute('href').slice(1))])
+        .filter(([, section]) => section);
+      let queued = false;
+      const mark = () => {
+        queued = false;
+        const line = innerHeight / 3;
+        let current = null;
+        entries.forEach(([a, section]) => { if (section.getBoundingClientRect().top <= line) current = a; });
+        entries.forEach(([a]) => (a === current ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current')));
+      };
+      addEventListener('scroll', () => { if (!queued) { queued = true; requestAnimationFrame(mark); } }, { passive: true });
+      mark();
+    }
+
     document.documentElement.dataset.motion = 'ready';
   });
 })();

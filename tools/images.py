@@ -6,6 +6,7 @@ build itself never encodes anything (the results are committed).
     python3 tools/images.py covers [folder]   # service covers
     python3 tools/images.py about  <folder>   # About photographs
     python3 tools/images.py board             # the Pixora identity board
+    python3 tools/images.py cases             # the case study covers
 
   covers  <folder>/svc-<id>.png|.jpg (16:10, at least 1600 wide; default
           tools/service-covers/out) → svc-<id>.webp (1600×1000) and
@@ -17,6 +18,9 @@ build itself never encodes anything (the results are committed).
   board   tools/share-cards/out/pixora-board.png (rendered by
           tools/share-cards/render.mjs, 1800×1200) → pixora-board.webp and
           pixora-board-900.webp (the campaign page's hero).
+
+  cases   tools/share-cards/out/case-<slug>.png (rendered by render.mjs,
+          1600×1000) → case-<slug>.webp and case-<slug>-800.webp.
 
 ffmpeg does the work (FFMPEG=/path/to/ffmpeg if it is not on the PATH).
 """
@@ -59,6 +63,13 @@ def board():
     print("overlay/assets/pixora-board.webp (+ -900)")
 
 
+def cases():
+    for src in sorted((ROOT / "tools" / "share-cards" / "out").glob("case-*.png")):
+        webp(src, f"{src.stem}.webp", "scale=1600:1000:flags=lanczos", 82)
+        webp(src, f"{src.stem}-800.webp", "scale=800:500:flags=lanczos", 82)
+        print(f"overlay/assets/{src.stem}.webp (+ -800)")
+
+
 if __name__ == "__main__":
     kind, *rest = sys.argv[1:] or [""]
     if kind == "covers":
@@ -67,5 +78,7 @@ if __name__ == "__main__":
         about(pathlib.Path(rest[0]))
     elif kind == "board":
         board()
+    elif kind == "cases":
+        cases()
     else:
         sys.exit(__doc__)

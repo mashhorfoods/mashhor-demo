@@ -144,6 +144,8 @@ REDIRECTS = r"""  # Clean addresses: /pricing.html → /pricing, /index.html →
   RewriteCond %{THE_REQUEST} \s/+([^\s?]+?)\.html[\s?] [NC]
   RewriteCond %1 !^404$
   RewriteRule ^ /%1 [R=301,L]
+  # /work is a page and also the folder of its case studies: /work/ is the page.
+  RewriteRule ^work/$ /work [R=301,L]
 
 """
 

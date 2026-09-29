@@ -28,10 +28,10 @@ def inject_css(page, css):
 
 
 def pages(site, go=False):
-    """The site's pages — every .html at the top and in services/ — in a fixed
-    order. The campaign page (go.html) carries its own copy and styles, so it
+    """The site's pages — every .html at the top, in services/ and in work/ —
+    in a fixed order. The campaign page (go.html) carries its own copy and styles, so it
     is left out unless asked for."""
-    found = sorted(list(site.glob("*.html")) + list(site.glob("services/*.html")))
+    found = sorted(list(site.glob("*.html")) + list(site.glob("services/*.html")) + list(site.glob("work/*.html")))
     return [p for p in found if go or p.name != "go.html"]
 
 

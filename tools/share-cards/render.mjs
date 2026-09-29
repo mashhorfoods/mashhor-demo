@@ -1,28 +1,33 @@
 // Renders the link-preview cards (1200×630) into overlay/assets, one design
 // for all of them (base.css):
-//   share-home.jpg, share-go.jpg, share-story.jpg, share-about.jpg
-//                                    from home.html / go.html / story.html / about.html
+//   share-home.jpg, share-go.jpg, share-story.jpg, share-about.jpg, share-work.jpg
+//                                    from home.html / go.html / story.html / about.html / work.html
 //   share-pricing.jpg                from pricing.html, its price tiles filled
 //                                    from the built pricing page
 //   share-<service>.jpg              from service.html, one per service, filled
 //                                    with the service's cover, name, headline
 //                                    and starting price as they appear on the
 //                                    built site
+//   share-case-<slug>.jpg            from service.html too, one per case study,
+//                                    with its cover, category, title and (English) summary
 // It also renders the Pixora identity board (board.html, 1800×1200) to
 // tools/share-cards/out/pixora-board.png; `python3 tools/images.py board`
 // encodes it for the site (the campaign page's hero) — do that before this
 // script's cards, since share-go.jpg shows the encoded board.
 // Run the build first (the prices and headlines are read from site/).
 //   node tools/share-cards/render.mjs [board]   (CHROMIUM=/path/to/chrome if needed;
-//                                               "board" renders the board only)
+//                                               "board"/"covers" render the board
+//                                               and case covers only)
 import { chromium } from 'playwright';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { readFileSync } from 'node:fs';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(here, '..', '..');
 const out = path.join(root, 'overlay', 'assets');
 const site = (p) => `file://${path.join(root, 'site', p)}`;
 const SERVICES = { branding: 'center', websites: 'center', social: '40% 50%', marketing: 'center', integrated: 'center' };
+const CASES = [...readFileSync(path.join(here, '..', 'cases.py'), 'utf8').matchAll(/"slug": "([^"]+)"/g)].map((m) => m[1]);
 const BILLING = { billingOnce: 'مرة واحدة', billingMonthly: 'شهريًا' };
 const browser = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
 const page = await browser.newPage({ viewport: { width: 1200, height: 630 } });
@@ -43,8 +48,22 @@ const shoot = async (file) => {
   await bp.screenshot({ path: path.join(here, 'out', 'pixora-board.png') });
   await bp.close();
   console.log('out/pixora-board.png');
-  if (process.argv[2] === 'board') { await browser.close(); process.exit(0); }
 }
+
+// The case study covers (case-cover.html?s=<slug>, 1600×1000), one per study in
+// tools/cases.py; `python3 tools/images.py cases` encodes them.
+{
+  const cp = await browser.newPage({ viewport: { width: 1600, height: 1000 } });
+  for (const slug of CASES) {
+    await cp.goto(`file://${path.join(here, 'case-cover.html')}?s=${slug}`);
+    await cp.evaluate(() => document.fonts.ready);
+    await cp.waitForTimeout(200);
+    await cp.screenshot({ path: path.join(here, 'out', `case-${slug}.png`) });
+    console.log(`out/case-${slug}.png`);
+  }
+  await cp.close();
+}
+if (['board', 'covers'].includes(process.argv[2])) { await browser.close(); process.exit(0); }
 
 // "From" prices, per service, as the pricing page lists them.
 const reader = await browser.newPage();
@@ -59,7 +78,7 @@ const prices = await reader.$$eval('.c-index__link', (links) => links.filter((a)
 })));
 if (prices.length < 4) throw new Error(`pricing: expected the service index, found ${prices.length} entries`);
 
-for (const name of ['home', 'go', 'story', 'about']) {
+for (const name of ['home', 'go', 'story', 'about', 'work']) {
   await page.goto(`file://${path.join(here, `${name}.html`)}`);
   await shoot(`share-${name}.jpg`);
 }
@@ -95,5 +114,24 @@ for (const [id, focus] of Object.entries(SERVICES)) {
   }, { t, id, focus, img: `file://${path.join(out, `svc-${id}.webp`)}`,
        from: p ? `تبدأ من ${p.amount} ${p.currency}` : 'الباقات والأسعار' });
   await shoot(`share-${id}.jpg`);
+}
+
+for (const slug of CASES) {
+  await reader.goto(site(`work/${slug}.html`), { waitUntil: 'domcontentloaded' });
+  const t = await reader.evaluate(() => {
+    const hero = document.querySelector('.c-case-hero');
+    const ar = (sel) => hero.querySelector(`${sel} [data-lang-copy="ar"]`).textContent.trim();
+    return { name: ar('.c-detail__eyebrow'), h1: ar('h1'), en: hero.querySelector('.c-detail__lead [data-lang-copy="en"]').textContent.trim() };
+  });
+  await page.goto(`file://${path.join(here, 'service.html')}`);
+  await page.evaluate(({ t, slug, img }) => {
+    document.getElementById('img').src = img;
+    document.getElementById('name').textContent = t.name;
+    document.getElementById('h1').textContent = t.h1;
+    document.getElementById('en').textContent = t.en;
+    document.querySelector('.foot').innerHTML = '<span>دراسة حالة</span><span>من المشكلة إلى النتيجة</span><span>عربي / English</span>';
+    document.getElementById('path').textContent = `/work/${slug}`;
+  }, { t, slug, img: `file://${path.join(out, `case-${slug}.webp`)}` });
+  await shoot(`share-case-${slug}.jpg`);
 }
 await browser.close();

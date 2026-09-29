@@ -35,6 +35,9 @@ const VIEWPORTS = {
 
 // A browser context on the site: analytics stubbed (it is external), and the
 // page's language chosen up front when a test needs one.
+// The case studies, as tools/cases.py lists them.
+const CASES = [...readFileSync(path.join(here, '..', 'tools', 'cases.py'), 'utf8').matchAll(/"slug": "([^"]+)"/g)].map((m) => m[1]);
+
 async function siteContext(browser, options, lang) {
   const context = await browser.newContext(options);
   await context.route('https://plausible.io/**', (route) => route.fulfill({ status: 200, body: '' }));
@@ -346,7 +349,7 @@ for (const kind of ['mobile', 'desktop']) {
   // Every file a page asks for exists — fonts, images and scripts included.
   const missing = new Set();
   p.on('response', (r) => { if (r.url().startsWith(BASE) && r.status() >= 400 && !r.url().includes('/nope')) missing.add(`${r.status()} ${r.url().replace(BASE, '')}`); });
-  for (const path of ['/', '/go', '/pricing', '/about', '/story', '/privacy', '/terms', '/accessibility', '/services/branding', '/services/websites', '/services/social', '/services/marketing', '/services/integrated']) {
+  for (const path of ['/', '/go', '/pricing', '/about', '/story', '/privacy', '/terms', '/accessibility', '/services/branding', '/services/websites', '/services/social', '/services/marketing', '/services/integrated', '/work', ...CASES.map((c) => `/work/${c}`)]) {
     await p.goto(`${BASE}${path}`, { waitUntil: 'networkidle' });
   }
   check(missing.size === 0, 'every page: no request for a missing file', [...missing].join(', '));
@@ -357,7 +360,7 @@ for (const kind of ['mobile', 'desktop']) {
   const covers = await p.$$eval('#services .c-svc-card__media', (els) => els.map((e) => [e.style.viewTransitionName, e.querySelector('img')?.getAttribute('src')]));
   check(covers.length === 5 && covers.every(([n, src]) => src === `/assets/${n}.webp`), 'home: every service card carries its cover, named for the transition', JSON.stringify(covers));
   // Every page's link preview is its own card (or the homepage's), and it is on the site.
-  for (const [page, card] of [['/', 'home'], ['/go', 'go'], ['/story', 'story'], ['/about', 'about'], ['/pricing', 'pricing'], ['/privacy', 'home'], ['/terms', 'home'], ['/accessibility', 'home']]) {
+  for (const [page, card] of [['/', 'home'], ['/go', 'go'], ['/story', 'story'], ['/about', 'about'], ['/pricing', 'pricing'], ['/work', 'work'], ...CASES.map((c) => [`/work/${c}`, `case-${c}`]), ['/privacy', 'home'], ['/terms', 'home'], ['/accessibility', 'home']]) {
     const html = await (await fetch(`${BASE}${page}`)).text();
     const og = (html.match(/property="og:image" content="([^"]+)"/) || [])[1];
     const tw = (html.match(/name="twitter:image" content="([^"]+)"/) || [])[1];
@@ -579,6 +582,51 @@ for (const kind of ['mobile', 'desktop']) {
     const hero = await bp.$eval('.g-hero__frame img', (i) => ({ src: i.currentSrc.split('/').pop(), ok: i.complete && i.naturalWidth > 0, zoom: i.classList.contains('is-zoomable') }));
     check(/^pixora-board(-900)?\.webp$/.test(hero.src) && hero.ok && hero.zoom, '/go: hero is the Pixora identity board, zoomable', JSON.stringify(hero));
     await bc.close();
+  }
+  // Case studies: a hub that filters by discipline without reloading, and a
+  // page per study that reads in the same order every time.
+  for (const [kind, lang] of [['desktop', 'en'], ['mobile', 'ar']]) {
+    const cc = await siteContext(browser, VIEWPORTS[kind], lang);
+    const cp = await cc.newPage();
+    const errs = [];
+    cp.on('pageerror', (e) => errs.push(e.message));
+    await cp.goto(`${BASE}/work`, { waitUntil: 'networkidle' });
+    const shown = () => cp.$$eval('.c-case-card', (els) => els.filter((e) => e.offsetParent).length);
+    check(await cp.locator('h1').count() === 1 && await shown() === CASES.length + 1, `[${kind}] /work: every study, and the Al Mada story, as a card`, String(await shown()));
+    const hrefs = await cp.$$eval('.c-case-card a', (els) => els.map((a) => a.getAttribute('href')));
+    check(hrefs.includes('/story') && CASES.every((c) => hrefs.includes(`/work/${c}`)), `[${kind}] /work: cards link to each study`, hrefs.join());
+    await cp.click('label[for="kind-editorial"]');
+    const editorial = await cp.$$eval('.c-case-card', (els) => els.filter((e) => e.offsetParent).map((e) => e.dataset.kinds));
+    check(editorial.length >= 1 && editorial.length < CASES.length && editorial.every((k) => k.split(' ').includes('editorial')), `[${kind}] /work: a discipline shows only its studies`, editorial.join('|'));
+    await cp.click('label[for="kind-all"]');
+    check(await shown() === CASES.length + 1, `[${kind}] /work: "All work" brings every card back`);
+    const width = await cp.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+    check(width <= 0, `[${kind}] /work: no horizontal scroll`, String(width));
+    const menu = await cp.$$eval('[data-nav-link]', (els) => els.map((a) => [a.getAttribute('href'), a.getAttribute('aria-current'), a.textContent.trim()]));
+    const entry = menu.find(([h]) => h === '/work');
+    check(entry && entry[1] === 'page' && entry[2] === (lang === 'ar' ? 'دراسات الحالة' : 'Case studies'), `[${kind}] the menu's "Case studies" leads to /work and marks it`, JSON.stringify(entry));
+    for (const slug of CASES) {
+      await cp.goto(`${BASE}/work/${slug}`, { waitUntil: 'domcontentloaded' });
+      const page = await cp.evaluate(() => ({
+        h1: document.querySelectorAll('h1').length,
+        crumbs: [...document.querySelectorAll('.c-crumbs a')].map((a) => a.getAttribute('href')).join(),
+        cover: (() => { const i = document.querySelector('.c-case-hero__cover img'); return i && i.complete && i.naturalWidth > 0; })(),
+        sections: [...document.querySelectorAll('.c-case__section')].map((s) => s.id),
+        toc: [...document.querySelectorAll('.c-case__toc a')].map((a) => a.getAttribute('href').slice(1)),
+        more: document.querySelectorAll('.c-case__more .c-case-card').length,
+        wide: document.documentElement.scrollWidth - innerWidth,
+      }));
+      check(page.h1 === 1 && page.crumbs === '/,/work' && page.cover && page.sections.length === 7 && page.toc.join() === page.sections.join() && page.more === 2 && page.wide <= 0,
+        `[${kind}] /work/${slug}: hero with its cover, seven sections in the contents, two more studies`, JSON.stringify(page));
+    }
+    // The contents follow the reading.
+    await cp.goto(`${BASE}/work/${CASES[0]}`, { waitUntil: 'networkidle' });
+    await cp.evaluate(() => document.getElementById('case-process').scrollIntoView());
+    await cp.waitForTimeout(600);
+    const current = await cp.$eval('.c-case__toc a[aria-current]', (a) => a.getAttribute('href')).catch(() => null);
+    check(current === '#case-process', `[${kind}] a study's contents mark the section being read`, String(current));
+    check(errs.length === 0, `[${kind}] case studies: no script errors`, errs.join('; '));
+    await cc.close();
   }
   // The code lead.php and /admin/ share is never served; the admin page links
   // the same stylesheet as every other page (written in by the build).
