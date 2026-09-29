@@ -12,6 +12,7 @@ Steps, in order:
        site/_leads is kept)
     2. build_services.py          one page per service; home and pricing unified
        streamline.py              order, repetition, placeholders, shorter copy
+       story_hero.py              the case study's hero (its four surfaces)
     3. apply-site-refinements.py  spacing, pills, WhatsApp button, hero,
                                   profile, privacy, clean links, CSP
     4. motion.py                  the "quiet luxury" motion layer (CSS half)
@@ -78,6 +79,9 @@ import streamline  # noqa: E402
 
 streamline.build(SITE)
 print("streamline: sections reordered, repetition and placeholders removed")
+import story_hero  # noqa: E402
+story_hero.build(SITE)
+print("story: hero added")
 
 subprocess.run([sys.executable, str(TOOLS / "apply-site-refinements.py")], check=True)
 

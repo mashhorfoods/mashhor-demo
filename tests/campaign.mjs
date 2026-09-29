@@ -441,6 +441,22 @@ for (const kind of ['mobile', 'desktop']) {
   const hiddenChapters = await np.$$eval('.c-chapter__text > *', (els) => els.filter((e) => +getComputedStyle(e).opacity < 0.95).length);
   check(hiddenChapters === 0, '/story: chapter text shows without JavaScript', String(hiddenChapters));
   await nojs.close();
+  // The case study's hero: its four surfaces, each a link down to its chapter.
+  {
+    const hc = await browser.newContext({ ...VIEWPORTS.desktop });
+    const hp = await hc.newPage();
+    await hp.goto(`${BASE}/story`, { waitUntil: 'networkidle' });
+    const cards = await hp.$$eval('.c-story-hero__card', (as) => as.map((a) => {
+      const img = a.querySelector('img'), r = a.getBoundingClientRect();
+      return { target: !!document.querySelector(a.hash), loaded: img.complete && img.naturalWidth > 0, name: a.textContent.trim(), inView: r.top < innerHeight && r.bottom > 0 };
+    }));
+    check(cards.length === 4 && cards.every((c) => c.target && c.loaded && c.name && c.inView), '/story: hero shows the four surfaces, each linking to its chapter', JSON.stringify(cards));
+    await hp.click('.c-story-hero__card--website', { force: true }); // it drifts, so never "stable"
+    await hp.waitForTimeout(1500);
+    const top = await hp.$eval('#story-transformation', (e) => Math.round(e.getBoundingClientRect().top));
+    check(top >= 0 && top < 400, '/story: a hero card scrolls to its chapter', String(top));
+    await hc.close();
+  }
   // Every inline script is covered by a hash in the CSP the server sends.
   {
     const { createHash } = await import('node:crypto');

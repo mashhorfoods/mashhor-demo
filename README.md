@@ -103,6 +103,15 @@ The site shows no sequence numbering (01, 02/07 …): the rule is in the
 refinements stylesheet; prices, counts and the brand challenge's steps keep
 their numbers. A test fails if an "01"-style label shows on any page.
 
+## Case study hero
+
+The Story page opens with its four surfaces beside the title — identity,
+website, campaign, profile — laid out like prints on a table
+(`tools/story_hero.py`). Each card links down to its chapter, shows its name
+under the pointer (always on touch screens), rises in on arrival and then
+drifts slowly (still under reduced motion). It mirrors in Arabic and sits
+under the text on phones.
+
 ## Image viewer
 
 Every work image (slideshows, the homepage gallery, the work page, Story and
