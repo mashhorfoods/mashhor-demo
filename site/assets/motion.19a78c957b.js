@@ -21,7 +21,6 @@
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
   const fine = window.matchMedia('(pointer: fine)');
   if (reduce.matches) return;
-  const root = document.documentElement;
 
   /* 1. Hero headline, line by line --------------------------------------- */
   function splitLines(el) {

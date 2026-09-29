@@ -7,12 +7,13 @@
 // PHP's built-in server; mail() is expected to fail there, so the lead is
 // proven by the CSV row instead.
 import { chromium } from 'playwright';
-import { readFileSync, existsSync, rmSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, rmSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const BASE = process.env.BASE || 'http://127.0.0.1:8099';
 const here = path.dirname(fileURLToPath(import.meta.url));
+const WHATSAPP = JSON.parse(readFileSync(path.join(here, '..', 'tools', 'config.json'), 'utf8')).whatsapp;
 const csvCandidates = [path.join(here, '..', 'pixora-leads', 'leads.csv'), path.join(here, '..', 'site', '_leads', 'leads.csv')];
 csvCandidates.forEach((file) => { if (existsSync(file)) rmSync(file); });
 [path.join(here, '..', 'pixora-leads', 'rate.json'), path.join(here, '..', 'site', '_leads', 'rate.json')]
@@ -106,7 +107,7 @@ for (const kind of Object.keys(VIEWPORTS)) {
   check(/Muhalab Basheir/.test(await page.locator('.g-trust').textContent()) && /Visual Communications Designer/.test(await page.locator('.g-trust').textContent()),
     `[${kind}] profile reads Muhalab Basheir, Visual Communications Designer`);
   const wa = await waText(page, '#contact a[data-wa]');
-  check(wa.host === 'wa.me' && wa.path === '/249962672192', `[${kind}] WhatsApp link targets the approved number`);
+  check(wa.host === 'wa.me' && wa.path === `/${WHATSAPP}`, `[${kind}] WhatsApp link targets the approved number`);
   check(/سناب شات/.test(wa.text) && /اطّلعت على أعمالكم/.test(wa.text) && /PX-[A-Z0-9]{5}/.test(wa.text),
     `[${kind}] WhatsApp message carries platform, path and reference`, wa.text.replace(/\n/g, ' | '));
   check(!/utm|launch-q4|snapchat/i.test(wa.text), `[${kind}] no technical tracking in the message`);
@@ -280,7 +281,7 @@ for (const kind of ['mobile', 'desktop']) {
   check(await fab.isVisible() === (kind === 'mobile'), `[${kind}] floating WhatsApp button ${kind === 'mobile' ? 'shown' : 'hidden'}`);
   if (kind === 'mobile') {
     const href = await fab.getAttribute('href');
-    check(/wa\.me\/249962672192/.test(href) && decodeURIComponent(href).includes('مرحبًا بيكسورا'), 'floating WhatsApp message follows the Arabic language choice');
+    check(href.includes(`wa.me/${WHATSAPP}`) && decodeURIComponent(href).includes('مرحبًا بيكسورا'), 'floating WhatsApp message follows the Arabic language choice');
   }
   await context.close();
 }
@@ -397,5 +398,19 @@ for (const kind of ['mobile', 'desktop']) {
 }
 
 await browser.close();
+
+// The built site ships only what it uses, and every placeholder is filled.
+{
+  const site = path.join(here, '..', 'site');
+  const files = readdirSync(site, { recursive: true }).map(String).filter((f) => !f.startsWith('_leads'));
+  const text = files.filter((f) => /\.(html|css|js|php|xml|txt)$|\.htaccess$/.test(f))
+    .map((f) => [f, readFileSync(path.join(site, f), 'utf8')]);
+  const unused = files.filter((f) => f.startsWith('assets' + path.sep) && /\.\w+$/.test(f))
+    .filter((f) => !text.some(([name, body]) => name !== f && body.includes(path.basename(f))));
+  check(unused.length === 0, '[build] every file in site/assets is used', unused.join(', '));
+  const unfilled = text.filter(([, body]) => body.includes('{{WHATSAPP}}')).map(([name]) => name);
+  check(unfilled.length === 0, '[build] WhatsApp number filled in everywhere', unfilled.join(', '));
+}
+
 console.log(failures ? `\n${failures} check(s) FAILED` : '\nAll checks passed');
 process.exit(failures ? 1 : 0);

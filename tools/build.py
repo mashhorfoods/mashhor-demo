@@ -21,6 +21,7 @@ Steps, in order:
     python3 tools/build.py
 """
 import pathlib
+import re
 import shutil
 import subprocess
 import sys
@@ -43,6 +44,17 @@ for name, data in kept.items():
 print("site/: source + overlay copied")
 
 sys.path.insert(0, str(TOOLS))
+from common import WHATSAPP  # noqa: E402
+
+# One WhatsApp number: filled into the campaign page, and the supplied site's
+# own links must already use it (change it there too if it ever changes).
+for name in ("go.html", "assets/go.js"):
+    path = SITE / name
+    path.write_text(path.read_text(encoding="utf-8").replace("{{WHATSAPP}}", WHATSAPP), encoding="utf-8")
+for path in SOURCE.glob("*.html"):
+    others = set(re.findall(r"wa\.me/(\d+)", path.read_text(encoding="utf-8"))) - {WHATSAPP}
+    if others:
+        sys.exit(f"build: {path.name} links to WhatsApp {', '.join(others)}, tools/config.json says {WHATSAPP}")
 import build_services  # noqa: E402
 
 build_services.build(SITE)

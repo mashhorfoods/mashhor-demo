@@ -26,7 +26,7 @@
   'use strict';
 
   const CONFIG = {
-    // The approved business number, digits only, as in the main site's links.
+    // The business number, digits only — filled in by tools/build.py from tools/config.json.
     whatsapp: '249962672192',
     endpoint: '/lead.php',
     // Optional: campaign code (lower case) → the words a customer would use. When a code is

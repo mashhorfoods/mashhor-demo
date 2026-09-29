@@ -20,11 +20,14 @@
          noindex: an ad destination, not a search result. It is deliberately
          absent from sitemap.xml.
 
-         Styles: the SHARED block below is index.html's stylesheet copied
-         verbatim by pixora/tools/sync-shared-styles.py — tokens, fonts and
-         components are the site's own, not a re-creation. The CAMPAIGN block
+         Styles: the build (tools/finalize.py) fills the SHARED block below
+         with a link to the site's own stylesheet — tokens, fonts and
+         components are the site's, not a re-creation. The CAMPAIGN block
          after it only adds the few layouts this page needs, built from those
          tokens.
+
+         WhatsApp: the number in the wa.me links is filled in by
+         tools/build.py from tools/config.json.
          =================================================================== -->
     <title>Pixora — علامتك. حضورك الرقمي. شريك واحد.</title>
     <meta
@@ -319,7 +322,7 @@
          before go.js tidies the address bar, hence the order of these two. -->
     <script defer data-domain="zaokalyamamah.online" src="https://plausible.io/js/script.js"></script>
     <script defer src="/assets/go.js"></script>
-      <script type="module" src="/assets/motion.0ecc05e740.js"></script>
+      <script type="module" src="/assets/motion.19a78c957b.js"></script>
   </head>
 
   <body>

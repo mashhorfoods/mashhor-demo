@@ -27,6 +27,9 @@ Runs on the site/ copy of the supplied pages, before apply-site-refinements.
 import pathlib
 import re
 
+import common
+from common import inject_css
+
 SERVICES = ["branding", "websites", "social", "marketing", "integrated"]
 # Which add-on categories (by their English name) belong on which page.
 ADDONS_FOR = {
@@ -38,7 +41,7 @@ ADDONS_FOR = {
 }
 # The detail sections that already carry a "what it covers" list of their own.
 HAS_OWN_LIST = {"websites", "marketing", "integrated"}
-WA = "https://wa.me/249962672192?text="
+WA = common.WA + "?text="
 
 
 def bi(en, ar):
@@ -374,14 +377,6 @@ CSS = CSS_START + """
 """ + CSS_END
 
 
-def add_css(page):
-    a, b = page.find(CSS_START), page.find(CSS_END)
-    if a >= 0:
-        return page[:a] + CSS + page[b + len(CSS_END):]
-    close = page.find("</style>")
-    return page[:close] + CSS + page[close:]
-
-
 # ---------------------------------------------------------------------------
 # The three changes.
 # ---------------------------------------------------------------------------
@@ -400,7 +395,7 @@ def build(site: pathlib.Path):
         s = data[sid]
         page = page_head(pricing[:main_a], s) + service_main(s, data, addon_groups) + "    " + pricing[main_b:]
         page = page.replace('id="pricing-title"', 'id="svc-page-title"')
-        (site / "services" / f"{sid}.html").write_text(add_css(page), encoding="utf-8")
+        (site / "services" / f"{sid}.html").write_text(page, encoding="utf-8")
 
     # 2. Homepage: one services section of cards; the accordion, the detail
     #    sections and the add-ons leave.
@@ -451,8 +446,8 @@ def build(site: pathlib.Path):
     # The sections that stay keep their order; their numbers close the gap.
     n = iter(range(1, 100))
     home = re.sub(r'(<span class="c-detail__number">)\d+(</span>)', lambda m: f"{m.group(1)}{next(n):02d}{m.group(2)}", home)
-    (site / "index.html").write_text(add_css(home), encoding="utf-8")
-    (site / "pricing.html").write_text(add_css(pricing), encoding="utf-8")
+    (site / "index.html").write_text(home, encoding="utf-8")
+    (site / "pricing.html").write_text(pricing, encoding="utf-8")
 
     # 4. Every page: links to the old in-page service anchors go to the pages,
     #    and the site script's service list carries those addresses.
@@ -468,7 +463,7 @@ def build(site: pathlib.Path):
             text = text.replace(f"{{ id: '{sid}', label:", f"{{ id: '{sid}', href: '/services/{sid}', label:")
         for old in ('"./#add-ons"', '"/#add-ons"', '"#add-ons"'):
             text = text.replace(f"href={old}", 'href="/pricing#add-ons"')
-        text = add_css(text)
+        text = inject_css(text, CSS)  # the service cards and pages styles, once per page
         if text != before:
             path.write_text(text, encoding="utf-8")
 

@@ -7,8 +7,9 @@ Homepage order:  hero → services → recent work (Al Mada) → selected work �
                  brand challenge → questions → contact
 Removed:         "Process" (and its menu/footer links), the "Campaigns"
                  section and the showreel — both are placeholder artwork until
-                 the real files exist (they stay in source/ and come back by
-                 deleting their line in PLACEHOLDERS below).
+                 the real files exist. Their files leave site/ with them; both
+                 stay in source/ and come back by deleting their entry in
+                 PLACEHOLDERS below.
 Said once:       "you deal with the person doing the work" lives in the
                  "Who you are talking to" band on every page; the FAQ entry
                  and the note under the contact form that repeated it go.
@@ -18,10 +19,15 @@ Shorter:         the section introductions on the homepage; the service pages
 import pathlib
 import re
 
-from build_services import element, find, inner, bi
+from build_services import find, bi
 
 ORDER = ["home", "services", "proof", "work", "challenge", "faq", "contact"]
-PLACEHOLDERS = ["campaigns"]          # sections whose artwork is still placeholder
+# Homepage blocks whose artwork is still placeholder: (start of the block,
+# its tag) → the asset files only that block uses.
+PLACEHOLDERS = {
+    (r'<section id="campaigns"', "section"): ["campaign-0*.svg"],
+    (r'<figure class="c-reel"', "figure"): ["reel.mp4", "reel.webm", "reel-still.webp"],
+}
 
 LEADS = {
     "c-services__lead": ("Five services, one partner. Pick one for what it covers and what it costs.",
@@ -46,19 +52,10 @@ def section_span(html, key):
 
 
 def streamline_home(home):
-    # 1. Out: process and the placeholder sections.
-    for key in ["process", *PLACEHOLDERS]:
-        try:
-            a, b = section_span(home, key)
-            home = home[:a] + home[b:]
-        except ValueError:
-            pass
-    # The showreel is placeholder footage too.
-    try:
-        a, b = find(home, r'<figure class="c-reel"', "figure")
+    # 1. Out: process and the placeholder blocks.
+    for pattern, tag in [(r'<section id="process"', "section"), *PLACEHOLDERS]:
+        a, b = find(home, pattern, tag)
         home = home[:a] + home[b:]
-    except ValueError:
-        pass
 
     # 2. Reorder: lift every section out (last first, so earlier offsets
     #    hold), then put them back in ORDER where the first one stood.
@@ -95,6 +92,14 @@ def drop_process_links(page):
 def build(site: pathlib.Path):
     home_path = site / "index.html"
     home_path.write_text(streamline_home(home_path.read_text(encoding="utf-8")), encoding="utf-8")
+
+    # The placeholder files go too — unless some page still uses one.
+    pages = "".join(p.read_text(encoding="utf-8") for p in list(site.glob("*.html")) + list(site.glob("services/*.html")))
+    for pattern in [p for files in PLACEHOLDERS.values() for p in files]:
+        for asset in (site / "assets").glob(pattern):
+            if asset.name in pages:
+                raise SystemExit(f"streamline: {asset.name} is placeholder but still used")
+            asset.unlink()
 
     for path in list(site.glob("*.html")) + list((site / "services").glob("*.html")):
         if path.name == "go.html":

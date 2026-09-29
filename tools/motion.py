@@ -19,6 +19,8 @@ scroll-driven animations show the text in place.
 """
 import pathlib
 
+from common import inject_css
+
 START, END = "/* MOTION:START */", "/* MOTION:END */"
 CSS = START + """
 @layer tokens{@media (prefers-reduced-motion:no-preference){:root{--duration-base:480ms;--duration-slow:900ms;--reveal-distance:28px}}}
@@ -45,20 +47,12 @@ CSS = START + """
 """ + END
 
 
-def add(page):
-    a, b = page.find(START), page.find(END)
-    if a >= 0:
-        return page[:a] + CSS + page[b + len(END):]
-    close = page.find("</style>")
-    return page[:close] + CSS + page[close:]
-
-
 def build(site: pathlib.Path):
     for path in list(site.glob("*.html")) + list(site.glob("services/*.html")):
         if path.name == "go.html":
             continue
         text = path.read_text(encoding="utf-8")
-        new = add(text)
+        new = inject_css(text, CSS)
         if new != text:
             path.write_text(new, encoding="utf-8")
 

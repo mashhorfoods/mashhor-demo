@@ -15,12 +15,18 @@ tools/build.py   →   site/
 | Step | Script | What it does |
 | --- | --- | --- |
 | 1 | `build_services.py`, `streamline.py` | One page per service at `/services/<id>` (details, showcase, what it covers, packages and prices, related add-ons, other services). The homepage gets a single services section of cards; the old accordion, the five detail sections and the add-ons leave it. `/pricing` keeps only pricing matters: what moves a price, an index linking to the service pages, every add-on, the build-your-own estimator and billing. |
-| 2 | `apply-site-refinements.py` | Spacing, pill buttons, WhatsApp button on phones, hero copy, profile, privacy note, root-based clean links, 301s from `.html`, CSP hashes. |
+| 2 | `apply-site-refinements.py` | Spacing, pill buttons, WhatsApp button on phones, hero copy, profile, privacy note, root-based clean links, 301s from `.html`. |
 | 3 | `motion.py` | "Quiet luxury" motion layer, stylesheet half: one rhythm (480/900 ms, expo ease-out) with a light blur on the site's own reveal; page-to-page cross-fades with the header held still and each service card growing into its page (`@view-transition`); long text and the campaign page surfacing with the scroll (scroll-driven CSS); hero lines rising; pointer light on cards. Script half: `overlay/assets/motion.js` (line split, magnetic primary buttons, pointer light, self-gliding galleries that stop when touched, counting totals). All off under reduced motion; nothing hidden without it. |
 | 4 | `finalize.py` | One shared, content-hashed `site.<hash>.css` / `.js` / `motion.<hash>.js` for every page (go and admin included), long caching, CSP hashes. |
 
 The build is deterministic (two runs give identical output); the tests below
-run against its output.
+run against its output. Every edit it makes to the supplied pages must find
+the text it expects: when a new version of the site changes that text, the
+build stops and names it instead of silently skipping the change.
+
+The homepage's placeholder blocks (campaign artwork, showreel) are left out
+with their files until real work replaces them — see `PLACEHOLDERS` in
+`streamline.py`.
 
 ## The campaign flow
 
@@ -31,19 +37,12 @@ Ad  →  /go (hero)  →  "شوف أعمالنا"  →  /go#work     →  توا
 
 | File | What it is |
 | --- | --- |
-| `site/go.html` | The landing page. One document, four views (`#top`, `#work`, `#contact`, `#sent`); Back always works; without JavaScript the views stack. Arabic, RTL, `noindex`, not in the sitemap. |
-| `site/assets/go.js` | Views, WhatsApp messages, the form, attribution. External so the site's CSP needs no new hash. |
-| `site/lead.php` | Receives the form: validates, stores a CSV row, emails `muhalabsalah@gmail.com`. Answers "ok" only when the lead is actually held — otherwise the page offers WhatsApp with the details pre-written. |
-| `site/_leads/.htaccess` | Refuses all web access to the fallback storage folder. |
-| `tools/apply-site-refinements.py` | Site-wide design refinements on all six pages: more generous spacing, one pill-shaped 52px button, softer fields, a floating WhatsApp button on phones, and the profile (Muhalab Basheir, Visual Communications Designer). CSS and markup only — the inline scripts and their CSP hashes are untouched. **Idempotent; run it after every site rebuild, then the sync below.** |
-| `tools/sync-shared-styles.py` | Copies `index.html`'s stylesheet into `go.html` verbatim. **Run it after every site rebuild.** |
-| `tests/campaign.mjs` | End-to-end checks (99): routes, devices, WhatsApp links, validation, submission, tracking, fallback, and the existing pages. |
-
-Outside the campaign, the pages carry the refinements above, and `privacy.html` (it said the
-site's only form has no server — now it describes the campaign form too) and
-`robots.txt` (keeps `lead.php` out of search). Both are build outputs of
-`tools/build-deploy.js`, which was not supplied: carry these edits into the
-generator's sources, or they will be lost on the next build.
+| `overlay/go.html` | The landing page. One document, four views (`#top`, `#work`, `#contact`, `#sent`); Back always works; without JavaScript the views stack. Arabic, RTL, `noindex`, not in the sitemap. |
+| `overlay/assets/go.js` | Views, WhatsApp messages, the form, attribution. External so the site's CSP needs no new hash. |
+| `overlay/lead.php` | Receives the form: validates, stores a CSV row, emails `muhalabsalah@gmail.com`. Answers "ok" only when the lead is actually held — otherwise the page offers WhatsApp with the details pre-written. |
+| `overlay/_leads/.htaccess` | Refuses all web access to the fallback storage folder. |
+| `tools/config.json` | The business WhatsApp number — the one place to change it. The build fills it into the campaign page and stops if the supplied site's own links use a different one. |
+| `tests/campaign.mjs` | End-to-end checks: routes, devices, WhatsApp links, validation, submission, tracking, fallback, every page's links, and that every file in `site/assets` is used. |
 
 ## Ad URLs
 

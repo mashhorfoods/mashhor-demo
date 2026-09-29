@@ -2,11 +2,9 @@
 """Apply the agreed design refinements to every page of the Pixora site.
 
 The pages are build output of a generator that is not part of this
-repository, so the changes are made to the output. Re-run after any rebuild;
-it is idempotent (a second run changes nothing):
-
-    python3 tools/apply-site-refinements.py
-    python3 tools/sync-shared-styles.py     # then carry them into /go
+repository, so the changes are made to the output. Step 3 of tools/build.py,
+which always runs it on a fresh copy of source/. A replacement whose text is
+no longer in the supplied site stops the build rather than being skipped.
 
 On index, pricing, about, story, privacy, terms, accessibility and 404:
   1. Spacing   — larger section / heading / CTA rhythm.
@@ -24,14 +22,14 @@ On index, pricing, about, story, privacy, terms, accessibility and 404:
                  script's menu. Root-based matters on 404.html, which is
                  served at whatever wrong address was typed, and in /admin/.
 Then: robots.txt keeps /admin, /lead.php and /_leads out of search, and
-.htaccess gains 301s from old *.html addresses plus a Content-Security-Policy
-whose script hashes match the pages as they now are.
+.htaccess gains 301s from old *.html addresses. (The Content-Security-Policy
+script hashes are written last, by finalize.py.)
 """
-import base64
-import hashlib
 import pathlib
 import re
 import sys
+
+from common import WA, inject_css
 
 SITE = pathlib.Path(__file__).resolve().parent.parent / "site"
 # Every page of the site (the service pages included) except the campaign
@@ -76,7 +74,6 @@ CSS = CSS_START + """
 """ + CSS_END
 
 FAB_START, FAB_END = "<!-- WA-FAB:START -->", "<!-- WA-FAB:END -->"
-WA = "https://wa.me/249962672192"
 WA_EN = WA + "?text=Hi%20Pixora%20%E2%80%94%20I%27d%20like%20to%20start%20a%20project."
 WA_AR = WA + "?text=%D9%85%D8%B1%D8%AD%D8%A8%D9%8B%D8%A7%20%D8%A8%D9%8A%D9%83%D8%B3%D9%88%D8%B1%D8%A7%20%E2%80%94%20%D8%A3%D9%88%D8%AF%D9%91%20%D8%A7%D9%84%D8%AA%D8%AD%D8%AF%D8%AB%20%D8%B9%D9%86%20%D9%85%D8%B4%D8%B1%D9%88%D8%B9."
 FAB = f"""{FAB_START}
@@ -133,13 +130,6 @@ PRIVACY = [
 ]
 
 
-def between(text, start, end, block):
-    a, b = text.find(start), text.find(end)
-    if a < 0 or b < 0:
-        return None
-    return text[:a] + block + text[b + len(end):]
-
-
 def clean_links(text):
     """Every "./x" link, asset, font and script path becomes root-based "/x"."""
     text = re.sub(r"""(["'(])\./""", r"\1/", text)
@@ -147,72 +137,46 @@ def clean_links(text):
     return text
 
 
-def replace_all(text, pairs, name, report):
+def replace_all(text, pairs, name, required):
+    """Replace each old text with its new one. A required replacement whose
+    old text is missing means the supplied site changed: stop, don't skip."""
     for old, new in pairs:
-        if new in text:
-            continue  # already applied (some replacements extend their old text)
         if old in text:
             text = text.replace(old, new)
-        elif new not in text and report:
-            print(f"  note: {name}: text not found — {old[:60]!r}")
+        elif required:
+            sys.exit(f"{name}: text not found — {old[:60]!r}")
     return text
 
 
 for name in PAGES:
     path = SITE / name
     text = path.read_text(encoding="utf-8")
-    before = text
 
-    replaced = between(text, CSS_START, CSS_END, CSS)
-    if replaced is None:
-        close = text.find("</style>")
-        if close < 0:
-            sys.exit(f"{name}: no <style> block")
-        text = text[:close] + CSS + text[close:]
-    else:
-        text = replaced
+    text = inject_css(text, CSS)
+    close = text.rfind("</body>")
+    text = text[:close] + "  " + FAB + "\n  " + text[close:]
 
-    replaced = between(text, FAB_START, FAB_END, FAB)
-    if replaced is None:
-        close = text.rfind("</body>")
-        text = text[:close] + "  " + FAB + "\n  " + text[close:]
-    else:
-        text = replaced
-
-    text = replace_all(text, TEXT[1:3], name, report=False)
-    text = replace_all(text, TEXT[:1], name, report=True)
+    text = replace_all(text, TEXT[1:3], name, required=False)
+    text = replace_all(text, TEXT[:1], name, required=True)
     if name == "index.html":
-        text = replace_all(text, TEXT[3:], name, report=True)
+        text = replace_all(text, TEXT[3:], name, required=True)
     if name == "privacy.html":
-        text = replace_all(text, PRIVACY, name, report=True)
+        text = replace_all(text, PRIVACY, name, required=True)
     text = clean_links(text)
 
-    if text != before:
-        path.write_text(text, encoding="utf-8")
-    print(f"{name}: {'updated' if text != before else 'already current'}")
+    path.write_text(text, encoding="utf-8")
+print(f"refinements: {len(PAGES)} pages")
 
 # robots.txt: private endpoints stay out of search.
 robots = SITE / "robots.txt"
 text = robots.read_text(encoding="utf-8")
-extra = [line for line in ("Disallow: /admin/", "Disallow: /lead.php", "Disallow: /_leads/") if line not in text]
-if extra:
-    text = text.replace("Allow: /\n", "Allow: /\n" + "\n".join(extra) + "\n", 1)
-    robots.write_text(text, encoding="utf-8")
-print(f"robots.txt: {'updated' if extra else 'already current'}")
+if "Allow: /\n" not in text:
+    sys.exit("robots.txt: 'Allow: /' line not found")
+robots.write_text(text.replace("Allow: /\n", "Allow: /\nDisallow: /admin/\nDisallow: /lead.php\nDisallow: /_leads/\n", 1), encoding="utf-8")
 
-# .htaccess: 301 old .html addresses; CSP hashes for the inline scripts as
-# they are now (steps above edit the site script and the JSON-LD).
+# .htaccess: 301 old .html addresses, just above the clean-URL rewrite.
 htaccess = SITE / ".htaccess"
 text = htaccess.read_text(encoding="utf-8")
-hashes = []
-for name in PAGES + ["go.html"]:
-    page = (SITE / name).read_text(encoding="utf-8")
-    for body in re.findall(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>", page, re.S):
-        digest = "'sha256-" + base64.b64encode(hashlib.sha256(body.encode("utf-8")).digest()).decode() + "'"
-        if digest not in hashes:
-            hashes.append(digest)
-updated = re.sub(r"(script-src 'self' https://plausible\.io)(?: '[^']+')+",
-                 lambda m: m.group(1) + " " + " ".join(hashes), text)
 REDIRECTS = r"""  # Clean addresses: /pricing.html → /pricing, /index.html → /. THE_REQUEST
   # is what the browser asked for, so the internal rewrite below (and the
   # 404 page) never loop back through these.
@@ -224,14 +188,11 @@ REDIRECTS = r"""  # Clean addresses: /pricing.html → /pricing, /index.html →
 
 """
 anchor = "  RewriteCond %{REQUEST_FILENAME}.html -f"
-if "# Clean addresses:" not in updated:
-    if anchor not in updated:
-        sys.exit(".htaccess: rewrite anchor not found")
-    lines = updated.split("\n")
-    at = next(i for i, line in enumerate(lines) if line.startswith(anchor))
-    while at > 0 and lines[at - 1].lstrip().startswith("#"):
-        at -= 1  # keep the rule's own comment attached to it
-    updated = "\n".join(lines[:at]) + "\n" + REDIRECTS + "\n".join(lines[at:])
-if updated != text:
-    htaccess.write_text(updated, encoding="utf-8")
-print(f".htaccess: {'updated' if updated != text else 'already current'}")
+if anchor not in text:
+    sys.exit(".htaccess: rewrite anchor not found")
+lines = text.split("\n")
+at = next(i for i, line in enumerate(lines) if line.startswith(anchor))
+while at > 0 and lines[at - 1].lstrip().startswith("#"):
+    at -= 1  # keep the rule's own comment attached to it
+htaccess.write_text("\n".join(lines[:at]) + "\n" + REDIRECTS + "\n".join(lines[at:]), encoding="utf-8")
+print("robots.txt, .htaccess: updated")
