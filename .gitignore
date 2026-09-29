@@ -9,3 +9,4 @@ node_modules/
 tools/service-covers/out/
 # Upload packages made by hand
 pixora-site-upload*.zip
+tools/share-cards/out/

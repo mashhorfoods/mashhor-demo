@@ -127,6 +127,18 @@ Its three photographs (hero, the team, the process) live in
 `python3 tools/images.py about <folder>` from the source PNGs; the supplied site's
 About photos leave the upload.
 
+## Pixora identity board
+
+The campaign page's hero shows Pixora's own identity — the wordmark and its
+gold X monogram, colours, type, voice, and the brand on a business card, a
+post, the site and the five services — "our identity, to the standard we
+build yours". It is an HTML template (`tools/share-cards/board.html`, the
+site's own fonts and colours), rendered and encoded like the other images:
+
+    node tools/share-cards/render.mjs board && python3 tools/images.py board
+
+It opens in the image viewer, and the /go link preview shows it too.
+
 ## Link previews
 
 What WhatsApp, X and the rest show when a page is shared: one 1200×630 card

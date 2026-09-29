@@ -1,0 +1,151 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><link rel="stylesheet" href="base.css"><style>
+/* The Pixora identity board (1800×1200): the studio's own brand, shown the way
+   it shows a client's. Rendered by render.mjs, encoded by tools/images.py. */
+html,body{width:1800px;height:1200px}
+body{background:#1a1a1a;font-family:Cairo,Poppins,sans-serif}
+.glow{background:radial-gradient(760px 520px at 50% 40%,rgba(244,209,63,.13),transparent 70%),radial-gradient(900px 300px at 50% 108%,rgba(244,209,63,.08),transparent 70%)}
+.sheet{position:absolute;inset:48px;display:grid;grid-template-columns:420px 1fr 440px;grid-template-rows:1fr 330px;gap:28px}
+.panel{position:relative;border:1px solid rgba(255,255,255,.08);border-radius:22px;background:rgba(32,32,32,.72);padding:34px 36px;overflow:hidden}
+.lbl{font-family:Poppins;font-weight:600;font-size:15px;letter-spacing:.28em;color:#f4d13f;text-transform:uppercase;direction:ltr;text-align:right;display:flex;align-items:center;gap:14px;justify-content:flex-end}
+.lbl::before{content:"";width:34px;height:2px;background:currentColor}
+.lbl.ar{font-family:Cairo;letter-spacing:0;font-size:18px;font-weight:700;direction:rtl;justify-content:flex-start}
+.lbl.ar::before{order:2}
+/* Centre: the lockup */
+.hero{grid-row:1;grid-column:2;display:grid;place-items:center;text-align:center;background:radial-gradient(circle at 50% 46%,rgba(244,209,63,.1),transparent 62%),#171717}
+.rings{position:absolute;inset:0;margin:auto;width:640px;height:640px;top:-40px}
+.rings circle{fill:none;stroke:rgba(244,209,63,.16)}
+.lockup{position:relative;display:grid;gap:18px;justify-items:center;margin-top:-10px}
+.word{font-family:Poppins;font-weight:700;font-size:176px;line-height:.9;letter-spacing:.02em;direction:ltr;color:#fff}
+.word b{color:#f4d13f}
+.sub{font-family:Poppins;font-weight:500;font-size:22px;letter-spacing:.62em;color:rgba(255,255,255,.55);direction:ltr;margin-right:-.62em}
+.ar-name{font-size:30px;font-weight:700;color:rgba(255,255,255,.86)}
+.ar-name span{color:#f4d13f}
+.promise{position:absolute;bottom:34px;left:0;right:0;text-align:center;font-size:25px;font-weight:700;color:rgba(255,255,255,.9)}
+.promise span{color:#f4d13f}
+/* Left: mark construction + pillars */
+.left{grid-row:1;grid-column:1;display:flex;flex-direction:column;gap:18px}
+.mark-row{display:flex;gap:22px;align-items:center;margin-top:6px}
+.mono{position:relative;width:150px;height:150px;border-radius:34px;background:#141414;border:1px solid rgba(244,209,63,.35);display:grid;place-items:center;box-shadow:0 20px 40px -18px rgba(0,0,0,.8)}
+.mono svg{width:150px;height:150px;position:absolute;inset:0}
+.mono i{font-style:normal;font-family:Poppins;font-weight:700;font-size:96px;line-height:1;color:#f4d13f;transform:translateY(4px)}
+.mono.light{background:#f4d13f;border-color:transparent}.mono.light i{color:#141414}
+.small-mono{width:96px;height:96px;border-radius:24px}.small-mono i{font-size:60px}
+.notes{display:grid;gap:12px;font-size:17px;color:rgba(255,255,255,.72);line-height:1.5}
+.notes b{color:#fff;font-weight:700}
+.pillars{margin-top:auto;display:grid;gap:8px}
+.pill{display:flex;justify-content:space-between;align-items:center;padding:9px 18px;border:1px solid rgba(255,255,255,.1);border-radius:14px;font-size:19px;font-weight:600;color:#fff}
+.pill small{font-family:Poppins;font-size:13px;letter-spacing:.14em;color:rgba(255,255,255,.45);direction:ltr}
+/* Right: colour + type */
+.right{grid-row:1;grid-column:3;display:flex;flex-direction:column;gap:22px}
+.swatches{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.sw{height:118px;border-radius:14px;padding:12px;display:flex;flex-direction:column;justify-content:flex-end;font-family:Poppins;direction:ltr;text-align:left;border:1px solid rgba(255,255,255,.08)}
+.sw b{font-size:14px;font-weight:600}.sw span{font-size:12px;opacity:.7}
+.type{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.face{border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px 18px;display:grid;gap:4px}
+.face .aa{font-size:72px;line-height:1;font-weight:700;color:#fff}
+.face .aa.lat{font-family:Poppins;direction:ltr;text-align:left}
+.face .nm{font-size:16px;font-weight:700;color:#f4d13f}
+.face .wt{font-size:13px;color:rgba(255,255,255,.55);font-family:Poppins;direction:ltr;text-align:left}
+.face .wt.ar{font-family:Cairo;direction:rtl;text-align:right}
+.voice{font-size:16px;line-height:1.55;color:rgba(255,255,255,.7)}
+.voice b{color:#fff}
+/* Bottom: applications */
+.apps{grid-row:2;grid-column:1 / -1;display:grid;grid-template-columns:1.25fr 1fr 1fr 1.35fr;gap:28px;padding:0;background:none;border:0}
+.app{position:relative;border:1px solid rgba(255,255,255,.08);border-radius:22px;background:#151515;overflow:hidden;display:grid;place-items:center}
+.app .cap{position:absolute;top:16px;right:20px;font-size:15px;font-weight:700;color:rgba(255,255,255,.55)}
+/* business cards */
+.card{position:absolute;width:300px;height:172px;border-radius:14px;box-shadow:0 26px 50px -18px rgba(0,0,0,.9)}
+.card.front{background:#111;border:1px solid rgba(244,209,63,.3);transform:rotate(-6deg) translate(78px,52px);display:grid;place-items:center}
+.card.front .w{font-family:Poppins;font-weight:700;font-size:44px;color:#fff;direction:ltr}.card.front .w b{color:#f4d13f}
+.card.back{background:#f4d13f;transform:rotate(4deg) translate(-60px,-40px);display:flex;flex-direction:column;justify-content:space-between;padding:18px 20px;color:#141414}
+.card.back .t{font-size:17px;font-weight:800;line-height:1.35}
+.card.back .u{font-family:Poppins;font-size:12px;font-weight:600;direction:ltr;text-align:left;opacity:.8}
+/* social post */
+.post{width:250px;height:250px;border-radius:16px;background:linear-gradient(160deg,#262626,#141414);border:1px solid rgba(255,255,255,.1);padding:22px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 26px 50px -18px rgba(0,0,0,.9);margin-top:24px}
+.post .h{font-size:27px;font-weight:800;line-height:1.3;color:#fff}.post .h span{color:#f4d13f}
+.post .f{display:flex;justify-content:space-between;align-items:center;font-family:Poppins;font-weight:700;font-size:15px;color:#fff;direction:ltr}.post .f b{color:#f4d13f}
+.post .f i{width:22px;height:22px;border-radius:6px;background:#f4d13f}
+/* phone */
+.phone{width:150px;height:282px;border-radius:26px;background:#0d0d0d;border:3px solid #333;padding:9px;margin-top:26px;box-shadow:0 26px 50px -18px rgba(0,0,0,.9)}
+.screen{width:100%;height:100%;border-radius:18px;background:radial-gradient(160px 120px at 60% 30%,rgba(244,209,63,.25),transparent 70%),#1b1b1b;padding:16px 12px;display:flex;flex-direction:column;gap:9px}
+.screen .b{font-family:Poppins;font-weight:700;font-size:13px;color:#fff;direction:ltr;text-align:right}.screen .b b{color:#f4d13f}
+.screen .l{font-size:15px;font-weight:800;line-height:1.35;color:#fff;margin-top:26px}.screen .l span{color:#f4d13f}
+.screen .btn{margin-top:auto;height:26px;border-radius:99px;background:#f4d13f}
+.screen .btn2{height:24px;border-radius:99px;border:1px solid rgba(255,255,255,.3)}
+/* services */
+.svc{padding:52px 26px 20px;display:grid;grid-template-columns:repeat(5,1fr);gap:8px;align-content:center;width:100%}
+.svc div{display:grid;justify-items:center;gap:10px;text-align:center;font-size:14px;font-weight:600;color:rgba(255,255,255,.8);line-height:1.3}
+.svc svg{width:52px;height:52px;padding:12px;border-radius:14px;border:1px solid rgba(244,209,63,.35);color:#f4d13f;background:rgba(244,209,63,.06)}
+</style></head><body><div class="glow"></div>
+<div class="sheet">
+
+ <div class="panel left">
+  <div class="lbl">Brand Identity</div>
+  <p class="lbl ar">العلامة</p>
+  <div class="mark-row">
+   <div class="mono"><svg viewBox="0 0 150 150"><g stroke="rgba(244,209,63,.22)" stroke-dasharray="3 5"><line x1="0" y1="75" x2="150" y2="75"/><line x1="75" y1="0" x2="75" y2="150"/><circle cx="75" cy="75" r="46" fill="none"/></g></svg><i>X</i></div>
+   <div class="mono light small-mono"><i>X</i></div>
+  </div>
+  <div class="notes">
+   <p><b>الحرف X</b> — نقطة التقاء: الهوية والموقع والمحتوى والإعلانات في مكان واحد.</p>
+   <p><b>الأصفر</b> لما يستحق الانتباه وحده؛ وكل ما عداه هادئ.</p>
+  </div>
+  <div class="pillars">
+   <div class="pill">الهوية <small>BRAND</small></div>
+   <div class="pill">الموقع <small>WEB</small></div>
+   <div class="pill">المحتوى <small>CONTENT</small></div>
+   <div class="pill">الإعلانات <small>ADS</small></div>
+  </div>
+ </div>
+
+ <div class="panel hero">
+  <svg class="rings" viewBox="0 0 640 640"><circle cx="320" cy="320" r="300"/><circle cx="320" cy="320" r="232" stroke-dasharray="4 10"/><circle cx="320" cy="320" r="160"/><circle cx="320" cy="20" r="5" fill="#f4d13f" stroke="none"/><circle cx="552" cy="320" r="4" fill="#f4d13f" stroke="none"/><circle cx="160" cy="320" r="3" fill="#f4d13f" stroke="none" opacity=".7"/></svg>
+  <div class="lockup">
+   <div class="word">PI<b>X</b>ORA</div>
+   <div class="sub">DIGITAL AGENCY</div>
+   <div class="ar-name">بيكسورا <span>·</span> وكالة رقمية</div>
+  </div>
+  <p class="promise">علامتك. حضورك الرقمي. <span>شريك واحد.</span></p>
+ </div>
+
+ <div class="panel right">
+  <div class="lbl">Colour</div>
+  <div class="swatches">
+   <div class="sw" style="background:#f4d13f;color:#141414"><b>Pixora Gold</b><span>#F4D13F</span></div>
+   <div class="sw" style="background:#b9991f;color:#141414"><b>Deep Gold</b><span>#B9991F</span></div>
+   <div class="sw" style="background:#f8e07a;color:#141414"><b>Light Gold</b><span>#F8E07A</span></div>
+   <div class="sw" style="background:#202020;color:#fff"><b>Charcoal</b><span>#202020</span></div>
+   <div class="sw" style="background:#141414;color:#fff"><b>Night</b><span>#141414</span></div>
+   <div class="sw" style="background:#ffffff;color:#141414"><b>White</b><span>#FFFFFF</span></div>
+  </div>
+  <div class="lbl">Type</div>
+  <div class="type">
+   <div class="face"><div class="aa lat">Aa</div><div class="nm" style="font-family:Poppins;direction:ltr;text-align:left">Poppins</div><div class="wt">500 · 600 · 700</div></div>
+   <div class="face"><div class="aa">أب</div><div class="nm">Cairo</div><div class="wt ar">عربي أولًا — بنفس الوزن</div></div>
+  </div>
+  <p class="voice"><b>النبرة:</b> واضحة، هادئة، بلا مبالغة. نقول ما نفعله، ونضع السعر على الطاولة.</p>
+ </div>
+
+ <div class="apps panel">
+  <div class="app"><span class="cap">بطاقة العمل</span>
+   <div class="card back"><div class="t">هوية، موقع، محتوى<br>وإعلانات — من فريق واحد.</div><div class="u">zaokalyamamah.online</div></div>
+   <div class="card front"><div class="w">PI<b>X</b>ORA</div></div>
+  </div>
+  <div class="app"><span class="cap">منشور</span>
+   <div class="post"><div class="h">الفرق؟<br><span>ستلاحظه من أول نظرة.</span></div><div class="f"><i></i><span>PI<b>X</b>ORA</span></div></div>
+  </div>
+  <div class="app"><span class="cap">الموقع</span>
+   <div class="phone"><div class="screen"><div class="b">PI<b>X</b>ORA</div><div class="l">علامتك.<br>حضورك الرقمي.<br><span>شريك واحد.</span></div><div class="btn"></div><div class="btn2"></div></div></div>
+  </div>
+  <div class="app"><span class="cap">الخدمات</span>
+   <div class="svc">
+    <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M8.4 15.6 15.6 8.4M13.8 7.2l3 3" stroke-linecap="round"/></svg>الهوية</div>
+    <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M3 9h18"/><path d="M6 12h5v4H6zM13.5 12H18M13.5 15H18" stroke-linecap="round"/></svg>المواقع</div>
+    <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4.5h16v11H9.5L4 19.5v-15z" stroke-linejoin="round"/><path d="M12 13.2 9.2 10.6a1.7 1.7 0 0 1 2.8-1.9 1.7 1.7 0 0 1 2.8 1.9L12 13.2z" stroke-linejoin="round"/></svg>التواصل</div>
+    <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 9.5v5h3l8 4.5v-14l-8 4.5h-3z" stroke-linejoin="round"/><path d="M18 9a4.2 4.2 0 0 1 0 6" stroke-linecap="round"/><path d="M7 15v4" stroke-linecap="round"/></svg>الإعلانات</div>
+    <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8.5" stroke-dasharray="2 3"/><path d="M12 3.5v2M12 18.5v2M3.5 12h2M18.5 12h2" stroke-linecap="round"/></svg>المتكاملة</div>
+   </div>
+  </div>
+ </div>
+</div>
+</body></html>

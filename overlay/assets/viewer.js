@@ -23,6 +23,8 @@
     ['main', '.c-work img, .c-chapter__work img'],
     ['.c-gallery', 'img'],
     ['.g-work', '.g-project__frame img'],
+  // The campaign page's hero: Pixora's own identity board, up close.
+  ['.g-hero__visual', 'img'],
     ['main', '.c-split__figure img'],
   ];
   const MAX = 4;

@@ -571,6 +571,15 @@ for (const kind of ['mobile', 'desktop']) {
     check(!clash, '320px phone: the floating WhatsApp button does not cover the hero button');
     await sc.close();
   }
+  // The campaign page's hero shows Pixora's own identity board, and it opens up close.
+  {
+    const bc = await siteContext(browser, VIEWPORTS.mobile);
+    const bp = await bc.newPage();
+    await bp.goto(`${BASE}/go`, { waitUntil: 'networkidle' });
+    const hero = await bp.$eval('.g-hero__frame img', (i) => ({ src: i.currentSrc.split('/').pop(), ok: i.complete && i.naturalWidth > 0, zoom: i.classList.contains('is-zoomable') }));
+    check(/^pixora-board(-900)?\.webp$/.test(hero.src) && hero.ok && hero.zoom, '/go: hero is the Pixora identity board, zoomable', JSON.stringify(hero));
+    await bc.close();
+  }
   // The code lead.php and /admin/ share is never served; the admin page links
   // the same stylesheet as every other page (written in by the build).
   {

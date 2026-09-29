@@ -8,8 +8,13 @@
 //                                    with the service's cover, name, headline
 //                                    and starting price as they appear on the
 //                                    built site
+// It also renders the Pixora identity board (board.html, 1800×1200) to
+// tools/share-cards/out/pixora-board.png; `python3 tools/images.py board`
+// encodes it for the site (the campaign page's hero) — do that before this
+// script's cards, since share-go.jpg shows the encoded board.
 // Run the build first (the prices and headlines are read from site/).
-//   node tools/share-cards/render.mjs     (CHROMIUM=/path/to/chrome if needed)
+//   node tools/share-cards/render.mjs [board]   (CHROMIUM=/path/to/chrome if needed;
+//                                               "board" renders the board only)
 import { chromium } from 'playwright';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -28,6 +33,18 @@ const shoot = async (file) => {
   await page.screenshot({ path: path.join(out, file), type: 'jpeg', quality: 86 });
   console.log(file);
 };
+
+// The identity board.
+{
+  const bp = await browser.newPage({ viewport: { width: 1800, height: 1200 } });
+  await bp.goto(`file://${path.join(here, 'board.html')}`);
+  await bp.evaluate(() => document.fonts.ready);
+  await bp.waitForTimeout(300);
+  await bp.screenshot({ path: path.join(here, 'out', 'pixora-board.png') });
+  await bp.close();
+  console.log('out/pixora-board.png');
+  if (process.argv[2] === 'board') { await browser.close(); process.exit(0); }
+}
 
 // "From" prices, per service, as the pricing page lists them.
 const reader = await browser.newPage();
