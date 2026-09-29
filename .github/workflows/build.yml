@@ -1,0 +1,60 @@
+# Builds the site from source/ + overlay/, tests it, and publishes the upload
+# package: Actions → the latest run → Artifacts → pixora-site-upload.
+# Unzip its contents into public_html.
+name: Build site
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Build
+        run: python3 tools/build.py
+
+      # Packed before the tests run, so no test data can end up in it.
+      - name: Pack the upload
+        run: |
+          short_sha=$(git rev-parse --short HEAD)
+          echo "SHORT_SHA=$short_sha" >> "$GITHUB_ENV"
+          mkdir -p dist
+          cp -a site "dist/pixora-site-$short_sha"
+
+      - name: Install test browser
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Test the site
+        run: |
+          php -S 127.0.0.1:8099 -t site tests/router.php > /dev/null 2>&1 &
+          sleep 1
+          BASE=http://127.0.0.1:8099 node tests/campaign.mjs
+
+      - name: Test the admin page
+        run: node tests/admin.mjs
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pixora-site-upload-${{ env.SHORT_SHA }}
+          path: dist/pixora-site-${{ env.SHORT_SHA }}/
+          include-hidden-files: true
+          retention-days: 30
+          if-no-files-found: error

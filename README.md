@@ -1,7 +1,21 @@
 # Pixora — website + campaign landing
 
-`site/` is the deployable web root — upload its **contents** to `public_html`.
-It is **generated**; do not edit it by hand:
+## Getting the upload package
+
+Every push builds and tests the site on GitHub (`.github/workflows/build.yml`).
+Open **Actions → Build site →** the latest green run **→ Artifacts →
+`pixora-site-upload-<commit>`**, download it, and extract its contents into
+`public_html`. A red run means a test failed: nothing from it should be
+uploaded. Packages are kept for 30 days; "Run workflow" on the same page makes
+a fresh one at any time.
+
+Do not overwrite `admin/config.php` on the server once the admin password is
+set (the package carries the empty one).
+
+## How it is built
+
+`site/` is the deployable web root. It is **generated** and not kept in git
+(build it locally with `npm run build`, or take it from Actions):
 
 ```
 source/    the site exactly as supplied (replace wholesale with each new version)
