@@ -99,6 +99,36 @@ CSS = CSS_START + """
    translate:-50% pushed them a whole mark sideways, onto the text, in Arabic. */
 .c-faq__mark::before,.c-faq__mark::after,.c-addons__mark::before,.c-addons__mark::after,
 .c-challenge__why-mark::before,.c-challenge__why-mark::after{inset-inline-start:auto;left:50%}
+/* ---- UI pass: one system everywhere ------------------------------------ */
+/* Section labels: gold, with the short rule after them, wherever a section
+   begins (some had it, some did not; the page template's was grey). */
+.c-proof__eyebrow,.c-showcase__eyebrow,.c-story__eyebrow,.c-page__eyebrow{display:flex;align-items:center;gap:var(--space-12);color:var(--color-accent)}
+.c-proof__eyebrow::after,.c-showcase__eyebrow::after,.c-story__eyebrow::after,.c-page__eyebrow::after{content:"";inline-size:var(--rule-width);block-size:var(--border-width-strong);background-color:currentcolor;flex-shrink:0}
+/* Headings: the display face, bold, like every other heading on the site
+   (the page template — pricing, privacy, terms, accessibility — the brand
+   challenge and the package builder were set in the regular weight). */
+.c-page__title,.c-prose h2,.c-challenge__title,.c-build-title{font-family:var(--font-display);font-weight:var(--weight-bold);letter-spacing:var(--tracking-heading);color:var(--color-text-primary)}
+.c-page__title{letter-spacing:var(--tracking-display);line-height:var(--leading-heading)}
+.c-prose h2{margin-block-end:var(--space-12)}
+/* Pricing: "How we bill" no longer touches the package builder above it. */
+div:has(> form.c-build) + .c-prose{margin-block-start:var(--space-80)}
+/* The brand challenge: the same rhythm as the sections around it. */
+.c-challenge{padding-block:var(--section-space-tight)}
+/* The testimonial: a pull quote across the section, not half of it. */
+.c-proof .c-testimonial{max-inline-size:none}
+@media (min-width:64em){.c-proof .c-testimonial{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:var(--space-64);align-items:end;padding:var(--space-48)}
+.c-proof .c-testimonial__quote p{font-size:var(--text-h4,1.35rem);line-height:var(--leading-relaxed)}
+.c-proof .c-testimonial__by{margin:0;padding:0 0 0 var(--space-32);border:0;border-inline-start:var(--border-hairline)}
+:root[dir="rtl"] .c-proof .c-testimonial__by{padding:0 var(--space-32) 0 0}}
+/* "What it covers": the dot sits inside its chip, before the word. */
+.c-svc__caps .c-service__cap{gap:var(--space-12)}
+.c-svc__caps .c-service__cap::before{position:static;flex:none}
+/* Pills everywhere (an unlayered rule had kept "Copy" square). */
+.c-channel__copy,.c-elsewhere__link{border-radius:var(--radius-pill)}
+/* "Check us": links as chips, like "Elsewhere", not a bulleted list. */
+.c-verify__list{flex-direction:row;flex-wrap:wrap;gap:var(--space-8);list-style:none;margin:0;padding:0}
+.c-verify__list a{gap:var(--space-8);padding-inline:var(--space-16);border:var(--border-hairline);border-radius:var(--radius-pill);text-decoration:none;font-size:var(--text-body-sm);transition:border-color var(--duration-fast) var(--ease-standard),background-color var(--duration-fast) var(--ease-standard)}
+.c-verify__list a:hover{border-color:var(--color-accent);background-color:rgba(244,209,63,0.06)}
 /* An email address reads left to right, in Arabic too. */
 :root[dir="rtl"] input[type="email"]{direction:ltr;text-align:right}
 /* Breadcrumb links: a finger-sized target without moving the text. */

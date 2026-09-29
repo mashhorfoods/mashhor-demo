@@ -167,6 +167,12 @@ Kept by tests in `tests/campaign.mjs` ("UX pass"):
   section and the footer, where WhatsApp is already on screen.
 - Breadcrumb links have finger-sized targets.
 
+One visual system (refinements stylesheet, "UI pass"; a test checks it):
+every section label is gold with its short rule, every heading is the bold
+display face (the page template, the brand challenge and the builder
+included); the testimonial is a full-width pull quote; "What it covers"
+dots sit inside their chips; "Copy" and the "Check us" links are pills.
+
 ## Ad URLs
 
 Use standard UTM parameters. Everything is optional; the page works with none.

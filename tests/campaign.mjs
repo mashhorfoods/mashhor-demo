@@ -522,6 +522,27 @@ for (const kind of ['mobile', 'desktop']) {
     check(await up.$eval('.c-wa-fab', (e) => e.classList.contains('is-aside') && getComputedStyle(e).visibility === 'hidden'), 'floating WhatsApp steps aside over the contact section');
     await uc.close();
   }
+  // UI pass: one system — gold section labels with their rule, bold headings.
+  {
+    const vc = await browser.newContext({ ...VIEWPORTS.desktop });
+    await vc.route('https://plausible.io/**', (r) => r.fulfill({ status: 200, body: '' }));
+    const vp = await vc.newPage();
+    for (const path of ['/', '/pricing', '/story', '/about', '/services/branding', '/privacy']) {
+      await vp.goto(`${BASE}${path}`, { waitUntil: 'networkidle' });
+      const off = await vp.evaluate(() => {
+        const bad = [];
+        document.querySelectorAll('main :is(.c-hero__eyebrow,.c-services__eyebrow,.c-proof__eyebrow,.c-showcase__eyebrow,.c-detail__eyebrow,.c-story__eyebrow,.c-page__eyebrow)').forEach((e) => {
+          if (!e.getClientRects().length) return;
+          const line = getComputedStyle(e, '::after').content;
+          if (line === 'none' || getComputedStyle(e).color !== 'rgb(244, 209, 63)') bad.push('label ' + e.className);
+        });
+        document.querySelectorAll('main h1, main h2:not(.t-label)').forEach((h) => { if (h.getClientRects().length && +getComputedStyle(h).fontWeight < 700) bad.push('heading ' + h.textContent.trim().slice(0, 30)); });
+        return bad;
+      });
+      check(off.length === 0, `${path}: section labels and headings follow the one system`, off.join(' | '));
+    }
+    await vc.close();
+  }
   // Every inline script is covered by a hash in the CSP the server sends.
   {
     const { createHash } = await import('node:crypto');
