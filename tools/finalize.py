@@ -10,6 +10,8 @@ changed file gets a new name, so no visitor ever runs a stale copy.
 Then:
   - go.html links the same stylesheet (between its SHARED-STYLES markers);
     /admin/ finds it through the homepage;
+  - the shared stylesheet loses the rules of components no page uses
+    (prune_css.py);
   - .htaccess: long caching for the hashed files, and the CSP script hashes
     recomputed for the inline scripts that remain (the reveal failsafe, the
     analytics stub, JSON data blocks).
@@ -19,6 +21,8 @@ import hashlib
 import pathlib
 import re
 import sys
+
+import prune_css
 
 START, END = "<!-- SHARED-STYLES:START -->", "<!-- SHARED-STYLES:END -->"
 
@@ -36,6 +40,15 @@ def build(site: pathlib.Path):
     if len(styles) != 1 or len(modules) != 1:
         sys.exit(f"finalize: pages disagree ({len(styles)} stylesheets, {len(modules)} scripts) — refusing to merge")
     css, js = styles.pop(), modules.pop()
+
+    # Rules for components no page uses any more (see prune_css.py).
+    uses = "".join(re.sub(r"<style>.*?</style>", "", t, flags=re.S) for t in texts.values()) + js
+    for extra in ("go.html", "assets/go.js", "assets/motion.js", "admin/index.php", "admin/admin.js"):
+        uses += re.sub(r"<style>.*?</style>", "", (site / extra).read_text(encoding="utf-8"), flags=re.S)
+    prune_css.check_unused(uses)
+    before_css = len(css)
+    css = prune_css.prune(css)
+    print(f"finalize: unused component styles pruned, {(before_css - len(css)) // 1024} KB")
 
     css_name, js_name = f"site.{digest(css)}.css", f"site.{digest(js)}.js"
     (site / "assets" / css_name).write_text(css.strip() + "\n", encoding="utf-8")
