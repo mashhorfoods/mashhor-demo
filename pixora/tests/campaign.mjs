@@ -354,6 +354,48 @@ for (const kind of ['mobile', 'desktop']) {
   await context.close();
 }
 
+/* ---- 10. Quiet luxury: the motion layer ------------------------------------ */
+{
+  for (const reduced of [false, true]) {
+    const context = await browser.newContext({ ...VIEWPORTS.desktop, reducedMotion: reduced ? 'reduce' : 'no-preference' });
+    await context.route('https://plausible.io/**', (route) => route.fulfill({ status: 200, body: '' }));
+    await context.addInitScript(() => { try { localStorage.setItem('site-lang', 'ar'); } catch {} });
+    const p = await context.newPage();
+    const errors = [];
+    p.on('pageerror', (e) => errors.push(e.message));
+    const tag = reduced ? 'reduced motion' : 'motion';
+    for (const page of ['/', '/pricing', '/services/social', '/about', '/go']) {
+      await p.goto(`${BASE}${page}`);
+      await p.waitForTimeout(150);
+      check(await p.locator('script[src^="/assets/motion."]').count() === 1, `[${tag}] ${page}: motion layer loaded once`);
+    }
+    await p.goto(`${BASE}/`);
+    await p.waitForTimeout(1400);
+    const lines = await p.$$eval('.c-hero__headline [lang="ar"] .m-line', (els) => els.length);
+    check(reduced ? lines === 0 : lines === 3, `[${tag}] hero headline ${reduced ? 'stays whole' : 'rises in 3 lines'}`, String(lines));
+    check(await p.$eval('.c-hero__headline', (e) => getComputedStyle(e).opacity) === '1', `[${tag}] hero headline visible`);
+    if (!reduced) {
+      await p.evaluate(() => document.querySelector('#work').scrollIntoView({ block: 'center' }));
+      await p.waitForTimeout(300);
+      const a = await p.$eval('.c-gallery', (g) => g.scrollLeft);
+      await p.waitForTimeout(1500);
+      const b = await p.$eval('.c-gallery', (g) => g.scrollLeft);
+      check(Math.abs(b - a) > 10, '[motion] work gallery glides on its own', `${a} → ${b}`);
+      await p.hover('.c-gallery');
+      await p.waitForTimeout(300);
+      const c = await p.$eval('.c-gallery', (g) => g.scrollLeft);
+      await p.waitForTimeout(800);
+      check(Math.abs((await p.$eval('.c-gallery', (g) => g.scrollLeft)) - c) < 1, '[motion] gallery stops under the pointer');
+    }
+    for (let y = 0; y < 14000; y += 500) { await p.evaluate((v) => window.scrollTo(0, v), y); await p.waitForTimeout(40); }
+    await p.waitForTimeout(1200);
+    const hidden = await p.$$eval('[data-reveal], [data-reveal-group] > *', (els) => els.filter((e) => e.offsetParent && parseFloat(getComputedStyle(e).opacity) < 0.99).length);
+    check(hidden === 0, `[${tag}] nothing left hidden after scrolling the homepage`, String(hidden));
+    check(errors.length === 0, `[${tag}] no script errors`, errors.join('; '));
+    await context.close();
+  }
+}
+
 await browser.close();
 console.log(failures ? `\n${failures} check(s) FAILED` : '\nAll checks passed');
 process.exit(failures ? 1 : 0);

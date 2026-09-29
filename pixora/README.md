@@ -14,9 +14,10 @@ pixora/tools/build.py   →   pixora/site/
 
 | Step | Script | What it does |
 | --- | --- | --- |
-| 1 | `build_services.py` | One page per service at `/services/<id>` (details, showcase, what it covers, packages and prices, related add-ons, other services). The homepage gets a single services section of cards; the old accordion, the five detail sections and the add-ons leave it. `/pricing` keeps only pricing matters: what moves a price, an index linking to the service pages, every add-on, the build-your-own estimator and billing. |
+| 1 | `build_services.py`, `streamline.py` | One page per service at `/services/<id>` (details, showcase, what it covers, packages and prices, related add-ons, other services). The homepage gets a single services section of cards; the old accordion, the five detail sections and the add-ons leave it. `/pricing` keeps only pricing matters: what moves a price, an index linking to the service pages, every add-on, the build-your-own estimator and billing. |
 | 2 | `apply-site-refinements.py` | Spacing, pill buttons, WhatsApp button on phones, hero copy, profile, privacy note, root-based clean links, 301s from `.html`, CSP hashes. |
-| 3 | `sync-shared-styles.py` | The homepage stylesheet into `go.html`. |
+| 3 | `motion.py` | "Quiet luxury" motion layer, stylesheet half: one rhythm (480/900 ms, expo ease-out) with a light blur on the site's own reveal; page-to-page cross-fades with the header held still and each service card growing into its page (`@view-transition`); long text and the campaign page surfacing with the scroll (scroll-driven CSS); hero lines rising; pointer light on cards. Script half: `overlay/assets/motion.js` (line split, magnetic primary buttons, pointer light, self-gliding galleries that stop when touched, counting totals). All off under reduced motion; nothing hidden without it. |
+| 4 | `finalize.py` | One shared, content-hashed `site.<hash>.css` / `.js` / `motion.<hash>.js` for every page (go and admin included), long caching, CSP hashes. |
 
 The build is deterministic (two runs give identical output); the tests below
 run against its output.

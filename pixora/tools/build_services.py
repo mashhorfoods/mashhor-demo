@@ -152,7 +152,7 @@ def cards(data, skip=None):
         chips = re.findall(r'<li\b[^>]*>(.*?)</li>', s["caps"], re.S)[:4]
         wide = " c-svc-card--wide" if sid == "integrated" and not skip else ""
         items.append(f'''            <li class="c-svc-card{wide}">
-              <a class="c-svc-card__link" href="/services/{sid}">
+              <a class="c-svc-card__link" href="/services/{sid}" style="view-transition-name: svc-{sid}">
                 <span class="c-svc-card__visual" aria-hidden="true">{s["visual"]}</span>
                 <span class="c-svc-card__index" aria-hidden="true">{s["index"]}</span>
                 <span class="c-svc-card__name">{s["name"]}</span>
@@ -274,7 +274,7 @@ def service_main(s, data, addon_groups):
       <section class="l-section c-svc" aria-labelledby="svc-title">
         <div class="l-container">
           {crumbs}
-          <div class="c-svc__hero">
+          <div class="c-svc__hero" style="view-transition-name: svc-{sid}">
 {head}
           {deal}
           </div>

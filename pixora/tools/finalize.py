@@ -41,7 +41,14 @@ def build(site: pathlib.Path):
     (site / "assets" / css_name).write_text(css.strip() + "\n", encoding="utf-8")
     (site / "assets" / js_name).write_text(js.strip() + "\n", encoding="utf-8")
     link = f'<link rel="stylesheet" href="/assets/{css_name}" />'
-    script = f'<script type="module" src="/assets/{js_name}"></script>'
+    # The motion layer (overlay/assets/motion.js) ships hashed the same way.
+    motion_src = site / "assets" / "motion.js"
+    motion_js = motion_src.read_text(encoding="utf-8")
+    motion_name = f"motion.{digest(motion_js)}.js"
+    (site / "assets" / motion_name).write_text(motion_js, encoding="utf-8")
+    motion_src.unlink()
+    motion = f'<script type="module" src="/assets/{motion_name}"></script>'
+    script = f'<script type="module" src="/assets/{js_name}"></script>\n    {motion}'
 
     for page, text in texts.items():
         text = re.sub(r"<style>.*?</style>", lambda m: link, text, count=1, flags=re.S)
@@ -53,7 +60,10 @@ def build(site: pathlib.Path):
     a, b = text.find(START), text.find(END)
     if a < 0 or b < 0:
         sys.exit("finalize: SHARED-STYLES markers missing in go.html")
-    go.write_text(text[:a] + f"{START}\n    {link}\n{END}" + text[b + len(END):], encoding="utf-8")
+    text = text[:a] + f"{START}\n    {link}\n{END}" + text[b + len(END):]
+    text = re.sub(r'\s*<script type="module" src="/assets/motion\.[a-f0-9]+\.js"></script>', "", text)
+    text = text.replace("</head>", f"    {motion}\n  </head>", 1)
+    go.write_text(text, encoding="utf-8")
 
     htaccess = site / ".htaccess"
     rules = htaccess.read_text(encoding="utf-8")
