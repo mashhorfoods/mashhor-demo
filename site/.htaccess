@@ -25,10 +25,10 @@
 
 # --- Caching -----------------------------------------------------------------
 # The HTML carries everything, so it must never be cached hard: a stale copy is
-# a stale SITE, not a stale stylesheet. One hour, revalidated.
+# a stale SITE, not a stale stylesheet. Revalidated on every visit.
 <IfModule mod_expires.c>
   ExpiresActive On
-  ExpiresByType text/html "access plus 1 hour"
+  ExpiresByType text/html "access plus 0 seconds"
   ExpiresByType image/svg+xml "access plus 1 month"
   ExpiresByType font/woff2 "access plus 1 year"
   # site.<hash>.css / .js: the name changes whenever the content does.
@@ -41,7 +41,9 @@
 
 <IfModule mod_headers.c>
   <FilesMatch "\.html$">
-    Header set Cache-Control "public, max-age=3600, must-revalidate"
+    Header set Cache-Control "no-cache"
+    Header set X-LiteSpeed-Cache-Control "no-cache"
+    Header set CDN-Cache-Control "no-store"
   </FilesMatch>
 
   # --- Security ---------------------------------------------------------

@@ -81,6 +81,16 @@ def build(site: pathlib.Path):
                               '  ExpiresByType text/css "access plus 1 year"\n'
                               '  ExpiresByType text/javascript "access plus 1 year"\n'
                               '  ExpiresByType application/javascript "access plus 1 year"', 1)
+    # HTML is small and names every hashed file it needs, so it is never kept:
+    # browsers revalidate it on each visit, and LiteSpeed / the Hostinger CDN
+    # (which cache desktop and mobile copies separately) do not store it — a
+    # new upload shows on every device at once.
+    rules = rules.replace('ExpiresByType text/html "access plus 1 hour"', 'ExpiresByType text/html "access plus 0 seconds"')
+    rules = rules.replace('    Header set Cache-Control "public, max-age=3600, must-revalidate"\n',
+                          '    Header set Cache-Control "no-cache"\n'
+                          '    Header set X-LiteSpeed-Cache-Control "no-cache"\n'
+                          '    Header set CDN-Cache-Control "no-store"\n')
+    rules = rules.replace("a stale SITE, not a stale stylesheet. One hour, revalidated.", "a stale SITE, not a stale stylesheet. Revalidated on every visit.")
     htaccess.write_text(rules, encoding="utf-8")
 
     before = sum(len(t) for t in texts.values())
