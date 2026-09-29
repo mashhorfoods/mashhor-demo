@@ -359,6 +359,10 @@ for (const kind of ['mobile', 'desktop']) {
     check(await p.locator('.c-tier').count() === tiers, `/services/${sid}: ${tiers} packages`);
     const hero = await p.$eval('.c-svc-hero', (s) => { const m = s.querySelector('.c-svc-hero__media'); const img = m.querySelector('img'); const r = s.getBoundingClientRect();
       return { name: m.style.viewTransitionName, src: img.getAttribute('src'), loaded: img.complete && img.naturalWidth > 0, h1: !!s.querySelector('h1'), crumbs: !!s.querySelector('.c-crumbs'), tall: r.height >= innerHeight * 0.6 }; });
+    const og = await p.$eval('meta[property="og:image"]', (m) => m.content);
+    const card = await fetch(`${BASE}/assets/share-${sid}.jpg`);
+    check(og === `https://zaokalyamamah.online/assets/share-${sid}.jpg` && card.ok && (await card.arrayBuffer()).byteLength > 20000,
+      `/services/${sid}: its own link-preview card, present on the site`, og);
     check(hero.name === `svc-${sid}` && hero.src === `/assets/svc-${sid}.webp` && hero.loaded && hero.h1 && hero.crumbs && hero.tall,
       `/services/${sid}: a hero with its cover (same transition name as its card), breadcrumb and heading`, JSON.stringify(hero));
     check(await p.locator('.c-svc-cards .c-svc-card').count() === 4, `/services/${sid}: links to the other four services`);

@@ -334,6 +334,14 @@ def page_head(shell, s):
     h = re.sub(r'(<meta property="og:title" content=")[^"]*(")', rf'\g<1>{name_en} — Pixora\2', h, 1)
     h = re.sub(r'(<meta\s+property="og:description"\s+content=")[^"]*(")', rf'\g<1>{desc_en}\2', h, 1)
     h = h.replace('href="https://zaokalyamamah.online/pricing"', f'href="{url}"')
+    # Its own link-preview card (tools/share-cards: the cover, name and headline).
+    card = f"https://zaokalyamamah.online/assets/share-{s['id']}.jpg"
+    for old in ('property="og:image" content="https://zaokalyamamah.online/assets/share-card.jpg"',
+                'name="twitter:image" content="https://zaokalyamamah.online/assets/share-card.jpg"'):
+        if old not in h:
+            raise SystemExit(f"build_services: share image tag not found: {old}")
+        h = h.replace(old, old.replace("https://zaokalyamamah.online/assets/share-card.jpg", card))
+    h = re.sub(r'(<meta property="og:image:alt" content=")[^"]*(")', rf"\g<1>{name_en} — Pixora / {name_ar} — بيكسورا\2", h, 1)
     h = h.replace('content="https://zaokalyamamah.online/pricing"', f'content="{url}"')
     return h
 
