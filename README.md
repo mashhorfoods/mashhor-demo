@@ -103,6 +103,18 @@ The site shows no sequence numbering (01, 02/07 …): the rule is in the
 refinements stylesheet; prices, counts and the brand challenge's steps keep
 their numbers. A test fails if an "01"-style label shows on any page.
 
+## Link previews
+
+What WhatsApp, X and the rest show when a page is shared: one 1200×630 card
+per page, all in one design (`tools/share-cards/base.css`) — the brand, the
+page's own headline in Arabic with its accent in yellow, the English line,
+a few facts and the page's address. Home, /go, Story, About, Pricing and
+each service have their own; privacy, terms and accessibility use the
+homepage's. The pricing card's prices and each service card's headline and
+starting price are read from the built site, so run the build, then
+`node tools/share-cards/render.mjs`, whenever those change (the cards land
+in `overlay/assets/share-*.jpg`).
+
 ## Case study hero
 
 The Story page opens with its four surfaces beside the title — identity,
