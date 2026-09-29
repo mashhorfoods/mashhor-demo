@@ -109,7 +109,7 @@ The Story page opens with its four surfaces beside the title — identity,
 website, campaign, profile — laid out like prints on a table
 (`tools/story_hero.py`). Each card links down to its chapter, shows its name
 under the pointer (always on touch screens), rises in on arrival and then
-drifts slowly (still under reduced motion). It mirrors in Arabic and sits
+drifts slowly (under reduced motion it simply stays still). It mirrors in Arabic and sits
 under the text on phones.
 
 ## Image viewer
