@@ -58,6 +58,20 @@ Ad  →  /go (hero)  →  "شوف أعمالنا"  →  /go#work     →  توا
 | `tools/config.json` | The business WhatsApp number — the one place to change it. The build fills it into the campaign page and stops if the supplied site's own links use a different one. |
 | `tests/campaign.mjs` | End-to-end checks: routes, devices, WhatsApp links, validation, submission, tracking, fallback, every page's links, and that every file in `site/assets` is used. |
 
+## Service covers
+
+Each service has one cover image, `overlay/assets/svc-<id>.webp` (2400×1500,
+16:10) plus `svc-<id>-1200.webp` for phones. It is the thumbnail on the
+service's card and the full-width hero of its page, and the card's image grows
+into the hero when the page opens (a cross-document view transition). Keep
+the subject in the centre: the card shows it at 16:10, the hero wider on
+desktop and tall on phones, with the headline over its lower part.
+
+The current covers are interim (the service's own drawing, rendered by
+`tools/service-covers/render.mjs`). To use real ones: save them as
+`tools/service-covers/out/svc-<id>.png` or `.jpg`, run
+`FFMPEG=ffmpeg tools/service-covers/encode.sh`, and rebuild.
+
 ## Ad URLs
 
 Use standard UTM parameters. Everything is optional; the page works with none.

@@ -338,11 +338,17 @@ for (const kind of ['mobile', 'desktop']) {
   const cards = await p.$$eval('#services .c-svc-card__link', (els) => els.map((e) => e.getAttribute('href')));
   check(cards.join() === '/services/branding,/services/websites,/services/social,/services/marketing,/services/integrated', 'home: one card per service, linking to its page', cards.join());
   check(await p.locator('#branding, #websites, #social, #marketing, #add-ons, .c-tier').count() === 0, 'home: no duplicated service details or packages');
+  const covers = await p.$$eval('#services .c-svc-card__media', (els) => els.map((e) => [e.style.viewTransitionName, e.querySelector('img')?.getAttribute('src')]));
+  check(covers.length === 5 && covers.every(([n, src]) => src === `/assets/${n}.webp`), 'home: every service card carries its cover, named for the transition', JSON.stringify(covers));
   for (const [sid, tiers] of [['branding', 3], ['websites', 3], ['social', 3], ['marketing', 3], ['integrated', 0]]) {
     await p.goto(`${BASE}/services/${sid}`);
     await p.waitForTimeout(100);
     check(await p.locator('h1').count() === 1 && await p.locator('.c-crumbs [aria-current]').count() === 1, `/services/${sid}: one heading and a breadcrumb`);
     check(await p.locator('.c-tier').count() === tiers, `/services/${sid}: ${tiers} packages`);
+    const hero = await p.$eval('.c-svc-hero', (s) => { const m = s.querySelector('.c-svc-hero__media'); const img = m.querySelector('img'); const r = s.getBoundingClientRect();
+      return { name: m.style.viewTransitionName, src: img.getAttribute('src'), loaded: img.complete && img.naturalWidth > 0, h1: !!s.querySelector('h1'), crumbs: !!s.querySelector('.c-crumbs'), tall: r.height >= innerHeight * 0.6 }; });
+    check(hero.name === `svc-${sid}` && hero.src === `/assets/svc-${sid}.webp` && hero.loaded && hero.h1 && hero.crumbs && hero.tall,
+      `/services/${sid}: a hero with its cover (same transition name as its card), breadcrumb and heading`, JSON.stringify(hero));
     check(await p.locator('.c-svc-cards .c-svc-card').count() === 4, `/services/${sid}: links to the other four services`);
     const current = await p.$eval('[data-nav-link][aria-current="page"]', (e) => e.getAttribute('href')).catch(() => null);
     check(current === `/services/${sid}` || current === null, `/services/${sid}: menu marks the page`, String(current));

@@ -104,7 +104,6 @@ def read_services(home, pricing):
             s["caps"] = acc[slice(*find(acc, r'<ul class="c-service__caps"', "ul"))]
         except ValueError:
             s["caps"] = acc[slice(*find(acc, r'<ol class="c-service__flow"', "ol"))]
-        s["visual"] = inner(acc[slice(*find(acc, r'<div class="c-service__visual"', "div"))])
         s["name_en"] = re.search(r'data-lang-copy="en">(.*?)</span>', s["name"]).group(1)
 
         a, b = find(home, rf'<section id="{sid}"', "section")
@@ -155,8 +154,8 @@ def cards(data, skip=None):
         chips = re.findall(r'<li\b[^>]*>(.*?)</li>', s["caps"], re.S)[:4]
         wide = " c-svc-card--wide" if sid == "integrated" and not skip else ""
         items.append(f'''            <li class="c-svc-card{wide}">
-              <a class="c-svc-card__link" href="/services/{sid}" style="view-transition-name: svc-{sid}">
-                <span class="c-svc-card__visual" aria-hidden="true">{s["visual"]}</span>
+              <a class="c-svc-card__link" href="/services/{sid}">
+                <span class="c-svc-card__media" style="view-transition-name: svc-{sid}">{cover(sid, lazy=True)}</span>
                 <span class="c-svc-card__index" aria-hidden="true">{s["index"]}</span>
                 <span class="c-svc-card__name">{s["name"]}</span>
                 <span class="c-svc-card__summary">{s["summary"]}</span>
@@ -169,6 +168,15 @@ def cards(data, skip=None):
             </li>''')
     four = " c-svc-cards--four" if skip else ""
     return f'<ul class="c-svc-cards{four}" role="list" data-reveal-group>\n' + "\n".join(items) + "\n          </ul>"
+
+
+def cover(sid, lazy):
+    """The service's cover image: the card's thumbnail and its page's hero.
+    Two sizes (tools/service-covers/encode.sh makes both); phones take 1200."""
+    load = 'loading="lazy" decoding="async"' if lazy else 'fetchpriority="high" decoding="async"'
+    sizes = "(min-width: 64em) 40rem, 100vw" if lazy else "100vw"
+    return (f'<img src="/assets/svc-{sid}.webp" srcset="/assets/svc-{sid}-1200.webp 1200w, /assets/svc-{sid}.webp 2400w" '
+            f'sizes="{sizes}" alt="" width="2400" height="1500" {load} />')
 
 
 def wa_link(s):
@@ -274,13 +282,16 @@ def service_main(s, data, addon_groups):
       </section>'''
 
     return f'''
-      <section class="l-section c-svc" aria-labelledby="svc-title">
-        <div class="l-container">
+      <section class="c-svc-hero" aria-labelledby="svc-title">
+        <div class="c-svc-hero__media" style="view-transition-name: svc-{sid}">{cover(sid, lazy=False)}</div>
+        <div class="l-container c-svc-hero__inner">
           {crumbs}
-          <div class="c-svc__hero" style="view-transition-name: svc-{sid}">
 {head}
+        </div>
+      </section>
+      <section class="c-svc__lead-in">
+        <div class="l-container">
           {deal}
-          </div>
         </div>
       </section>
       <section class="l-section l-section--tight c-svc__body">
@@ -332,9 +343,11 @@ CSS = CSS_START + """
 .c-svc-card__link{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:var(--space-16);block-size:100%;padding:var(--space-32);border:var(--border-hairline);border-radius:var(--radius-lg);background-color:var(--color-bg-sunken);color:inherit;text-decoration:none;overflow:hidden;transition:border-color var(--duration-base) var(--ease-standard),transform var(--duration-base) var(--ease-out),background-color var(--duration-base) var(--ease-standard)}
 .c-svc-card__link:hover,.c-svc-card__link:focus-visible{border-color:var(--color-border-accent);background-color:var(--color-surface)}
 @media (prefers-reduced-motion:no-preference){.c-svc-card__link:hover{transform:translateY(-4px)}}
-.c-svc-card__visual{display:block;inline-size:min(100%,13rem);color:var(--color-text-muted);margin-block-end:var(--space-8)}
-.c-svc-card__visual svg{inline-size:100%;block-size:auto}
-@media (min-width:64em){.c-svc-card--wide .c-svc-card__link{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:var(--space-64);align-items:center}.c-svc-card--wide .c-svc-card__visual{grid-column:2;grid-row:1 / span 6;inline-size:14rem}.c-svc-card--wide .c-svc-card__link>:not(.c-svc-card__visual){grid-column:1}.c-svc-card--wide .c-svc-card__foot{margin-block-start:var(--space-8)}}
+.c-svc-card__media{display:block;align-self:stretch;margin:calc(var(--space-32) * -1) calc(var(--space-32) * -1) var(--space-8);aspect-ratio:16 / 10;overflow:hidden;background-color:var(--_charcoal-900);view-transition-class:svc-cover}
+.c-svc-card__media img{display:block;inline-size:100%;block-size:100%;object-fit:cover;transition:scale 900ms var(--ease-out),filter 900ms var(--ease-out);filter:saturate(0.92) brightness(0.94)}
+.c-svc-card__link:hover .c-svc-card__media img,.c-svc-card__link:focus-visible .c-svc-card__media img{scale:1.045;filter:none}
+@media (prefers-reduced-motion:reduce){.c-svc-card__media img{transition:none}.c-svc-card__link:hover .c-svc-card__media img{scale:1}}
+@media (min-width:64em){.c-svc-card--wide .c-svc-card__link{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:var(--space-64);align-items:center}.c-svc-card--wide .c-svc-card__media{grid-column:2;grid-row:1 / span 6;align-self:stretch;margin:calc(var(--space-32) * -1) calc(var(--space-32) * -1) calc(var(--space-32) * -1) 0;aspect-ratio:auto;min-block-size:20rem}.c-svc-card--wide .c-svc-card__link>:not(.c-svc-card__media){grid-column:1}.c-svc-card--wide .c-svc-card__foot{margin-block-start:var(--space-8)}}
 .c-svc-card__index{font-family:var(--font-display);font-size:var(--text-label);letter-spacing:var(--tracking-label);color:var(--color-accent)}
 .c-svc-card__name{font-family:var(--font-display);font-size:var(--text-h3);font-weight:var(--weight-bold);line-height:var(--leading-heading);color:var(--color-text-primary)}
 .c-svc-card__summary{color:var(--color-text-secondary)}
@@ -351,11 +364,20 @@ CSS = CSS_START + """
 .c-crumbs__list a{color:var(--color-text-secondary);text-decoration:none}
 .c-crumbs__list a:hover{color:var(--color-accent)}
 .c-crumbs__list [aria-current]{color:var(--color-text-primary)}
-.c-svc{padding-block:calc(var(--header-height) + var(--space-48)) var(--space-48)}
+.c-svc-hero{position:relative;isolation:isolate;display:flex;flex-direction:column;min-block-size:clamp(34rem,86svh,58rem);padding-block:calc(var(--header-height) + var(--space-32)) var(--space-64);overflow:hidden}
+.c-svc-hero__media{position:absolute;inset:0;z-index:-1;background-color:var(--_charcoal-900);view-transition-class:svc-cover}
+.c-svc-hero__media img{display:block;inline-size:100%;block-size:100%;object-fit:cover}
+.c-svc-hero__media::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,var(--color-bg) 0%,rgba(32,32,32,0.78) 34%,rgba(32,32,32,0.18) 68%,rgba(20,20,20,0.55) 100%)}
+.c-svc-hero__inner{flex:1;display:flex;flex-direction:column;inline-size:100%}
+.c-svc-hero__inner .c-detail__head{margin-block:auto 0}
+.c-svc-hero .c-crumbs__list a,.c-svc-hero .c-detail__lead{text-shadow:0 1px 18px rgba(0,0,0,0.5)}
+@media (max-width:47.99em){.c-svc-hero{min-block-size:clamp(30rem,82svh,44rem)}.c-svc-hero__media::after{background:linear-gradient(to top,var(--color-bg) 0%,rgba(32,32,32,0.86) 46%,rgba(32,32,32,0.4) 76%,rgba(20,20,20,0.6) 100%)}}
+.c-svc__lead-in{padding-block:var(--space-8) var(--space-48)}
+/* The cover travels from the card into the hero: both keep their crop. */
+::view-transition-group(*.svc-cover){overflow:hidden;animation-duration:720ms}
+::view-transition-old(*.svc-cover),::view-transition-new(*.svc-cover){block-size:100%;inline-size:100%;object-fit:cover}
 .c-svc__body{padding-block-start:var(--space-24)}
 
-.c-svc__hero{display:grid;gap:var(--space-40)}
-.c-svc__hero .c-detail__head{margin-block-end:0}
 .c-svc__deal{display:grid;gap:var(--space-24);padding:var(--space-32);border:var(--border-hairline);border-radius:var(--radius-lg);background-color:var(--color-bg-sunken)}
 @media (min-width:64em){.c-svc__deal{grid-template-columns:minmax(0,1fr) auto;align-items:center;padding:var(--space-40) var(--space-48)}}
 .c-svc__deal .c-detail__packages{margin:0}

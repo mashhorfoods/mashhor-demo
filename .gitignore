@@ -6,3 +6,4 @@ dist/
 pixora-leads/
 __pycache__/
 node_modules/
+tools/service-covers/out/

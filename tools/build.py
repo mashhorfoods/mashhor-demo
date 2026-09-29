@@ -20,6 +20,7 @@ Steps, in order:
 
     python3 tools/build.py
 """
+import base64
 import pathlib
 import re
 import shutil
@@ -51,6 +52,18 @@ from common import WHATSAPP  # noqa: E402
 for name in ("go.html", "assets/go.js"):
     path = SITE / name
     path.write_text(path.read_text(encoding="utf-8").replace("{{WHATSAPP}}", WHATSAPP), encoding="utf-8")
+# The hero's still (shown until the video plays, and instead of it under
+# reduced motion) is inlined in the page for an instant first paint. The
+# supplied one carries the video tool's watermark; overlay/ has a clean copy.
+poster = SITE / "assets" / "hero-poster.webp"
+home = SITE / "index.html"
+text, n = re.subn(r"data:image/webp;base64,[A-Za-z0-9+/=]+",
+                  "data:image/webp;base64," + base64.b64encode(poster.read_bytes()).decode(),
+                  home.read_text(encoding="utf-8"), count=1)
+if n != 1:
+    sys.exit("build: the hero still (inline webp) was not found in index.html")
+home.write_text(text, encoding="utf-8")
+poster.unlink()
 for path in SOURCE.glob("*.html"):
     others = set(re.findall(r"wa\.me/(\d+)", path.read_text(encoding="utf-8"))) - {WHATSAPP}
     if others:
