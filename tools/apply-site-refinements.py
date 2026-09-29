@@ -129,6 +129,31 @@ div:has(> form.c-build) + .c-prose{margin-block-start:var(--space-80)}
 .c-verify__list{flex-direction:row;flex-wrap:wrap;gap:var(--space-8);list-style:none;margin:0;padding:0}
 .c-verify__list a{gap:var(--space-8);padding-inline:var(--space-16);border:var(--border-hairline);border-radius:var(--radius-pill);text-decoration:none;font-size:var(--text-body-sm);transition:border-color var(--duration-fast) var(--ease-standard),background-color var(--duration-fast) var(--ease-standard)}
 .c-verify__list a:hover{border-color:var(--color-accent);background-color:rgba(244,209,63,0.06)}
+/* ---- Phones ------------------------------------------------------------ */
+/* A tap answers in the site's own way (press scale, gold focus), not with
+   the browser's blue flash. */
+html{-webkit-tap-highlight-color:transparent}
+@media (hover:none){.c-svc-card__link:active,.c-faq__q:active,.c-index__link:active,.c-story-hero__card:active{scale:0.985;transition:scale 120ms var(--ease-out)}}
+/* Short phones (portrait under 700px tall): the service and About heroes
+   leave room for what follows instead of filling the screen with the cover. */
+@media (max-width:47.99em) and (max-height:700px){.c-svc-hero{min-block-size:min(30rem,74svh)}}
+/* Phones held sideways: a screen about 400px tall. The heroes had been
+   sized for portrait (a 480px minimum, headlines set by width), so the
+   headline filled the screen and every button sat below it. */
+@media (orientation:landscape) and (max-height:520px){
+.c-hero{min-block-size:0;padding-block:calc(var(--header-height) + var(--space-16)) var(--space-32)}
+.c-hero__content{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);grid-template-areas:"eyebrow eyebrow" "head lead" "head actions";column-gap:var(--space-40);row-gap:var(--space-12);align-items:end;inline-size:100%}
+.c-hero__eyebrow{grid-area:eyebrow}
+.c-hero__headline{grid-area:head;font-size:clamp(1.75rem,10.5vh,2.6rem);align-self:center}
+.c-hero__lead{grid-area:lead;margin:0}
+.c-hero__actions{grid-area:actions;flex-direction:row;flex-wrap:wrap;margin:0}
+.c-hero__visual{display:none}
+.c-svc-hero{min-block-size:0;padding-block:calc(var(--header-height) + var(--space-16)) var(--space-32)}
+.c-detail__headline{font-size:clamp(1.6rem,9vh,2.3rem)}
+.c-story__title,.c-page__title{font-size:clamp(1.7rem,9.5vh,2.4rem)}
+.c-story__head.c-story-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:var(--space-32);align-items:center}
+.c-story-hero>:not(.c-story-hero__stage){grid-column:1}
+.c-story-hero__stage{grid-column:2;grid-row:1 / span 3;margin-block-start:0;max-inline-size:26rem}}
 /* An email address reads left to right, in Arabic too. */
 :root[dir="rtl"] input[type="email"]{direction:ltr;text-align:right}
 /* Breadcrumb links: a finger-sized target without moving the text. */
@@ -268,6 +293,11 @@ for name in PAGES:
     text = replace_all(text, TEAM[1:], name, required=False)
     if name == "index.html":
         text = replace_all(text, TEAM_HOME, name, required=True)
+        # Phones: the keyboard's action key moves on to the next field.
+        for field, extra in (("contact-name", 'enterkeyhint="next"'), ("contact-email", 'enterkeyhint="next" spellcheck="false"')):
+            text, n = re.subn(f'id="{field}"', f'id="{field}" {extra}', text, count=1)
+            if n != 1:
+                sys.exit(f"index.html: {field} not found")
         # The contact section's link to the founder's portfolio.
         text, n = re.subn(r'\s*<li>\s*<a class="c-elsewhere__link" href="https://muhalabsalah\.github\.io/muhalabsalah/".*?</li>', "", text, count=1, flags=re.S)
         if n != 1:

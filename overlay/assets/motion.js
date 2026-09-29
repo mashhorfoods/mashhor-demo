@@ -10,8 +10,9 @@
      4. galleries glide on their own, slowly, and stop the moment a person
         touches, hovers, focuses or scrolls them;
      5. running totals in the package builder count to their new value;
-     6. the phones' floating WhatsApp button steps aside where WhatsApp is
-        already on screen (this one runs under reduced motion too).
+     6. the phones' floating WhatsApp button steps aside where WhatsApp (or
+        the hero's own button) is already on screen (runs under reduced
+        motion too).
 
    Page-to-page transitions are pure CSS (@view-transition). Everything here
    is skipped under prefers-reduced-motion, and nothing is hidden waiting for
@@ -136,10 +137,12 @@
   });
 
   /* The floating WhatsApp button steps aside ------------------------------ */
-  // Where WhatsApp is already on screen — the contact section, the footer —
-  // the phones' floating button would only cover the text beneath it.
+  // Where WhatsApp is already on screen — the contact section, the footer,
+  // the About hero, a service's price box — the phones' floating button would
+  // only cover the text beneath it; over the homepage hero it would sit on
+  // the main button. It arrives once the visitor moves past these.
   const fab = document.querySelector('.c-wa-fab');
-  const covered = [...document.querySelectorAll('#contact, .c-footer')];
+  const covered = [...document.querySelectorAll('#contact, .c-footer, #home.c-hero, .c-about-hero, .c-svc__deal')];
   if (fab && covered.length && 'IntersectionObserver' in window) {
     const onScreen = new Set();
     const io = new IntersectionObserver((entries) => {

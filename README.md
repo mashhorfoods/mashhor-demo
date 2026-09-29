@@ -166,6 +166,14 @@ Kept by tests in `tests/campaign.mjs` ("UX pass"):
 - On phones the floating WhatsApp button steps aside over the contact
   section and the footer, where WhatsApp is already on screen.
 - Breadcrumb links have finger-sized targets.
+- Phones held sideways (under 520px tall): the headline sits beside the
+  lead and buttons, heroes drop their portrait minimum height, and the
+  main button is on the first screen (tested at 844×390).
+- The floating WhatsApp button also waits while the homepage hero, the
+  About hero or a service's price box is on screen — it never covers the
+  hero's own button (tested at 320px).
+- No blue tap flash; cards and FAQ answer a tap with a slight press. The
+  contact form's keyboard key moves to the next field.
 
 One visual system (refinements stylesheet, "UI pass"; a test checks it):
 every section label is gold with its short rule, every heading is the bold

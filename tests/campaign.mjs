@@ -278,7 +278,10 @@ for (const kind of ['mobile', 'desktop']) {
   await p.waitForTimeout(150);
   check(await p.locator('.c-verify__name').innerText() === 'مهلب بشير', `[${kind}] profile name reads in Arabic when the page is Arabic`);
   const fab = p.locator('.c-wa-fab');
-  check(await fab.isVisible() === (kind === 'mobile'), `[${kind}] floating WhatsApp button ${kind === 'mobile' ? 'shown' : 'hidden'}`);
+  // Phones: present, but aside while the hero (and its own button) is on screen;
+  // it arrives once the visitor scrolls on (checked below). Desktop: none.
+  check(kind === 'mobile' ? (await fab.count() === 1 && !(await fab.isVisible())) : !(await fab.isVisible()),
+    `[${kind}] floating WhatsApp button ${kind === 'mobile' ? 'waits past the hero' : 'hidden'}`);
   if (kind === 'mobile') {
     const href = await fab.getAttribute('href');
     check(href.includes(`wa.me/${WHATSAPP}`) && decodeURIComponent(href).includes('مرحبًا بيكسورا'), 'floating WhatsApp message follows the Arabic language choice');
@@ -542,6 +545,31 @@ for (const kind of ['mobile', 'desktop']) {
       check(off.length === 0, `${path}: section labels and headings follow the one system`, off.join(' | '));
     }
     await vc.close();
+  }
+  // Phones: sideways, the first screen holds the main button; the floating
+  // WhatsApp button never sits on the hero's own button.
+  {
+    const lc = await browser.newContext({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true });
+    await lc.route('https://plausible.io/**', (r) => r.fulfill({ status: 200, body: '' }));
+    const lp = await lc.newPage();
+    for (const [path, sel] of [['/', '.c-hero__action'], ['/go', '.c-hero__action'], ['/about', '.c-about-hero .c-btn--primary']]) {
+      await lp.goto(`${BASE}${path}`, { waitUntil: 'networkidle' }); await lp.waitForTimeout(600);
+      const bottom = await lp.$eval(sel, (e) => Math.round(e.getBoundingClientRect().bottom));
+      check(bottom <= 390, `landscape phone ${path}: the main button is on the first screen`, String(bottom));
+    }
+    await lc.close();
+    const sc = await browser.newContext({ viewport: { width: 320, height: 568 }, isMobile: true, hasTouch: true });
+    await sc.route('https://plausible.io/**', (r) => r.fulfill({ status: 200, body: '' }));
+    const sp2 = await sc.newPage();
+    await sp2.goto(`${BASE}/`, { waitUntil: 'networkidle' }); await sp2.waitForTimeout(800);
+    const clash = await sp2.evaluate(() => {
+      const f = document.querySelector('.c-wa-fab'), c = document.querySelector('.c-hero__action');
+      if (getComputedStyle(f).visibility === 'hidden') return false;
+      const a = f.getBoundingClientRect(), b = c.getBoundingClientRect();
+      return !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom);
+    });
+    check(!clash, '320px phone: the floating WhatsApp button does not cover the hero button');
+    await sc.close();
   }
   // Every inline script is covered by a hash in the CSP the server sends.
   {
