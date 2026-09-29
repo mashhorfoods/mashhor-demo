@@ -114,6 +114,11 @@ founder links or mentions (the build stops if one returns); the contact
 card keeps the name of the person you reach, in both languages —
 Muhalab Basheir, Visual Communications Designer / مهلب بشير، مصمم المحتوى البصري.
 
+Its three photographs (hero, the team, the process) live in
+`overlay/assets/about-*.webp`, 16:9, with 640 and 1280 wide copies made by
+`tools/about-images/encode.sh` from the source PNGs; the supplied site's
+About photos leave the upload.
+
 ## Link previews
 
 What WhatsApp, X and the rest show when a page is shared: one 1200×630 card

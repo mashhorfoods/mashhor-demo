@@ -71,6 +71,7 @@ PROMISES = [
 
 
 def img(name, alt_en, alt_ar, cls, sizes, eager=False):
+    """A photograph from tools/about-images (1672 wide, with 640 and 1280 copies)."""
     srcset = f"/assets/{name}-640.webp 640w, /assets/{name}-1280.webp 1280w, /assets/{name}.webp 1672w"
     load = 'fetchpriority="high"' if eager else 'loading="lazy"'
     return (f'<img class="{cls}" src="/assets/{name}.webp" srcset="{srcset}" sizes="{sizes}" alt="{alt_en}" '
@@ -93,9 +94,9 @@ def main(cards):
         f'            <li class="c-about-promise">{t(en, ar)}</li>' for en, ar in PROMISES)
     return f'''<main id="main" class="c-about">
       <section class="c-svc-hero c-about-hero" aria-labelledby="about-title">
-        <div class="c-svc-hero__media">{img("about4",
-            "Working across distance after hours: one desk lit in the dark, and around it the screens of the people a project passes through, joined by light across a map of the region.",
-            "العمل عبر المسافات في ساعة متأخرة: مكتب مضاء في العتمة، وحوله شاشات من يمرّ بهم المشروع، تربطها خيوط ضوء عبر خريطة المنطقة.",
+        <div class="c-svc-hero__media">{img("about-hero",
+            "One brand laid out together on a dark stone table under a single warm light: a laptop with a dark website, a phone with a social post, black business cards with gold edges, a letterhead and a printed campaign poster. Fine gold lines in the stone trace a map.",
+            "علامة واحدة مجتمعة على طاولة حجرية داكنة تحت ضوء دافئ واحد: حاسوب عليه موقع داكن، وهاتف عليه منشور، وبطاقات عمل سوداء بحواف ذهبية، وورق مراسلات، وملصق حملة مطبوع. وخطوط ذهبية دقيقة في الحجر ترسم خريطة.",
             "c-about-hero__image", "100vw", eager=True)}</div>
         <div class="l-container c-svc-hero__inner">
           <nav class="c-crumbs" aria-label="Breadcrumb">
@@ -129,9 +130,9 @@ def main(cards):
             <p class="c-about-intro__body" data-reveal>{t("You talk to the Pixora team directly — the people doing the work — on WhatsApp or by email, in whichever language suits you.",
               "تتحدّث مع فريق بيكسورا مباشرة — مع من ينفّذون العمل — عبر واتساب أو البريد، وباللغة التي تناسبك.")}</p>
           </div>
-          <figure class="c-split__figure c-about-intro__figure" data-reveal>{img("about1",
-              "A studio at work across distance: a laptop at the centre, and around it the people a project passes through — a designer, a developer, an editor, a social manager — each on their own screen, connected across a map of the region.",
-              "استوديو يعمل عبر المسافات: حاسوب في المركز، وحوله من يمرّ بهم المشروع — مصمّم ومطوّر ومحرّر ومسؤول تواصل — كلٌّ على شاشته، متّصلين عبر خريطة المنطقة.",
+          <figure class="c-split__figure c-about-intro__figure" data-reveal>{img("about-team",
+              "Seen from above, four people's hands work on the same brand around one dark table: one sketches a logo, one holds a tablet with the website, one scrolls a phone of social posts, one lays out printed ads. Gold threads run from each to one glowing point at the centre.",
+              "من الأعلى، أيادي أربعة أشخاص تعمل على العلامة نفسها حول طاولة داكنة واحدة: يدٌ ترسم شعارًا، وأخرى تمسك جهازًا لوحيًا عليه الموقع، وثالثة تتصفح منشورات على هاتف، ورابعة ترتّب إعلانات مطبوعة. وخيوط ذهبية تمتد من كلٍّ منها إلى نقطة مضيئة في المنتصف.",
               "c-about-intro__image", "(min-width: 64em) 45vw, 92vw")}</figure>
         </div>
       </section>
@@ -158,9 +159,9 @@ def main(cards):
               <p class="c-about-intro__body">{t("Six stages, the same on every project. You always know which one you are in, and what comes next.",
                 "ست مراحل، هي نفسها في كل مشروع. تعرف دائمًا في أيّها أنت، وما الذي يليها.")}</p>
             </header>
-            <figure class="c-split__figure c-about-intro__figure" data-reveal>{img("about2",
-                "The shape of the arrangement: one lit core on a platform, with five workstations around it, each joined to the centre by a single line of light. Five services, one place they meet.",
-                "شكل الترتيب: نواة مضيئة على منصّة، وحولها خمس محطات عمل، تصل كلٌّ منها بالمركز خيط ضوء واحد. خمس خدمات، ومكان واحد تلتقي فيه.",
+            <figure class="c-split__figure c-about-intro__figure" data-reveal>{img("about-process",
+                "One glowing gold line runs across a dark table through six objects in order: a coffee cup, an open notebook, a plan with a pen, a sketchbook with a mark drawn in pencil, a laptop, a phone with a notification — and, in the warmest light at the end, a growing plant.",
+                "خيط ذهبي مضيء يعبر طاولة داكنة مارًّا بستة أشياء بالترتيب: فنجان قهوة، ودفتر مفتوح، ومخطط وقلم، وكرّاسة عليها رسمة شعار بالرصاص، وحاسوب، وهاتف عليه إشعار — وفي آخرها، تحت أدفأ ضوء، نبتة تنمو.",
                 "c-about-intro__image", "(min-width: 64em) 45vw, 92vw")}</figure>
           </div>
           <ol class="c-about-stages" role="list" data-reveal-group>
@@ -211,8 +212,9 @@ def main(cards):
 CSS = """
 /* ABOUT */
 .c-about-hero .c-svc__actions{margin-block-start:var(--space-32)}
-.c-about-hero .c-svc-hero__media::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(to right,rgba(20,20,20,0.82),rgba(20,20,20,0.35) 55%,transparent);-webkit-mask-image:linear-gradient(to top,transparent,#000 35%);mask-image:linear-gradient(to top,transparent,#000 35%)}
-:root[dir="rtl"] .c-about-hero .c-svc-hero__media::before{background:linear-gradient(to left,rgba(20,20,20,0.82),rgba(20,20,20,0.35) 55%,transparent)}
+.c-about-hero__image{object-position:56% 50%}
+.c-about-hero .c-svc-hero__media::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(to right,rgba(20,20,20,0.6),rgba(20,20,20,0.15) 55%,transparent);-webkit-mask-image:linear-gradient(to top,transparent,#000 35%);mask-image:linear-gradient(to top,transparent,#000 35%)}
+:root[dir="rtl"] .c-about-hero .c-svc-hero__media::before{background:linear-gradient(to left,rgba(20,20,20,0.6),rgba(20,20,20,0.15) 55%,transparent)}
 .c-about-intro__grid{display:grid;gap:var(--space-48);align-items:center}
 @media (min-width:64em){.c-about-intro__grid{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:var(--space-80)}}
 .c-about-intro__text{display:grid;gap:var(--space-24);max-inline-size:40rem}
@@ -275,6 +277,9 @@ def build(site: pathlib.Path):
                   r"\g<1>Pixora is a digital studio for the Gulf and Egypt: identity, websites, content, social media and advertising, made by one team in Arabic and English.\2",
                   text, count=1)
     about.write_text(text, encoding="utf-8")
+    # The supplied site's About photos give way to tools/about-images.
+    for old in ("about1", "about2", "about4"):
+        (site / "assets" / f"{old}.webp").unlink()
     for page in list(site.glob("*.html")) + list(site.glob("services/*.html")):
         if page.name != "go.html":
             page.write_text(inject_css(page.read_text(encoding="utf-8"), CSS), encoding="utf-8")

@@ -20,12 +20,7 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 # name → (full width, smaller widths, sizes)
-ABOUT = ((640, 1280), "(min-width: 64em) 43vw, 92vw")
-IMAGES = {
-    "about1.webp": (1672, *ABOUT),
-    "about2.webp": (1672, *ABOUT),
-    "about4.webp": (1672, *ABOUT),
-}
+IMAGES = {}  # none at present (About's photos come in their sizes: tools/about-images)
 # A page's largest paint, fetched first rather than lazily (About's hero
 # photo is written eager, with its own srcset, by about_page.py).
 EAGER = {}
