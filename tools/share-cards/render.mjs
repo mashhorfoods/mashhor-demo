@@ -119,9 +119,8 @@ for (const [id, focus] of Object.entries(SERVICES)) {
 for (const slug of CASES) {
   await reader.goto(site(`work/${slug}.html`), { waitUntil: 'domcontentloaded' });
   const t = await reader.evaluate(() => {
-    const hero = document.querySelector('.c-case-hero');
-    const ar = (sel) => hero.querySelector(`${sel} [data-lang-copy="ar"]`).textContent.trim();
-    return { name: ar('.c-detail__eyebrow'), h1: ar('h1'), en: hero.querySelector('.c-detail__lead [data-lang-copy="en"]').textContent.trim() };
+    const ar = (sel) => document.querySelector(`${sel} [data-lang-copy="ar"]`).textContent.trim();
+    return { name: ar('.c-story__eyebrow'), h1: ar('.c-crumbs [aria-current]'), en: document.querySelector('meta[name="description"]').content };
   });
   await page.goto(`file://${path.join(here, 'service.html')}`);
   await page.evaluate(({ t, slug, img }) => {

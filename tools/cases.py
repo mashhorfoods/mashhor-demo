@@ -2,18 +2,21 @@
 """Case studies: a hub at /work and one page per study at /work/<slug>.
 
 The studies (from the portfolio the owner supplied, rewritten in Pixora's
-voice — the team, never one person — and in both languages) sit in CASES
-below; Al Mada, told at length on /story, leads the hub. Every page is built
+voice — the team, never one person — and in both languages): CASES below
+has what the hub shows, tools/case_stories.py the pages; Al Mada, told at length on /story, leads the hub. Every page is built
 on the pricing page's shell (head, header, verification band, footer,
 script), like the service pages, so it is one of the site's own pages.
 
   Hub   a filter by discipline (radio buttons and :has(), no script), the
         featured study, then a card per study; each cover carries a
         view-transition name, so a card grows into its page.
-  Page  a hero with the cover, a sticky "on this page" index on wide
-        screens, and the sections: overview, challenge, what we did, how
-        it ran, key decisions, outcome, impact — then the next and previous
-        studies and a call to action.
+  Page  told like the Al Mada story, in the story's own markup and styles:
+        the headline beside four pieces of the work laid out as prints, five
+        chapters (annotation, headline, lead, aside, a self-drawing sketch,
+        the work) joined by its thread, a closing line — then the next and
+        previous studies and a call to action. A piece of work is its image
+        once case-<slug>-<piece>.webp is in the assets, a placeholder in its
+        proportions until then.
 
 Covers are drawn from the identity (tools/share-cards/case-cover.html,
 rendered by render.mjs, encoded by `python3 tools/images.py cases`). Runs
@@ -24,6 +27,7 @@ import pathlib
 import re
 
 from build_services import bi
+from case_stories import ICONS, STORIES, sketch
 from common import inject_all, pages, stylesheet
 
 URL = "https://zaokalyamamah.online"
@@ -65,33 +69,6 @@ CASES = [
         "title": ("Brand identity systems", "أنظمة الهوية البصرية"),
         "summary": ("Identity systems, packaging and collateral for commercial organisations across Sudan and Oman.",
                     "أنظمة هوية وتغليف ومطبوعات لمؤسسات تجارية في السودان وعُمان."),
-        "overview": [
-            ("Over nine years, the team behind Pixora has built identities for startups, SMEs, FMCG companies, agencies and humanitarian initiatives — never just a logo, always a complete visual system that holds from the packaging to the social feed.",
-             "على مدى تسع سنوات، بنى فريق بيكسورا هويات لشركات ناشئة ومنشآت صغيرة ومتوسطة وشركات سلع استهلاكية ووكالات ومبادرات إنسانية — لم يكن العمل شعارًا فقط، بل نظامًا بصريًا كاملًا يصمد من العبوة حتى منشورات التواصل."),
-            ("Every identity tells one clear story, and stays practical for the people who use it every day.",
-             "كل هوية تحكي قصة واحدة واضحة، وتبقى عملية لمن يستخدمها كل يوم."),
-        ],
-        "challenge": [
-            ("Most organisations come to us with a logo but no system: the brand looks different on every product, report, website and ad.",
-             "تأتينا معظم المؤسسات بشعار بلا نظام: تبدو العلامة مختلفة على كل منتج وتقرير وموقع وإعلان."),
-            ("The task was an identity that is creative and usable at once — consistent everywhere, and flexible enough for every channel.",
-             "المهمة: هوية مبدعة وعملية في آن — متسقة في كل مكان، ومرنة بما يكفي لكل قناة."),
-        ],
-        "roles": [("Brand strategy", "استراتيجية العلامة"), ("Visual identity", "الهوية البصرية"), ("Graphic design", "التصميم الجرافيكي"), ("Brand systems", "أنظمة العلامة")],
-        "did": ("We run the whole identity process — from the first concept to the guidelines the client's own team works from.",
-                "نتولى رحلة الهوية كاملة — من الفكرة الأولى حتى الدليل الذي يعمل به فريق العميل."),
-        "process": [("Research the organisation and its audience", "دراسة المؤسسة وجمهورها"), ("Understand the business goals", "فهم أهداف العمل وتحديات التواصل"),
-                    ("Explore visual directions", "استكشاف اتجاهات بصرية"), ("Design a logo system that scales", "تصميم نظام شعار قابل للتوسع"),
-                    ("Set type, colour and layout standards", "وضع معايير الخط واللون والتخطيط"), ("Build the supporting brand assets", "بناء عناصر العلامة المساندة"),
-                    ("Test on print and on screen", "الاختبار على المطبوع والشاشة"), ("Deliver production-ready files", "تسليم ملفات جاهزة للإنتاج")],
-        "decisions_intro": ("Systems, not isolated logos:", "أنظمة، لا شعارات منفردة:"),
-        "decisions": [("Clear visual hierarchy", "تسلسل بصري واضح"), ("Flexible colour systems", "أنظمة ألوان مرنة"), ("Highly legible type", "خطوط سهلة القراءة"),
-                      ("Modular layouts", "تخطيطات مرنة الوحدات"), ("One design for print and screen", "تصميم واحد للمطبوع والشاشة"), ("Efficient to produce as the brand grows", "إنتاج فعّال مع نمو العلامة")],
-        "outcome": ("Cohesive identity systems, carried across packaging, corporate communication, campaigns, presentations, websites and social platforms — recognisable, scalable, and ready to grow with the business.",
-                    "أنظمة هوية متماسكة تمتد عبر العبوات والتواصل المؤسسي والحملات والعروض والمواقع ومنصات التواصل — مميّزة وقابلة للتوسع وجاهزة للنمو مع العمل."),
-        "impact": [("Lasting brand consistency", "اتساق دائم للعلامة"), ("Stronger recognition across channels", "حضور أوضح عبر القنوات"),
-                   ("Faster design production later on", "إنتاج أسرع للتصاميم لاحقًا"), ("Reusable assets that save production time", "عناصر قابلة لإعادة الاستخدام توفّر وقت الإنتاج"),
-                   ("A more professional, trustworthy image", "صورة أكثر احترافية وموثوقية")],
     },
     {
         "slug": "editorial-publication-design", "kinds": "editorial",
@@ -99,30 +76,6 @@ CASES = [
         "title": ("Editorial &amp; publication design", "التصميم التحريري والمطبوعات"),
         "summary": ("Annual reports, publications and presentations that make complex information easy to follow.",
                     "تقارير سنوية ومطبوعات وعروض تجعل المعلومات المعقدة سهلة المتابعة."),
-        "overview": [
-            ("Editorial design is one of our deepest specialities — above all in humanitarian communication and institutional reporting.",
-             "التصميم التحريري من أعمق تخصصاتنا — خاصة في التواصل الإنساني والتقارير المؤسسية."),
-            ("Reports, publications, brochures and presentations: work where the order of information matters as much as how it looks.",
-             "تقارير ومطبوعات وكتيبات وعروض: عمل يهم فيه ترتيب المعلومة بقدر شكلها."),
-        ],
-        "challenge": [
-            ("Long reports lose their readers in dense text, inconsistent pages and scattered information.",
-             "تُضيّع التقارير الطويلة قرّاءها بين نصوص كثيفة وصفحات غير متسقة ومعلومات مبعثرة."),
-            ("The task: publications that guide the reader through complex content while staying clear and consistent.",
-             "المهمة: مطبوعات تقود القارئ عبر المحتوى المعقد وتبقى واضحة ومتسقة."),
-        ],
-        "roles": [("Editorial design", "التصميم التحريري"), ("Information architecture", "هندسة المعلومات"), ("Publication design", "تصميم المطبوعات"), ("Layout", "التنسيق والإخراج")],
-        "did": ("We design the whole publication system — page structures, typography, grids, hierarchy, icons and supporting graphics.",
-                "نصمم نظام المطبوعة كاملًا — بنية الصفحات والخطوط والشبكات والتسلسل والأيقونات والرسوم المساندة."),
-        "process": [("Research", "البحث"), ("Content analysis", "تحليل المحتوى"), ("Information hierarchy", "تسلسل المعلومات"), ("The editorial grid", "الشبكة التحريرية"),
-                    ("Typography", "الخطوط"), ("Visual integration", "دمج العناصر البصرية"), ("Quality review", "مراجعة الجودة"), ("Production", "الإنتاج")],
-        "decisions_intro": ("Every choice aimed to lower the reader's effort:", "كل قرار هدفه تخفيف جهد القارئ:"),
-        "decisions": [("Strong editorial grids", "شبكات تحريرية متينة"), ("Consistent typography", "خطوط متسقة"), ("Modular pages", "صفحات مرنة الوحدات"),
-                      ("Clear navigation", "تنقل واضح"), ("Deliberate white space", "مساحات بيضاء مقصودة"), ("Storytelling backed by data", "سرد تدعمه البيانات")],
-        "outcome": ("Publications that are easier to navigate and keep a professional institutional look — fit for humanitarian organisations, NGOs and corporate readers alike.",
-                    "مطبوعات أسهل في التنقل تحافظ على مظهر مؤسسي احترافي — تناسب المنظمات الإنسانية وغير الحكومية وقرّاء الشركات على حد سواء."),
-        "impact": [("Information that is easier to reach", "معلومات أسهل وصولًا"), ("More engaged readers", "قرّاء أكثر تفاعلًا"), ("Consistent publications", "مطبوعات متسقة"),
-                   ("Less visual clutter", "ازدحام بصري أقل"), ("Editorial systems ready for the next report", "أنظمة تحريرية جاهزة للتقرير القادم")],
     },
     {
         "slug": "information-design", "kinds": "information",
@@ -130,30 +83,6 @@ CASES = [
         "title": ("Information design &amp; visual storytelling", "تصميم المعلومات والسرد البصري"),
         "summary": ("Infographics, presentations and data stories that turn research into something people understand.",
                     "إنفوجرافيك وعروض وقصص بيانات تحوّل الأبحاث إلى ما يفهمه الناس."),
-        "overview": [
-            ("Information design joins research, data and visual communication to turn technical material into clear stories.",
-             "يجمع تصميم المعلومات بين البحث والبيانات والتواصل البصري ليحوّل المادة التقنية إلى قصص واضحة."),
-            ("The aim: help people grasp complex issues quickly, without losing accuracy.",
-             "الهدف: أن يفهم الناس القضايا المعقدة بسرعة، دون أن تضيع الدقة."),
-        ],
-        "challenge": [
-            ("Datasets, technical reports and humanitarian assessments hold valuable insight that non-specialists cannot reach.",
-             "تحمل مجموعات البيانات والتقارير التقنية والتقييمات الإنسانية رؤى قيّمة لا يصل إليها غير المتخصصين."),
-            ("The task: keep the data exact while making it far easier to understand.",
-             "المهمة: الحفاظ على دقة البيانات مع جعلها أسهل فهمًا بكثير."),
-        ],
-        "roles": [("Information design", "تصميم المعلومات"), ("Visual storytelling", "السرد البصري"), ("Data visualisation", "تصوير البيانات"), ("Communication design", "تصميم التواصل")],
-        "did": ("We turn research findings into structured visual narratives, built on editorial design principles.",
-                "نحوّل نتائج الأبحاث إلى سرديات بصرية منظمة، مبنية على أسس التصميم التحريري."),
-        "process": [("Research", "البحث"), ("Data verification", "التحقق من البيانات"), ("Finding the insight", "استخراج الفكرة"), ("Building the narrative", "بناء السردية"),
-                    ("Visual hierarchy", "التسلسل البصري"), ("Data visualisation", "تصوير البيانات"), ("Editorial integration", "الدمج التحريري"), ("Review", "المراجعة")],
-        "decisions_intro": ("Every chart answers a question, rather than just showing a number:", "كل رسم يجيب عن سؤال، لا يعرض رقمًا فقط:"),
-        "decisions": [("Clarity over decoration", "الوضوح قبل الزخرفة"), ("Accuracy over complexity", "الدقة قبل التعقيد"),
-                      ("A story over isolated graphics", "القصة قبل الرسوم المنفردة"), ("Open to every audience", "في متناول كل جمهور")],
-        "outcome": ("Decision-makers, partners and the public could understand complex information faster, through structured visual communication.",
-                    "صار بإمكان صنّاع القرار والشركاء والجمهور فهم المعلومات المعقدة أسرع، عبر تواصل بصري منظم."),
-        "impact": [("Better understanding of the data", "فهم أعمق للبيانات"), ("Less effort to interpret", "جهد أقل في التفسير"), ("More effective communication", "تواصل أكثر فاعلية"),
-                   ("Stronger evidence-based storytelling", "سرد أقوى قائم على الأدلة"), ("Better-informed decisions", "قرارات مبنية على معرفة")],
     },
     {
         "slug": "talk-about-sudan", "kinds": "editorial information",
@@ -161,35 +90,6 @@ CASES = [
         "title": ("Talk About Sudan", "Talk About Sudan — تحدّث عن السودان"),
         "summary": ("A self-initiated editorial series that turns humanitarian reporting on Sudan into clear visual narratives.",
                     "سلسلة تحريرية بمبادرة ذاتية تحوّل التقارير الإنسانية عن السودان إلى سرديات بصرية واضحة."),
-        "overview": [
-            ("Talk About Sudan is a self-initiated project that turns humanitarian reports into accessible visual narratives.",
-             "Talk About Sudan مشروع بمبادرة ذاتية يحوّل التقارير الإنسانية إلى سرديات بصرية في متناول الجميع."),
-            ("Rather than repeating statistics, it gathers verified information from trusted humanitarian sources into editorial pieces that show the scale, the context and the human impact of the crisis — with clarity, accuracy and dignity.",
-             "بدل تكرار الإحصاءات، يجمع معلومات موثّقة من مصادر إنسانية موثوقة في قطع تحريرية تُظهر حجم الأزمة وسياقها وأثرها الإنساني — بوضوح ودقة وكرامة."),
-        ],
-        "challenge": [
-            ("Humanitarian reports hold critical evidence, but they are hard for non-specialists to navigate.",
-             "تحمل التقارير الإنسانية أدلة حاسمة، لكن يصعب على غير المتخصصين التنقل فيها."),
-            ("The task: bridge technical documentation and public understanding, without compromising accuracy or ethics.",
-             "المهمة: وصل التوثيق التقني بفهم الجمهور، دون المساس بالدقة أو الأخلاقيات."),
-        ],
-        "roles": [("Research", "البحث"), ("Source verification", "التحقق من المصادر"), ("Editorial planning", "التخطيط التحريري"), ("Information architecture", "هندسة المعلومات"),
-                  ("Data visualisation", "تصوير البيانات"), ("Publication design", "تصميم النشر")],
-        "did": ("Every stage in-house — from research and verification to design, motion concepts and quality review.",
-                "كل المراحل داخل الفريق — من البحث والتحقق حتى التصميم ومفاهيم الحركة ومراجعة الجودة."),
-        "process": [("Primary-source research", "البحث في المصادر الأولية"), ("Evidence verification", "التحقق من الأدلة"), ("Insight extraction", "استخراج الرؤى"),
-                    ("Narrative structure", "بنية السرد"), ("Editorial design", "التصميم التحريري"), ("Information visualisation", "تصوير المعلومات"),
-                    ("Quality review", "مراجعة الجودة"), ("Publication", "النشر")],
-        "decisions_intro": ("The principles behind every piece:", "مبادئ وراء كل قطعة:"),
-        "decisions": [("Primary sources only", "المصادر الأولية فقط"), ("No assumptions", "لا افتراضات"), ("Evidence before aesthetics", "الدليل قبل الجماليات"),
-                      ("Human-centred communication", "تواصل محوره الإنسان"), ("Ethical representation of affected communities", "تمثيل أخلاقي للمجتمعات المتأثرة"),
-                      ("Every visual carries evidence", "كل عنصر بصري يحمل دليلًا")],
-        "outcome": ("A growing editorial series on food security, education, health, displacement, inflation and humanitarian access in Sudan — each piece a structured visual story for digital audiences, credible and carefully edited.",
-                    "سلسلة تحريرية متنامية عن الأمن الغذائي والتعليم والصحة والنزوح والتضخم والوصول الإنساني في السودان — كل قطعة قصة بصرية منظمة لجمهور رقمي، موثوقة ومحررة بعناية."),
-        "impact": [("A repeatable method for evidence-based visual communication", "منهجية قابلة للتكرار للتواصل البصري القائم على الأدلة"),
-                   ("Clearer public understanding of Sudan's humanitarian situation", "فهم أوضح لدى الجمهور للوضع الإنساني في السودان"),
-                   ("Depth in information design and editorial storytelling", "عمق في تصميم المعلومات والسرد التحريري"),
-                   ("Communication that keeps dignity at the centre", "تواصل يضع الكرامة في المركز")],
     },
     {
         "slug": "digital-campaigns", "kinds": "digital",
@@ -197,32 +97,6 @@ CASES = [
         "title": ("Digital communication campaigns", "حملات التواصل الرقمي"),
         "summary": ("Campaign systems that unite branding, storytelling and motion across every platform.",
                     "أنظمة حملات توحّد الهوية والسرد والحركة عبر كل المنصات."),
-        "overview": [
-            ("An effective campaign is more than attractive posts: it needs one visual language, a plan, and consistent execution on every platform.",
-             "الحملة الفعالة أكثر من منشورات جذابة: تحتاج لغة بصرية واحدة وخطة وتنفيذًا متسقًا على كل منصة."),
-            ("These campaign systems combine branding, visual storytelling and motion design — engaging on every platform, consistent at every touchpoint.",
-             "تجمع أنظمة الحملات هذه بين الهوية والسرد البصري والموشن — جاذبة على كل منصة، ومتسقة في كل نقطة تواصل."),
-        ],
-        "challenge": [
-            ("Brands often treat digital communication as one-off posts, and the inconsistency dilutes recognition.",
-             "كثيرًا ما تتعامل العلامات مع التواصل الرقمي كمنشورات منفصلة، فيضعف تمييزها بسبب عدم الاتساق."),
-            ("The task: move from isolated artwork to a campaign system in which visuals, message and motion reinforce one presence.",
-             "المهمة: الانتقال من تصاميم منفردة إلى نظام حملة تعزّز فيه الصورة والرسالة والحركة حضورًا واحدًا."),
-        ],
-        "roles": [("Campaign visual design", "التصميم البصري للحملات"), ("Motion graphics", "الموشن جرافيك"), ("Multi-platform adaptation", "التكييف لكل منصة"),
-                  ("Asset production", "إنتاج المواد"), ("Brand consistency", "اتساق العلامة")],
-        "did": ("We own the campaign's visual execution end to end — from the visual system to every format it ships in.",
-                "نتولى التنفيذ البصري للحملة من أولها لآخرها — من النظام البصري حتى كل مقاس تُنشر به."),
-        "process": [("Understand the campaign's goals", "فهم أهداف الحملة"), ("Set the visual direction", "تحديد الاتجاه البصري"), ("Build a flexible design system", "بناء نظام تصميم مرن"),
-                    ("Produce assets for every format", "إنتاج المواد لكل مقاس"), ("Add motion where it earns attention", "إضافة الحركة حيث تجذب الانتباه"),
-                    ("Deliver one cohesive campaign", "تسليم حملة واحدة متماسكة")],
-        "decisions_intro": ("The focus areas:", "محاور التركيز:"),
-        "decisions": [("Campaign strategy", "استراتيجية الحملة"), ("Visual consistency", "الاتساق البصري"), ("Multi-platform adaptation", "التكيف مع المنصات"),
-                      ("Audience engagement", "تفاعل الجمهور"), ("Motion integration", "دمج الحركة")],
-        "outcome": ("A campaign system that scales: one brand presence everywhere, with content that adapts quickly to each platform.",
-                    "نظام حملات قابل للتوسع: حضور واحد للعلامة في كل مكان، ومحتوى يتكيف بسرعة مع كل منصة."),
-        "impact": [("One brand presence on every platform", "حضور واحد للعلامة على كل منصة"), ("New formats without a redesign", "مقاسات جديدة دون إعادة تصميم"),
-                   ("Stronger engagement", "تفاعل أقوى"), ("A reusable system that speeds production", "نظام قابل لإعادة الاستخدام يسرّع الإنتاج")],
     },
 ]
 
@@ -312,79 +186,118 @@ def closing():
       </section>'''
 
 
-def paras(items):
-    return "\n".join(f'<p>{bi(en, ar)}</p>' for en, ar in items)
+def piece_media(slug, key, piece, site, hero=False):
+    """The piece's image once it is on the site; until then a placeholder in its proportions."""
+    (en, ar), (w, h), icon = piece
+    name = f"case-{slug}-{key}"
+    if (site / "assets" / f"{name}.webp").exists():
+        small = (site / "assets" / f"{name}-800.webp").exists()
+        srcset = f' srcset="/assets/{name}-800.webp 800w, /assets/{name}.webp 1600w" sizes="{"(min-width: 64em) 30vw, 70vw" if hero else "(min-width: 64em) 60vw, 100vw"}"' if small else ""
+        cls, lazy = ("", "") if hero else (' class="c-work__image"', 'loading="lazy" ')
+        alt = 'alt=""' if hero else f'alt="{plain(en)}" data-alt-en="{plain(en)}" data-alt-ar="{ar}"'
+        return (f'<img{cls} src="/assets/{name}.webp"{srcset} {alt} '
+                f'width="1600" height="{round(1600 * h / w)}" {lazy}decoding="async" />')
+    label = "" if hero else f'<span class="c-ph__text"><span class="c-ph__label">{bi(en, ar)}</span><span class="c-ph__note">{bi("The work, coming soon", "العمل قريبًا")}</span></span>'
+    aria = "" if hero else f' role="img" aria-label="{plain(en)}" data-label-ar="{ar}"'
+    return (f'<span class="c-ph" style="--ratio:{w} / {h}"{aria} data-ph="{name}"><svg class="c-ph__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">'
+            f'<path d="{ICONS[icon]}" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" /></svg>{label}</span>')
 
 
-def case_main(c, prev, nxt):
-    sections = {
-        "overview": paras(c["overview"]),
-        "challenge": paras(c["challenge"]),
-        "did": f'''<ul class="c-case__roles" role="list">{"".join(f'<li>{bi(en, ar)}</li>' for en, ar in c["roles"])}</ul>
-              <p>{bi(*c["did"])}</p>''',
-        "process": f'''<ol class="c-case__steps" role="list" data-reveal-group>{"".join(
-            f'<li>{bi(en, ar)}</li>' for en, ar in c["process"])}</ol>''',
-        "decisions": f'''<p>{bi(*c["decisions_intro"])}</p>
-              <ul class="c-case__decisions" role="list" data-reveal-group>{"".join(f'<li>{bi(en, ar)}</li>' for en, ar in c["decisions"])}</ul>''',
-        "outcome": f'<blockquote class="c-case__outcome"><p>{bi(*c["outcome"])}</p></blockquote>',
-        "impact": f'''<ul class="c-case__impact" role="list" data-reveal-group>{"".join(f'<li>{bi(en, ar)}</li>' for en, ar in c["impact"])}</ul>''',
-    }
-    toc = "\n".join(f'<li><a href="#case-{sid}">{bi(en, ar)}</a></li>' for sid, en, ar in SECTIONS)
-    body = "\n".join(f'''            <section class="c-case__section" id="case-{sid}" aria-labelledby="case-{sid}-title">
-              <h2 class="c-case__h2" id="case-{sid}-title" data-reveal>{bi(en, ar)}</h2>
-              <div class="c-case__body" data-reveal>
-              {sections[sid]}
-              </div>
-            </section>''' for sid, en, ar in SECTIONS)
+def hero_prints(c, story, site):
+    chapter_of = {k: ch["key"] for ch in story["chapters"] for k in ch["work"]}
+    out = []
+    for i, (key, slot) in enumerate(zip(story["hero"], "abcd")):
+        piece = story["pieces"][key]
+        out.append(f'<a class="c-story-hero__card c-case-print c-case-print--{slot}" href="#ch-{chapter_of[key]}" style="--i:{i}">'
+                   f'{piece_media(c["slug"], key, piece, site, hero=True)}<span class="c-story-hero__label">{bi(*piece[0])}</span></a>')
+    return (f'<div class="c-story-hero__stage" style="view-transition-name: case-{c["slug"]}">\n          '
+            + "\n          ".join(out) + "\n        </div>")
+
+
+THREAD = ('<div class="c-chapter__joint" aria-hidden="true"><svg class="c-chapter__thread{}" viewBox="0 0 60 136" fill="none" aria-hidden="true" focusable="false" '
+          'preserveAspectRatio="xMidYMid meet"><path d="M30 0 C30 30 12 40 12 62 C12 88 44.4 96 30 126" pathLength="1" class="c-sketch__ink" stroke-width="1.6" style="--d:0" />'
+          '<path d="M30 126 l-6 -9 M30 126 l7 -8" pathLength="1" class="c-sketch__ink" stroke-width="1.6" style="--d:1" /></svg></div>')
+
+
+def chapter(c, story, n, ch, site):
+    k = ch["key"]
+    svg, (alt_en, alt_ar) = sketch(ch["sketch"], f"ch-{k}-alt", f'{c["slug"]}-{k}')
+    work = ""
+    if ch["work"]:
+        figs = "\n".join(
+            f'''              <figure class="c-case-work" style="--r:{story["pieces"][key][1][0] / story["pieces"][key][1][1]:.4f}">
+                {piece_media(c["slug"], key, story["pieces"][key], site)}
+                <figcaption class="c-case-work__caption">{bi(*story["pieces"][key][0])}</figcaption>
+              </figure>''' for key in ch["work"])
+        work = f'''
+          <div class="c-chapter__work">
+            <div class="c-case-works">
+{figs}
+            </div>
+          </div>'''
+    return f'''        <article class="c-chapter" id="ch-{k}" aria-labelledby="ch-{k}-title" data-chapter="{n:02d}">
+          <div class="c-chapter__text">
+            <p class="c-chapter__meta">
+              <span class="c-chapter__num" aria-hidden="true">{n:02d}</span>
+              <span class="c-chapter__annotation">{bi(*ch["note"])}</span>
+            </p>
+            <h2 class="c-chapter__title" id="ch-{k}-title">{bi(*ch["title"])}</h2>
+            <p class="c-chapter__lead">{bi(*ch["lead"])}</p>
+            <p class="c-chapter__aside">{bi(*ch["aside"])}</p>
+          </div>
+          <figure class="c-chapter__figure">
+            {svg}
+            <figcaption class="u-visually-hidden">{bi(alt_en, alt_ar)}</figcaption>
+          </figure>{work}
+        </article>'''
+
+
+def case_main(c, prev, nxt, site):
+    story = STORIES[c["slug"]]
+    chapters = story["chapters"]
+    body = []
+    for n, ch in enumerate(chapters, 1):
+        body.append(chapter(c, story, n, ch, site))
+        if n < len(chapters):
+            body.append("        " + THREAD.format(" c-chapter__thread--resolved" if n == len(chapters) - 1 else ""))
+    (close_en, close_ar), href, link = story["close"]
     more = "\n".join(card(x) for x in (prev, nxt))
     return f'''<main id="main" class="c-case">
-      <section class="c-case-hero" aria-labelledby="case-title">
-        <div class="l-container">
-          <nav class="c-crumbs" aria-label="Breadcrumb">
-            <ol class="c-crumbs__list" role="list">
-              <li><a href="/">{bi("Home", "الرئيسية")}</a></li>
-              <li><a href="/work">{bi("Case studies", "دراسات الحالة")}</a></li>
-              <li aria-current="page">{bi(*c["title"])}</li>
-            </ol>
-          </nav>
-          <div class="c-case-hero__grid">
-            <div class="c-case-hero__text" data-reveal-group>
-              <p class="t-label c-detail__eyebrow">{bi(*c["category"])}</p>
-              <h1 class="c-detail__headline" id="case-title">{bi(*c["title"])}</h1>
-              <p class="t-body-lg c-detail__lead">{bi(*c["summary"])}</p>
-            </div>
-            <div class="c-case-hero__cover" style="view-transition-name: case-{c["slug"]}">{cover(c["slug"], lazy=False, sizes="(min-width: 64em) 58vw, 100vw")}</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="l-section c-case__main">
-        <div class="l-container c-case__grid">
-          <nav class="c-case__toc" aria-label="{plain(bi("On this page", "في هذه الصفحة"))}">
-            <p class="t-label">{bi("On this page", "في هذه الصفحة")}</p>
-            <ol role="list">
-{toc}
-            </ol>
-          </nav>
-          <div class="c-case__content">
-{body}
-          </div>
-        </div>
-      </section>
-
-      <section class="l-section l-section--tight c-case__more" aria-labelledby="case-more">
-        <div class="l-container">
-          <header class="c-svc__head">
-            <p class="t-label c-detail__eyebrow">{bi("More case studies", "دراسات حالة أخرى")}</p>
-            <h2 class="c-svc__h2" id="case-more">{bi("Keep reading.", "تابع القراءة.")}</h2>
-          </header>
-          <ul class="c-case-cards c-case-cards--two" role="list" data-reveal-group>
+      <div class="c-story">
+      <nav class="c-crumbs c-case__crumbs" aria-label="Breadcrumb">
+        <ol class="c-crumbs__list" role="list">
+          <li><a href="/">{bi("Home", "الرئيسية")}</a></li>
+          <li><a href="/work">{bi("Case studies", "دراسات الحالة")}</a></li>
+          <li aria-current="page">{bi(*c["title"])}</li>
+        </ol>
+      </nav>
+      <header class="c-story__head c-story-hero">
+        <p class="t-label c-story__eyebrow">{bi(*c["category"])}</p>
+        <h1 class="c-story__title">{bi(*story["headline"])}</h1>
+        <p class="c-story__standfirst t-body-lg">{bi(*story["standfirst"])}</p>
+        {hero_prints(c, story, site)}
+      </header>
+      <div class="c-story__chapters">
+{chr(10).join(body)}
+      </div>
+      <footer class="c-story__close">
+        <p class="c-story__statement">{bi(close_en, close_ar)}</p>
+        <a class="c-link c-story__link" href="{href}">{bi(*link)}{ARROW}</a>
+      </footer>
+      </div>
+    <section class="l-section l-section--tight c-case__more" aria-labelledby="case-more">
+      <div class="l-container">
+        <header class="c-svc__head">
+          <p class="t-label c-detail__eyebrow">{bi("More case studies", "دراسات حالة أخرى")}</p>
+          <h2 class="c-svc__h2" id="case-more">{bi("Keep reading.", "تابع القراءة.")}</h2>
+        </header>
+        <ul class="c-case-cards c-case-cards--two" role="list" data-reveal-group>
 {more}
-          </ul>
-          <p class="c-detail__more"><a class="c-link" href="/work"><span>{bi("All case studies", "كل دراسات الحالة")}</span>{ARROW}</a></p>
-        </div>
-      </section>
-      {closing()}
+        </ul>
+        <p class="c-detail__more"><a class="c-link" href="/work"><span>{bi("All case studies", "كل دراسات الحالة")}</span>{ARROW}</a></p>
+      </div>
+    </section>
+    {closing()}
     </main>'''
 
 
@@ -417,7 +330,7 @@ def build(site: pathlib.Path):
     for i, c in enumerate(CASES):
         prev, nxt = CASES[i - 1], CASES[(i + 1) % len(CASES)]
         page = head(shell_head, f"/work/{c['slug']}", plain(c["title"][0]), plain(c["title"][1]), plain(c["summary"][0]), f"share-case-{c['slug']}.jpg")
-        (site / "work" / f"{c['slug']}.html").write_text(page + case_main(c, prev, nxt) + shell_tail, encoding="utf-8")
+        (site / "work" / f"{c['slug']}.html").write_text(page + case_main(c, prev, nxt, site) + shell_tail, encoding="utf-8")
 
     # The site's menu and footer: "Story" becomes the case studies.
     for page in pages(site):

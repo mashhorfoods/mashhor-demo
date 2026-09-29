@@ -7,6 +7,7 @@ build itself never encodes anything (the results are committed).
     python3 tools/images.py about  <folder>   # About photographs
     python3 tools/images.py board             # the Pixora identity board
     python3 tools/images.py cases             # the case study covers
+    python3 tools/images.py work  <folder>    # the work shown in the case studies
 
   covers  <folder>/svc-<id>.png|.jpg (16:10, at least 1600 wide; default
           tools/service-covers/out) → svc-<id>.webp (1600×1000) and
@@ -21,6 +22,12 @@ build itself never encodes anything (the results are committed).
 
   cases   tools/share-cards/out/case-<slug>.png (rendered by render.mjs,
           1600×1000) → case-<slug>.webp and case-<slug>-800.webp.
+
+  work    <folder>/<slug>-<piece>.png|.jpg|.webp, named after a study and one of
+          its pieces in tools/case_stories.py (e.g. talk-about-sudan-map.png)
+          → case-<slug>-<piece>.webp (1600 wide) and -800.webp, cropped to
+          the piece's proportions. Rebuild, and the image replaces the
+          placeholder wherever the piece appears.
 
 ffmpeg does the work (FFMPEG=/path/to/ffmpeg if it is not on the PATH).
 """
@@ -70,6 +77,28 @@ def cases():
         print(f"overlay/assets/{src.stem}.webp (+ -800)")
 
 
+def work(folder):
+    sys.path.insert(0, str(ROOT / "tools"))
+    from case_stories import STORIES
+    names = {f"{slug}-{key}": ratio for slug, st in STORIES.items() for key, (_, ratio, _) in st["pieces"].items()}
+    found = 0
+    for src in sorted(folder.iterdir()):
+        if src.suffix.lower() not in (".png", ".jpg", ".jpeg", ".webp"):
+            continue
+        if src.stem not in names:
+            print(f"skipped {src.name}: not <slug>-<piece> of a study in tools/case_stories.py")
+            continue
+        w, h = names[src.stem]
+        for width, suffix in ((1600, ""), (800, "-800")):
+            height = round(width * h / w)
+            webp(src, f"case-{src.stem}{suffix}.webp",
+                 f"scale={width}:{height}:force_original_aspect_ratio=increase:flags=lanczos,crop={width}:{height}", 82)
+        found += 1
+        print(f"overlay/assets/case-{src.stem}.webp (+ -800)")
+    if not found:
+        sys.exit(f"work: no images named <slug>-<piece> in {folder}")
+
+
 if __name__ == "__main__":
     kind, *rest = sys.argv[1:] or [""]
     if kind == "covers":
@@ -80,5 +109,7 @@ if __name__ == "__main__":
         board()
     elif kind == "cases":
         cases()
+    elif kind == "work" and rest:
+        work(pathlib.Path(rest[0]))
     else:
         sys.exit(__doc__)

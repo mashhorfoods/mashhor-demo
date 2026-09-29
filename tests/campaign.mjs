@@ -610,21 +610,23 @@ for (const kind of ['mobile', 'desktop']) {
       const page = await cp.evaluate(() => ({
         h1: document.querySelectorAll('h1').length,
         crumbs: [...document.querySelectorAll('.c-crumbs a')].map((a) => a.getAttribute('href')).join(),
-        cover: (() => { const i = document.querySelector('.c-case-hero__cover img'); return i && i.complete && i.naturalWidth > 0; })(),
-        sections: [...document.querySelectorAll('.c-case__section')].map((s) => s.id),
-        toc: [...document.querySelectorAll('.c-case__toc a')].map((a) => a.getAttribute('href').slice(1)),
+        prints: [...document.querySelectorAll('.c-story-hero__card')].map((a) => a.getAttribute('href')),
+        chapters: [...document.querySelectorAll('.c-chapter')].map((c) => c.id),
+        drawings: document.querySelectorAll('.c-chapter__figure svg.c-sketch title').length,
+        frames: [...document.querySelectorAll('.c-case-work')].map((f) => { const m = f.querySelector('.c-ph, img'); const r = m.getBoundingClientRect(); return m.width || r.width > 0; }),
         more: document.querySelectorAll('.c-case__more .c-case-card').length,
         wide: document.documentElement.scrollWidth - innerWidth,
       }));
-      check(page.h1 === 1 && page.crumbs === '/,/work' && page.cover && page.sections.length === 7 && page.toc.join() === page.sections.join() && page.more === 2 && page.wide <= 0,
-        `[${kind}] /work/${slug}: hero with its cover, seven sections in the contents, two more studies`, JSON.stringify(page));
+      const linked = page.prints.every((h) => page.chapters.includes(h.slice(1)));
+      check(page.h1 === 1 && page.crumbs === '/,/work' && page.prints.length === 4 && linked && page.chapters.length === 5 && page.drawings === 5
+        && page.frames.length >= 4 && page.frames.every(Boolean) && page.more === 2 && page.wide <= 0,
+        `[${kind}] /work/${slug}: told like the story — four prints linked to their chapters, five drawn chapters, the work framed, two more studies`, JSON.stringify(page));
     }
-    // The contents follow the reading.
-    await cp.goto(`${BASE}/work/${CASES[0]}`, { waitUntil: 'networkidle' });
-    await cp.evaluate(() => document.getElementById('case-process').scrollIntoView());
-    await cp.waitForTimeout(600);
-    const current = await cp.$eval('.c-case__toc a[aria-current]', (a) => a.getAttribute('href')).catch(() => null);
-    check(current === '#case-process', `[${kind}] a study's contents mark the section being read`, String(current));
+    // Chapters draw themselves as they arrive, like the story's.
+    await cp.goto(`${BASE}/work/${CASES[3]}`, { waitUntil: 'networkidle' });
+    await cp.evaluate(() => document.querySelector('.c-chapter:last-of-type').scrollIntoView());
+    await cp.waitForTimeout(800);
+    check(await cp.$eval('.c-chapter:last-of-type', (c) => c.classList.contains('is-drawing')), `[${kind}] a study's chapters draw themselves in`);
     check(errs.length === 0, `[${kind}] case studies: no script errors`, errs.join('; '));
     await cc.close();
   }

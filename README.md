@@ -47,7 +47,7 @@ tools/build.py   →   site/
 | 3 | `motion.py` | "Quiet luxury" motion layer, stylesheet half: one rhythm (480/900 ms, expo ease-out) with a light blur on the site's own reveal; page-to-page cross-fades with the header held still and each service card growing into its page (`@view-transition`); long text and the campaign page surfacing with the scroll (scroll-driven CSS); hero lines rising; pointer light on cards. Script half: `overlay/assets/motion.js` (line split, magnetic primary buttons, pointer light, self-gliding galleries that stop when touched, counting totals). All off under reduced motion; nothing hidden without it. |
 | 4 | `finalize.py`, `prune_css.py` | One shared, content-hashed `site.<hash>.css` / `.js` / `motion.<hash>.js` for every page (go and admin included), long caching, CSP hashes. The stylesheet loses the rules of components no page uses (listed by exact class name in `prune_css.py`; the build stops if a page uses one again). |
 
-Photographs are encoded once with `python3 tools/images.py covers|about|board|cases`
+Photographs are encoded once with `python3 tools/images.py covers|about|board|cases|work`
 (the results are committed; the build never encodes). Shared helpers live in
 `tools/common.py`: the page list, CSS injection, `drop()` for supplied files
 that no longer ship.
@@ -154,31 +154,43 @@ in `overlay/assets/share-*.jpg`).
 
 ## Case studies — /work
 
-`tools/cases.py` holds the studies (identity systems, editorial, information
-design, Talk About Sudan, digital campaigns), each in English and Arabic and
-told as Pixora's team: overview, challenge, what we did, how it ran, key
-decisions, outcome, impact. No numbers the studies cannot prove. From it the
-build writes:
+`tools/cases.py` builds the section; `tools/case_stories.py` holds the five
+studies (identity systems, editorial, information design, Talk About Sudan,
+digital campaigns), each in English and Arabic, in the team's voice, with no
+number or result the work cannot show.
 
 - `/work` — the hub: the Al Mada story as the featured card, then one card
   per study, filtered by discipline (identity, editorial, information,
   digital) without reloading — plain radio buttons and CSS, so it works
   without JavaScript too. The menu's "Case studies" and the homepage's
   "All case studies" link lead here.
-- `/work/<slug>` — one page per study: its cover beside the title (the card's
-  cover grows into it between pages), a contents list that stays beside the
-  text on wide screens (a row of links on phones) and marks the section being
-  read, then two more studies and the contact call.
+- `/work/<slug>` — each study told the way the Al Mada story is: its headline
+  beside four pieces of its work laid out like prints (each a link down to
+  the chapter that shows it), then five chapters — an annotation, a headline,
+  the lead, an aside, a hand-drawn line that draws itself in, and the work —
+  joined by the story's thread, a closing line, two more studies and the
+  contact call. The card's cover grows into the prints between pages.
 
-The covers are HTML scenes in the site's colours
+**The work, and its placeholders.** Each study lists its pieces (identity
+sheet, report cover, map, stories…) with their proportions. Until a piece's
+image exists it shows as a framed placeholder in those proportions, so the
+page does not move when the work arrives. To add the real work, name each
+image `<slug>-<piece>` (for example `talk-about-sudan-map.png`,
+`brand-identity-systems-packaging.jpg` — the slugs and piece names are in
+`tools/case_stories.py`), put them in one folder, and run
+
+    python3 tools/images.py work <folder> && npm run build
+
+The images are cropped to the piece's proportions (1600 and 800 wide) and
+replace the placeholder in the hero and in the chapter at once.
+
+The hub cards' covers are HTML scenes in the site's colours
 (`tools/share-cards/case-cover.html?s=<slug>`), rendered and encoded with
 
     node tools/share-cards/render.mjs covers && python3 tools/images.py cases
 
-To use real photographs instead, save them as
-`tools/share-cards/out/case-<slug>.png` (16:10) and run only the second
-command. To add a study, add an entry to `CASES` with a new slug and a scene
-(or a photograph) for its cover.
+To use a photograph instead, save it as `tools/share-cards/out/case-<slug>.png`
+(16:10) and run only the second command.
 
 ## Case study hero
 
