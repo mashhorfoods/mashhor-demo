@@ -1,14 +1,19 @@
 #!/bin/sh
-# PNG/JPG → overlay/assets/svc-<id>.webp (2400×1500) and svc-<id>-1200.webp. Also works for the real
-# cover images: put them in tools/service-covers/out/ as svc-<id>.png/.jpg.
+# The service covers: tools/service-covers/out/svc-<id>.png|.jpg (16:10, at
+# least 1600 wide) → overlay/assets/svc-<id>.webp (1600×1000) and
+# svc-<id>-1200.webp (1200×750, for phones). Then rebuild.
+#
+#   FFMPEG=/path/to/ffmpeg tools/service-covers/encode.sh
 set -e
 cd "$(dirname "$0")"
 FF=${FFMPEG:-ffmpeg}
 for f in out/svc-*.*; do
   id=$(basename "$f" | sed 's/\.[^.]*$//')
-  "$FF" -v error -y -i "$f" -vf "scale=2400:1500:force_original_aspect_ratio=increase,crop=2400:1500" \
-    -c:v libwebp -quality 80 -compression_level 6 "../../overlay/assets/$id.webp"
-  "$FF" -v error -y -i "$f" -vf "scale=1200:750:force_original_aspect_ratio=increase,crop=1200:750" \
-    -c:v libwebp -quality 80 -compression_level 6 "../../overlay/assets/$id-1200.webp"
+  for size in 1600:1000 1200:750; do
+    w=${size%%:*}
+    name=$id; [ "$w" = 1600 ] || name=$id-$w
+    "$FF" -v error -y -i "$f" -vf "scale=$size:force_original_aspect_ratio=increase:flags=lanczos,crop=$size" \
+      -c:v libwebp -quality 82 -compression_level 6 "../../overlay/assets/$name.webp"
+  done
   echo "overlay/assets/$id.webp (+ $id-1200.webp)"
 done

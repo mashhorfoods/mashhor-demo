@@ -66,6 +66,9 @@ CSS = CSS_START + """
 @media (min-width:64em){.c-hero__headline{font-size:max(2.75rem,min(var(--text-hero),12.5cqw))}}
 .c-wa-fab{position:fixed;inset-block-end:calc(var(--space-16) + env(safe-area-inset-bottom));inset-inline-end:var(--space-16);z-index:var(--z-sticky);display:grid;place-items:center;inline-size:56px;block-size:56px;border-radius:var(--radius-pill);background-color:var(--color-accent);color:var(--color-text-on-accent);box-shadow:var(--shadow-overlay);transition:var(--transition-interactive)}
 .c-wa-fab:hover{background-color:var(--color-accent-hover)}
+/* When the phone's "Start your project" bar is showing, the button sits above it. */
+.c-phone-cta.is-on~.c-wa-fab{inset-block-end:calc(var(--control-height) + var(--space-12) * 3 + env(safe-area-inset-bottom))}
+@media (prefers-reduced-motion:no-preference){.c-wa-fab{transition:var(--transition-interactive),inset-block-end var(--duration-base) var(--ease-out)}}
 .c-wa-fab:active{transform:scale(0.96)}
 .c-wa-fab svg{inline-size:26px;block-size:26px}
 @media (min-width:64em){.c-wa-fab{display:none}}

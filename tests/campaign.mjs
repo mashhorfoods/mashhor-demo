@@ -282,6 +282,11 @@ for (const kind of ['mobile', 'desktop']) {
   if (kind === 'mobile') {
     const href = await fab.getAttribute('href');
     check(href.includes(`wa.me/${WHATSAPP}`) && decodeURIComponent(href).includes('مرحبًا بيكسورا'), 'floating WhatsApp message follows the Arabic language choice');
+    await p.evaluate(() => window.scrollTo(0, 1600));
+    await p.waitForTimeout(600);
+    const clash = await p.evaluate(() => { const bar = document.querySelector('.c-phone-cta.is-on .c-btn'); if (!bar) return 'no bar';
+      const a = bar.getBoundingClientRect(), f = document.querySelector('.c-wa-fab').getBoundingClientRect(); return f.bottom > a.top && f.top < a.bottom; });
+    check(clash === false, 'floating WhatsApp button sits above the phone "Start your project" bar', String(clash));
   }
   await context.close();
 }

@@ -60,17 +60,18 @@ Ad  →  /go (hero)  →  "شوف أعمالنا"  →  /go#work     →  توا
 
 ## Service covers
 
-Each service has one cover image, `overlay/assets/svc-<id>.webp` (2400×1500,
+Each service has one cover image: `overlay/assets/svc-<id>.webp` (1600×1000,
 16:10) plus `svc-<id>-1200.webp` for phones. It is the thumbnail on the
 service's card and the full-width hero of its page, and the card's image grows
 into the hero when the page opens (a cross-document view transition). Keep
-the subject in the centre: the card shows it at 16:10, the hero wider on
-desktop and tall on phones, with the headline over its lower part.
+the subject near the centre: the card shows the whole frame, the hero shows
+it wider on desktop and only the middle third on phones, with the headline
+over its lower part — so low-key images with a calm lower third work best.
 
-The current covers are interim (the service's own drawing, rendered by
-`tools/service-covers/render.mjs`). To use real ones: save them as
+To replace one: save it (16:10, at least 1600 wide) as
 `tools/service-covers/out/svc-<id>.png` or `.jpg`, run
-`FFMPEG=ffmpeg tools/service-covers/encode.sh`, and rebuild.
+`FFMPEG=ffmpeg tools/service-covers/encode.sh`, and rebuild. The originals in
+`out/` stay out of git; the encoded covers in `overlay/assets/` are what count.
 
 ## Ad URLs
 

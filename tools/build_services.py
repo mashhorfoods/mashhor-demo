@@ -41,6 +41,8 @@ ADDONS_FOR = {
 }
 # The detail sections that already carry a "what it covers" list of their own.
 HAS_OWN_LIST = {"websites", "marketing", "integrated"}
+# Cover subjects that are off-centre (default: centre).
+FOCUS = {"social": "40% 50%"}
 WA = common.WA + "?text="
 
 
@@ -175,8 +177,10 @@ def cover(sid, lazy):
     Two sizes (tools/service-covers/encode.sh makes both); phones take 1200."""
     load = 'loading="lazy" decoding="async"' if lazy else 'fetchpriority="high" decoding="async"'
     sizes = "(min-width: 64em) 40rem, 100vw" if lazy else "100vw"
-    return (f'<img src="/assets/svc-{sid}.webp" srcset="/assets/svc-{sid}-1200.webp 1200w, /assets/svc-{sid}.webp 2400w" '
-            f'sizes="{sizes}" alt="" width="2400" height="1500" {load} />')
+    # Where the subject sits, for the narrow crop phones show of the hero.
+    focus = f' style="object-position: {FOCUS[sid]}"' if sid in FOCUS else ""
+    return (f'<img src="/assets/svc-{sid}.webp" srcset="/assets/svc-{sid}-1200.webp 1200w, /assets/svc-{sid}.webp 1600w" '
+            f'sizes="{sizes}" alt="" width="1600" height="1000"{focus} {load} />')
 
 
 def wa_link(s):
