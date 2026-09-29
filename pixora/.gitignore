@@ -3,3 +3,4 @@ pixora-leads/
 site/_leads/*
 !site/_leads/.htaccess
 __pycache__/
+node_modules/
