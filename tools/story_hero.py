@@ -14,7 +14,7 @@ its CSS goes on every page (finalize.py wants one shared stylesheet).
 """
 import pathlib
 
-from common import inject_css
+from common import inject_all
 
 # name, EN, AR, chapter, tile width, full width, width/height
 CARDS = [
@@ -81,9 +81,7 @@ def build(site: pathlib.Path):
     text = (text[:a] + '<header class="c-story__head c-story-hero">'
             + text[a + len(HEAD):b].rstrip() + cards() + text[b:])
     story.write_text(text, encoding="utf-8")
-    for page in list(site.glob("*.html")) + list(site.glob("services/*.html")):
-        if page.name != "go.html":
-            page.write_text(inject_css(page.read_text(encoding="utf-8"), CSS), encoding="utf-8")
+    inject_all(site, CSS)
 
 
 if __name__ == "__main__":

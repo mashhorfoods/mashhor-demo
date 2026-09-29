@@ -14,10 +14,9 @@ Steps, in order:
        streamline.py              order, repetition, placeholders, shorter copy
        story_hero.py              the case study's hero (its four surfaces)
        about_page.py              the About page, about Pixora and its team
-    3. apply-site-refinements.py  spacing, pills, WhatsApp button, hero,
-                                  profile, privacy, clean links, CSP
+    3. refinements.py             spacing, pills, WhatsApp button, hero,
+                                  profile, privacy, clean links, UX/UI fixes
     4. motion.py                  the "quiet luxury" motion layer (CSS half)
-       responsive.py              srcset for the supplied site's oversized images
     5. finalize.py                one shared stylesheet + script for every page
                                   (go.html and /admin/ included), CSP, caching
 
@@ -27,7 +26,6 @@ import base64
 import pathlib
 import re
 import shutil
-import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -87,16 +85,14 @@ import about_page  # noqa: E402
 about_page.build(SITE)
 print("about: page rewritten around the team")
 
-subprocess.run([sys.executable, str(TOOLS / "apply-site-refinements.py")], check=True)
+import refinements  # noqa: E402
+
+refinements.build(SITE)
 
 import motion  # noqa: E402
 
 motion.build(SITE)
 print("motion: quiet-luxury layer added")
-
-import responsive  # noqa: E402
-
-responsive.build(SITE)
 
 import finalize  # noqa: E402
 

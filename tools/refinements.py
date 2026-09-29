@@ -29,13 +29,8 @@ import pathlib
 import re
 import sys
 
-from common import WA, inject_css
+from common import WA, drop, inject_css, pages
 
-SITE = pathlib.Path(__file__).resolve().parent.parent / "site"
-# Every page of the site (the service pages included) except the campaign
-# page, which carries its own styles and copy.
-PAGES = sorted(str(p.relative_to(SITE)) for p in list(SITE.glob("*.html")) + list(SITE.glob("services/*.html"))
-               if p.name != "go.html")
 
 CSS_START, CSS_END = "/* REFINEMENTS:START */", "/* REFINEMENTS:END */"
 CSS = CSS_START + """
@@ -261,99 +256,7 @@ def replace_all(text, pairs, name, required):
     return text
 
 
-for name in PAGES:
-    path = SITE / name
-    text = path.read_text(encoding="utf-8")
-
-    text = inject_css(text, CSS)
-    # Inside the footer landmark (it is fixed in place, so nothing moves), so
-    # that assistive tech finds it in a region like everything else.
-    close = text.rfind("</footer>")
-    if close < 0:
-        sys.exit(f"{name}: no footer for the WhatsApp button")
-    text = text[:close] + "  " + FAB + "\n    " + text[close:]
-
-    text = replace_all(text, TEXT[1:3], name, required=False)
-    text = replace_all(text, TEXT[:1], name, required=True)
-    if name == "index.html":
-        text = replace_all(text, TEXT[3:], name, required=True)
-    if not name.startswith("services/") and SHARE_OLD in text:
-        card, alt = SHARE.get(name, HOME_CARD)
-        text = text.replace(SHARE_OLD, f"https://zaokalyamamah.online/assets/{card}")
-        text = replace_all(text, [(ALT_OLD, f'<meta property="og:image:alt" content="{alt}" />')], name, required=True)
-    if name == "privacy.html":
-        text = replace_all(text, PRIVACY, name, required=True)
-    # Reveal-on-scroll: a tall block (a price box, a card) at the fold waited
-    # for a tenth of itself to clear a band 12% above the bottom, so it sat
-    # blurred and invisible on phones until the visitor scrolled. Any part of
-    # it in view now starts the reveal.
-    text = replace_all(text, [("{ rootMargin: '0px 0px -12% 0px', threshold: 0.1 }",
-                               "{ rootMargin: '0px 0px -8% 0px', threshold: 0 }")], name, required=True)
-    text = replace_all(text, TEAM[:1], name, required=True)
-    text = replace_all(text, TEAM[1:], name, required=False)
-    if name == "index.html":
-        text = replace_all(text, TEAM_HOME, name, required=True)
-        # Phones: the keyboard's action key moves on to the next field.
-        for field, extra in (("contact-name", 'enterkeyhint="next"'), ("contact-email", 'enterkeyhint="next" spellcheck="false"')):
-            text, n = re.subn(f'id="{field}"', f'id="{field}" {extra}', text, count=1)
-            if n != 1:
-                sys.exit(f"index.html: {field} not found")
-        # The contact section's link to the founder's portfolio.
-        text, n = re.subn(r'\s*<li>\s*<a class="c-elsewhere__link" href="https://muhalabsalah\.github\.io/muhalabsalah/".*?</li>', "", text, count=1, flags=re.S)
-        if n != 1:
-            sys.exit("index.html: founder's portfolio link not found")
-    if name == "terms.html":
-        text = replace_all(text, TEAM_TERMS, name, required=True)
-    text = clean_links(text)
-    # Phones: the WhatsApp button is the one floating action. The supplied
-    # "Start your project" bar, which came and went with the scroll, goes
-    # (the site script skips it when it is absent).
-    text, n = re.subn(r'\s*<div class="c-phone-cta" data-phone-cta>.*?</div>', "", text, count=1, flags=re.S)
-    if n != 1:
-        sys.exit(f"{name}: phone call-to-action bar not found")
-    # "Back to top" scrolls this page to its top. It pointed at the homepage's
-    # #home, which the site script sends to "/" on every other page.
-    text, n = re.subn(r'(<a class="c-link c-footer__top-link" href=")[^"]*(")', r"\1#top\2", text, count=1)
-    if n != 1:
-        sys.exit(f"{name}: back-to-top link not found")
-    text = text.replace("<body>", '<body id="top">', 1)
-    # Away from the homepage, the logo and "Home" go to "/", not "/#home".
-    if name != "index.html":
-        text = re.sub(r'href="(?:\./|/)?#home"', 'href="/"', text)
-    text = replace_all(text, [("return entry.href ?? `${HOME}#${entry.id}`;",
-                               "return entry.href ?? (entry.id === 'home' && HOME ? HOME : `${HOME}#${entry.id}`);")], name, required=True)
-    # 404.html's <base href="/"> made every fragment link (Back to top) lead
-    # home; its links are all root-based now, so it has nothing left to do.
-    text = text.replace('<base href="/" />', "")
-    # A phone number never breaks across lines.
-    text = text.replace('<span class="c-channel__value">+249 119005441</span>', '<span class="c-channel__value">+249&nbsp;119005441</span>')
-    # The footer's giant wordmark is decoration: drawn by CSS, it is no longer
-    # text for readers or contrast checks to trip on (it looks the same).
-    text = text.replace('<p class="c-footer__mark" aria-hidden="true">PIXORA</p>',
-                        '<p class="c-footer__mark" aria-hidden="true" data-mark="PIXORA"></p>')
-    # The service diagram's markers carry numbers; they become plain dots.
-    text = re.sub(r'(<span class="c-eco__marker"[^>]*>)\d+(</span>)', r"\1\2", text)
-
-    path.write_text(text, encoding="utf-8")
-print(f"refinements: {len(PAGES)} pages")
-for n in PAGES:
-    if re.search(r"Founder's portfolio|Founder&#39;s|أعمال المؤسس|موقع المؤسس|muhalabsalah\.github\.io|\"founder\"|run by <strong>", (SITE / n).read_text(encoding="utf-8")):
-        sys.exit(f"refinements: {n} still refers to a founder")
-# The supplied generic preview card: every page now names its own.
-if any(SHARE_OLD in (SITE / n).read_text(encoding="utf-8") for n in PAGES):
-    sys.exit("refinements: a page still uses share-card.jpg")
-(SITE / "assets" / "share-card.jpg").unlink()
-
-# robots.txt: private endpoints stay out of search.
-robots = SITE / "robots.txt"
-text = robots.read_text(encoding="utf-8")
-if "Allow: /\n" not in text:
-    sys.exit("robots.txt: 'Allow: /' line not found")
-robots.write_text(text.replace("Allow: /\n", "Allow: /\nDisallow: /admin/\nDisallow: /lead.php\nDisallow: /_leads/\n", 1), encoding="utf-8")
-
-# .htaccess: 301 old .html addresses, just above the clean-URL rewrite.
-htaccess = SITE / ".htaccess"
-text = htaccess.read_text(encoding="utf-8")
+# .htaccess: 301s from old .html addresses (placed by build(), below).
 REDIRECTS = r"""  # Clean addresses: /pricing.html → /pricing, /index.html → /. THE_REQUEST
   # is what the browser asked for, so the internal rewrite below (and the
   # 404 page) never loop back through these.
@@ -364,12 +267,110 @@ REDIRECTS = r"""  # Clean addresses: /pricing.html → /pricing, /index.html →
   RewriteRule ^ /%1 [R=301,L]
 
 """
-anchor = "  RewriteCond %{REQUEST_FILENAME}.html -f"
-if anchor not in text:
-    sys.exit(".htaccess: rewrite anchor not found")
-lines = text.split("\n")
-at = next(i for i, line in enumerate(lines) if line.startswith(anchor))
-while at > 0 and lines[at - 1].lstrip().startswith("#"):
-    at -= 1  # keep the rule's own comment attached to it
-htaccess.write_text("\n".join(lines[:at]) + "\n" + REDIRECTS + "\n".join(lines[at:]), encoding="utf-8")
-print("robots.txt, .htaccess: updated")
+
+
+def build(site: pathlib.Path):
+    for path in pages(site):
+        name = str(path.relative_to(site))
+        text = path.read_text(encoding="utf-8")
+
+        text = inject_css(text, CSS)
+        # Inside the footer landmark (it is fixed in place, so nothing moves), so
+        # that assistive tech finds it in a region like everything else.
+        close = text.rfind("</footer>")
+        if close < 0:
+            sys.exit(f"{name}: no footer for the WhatsApp button")
+        text = text[:close] + "  " + FAB + "\n    " + text[close:]
+
+        text = replace_all(text, TEXT[1:3], name, required=False)
+        text = replace_all(text, TEXT[:1], name, required=True)
+        if name == "index.html":
+            text = replace_all(text, TEXT[3:], name, required=True)
+        if not name.startswith("services/") and SHARE_OLD in text:
+            card, alt = SHARE.get(name, HOME_CARD)
+            text = text.replace(SHARE_OLD, f"https://zaokalyamamah.online/assets/{card}")
+            text = replace_all(text, [(ALT_OLD, f'<meta property="og:image:alt" content="{alt}" />')], name, required=True)
+        if name == "privacy.html":
+            text = replace_all(text, PRIVACY, name, required=True)
+        # Reveal-on-scroll: a tall block (a price box, a card) at the fold waited
+        # for a tenth of itself to clear a band 12% above the bottom, so it sat
+        # blurred and invisible on phones until the visitor scrolled. Any part of
+        # it in view now starts the reveal.
+        text = replace_all(text, [("{ rootMargin: '0px 0px -12% 0px', threshold: 0.1 }",
+                                   "{ rootMargin: '0px 0px -8% 0px', threshold: 0 }")], name, required=True)
+        text = replace_all(text, TEAM[:1], name, required=True)
+        text = replace_all(text, TEAM[1:], name, required=False)
+        if name == "index.html":
+            text = replace_all(text, TEAM_HOME, name, required=True)
+            # Phones: the keyboard's action key moves on to the next field.
+            for field, extra in (("contact-name", 'enterkeyhint="next"'), ("contact-email", 'enterkeyhint="next" spellcheck="false"')):
+                text, n = re.subn(f'id="{field}"', f'id="{field}" {extra}', text, count=1)
+                if n != 1:
+                    sys.exit(f"index.html: {field} not found")
+            # The contact section's link to the founder's portfolio.
+            text, n = re.subn(r'\s*<li>\s*<a class="c-elsewhere__link" href="https://muhalabsalah\.github\.io/muhalabsalah/".*?</li>', "", text, count=1, flags=re.S)
+            if n != 1:
+                sys.exit("index.html: founder's portfolio link not found")
+        if name == "terms.html":
+            text = replace_all(text, TEAM_TERMS, name, required=True)
+        text = clean_links(text)
+        # Phones: the WhatsApp button is the one floating action. The supplied
+        # "Start your project" bar, which came and went with the scroll, goes
+        # (the site script skips it when it is absent).
+        text, n = re.subn(r'\s*<div class="c-phone-cta" data-phone-cta>.*?</div>', "", text, count=1, flags=re.S)
+        if n != 1:
+            sys.exit(f"{name}: phone call-to-action bar not found")
+        # "Back to top" scrolls this page to its top. It pointed at the homepage's
+        # #home, which the site script sends to "/" on every other page.
+        text, n = re.subn(r'(<a class="c-link c-footer__top-link" href=")[^"]*(")', r"\1#top\2", text, count=1)
+        if n != 1:
+            sys.exit(f"{name}: back-to-top link not found")
+        text = text.replace("<body>", '<body id="top">', 1)
+        # Away from the homepage, the logo and "Home" go to "/", not "/#home".
+        if name != "index.html":
+            text = re.sub(r'href="(?:\./|/)?#home"', 'href="/"', text)
+        text = replace_all(text, [("return entry.href ?? `${HOME}#${entry.id}`;",
+                                   "return entry.href ?? (entry.id === 'home' && HOME ? HOME : `${HOME}#${entry.id}`);")], name, required=True)
+        # 404.html's <base href="/"> made every fragment link (Back to top) lead
+        # home; its links are all root-based now, so it has nothing left to do.
+        text = text.replace('<base href="/" />', "")
+        # A phone number never breaks across lines.
+        text = text.replace('<span class="c-channel__value">+249 119005441</span>', '<span class="c-channel__value">+249&nbsp;119005441</span>')
+        # The footer's giant wordmark is decoration: drawn by CSS, it is no longer
+        # text for readers or contrast checks to trip on (it looks the same).
+        text = text.replace('<p class="c-footer__mark" aria-hidden="true">PIXORA</p>',
+                            '<p class="c-footer__mark" aria-hidden="true" data-mark="PIXORA"></p>')
+        # The service diagram's markers carry numbers; they become plain dots.
+        text = re.sub(r'(<span class="c-eco__marker"[^>]*>)\d+(</span>)', r"\1\2", text)
+
+        path.write_text(text, encoding="utf-8")
+    print(f"refinements: {len(pages(site))} pages")
+    for path in pages(site):
+        if re.search(r"Founder's portfolio|Founder&#39;s|أعمال المؤسس|موقع المؤسس|muhalabsalah\.github\.io|\"founder\"|run by <strong>", path.read_text(encoding="utf-8")):
+            sys.exit(f"refinements: {path.name} still refers to a founder")
+    # The supplied generic preview card: every page now names its own.
+    drop(site, ["share-card.jpg"], "refinements")
+
+    # robots.txt: private endpoints stay out of search.
+    robots = site / "robots.txt"
+    text = robots.read_text(encoding="utf-8")
+    if "Allow: /\n" not in text:
+        sys.exit("robots.txt: 'Allow: /' line not found")
+    robots.write_text(text.replace("Allow: /\n", "Allow: /\nDisallow: /admin/\nDisallow: /lead.php\nDisallow: /_leads/\n", 1), encoding="utf-8")
+
+    # .htaccess: 301 old .html addresses, just above the clean-URL rewrite.
+    htaccess = site / ".htaccess"
+    text = htaccess.read_text(encoding="utf-8")
+    anchor = "  RewriteCond %{REQUEST_FILENAME}.html -f"
+    if anchor not in text:
+        sys.exit(".htaccess: rewrite anchor not found")
+    lines = text.split("\n")
+    at = next(i for i, line in enumerate(lines) if line.startswith(anchor))
+    while at > 0 and lines[at - 1].lstrip().startswith("#"):
+        at -= 1  # keep the rule's own comment attached to it
+    htaccess.write_text("\n".join(lines[:at]) + "\n" + REDIRECTS + "\n".join(lines[at:]), encoding="utf-8")
+    print("robots.txt, .htaccess: updated")
+
+
+if __name__ == "__main__":
+    build(pathlib.Path(__file__).resolve().parent.parent / "site")

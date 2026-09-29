@@ -22,13 +22,13 @@ copy, the prices, the WhatsApp links and the site script's behaviour (tiers,
 analytics, language switch) come along unchanged. New wording is limited to
 labels (breadcrumb, section titles, card links), in English and Arabic.
 
-Runs on the site/ copy of the supplied pages, before apply-site-refinements.
+Runs on the site/ copy of the supplied pages, before refinements.py.
 """
 import pathlib
 import re
 
 import common
-from common import inject_css
+from common import drop, inject_css, pages
 
 SERVICES = ["branding", "websites", "social", "marketing", "integrated"]
 # Which add-on categories (by their English name) belong on which page.
@@ -98,7 +98,7 @@ ARROW = ('<svg class="c-btn__icon u-flip-rtl" viewBox="0 0 24 24" aria-hidden="t
 # ---------------------------------------------------------------------------
 def element(html, start, tag):
     """(start, end) of the element that opens at `start`, end exclusive."""
-    depth, i = 0, start
+    depth = 0
     pattern = re.compile(rf"<(/?){tag}\b[^>]*>", re.S)
     for m in pattern.finditer(html, start):
         depth += -1 if m.group(1) else 1
@@ -613,10 +613,7 @@ def build(site: pathlib.Path):
 
     # 4. Every page: links to the old in-page service anchors go to the pages,
     #    and the site script's service list carries those addresses.
-    pages = list(site.glob("*.html")) + list((site / "services").glob("*.html"))
-    for path in pages:
-        if path.name == "go.html":
-            continue
+    for path in pages(site):
         text = path.read_text(encoding="utf-8")
         before = text
         for sid in SERVICES:
@@ -630,10 +627,7 @@ def build(site: pathlib.Path):
             path.write_text(text, encoding="utf-8")
 
     # The replaced blocks' images leave site/ — unless a page still uses one.
-    pages = "".join(p.read_text(encoding="utf-8") for p in list(site.glob("*.html")) + list(site.glob("services/*.html")))
-    for name in sorted(REPLACED):
-        if name not in pages and (site / "assets" / name).exists():
-            (site / "assets" / name).unlink()
+    drop(site, sorted(REPLACED), "build_services", keep_used=True)
 
     # 5. Sitemap: the five pages.
     sitemap = site / "sitemap.xml"

@@ -23,6 +23,7 @@ import re
 import sys
 
 import prune_css
+from common import pages as site_pages
 
 START, END = "<!-- SHARED-STYLES:START -->", "<!-- SHARED-STYLES:END -->"
 
@@ -32,7 +33,7 @@ def digest(text):
 
 
 def build(site: pathlib.Path):
-    pages = sorted(p for p in list(site.glob("*.html")) + list(site.glob("services/*.html")) if p.name != "go.html")
+    pages = site_pages(site)
     texts = {p: p.read_text(encoding="utf-8") for p in pages}
 
     styles = {re.search(r"<style>(.*?)</style>", t, re.S).group(1) for t in texts.values()}

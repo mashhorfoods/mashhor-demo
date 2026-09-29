@@ -19,7 +19,7 @@ scroll-driven animations show the text in place.
 """
 import pathlib
 
-from common import inject_css
+from common import inject_css, pages
 
 START, END = "/* MOTION:START */", "/* MOTION:END */"
 CSS = START + """
@@ -112,9 +112,7 @@ def sparks(home):
 
 
 def build(site: pathlib.Path):
-    for path in list(site.glob("*.html")) + list(site.glob("services/*.html")):
-        if path.name == "go.html":
-            continue
+    for path in pages(site):
         text = path.read_text(encoding="utf-8")
         # One shared stylesheet for every page, so the spark rules go everywhere.
         new = inject_css(text, CSS + SPARK_CSS + VIEWER_CSS)

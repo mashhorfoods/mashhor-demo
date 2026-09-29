@@ -16,7 +16,7 @@ import pathlib
 import re
 from urllib.parse import quote
 
-from common import WA, inject_css
+from common import WA, drop, inject_all
 
 
 def t(en, ar):
@@ -278,11 +278,8 @@ def build(site: pathlib.Path):
                   text, count=1)
     about.write_text(text, encoding="utf-8")
     # The supplied site's About photos give way to tools/about-images.
-    for old in ("about1", "about2", "about4"):
-        (site / "assets" / f"{old}.webp").unlink()
-    for page in list(site.glob("*.html")) + list(site.glob("services/*.html")):
-        if page.name != "go.html":
-            page.write_text(inject_css(page.read_text(encoding="utf-8"), CSS), encoding="utf-8")
+    drop(site, ["about1.webp", "about2.webp", "about4.webp"], "about_page")
+    inject_all(site, CSS)
 
 
 if __name__ == "__main__":

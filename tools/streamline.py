@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Less to read, nothing said twice, sections in the order a visitor needs them.
 
-Runs after build_services.py and before apply-site-refinements.py.
+Runs after build_services.py and before refinements.py.
 
 Homepage order:  hero → services → recent work (Al Mada) → selected work →
                  brand challenge → questions → contact
@@ -20,6 +20,7 @@ import pathlib
 import re
 
 from build_services import find, bi
+from common import drop, pages
 
 ORDER = ["home", "services", "proof", "work", "challenge", "faq", "contact"]
 # Homepage blocks whose artwork is still placeholder: (start of the block,
@@ -94,16 +95,10 @@ def build(site: pathlib.Path):
     home_path.write_text(streamline_home(home_path.read_text(encoding="utf-8")), encoding="utf-8")
 
     # The placeholder files go too — unless some page still uses one.
-    pages = "".join(p.read_text(encoding="utf-8") for p in list(site.glob("*.html")) + list(site.glob("services/*.html")))
-    for pattern in [p for files in PLACEHOLDERS.values() for p in files]:
-        for asset in (site / "assets").glob(pattern):
-            if asset.name in pages:
-                raise SystemExit(f"streamline: {asset.name} is placeholder but still used")
-            asset.unlink()
+    names = sorted(a.name for pattern in (p for files in PLACEHOLDERS.values() for p in files) for a in (site / "assets").glob(pattern))
+    drop(site, names, "streamline")
 
-    for path in list(site.glob("*.html")) + list((site / "services").glob("*.html")):
-        if path.name == "go.html":
-            continue
+    for path in pages(site):
         text = path.read_text(encoding="utf-8")
         new = drop_process_links(text)
         if path.parent.name == "services":
