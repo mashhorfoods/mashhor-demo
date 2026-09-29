@@ -288,6 +288,10 @@ function sharedStyles(): string
     // The site's own stylesheet (tokens, fonts, buttons, fields), read from the
     // homepage so this page can never drift from the brand.
     $home = @file_get_contents(dirname(__DIR__) . '/index.html');
+    // The build links one shared, hashed stylesheet; older builds inlined it.
+    if ($home && preg_match('#<link rel="stylesheet" href="/assets/site\.[a-f0-9]+\.css" />#', $home, $m)) {
+        return $m[0];
+    }
     return ($home && preg_match('/<style>.*?<\/style>/s', $home, $m)) ? $m[0] : '';
 }
 

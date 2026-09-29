@@ -11,9 +11,11 @@ Steps, in order:
     1. copy source, then overlay, into a fresh site/ (runtime lead data in
        site/_leads is kept)
     2. build_services.py          one page per service; home and pricing unified
+       streamline.py              order, repetition, placeholders, shorter copy
     3. apply-site-refinements.py  spacing, pills, WhatsApp button, hero,
                                   profile, privacy, clean links, CSP
-    4. sync-shared-styles.py      the homepage stylesheet into go.html
+    4. finalize.py                one shared stylesheet + script for every page
+                                  (go.html and /admin/ included), CSP, caching
 
     python3 pixora/tools/build.py
 """
@@ -45,6 +47,14 @@ import build_services  # noqa: E402
 build_services.build(SITE)
 print("services: pages built, home and pricing unified")
 
-for script in ("apply-site-refinements.py", "sync-shared-styles.py"):
-    subprocess.run([sys.executable, str(TOOLS / script)], check=True)
+import streamline  # noqa: E402
+
+streamline.build(SITE)
+print("streamline: sections reordered, repetition and placeholders removed")
+
+subprocess.run([sys.executable, str(TOOLS / "apply-site-refinements.py")], check=True)
+
+import finalize  # noqa: E402
+
+finalize.build(SITE)
 print("done")
