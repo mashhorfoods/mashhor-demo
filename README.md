@@ -182,7 +182,9 @@ image `<slug>-<piece>` (for example `talk-about-sudan-map.png`,
     python3 tools/images.py work <folder> && npm run build
 
 The images are cropped to the piece's proportions (1600 and 800 wide) and
-replace the placeholder in the hero and in the chapter at once.
+replace the placeholder in the hero and in the chapter at once. Once a study's
+first piece is real, it also becomes the study's card on `/work` and, after
+`node tools/share-cards/render.mjs`, its link preview.
 
 The hub cards' covers are HTML scenes in the site's colours
 (`tools/share-cards/case-cover.html?s=<slug>`), rendered and encoded with

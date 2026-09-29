@@ -21,7 +21,9 @@ build itself never encodes anything (the results are committed).
           pixora-board-900.webp (the campaign page's hero).
 
   cases   tools/share-cards/out/case-<slug>.png (rendered by render.mjs,
-          1600×1000) → case-<slug>.webp and case-<slug>-800.webp.
+          1600×1000) → case-<slug>.webp and case-<slug>-800.webp — only
+          for studies whose first piece of work is still a placeholder (once
+          it is real, it is the study's cover).
 
   work    <folder>/<slug>-<piece>.png|.jpg|.webp, named after a study and one of
           its pieces in tools/case_stories.py (e.g. talk-about-sudan-map.png)
@@ -71,7 +73,12 @@ def board():
 
 
 def cases():
+    sys.path.insert(0, str(ROOT / "tools"))
+    from cases import cover_name
     for src in sorted((ROOT / "tools" / "share-cards" / "out").glob("case-*.png")):
+        if cover_name(src.stem[len("case-"):]) != src.stem:
+            print(f"skipped {src.name}: the study's cover is its real work now")
+            continue
         webp(src, f"{src.stem}.webp", "scale=1600:1000:flags=lanczos", 82)
         webp(src, f"{src.stem}-800.webp", "scale=800:500:flags=lanczos", 82)
         print(f"overlay/assets/{src.stem}.webp (+ -800)")

@@ -105,9 +105,19 @@ def plain(html):
     return re.sub(r"<[^>]+>", "", html).replace("&amp;", "&")
 
 
+ASSETS = pathlib.Path(__file__).resolve().parent.parent / "overlay" / "assets"
+
+
+def cover_name(slug):
+    """A study's cover: its first piece of work once that is real, else its drawn cover."""
+    first = f"case-{slug}-{STORIES[slug]['hero'][0]}"
+    return first if (ASSETS / f"{first}.webp").exists() else f"case-{slug}"
+
+
 def cover(slug, lazy=True, sizes="(min-width: 64em) 40rem, 100vw"):
     load = 'loading="lazy"' if lazy else 'fetchpriority="high"'
-    return (f'<img src="/assets/case-{slug}.webp" srcset="/assets/case-{slug}-800.webp 800w, /assets/case-{slug}.webp 1600w" '
+    name = cover_name(slug)
+    return (f'<img src="/assets/{name}.webp" srcset="/assets/{name}-800.webp 800w, /assets/{name}.webp 1600w" '
             f'sizes="{sizes}" alt="" width="1600" height="1000" {load} decoding="async" />')
 
 

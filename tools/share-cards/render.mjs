@@ -120,17 +120,21 @@ for (const slug of CASES) {
   await reader.goto(site(`work/${slug}.html`), { waitUntil: 'domcontentloaded' });
   const t = await reader.evaluate(() => {
     const ar = (sel) => document.querySelector(`${sel} [data-lang-copy="ar"]`).textContent.trim();
-    return { name: ar('.c-story__eyebrow'), h1: ar('.c-crumbs [aria-current]'), en: document.querySelector('meta[name="description"]').content };
+    // The study's first print, once it is real work (else its drawn cover).
+    const first = document.querySelector('.c-story-hero__card img');
+    return { name: ar('.c-story__eyebrow'), h1: ar('.c-crumbs [aria-current]'), en: document.querySelector('meta[name="description"]').content,
+      img: first ? first.getAttribute('src').split('/').pop() : null };
   });
   await page.goto(`file://${path.join(here, 'service.html')}`);
   await page.evaluate(({ t, slug, img }) => {
     document.getElementById('img').src = img;
+    document.body.classList.toggle('is-light', Boolean(t.img && !t.img.startsWith(`case-${slug}.`)));
     document.getElementById('name').textContent = t.name;
     document.getElementById('h1').textContent = t.h1;
     document.getElementById('en').textContent = t.en;
     document.querySelector('.foot').innerHTML = '<span>دراسة حالة</span><span>من المشكلة إلى النتيجة</span><span>عربي / English</span>';
     document.getElementById('path').textContent = `/work/${slug}`;
-  }, { t, slug, img: `file://${path.join(out, `case-${slug}.webp`)}` });
+  }, { t, slug, img: `file://${path.join(out, t.img || `case-${slug}.webp`)}` });
   await shoot(`share-case-${slug}.jpg`);
 }
 await browser.close();
