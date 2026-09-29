@@ -12,6 +12,15 @@ a fresh one at any time.
 Do not overwrite `admin/config.php` on the server once the admin password is
 set (the package carries the empty one).
 
+## Preview on GitHub Pages
+
+Every push to `main` that passes the tests also publishes a preview at
+https://mashhorfoods.github.io/mashhor-demo/ (`tools/pages.py`): the same
+pages, moved under the repository's path. It is static, so the campaign form
+falls back to WhatsApp there and `/admin/` is absent, and every page says
+`noindex` — the real site stays the one search engines show. One-time
+setting: **Settings → Pages → Source: GitHub Actions**.
+
 ## How it is built
 
 `site/` is the deployable web root. It is **generated** and not kept in git

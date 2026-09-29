@@ -1,6 +1,10 @@
 # Builds the site from source/ + overlay/, tests it, and publishes the upload
 # package: Actions → the latest run → Artifacts → pixora-site-upload.
 # Unzip its contents into public_html.
+#
+# On main it also publishes a preview to GitHub Pages
+# (https://<owner>.github.io/<repo>/): the same site under the repo's path,
+# without PHP (tools/pages.py). Needs Settings → Pages → Source: GitHub Actions.
 name: Build site
 
 on:
@@ -58,3 +62,29 @@ jobs:
           include-hidden-files: true
           retention-days: 30
           if-no-files-found: error
+
+      - name: Prepare the GitHub Pages preview
+        if: github.ref == 'refs/heads/main'
+        run: python3 tools/pages.py "/${{ github.event.repository.name }}"
+
+      - uses: actions/upload-pages-artifact@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          path: dist/pages/
+
+  pages:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
