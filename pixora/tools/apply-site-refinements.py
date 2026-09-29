@@ -34,8 +34,10 @@ import re
 import sys
 
 SITE = pathlib.Path(__file__).resolve().parent.parent / "site"
-PAGES = ["index.html", "pricing.html", "about.html", "story.html", "privacy.html",
-         "terms.html", "accessibility.html", "404.html"]
+# Every page of the site (the service pages included) except the campaign
+# page, which carries its own styles and copy.
+PAGES = sorted(str(p.relative_to(SITE)) for p in list(SITE.glob("*.html")) + list(SITE.glob("services/*.html"))
+               if p.name != "go.html")
 
 CSS_START, CSS_END = "/* REFINEMENTS:START */", "/* REFINEMENTS:END */"
 CSS = CSS_START + """

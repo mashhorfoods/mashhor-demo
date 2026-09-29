@@ -266,7 +266,7 @@ for (const kind of ['mobile', 'desktop']) {
   await context.route('https://plausible.io/**', (route) => route.fulfill({ status: 200, body: '' }));
   await context.addInitScript(() => { try { localStorage.setItem('site-lang', 'ar'); } catch {} });
   const p = await context.newPage();
-  for (const page of ['index.html', 'pricing.html', 'about.html']) {
+  for (const page of ['index.html', 'pricing.html', 'about.html', 'services/branding', 'services/integrated']) {
     await p.goto(`${BASE}/${page}`);
     await p.waitForTimeout(150);
     const shapes = await p.$$eval('.c-btn', (els) => [...new Set(els.filter((e) => e.offsetParent)
@@ -291,7 +291,7 @@ for (const kind of ['mobile', 'desktop']) {
   await context.route('https://plausible.io/**', (route) => route.fulfill({ status: 200, body: '' }));
   const p = await context.newPage();
   const internal = new Map(); // href → first page it was seen on
-  const pages = ['/', '/pricing', '/about', '/story', '/privacy', '/terms', '/accessibility', '/go', '/404.html'];
+  const pages = ['/', '/pricing', '/services/branding', '/services/websites', '/services/social', '/services/marketing', '/services/integrated', '/about', '/story', '/privacy', '/terms', '/accessibility', '/go', '/404.html'];
   for (const url of pages) {
     const res = await p.goto(`${BASE}${url}`);
     await p.waitForTimeout(150);
@@ -325,6 +325,32 @@ for (const kind of ['mobile', 'desktop']) {
   }
   const sitemap = readFileSync(path.join(here, '..', 'site', 'sitemap.xml'), 'utf8');
   check(!sitemap.includes('.html'), 'sitemap lists clean addresses');
+  await context.close();
+}
+
+/* ---- 9. Services: one card each on the home page, one page each ---------- */
+{
+  const context = await browser.newContext(VIEWPORTS.desktop);
+  await context.route('https://plausible.io/**', (route) => route.fulfill({ status: 200, body: '' }));
+  const p = await context.newPage();
+  await p.goto(`${BASE}/`);
+  const cards = await p.$$eval('#services .c-svc-card__link', (els) => els.map((e) => e.getAttribute('href')));
+  check(cards.join() === '/services/branding,/services/websites,/services/social,/services/marketing,/services/integrated', 'home: one card per service, linking to its page', cards.join());
+  check(await p.locator('#branding, #websites, #social, #marketing, #add-ons, .c-tier').count() === 0, 'home: no duplicated service details or packages');
+  for (const [sid, tiers] of [['branding', 3], ['websites', 3], ['social', 3], ['marketing', 3], ['integrated', 0]]) {
+    await p.goto(`${BASE}/services/${sid}`);
+    await p.waitForTimeout(100);
+    check(await p.locator('h1').count() === 1 && await p.locator('.c-crumbs [aria-current]').count() === 1, `/services/${sid}: one heading and a breadcrumb`);
+    check(await p.locator('.c-tier').count() === tiers, `/services/${sid}: ${tiers} packages`);
+    check(await p.locator('.c-svc-cards .c-svc-card').count() === 4, `/services/${sid}: links to the other four services`);
+    const current = await p.$eval('[data-nav-link][aria-current="page"]', (e) => e.getAttribute('href')).catch(() => null);
+    check(current === `/services/${sid}` || current === null, `/services/${sid}: menu marks the page`, String(current));
+  }
+  await p.goto(`${BASE}/pricing`);
+  check(await p.locator('.c-tier').count() === 0 && await p.locator('#add-ons .c-addon').count() >= 11 && await p.locator('#build').count() === 1,
+    'pricing: no duplicated packages; every add-on and the builder are here');
+  const index = await p.$$eval('.c-index__link', (els) => els.map((e) => e.getAttribute('href')));
+  check(index.slice(0, 4).every((h) => h.startsWith('/services/')), 'pricing: service index opens the service pages', index.join());
   await context.close();
 }
 

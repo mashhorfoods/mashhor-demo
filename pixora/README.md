@@ -1,11 +1,25 @@
 # Pixora — website + campaign landing
 
-`site/` is the deployable web root: the latest supplied version of the site
-(`pixora-site-61f4ae2`), plus the campaign experience, lead endpoint and admin
-page described below, with the refinements applied by
-`tools/apply-site-refinements.py`. Upload the **contents** of
-`site/` to `public_html` on Hostinger (the existing `.htaccess` already serves
-`/go` for `go.html`).
+`site/` is the deployable web root — upload its **contents** to `public_html`.
+It is **generated**; do not edit it by hand:
+
+```
+pixora/source/    the site exactly as supplied (replace wholesale with each new version)
+pixora/overlay/   what this project adds: go.html, assets/go.js, lead.php, _leads/, admin/
+pixora/tools/build.py   →   pixora/site/
+```
+
+`python3 pixora/tools/build.py` copies source then overlay into a fresh `site/`
+(keeping any lead data in `site/_leads`), then runs, in order:
+
+| Step | Script | What it does |
+| --- | --- | --- |
+| 1 | `build_services.py` | One page per service at `/services/<id>` (details, showcase, what it covers, packages and prices, related add-ons, other services). The homepage gets a single services section of cards; the old accordion, the five detail sections and the add-ons leave it. `/pricing` keeps only pricing matters: what moves a price, an index linking to the service pages, every add-on, the build-your-own estimator and billing. |
+| 2 | `apply-site-refinements.py` | Spacing, pill buttons, WhatsApp button on phones, hero copy, profile, privacy note, root-based clean links, 301s from `.html`, CSP hashes. |
+| 3 | `sync-shared-styles.py` | The homepage stylesheet into `go.html`. |
+
+The build is deterministic (two runs give identical output); the tests below
+run against its output.
 
 ## The campaign flow
 

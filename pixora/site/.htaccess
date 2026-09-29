@@ -59,7 +59,7 @@
   #
   # plausible.io appears twice: script-src to load the tag, connect-src for
   # the event it sends. Nothing else off-origin is permitted at all.
-  Header set Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self' mailto:; img-src 'self' data:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://plausible.io 'sha256-s9ZpBQhWC9S7CD5hCBHOrhPFuI4Yk/i/x31bP/I3K0w=' 'sha256-roA0/wcrwso6jPKsScvezfBEwVfxagOruXw75++4lzY=' 'sha256-hYBS32mpfsiD1nT9AzINbOsbpcmCmj3I3HEOVaMrJRo=' 'sha256-DxdO0KMifr4qBxX++GTv0w7cNu8FeArRvitEZf1FSrE=' 'sha256-CAyoNmtZs2L62RXp6xxIJOD3hlQrms/RB5Pi4BGZAKc=' 'sha256-RBNvo1WzZ4oRRq0W9+hknpT7T8If536DEMBg9hyq/4o='; connect-src 'self' https://plausible.io"
+  Header set Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self' mailto:; img-src 'self' data:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://plausible.io 'sha256-s9ZpBQhWC9S7CD5hCBHOrhPFuI4Yk/i/x31bP/I3K0w=' 'sha256-MPkn9bkT5xMgNSNx4NZrhMhmAA7PElP3MlRcFNWGKuo=' 'sha256-DxdO0KMifr4qBxX++GTv0w7cNu8FeArRvitEZf1FSrE=' 'sha256-hYBS32mpfsiD1nT9AzINbOsbpcmCmj3I3HEOVaMrJRo=' 'sha256-CAyoNmtZs2L62RXp6xxIJOD3hlQrms/RB5Pi4BGZAKc=' 'sha256-RBNvo1WzZ4oRRq0W9+hknpT7T8If536DEMBg9hyq/4o='; connect-src 'self' https://plausible.io"
   # HSTS: enabled in site.config.json AFTER the live site was verified.
   # The apex only. includeSubDomains would force HTTPS on every subdomain of
   # this host — webmail, cpanel, anything a control panel creates later — and
