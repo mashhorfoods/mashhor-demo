@@ -1,0 +1,23 @@
+/* MOTION:START */
+@layer tokens{@media (prefers-reduced-motion:no-preference){:root{--duration-base:480ms;--duration-slow:900ms;--reveal-distance:28px}}}
+@view-transition{navigation:auto}
+@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}
+::view-transition-group(*){animation-duration:560ms;animation-timing-function:cubic-bezier(0.16,1,0.3,1)}
+::view-transition-old(root),::view-transition-new(root){animation-duration:420ms}
+.c-header{view-transition-name:site-header}
+@layer components{
+@media (prefers-reduced-motion:no-preference){
+.js [data-reveal],.js [data-reveal-group]>*{filter:blur(6px);transition:opacity var(--duration-slow) var(--ease-out),transform var(--duration-slow) var(--ease-out),filter var(--duration-slow) var(--ease-out)}
+.js [data-reveal].is-revealed,.js [data-reveal-group].is-revealed>*{filter:none}
+.m-line{display:block;overflow:hidden;padding-block-end:0.1em;margin-block-end:-0.1em}
+.m-line>span{display:inline-block;animation:m-rise var(--duration-slow) var(--ease-out) both;animation-delay:calc(var(--l,0) * 130ms + 150ms)}
+.c-btn--primary{transition:var(--transition-interactive),translate 600ms var(--ease-out)}
+}
+@keyframes m-rise{from{transform:translateY(135%)}}
+.m-lit{background-image:radial-gradient(280px circle at var(--mx,50%) var(--my,50%),rgba(244,209,63,0.09),transparent 70%)}
+@supports (animation-timeline:view()){@media (prefers-reduced-motion:no-preference){
+.c-prose>*,.c-svc__deal,.c-svc__covers,.c-note,.g-head,.g-project,.g-quote,.g-next,.g-option,.g-trust>*{animation:m-surface linear both;animation-timeline:view();animation-range:entry 0% cover 28%}
+}}
+@keyframes m-surface{from{opacity:0;transform:translateY(32px);filter:blur(6px)}}
+}
+/* MOTION:END */

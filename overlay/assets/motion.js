@@ -144,6 +144,12 @@
   const fab = document.querySelector('.c-wa-fab');
   const covered = [...document.querySelectorAll('#contact, .c-footer, #home.c-hero, .c-about-hero, .c-svc__deal')];
   if (fab && covered.length && 'IntersectionObserver' in window) {
+    // Its first place is set at once, without the fade: it must not appear
+    // over the hero on arrival only to fade away.
+    const inView = (el) => { const r = el.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight * 0.85; };
+    fab.classList.add('is-instant');
+    fab.classList.toggle('is-aside', covered.some(inView));
+    requestAnimationFrame(() => requestAnimationFrame(() => fab.classList.remove('is-instant')));
     const onScreen = new Set();
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e) => (e.isIntersecting ? onScreen.add(e.target) : onScreen.delete(e.target)));

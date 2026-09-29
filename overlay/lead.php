@@ -123,20 +123,9 @@ if (!preg_match('/^PX-[2-9A-HJKMNP-Z]{5}$/', $tracking['ref'])) {
 
 /* ---- Storage -------------------------------------------------------------- */
 
-function storageDir(): ?string
-{
-    $candidates = [dirname(__DIR__) . '/pixora-leads', __DIR__ . '/_leads'];
-    foreach ($candidates as $dir) {
-        if (is_dir($dir) || @mkdir($dir, 0700, true)) {
-            if (is_writable($dir)) {
-                return $dir;
-            }
-        }
-    }
-    return null;
-}
+require __DIR__ . '/_lib/storage.php';
 
-$dir = storageDir();
+$dir = pixoraStorageDir(true);
 
 // Rate limit per IP, stored as a hash — the address itself is never written.
 if ($dir !== null) {

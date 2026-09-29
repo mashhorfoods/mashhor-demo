@@ -10,6 +10,15 @@ WHATSAPP = CONFIG["whatsapp"]
 WA = f"https://wa.me/{WHATSAPP}"
 
 
+CSS_DIR = pathlib.Path(__file__).resolve().parent / "css"
+
+
+def stylesheet(name):
+    """One of the project's stylesheets (tools/css/<name>.css), injected into
+    every page by the build step it belongs to."""
+    return (CSS_DIR / f"{name}.css").read_text(encoding="utf-8")
+
+
 def inject_css(page, css):
     """Append a block of CSS to the end of the page's stylesheet."""
     close = page.find("</style>")

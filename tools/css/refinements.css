@@ -1,0 +1,116 @@
+/* REFINEMENTS:START */
+@layer tokens{:root{
+--section-space:clamp(5rem,3rem + 8.5vw,11rem);
+--section-space-tight:clamp(3.75rem,2.5rem + 5.5vw,7.5rem);
+--section-space-loose:clamp(6.5rem,3.5rem + 13vw,13rem);
+--stack-heading-body:clamp(1.25rem,0.9rem + 1.6vw,2.25rem);
+--stack-body-cta:clamp(2rem,1.4rem + 2.6vw,3.5rem);
+--space-label-group:var(--space-32);
+--control-height-button:52px}}
+@layer components{
+.c-btn,.c-btn--sm,.c-btn--lg,.c-header__cta,.is-compact .c-header__cta{min-block-size:var(--control-height-button);padding-inline:var(--space-32);border-radius:var(--radius-pill);font-size:var(--text-body-sm)}
+.c-btn--icon{padding:0;inline-size:var(--control-height-button);aspect-ratio:1}
+.c-btn:active{transform:scale(0.98)}
+.c-lang,.c-lang__option,.c-menu-trigger,.c-skip-link{border-radius:var(--radius-pill)}
+.c-field__control{border-radius:var(--radius-md)}
+.c-detail__head{margin-block-end:var(--space-64)}
+@media (min-width:64em){.c-detail__head{margin-block-end:var(--space-96)}}
+.c-tiers,.c-brandboard,.c-modules,.c-devices,.c-bento{gap:var(--space-32)}
+.c-contact{gap:var(--space-64)}
+.c-channel{padding-block:var(--space-32)}
+.c-verify{padding-block:var(--space-80)}
+.c-footer__top{row-gap:var(--space-64)}
+.c-hero__actions{margin-block-start:var(--space-16)}
+.c-hero__actions .c-btn{justify-content:center}
+.c-hero__tease{color:var(--color-text-primary)}
+@media (min-width:64em){.c-hero__headline{font-size:max(2.75rem,min(var(--text-hero),12.5cqw))}}
+.c-wa-fab{position:fixed;inset-block-end:calc(var(--space-16) + env(safe-area-inset-bottom));inset-inline-end:var(--space-16);z-index:var(--z-sticky);display:grid;place-items:center;inline-size:56px;block-size:56px;border-radius:var(--radius-pill);background-color:var(--color-accent);color:var(--color-text-on-accent);box-shadow:var(--shadow-overlay);transition:var(--transition-interactive)}
+.c-wa-fab:hover{background-color:var(--color-accent-hover)}
+.c-wa-fab:active{transform:scale(0.96)}
+.c-wa-fab svg{inline-size:26px;block-size:26px}
+@media (min-width:64em){.c-wa-fab{display:none}}
+/* Where WhatsApp is already on screen (contact, footer) it steps aside
+   (motion.js adds .is-aside). */
+.c-wa-fab.is-aside{opacity:0;scale:0.8;visibility:hidden}
+.c-wa-fab.is-instant{transition:none}
+@media (prefers-reduced-motion:no-preference){.c-wa-fab{transition:var(--transition-interactive),inset-block-end var(--duration-base) var(--ease-out),opacity var(--duration-base) var(--ease-out),scale var(--duration-base) var(--ease-out),visibility var(--duration-base),translate 600ms var(--ease-out)}}
+@media print{.c-wa-fab{display:none}}
+}
+
+/* No sequence numbers anywhere: sections, service cards, the menu, add-ons,
+   service steps, story chapters, portfolio tiles and galleries are not
+   numbered. (Prices, counts and the brand challenge's steps — which say
+   where you are — keep theirs.) */
+.c-detail__number,.c-svc-card__index,.c-drawer__index,.c-addon__index,.c-pipeline__index,
+.c-chapter__num,.c-bento__index,.c-gallery__count{display:none}
+.c-addon{grid-template-columns:1fr}
+/* Steps kept a narrow first column for their number on small phones. */
+.c-pipeline__step{grid-template-columns:minmax(0,1fr)}
+.c-pipeline__step>:nth-child(n + 3){grid-column:auto}
+.c-eco__marker::before{content:"";inline-size:8px;block-size:8px;border-radius:50%;background-color:currentColor}
+/* The featured package card sits on a lighter surface: its muted text is
+   lifted to keep 4.5:1 ("From", "Delivery", …). */
+.c-tier--featured{--color-text-muted:rgba(255,255,255,0.62)}
+.c-footer__mark::before{content:attr(data-mark)}
+/* The story's chapter text waits for the site script to reveal it; without
+   the script (blocked, failed, or off) it must simply be there. */
+:root:not(.js) .c-chapter__text>*{opacity:1;translate:none}
+/* Plus/minus marks centred with physical left: inset-inline-start:50% plus
+   translate:-50% pushed them a whole mark sideways, onto the text, in Arabic. */
+.c-faq__mark::before,.c-faq__mark::after,.c-addons__mark::before,.c-addons__mark::after,
+.c-challenge__why-mark::before,.c-challenge__why-mark::after{inset-inline-start:auto;left:50%}
+/* ---- UI pass: one system everywhere ------------------------------------ */
+/* Section labels: gold, with the short rule after them, wherever a section
+   begins (some had it, some did not; the page template's was grey). */
+.c-proof__eyebrow,.c-showcase__eyebrow,.c-story__eyebrow,.c-page__eyebrow{display:flex;align-items:center;gap:var(--space-12);color:var(--color-accent)}
+.c-proof__eyebrow::after,.c-showcase__eyebrow::after,.c-story__eyebrow::after,.c-page__eyebrow::after{content:"";inline-size:var(--rule-width);block-size:var(--border-width-strong);background-color:currentcolor;flex-shrink:0}
+/* Headings: the display face, bold, like every other heading on the site
+   (the page template — pricing, privacy, terms, accessibility — the brand
+   challenge and the package builder were set in the regular weight). */
+.c-page__title,.c-prose h2,.c-challenge__title,.c-build-title{font-family:var(--font-display);font-weight:var(--weight-bold);letter-spacing:var(--tracking-heading);color:var(--color-text-primary)}
+.c-page__title{letter-spacing:var(--tracking-display);line-height:var(--leading-heading)}
+.c-prose h2{margin-block-end:var(--space-12)}
+/* Pricing: "How we bill" no longer touches the package builder above it. */
+div:has(> form.c-build) + .c-prose{margin-block-start:var(--space-80)}
+/* The brand challenge: the same rhythm as the sections around it. */
+.c-challenge{padding-block:var(--section-space-tight)}
+/* The testimonial: a pull quote across the section, not half of it. */
+.c-proof .c-testimonial{max-inline-size:none}
+@media (min-width:64em){.c-proof .c-testimonial{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:var(--space-64);align-items:end;padding:var(--space-48)}
+.c-proof .c-testimonial__quote p{font-size:var(--text-h4,1.35rem);line-height:var(--leading-relaxed)}
+.c-proof .c-testimonial__by{margin:0;padding:0 0 0 var(--space-32);border:0;border-inline-start:var(--border-hairline)}
+:root[dir="rtl"] .c-proof .c-testimonial__by{padding:0 var(--space-32) 0 0}}
+/* "Copy" and "Elsewhere" as pills (unlayered: a supplied rule had kept them square). */
+.c-channel__copy,.c-elsewhere__link{border-radius:var(--radius-pill)}
+/* "Check us": links as chips, like "Elsewhere", not a bulleted list. */
+.c-verify__list{flex-direction:row;flex-wrap:wrap;gap:var(--space-8);list-style:none;margin:0;padding:0}
+.c-verify__list a{gap:var(--space-8);padding-inline:var(--space-16);border:var(--border-hairline);border-radius:var(--radius-pill);text-decoration:none;font-size:var(--text-body-sm);transition:border-color var(--duration-fast) var(--ease-standard),background-color var(--duration-fast) var(--ease-standard)}
+.c-verify__list a:hover{border-color:var(--color-accent);background-color:rgba(244,209,63,0.06)}
+/* ---- Phones ------------------------------------------------------------ */
+/* A tap answers in the site's own way (press scale, gold focus), not with
+   the browser's blue flash. */
+html{-webkit-tap-highlight-color:transparent}
+@media (hover:none){.c-svc-card__link:active,.c-faq__q:active,.c-index__link:active,.c-story-hero__card:active{scale:0.985;transition:scale 120ms var(--ease-out)}}
+/* Short phones (portrait under 700px tall): the service and About heroes
+   leave room for what follows instead of filling the screen with the cover. */
+@media (max-width:47.99em) and (max-height:700px){.c-svc-hero{min-block-size:min(30rem,74svh)}}
+/* Phones held sideways: a screen about 400px tall. The heroes had been
+   sized for portrait (a 480px minimum, headlines set by width), so the
+   headline filled the screen and every button sat below it. */
+@media (orientation:landscape) and (max-height:520px){
+.c-hero{min-block-size:0;padding-block:calc(var(--header-height) + var(--space-16)) var(--space-32)}
+.c-hero__content{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);grid-template-areas:"eyebrow eyebrow" "head lead" "head actions";column-gap:var(--space-40);row-gap:var(--space-12);align-items:end;inline-size:100%}
+.c-hero__eyebrow{grid-area:eyebrow}
+.c-hero__headline{grid-area:head;font-size:clamp(1.75rem,10.5vh,2.6rem);align-self:center}
+.c-hero__lead{grid-area:lead;margin:0}
+.c-hero__actions{grid-area:actions;flex-direction:row;flex-wrap:wrap;margin:0}
+.c-hero__visual{display:none}
+.c-svc-hero{min-block-size:0;padding-block:calc(var(--header-height) + var(--space-16)) var(--space-32)}
+.c-detail__headline{font-size:clamp(1.6rem,9vh,2.3rem)}
+.c-story__title,.c-page__title{font-size:clamp(1.7rem,9.5vh,2.4rem)}
+.c-story__head.c-story-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:var(--space-32);align-items:center}
+.c-story-hero>:not(.c-story-hero__stage){grid-column:1}
+.c-story-hero__stage{grid-column:2;grid-row:1 / span 3;margin-block-start:0;max-inline-size:26rem}}
+/* An email address reads left to right, in Arabic too. */
+:root[dir="rtl"] input[type="email"]{direction:ltr;text-align:right}
+/* REFINEMENTS:END */

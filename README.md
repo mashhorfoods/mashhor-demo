@@ -27,8 +27,12 @@ setting: **Settings → Pages → Source: GitHub Actions**.
 (build it locally with `npm run build`, or take it from Actions):
 
 ```
-source/    the site exactly as supplied (replace wholesale with each new version)
-overlay/   what this project adds: go.html, assets/go.js, lead.php, _leads/, admin/
+source/      the site exactly as supplied (replace wholesale with each new version)
+overlay/     what this project adds: go.html, lead.php, admin/, _lib/ (PHP shared
+             by lead.php and admin, never served), _leads/, assets/ (go.js,
+             motion.js, viewer.js, forms.js, images)
+tools/css/   the project's stylesheets, one per build step (services, story-hero,
+             about, refinements, motion, sparks, viewer), injected in that order
 tools/build.py   →   site/
 ```
 
@@ -41,6 +45,11 @@ tools/build.py   →   site/
 | 2 | `refinements.py` | Spacing, pill buttons, WhatsApp button on phones, hero copy, profile, privacy note, root-based clean links, 301s from `.html`. |
 | 3 | `motion.py` | "Quiet luxury" motion layer, stylesheet half: one rhythm (480/900 ms, expo ease-out) with a light blur on the site's own reveal; page-to-page cross-fades with the header held still and each service card growing into its page (`@view-transition`); long text and the campaign page surfacing with the scroll (scroll-driven CSS); hero lines rising; pointer light on cards. Script half: `overlay/assets/motion.js` (line split, magnetic primary buttons, pointer light, self-gliding galleries that stop when touched, counting totals). All off under reduced motion; nothing hidden without it. |
 | 4 | `finalize.py`, `prune_css.py` | One shared, content-hashed `site.<hash>.css` / `.js` / `motion.<hash>.js` for every page (go and admin included), long caching, CSP hashes. The stylesheet loses the rules of components no page uses (listed by exact class name in `prune_css.py`; the build stops if a page uses one again). |
+
+Photographs are encoded once with `python3 tools/images.py covers|about`
+(the results are committed; the build never encodes). Shared helpers live in
+`tools/common.py`: the page list, CSS injection, `drop()` for supplied files
+that no longer ship.
 
 The build is deterministic (two runs give identical output); the tests below
 run against its output. Every edit it makes to the supplied pages must find
@@ -79,7 +88,7 @@ over its lower part — so low-key images with a calm lower third work best.
 
 To replace one: save it (16:10, at least 1600 wide) as
 `tools/service-covers/out/svc-<id>.png` or `.jpg`, run
-`FFMPEG=ffmpeg tools/service-covers/encode.sh`, and rebuild. The originals in
+`python3 tools/images.py covers`, and rebuild. The originals in
 `out/` stay out of git; the encoded covers in `overlay/assets/` are what count.
 
 ## Work slideshows on service pages
@@ -115,7 +124,7 @@ Muhalab Basheir, Visual Communications Designer / مهلب بشير، مصمم �
 
 Its three photographs (hero, the team, the process) live in
 `overlay/assets/about-*.webp`, 16:9, with 640 and 1280 wide copies made by
-`tools/about-images/encode.sh` from the source PNGs; the supplied site's
+`python3 tools/images.py about <folder>` from the source PNGs; the supplied site's
 About photos leave the upload.
 
 ## Link previews

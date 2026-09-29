@@ -99,16 +99,7 @@ function checkCsrf(): void
 
 /* ---- Storage (the same places lead.php writes to) -------------------------- */
 
-function storageDir(): ?string
-{
-    $site = dirname(__DIR__);
-    foreach ([dirname($site) . '/pixora-leads', $site . '/_leads'] as $dir) {
-        if (is_dir($dir) && is_writable($dir)) {
-            return $dir;
-        }
-    }
-    return null;
-}
+require dirname(__DIR__) . '/_lib/storage.php';
 
 function readJson(?string $file): array
 {
@@ -152,7 +143,7 @@ function readLeads(?string $dir): array
     return array_reverse($leads);
 }
 
-$dir = storageDir();
+$dir = pixoraStorageDir();
 $stateFile = $dir === null ? null : $dir . '/admin-state.json';
 $attemptsFile = $dir === null ? null : $dir . '/admin-attempts.json';
 $action = (string) ($_POST['action'] ?? $_GET['action'] ?? '');
@@ -283,18 +274,6 @@ if ($signedIn && $action === 'export') {
 
 /* ---- View helpers ------------------------------------------------------------ */
 
-function sharedStyles(): string
-{
-    // The site's own stylesheet (tokens, fonts, buttons, fields), read from the
-    // homepage so this page can never drift from the brand.
-    $home = @file_get_contents(dirname(__DIR__) . '/index.html');
-    // The build links one shared, hashed stylesheet; older builds inlined it.
-    if ($home && preg_match('#<link rel="stylesheet" href="/assets/site\.[a-f0-9]+\.css" />#', $home, $m)) {
-        return $m[0];
-    }
-    return ($home && preg_match('/<style>.*?<\/style>/s', $home, $m)) ? $m[0] : '';
-}
-
 function when(string $iso): string
 {
     try {
@@ -352,7 +331,7 @@ $csrf = e($_SESSION['csrf']);
   <meta name="robots" content="noindex, nofollow" />
   <meta name="color-scheme" content="dark" />
   <title>لوحة الطلبات — Pixora</title>
-  <?= sharedStyles() ?>
+  <!-- SHARED-STYLES: the site's own stylesheet (tokens, fonts, buttons, fields), linked by the build (finalize.py) -->
   <style>
     @layer components {
       body { min-block-size: 100svh; }

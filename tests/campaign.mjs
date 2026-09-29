@@ -33,13 +33,21 @@ const VIEWPORTS = {
   desktop: { viewport: { width: 1440, height: 900 } },
 };
 
-async function open(browser, kind, url) {
-  const context = await browser.newContext(VIEWPORTS[kind]);
-  // Plausible is external; stub it and record every event instead.
+// A browser context on the site: analytics stubbed (it is external), and the
+// page's language chosen up front when a test needs one.
+async function siteContext(browser, options, lang) {
+  const context = await browser.newContext(options);
   await context.route('https://plausible.io/**', (route) => route.fulfill({ status: 200, body: '' }));
+  if (lang) await context.addInitScript((l) => { try { localStorage.setItem('site-lang', l); } catch {} }, lang);
+  return context;
+}
+
+async function open(browser, kind, url) {
+  const context = await siteContext(browser, VIEWPORTS[kind]);
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
+  // Analytics events, recorded on the page instead of sent.
   await page.addInitScript(() => {
     window.__events = [];
     document.addEventListener('pixora:event', (e) => window.__events.push(e.detail));
@@ -249,8 +257,7 @@ for (const kind of Object.keys(VIEWPORTS)) {
 
 /* ---- 6. The existing site is untouched and still works ------------------- */
 for (const page of ['index.html', 'pricing.html', 'about.html', 'story.html', 'privacy.html', 'terms.html', 'accessibility.html', '404.html']) {
-  const context = await browser.newContext(VIEWPORTS.desktop);
-  await context.route('https://plausible.io/**', (route) => route.fulfill({ status: 200, body: '' }));
+  const context = await siteContext(browser, VIEWPORTS.desktop);
   const p = await context.newPage();
   const errors = [];
   p.on('pageerror', (e) => errors.push(e.message));
@@ -263,9 +270,7 @@ for (const page of ['index.html', 'pricing.html', 'about.html', 'story.html', 'p
 
 /* ---- 7. Main-site refinements -------------------------------------------- */
 for (const kind of ['mobile', 'desktop']) {
-  const context = await browser.newContext(VIEWPORTS[kind]);
-  await context.route('https://plausible.io/**', (route) => route.fulfill({ status: 200, body: '' }));
-  await context.addInitScript(() => { try { localStorage.setItem('site-lang', 'ar'); } catch {} });
+  const context = await siteContext(browser, VIEWPORTS[kind], 'ar');
   const p = await context.newPage();
   for (const page of ['index.html', 'pricing.html', 'about.html', 'services/branding', 'services/integrated']) {
     await p.goto(`${BASE}/${page}`);
@@ -294,8 +299,7 @@ for (const kind of ['mobile', 'desktop']) {
 
 /* ---- 8. Links: clean, root-based, and every one of them lands -------------- */
 {
-  const context = await browser.newContext(VIEWPORTS.desktop);
-  await context.route('https://plausible.io/**', (route) => route.fulfill({ status: 200, body: '' }));
+  const context = await siteContext(browser, VIEWPORTS.desktop);
   const p = await context.newPage();
   const internal = new Map(); // href → first page it was seen on
   const pages = ['/', '/pricing', '/services/branding', '/services/websites', '/services/social', '/services/marketing', '/services/integrated', '/about', '/story', '/privacy', '/terms', '/accessibility', '/go', '/404.html'];
@@ -337,8 +341,7 @@ for (const kind of ['mobile', 'desktop']) {
 
 /* ---- 9. Services: one card each on the home page, one page each ---------- */
 {
-  const context = await browser.newContext(VIEWPORTS.desktop);
-  await context.route('https://plausible.io/**', (route) => route.fulfill({ status: 200, body: '' }));
+  const context = await siteContext(browser, VIEWPORTS.desktop);
   const p = await context.newPage();
   // Every file a page asks for exists — fonts, images and scripts included.
   const missing = new Set();
@@ -500,9 +503,7 @@ for (const kind of ['mobile', 'desktop']) {
   }
   // UX pass: fixes that must stay fixed.
   {
-    const uc = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
-    await uc.route('https://plausible.io/**', (r) => r.fulfill({ status: 200, body: '' }));
-    await uc.addInitScript(() => { try { localStorage.setItem('site-lang', 'ar'); } catch {} });
+    const uc = await siteContext(browser, { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }, 'ar');
     const up = await uc.newPage();
     for (const path of ['/about', '/story', '/services/branding', '/404.html']) {
       await up.goto(`${BASE}${path}`, { waitUntil: 'networkidle' });
@@ -523,12 +524,13 @@ for (const kind of ['mobile', 'desktop']) {
     check(await form.locator('input[name=name]').evaluate((e) => e.validationMessage) === 'هذا الحقل مطلوب.', 'contact form: validation messages in the page language');
     await up.waitForTimeout(500);
     check(await up.$eval('.c-wa-fab', (e) => e.classList.contains('is-aside') && getComputedStyle(e).visibility === 'hidden'), 'floating WhatsApp steps aside over the contact section');
+    const fade = await up.$eval('.c-wa-fab', (e) => getComputedStyle(e).transitionProperty);
+    check(/opacity/.test(fade) && /visibility/.test(fade), 'floating WhatsApp fades as it steps aside (one transition rule)', fade);
     await uc.close();
   }
   // UI pass: one system — gold section labels with their rule, bold headings.
   {
-    const vc = await browser.newContext({ ...VIEWPORTS.desktop });
-    await vc.route('https://plausible.io/**', (r) => r.fulfill({ status: 200, body: '' }));
+    const vc = await siteContext(browser, { ...VIEWPORTS.desktop });
     const vp = await vc.newPage();
     for (const path of ['/', '/pricing', '/story', '/about', '/services/branding', '/privacy']) {
       await vp.goto(`${BASE}${path}`, { waitUntil: 'networkidle' });
@@ -549,8 +551,7 @@ for (const kind of ['mobile', 'desktop']) {
   // Phones: sideways, the first screen holds the main button; the floating
   // WhatsApp button never sits on the hero's own button.
   {
-    const lc = await browser.newContext({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true });
-    await lc.route('https://plausible.io/**', (r) => r.fulfill({ status: 200, body: '' }));
+    const lc = await siteContext(browser, { viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true });
     const lp = await lc.newPage();
     for (const [path, sel] of [['/', '.c-hero__action'], ['/go', '.c-hero__action'], ['/about', '.c-about-hero .c-btn--primary']]) {
       await lp.goto(`${BASE}${path}`, { waitUntil: 'networkidle' }); await lp.waitForTimeout(600);
@@ -558,8 +559,7 @@ for (const kind of ['mobile', 'desktop']) {
       check(bottom <= 390, `landscape phone ${path}: the main button is on the first screen`, String(bottom));
     }
     await lc.close();
-    const sc = await browser.newContext({ viewport: { width: 320, height: 568 }, isMobile: true, hasTouch: true });
-    await sc.route('https://plausible.io/**', (r) => r.fulfill({ status: 200, body: '' }));
+    const sc = await siteContext(browser, { viewport: { width: 320, height: 568 }, isMobile: true, hasTouch: true });
     const sp2 = await sc.newPage();
     await sp2.goto(`${BASE}/`, { waitUntil: 'networkidle' }); await sp2.waitForTimeout(800);
     const clash = await sp2.evaluate(() => {
@@ -570,6 +570,16 @@ for (const kind of ['mobile', 'desktop']) {
     });
     check(!clash, '320px phone: the floating WhatsApp button does not cover the hero button');
     await sc.close();
+  }
+  // The code lead.php and /admin/ share is never served; the admin page links
+  // the same stylesheet as every other page (written in by the build).
+  {
+    const lib = await fetch(`${BASE}/_lib/storage.php`);
+    const deny = readFileSync(path.join(here, '..', 'site', '_lib', '.htaccess'), 'utf8');
+    check(lib.status === 403 && /Require all denied/.test(deny), '_lib/ (shared PHP) is closed to the web', String(lib.status));
+    const css = readdirSync(path.join(here, '..', 'site', 'assets')).find((f) => /^site\.[a-f0-9]+\.css$/.test(f));
+    const adminSrc = readFileSync(path.join(here, '..', 'site', 'admin', 'index.php'), 'utf8');
+    check(adminSrc.includes(`href="/assets/${css}"`), '/admin/ links the current shared stylesheet', css);
   }
   // Every inline script is covered by a hash in the CSP the server sends.
   {
@@ -598,9 +608,7 @@ for (const kind of ['mobile', 'desktop']) {
 /* ---- 10. Quiet luxury: the motion layer ------------------------------------ */
 {
   for (const reduced of [false, true]) {
-    const context = await browser.newContext({ ...VIEWPORTS.desktop, reducedMotion: reduced ? 'reduce' : 'no-preference' });
-    await context.route('https://plausible.io/**', (route) => route.fulfill({ status: 200, body: '' }));
-    await context.addInitScript(() => { try { localStorage.setItem('site-lang', 'ar'); } catch {} });
+    const context = await siteContext(browser, { ...VIEWPORTS.desktop, reducedMotion: reduced ? 'reduce' : 'no-preference' }, 'ar');
     const p = await context.newPage();
     const errors = [];
     p.on('pageerror', (e) => errors.push(e.message));

@@ -8,8 +8,8 @@ This moves each into a single file named by its content hash
 changed file gets a new name, so no visitor ever runs a stale copy.
 
 Then:
-  - go.html links the same stylesheet (between its SHARED-STYLES markers);
-    /admin/ finds it through the homepage;
+  - go.html links the same stylesheet (between its SHARED-STYLES markers),
+    and so does /admin/ (at its SHARED-STYLES comment);
   - the shared stylesheet loses the rules of components no page uses
     (prune_css.py);
   - .htaccess: long caching for the hashed files, and the CSP script hashes
@@ -75,6 +75,12 @@ def build(site: pathlib.Path):
         text = re.sub(r"<style>.*?</style>", lambda m: link, text, count=1, flags=re.S)
         text = re.sub(r'<script type="module">.*?</script>', lambda m: script, text, count=1, flags=re.S)
         page.write_text(text, encoding="utf-8")
+
+    admin = site / "admin" / "index.php"
+    text, n = re.subn(r"  <!-- SHARED-STYLES:[^>]*-->", lambda m: "  " + link, admin.read_text(encoding="utf-8"), count=1)
+    if n != 1:
+        sys.exit("finalize: SHARED-STYLES comment missing in admin/index.php")
+    admin.write_text(text, encoding="utf-8")
 
     go = site / "go.html"
     text = go.read_text(encoding="utf-8")

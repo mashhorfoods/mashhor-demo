@@ -1,0 +1,13 @@
+
+/* Orbit points (see motion.py SPARKS): turn round the drawing's centre, 52 48. */
+.m-spin{display:none}
+@media (min-width:48em){
+.m-spin{display:block;position:absolute;inset:0;pointer-events:none;transform-origin:52% 48%;animation:orbit-travel 26s linear infinite}
+.m-spin--slow{animation-duration:38s;animation-direction:reverse;opacity:0.7}
+.m-spin i{position:absolute;left:calc(var(--x) - var(--d) / 2);top:calc(var(--y) - var(--d) / 2);inline-size:var(--d);aspect-ratio:1;border-radius:50%;background-color:var(--color-accent)}
+/* The rings are mirrored in Arabic (scaleX(-1) about the centre): so are these. */
+[dir="rtl"] .m-spin{transform-origin:48% 48%;animation-direction:reverse}
+[dir="rtl"] .m-spin--slow{animation-direction:normal}
+[dir="rtl"] .m-spin i{left:calc(100% - var(--x) - var(--d) / 2)}
+}
+@media (prefers-reduced-motion:reduce){.m-spin{animation:none}}
