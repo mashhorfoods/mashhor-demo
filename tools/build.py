@@ -102,6 +102,11 @@ import motion  # noqa: E402
 motion.build(SITE)
 print("motion: quiet-luxury layer added")
 
+import seo  # noqa: E402
+
+seo.build(SITE)
+print("seo: titles, previews, structured data, sitemap dates")
+
 import finalize  # noqa: E402
 
 finalize.build(SITE)

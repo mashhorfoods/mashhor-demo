@@ -922,6 +922,46 @@ for (const [w, root] of [[1440, 16], [1920, 18], [2560, 20]]) {
   }
 }
 
+/* ---- Search and link previews ----------------------------------------------- */
+{
+  const ctx = await siteContext(browser, VIEWPORTS.desktop);
+  const p = await ctx.newPage();
+  const indexable = ['/', '/about', '/story', '/work', '/pricing', '/privacy', '/terms', '/accessibility',
+    ...['branding', 'websites', 'social', 'marketing', 'integrated'].map((s) => `/services/${s}`), ...CASES.map((c) => `/work/${c}`)];
+  const bad = [];
+  for (const url of indexable) {
+    await p.goto(`${BASE}${url}`, { waitUntil: 'domcontentloaded' });
+    const r = await p.evaluate(() => {
+      const m = (sel) => document.querySelector(sel)?.getAttribute('content');
+      let ld = [];
+      try { ld = [...document.querySelectorAll('script[type="application/ld+json"]')].map((s) => JSON.parse(s.textContent)); } catch (e) { ld = null; }
+      const shown = [...document.querySelectorAll('.c-tier__amount')].map((e) => e.textContent.replace(/,/g, '').trim());
+      return { title: document.title, desc: m('meta[name="description"]'), og: m('meta[property="og:description"]'), canon: document.querySelector('link[rel="canonical"]')?.href, ld, shown, hreflang: document.querySelectorAll('[hreflang]').length };
+    });
+    const problems = [];
+    if (!r.title || r.title.length > 65) problems.push(`title ${r.title?.length}`);
+    if (!r.desc || r.desc.length < 50 || r.desc.length > 160) problems.push(`description ${r.desc?.length}`);
+    if (url !== '/story' && r.og !== r.desc) problems.push('preview text is not the page\'s');
+    if (!r.canon) problems.push('no canonical');
+    if (r.ld === null) problems.push('structured data does not parse');
+    if (r.hreflang) problems.push('hreflang on a one-address bilingual page');
+    const types = (r.ld || []).map((x) => x['@type']);
+    if (url.startsWith('/services/')) {
+      const svc = (r.ld || []).find((x) => x['@type'] === 'Service');
+      const prices = (svc?.offers || []).map((o) => o.price);
+      if (!svc || JSON.stringify(prices) !== JSON.stringify(r.shown)) problems.push(`service data ${JSON.stringify(prices)} vs shown ${JSON.stringify(r.shown)}`);
+    }
+    if ((url.startsWith('/work/') || url === '/story') && !types.includes('CreativeWork')) problems.push('no CreativeWork');
+    if (url === '/' && !(types.includes('Organization') && types.includes('WebSite'))) problems.push('no Organization/WebSite');
+    if (problems.length) bad.push(`${url}: ${problems.join(', ')}`);
+  }
+  check(bad.length === 0, 'search: every page has its own title, description, preview and valid structured data; prices match the page', bad.join(' | '));
+  const sitemap = await (await p.request.get(`${BASE}/sitemap.xml`)).text();
+  const entries = sitemap.split('<url>').slice(1);
+  check(entries.length === indexable.length && entries.every((e) => /<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/.test(e)), 'sitemap: every indexable page, each with a date', `${entries.length} entries`);
+  await ctx.close();
+}
+
 await browser.close();
 
 // The built site ships only what it uses, and every placeholder is filled.
