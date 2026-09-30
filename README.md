@@ -32,7 +32,7 @@ overlay/     what this project adds: go.html, lead.php, admin/, _lib/ (PHP share
              by lead.php and admin, never served), _leads/, assets/ (go.js,
              motion.js, viewer.js, forms.js, images)
 tools/css/   the project's stylesheets, one per build step (services, story-hero,
-             about, cases, refinements, motion, sparks, viewer), injected in that order
+             about, cases, home-links, refinements, motion, sparks, viewer), injected in that order
 tools/build.py   →   site/
 ```
 
@@ -42,7 +42,7 @@ tools/build.py   →   site/
 | Step | Script | What it does |
 | --- | --- | --- |
 | 1 | `build_services.py`, `streamline.py` | One page per service at `/services/<id>` (details, showcase, what it covers, packages and prices, related add-ons, other services). The homepage gets a single services section of cards; the old accordion, the five detail sections and the add-ons leave it. `/pricing` keeps only pricing matters: what moves a price, an index linking to the service pages, every add-on, the build-your-own estimator and billing. |
-| 1b | `story_hero.py`, `about_page.py`, `cases.py` | The Story page's hero, the About page, and the case studies (`/work`, `/work/<slug>` — see below). |
+| 1b | `story_hero.py`, `about_page.py`, `cases.py`, `home_links.py` | The Story page's hero, the About page, the case studies (`/work`, `/work/<slug>` — see below), and the homepage's two doors to them and to About. |
 | 2 | `refinements.py` | Spacing, pill buttons, WhatsApp button on phones, hero copy, profile, privacy note, root-based clean links, 301s from `.html`. |
 | 3 | `motion.py` | "Quiet luxury" motion layer, stylesheet half: one rhythm (480/900 ms, expo ease-out) with a light blur on the site's own reveal; page-to-page cross-fades with the header held still and each service card growing into its page (`@view-transition`); long text and the campaign page surfacing with the scroll (scroll-driven CSS); hero lines rising; pointer light on cards. Script half: `overlay/assets/motion.js` (line split, magnetic primary buttons, pointer light, self-gliding galleries that stop when touched, counting totals). All off under reduced motion; nothing hidden without it. |
 | 4 | `finalize.py`, `prune_css.py` | One shared, content-hashed `site.<hash>.css` / `.js` / `motion.<hash>.js` for every page (go and admin included), long caching, CSP hashes. The stylesheet loses the rules of components no page uses (listed by exact class name in `prune_css.py`; the build stops if a page uses one again). |
@@ -152,6 +152,21 @@ starting price are read from the built site, so run the build, then
 `node tools/share-cards/render.mjs`, whenever those change (the cards land
 in `overlay/assets/share-*.jpg`).
 
+## Homepage: the services rail and the two doors
+
+The five services sit in one horizontal rail on every screen size: it runs
+to the window's edges, snaps card by card, and has a gold line that fills
+with how much of it has been seen, plus previous/next buttons (a mouse can
+also drag it; fingers and trackpads scroll it natively). About shows the same
+rail. The script half is `overlay/assets/motion.js`, section 6; without it the
+rail still scrolls.
+
+After the portfolio, two doors (`tools/home_links.py`): the case studies,
+previewed as the studies' own covers laid out as prints that fan out under
+the pointer, and About, previewed by the team photograph. Each lists what its
+page covers. Inner pages carry no breadcrumbs: the menu and these doors lead
+to them.
+
 ## Case studies — /work
 
 `tools/cases.py` builds the section; `tools/case_stories.py` holds the five
@@ -228,7 +243,6 @@ Kept by tests in `tests/campaign.mjs` ("UX pass"):
   email addresses are typed left to right in Arabic too.
 - On phones the floating WhatsApp button steps aside over the contact
   section and the footer, where WhatsApp is already on screen.
-- Breadcrumb links have finger-sized targets.
 - Phones held sideways (under 520px tall): the headline sits beside the
   lead and buttons, heroes drop their portrait minimum height, and the
   main button is on the first screen (tested at 844×390).

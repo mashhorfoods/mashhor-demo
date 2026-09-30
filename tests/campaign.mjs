@@ -359,6 +359,32 @@ for (const kind of ['mobile', 'desktop']) {
   check(await p.locator('#branding, #websites, #social, #marketing, #add-ons, .c-tier').count() === 0, 'home: no duplicated service details or packages');
   const covers = await p.$$eval('#services .c-svc-card__media', (els) => els.map((e) => [e.style.viewTransitionName, e.querySelector('img')?.getAttribute('src')]));
   check(covers.length === 5 && covers.every(([n, src]) => src === `/assets/${n}.webp`), 'home: every service card carries its cover, named for the transition', JSON.stringify(covers));
+  // Home: the five services in one sideways rail; its buttons step through it.
+  for (const [kind, lang] of [['desktop', 'ar'], ['mobile', 'en']]) {
+    const rc = await siteContext(browser, VIEWPORTS[kind], lang);
+    const rp = await rc.newPage();
+    await rp.goto(`${BASE}/`, { waitUntil: 'networkidle' });
+    await rp.evaluate(() => document.getElementById('services').scrollIntoView());
+    await rp.waitForTimeout(1500);
+    const rail = await rp.$eval('[data-rail-track]', (t) => ({ cards: t.children.length, flex: getComputedStyle(t).display, overflow: getComputedStyle(t).overflowX,
+      oneRow: new Set([...t.children].map((c) => Math.round(c.getBoundingClientRect().top))).size === 1, scrolls: t.scrollWidth > t.clientWidth,
+      bar: !t.parentElement.querySelector('[data-rail-bar]').hidden, prevOff: t.parentElement.querySelector('[data-rail-prev]').disabled }));
+    check(rail.cards === 5 && rail.flex === 'flex' && rail.overflow === 'auto' && rail.oneRow && rail.scrolls && rail.bar && rail.prevOff,
+      `[${kind}] home: the five services sit in one row that scrolls sideways, with its bar`, JSON.stringify(rail));
+    const before = await rp.$eval('[data-rail-track]', (t) => Math.abs(t.scrollLeft));
+    await rp.click('[data-rail-next]');
+    await rp.waitForTimeout(900);
+    const after = await rp.$eval('[data-rail-track]', (t) => ({ at: Math.abs(t.scrollLeft), seen: parseFloat(t.parentElement.querySelector('.c-rail__progress i').style.getPropertyValue('--seen')) }));
+    check(after.at > before + 100 && after.seen > 0 && after.seen <= 1, `[${kind}] home: "next" moves the rail a card on, and the gold line follows`, JSON.stringify({ before, ...after }));
+    const wide = await rp.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+    check(wide <= 0, `[${kind}] home: the rail does not widen the page`, String(wide));
+    // The doors to the case studies and About.
+    await rp.evaluate(() => document.querySelector('.c-doors').scrollIntoView());
+    await rp.waitForTimeout(1200);
+    const doors = await rp.$$eval('.c-doors .c-door', (ds) => ds.map((d) => [d.getAttribute('href'), [...d.querySelectorAll('img')].every((i) => i.complete && i.naturalWidth > 0)]));
+    check(JSON.stringify(doors.map((d) => d[0])) === '["/work","/about"]' && doors.every((d) => d[1]), `[${kind}] home: doors to the case studies and About, their previews loaded`, JSON.stringify(doors));
+    await rc.close();
+  }
   // Every page's link preview is its own card (or the homepage's), and it is on the site.
   for (const [page, card] of [['/', 'home'], ['/go', 'go'], ['/story', 'story'], ['/about', 'about'], ['/pricing', 'pricing'], ['/work', 'work'], ...CASES.map((c) => [`/work/${c}`, `case-${c}`]), ['/privacy', 'home'], ['/terms', 'home'], ['/accessibility', 'home']]) {
     const html = await (await fetch(`${BASE}${page}`)).text();
@@ -371,16 +397,16 @@ for (const kind of ['mobile', 'desktop']) {
   for (const [sid, tiers] of [['branding', 3], ['websites', 3], ['social', 3], ['marketing', 3], ['integrated', 0]]) {
     await p.goto(`${BASE}/services/${sid}`);
     await p.waitForTimeout(100);
-    check(await p.locator('h1').count() === 1 && await p.locator('.c-crumbs [aria-current]').count() === 1, `/services/${sid}: one heading and a breadcrumb`);
+    check(await p.locator('h1').count() === 1 && await p.locator('.c-crumbs').count() === 0, `/services/${sid}: one heading, no links above it`);
     check(await p.locator('.c-tier').count() === tiers, `/services/${sid}: ${tiers} packages`);
     const hero = await p.$eval('.c-svc-hero', (s) => { const m = s.querySelector('.c-svc-hero__media'); const img = m.querySelector('img'); const r = s.getBoundingClientRect();
-      return { name: m.style.viewTransitionName, src: img.getAttribute('src'), loaded: img.complete && img.naturalWidth > 0, h1: !!s.querySelector('h1'), crumbs: !!s.querySelector('.c-crumbs'), tall: r.height >= innerHeight * 0.6 }; });
+      return { name: m.style.viewTransitionName, src: img.getAttribute('src'), loaded: img.complete && img.naturalWidth > 0, h1: !!s.querySelector('h1'), tall: r.height >= innerHeight * 0.6 }; });
     const og = await p.$eval('meta[property="og:image"]', (m) => m.content);
     const card = await fetch(`${BASE}/assets/share-${sid}.jpg`);
     check(og === `https://zaokalyamamah.online/assets/share-${sid}.jpg` && card.ok && (await card.arrayBuffer()).byteLength > 20000,
       `/services/${sid}: its own link-preview card, present on the site`, og);
-    check(hero.name === `svc-${sid}` && hero.src === `/assets/svc-${sid}.webp` && hero.loaded && hero.h1 && hero.crumbs && hero.tall,
-      `/services/${sid}: a hero with its cover (same transition name as its card), breadcrumb and heading`, JSON.stringify(hero));
+    check(hero.name === `svc-${sid}` && hero.src === `/assets/svc-${sid}.webp` && hero.loaded && hero.h1 && hero.tall,
+      `/services/${sid}: a hero with its cover (same transition name as its card) and heading`, JSON.stringify(hero));
     check(await p.locator('.c-svc-cards .c-svc-card').count() === 4, `/services/${sid}: links to the other four services`);
     const current = await p.$eval('[data-nav-link][aria-current="page"]', (e) => e.getAttribute('href')).catch(() => null);
     check(current === `/services/${sid}` || current === null, `/services/${sid}: menu marks the page`, String(current));
@@ -600,6 +626,7 @@ for (const kind of ['mobile', 'desktop']) {
     check(editorial.length >= 1 && editorial.length < CASES.length && editorial.every((k) => k.split(' ').includes('editorial')), `[${kind}] /work: a discipline shows only its studies`, editorial.join('|'));
     await cp.click('label[for="kind-all"]');
     check(await shown() === CASES.length + 1, `[${kind}] /work: "All work" brings every card back`);
+    check(await cp.locator('.c-crumbs').count() === 0, `[${kind}] /work: no links above its heading`);
     const width = await cp.evaluate(() => document.documentElement.scrollWidth - innerWidth);
     check(width <= 0, `[${kind}] /work: no horizontal scroll`, String(width));
     const menu = await cp.$$eval('[data-nav-link]', (els) => els.map((a) => [a.getAttribute('href'), a.getAttribute('aria-current'), a.textContent.trim()]));
@@ -609,7 +636,7 @@ for (const kind of ['mobile', 'desktop']) {
       await cp.goto(`${BASE}/work/${slug}`, { waitUntil: 'domcontentloaded' });
       const page = await cp.evaluate(() => ({
         h1: document.querySelectorAll('h1').length,
-        crumbs: [...document.querySelectorAll('.c-crumbs a')].map((a) => a.getAttribute('href')).join(),
+        crumbs: document.querySelectorAll('.c-crumbs').length,
         prints: [...document.querySelectorAll('.c-story-hero__card')].map((a) => a.getAttribute('href')),
         chapters: [...document.querySelectorAll('.c-chapter')].map((c) => c.id),
         drawings: document.querySelectorAll('.c-chapter__figure svg.c-sketch title').length,
@@ -618,7 +645,7 @@ for (const kind of ['mobile', 'desktop']) {
         wide: document.documentElement.scrollWidth - innerWidth,
       }));
       const linked = page.prints.every((h) => page.chapters.includes(h.slice(1)));
-      check(page.h1 === 1 && page.crumbs === '/,/work' && page.prints.length === 4 && linked && page.chapters.length === 5 && page.drawings === 5
+      check(page.h1 === 1 && page.crumbs === 0 && page.prints.length === 4 && linked && page.chapters.length === 5 && page.drawings === 5
         && page.frames.length >= 4 && page.frames.every(Boolean) && page.more === 2 && page.wide <= 0,
         `[${kind}] /work/${slug}: told like the story — four prints linked to their chapters, five drawn chapters, the work framed, two more studies`, JSON.stringify(page));
     }

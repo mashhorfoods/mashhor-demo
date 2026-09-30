@@ -303,6 +303,63 @@
       }).observe(el, { childList: true, characterData: true, subtree: true });
     });
 
+    /* 6. Rails: the services, sideways --------------------------------------- */
+    // Buttons step a card at a time, the gold line fills with what has been
+    // seen, and a mouse can drag the rail (a finger or trackpad already can).
+    // Without this script the rail still scrolls; the bar stays hidden.
+    document.querySelectorAll('[data-rail]').forEach((rail) => {
+      const track = rail.querySelector('[data-rail-track]');
+      const bar = rail.querySelector('[data-rail-bar]');
+      const prev = rail.querySelector('[data-rail-prev]');
+      const next = rail.querySelector('[data-rail-next]');
+      const fill = bar.querySelector('.c-rail__progress i');
+      const rtl = () => getComputedStyle(track).direction === 'rtl';
+      const step = () => {
+        const card = track.firstElementChild;
+        return card ? card.getBoundingClientRect().width + (parseFloat(getComputedStyle(track).columnGap) || 0) : track.clientWidth * 0.8;
+      };
+      const update = () => {
+        const max = track.scrollWidth - track.clientWidth;
+        const at = Math.abs(track.scrollLeft);
+        bar.hidden = max < 2;
+        fill.style.setProperty('--seen', max < 2 ? 1 : ((at + track.clientWidth) / track.scrollWidth).toFixed(3));
+        prev.disabled = at < 2;
+        next.disabled = at > max - 2;
+      };
+      const go = (dir) => track.scrollBy({ left: dir * step() * (rtl() ? -1 : 1), behavior: reduce.matches ? 'auto' : 'smooth' });
+      prev.addEventListener('click', () => go(-1));
+      next.addEventListener('click', () => go(1));
+      track.addEventListener('scroll', update, { passive: true });
+      addEventListener('resize', update);
+      new MutationObserver(update).observe(document.documentElement, { attributes: true, attributeFilter: ['dir', 'lang'] });
+      update();
+      if (!fine.matches) return;
+      let x0 = null;
+      let s0 = 0;
+      let dragged = false;
+      track.addEventListener('pointerdown', (e) => {
+        if (e.pointerType !== 'mouse' || e.button !== 0) return;
+        x0 = e.clientX;
+        s0 = track.scrollLeft;
+        dragged = false;
+      });
+      addEventListener('pointermove', (e) => {
+        if (x0 === null) return;
+        const dx = e.clientX - x0;
+        if (!dragged && Math.abs(dx) > 6) { dragged = true; track.classList.add('is-dragging'); }
+        if (dragged) track.scrollLeft = s0 - dx;
+      });
+      addEventListener('pointerup', () => {
+        if (x0 === null) return;
+        x0 = null;
+        // Snapping comes back on, and the rail settles on the nearest card.
+        if (dragged) requestAnimationFrame(() => track.classList.remove('is-dragging'));
+      });
+      // A drag is not a click on the card it ended over.
+      track.addEventListener('click', (e) => { if (dragged) { e.preventDefault(); dragged = false; } }, true);
+      track.addEventListener('dragstart', (e) => e.preventDefault());
+    });
+
     document.documentElement.dataset.motion = 'ready';
   });
 })();

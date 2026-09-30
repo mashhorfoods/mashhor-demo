@@ -130,7 +130,7 @@ for (const slug of CASES) {
     const ar = (sel) => document.querySelector(`${sel} [data-lang-copy="ar"]`).textContent.trim();
     // The study's first print, once it is real work (else its drawn cover).
     const first = document.querySelector('.c-story-hero__card img');
-    return { name: ar('.c-story__eyebrow'), h1: ar('.c-crumbs [aria-current]'), en: document.querySelector('meta[name="description"]').content,
+    return { name: ar('.c-story__eyebrow'), h1: document.querySelector('meta[name="title-ar"]').content.replace(/ — بيكسورا$/, ''), en: document.querySelector('meta[name="description"]').content,
       img: first ? first.getAttribute('src').split('/').pop() : null };
   });
   await page.goto(`file://${path.join(here, 'service.html')}`);

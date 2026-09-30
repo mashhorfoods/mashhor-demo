@@ -15,6 +15,7 @@ Steps, in order:
        story_hero.py              the case study's hero (its four surfaces)
        about_page.py              the About page, about Pixora and its team
        cases.py                   case studies: /work and /work/<slug>
+       home_links.py              the homepage's doors to the case studies and About
     3. refinements.py             spacing, pills, WhatsApp button, hero,
                                   profile, privacy, clean links, UX/UI fixes
     4. motion.py                  the "quiet luxury" motion layer (CSS half)
@@ -88,6 +89,9 @@ print("about: page rewritten around the team")
 import cases  # noqa: E402
 cases.build(SITE)
 print("cases: hub and case study pages built")
+import home_links  # noqa: E402
+home_links.build(SITE)
+print("home: doors to the case studies and About added")
 
 import refinements  # noqa: E402
 

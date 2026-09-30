@@ -237,14 +237,14 @@ def price_line(s):
             f'<span class="c-svc-card__currency" data-i18n="currency">USD</span> {s["billing"]}</span>')
 
 
-def cards(data, skip=None):
+def cards(data, skip=None, rail=False):
     items = []
     for sid in SERVICES:
         if sid == skip:
             continue
         s = data[sid]
         chips = re.findall(r'<li\b[^>]*>(.*?)</li>', s["caps"], re.S)[:4]
-        wide = " c-svc-card--wide" if sid == "integrated" and not skip else ""
+        wide = " c-svc-card--wide" if sid == "integrated" and not skip and not rail else ""
         items.append(f'''            <li class="c-svc-card{wide}">
               <a class="c-svc-card__link" href="/services/{sid}">
                 <span class="c-svc-card__media" style="view-transition-name: svc-{sid}">{cover(sid, lazy=True)}</span>
@@ -259,6 +259,21 @@ def cards(data, skip=None):
               </a>
             </li>''')
     four = " c-svc-cards--four" if skip else ""
+    if rail:
+        # The homepage's five, in one horizontal rail (overlay/assets/motion.js,
+        # section 6, adds the buttons' work and the progress line).
+        prev = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" fill="none" /></svg>'
+        nxt = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" fill="none" /></svg>'
+        return ('''<div class="c-rail" data-rail>
+          <ul class="c-svc-cards c-svc-cards--rail" role="list" tabindex="0" aria-label="Our services — خدماتنا" data-rail-track>
+''' + "\n".join(items) + f'''
+          </ul>
+          <div class="c-rail__bar" data-rail-bar hidden>
+            <span class="c-rail__progress" aria-hidden="true"><i></i></span>
+            <button class="c-slides__btn u-flip-rtl" type="button" data-rail-prev aria-label="Previous — السابق">{prev}</button>
+            <button class="c-slides__btn u-flip-rtl" type="button" data-rail-next aria-label="Next — التالي">{nxt}</button>
+          </div>
+        </div>''')
     return f'<ul class="c-svc-cards{four}" role="list" data-reveal-group>\n' + "\n".join(items) + "\n          </ul>"
 
 
@@ -312,14 +327,6 @@ def service_main(s, data, addon_groups, work):
     # The detail heading becomes the page heading.
     head = re.sub(r'<h2 class="c-detail__headline" id="[^"]*">', '<h1 class="c-detail__headline" id="svc-title">', head, 1)
     head = head.replace("</h2>", "</h1>", 1)
-
-    crumbs = f'''<nav class="c-crumbs" aria-label="Breadcrumb">
-            <ol class="c-crumbs__list" role="list">
-              <li><a href="/">{bi("Home", "الرئيسية")}</a></li>
-              <li><a href="/#services">{bi("Services", "خدماتنا")}</a></li>
-              <li aria-current="page">{s["name"]}</li>
-            </ol>
-          </nav>'''
 
     if s["pricing"]:
         p = s["pricing"]
@@ -390,7 +397,6 @@ def service_main(s, data, addon_groups, work):
       <section class="c-svc-hero" aria-labelledby="svc-title">
         <div class="c-svc-hero__media" style="view-transition-name: svc-{sid}">{cover(sid, lazy=False)}</div>
         <div class="l-container c-svc-hero__inner">
-          {crumbs}
 {head}
         </div>
       </section>
@@ -474,7 +480,7 @@ def build(site: pathlib.Path):
     # 2. Homepage: one services section of cards; the accordion, the detail
     #    sections and the add-ons leave.
     a, b = find(home, r'<div class="c-service-list"', "div")
-    home = home[:a] + cards(data) + home[b:]
+    home = home[:a] + cards(data, rail=True) + home[b:]
     home = home.replace(
         bi("The difference is not what gets made — it is how much of the coordinating you have to do yourself. Five services; open any one to see what it covers.",
            "الفارق ليس فيما يُنجَز — بل في مقدار التنسيق الذي يقع عليك. خمس خدمات؛ افتح أيًا منها لترى ما تشمله."),

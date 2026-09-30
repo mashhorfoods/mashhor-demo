@@ -21,24 +21,34 @@
 .c-svc-card__amount{font-family:var(--font-display);font-size:var(--text-h4);font-weight:var(--weight-bold);color:var(--color-text-primary)}
 .c-svc-card__go{display:inline-flex;align-items:center;gap:var(--space-8);font-weight:var(--weight-semibold);color:var(--color-accent)}
 .c-svc-card__go .c-btn__icon{inline-size:var(--icon-sm);block-size:var(--icon-sm)}
-.c-crumbs{margin-block-end:var(--space-40)}
-.c-crumbs__list{display:flex;flex-wrap:wrap;gap:var(--space-8);margin:0;padding:0;list-style:none;font-size:var(--text-small);color:var(--color-text-muted)}
-.c-crumbs__list li+li::before{content:"/";margin-inline-end:var(--space-8);opacity:0.5}
-.c-crumbs__list a{color:var(--color-text-secondary);text-decoration:none}
-/* A finger-sized target without moving the text. */
-.c-crumbs__list a{display:inline-block;padding-block:12px;margin-block:-12px;padding-inline:4px;margin-inline:-4px}
-.c-crumbs__list a:hover{color:var(--color-accent)}
-.c-crumbs__list [aria-current]{color:var(--color-text-primary)}
 .c-svc-hero{position:relative;isolation:isolate;display:flex;flex-direction:column;min-block-size:clamp(34rem,86svh,58rem);padding-block:calc(var(--header-height) + var(--space-32)) var(--space-64);overflow:hidden}
 .c-svc-hero__media{position:absolute;inset:0;z-index:-1;background-color:var(--_charcoal-900);view-transition-class:svc-cover}
 .c-svc-hero__media img{display:block;inline-size:100%;block-size:100%;object-fit:cover}
 .c-svc-hero__media::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,var(--color-bg) 0%,rgba(32,32,32,0.78) 34%,rgba(32,32,32,0.18) 68%,rgba(20,20,20,0.55) 100%)}
 .c-svc-hero__inner{flex:1;display:flex;flex-direction:column;inline-size:100%}
 .c-svc-hero__inner .c-detail__head{margin-block:auto 0}
-.c-svc-hero .c-crumbs__list a,.c-svc-hero .c-detail__lead{text-shadow:0 1px 18px rgba(0,0,0,0.5)}
+.c-svc-hero .c-detail__lead{text-shadow:0 1px 18px rgba(0,0,0,0.5)}
 @media (max-width:47.99em){.c-svc-hero{min-block-size:clamp(30rem,82svh,44rem)}.c-svc-hero__media::after{background:linear-gradient(to top,var(--color-bg) 0%,rgba(32,32,32,0.86) 46%,rgba(32,32,32,0.4) 76%,rgba(20,20,20,0.6) 100%)}}
 .c-svc__lead-in{padding-block:var(--space-8) var(--space-48)}
 /* Slideshow of real work (SHOWCASE): uniform 4:3 frames, 1.2 / 2 / 3 per view. */
+/* The homepage's (and About's) five services: one horizontal rail on every
+   screen, bleeding to the window's edges (cqw: the rail's own width,
+   which is the page container's), snapping card by card; a gold line
+   shows how much of it has been seen (motion.js, section 6). */
+.c-services,.c-about-services{overflow-x:clip}
+.c-rail{display:grid;gap:var(--space-24);margin-block-start:var(--space-48);container-type:inline-size}
+.c-svc-cards--rail{display:flex;gap:var(--space-16);margin:0 calc(50cqw - 50vw);padding:var(--space-8) calc(50vw - 50cqw) var(--space-16);overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scroll-padding-inline:calc(50vw - 50cqw);scrollbar-width:none;outline-offset:-4px}
+.c-svc-cards--rail::-webkit-scrollbar{display:none}
+.c-svc-cards--rail>.c-svc-card{flex:0 0 clamp(16.5rem,80vw,23rem);scroll-snap-align:start}
+@media (min-width:48em){.c-svc-cards--rail{gap:var(--space-24)}}
+.c-svc-cards--rail.is-dragging{scroll-snap-type:none;cursor:grabbing;user-select:none}
+.c-svc-cards--rail.is-dragging .c-svc-card__link{pointer-events:none}
+.c-rail__bar{display:flex;align-items:center;gap:var(--space-16)}
+.c-rail__bar[hidden]{display:none}
+.c-rail__progress{flex:1;block-size:2px;overflow:hidden;border-radius:2px;background-color:var(--color-border)}
+.c-rail__progress i{display:block;block-size:100%;background-color:var(--color-accent);transform:scaleX(var(--seen,0));transform-origin:left center;transition:transform 240ms var(--ease-out)}
+[dir="rtl"] .c-rail__progress i{transform-origin:right center}
+.c-slides__btn:disabled{opacity:0.35;cursor:default;border-color:var(--color-border);color:var(--color-text-primary)}
 .c-slides{display:grid;gap:var(--space-24);margin-block-end:var(--space-48)}
 .c-slides .c-detail__subhead{margin:0}
 .c-slides__track{display:grid;grid-auto-flow:column;grid-auto-columns:84%;gap:var(--space-16);overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scrollbar-width:none;outline-offset:6px}

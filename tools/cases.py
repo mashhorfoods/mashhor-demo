@@ -155,12 +155,6 @@ def hub_main():
     return f'''<main id="main" class="c-cases-page">
       <section class="l-section c-cases" aria-labelledby="cases-title">
         <div class="l-container">
-          <nav class="c-crumbs" aria-label="Breadcrumb">
-            <ol class="c-crumbs__list" role="list">
-              <li><a href="/">{bi("Home", "الرئيسية")}</a></li>
-              <li aria-current="page">{bi("Case studies", "دراسات الحالة")}</li>
-            </ol>
-          </nav>
           <header class="c-cases__head" data-reveal-group>
             <p class="t-label c-detail__eyebrow">{bi("Case studies", "دراسات الحالة")}</p>
             <h1 class="c-detail__headline" id="cases-title">{bi('Work that had to hold up.<br /><span class="c-detail__accent">Here is how it was made.</span>', 'أعمال صُمّمت لتصمد.<br /><span class="c-detail__accent">وهكذا صُنعت.</span>')}</h1>
@@ -274,13 +268,6 @@ def case_main(c, prev, nxt, site):
     more = "\n".join(card(x) for x in (prev, nxt))
     return f'''<main id="main" class="c-case">
       <div class="c-story">
-      <nav class="c-crumbs c-case__crumbs" aria-label="Breadcrumb">
-        <ol class="c-crumbs__list" role="list">
-          <li><a href="/">{bi("Home", "الرئيسية")}</a></li>
-          <li><a href="/work">{bi("Case studies", "دراسات الحالة")}</a></li>
-          <li aria-current="page">{bi(*c["title"])}</li>
-        </ol>
-      </nav>
       <header class="c-story__head c-story-hero">
         <p class="t-label c-story__eyebrow">{bi(*c["category"])}</p>
         <h1 class="c-story__title">{bi(*story["headline"])}</h1>

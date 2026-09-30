@@ -99,12 +99,6 @@ def main(cards):
             "علامة واحدة مجتمعة على طاولة حجرية داكنة تحت ضوء دافئ واحد: حاسوب عليه موقع داكن، وهاتف عليه منشور، وبطاقات عمل سوداء بحواف ذهبية، وورق مراسلات، وملصق حملة مطبوع. وخطوط ذهبية دقيقة في الحجر ترسم خريطة.",
             "c-about-hero__image", "100vw", eager=True)}</div>
         <div class="l-container c-svc-hero__inner">
-          <nav class="c-crumbs" aria-label="Breadcrumb">
-            <ol class="c-crumbs__list" role="list">
-              <li><a href="/">{t("Home", "الرئيسية")}</a></li>
-              <li aria-current="page">{t("About", "من نحن")}</li>
-            </ol>
-          </nav>
           <div class="c-detail__head" data-reveal-group>
             <div class="c-detail__intro">
               <p class="t-label c-detail__eyebrow">{t("About Pixora", "عن بيكسورا")}</p>
@@ -214,7 +208,7 @@ CSS = stylesheet("about")
 
 def build(site: pathlib.Path):
     home = (site / "index.html").read_text(encoding="utf-8")
-    m = re.search(r'<ul class="c-svc-cards" role="list" data-reveal-group>.*?</ul>\s*(?=</div>|$)', home, re.S)
+    m = re.search(r'<div class="c-rail" data-rail>.*?<div class="c-rail__bar".*?</div>\s*</div>', home, re.S)
     if not m:
         raise SystemExit("about_page: the homepage's service cards were not found")
     cards = m.group(0).strip()

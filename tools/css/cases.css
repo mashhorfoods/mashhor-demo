@@ -1,7 +1,6 @@
 /* CASES — the case studies hub (/work) and pages (/work/<slug>); tools/cases.py */
 /* Hub */
 .c-cases{padding-block-start:calc(var(--header-height) + var(--space-32))}
-.c-cases .c-crumbs{margin-block-end:var(--space-48)}
 .c-cases__head{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--space-16);max-inline-size:52rem;margin-block-end:var(--space-48)}
 .c-cases__head>*{grid-column:auto;grid-row:auto}
 .c-cases__head .c-detail__headline{text-wrap:balance}
@@ -41,7 +40,6 @@
 @starting-style{.c-cases .c-case-card{opacity:0;translate:0 14px}}}
 /* Case page: told like the Al Mada story, with the story's own styles; its
    work sits in the hero as prints and in the chapters as figures. */
-.c-case__crumbs{margin-block-end:var(--space-40)}
 .c-case .c-story-hero__stage{view-transition-class:case-cover}
 .c-case .c-story-hero__stage::before{background:radial-gradient(closest-side,rgba(244,209,63,0.16),rgba(244,209,63,0.05) 55%,transparent)}
 .c-case-print--a{--w:60%;--x:36%;--y:0%;--z:1;--r:3deg}
