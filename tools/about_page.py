@@ -16,6 +16,7 @@ import pathlib
 import re
 from urllib.parse import quote
 
+from build_services import RAIL_BAR
 from common import WA, drop, inject_all, stylesheet
 
 
@@ -158,9 +159,20 @@ def main(cards):
                 "خيط ذهبي مضيء يعبر طاولة داكنة مارًّا بستة أشياء بالترتيب: فنجان قهوة، ودفتر مفتوح، ومخطط وقلم، وكرّاسة عليها رسمة شعار بالرصاص، وحاسوب، وهاتف عليه إشعار — وفي آخرها، تحت أدفأ ضوء، نبتة تنمو.",
                 "c-about-intro__image", "(min-width: 64em) 45vw, 92vw")}</figure>
           </div>
-          <ol class="c-about-stages" role="list" data-reveal-group>
+          <div class="c-about-pin">
+            <div class="c-about-pin__stick">
+              <div class="c-about-pin__label" aria-hidden="true">
+                <p class="t-label c-detail__eyebrow">{t("How a project runs", "مسار المشروع")}</p>
+                <p class="c-about-pin__title">{t("From the first conversation to growth.", "من أول محادثة حتى النمو.")}</p>
+              </div>
+              <div class="c-rail c-rail--stages" data-rail>
+                <ol class="c-about-stages" role="list" data-reveal-group data-rail-track tabindex="0" aria-label="The six stages — المراحل الست">
 {stages}
-          </ol>
+                </ol>
+                {RAIL_BAR}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

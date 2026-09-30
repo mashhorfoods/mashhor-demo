@@ -47,4 +47,43 @@
 .c-about-promise{position:relative;padding:var(--space-24) var(--space-24) var(--space-24) var(--space-64);border:var(--border-hairline);border-radius:var(--radius-lg);color:var(--color-text-secondary);line-height:var(--leading-body)}
 :root[dir="rtl"] .c-about-promise{padding:var(--space-24) var(--space-64) var(--space-24) var(--space-24)}
 .c-about-promise::before{content:"";position:absolute;inset-inline-start:var(--space-24);inset-block-start:calc(var(--space-24) + 0.35em);inline-size:18px;block-size:18px;border-radius:50%;border:1.5px solid var(--color-accent);background:linear-gradient(135deg,transparent 45%,var(--color-accent) 45%,var(--color-accent) 55%,transparent 55%)}
+/* The six stages, sideways.
+   Phones and tablets: a rail of cards, a finger swipes through them, the
+   gold line running along their tops from dot to dot.
+   Computers: the section pins and scrolling down carries the stages across
+   while the line fills (CSS bound to the scroll, no script). Without
+   scroll-driven animations, on short screens or under reduced motion, the
+   six columns stay as they were. */
+.c-about-pin__label{display:none}
+@media (max-width:63.99em){
+.c-rail--stages{margin-block-start:0}
+.c-about-stages{display:flex;gap:var(--space-16);overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scrollbar-width:none;margin-inline:calc(var(--container-gutter) * -1);padding:var(--space-12) var(--container-gutter) var(--space-8);scroll-padding-inline:var(--container-gutter)}
+.c-about-stages::-webkit-scrollbar{display:none}
+.c-about-stages::before{display:none}
+.c-about-stage{flex:0 0 min(78%,20rem);scroll-snap-align:start;align-content:start;padding:var(--space-32) var(--space-24) var(--space-24);border:var(--border-hairline);border-radius:var(--radius-lg);background-color:var(--color-bg-sunken)}
+.c-about-stage::before{inset-block-start:-6px;inset-inline-start:var(--space-24)}
+.c-about-stage::after{content:"";position:absolute;inset-block-start:-1px;inset-inline-start:calc(var(--space-24) + 11px);inline-size:calc(100% - var(--space-24) - 11px + var(--space-16) + 1px);block-size:1px;background-color:rgba(244,209,63,0.5)}
+.c-about-stage:last-child::after{display:none}
+.c-about-stages:focus-visible{outline:2px solid var(--color-accent);outline-offset:-2px}}
+@supports (view-timeline-name:--a){
+@media (min-width:64em) and (min-height:40em) and (prefers-reduced-motion:no-preference){
+.c-about-process .l-container{container-type:inline-size}
+.c-about-pin{--card:clamp(18rem,26cqw,25rem);--gap:var(--space-48);block-size:calc(100svh + 6 * var(--card) + 5 * var(--gap) - 100cqw);view-timeline:--stages block;view-timeline-inset:0}
+.c-about-pin__stick{position:sticky;inset-block-start:0;block-size:100svh;display:grid;align-content:center;gap:var(--space-40);overflow:clip}
+.c-about-pin__label{display:grid;gap:var(--space-16)}
+.c-about-pin__title{font-family:var(--font-display);font-size:var(--text-h2);font-weight:var(--weight-bold);line-height:var(--leading-heading);color:var(--color-text-primary);text-wrap:balance;max-inline-size:22ch}
+.c-rail--stages{margin:0;-webkit-mask-image:linear-gradient(to right,transparent,#000 4%,#000 96%,transparent);mask-image:linear-gradient(to right,transparent,#000 4%,#000 96%,transparent)}
+.c-about-stages{display:flex;gap:var(--gap);inline-size:max-content;padding-block-start:var(--space-32);animation:about-travel linear both;animation-timeline:--stages;animation-range:contain 0% contain 100%}
+:root[dir="rtl"] .c-about-stages{animation-name:about-travel-rtl}
+.c-about-stage{flex:0 0 var(--card);align-content:start;gap:var(--space-12);padding:var(--space-40) var(--space-32) var(--space-32);border:var(--border-hairline);border-radius:var(--radius-lg);background-color:var(--color-bg-sunken)}
+.c-about-stage::before{inset-inline-start:var(--space-32)}
+.c-about-stage__name{font-size:var(--text-h3)}
+.c-about-stage__body{max-inline-size:none;font-size:var(--text-body-lg,1.125rem);line-height:var(--leading-body)}
+.c-about-stage::before{z-index:2}
+.js .c-about-stages::before,.c-about-stages::before{z-index:1;background:var(--color-accent);inset-inline:0;transform:none;transition:none;animation:about-line linear both;animation-timeline:--stages;animation-range:contain 0% contain 100%}
+:root[dir="rtl"] .c-about-stages::before{background:var(--color-accent)}
+}}
+@keyframes about-travel{to{translate:calc(-100% + 100cqw) 0}}
+@keyframes about-travel-rtl{to{translate:calc(100% - 100cqw) 0}}
+@keyframes about-line{from{scale:0.08 1}to{scale:1 1}}
 /* ABOUT:END */
