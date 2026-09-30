@@ -627,6 +627,16 @@ for (const kind of ['mobile', 'desktop']) {
     check(await cp.locator('h1').count() === 1 && await shown() === CASES.length + 1, `[${kind}] /work: every study, and the Al Mada story, as a card`, String(await shown()));
     const hrefs = await cp.$$eval('.c-case-card a', (els) => els.map((a) => a.getAttribute('href')));
     check(hrefs.includes('/story') && CASES.every((c) => hrefs.includes(`/work/${c}`)), `[${kind}] /work: cards link to each study`, hrefs.join());
+    // Each card says what its study holds; each filter says how many studies it shows.
+    const inside = await cp.$$eval('.c-case-card', (els) => els.map((e) => e.querySelectorAll('.c-case-card__piece').length > 0 && !!e.querySelector('.c-case-card__meta')));
+    check(inside.every(Boolean), `[${kind}] /work: every card lists its pieces of work`, JSON.stringify(inside));
+    const counts = await cp.$$eval('.c-cases__chip', (els) => els.map((l) => {
+      const k = l.getAttribute('for').replace('kind-', '');
+      const n = [...document.querySelectorAll('.c-case-card')].filter((c) => k === 'all' || c.dataset.kinds.split(' ').includes(k)).length;
+      return +l.querySelector('.c-cases__count').textContent === n;
+    }));
+    check(counts.every(Boolean), `[${kind}] /work: each filter's count matches its cards`, JSON.stringify(counts));
+    check(!/talk-about-sudan|Talk About Sudan/i.test(await cp.content()), `[${kind}] /work: Talk About Sudan is gone`);
     await cp.click('label[for="kind-editorial"]');
     const editorial = await cp.$$eval('.c-case-card', (els) => els.filter((e) => e.offsetParent).map((e) => e.dataset.kinds));
     check(editorial.length >= 1 && editorial.length < CASES.length && editorial.every((k) => k.split(' ').includes('editorial')), `[${kind}] /work: a discipline shows only its studies`, editorial.join('|'));

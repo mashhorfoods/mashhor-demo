@@ -60,6 +60,7 @@ FEATURED = {
     "title": ("One brand, four surfaces.", "هوية واحدة، أربع واجهات."),
     "summary": ("Identity, website, campaign and company profile — one partner, one standard, from the first sketch to the last poster.",
                 "هوية وموقع وحملة وملف تعريفي — شريك واحد ومعيار واحد، من أول رسمة حتى آخر ملصق."),
+    "pieces": [("Identity", "الهوية"), ("Website", "الموقع"), ("Campaign", "الحملة"), ("Company profile", "الملف التعريفي")],
 }
 
 CASES = [
@@ -83,13 +84,6 @@ CASES = [
         "title": ("Information design &amp; visual storytelling", "تصميم المعلومات والسرد البصري"),
         "summary": ("Infographics, presentations and data stories that turn research into something people understand.",
                     "إنفوجرافيك وعروض وقصص بيانات تحوّل الأبحاث إلى ما يفهمه الناس."),
-    },
-    {
-        "slug": "talk-about-sudan", "kinds": "editorial information",
-        "category": ("Visual Storytelling", "السرد البصري"),
-        "title": ("Talk About Sudan", "Talk About Sudan — تحدّث عن السودان"),
-        "summary": ("A self-initiated editorial series that turns humanitarian reporting on Sudan into clear visual narratives.",
-                    "سلسلة تحريرية بمبادرة ذاتية تحوّل التقارير الإنسانية عن السودان إلى سرديات بصرية واضحة."),
     },
     {
         "slug": "digital-campaigns", "kinds": "digital",
@@ -121,14 +115,30 @@ def cover(slug, lazy=True, sizes="(min-width: 64em) 40rem, 100vw"):
             f'sizes="{sizes}" alt="" width="1600" height="1000" {load} decoding="async" />')
 
 
+def inside(pieces, chapters=None, shown=3):
+    """What a card's study holds: its first pieces by name, then how much more."""
+    chips = "".join(f'<span class="c-case-card__piece">{bi(en, ar)}</span>' for en, ar in pieces[:shown])
+    if len(pieces) > shown:
+        chips += f'<span class="c-case-card__piece c-case-card__piece--more">+{len(pieces) - shown}<span class="u-visually-hidden">{bi(" more", " أخرى")}</span></span>'
+    n = len(pieces)
+    meta = bi(f"{n} pieces of work", f"{n} {'قطع' if n <= 10 else 'قطعة'} من العمل")
+    if chapters:
+        meta += " · " + bi(f"{chapters} chapters", f"{chapters} فصول")
+    return (f'<span class="c-case-card__meta">{meta}</span>'
+            f'<span class="c-case-card__pieces">{chips}</span>')
+
+
 def card(c, wide=False):
     extra = " c-case-card--wide" if wide else ""
+    story = STORIES[c["slug"]]
+    pieces = [label for label, _, _ in story["pieces"].values()]
     return f'''            <li class="c-case-card{extra}" data-kinds="{c["kinds"]}">
               <a class="c-case-card__link" href="/work/{c["slug"]}">
                 <span class="c-case-card__media" style="view-transition-name: case-{c["slug"]}">{cover(c["slug"])}</span>
                 <span class="c-case-card__kind">{bi(*c["category"])}</span>
                 <span class="c-case-card__title">{bi(*c["title"])}</span>
                 <span class="c-case-card__summary">{bi(*c["summary"])}</span>
+                {inside(pieces, len(story["chapters"]))}
                 <span class="c-case-card__go">{bi("Read the case study", "اقرأ دراسة الحالة")}{ARROW}</span>
               </a>
             </li>'''
@@ -142,15 +152,18 @@ def featured():
                 <span class="c-case-card__kind">{bi(*f["category"])}</span>
                 <span class="c-case-card__title">{bi(*f["title"])}</span>
                 <span class="c-case-card__summary">{bi(*f["summary"])}</span>
+                {inside(f["pieces"], shown=4)}
                 <span class="c-case-card__go">{bi("Read the full story", "اقرأ القصة كاملة")}{ARROW}</span>
               </a>
             </li>'''
 
 
 def hub_main():
+    every = [FEATURED] + CASES
+    count = {k: sum(k == "all" or k in c["kinds"].split() for c in every) for k, _, _ in [("all", "", "")] + KINDS}
     chips = "\n".join(
         f'''            <input class="c-cases__radio" type="radio" name="case-kind" id="kind-{k}" value="{k}"{" checked" if k == "all" else ""} />
-            <label class="c-cases__chip" for="kind-{k}">{bi(en, ar)}</label>''' for k, en, ar in [("all", "All work", "كل الأعمال")] + KINDS)
+            <label class="c-cases__chip" for="kind-{k}">{bi(en, ar)}<span class="c-cases__count" aria-hidden="true">{count[k]}</span></label>''' for k, en, ar in [("all", "All work", "كل الأعمال")] + KINDS)
     cards = "\n".join([featured()] + [card(c) for c in CASES])
     return f'''<main id="main" class="c-cases-page">
       <section class="l-section c-cases" aria-labelledby="cases-title">

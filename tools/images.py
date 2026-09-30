@@ -26,7 +26,7 @@ build itself never encodes anything (the results are committed).
           it is real, it is the study's cover).
 
   work    <folder>/<slug>-<piece>.png|.jpg|.webp, named after a study and one of
-          its pieces in tools/case_stories.py (e.g. talk-about-sudan-map.png)
+          its pieces in tools/case_stories.py (e.g. information-design-infographic.png)
           → case-<slug>-<piece>.webp (1600 wide) and -800.webp, cropped to
           the piece's proportions. Rebuild, and the image replaces the
           placeholder wherever the piece appears.

@@ -170,15 +170,17 @@ to them.
 
 ## Case studies — /work
 
-`tools/cases.py` builds the section; `tools/case_stories.py` holds the five
-studies (identity systems, editorial, information design, Talk About Sudan,
-digital campaigns), each in English and Arabic, in the team's voice, with no
+`tools/cases.py` builds the section; `tools/case_stories.py` holds the four
+studies (identity systems, editorial, information design, digital
+campaigns), each in English and Arabic, in the team's voice, with no
 number or result the work cannot show.
 
 - `/work` — the hub: the Al Mada story as the featured card, then one card
   per study, filtered by discipline (identity, editorial, information,
   digital) without reloading — plain radio buttons and CSS, so it works
-  without JavaScript too. The menu's "Case studies" and the homepage's
+  without JavaScript too. Each filter shows how many studies it holds (a
+  single sideways row on phones), and each card lists what its study holds:
+  how many pieces and chapters, and the first pieces by name. The menu's "Case studies" and the homepage's
   "All case studies" link lead here.
 - `/work/<slug>` — each study told the way the Al Mada story is: its headline
   beside four pieces of its work laid out like prints (each a link down to
@@ -192,7 +194,7 @@ number or result the work cannot show.
 sheet, report cover, map, stories…) with their proportions. Until a piece's
 image exists it shows as a framed placeholder in those proportions, so the
 page does not move when the work arrives. To add the real work, name each
-image `<slug>-<piece>` (for example `talk-about-sudan-map.png`,
+image `<slug>-<piece>` (for example `information-design-infographic.png`,
 `brand-identity-systems-packaging.jpg` — the slugs and piece names are in
 `tools/case_stories.py`), put them in one folder, and run
 

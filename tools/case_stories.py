@@ -177,19 +177,8 @@ def _path(s):
     s.box(260, 200, 90, 50, 2)
 
 
-def _person(s):
-    s.box(80, 30, 240, 240, 0)
-    s.circle(200, 118, 36)
-    s.ink("M132 250 C140 190 260 190 268 250")
-    s.ink("M110 60 C150 44 250 44 290 60", accent=True, width=2)
 
 
-def _series(s):
-    for i, h in enumerate((70, 84, 98, 112)):
-        s.box(34 + i * 72, 220 - h, 58, h, 0)
-    s.box(322, 220 - 126, 58, 126, 0, draft=True)
-    s.line(34, 240, 380, 240, width=1.2)
-    s.dot(270, 240)
 
 
 def _target(s):
@@ -224,8 +213,6 @@ SKETCHES = {  # kind: (draw, EN, AR)
     "chart": (_chart, "A simple bar chart with one bar and one point marked.", "رسم أعمدة بسيط، عُلِّم فيه عمود واحد ونقطة واحدة."),
     "table": (_table, "A dense table with one figure circled.", "جدول مزدحم، ورقم واحد فيه محاط بدائرة."),
     "path": (_path, "A tangled line straightening into a clear path.", "خط متشابك يستقيم ليصبح مسارًا واضحًا."),
-    "person": (_person, "A person drawn at the centre of the frame, not at its edge.", "إنسان مرسوم في وسط الإطار، لا على حافته."),
-    "series": (_series, "A row of pieces, with space left for the next.", "صف من القطع، ومساحة متروكة للقطعة التالية."),
     "target": (_target, "One target, one arrow.", "هدف واحد، وسهم واحد."),
     "motion": (_motion, "A frame with a play mark and lines of movement.", "إطار فيه علامة تشغيل وخطوط حركة."),
 }
@@ -395,57 +382,6 @@ STORIES = {
         ],
         "close": (("If your research has to reach people who will never open the full report, that is where we start.",
                    "إذا كان بحثك يجب أن يصل إلى من لن يفتح التقرير الكامل أبدًا، فمن هناك نبدأ."),
-                  "/#contact", ("Talk to the team", "تحدّث مع الفريق")),
-    },
-    "talk-about-sudan": {
-        "behance": "https://www.behance.net/moodboard/224952325/Talk-about-Sudan",
-        "pieces": {
-            "map": (("Map", "الخريطة"), (3, 2), "pin"),
-            "series": (("The series", "السلسلة"), (16, 9), "grid"),
-            "piece": (("Editorial piece", "قطعة تحريرية"), (4, 5), "phone"),
-            "motion": (("Motion concept", "مفهوم الحركة"), (16, 9), "play"),
-        },
-        "hero": ["map", "series", "piece", "motion"],
-        "headline": ("The evidence exists. Few people can read it.", "الأدلة موجودة، لكن قلّة يستطيعون قراءتها."),
-        "standfirst": ("Talk About Sudan is a self-initiated editorial series: verified information from trusted humanitarian sources, turned into visual stories that show the scale, the context and the human impact of the crisis — with clarity, accuracy and dignity.",
-                       "Talk About Sudan سلسلة تحريرية بمبادرة ذاتية: معلومات موثّقة من مصادر إنسانية موثوقة، تتحوّل إلى قصص بصرية تُظهر حجم الأزمة وسياقها وأثرها الإنساني — بوضوح ودقة وكرامة."),
-        "chapters": [
-            {"key": "why", "note": ("why", "لماذا"), "sketch": "pages",
-             "title": ("Numbers repeated until they stop meaning anything.", "أرقام تتكرر حتى تفقد معناها."),
-             "lead": ("Humanitarian reports on Sudan hold critical evidence on food security, displacement, health and education — written for specialists. The public meets the same statistics again and again, without the context that would make them mean something.",
-                      "تحمل التقارير الإنسانية عن السودان أدلة حاسمة عن الأمن الغذائي والنزوح والصحة والتعليم — مكتوبة للمتخصصين. ويلتقي الجمهور بالإحصاءات نفسها مرة بعد مرة، دون السياق الذي يجعل لها معنى."),
-             "aside": ("Nobody commissioned this series, which is exactly why its standards are ours to keep.",
-                       "لم يطلب أحد هذه السلسلة، ولهذا بالتحديد فمعاييرها مسؤوليتنا وحدنا."),
-             "work": []},
-            {"key": "sources", "note": ("the sources", "المصادر"), "sketch": "search",
-             "title": ("Primary sources only. No assumptions.", "المصادر الأولية فقط، بلا افتراضات."),
-             "lead": ("Each piece starts in the primary sources — trusted humanitarian organisations and their published assessments. Every figure is verified before any design begins; what cannot be verified is not published.",
-                      "تبدأ كل قطعة من المصادر الأولية — المنظمات الإنسانية الموثوقة وتقييماتها المنشورة. ويُتحقق من كل رقم قبل أن يبدأ أي تصميم؛ وما لا يمكن التحقق منه لا يُنشر."),
-             "aside": ("Evidence before aesthetics — in that order, every time.", "الدليل قبل الجماليات — بهذا الترتيب، في كل مرة."),
-             "work": ["piece"]},
-            {"key": "story", "note": ("the story", "القصة"), "sketch": "path",
-             "title": ("Scale, context, and the people inside the numbers.", "الحجم، والسياق، والناس داخل الأرقام."),
-             "lead": ("Every piece answers three questions in order: what is happening, why, and who it affects. Maps place the crisis, charts give it scale, and the editorial structure keeps the two in the service of the story rather than the other way round.",
-                      "تجيب كل قطعة عن ثلاثة أسئلة بترتيبها: ماذا يحدث، ولماذا، ومن يتأثر به. الخرائط تحدد مكان الأزمة، والرسوم تعطيها حجمها، والبنية التحريرية تُبقي الاثنين في خدمة القصة لا العكس."),
-             "aside": ("Every visual carries evidence; none is there only to move the reader.", "كل عنصر بصري يحمل دليلًا؛ ولا شيء فيها لمجرد التأثير في القارئ."),
-             "work": ["map"]},
-            {"key": "dignity", "note": ("dignity", "الكرامة"), "sketch": "person",
-             "title": ("Showing a crisis without taking anyone's dignity.", "أن تُظهر الأزمة دون أن تنتقص من كرامة أحد."),
-             "lead": ("No sensational images, and people shown as people, not as statistics. The typography stays calm, the colour restrained, and the motion concepts exist to help a reader understand — never to shock them into sharing.",
-                      "لا صور صادمة، والناس يظهرون بشرًا لا أرقامًا. الخطوط هادئة، والألوان متحفّظة، ومفاهيم الحركة موجودة لتعين القارئ على الفهم — لا لتصدمه كي يشارك."),
-             "aside": ("Ethical representation of affected communities is a design decision, made on every page.",
-                       "التمثيل الأخلاقي للمجتمعات المتأثرة قرار تصميمي، يُتخذ في كل صفحة."),
-             "work": ["motion"]},
-            {"key": "series", "note": ("what it became", "ما أصبح عليه"), "sketch": "series",
-             "title": ("A series that grows one verified piece at a time.", "سلسلة تكبر، قطعةً موثّقة بعد أخرى."),
-             "lead": ("Food security, education, health, displacement, inflation and humanitarian access — each a structured visual story for digital audiences. And a method that can be repeated: sources, structure, dignity.",
-                      "الأمن الغذائي والتعليم والصحة والنزوح والتضخم والوصول الإنساني — كلٌّ منها قصة بصرية منظمة لجمهور رقمي. ومنهجية يمكن تكرارها: المصادر، والبنية، والكرامة."),
-             "aside": ("We do not publish results we cannot prove. These chapters stop at what was made.",
-                       "لا ننشر نتائج لا نستطيع إثباتها. تقف هذه الفصول عند ما صُنع."),
-             "work": ["series"]},
-        ],
-        "close": (("Talk About Sudan continues. The same method is what we bring to any organisation that has something serious to explain.",
-                   "Talk About Sudan مستمرة. والمنهجية نفسها هي ما نقدمه لأي مؤسسة لديها أمر جاد تريد شرحه."),
                   "/#contact", ("Talk to the team", "تحدّث مع الفريق")),
     },
     "digital-campaigns": {
