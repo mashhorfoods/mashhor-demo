@@ -8,12 +8,16 @@ focus; About's is the team photograph, which comes closer. Each card also
 holds a line of what the page covers, shown on arrival under the pointer (and
 always on touch screens, which have no hover). The whole card is the link.
 
+It also turns the Recent work tiles into a sideways rail on phones.
+
 Runs after cases.py (the covers are the studies' current ones); the CSS
 (tools/css/home-links.css) goes on every page, like every step's.
 """
 import pathlib
 
-from build_services import ARROW, bi
+import re
+
+from build_services import ARROW, RAIL_BAR, bi
 from cases import CASES, cover_name
 from common import inject_all, stylesheet
 
@@ -77,7 +81,16 @@ def build(site: pathlib.Path):
     text = home.read_text(encoding="utf-8")
     if ANCHOR not in text:
         raise SystemExit("home_links: the homepage's challenge section was not found")
-    home.write_text(text.replace(ANCHOR, section() + ANCHOR, 1), encoding="utf-8")
+    text = text.replace(ANCHOR, section() + ANCHOR, 1)
+    # Recent work (Al Mada's four tiles): on phones a sideways rail, like the
+    # services; wider screens keep the grid (and the rail's bar stays hidden).
+    text, n = re.subn(r'<ul class="c-bento" role="list" data-reveal-group>(.*?)</ul>',
+                      lambda m: ('<div class="c-rail c-rail--proof" data-rail>\n          <ul class="c-bento c-bento--rail" role="list" tabindex="0" '
+                                 'aria-label="Recent work — عمل حديث" data-rail-track>' + m.group(1) + '</ul>\n          ' + RAIL_BAR + '\n        </div>'),
+                      text, count=1, flags=re.S)
+    if n != 1:
+        raise SystemExit("home_links: the homepage's recent-work tiles were not found")
+    home.write_text(text, encoding="utf-8")
     inject_all(site, CSS)
 
 

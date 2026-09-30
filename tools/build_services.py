@@ -237,6 +237,16 @@ def price_line(s):
             f'<span class="c-svc-card__currency" data-i18n="currency">USD</span> {s["billing"]}</span>')
 
 
+# A rail's controls (overlay/assets/motion.js, section 6 does their work): the
+# gold line of how much has been seen, and a card back or on. Hidden until the
+# script runs, and whenever everything already fits.
+RAIL_BAR = '''<div class="c-rail__bar" data-rail-bar hidden>
+            <span class="c-rail__progress" aria-hidden="true"><i></i></span>
+            <button class="c-slides__btn u-flip-rtl" type="button" data-rail-prev aria-label="Previous — السابق"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" fill="none" /></svg></button>
+            <button class="c-slides__btn u-flip-rtl" type="button" data-rail-next aria-label="Next — التالي"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" fill="none" /></svg></button>
+          </div>'''
+
+
 def cards(data, skip=None, rail=False):
     items = []
     for sid in SERVICES:
@@ -260,19 +270,12 @@ def cards(data, skip=None, rail=False):
             </li>''')
     four = " c-svc-cards--four" if skip else ""
     if rail:
-        # The homepage's five, in one horizontal rail (overlay/assets/motion.js,
-        # section 6, adds the buttons' work and the progress line).
-        prev = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" fill="none" /></svg>'
-        nxt = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" fill="none" /></svg>'
+        # The homepage's five, in one horizontal rail.
         return ('''<div class="c-rail" data-rail>
           <ul class="c-svc-cards c-svc-cards--rail" role="list" tabindex="0" aria-label="Our services — خدماتنا" data-rail-track>
 ''' + "\n".join(items) + f'''
           </ul>
-          <div class="c-rail__bar" data-rail-bar hidden>
-            <span class="c-rail__progress" aria-hidden="true"><i></i></span>
-            <button class="c-slides__btn u-flip-rtl" type="button" data-rail-prev aria-label="Previous — السابق">{prev}</button>
-            <button class="c-slides__btn u-flip-rtl" type="button" data-rail-next aria-label="Next — التالي">{nxt}</button>
-          </div>
+          {RAIL_BAR}
         </div>''')
     return f'<ul class="c-svc-cards{four}" role="list" data-reveal-group>\n' + "\n".join(items) + "\n          </ul>"
 

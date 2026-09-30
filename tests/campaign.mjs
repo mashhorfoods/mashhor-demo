@@ -378,6 +378,12 @@ for (const kind of ['mobile', 'desktop']) {
     check(after.at > before + 100 && after.seen > 0 && after.seen <= 1, `[${kind}] home: "next" moves the rail a card on, and the gold line follows`, JSON.stringify({ before, ...after }));
     const wide = await rp.evaluate(() => document.documentElement.scrollWidth - innerWidth);
     check(wide <= 0, `[${kind}] home: the rail does not widen the page`, String(wide));
+    // Recent work: a sideways rail on phones, the grid elsewhere.
+    const proof = await rp.$eval('.c-rail--proof [data-rail-track]', (t) => ({ scrolls: t.scrollWidth > t.clientWidth,
+      oneRow: new Set([...t.children].map((c) => Math.round(c.getBoundingClientRect().top))).size === 1,
+      bar: !t.parentElement.querySelector('[data-rail-bar]').hidden }));
+    check(kind === 'mobile' ? proof.scrolls && proof.oneRow && proof.bar : !proof.scrolls && !proof.bar,
+      `[${kind}] home: recent work ${kind === 'mobile' ? 'runs sideways on a phone' : 'keeps its grid'}`, JSON.stringify(proof));
     // The doors to the case studies and About.
     await rp.evaluate(() => document.querySelector('.c-doors').scrollIntoView());
     await rp.waitForTimeout(1200);

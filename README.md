@@ -159,7 +159,8 @@ to the window's edges, snaps card by card, and has a gold line that fills
 with how much of it has been seen, plus previous/next buttons (a mouse can
 also drag it; fingers and trackpads scroll it natively). About shows the same
 rail. The script half is `overlay/assets/motion.js`, section 6; without it the
-rail still scrolls.
+rail still scrolls. On phones, Recent work (Al Mada's four tiles) runs
+sideways in the same kind of rail; wider screens keep its grid.
 
 After the portfolio, two doors (`tools/home_links.py`): the case studies,
 previewed as the studies' own covers laid out as prints that fan out under
