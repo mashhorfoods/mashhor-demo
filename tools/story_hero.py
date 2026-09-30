@@ -37,7 +37,7 @@ def cards():
         out.append(
             f'<a class="c-story-hero__card c-story-hero__card--{name}" href="#{chapter}" style="--i:{i}">'
             f'<img src="/assets/al-mada-{name}-tile.webp" srcset="{srcset}" '
-            f'sizes="(min-width: 64em) 36vw, 70vw" width="{w}" height="{h}" alt="" decoding="async" />'
+            f'sizes="(min-width: 64em) 36vw, 40vw" width="{w}" height="{h}" alt="" decoding="async" />'
             f'<span class="c-story-hero__label"><span data-lang-copy="en">{en}</span>'
             f'<span data-lang-copy="ar" lang="ar">{ar}</span></span></a>')
     return ("\n        <div class=\"c-story-hero__stage\">\n          "

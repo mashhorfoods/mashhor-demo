@@ -185,6 +185,23 @@ def read_work(home):
     return work
 
 
+def webp_size(name):
+    """Pixel size of a shipped WebP (the supplied site's or the project's)."""
+    for d in ("source/assets", "overlay/assets"):
+        f = pathlib.Path(__file__).resolve().parent.parent / d / name
+        if f.exists():
+            b = f.read_bytes()[:30]
+            kind = b[12:16]
+            if kind == b"VP8X":
+                return 1 + int.from_bytes(b[24:27], "little"), 1 + int.from_bytes(b[27:30], "little")
+            if kind == b"VP8 ":
+                return int.from_bytes(b[26:28], "little") & 0x3FFF, int.from_bytes(b[28:30], "little") & 0x3FFF
+            if kind == b"VP8L":
+                v = int.from_bytes(b[21:25], "little")
+                return (v & 0x3FFF) + 1, ((v >> 14) & 0x3FFF) + 1
+    raise SystemExit(f"build_services: {name}: no such WebP to size")
+
+
 def slideshow(images, work):
     """A slideshow of real work: uniform 4:3 frames, three / two / one-and-a-bit
     per view, advancing on its own (overlay/assets/motion.js, section 0)."""
@@ -196,7 +213,7 @@ def slideshow(images, work):
         srcset = f' srcset="/assets/{small[0]} {small[1]}w, /assets/{name} {small[2]}w"' if small else ""
         slides.append(f'''            <div class="c-slides__slide" role="group" aria-roledescription="slide" aria-label="{i} / {n}"><figure class="c-slides__figure">
               <span class="c-slides__frame{' c-slides__frame--top' if name in TOP else ''}"><img src="/assets/{name}"{srcset} sizes="(min-width: 64em) 26rem, (min-width: 48em) 46vw, 84vw"
-                alt="{w["alt"][0]}" data-alt-en="{w["alt"][0]}" data-alt-ar="{w["alt"][1]}" loading="lazy" decoding="async" /></span>
+                width="{webp_size(name)[0]}" height="{webp_size(name)[1]}" alt="{w["alt"][0]}" data-alt-en="{w["alt"][0]}" data-alt-ar="{w["alt"][1]}" loading="lazy" decoding="async" /></span>
               <figcaption class="c-slides__caption">{bi(*w["caption"])}</figcaption>
             </figure></div>''')
     prev = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" fill="none" /></svg>'

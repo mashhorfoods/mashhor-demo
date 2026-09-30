@@ -51,6 +51,14 @@ def build(site: pathlib.Path):
     css = prune_css.prune(css)
     print(f"finalize: unused component styles pruned, {(before_css - len(css)) // 1024} KB")
 
+    # Comments and indentation go: the stylesheet holds up the first paint,
+    # so every byte of it counts. Only whitespace at line ends and comments
+    # outside strings are removed; no rule changes.
+    before_min = len(css)
+    css = re.sub(r"/\*(?:(?!\*/).)*\*/", "", css, flags=re.S)
+    css = re.sub(r"[ \t]*\n[ \t]*", "\n", css)
+    css = re.sub(r"\n+", "\n", css)
+    print(f"finalize: comments and indentation removed, {(before_min - len(css)) // 1024} KB")
     css_name, js_name = f"site.{digest(css)}.css", f"site.{digest(js)}.js"
     (site / "assets" / css_name).write_text(css.strip() + "\n", encoding="utf-8")
     (site / "assets" / js_name).write_text(js.strip() + "\n", encoding="utf-8")

@@ -163,7 +163,7 @@ def featured():
     f = FEATURED
     return f'''            <li class="c-case-card c-case-card--wide c-case-card--featured" data-kinds="{f["kinds"]}">
               <a class="c-case-card__link" href="{f["href"]}">
-                <span class="c-case-card__media"><img src="/assets/{f["img"]}" srcset="/assets/{f["img"]} {f["w"]}w, /assets/{f["full"]} {f["full_w"]}w" sizes="(min-width: 64em) 45vw, 100vw" alt="" width="{f["w"]}" height="{f["h"]}" loading="lazy" decoding="async" /></span>
+                <span class="c-case-card__media"><img src="/assets/{f["img"]}" srcset="/assets/{f["img"]} {f["w"]}w, /assets/{f["full"]} {f["full_w"]}w" sizes="(min-width: 64em) 45vw, 100vw" alt="" width="{f["w"]}" height="{f["h"]}" fetchpriority="high" decoding="async" /></span>
                 <span class="c-case-card__kind">{bi(*f["category"])}</span>
                 <span class="c-case-card__title">{bi(*f["title"])}</span>
                 <span class="c-case-card__summary">{bi(*f["summary"])}</span>
