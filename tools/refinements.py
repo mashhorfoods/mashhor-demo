@@ -157,6 +157,24 @@ LANG_FIRST = ("<script>(function(){var d=document.documentElement,l;"
               "if(l==='ar'){d.lang='ar';d.dir='rtl'}})();</script>")
 
 
+FORM_NOTE = [
+    ("formNote: 'Opens your email app with the message ready to send.',",
+     "formNote: 'Sent straight to the Pixora team. We reply within two working hours.',"),
+    ("formNote: 'يفتح تطبيق البريد لديك والرسالة جاهزة للإرسال.',",
+     "formNote: 'تصل مباشرة إلى فريق بيكسورا، ونردّ خلال ساعتين في أوقات العمل.',"),
+]
+CONTACT_EMAIL_END = """<input class="c-field__control" id="contact-email" name="email" type="email"
+                  autocomplete="email" required />
+              </p>"""
+CONTACT_EXTRA = """
+              <p class="c-field">
+                <label class="c-field__label" for="contact-whatsapp"><span data-lang-copy="en">WhatsApp number <span class="c-field__optional">(optional — we usually reply there)</span></span><span data-lang-copy="ar" lang="ar">رقم واتساب <span class="c-field__optional">(اختياري — غالبًا نردّ عليه)</span></span></label>
+                <input class="c-field__control" id="contact-whatsapp" enterkeyhint="next" name="whatsapp" type="tel" inputmode="tel"
+                  autocomplete="tel" dir="ltr" placeholder="+971 50 123 4567" />
+              </p>
+              <p class="u-visually-hidden" aria-hidden="true"><label>Company <input name="company" type="text" tabindex="-1" autocomplete="off" /></label></p>"""
+
+
 def build(site: pathlib.Path):
     for path in pages(site):
         name = str(path.relative_to(site))
@@ -179,6 +197,19 @@ def build(site: pathlib.Path):
         if close < 0:
             sys.exit(f"{name}: no footer for the WhatsApp button")
         text = text[:close] + "  " + FAB + "\n    " + text[close:]
+        # On a service page or a study, the floating button says what the
+        # visitor is looking at: it takes the message of the page's own
+        # WhatsApp button for its service or study.
+        topic = re.search(r'<a class="c-btn c-btn--(?:primary|secondary)" href="[^"]*wa\.me[^"]*" data-wa data-about="([a-z-]+)" '
+                          r'data-wa-en="([^"]*)" data-wa-ar="([^"]*)"', text)
+        if topic and topic.group(1) in ("branding", "websites", "social", "marketing", "integrated", "case-study"):
+            about, en, ar = topic.groups()
+            a, b = text.index(FAB_START), text.index(FAB_END)
+            fab = text[a:b].replace(f'href="{WA_EN}" data-wa data-about="general"', f'href="{en}" data-wa data-about="{about}"', 1)
+            fab = fab.replace(f'data-wa-en="{WA_EN}" data-wa-ar="{WA_AR}"', f'data-wa-en="{en}" data-wa-ar="{ar}"', 1)
+            if fab == text[a:b]:
+                sys.exit(f"{name}: floating WhatsApp button not as expected")
+            text = text[:a] + fab + text[b:]
 
         text = replace_all(text, TEXT[1:3], name, required=False)
         text = replace_all(text, TEXT[:1], name, required=True)
@@ -198,8 +229,13 @@ def build(site: pathlib.Path):
                                    "{ rootMargin: '0px 0px -8% 0px', threshold: 0 }")], name, required=True)
         text = replace_all(text, TEAM[:1], name, required=True)
         text = replace_all(text, TEAM[1:], name, required=False)
+        # The contact form now sends to lead.php (forms.js); its note says so.
+        text = replace_all(text, FORM_NOTE, name, required=True)
         if name == "index.html":
             text = replace_all(text, TEAM_HOME, name, required=True)
+            # The contact form: an optional WhatsApp number (most replies go
+            # there), and the hidden field only bots fill (lead.php drops them).
+            text = replace_all(text, [(CONTACT_EMAIL_END, CONTACT_EMAIL_END + CONTACT_EXTRA)], name, required=True)
             # Phones: the keyboard's action key moves on to the next field.
             for field, extra in (("contact-name", 'enterkeyhint="next"'), ("contact-email", 'enterkeyhint="next" spellcheck="false"')):
                 text, n = re.subn(f'id="{field}"', f'id="{field}" {extra}', text, count=1)

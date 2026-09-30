@@ -136,7 +136,10 @@ function readLeads(?string $dir): array
         // lead.php prefixes formula-like cells with ' for spreadsheets; undo it.
         $row = array_map(static fn ($v) => preg_match("/^'[=+\\-@]/", (string) $v) ? substr((string) $v, 1) : (string) $v, $row);
         $lead = array_combine($header, $row);
-        $lead['id'] = substr(sha1($lead['received_at'] . '|' . $lead['whatsapp']), 0, 12);
+        // Campaign leads keep their id (received_at|whatsapp); a site message
+        // without a number is told apart by its email.
+        $lead['id'] = substr(sha1($lead['received_at'] . '|' . ($lead['whatsapp'] !== '' ? $lead['whatsapp'] : $lead['location'])), 0, 12);
+        $lead['email'] = strpos($lead['location'], '@') !== false ? $lead['location'] : '';
         $leads[] = $lead;
     }
     fclose($handle);
@@ -456,7 +459,7 @@ $csrf = e($_SESSION['csrf']);
       </form>
 
       <?php if (!$visible): ?>
-        <p class="a-empty"><?= $leads ? 'لا توجد طلبات تطابق هذا البحث.' : 'لا توجد طلبات بعد. أول طلب يُرسَل من صفحة الحملة سيظهر هنا.' ?></p>
+        <p class="a-empty"><?= $leads ? 'لا توجد طلبات تطابق هذا البحث.' : 'لا توجد طلبات بعد. أول طلب يُرسَل من صفحة الحملة أو نموذج الموقع سيظهر هنا.' ?></p>
       <?php else: ?>
       <p class="a-muted" style="margin-block-end: var(--space-16)">يُعرض <?= count($visible) ?> من <?= count($leads) ?></p>
       <ol class="a-list">
@@ -468,8 +471,9 @@ $csrf = e($_SESSION['csrf']);
               <span class="a-lead__time"><?= e(when($lead['received_at'])) ?></span>
             </div>
             <div class="a-lead__meta">
-              <span>واتساب: <bdi dir="ltr"><?= e($lead['whatsapp']) ?></bdi></span>
-              <span>الدولة / المدينة: <bdi><?= e($lead['location']) ?></bdi></span>
+              <?php if ($lead['whatsapp'] !== ''): ?><span>واتساب: <bdi dir="ltr"><?= e($lead['whatsapp']) ?></bdi></span><?php endif; ?>
+              <?php if ($lead['email'] !== ''): ?><span>البريد: <bdi dir="ltr"><?= e($lead['email']) ?></bdi></span><span class="a-tag">من نموذج الموقع</span>
+              <?php else: ?><span>الدولة / المدينة: <bdi><?= e($lead['location']) ?></bdi></span><?php endif; ?>
               <span>الخدمة: <bdi><?= e(SERVICES[$lead['service']] ?? $lead['service']) ?></bdi></span>
             </div>
             <?php if ($lead['note'] !== ''): ?><p class="a-lead__quote"><?= e($lead['note']) ?></p><?php endif; ?>
@@ -477,15 +481,20 @@ $csrf = e($_SESSION['csrf']);
               <span class="a-tag a-tag--status-<?= e($lead['status']) ?>"><?= e(STATUSES[$lead['status']]) ?></span>
               <?php if (($lead['source'] ?? '') !== ''): ?><span class="a-tag">المصدر: <?= e(platform($lead['source'])) ?></span><?php endif; ?>
               <?php if (($lead['campaign'] ?? '') !== ''): ?><span class="a-tag">الحملة: <bdi dir="ltr"><?= e($lead['campaign']) ?></bdi></span><?php endif; ?>
-              <?php if (($lead['path'] ?? '') !== ''): ?><span class="a-tag">المسار: <?= e(str_replace(['portfolio', 'contact', '>'], ['الأعمال', 'التواصل', ' ← '], $lead['path'])) ?></span><?php endif; ?>
+              <?php if (($lead['path'] ?? '') !== ''): ?><span class="a-tag">المسار: <?= e(str_replace(['site-form', 'portfolio', 'contact', '>'], ['نموذج الموقع', 'الأعمال', 'التواصل', ' ← '], $lead['path'])) ?></span><?php endif; ?>
               <?php if (($lead['device'] ?? '') !== ''): ?><span class="a-tag"><?= e(['mobile' => 'جوال', 'tablet' => 'جهاز لوحي', 'desktop' => 'حاسوب'][$lead['device']] ?? $lead['device']) ?></span><?php endif; ?>
               <?php if (($lead['ref'] ?? '') !== ''): ?><span class="a-tag"><bdi dir="ltr"><?= e($lead['ref']) ?></bdi></span><?php endif; ?>
             </div>
           </div>
           <div>
             <div class="a-actions">
+              <?php if ($lead['whatsapp'] !== ''): ?>
               <a class="c-btn c-btn--primary" href="<?= e(waReply($lead)) ?>" target="_blank" rel="noopener noreferrer">رد على واتساب</a>
               <a class="c-btn c-btn--secondary" href="tel:<?= e($lead['whatsapp']) ?>">اتصال</a>
+              <?php endif; ?>
+              <?php if ($lead['email'] !== ''): ?>
+              <a class="c-btn <?= $lead['whatsapp'] !== '' ? 'c-btn--secondary' : 'c-btn--primary' ?>" href="mailto:<?= e($lead['email']) ?>?subject=<?= e(rawurlencode('بيكسورا — بخصوص رسالتك')) ?>">رد بالبريد</a>
+              <?php endif; ?>
             </div>
             <form class="a-form" method="post">
               <input type="hidden" name="action" value="update" />

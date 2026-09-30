@@ -981,6 +981,47 @@ for (const [label, locale, stored, want] of [['an Arabic phone', 'ar-SA', null, 
   await ctx.close();
 }
 
+/* ---- The contact path --------------------------------------------------------- */
+{
+  // The homepage form sends to the team and says so only once it is held; with
+  // no server it falls back to the mail app, with WhatsApp beside it.
+  for (const mode of ['held', 'no server']) {
+    const ctx = await browser.newContext({ ...VIEWPORTS.mobile, locale: 'ar-SA' });
+    await ctx.route(/plausible\.io/, (r) => r.abort());
+    if (mode === 'no server') await ctx.route('**/lead.php', (r) => r.fulfill({ status: 404, body: '' }));
+    await ctx.addInitScript(() => { window.__events = []; window.plausible = (e) => window.__events.push(e); });
+    const p = await ctx.newPage();
+    let mailApp = false; p.on('request', (r) => { if (r.url().startsWith('mailto:')) mailApp = true; });
+    await p.goto(`${BASE}/#contact`, { waitUntil: 'networkidle' });
+    await p.selectOption('#contact-about', 'websites:web-business');
+    await p.fill('#contact-name', 'اختبار');
+    await p.fill('#contact-email', 'test@example.com');
+    await p.fill('#contact-whatsapp', '+971 50 123 4567');
+    await p.fill('#contact-message', 'موقع لمخبز');
+    await p.click('[data-contact-form] [type="submit"]');
+    await p.waitForTimeout(1500);
+    const r = await p.evaluate(() => ({ status: document.querySelector('[data-contact-status]').textContent, fallback: !document.querySelector('[data-contact-fallback]').hidden, events: window.__events, kept: document.querySelector('#contact-name').value }));
+    if (mode === 'held') check(/وصلتنا رسالتك/.test(r.status) && !r.fallback && !mailApp && r.events.includes('enquiry_sent') && !r.events.includes('enquiry_failed') && r.kept === '',
+      'contact form: sent to the team, confirmed only once held, counted as sent', JSON.stringify(r));
+    else check(r.fallback && mailApp && r.events.includes('enquiry_failed') && !r.events.includes('enquiry_sent') && r.kept === 'اختبار',
+      'contact form: with no server, the mail app and WhatsApp take over; counted as failed, the text kept', JSON.stringify(r));
+    await ctx.close();
+  }
+  // After a study, WhatsApp opens with the study's name; the floating button
+  // on a service or a study carries its topic.
+  const ctx = await browser.newContext({ ...VIEWPORTS.mobile, locale: 'ar-SA' });
+  await ctx.route(/plausible\.io/, (r) => r.abort());
+  const p = await ctx.newPage();
+  const topic = [];
+  for (const [url, want] of [['/work/information-design', 'تصميم المعلومات'], ['/story', 'المدى'], ['/services/social', 'إدارة وسائل التواصل']]) {
+    await p.goto(`${BASE}${url}`, { waitUntil: 'networkidle' });
+    const r = await p.evaluate(() => ({ close: decodeURIComponent(document.querySelector('.c-svc__next a[data-wa]')?.href || ''), fab: decodeURIComponent(document.querySelector('.c-wa-fab').href) }));
+    topic.push(`${url}: ${(url.startsWith('/services') || r.close.includes(want)) && r.fab.includes(want)}`);
+  }
+  check(topic.every((t) => t.endsWith('true')), 'WhatsApp from a study or a service names what the visitor was reading', topic.join(' | '));
+  await ctx.close();
+}
+
 await browser.close();
 
 // The built site ships only what it uses, and every placeholder is filled.

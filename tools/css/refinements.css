@@ -171,4 +171,7 @@ html{-webkit-tap-highlight-color:transparent}
 /* The homepage's two doors bridge the work and the challenge: the tighter
    spacing, so neither side opens a gap wider than the rest of the page. */
 .c-doors{padding-block:var(--section-space-tight)}
+/* Contact form: the optional part of a label, quieter; the confirmation, gold. */
+.c-field__optional{font-weight:var(--weight-regular,400);color:var(--color-text-muted)}
+[data-contact-status].is-sent{color:var(--color-accent);font-weight:var(--weight-semibold)}
 /* REFINEMENTS:END */

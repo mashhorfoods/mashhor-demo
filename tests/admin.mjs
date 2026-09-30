@@ -128,6 +128,24 @@ try {
   res = await fetch(`${BASE}/admin/config.php`);
   check(!(await res.text()).includes('$2y$'), 'config.php never reveals the hash');
 
+  /* ---- The main site's form (form=site) ------------------------------------- */
+  res = await post({ form: 'site', name: 'Lina', email: 'not-an-email', message: 'Hi' });
+  check(res.status === 422, 'site form: a bad email is refused', String(res.status));
+  res = await post({ form: 'site', name: 'Lina', email: 'lina@example.com', whatsapp: '12', message: 'Hello' });
+  check(res.status === 422, 'site form: a WhatsApp number, if given, must be one', String(res.status));
+  res = await post({ form: 'site', name: 'Lina', email: 'lina@example.com', message: 'A site for my bakery',
+    about: 'websites:web-business', about_label: 'Business Website — 650 USD', t_landing: '/', t_path: 'site-form', t_device: 'mobile' });
+  check(res.status === 200 && (await res.json()).ok === true, 'site form: a message without WhatsApp is held');
+  await page.goto(`${BASE}/admin/`);
+  const lina = page.locator('.a-lead', { hasText: 'Lina' });
+  const linaText = await lina.textContent();
+  check(linaText.includes('lina@example.com') && linaText.includes('من نموذج الموقع') && linaText.includes('Business Website — 650 USD') && linaText.includes('A site for my bakery'),
+    'admin: a site message shows its email, topic and message', linaText.replace(/\s+/g, ' ').slice(0, 160));
+  const replies = await lina.locator('.a-actions a').evaluateAll((as) => as.map((a) => a.getAttribute('href')));
+  check(replies.length === 1 && replies[0].startsWith('mailto:lina@example.com'), 'admin: a site message is answered by email, with no empty WhatsApp or call link', JSON.stringify(replies));
+  check(await page.locator('.a-lead', { hasText: 'سارة' }).locator('a[href^="https://wa.me/966501234567"]').count() === 1, 'admin: campaign requests keep their WhatsApp reply (and their saved status)');
+  check(await page.locator('.a-lead', { hasText: 'سارة' }).locator('select').inputValue() === 'contacted', 'admin: an earlier status survives the new kind of request');
+
   await page.goto(`${BASE}/admin/`);
   await page.click('button:has-text("خروج")');
   check(await page.locator('#pw').count() === 1, 'sign out returns to the sign-in screen');

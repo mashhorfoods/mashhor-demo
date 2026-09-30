@@ -366,6 +366,23 @@ campaigns: { 'launch-q4': 'عرض الإطلاق' },   // → "…على سنا�
 
 ## Where leads go
 
+Both forms send to `lead.php`: the campaign page's (/go) and, since the
+contact-path pass, the main site's contact form (/#contact, `form=site`:
+name, email, an optional WhatsApp number, the topic and the message). The
+site form says "received" only once `lead.php` answers that the message is
+held; if it cannot be (no server, as on the GitHub Pages preview, or a
+failure) the visitor's mail app opens with the message written and WhatsApp
+is offered beside it — the form's old behaviour, now the fallback
+(`overlay/assets/forms.js`). A site message keeps its email in the
+`location` column and its topic and message in `note`; the admin page shows
+it with "رد بالبريد" (and WhatsApp too when a number was given). Plausible
+counts `enquiry_sent` only when a message is held, `enquiry_failed` otherwise.
+
+After a case study (and the Al Mada story) the main action opens WhatsApp
+with the study's name in the message; the phones' floating WhatsApp button
+carries the page's topic on service pages and studies.
+
+
 1. Email to `muhalabsalah@gmail.com` via PHP `mail()` (from `no-reply@<domain>`).
    Worth sending one test from the live site: Hostinger mail can land in spam
    until the domain has SPF/DKIM set in hPanel.

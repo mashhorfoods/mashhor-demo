@@ -201,8 +201,30 @@ def hub_main():
     </main>'''
 
 
-def closing():
-    return f'''<section class="l-section l-section--tight c-svc__next" aria-labelledby="cases-next">
+def wa_about(study_en, study_ar):
+    """A WhatsApp button whose message names the study the visitor just read."""
+    import urllib.parse
+    from build_services import WA
+    en = f"Hi Pixora — I read your case study “{study_en}” and would like to talk about a similar project."
+    ar = f"مرحبًا بيكسورا — قرأت دراسة الحالة «{study_ar}» وأودّ التحدث عن مشروع مشابه."
+    q = lambda t: urllib.parse.quote(t, safe="")
+    return (f'<a class="c-btn c-btn--primary" href="{WA}{q(en)}" data-wa data-about="case-study" '
+            f'data-wa-en="{WA}{q(en)}" data-wa-ar="{WA}{q(ar)}" target="_blank" rel="noopener noreferrer">'
+            f'<span>{bi("Talk about a project like this", "تحدّث معنا عن مشروع مشابه")}</span>'
+            f'<span class="u-visually-hidden">{bi(" — WhatsApp, opens in a new tab", " — واتساب، يفتح في نافذة جديدة")}</span></a>')
+
+
+def closing(study=None):
+    """The closing box. After a study it leads straight to a conversation about
+    it on WhatsApp, with the contact form beside; on the hub, to the form and
+    the prices."""
+    if study:
+        actions = (wa_about(*study) + "\n              "
+                   + '<a class="c-btn c-btn--secondary" href="/#contact" data-cta-link><span data-cta-label>Start Your Project</span></a>')
+    else:
+        actions = ('<a class="c-btn c-btn--primary" href="/#contact" data-cta-link><span data-cta-label>Start Your Project</span></a>\n              '
+                   + f'<a class="c-btn c-btn--secondary" href="/pricing"><span>{bi("See the prices", "شاهد الأسعار")}</span>{ARROW}</a>')
+    return f"""<section class="l-section l-section--tight c-svc__next" aria-labelledby="cases-next">
         <div class="l-container">
           <div class="c-quote" data-reveal>
             <div>
@@ -210,12 +232,11 @@ def closing():
               <p class="c-quote__body">{bi("Tell the Pixora team what you are building; we reply within two working hours.", "أخبر فريق بيكسورا بما تبنيه؛ نردّ خلال ساعتين في أوقات العمل.")}</p>
             </div>
             <div class="c-svc__actions">
-              <a class="c-btn c-btn--primary" href="/#contact" data-cta-link><span data-cta-label>Start Your Project</span></a>
-              <a class="c-btn c-btn--secondary" href="/pricing"><span>{bi("See the prices", "شاهد الأسعار")}</span>{ARROW}</a>
+              {actions}
             </div>
           </div>
         </div>
-      </section>'''
+      </section>"""
 
 
 def piece_media(slug, key, piece, site, hero=False):
@@ -343,7 +364,7 @@ def case_main(c, prev, nxt, site):
       </footer>
       </div>
     {more_section(more)}
-    {closing()}
+    {closing((plain(c["title"][0]), plain(c["title"][1]).split(" — ")[0]))}
     </main>'''
 
 
@@ -384,7 +405,8 @@ def build(site: pathlib.Path):
     text = story.read_text(encoding="utf-8")
     if text.count("</main>") != 1 or "c-case__more" in text:
         raise SystemExit("cases: story.html: the end of its main was not found")
-    text = text.replace("</main>", "  " + more_section("\n".join(card(c) for c in CASES)) + "\n    </main>", 1)
+    text = text.replace("</main>", "  " + closing(("Al Mada Travel & Tourism", "المدى للسفر والسياحة")) + "\n    "
+                        + more_section("\n".join(card(c) for c in CASES)) + "\n    </main>", 1)
     story.write_text(text, encoding="utf-8")
     for page in pages(site):
         text = page.read_text(encoding="utf-8")

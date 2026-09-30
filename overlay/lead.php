@@ -1,13 +1,13 @@
 <?php
 /* =============================================================================
-   lead.php — receives the campaign form (go.html#contact).
+   lead.php — receives the campaign form (go.html#contact) and, with
+   form=site, the main site's contact form (/#contact).
 
-   The main site's contact form deliberately has no server: it opens the
-   visitor's mail app. The campaign form cannot work that way — it promises
-   "تم استلام طلبك", and that sentence may only appear once the request is
-   really held somewhere. So this endpoint:
+   Either form promises "received" only once the request is really held
+   somewhere. So this endpoint:
 
-     1. validates the five fields (the same rules as go.js);
+     1. validates the fields (the campaign's five, the same rules as go.js;
+        the site form's name, email, message and optional WhatsApp number);
      2. appends the lead, with its campaign context, to a CSV kept OUTSIDE the
         web root when the host allows it (../pixora-leads/), or else in
         ./_leads/, which ships with an .htaccess that refuses every request;
@@ -17,7 +17,9 @@
 
    No database, no dependencies, no third party. PHP 7.4+.
    A browser without JavaScript posts here directly and is redirected to
-   go.html#sent (or back to the form) instead of receiving JSON.
+   go.html#sent (or back to the form) instead of receiving JSON. The site
+   form's email goes in the location column and its topic and message in
+   the note, so both forms share one file and one admin page.
    ============================================================================= */
 
 declare(strict_types=1);
@@ -55,8 +57,9 @@ function finish(int $status, array $body, bool $json, string $redirect): void
 }
 
 $base = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
-$sentUrl = $base . '/go#sent';
-$formUrl = $base . '/go?error=1#contact';
+$isSite = ($_POST['form'] ?? '') === 'site';
+$sentUrl = $base . ($isSite ? '/#contact' : '/go#sent');
+$formUrl = $base . ($isSite ? '/#contact' : '/go?error=1#contact');
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     header('Allow: POST');
@@ -92,6 +95,20 @@ $name     = str_replace("\n", ' ', field('name', 80));
 $location = str_replace("\n", ' ', field('location', 80));
 $service  = field('service', 20);
 $note     = field('note', 600);
+$email    = '';
+$aboutLabel = '';
+if ($isSite) {
+    // The site form: its topic is "service:package" (or empty for a general
+    // enquiry), its label what the visitor saw ("Starter — from 490 USD").
+    $email = str_replace("\n", '', field('email', 120));
+    $about = field('about', 40);
+    $aboutLabel = str_replace("\n", ' ', field('about_label', 120));
+    $service = explode(':', $about)[0] ?: 'unsure';
+    if (!array_key_exists($service, SERVICES)) $service = 'unsure';
+    $message = field('message', 1500);
+    $note = ($aboutLabel !== '' ? 'بخصوص: ' . $aboutLabel . "\n" : '') . $message;
+    $location = $email;
+}
 
 // Arabic-Indic and Persian digits → Latin, then strip spacing and punctuation.
 $phone = strtr(field('whatsapp', 30), [
@@ -105,9 +122,16 @@ if (strpos($phone, '00') === 0) {
 
 $errors = [];
 if (length($name) < 2)                       $errors['name'] = 'required';
-if (!preg_match('/^\+?\d{8,15}$/', $phone))  $errors['whatsapp'] = 'invalid';
-if (length($location) < 2)                   $errors['location'] = 'required';
-if (!array_key_exists($service, SERVICES))   $errors['service'] = 'invalid';
+if ($isSite) {
+    // WhatsApp is optional here; if given, it must be a number.
+    if ($phone !== '' && !preg_match('/^\+?\d{8,15}$/', $phone)) $errors['whatsapp'] = 'invalid';
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors['email'] = 'invalid';
+    if (length($message) < 2)                      $errors['message'] = 'required';
+} else {
+    if (!preg_match('/^\+?\d{8,15}$/', $phone))  $errors['whatsapp'] = 'invalid';
+    if (length($location) < 2)                   $errors['location'] = 'required';
+    if (!array_key_exists($service, SERVICES))   $errors['service'] = 'invalid';
+}
 if ($errors) {
     finish(422, ['ok' => false, 'errors' => $errors], $wantsJson, $formUrl);
 }
@@ -183,6 +207,21 @@ if ($dir !== null) {
 $host = preg_replace('/[^a-z0-9.-]/i', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
 $host = preg_replace('/^www\./i', '', $host);
 $waLink = 'https://wa.me/' . ltrim($phone, '+');
+if ($isSite) {
+    $subject = 'رسالة من الموقع — ' . $name . ' — ' . ($aboutLabel !== '' ? $aboutLabel : 'استفسار عام');
+    $lines = [
+        'رسالة جديدة من نموذج التواصل في الموقع',
+        '',
+        'الاسم: ' . $name,
+        'البريد: ' . $email,
+        'واتساب: ' . ($phone !== '' ? $phone . '  (' . $waLink . ')' : '—'),
+        'بخصوص: ' . ($aboutLabel !== '' ? $aboutLabel : 'استفسار عام'),
+        '',
+        $message,
+        '',
+        '— مصدر الطلب —',
+    ];
+} else {
 $subject = 'طلب جديد — ' . $name . ' — ' . SERVICES[$service];
 $lines = [
     'طلب جديد من صفحة الحملة',
@@ -195,6 +234,7 @@ $lines = [
     '',
     '— مصدر الطلب —',
 ];
+}
 foreach ($tracking as $key => $value) {
     $lines[] = str_pad($key, 9) . ': ' . ($value !== '' ? $value : '—');
 }
@@ -203,6 +243,7 @@ $body = implode("\r\n", $lines);
 
 $headers = implode("\r\n", [
     'From: Pixora Website <no-reply@' . $host . '>',
+    ...($isSite ? ['Reply-To: ' . $email] : []),
     'MIME-Version: 1.0',
     'Content-Type: text/plain; charset=UTF-8',
     'Content-Transfer-Encoding: 8bit',
