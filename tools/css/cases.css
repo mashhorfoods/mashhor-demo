@@ -62,4 +62,7 @@
 .c-case__more .c-case-cards{margin-block-end:var(--space-32)}
 /* The cover travels from the card into the page's hero. */
 ::view-transition-group(.case-cover){animation-duration:620ms;animation-timing-function:cubic-bezier(0.16,1,0.3,1)}
+/* The closing link and more of the work on Behance, side by side, wrapping on phones. */
+.c-story__close .c-story__link+.c-story__link{margin-inline-start:var(--space-32)}
+@media (max-width:40em){.c-story__close .c-story__link+.c-story__link{display:flex;inline-size:max-content;margin-inline-start:0;margin-block-start:var(--space-16)}}
 /* CASES:END */

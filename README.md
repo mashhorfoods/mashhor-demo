@@ -184,8 +184,9 @@ number or result the work cannot show.
   beside four pieces of its work laid out like prints (each a link down to
   the chapter that shows it), then five chapters — an annotation, a headline,
   the lead, an aside, a hand-drawn line that draws itself in, and the work —
-  joined by the story's thread, a closing line, two more studies and the
-  contact call. The card's cover grows into the prints between pages.
+  joined by the story's thread, a closing line (with "More of this work on
+  Behance" beside it where the study has a `behance` link in
+  `case_stories.py`), two more studies and the contact call. The card's cover grows into the prints between pages.
 
 **The work, and its placeholders.** Each study lists its pieces (identity
 sheet, report cover, map, stories…) with their proportions. Until a piece's

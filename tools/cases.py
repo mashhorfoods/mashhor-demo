@@ -256,6 +256,15 @@ def chapter(c, story, n, ch, site):
         </article>'''
 
 
+def behance(story):
+    """More of this work on Behance, beside the closing link, when the study has one."""
+    if "behance" not in story:
+        return ""
+    return (f'\n        <a class="c-link c-story__link" href="{story["behance"]}" target="_blank" rel="noopener noreferrer">'
+            f'{bi("More of this work on Behance", "المزيد من هذه الأعمال على Behance")}'
+            f'<span class="u-visually-hidden">{bi(" (opens in a new tab)", " (يفتح في نافذة جديدة)")}</span>{ARROW}</a>')
+
+
 def case_main(c, prev, nxt, site):
     story = STORIES[c["slug"]]
     chapters = story["chapters"]
@@ -279,7 +288,7 @@ def case_main(c, prev, nxt, site):
       </div>
       <footer class="c-story__close">
         <p class="c-story__statement">{bi(close_en, close_ar)}</p>
-        <a class="c-link c-story__link" href="{href}">{bi(*link)}{ARROW}</a>
+        <a class="c-link c-story__link" href="{href}">{bi(*link)}{ARROW}</a>{behance(story)}
       </footer>
       </div>
     <section class="l-section l-section--tight c-case__more" aria-labelledby="case-more">

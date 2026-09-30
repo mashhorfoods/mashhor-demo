@@ -16,6 +16,8 @@ Each study has:
             (the story's hand-drawn line, see SKETCHES) and the pieces that
             chapter shows, if any.
   close     the closing statement and where it leads.
+  behance   where more of this work is on Behance (optional): a second link
+            beside the closing one.
 
 Every sentence is in the team's voice, in both languages, and states no
 number or result the work cannot show.
@@ -241,6 +243,7 @@ def sketch(kind, alt_id, seed):
 # The studies. Hero slots: a (wide, 3:2), b (screen, 16:9), c (tall), d (strip).
 STORIES = {
     "brand-identity-systems": {
+        "behance": "https://www.behance.net/gallery/119607411/Brands-ID",
         "pieces": {
             "identity": (("Identity sheet", "لوحة الهوية"), (3, 2), "sheet"),
             "guidelines": (("Brand guidelines", "دليل الهوية"), (16, 9), "book"),
@@ -295,6 +298,7 @@ STORIES = {
                   "/services/branding", ("See branding &amp; design", "خدمة الهوية والتصميم")),
     },
     "editorial-publication-design": {
+        "behance": "https://www.behance.net/moodboard/226170673/Editorial-Publication-Design",
         "pieces": {
             "spread": (("Report spread", "صفحات التقرير"), (3, 2), "book"),
             "deck": (("Presentation", "العرض التقديمي"), (16, 9), "screen"),
@@ -345,6 +349,7 @@ STORIES = {
                   "/#contact", ("Talk to the team", "تحدّث مع الفريق")),
     },
     "information-design": {
+        "behance": "https://www.behance.net/moodboard/170306923/Information-Design-Visual-Storytelling",
         "pieces": {
             "visuals": (("Data visuals", "رسوم البيانات"), (3, 2), "chart"),
             "deck": (("Presentation", "العرض التقديمي"), (16, 9), "screen"),
@@ -393,6 +398,7 @@ STORIES = {
                   "/#contact", ("Talk to the team", "تحدّث مع الفريق")),
     },
     "talk-about-sudan": {
+        "behance": "https://www.behance.net/moodboard/224952325/Talk-about-Sudan",
         "pieces": {
             "map": (("Map", "الخريطة"), (3, 2), "pin"),
             "series": (("The series", "السلسلة"), (16, 9), "grid"),
