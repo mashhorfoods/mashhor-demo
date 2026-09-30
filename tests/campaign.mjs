@@ -825,6 +825,18 @@ for (const [w, root] of [[1440, 16], [1920, 18], [2560, 20]]) {
     return { names, shown: names.every((n) => alts.includes(n)), copies: document.querySelectorAll('.c-brands__item[aria-hidden="true"]').length };
   });
   check(brands.names.length >= 4 && brands.shown && brands.copies === brands.names.length, 'home: the brands strip names only brands shown in the work, looped once for assistive tech', JSON.stringify(brands));
+  // The Al Mada story ends like every study: all the others, in a rail whose
+  // buttons stay clear of the floating WhatsApp button.
+  await p.goto(`${BASE}/story`, { waitUntil: 'networkidle' });
+  await p.waitForTimeout(800);
+  const end = await p.evaluate(async () => {
+    const bar = document.querySelector('.c-case__more [data-rail-bar]'); bar.scrollIntoView({ block: 'end', behavior: 'instant' });
+    await new Promise((r) => setTimeout(r, 600));
+    const f = document.querySelector('.c-wa-fab').getBoundingClientRect();
+    return { cards: document.querySelectorAll('.c-case__more .c-case-card').length, bar: !bar.hidden,
+      covered: [...bar.querySelectorAll('button')].some((x) => { x = x.getBoundingClientRect(); return x.right > f.left && x.left < f.right && x.bottom > f.top && x.top < f.bottom; }) };
+  });
+  check(end.cards === CASES.length && end.bar && !end.covered, '[mobile] /story: ends in a rail of every study, its buttons clear of WhatsApp', JSON.stringify(end));
   await phone.close();
 
   const desk = await siteContext(browser, VIEWPORTS.desktop);

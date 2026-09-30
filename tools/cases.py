@@ -293,6 +293,25 @@ def behance(story):
             f'<span class="u-visually-hidden">{bi(" (opens in a new tab)", " (يفتح في نافذة جديدة)")}</span>{ARROW}</a>')
 
 
+def more_section(more):
+    """The end of a study: every other one in a rail, and the way to them all."""
+    return f'''<section class="l-section l-section--tight c-case__more" aria-labelledby="case-more">
+      <div class="l-container">
+        <header class="c-svc__head">
+          <p class="t-label c-detail__eyebrow">{bi("More case studies", "دراسات حالة أخرى")}</p>
+          <h2 class="c-svc__h2" id="case-more">{bi("Keep reading.", "تابع القراءة.")}</h2>
+        </header>
+        <div class="c-rail c-rail--cases" data-rail>
+          <ul class="c-case-cards c-case-cards--rail" role="list" tabindex="0" aria-label="{plain(bi("More case studies", "دراسات حالة أخرى"))}" data-rail-track>
+{more}
+          </ul>
+          {RAIL_BAR}
+        </div>
+        <p class="c-detail__more"><a class="c-link" href="/work"><span>{bi("All case studies", "كل دراسات الحالة")}</span>{ARROW}</a></p>
+      </div>
+    </section>'''
+
+
 def case_main(c, prev, nxt, site):
     story = STORIES[c["slug"]]
     chapters = story["chapters"]
@@ -323,21 +342,7 @@ def case_main(c, prev, nxt, site):
         <a class="c-link c-story__link" href="{href}">{bi(*link)}{ARROW}</a>{behance(story)}
       </footer>
       </div>
-    <section class="l-section l-section--tight c-case__more" aria-labelledby="case-more">
-      <div class="l-container">
-        <header class="c-svc__head">
-          <p class="t-label c-detail__eyebrow">{bi("More case studies", "دراسات حالة أخرى")}</p>
-          <h2 class="c-svc__h2" id="case-more">{bi("Keep reading.", "تابع القراءة.")}</h2>
-        </header>
-        <div class="c-rail c-rail--cases" data-rail>
-          <ul class="c-case-cards c-case-cards--rail" role="list" tabindex="0" aria-label="{plain(bi("More case studies", "دراسات حالة أخرى"))}" data-rail-track>
-{more}
-          </ul>
-          {RAIL_BAR}
-        </div>
-        <p class="c-detail__more"><a class="c-link" href="/work"><span>{bi("All case studies", "كل دراسات الحالة")}</span>{ARROW}</a></p>
-      </div>
-    </section>
+    {more_section(more)}
     {closing()}
     </main>'''
 
@@ -374,6 +379,13 @@ def build(site: pathlib.Path):
         (site / "work" / f"{c['slug']}.html").write_text(page + case_main(c, prev, nxt, site) + shell_tail, encoding="utf-8")
 
     # The site's menu and footer: "Story" becomes the case studies.
+    # The Al Mada story is a study too: it ends in the same rail, every study.
+    story = site / "story.html"
+    text = story.read_text(encoding="utf-8")
+    if text.count("</main>") != 1 or "c-case__more" in text:
+        raise SystemExit("cases: story.html: the end of its main was not found")
+    text = text.replace("</main>", "  " + more_section("\n".join(card(c) for c in CASES)) + "\n    </main>", 1)
+    story.write_text(text, encoding="utf-8")
     for page in pages(site):
         text = page.read_text(encoding="utf-8")
         new, n = re.subn(r"\{ id: 'story', label: 'Story', labelAr: 'القصة', href: '(?:\./|/)story' \}",

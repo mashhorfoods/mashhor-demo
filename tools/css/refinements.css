@@ -147,4 +147,7 @@ html{-webkit-tap-highlight-color:transparent}
 .c-contact{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:var(--space-40);align-items:start}}
 @media (max-width:63.99em){
 .c-svc__deal-note,.c-eco__hub-note,.c-about-value__body,.c-challenge__lead,.c-page__note,.c-about-intro__text,.c-about-intro__body,.c-chapter__aside{max-inline-size:68ch}}
+/* Phones: a rail's buttons end where the floating WhatsApp button begins
+   (both sit at the reading end), so neither covers the other. */
+@media (max-width:47.99em){.c-rail__bar{padding-inline-end:4rem}}
 /* REFINEMENTS:END */
