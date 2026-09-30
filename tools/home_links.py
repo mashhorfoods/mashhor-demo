@@ -76,12 +76,39 @@ def section():
       '''
 
 
+# The brands whose work this site shows, by the names its own images give
+# them. Only these: the site promises no invented client anywhere.
+BRANDS = [("Al Mada Travel &amp; Tourism", "المدى للسفر والسياحة"), ("Ajwa Flavors", "Ajwa Flavors"), ("Teela", "Teela"),
+          ("NexTech", "NexTech"), ("Mashhor Foodstuff Trading", "مشهور لتجارة المواد الغذائية"), ("Box Store", "Box Store")]
+SERVICES_ANCHOR = '<section id="services" class="l-section c-services"'
+
+
+def brands():
+    """Under the hero: the brands from the work, drifting slowly past. The
+    list is written twice so the drift loops without a seam; the second copy
+    is hidden from assistive tech. Still under reduced motion (it wraps)."""
+    items = lambda hidden: "".join(
+        f'<li class="c-brands__item"{hidden}>{bi(en, ar)}</li>' for en, ar in BRANDS)
+    return f'''<section class="c-brands" aria-labelledby="brands-title">
+        <div class="l-container c-brands__inner">
+          <p class="c-brands__label" id="brands-title">{bi("Brands from our work", "علامات من أعمالنا")}</p>
+          <div class="c-brands__window">
+            <ul class="c-brands__track" role="list">{items("")}{items(' aria-hidden="true"')}</ul>
+          </div>
+        </div>
+      </section>
+      '''
+
+
 def build(site: pathlib.Path):
     home = site / "index.html"
     text = home.read_text(encoding="utf-8")
     if ANCHOR not in text:
         raise SystemExit("home_links: the homepage's challenge section was not found")
     text = text.replace(ANCHOR, section() + ANCHOR, 1)
+    if text.count(SERVICES_ANCHOR) != 1:
+        raise SystemExit("home_links: the homepage's services section was not found")
+    text = text.replace(SERVICES_ANCHOR, brands() + SERVICES_ANCHOR, 1)
     # Recent work (Al Mada's four tiles): on phones a sideways rail, like the
     # services; wider screens keep the grid (and the rail's bar stays hidden).
     text, n = re.subn(r'<ul class="c-bento" role="list" data-reveal-group>(.*?)</ul>',

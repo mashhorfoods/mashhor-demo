@@ -802,6 +802,65 @@ for (const [w, root] of [[1440, 16], [1920, 18], [2560, 20]]) {
   await context.close();
 }
 
+/* ---- Sideways and scroll-bound presentation ------------------------------ */
+{
+  // Phones: a service's packages in a rail that opens on the recommended one.
+  const phone = await siteContext(browser, VIEWPORTS.mobile);
+  const p = await phone.newPage();
+  await p.goto(`${BASE}/services/branding`, { waitUntil: 'networkidle' });
+  await p.waitForTimeout(1500);
+  const tiers = await p.evaluate(() => {
+    const t = document.querySelector('.c-rail--tiers .c-tiers'); const f = t.querySelector('.c-tier--featured').getBoundingClientRect(); const b = t.getBoundingClientRect();
+    return { rail: t.scrollWidth > t.clientWidth, centred: Math.abs(f.left + f.width / 2 - (b.left + b.width / 2)) < 4 };
+  });
+  check(tiers.rail && tiers.centred, '[mobile] service packages: a rail that opens on the recommended package', JSON.stringify(tiers));
+  // About on a phone: the six stages swipe sideways; the principles stack.
+  await p.goto(`${BASE}/about`, { waitUntil: 'networkidle' });
+  const stagesRail = await p.$eval('.c-about-stages', (o) => o.scrollWidth > o.clientWidth + 100);
+  check(stagesRail, '[mobile] /about: the six stages swipe sideways');
+  // Home: the brands strip names only brands the site's own images show.
+  await p.goto(`${BASE}/`, { waitUntil: 'networkidle' });
+  const brands = await p.evaluate(() => {
+    const names = [...document.querySelectorAll('.c-brands__item:not([aria-hidden]) [data-lang-copy="en"]')].map((e) => e.textContent.replace(/ &.*| Travel.*/, '').trim());
+    const alts = [...document.querySelectorAll('img[alt]')].map((i) => i.dataset.altEn || i.alt).join(' ');
+    return { names, shown: names.every((n) => alts.includes(n)), copies: document.querySelectorAll('.c-brands__item[aria-hidden="true"]').length };
+  });
+  check(brands.names.length >= 4 && brands.shown && brands.copies === brands.names.length, 'home: the brands strip names only brands shown in the work, looped once for assistive tech', JSON.stringify(brands));
+  await phone.close();
+
+  const desk = await siteContext(browser, VIEWPORTS.desktop);
+  const d = await desk.newPage();
+  // About on a computer: the stages pin and travel with the scroll, start to end.
+  await d.goto(`${BASE}/about`, { waitUntil: 'networkidle' });
+  const pin = await d.evaluate(async () => {
+    const pin = document.querySelector('.c-about-pin'); const ol = document.querySelector('.c-about-stages');
+    const at = async (k) => { const top = pin.getBoundingClientRect().top + scrollY; scrollTo({ top: top + (pin.offsetHeight - innerHeight) * k, behavior: 'instant' });
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const s = [...ol.children].map((c) => c.getBoundingClientRect()); const box = document.querySelector('.c-about-pin__stick').getBoundingClientRect();
+      return { stuck: Math.abs(box.top) < 2, first: Math.round(s[0].left), last: Math.round(s.at(-1).right) }; };
+    return [await at(0), await at(0.5), await at(1)];
+  });
+  const edge = await d.evaluate(() => { const c = document.querySelector('.c-about-process .l-container'); const r = c.getBoundingClientRect(); const pad = parseFloat(getComputedStyle(c).paddingLeft); return [Math.round(r.left + pad), Math.round(r.right - pad)]; });
+  check(pin.every((x) => x.stuck) && Math.abs(pin[0].first - edge[0]) < 3 && pin[1].first < pin[0].first && Math.abs(pin[2].last - edge[1]) < 3,
+    '[desktop] /about: the stages pin and travel with the scroll, first card to last', JSON.stringify({ pin, edge }));
+  // The principles stack: scrolled past, each holds a step below the one before.
+  const stack = await d.evaluate(async () => {
+    const g = document.querySelector('.c-about-values__grid'); scrollTo({ top: g.getBoundingClientRect().top + scrollY + g.offsetHeight - innerHeight * 0.9, behavior: 'instant' });
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    const t = [...g.children].map((c) => Math.round(c.getBoundingClientRect().top)); return t;
+  });
+  check(stack[1] > stack[0] && stack[1] - stack[0] < 40 && stack[2] > stack[1], '[desktop] /about: the principles stack, each a step below the last', stack.join(','));
+  // Case studies on a computer: a chapter's text holds while its work passes.
+  await d.goto(`${BASE}/work/brand-identity-systems`, { waitUntil: 'networkidle' });
+  const scrolly = await d.evaluate(async () => {
+    const ch = document.querySelector('#ch-test'); const text = ch.querySelector('.c-chapter__text'); const work = ch.querySelector('.c-case-work');
+    const at = async (dy) => { scrollTo({ top: ch.getBoundingClientRect().top + scrollY + dy, behavior: 'instant' }); await new Promise((r) => setTimeout(r, 300)); return [Math.round(text.getBoundingClientRect().top), Math.round(work.getBoundingClientRect().top)]; };
+    return [await at(200), await at(600)];
+  });
+  check(scrolly[0][0] === scrolly[1][0] && scrolly[1][1] < scrolly[0][1] - 300, '[desktop] case study: a chapter\'s text holds while its work passes', JSON.stringify(scrolly));
+  await desk.close();
+}
+
 await browser.close();
 
 // The built site ships only what it uses, and every placeholder is filled.

@@ -56,4 +56,26 @@
 .c-bento--rail::-webkit-scrollbar{display:none}
 .c-bento--rail>.c-bento__tile{flex:0 0 clamp(15rem,80vw,22rem);scroll-snap-align:start}
 .c-bento--rail.is-dragging{scroll-snap-type:none}}
+/* Brands from our work: one line under the hero, drifting slowly; a pointer
+   over it holds it still. Under reduced motion the names simply wrap. */
+.c-brands{padding-block:var(--space-32);border-block:var(--border-hairline);background-color:var(--color-bg-sunken)}
+.c-brands__inner{display:grid;gap:var(--space-16);align-items:center}
+@media (min-width:64em){.c-brands__inner{grid-template-columns:auto minmax(0,1fr);gap:var(--space-48)}}
+.c-brands__label{margin:0;font-size:var(--text-label);font-weight:var(--weight-semibold);letter-spacing:var(--tracking-label);text-transform:uppercase;color:var(--color-text-muted);white-space:nowrap}
+:root[dir="rtl"] .c-brands__label{letter-spacing:0;text-transform:none;font-size:var(--text-body-sm)}
+.c-brands__window{overflow:hidden;-webkit-mask-image:linear-gradient(to right,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(to right,transparent,#000 8%,#000 92%,transparent)}
+.c-brands__track{display:flex;inline-size:max-content;margin:0;padding:0;list-style:none}
+.c-brands__item{display:flex;align-items:center;gap:var(--space-40);padding-inline-end:var(--space-40);font-family:var(--font-display);font-size:var(--text-h4,1.25rem);font-weight:var(--weight-semibold);color:var(--color-text-secondary);white-space:nowrap}
+.c-brands__item::after{content:"";inline-size:6px;block-size:6px;border-radius:50%;background-color:var(--color-accent);opacity:0.7}
+@media (prefers-reduced-motion:no-preference){
+.c-brands__track{animation:brands-drift 42s linear infinite}
+:root[dir="rtl"] .c-brands__track{animation-name:brands-drift-rtl}
+.c-brands__window:hover .c-brands__track{animation-play-state:paused}}
+@media (prefers-reduced-motion:reduce){
+.c-brands__window{-webkit-mask-image:none;mask-image:none}
+.c-brands__track{inline-size:auto;flex-wrap:wrap;row-gap:var(--space-8)}
+.c-brands__item{gap:var(--space-16);padding-inline-end:var(--space-16)}
+.c-brands__item[aria-hidden]{display:none}}
+@keyframes brands-drift{to{translate:-50% 0}}
+@keyframes brands-drift-rtl{to{translate:50% 0}}
 /* HOME-LINKS:END */

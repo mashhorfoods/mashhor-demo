@@ -168,6 +168,27 @@ the pointer, and About, previewed by the team photograph. Each lists what its
 page covers. Inner pages carry no breadcrumbs: the menu and these doors lead
 to them.
 
+## Sideways and scroll-bound presentation
+
+- **Service packages, phones:** the three packages in a rail that opens on
+  the recommended one (`data-rail-start`, motion.js section 6), neighbours
+  at the edges; wider screens keep the grid.
+- **About, the six stages:** on computers the section pins and scrolling
+  down carries the stage cards across while the gold line fills — CSS bound
+  to the scroll (`view-timeline`, inset 0), one pixel of scroll to one of
+  travel; off without scroll-driven animations, under 40em tall or under
+  reduced motion (the six columns stay). Phones and tablets swipe them.
+- **About, the four principles:** cards that stack as they scroll, each
+  holding a step below the last (`position: sticky`), the heading holding
+  beside them on computers.
+- **Case studies:** on computers, a chapter that shows work keeps its text
+  still while the work passes beside it; each study ends in a rail of every
+  other study and the Al Mada story.
+- **Home, brands from our work:** under the hero, the brands the site's
+  own work shows (`BRANDS` in `home_links.py`) drift slowly past; a pointer
+  holds them, reduced motion shows them still. A test fails if a name is
+  not in the site's own images — the site promises no invented client.
+
 ## Case studies — /work
 
 `tools/cases.py` builds the section; `tools/case_stories.py` holds the four
