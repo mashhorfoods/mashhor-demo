@@ -403,6 +403,14 @@ is offered beside it — the form's old behaviour, now the fallback
 it with "رد بالبريد" (and WhatsApp too when a number was given). Plausible
 counts `enquiry_sent` only when a message is held, `enquiry_failed` otherwise.
 
+The admin page (`/admin/`) lists both kinds of request with totals, search
+and filters; per request: reply (WhatsApp or email), status, internal note,
+**edit** its details (a new number keeps its status and note), **archive**
+and restore (the archive is its own tab, outside the counts), and **delete**
+for good (asked first). Several can be ticked and archived, restored or
+deleted together. Deleting rewrites `leads.csv` under the same lock
+`lead.php` appends with, so a request arriving at that moment is kept.
+
 After a case study (and the Al Mada story) the main action opens WhatsApp
 with the study's name in the message; the phones' floating WhatsApp button
 carries the page's topic on service pages and studies.

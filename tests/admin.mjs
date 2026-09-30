@@ -97,15 +97,15 @@ try {
   check((await sara.textContent()).includes('سناب شات') && (await sara.textContent()).includes('الأعمال ← التواصل') && (await sara.textContent()).includes('PX-ABCDE'),
     'source, path and reference shown');
 
-  await sara.locator('textarea').fill('اتصلت بها — تنتظر عرض السعر');
-  await sara.locator('button', { hasText: 'حفظ' }).click();
+  await sara.locator('textarea[name="note"]').fill('اتصلت بها — تنتظر عرض السعر');
+  await sara.locator('button:text-is("حفظ")').click();
   await page.waitForSelector('.a-flash');
-  await page.locator('.a-lead', { hasText: 'سارة' }).locator('select').selectOption('contacted'); // auto-saves via admin.js
+  await page.locator('.a-lead', { hasText: 'سارة' }).locator('select[name="status"]').selectOption('contacted'); // auto-saves via admin.js
   await page.waitForLoadState('load');
   await page.waitForTimeout(300);
   const saraNow = page.locator('.a-lead', { hasText: 'سارة' });
-  check(await saraNow.locator('select').inputValue() === 'contacted', 'status saved (auto-submit on change)');
-  check(await saraNow.locator('textarea').inputValue() === 'اتصلت بها — تنتظر عرض السعر', 'internal note saved');
+  check(await saraNow.locator('select[name="status"]').inputValue() === 'contacted', 'status saved (auto-submit on change)');
+  check(await saraNow.locator('textarea[name="note"]').inputValue() === 'اتصلت بها — تنتظر عرض السعر', 'internal note saved');
   check(await page.locator('.a-stat--accent b').textContent() === '2', 'waiting count drops to 2');
 
   /* ---- 5. Filters, search, export ---------------------------------------------- */
@@ -144,7 +144,81 @@ try {
   const replies = await lina.locator('.a-actions a').evaluateAll((as) => as.map((a) => a.getAttribute('href')));
   check(replies.length === 1 && replies[0].startsWith('mailto:lina@example.com'), 'admin: a site message is answered by email, with no empty WhatsApp or call link', JSON.stringify(replies));
   check(await page.locator('.a-lead', { hasText: 'سارة' }).locator('a[href^="https://wa.me/966501234567"]').count() === 1, 'admin: campaign requests keep their WhatsApp reply (and their saved status)');
-  check(await page.locator('.a-lead', { hasText: 'سارة' }).locator('select').inputValue() === 'contacted', 'admin: an earlier status survives the new kind of request');
+  check(await page.locator('.a-lead', { hasText: 'سارة' }).locator('select[name="status"]').inputValue() === 'contacted', 'admin: an earlier status survives the new kind of request');
+
+  /* ---- Edit, archive, delete — one at a time and together -------------------- */
+  const csvPath = path.join(work, 'pixora-leads', 'leads.csv');
+  const csvText = () => readFileSync(csvPath, 'utf8');
+  page.on('dialog', (d) => d.accept());
+  const card = (name) => page.locator('.a-lead', { hasText: name });
+
+  // Edit: a corrected number keeps the request's status and note (they move to its new id).
+  await page.goto(`${BASE}/admin/`);
+  await card('سارة').locator('summary:has-text("تعديل البيانات")').click();
+  await card('سارة').locator('input[name="whatsapp"]').fill('+966 50 999 8888');
+  await card('سارة').locator('input[name="location"]').fill('جدة');
+  await card('سارة').locator('button:has-text("حفظ التعديل")').click();
+  await page.waitForLoadState('load');
+  const saraText = await card('سارة').textContent();
+  check((await page.locator('.a-flash').textContent()).includes('تم حفظ التعديل') && saraText.includes('+966509998888') && saraText.includes('جدة'),
+    'edit: corrected details are saved (number cleaned, city changed)', saraText.replace(/\s+/g, ' ').slice(0, 120));
+  check(await card('سارة').locator('select[name="status"]').inputValue() === 'contacted' && (await card('سارة').locator('textarea[name="note"]').inputValue()).includes('تنتظر عرض السعر'),
+    'edit: its status and internal note stay with it');
+  check(csvText().includes('+966509998888') && !csvText().includes('+966501234567'), 'edit: written to leads.csv, the old number gone');
+  await card('سارة').locator('summary:has-text("تعديل البيانات")').click();
+  await card('سارة').locator('input[name="whatsapp"]').fill('12');
+  await card('سارة').locator('button:has-text("حفظ التعديل")').click();
+  await page.waitForLoadState('load');
+  check((await page.locator('.a-flash').textContent()).includes('لم يُحفظ') && csvText().includes('+966509998888'), 'edit: an invalid number is refused, nothing changed');
+
+  // Archive: out of the list and the counts, into the archive, and back.
+  const mainCount = async () => Number(await page.locator('.a-tab').first().locator('b').textContent());
+  await page.goto(`${BASE}/admin/`);
+  const before = await mainCount();
+  await card('Lina').locator('button:has-text("نقل إلى الأرشيف")').click();
+  await page.waitForLoadState('load');
+  check(await card('Lina').count() === 0 && await mainCount() === before - 1, 'archive: the request leaves the list and its count');
+  await page.goto(`${BASE}/admin/?view=archived`);
+  check(await card('Lina').count() === 1 && await page.locator('.a-lead').count() === 1, 'archive: it is in the archive, alone');
+  await card('Lina').locator('button:has-text("إعادة من الأرشيف")').click();
+  await page.waitForLoadState('load');
+  await page.goto(`${BASE}/admin/`);
+  check(await card('Lina').count() === 1 && await mainCount() === before, 'archive: restored to the list');
+
+  // Several together: archive two, then deleting needs its confirmation.
+  await card('Omar').locator('[data-pick]').check();
+  await card('HYPERLINK').locator('[data-pick]').check();
+  await page.selectOption('[data-bulk-do]', 'archive');
+  await page.click('#bulk button[type="submit"]');
+  await page.waitForLoadState('load');
+  await page.goto(`${BASE}/admin/?view=archived`);
+  check(await page.locator('.a-lead').count() === 2, 'bulk: two archived at once');
+  const token = await page.locator('#bulk input[name="csrf"]').inputValue();
+  const ids = await page.locator('[data-pick]').evaluateAll((bs) => bs.map((b) => b.value));
+  const unconfirmed = await page.evaluate(async ({ token, ids }) => {
+    const body = new URLSearchParams({ action: 'bulk', bulk: 'delete', csrf: token }); ids.forEach((id) => body.append('ids[]', id));
+    await fetch('./', { method: 'POST', body }); return true;
+  }, { token, ids });
+  check(unconfirmed && csvText().includes('Omar'), 'bulk: deleting without the confirmation deletes nothing');
+  await page.goto(`${BASE}/admin/?view=archived`);
+  await page.locator('[data-check-all]').check();
+  await page.selectOption('[data-bulk-do]', 'delete');
+  await page.click('#bulk button[type="submit"]');
+  await page.waitForLoadState('load');
+  check(!csvText().includes('Omar') && !csvText().includes('HYPERLINK') && await page.locator('.a-lead').count() === 0, 'bulk: confirmed, both are deleted from leads.csv for good');
+
+  // One at a time, from its own card.
+  await page.goto(`${BASE}/admin/`);
+  await card('Lina').locator('summary:has-text("حذف")').click();
+  await card('Lina').locator('button:has-text("حذف نهائي")').click();
+  await page.waitForLoadState('load');
+  check(!csvText().includes('lina@example.com') && (await page.locator('.a-flash').textContent()).includes('حُذف نهائيًا'), 'delete: one request removed for good');
+
+  // The file is still whole: a new request after the deletions arrives intact.
+  res = await post({ name: 'بعد الحذف', whatsapp: '+97150000111', location: 'أبوظبي', service: 'social' });
+  const rows = csvText().replace(/^\uFEFF/, '').trim().split('\n');
+  check(res.status === 200 && rows[0].startsWith('received_at,name,whatsapp') && rows.length === 3 && rows[2].includes('بعد الحذف'),
+    'delete: leads.csv keeps its header and takes new requests after', `${rows.length} lines`);
 
   await page.goto(`${BASE}/admin/`);
   await page.click('button:has-text("خروج")');

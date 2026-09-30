@@ -14,7 +14,10 @@
        (status, source, campaign, service);
      - per request: reply on WhatsApp with a ready greeting, call, set a
        status (new / contacted / agreed / not interested), keep a note;
-     - export what is on screen to a CSV that opens in Excel with Arabic intact.
+     - export what is on screen to a CSV that opens in Excel with Arabic intact;
+     - correct a request's details, archive and restore it, or delete it for
+       good (asked first) — one at a time or several ticked together.
+       Deleting rewrites leads.csv under the same lock lead.php appends with.
 
    Scripts: only ./admin.js (external), so the site's Content-Security-Policy
    in .htaccess covers this page without a new hash.
@@ -207,7 +210,174 @@ $filters = [
     'source'   => (string) ($_GET['source'] ?? ''),
     'campaign' => (string) ($_GET['campaign'] ?? ''),
     'service'  => (string) ($_GET['service'] ?? ''),
+    'view'     => ($_GET['view'] ?? '') === 'archived' ? 'archived' : '',
 ];
+
+/* ---- Changing the requests themselves: edit, archive, delete ---------------- */
+
+/** Same id as readLeads(): received_at plus the number, or the email. */
+function leadId(array $lead): string
+{
+    return substr(sha1($lead['received_at'] . '|' . ($lead['whatsapp'] !== '' ? $lead['whatsapp'] : $lead['location'])), 0, 12);
+}
+
+/** A cell as lead.php stores it: formula-like text is prefixed with '. */
+function guardCell(string $value): string
+{
+    return preg_match('/^[=+\-@\t\r]/', $value) ? "'" . $value : $value;
+}
+
+/** A cell as the page shows it: the ' prefix taken off again. */
+function unguardCell(string $value): string
+{
+    return preg_match("/^'[=+\\-@]/", $value) ? substr($value, 1) : $value;
+}
+
+/**
+ * Rewrites leads.csv under the same lock lead.php appends with, so a request
+ * arriving at that moment waits and is kept. $change gets each lead (cells
+ * unguarded, 'id' added) and returns it (changed or not) or null to drop it.
+ */
+function rewriteLeads(?string $dir, callable $change): bool
+{
+    $file = $dir === null ? null : $dir . '/leads.csv';
+    if ($file === null || !is_file($file) || !($handle = fopen($file, 'c+'))) {
+        return false;
+    }
+    if (!flock($handle, LOCK_EX)) {
+        fclose($handle);
+        return false;
+    }
+    $header = fgetcsv($handle, 0, ',', '"', '\\');
+    if (!$header) {
+        flock($handle, LOCK_UN);
+        fclose($handle);
+        return false;
+    }
+    $header[0] = preg_replace('/^\xEF\xBB\xBF/', '', (string) $header[0]);
+    $rows = [];
+    while (($row = fgetcsv($handle, 0, ',', '"', '\\')) !== false) {
+        if (count($row) !== count($header)) {
+            $rows[] = $row; // not ours to judge: kept exactly as it was
+            continue;
+        }
+        $lead = array_combine($header, array_map(static fn ($v) => unguardCell((string) $v), $row));
+        $lead['id'] = leadId($lead);
+        $lead = $change($lead);
+        if ($lead === null) {
+            continue;
+        }
+        $rows[] = array_map(static fn ($key) => guardCell((string) ($lead[$key] ?? '')), $header);
+    }
+    ftruncate($handle, 0);
+    rewind($handle);
+    fwrite($handle, "\xEF\xBB\xBF");
+    $ok = fputcsv($handle, $header, ',', '"', '\\') !== false;
+    foreach ($rows as $row) {
+        $ok = $ok && fputcsv($handle, $row, ',', '"', '\\') !== false;
+    }
+    fflush($handle);
+    flock($handle, LOCK_UN);
+    fclose($handle);
+    return $ok;
+}
+
+/** The ids a form sends: one (id) or many (ids[]), each checked. */
+function postedIds(): array
+{
+    $ids = (array) ($_POST['ids'] ?? []);
+    if (isset($_POST['id'])) {
+        $ids[] = $_POST['id'];
+    }
+    return array_values(array_unique(array_filter(array_map('strval', $ids), static fn ($id) => (bool) preg_match('/^[a-f0-9]{12}$/', $id))));
+}
+
+$changes = ['archive', 'unarchive', 'delete', 'edit', 'bulk'];
+if ($signedIn && in_array($action, $changes, true) && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    checkCsrf();
+    $ids = postedIds();
+    $do = $action === 'bulk' ? (string) ($_POST['bulk'] ?? '') : $action;
+    $state = readJson($stateFile);
+    $message = '';
+    $anchor = count($ids) === 1 && $do !== 'delete' ? '#lead-' . $ids[0] : '';
+
+    if (!$ids) {
+        $message = 'لم يُحدَّد أي طلب.';
+    } elseif ($do === 'archive' || $do === 'unarchive') {
+        foreach ($ids as $id) {
+            $state[$id] = array_merge($state[$id] ?? ['status' => 'new', 'note' => ''], ['archived' => $do === 'archive', 'updated' => gmdate('c')]);
+        }
+        $saved = writeJson($stateFile, $state);
+        $message = !$saved ? 'تعذّر الحفظ — تحقق من صلاحيات مجلد الطلبات.'
+            : ($do === 'archive' ? 'نُقل إلى الأرشيف: ' : 'أُعيد من الأرشيف: ') . count($ids) . '.';
+    } elseif ($do === 'delete') {
+        // Deleting is final: the form asks first (and without JavaScript the
+        // confirmation box must be ticked).
+        if (($_POST['confirm'] ?? '') !== 'yes') {
+            $message = 'لم يُحذف شيء: أكّد الحذف أولًا.';
+        } else {
+            $gone = 0;
+            $ok = rewriteLeads($dir, static function (array $lead) use ($ids, &$gone) {
+                if (in_array($lead['id'], $ids, true)) {
+                    $gone++;
+                    return null;
+                }
+                return $lead;
+            });
+            foreach ($ids as $id) {
+                unset($state[$id]);
+            }
+            writeJson($stateFile, $state);
+            $message = $ok ? "حُذف نهائيًا: {$gone}." : 'تعذّر الحذف — تحقق من صلاحيات مجلد الطلبات.';
+        }
+    } elseif ($do === 'edit' && count($ids) === 1) {
+        $id = $ids[0];
+        $clean = static fn (string $key, int $max) => mb_substr(trim(str_replace(["\r", "\n"], ' ', (string) ($_POST[$key] ?? ''))), 0, $max);
+        $name = $clean('name', 80);
+        $phone = strtr($clean('whatsapp', 30), ['٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4', '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9']);
+        $phone = (string) preg_replace('/[\s\-().\x{200E}\x{200F}]/u', '', $phone);
+        if (strpos($phone, '00') === 0) {
+            $phone = '+' . substr($phone, 2);
+        }
+        $location = $clean('location', 120);
+        $service = (string) ($_POST['service'] ?? '');
+        $note = mb_substr(trim(str_replace("\r", '', (string) ($_POST['customer_note'] ?? ''))), 0, 1500);
+        $errors = [];
+        if (mb_strlen($name) < 2) $errors[] = 'الاسم';
+        if ($phone !== '' && !preg_match('/^\+?\d{8,15}$/', $phone)) $errors[] = 'رقم واتساب';
+        if ($phone === '' && !filter_var($location, FILTER_VALIDATE_EMAIL)) $errors[] = 'رقم واتساب أو بريد صحيح';
+        if (!isset(SERVICES[$service])) $errors[] = 'الخدمة';
+        if ($errors) {
+            $message = 'لم يُحفظ التعديل — راجع: ' . implode('، ', $errors) . '.';
+        } else {
+            $newId = $id;
+            $ok = rewriteLeads($dir, static function (array $lead) use ($id, $name, $phone, $location, $service, $note, &$newId) {
+                if ($lead['id'] !== $id) {
+                    return $lead;
+                }
+                $lead = array_merge($lead, ['name' => $name, 'whatsapp' => $phone, 'location' => $location, 'service' => $service, 'note' => $note]);
+                $newId = leadId($lead);
+                return $lead;
+            });
+            // A new number (or email) makes a new id: its status and note move with it.
+            if ($ok && $newId !== $id && isset($state[$id])) {
+                $state[$newId] = $state[$id];
+                unset($state[$id]);
+                writeJson($stateFile, $state);
+            }
+            $message = $ok ? 'تم حفظ التعديل.' : 'تعذّر الحفظ — تحقق من صلاحيات مجلد الطلبات.';
+            $anchor = '#lead-' . $newId;
+        }
+    } else {
+        $message = 'إجراء غير معروف.';
+    }
+    $_SESSION['flash'] = $message;
+    $back = [];
+    foreach ($filters as $key => $value) {
+        $back[$key] = (string) ($_POST['f_' . $key] ?? '');
+    }
+    redirect(here($back) . $anchor);
+}
 
 $flash = '';
 if ($signedIn && $action === 'update' && $_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -217,9 +387,10 @@ if ($signedIn && $action === 'update' && $_SERVER['REQUEST_METHOD'] === 'POST') 
     if (preg_match('/^[a-f0-9]{12}$/', $id) && isset(STATUSES[$status])) {
         $state = readJson($stateFile);
         $state[$id] = [
-            'status'  => $status,
-            'note'    => mb_substr(trim((string) ($_POST['note'] ?? '')), 0, 1000),
-            'updated' => gmdate('c'),
+            'status'   => $status,
+            'note'     => mb_substr(trim((string) ($_POST['note'] ?? '')), 0, 1000),
+            'archived' => (bool) ($state[$id]['archived'] ?? false),
+            'updated'  => gmdate('c'),
         ];
         $_SESSION['flash'] = writeJson($stateFile, $state) ? 'تم الحفظ.' : 'تعذّر الحفظ — تحقق من صلاحيات مجلد الطلبات.';
     }
@@ -241,11 +412,16 @@ if ($signedIn) {
     foreach (readLeads($dir) as $lead) {
         $lead['status'] = $state[$lead['id']]['status'] ?? 'new';
         $lead['admin_note'] = $state[$lead['id']]['note'] ?? '';
+        $lead['archived'] = (bool) ($state[$lead['id']]['archived'] ?? false);
         $leads[] = $lead;
     }
 }
 
 $visible = array_values(array_filter($leads, static function (array $lead) use ($filters): bool {
+    // The archive is its own view; the main list never shows it.
+    if ($lead['archived'] !== ($filters['view'] === 'archived')) {
+        return false;
+    }
     foreach (['status', 'source', 'campaign', 'service'] as $key) {
         if ($filters[$key] !== '' && ($lead[$key] ?? '') !== $filters[$key]) {
             return false;
@@ -309,10 +485,15 @@ function options(array $values, string $selected, string $all): string
     return $html;
 }
 
-$counts = ['all' => count($leads), 'new' => 0, 'week' => 0];
+$counts = ['all' => 0, 'new' => 0, 'week' => 0, 'archived' => 0];
 $sources = [];
 $campaigns = [];
 foreach ($leads as $lead) {
+    if ($lead['archived']) {
+        $counts['archived']++;
+        continue;
+    }
+    $counts['all']++;
     if ($lead['status'] === 'new') $counts['new']++;
     if (strtotime($lead['received_at']) > time() - 7 * 86400) $counts['week']++;
     if (($lead['source'] ?? '') !== '') $sources[$lead['source']] = ($sources[$lead['source']] ?? 0) + 1;
@@ -377,6 +558,22 @@ $csrf = e($_SESSION['csrf']);
       .a-error { color: var(--color-danger); font-size: var(--text-body-sm); }
       .a-code { direction: ltr; text-align: left; padding: var(--space-16); border-radius: var(--radius-md); background-color: var(--color-bg-deep); font-family: ui-monospace, monospace; font-size: var(--text-small); overflow-wrap: anywhere; user-select: all; }
       .a-muted { color: var(--color-text-muted); font-size: var(--text-small); }
+      .a-tabs { display: flex; gap: var(--space-8); margin-block-end: var(--space-24); }
+      .a-tab { display: inline-flex; align-items: center; gap: var(--space-8); min-block-size: 44px; padding-inline: var(--space-20, 1.25rem); border: var(--border-hairline); border-radius: var(--radius-pill); color: var(--color-text-secondary); text-decoration: none; }
+      .a-tab[aria-current="page"] { border-color: var(--color-accent); color: var(--color-accent); }
+      .a-tab b { font-family: "Poppins", var(--font-arabic); color: inherit; }
+      .a-bulk { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-12) var(--space-16); margin-block-end: var(--space-16); padding: var(--space-12) var(--space-16); border: var(--border-hairline); border-radius: var(--radius-lg); }
+      .a-bulk__do { inline-size: auto; min-inline-size: 11rem; }
+      .a-check { display: inline-flex; align-items: center; gap: var(--space-8); min-block-size: 44px; cursor: pointer; }
+      .a-check input, .a-lead__pick { inline-size: 20px; block-size: 20px; accent-color: var(--color-accent); }
+      .js .a-bulk__confirm { display: none; }
+      .a-lead--archived { opacity: 0.85; border-style: dashed; }
+      .a-more { display: grid; gap: var(--space-12); margin-block-start: var(--space-16); padding-block-start: var(--space-16); border-block-start: var(--border-hairline); }
+      .a-details summary { min-block-size: 44px; display: flex; align-items: center; cursor: pointer; color: var(--color-text-secondary); }
+      .a-details[open] summary { color: var(--color-text-primary); margin-block-end: var(--space-12); }
+      .a-details--danger summary { color: var(--color-danger); }
+      .a-btn--danger { background-color: transparent; border: 1px solid var(--color-danger); color: var(--color-danger); }
+      .a-btn--danger:hover { background-color: var(--color-danger); color: var(--color-bg); }
     }
   </style>
   <script defer src="./admin.js"></script>
@@ -443,7 +640,13 @@ $csrf = e($_SESSION['csrf']);
         <div class="a-stat"><b><?= e($topSource) ?></b><span>أكثر مصدر</span></div>
       </div>
 
+      <nav class="a-tabs" aria-label="عرض">
+        <a class="a-tab" href="<?= e(here(array_merge($filters, ['view' => '']))) ?>"<?= $filters['view'] === '' ? ' aria-current="page"' : '' ?>>الطلبات <b><?= $counts['all'] ?></b></a>
+        <a class="a-tab" href="<?= e(here(array_merge($filters, ['view' => 'archived']))) ?>"<?= $filters['view'] === 'archived' ? ' aria-current="page"' : '' ?>>الأرشيف <b><?= $counts['archived'] ?></b></a>
+      </nav>
+
       <form class="a-filters" method="get" role="search">
+        <input type="hidden" name="view" value="<?= e($filters['view']) ?>" />
         <p class="c-field"><label class="c-field__label" for="q">بحث</label>
           <input class="c-field__control" id="q" name="q" type="search" value="<?= e($filters['q']) ?>" placeholder="اسم، رقم، مدينة، رقم مرجع…" /></p>
         <p class="c-field"><label class="c-field__label" for="f-status">الحالة</label>
@@ -459,14 +662,28 @@ $csrf = e($_SESSION['csrf']);
       </form>
 
       <?php if (!$visible): ?>
-        <p class="a-empty"><?= $leads ? 'لا توجد طلبات تطابق هذا البحث.' : 'لا توجد طلبات بعد. أول طلب يُرسَل من صفحة الحملة أو نموذج الموقع سيظهر هنا.' ?></p>
+        <p class="a-empty"><?= $filters['view'] === 'archived' ? 'الأرشيف فارغ.' : ($leads ? 'لا توجد طلبات تطابق هذا البحث.' : 'لا توجد طلبات بعد. أول طلب يُرسَل من صفحة الحملة أو نموذج الموقع سيظهر هنا.') ?></p>
       <?php else: ?>
-      <p class="a-muted" style="margin-block-end: var(--space-16)">يُعرض <?= count($visible) ?> من <?= count($leads) ?></p>
+      <form class="a-bulk" id="bulk" method="post">
+        <input type="hidden" name="action" value="bulk" />
+        <input type="hidden" name="csrf" value="<?= $csrf ?>" />
+        <?php foreach ($filters as $key => $value): ?><input type="hidden" name="f_<?= e($key) ?>" value="<?= e($value) ?>" /><?php endforeach; ?>
+        <label class="a-check"><input type="checkbox" data-check-all /> <span>تحديد الكل</span></label>
+        <span class="a-muted" data-picked>يُعرض <?= count($visible) ?></span>
+        <select class="c-field__control c-field__select a-bulk__do" name="bulk" aria-label="الإجراء على المحدد" data-bulk-do>
+          <?php if ($filters['view'] === 'archived'): ?><option value="unarchive">إعادة من الأرشيف</option>
+          <?php else: ?><option value="archive">نقل إلى الأرشيف</option><?php endif; ?>
+          <option value="delete">حذف نهائي</option>
+        </select>
+        <label class="a-check a-bulk__confirm" data-bulk-confirm><input type="checkbox" name="confirm" value="yes" /> <span>أؤكد الحذف النهائي</span></label>
+        <button class="c-btn c-btn--secondary" type="submit">تطبيق على المحدد</button>
+      </form>
       <ol class="a-list">
         <?php foreach ($visible as $lead): ?>
-        <li class="a-lead<?= $lead['status'] === 'new' ? ' a-lead--new' : '' ?>" id="lead-<?= e($lead['id']) ?>">
+        <li class="a-lead<?= $lead['status'] === 'new' && !$lead['archived'] ? ' a-lead--new' : '' ?><?= $lead['archived'] ? ' a-lead--archived' : '' ?>" id="lead-<?= e($lead['id']) ?>">
           <div>
             <div class="a-lead__head">
+              <input class="a-lead__pick" type="checkbox" name="ids[]" value="<?= e($lead['id']) ?>" form="bulk" aria-label="تحديد طلب <?= e($lead['name']) ?>" data-pick />
               <h2 class="a-lead__name"><?= e($lead['name']) ?></h2>
               <span class="a-lead__time"><?= e(when($lead['received_at'])) ?></span>
             </div>
@@ -509,6 +726,49 @@ $csrf = e($_SESSION['csrf']);
                 <textarea class="c-field__control" id="n-<?= e($lead['id']) ?>" name="note" rows="2" maxlength="1000" placeholder="لا يراها العميل"><?= e($lead['admin_note']) ?></textarea></p>
               <button class="c-btn c-btn--secondary" type="submit">حفظ</button>
             </form>
+            <div class="a-more">
+              <form method="post">
+                <input type="hidden" name="action" value="<?= $lead['archived'] ? 'unarchive' : 'archive' ?>" />
+                <input type="hidden" name="csrf" value="<?= $csrf ?>" />
+                <input type="hidden" name="id" value="<?= e($lead['id']) ?>" />
+                <?php foreach ($filters as $key => $value): ?><input type="hidden" name="f_<?= e($key) ?>" value="<?= e($value) ?>" /><?php endforeach; ?>
+                <button class="c-btn c-btn--ghost" type="submit"><?= $lead['archived'] ? 'إعادة من الأرشيف' : 'نقل إلى الأرشيف' ?></button>
+              </form>
+              <details class="a-details">
+                <summary>تعديل البيانات</summary>
+                <form class="a-form" method="post">
+                  <input type="hidden" name="action" value="edit" />
+                  <input type="hidden" name="csrf" value="<?= $csrf ?>" />
+                  <input type="hidden" name="id" value="<?= e($lead['id']) ?>" />
+                  <?php foreach ($filters as $key => $value): ?><input type="hidden" name="f_<?= e($key) ?>" value="<?= e($value) ?>" /><?php endforeach; ?>
+                  <p class="c-field"><label class="c-field__label" for="en-<?= e($lead['id']) ?>">الاسم</label>
+                    <input class="c-field__control" id="en-<?= e($lead['id']) ?>" name="name" value="<?= e($lead['name']) ?>" required minlength="2" maxlength="80" /></p>
+                  <p class="c-field"><label class="c-field__label" for="ew-<?= e($lead['id']) ?>">رقم واتساب<?= $lead['email'] !== '' ? ' (اختياري)' : '' ?></label>
+                    <input class="c-field__control" id="ew-<?= e($lead['id']) ?>" name="whatsapp" value="<?= e($lead['whatsapp']) ?>" dir="ltr" inputmode="tel" maxlength="30" /></p>
+                  <p class="c-field"><label class="c-field__label" for="el-<?= e($lead['id']) ?>"><?= $lead['email'] !== '' ? 'البريد' : 'الدولة / المدينة' ?></label>
+                    <input class="c-field__control" id="el-<?= e($lead['id']) ?>" name="location" value="<?= e($lead['location']) ?>" maxlength="120"<?= $lead['email'] !== '' ? ' dir="ltr" type="email"' : '' ?> /></p>
+                  <p class="c-field"><label class="c-field__label" for="es-<?= e($lead['id']) ?>">الخدمة</label>
+                    <select class="c-field__control c-field__select" id="es-<?= e($lead['id']) ?>" name="service">
+                      <?php foreach (SERVICES as $value => $label): ?><option value="<?= e($value) ?>"<?= $lead['service'] === $value ? ' selected' : '' ?>><?= e($label) ?></option><?php endforeach; ?>
+                    </select></p>
+                  <p class="c-field"><label class="c-field__label" for="ec-<?= e($lead['id']) ?>">رسالة العميل</label>
+                    <textarea class="c-field__control" id="ec-<?= e($lead['id']) ?>" name="customer_note" rows="3" maxlength="1500"><?= e($lead['note']) ?></textarea></p>
+                  <button class="c-btn c-btn--secondary" type="submit">حفظ التعديل</button>
+                </form>
+              </details>
+              <details class="a-details a-details--danger">
+                <summary>حذف</summary>
+                <form class="a-form" method="post" data-confirm="حذف طلب <?= e($lead['name']) ?> نهائيًا؟ لا يمكن التراجع.">
+                  <input type="hidden" name="action" value="delete" />
+                  <input type="hidden" name="csrf" value="<?= $csrf ?>" />
+                  <input type="hidden" name="id" value="<?= e($lead['id']) ?>" />
+                  <input type="hidden" name="confirm" value="yes" />
+                  <?php foreach ($filters as $key => $value): ?><input type="hidden" name="f_<?= e($key) ?>" value="<?= e($value) ?>" /><?php endforeach; ?>
+                  <p class="a-muted">يُحذف الطلب من ملف الطلبات نهائيًا، مع حالته وملاحظته. للإخفاء دون حذف استخدم الأرشيف.</p>
+                  <button class="c-btn a-btn--danger" type="submit">حذف نهائي</button>
+                </form>
+              </details>
+            </div>
           </div>
         </li>
         <?php endforeach; ?>
