@@ -26,7 +26,7 @@ goes on every page.
 import pathlib
 import re
 
-from build_services import bi
+from build_services import RAIL_BAR, bi
 from case_stories import ICONS, STORIES, sketch
 from common import inject_all, pages, stylesheet
 
@@ -140,6 +140,21 @@ def card(c, wide=False):
                 <span class="c-case-card__summary">{bi(*c["summary"])}</span>
                 {inside(pieces, len(story["chapters"]))}
                 <span class="c-case-card__go">{bi("Read the case study", "اقرأ دراسة الحالة")}{ARROW}</span>
+              </a>
+            </li>'''
+
+
+def story_card():
+    """Al Mada's story as an ordinary card, for the rail at the end of each study."""
+    f = FEATURED
+    return f'''            <li class="c-case-card" data-kinds="{f["kinds"]}">
+              <a class="c-case-card__link" href="{f["href"]}">
+                <span class="c-case-card__media"><img src="/assets/{f["img"]}" srcset="/assets/{f["img"]} {f["w"]}w, /assets/{f["full"]} {f["full_w"]}w" sizes="(min-width: 64em) 30rem, 85vw" alt="" width="{f["w"]}" height="{f["h"]}" loading="lazy" decoding="async" /></span>
+                <span class="c-case-card__kind">{bi(*f["category"])}</span>
+                <span class="c-case-card__title">{bi(*f["title"])}</span>
+                <span class="c-case-card__summary">{bi(*f["summary"])}</span>
+                {inside(f["pieces"], shown=4)}
+                <span class="c-case-card__go">{bi("Read the full story", "اقرأ القصة كاملة")}{ARROW}</span>
               </a>
             </li>'''
 
@@ -287,7 +302,11 @@ def case_main(c, prev, nxt, site):
         if n < len(chapters):
             body.append("        " + THREAD.format(" c-chapter__thread--resolved" if n == len(chapters) - 1 else ""))
     (close_en, close_ar), href, link = story["close"]
-    more = "\n".join(card(x) for x in (prev, nxt))
+    # Every other study, starting with the next one, then the Al Mada story:
+    # one rail, so a reader can keep going without going back to the hub.
+    i = CASES.index(c)
+    others = CASES[i + 1:] + CASES[:i]
+    more = "\n".join([card(x) for x in others] + [story_card()])
     return f'''<main id="main" class="c-case">
       <div class="c-story">
       <header class="c-story__head c-story-hero">
@@ -310,9 +329,12 @@ def case_main(c, prev, nxt, site):
           <p class="t-label c-detail__eyebrow">{bi("More case studies", "دراسات حالة أخرى")}</p>
           <h2 class="c-svc__h2" id="case-more">{bi("Keep reading.", "تابع القراءة.")}</h2>
         </header>
-        <ul class="c-case-cards c-case-cards--two" role="list" data-reveal-group>
+        <div class="c-rail c-rail--cases" data-rail>
+          <ul class="c-case-cards c-case-cards--rail" role="list" tabindex="0" aria-label="{plain(bi("More case studies", "دراسات حالة أخرى"))}" data-rail-track>
 {more}
-        </ul>
+          </ul>
+          {RAIL_BAR}
+        </div>
         <p class="c-detail__more"><a class="c-link" href="/work"><span>{bi("All case studies", "كل دراسات الحالة")}</span>{ARROW}</a></p>
       </div>
     </section>

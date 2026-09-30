@@ -88,4 +88,12 @@
 .c-case-card--featured .c-case-card__go{align-self:end}
 /* The image fills its column's height by cropping, never by growing into the text's. */
 .c-case-card--featured .c-case-card__media{aspect-ratio:auto;min-block-size:100%}}
+/* The end of a study: every other study in one rail, running to the
+   window's edges like the services' (motion.js section 6 drives its bar). */
+.c-case-cards--rail{display:flex;gap:var(--space-24);margin:0 calc(50cqw - 50vw);padding:var(--space-8) calc(50vw - 50cqw) var(--space-16);overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scroll-padding-inline:calc(50vw - 50cqw);scrollbar-width:none;outline-offset:-4px}
+.c-case-cards--rail::-webkit-scrollbar{display:none}
+.c-case-cards--rail>.c-case-card{flex:0 0 clamp(17rem,82vw,27rem);scroll-snap-align:start}
+.c-case-cards--rail.is-dragging{scroll-snap-type:none;cursor:grabbing;user-select:none}
+.c-case-cards--rail.is-dragging .c-case-card__link{pointer-events:none}
+.c-rail--cases{margin-block:0 var(--space-32)}
 /* CASES:END */

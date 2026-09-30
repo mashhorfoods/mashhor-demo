@@ -348,6 +348,14 @@
       track.addEventListener('scroll', update, { passive: true });
       addEventListener('resize', update);
       new MutationObserver(update).observe(document.documentElement, { attributes: true, attributeFilter: ['dir', 'lang'] });
+      // A rail can open on a chosen card (a service page's recommended
+      // package): centred at once, before anyone has reached the rail.
+      const opening = track.querySelector('[data-rail-start]');
+      if (opening && track.scrollWidth - track.clientWidth > 2 && track.getBoundingClientRect().top > innerHeight) {
+        const t = track.getBoundingClientRect();
+        const r = opening.getBoundingClientRect();
+        track.scrollLeft += (r.left + r.width / 2) - (t.left + t.width / 2);
+      }
       update();
       if (!fine.matches) return;
       let x0 = null;

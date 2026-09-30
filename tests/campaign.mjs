@@ -662,8 +662,8 @@ for (const kind of ['mobile', 'desktop']) {
       }));
       const linked = page.prints.every((h) => page.chapters.includes(h.slice(1)));
       check(page.h1 === 1 && page.crumbs === 0 && page.prints.length === 4 && linked && page.chapters.length === 5 && page.drawings === 5
-        && page.frames.length >= 4 && page.frames.every(Boolean) && page.more === 2 && page.wide <= 0,
-        `[${kind}] /work/${slug}: told like the story — four prints linked to their chapters, five drawn chapters, the work framed, two more studies`, JSON.stringify(page));
+        && page.frames.length >= 4 && page.frames.every(Boolean) && page.more === CASES.length && page.wide <= 0,
+        `[${kind}] /work/${slug}: told like the story — four prints linked to their chapters, five drawn chapters, the work framed, a rail of every other study and the story`, JSON.stringify(page));
     }
     // Chapters draw themselves as they arrive, like the story's.
     await cp.goto(`${BASE}/work/${CASES[3]}`, { waitUntil: 'networkidle' });

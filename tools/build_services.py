@@ -345,6 +345,16 @@ def service_main(s, data, addon_groups, work):
         p = cut(p, r'<a class="c-btn c-btn--primary c-detail__action"', "a")
         title_m = re.search(r'<h2 class="c-page__h2" id="[^"]*">(.*?)</h2>', p, re.S)
         p = p.replace(title_m.group(0), "", 1)
+        # Phones: the three packages side by side in a rail that opens on the
+        # recommended one, so they can be compared without scrolling away
+        # (wider screens keep the grid; the rail's bar stays hidden there).
+        tiers = f'<div class="c-tiers" data-reveal-group>'
+        if p.count(tiers) != 1:
+            raise SystemExit(f"build_services: {sid}: packages grid not found")
+        a, b = find(p, r'<div class="c-tiers" data-reveal-group>', "div")
+        grid = p[a:b].replace(tiers, '<div class="c-tiers" data-reveal-group data-rail-track tabindex="0" aria-label="Packages — الباقات">', 1)
+        grid = grid.replace('<article class="c-tier c-tier--featured"', '<article class="c-tier c-tier--featured" data-rail-start', 1)
+        p = p[:a] + f'<div class="c-rail c-rail--tiers" data-rail>\n{grid}\n          {RAIL_BAR}\n        </div>' + p[b:]
         packages = f'''
       <section class="l-section c-svc__packages" id="packages" aria-labelledby="packages-title">
         <div class="l-container">
