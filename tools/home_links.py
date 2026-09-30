@@ -8,7 +8,7 @@ focus; About's is the team photograph, which comes closer. Each card also
 holds a line of what the page covers, shown on arrival under the pointer (and
 always on touch screens, which have no hover). The whole card is the link.
 
-It also turns the Recent work tiles into a sideways rail on phones.
+It also turns the Recent work tiles into a sideways rail on every screen.
 
 Runs after cases.py (the covers are the studies' current ones); the CSS
 (tools/css/home-links.css) goes on every page, like every step's.
@@ -109,8 +109,8 @@ def build(site: pathlib.Path):
     if text.count(SERVICES_ANCHOR) != 1:
         raise SystemExit("home_links: the homepage's services section was not found")
     text = text.replace(SERVICES_ANCHOR, brands() + SERVICES_ANCHOR, 1)
-    # Recent work (Al Mada's four tiles): on phones a sideways rail, like the
-    # services; wider screens keep the grid (and the rail's bar stays hidden).
+    # Recent work (Al Mada's four tiles): a sideways rail on every screen,
+    # like the services.
     text, n = re.subn(r'<ul class="c-bento" role="list" data-reveal-group>(.*?)</ul>',
                       lambda m: ('<div class="c-rail c-rail--proof" data-rail>\n          <ul class="c-bento c-bento--rail" role="list" tabindex="0" '
                                  'aria-label="Recent work — عمل حديث" data-rail-track>' + m.group(1) + '</ul>\n          ' + RAIL_BAR + '\n        </div>'),

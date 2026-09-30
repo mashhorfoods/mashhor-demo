@@ -47,15 +47,21 @@
 .c-door__print--3{--x:-44%;--y:28%;--r:-3deg}
 .c-door__print--4{--x:50%;--y:26%;--r:6deg}}
 @media (prefers-reduced-motion:reduce){.c-door__print,.c-door--about .c-door__stage img,.c-door__go .c-btn__icon{transition:none}}
-/* Recent work: on phones Al Mada's four tiles run sideways, like the services
-   (the rail's markup and script are the services'); wider screens keep the grid. */
+/* Recent work: Al Mada's four tiles run sideways on every screen, like the
+   services (the rail's markup and script are the services'): a finger or
+   trackpad scrolls them, a mouse drags them, the buttons step a tile. */
 .c-rail--proof{margin-block-start:0}
-@media (max-width:47.99em){
 .c-proof{overflow-x:clip}
 .c-bento.c-bento--rail{display:flex;gap:var(--space-16);margin:0 calc(50cqw - 50vw);padding:0 calc(50vw - 50cqw) var(--space-8);overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scroll-padding-inline:calc(50vw - 50cqw);scrollbar-width:none;outline-offset:-4px}
 .c-bento--rail::-webkit-scrollbar{display:none}
 .c-bento--rail>.c-bento__tile{flex:0 0 clamp(15rem,80vw,22rem);scroll-snap-align:start}
-.c-bento--rail.is-dragging{scroll-snap-type:none}}
+.c-bento--rail.is-dragging{scroll-snap-type:none;cursor:grabbing;user-select:none}
+.c-bento--rail.is-dragging .c-bento__tile *{pointer-events:none}
+@media (min-width:48em){
+.c-bento.c-bento--rail{gap:var(--space-24)}
+.c-bento--rail>.c-bento__tile{flex-basis:clamp(20rem,42vw,26rem);aspect-ratio:4 / 3}}
+@media (min-width:64em){
+.c-bento--rail>.c-bento__tile{flex-basis:clamp(24rem,34vw,34rem)}}
 /* Brands from our work: one line under the hero, drifting slowly; a pointer
    over it holds it still. Under reduced motion the names simply wrap. */
 .c-brands{padding-block:var(--space-32);border-block:var(--border-hairline);background-color:var(--color-bg-sunken)}
