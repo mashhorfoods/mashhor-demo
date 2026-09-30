@@ -358,7 +358,24 @@ def build(site: pathlib.Path):
     at = next(i for i, line in enumerate(lines) if line.startswith(anchor))
     while at > 0 and lines[at - 1].lstrip().startswith("#"):
         at -= 1  # keep the rule's own comment attached to it
-    htaccess.write_text("\n".join(lines[:at]) + "\n" + REDIRECTS + "\n".join(lines[at:]), encoding="utf-8")
+    text = "\n".join(lines[:at]) + "\n" + REDIRECTS + "\n".join(lines[at:])
+    # Security headers the supplied file lacked: isolation from windows the
+    # site opens (WhatsApp), framing protection for browsers that ignore CSP's
+    # frame-ancestors, current permissions (interest-cohort is retired; its
+    # successor is browsing-topics), and http links upgraded to https. HSTS
+    # stays without includeSubDomains: a subdomain without a certificate
+    # would stop working.
+    for old_h, new_h in (
+        ('  Header set Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"',
+         '  Header set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()"\n'
+         '  Header set Cross-Origin-Opener-Policy "same-origin-allow-popups"\n'
+         '  Header set X-Frame-Options "SAMEORIGIN"'),
+        ("Content-Security-Policy \"default-src 'self';", "Content-Security-Policy \"upgrade-insecure-requests; default-src 'self';"),
+    ):
+        if text.count(old_h) != 1:
+            sys.exit(f".htaccess: security header not found — {old_h[:60]!r}")
+        text = text.replace(old_h, new_h, 1)
+    htaccess.write_text(text, encoding="utf-8")
     print("robots.txt, .htaccess: updated")
 
 

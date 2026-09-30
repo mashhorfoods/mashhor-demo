@@ -314,6 +314,20 @@ display face (the page template, the brand challenge and the builder
 included); the testimonial is a full-width pull quote; "What it covers"
 dots sit inside their chips; "Copy" and the "Check us" links are pills.
 
+## Lost visitors and security headers
+
+The 404 page offers the homepage, WhatsApp and every service, case studies,
+pricing, about and contact (refinements.py `NOTFOUND_LINKS`). `.htaccess`
+forwards (301) addresses people type or that used to exist — /contact,
+/services, /faq, /portfolio, /projects, /case-studies, the removed
+/work/talk-about-sudan, /prices, /packages, /about-us, /team — in its
+FORWARD block, which `tests/router.php` also reads.
+
+Headers added to the supplied set (nosniff, referrer policy, HSTS, CSP):
+Cross-Origin-Opener-Policy, X-Frame-Options, a current Permissions-Policy
+(browsing-topics, payment, usb off) and `upgrade-insecure-requests` in the
+CSP. HSTS deliberately has no includeSubDomains.
+
 ## Ad URLs
 
 Use standard UTM parameters. Everything is optional; the page works with none.

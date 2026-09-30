@@ -1046,6 +1046,16 @@ for (const [label, locale, stored, want] of [['an Arabic phone', 'ar-SA', null, 
   await ctx.close();
 }
 
+/* ---- Security headers (the host's .htaccess) ------------------------------------ */
+{
+  const rules = readFileSync(path.join(here, '..', 'site', '.htaccess'), 'utf8');
+  const want = [/Strict-Transport-Security "max-age=31536000"/, /X-Content-Type-Options "nosniff"/, /Referrer-Policy "strict-origin-when-cross-origin"/,
+    /Permissions-Policy "[^"]*browsing-topics=\(\)[^"]*"/, /Cross-Origin-Opener-Policy "same-origin-allow-popups"/, /X-Frame-Options "SAMEORIGIN"/,
+    /Content-Security-Policy "upgrade-insecure-requests; default-src 'self';[^"]*frame-ancestors 'self'[^"]*script-src 'self' https:\/\/plausible\.io 'sha256-/];
+  const missing = want.filter((re) => !re.test(rules)).map(String);
+  check(missing.length === 0 && !/interest-cohort/.test(rules), 'security headers: HSTS, CSP with script hashes, COOP, framing, permissions', missing.join(' | '));
+}
+
 await browser.close();
 
 // The built site ships only what it uses, and every placeholder is filled.
