@@ -92,19 +92,23 @@ def work(folder):
     for src in sorted(folder.iterdir()):
         if src.suffix.lower() not in (".png", ".jpg", ".jpeg", ".webp"):
             continue
-        if src.stem not in names:
+        # "x.png.png", as some tools save it, is x.
+        stem = src.name
+        while pathlib.Path(stem).suffix.lower() in (".png", ".jpg", ".jpeg", ".webp"):
+            stem = pathlib.Path(stem).stem
+        if stem not in names:
             print(f"skipped {src.name}: not <slug>-<piece> of a study in tools/case_stories.py")
             continue
-        w, h = names[src.stem]
+        w, h = names[stem]
         for width, suffix in ((1600, ""), (800, "-800")):
             height = round(width * h / w)
-            webp(src, f"case-{src.stem}{suffix}.webp",
+            webp(src, f"case-{stem}{suffix}.webp",
                  f"scale={width}:{height}:force_original_aspect_ratio=increase:flags=lanczos,crop={width}:{height}", 82)
         found += 1
-        print(f"overlay/assets/case-{src.stem}.webp (+ -800)")
+        print(f"overlay/assets/case-{stem}.webp (+ -800)")
         # The study's first piece is its cover now: the drawn one goes.
-        slug = next(s for s in STORIES if src.stem.startswith(s + "-"))
-        if src.stem == f"{slug}-{STORIES[slug]['hero'][0]}":
+        slug = next(s for s in STORIES if stem.startswith(s + "-"))
+        if stem == f"{slug}-{STORIES[slug]['hero'][0]}":
             for old in (f"case-{slug}.webp", f"case-{slug}-800.webp"):
                 if (OUT / old).exists():
                     (OUT / old).unlink()
