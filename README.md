@@ -285,6 +285,15 @@ layout in proportion instead of a narrow column; below 1680 nothing
 changes. Recent work's Al Mada tiles offer their full-size copies to large
 and high-density screens. Tested at 1440, 1920 and 2560.
 
+Arabic first (refinements.py `LANG_FIRST`): before anything is painted,
+every page (not /go, which is Arabic) takes the visitor's saved choice or,
+on a first visit, the first of Arabic or English in the device's language
+list — an Arabic phone opens the site in Arabic, right to left, with its
+Arabic title. The site script carries on from there; the HTML itself stays
+English, so search engines read it as before. The Arabic titles carry the
+same information as the English ones (seo.py: a service's from-price, a
+case study's name).
+
 Across screens (refinements stylesheet; tests in "Layout across screens"):
 - Tablets and wide phones (48em–64em): a chapter's text sits beside its
   drawing, the closing box stacks, one-column text reads up to 68

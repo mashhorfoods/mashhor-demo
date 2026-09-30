@@ -37,6 +37,17 @@ TITLES = {
     "story.html": "Al Mada Travel — One Brand, Four Surfaces | Pixora",
 }
 
+# The Arabic titles (title-ar; the site script shows them in Arabic).
+TITLES_AR = {
+    "about.html": "من نحن — فريق واحد لعلامتك كاملة | بيكسورا",
+    "pricing.html": "الأسعار — باقات الهوية والمواقع والإعلانات | بيكسورا",
+    "work.html": "دراسات الحالة — أعمال الهوية والتحرير والرقمي | بيكسورا",
+}
+
+
+def set_title_ar(text, title, page):
+    return set_meta(text, "name", "title-ar", title, page)
+
 
 def fail(page, what):
     sys.exit(f"seo: {page}: {what} not found")
@@ -128,6 +139,8 @@ def build(site: pathlib.Path):
 
         if page in TITLES:
             text = set_title(text, TITLES[page], page)
+        if page in TITLES_AR:
+            text = set_title_ar(text, TITLES_AR[page], page)
 
         if page == "index.html":
             m = re.search(r'<script type="application/ld\+json">(.*?)</script>', text, re.S)
@@ -143,6 +156,11 @@ def build(site: pathlib.Path):
             name, offers = service(text, page)
             text = set_title(text, f"{name} — Packages from {min(int(o['price']) for o in offers)} USD | Pixora" if offers
                              else f"{name} — One Team | Pixora", page)
+            name_ar = (meta(text, "name", "title-ar") or "").split(" — ")[0]
+            if not name_ar:
+                fail(page, "its Arabic title")
+            text = set_title_ar(text, f"{name_ar} — باقات تبدأ من {min(int(o['price']) for o in offers)} دولار | بيكسورا" if offers
+                                else f"{name_ar} — فريق واحد | بيكسورا", page)
             data = {"@context": "https://schema.org", "@type": "Service", "name": name, "serviceType": name,
                     "description": desc, "url": url, "provider": {"@id": ORG}, "areaServed": AREA,
                     "availableLanguage": ["en", "ar"]}
@@ -159,6 +177,7 @@ def build(site: pathlib.Path):
                 fail(page, "its study in cases.CASES")
             title_en = plain(case["title"][0])
             text = set_title(text, f"{title_en} — Case Study | Pixora", page)
+            text = set_title_ar(text, f"{plain(case['title'][1])} — دراسة حالة | بيكسورا", page)
             data = {"@context": "https://schema.org", "@type": "CreativeWork", "name": title_en,
                     "headline": plain(STORIES[slug]["headline"][0]), "description": desc, "url": url,
                     "genre": plain(case["category"][0]), "inLanguage": ["en", "ar"],

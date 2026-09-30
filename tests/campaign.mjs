@@ -962,6 +962,25 @@ for (const [w, root] of [[1440, 16], [1920, 18], [2560, 20]]) {
   await ctx.close();
 }
 
+/* ---- Arabic first for Arabic speakers --------------------------------------- */
+// A first visit takes the device's language (the first of Arabic or English it
+// lists), set before anything is painted; a choice once made always wins.
+for (const [label, locale, stored, want] of [['an Arabic phone', 'ar-SA', null, 'ar'], ['an English phone', 'en-US', null, 'en'],
+  ['an Arabic phone whose owner chose English', 'ar-EG', 'en', 'en'], ['an English phone whose owner chose Arabic', 'en-GB', 'ar', 'ar']]) {
+  const ctx = await browser.newContext({ ...VIEWPORTS.mobile, locale });
+  await ctx.route(/plausible\.io/, (r) => r.abort());
+  if (stored) await ctx.addInitScript((v) => { try { localStorage.setItem('site-lang', v); } catch {} }, stored);
+  await ctx.addInitScript(() => { document.addEventListener('readystatechange', () => { if (document.readyState === 'interactive') window.__first = document.documentElement.lang + '/' + document.documentElement.dir; }, { once: true }); });
+  const p = await ctx.newPage();
+  const errs = []; p.on('pageerror', (e) => errs.push(e.message));
+  await p.goto(`${BASE}/services/branding`, { waitUntil: 'networkidle' });
+  const r = await p.evaluate(() => ({ first: window.__first, lang: document.documentElement.lang, title: document.title, pressed: document.querySelector('button[data-lang][aria-pressed="true"]')?.dataset.lang }));
+  const dir = want === 'ar' ? 'rtl' : 'ltr';
+  check(r.first === `${want}/${dir}` && r.lang === want && r.pressed === want && (want === 'en' || /[\u0600-\u06FF]/.test(r.title)) && errs.length === 0,
+    `language: ${label} opens in ${want === 'ar' ? 'Arabic' : 'English'}, from the first paint`, JSON.stringify(r));
+  await ctx.close();
+}
+
 await browser.close();
 
 // The built site ships only what it uses, and every placeholder is filled.

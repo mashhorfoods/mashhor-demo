@@ -150,12 +150,29 @@ REDIRECTS = r"""  # Clean addresses: /pricing.html → /pricing, /index.html →
 """
 
 
+LANG_FIRST = ("<script>(function(){var d=document.documentElement,l;"
+              "try{l=localStorage.getItem('site-lang')}catch(e){}"
+              "if(l!=='ar'&&l!=='en'){var p=navigator.languages&&navigator.languages.length?navigator.languages:[navigator.language||''];"
+              "l='en';for(var i=0;i<p.length;i++){var c=String(p[i]).toLowerCase().slice(0,2);if(c==='ar'||c==='en'){l=c;break}}}"
+              "if(l==='ar'){d.lang='ar';d.dir='rtl'}})();</script>")
+
+
 def build(site: pathlib.Path):
     for path in pages(site):
         name = str(path.relative_to(site))
         text = path.read_text(encoding="utf-8")
 
         text = inject_css(text, CSS)
+        # Arabic first for Arabic speakers: before anything is painted, the
+        # page takes the visitor's saved choice or, on a first visit, the first
+        # of Arabic or English in the device's languages. The site script then
+        # carries on from the document's language (currentLang), as before.
+        if LANG_FIRST not in text:
+            head = text.find('<meta charset="utf-8" />')
+            if head < 0:
+                sys.exit(f"{name}: <meta charset> not found for the language script")
+            head += len('<meta charset="utf-8" />')
+            text = text[:head] + "\n    " + LANG_FIRST + text[head:]
         # Inside the footer landmark (it is fixed in place, so nothing moves), so
         # that assistive tech finds it in a region like everything else.
         close = text.rfind("</footer>")
