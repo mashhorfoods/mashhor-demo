@@ -111,7 +111,8 @@ try {
   await page.locator('input').first().fill('github_pat_example');
   await page.keyboard.press('Enter');
   await page.getByText('الأسعار والتواصل').first().waitFor({ timeout: 15000 });
-  check(await page.getByText('دراسات الحالة').count() > 0, 'signed in: prices & contact, and case studies');
+  const studies = await page.getByText('دراسات الحالة').first().waitFor({ timeout: 15000 }).then(() => true, () => false);
+  check(studies, 'signed in: prices & contact, and case studies');
 
   /* ---- 2. A price ------------------------------------------------------- */
   await page.getByText('أسعار الباقات').first().click();
