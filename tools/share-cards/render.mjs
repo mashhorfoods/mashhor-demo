@@ -78,8 +78,16 @@ const prices = await reader.$$eval('.c-index__link', (links) => links.filter((a)
 })));
 if (prices.length < 4) throw new Error(`pricing: expected the service index, found ${prices.length} entries`);
 
+// The hub's prints are the first four studies' covers, as the built hub shows them.
+await reader.goto(site('work.html'), { waitUntil: 'domcontentloaded' });
+const covers = await reader.$$eval('.c-case-card:not(.c-case-card--featured) .c-case-card__media img',
+  (imgs) => imgs.map((i) => i.getAttribute('src').split('/').pop().replace(/\.webp$/, '-800.webp')));
 for (const name of ['home', 'go', 'story', 'about', 'work']) {
   await page.goto(`file://${path.join(here, `${name}.html`)}`);
+  if (name === 'work') {
+    await page.evaluate(({ covers, out }) => document.querySelectorAll('.print img').forEach((img, i) => { img.src = `file://${out}/${covers[i]}`; }),
+      { covers: [covers[0], covers[2], covers[1], covers[3]], out });
+  }
   await shoot(`share-${name}.jpg`);
 }
 

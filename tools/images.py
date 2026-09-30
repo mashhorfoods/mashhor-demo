@@ -102,6 +102,13 @@ def work(folder):
                  f"scale={width}:{height}:force_original_aspect_ratio=increase:flags=lanczos,crop={width}:{height}", 82)
         found += 1
         print(f"overlay/assets/case-{src.stem}.webp (+ -800)")
+        # The study's first piece is its cover now: the drawn one goes.
+        slug = next(s for s in STORIES if src.stem.startswith(s + "-"))
+        if src.stem == f"{slug}-{STORIES[slug]['hero'][0]}":
+            for old in (f"case-{slug}.webp", f"case-{slug}-800.webp"):
+                if (OUT / old).exists():
+                    (OUT / old).unlink()
+                    print(f"removed overlay/assets/{old} (the drawn cover)")
     if not found:
         sys.exit(f"work: no images named <slug>-<piece> in {folder}")
 
