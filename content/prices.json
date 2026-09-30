@@ -1,0 +1,22 @@
+{
+  "branding": {
+    "tier-starter": 490,
+    "tier-professional": 990,
+    "tier-advanced": 1990
+  },
+  "websites": {
+    "web-landing": 250,
+    "web-business": 650,
+    "web-professional": 1200
+  },
+  "social": {
+    "soc-starter": 250,
+    "soc-pro": 400,
+    "soc-growth": 650
+  },
+  "marketing": {
+    "ads-starter": 250,
+    "ads-growth": 400,
+    "ads-performance": 600
+  }
+}

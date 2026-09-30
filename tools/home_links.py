@@ -18,6 +18,7 @@ import pathlib
 import re
 
 from build_services import ARROW, RAIL_BAR, bi
+import content
 from cases import CASES, cover_name
 from common import inject_all, stylesheet
 
@@ -78,8 +79,7 @@ def section():
 
 # The brands whose work this site shows, by the names its own images give
 # them. Only these: the site promises no invented client anywhere.
-BRANDS = [("Al Mada Travel &amp; Tourism", "المدى للسفر والسياحة"), ("Ajwa Flavors", "Ajwa Flavors"), ("Teela", "Teela"),
-          ("NexTech", "NexTech"), ("Mashhor Foodstuff Trading", "مشهور لتجارة المواد الغذائية"), ("Box Store", "Box Store")]
+BRANDS = content.brands()  # content/brands.json, edited from /cms/
 SERVICES_ANCHOR = '<section id="services" class="l-section c-services"'
 
 

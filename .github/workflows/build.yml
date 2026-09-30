@@ -5,6 +5,11 @@
 # On main it also publishes a preview to GitHub Pages
 # (https://<owner>.github.io/<repo>/): the same site under the repo's path,
 # without PHP (tools/pages.py). Needs Settings → Pages → Source: GitHub Actions.
+#
+# And, once the FTP secrets exist (LAUNCH.md, "النشر التلقائي"), uploads the
+# tested site to the host: every save in the editing panel (/cms/) is a push
+# to main, so it reaches the live site a few minutes later — or, if a test
+# fails, not at all.
 name: Build site
 
 on:
@@ -30,6 +35,10 @@ jobs:
           node-version: "22"
           cache: npm
 
+      # Before the build: it copies the editing panel (/cms/) from node_modules.
+      - name: Install
+        run: npm ci
+
       - name: Build
         run: python3 tools/build.py
 
@@ -42,9 +51,7 @@ jobs:
           cp -a site "dist/pixora-site-$short_sha"
 
       - name: Install test browser
-        run: |
-          npm ci
-          npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium
 
       - name: Test the site
         run: |
@@ -54,6 +61,12 @@ jobs:
 
       - name: Test the admin page
         run: node tests/admin.mjs
+
+      - name: Test content edits
+        run: python3 tests/content.py
+
+      - name: Test the editing panel
+        run: node tests/cms.mjs
 
       - uses: actions/upload-artifact@v4
         with:
@@ -71,6 +84,50 @@ jobs:
         if: github.ref == 'refs/heads/main'
         with:
           path: dist/pages/
+
+  # Upload to the host. Skipped (with a note in the run) until the secrets
+  # FTP_SERVER, FTP_USERNAME and FTP_PASSWORD exist; FTP_DIR and FTP_PROTOCOL
+  # are optional repository variables (public_html, ftps).
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # One upload at a time, in order: two quick saves never race.
+    concurrency:
+      group: deploy-live
+      cancel-in-progress: false
+    env:
+      FTP_SERVER: ${{ secrets.FTP_SERVER }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_DIR: ${{ vars.FTP_DIR || 'public_html' }}
+      FTP_PROTOCOL: ${{ vars.FTP_PROTOCOL || 'ftps' }}
+    steps:
+      - name: Check the FTP secrets
+        id: secrets
+        run: |
+          if [ -n "$FTP_SERVER" ] && [ -n "$FTP_USERNAME" ] && [ -n "$FTP_PASSWORD" ]; then
+            echo "ready=yes" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Not uploaded: add the FTP_SERVER, FTP_USERNAME and FTP_PASSWORD secrets to publish automatically (LAUNCH.md)."
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.secrets.outputs.ready == 'yes'
+
+      - uses: actions/download-artifact@v4
+        if: steps.secrets.outputs.ready == 'yes'
+        with:
+          pattern: pixora-site-upload-*
+          path: upload
+          merge-multiple: true
+
+      - name: Upload to the host
+        if: steps.secrets.outputs.ready == 'yes'
+        run: |
+          sudo apt-get install -y lftp > /dev/null
+          tools/deploy.sh upload
 
   pages:
     if: github.ref == 'refs/heads/main'

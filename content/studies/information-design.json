@@ -1,0 +1,120 @@
+{
+  "card": {
+    "category": {
+      "ar": "تصميم المعلومات",
+      "en": "Information Design"
+    },
+    "title": {
+      "ar": "تصميم المعلومات والسرد البصري",
+      "en": "Information design & visual storytelling"
+    },
+    "summary": {
+      "ar": "إنفوجرافيك وعروض وقصص بيانات تحوّل الأبحاث إلى ما يفهمه الناس.",
+      "en": "Infographics, presentations and data stories that turn research into something people understand."
+    }
+  },
+  "headline": {
+    "ar": "أبحاث تتحوّل إلى ما يفهمه الناس.",
+    "en": "Research, turned into something people understand."
+  },
+  "standfirst": {
+    "ar": "إنفوجرافيك وعروض وقصص بيانات مبنية من مجموعات البيانات والتقارير التقنية والتقييمات الإنسانية — لقرّاء يحتاجون النتيجة، لا جدول البيانات.",
+    "en": "Infographics, presentations and data stories built from datasets, technical reports and humanitarian assessments — for readers who need the finding, not the spreadsheet."
+  },
+  "chapters": {
+    "gap": {
+      "note": {
+        "ar": "الفجوة",
+        "en": "the gap"
+      },
+      "title": {
+        "ar": "الفكرة موجودة في التقرير، لكن القارئ لا يصل إليها.",
+        "en": "The insight is in the report. The reader never gets there."
+      },
+      "lead": {
+        "ar": "تحمل مجموعات البيانات والتقارير التقنية والتقييمات رؤى قيّمة، مكتوبة بجداول ولغة تقنية لا يقرؤها إلا المتخصصون. النتيجة المهمة موجودة — في الصفحة الأربعين، في العمود الرابع — ومن يحتاجها أكثر من غيره لن يجدها.",
+        "en": "Datasets, technical reports and assessments hold valuable insight, written in tables and technical language that only specialists can read. The finding that matters is there — on page forty, in the fourth column — and the people who need it most will not find it."
+      },
+      "aside": {
+        "ar": "الدقة التي لا يفهمها أحد لا تنفع أحدًا.",
+        "en": "Accuracy that nobody understands helps nobody."
+      }
+    },
+    "question": {
+      "note": {
+        "ar": "السؤال",
+        "en": "the question"
+      },
+      "title": {
+        "ar": "كل رسم يبدأ بسؤال.",
+        "en": "Every chart starts as a question."
+      },
+      "lead": {
+        "ar": "نقرأ البحث، ونتحقق من البيانات، ونبحث عن الفكرة: ماذا يحتاج هذا الجمهور أن يعرف، وأي قرار يُفترض أن تدعمه؟ عندها فقط نقرر ما نعرضه — وما نتركه في الملحق.",
+        "en": "We read the research, verify the data, and look for the insight: what does this audience need to know, and what decision is it meant to support? Only then do we decide what to show — and what to leave in the appendix."
+      },
+      "aside": {
+        "ar": "الرسم الذي لا يقول أي سؤال يجيب عنه، لا يُرسم.",
+        "en": "If a chart cannot say which question it answers, it does not get drawn."
+      }
+    },
+    "narrative": {
+      "note": {
+        "ar": "السرد",
+        "en": "the story"
+      },
+      "title": {
+        "ar": "البيانات بالترتيب الذي يفكر به الإنسان.",
+        "en": "Data in the order a person thinks."
+      },
+      "lead": {
+        "ar": "السياق أولًا، ثم النتيجة، ثم معناها، ثم ما يترتب عليها. ويقود التسلسل البصري العين على هذا الترتيب، فيتبع القارئ الفكرة دون أن يُقال له أين ينظر.",
+        "en": "Context first, then the finding, then what it means, then what follows from it. The visual hierarchy walks the eye along that order, so a reader can follow the argument without being told where to look."
+      },
+      "aside": {
+        "ar": "القصة قبل الرسوم المنفردة.",
+        "en": "A story over isolated graphics."
+      }
+    },
+    "form": {
+      "note": {
+        "ar": "الشكل",
+        "en": "the form"
+      },
+      "title": {
+        "ar": "الوضوح قبل الزخرفة، والدقة قبل التعقيد.",
+        "en": "Clarity over decoration. Accuracy over complexity."
+      },
+      "lead": {
+        "ar": "نختار أبسط رسم يقول الحقيقة، ونعطي اللون معنى ونحافظ عليه، ونضع كل عنصر بصري في التقرير أو العرض الذي ينتمي إليه — مبنيًا على الأسس التحريرية نفسها التي بُنيت عليها الصفحات من حوله.",
+        "en": "We choose the simplest chart that tells the truth, give colour a meaning and keep it, and fit each visual into the report or presentation it belongs to — built on the same editorial principles as the pages around it."
+      },
+      "aside": {
+        "ar": "يُستخدم اللون ليعني شيئًا، لا ليملأ فراغًا.",
+        "en": "Colour is used to mean something, never to fill space."
+      }
+    },
+    "result": {
+      "note": {
+        "ar": "ما أنتجه",
+        "en": "what it produced"
+      },
+      "title": {
+        "ar": "مصمَّمة لتُقرأ في جلسة واحدة.",
+        "en": "Made to be read in one sitting."
+      },
+      "lead": {
+        "ar": "تواصل بصري يستوعبه صنّاع القرار والشركاء والجمهور بسرعة دون أن تضيع الدقة: ملخصات وإنفوجرافيك وعروض مبنية من الأدلة الموثّقة نفسها.",
+        "en": "Visual communication that decision-makers, partners and the public can take in quickly without losing accuracy: summaries, infographics and presentations built from the same verified evidence."
+      },
+      "aside": {
+        "ar": "لا ننشر نتائج لا نستطيع إثباتها. تقف هذه الفصول عند ما سُلِّم.",
+        "en": "We do not publish results we cannot prove. These chapters stop at what was delivered."
+      }
+    }
+  },
+  "close": {
+    "ar": "إذا كان بحثك يجب أن يصل إلى من لن يفتح التقرير الكامل أبدًا، فمن هناك نبدأ.",
+    "en": "If your research has to reach people who will never open the full report, that is where we start."
+  }
+}

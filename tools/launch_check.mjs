@@ -157,6 +157,22 @@ for (const path of ['/_leads/leads.csv', '/_lib/storage.php', '/admin/config.php
   check(r.status !== 200 || !/\$2y\$|received_at|<\?php/.test(body), `${path} reveals nothing`, 'ارفع ملفات .htaccess الموجودة داخل _leads و_lib وadmin من الحزمة.', `status ${r.status}`);
 }
 
+// The editing panel: open (it is useless without a GitHub token), under its
+// own policy, and out of search.
+{
+  const r = await get('/cms/');
+  const csp = r.headers.get('content-security-policy') || '';
+  const page = r.status === 200 ? await r.text() : '';
+  const script = (page.match(/src="(sveltia-cms-[\d.]+\.js)"/) || [])[1];
+  const js = script ? await get(`/cms/${script}`) : { status: 0 };
+  const config = await get('/cms/config.yml');
+  check(r.status === 200 && js.status === 200 && config.status === 200, '/cms/ (the editing panel) is uploaded',
+    'ارفع مجلد cms كاملًا من الحزمة، بما فيه ‎.htaccess.', `page ${r.status}, script ${js.status}, config ${config.status}`);
+  check(/connect-src[^;]*api\.github\.com/.test(csp) && /script-src 'self';/.test(csp), '/cms/ has its own security policy (GitHub only)',
+    'ارفع cms/.htaccess من الحزمة نفسها.', csp.slice(0, 120));
+  check(/noindex/.test(r.headers.get('x-robots-tag') || ''), '/cms/ is kept out of search', 'ارفع cms/.htaccess من الحزمة نفسها.');
+}
+
 /* ---- 8. The contact form's server --------------------------------------------- */
 section('8. نموذج التواصل — the server behind both forms (lead.php)');
 const lg = await get('/lead.php');

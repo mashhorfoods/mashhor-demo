@@ -63,36 +63,14 @@ FEATURED = {
     "pieces": [("Identity", "الهوية"), ("Website", "الموقع"), ("Campaign", "الحملة"), ("Company profile", "الملف التعريفي")],
 }
 
-CASES = [
-    {
-        "slug": "brand-identity-systems", "kinds": "branding",
-        "category": ("Branding &amp; Visual Identity", "الهوية والتصميم"),
-        "title": ("Brand identity systems", "أنظمة الهوية البصرية"),
-        "summary": ("Identity systems, packaging and collateral for commercial organisations across Sudan and Oman.",
-                    "أنظمة هوية وتغليف ومطبوعات لمؤسسات تجارية في السودان وعُمان."),
-    },
-    {
-        "slug": "editorial-publication-design", "kinds": "editorial",
-        "category": ("Editorial Design", "التصميم التحريري"),
-        "title": ("Editorial &amp; publication design", "التصميم التحريري والمطبوعات"),
-        "summary": ("Annual reports, publications and presentations that make complex information easy to follow.",
-                    "تقارير سنوية ومطبوعات وعروض تجعل المعلومات المعقدة سهلة المتابعة."),
-    },
-    {
-        "slug": "information-design", "kinds": "information",
-        "category": ("Information Design", "تصميم المعلومات"),
-        "title": ("Information design &amp; visual storytelling", "تصميم المعلومات والسرد البصري"),
-        "summary": ("Infographics, presentations and data stories that turn research into something people understand.",
-                    "إنفوجرافيك وعروض وقصص بيانات تحوّل الأبحاث إلى ما يفهمه الناس."),
-    },
-    {
-        "slug": "digital-campaigns", "kinds": "digital",
-        "category": ("Digital Communication", "التواصل الرقمي"),
-        "title": ("Digital communication campaigns", "حملات التواصل الرقمي"),
-        "summary": ("Campaign systems that unite branding, storytelling and motion across every platform.",
-                    "أنظمة حملات توحّد الهوية والسرد والحركة عبر كل المنصات."),
-    },
-]
+# The studies, in the order /work shows them. Each card's words (category,
+# title, summary) are in content/studies/<slug>.json, with the study's own.
+CASES = [{"slug": slug, "kinds": kinds, **STORIES[slug]["card"]} for slug, kinds in [
+    ("brand-identity-systems", "branding"),
+    ("editorial-publication-design", "editorial"),
+    ("information-design", "information"),
+    ("digital-campaigns", "digital"),
+]]
 
 
 def plain(html):

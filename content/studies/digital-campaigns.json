@@ -1,0 +1,120 @@
+{
+  "card": {
+    "category": {
+      "ar": "التواصل الرقمي",
+      "en": "Digital Communication"
+    },
+    "title": {
+      "ar": "حملات التواصل الرقمي",
+      "en": "Digital communication campaigns"
+    },
+    "summary": {
+      "ar": "أنظمة حملات توحّد الهوية والسرد والحركة عبر كل المنصات.",
+      "en": "Campaign systems that unite branding, storytelling and motion across every platform."
+    }
+  },
+  "headline": {
+    "ar": "ليست ثلاثين منشورًا، بل حملة واحدة.",
+    "en": "Not thirty posts. One campaign."
+  },
+  "standfirst": {
+    "ar": "أنظمة حملات تجمع الهوية والسرد البصري والموشن — ليبدو كل مقاس تُنشر به الحملة، على كل منصة، علامةً واحدة.",
+    "en": "Campaign systems that bring branding, visual storytelling and motion together — so every format the campaign ships in, on every platform, reads as the same brand."
+  },
+  "chapters": {
+    "problem": {
+      "note": {
+        "ar": "المشكلة",
+        "en": "the problem"
+      },
+      "title": {
+        "ar": "منشورات جيدة قد لا تصنع علامة.",
+        "en": "Good posts can still add up to no brand."
+      },
+      "lead": {
+        "ar": "كثيرًا ما تتعامل العلامات مع التواصل الرقمي كسلسلة من المنشورات المنفصلة. يبدو كلٌّ منها جيدًا وحده؛ لكنها معًا لا تصنع حضورًا، ويصبح التعرّف على العلامة أصعب مع كل تصميم جديد.",
+        "en": "Brands often treat digital communication as a stream of one-off posts. Each one looks fine on its own; together they do not form a presence, and the brand becomes harder to recognise with every new design."
+      },
+      "aside": {
+        "ar": "يُبنى التمييز بالتكرار، وعدم الاتساق يستهلكه.",
+        "en": "Recognition is built by repetition, and inconsistency spends it."
+      }
+    },
+    "direction": {
+      "note": {
+        "ar": "الاتجاه",
+        "en": "the direction"
+      },
+      "title": {
+        "ar": "فكرة واحدة تُحسم قبل تصميم أول منشور.",
+        "en": "One idea, decided before the first post is designed."
+      },
+      "lead": {
+        "ar": "نبدأ من أهداف الحملة وجمهورها، ونحدد اتجاهًا بصريًا واحدًا وصورة رئيسية تنمو منها الحملة كلها. وكل مقاس لاحق نسخة من هذه الفكرة، لا فكرة جديدة.",
+        "en": "We start from the campaign's goals and its audience, and set one visual direction and a key visual the whole campaign grows from. Every later format is a version of that idea, not a new one."
+      },
+      "aside": {
+        "ar": "الحملة بفكرتين حملتان، كلٌّ منهما بنصف القوة.",
+        "en": "A campaign with two ideas is two campaigns, each half as strong."
+      }
+    },
+    "system": {
+      "note": {
+        "ar": "النظام",
+        "en": "the system"
+      },
+      "title": {
+        "ar": "نظام يتغيّر مقاسه، لا تصميم يبدأ من جديد.",
+        "en": "A system that resizes, not a design that restarts."
+      },
+      "lead": {
+        "ar": "شبكة وخطوط وألوان ومعالجة للصور، تُضبط مرة واحدة وتتكيف مع كل مقاس تحتاجه الحملة — منشورات الحساب والستوري والأغلفة والبانرات. المقاس الجديد مسألة ساعات، ويبقى شبيهًا بالحملة.",
+        "en": "Grid, type, colour and image treatment, set once and adapted to every format the campaign needs — feed posts, stories, covers and banners. A new size is a matter of hours, and it still looks like the campaign."
+      },
+      "aside": {
+        "ar": "التكيف مع المنصات يُصمَّم من البداية، لا يُضاف في النهاية.",
+        "en": "Multi-platform adaptation is designed in from the start, not added at the end."
+      }
+    },
+    "motion": {
+      "note": {
+        "ar": "الحركة",
+        "en": "motion"
+      },
+      "title": {
+        "ar": "الحركة حيث تستحق الانتباه، لا في كل مكان.",
+        "en": "Motion where it earns attention, not everywhere."
+      },
+      "lead": {
+        "ar": "يُبنى الموشن جرافيك من النظام نفسه الذي بُنيت منه التصاميم الثابتة — الأشكال والألوان والخطوط نفسها، لكنها تتحرك. ويوضع حيث تساعد الحركة الرسالة على الوصول، لا حيث لا تضيف إلا ضجيجًا.",
+        "en": "Motion graphics are built from the same system as the still designs — the same shapes, colours and type, now moving. They go where movement helps the message land, and nowhere it would only add noise."
+      },
+      "aside": {
+        "ar": "النسخة الثابتة والمتحركة من الحملة يجب أن تكونا الشيء نفسه بوضوح.",
+        "en": "The still and the moving versions of a campaign should be recognisably the same thing."
+      }
+    },
+    "result": {
+      "note": {
+        "ar": "ما أنتجه",
+        "en": "what it produced"
+      },
+      "title": {
+        "ar": "حضور واحد على كل منصة تصل إليها الحملة.",
+        "en": "One presence on every platform the campaign touches."
+      },
+      "lead": {
+        "ar": "نظام حملات قابل للتوسع: حضور واحد للعلامة في كل مكان، ومحتوى يتكيف بسرعة مع كل منصة، ومجموعة عناصر يعيد الفريق استخدامها في الحملة التالية بدل أن يبدأ من جديد.",
+        "en": "A campaign system that scales: one brand presence everywhere, content that adapts quickly to each platform, and a set of assets the team can reuse for the next campaign instead of starting again."
+      },
+      "aside": {
+        "ar": "لا ننشر نتائج لا نستطيع إثباتها. تقف هذه الفصول عند ما سُلِّم.",
+        "en": "We do not publish results we cannot prove. These chapters stop at what was delivered."
+      }
+    }
+  },
+  "close": {
+    "ar": "إذا كانت منشوراتك جميلة كلٌّ على حدة لكنها لا تتسق معًا، فالحل نظام، لا منشور آخر.",
+    "en": "If your posts look good one at a time but not together, the fix is a system, not another post."
+  }
+}

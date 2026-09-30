@@ -17,6 +17,7 @@ build stops and says which.
 No hreflang: both languages live at the same address (the page switches
 between them), and hreflang is only for languages at different addresses.
 """
+import html
 import json
 import pathlib
 import re
@@ -109,6 +110,11 @@ def plain(html):
     return re.sub(r"<[^>]+>", "", html).replace("&amp;", "&").strip()
 
 
+def words(text):
+    """Page text as structured data wants it: no tags, no entities."""
+    return html.unescape(re.sub(r"<[^>]+>", "", text)).strip()
+
+
 def service(text, page):
     """The service's name, packages and prices, as its page shows them."""
     name = re.search(r'<meta\s+property="og:title"\s+content="([^"]*?) — Pixora"', text)
@@ -124,10 +130,10 @@ def service(text, page):
         if not (tier_name and amount):
             fail(page, "a package's name or price")
         price = amount.group(1).replace(",", "")
-        offer = {"@type": "Offer", "name": plain(tier_name.group(1)), "price": price, "priceCurrency": "USD",
+        offer = {"@type": "Offer", "name": words(tier_name.group(1)), "price": price, "priceCurrency": "USD",
                  "url": f"{ORIGIN}/{page[:-5]}#packages"}
         if purpose:
-            offer["description"] = plain(purpose.group(1))
+            offer["description"] = words(purpose.group(1))
         if 'data-i18n="billingMonthly"' in t or ">Monthly<" in t:
             offer["priceSpecification"] = {"@type": "UnitPriceSpecification", "price": price, "priceCurrency": "USD", "unitText": "MONTH"}
         offers.append(offer)
@@ -206,9 +212,9 @@ def build(site: pathlib.Path):
             title_en = plain(case["title"][0])
             text = set_title(text, f"{title_en} — Case Study | Pixora", page)
             text = set_title_ar(text, f"{plain(case['title'][1])} — دراسة حالة | بيكسورا", page)
-            data = {"@context": "https://schema.org", "@type": "CreativeWork", "name": title_en,
-                    "headline": plain(STORIES[slug]["headline"][0]), "description": desc, "url": url,
-                    "genre": plain(case["category"][0]), "inLanguage": ["en", "ar"],
+            data = {"@context": "https://schema.org", "@type": "CreativeWork", "name": words(case["title"][0]),
+                    "headline": words(STORIES[slug]["headline"][0]), "description": desc, "url": url,
+                    "genre": words(case["category"][0]), "inLanguage": ["en", "ar"],
                     "author": {"@type": "Organization", "@id": ORG, "name": "Pixora"}, "publisher": {"@id": ORG}}
             if image:
                 data["image"] = image

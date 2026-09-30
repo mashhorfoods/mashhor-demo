@@ -10,7 +10,9 @@
 Steps, in order:
     1. copy source, then overlay, into a fresh site/ (runtime lead data in
        site/_leads is kept)
-    2. build_services.py          one page per service; home and pricing unified
+    2. content.py                 prices and the WhatsApp number from content/
+                                  (the editing panel's files; see content.py)
+       build_services.py          one page per service; home and pricing unified
        streamline.py              order, repetition, placeholders, shorter copy
        story_hero.py              the case study's hero (its four surfaces)
        about_page.py              the About page, about Pixora and its team
@@ -21,6 +23,7 @@ Steps, in order:
     4. motion.py                  the "quiet luxury" motion layer (CSS half)
     5. finalize.py                one shared stylesheet + script for every page
                                   (go.html and /admin/ included), CSP, caching
+    6. cms.py                     the editing panel, /cms/ (needs `npm ci` first)
 
     python3 tools/build.py
 """
@@ -50,8 +53,8 @@ print("site/: source + overlay copied")
 sys.path.insert(0, str(TOOLS))
 from common import WHATSAPP  # noqa: E402
 
-# One WhatsApp number: filled into the campaign page, and the supplied site's
-# own links must already use it (change it there too if it ever changes).
+# One WhatsApp number (tools/config.json): filled into the campaign page here,
+# and written over the supplied site's own by content.py below.
 for name in ("go.html", "assets/go.js"):
     path = SITE / name
     path.write_text(path.read_text(encoding="utf-8").replace("{{WHATSAPP}}", WHATSAPP), encoding="utf-8")
@@ -67,10 +70,10 @@ if n != 1:
     sys.exit("build: the hero still (inline webp) was not found in index.html")
 home.write_text(text, encoding="utf-8")
 poster.unlink()
-for path in SOURCE.glob("*.html"):
-    others = set(re.findall(r"wa\.me/(\d+)", path.read_text(encoding="utf-8"))) - {WHATSAPP}
-    if others:
-        sys.exit(f"build: {path.name} links to WhatsApp {', '.join(others)}, tools/config.json says {WHATSAPP}")
+import content  # noqa: E402
+
+content.apply(SITE)
+print("content: prices and WhatsApp number from content/")
 import build_services  # noqa: E402
 
 build_services.build(SITE)
@@ -110,4 +113,9 @@ print("seo: titles, previews, structured data, sitemap dates")
 import finalize  # noqa: E402
 
 finalize.build(SITE)
+
+import cms  # noqa: E402
+
+cms.build(SITE)
+print("cms: the editing panel at /cms/")
 print("done")

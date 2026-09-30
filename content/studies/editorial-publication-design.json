@@ -1,0 +1,120 @@
+{
+  "card": {
+    "category": {
+      "ar": "التصميم التحريري",
+      "en": "Editorial Design"
+    },
+    "title": {
+      "ar": "التصميم التحريري والمطبوعات",
+      "en": "Editorial & publication design"
+    },
+    "summary": {
+      "ar": "تقارير سنوية ومطبوعات وعروض تجعل المعلومات المعقدة سهلة المتابعة.",
+      "en": "Annual reports, publications and presentations that make complex information easy to follow."
+    }
+  },
+  "headline": {
+    "ar": "وثائق طويلة، صُمّمت لتُقرأ حتى آخرها.",
+    "en": "Long documents, written to be read to the end."
+  },
+  "standfirst": {
+    "ar": "تقارير سنوية ومطبوعات إنسانية وكتيّبات وعروض تقديمية — عمل يهم فيه ترتيب المعلومة بقدر شكلها. وهو المجال الذي عمل فيه الفريق أطول وقت.",
+    "en": "Annual reports, humanitarian publications, brochures and presentations — work where the order of the information matters as much as how it looks. It is where the team has worked longest."
+  },
+  "chapters": {
+    "reader": {
+      "note": {
+        "ar": "القارئ",
+        "en": "the reader"
+      },
+      "title": {
+        "ar": "قيمة التقرير تقف عند الصفحة التي يتوقف فيها القارئ.",
+        "en": "A report is only as good as the page where the reader gives up."
+      },
+      "lead": {
+        "ar": "نصوص كثيفة، وصفحات يتغيّر أسلوبها في منتصف الطريق، ونتائج مبعثرة بين الفصول: تفقد التقارير الطويلة قرّاءها قبل أن يصلوا إلى المهم. والذين يحتاجون المعلومة أكثر من غيرهم — المانحون والشركاء وصنّاع القرار — هم أقلّهم وقتًا للبحث عنها.",
+        "en": "Dense text, pages that change style halfway through, findings scattered across chapters: long reports lose their readers before they reach what matters. And the people who most need the information — donors, partners, decision-makers — are the ones with the least time to dig for it."
+      },
+      "aside": {
+        "ar": "التواصل الإنساني والتقارير المؤسسية: وثائق لا يكون الوضوح فيها خيارًا.",
+        "en": "Humanitarian communication and institutional reporting: the documents where clarity is not optional."
+      }
+    },
+    "content": {
+      "note": {
+        "ar": "المحتوى",
+        "en": "the content"
+      },
+      "title": {
+        "ar": "قبل الشبكة، نقرأ المحتوى كله.",
+        "en": "Before the grid, we read the whole thing."
+      },
+      "lead": {
+        "ar": "تبدأ كل مطبوعة بالمحتوى لا بالتخطيط. نحلّل ما هو موجود، ونقرر ما يجب أن يراه القارئ أولًا وما يمكن أن ينتظر، ونخطط الوثيقة صفحةً صفحة — ليجد التصميم بنية يعبّر عنها، لا كومة نصوص يزيّنها.",
+        "en": "Every publication starts with the content, not the layout. We analyse what is there, decide what the reader must see first and what can wait, and plan the document page by page — so the design has a structure to express instead of a pile of text to decorate."
+      },
+      "aside": {
+        "ar": "معظم مشكلات التخطيط هي في حقيقتها مشكلات تسلسل.",
+        "en": "Most layout problems are really hierarchy problems."
+      }
+    },
+    "grid": {
+      "note": {
+        "ar": "الشبكة",
+        "en": "the grid"
+      },
+      "title": {
+        "ar": "شبكة تصمد من الصفحة الأولى حتى الأخيرة.",
+        "en": "A grid that holds from the first page to the last."
+      },
+      "lead": {
+        "ar": "شبكة تحريرية متينة، وخطوط متسقة باللغتين، ومجموعة صغيرة من أنواع الصفحات مبنية عليها — افتتاحيات الفصول وصفحات القصص وصفحات البيانات والمربعات الجانبية. والمساحات البيضاء موضوعة عن قصد، لتمنح العين مكانًا تستريح فيه بين ما يهم.",
+        "en": "A strong editorial grid, typography that stays consistent in both languages, and a small set of page types — chapter openers, story pages, data pages, case boxes — built on it. White space is placed on purpose, to give the eye somewhere to rest between the things that matter."
+      },
+      "aside": {
+        "ar": "الصفحات المرنة تعني أن تقرير العام القادم يبدأ من نظام، لا من صفحة فارغة.",
+        "en": "Modular pages mean next year's report starts from a system, not a blank page."
+      }
+    },
+    "data": {
+      "note": {
+        "ar": "الأرقام",
+        "en": "the numbers"
+      },
+      "title": {
+        "ar": "أرقام تُصمَّم داخل القصة، لا تُلقى فيها.",
+        "en": "Numbers designed into the story, not dropped into it."
+      },
+      "lead": {
+        "ar": "الرسوم البيانية والإنفوجرافيك جزء من السياق التحريري: يقف كلٌّ منها حيث يطرح النص سؤاله، ولا يجيب إلا عنه. ويمتد النظام نفسه إلى العرض التقديمي المرافق للتقرير، فيرى الحاضرون ما رآه القارئ.",
+        "en": "Charts and infographics are part of the editorial flow: each one sits where the text raises its question, and answers only that. The same system carries into the presentation that goes with the report, so the room sees what the reader saw."
+      },
+      "aside": {
+        "ar": "يُراجَع كل رسم بياني مقابل مصدره قبل أن يُرسم.",
+        "en": "Every chart is checked against its source before it is drawn."
+      }
+    },
+    "result": {
+      "note": {
+        "ar": "ما أنتجه",
+        "en": "what it produced"
+      },
+      "title": {
+        "ar": "مطبوعات تتحدث بصوت مؤسسة واحدة.",
+        "en": "Publications that speak as one institution."
+      },
+      "lead": {
+        "ar": "تقارير وكتيّبات وعروض أسهل في التنقل، تحافظ على مظهر مؤسسي احترافي — للمنظمات الإنسانية وغير الحكومية وقرّاء الشركات على حد سواء — ونظام تحريري جاهز للإصدار التالي.",
+        "en": "Reports, brochures and presentations that are easier to navigate and keep a professional institutional look — for humanitarian organisations, NGOs and corporate readers alike — and an editorial system ready for the next one."
+      },
+      "aside": {
+        "ar": "لا ننشر نتائج لا نستطيع إثباتها. تقف هذه الفصول عند ما سُلِّم.",
+        "en": "We do not publish results we cannot prove. These chapters stop at what was delivered."
+      }
+    }
+  },
+  "close": {
+    "ar": "إذا كان تقريرك القادم يجب أن يُقرأ لا أن يُنشر فقط، فالعمل يبدأ ببنيته.",
+    "en": "If your next report has to be read, not just published, the work starts with its structure."
+  }
+}

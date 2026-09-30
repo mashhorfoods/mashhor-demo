@@ -1,0 +1,120 @@
+{
+  "card": {
+    "category": {
+      "ar": "الهوية والتصميم",
+      "en": "Branding & Visual Identity"
+    },
+    "title": {
+      "ar": "أنظمة الهوية البصرية",
+      "en": "Brand identity systems"
+    },
+    "summary": {
+      "ar": "أنظمة هوية وتغليف ومطبوعات لمؤسسات تجارية في السودان وعُمان.",
+      "en": "Identity systems, packaging and collateral for commercial organisations across Sudan and Oman."
+    }
+  },
+  "headline": {
+    "ar": "الشعار بداية العلامة، لا نهايتها.",
+    "en": "A logo is where a brand starts, not where it ends."
+  },
+  "standfirst": {
+    "ar": "جاءتنا شركات ناشئة ومنشآت صغيرة ومتوسطة وشركات سلع استهلاكية ووكالات ومبادرات إنسانية في السودان وعُمان من أجل هوية. وما حصل عليه كلٌّ منها كان نظامًا: العلامة، والقواعد التي تُبقيها واحدة على كل واجهة ستظهر عليها.",
+    "en": "Startups, SMEs, FMCG companies, agencies and humanitarian initiatives across Sudan and Oman came to us for an identity. What each of them received was a system: the mark, and the rules that keep it the same on every surface it will ever touch."
+  },
+  "chapters": {
+    "problem": {
+      "note": {
+        "ar": "المشكلة",
+        "en": "the problem"
+      },
+      "title": {
+        "ar": "شعار واحد، وأربع نسخ من الشركة.",
+        "en": "One logo, four versions of the business."
+      },
+      "lead": {
+        "ar": "تصلنا معظم المؤسسات بشعار بلا نظام. تبدو العلامة بشكل على المنتج، وبآخر في التقرير، وبثالث على الموقع — وكل مصمم جديد يضيف شكلًا رابعًا. العميل لا يرى الشعار وحده؛ يرى كل مكان يظهر فيه، وحين تختلف هذه الأماكن تبدو الشركة غير واثقة من نفسها.",
+        "en": "Most organisations reach us with a logo and no system. The mark looks one way on the product, another in the report, a third on the website — and every new designer adds a fourth. Customers never see a logo on its own; they see every place it appears, and when those places disagree, the business looks unsure of itself."
+      },
+      "aside": {
+        "ar": "المشكلة نفسها بكل الأحجام: من أول منتج لشركة ناشئة إلى التقرير العاشر لمؤسسة.",
+        "en": "The same problem at every size: from a startup's first product to an organisation's tenth report."
+      }
+    },
+    "research": {
+      "note": {
+        "ar": "البحث",
+        "en": "the research"
+      },
+      "title": {
+        "ar": "نبدأ بالعمل نفسه، لا بالخط.",
+        "en": "We start with the business, not the typeface."
+      },
+      "lead": {
+        "ar": "قبل أن نرسم أي شيء ندرس المؤسسة وجمهورها وأهدافها والمواضع التي يتعثر فيها تواصلها. ثم نستكشف عدة اتجاهات بصرية — ويُحكم على كلٍّ منها بسؤال واحد: هل يستطيع أن يقول ما تحتاج هذه الشركة أن تقوله، في كل مكان تحتاج أن تقوله فيه؟",
+        "en": "Before anything is drawn we study the organisation, its audience, its goals and the places its communication breaks down. Then we explore several visual directions — and each is judged on one question: can it say what this business needs to say, everywhere it needs to say it?"
+      },
+      "aside": {
+        "ar": "الاتجاه الذي لا يُشرح في جملة واحدة ليس جاهزًا للرسم.",
+        "en": "A direction that cannot be explained in one sentence is not ready to be drawn."
+      }
+    },
+    "system": {
+      "note": {
+        "ar": "النظام",
+        "en": "the system"
+      },
+      "title": {
+        "ar": "علامة واحدة، مكتوبة بحيث يستطيع أي أحد استخدامها.",
+        "en": "One mark, written down so anyone can use it."
+      },
+      "lead": {
+        "ar": "نظام شعار يعمل من أيقونة المتصفح حتى واجهة المتجر. ألوان بقيمها المكتوبة. وخطوط اختيرت لتبقى واضحة بالعربية والإنجليزية. وتخطيطات مرنة الوحدات، وأشكال وأنماط وأيقونات مساندة تمكّن فريق العميل من بناء صفحة جديدة دون أن يبدأ من الصفر — وكل ذلك مجموع في دليل للهوية.",
+        "en": "A logo system that works from a favicon to a shop front. Colours with their values written down. Type chosen to stay legible in Arabic and English. Modular layouts and the supporting shapes, patterns and icons that let the client's own team build a new page without starting from nothing — all of it gathered in guidelines."
+      },
+      "aside": {
+        "ar": "يُكتب الدليل لفريق العميل، لا للمصممين الآخرين.",
+        "en": "Guidelines are written for the client's team, not for other designers."
+      }
+    },
+    "test": {
+      "note": {
+        "ar": "الاختبار",
+        "en": "the test"
+      },
+      "title": {
+        "ar": "مُختبَرة حيث ستعيش: على الرف وعلى الشاشة.",
+        "en": "Tested where it will live: on the shelf and on the screen."
+      },
+      "lead": {
+        "ar": "تُجرَّب كل هوية بمقاسها الحقيقي على ما ستُطبع عليه وتُعرض فيه فعلًا — العبوة والمطبوعات المكتبية واللافتات والهاتف في اليد — قبل تسليم أي شيء. وتخرج الملفات من عندنا جاهزة للمطبعة وللمطوّر، فلا يحتاج شيء إلى إعادة رسم ليناسب مكانه.",
+        "en": "Every identity is tried at real size on the things it will actually be printed on and shown on — packaging, stationery, signage, a phone in the hand — before anything is handed over. The files leave us ready for the printer and the developer, so nothing has to be redrawn to fit."
+      },
+      "aside": {
+        "ar": "اللون الذي ينجح على الشاشة ويفشل في الطباعة يُكتشف هنا، لا في المطبعة.",
+        "en": "A colour that works on screen and fails in print is caught here, not at the printer."
+      }
+    },
+    "result": {
+      "note": {
+        "ar": "ما أنتجه",
+        "en": "what it produced"
+      },
+      "title": {
+        "ar": "العلامة نفسها أينما التقاها العميل.",
+        "en": "The same brand wherever the customer meets it."
+      },
+      "lead": {
+        "ar": "أنظمة هوية تمتد عبر العبوات والتواصل المؤسسي والحملات والعروض والمواقع ومنصات التواصل. يُصنع كل جديد من النظام لا من الصفر، وهذا ما يُبقي العلامة مميّزة كلما كبرت الشركة.",
+        "en": "Identity systems that carry across packaging, corporate communication, campaigns, presentations, websites and social platforms. New material is made from the system rather than from scratch, which is what keeps a brand recognisable as the business grows."
+      },
+      "aside": {
+        "ar": "لا ننشر نتائج لا نستطيع إثباتها. تقف هذه الفصول عند ما سُلِّم.",
+        "en": "We do not publish results we cannot prove. These chapters stop at what was delivered."
+      }
+    }
+  },
+  "close": {
+    "ar": "تكتمل الهوية حين يستطيع فريقك استخدامها من دوننا. هذا هو الاختبار الذي بُني كل نظام هنا ليجتازه.",
+    "en": "An identity is finished when your own team can use it without us. That is the test every system here was built to pass."
+  }
+}

@@ -12,6 +12,7 @@
     "check:live": "node tools/launch_check.mjs"
   },
   "devDependencies": {
+    "@sveltia/cms": "0.226.0",
     "playwright": "^1.49.0"
   }
 }

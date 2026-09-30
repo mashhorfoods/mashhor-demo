@@ -23,6 +23,9 @@ a fresh one at any time.
 Do not overwrite `admin/config.php` on the server once the admin password is
 set (the package carries the empty one).
 
+Once the FTP secrets are set, the workflow uploads it itself after every
+green run on `main` — see "Editing content" below.
+
 ## Preview on GitHub Pages
 
 Every push to `main` that passes the tests also publishes a preview at
@@ -52,12 +55,14 @@ tools/build.py   →   site/
 
 | Step | Script | What it does |
 | --- | --- | --- |
+| 0 | `content.py` | The package prices and the WhatsApp number from `content/` and `tools/config.json`, written wherever the supplied pages state them (see "Editing content"). |
 | 1 | `build_services.py`, `streamline.py` | One page per service at `/services/<id>` (details, showcase, what it covers, packages and prices, related add-ons, other services). The homepage gets a single services section of cards; the old accordion, the five detail sections and the add-ons leave it. `/pricing` keeps only pricing matters: what moves a price, an index linking to the service pages, every add-on, the build-your-own estimator and billing. |
 | 1b | `story_hero.py`, `about_page.py`, `cases.py`, `home_links.py` | The Story page's hero, the About page, the case studies (`/work`, `/work/<slug>` — see below), and the homepage's two doors to them and to About. |
 | 2 | `refinements.py` | Spacing, pill buttons, WhatsApp button on phones, hero copy, profile, privacy note, root-based clean links, 301s from `.html`. |
 | 3 | `motion.py` | "Quiet luxury" motion layer, stylesheet half: one rhythm (480/900 ms, expo ease-out) with a light blur on the site's own reveal; page-to-page cross-fades with the header held still and each service card growing into its page (`@view-transition`); long text and the campaign page surfacing with the scroll (scroll-driven CSS); hero lines rising; pointer light on cards. Script half: `overlay/assets/motion.js` (line split, magnetic primary buttons, pointer light, self-gliding galleries that stop when touched, counting totals). On touch screens (phones, tablets) reveals start just before content arrives and run shorter, closer and without blur, so a flick never outruns them; hover lifts and zooms stay off there, so a tap leaves no card stuck raised. Case studies and the Story show a gold reading-progress line bound to the scroll. All off under reduced motion; nothing hidden without it. |
 | 3b | `seo.py` | Titles that say what a page offers (a service's from-price included), link previews that describe their own page, structured data (Organization and WebSite on the homepage, each service with its packages and prices read from its page, each case study and the Story as a CreativeWork), and a date on every sitemap entry (the commit built). No hreflang: both languages share one address. |
 | 4 | `finalize.py`, `prune_css.py` | Comments and indentation stripped from the stylesheet (it holds up the first paint); one shared, content-hashed `site.<hash>.css` / `.js` / `motion.<hash>.js` for every page (go and admin included), long caching, CSP hashes. The stylesheet loses the rules of components no page uses (listed by exact class name in `prune_css.py`; the build stops if a page uses one again). |
+| 5 | `cms.py` | The editing panel at `/cms/` (needs `npm ci` first). |
 
 Photographs are encoded once with `python3 tools/images.py covers|about|board|cases|work`
 (the results are committed; the build never encodes). Shared helpers live in
@@ -86,7 +91,7 @@ Ad  →  /go (hero)  →  "شوف أعمالنا"  →  /go#work     →  توا
 | `overlay/assets/go.js` | Views, WhatsApp messages, the form, attribution. External so the site's CSP needs no new hash. |
 | `overlay/lead.php` | Receives the form: validates, stores a CSV row, emails `muhalabsalah@gmail.com`. Answers "ok" only when the lead is actually held — otherwise the page offers WhatsApp with the details pre-written. |
 | `overlay/_leads/.htaccess` | Refuses all web access to the fallback storage folder. |
-| `tools/config.json` | The business WhatsApp number — the one place to change it. The build fills it into the campaign page and stops if the supplied site's own links use a different one. |
+| `tools/config.json` | The business WhatsApp number — the one place to change it (also from `/cms/`). The build writes it over the supplied site's own number everywhere, and fills it into the campaign page. |
 | `tests/campaign.mjs` | End-to-end checks: routes, devices, WhatsApp links, validation, submission, tracking, fallback, every page's links, and that every file in `site/assets` is used. |
 
 ## Service covers
@@ -204,9 +209,9 @@ to them.
 ## Case studies — /work
 
 `tools/cases.py` builds the section; `tools/case_stories.py` holds the four
-studies (identity systems, editorial, information design, digital
-campaigns), each in English and Arabic, in the team's voice, with no
-number or result the work cannot show.
+studies' shape (pieces, chapters, drawings, links) and `content/studies/`
+their words (editable in `/cms/`), each in English and Arabic, in the team's
+voice, with no number or result the work cannot show.
 
 - `/work` — the hub: the Al Mada story as the featured card, then one card
   per study, filtered by discipline (identity, editorial, information,
@@ -435,6 +440,52 @@ BASE=http://127.0.0.1:8099 node tests/campaign.mjs
 # if the installed Playwright wants a browser it cannot download:
 CHROMIUM=/path/to/chrome BASE=http://127.0.0.1:8099 node tests/campaign.mjs
 ```
+
+## Editing content — /cms/
+
+The owner edits content at `https://zaokalyamamah.online/cms/` without
+touching code: the twelve package prices, the WhatsApp number, the brands in
+the homepage strip, and each case study's words (card, headline, standfirst,
+the five chapters, the closing line), in Arabic and English. The panel is
+[Sveltia CMS](https://github.com/sveltia/sveltia-cms) (MIT, pinned in
+`package.json`); `tools/cms.py` writes its config from the content files, so
+everything in them has a field and nothing can be added that the build could
+not place.
+
+    content/prices.json            package prices by service and package id
+    content/brands.json            the brands strip
+    content/studies/<slug>.json    a study's words
+    tools/config.json              the WhatsApp number
+
+**What a save does.** The panel commits the one file to `main`. The workflow
+builds the site, runs every test, and — if the FTP secrets exist — uploads it
+to Hostinger (`tools/deploy.sh`: files, then pages, then `.htaccess`; never
+`admin/config.php` once it exists, never the leads, nothing deleted). A few
+minutes after "Save" the change is live; if a test fails, nothing is
+uploaded and the run in Actions says why. A price reaches its card, its
+WhatsApp message, the contact form, the homepage's "from" (the lowest
+package), the pricing index, the price data the estimator reads, and search
+results data.
+
+**Signing in** takes a GitHub fine-grained token for this repository with
+*Contents: read and write* (LAUNCH.md, step by step). "Sign in with GitHub"
+on the panel needs an OAuth server and is not set up; use the token button.
+
+**Automatic upload** needs three repository secrets — `FTP_SERVER`,
+`FTP_USERNAME`, `FTP_PASSWORD` (hPanel → Files → FTP Accounts) — and
+optionally two variables: `FTP_DIR` (default `public_html`, the site's folder
+as the FTP account sees it) and `FTP_PROTOCOL` (`ftps` by default; `ftp` only
+if the host offers no encryption). Until the secrets exist the run notes
+"Not uploaded" and the package is downloaded by hand as before.
+
+The build proved the move byte for byte: with the content files as
+generated, the site is identical to the one built before them. Tests:
+`python3 tests/content.py` (edits every price, the number, a brand and a
+study in a copy, builds it, finds every new value and no old one; broken
+files stop the build with a message naming the field; the panel has a field
+for every value) and `node tests/cms.mjs` (the panel against a stand-in for
+GitHub: signs in, saves a price and a study, checks the commit changes one
+line, and that a malformed number does not save).
 
 ## Admin — /admin/
 

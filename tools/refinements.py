@@ -346,7 +346,7 @@ def build(site: pathlib.Path):
     text = robots.read_text(encoding="utf-8")
     if "Allow: /\n" not in text:
         sys.exit("robots.txt: 'Allow: /' line not found")
-    robots.write_text(text.replace("Allow: /\n", "Allow: /\nDisallow: /admin/\nDisallow: /lead.php\nDisallow: /_leads/\n", 1), encoding="utf-8")
+    robots.write_text(text.replace("Allow: /\n", "Allow: /\nDisallow: /admin/\nDisallow: /cms/\nDisallow: /lead.php\nDisallow: /_leads/\n", 1), encoding="utf-8")
 
     # .htaccess: 301 old .html addresses, just above the clean-URL rewrite.
     htaccess = site / ".htaccess"

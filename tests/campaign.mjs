@@ -36,7 +36,10 @@ const VIEWPORTS = {
 // A browser context on the site: analytics stubbed (it is external), and the
 // page's language chosen up front when a test needs one.
 // The case studies, as tools/cases.py lists them.
-const CASES = [...readFileSync(path.join(here, '..', 'tools', 'cases.py'), 'utf8').matchAll(/"slug": "([^"]+)"/g)].map((m) => m[1]);
+// The studies, in /work's order: tools/cases.py lists them as ("slug", "kinds").
+const CASES = [...readFileSync(path.join(here, '..', 'tools', 'cases.py'), 'utf8').split('CASES = [')[1].split(']]')[0]
+  .matchAll(/\("([a-z-]+)", "[a-z ]+"\)/g)].map((m) => m[1]);
+if (CASES.length < 2) throw new Error('tests: could not read the studies from tools/cases.py');
 
 async function siteContext(browser, options, lang) {
   const context = await browser.newContext(options);

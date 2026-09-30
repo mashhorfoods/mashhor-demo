@@ -19,6 +19,9 @@ Each study has:
   behance   where more of this work is on Behance (optional): a second link
             beside the closing one.
 
+The words — headline, standfirst, each chapter's annotation, title, lead
+and aside, the closing statement — live in content/studies/<slug>.json, where
+the editing panel (/cms/) changes them; this file holds the shape they fill.
 Every sentence is in the team's voice, in both languages, and states no
 number or result the work cannot show.
 """
@@ -227,7 +230,10 @@ def sketch(kind, alt_id, seed):
 
 
 # ---------------------------------------------------------------------------
-# The studies. Hero slots: a (wide, 3:2), b (screen, 16:9), c (tall), d (strip).
+# The studies' shape. Hero slots: a (wide, 3:2), b (screen, 16:9), c (tall),
+# d (strip). Their words — headline, standfirst, each chapter's annotation,
+# title, lead and aside, the closing statement — are in
+# content/studies/<slug>.json (edited from /cms/) and joined in below.
 STORIES = {
     "brand-identity-systems": {
         "behance": "https://www.behance.net/gallery/119607411/Brands-ID",
@@ -240,49 +246,14 @@ STORIES = {
             "deck": (("Company presentation", "العرض التعريفي"), (16, 9), "screen"),
         },
         "hero": ["identity", "guidelines", "packaging", "stationery"],
-        "headline": ("A logo is where a brand starts, not where it ends.", "الشعار بداية العلامة، لا نهايتها."),
-        "standfirst": ("Startups, SMEs, FMCG companies, agencies and humanitarian initiatives across Sudan and Oman came to us for an identity. What each of them received was a system: the mark, and the rules that keep it the same on every surface it will ever touch.",
-                       "جاءتنا شركات ناشئة ومنشآت صغيرة ومتوسطة وشركات سلع استهلاكية ووكالات ومبادرات إنسانية في السودان وعُمان من أجل هوية. وما حصل عليه كلٌّ منها كان نظامًا: العلامة، والقواعد التي تُبقيها واحدة على كل واجهة ستظهر عليها."),
         "chapters": [
-            {"key": "problem", "note": ("the problem", "المشكلة"), "sketch": "scatter",
-             "title": ("One logo, four versions of the business.", "شعار واحد، وأربع نسخ من الشركة."),
-             "lead": ("Most organisations reach us with a logo and no system. The mark looks one way on the product, another in the report, a third on the website — and every new designer adds a fourth. Customers never see a logo on its own; they see every place it appears, and when those places disagree, the business looks unsure of itself.",
-                      "تصلنا معظم المؤسسات بشعار بلا نظام. تبدو العلامة بشكل على المنتج، وبآخر في التقرير، وبثالث على الموقع — وكل مصمم جديد يضيف شكلًا رابعًا. العميل لا يرى الشعار وحده؛ يرى كل مكان يظهر فيه، وحين تختلف هذه الأماكن تبدو الشركة غير واثقة من نفسها."),
-             "aside": ("The same problem at every size: from a startup's first product to an organisation's tenth report.",
-                       "المشكلة نفسها بكل الأحجام: من أول منتج لشركة ناشئة إلى التقرير العاشر لمؤسسة."),
-             "work": []},
-            {"key": "research", "note": ("the research", "البحث"), "sketch": "search",
-             "title": ("We start with the business, not the typeface.", "نبدأ بالعمل نفسه، لا بالخط."),
-             "lead": ("Before anything is drawn we study the organisation, its audience, its goals and the places its communication breaks down. Then we explore several visual directions — and each is judged on one question: can it say what this business needs to say, everywhere it needs to say it?",
-                      "قبل أن نرسم أي شيء ندرس المؤسسة وجمهورها وأهدافها والمواضع التي يتعثر فيها تواصلها. ثم نستكشف عدة اتجاهات بصرية — ويُحكم على كلٍّ منها بسؤال واحد: هل يستطيع أن يقول ما تحتاج هذه الشركة أن تقوله، في كل مكان تحتاج أن تقوله فيه؟"),
-             "aside": ("A direction that cannot be explained in one sentence is not ready to be drawn.",
-                       "الاتجاه الذي لا يُشرح في جملة واحدة ليس جاهزًا للرسم."),
-             "work": ["identity"]},
-            {"key": "system", "note": ("the system", "النظام"), "sketch": "grid",
-             "title": ("One mark, written down so anyone can use it.", "علامة واحدة، مكتوبة بحيث يستطيع أي أحد استخدامها."),
-             "lead": ("A logo system that works from a favicon to a shop front. Colours with their values written down. Type chosen to stay legible in Arabic and English. Modular layouts and the supporting shapes, patterns and icons that let the client's own team build a new page without starting from nothing — all of it gathered in guidelines.",
-                      "نظام شعار يعمل من أيقونة المتصفح حتى واجهة المتجر. ألوان بقيمها المكتوبة. وخطوط اختيرت لتبقى واضحة بالعربية والإنجليزية. وتخطيطات مرنة الوحدات، وأشكال وأنماط وأيقونات مساندة تمكّن فريق العميل من بناء صفحة جديدة دون أن يبدأ من الصفر — وكل ذلك مجموع في دليل للهوية."),
-             "aside": ("Guidelines are written for the client's team, not for other designers.",
-                       "يُكتب الدليل لفريق العميل، لا للمصممين الآخرين."),
-             "work": ["guidelines"]},
-            {"key": "test", "note": ("the test", "الاختبار"), "sketch": "devices",
-             "title": ("Tested where it will live: on the shelf and on the screen.", "مُختبَرة حيث ستعيش: على الرف وعلى الشاشة."),
-             "lead": ("Every identity is tried at real size on the things it will actually be printed on and shown on — packaging, stationery, signage, a phone in the hand — before anything is handed over. The files leave us ready for the printer and the developer, so nothing has to be redrawn to fit.",
-                      "تُجرَّب كل هوية بمقاسها الحقيقي على ما ستُطبع عليه وتُعرض فيه فعلًا — العبوة والمطبوعات المكتبية واللافتات والهاتف في اليد — قبل تسليم أي شيء. وتخرج الملفات من عندنا جاهزة للمطبعة وللمطوّر، فلا يحتاج شيء إلى إعادة رسم ليناسب مكانه."),
-             "aside": ("A colour that works on screen and fails in print is caught here, not at the printer.",
-                       "اللون الذي ينجح على الشاشة ويفشل في الطباعة يُكتشف هنا، لا في المطبعة."),
-             "work": ["packaging", "stationery"]},
-            {"key": "result", "note": ("what it produced", "ما أنتجه"), "sketch": "hub",
-             "title": ("The same brand wherever the customer meets it.", "العلامة نفسها أينما التقاها العميل."),
-             "lead": ("Identity systems that carry across packaging, corporate communication, campaigns, presentations, websites and social platforms. New material is made from the system rather than from scratch, which is what keeps a brand recognisable as the business grows.",
-                      "أنظمة هوية تمتد عبر العبوات والتواصل المؤسسي والحملات والعروض والمواقع ومنصات التواصل. يُصنع كل جديد من النظام لا من الصفر، وهذا ما يُبقي العلامة مميّزة كلما كبرت الشركة."),
-             "aside": ("We do not publish results we cannot prove. These chapters stop at what was delivered.",
-                       "لا ننشر نتائج لا نستطيع إثباتها. تقف هذه الفصول عند ما سُلِّم."),
-             "work": ["social", "deck"]},
+            {"key": "problem", "sketch": "scatter", "work": []},
+            {"key": "research", "sketch": "search", "work": ["identity"]},
+            {"key": "system", "sketch": "grid", "work": ["guidelines"]},
+            {"key": "test", "sketch": "devices", "work": ["packaging", "stationery"]},
+            {"key": "result", "sketch": "hub", "work": ["social", "deck"]},
         ],
-        "close": (("An identity is finished when your own team can use it without us. That is the test every system here was built to pass.",
-                   "تكتمل الهوية حين يستطيع فريقك استخدامها من دوننا. هذا هو الاختبار الذي بُني كل نظام هنا ليجتازه."),
-                  "/services/branding", ("See branding &amp; design", "خدمة الهوية والتصميم")),
+        "close": ("/services/branding", ("See branding &amp; design", "خدمة الهوية والتصميم")),
     },
     "editorial-publication-design": {
         "behance": "https://www.behance.net/moodboard/226170673/Editorial-Publication-Design",
@@ -293,47 +264,14 @@ STORIES = {
             "brochure": (("Brochure", "الكتيّب"), (9, 5), "book"),
         },
         "hero": ["spread", "deck", "cover", "brochure"],
-        "headline": ("Long documents, written to be read to the end.", "وثائق طويلة، صُمّمت لتُقرأ حتى آخرها."),
-        "standfirst": ("Annual reports, humanitarian publications, brochures and presentations — work where the order of the information matters as much as how it looks. It is where the team has worked longest.",
-                       "تقارير سنوية ومطبوعات إنسانية وكتيّبات وعروض تقديمية — عمل يهم فيه ترتيب المعلومة بقدر شكلها. وهو المجال الذي عمل فيه الفريق أطول وقت."),
         "chapters": [
-            {"key": "reader", "note": ("the reader", "القارئ"), "sketch": "pages",
-             "title": ("A report is only as good as the page where the reader gives up.", "قيمة التقرير تقف عند الصفحة التي يتوقف فيها القارئ."),
-             "lead": ("Dense text, pages that change style halfway through, findings scattered across chapters: long reports lose their readers before they reach what matters. And the people who most need the information — donors, partners, decision-makers — are the ones with the least time to dig for it.",
-                      "نصوص كثيفة، وصفحات يتغيّر أسلوبها في منتصف الطريق، ونتائج مبعثرة بين الفصول: تفقد التقارير الطويلة قرّاءها قبل أن يصلوا إلى المهم. والذين يحتاجون المعلومة أكثر من غيرهم — المانحون والشركاء وصنّاع القرار — هم أقلّهم وقتًا للبحث عنها."),
-             "aside": ("Humanitarian communication and institutional reporting: the documents where clarity is not optional.",
-                       "التواصل الإنساني والتقارير المؤسسية: وثائق لا يكون الوضوح فيها خيارًا."),
-             "work": []},
-            {"key": "content", "note": ("the content", "المحتوى"), "sketch": "hierarchy",
-             "title": ("Before the grid, we read the whole thing.", "قبل الشبكة، نقرأ المحتوى كله."),
-             "lead": ("Every publication starts with the content, not the layout. We analyse what is there, decide what the reader must see first and what can wait, and plan the document page by page — so the design has a structure to express instead of a pile of text to decorate.",
-                      "تبدأ كل مطبوعة بالمحتوى لا بالتخطيط. نحلّل ما هو موجود، ونقرر ما يجب أن يراه القارئ أولًا وما يمكن أن ينتظر، ونخطط الوثيقة صفحةً صفحة — ليجد التصميم بنية يعبّر عنها، لا كومة نصوص يزيّنها."),
-             "aside": ("Most layout problems are really hierarchy problems.", "معظم مشكلات التخطيط هي في حقيقتها مشكلات تسلسل."),
-             "work": ["cover"]},
-            {"key": "grid", "note": ("the grid", "الشبكة"), "sketch": "grid",
-             "title": ("A grid that holds from the first page to the last.", "شبكة تصمد من الصفحة الأولى حتى الأخيرة."),
-             "lead": ("A strong editorial grid, typography that stays consistent in both languages, and a small set of page types — chapter openers, story pages, data pages, case boxes — built on it. White space is placed on purpose, to give the eye somewhere to rest between the things that matter.",
-                      "شبكة تحريرية متينة، وخطوط متسقة باللغتين، ومجموعة صغيرة من أنواع الصفحات مبنية عليها — افتتاحيات الفصول وصفحات القصص وصفحات البيانات والمربعات الجانبية. والمساحات البيضاء موضوعة عن قصد، لتمنح العين مكانًا تستريح فيه بين ما يهم."),
-             "aside": ("Modular pages mean next year's report starts from a system, not a blank page.",
-                       "الصفحات المرنة تعني أن تقرير العام القادم يبدأ من نظام، لا من صفحة فارغة."),
-             "work": ["spread"]},
-            {"key": "data", "note": ("the numbers", "الأرقام"), "sketch": "chart",
-             "title": ("Numbers designed into the story, not dropped into it.", "أرقام تُصمَّم داخل القصة، لا تُلقى فيها."),
-             "lead": ("Charts and infographics are part of the editorial flow: each one sits where the text raises its question, and answers only that. The same system carries into the presentation that goes with the report, so the room sees what the reader saw.",
-                      "الرسوم البيانية والإنفوجرافيك جزء من السياق التحريري: يقف كلٌّ منها حيث يطرح النص سؤاله، ولا يجيب إلا عنه. ويمتد النظام نفسه إلى العرض التقديمي المرافق للتقرير، فيرى الحاضرون ما رآه القارئ."),
-             "aside": ("Every chart is checked against its source before it is drawn.", "يُراجَع كل رسم بياني مقابل مصدره قبل أن يُرسم."),
-             "work": ["deck"]},
-            {"key": "result", "note": ("what it produced", "ما أنتجه"), "sketch": "hub",
-             "title": ("Publications that speak as one institution.", "مطبوعات تتحدث بصوت مؤسسة واحدة."),
-             "lead": ("Reports, brochures and presentations that are easier to navigate and keep a professional institutional look — for humanitarian organisations, NGOs and corporate readers alike — and an editorial system ready for the next one.",
-                      "تقارير وكتيّبات وعروض أسهل في التنقل، تحافظ على مظهر مؤسسي احترافي — للمنظمات الإنسانية وغير الحكومية وقرّاء الشركات على حد سواء — ونظام تحريري جاهز للإصدار التالي."),
-             "aside": ("We do not publish results we cannot prove. These chapters stop at what was delivered.",
-                       "لا ننشر نتائج لا نستطيع إثباتها. تقف هذه الفصول عند ما سُلِّم."),
-             "work": ["brochure"]},
+            {"key": "reader", "sketch": "pages", "work": []},
+            {"key": "content", "sketch": "hierarchy", "work": ["cover"]},
+            {"key": "grid", "sketch": "grid", "work": ["spread"]},
+            {"key": "data", "sketch": "chart", "work": ["deck"]},
+            {"key": "result", "sketch": "hub", "work": ["brochure"]},
         ],
-        "close": (("If your next report has to be read, not just published, the work starts with its structure.",
-                   "إذا كان تقريرك القادم يجب أن يُقرأ لا أن يُنشر فقط، فالعمل يبدأ ببنيته."),
-                  "/#contact", ("Talk to the team", "تحدّث مع الفريق")),
+        "close": ("/#contact", ("Talk to the team", "تحدّث مع الفريق")),
     },
     "information-design": {
         "behance": "https://www.behance.net/moodboard/170306923/Information-Design-Visual-Storytelling",
@@ -344,45 +282,14 @@ STORIES = {
             "summary": (("Research summary", "ملخص البحث"), (9, 5), "sheet"),
         },
         "hero": ["visuals", "deck", "infographic", "summary"],
-        "headline": ("Research, turned into something people understand.", "أبحاث تتحوّل إلى ما يفهمه الناس."),
-        "standfirst": ("Infographics, presentations and data stories built from datasets, technical reports and humanitarian assessments — for readers who need the finding, not the spreadsheet.",
-                       "إنفوجرافيك وعروض وقصص بيانات مبنية من مجموعات البيانات والتقارير التقنية والتقييمات الإنسانية — لقرّاء يحتاجون النتيجة، لا جدول البيانات."),
         "chapters": [
-            {"key": "gap", "note": ("the gap", "الفجوة"), "sketch": "table",
-             "title": ("The insight is in the report. The reader never gets there.", "الفكرة موجودة في التقرير، لكن القارئ لا يصل إليها."),
-             "lead": ("Datasets, technical reports and assessments hold valuable insight, written in tables and technical language that only specialists can read. The finding that matters is there — on page forty, in the fourth column — and the people who need it most will not find it.",
-                      "تحمل مجموعات البيانات والتقارير التقنية والتقييمات رؤى قيّمة، مكتوبة بجداول ولغة تقنية لا يقرؤها إلا المتخصصون. النتيجة المهمة موجودة — في الصفحة الأربعين، في العمود الرابع — ومن يحتاجها أكثر من غيره لن يجدها."),
-             "aside": ("Accuracy that nobody understands helps nobody.", "الدقة التي لا يفهمها أحد لا تنفع أحدًا."),
-             "work": []},
-            {"key": "question", "note": ("the question", "السؤال"), "sketch": "search",
-             "title": ("Every chart starts as a question.", "كل رسم يبدأ بسؤال."),
-             "lead": ("We read the research, verify the data, and look for the insight: what does this audience need to know, and what decision is it meant to support? Only then do we decide what to show — and what to leave in the appendix.",
-                      "نقرأ البحث، ونتحقق من البيانات، ونبحث عن الفكرة: ماذا يحتاج هذا الجمهور أن يعرف، وأي قرار يُفترض أن تدعمه؟ عندها فقط نقرر ما نعرضه — وما نتركه في الملحق."),
-             "aside": ("If a chart cannot say which question it answers, it does not get drawn.", "الرسم الذي لا يقول أي سؤال يجيب عنه، لا يُرسم."),
-             "work": ["infographic"]},
-            {"key": "narrative", "note": ("the story", "السرد"), "sketch": "path",
-             "title": ("Data in the order a person thinks.", "البيانات بالترتيب الذي يفكر به الإنسان."),
-             "lead": ("Context first, then the finding, then what it means, then what follows from it. The visual hierarchy walks the eye along that order, so a reader can follow the argument without being told where to look.",
-                      "السياق أولًا، ثم النتيجة، ثم معناها، ثم ما يترتب عليها. ويقود التسلسل البصري العين على هذا الترتيب، فيتبع القارئ الفكرة دون أن يُقال له أين ينظر."),
-             "aside": ("A story over isolated graphics.", "القصة قبل الرسوم المنفردة."),
-             "work": ["visuals"]},
-            {"key": "form", "note": ("the form", "الشكل"), "sketch": "chart",
-             "title": ("Clarity over decoration. Accuracy over complexity.", "الوضوح قبل الزخرفة، والدقة قبل التعقيد."),
-             "lead": ("We choose the simplest chart that tells the truth, give colour a meaning and keep it, and fit each visual into the report or presentation it belongs to — built on the same editorial principles as the pages around it.",
-                      "نختار أبسط رسم يقول الحقيقة، ونعطي اللون معنى ونحافظ عليه، ونضع كل عنصر بصري في التقرير أو العرض الذي ينتمي إليه — مبنيًا على الأسس التحريرية نفسها التي بُنيت عليها الصفحات من حوله."),
-             "aside": ("Colour is used to mean something, never to fill space.", "يُستخدم اللون ليعني شيئًا، لا ليملأ فراغًا."),
-             "work": ["deck"]},
-            {"key": "result", "note": ("what it produced", "ما أنتجه"), "sketch": "hub",
-             "title": ("Made to be read in one sitting.", "مصمَّمة لتُقرأ في جلسة واحدة."),
-             "lead": ("Visual communication that decision-makers, partners and the public can take in quickly without losing accuracy: summaries, infographics and presentations built from the same verified evidence.",
-                      "تواصل بصري يستوعبه صنّاع القرار والشركاء والجمهور بسرعة دون أن تضيع الدقة: ملخصات وإنفوجرافيك وعروض مبنية من الأدلة الموثّقة نفسها."),
-             "aside": ("We do not publish results we cannot prove. These chapters stop at what was delivered.",
-                       "لا ننشر نتائج لا نستطيع إثباتها. تقف هذه الفصول عند ما سُلِّم."),
-             "work": ["summary"]},
+            {"key": "gap", "sketch": "table", "work": []},
+            {"key": "question", "sketch": "search", "work": ["infographic"]},
+            {"key": "narrative", "sketch": "path", "work": ["visuals"]},
+            {"key": "form", "sketch": "chart", "work": ["deck"]},
+            {"key": "result", "sketch": "hub", "work": ["summary"]},
         ],
-        "close": (("If your research has to reach people who will never open the full report, that is where we start.",
-                   "إذا كان بحثك يجب أن يصل إلى من لن يفتح التقرير الكامل أبدًا، فمن هناك نبدأ."),
-                  "/#contact", ("Talk to the team", "تحدّث مع الفريق")),
+        "close": ("/#contact", ("Talk to the team", "تحدّث مع الفريق")),
     },
     "digital-campaigns": {
         "pieces": {
@@ -392,46 +299,32 @@ STORIES = {
             "feed": (("Feed posts", "منشورات الحساب"), (9, 5), "grid"),
         },
         "hero": ["key-visual", "motion", "stories", "feed"],
-        "headline": ("Not thirty posts. One campaign.", "ليست ثلاثين منشورًا، بل حملة واحدة."),
-        "standfirst": ("Campaign systems that bring branding, visual storytelling and motion together — so every format the campaign ships in, on every platform, reads as the same brand.",
-                       "أنظمة حملات تجمع الهوية والسرد البصري والموشن — ليبدو كل مقاس تُنشر به الحملة، على كل منصة، علامةً واحدة."),
         "chapters": [
-            {"key": "problem", "note": ("the problem", "المشكلة"), "sketch": "scatter",
-             "title": ("Good posts can still add up to no brand.", "منشورات جيدة قد لا تصنع علامة."),
-             "lead": ("Brands often treat digital communication as a stream of one-off posts. Each one looks fine on its own; together they do not form a presence, and the brand becomes harder to recognise with every new design.",
-                      "كثيرًا ما تتعامل العلامات مع التواصل الرقمي كسلسلة من المنشورات المنفصلة. يبدو كلٌّ منها جيدًا وحده؛ لكنها معًا لا تصنع حضورًا، ويصبح التعرّف على العلامة أصعب مع كل تصميم جديد."),
-             "aside": ("Recognition is built by repetition, and inconsistency spends it.", "يُبنى التمييز بالتكرار، وعدم الاتساق يستهلكه."),
-             "work": []},
-            {"key": "direction", "note": ("the direction", "الاتجاه"), "sketch": "target",
-             "title": ("One idea, decided before the first post is designed.", "فكرة واحدة تُحسم قبل تصميم أول منشور."),
-             "lead": ("We start from the campaign's goals and its audience, and set one visual direction and a key visual the whole campaign grows from. Every later format is a version of that idea, not a new one.",
-                      "نبدأ من أهداف الحملة وجمهورها، ونحدد اتجاهًا بصريًا واحدًا وصورة رئيسية تنمو منها الحملة كلها. وكل مقاس لاحق نسخة من هذه الفكرة، لا فكرة جديدة."),
-             "aside": ("A campaign with two ideas is two campaigns, each half as strong.", "الحملة بفكرتين حملتان، كلٌّ منهما بنصف القوة."),
-             "work": ["key-visual"]},
-            {"key": "system", "note": ("the system", "النظام"), "sketch": "grid",
-             "title": ("A system that resizes, not a design that restarts.", "نظام يتغيّر مقاسه، لا تصميم يبدأ من جديد."),
-             "lead": ("Grid, type, colour and image treatment, set once and adapted to every format the campaign needs — feed posts, stories, covers and banners. A new size is a matter of hours, and it still looks like the campaign.",
-                      "شبكة وخطوط وألوان ومعالجة للصور، تُضبط مرة واحدة وتتكيف مع كل مقاس تحتاجه الحملة — منشورات الحساب والستوري والأغلفة والبانرات. المقاس الجديد مسألة ساعات، ويبقى شبيهًا بالحملة."),
-             "aside": ("Multi-platform adaptation is designed in from the start, not added at the end.",
-                       "التكيف مع المنصات يُصمَّم من البداية، لا يُضاف في النهاية."),
-             "work": ["feed", "stories"]},
-            {"key": "motion", "note": ("motion", "الحركة"), "sketch": "motion",
-             "title": ("Motion where it earns attention, not everywhere.", "الحركة حيث تستحق الانتباه، لا في كل مكان."),
-             "lead": ("Motion graphics are built from the same system as the still designs — the same shapes, colours and type, now moving. They go where movement helps the message land, and nowhere it would only add noise.",
-                      "يُبنى الموشن جرافيك من النظام نفسه الذي بُنيت منه التصاميم الثابتة — الأشكال والألوان والخطوط نفسها، لكنها تتحرك. ويوضع حيث تساعد الحركة الرسالة على الوصول، لا حيث لا تضيف إلا ضجيجًا."),
-             "aside": ("The still and the moving versions of a campaign should be recognisably the same thing.",
-                       "النسخة الثابتة والمتحركة من الحملة يجب أن تكونا الشيء نفسه بوضوح."),
-             "work": ["motion"]},
-            {"key": "result", "note": ("what it produced", "ما أنتجه"), "sketch": "hub",
-             "title": ("One presence on every platform the campaign touches.", "حضور واحد على كل منصة تصل إليها الحملة."),
-             "lead": ("A campaign system that scales: one brand presence everywhere, content that adapts quickly to each platform, and a set of assets the team can reuse for the next campaign instead of starting again.",
-                      "نظام حملات قابل للتوسع: حضور واحد للعلامة في كل مكان، ومحتوى يتكيف بسرعة مع كل منصة، ومجموعة عناصر يعيد الفريق استخدامها في الحملة التالية بدل أن يبدأ من جديد."),
-             "aside": ("We do not publish results we cannot prove. These chapters stop at what was delivered.",
-                       "لا ننشر نتائج لا نستطيع إثباتها. تقف هذه الفصول عند ما سُلِّم."),
-             "work": []},
+            {"key": "problem", "sketch": "scatter", "work": []},
+            {"key": "direction", "sketch": "target", "work": ["key-visual"]},
+            {"key": "system", "sketch": "grid", "work": ["feed", "stories"]},
+            {"key": "motion", "sketch": "motion", "work": ["motion"]},
+            {"key": "result", "sketch": "hub", "work": []},
         ],
-        "close": (("If your posts look good one at a time but not together, the fix is a system, not another post.",
-                   "إذا كانت منشوراتك جميلة كلٌّ على حدة لكنها لا تتسق معًا، فالحل نظام، لا منشور آخر."),
-                  "/services/social", ("See social media management", "خدمة إدارة وسائل التواصل")),
+        "close": ("/services/social", ("See social media management", "خدمة إدارة وسائل التواصل")),
     },
 }
+
+
+def _words():
+    """Join each study's words (content/studies/<slug>.json) to its shape."""
+    import content
+    for slug, st in STORIES.items():
+        words = content.study(slug)
+        keys = [ch["key"] for ch in st["chapters"]]
+        if list(words["chapters"]) != keys:
+            raise SystemExit(f"content: content/studies/{slug}.json: the chapters must be {', '.join(keys)}, in that order")
+        st["headline"], st["standfirst"] = words["headline"], words["standfirst"]
+        for ch in st["chapters"]:
+            ch.update(words["chapters"][ch["key"]])
+        href, label = st["close"]
+        st["close"] = (words["close"], href, label)
+        st["card"] = words["card"]
+
+
+_words()
