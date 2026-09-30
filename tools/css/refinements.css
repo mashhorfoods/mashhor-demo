@@ -113,4 +113,11 @@ html{-webkit-tap-highlight-color:transparent}
 .c-story-hero__stage{grid-column:2;grid-row:1 / span 3;margin-block-start:0;max-inline-size:26rem}}
 /* An email address reads left to right, in Arabic too. */
 :root[dir="rtl"] input[type="email"]{direction:ltr;text-align:right}
+/* Large screens. The page was drawn for 1320 px at most, so on a 1920 or
+   2560 screen it sat in a narrow column with its text at laptop size. From
+   1680 px the base size and the page's width grow in steps; every size and
+   space is in rem, so the whole layout grows together, in proportion. */
+@media (min-width:105em){html{font-size:106.25%}:root{--container-max:1440px}}
+@media (min-width:120em){html{font-size:112.5%}:root{--container-max:1600px}}
+@media (min-width:150em){html{font-size:125%}:root{--container-max:1840px}}
 /* REFINEMENTS:END */

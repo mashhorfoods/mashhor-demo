@@ -85,5 +85,7 @@
 :root[dir="rtl"] .c-case-card__link:is(:hover,:focus-visible) .c-case-card__go .c-btn__icon{translate:-4px 0}}
 @media (min-width:64em){.c-case-card--featured .c-case-card__link{padding-inline-end:var(--space-48);grid-template-rows:auto auto auto auto auto 1fr}
 .c-case-card--featured .c-case-card__link>:not(.c-case-card__media){grid-column:2}
-.c-case-card--featured .c-case-card__go{align-self:end}}
+.c-case-card--featured .c-case-card__go{align-self:end}
+/* The image fills its column's height by cropping, never by growing into the text's. */
+.c-case-card--featured .c-case-card__media{aspect-ratio:auto;min-block-size:100%}}
 /* CASES:END */

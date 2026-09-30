@@ -188,6 +188,16 @@ def build(site: pathlib.Path):
                 text, n = re.subn(f'id="{field}"', f'id="{field}" {extra}', text, count=1)
                 if n != 1:
                     sys.exit(f"index.html: {field} not found")
+            # Al Mada's tiles in Recent work: the full-size copies already ship
+            # (the Story shows them), so large and high-density screens get
+            # them instead of the tile stretched.
+            for tile, full, w in (("identity", "identity", 1400), ("website", "website", 1200), ("campaign", "campaign", 900), ("profile", "profile", 1200)):
+                small = {"identity": 900, "website": 900, "campaign": 560, "profile": 560}[tile]
+                text, n = re.subn(rf'(<img class="c-bento__image" src="\./assets/al-mada-{tile}-tile\.webp")',
+                                  rf'\1 srcset="./assets/al-mada-{tile}-tile.webp {small}w, ./assets/al-mada-{full}.webp {w}w" sizes="(min-width: 64em) 50vw, 100vw"',
+                                  text, count=1)
+                if n != 1:
+                    sys.exit(f"index.html: Al Mada {tile} tile not found")
             # The contact section's link to the founder's portfolio.
             text, n = re.subn(r'\s*<li>\s*<a class="c-elsewhere__link" href="https://muhalabsalah\.github\.io/muhalabsalah/".*?</li>', "", text, count=1, flags=re.S)
             if n != 1:

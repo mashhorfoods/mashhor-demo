@@ -256,6 +256,13 @@ Kept by tests in `tests/campaign.mjs` ("UX pass"):
 - No blue tap flash; cards and FAQ answer a tap with a slight press. The
   contact form's keyboard key moves to the next field.
 
+Large screens (refinements stylesheet, end): from 1680 px the base size and
+the page's width grow in steps (17 px / 1440 px, 18 px / 1600 px from
+1920, 20 px / 1840 px from 2400), so a 1920 or 2560 screen gets the same
+layout in proportion instead of a narrow column; below 1680 nothing
+changes. Recent work's Al Mada tiles offer their full-size copies to large
+and high-density screens. Tested at 1440, 1920 and 2560.
+
 One visual system (refinements stylesheet, "UI pass"; a test checks it):
 every section label is gold with its short rule, every heading is the bold
 display face (the page template, the brand challenge and the builder

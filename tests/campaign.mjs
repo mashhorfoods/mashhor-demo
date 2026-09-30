@@ -782,6 +782,26 @@ for (const [kind, touch] of [['mobile', true], ['desktop', false]]) {
   await context.close();
 }
 
+/* ---- Large screens: the page grows with the screen --------------------- */
+// From 1680 px the base size and the page's width grow in steps; below it
+// nothing changes. The featured card's image never runs into its text.
+for (const [w, root] of [[1440, 16], [1920, 18], [2560, 20]]) {
+  const context = await siteContext(browser, { viewport: { width: w, height: 1100 } });
+  const p = await context.newPage();
+  await p.goto(`${BASE}/work`, { waitUntil: 'networkidle' });
+  const r = await p.evaluate(() => {
+    const L = document.querySelector('.c-case-card--featured .c-case-card__link');
+    const gap = L.querySelector('.c-case-card__kind').getBoundingClientRect().left - L.querySelector('.c-case-card__media').getBoundingClientRect().right;
+    const box = document.querySelector('.c-cases .l-container').getBoundingClientRect();
+    return { root: parseFloat(getComputedStyle(document.documentElement).fontSize), gap: Math.round(gap), share: box.width / innerWidth, overflow: document.documentElement.scrollWidth - innerWidth };
+  });
+  check(r.root === root, `[${w}px] base size ${root}px`, String(r.root));
+  check(r.gap >= 24, `[${w}px] /work: the featured card's image stays clear of its text`, `${r.gap}px`);
+  check(w < 1680 || r.share >= 0.7, `[${w}px] /work: the page uses the width of a large screen`, r.share.toFixed(2));
+  check(r.overflow <= 0, `[${w}px] /work: no horizontal scroll`, String(r.overflow));
+  await context.close();
+}
+
 await browser.close();
 
 // The built site ships only what it uses, and every placeholder is filled.
