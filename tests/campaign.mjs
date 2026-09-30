@@ -1054,6 +1054,10 @@ for (const [label, locale, stored, want] of [['an Arabic phone', 'ar-SA', null, 
     /Content-Security-Policy "upgrade-insecure-requests; default-src 'self';[^"]*frame-ancestors 'self'[^"]*script-src 'self' https:\/\/plausible\.io 'sha256-/];
   const missing = want.filter((re) => !re.test(rules)).map(String);
   check(missing.length === 0 && !/interest-cohort/.test(rules), 'security headers: HSTS, CSP with script hashes, COOP, framing, permissions', missing.join(' | '));
+  // /work is a page and a folder: on Apache, without this, /work and /work/
+  // redirect each other forever (found by tools/launch_check.mjs on Apache).
+  check(/<If "%\{REQUEST_URI\} == '\/work'">\s*DirectorySlash Off\s*<\/If>/.test(rules) && /RewriteRule \^work\/\$ \/work \[R=301,L\]/.test(rules),
+    '.htaccess: /work opens on Apache (no slash added, no redirect loop)');
 }
 
 await browser.close();

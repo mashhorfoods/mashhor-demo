@@ -365,6 +365,16 @@ def build(site: pathlib.Path):
     # successor is browsing-topics), and http links upgraded to https. HSTS
     # stays without includeSubDomains: a subdomain without a certificate
     # would stop working.
+    # /work is a page (work.html) and the folder of its case studies (work/).
+    # Apache adds a slash to a folder's address and the rule above takes it
+    # off again: /work and /work/ sent the browser to each other forever. For
+    # this address only no slash is added, and work.html is served.
+    anchor = "# HTTPS redirect."
+    if text.count(anchor) != 1:
+        sys.exit(".htaccess: HTTPS block not found")
+    text = text.replace(anchor, "# /work is both a page (work.html) and a folder (work/): no slash added here,\n"
+                                "# or it and the /work/ -> /work rule below would redirect each other forever.\n"
+                                "<If \"%{REQUEST_URI} == '/work'\">\n  DirectorySlash Off\n</If>\n\n" + anchor, 1)
     for old_h, new_h in (
         ('  Header set Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"',
          '  Header set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()"\n'

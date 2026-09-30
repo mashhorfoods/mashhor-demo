@@ -8,7 +8,8 @@
     "serve": "php -S 127.0.0.1:8099 -t site tests/router.php",
     "test": "node tests/campaign.mjs",
     "test:admin": "node tests/admin.mjs",
-    "share-cards": "node tools/share-cards/render.mjs"
+    "share-cards": "node tools/share-cards/render.mjs",
+    "check:live": "node tools/launch_check.mjs"
   },
   "devDependencies": {
     "playwright": "^1.49.0"

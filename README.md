@@ -1,5 +1,16 @@
 # Pixora — website + campaign landing
 
+## Launching and checking the live site
+
+**[LAUNCH.md](LAUNCH.md)** (Arabic) lists every step in order: SSL, PHP,
+upload, the admin password, SPF/DKIM, Search Console, Plausible goals. After
+every upload run `node tools/launch_check.mjs` (add `--send-test-lead` for a
+real test message): it checks the live site in eight sections — pages,
+HTTPS, script hashes against the CSP (catches pages and .htaccess from
+different builds), headers, caching and compression, every asset, redirects
+and the 404, closed folders, and lead.php. For a local Apache:
+`--header "X-Forwarded-Proto: https" --skip-https`.
+
 ## Getting the upload package
 
 Every push builds and tests the site on GitHub (`.github/workflows/build.yml`).
