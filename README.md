@@ -26,6 +26,14 @@ set (the package carries the empty one).
 Once the FTP secrets are set, the workflow uploads it itself after every
 green run on `main` — see "Editing content" below.
 
+## A test copy on another domain
+
+`python3 tools/build.py && python3 tools/staging.py` makes
+`dist/pixora-staging-<commit>.zip`: the same site for a testing domain on a
+real host (unzip into its web root). Everything works as live, but every page
+is noindex, robots.txt closes the site, analytics are off and there is no
+HSTS. It needs SSL on that domain (the site redirects to https).
+
 ## Preview on GitHub Pages
 
 Every push to `main` that passes the tests also publishes a preview at
