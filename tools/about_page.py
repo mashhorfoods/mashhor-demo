@@ -81,11 +81,11 @@ def img(name, alt_en, alt_ar, cls, sizes, eager=False):
 
 def main(cards):
     principles = "\n".join(
-        f'''            <li class="c-about-value">
+        f'''            <li class="c-about-value" style="--i:{i}">
               <svg class="c-about-value__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">{icon}</svg>
               <h3 class="c-about-value__title">{t(en, ar)}</h3>
               <p class="c-about-value__body">{t(ben, bar)}</p>
-            </li>''' for en, ar, ben, bar, icon in PRINCIPLES)
+            </li>''' for i, (en, ar, ben, bar, icon) in enumerate(PRINCIPLES))
     stages = "\n".join(
         f'''            <li class="c-about-stage" style="--i:{i}">
               <h3 class="c-about-stage__name">{t(en, ar)}</h3>
@@ -133,8 +133,8 @@ def main(cards):
       </section>
 
       <section class="l-section l-section--tight c-about-values" aria-labelledby="about-how">
-        <div class="l-container">
-          <header class="c-svc__head" data-reveal>
+        <div class="l-container c-about-values__layout">
+          <header class="c-svc__head c-about-values__head" data-reveal>
             <p class="t-label c-detail__eyebrow">{t("How we work", "كيف نعمل")}</p>
             <h2 class="c-svc__h2" id="about-how">{t("Four things Pixora holds to.", "أربعة أشياء تلتزم بها بيكسورا.")}</h2>
           </header>

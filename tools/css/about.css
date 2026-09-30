@@ -86,4 +86,21 @@
 @keyframes about-travel{to{translate:calc(-100% + 100cqw) 0}}
 @keyframes about-travel-rtl{to{translate:calc(100% - 100cqw) 0}}
 @keyframes about-line{from{scale:0.08 1}to{scale:1 1}}
+/* The four principles, stacked: each card holds under the header while the
+   next slides up over it, a step lower, so the ones passed stay counted at
+   the top. On computers the heading holds beside them. Position: sticky
+   only — the scroll stays the visitor's; screens under 40em tall keep the
+   plain grid. */
+@media (min-height:40em){
+.c-about-values__grid{grid-template-columns:minmax(0,1fr);gap:var(--space-24)}
+.c-about-value{position:sticky;inset-block-start:calc(var(--header-height) + var(--space-24) + var(--i,0) * 1.25rem);min-block-size:15rem;justify-content:flex-end;padding:var(--space-40);background-color:var(--color-surface);box-shadow:0 -18px 40px -24px rgba(0,0,0,0.9)}
+.c-about-value__icon{inline-size:36px;block-size:36px;margin-block-end:auto}
+.c-about-value__title{font-size:var(--text-h3)}
+.c-about-value__body{max-inline-size:40ch;font-size:var(--text-body-lg,1.125rem)}
+@media (min-width:64em){
+.c-about-values__layout{display:grid;grid-template-columns:minmax(0,0.85fr) minmax(0,1.15fr);column-gap:var(--space-80);align-items:start}
+.c-about-values__head{position:sticky;inset-block-start:calc(var(--header-height) + var(--space-48));grid-column:1;grid-row:1}
+.c-about-values .c-detail__more{grid-column:1;grid-row:2;margin-block-start:var(--space-16)}
+.c-about-values__grid{grid-column:2;grid-row:1 / span 3}
+.c-about-value{min-block-size:17rem}}}
 /* ABOUT:END */
