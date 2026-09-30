@@ -96,4 +96,23 @@
 .c-case-cards--rail.is-dragging{scroll-snap-type:none;cursor:grabbing;user-select:none}
 .c-case-cards--rail.is-dragging .c-case-card__link{pointer-events:none}
 .c-rail--cases{margin-block:0 var(--space-32)}
+/* Scrollytelling, computers: in a chapter that shows work, the text holds
+   still on one side while its drawing and each piece of work pass on the
+   other, every piece surfacing as it arrives. Sides alternate like the
+   chapters'. Phones, short screens and chapters without work keep the
+   story's layout. */
+@media (min-width:64em) and (min-height:40em){
+.c-case .c-chapter:has(.c-chapter__work){align-items:start;row-gap:var(--space-48)}
+.c-case .c-chapter:has(.c-chapter__work) .c-chapter__text{grid-column:1 / span 5;grid-row:1 / span 2;position:sticky;inset-block-start:calc(var(--header-height) + var(--space-48));align-self:start}
+.c-case .c-chapter:has(.c-chapter__work) .c-chapter__figure{grid-column:7 / span 6;grid-row:1}
+.c-case .c-chapter:has(.c-chapter__work) .c-chapter__work{grid-column:7 / span 6;grid-row:2;margin-block-start:0}
+.c-case .c-chapter:nth-of-type(even):has(.c-chapter__work) .c-chapter__text{grid-column:8 / span 5}
+.c-case .c-chapter:nth-of-type(even):has(.c-chapter__work) .c-chapter__figure,
+.c-case .c-chapter:nth-of-type(even):has(.c-chapter__work) .c-chapter__work{grid-column:1 / span 6}
+.c-case .c-chapter__work .c-case-works{display:grid;gap:var(--space-64);justify-items:center}
+.c-case .c-chapter__work .c-case-work{inline-size:100%;max-inline-size:min(100%,calc(var(--r) * 78svh))}
+@supports (animation-timeline:view()){@media (prefers-reduced-motion:no-preference){
+.c-case .c-chapter__work .c-case-work{animation:case-arrive linear both;animation-timeline:view();animation-range:entry 0% cover 35%}
+}}}
+@keyframes case-arrive{from{opacity:0;transform:translateY(48px) scale(0.96)}}
 /* CASES:END */
