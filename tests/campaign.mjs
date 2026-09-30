@@ -872,6 +872,56 @@ for (const [w, root] of [[1440, 16], [1920, 18], [2560, 20]]) {
   await desk.close();
 }
 
+/* ---- Layout across screens: aligned, filled, evenly spaced --------------- */
+{
+  // Tablets: a chapter's text sits beside its drawing; the closing box stacks.
+  const tab = await siteContext(browser, VIEWPORTS.tablet);
+  const t = await tab.newPage();
+  await t.goto(`${BASE}/story`, { waitUntil: 'networkidle' });
+  const side = await t.evaluate(() => [...document.querySelectorAll('.c-chapter')].map((c) => {
+    const a = c.querySelector('.c-chapter__text').getBoundingClientRect(); const f = c.querySelector('.c-chapter__figure').getBoundingClientRect();
+    return Math.abs((a.top + a.bottom) / 2 - (f.top + f.bottom) / 2) < a.height && (a.right <= f.left + 1 || f.right <= a.left + 1);
+  }));
+  check(side.every(Boolean), '[tablet] /story: each chapter\'s text sits beside its drawing', JSON.stringify(side));
+  await t.goto(`${BASE}/work`, { waitUntil: 'networkidle' });
+  const quote = await t.evaluate(() => { const q = document.querySelector('.c-quote'); const h = q.querySelector('.c-quote__title').getBoundingClientRect(); return h.width / (q.getBoundingClientRect().width - 80); });
+  check(quote > 0.6, '[tablet] the closing box: its heading across the width, buttons below', quote.toFixed(2));
+  await tab.close();
+
+  for (const w of [1440, 1920]) {
+    const d = await siteContext(browser, { viewport: { width: w, height: 900 } });
+    const p = await d.newPage();
+    await p.goto(`${BASE}/`, { waitUntil: 'networkidle' });
+    const r = await p.evaluate(() => {
+      const x = (sel) => Math.round(document.querySelector(sel).getBoundingClientRect().left);
+      const head = document.querySelector('.c-faq__head').getBoundingClientRect(); const list = document.querySelector('.c-faq__list').getBoundingClientRect();
+      return { hero: x('.c-hero__headline'), logo: x('.c-header__logo, .c-header a'), faqSide: list.left > head.right };
+    });
+    check(r.hero === r.logo, `[${w}px] home: the hero lines up with the logo`, JSON.stringify(r));
+    check(r.faqSide, `[${w}px] home: the questions sit beside their heading`);
+    // No stretch of empty page taller than a third of the screen between sections.
+    for (const url of ['/', '/about', '/work/digital-campaigns', '/services/websites', '/pricing']) {
+      await p.goto(`${BASE}${url}`, { waitUntil: 'networkidle' });
+      const gap = await p.evaluate(() => {
+        const main = document.querySelector('main'); const H = document.documentElement.scrollHeight; const band = new Uint8Array(Math.ceil(H / 4));
+        for (const el of main.querySelectorAll('*')) {
+          const cs = getComputedStyle(el); if (cs.visibility === 'hidden' || cs.display === 'none') continue;
+          // The pinned stages' height is scroll travel, filled on screen as it pins.
+          const inked = el.matches('img, svg, video, input, textarea, select, button, .c-about-pin') || [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()) || (cs.borderTopStyle !== 'none' && cs.borderTopWidth !== '0px') || (cs.backgroundColor !== 'rgba(0, 0, 0, 0)' && !el.matches('section, main'));
+          if (!inked) continue; const r = el.getBoundingClientRect(); if (r.width < 4) continue;
+          for (let y = Math.max(0, Math.floor((r.top + scrollY) / 4)); y < Math.min(band.length, Math.ceil((r.bottom + scrollY) / 4)); y++) band[y] = 1;
+        }
+        const m = main.getBoundingClientRect(); let run = 0, worst = 0;
+        for (let y = Math.floor((m.top + scrollY) / 4); y < Math.ceil((m.bottom + scrollY) / 4); y++) { run = band[y] ? 0 : run + 4; worst = Math.max(worst, run); }
+        return worst / (parseFloat(getComputedStyle(document.documentElement).fontSize) / 16);
+      });
+      // In 16 px units: the page scales up with the base size on large screens.
+      check(gap <= 300, `[${w}px] ${url}: no empty stretch over 300 px (at a 16 px base) between sections`, `${Math.round(gap)}px`);
+    }
+    await d.close();
+  }
+}
+
 await browser.close();
 
 // The built site ships only what it uses, and every placeholder is filled.

@@ -34,7 +34,7 @@
 [dir="rtl"] .c-door:is(:hover,:focus-visible) .c-door__go .c-btn__icon{translate:-4px 0}
 /* What the page covers arrives with the pointer; touch screens show it always. */
 @media (hover:hover){
-.c-door__chip{opacity:0.55;transition:opacity var(--duration-base) var(--ease-out),border-color var(--duration-base) var(--ease-out),color var(--duration-base) var(--ease-out)}
+.c-door__chip{opacity:0.8;transition:opacity var(--duration-base) var(--ease-out),border-color var(--duration-base) var(--ease-out),color var(--duration-base) var(--ease-out)}
 .c-door:is(:hover,:focus-visible) .c-door__chip{opacity:1;border-color:rgba(244,209,63,0.35);color:var(--color-text-primary)}
 .c-door:is(:hover,:focus-visible) .c-door__chip:nth-child(2){transition-delay:40ms}
 .c-door:is(:hover,:focus-visible) .c-door__chip:nth-child(3){transition-delay:80ms}

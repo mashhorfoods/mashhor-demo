@@ -150,4 +150,25 @@ html{-webkit-tap-highlight-color:transparent}
 /* Phones: a rail's buttons end where the floating WhatsApp button begins
    (both sit at the reading end), so neither covers the other. */
 @media (max-width:47.99em){.c-rail__bar{padding-inline-end:4rem}}
+/* The hero lines up with the header and every section: it used a wider
+   container, so its text started 16-20 px left of the logo above it. */
+.c-hero__inner.l-container--wide{max-inline-size:var(--container-max)}
+/* Computers: the questions beside their heading rather than under it, so
+   the list does not stop two-thirds of the way across. */
+@media (min-width:64em){
+.c-faq .l-container{display:grid;grid-template-columns:minmax(0,0.8fr) minmax(0,1.4fr);column-gap:var(--space-80);align-items:start}
+.c-faq__head{position:sticky;inset-block-start:calc(var(--header-height) + var(--space-48));margin-block-end:0}
+.c-faq__list{max-inline-size:none}}
+/* Computers: two sections in a row stood about 340 px apart (their padding
+   meeting), close to half a screen of nothing between one idea and the
+   next. The same rhythm, about a quarter tighter; phones and tablets keep
+   theirs. */
+@media (min-width:64em){
+:root{--section-space:clamp(5rem,2.5rem + 6vw,8.5rem);--section-space-tight:clamp(3.75rem,2rem + 4vw,6rem);--section-space-loose:clamp(6rem,3rem + 9vw,10rem)}
+.c-story__head{margin-block-end:calc(var(--section-space-loose) * 0.85)}}
+/* A service's packages follow straight on from what it covers. */
+.c-svc__packages{padding-block-start:var(--section-space-tight)}
+/* The homepage's two doors bridge the work and the challenge: the tighter
+   spacing, so neither side opens a gap wider than the rest of the page. */
+.c-doors{padding-block:var(--section-space-tight)}
 /* REFINEMENTS:END */

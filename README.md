@@ -284,6 +284,20 @@ layout in proportion instead of a narrow column; below 1680 nothing
 changes. Recent work's Al Mada tiles offer their full-size copies to large
 and high-density screens. Tested at 1440, 1920 and 2560.
 
+Across screens (refinements stylesheet; tests in "Layout across screens"):
+- Tablets and wide phones (48em–64em): a chapter's text sits beside its
+  drawing, the closing box stacks, one-column text reads up to 68
+  characters, the hero's buttons keep their size, add-ons run three to a
+  row, the contact channels sit beside the form, a service's packages are
+  a rail.
+- Computers: the hero lines up with the header's logo (it used a wider
+  container), the FAQ sits beside its heading, and sections are spaced a
+  quarter tighter (no empty stretch over 300 px at a 16 px base).
+- Rails keep their buttons, line and opening card under reduced motion,
+  and on phones their buttons stay clear of the floating WhatsApp button.
+  Recent work is a rail on every screen; every study, the Al Mada story
+  included, ends in a rail of the others.
+
 One visual system (refinements stylesheet, "UI pass"; a test checks it):
 every section label is gold with its short rule, every heading is the bold
 display face (the page template, the brand challenge and the builder
