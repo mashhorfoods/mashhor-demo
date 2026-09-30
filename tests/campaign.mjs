@@ -941,7 +941,8 @@ for (const [w, root] of [[1440, 16], [1920, 18], [2560, 20]]) {
     const problems = [];
     if (!r.title || r.title.length > 65) problems.push(`title ${r.title?.length}`);
     if (!r.desc || r.desc.length < 50 || r.desc.length > 160) problems.push(`description ${r.desc?.length}`);
-    if (url !== '/story' && r.og !== r.desc) problems.push('preview text is not the page\'s');
+    // Previews: Arabic first, then the page's own English description.
+    if (!r.og || !/^[\u0600-\u06FF]/.test(r.og) || (url !== '/story' && !r.og.endsWith(` | ${r.desc}`))) problems.push('preview text is not the page\'s, Arabic first');
     if (!r.canon) problems.push('no canonical');
     if (r.ld === null) problems.push('structured data does not parse');
     if (r.hreflang) problems.push('hreflang on a one-address bilingual page');

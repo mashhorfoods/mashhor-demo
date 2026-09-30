@@ -45,6 +45,24 @@ TITLES_AR = {
 }
 
 
+# Arabic link-preview text: the English descriptions, translated (no new
+# claims). Case studies take the Arabic summary from cases.CASES.
+DESC_AR = {
+    "index.html": "الهوية والتصميم، والمواقع، وإدارة وسائل التواصل، والإعلانات الرقمية — تُنجَز معًا، مع شريك واحد.",
+    "about.html": "بيكسورا استوديو رقمي للخليج ومصر: هوية ومواقع ومحتوى ووسائل تواصل وإعلانات، يصنعها فريق واحد بالعربية والإنجليزية.",
+    "accessibility.html": "ما اختُبر عليه هذا الموقع، وما لم يُختبر، وكيف تخبرنا حين لا يعمل شيء.",
+    "pricing.html": "ما الذي يحرّك السعر، وكل الإضافات، وأداة لتكوين باقتك بنفسك، وكيف تتم الفوترة.",
+    "privacy.html": "ما يجمعه هذا الموقع، وما لا يجمعه، وكيف تتواصل معنا بشأنه.",
+    "terms.html": "مع من تتعامل، وماذا يعني السعر المنشور، وكيف يتم الدفع والتعديلات، ولمن تعود الملكية.",
+    "work.html": "دراسات حالة من بيكسورا: أعمال في الهوية والتحرير والمعلومات والرقمي، تُروى كلٌّ منها من المشكلة حتى ما تغيّر.",
+    "story.html": "هوية وموقع وحملات وملف تعريفي لوكالة المدى للسفر والسياحة — أربع واجهات تشتريها معظم الشركات من أربعة موردين.",
+    "services/branding.html": "شعار وهوية وأنظمة بصرية تمنح عملك مظهرًا واحدًا متسقًا في كل قناة.",
+    "services/websites.html": "تصميم وبناء وإطلاق — نسلّمك موقعًا يعمل، مع ترتيب النطاق والاستضافة.",
+    "services/social.html": "استراتيجية ومحتوى ونشر عبر قنواتك، مع متابعة التفاعل وتحليل الأداء.",
+    "services/marketing.html": "حملات مدفوعة على المنصات الرئيسية، مع استهداف الجمهور وإدارة الحملات وتحسينها وتتبّعها.",
+    "services/integrated.html": "العرض المتكامل كله، يُدار كنظام واحد من الهوية حتى النمو، لا كمشاريع منفصلة.",
+}
+
 def set_title_ar(text, title, page):
     return set_meta(text, "name", "title-ar", title, page)
 
@@ -131,9 +149,19 @@ def build(site: pathlib.Path):
         desc = meta(text, "name", "description")
         if not desc:
             fail(page, "the description")
-        # A shared link describes the page shared.
-        if meta(text, "property", "og:description") is not None and page != "story.html":
-            text = set_meta(text, "property", "og:description", desc, page)
+        # A shared link describes the page shared (story.html keeps its own
+        # line in English); the preview carries it in Arabic first, then in
+        # English — both languages share this address, and most shares are
+        # Arabic.
+        og_en = meta(text, "property", "og:description") if page == "story.html" else desc
+        if page.startswith("work/"):
+            ar = plain(next(c for c in CASES if c["slug"] == page[5:-5])["summary"][1])
+        else:
+            ar = DESC_AR.get(page)
+        if not ar:
+            fail(page, "its Arabic preview text (seo.DESC_AR)")
+        if meta(text, "property", "og:description") is not None:
+            text = set_meta(text, "property", "og:description", f"{ar} | {og_en}", page)
         url = f"{ORIGIN}/" + ("" if page == "index.html" else page[:-5])
         image = meta(text, "property", "og:image")
 
@@ -196,6 +224,12 @@ def build(site: pathlib.Path):
                 data["image"] = image
             text = add_ld(text, data, page)
 
+        # The preview's title: the page's Arabic name first, then the English
+        # title (the tab keeps one language at a time; a preview cannot).
+        name_ar = (meta(text, "name", "title-ar") or "").split(" — ")[0].split(" | ")[0]
+        title_en = re.search(r"<title>(.*?)</title>", text, re.S).group(1)
+        if name_ar and meta(text, "property", "og:title") is not None:
+            text = set_meta(text, "property", "og:title", f"{name_ar} | {title_en}", page)
         path.write_text(text, encoding="utf-8")
 
     # Every sitemap entry says when it last changed (the commit the site was
