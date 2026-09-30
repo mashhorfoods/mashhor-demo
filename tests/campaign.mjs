@@ -1023,6 +1023,29 @@ for (const [label, locale, stored, want] of [['an Arabic phone', 'ar-SA', null, 
   await ctx.close();
 }
 
+/* ---- Lost visitors ------------------------------------------------------------ */
+{
+  // Addresses people type, or that used to exist, lead where they meant.
+  const forwards = [['/contact', '/#contact'], ['/portfolio', '/work'], ['/work/talk-about-sudan', '/work'], ['/services', '/#services'],
+    ['/prices', '/pricing'], ['/about-us', '/about'], ['/faq', '/#faq']];
+  const wrong = [];
+  for (const [from, to] of forwards) {
+    const res = await fetch(`${BASE}${from}`, { redirect: 'manual' });
+    const where = (res.headers.get('location') || '').replace(BASE, '');
+    if (res.status !== 301 || where !== to) wrong.push(`${from} → ${res.status} ${where}`);
+  }
+  check(wrong.length === 0, 'forwarding: typed and retired addresses lead to the page meant', wrong.join(' | '));
+  // Anything else: the 404 page, with its status, every destination and a person to ask.
+  const ctx = await siteContext(browser, VIEWPORTS.mobile);
+  const p = await ctx.newPage();
+  const res = await p.goto(`${BASE}/an-old-link`, { waitUntil: 'networkidle' });
+  const links = await p.$$eval('main a', (as) => as.map((a) => a.getAttribute('href')));
+  const need = ['/', '/work', '/pricing', '/about', '/#contact', ...['branding', 'websites', 'social', 'marketing', 'integrated'].map((x) => `/services/${x}`)];
+  check(res.status() === 404 && need.every((h) => links.includes(h)) && links.some((h) => h.startsWith('https://wa.me/')) && !links.includes('/story'),
+    '404: status 404, every service, case studies, pricing, about, contact and WhatsApp', JSON.stringify(links));
+  await ctx.close();
+}
+
 await browser.close();
 
 // The built site ships only what it uses, and every placeholder is filled.

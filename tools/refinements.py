@@ -146,9 +146,49 @@ REDIRECTS = r"""  # Clean addresses: /pricing.html → /pricing, /index.html →
   RewriteRule ^ /%1 [R=301,L]
   # /work is a page and also the folder of its case studies: /work/ is the page.
   RewriteRule ^work/$ /work [R=301,L]
+  # FORWARD:START — addresses people type, or that used to exist, lead to the
+  # page they meant (tests/router.php reads this block, so tests use it too).
+  RewriteRule ^work/talk-about-sudan/?$ /work [R=301,L]
+  RewriteRule ^(portfolio|projects|case-studies|casestudies)/?$ /work [R=301,L,NC]
+  RewriteRule ^(contact|contact-us)/?$ /#contact [R=301,L,NE,NC]
+  RewriteRule ^services/?$ /#services [R=301,L,NE,NC]
+  RewriteRule ^(prices|price|packages)/?$ /pricing [R=301,L,NC]
+  RewriteRule ^(about-us|team)/?$ /about [R=301,L,NC]
+  RewriteRule ^(faq|questions)/?$ /#faq [R=301,L,NE,NC]
+  # FORWARD:END
 
 """
 
+
+# The 404 page: every place a lost visitor is likely to have been heading,
+# and a person to ask. Replaces the supplied links (which still pointed to
+# the old Story entry and to no service).
+NOTFOUND_OLD_START = '<nav class="c-notfound__links"'
+NOTFOUND_LINKS = """<nav class="c-notfound__links" aria-label="Main destinations — الوجهات الرئيسية">
+        <a class="c-btn c-btn--primary" href="/">
+          <span data-lang-copy="en">Go to the homepage</span><span data-lang-copy="ar" lang="ar">إلى الصفحة الرئيسية</span>
+        </a>
+        <a class="c-btn c-btn--secondary" href="https://wa.me/{wa}?text=Hi%20Pixora%20%E2%80%94%20a%20link%20on%20your%20site%20did%20not%20work%3B%20I%20was%20looking%20for%3A%20" data-wa data-about="not-found"
+          data-wa-en="https://wa.me/{wa}?text=Hi%20Pixora%20%E2%80%94%20a%20link%20on%20your%20site%20did%20not%20work%3B%20I%20was%20looking%20for%3A%20"
+          data-wa-ar="https://wa.me/{wa}?text=%D9%85%D8%B1%D8%AD%D8%A8%D9%8B%D8%A7%20%D8%A8%D9%8A%D9%83%D8%B3%D9%88%D8%B1%D8%A7%20%E2%80%94%20%D8%B1%D8%A7%D8%A8%D8%B7%20%D9%81%D9%8A%20%D9%85%D9%88%D9%82%D8%B9%D9%83%D9%85%20%D9%84%D9%85%20%D9%8A%D8%B9%D9%85%D9%84%D8%8C%20%D9%88%D9%83%D9%86%D8%AA%20%D8%A3%D8%A8%D8%AD%D8%AB%20%D8%B9%D9%86%3A%20"
+          target="_blank" rel="noopener noreferrer">
+          <span data-lang-copy="en">Ask us on WhatsApp</span><span data-lang-copy="ar" lang="ar">اسألنا على واتساب</span><span class="u-visually-hidden"><span data-lang-copy="en"> (opens in a new tab)</span><span data-lang-copy="ar" lang="ar"> (يفتح في نافذة جديدة)</span></span>
+        </a>
+      </nav>
+      <div class="c-notfound__more">
+        <p class="t-label c-detail__eyebrow"><span data-lang-copy="en">Or go straight to</span><span data-lang-copy="ar" lang="ar">أو اذهب مباشرة إلى</span></p>
+        <ul class="c-notfound__list" role="list">
+          <li><a class="c-link" href="/services/branding"><span data-lang-copy="en">Branding &amp; Design</span><span data-lang-copy="ar" lang="ar">الهوية والتصميم</span></a></li>
+          <li><a class="c-link" href="/services/websites"><span data-lang-copy="en">Websites</span><span data-lang-copy="ar" lang="ar">المواقع الإلكترونية</span></a></li>
+          <li><a class="c-link" href="/services/social"><span data-lang-copy="en">Social Media Management</span><span data-lang-copy="ar" lang="ar">إدارة وسائل التواصل</span></a></li>
+          <li><a class="c-link" href="/services/marketing"><span data-lang-copy="en">Digital Marketing &amp; Advertising</span><span data-lang-copy="ar" lang="ar">التسويق الرقمي والإعلانات</span></a></li>
+          <li><a class="c-link" href="/services/integrated"><span data-lang-copy="en">Integrated Digital Solutions</span><span data-lang-copy="ar" lang="ar">الحلول الرقمية المتكاملة</span></a></li>
+          <li><a class="c-link" href="/work"><span data-lang-copy="en">Case studies</span><span data-lang-copy="ar" lang="ar">دراسات الحالة</span></a></li>
+          <li><a class="c-link" href="/pricing"><span data-lang-copy="en">Pricing</span><span data-lang-copy="ar" lang="ar">الأسعار</span></a></li>
+          <li><a class="c-link" href="/about"><span data-lang-copy="en">About</span><span data-lang-copy="ar" lang="ar">من نحن</span></a></li>
+          <li><a class="c-link" href="/#contact"><span data-lang-copy="en">Contact</span><span data-lang-copy="ar" lang="ar">تواصل معنا</span></a></li>
+        </ul>
+      </div>"""
 
 LANG_FIRST = ("<script>(function(){var d=document.documentElement,l;"
               "try{l=localStorage.getItem('site-lang')}catch(e){}"
@@ -219,6 +259,12 @@ def build(site: pathlib.Path):
             card, alt = SHARE.get(name, HOME_CARD)
             text = text.replace(SHARE_OLD, f"https://zaokalyamamah.online/assets/{card}")
             text = replace_all(text, [(ALT_OLD, f'<meta property="og:image:alt" content="{alt}" />')], name, required=True)
+        if name == "404.html":
+            a = text.find(NOTFOUND_OLD_START)
+            if a < 0:
+                sys.exit("404.html: its links block not found")
+            b = text.index("</nav>", a) + len("</nav>")
+            text = text[:a] + NOTFOUND_LINKS.replace("{wa}", WA.rsplit("/", 1)[-1]) + text[b:]
         if name == "privacy.html":
             text = replace_all(text, PRIVACY, name, required=True)
         # Reveal-on-scroll: a tall block (a price box, a card) at the fold waited

@@ -174,4 +174,8 @@ html{-webkit-tap-highlight-color:transparent}
 /* Contact form: the optional part of a label, quieter; the confirmation, gold. */
 .c-field__optional{font-weight:var(--weight-regular,400);color:var(--color-text-muted)}
 [data-contact-status].is-sent{color:var(--color-accent);font-weight:var(--weight-semibold)}
+/* 404: the likely destinations, as a quiet list under the two actions. */
+.c-notfound__more{display:grid;gap:var(--space-16);margin-block-start:var(--space-48);padding-block-start:var(--space-32);border-block-start:var(--border-hairline)}
+.c-notfound__list{display:grid;grid-template-columns:repeat(auto-fill,minmax(14rem,1fr));gap:var(--space-12) var(--space-32);margin:0;padding:0;list-style:none}
+.c-notfound__list .c-link{display:inline-flex;min-block-size:44px;align-items:center}
 /* REFINEMENTS:END */
