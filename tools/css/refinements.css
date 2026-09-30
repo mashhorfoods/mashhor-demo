@@ -120,4 +120,31 @@ html{-webkit-tap-highlight-color:transparent}
 @media (min-width:105em){html{font-size:106.25%}:root{--container-max:1440px}}
 @media (min-width:120em){html{font-size:112.5%}:root{--container-max:1600px}}
 @media (min-width:150em){html{font-size:125%}:root{--container-max:1840px}}
+/* Tablets and wide phones (48em–64em). The page is one column there, but
+   text kept the narrow measures of the desktop's side-by-side layouts, so it
+   filled half a row and left the other half empty:
+   - a chapter's text and its drawing sit side by side, alternating, as on
+     computers; the chapter's work stays full width beneath them;
+   - the closing box stacks: its heading across the width, the buttons below;
+   - one-column text reads up to 68 characters instead of 32–40. */
+@media (min-width:48em) and (max-width:63.99em){
+.c-chapter{grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--space-32);align-items:center}
+.c-chapter__text{grid-column:1 / span 7;grid-row:1}
+.c-chapter__figure{grid-column:8 / span 5;grid-row:1}
+.c-chapter:nth-of-type(even) .c-chapter__text{grid-column:6 / span 7}
+.c-chapter:nth-of-type(even) .c-chapter__figure{grid-column:1 / span 5}
+.c-chapter__work{grid-column:1 / -1;grid-row:2}
+.c-chapter__lead,.c-chapter__aside{max-inline-size:none}
+.c-quote{flex-direction:column;align-items:flex-start;gap:var(--space-24);padding:var(--space-40)}
+.c-quote .c-svc__actions{align-self:stretch}
+.c-quote__body{max-inline-size:none}
+/* The hero's two buttons side by side at their own size, not phone-wide. */
+.c-hero__actions{flex-direction:row;flex-wrap:wrap;inline-size:auto}
+.c-hero__actions .c-btn{inline-size:auto;flex:0 0 auto}
+/* Add-ons three to a row, so a group of three has no orphan. */
+.c-addons__grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+/* Contact: the channels beside the form rather than above it. */
+.c-contact{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:var(--space-40);align-items:start}}
+@media (max-width:63.99em){
+.c-svc__deal-note,.c-eco__hub-note,.c-about-value__body,.c-challenge__lead,.c-page__note,.c-about-intro__text,.c-about-intro__body,.c-chapter__aside{max-inline-size:68ch}}
 /* REFINEMENTS:END */
