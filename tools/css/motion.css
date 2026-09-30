@@ -20,4 +20,37 @@
 }}
 @keyframes m-surface{from{opacity:0;transform:translateY(32px);filter:blur(6px)}}
 }
+/* Touch screens (phones, tablets): a flick is fast, and a reveal that waits
+   until content is on screen leaves it blank while the hand moves on. So:
+   shorter and closer, no blur (it also keeps text soft for longer and costs
+   the GPU), a tighter stagger, and scroll-bound text done within 160 px of
+   arriving. motion.js starts these reveals just before the fold. Desktop keeps
+   the slower rhythm. */
+@media (prefers-reduced-motion:no-preference) and (pointer:coarse){
+:root{--reveal-distance:16px}
+.js [data-reveal],.js [data-reveal-group]>*{filter:none;transition-duration:560ms}
+.js [data-reveal-group].is-revealed>*:nth-child(2){transition-delay:60ms}
+.js [data-reveal-group].is-revealed>*:nth-child(3){transition-delay:120ms}
+.js [data-reveal-group].is-revealed>*:nth-child(n + 4){transition-delay:180ms}
+.m-line>span{animation-duration:720ms;animation-delay:calc(var(--l,0) * 90ms + 80ms)}
+@supports (animation-timeline:view()){
+.c-prose>*,.c-svc__deal,.c-svc__covers,.c-note,.g-head,.g-project,.g-quote,.g-next,.g-option,.g-trust>*{animation-name:m-surface-touch;animation-range:entry 0% entry 160px}
+}}
+@keyframes m-surface-touch{from{opacity:0;transform:translateY(20px)}}
+/* No hover on a touch screen: a tap must not leave a card lifted or its
+   image zoomed (it stays that way when the visitor comes back). */
+@media (hover:none){
+.c-about-value:hover,.c-case-card__link:hover{translate:none}
+.c-svc-card__link:hover{transform:none}
+.c-case-card__link:hover .c-case-card__media img,.c-svc-card__link:hover .c-svc-card__media img,.c-slides__slide:hover .c-slides__frame img,.c-door--about:hover .c-door__stage img{scale:1}
+}
+/* Long reads (the Al Mada story, each case study): a thin gold line at the
+   top of the screen fills with how far the reader has come. Bound to the
+   scroll itself (no script); stays put while the header slides away. */
+@supports (animation-timeline:scroll()){
+body:has(> main.c-story, > main.c-case)::before{content:"";position:fixed;inset-block-start:0;inset-inline:0;z-index:calc(var(--z-header) + 1);block-size:2px;background-color:var(--color-accent);transform-origin:0 50%;scale:0 1;pointer-events:none;animation:m-progress linear both;animation-timeline:scroll(root)}
+[dir="rtl"] body:has(> main.c-story, > main.c-case)::before{transform-origin:100% 50%}
+@media (prefers-reduced-motion:reduce){body:has(> main.c-story, > main.c-case)::before{display:none}}
+}
+@keyframes m-progress{to{scale:1 1}}
 /* MOTION:END */

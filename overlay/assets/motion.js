@@ -10,6 +10,7 @@
      4. galleries glide on their own, slowly, and stop the moment a person
         touches, hovers, focuses or scrolls them;
      5. running totals in the package builder count to their new value;
+     0b. on touch screens, reveals start just before content arrives;
      6. the phones' floating WhatsApp button steps aside where WhatsApp (or
         the hero's own button) is already on screen (runs under reduced
         motion too).
@@ -159,6 +160,21 @@
   }
 
   if (reduce.matches) return;
+
+  /* 0b. Reveals start before the fold on touch screens -------------------- */
+  // The site reveals a block once it is 8% inside the screen, which on a
+  // phone flick leaves the arriving content blank. On touch screens it
+  // starts just before the block arrives (the transition itself is shorter
+  // there, in the MOTION block of the stylesheet); the site's own observer
+  // still runs and finds it done.
+  if (window.matchMedia('(pointer: coarse)').matches && 'IntersectionObserver' in window) {
+    const early = new IntersectionObserver((entries) => entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('is-revealed');
+      early.unobserve(e.target);
+    }), { rootMargin: '0px 0px 12% 0px' });
+    document.querySelectorAll('[data-reveal]:not(.is-revealed), [data-reveal-group]:not(.is-revealed)').forEach((el) => early.observe(el));
+  }
 
   /* 1. Hero headline, line by line --------------------------------------- */
   function splitLines(el) {

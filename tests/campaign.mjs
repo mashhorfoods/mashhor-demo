@@ -749,6 +749,39 @@ for (const kind of ['mobile', 'desktop']) {
   }
 }
 
+/* ---- Touch screens: reveals that keep up with a flick -------------------- */
+// Phones and tablets reveal sooner, shorter and without blur; desktop keeps
+// its slower rhythm. Long reads carry a progress line bound to the scroll.
+for (const [kind, touch] of [['mobile', true], ['desktop', false]]) {
+  const context = await siteContext(browser, { ...VIEWPORTS[kind], ...(touch ? { isMobile: true, hasTouch: true } : {}) });
+  const p = await context.newPage();
+  await p.goto(`${BASE}/`, { waitUntil: 'networkidle' });
+  await p.waitForTimeout(1200);
+  const pending = await p.evaluate(() => {
+    const el = [...document.querySelectorAll('[data-reveal-group]:not(.is-revealed) > *, [data-reveal]:not(.is-revealed)')].at(-1);
+    const cs = getComputedStyle(el);
+    return { ms: parseFloat(cs.transitionDuration) * 1000, blur: cs.filter !== 'none' };
+  });
+  check(touch ? pending.ms <= 600 && !pending.blur : pending.ms >= 800 && pending.blur,
+    `[${kind}] reveals: ${touch ? 'short and sharp on touch screens' : 'the slower, blurred rhythm on desktop'}`, JSON.stringify(pending));
+  if (touch) {
+    // The next block below the fold is already revealing before it arrives.
+    const early = await p.evaluate(async () => {
+      const el = [...document.querySelectorAll('[data-reveal], [data-reveal-group]')].find((e) => e.getBoundingClientRect().top > innerHeight * 1.2);
+      scrollBy(0, el.getBoundingClientRect().top - innerHeight * 1.05);
+      await new Promise((r) => setTimeout(r, 200));
+      return el.classList.contains('is-revealed') && el.getBoundingClientRect().top > innerHeight;
+    });
+    check(early, `[${kind}] reveals start just before the fold on touch screens`);
+    await p.goto(`${BASE}/work/information-design`, { waitUntil: 'networkidle' });
+    const fill = async (k) => { await p.evaluate((k) => scrollTo(0, (document.documentElement.scrollHeight - innerHeight) * k), k); await p.waitForTimeout(200);
+      return p.evaluate(() => getComputedStyle(document.body, '::before').scale); };
+    const seen = [await fill(0), await fill(0.5), await fill(1)];
+    check(seen[0].startsWith('0') && seen[1].startsWith('0.5') && seen[2] === '1', `[${kind}] case study: the progress line fills with the scroll`, seen.join(' | '));
+  }
+  await context.close();
+}
+
 await browser.close();
 
 // The built site ships only what it uses, and every placeholder is filled.
