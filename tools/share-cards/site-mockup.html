@@ -29,7 +29,7 @@ body{background:#141414;position:relative;font-family:system-ui,sans-serif}
 <script>
 const q = new URLSearchParams(location.search);
 const s = q.get('s') || 'travel', k = q.get('k') || 'hero';
-const SITES = { travel: '', aun: 'aunaldrb.com' };
+const SITES = { travel: '', aun: '' };
 const img = (n) => `sites/${s}-${n}.jpg`;
 const phone = (src, x, y, w, rot = 0, z = 3) =>
   `<div class="phone shadow" style="left:${x}px;top:${y}px;width:${w}px;rotate:${rot}deg;z-index:${z}"><img src="${src}"></div>`;

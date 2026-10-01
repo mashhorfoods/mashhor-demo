@@ -121,7 +121,6 @@ for (const [id, focus] of Object.entries(SERVICES)) {
     document.getElementById('h1').innerHTML = t.h1;
     document.getElementById('en').textContent = t.en;
     document.getElementById('from').textContent = from;
-    document.getElementById('path').textContent = `/services/${id}`;
   }, { t, id, focus, img: `file://${path.join(out, `svc-${id}.webp`)}`,
        from: p ? `تبدأ من ${p.amount} ${p.currency}` : 'الباقات والأسعار' });
   await shoot(`share-${id}.jpg`);
@@ -144,7 +143,6 @@ for (const slug of CASES) {
     document.getElementById('h1').textContent = t.h1;
     document.getElementById('en').textContent = t.en;
     document.querySelector('.foot').innerHTML = '<span>دراسة حالة</span><span>من المشكلة إلى النتيجة</span><span>عربي / English</span>';
-    document.getElementById('path').textContent = `/work/${slug}`;
   }, { t, slug, img: `file://${path.join(out, t.img || `case-${slug}.webp`)}` });
   await shoot(`share-case-${slug}.jpg`);
 }
