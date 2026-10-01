@@ -3,12 +3,13 @@
 // reel-branding.html (one service, 10s), reel-energy.html (the brand, 15s,
 // cut to the beat, with its own soundtrack and motion blur):
 // 1080×1920, 30 fps, H.264. A page that declares window.CUES gets the
-// soundtrack composed to them (soundtrack.py) and SUB sub-frames per frame,
+// soundtrack composed to them (soundtrack.py, or music.py for a CUES.style) and SUB sub-frames per frame,
 // averaged into motion blur; the others get a silent track.
 // Each frame is the page's animations paused at that instant, so the video is
 // the same every time.
 //   node tools/share-cards/reel.mjs [name] [query]   (needs ffmpeg; CHROMIUM=/path/to/chrome if needed)
-// e.g. reel-energy s=branding → pixora-reel-energy-branding.mp4, the brand film for one service.
+// film-<service>.html: the four service films, each with its own style and
+// soundtrack (CUES.style → music.py), e.g. film-branding → pixora-film-branding.mp4.
 import { chromium } from 'playwright';
 import { fileURLToPath } from 'node:url';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
@@ -45,7 +46,7 @@ let audio = ['-f', 'lavfi', '-i', 'anullsrc=channel_layout=stereo:sample_rate=44
 if (cues) {
   const json = path.join(frames, 'cues.json'), wav = path.join(frames, 'soundtrack.wav');
   writeFileSync(json, JSON.stringify(cues));
-  execFileSync('python3', [path.join(here, 'soundtrack.py'), json, wav]);
+  execFileSync('python3', [path.join(here, cues.style ? 'music.py' : 'soundtrack.py'), json, wav]);
   audio = ['-i', wav, '-af', 'loudnorm=I=-14:TP=-2:LRA=11,alimiter=limit=0.79:level=false'];
 }
 const blur = SUB > 1 ? ['-vf', `tmix=frames=${SUB},select='not(mod(n+1\\,${SUB}))',setpts=N/${FPS}/TB`] : [];

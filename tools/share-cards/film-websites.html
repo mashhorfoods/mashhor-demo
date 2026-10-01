@@ -1,0 +1,265 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><style>
+/* PIXORA · Websites — "from a line of code to a site that works" (1080×1920,
+   18.75s, 128 BPM, ten bars). At night in the editor: the code is typed, it
+   glitches into a wireframe, the wireframe fills with a real site, the
+   browser morphs to tablet and phone, the phone scrolls a whole site, the
+   work lands as a bento, a loading bar runs to launch. Synthwave/electro
+   (music.py, "websites"). Text sits between y 280 and 1480. */
+@font-face{font-family:Cairo;src:url(fonts/Cairo-Bold.ttf);font-weight:700}
+@font-face{font-family:Cairo;src:url(fonts/Cairo-ExtraBold.ttf);font-weight:800}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-Medium.ttf);font-weight:500}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-SemiBold.ttf);font-weight:600}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-Bold.ttf);font-weight:700}
+:root{--y:#f4d13f;--k:#0b0d12;--line:rgba(244,209,63,.85);--dim:rgba(255,255,255,.4)}
+*{box-sizing:border-box;margin:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--k)}
+body{color:#fff;font-family:Cairo,Poppins,sans-serif}
+#cam{position:absolute;inset:0}
+.layer{position:absolute;inset:0;display:none;overflow:hidden}
+.c{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+.mono{font-family:'DejaVu Sans Mono',monospace;direction:ltr}
+.dots{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.09) 2px,transparent 2px);background-size:48px 48px}
+.big{font-weight:800;line-height:1.05;white-space:nowrap;text-align:center}
+.tag{font-family:'DejaVu Sans Mono',monospace;direction:ltr;font-size:30px;color:var(--y);letter-spacing:.05em;white-space:nowrap}
+#code{position:absolute;left:80px;top:700px;font-size:52px;line-height:1.9;white-space:pre}
+#code .n{color:rgba(255,255,255,.25);display:inline-block;width:70px}
+.kw{color:var(--y)}.st{color:#9be7c4;font-family:Cairo;font-weight:700}.pn{color:rgba(255,255,255,.55)}.fn{color:#fff}
+.cursor{display:inline-block;width:24px;height:52px;background:var(--y);vertical-align:-10px}
+.dev{position:absolute;left:50%;top:50%;background:#16181f;overflow:hidden;box-shadow:0 0 0 2px rgba(255,255,255,.12),0 80px 140px -50px rgba(0,0,0,.9)}
+.dev .barr{position:absolute;left:0;right:0;top:0;height:52px;background:#1d2029;display:flex;align-items:center;gap:12px;padding:0 22px;direction:ltr}
+.dev .barr i{width:14px;height:14px;border-radius:50%;display:block}
+.dev .barr i:nth-child(1){background:#ff5f57}.dev .barr i:nth-child(2){background:#febc2e}.dev .barr i:nth-child(3){background:#28c840}
+.dev img{position:absolute;left:0;width:100%;display:block}
+.wf{position:absolute;border:3px solid var(--line);border-radius:10px}
+.wf b{position:absolute;left:12px;top:8px;font-family:'DejaVu Sans Mono',monospace;font-weight:400;font-size:22px;color:var(--y);direction:ltr}
+.tile{position:absolute;border-radius:22px;overflow:hidden;box-shadow:0 0 0 2px rgba(255,255,255,.1),0 40px 80px -40px rgba(0,0,0,.9)}
+.tile img{width:100%;height:100%;object-fit:cover;display:block}
+.track{position:absolute;left:120px;right:120px;height:26px;border-radius:13px;background:rgba(255,255,255,.1);overflow:hidden}
+.fill{position:absolute;left:0;top:0;bottom:0;background:var(--y);border-radius:13px}
+.pill{display:inline-flex;align-items:center;gap:24px;background:var(--y);color:#141414;border-radius:999px;padding:30px 54px;font-size:46px;font-weight:700;white-space:nowrap}
+.pill::before{content:"";width:20px;height:20px;border-radius:50%;background:#141414}
+.flash{position:absolute;inset:0;background:#fff;pointer-events:none;opacity:0}
+.scan{position:absolute;left:0;right:0;height:4px;background:var(--y);box-shadow:0 0 30px 8px rgba(244,209,63,.6)}
+</style></head><body>
+<div id="cam">
+  <!-- 1. the code, typed -->
+  <section class="layer" id="s1"><div class="dots"></div><p class="tag" style="position:absolute;left:80px;top:580px;color:var(--dim)">~/pixora/site.js</p><div id="code" class="mono"></div></section>
+  <!-- 2–4. one device: wireframe → real site → tablet → phone; words above -->
+  <section class="layer" id="s2">
+    <div class="dots"></div>
+    <p class="big c" id="w" style="font-size:150px;top:400px"></p><p class="tag c" id="wt" style="top:520px"></p>
+    <div class="dev" id="dev"><div class="barr" id="devbar"><i></i><i></i><i></i></div>
+      <img id="dimg" src="sites/travel-desktop.jpg"><img id="mimg" src="sites/travel-mobile-1.jpg">
+      <div id="wfs"></div><div class="scan" id="scan"></div></div>
+    <p class="tag c" id="devl" style="top:1470px"></p>
+  </section>
+  <!-- 5. a phone scrolls a whole site -->
+  <section class="layer" id="s5">
+    <div class="dots"></div>
+    <p class="c" id="s5g" style="left:170px;top:960px;font-family:Poppins;font-weight:700;font-size:300px;line-height:1;color:transparent;-webkit-text-stroke:3px rgba(244,209,63,.3);white-space:nowrap;direction:ltr">SCROLL</p>
+    <div class="dev" id="ph" style="width:480px;height:1000px;border-radius:64px;border:14px solid #050608"><img id="pimg" src="sites/aun-mobile-full.jpg" style="top:0"></div>
+    <p class="big c" id="s5l" style="font-size:52px;top:1500px;left:650px">عون الدرب</p>
+  </section>
+  <!-- 6. the work, a bento -->
+  <section class="layer" id="s6"><div class="dots"></div><p class="tag c" style="top:330px">&lt;work /&gt;</p><div id="bento"></div></section>
+  <!-- 7. loading → launch -->
+  <section class="layer" id="s7">
+    <div class="dots"></div>
+    <p class="big c" id="s7a" style="top:620px"></p><p class="big c" id="s7b" style="top:810px;color:var(--y)"></p>
+    <div class="track" id="trk" style="top:1060px"><div class="fill" id="fill"></div></div>
+    <p class="tag c" id="pct" style="top:1150px;font-size:44px"></p>
+    <p class="big c" id="s7l" style="top:1330px;font-size:150px;color:var(--y)">إطلاق.</p>
+  </section>
+  <!-- 8. the invitation, in a browser window -->
+  <section class="layer" id="s8" style="background:var(--y)">
+    <div class="dev c" id="win" style="width:940px;height:900px;border-radius:36px;background:#141414;top:880px"><div class="barr"><i></i><i></i><i></i></div>
+      <p class="big c" id="s8a" style="top:330px;color:#fff"></p><p class="big c" id="s8b" style="top:500px;font-size:84px;color:var(--y)">نبدأ من محادثة.</p>
+      <div class="c" id="s8p" style="top:700px"><span class="pill">راسلنا — الرابط في البايو</span></div></div>
+    <p class="c" id="s8w" style="top:1440px;font-family:Poppins;font-weight:700;font-size:64px;direction:ltr;color:#141414;letter-spacing:.02em">PIXORA</p>
+  </section>
+</div>
+<div class="flash" id="flash"></div>
+<script src="film.js"></script>
+<script>
+const BEAT = 60 / 128, BAR = 4 * BEAT;
+window.DURATION = 10 * BAR;                                   // 18.75s
+const at = (bar, beat = 0) => bar * BAR + beat * BEAT;
+const WORDS = [['تصميم.', 'design()'], ['تطوير.', 'build()'], ['نطاق.', 'domain()'], ['استضافة.', 'host()']];
+const CODE = [
+  [['kw', 'const '], ['fn', 'site'], ['pn', ' = '], ['kw', 'new '], ['fn', 'Pixora'], ['pn', '();']],
+  [['fn', 'site'], ['pn', '.'], ['kw', 'design'], ['pn', '('], ['st', '"موقعك"'], ['pn', ');']],
+  [['fn', 'site'], ['pn', '.'], ['kw', 'build'], ['pn', '();']],
+  [['fn', 'site'], ['pn', '.'], ['kw', 'launch'], ['pn', '();']],
+];
+const CHARS = CODE.flat().reduce((n, [, s]) => n + s.length, 0);
+const TYPE0 = 0.1, TYPE1 = at(0, 3.4), RATE = CHARS / (TYPE1 - TYPE0);
+const BENTO = [[asset('site-travel'), 'TRAVEL'], [asset('site-aun'), 'AUN ALDRB'], [src('al-mada-website'), 'AL MADA'], [asset('site-aun-phones'), 'MOBILE']];
+window.CUES = {
+  style: 'websites', bpm: 128, duration: 10 * BAR,
+  groove: [at(1), 10 * BAR], breaks: [[at(7), at(8)]],
+  hits: [at(1), at(8)],
+  accents: [
+    ...[...Array(14)].map((_, i) => [TYPE0 + i * BEAT / 4, 'blip']), [at(0, 3.5), 'glitch'],
+    ...[0, 1, 2, 3].map((i) => [at(1, i), 'tick']),
+    [at(3), 'swipe'], [at(3, 2), 'swipe'], [at(4), 'note'],
+    ...BENTO.map((_, i) => [at(6, i), 'glitch']),
+    [at(7, 3.5), 'note'],
+  ],
+  whooshes: [[at(2) - 0.1, 0.3], [at(4) - 0.1, 0.25], [at(6) - 0.1, 0.2]],
+  risers: [[at(7), BAR]],
+  outro: at(8),
+};
+const HITS = CUES.hits;
+
+// ---- build -----------------------------------------------------------------
+['s2', 's7', 's8'].forEach((id) => show(id, true));
+const WSIZE = WORDS.map(([w]) => { $('w').textContent = w; return fit($('w'), 150); });
+$('s7a').textContent = 'ابنِ تجربة رقمية'; fit($('s7a'), 140);
+$('s7b').textContent = 'تؤدي عملها.'; fit($('s7b'), 170);
+$('s8a').textContent = 'تحتاج موقعًا؟'; fit($('s8a'), 140, 820);
+['s2', 's7', 's8'].forEach((id) => show(id, false));
+// The wireframe's blocks, in the browser's own coordinates (940×640).
+const WF = [['nav', 30, 72, 880, 50], ['hero', 30, 142, 880, 250], ['cards', 30, 412, 280, 150], ['', 330, 412, 280, 150], ['', 630, 412, 280, 150], ['footer', 30, 582, 880, 40]];
+$('wfs').innerHTML = WF.map(([l, x, y, w, h], i) => `<div class="wf" id="wf${i}" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px">${l ? `<b>&lt;${l}&gt;</b>` : ''}</div>`).join('');
+$('bento').innerHTML = BENTO.map(([s, l], i) => {
+  const x = i % 2 ? 80 : 560, y = 470 + Math.floor(i / 2) * 470;
+  return `<div class="tile" id="b${i}" style="left:${x}px;top:${y}px;width:440px;height:440px"><img src="${s}"></div><p class="tag" id="bl${i}" style="position:absolute;left:${x}px;top:${y + 452}px;font-size:24px">${l}</p>`;
+}).join('');
+
+const typed = (n) => CODE.map((line, li) => {
+  let html = `<span class="n">${li + 1}</span>`;
+  for (const [cls, s] of line) {
+    if (n <= 0) break;
+    html += `<span class="${cls}">${s.slice(0, n)}</span>`;
+    n -= s.length;
+  }
+  return html;
+});
+
+// ---- the film ---------------------------------------------------------------
+window.render = (t) => {
+  $('cam').style.transform = shake(t, HITS, 0.8);
+  $('flash').style.opacity = flashAt(t, HITS, 0.3);
+
+  // 1 · bar 0: the code; a glitch on the last half-beat.
+  show('s1', t < at(1));
+  if (t < at(1)) {
+    const n = Math.floor((t - TYPE0) * RATE);
+    let left = n;
+    const lines = typed(left);
+    // The cursor sits after the last typed character.
+    let done = 0, li = 0;
+    for (; li < CODE.length; li++) { const len = CODE[li].reduce((a, [, s]) => a + s.length, 0); if (done + len >= n) break; done += len; }
+    const blink = Math.floor(t / (BEAT / 2)) % 2 === 0 || t < TYPE1;
+    $('code').innerHTML = lines.map((l, i) => (i <= li ? l + (i === Math.min(li, CODE.length - 1) && blink ? '<span class="cursor"></span>' : '') : '')).join('\n');
+    const g = p(t, at(0, 3.5), BEAT / 2);
+    const r = seeded(Math.floor(t * 60));
+    $('code').style.transform = g > 0 ? `translateX(${(r() - 0.5) * 80 * g}px) skewX(${(r() - 0.5) * 20 * g}deg)` : '';
+    $('code').style.textShadow = g > 0 ? `${12 * g}px 0 rgba(255,0,80,.8), ${-12 * g}px 0 rgba(0,220,255,.8)` : 'none';
+    $('s1').style.opacity = 1 - g * g;
+  }
+
+  // 2–4 · bars 1–4: one device. Wireframe (bar 1), filled with the real
+  // site (bar 2), morphing desktop → tablet → phone (bar 3).
+  show('s2', t >= at(1) && t < at(4));
+  if (t >= at(1) && t < at(4)) {
+    // Words every two beats over bars 1–2.
+    const wi = clamp(Math.floor((t - at(1)) / (2 * BEAT)), 0, 3);
+    const wk = expoOut(p(t, at(1) + wi * 2 * BEAT, 0.3));
+    const wOut = expoIn(p(t, at(3) - 0.2, 0.25));
+    $('w').textContent = WORDS[wi][0]; $('w').style.fontSize = WSIZE[wi];
+    $('w').style.transform = `translate(-50%,-50%) translateY(${lerp(50, 0, wk) - wOut * 200}px)`; $('w').style.opacity = wk * (1 - wOut);
+    $('wt').textContent = `site.${WORDS[wi][1]}`; $('wt').style.opacity = wk * (1 - wOut);
+    // The device's shape: browser 940×640 → tablet 640×880 → phone 480×1000.
+    const m1 = expoInOut(p(t, at(3), 0.35)), m2 = expoInOut(p(t, at(3, 2), 0.35));
+    const w = lerp(lerp(940, 640, m1), 480, m2), h = lerp(lerp(640, 880, m1), 1000, m2);
+    const rad = lerp(lerp(22, 44, m1), 64, m2), bz = lerp(0, 14, Math.max(m1 * 0.6, m2));
+    const pop = spring(p(t, at(1), 0.6));
+    const dev = $('dev');
+    dev.style.width = `${w}px`; dev.style.height = `${h}px`; dev.style.borderRadius = `${rad}px`; dev.style.border = `${bz}px solid #050608`;
+    dev.style.transform = `translate(-50%,-50%) translateY(${lerp(140, 100, m1)}px) scale(${pop})`;
+    $('devbar').style.opacity = 1 - m1;
+    // The wireframe draws in a block per sixteenth, then fades as the site fills.
+    const fillK = expoInOut(p(t, at(2), 0.9));
+    WF.forEach((_, i) => {
+      const k = expoOut(p(t, at(1) + i * BEAT * 0.6, 0.25));
+      $(`wf${i}`).style.opacity = k * (1 - fillK);
+      $(`wf${i}`).style.transform = `scale(${lerp(0.85, 1, k)})`;
+    });
+    // The site fills behind a scanline, top to bottom.
+    const img = $('dimg');
+    img.style.top = `${lerp(52, 0, m1)}px`;
+    img.style.height = `${h - lerp(52, 0, m1) - 2 * bz}px`; img.style.objectFit = 'cover'; img.style.objectPosition = '50% 0';
+    img.style.clipPath = `inset(0 0 ${100 - fillK * 100}% 0)`;
+    $('scan').style.display = fillK > 0 && fillK < 1 ? 'block' : 'none';
+    $('scan').style.top = `${52 + fillK * (h - 52)}px`;
+    // On the phone, its own screen.
+    const mk = expoOut(p(t, at(3, 2) + 0.15, 0.25));
+    const mi = $('mimg');
+    mi.style.top = 0; mi.style.height = '100%'; mi.style.objectFit = 'cover'; mi.style.objectPosition = '50% 0'; mi.style.opacity = mk;
+    const lab = t < at(3) ? (t < at(2) ? '&lt;wireframe /&gt;' : 'DESKTOP') : t < at(3, 2) ? 'TABLET' : 'MOBILE';
+    $('devl').innerHTML = lab;
+    $('devl').style.top = `${960 + 100 + h / 2 + 50}px`;
+    $('devl').style.opacity = expoOut(p(t, at(1, 1), 0.3));
+  }
+
+  // 5 · bars 4–5: a phone scrolls a whole site, a step on every beat.
+  show('s5', t >= at(4) && t < at(6));
+  if (t >= at(4) && t < at(6)) {
+    const swap = expoOut(p(t, at(4), 0.4));
+    const steps = (t - at(4) - 0.3) / BEAT;
+    const k = Math.floor(clamp(steps, 0, 14)), f = expoOut(clamp(steps - k, 0, 1) / 0.6);
+    const y = (k + (steps > 0 ? f : 0)) * 620 * (452 / 780);
+    $('pimg').style.width = '100%'; $('pimg').style.top = `${-y}px`;
+    $('ph').style.transform = `translate(-50%,-50%) translateX(${lerp(1100, 110, swap)}px) rotate(${lerp(8, 0, swap)}deg)`;
+    $('s5g').style.transform = `translate(-50%,-50%) rotate(-90deg) translateX(${-(t - at(4)) * 120}px)`;
+    $('s5l').style.opacity = expoOut(p(t, at(4, 1), 0.3));
+    const out = expoIn(p(t, at(6) - 0.25, 0.25));
+    $('s5').style.transform = `scale(${lerp(1, 0.8, out)})`; $('s5').style.opacity = 1 - out;
+  }
+
+  // 6 · bar 6: the work as a bento, a tile per beat, glitching in.
+  show('s6', t >= at(6) && t < at(7));
+  if (t >= at(6) && t < at(7)) {
+    BENTO.forEach((_, i) => {
+      const k = p(t, at(6, i), 0.3), r = seeded(i * 999 + Math.floor(t * 60));
+      const g = k > 0 && k < 0.6 ? 1 - k / 0.6 : 0;
+      $(`b${i}`).style.opacity = k > 0 ? 1 : 0;
+      $(`b${i}`).style.transform = `translateX(${(r() - 0.5) * 90 * g}px) scale(${lerp(1.15, 1, expoOut(k))})`;
+      $(`b${i}`).style.clipPath = g > 0.2 ? `inset(${r() * 40}% 0 ${r() * 40}% 0)` : 'none';
+      $(`bl${i}`).style.opacity = expoOut(p(t, at(6, i) + 0.15, 0.2));
+    });
+  }
+
+  // 7 · bar 7: loading to 100%, then "launch".
+  show('s7', t >= at(7) && t < at(8));
+  if (t >= at(7) && t < at(8)) {
+    const a = expoOut(p(t, at(7), 0.35)), b = expoOut(p(t, at(7, 1), 0.35));
+    $('s7a').style.opacity = a; $('s7a').style.transform = `translate(-50%,-50%) translateY(${lerp(50, 0, a)}px)`;
+    $('s7b').style.opacity = b; $('s7b').style.transform = `translate(-50%,-50%) scale(${lerp(1.3, 1, b)})`;
+    // Loading in chunks, like a real one.
+    const lk = p(t, at(7, 0.5), BAR - 0.55);
+    const pct = Math.min(100, Math.round(100 * (lk < 0.4 ? lk * 1.4 : lk < 0.7 ? 0.56 + (lk - 0.4) * 0.6 : 0.74 + (lk - 0.7) * 0.87)));
+    $('fill').style.width = `${pct}%`; $('pct').textContent = `${String(pct).padStart(3, ' ')}%`;
+    $('trk').style.opacity = expoOut(p(t, at(7, 0.5), 0.2));
+    const done = pct >= 100;
+    $('s7l').style.opacity = done ? 1 : 0;
+    $('s7l').style.transform = `translate(-50%,-50%) scale(${done ? lerp(1.6, 1, expoOut(p(t, at(7, 3.6), 0.15))) : 1})`;
+  }
+
+  // 8 · bars 8–9: the invitation, in a window.
+  show('s8', t >= at(8));
+  if (t >= at(8)) {
+    const w = spring(p(t, at(8), 0.7)), a = expoOut(p(t, at(8, 0.5), 0.35)), b = expoOut(p(t, at(8, 1), 0.35));
+    const c = backOut(p(t, at(8, 1.5), 0.45)), d = expoOut(p(t, at(8, 2), 0.4));
+    $('win').style.transform = `translate(-50%,-50%) scale(${lerp(0.4, 1, w)})`;
+    $('s8a').style.opacity = a; $('s8a').style.transform = `translate(-50%,-50%) translateY(${lerp(40, 0, a)}px)`;
+    $('s8b').style.opacity = b; $('s8b').style.transform = `translate(-50%,-50%) translateY(${lerp(40, 0, b)}px)`;
+    $('s8p').style.transform = `translate(-50%,-50%) scale(${c})`;
+    $('s8w').style.opacity = d; $('s8w').style.transform = `translate(-50%,-50%) translateY(${lerp(40, 0, d)}px)`;
+  }
+};
+window.seek = (t) => window.render(t);
+window.seek(0);
+</script>
+</body></html>

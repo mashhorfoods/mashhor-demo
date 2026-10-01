@@ -1,0 +1,244 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><style>
+/* PIXORA · Social — "the account's pulse" (1080×1920, 21.25s, 96 BPM). The
+   film is itself a story: progress bars across the top, a chapter each.
+   Notifications pop in; the services land as stickers; a profile grid fills
+   tile by tile; the work plays as stories with a cube swipe; hearts float up;
+   it ends in a DM. Bouncy pop (music.py, "social"). Text between y 280 and 1480. */
+@font-face{font-family:Cairo;src:url(fonts/Cairo-Medium.ttf);font-weight:500}
+@font-face{font-family:Cairo;src:url(fonts/Cairo-Bold.ttf);font-weight:700}
+@font-face{font-family:Cairo;src:url(fonts/Cairo-ExtraBold.ttf);font-weight:800}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-Medium.ttf);font-weight:500}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-SemiBold.ttf);font-weight:600}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-Bold.ttf);font-weight:700}
+:root{--y:#f4d13f;--k:#141414;--cream:#f6f3ec}
+*{box-sizing:border-box;margin:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--k)}
+body{color:var(--k);font-family:Cairo,Poppins,sans-serif}
+#cam{position:absolute;inset:0}
+.layer{position:absolute;inset:0;display:none;overflow:hidden}
+.c{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+.big{font-weight:800;line-height:1.05;white-space:nowrap;text-align:center}
+#bars{position:absolute;top:268px;left:60px;right:60px;display:flex;gap:10px;direction:ltr;z-index:50}
+#bars div{flex:1;height:8px;border-radius:4px;overflow:hidden}
+#bars i{display:block;height:100%}
+.note{position:absolute;right:90px;left:90px;height:150px;border-radius:40px;background:#fff;display:flex;align-items:center;gap:30px;padding:0 34px;box-shadow:0 30px 60px -30px rgba(0,0,0,.45)}
+.note .ic{width:90px;height:90px;border-radius:50%;background:var(--k);display:flex;align-items:center;justify-content:center;flex:none}
+.note .ic svg{width:46px;height:46px}
+.note b{font-size:46px;font-weight:800}
+.note span{font-size:34px;font-weight:500;color:rgba(20,20,20,.55);margin-inline-start:auto;font-family:Poppins;direction:ltr}
+.sticker{position:absolute;padding:20px 46px;border-radius:30px;font-size:96px;font-weight:800;white-space:nowrap;box-shadow:0 24px 50px -20px rgba(0,0,0,.6);line-height:1.2}
+.phone{position:absolute;left:50%;top:50%;width:760px;height:1300px;border-radius:80px;background:#050505;padding:18px}
+.screen{position:absolute;inset:18px;border-radius:64px;background:#fff;overflow:hidden}
+.tile{position:absolute;overflow:hidden;background:#eee}
+.tile img{width:100%;height:100%;object-fit:cover;display:block}
+.story{position:absolute;left:70px;right:70px;top:340px;bottom:340px;border-radius:44px;overflow:hidden;backface-visibility:hidden;background:#000}
+.story img{width:100%;height:100%;object-fit:cover;display:block}
+.story .lab{position:absolute;bottom:60px;right:50%;transform:translateX(50%) rotate(-3deg);background:var(--y);color:var(--k);padding:14px 40px;border-radius:24px;font-size:56px;font-weight:800;white-space:nowrap}
+.heart{position:absolute;width:90px;height:90px}
+.bubble{position:absolute;max-width:820px;padding:30px 46px;border-radius:50px;font-size:64px;font-weight:800;white-space:nowrap}
+.pill{display:inline-flex;align-items:center;gap:24px;background:var(--y);color:var(--k);border-radius:999px;padding:30px 56px;font-size:48px;font-weight:700;white-space:nowrap}
+.pill::before{content:"";width:20px;height:20px;border-radius:50%;background:var(--k)}
+.flash{position:absolute;inset:0;background:#fff;pointer-events:none;opacity:0}
+</style></head><body>
+<div id="cam">
+  <!-- 1. notifications -->
+  <section class="layer" id="s1" style="background:var(--y)"><div id="notes"></div><p class="big c" id="s1h" style="top:1340px;font-size:90px">حسابك… حيّ.</p></section>
+  <!-- 2. the services, as stickers -->
+  <section class="layer" id="s2" style="background:var(--k)"><p class="big c" id="s2h" style="top:520px;color:#fff;font-size:120px">كل ما يحتاجه حسابك</p><div id="stk"></div></section>
+  <!-- 3. a profile grid fills -->
+  <section class="layer" id="s3" style="background:var(--cream)">
+    <div class="phone" id="ph"><div class="screen" id="scr">
+      <div style="position:absolute;top:70px;right:50px;width:150px;height:150px;border-radius:50%;background:var(--k);box-shadow:0 0 0 6px #fff,0 0 0 11px var(--y);display:flex;align-items:center;justify-content:center"><span style="font-family:Poppins;font-weight:700;font-size:96px;color:var(--y);line-height:1;margin-top:10px">X</span></div>
+      <p style="position:absolute;top:84px;right:240px;font-family:Poppins;font-weight:700;font-size:44px;direction:ltr">pixora</p>
+      <p style="position:absolute;top:150px;right:240px;font-size:30px;font-weight:700;color:rgba(20,20,20,.5)">وكالة رقمية</p>
+      <div style="position:absolute;top:270px;right:50px;left:50px;display:flex;gap:30px;justify-content:space-between;direction:rtl"><div style="width:110px;height:110px;border-radius:50%;border:4px solid rgba(20,20,20,.15);background:#f3f3f3"></div><div style="width:110px;height:110px;border-radius:50%;border:4px solid rgba(20,20,20,.15);background:#f3f3f3"></div><div style="width:110px;height:110px;border-radius:50%;border:4px solid rgba(20,20,20,.15);background:#f3f3f3"></div><div style="width:110px;height:110px;border-radius:50%;border:4px solid rgba(20,20,20,.15);background:#f3f3f3"></div></div>
+      <div id="grid"></div>
+    </div></div>
+    <p class="big c" id="s3l" style="top:1480px;font-size:56px">محتوى يُنشر بانتظام.</p>
+  </section>
+  <!-- 4. the work, as stories -->
+  <section class="layer" id="s4" style="background:var(--k);perspective:2200px"><div id="stories" style="position:absolute;inset:0;transform-style:preserve-3d"></div></section>
+  <!-- 5. the promise, hearts rising -->
+  <section class="layer" id="s5" style="background:var(--y)">
+    <div id="hearts"></div>
+    <p class="big c" id="s5a" style="top:720px"></p><p class="big c" id="s5b" style="top:900px"></p>
+    <p class="big c" id="s5c" style="top:1080px;font-weight:700;color:rgba(20,20,20,.75)"></p>
+  </section>
+  <!-- 6. a DM -->
+  <section class="layer" id="s6" style="background:var(--k)">
+    <div style="position:absolute;top:330px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:24px"><div style="width:96px;height:96px;border-radius:50%;background:var(--y);display:flex;align-items:center;justify-content:center"><span style="font-family:Poppins;font-weight:700;font-size:60px;color:var(--k);line-height:1;margin-top:6px">X</span></div><span style="font-family:Poppins;font-weight:700;font-size:48px;color:#fff;direction:ltr">pixora</span></div>
+    <div class="bubble" id="m1" style="right:80px;top:600px;background:#2a2a2a;color:#fff;border-bottom-right-radius:14px"></div>
+    <div class="bubble" id="typing" style="left:80px;top:800px;background:var(--y);padding:34px 40px"><svg width="130" height="30" viewBox="0 0 130 30"><circle id="d0" cx="15" cy="15" r="13" fill="#141414"/><circle id="d1" cx="65" cy="15" r="13" fill="#141414"/><circle id="d2" cx="115" cy="15" r="13" fill="#141414"/></svg></div>
+    <div class="bubble" id="m2" style="left:80px;top:800px;background:var(--y);color:var(--k);border-bottom-left-radius:14px">نبدأ من محادثة.</div>
+    <div class="c" id="s6p" style="top:1110px"><span class="pill">راسلنا — الرابط في البايو</span></div>
+    <p class="c" id="s6w" style="top:1440px;font-family:Poppins;font-weight:700;font-size:64px;direction:ltr;color:#fff;letter-spacing:.02em">PI<span style="color:var(--y)">X</span>ORA</p>
+  </section>
+</div>
+<div id="bars"></div>
+<div class="flash" id="flash"></div>
+<script src="film.js"></script>
+<script>
+const BEAT = 0.625, BAR = 4 * BEAT;
+window.DURATION = 8.5 * BAR;                                 // 21.25s
+const at = (bar, beat = 0) => bar * BAR + beat * BEAT;
+// The chapters, as the story's progress bars: [start, end].
+const CH = [[0, at(1)], [at(1), at(2)], [at(2), at(4)], [at(4), at(6)], [at(6), at(7)], [at(7), 8.5 * BAR]];
+const ICON = {
+  heart: '<path d="M23 40s-16-9.5-16-21a9 9 0 0 1 16-5.6A9 9 0 0 1 39 19c0 11.5-16 21-16 21z" fill="#f4d13f"/>',
+  chat: '<path d="M8 10h30v20H20l-8 7v-7H8z" fill="#f4d13f"/>',
+  share: '<path d="M8 24l30-14-10 30-5-11z" fill="#f4d13f"/>',
+  plus: '<path d="M23 8v30M8 23h30" stroke="#f4d13f" stroke-width="7" stroke-linecap="round"/>',
+};
+const NOTES = [['heart', 'أُعجب بمنشورك'], ['chat', 'علّق على منشورك'], ['share', 'شارك منشورك'], ['plus', 'بدأ بمتابعتك']];
+const STICKERS = [['استراتيجية.', 560, 760, -6, 'var(--y)'], ['محتوى.', 420, 960, 5, '#fff'], ['تصميم.', 640, 1150, -3, 'var(--y)'], ['نشر.', 380, 1330, 7, '#fff'], ['تقارير.', 600, 1490, -5, 'var(--y)']];
+const TILES = [asset('case-digital-campaigns-key-visual'), src('c02'), asset('case-brand-identity-systems-social'), src('c03'), asset('case-digital-campaigns-stories'), src('c04'),
+  asset('case-digital-campaigns-feed'), src('work-2'), asset('case-digital-campaigns-motion'), src('c01'), src('work-7'), asset('case-brand-identity-systems-packaging')];
+const STORIES = [[src('c01'), 'خطة المحتوى'], [src('c02'), 'المنشورات'], [src('c03'), 'الريلز'], [src('c04'), 'الستوريز']];
+window.CUES = {
+  style: 'social', bpm: 96, duration: 8.5 * BAR,
+  groove: [0, 8.5 * BAR], breaks: [[at(6), at(6, 1)]],
+  hits: [at(2), at(6, 1), at(7)],
+  accents: [...NOTES.map((_, i) => [0.15 + i * BEAT * 0.75, 'pop']),
+    ...STICKERS.map((_, i) => [at(1, 0.5 + i * 0.7), 'pop']),
+    ...TILES.map((_, i) => [at(2, 1 + i * 0.5), i % 3 ? 'tick' : 'pop']),
+    ...STORIES.slice(1).map((_, i) => [at(4) + (i + 1) * 1.25, 'swipe']),
+    [at(7, 0.3), 'pop'], [at(7, 2.2), 'pop'], [at(7, 3), 'note']],
+  whooshes: [[at(1) - 0.1, 0.2], [at(4) - 0.15, 0.3], [at(6) - 0.1, 0.2]],
+  risers: [[at(5, 2), 2 * BEAT]],
+  outro: at(7),
+};
+const HITS = CUES.hits;
+
+// ---- build -----------------------------------------------------------------
+$('bars').innerHTML = CH.map((_, i) => `<div id="bar${i}"><i id="bf${i}"></i></div>`).join('');
+$('notes').innerHTML = NOTES.map(([ic, txt], i) => `<div class="note" id="n${i}" style="top:${430 + i * 190}px"><div class="ic"><svg viewBox="0 0 46 46">${ICON[ic]}</svg></div><b>${txt}</b><span>pixora</span></div>`).join('');
+$('stk').innerHTML = STICKERS.map(([w, x, y, r, bg], i) => `<div class="sticker" id="st${i}" style="left:${x}px;top:${y}px;background:${bg};color:var(--k)">${w}</div>`).join('');
+// The grid: three across, under the profile header.
+const GW = 724 / 3;
+$('grid').innerHTML = TILES.map((s, i) => `<div class="tile" id="t${i}" style="left:${(2 - i % 3) * (GW + 2)}px;top:${430 + Math.floor(i / 3) * (GW + 2)}px;width:${GW}px;height:${GW}px"><img src="${s}"></div>`).join('');
+$('stories').innerHTML = STORIES.map(([s, l], i) => `<div class="story" id="sy${i}"><img src="${s}"><div class="lab">${l}</div></div>`).join('');
+// Hearts: a seeded stream.
+const R = seeded(42);
+const HEARTS = [...Array(26)].map(() => ({ x: 120 + R() * 840, d: R() * 2.2, s: 0.6 + R() * 0.9, w: R() * 6, k: R() < 0.5 }));
+$('hearts').innerHTML = HEARTS.map((h, i) => `<svg class="heart" id="h${i}" viewBox="0 0 46 46"><path d="M23 40s-16-9.5-16-21a9 9 0 0 1 16-5.6A9 9 0 0 1 39 19c0 11.5-16 21-16 21z" fill="${h.k ? '#141414' : '#fff'}"/></svg>`).join('');
+['s2', 's5', 's6'].forEach((id) => show(id, true));
+fit($('s2h'), 120);
+$('s5a').textContent = 'حضور مستمر'; fit($('s5a'), 190);
+$('s5b').textContent = 'ومتّصل بجمهورك.'; fit($('s5b'), 140);
+$('s5c').textContent = 'استراتيجية ومحتوى ونشر وتقارير — كعملية واحدة.'; fit($('s5c'), 48);
+$('m1').textContent = 'تحتاج حضورًا؟'; fit($('m1'), 72, 760);
+['s2', 's5', 's6'].forEach((id) => show(id, false));
+
+// ---- the film ---------------------------------------------------------------
+window.render = (t) => {
+  $('cam').style.transform = shake(t, HITS, 0.6);
+  $('flash').style.opacity = flashAt(t, HITS, 0.22);
+  // The story bars: done, filling, waiting; dark on light chapters.
+  const light = t < at(1) || (t >= at(2) && t < at(4)) || (t >= at(6) && t < at(7));
+  CH.forEach(([a, b], i) => {
+    $(`bar${i}`).style.background = light ? 'rgba(20,20,20,.18)' : 'rgba(255,255,255,.25)';
+    $(`bf${i}`).style.background = light ? '#141414' : '#fff';
+    $(`bf${i}`).style.width = `${p(t, a, b - a) * 100}%`;
+  });
+
+  // 1 · bar 0: notifications, one every three-quarter beat.
+  show('s1', t < at(1));
+  if (t < at(1)) {
+    NOTES.forEach((_, i) => {
+      const k = spring(p(t, 0.15 + i * BEAT * 0.75, 0.55), 8);
+      $(`n${i}`).style.transform = `translateY(${lerp(-500, 0, k)}px) rotate(${(i % 2 ? 1.5 : -1.5) * (1 - k)}deg) scale(${lerp(0.8, 1, k)})`;
+      $(`n${i}`).style.opacity = clamp(k * 3);
+    });
+    const h = spring(p(t, at(0, 3), 0.5));
+    $('s1h').style.transform = `translate(-50%,-50%) scale(${h})`;
+    const out = expoIn(p(t, at(1) - 0.25, 0.25));
+    $('s1').style.transform = `translateY(${-out * 1920}px)`;
+  }
+
+  // 2 · bar 1: stickers slapped on, one every 0.7 beat.
+  show('s2', t >= at(1) && t < at(2));
+  if (t >= at(1) && t < at(2)) {
+    const h = expoOut(p(t, at(1), 0.3));
+    $('s2h').style.opacity = h; $('s2h').style.transform = `translate(-50%,-50%) translateY(${lerp(-40, 0, h)}px)`;
+    STICKERS.forEach(([, , , r], i) => {
+      const k = spring(p(t, at(1, 0.5 + i * 0.7), 0.45), 9);
+      const el = $(`st${i}`);
+      el.style.display = k > 0 ? 'block' : 'none';
+      el.style.transform = `translate(-50%,-50%) scale(${lerp(2.4, 1, k)}) rotate(${r + (1 - k) * 20}deg)`;
+    });
+    const out = expoIn(p(t, at(2) - 0.2, 0.2));
+    $('s2').style.clipPath = `circle(${(1 - out) * 120}% at 50% 50%)`;
+  }
+
+  // 3 · bars 2–3: the grid fills an eighth at a time; then we dive into a tile.
+  show('s3', t >= at(2) && t < at(4));
+  if (t >= at(2) && t < at(4)) {
+    const ph = spring(p(t, at(2), 0.7), 7);
+    const dive = expoIn(p(t, at(4) - 0.5, 0.5));
+    $('ph').style.transform = `translate(-50%,-50%) translateY(${lerp(1400, -100, ph)}px) scale(${0.82 * lerp(1, 3.2, dive)})`;
+    $('ph').style.transformOrigin = '50% 70%';
+    TILES.forEach((_, i) => {
+      const k = spring(p(t, at(2, 1 + i * 0.5), 0.4), 9);
+      $(`t${i}`).style.transform = `scale(${k})`; $(`t${i}`).style.opacity = clamp(k * 2);
+    });
+    const l = expoOut(p(t, at(3), 0.3));
+    $('s3l').style.opacity = l * (1 - dive); $('s3l').style.transform = `translate(-50%,-50%) translateY(${lerp(40, 0, l)}px)`;
+    $('s3').style.opacity = 1 - expoIn(p(t, at(4) - 0.15, 0.15));
+  }
+
+  // 4 · bars 4–5: four stories, a cube turn between each.
+  show('s4', t >= at(4) && t < at(6));
+  if (t >= at(4) && t < at(6)) {
+    const D = 1.25;
+    STORIES.forEach((_, i) => {
+      const s0 = at(4) + i * D;
+      const inn = i === 0 ? expoOut(p(t, s0, 0.35)) : expoInOut(p(t, s0 - 0.3, 0.4));
+      const out = i === STORIES.length - 1 ? 0 : expoInOut(p(t, s0 + D - 0.3, 0.4));
+      const el = $(`sy${i}`);
+      el.style.display = inn > 0 && out < 1 ? 'block' : 'none';
+      // Cube: the face turns about its left/right edge.
+      const ang = i === 0 && t < s0 + 0.35 ? 0 : (1 - inn) * -90 + out * 90;
+      el.style.transformOrigin = out > 0 ? '0% 50%' : '100% 50%';
+      el.style.transform = `translateX(${(1 - inn) * (i === 0 ? 0 : 940) - out * 940}px) rotateY(${ang}deg) scale(${i === 0 ? lerp(0.6, 1, inn) : 1})`;
+      el.querySelector('.lab').style.transform = `translateX(50%) rotate(-3deg) scale(${spring(p(t, s0 + 0.15, 0.4), 9)})`;
+    });
+  }
+
+  // 5 · bar 6: the promise, hearts rising.
+  show('s5', t >= at(6) && t < at(7));
+  if (t >= at(6) && t < at(7)) {
+    const a = spring(p(t, at(6), 0.5)), b = spring(p(t, at(6, 1), 0.5)), c = expoOut(p(t, at(6, 2), 0.4));
+    $('s5a').style.transform = `translate(-50%,-50%) scale(${a})`;
+    $('s5b').style.transform = `translate(-50%,-50%) scale(${b}) rotate(${(1 - b) * -8}deg)`;
+    $('s5c').style.opacity = c; $('s5c').style.transform = `translate(-50%,-50%) translateY(${lerp(30, 0, c)}px)`;
+    HEARTS.forEach((h, i) => {
+      const k = p(t, at(6) + h.d * 0.6, 1.6);
+      const el = $(`h${i}`);
+      el.style.display = k > 0 && k < 1 ? 'block' : 'none';
+      el.style.left = `${h.x + Math.sin(k * 6 + h.w) * 50}px`; el.style.top = `${lerp(1800, 1180, k)}px`;
+      el.style.opacity = k < 0.8 ? 1 : (1 - k) * 5;
+      el.style.transform = `scale(${h.s * spring(clamp(k * 4), 9)})`;
+    });
+  }
+
+  // 6 · bars 7–8.5: a DM. Their question; we're typing; our answer; the link.
+  show('s6', t >= at(7));
+  if (t >= at(7)) {
+    const m1 = spring(p(t, at(7, 0.3), 0.5), 8);
+    $('m1').style.transform = `scale(${m1})`; $('m1').style.transformOrigin = '100% 100%';
+    const typing = t >= at(7, 1.2) && t < at(7, 2.2);
+    $('typing').style.display = typing ? 'block' : 'none';
+    $('typing').style.transform = `scale(${spring(p(t, at(7, 1.2), 0.3), 9)})`; $('typing').style.transformOrigin = '0% 100%';
+    for (let i = 0; i < 3; i++) $(`d${i}`).style.transform = `translateY(${-8 * Math.max(0, Math.sin((t * 8 - i * 0.9)))}px)`;
+    const m2 = spring(p(t, at(7, 2.2), 0.5), 8);
+    $('m2').style.display = t >= at(7, 2.2) ? 'block' : 'none';
+    $('m2').style.transform = `scale(${m2})`; $('m2').style.transformOrigin = '0% 100%';
+    $('s6p').style.transform = `translate(-50%,-50%) scale(${backOut(p(t, at(7, 3), 0.45))})`;
+    const w = expoOut(p(t, at(7, 3.4), 0.4));
+    $('s6w').style.opacity = w; $('s6w').style.transform = `translate(-50%,-50%) translateY(${lerp(40, 0, w)}px)`;
+  }
+};
+window.seek = (t) => window.render(t);
+window.seek(0);
+</script>
+</body></html>

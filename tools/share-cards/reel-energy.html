@@ -54,7 +54,7 @@ body{color:#fff;font-family:Cairo,Poppins,sans-serif}
 <script>
 const BEAT = 0.5;
 window.DURATION = 19;
-// ---- the films: the brand (no ?s=), or one service --------------------------
+// ---- the film's content (the services have their own films: film-*.html) ----
 // words: one per beat on yellow; promise: two lines and a short third; work:
 // [image, ghost word, label]; verbs: four bands; cta: the invitation's question.
 const work = (f) => `../../overlay/assets/${f}.webp`, site = (f) => `../../source/assets/${f}.webp`;
@@ -73,50 +73,8 @@ const FILMS = {
     verbs: ['نصمّم.', 'نبني.', 'نطلق.', 'ننمّي.'],
     cta: 'عندك مشروع؟',
   },
-  branding: {
-    words: [['شعار.', 'LOGO'], ['ألوان.', 'COLOUR'], ['خطوط.', 'TYPE'], ['دليل.', 'GUIDELINES'], ['تطبيقات.', 'APPLICATIONS']],
-    promise: ['ابنِ علامة', 'يتعرّف عليها الناس.', 'نظام هوية كامل — لا شعار وحده.'],
-    work: [
-      [site('work-2'), 'AJWA', 'Ajwa Flavors'], [site('work-3'), 'NEXTECH', 'NexTech'], [site('work-4'), 'BOX STORE', 'Box Store'],
-      [site('work-6'), 'MASHHOR', 'مشهور لتجارة المواد الغذائية'], [site('work-7'), 'TEELA', 'Teela'], [site('B4'), 'NOORU', 'Nooru'],
-    ],
-    verbs: ['نبحث.', 'نرسم.', 'نختبر.', 'نسلّم.'],
-    cta: 'تحتاج هوية؟',
-  },
-  websites: {
-    words: [['تصميم.', 'DESIGN'], ['تطوير.', 'DEVELOPMENT'], ['نطاق.', 'DOMAIN'], ['استضافة.', 'HOSTING'], ['إطلاق.', 'LAUNCH']],
-    promise: ['ابنِ تجربة رقمية', 'تؤدي عملها.', 'مواقع جاهزة للاستخدام التجاري الفعلي.'],
-    work: [
-      [work('site-travel'), 'TRAVEL', 'منصة سفر وسياحة'], [work('site-aun'), 'AUN ALDRB', 'عون الدرب'],
-      [work('site-travel-phones'), 'MOBILE', 'منصة السفر على الجوال'], [work('site-aun-phones'), 'MOBILE', 'عون الدرب على الجوال'],
-      [site('al-mada-website'), 'AL MADA', 'المدى للسفر والسياحة'], [site('d01'), 'DESKTOP', 'على الشاشة الكبيرة'],
-    ],
-    verbs: ['نصمّم.', 'نطوّر.', 'نختبر.', 'نطلق.'],
-    cta: 'تحتاج موقعًا؟',
-  },
-  social: {
-    words: [['استراتيجية.', 'STRATEGY'], ['محتوى.', 'CONTENT'], ['تصميم.', 'DESIGN'], ['نشر.', 'PUBLISHING'], ['تقارير.', 'REPORTING']],
-    promise: ['حضور مستمر', 'ومتّصل بجمهورك.', 'استراتيجية ومحتوى ونشر وتقارير — كعملية واحدة.'],
-    work: [
-      [site('c01'), 'CALENDAR', 'خطة المحتوى'], [site('c02'), 'POSTS', 'المنشورات'], [site('c03'), 'REELS', 'الريلز'],
-      [site('c04'), 'STORIES', 'الستوريز'], [work('case-digital-campaigns-feed'), 'FEED', 'شبكة الحساب'], [work('case-brand-identity-systems-social'), 'BRAND', 'حضور العلامة'],
-    ],
-    verbs: ['نخطّط.', 'نكتب.', 'ننشر.', 'نقيس.'],
-    cta: 'تحتاج حضورًا؟',
-  },
-  ads: {
-    words: [['استراتيجية.', 'STRATEGY'], ['جمهور.', 'AUDIENCE'], ['إعلانات.', 'CREATIVE'], ['تحسين.', 'OPTIMISATION'], ['تقارير.', 'REPORTING']],
-    promise: ['اصل إلى الجمهور الصحيح.', 'في اللحظة الصحيحة.', 'خدمة مستمرة — لا منشورات مموّلة.'],
-    work: [
-      [work('case-digital-campaigns-key-visual'), 'CAMPAIGN', 'الحملة'], [site('al-mada-campaign'), 'AL MADA', 'حملة المدى'],
-      [work('case-digital-campaigns-stories'), 'STORIES', 'إعلانات الستوري'], [work('case-digital-campaigns-motion'), 'MOTION', 'الموشن'],
-      [site('c05'), 'INSIGHTS', 'تقارير الأداء'],
-    ],
-    verbs: ['نستهدف.', 'نصمّم.', 'نحسّن.', 'نقيس.'],
-    cta: 'تحتاج حملة؟',
-  },
 };
-const D = FILMS[new URLSearchParams(location.search).get('s') || 'brand'];
+const D = FILMS.brand;
 // The work fills 6–12s whatever its count; a tick on each cut and each punch.
 const PIECE = 6 / D.work.length;
 const TICKS = D.work.flatMap((_, i) => [6 + i * PIECE, 6 + i * PIECE + BEAT]);

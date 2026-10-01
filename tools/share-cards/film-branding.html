@@ -1,0 +1,263 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><style>
+/* PIXORA · Branding — "from a dot to a brand" (1080×1920, 19.2s, 100 BPM).
+   On paper, like a designer's desk: a yellow dot drops, stretches into the X,
+   a compass draws around it; the identity is built piece by piece (logo,
+   colour, type, guidelines); the work is dealt as a deck of brand cards; the
+   wordmark is inked in. Marimba and plucked bass (music.py, "branding").
+   Text sits between y 280 and 1480, clear of the platforms' interface. */
+@font-face{font-family:Cairo;src:url(fonts/Cairo-Medium.ttf);font-weight:500}
+@font-face{font-family:Cairo;src:url(fonts/Cairo-Bold.ttf);font-weight:700}
+@font-face{font-family:Cairo;src:url(fonts/Cairo-ExtraBold.ttf);font-weight:800}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-Medium.ttf);font-weight:500}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-SemiBold.ttf);font-weight:600}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-Bold.ttf);font-weight:700}
+:root{--y:#f4d13f;--k:#141414;--paper:#f2eee6;--ink:rgba(20,20,20,.12)}
+*{box-sizing:border-box;margin:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--paper)}
+body{color:var(--k);font-family:Cairo,Poppins,sans-serif}
+#cam{position:absolute;inset:0}
+.layer{position:absolute;inset:0;display:none;overflow:hidden}
+.paper{background:var(--paper)}.black{background:var(--k);color:#fff}.yellow{background:var(--y)}
+.c{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+.gl{position:absolute;background:var(--ink)}
+.big{font-weight:800;line-height:1.05;white-space:nowrap;text-align:center}
+.en{font-family:Poppins;font-weight:600;letter-spacing:.42em;direction:ltr;white-space:nowrap;font-size:34px}
+.bar{position:absolute;left:50%;top:50%;height:120px;border-radius:60px;background:var(--y)}
+.chip{position:absolute;width:200px;height:300px;border-radius:26px;box-shadow:0 30px 60px -30px rgba(0,0,0,.45)}
+.chip b{position:absolute;bottom:22px;left:0;right:0;text-align:center;font-family:Poppins;font-weight:600;font-size:22px;direction:ltr}
+.page{position:absolute;width:520px;height:700px;background:#fff;border-radius:14px;box-shadow:0 40px 80px -40px rgba(0,0,0,.4);overflow:hidden}
+.card{position:absolute;left:50%;top:50%;border-radius:28px;overflow:hidden;background:#fff;box-shadow:0 60px 110px -40px rgba(0,0,0,.55);backface-visibility:hidden}
+.card img{width:100%;height:100%;object-fit:cover;display:block}
+.word{font-family:Poppins;font-weight:700;font-size:186px;letter-spacing:.02em;line-height:1;direction:ltr;display:flex;white-space:nowrap}
+.word span{display:inline-block;color:transparent;-webkit-text-stroke:3px var(--k)}
+.pill{display:inline-flex;align-items:center;gap:24px;background:var(--k);color:var(--y);border-radius:999px;padding:34px 60px;font-size:50px;font-weight:700;white-space:nowrap}
+.pill::before{content:"";width:22px;height:22px;border-radius:50%;background:var(--y)}
+.flash{position:absolute;inset:0;background:#fff;pointer-events:none;opacity:0}
+</style></head><body>
+<div id="cam">
+  <!-- 1. a dot, a line, the X, a compass around it -->
+  <section class="layer paper" id="s1">
+    <div id="s1grid"></div>
+    <svg class="c" id="s1o" width="900" height="900" viewBox="0 0 900 900" style="overflow:visible"><circle id="s1arc" cx="450" cy="450" r="400" fill="none" stroke="#141414" stroke-width="3" stroke-dasharray="2513" stroke-dashoffset="2513"/><circle id="s1arc2" cx="450" cy="450" r="300" fill="none" stroke="rgba(20,20,20,.25)" stroke-width="2" stroke-dasharray="8 12"/></svg>
+    <div class="bar" id="s1a"></div><div class="bar" id="s1b"></div>
+    <p class="big c" id="s1t" style="font-size:64px;top:1410px">كل علامة تبدأ بنقطة.</p>
+  </section>
+  <!-- 2. the system, a piece every two beats -->
+  <section class="layer paper" id="s2">
+    <p class="big c" id="s2w" style="font-size:200px;top:430px"></p><p class="en c" id="s2e" style="top:600px"></p>
+    <div id="s2v"></div>
+    <div id="s2sweep" style="position:absolute;top:0;bottom:0;width:260px;background:var(--y)"></div>
+  </section>
+  <!-- 3. the promise -->
+  <section class="layer black" id="s3">
+    <p class="big c" id="s3a" style="top:730px"></p><p class="big c" id="s3b" style="top:950px;color:var(--y)"></p>
+    <p class="big c" id="s3c" style="top:1150px;font-weight:700;color:rgba(255,255,255,.8)"></p>
+  </section>
+  <!-- 4. the work, dealt as a deck -->
+  <section class="layer paper" id="s4">
+    <p class="en c" id="s4n" style="top:330px;font-size:40px;letter-spacing:.3em"></p>
+    <div id="s4deck" style="position:absolute;inset:0;perspective:2600px"></div>
+    <p class="big c" id="s4l" style="font-size:52px"></p>
+  </section>
+  <!-- 5. the wordmark, inked in -->
+  <section class="layer paper" id="s5"><div class="word c" id="s5w"></div><p class="en c" id="s5s" style="top:1080px;color:rgba(20,20,20,.55)">DIGITAL AGENCY</p></section>
+  <!-- 6. the invitation -->
+  <section class="layer yellow" id="s6">
+    <svg class="c" id="s6o" width="1400" height="1400" viewBox="0 0 1400 1400"><circle cx="700" cy="700" r="640" fill="none" stroke="rgba(20,20,20,.14)" stroke-width="3" stroke-dasharray="10 16"/><circle cx="700" cy="700" r="470" fill="none" stroke="rgba(20,20,20,.1)" stroke-width="2"/></svg>
+    <p class="big c" id="s6a" style="top:730px"></p><p class="big c" id="s6b" style="font-size:96px;top:930px">نبدأ من محادثة.</p>
+    <div class="c" id="s6p" style="top:1170px"><span class="pill">راسلنا — الرابط في البايو</span></div>
+    <p class="c" id="s6w" style="top:1440px;font-family:Poppins;font-weight:700;font-size:64px;direction:ltr;letter-spacing:.02em">PIXORA</p>
+  </section>
+</div>
+<div class="flash" id="flash"></div>
+<script src="film.js"></script>
+<script>
+const BEAT = 0.6;
+window.DURATION = 19.2;
+const SYSTEM = [['شعار.', 'LOGO'], ['ألوان.', 'COLOUR'], ['خطوط.', 'TYPE'], ['دليل.', 'GUIDELINES']];
+const WORK = [[src('work-2'), 'Ajwa Flavors'], [src('work-3'), 'NexTech'], [src('work-4'), 'Box Store'],
+  [src('work-6'), 'مشهور لتجارة المواد الغذائية'], [src('work-7'), 'Teela'], [src('B4'), 'Nooru']];
+const DECK0 = 9.6, CARD = 0.8;
+window.CUES = {
+  style: 'branding', bpm: 100, duration: 19.2,
+  groove: [2.4, 19.2], breaks: [[7.2, 8.4]],
+  hits: [7.2, 16.2],
+  accents: [[0.6, 'note'], [1.2, 'note'], [1.8, 'note'], [2.4, 'note'],
+    ...WORK.map((_, i) => [DECK0 + i * CARD, 'flip']), [15.6, 'chime']],
+  whooshes: [[3.5, 0.2], [4.7, 0.2], [5.9, 0.2], [9.35, 0.25], [14.2, 0.2]],
+  risers: [[13.2, 1.2]],
+  outro: 16.2,
+};
+const HITS = CUES.hits;
+
+// ---- build -----------------------------------------------------------------
+// The construction grid: lines every 120px, drawn in from the centre.
+$('s1grid').innerHTML = [...Array(9)].map((_, i) => `<div class="gl" id="gv${i}" style="left:${60 + i * 120}px;top:0;bottom:0;width:2px"></div>`).join('')
+  + [...Array(16)].map((_, i) => `<div class="gl" id="gh${i}" style="top:${60 + i * 120}px;left:0;right:0;height:2px"></div>`).join('');
+['s2', 's3', 's4', 's6'].forEach((id) => show(id, true));
+const SIZES = SYSTEM.map(([w]) => { $('s2w').textContent = w; return fit($('s2w'), 200); });
+$('s3a').textContent = 'ابنِ علامة'; fit($('s3a'), 230);
+$('s3b').textContent = 'يتعرّف عليها الناس.'; fit($('s3b'), 150);
+$('s3c').textContent = 'نظام هوية كامل — لا شعار وحده.'; fit($('s3c'), 54);
+$('s6a').textContent = 'تحتاج هوية؟'; fit($('s6a'), 170);
+['s2', 's3', 's4', 's6'].forEach((id) => show(id, false));
+// The four pieces of the system.
+const SW = [['#F4D13F', '#141414'], ['#141414', '#F2EEE6'], ['#FFFFFF', '#141414'], ['#8A8A8A', '#FFFFFF']];
+$('s2v').innerHTML = `
+  <div id="v0" style="display:none">
+    <svg class="c" style="top:1060px" width="760" height="760" viewBox="0 0 760 760"><circle cx="380" cy="380" r="360" fill="none" stroke="rgba(20,20,20,.18)" stroke-width="2"/><circle cx="380" cy="380" r="250" fill="none" stroke="rgba(20,20,20,.18)" stroke-width="2" stroke-dasharray="6 10"/><line x1="0" y1="380" x2="760" y2="380" stroke="rgba(20,20,20,.18)" stroke-width="2"/><line x1="380" y1="0" x2="380" y2="760" stroke="rgba(20,20,20,.18)" stroke-width="2"/></svg>
+    <div class="c" id="v0t" style="top:1060px;width:400px;height:400px;border-radius:90px;background:var(--k);display:flex;align-items:center;justify-content:center;box-shadow:0 50px 90px -40px rgba(0,0,0,.6)"><span style="font-family:Poppins;font-weight:700;font-size:300px;color:var(--y);line-height:1;margin-top:20px">X</span></div>
+  </div>
+  <div id="v1" style="display:none">${SW.map(([bg, fg], i) => `<div class="chip" id="ch${i}" style="left:${90 + i * 230}px;top:880px;background:${bg};color:${fg};${bg === '#FFFFFF' ? 'border:2px solid rgba(20,20,20,.1)' : ''}"><b>${bg}</b></div>`).join('')}</div>
+  <div id="v2" style="display:none">
+    <p class="c" id="v2a" style="top:1000px;font-size:300px;line-height:1;white-space:nowrap;direction:ltr"><span style="font-family:Poppins">Aa</span> <span style="font-family:Cairo">أب</span></p>
+    <p class="en c" style="top:1300px;color:rgba(20,20,20,.5)">CAIRO · POPPINS</p>
+  </div>
+  <div id="v3" style="display:none">${[0, 1, 2].map((i) => `<div class="page" id="pg${i}" style="left:280px;top:720px">
+      <div style="position:absolute;inset:40px;border:2px dashed rgba(20,20,20,.18)"></div>
+      <div style="position:absolute;top:70px;right:70px;width:110px;height:110px;border-radius:26px;background:var(--k)"></div>
+      <div style="position:absolute;top:230px;right:70px;left:70px;height:26px;border-radius:13px;background:var(--y)"></div>
+      <div style="position:absolute;top:290px;right:70px;left:170px;height:18px;border-radius:9px;background:rgba(20,20,20,.15)"></div>
+      <div style="position:absolute;top:330px;right:70px;left:120px;height:18px;border-radius:9px;background:rgba(20,20,20,.15)"></div>
+      <div style="position:absolute;bottom:70px;right:70px;left:70px;height:220px;border-radius:14px;background:${['#f4d13f', '#141414', '#e6e1d6'][i]}"></div>
+    </div>`).join('')}</div>`;
+$('s4deck').innerHTML = WORK.map(([s], i) => `<figure class="card" id="cd${i}"><img src="${s}"></figure>`).join('');
+$('s5w').innerHTML = [...'PIXORA'].map((c, i) => `<span id="L${i}">${c}</span>`).join('');
+
+// ---- the film ---------------------------------------------------------------
+window.render = (t) => {
+  $('cam').style.transform = shake(t, HITS, 0.7);
+  $('flash').style.opacity = flashAt(t, HITS, 0.25);
+
+  // 1 · 0–2.4s: grid draws out; the dot drops (0.3→0.6), stretches and turns
+  // (→1.2), the second stroke makes the X (→1.8), the compass closes (→2.4).
+  show('s1', t < 2.4);
+  if (t < 2.4) {
+    for (let i = 0; i < 9; i++) $(`gv${i}`).style.transform = `scaleY(${expoOut(p(t, 0.02 * Math.abs(i - 4), 0.6))})`;
+    for (let i = 0; i < 16; i++) $(`gh${i}`).style.transform = `scaleX(${expoOut(p(t, 0.015 * Math.abs(i - 7.5), 0.6))})`;
+    const drop = p(t, 0.25, 0.35), land = spring(p(t, 0.6, 0.5), 9);
+    const len = lerp(120, 560, expoInOut(p(t, 0.7, 0.4)));
+    const rot = lerp(0, 45, expoOut(p(t, 1.05, 0.3)));
+    const y = t < 0.6 ? lerp(-900, 0, drop * drop) : 0;
+    const squash = t >= 0.6 ? 1 + 0.35 * Math.exp(-(t - 0.6) * 12) * Math.cos((t - 0.6) * 40) : 1;
+    $('s1a').style.cssText = `width:${len}px;transform:translate(-50%,-50%) translateY(${y}px) rotate(${rot}deg) scale(${squash},${2 - squash})`;
+    $('s1a').style.opacity = t < 0.25 ? 0 : 1;
+    const b = expoOut(p(t, 1.3, 0.4));
+    $('s1b').style.cssText = `width:${560 * b}px;transform:translate(-50%,-50%) rotate(-45deg);background:var(--k)`;
+    $('s1arc').style.strokeDashoffset = 2513 * (1 - expoInOut(p(t, 1.6, 0.7)));
+    $('s1arc2').style.opacity = expoOut(p(t, 1.8, 0.4));
+    $('s1o').style.transform = `translate(-50%,-50%) rotate(${t * 20}deg)`;
+    const tx = expoOut(p(t, 1.5, 0.5));
+    $('s1t').style.opacity = tx; $('s1t').style.transform = `translate(-50%,-50%) translateY(${lerp(30, 0, tx)}px)`;
+    // Out: everything shrinks to the logo tile's place.
+    const out = expoIn(p(t, 2.15, 0.25));
+    $('s1').style.transform = `scale(${lerp(1, 0.6, out)})`; $('s1').style.opacity = 1 - out;
+  }
+
+  // 2 · 2.4–7.2s: the system — logo, colour, type, guidelines; a yellow
+  // sweep wipes between them.
+  show('s2', t >= 2.4 && t < 7.2);
+  if (t >= 2.4 && t < 7.2) {
+    const i = clamp(Math.floor((t - 2.4) / 1.2), 0, 3), t0 = 2.4 + i * 1.2, k = expoOut(p(t, t0, 0.35));
+    $('s2w').textContent = SYSTEM[i][0]; $('s2w').style.fontSize = SIZES[i];
+    $('s2w').style.transform = `translate(-50%,-50%) scale(${lerp(1.3, 1, spring(p(t, t0, 0.5)))})`;
+    $('s2e').textContent = SYSTEM[i][1]; $('s2e').style.opacity = k;
+    $('s2e').style.transform = `translate(-50%,-50%) translateY(${lerp(30, 0, k)}px)`;
+    for (let j = 0; j < 4; j++) show(`v${j}`, j === i);
+    const s = spring(p(t, t0 + 0.1, 0.6));
+    if (i === 0) $('v0t').style.transform = `translate(-50%,-50%) scale(${s}) rotate(${lerp(-90, 0, s)}deg)`;
+    if (i === 1) for (let j = 0; j < 4; j++) {
+      const c = spring(p(t, t0 + 0.08 + j * 0.075, 0.55));
+      $(`ch${j}`).style.transform = `translateY(${lerp(900, 0, c)}px) rotate(${(j - 1.5) * 4 * c}deg)`;
+    }
+    if (i === 2) {
+      // The weight flicks on every sixteenth, then settles bold.
+      const step = Math.floor((t - t0) / (BEAT / 4));
+      $('v2a').style.fontWeight = step < 6 ? [500, 700, 800, 600, 800, 500][step] : 700;
+      $('v2a').style.transform = `translate(-50%,-50%) scale(${lerp(0.7, 1, spring(p(t, t0, 0.6)))})`;
+    }
+    if (i === 3) for (let j = 0; j < 3; j++) {
+      const c = spring(p(t, t0 + 0.05 + j * 0.12, 0.6));
+      $(`pg${j}`).style.transform = `translateY(${lerp(1000, 0, c)}px) rotate(${(j - 1) * 9 * c}deg) translateX(${(j - 1) * 160 * c}px)`;
+      $(`pg${j}`).style.zIndex = 3 - Math.abs(j - 1);
+    }
+    // The sweep crosses at each change (right to left, like the reading).
+    const sw = p(t, t0 + 1.2 - 0.18, 0.36);
+    $('s2sweep').style.display = i < 3 && sw > 0 && sw < 1 ? 'block' : 'none';
+    $('s2sweep').style.left = `${lerp(1080, -260, expoInOut(sw))}px`;
+  }
+
+  // 3 · 7.2–9.6s: the promise, line by line, wiped in.
+  show('s3', t >= 7.2 && t < 9.6);
+  if (t >= 7.2 && t < 9.6) {
+    [['s3a', 7.2], ['s3b', 7.8], ['s3c', 8.4]].forEach(([id, a]) => {
+      const k = expoOut(p(t, a, 0.45));
+      $(id).style.clipPath = `inset(0 0 0 ${100 - k * 100}%)`;
+      $(id).style.transform = `translate(-50%,-50%) translateX(${lerp(-60, 0, k)}px)`;
+    });
+    const out = expoIn(p(t, 9.3, 0.3));
+    $('s3').style.clipPath = `inset(0 0 ${out * 100}% 0)`;
+  }
+
+  // 4 · 9.6–14.4s: the deck. The top card flips away on every card's beat.
+  show('s4', t >= 9.6 && t < 14.4);
+  if (t >= 9.6 && t < 14.4) {
+    const i = clamp(Math.floor((t - DECK0) / CARD), 0, WORK.length - 1);
+    WORK.forEach((_, j) => {
+      const card = $(`cd${j}`), img = card.querySelector('img');
+      if (!card.dataset.sized) {
+        const r = ratio(img), w = r >= 1 ? 900 : Math.max(560, 940 * r);
+        card.style.width = `${w}px`; card.style.height = `${Math.min(940, Math.round(w / r))}px`; card.dataset.sized = 1;
+      }
+      const depth = j - i;                                   // 0 = on top
+      const gone = expoIn(p(t, DECK0 + (j + 1) * CARD - 0.22, 0.3));
+      const deal = j === 0 ? spring(p(t, DECK0, 0.6)) : 1;
+      card.style.display = depth < -0 && gone >= 1 ? 'none' : depth > 3 ? 'none' : 'block';
+      card.style.zIndex = 20 - depth;
+      const rest = depth > 0 ? `translateY(${depth * -38}px) rotate(${(j % 2 ? 1 : -1) * (2 + depth * 3)}deg) scale(${1 - depth * 0.05})` : '';
+      const flipOut = depth <= 0 ? `translateX(${-gone * 1300}px) rotateY(${-gone * 70}deg) rotate(${-gone * 18}deg)` : '';
+      // Rising into place as the card above leaves.
+      const rise = depth === 0 ? spring(p(t, DECK0 + j * CARD - 0.05, 0.5)) : 0;
+      card.style.transform = `translate(-50%,-50%) translateY(${(1 - deal) * 1400}px) ${flipOut} ${rest} scale(${depth === 0 ? lerp(0.92, 1, rise) : 1})`;
+    });
+    const top = $(`cd${i}`);
+    $('s4n').textContent = `0${i + 1} / 0${WORK.length}`;
+    $('s4l').textContent = WORK[i][1];
+    const k = expoOut(p(t, DECK0 + i * CARD, 0.3));
+    $('s4l').style.top = `${Math.min(1480, 960 + top.offsetHeight / 2 + 80)}px`;
+    $('s4l').style.opacity = k; $('s4l').style.transform = `translate(-50%,-50%) translateY(${lerp(30, 0, k)}px)`;
+    const out = expoIn(p(t, 14.15, 0.25));
+    $('s4').style.transform = `translateY(${-out * 1920}px)`;
+  }
+
+  // 5 · 14.4–16.2s: PIXORA, outlined letter by letter, then inked; the X last, in yellow.
+  show('s5', t >= 14.4 && t < 16.2);
+  if (t >= 14.4 && t < 16.2) {
+    $('s5').style.transform = `translateY(${(1 - expoOut(p(t, 14.4, 0.3))) * 1920}px)`;
+    [...'PIXORA'].forEach((c, j) => {
+      const a = spring(p(t, 14.55 + j * 0.075, 0.45));
+      const ink = p(t, 15.0 + j * 0.06, 0.1);
+      const el = $(`L${j}`);
+      el.style.transform = `translateY(${lerp(80, 0, a)}px)`; el.style.opacity = a;
+      el.style.color = j === 2 ? (t >= 15.6 ? 'var(--y)' : 'transparent') : `rgba(20,20,20,${ink})`;
+      el.style.webkitTextStroke = j === 2 && t >= 15.6 ? '3px var(--y)' : '3px var(--k)';
+    });
+    $('s5w').style.transform = `translate(-50%,-50%) scale(${1 + 0.06 * Math.exp(-Math.max(0, t - 15.6) * 8) * (t >= 15.6 ? 1 : 0)})`;
+    $('s5s').style.opacity = expoOut(p(t, 15.3, 0.3));
+  }
+
+  // 6 · 16.2–19.2s: the invitation.
+  show('s6', t >= 16.2);
+  if (t >= 16.2) {
+    const a = spring(p(t, 16.2, 0.6)), b = expoOut(p(t, 16.5, 0.4)), c = backOut(p(t, 16.8, 0.45)), d = expoOut(p(t, 17.1, 0.4));
+    $('s6o').style.transform = `translate(-50%,-50%) rotate(${(t - 16.2) * 12}deg) scale(${lerp(0.6, 1, expoOut(p(t, 16.2, 0.8)))})`;
+    $('s6a').style.transform = `translate(-50%,-50%) scale(${lerp(1.5, 1, a)})`; $('s6a').style.opacity = clamp(a * 2);
+    $('s6b').style.transform = `translate(-50%,-50%) translateY(${lerp(60, 0, b)}px)`; $('s6b').style.opacity = b;
+    $('s6p').style.transform = `translate(-50%,-50%) scale(${c})`;
+    $('s6w').style.transform = `translate(-50%,-50%) translateY(${lerp(40, 0, d)}px)`; $('s6w').style.opacity = d;
+  }
+};
+window.seek = (t) => window.render(t);
+window.seek(0);
+</script>
+</body></html>

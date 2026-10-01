@@ -1,0 +1,252 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><style>
+/* PIXORA · Ads — "on target" (1080×1920, 18.86s, 140 BPM half-time). A
+   targeting display: a reticle scans a crowd, locks on the right people,
+   and they gather into the X; the service is called out word by word in
+   brackets; the campaigns are locked on one by one; results rise (shapes,
+   not figures); the promise; the invitation, in the crosshair. Half-time trap
+   (music.py, "ads"). Text between y 280 and 1480. */
+@font-face{font-family:Cairo;src:url(fonts/Cairo-Bold.ttf);font-weight:700}
+@font-face{font-family:Cairo;src:url(fonts/Cairo-ExtraBold.ttf);font-weight:800}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-Medium.ttf);font-weight:500}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-SemiBold.ttf);font-weight:600}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-Bold.ttf);font-weight:700}
+:root{--y:#f4d13f;--k:#08090c}
+*{box-sizing:border-box;margin:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--k)}
+body{color:#fff;font-family:Cairo,Poppins,sans-serif}
+#cam{position:absolute;inset:0}
+.layer{position:absolute;inset:0;display:none;overflow:hidden}
+.c{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+.big{font-weight:800;line-height:1.05;white-space:nowrap;text-align:center}
+.mono{font-family:'DejaVu Sans Mono',monospace;direction:ltr;letter-spacing:.08em;white-space:nowrap}
+.hud{position:absolute;inset:0;background:linear-gradient(rgba(244,209,63,.05) 2px,transparent 2px) 0 0/100% 8px;pointer-events:none}
+#field{position:absolute;inset:0}
+.dot{position:absolute;width:16px;height:16px;margin:-8px;border-radius:50%}
+.br{position:absolute;width:70px;height:70px;border-color:var(--y);border-style:solid;border-width:0}
+.br.tl{border-top-width:7px;border-left-width:7px}.br.tr{border-top-width:7px;border-right-width:7px}
+.br.bl{border-bottom-width:7px;border-left-width:7px}.br.bb{border-bottom-width:7px;border-right-width:7px}
+.card{position:absolute;left:50%;top:50%;border-radius:20px;overflow:hidden;box-shadow:0 60px 120px -40px rgba(0,0,0,.95)}
+.card img{width:100%;height:100%;object-fit:cover;display:block}
+.col{position:absolute;bottom:0;width:200px;background:var(--y);border-radius:16px 16px 0 0}
+.pill{display:inline-flex;align-items:center;gap:24px;background:var(--k);color:var(--y);border-radius:999px;padding:34px 60px;font-size:50px;font-weight:700;white-space:nowrap}
+.pill::before{content:"";width:22px;height:22px;border-radius:50%;background:var(--y)}
+.flash{position:absolute;inset:0;background:#fff;pointer-events:none;opacity:0}
+</style></head><body>
+<div id="cam">
+  <!-- 1. the crowd; the reticle scans and locks; the right people form the X -->
+  <section class="layer" id="s1">
+    <div id="field"></div>
+    <svg id="ret" class="c" width="520" height="520" viewBox="-260 -260 520 520" style="overflow:visible">
+      <circle r="230" fill="none" stroke="#f4d13f" stroke-width="4" stroke-dasharray="40 20"/>
+      <circle id="retin" r="120" fill="none" stroke="#f4d13f" stroke-width="5"/>
+      <path d="M-300 0H-140M140 0H300M0 -300V-140M0 140V300" stroke="#f4d13f" stroke-width="5"/>
+      <circle r="8" fill="#f4d13f"/>
+    </svg>
+    <p class="mono c" id="s1d" style="top:1420px;font-size:30px;color:rgba(244,209,63,.8)"></p>
+    <p class="big c" id="s1t" style="top:400px;font-size:120px"></p>
+  </section>
+  <!-- 2. the service, a word a beat, bracketed -->
+  <section class="layer" id="s2">
+    <p class="mono c" id="s2n" style="top:780px;font-size:32px;color:var(--y)"></p>
+    <p class="big c" id="s2w" style="top:940px;font-size:180px"></p>
+    <div id="s2b"><i class="br tl" id="bk0"></i><i class="br tr" id="bk1"></i><i class="br bl" id="bk2"></i><i class="br bb" id="bk3"></i></div>
+  </section>
+  <!-- 3. the campaigns, locked on -->
+  <section class="layer" id="s3">
+    <div id="cards"></div>
+    <div><i class="br tl" id="ck0"></i><i class="br tr" id="ck1"></i><i class="br bl" id="ck2"></i><i class="br bb" id="ck3"></i></div>
+    <p class="mono" id="s3n" style="position:absolute;font-size:30px;color:var(--y)"></p>
+    <p class="big c" id="s3l" style="font-size:56px"></p>
+  </section>
+  <!-- 4. results rise -->
+  <section class="layer" id="s4">
+    <p class="big c" id="s4t" style="top:420px;font-size:110px"></p>
+    <div id="chart" style="position:absolute;left:120px;right:120px;top:640px;height:700px;border-bottom:4px solid rgba(255,255,255,.3)"></div>
+    <svg id="line" style="position:absolute;left:120px;top:640px;overflow:visible" width="840" height="700"><path id="lp" d="M0 620 L280 470 L560 300 L820 40" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1200" stroke-dashoffset="1200"/><path id="la" d="M770 40 L820 40 L820 90" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity="0"/></svg>
+    <div id="clabs" style="position:absolute;left:120px;right:120px;top:1370px;height:60px"></div>
+  </section>
+  <!-- 5. the promise -->
+  <section class="layer" id="s5"><div class="hud"></div>
+    <p class="big c" id="s5a" style="top:760px"></p><p class="big c" id="s5b" style="top:930px;color:var(--y)"></p>
+    <p class="big c" id="s5c" style="top:1110px;font-weight:700;color:rgba(255,255,255,.8)"></p>
+  </section>
+  <!-- 6. the invitation, in the crosshair -->
+  <section class="layer" id="s6" style="background:var(--y);color:var(--k)">
+    <p class="big c" id="s6a" style="top:560px"></p><p class="big c" id="s6b" style="font-size:96px;top:730px">نبدأ من محادثة.</p>
+    <svg id="s6r" class="c" width="1000" height="1000" viewBox="-500 -500 1000 1000" style="top:1150px;overflow:visible">
+      <circle r="330" fill="none" stroke="#141414" stroke-width="5" stroke-dasharray="44 22"/>
+      <path d="M-480 0H-350M350 0H480M0 -370V-300M0 300V370" stroke="#141414" stroke-width="6"/>
+    </svg>
+    <div class="c" id="s6p" style="top:1150px"><span class="pill">راسلنا — الرابط في البايو</span></div>
+    <p class="c" id="s6w" style="top:360px;font-family:Poppins;font-weight:700;font-size:64px;direction:ltr;letter-spacing:.02em">PIXORA</p>
+  </section>
+  <div class="hud" id="scanlines"></div>
+</div>
+<div class="flash" id="flash"></div>
+<script src="film.js"></script>
+<script>
+const BEAT = 60 / 140, BAR = 4 * BEAT;
+window.DURATION = 11 * BAR;                                  // 18.86s
+const at = (bar, beat = 0) => bar * BAR + beat * BEAT;
+const WORDS = [['استراتيجية.', 'STRATEGY'], ['جمهور.', 'AUDIENCE'], ['إعلانات.', 'CREATIVE'], ['تحسين.', 'OPTIMISE'], ['تقارير.', 'REPORT']];
+const ADS = [[asset('case-digital-campaigns-key-visual'), 'الحملة'], [src('al-mada-campaign'), 'حملة المدى'],
+  [asset('case-digital-campaigns-stories'), 'إعلانات الستوري'], [asset('case-digital-campaigns-motion'), 'الموشن'], [src('c05'), 'تقارير الأداء']];
+const AD0 = at(3, 2), AD = (at(6, 2) - AD0) / ADS.length;
+window.CUES = {
+  style: 'ads', bpm: 140, duration: 11 * BAR,
+  groove: [at(1), 11 * BAR], breaks: [[at(7, 2), at(8)]],
+  hits: [at(2), at(8)],
+  accents: [[at(0, 1), 'beep'], [at(0, 3), 'beep'], [at(1), 'beep'], ...WORDS.map((_, i) => [at(2, i), 'blip']),
+    ...ADS.map((_, i) => [AD0 + i * AD + 0.12, 'beep']), ...[0, 1, 2].map((i) => [at(6, 2 + i), 'tick']), [at(9, 1.5), 'beep']],
+  whooshes: [[at(1, 2), 0.6], [AD0 - 0.1, 0.25], [at(6, 2) - 0.1, 0.2], [at(9) - 0.1, 0.25]],
+  risers: [[at(7), BAR]],
+  outro: at(9),
+};
+const HITS = CUES.hits;
+
+// ---- build -----------------------------------------------------------------
+// The crowd: a seeded field; those near the lock point are "the right people".
+const R = seeded(7);
+const LOCK = [640, 1060];
+const DOTS = [...Array(240)].map(() => ({ x: 40 + R() * 1000, y: 300 + R() * 1300, ph: R() * 6.28, sp: 0.5 + R() }));
+DOTS.forEach((d) => { d.hit = Math.hypot(d.x - LOCK[0], d.y - LOCK[1]) < 330; });
+const HITDOTS = DOTS.filter((d) => d.hit);
+// Their places in the X: along its two strokes.
+HITDOTS.forEach((d, i) => {
+  const n = HITDOTS.length, half = Math.ceil(n / 2), a = i < half ? i / (half - 1) : (i - half) / Math.max(1, n - half - 1);
+  const s = lerp(-300, 300, a);
+  d.tx = 540 + s; d.ty = 960 + (i < half ? s : -s);
+});
+$('field').innerHTML = DOTS.map((_, i) => `<i class="dot" id="d${i}"></i>`).join('');
+['s1', 's2', 's4', 's5', 's6'].forEach((id) => show(id, true));
+const WSIZE = WORDS.map(([w]) => { $('s2w').textContent = w; return fit($('s2w'), 180, 800); });
+$('s1t').textContent = 'الجمهور الصحيح.'; fit($('s1t'), 120);
+$('s4t').textContent = 'نقيس. نحسّن. نكرّر.'; fit($('s4t'), 110);
+$('s5a').textContent = 'اصل إلى الجمهور الصحيح.'; fit($('s5a'), 120);
+$('s5b').textContent = 'في اللحظة الصحيحة.'; fit($('s5b'), 140);
+$('s5c').textContent = 'خدمة مستمرة — لا منشورات مموّلة.'; fit($('s5c'), 52);
+$('s6a').textContent = 'تحتاج حملة؟'; fit($('s6a'), 170);
+['s1', 's2', 's4', 's5', 's6'].forEach((id) => show(id, false));
+$('cards').innerHTML = ADS.map(([s], i) => `<figure class="card" id="cd${i}" style="display:none"><img src="${s}"></figure>`).join('');
+const COLS = [['الوصول', 0.38], ['التفاعل', 0.62], ['النتائج', 0.9]];
+$('chart').innerHTML = COLS.map((_, i) => `<div class="col" id="col${i}" style="left:${40 + i * 280}px"></div>`).join('');
+$('clabs').innerHTML = COLS.map(([l], i) => `<p class="big" style="position:absolute;left:${40 + i * 280}px;width:200px;font-size:44px" id="cl${i}">${l}</p>`).join('');
+// Brackets around a box (x, y, w, h), drawn in from `spread` px outside.
+const bracket = (ids, x, y, w, h, spread = 0, op = 1) => {
+  const pos = [[x - spread, y - spread], [x + w - 70 + spread, y - spread], [x - spread, y + h - 70 + spread], [x + w - 70 + spread, y + h - 70 + spread]];
+  ids.forEach((id, i) => { const e = $(id); e.style.left = `${pos[i][0]}px`; e.style.top = `${pos[i][1]}px`; e.style.opacity = op; });
+};
+
+// ---- the film ---------------------------------------------------------------
+window.render = (t) => {
+  $('cam').style.transform = shake(t, HITS, 1);
+  $('flash').style.opacity = flashAt(t, HITS, 0.35);
+  $('scanlines').style.display = t < at(9) ? 'block' : 'none';
+
+  // 1 · bars 0–2: scan (bar 0), lock (bar 1), gather into the X (by bar 2).
+  show('s1', t < at(2));
+  if (t < at(2)) {
+    // The reticle visits two places, then locks.
+    const path = [[300, 700], [820, 1300], LOCK];
+    const seg = t < at(0, 1) ? 0 : t < at(0, 3) ? 1 : 2;
+    const from = seg === 0 ? [180, 520] : path[seg - 1], to = path[seg];
+    const k = expoInOut(p(t, seg === 0 ? 0 : seg === 1 ? at(0, 1) : at(0, 3), BEAT * 1.2));
+    const rx = lerp(from[0], to[0], k), ry = lerp(from[1], to[1], k);
+    const lock = p(t, at(1), 0.25), gather = expoInOut(p(t, at(1, 2), BEAT * 1.8));
+    $('ret').style.left = `${rx}px`; $('ret').style.top = `${ry}px`;
+    $('ret').style.transform = `translate(-50%,-50%) rotate(${t * 40 + lock * 45}deg) scale(${lerp(1, 0.75, expoOut(lock)) + 0.1 * Math.exp(-Math.max(0, t - at(1)) * 10) * (t >= at(1) ? 1 : 0)})`;
+    $('ret').style.opacity = 1 - gather;
+    $('retin').setAttribute('r', lerp(120, 300, expoOut(lock)));
+    DOTS.forEach((d, i) => {
+      const e = $(`d${i}`);
+      const drift = Math.sin(t * d.sp + d.ph) * 14;
+      let x = d.x + drift, y = d.y + Math.cos(t * d.sp * 0.8 + d.ph) * 10;
+      const on = d.hit && t >= at(1);
+      if (on) { x = lerp(x, d.tx, gather); y = lerp(y, d.ty, gather); }
+      e.style.left = `${x}px`; e.style.top = `${y}px`;
+      e.style.background = on ? 'var(--y)' : '#fff';
+      e.style.opacity = on ? 1 : t >= at(1) ? lerp(0.35, 0.12, expoOut(p(t, at(1), 0.4))) * (1 - gather) : 0.35;
+      e.style.transform = `scale(${on ? lerp(1.2, 2.4, gather) : 1})`;
+    });
+    $('s1d').textContent = t < at(1) ? `SCANNING ${'.'.repeat(1 + Math.floor(t / (BEAT / 2)) % 3)}` : 'TARGET LOCKED';
+    $('s1d').style.color = t < at(1) ? 'rgba(255,255,255,.55)' : 'var(--y)';
+    const tk = expoOut(p(t, at(1), 0.35));
+    $('s1t').style.opacity = tk; $('s1t').style.transform = `translate(-50%,-50%) translateY(${lerp(40, 0, tk)}px)`;
+  }
+
+  // 2 · bar 2 → 3½: a word a beat, bracketed.
+  show('s2', t >= at(2) && t < AD0);
+  if (t >= at(2) && t < AD0) {
+    const i = clamp(Math.floor((t - at(2)) / BEAT), 0, 4), k = expoOut(p(t, at(2, i), 0.2));
+    const w = $('s2w');
+    w.textContent = WORDS[i][0]; w.style.fontSize = WSIZE[i];
+    w.style.transform = `translate(-50%,-50%) scale(${lerp(1.25, 1, k)})`;
+    $('s2n').textContent = `[ 0${i + 1} · ${WORDS[i][1]} ]`;
+    const bw = w.offsetWidth + 120, bh = w.offsetHeight + 80;
+    bracket(['bk0', 'bk1', 'bk2', 'bk3'], 540 - bw / 2, 940 - bh / 2, bw, bh, lerp(140, 0, k), k);
+    const out = expoIn(p(t, AD0 - 0.2, 0.2));
+    $('s2').style.opacity = 1 - out;
+  }
+
+  // 3 · the campaigns, one every 2.4 beats, the brackets closing in on each.
+  show('s3', t >= AD0 && t < at(6, 2));
+  if (t >= AD0 && t < at(6, 2)) {
+    const i = clamp(Math.floor((t - AD0) / AD), 0, ADS.length - 1), t0 = AD0 + i * AD;
+    ADS.forEach((_, j) => show(`cd${j}`, j === i));
+    const card = $(`cd${i}`), img = card.querySelector('img');
+    const r = ratio(img), w = r >= 1 ? 900 : Math.max(560, 960 * r), h = Math.min(960, w / r);
+    card.style.width = `${w}px`; card.style.height = `${h}px`;
+    const k = expoOut(p(t, t0, 0.3)), dir = i % 2 ? 1 : -1;
+    card.style.transform = `translate(-50%,-50%) translateY(${lerp(dir * 300, 0, k)}px) scale(${lerp(1.2, 1, k)})`;
+    card.style.opacity = k;
+    const lk = expoOut(p(t, t0 + 0.12, 0.25));
+    bracket(['ck0', 'ck1', 'ck2', 'ck3'], 540 - w / 2 - 24, 940 - h / 2 - 24, w + 48, h + 48, lerp(160, 0, lk), lk);
+    $('s3n').textContent = `AD 0${i + 1} / 0${ADS.length}`;
+    $('s3n').style.left = `${540 - w / 2}px`; $('s3n').style.top = `${940 - h / 2 - 90}px`; $('s3n').style.opacity = lk;
+    $('s3l').textContent = ADS[i][1];
+    $('s3l').style.top = `${Math.min(1480, 940 + h / 2 + 90)}px`; $('s3l').style.opacity = lk;
+  }
+
+  // 4 · bar 6½–8: results rise (shapes, not figures); the line climbs.
+  show('s4', t >= at(6, 2) && t < at(8));
+  if (t >= at(6, 2) && t < at(8)) {
+    const tk = expoOut(p(t, at(6, 2), 0.3));
+    $('s4t').style.opacity = tk;
+    COLS.forEach(([, hgt], i) => {
+      const k = spring(p(t, at(6, 2 + i), 0.5), 8);
+      $(`col${i}`).style.height = `${hgt * 640 * k}px`;
+      $(`cl${i}`).style.opacity = expoOut(p(t, at(6, 2 + i), 0.3));
+    });
+    const lk = expoInOut(p(t, at(7, 1), BEAT * 2));
+    $('lp').style.strokeDashoffset = 1200 * (1 - lk);
+    $('la').style.opacity = lk >= 1 ? 1 : 0;
+    const out = expoIn(p(t, at(8) - 0.2, 0.2));
+    $('s4').style.transform = `scale(${lerp(1, 1.4, out)})`; $('s4').style.opacity = 1 - out;
+  }
+
+  // 5 · bar 8: the drop, and the promise.
+  show('s5', t >= at(8) && t < at(9));
+  if (t >= at(8) && t < at(9)) {
+    const a = expoOut(p(t, at(8), 0.3)), b = backOut(p(t, at(8, 1), 0.4)), c = expoOut(p(t, at(8, 2), 0.35));
+    $('s5a').style.transform = `translate(-50%,-50%) scale(${lerp(1.8, 1, a)})`; $('s5a').style.opacity = a;
+    $('s5b').style.transform = `translate(-50%,-50%) scale(${b})`;
+    $('s5c').style.opacity = c; $('s5c').style.transform = `translate(-50%,-50%) translateY(${lerp(30, 0, c)}px)`;
+  }
+
+  // 6 · bars 9–11: the invitation; the crosshair locks onto the pill.
+  show('s6', t >= at(9));
+  if (t >= at(9)) {
+    const a = expoOut(p(t, at(9), 0.35)), b = expoOut(p(t, at(9, 0.5), 0.35));
+    const lk = expoOut(p(t, at(9, 1), 0.5)), c = backOut(p(t, at(9, 1.5), 0.45)), d = expoOut(p(t, at(9, 2.5), 0.4));
+    $('s6a').style.transform = `translate(-50%,-50%) scale(${lerp(1.6, 1, a)})`; $('s6a').style.opacity = a;
+    $('s6b').style.transform = `translate(-50%,-50%) translateY(${lerp(50, 0, b)}px)`; $('s6b').style.opacity = b;
+    $('s6r').style.transform = `translate(-50%,-50%) rotate(${lerp(-90, 0, lk) + (t - at(9)) * 6}deg) scale(${lerp(1.8, 1, lk)})`;
+    $('s6r').style.opacity = lk;
+    $('s6p').style.transform = `translate(-50%,-50%) scale(${c})`;
+    $('s6w').style.opacity = d; $('s6w').style.transform = `translate(-50%,-50%) translateY(${lerp(40, 0, d)}px)`;
+  }
+};
+window.seek = (t) => window.render(t);
+window.seek(0);
+</script>
+</body></html>
