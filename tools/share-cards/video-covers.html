@@ -1,0 +1,131 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><style>
+/* The films' covers (1080×1920), one series: ?v=brand|branding|websites|
+   social|ads|intro. Each is set in its film's own world — the brand's X, the
+   designer's paper, code at night, the yellow phone, the targeting display,
+   the four services — on one skeleton: the label, the picture, a two-line
+   title, the wordmark. Everything sits in the middle 3:4 (y 240–1680) that
+   the profile grid shows, clear of the Reels interface at the bottom.
+   For export.mjs: .t is text (a <br> per line; <span>/<b> in yellow),
+   figure.print a photo, svg.icon a vector icon; the rest is background. */
+@font-face{font-family:Cairo;src:url(fonts/Cairo-Medium.ttf);font-weight:500}
+@font-face{font-family:Cairo;src:url(fonts/Cairo-Bold.ttf);font-weight:700}
+@font-face{font-family:Cairo;src:url(fonts/Cairo-ExtraBold.ttf);font-weight:800}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-Medium.ttf);font-weight:500}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-SemiBold.ttf);font-weight:600}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-Bold.ttf);font-weight:700}
+:root{--y:#f4d13f;--k:#141414}
+*{box-sizing:border-box;margin:0}
+html,body{width:1080px;height:1920px;overflow:hidden}
+body{background:var(--k);color:#fff;font-family:Cairo,Poppins,sans-serif;position:relative}
+.t{position:absolute;left:0;right:0;text-align:center;white-space:nowrap}
+.t span,.t b{color:var(--y)}
+.tag{top:330px;font-size:40px;font-weight:700;color:var(--y)}
+.title{top:1150px;font-size:100px;font-weight:800;line-height:1.45}
+.mark{top:1500px;font-family:Poppins;font-weight:700;font-size:56px;letter-spacing:.02em;direction:ltr}
+.rule{position:absolute;top:412px;left:50%;width:90px;height:4px;margin-left:-45px;background:var(--y)}
+.print{position:absolute;margin:0;overflow:hidden;box-shadow:0 40px 80px -30px rgba(0,0,0,.85)}
+.print img{display:block;width:100%;height:100%;object-fit:cover}
+.icon{position:absolute;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.glow{position:absolute;inset:0;background:radial-gradient(700px 700px at 50% 42%,rgba(244,209,63,.16),transparent 70%)}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 2px,transparent 2px),linear-gradient(90deg,rgba(255,255,255,.04) 2px,transparent 2px);background-size:120px 120px;background-position:center}
+</style></head><body>
+<script>
+const v = new URLSearchParams(location.search).get('v') || 'brand';
+const asset = (f) => `../../overlay/assets/${f}`, src = (f) => `../../source/assets/${f}`, site = (f) => `sites/${f}`;
+const print = (img, x, y, w, h, r = 0, radius = 18, pos = 'center', z = 2) =>
+  `<figure class="print" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px;rotate:${r}deg;border-radius:${radius}px;z-index:${z}"><img src="${img}" style="object-position:${pos}"></figure>`;
+const t = (cls, style, html) => `<p class="t ${cls}" style="${style}">${html}</p>`;
+const MARK = (style = '') => t('mark', style, 'PI<b>X</b>ORA');
+const ICONS = {
+  branding: 'M12 3l6.5 7.5L12 21l-6.5-10.5z M12 3v8.5 M10.5 12.5a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0',
+  websites: 'M3 5h18v11H3z M3 8.5h18 M12 16v4 M8 20h8',
+  social: 'M8 3h8v18H8z M11 18h2 M12 12.6l-2.1-2.1a1.3 1.3 0 0 1 2.1-1.6a1.3 1.3 0 0 1 2.1 1.6z',
+  ads: 'M4 10v4h3l7 5V5l-7 5z M17.5 9a4 4 0 0 1 0 6 M7 14l1.5 6',
+};
+const COVERS = {
+  // 01 · the brand film: the X, alone, in its circle.
+  brand: () => `<div class="glow"></div><div class="grid" style="mask-image:radial-gradient(closest-side at 50% 42%,#000,transparent)"></div>
+    <svg style="position:absolute;left:190px;top:440px" width="700" height="700" viewBox="0 0 700 700"><circle cx="350" cy="350" r="330" fill="none" stroke="rgba(244,209,63,.35)" stroke-width="3" stroke-dasharray="10 14"/><circle cx="350" cy="350" r="250" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="2"/></svg>
+    ${t('tag', '', 'الفيلم التعريفي')}<i class="rule"></i>
+    ${t('', 'top:470px;font-family:Poppins;font-weight:700;font-size:560px;line-height:1;color:var(--y);direction:ltr', 'X')}
+    ${t('title', 'font-size:84px', 'علامتك. حضورك الرقمي.<br><span>شريك واحد.</span>')}${MARK()}`,
+
+  // 02 · branding: on paper — the dot became the X, a compass around it.
+  branding: () => {
+    document.body.style.background = '#f2eee6'; document.body.style.color = 'var(--k)';
+    const lines = [...Array(9)].map((_, i) => `<i style="position:absolute;left:${60 + i * 120}px;top:0;bottom:0;width:2px;background:rgba(20,20,20,.08)"></i>`).join('')
+      + [...Array(16)].map((_, i) => `<i style="position:absolute;top:${60 + i * 120}px;left:0;right:0;height:2px;background:rgba(20,20,20,.08)"></i>`).join('');
+    return `${lines}
+    <svg style="position:absolute;left:190px;top:430px" width="700" height="700" viewBox="0 0 700 700"><circle cx="350" cy="350" r="320" fill="none" stroke="#141414" stroke-width="3"/><circle cx="350" cy="350" r="240" fill="none" stroke="rgba(20,20,20,.3)" stroke-width="2" stroke-dasharray="8 12"/><circle cx="350" cy="30" r="9" fill="#141414"/></svg>
+    <i style="position:absolute;left:260px;top:720px;width:560px;height:120px;border-radius:60px;background:var(--y);transform:rotate(45deg)"></i>
+    <i style="position:absolute;left:260px;top:720px;width:560px;height:120px;border-radius:60px;background:var(--k);transform:rotate(-45deg)"></i>
+    <i style="position:absolute;left:300px;top:1392px;width:470px;height:30px;background:var(--y);border-radius:6px"></i>
+    ${t('tag', 'color:var(--k)', 'الهوية والتصميم')}<i class="rule" style="background:var(--k)"></i>
+    ${t('title', 'color:var(--k)', 'كل علامة<br>تبدأ بنقطة.')}${MARK('color:var(--k)')}`;
+  },
+
+  // 03 · websites: at night in the editor — the site in its browser, the phone beside it.
+  websites: () => {
+    document.body.style.background = '#0b0d12';
+    return `<div style="position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.09) 2px,transparent 2px);background-size:48px 48px"></div>
+    <div class="glow" style="background:radial-gradient(640px 520px at 50% 47%,rgba(244,209,63,.12),transparent 70%)"></div>
+    <div style="position:absolute;left:90px;top:520px;width:760px;height:526px;border-radius:22px;background:#1d2029;box-shadow:0 0 0 2px rgba(255,255,255,.12),0 60px 120px -40px #000"></div>
+    <svg style="position:absolute;left:112px;top:538px" width="80" height="18"><circle cx="9" cy="9" r="8" fill="#ff5f57"/><circle cx="36" cy="9" r="8" fill="#febc2e"/><circle cx="63" cy="9" r="8" fill="#28c840"/></svg>
+    ${print(site('travel-desktop.jpg'), 92, 572, 756, 472, 0, 4, '50% 0')}
+    <div style="position:absolute;left:668px;top:610px;width:322px;height:600px;border-radius:52px;background:#050608;box-shadow:0 0 0 2px rgba(255,255,255,.14),0 50px 100px -30px #000;z-index:3"></div>
+    ${print(site('aun-mobile-1.jpg'), 680, 622, 298, 576, 0, 42, '50% 0', 4)}
+    ${t('', 'top:460px;font-family:Poppins;font-weight:500;font-size:30px;color:rgba(255,255,255,.55);direction:ltr', 'site.<span>launch</span>();')}
+    ${t('tag', '', 'المواقع الإلكترونية')}<i class="rule"></i>
+    ${t('title', 'top:1250px;font-size:92px', 'من سطر كود<br><span>إلى موقع يعمل.</span>')}${MARK('top:1560px')}`;
+  },
+
+  // 04 · social: the film is a story — its bars, a phone, the grid filling.
+  social: () => {
+    document.body.style.background = 'var(--y)'; document.body.style.color = 'var(--k)';
+    const bars = [1, 1, 1, .5, 0, 0].map((f, i) => `<i style="position:absolute;top:300px;left:${90 + i * 152}px;width:142px;height:8px;border-radius:4px;background:rgba(20,20,20,.18);overflow:hidden"><b style="display:block;height:100%;width:${f * 100}%;background:var(--k)"></b></i>`).join('');
+    const TILES = [asset('case-digital-campaigns-key-visual.webp'), src('c02.webp'), asset('case-brand-identity-systems-social.webp'), src('c03.webp'), asset('case-digital-campaigns-stories.webp'), src('c04.webp')];
+    const tiles = TILES.map((s, i) => print(s, 330 + (2 - i % 3) * 140 - 0, 690 + Math.floor(i / 3) * 140, 136, 136, 0, 4, 'center', 3)).join('');
+    return `${bars}
+    <div style="position:absolute;left:300px;top:470px;width:480px;height:640px;border-radius:64px 64px 0 0;background:#050505"></div>
+    <div style="position:absolute;left:316px;top:486px;width:448px;height:624px;border-radius:50px 50px 0 0;background:#fff"></div>
+    <div style="position:absolute;left:650px;top:530px;width:84px;height:84px;border-radius:50%;background:var(--k);box-shadow:0 0 0 5px #fff,0 0 0 9px var(--y)"></div>
+    <svg style="position:absolute;left:668px;top:546px" width="48" height="52" viewBox="0 0 48 52"><path d="M8 8l32 36M40 8L8 44" stroke="#f4d13f" stroke-width="9" stroke-linecap="round"/></svg>
+    <i style="position:absolute;left:400px;top:548px;width:220px;height:22px;border-radius:11px;background:#eee"></i><i style="position:absolute;left:460px;top:584px;width:160px;height:16px;border-radius:8px;background:#f3f3f3"></i>
+    ${tiles}
+    <div style="position:absolute;left:110px;top:600px;width:400px;height:100px;border-radius:32px;background:#fff;box-shadow:0 24px 50px -20px rgba(0,0,0,.4);z-index:5;rotate:-4deg"></div>
+    <svg style="position:absolute;left:420px;top:600px;z-index:6;rotate:-4deg" width="72" height="72" viewBox="0 0 46 46"><circle cx="23" cy="23" r="22" fill="#141414"/><path d="M23 34s-10-6-10-13a5.5 5.5 0 0 1 10-3.4A5.5 5.5 0 0 1 33 21c0 7-10 13-10 13z" fill="#f4d13f"/></svg>
+    ${t('', 'top:614px;left:130px;right:auto;width:280px;font-size:32px;font-weight:800;color:var(--k);z-index:7;rotate:-4deg', 'أُعجب بمنشورك')}
+    ${t('tag', 'color:var(--k)', 'إدارة وسائل التواصل')}<i class="rule" style="background:var(--k)"></i>
+    ${t('title', 'color:var(--k);font-size:92px', 'حضور مستمر<br>ومتّصل بجمهورك.')}${t('mark', 'color:var(--k)', 'PIXORA')}`;
+  },
+
+  // 05 · ads: the targeting display — the right people gathered into the X.
+  ads: () => {
+    document.body.style.background = '#08090c';
+    let R = 9; const rnd = () => { R = (R * 16807) % 2147483647; return R / 2147483647; };
+    const dots = [...Array(150)].map(() => [40 + rnd() * 1000, 440 + rnd() * 760]).filter(([x, y]) => Math.hypot(x - 540, y - 800) > 300)
+      .map(([x, y]) => `<circle cx="${x}" cy="${y}" r="7" fill="rgba(255,255,255,.28)"/>`).join('');
+    const xs = [...Array(13)].flatMap((_, i) => { const s = -210 + i * 35; return [[540 + s, 800 + s], [540 + s, 800 - s]]; })
+      .map(([x, y]) => `<circle cx="${x}" cy="${y}" r="13" fill="#f4d13f"/>`).join('');
+    return `<div style="position:absolute;inset:0;background:linear-gradient(rgba(244,209,63,.05) 2px,transparent 2px) 0 0/100% 8px"></div>
+    <svg style="position:absolute;left:0;top:0" width="1080" height="1920">${dots}
+      <circle cx="540" cy="800" r="300" fill="none" stroke="#f4d13f" stroke-width="5" stroke-dasharray="44 22"/>
+      <path d="M190 800H260M820 800H890M540 450V520M540 1080V1150" stroke="#f4d13f" stroke-width="6"/>${xs}</svg>
+    ${t('', 'top:1172px;font-family:Poppins;font-weight:600;font-size:28px;letter-spacing:.1em;color:var(--y);direction:ltr', 'TARGET LOCKED')}
+    ${t('tag', '', 'التسويق الرقمي والإعلانات')}<i class="rule"></i>
+    ${t('title', 'top:1250px;font-size:84px', 'الجمهور الصحيح.<br><span>في اللحظة الصحيحة.</span>')}${MARK('top:1555px')}`;
+  },
+
+  // 06 · the short intro: four services, one team.
+  intro: () => `<div class="glow"></div><div class="grid" style="mask-image:radial-gradient(closest-side at 50% 42%,#000,transparent)"></div>
+    ${['branding', 'websites', 'social', 'ads'].map((k, i) => {
+      const x = 270 + (i % 2) * 290, y = 500 + Math.floor(i / 2) * 290, on = i === 0;
+      return `<div style="position:absolute;left:${x}px;top:${y}px;width:250px;height:250px;border-radius:44px;background:${on ? 'var(--y)' : '#1f1f1f'};box-shadow:0 0 0 2px ${on ? 'transparent' : 'rgba(255,255,255,.08)'}"></div>
+        <svg class="icon" style="left:${x + 55}px;top:${y + 55}px;width:140px;height:140px;stroke:${on ? '#141414' : '#f4d13f'};stroke-width:1.5" viewBox="0 0 24 24"><path d="${ICONS[k]}"/></svg>`;
+    }).join('')}
+    ${t('tag', '', 'تعرّف علينا')}<i class="rule"></i>
+    ${t('title', 'top:1110px;font-size:96px', 'أربع خدمات.<br><span>فريق واحد.</span>')}${MARK()}`,
+};
+document.body.innerHTML = COVERS[v]();
+</script>
+</body></html>

@@ -12,7 +12,7 @@
 //                                  default main: commit and push first)
 //
 // Groups: profile (1080×1080), covers (Facebook, X, LinkedIn, YouTube),
-// videos (the brand film's cover, 1080×1920),
+// videos (the six films' covers, 1080×1920),
 // instagram-highlights (1080×1920), instagram-posts (1080×1350).
 // Designs: social.html (?k=…) and instagram.html (?p=…).
 //
@@ -38,8 +38,11 @@ const DESIGNS = {
     'cover-linkedin': social('linkedin', 1128, 191, 'LinkedIn cover'),
     'cover-youtube': social('youtube', 2560, 1440, 'YouTube banner'),
   },
+  // The films' covers (video-covers.html ?v=), in the order they are posted.
   videos: {
-    'reel-cover': social('reel-cover', 1080, 1920, 'Brand film cover'),
+    ...Object.fromEntries([['01', 'brand', 'Brand film'], ['02', 'branding', 'Branding film'], ['03', 'websites', 'Websites film'],
+      ['04', 'social', 'Social media film'], ['05', 'ads', 'Ads film'], ['06', 'intro', 'Short intro']].map(([n, v, title]) =>
+      [`cover-${n}-${v}`, { source: 'video-covers.html', q: `v=${v}`, w: 1080, h: 1920, title: `${title} cover` }])),
   },
   'instagram-highlights': Object.fromEntries(['work', 'branding', 'websites', 'social', 'ads', 'contact'].map((k) =>
     [`highlight-${k}`, social(`highlight-${k}`, 1080, 1920, `Instagram highlight — ${k}`)])),

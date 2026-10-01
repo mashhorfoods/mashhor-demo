@@ -171,6 +171,7 @@
         .g-project__frame--site img:first-child { max-inline-size: 72%; }
         .g-project__frame--site img:last-child { max-inline-size: calc(28% - var(--space-12)); }
         .g-project__caption { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-4) var(--space-16); }
+        .g-project__service { flex: 1 0 100%; font-size: var(--text-label); font-weight: var(--weight-bold); color: var(--color-accent); }
         .g-project__title { font-size: var(--text-h4); font-weight: var(--weight-semibold); line-height: var(--leading-snug); }
         .g-project__client { font-family: "Poppins", var(--font-arabic); font-size: var(--text-label); letter-spacing: 0.16em; color: var(--color-text-muted); direction: ltr; unicode-bidi: isolate; }
 
@@ -384,7 +385,8 @@
       </section>
 
       <!-- ============================================================
-           PORTFOLIO — six pieces, all from the site's own showcase.
+           PORTFOLIO — six pieces from the site's own showcase, newest
+           first and the four services in turn, each tagged with its service.
            Image first, two words of context, and the way out to a
            conversation is always on screen.
            ============================================================ -->
@@ -399,10 +401,24 @@
               <p class="t-label g-eyebrow">أعمال مختارة</p>
               <h2 class="g-head__title" id="work-title" tabindex="-1">من الفكرة<br /> <span class="g-accent">إلى حضور متكامل.</span></h2>
             </div>
-            <p class="t-body-lg">هوية وموقع وحملات وملف تعريفي لعميل واحد — ونماذج أخرى من أعمالنا كما سُلّمت.</p>
+            <p class="t-body-lg">مواقع وهويات ومحتوى وحملات — نماذج من أعمالنا كما سُلّمت، من الخدمات الأربع.</p>
           </header>
 
           <ul class="g-work">
+            <li>
+              <figure class="g-project">
+                <div class="g-project__frame">
+                  <img src="/assets/site-travel.webp" width="1200" height="900" loading="lazy" decoding="async"
+                    srcset="/assets/site-travel-800.webp 800w, /assets/site-travel.webp 1200w" sizes="(min-width: 48em) 45vw, 92vw"
+                    alt="منصة سفر وسياحة على الحاسوب والجوال: البحث عن الرحلات والعروض والوجهات" />
+                </div>
+                <figcaption class="g-project__caption">
+                  <span class="g-project__service">موقع إلكتروني</span>
+                  <h3 class="g-project__title">منصة سفر وسياحة</h3>
+                  <span class="g-project__client">TRAVEL</span>
+                </figcaption>
+              </figure>
+            </li>
             <li>
               <figure class="g-project">
                 <div class="g-project__frame">
@@ -410,6 +426,7 @@
                     alt="هوية وكالة المدى: الشعار — طائرة داخل دائرة يرسم مسارها حرف الميم — مع الألوان والخطوط" />
                 </div>
                 <figcaption class="g-project__caption">
+                  <span class="g-project__service">الهوية والتصميم</span>
                   <h3 class="g-project__title">هوية بصرية متكاملة</h3>
                   <span class="g-project__client">AL MADA</span>
                 </figcaption>
@@ -418,12 +435,28 @@
             <li>
               <figure class="g-project">
                 <div class="g-project__frame">
-                  <img src="/assets/al-mada-website.webp" width="1200" height="674" loading="lazy" decoding="async"
-                    alt="موقع وكالة المدى على الحاسوب والجهاز اللوحي والجوال، بالعربية ومن اليمين إلى اليسار" />
+                  <img src="/assets/site-aun.webp" width="1200" height="900" loading="lazy" decoding="async"
+                    srcset="/assets/site-aun-800.webp 800w, /assets/site-aun.webp 1200w" sizes="(min-width: 48em) 45vw, 92vw"
+                    alt="موقع عون الدرب لنقل كبار السن وذوي الاحتياجات الخاصة، على الحاسوب والجوال" />
                 </div>
                 <figcaption class="g-project__caption">
-                  <h3 class="g-project__title">موقع عربي أولًا</h3>
-                  <span class="g-project__client">AL MADA</span>
+                  <span class="g-project__service">موقع إلكتروني</span>
+                  <h3 class="g-project__title">موقع خدمات بالعربية</h3>
+                  <span class="g-project__client">AUN ALDRB</span>
+                </figcaption>
+              </figure>
+            </li>
+            <li>
+              <figure class="g-project">
+                <div class="g-project__frame">
+                  <img src="/assets/case-digital-campaigns-feed.webp" width="1600" height="889" loading="lazy" decoding="async"
+                    srcset="/assets/case-digital-campaigns-feed-800.webp 800w, /assets/case-digital-campaigns-feed.webp 1600w" sizes="(min-width: 48em) 45vw, 92vw"
+                    alt="شبكة منشورات حملة رقمية على إنستغرام بهوية واحدة متسقة" />
+                </div>
+                <figcaption class="g-project__caption">
+                  <span class="g-project__service">السوشال ميديا</span>
+                  <h3 class="g-project__title">محتوى وحملة على المنصات</h3>
+                  <span class="g-project__client">CAMPAIGN</span>
                 </figcaption>
               </figure>
             </li>
@@ -434,32 +467,9 @@
                     alt="خمسة إعلانات لعروض العمرة بهوية المدى الزرقاء نفسها" />
                 </div>
                 <figcaption class="g-project__caption">
+                  <span class="g-project__service">الإعلانات</span>
                   <h3 class="g-project__title">حملة عروض العمرة</h3>
                   <span class="g-project__client">AL MADA</span>
-                </figcaption>
-              </figure>
-            </li>
-            <li>
-              <figure class="g-project">
-                <div class="g-project__frame">
-                  <img src="/assets/al-mada-profile.webp" width="1200" height="670" loading="lazy" decoding="async"
-                    alt="الملف التعريفي لوكالة المدى مطبوعًا: الغلاف وصفحات التعريف بالوكالة" />
-                </div>
-                <figcaption class="g-project__caption">
-                  <h3 class="g-project__title">الملف التعريفي</h3>
-                  <span class="g-project__client">AL MADA</span>
-                </figcaption>
-              </figure>
-            </li>
-            <li>
-              <figure class="g-project">
-                <div class="g-project__frame">
-                  <img src="/assets/work-4.webp" width="900" height="978" loading="lazy" decoding="async"
-                    alt="تجهيز متجر Box Store: اللافتة المضيئة ورفوف العرض وحقيبة تحمل العلامة" />
-                </div>
-                <figcaption class="g-project__caption">
-                  <h3 class="g-project__title">تجهيز متجر</h3>
-                  <span class="g-project__client">BOX STORE</span>
                 </figcaption>
               </figure>
             </li>
@@ -470,6 +480,7 @@
                     alt="علبة مشهور للمواد الغذائية من الأعلى على طاولة خشبية، حولها حبوب وبقوليات وأعشاب" />
                 </div>
                 <figcaption class="g-project__caption">
+                  <span class="g-project__service">الهوية والتصميم</span>
                   <h3 class="g-project__title">التغليف</h3>
                   <span class="g-project__client">MASHHOR</span>
                 </figcaption>
