@@ -54,12 +54,77 @@ body{color:#fff;font-family:Cairo,Poppins,sans-serif}
 <script>
 const BEAT = 0.5;
 window.DURATION = 19;
+// ---- the films: the brand (no ?s=), or one service --------------------------
+// words: one per beat on yellow; promise: two lines and a short third; work:
+// [image, ghost word, label]; verbs: four bands; cta: the invitation's question.
+const work = (f) => `../../overlay/assets/${f}.webp`, site = (f) => `../../source/assets/${f}.webp`;
+const FILMS = {
+  brand: {
+    words: [['هوية.', 'IDENTITY'], ['مواقع.', 'WEBSITES'], ['محتوى.', 'CONTENT'], ['سوشال.', 'SOCIAL'], ['إعلانات.', 'ADS']],
+    promise: ['شريك', 'واحد.', 'من الهوية حتى الإعلان — فريق واحد.'],
+    work: [
+      [work('case-brand-identity-systems-identity'), 'IDENTITY', 'الهوية'],
+      [work('case-brand-identity-systems-packaging'), 'PACKAGING', 'التغليف'],
+      [site('al-mada-website'), 'WEB', 'المواقع'],
+      [work('case-digital-campaigns-key-visual'), 'CAMPAIGN', 'الحملات'],
+      [work('case-editorial-publication-design-spread'), 'EDITORIAL', 'التقارير'],
+      [work('case-digital-campaigns-stories'), 'SOCIAL', 'السوشال'],
+    ],
+    verbs: ['نصمّم.', 'نبني.', 'نطلق.', 'ننمّي.'],
+    cta: 'عندك مشروع؟',
+  },
+  branding: {
+    words: [['شعار.', 'LOGO'], ['ألوان.', 'COLOUR'], ['خطوط.', 'TYPE'], ['دليل.', 'GUIDELINES'], ['تطبيقات.', 'APPLICATIONS']],
+    promise: ['ابنِ علامة', 'يتعرّف عليها الناس.', 'نظام هوية كامل — لا شعار وحده.'],
+    work: [
+      [site('work-2'), 'AJWA', 'Ajwa Flavors'], [site('work-3'), 'NEXTECH', 'NexTech'], [site('work-4'), 'BOX STORE', 'Box Store'],
+      [site('work-6'), 'MASHHOR', 'مشهور لتجارة المواد الغذائية'], [site('work-7'), 'TEELA', 'Teela'], [site('B4'), 'NOORU', 'Nooru'],
+    ],
+    verbs: ['نبحث.', 'نرسم.', 'نختبر.', 'نسلّم.'],
+    cta: 'تحتاج هوية؟',
+  },
+  websites: {
+    words: [['تصميم.', 'DESIGN'], ['تطوير.', 'DEVELOPMENT'], ['نطاق.', 'DOMAIN'], ['استضافة.', 'HOSTING'], ['إطلاق.', 'LAUNCH']],
+    promise: ['ابنِ تجربة رقمية', 'تؤدي عملها.', 'مواقع جاهزة للاستخدام التجاري الفعلي.'],
+    work: [
+      [site('d01'), 'DESKTOP', 'على الشاشة الكبيرة'], [site('t01'), 'TABLET', 'على التابلت'], [site('mo1'), 'MOBILE', 'على الجوال'],
+      [site('al-mada-website'), 'AL MADA', 'المدى للسفر والسياحة'], [work('svc-websites'), 'EVERY SCREEN', 'على كل الشاشات'],
+    ],
+    verbs: ['نصمّم.', 'نطوّر.', 'نختبر.', 'نطلق.'],
+    cta: 'تحتاج موقعًا؟',
+  },
+  social: {
+    words: [['استراتيجية.', 'STRATEGY'], ['محتوى.', 'CONTENT'], ['تصميم.', 'DESIGN'], ['نشر.', 'PUBLISHING'], ['تقارير.', 'REPORTING']],
+    promise: ['حضور مستمر', 'ومتّصل بجمهورك.', 'استراتيجية ومحتوى ونشر وتقارير — كعملية واحدة.'],
+    work: [
+      [site('c01'), 'CALENDAR', 'خطة المحتوى'], [site('c02'), 'POSTS', 'المنشورات'], [site('c03'), 'REELS', 'الريلز'],
+      [site('c04'), 'STORIES', 'الستوريز'], [work('case-digital-campaigns-feed'), 'FEED', 'شبكة الحساب'], [work('case-brand-identity-systems-social'), 'BRAND', 'حضور العلامة'],
+    ],
+    verbs: ['نخطّط.', 'نكتب.', 'ننشر.', 'نقيس.'],
+    cta: 'تحتاج حضورًا؟',
+  },
+  ads: {
+    words: [['استراتيجية.', 'STRATEGY'], ['جمهور.', 'AUDIENCE'], ['إعلانات.', 'CREATIVE'], ['تحسين.', 'OPTIMISATION'], ['تقارير.', 'REPORTING']],
+    promise: ['اصل إلى الجمهور الصحيح.', 'في اللحظة الصحيحة.', 'خدمة مستمرة — لا منشورات مموّلة.'],
+    work: [
+      [work('case-digital-campaigns-key-visual'), 'CAMPAIGN', 'الحملة'], [site('al-mada-campaign'), 'AL MADA', 'حملة المدى'],
+      [work('case-digital-campaigns-stories'), 'STORIES', 'إعلانات الستوري'], [work('case-digital-campaigns-motion'), 'MOTION', 'الموشن'],
+      [site('c05'), 'INSIGHTS', 'تقارير الأداء'],
+    ],
+    verbs: ['نستهدف.', 'نصمّم.', 'نحسّن.', 'نقيس.'],
+    cta: 'تحتاج حملة؟',
+  },
+};
+const D = FILMS[new URLSearchParams(location.search).get('s') || 'brand'];
+// The work fills 6–12s whatever its count; a tick on each cut and each punch.
+const PIECE = 6 / D.work.length;
+const TICKS = D.work.flatMap((_, i) => [6 + i * PIECE, 6 + i * PIECE + BEAT]);
 // The timeline the music follows: hits, beats and sweeps, in seconds.
 window.CUES = {
   bpm: 120, duration: 19,
   impacts: [0.25, 4.5, 5.0, 14.75, 15.5],
   whooshes: [[1.1, 0.45], [5.75, 0.3], [11.85, 0.2], [15.05, 0.45]],
-  ticks: [6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5],
+  ticks: TICKS,
   riser: [12, 2.0],
   groove: [2, 14.5],
   breaks: [[4.5, 6], [14, 15.5]],                        // no groove under the promise and the logo
@@ -92,19 +157,25 @@ const shake = (t) => {
 const flash = (t) => Math.max(0, ...CUES.impacts.map((i) => (t >= i && t < i + 0.07 ? 0.28 * (1 - (t - i) / 0.07) : 0)));
 
 // ---- scene content ------------------------------------------------------
-const SERVICES = [['هوية.', 'IDENTITY'], ['مواقع.', 'WEBSITES'], ['محتوى.', 'CONTENT'], ['سوشال.', 'SOCIAL'], ['إعلانات.', 'ADS']];
-const work = (f) => `../../overlay/assets/${f}.webp`, site = (f) => `../../source/assets/${f}.webp`;
-const WORK = [
-  [work('case-brand-identity-systems-identity'), 'IDENTITY', 'الهوية'],
-  [work('case-brand-identity-systems-packaging'), 'PACKAGING', 'التغليف'],
-  [site('al-mada-website'), 'WEB', 'المواقع'],
-  [work('case-digital-campaigns-key-visual'), 'CAMPAIGN', 'الحملات'],
-  [work('case-editorial-publication-design-spread'), 'EDITORIAL', 'التقارير'],
-  [work('case-digital-campaigns-stories'), 'SOCIAL', 'السوشال'],
-];
-const PIECE = 1;  // seconds per piece of work
+const SERVICES = D.words;
+const WORK = D.work;
+// Type that must fit the frame (940px): the largest size that does.
+const fit = (el, size, max = 940) => {
+  el.style.fontSize = `${size}px`;
+  const w = el.scrollWidth;
+  if (w > max) el.style.fontSize = `${Math.floor(size * max / w)}px`;
+  return el.style.fontSize;
+};
+// Measured with the scenes shown (a hidden element has no width).
+['s2', 's3', 's7'].forEach((id) => { $(id).style.display = 'block'; });
+const WORD_SIZE = SERVICES.map(([w]) => { $('s2w').textContent = w; return fit($('s2w'), 250); });
+$('s3a').textContent = D.promise[0]; fit($('s3a'), 300);
+$('s3b').textContent = D.promise[1]; fit($('s3b'), 330);
+$('s3c').textContent = D.promise[2]; fit($('s3c'), 52);
+$('s7a').textContent = D.cta; fit($('s7a'), 150);
+['s2', 's3', 's7'].forEach((id) => { $(id).style.display = 'none'; });
 $('s4cards').innerHTML = WORK.map(([s], i) => `<figure class="card" id="card${i}" style="display:none"><img src="${s}"></figure>`).join('');
-const VERBS = [['نصمّم.', 'var(--k)', 'var(--y)'], ['نبني.', '#fff', '#262626'], ['نطلق.', 'var(--k)', '#fff'], ['ننمّي.', 'var(--k)', 'var(--y)']];
+const VERBS = D.verbs.map((w, i) => [w, ...[['var(--k)', 'var(--y)'], ['#fff', '#262626'], ['var(--k)', '#fff'], ['var(--k)', 'var(--y)']][i]]);
 $('s5').innerHTML = VERBS.map(([w, fg, bg], i) => `<div class="band" id="v${i}" style="top:${280 + i * 300}px;color:${fg};background:${bg}">${w}</div>`).join('');
 $('s6w').innerHTML = [...'PIXORA'].map((c, i) => `<span id="L${i}" style="${c === 'X' ? 'color:var(--y)' : ''}">${c}</span>`).join('');
 
@@ -132,6 +203,7 @@ window.render = (t) => {
     else {
       const k = expoOut(p(t, 2 + i * BEAT, 0.22));
       $('s2w').textContent = SERVICES[i][0];
+      $('s2w').style.fontSize = WORD_SIZE[i];
       $('s2l').textContent = SERVICES[i][1];
       $('s2w').style.transform = `translate(-50%,-50%) scale(${lerp(1.45, 1, k)}) rotate(${(i % 2 ? 3 : -3) * (1 - k * 0.6)}deg)`;
       $('s2l').style.transform = `translate(-50%,-50%) translateY(${lerp(40, 0, k)}px)`;
@@ -162,6 +234,16 @@ window.render = (t) => {
     const yellow = i % 2 === 1;
     $('s4').className = `layer ${yellow ? 'fill-y' : 'fill-k'}`;
     WORK.forEach((_, j) => { $(`card${j}`).style.display = j === i ? 'block' : 'none'; });
+    // Each card takes its image's proportions: portrait screens stand tall,
+    // wide boards stay wide (at most 940 wide, 900 tall).
+    const card = $(`card${i}`), img = card.querySelector('img');
+    if (!card.dataset.sized && img.naturalWidth) {
+      const r = img.naturalWidth / img.naturalHeight;
+      const w = r >= 1 ? 940 : Math.max(480, 900 * r);
+      card.style.width = `${w}px`;
+      card.style.height = `${Math.min(900, Math.round(w / Math.max(r, 0.5)))}px`;
+      card.dataset.sized = '1';
+    }
     $(`card${i}`).style.transform = `translate(-50%,-50%) translateX(${dir * lerp(900, 0, inn)}px) rotate(${dir * lerp(12, 2, inn)}deg) scale(${lerp(1.15, 1, expoOut(k)) + punch * 0.06})`;
     $('s4g').textContent = WORK[i][1];
     $('s4g').style.color = yellow ? 'rgba(20,20,20,.22)' : 'rgba(244,209,63,.35)';
@@ -170,7 +252,9 @@ window.render = (t) => {
     $('s4c').textContent = `0${i + 1} / 0${WORK.length}`;
     $('s4c').style.color = yellow ? 'var(--k)' : 'var(--y)';
     $('s4l').textContent = WORK[i][2];
-    $('s4l').style.cssText = `font-size:44px;top:1420px;font-family:Cairo;letter-spacing:0;font-weight:800;color:${yellow ? 'var(--k)' : '#fff'};transform:translate(-50%,-50%) translateY(${lerp(30, 0, inn)}px);opacity:${inn}`;
+    // The label sits under its card, however tall the card is.
+    const labelTop = Math.min(1480, 960 + card.offsetHeight / 2 + 70);
+    $('s4l').style.cssText = `font-size:44px;top:${labelTop}px;font-family:Cairo,Poppins;letter-spacing:0;font-weight:800;color:${yellow ? 'var(--k)' : '#fff'};transform:translate(-50%,-50%) translateY(${lerp(30, 0, inn)}px);opacity:${inn}`;
   }
   // 5 · 12–14s: what we do, a band per beat, from alternate sides.
   show('s5', t >= 12 && t < 14);

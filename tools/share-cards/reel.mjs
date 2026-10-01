@@ -7,7 +7,8 @@
 // averaged into motion blur; the others get a silent track.
 // Each frame is the page's animations paused at that instant, so the video is
 // the same every time.
-//   node tools/share-cards/reel.mjs [name]   (needs ffmpeg; CHROMIUM=/path/to/chrome if needed)
+//   node tools/share-cards/reel.mjs [name] [query]   (needs ffmpeg; CHROMIUM=/path/to/chrome if needed)
+// e.g. reel-energy s=branding → pixora-reel-energy-branding.mp4, the brand film for one service.
 import { chromium } from 'playwright';
 import { fileURLToPath } from 'node:url';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
@@ -20,10 +21,12 @@ const out = path.join(here, '..', '..', 'brand', 'kit', 'videos');
 mkdirSync(out, { recursive: true });
 const FPS = 30;
 const NAME = process.argv[2] || 'reel';
+const QUERY = process.argv[3] || '';
+const OUT = QUERY ? `${NAME}-${QUERY.split('=').pop()}` : NAME;
 const frames = mkdtempSync(path.join(tmpdir(), 'pixora-reel-'));
 const browser = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
 const page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
-await page.goto(`file://${path.join(here, `${NAME}.html`)}`);
+await page.goto(`file://${path.join(here, `${NAME}.html`)}${QUERY ? `?${QUERY}` : ''}`);
 await page.evaluate(() => document.fonts.ready);
 await page.waitForFunction(() => [...document.images].every((i) => i.complete && i.naturalWidth));
 const duration = await page.evaluate(() => window.DURATION);
@@ -37,7 +40,7 @@ for (let f = 0; f < total; f += 1) {
   if (f % 150 === 0) process.stdout.write(`frame ${f}/${total}\r`);
 }
 await browser.close();
-const file = path.join(out, `pixora-${NAME}.mp4`);
+const file = path.join(out, `pixora-${OUT}.mp4`);
 let audio = ['-f', 'lavfi', '-i', 'anullsrc=channel_layout=stereo:sample_rate=44100'];
 if (cues) {
   const json = path.join(frames, 'cues.json'), wav = path.join(frames, 'soundtrack.wav');
@@ -50,4 +53,4 @@ execFileSync('ffmpeg', ['-v', 'error', '-y', '-framerate', String(FPS * SUB), '-
   ...blur, '-c:v', 'libx264', '-preset', 'slow', '-crf', '17', '-pix_fmt', 'yuv420p', '-r', String(FPS),
   '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', file]);
 rmSync(frames, { recursive: true, force: true });
-console.log(`\nbrand/kit/videos/pixora-${NAME}.mp4 (${duration}s, ${total} frames)`);
+console.log(`\nbrand/kit/videos/pixora-${OUT}.mp4 (${duration}s, ${total} frames)`);
