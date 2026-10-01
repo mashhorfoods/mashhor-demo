@@ -1,0 +1,132 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><style>
+/* Pixora's first nine Instagram posts (1080×1350, 4:5), ?p=1…9: a 3×3 grid
+   in the identity of the covers (social.html). Words come from the site's
+   own pages (services, About, the Al Mada story); no prices. The profile grid
+   shows 3:4, so nothing sits in the outer 40px of either side.
+   Rendered by instagram.mjs; canva.mjs (SET=instagram) makes Canva versions:
+   every .t is a text box there, every .print an image. */
+@font-face{font-family:Cairo;src:url(fonts/Cairo-Medium.ttf);font-weight:500}
+@font-face{font-family:Cairo;src:url(fonts/Cairo-Bold.ttf);font-weight:700}
+@font-face{font-family:Cairo;src:url(fonts/Cairo-ExtraBold.ttf);font-weight:800}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-Medium.ttf);font-weight:500}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-SemiBold.ttf);font-weight:600}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-Bold.ttf);font-weight:700}
+:root{--y:#f4d13f}
+*{box-sizing:border-box;margin:0}
+html,body{width:1080px;height:1350px;overflow:hidden}
+body{background:#141414;color:#fff;font-family:Cairo,Poppins,sans-serif;position:relative}
+.glow{position:absolute;inset:0;background:radial-gradient(760px 620px at var(--gx,50%) var(--gy,72%),rgba(244,209,63,.13),transparent 70%)}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:90px 90px;mask-image:radial-gradient(closest-side at var(--gx,50%) var(--gy,72%),#000,transparent)}
+.t{position:absolute;white-space:nowrap}
+.t span,.t b{color:var(--y)}
+/* The frame every post shares: the wordmark and the post's number on top,
+   the agency's name below. */
+.brand{top:84px;right:96px;font-family:Poppins;font-weight:700;font-size:40px;letter-spacing:.02em;direction:ltr}
+.num{top:92px;left:96px;font-family:Poppins;font-weight:600;font-size:22px;letter-spacing:.18em;color:rgba(255,255,255,.45);direction:ltr}
+.foot{bottom:78px;right:96px;font-size:22px;font-weight:700;color:rgba(255,255,255,.55)}
+.foot-en{bottom:82px;left:96px;font-family:Poppins;font-weight:500;font-size:18px;letter-spacing:.32em;color:rgba(255,255,255,.4);direction:ltr}
+.eyebrow{right:96px;font-size:30px;font-weight:700;color:var(--y);display:flex;align-items:center;gap:18px}
+.eyebrow::after{content:"";width:56px;height:3px;background:var(--y)}
+.h{right:96px;font-weight:800;font-size:84px;line-height:1.22}
+.en{right:96px;font-family:Poppins;font-weight:600;font-size:28px;color:rgba(255,255,255,.58);direction:ltr}
+.lead{right:96px;font-size:31px;font-weight:500;line-height:1.6;color:rgba(255,255,255,.78)}
+.print{position:absolute;margin:0;border-radius:22px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 46px 80px -34px rgba(0,0,0,.95)}
+.print img{display:block;width:100%;height:100%;object-fit:cover}
+.badge{position:absolute;display:inline-flex;align-items:center;gap:.6em;background:rgba(20,20,20,.92);border:1px solid rgba(244,209,63,.4);border-radius:999px;padding:.5em 1.1em;font-size:24px;font-weight:700;z-index:9}
+.badge::before{content:"";width:.5em;height:.5em;border-radius:50%;background:var(--y)}
+.services{display:flex;align-items:center;gap:.6em;font-size:28px;font-weight:700;color:rgba(255,255,255,.88)}
+.services i{width:.36em;height:.36em;border-radius:50%;background:var(--y)}
+/* Rows of a list (the stages, the principles). */
+.row-n{left:96px;font-family:Poppins;font-weight:700;font-size:44px;color:var(--y);direction:ltr}
+.row-t{right:96px;font-size:44px;font-weight:800}
+.row-d{right:96px;font-size:26px;font-weight:500;color:rgba(255,255,255,.62)}
+.row-en{right:96px;font-family:Poppins;font-weight:500;font-size:20px;letter-spacing:.2em;color:rgba(255,255,255,.4);direction:ltr}
+.rule{position:absolute;right:96px;left:96px;height:1px;background:rgba(255,255,255,.12)}
+.tile-l{font-size:26px;font-weight:700}
+</style></head><body>
+<script>
+const p = +new URLSearchParams(location.search).get('p') || 1;
+const work = (f) => `../../overlay/assets/${f}`;
+const site = (f) => `../../source/assets/${f}`;
+const fig = (src, x, y, w, ar, r, z = 1, pos = 'center') =>
+  `<figure class="print" style="left:${x}px;top:${y}px;width:${w}px;aspect-ratio:${ar};rotate:${r}deg;z-index:${z}"><img src="${src}" style="object-position:${pos}"></figure>`;
+const t = (cls, style, html) => `<div class="t ${cls}" style="${style}">${html}</div>`;
+const frame = (n) => t('brand', '', 'PI<b>X</b>ORA') + t('num', '', `0${n} / 09`) +
+  t('foot', '', 'بيكسورا · وكالة رقمية') + t('foot-en', '', 'DIGITAL AGENCY');
+const SERVICES = ['الهوية والتصميم', 'المواقع', 'السوشال ميديا', 'الإعلانات'];
+
+// One service: its name, the headline its page opens with (the second line
+// in yellow), the English, its lead, and its work laid out like prints.
+const service = (n, name, l1, l2, en, lead, prints, size = 84, gy = '80%') => ({ gy, html:
+  t('eyebrow', 'top:250px', name) +
+  t('h', `top:${316 + (84 - size)}px;font-size:${size}px`, `${l1}<br><span>${l2}</span>`) +
+  t('en', 'top:540px', en) +
+  t('lead', 'top:600px', lead) + prints + frame(n) });
+
+const POSTS = {
+  1: { gy: '78%', html:
+    t('t', 'top:250px;right:96px;font-family:Poppins;font-weight:700;font-size:190px;line-height:1;letter-spacing:.02em;direction:ltr', 'PI<b>X</b>ORA') +
+    t('t', 'top:452px;right:100px;font-family:Poppins;font-weight:500;font-size:24px;letter-spacing:.62em;color:rgba(255,255,255,.55);direction:ltr', 'DIGITAL AGENCY') +
+    t('h', 'top:530px;font-size:76px', 'علامتك. حضورك الرقمي.<br><span>شريك واحد.</span>') +
+    fig(work('case-brand-identity-systems-identity.webp'), 120, 820, 470, '3/2', -6, 2) +
+    fig(work('case-digital-campaigns-key-visual.webp'), 470, 770, 490, '16/9', 5, 3) +
+    fig(work('case-editorial-publication-design-spread.webp'), 400, 1000, 440, '3/2', -2, 4) +
+    t('num', '', '01 / 09') },
+  2: service(2, 'الهوية والتصميم', 'ابنِ علامة', 'يتعرّف عليها الناس.', 'Build a brand people recognize.',
+    'هويات بصرية وأنظمة تصميم تمنح عملك حضورًا متسقًا<br>واحترافيًا في كل قناة.',
+    fig(work('case-brand-identity-systems-guidelines.webp'), 110, 830, 560, '16/9', -5, 2) +
+    fig(work('case-brand-identity-systems-packaging.webp'), 620, 790, 300, '4/5', 4, 3, '50% 60%')),
+  3: service(3, 'المواقع الإلكترونية', 'ابنِ تجربة رقمية', 'تؤدي عملها.', 'Build a digital experience that works.',
+    'من النطاق والاستضافة إلى التصميم والتطوير والإطلاق —<br>نبني مواقع جاهزة للاستخدام التجاري الفعلي.',
+    fig(site('al-mada-website.webp'), 190, 830, 700, '16/9', -2, 2)),
+  4: service(4, 'إدارة وسائل التواصل', 'حضور مستمر', 'ومتّصل بجمهورك.', 'Stay active, consistent and connected.',
+    'استراتيجية ومحتوى وتصميم ونشر وتقارير شهرية —<br>تُدار كعملية واحدة.',
+    fig(work('case-digital-campaigns-feed.webp'), 110, 820, 560, '16/9', -4, 2) +
+    fig(work('case-brand-identity-systems-social.webp'), 640, 780, 290, '4/5', 5, 3)),
+  5: service(5, 'التسويق الرقمي والإعلانات', 'اصل إلى الجمهور الصحيح.', 'في اللحظة الصحيحة.', 'Reach the right people. At the right moment.',
+    'استراتيجية الحملات والجمهور والمواد الإعلانية والتحسين<br>والتقارير الشهرية — خدمة مستمرة، لا منشورات مموّلة.',
+    fig(work('case-digital-campaigns-key-visual.webp'), 130, 840, 600, '16/9', 4, 2) +
+    fig(work('case-digital-campaigns-stories.webp'), 680, 790, 250, '4/5', -5, 3), 72),
+  6: { gy: '70%', html:
+    t('eyebrow', 'top:250px', 'دراسة حالة · المدى للسفر والسياحة') +
+    t('h', 'top:316px', 'هوية واحدة،<br><span>أربع واجهات.</span>') +
+    t('en', 'top:540px', 'One brand, four surfaces.') +
+    [['al-mada-identity-tile.webp', 'الهوية'], ['al-mada-website-tile.webp', 'الموقع'],
+     ['al-mada-campaign-tile.webp', 'الحملة'], ['al-mada-profile-tile.webp', 'الملف التعريفي']].map(([f, l], i) => {
+      const x = i % 2 ? 96 : 552, y = 620 + Math.floor(i / 2) * 296;
+      return fig(site(f), x, y, 432, '16/10', 0, 1) + `<span class="badge" style="left:${x + 18}px;top:${y + 190}px;font-size:22px">${l}</span>`;
+    }).join('') + frame(6) },
+  7: { gy: '60%', html:
+    t('eyebrow', 'top:250px', 'كيف نعمل') +
+    t('h', 'top:310px;font-size:76px', 'ست مراحل،<br><span>فريق واحد.</span>') +
+    [['الاستكشاف', 'DISCOVER', 'فهم العمل وجمهوره قبل تصميم أي شيء.'], ['التخطيط', 'PLAN', 'النطاق والباقة والإضافات — متّفق عليها كتابةً.'],
+     ['الإنشاء', 'CREATE', 'الهوية والتصميم، تراهما وهما يتشكّلان.'], ['التنفيذ', 'BUILD', 'الموقع والقوالب والحملة — على أرض الواقع.'],
+     ['الإطلاق', 'LAUNCH', 'إطلاق واختبار، وتسليم كل ما تحتاجه.'], ['النمو', 'GROW', 'المحتوى والتواصل والإعلانات، إن أردت أن نستمر معك.']]
+      .map(([ar, en, d], i) => { const y = 548 + i * 108;
+        return `<i class="rule" style="top:${y - 14}px"></i>` + t('row-n', `top:${y}px;font-size:36px`, `0${i + 1}`) + t('row-t', `top:${y - 8}px;font-size:36px`, ar) +
+          t('row-d', `top:${y + 44}px;font-size:23px`, d) + t('row-en', `top:${y + 8}px;left:180px;right:auto;font-size:16px`, en); }).join('') +
+    frame(7) },
+  8: { gy: '62%', html:
+    t('eyebrow', 'top:250px', 'ما نؤمن به') +
+    t('h', 'top:310px;font-size:76px', 'ثلاثة أشياء<br><span>لا نتنازل عنها.</span>') +
+    [['فريق واحد وخيط واحد', 'One team, one thread', 'الهوية والموقع والمحتوى والإعلانات تُصنع معًا،<br>فتبدو كل واجهة وتتحدث كأنها العمل نفسه.'],
+     ['لغتان، كلتاهما أولًا', 'Two languages, both first', 'العربية والإنجليزية تُكتب كلٌّ منهما وتُصمَّم على أصولها —<br>لا تُضاف إحداهما ترجمةً في النهاية.'],
+     ['لا نعد بما لا نثبته', 'Nothing we cannot show', 'لا ننشر نتائج لا نستطيع إثباتها.<br>نعرض ما صنعناه، كما صنعناه.']]
+      .map(([ar, en, d], i) => { const y = 580 + i * 196;
+        return `<i class="rule" style="top:${y - 24}px"></i>` + t('row-n', `top:${y}px`, `0${i + 1}`) + t('row-t', `top:${y - 10}px`, ar) +
+          t('row-en', `top:${y + 64}px`, en) + t('row-d', `top:${y + 100}px;line-height:1.5`, d); }).join('') +
+    frame(8) },
+  9: { gy: '50%', html:
+    t('eyebrow', 'top:250px', 'لنبدأ') +
+    t('h', 'top:330px;font-size:104px;line-height:1.18', 'عندك مشروع؟<br><span>نبدأ من محادثة.</span>') +
+    t('en', 'top:610px;font-size:30px', 'Have a project? It starts with a conversation.') +
+    t('services', 'top:700px;right:96px;font-size:30px', SERVICES.join('<i></i>')) +
+    t('lead', 'top:790px', 'أخبرنا عن عملك وما تريد الوصول إليه،<br>ونقترح عليك الطريق — بلا التزام.') +
+    `<span class="badge" style="right:96px;top:1010px;font-size:34px;padding:.55em 1.3em">راسلنا — الرابط في البايو</span>` +
+    frame(9) },
+};
+const post = POSTS[p];
+document.documentElement.style.setProperty('--gy', post.gy || '72%');
+document.body.innerHTML = `<div class="glow"></div><div class="grid"></div>${post.html}`;
+</script>
+</body></html>
