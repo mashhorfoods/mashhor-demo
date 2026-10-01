@@ -3,10 +3,14 @@
    rendered at each platform's size by social.mjs (?k=<kind>). Brand as on the
    identity board (board.html): PIXORA with the yellow X, Cairo + Poppins,
    #f4d13f on near-black, real work shown like prints on a table. */
-@font-face{font-family:Cairo;src:url(../../source/assets/fonts/cairo-arabic-var.woff2) format('woff2');font-weight:200 1000}
-@font-face{font-family:Poppins;src:url(../../source/assets/fonts/poppins-latin-500.woff2) format('woff2');font-weight:500}
-@font-face{font-family:Poppins;src:url(../../source/assets/fonts/poppins-latin-600.woff2) format('woff2');font-weight:600}
-@font-face{font-family:Poppins;src:url(../../source/assets/fonts/poppins-latin-700.woff2) format('woff2');font-weight:700}
+/* Static weights (fonts/, made from the site's own files): a variable font
+   would reach the PDFs as outlines, not as text that can be edited. */
+@font-face{font-family:Cairo;src:url(fonts/Cairo-Medium.ttf);font-weight:500}
+@font-face{font-family:Cairo;src:url(fonts/Cairo-Bold.ttf);font-weight:700}
+@font-face{font-family:Cairo;src:url(fonts/Cairo-ExtraBold.ttf);font-weight:800}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-Medium.ttf);font-weight:500}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-SemiBold.ttf);font-weight:600}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-Bold.ttf);font-weight:700}
 :root{--y:#f4d13f;--ink:#141414}
 *{box-sizing:border-box;margin:0}
 html,body{width:var(--w);height:var(--h);overflow:hidden}
@@ -81,7 +85,6 @@ const PROMISE = 'علامتك. حضورك الرقمي.<br><span>شريك واح
 const PROMISE_LINE = 'علامتك. حضورك الرقمي. <span>شريك واحد.</span>';
 const EN = 'Your brand. Your digital presence. One partner.';
 const CHIPS = ['الهوية والتصميم', 'المواقع', 'السوشال ميديا', 'الإعلانات'];
-const URL = 'zaokalyamamah<b>.online</b>';
 if (k.startsWith('profile')) {
   document.body.className = 'profile' + (k === 'profile-yellow' ? ' yellow' : '');
   document.body.innerHTML = `<svg class="guides" viewBox="0 0 1080 1080"><circle cx="540" cy="540" r="330"/><line x1="0" y1="540" x2="1080" y2="540"/><line x1="540" y1="0" x2="540" y2="1080"/></svg><span class="x">X</span>`;
@@ -105,8 +108,7 @@ if (k.startsWith('profile')) {
     <div class="prints">${prints}<span class="badge" style="--bx:${o.bx * o.pw}px;--by:${(o.band ? (h - H) / 2 : 0) + o.by * H}px">أعمال حقيقية من فريقنا</span></div>
     <div class="text"><div><div class="word">PI<b>X</b>ORA</div><div class="sub">DIGITAL AGENCY</div></div>
       <p class="promise">${PROMISE}</p><p class="en">${EN}</p>
-      <p class="services">${CHIPS.join('<i></i>')}</p>
-      <p class="url">${URL}</p></div>`;
+      <p class="services">${CHIPS.join('<i></i>')}</p></div>`;
 }
 </script>
 </body></html>
