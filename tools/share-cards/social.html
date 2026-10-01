@@ -1,0 +1,112 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><style>
+/* Pixora's social accounts: the profile picture and the covers, one design,
+   rendered at each platform's size by social.mjs (?k=<kind>). Brand as on the
+   identity board (board.html): PIXORA with the yellow X, Cairo + Poppins,
+   #f4d13f on near-black, real work shown like prints on a table. */
+@font-face{font-family:Cairo;src:url(../../source/assets/fonts/cairo-arabic-var.woff2) format('woff2');font-weight:200 1000}
+@font-face{font-family:Poppins;src:url(../../source/assets/fonts/poppins-latin-500.woff2) format('woff2');font-weight:500}
+@font-face{font-family:Poppins;src:url(../../source/assets/fonts/poppins-latin-600.woff2) format('woff2');font-weight:600}
+@font-face{font-family:Poppins;src:url(../../source/assets/fonts/poppins-latin-700.woff2) format('woff2');font-weight:700}
+:root{--y:#f4d13f;--ink:#141414}
+*{box-sizing:border-box;margin:0}
+html,body{width:var(--w);height:var(--h);overflow:hidden}
+body{background:#141414;color:#fff;font-family:Cairo,Poppins,sans-serif;position:relative}
+.lat{font-family:Poppins;direction:ltr}
+
+/* ---- Profile picture: the X, alone, centred for a circle crop ---------- */
+.profile{display:grid;place-items:center;background:radial-gradient(circle at 50% 46%,#262626,#141414 68%)}
+.profile .guides{position:absolute;inset:0;width:100%;height:100%}
+.profile .guides *{fill:none;stroke:rgba(244,209,63,.2);stroke-width:2;stroke-dasharray:6 10}
+.profile .x{position:relative;font-family:Poppins;font-weight:700;font-size:640px;line-height:1;color:var(--y);transform:translateY(2px)}
+.profile.yellow{background:radial-gradient(circle at 50% 46%,#f8e07a,#f4d13f 70%)}
+.profile.yellow .guides *{stroke:rgba(20,20,20,.18)}
+.profile.yellow .x{color:var(--ink)}
+
+/* ---- Covers ------------------------------------------------------------- */
+.cover{background:#141414}
+.glow{position:absolute;inset:0;background:radial-gradient(calc(var(--h)*1.3) calc(var(--h)*1.05) at var(--gx,30%) 50%,rgba(244,209,63,.14),transparent 70%)}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:calc(var(--h)/6) calc(var(--h)/6);mask-image:radial-gradient(closest-side at var(--gx,30%) 50%,#000,transparent)}
+.text{position:absolute;width:var(--tw,auto);inset-inline-end:var(--te,auto);inset-inline-start:var(--ts);top:50%;transform:translateY(calc(-50% + var(--ty,0px)));display:flex;flex-direction:column;gap:var(--gap)}
+.word{font-family:Poppins;font-weight:700;font-size:var(--word);line-height:.9;letter-spacing:.02em;direction:ltr;text-align:right}
+.word b{color:var(--y)}
+.sub{font-family:Poppins;font-weight:500;font-size:calc(var(--word)*.13);letter-spacing:.5em;color:rgba(255,255,255,.55);direction:ltr;text-align:right;margin-top:calc(var(--word)*-.06);margin-right:-.5em}
+.promise{font-weight:800;font-size:var(--promise);line-height:1.25}
+.promise span{color:var(--y)}
+.en{font-family:Poppins;font-weight:500;font-size:calc(var(--promise)*.42);color:rgba(255,255,255,.6);direction:ltr;text-align:right;margin-top:calc(var(--gap)*-.55)}
+.chips{display:flex;flex-wrap:wrap;gap:calc(var(--promise)*.24)}
+.chips span{border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:.32em .95em;font-size:calc(var(--promise)*.4);font-weight:700;color:rgba(255,255,255,.88);display:inline-flex;align-items:center;gap:.55em}
+.chips span::before{content:"";width:.42em;height:.42em;border-radius:50%;background:var(--y)}
+.services{display:flex;align-items:center;gap:.6em;font-size:calc(var(--promise)*var(--sv,.46));font-weight:700;color:rgba(255,255,255,.88);white-space:nowrap}
+.services i{width:.36em;height:.36em;border-radius:50%;background:var(--y)}
+.url{font-family:Poppins;font-weight:600;font-size:calc(var(--promise)*.38);letter-spacing:.04em;color:rgba(255,255,255,.5);direction:ltr;text-align:right}
+.url b{color:var(--y);font-weight:600}
+
+.prints{position:absolute;inset-block:0;left:var(--px);width:var(--pw)}
+.print{position:absolute;left:var(--x);top:var(--y0);width:var(--pw0);aspect-ratio:var(--ar,3/2);rotate:var(--r);z-index:var(--z,1);border-radius:calc(var(--h)*.022);overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 calc(var(--h)*.05) calc(var(--h)*.1) calc(var(--h)*-.035) rgba(0,0,0,.9)}
+.print img{display:block;width:100%;height:100%;object-fit:cover;object-position:var(--pos,center)}
+.badge{position:absolute;z-index:9;left:var(--bx);top:var(--by);display:inline-flex;align-items:center;gap:.6em;background:rgba(20,20,20,.92);border:1px solid rgba(244,209,63,.4);border-radius:999px;padding:.5em 1.1em;font-size:var(--badge);font-weight:700}
+.badge::before{content:"";width:.5em;height:.5em;border-radius:50%;background:#7bc47f}
+
+/* LinkedIn's strip (1128×191) is too thin for prints: one line. */
+.strip .text{flex-direction:row;align-items:center;gap:calc(var(--h)*.2)}
+.strip .rule{width:2px;align-self:stretch;background:rgba(244,209,63,.45)}
+</style></head><body>
+<script>
+const k = new URLSearchParams(location.search).get('k') || 'facebook';
+const work = (f) => `../../overlay/assets/${f}`;
+const PRINTS = [
+  // file, aspect, x, y, width (as fractions of the print area), rotation, z, focus
+  ['case-brand-identity-systems-identity.webp', '3/2', .02, .14, .56, '-5deg', 2],
+  ['case-digital-campaigns-key-visual.webp', '16/9', .40, .06, .58, '4deg', 3],
+  ['case-brand-identity-systems-packaging.webp', '4/5', .26, .44, .30, '-2deg', 4, '50% 60%'],
+  ['case-editorial-publication-design-spread.webp', '3/2', .52, .52, .48, '6deg', 1],
+];
+const SIZES = {
+  // w, h, layout
+  'profile': [1080, 1080], 'profile-yellow': [1080, 1080],
+  // Facebook: 1640×624 upload; phones crop the sides, so everything sits
+  // inside the middle ~1200.
+  'facebook': [1640, 624, { sv: .38, ts: 290, tw: 560, word: 112, promise: 50, gap: 20, px: 285, pw: 520, gx: '33%', badge: 18, bx: '.03', by: '.82' }],
+  // X: 1500×500; the profile picture covers the lower left, so the prints
+  // start right of it and the text keeps clear of the top and bottom edge.
+  'x': [1500, 500, { ts: 100, tw: 520, word: 88, promise: 40, gap: 14, px: 360, pw: 480, gx: '36%', badge: 15, bx: '.04', by: '.82' }],
+  // YouTube: 2560×1440, but only the middle 1546×423 shows everywhere.
+  'youtube': [2560, 1440, { ts: 540, tw: 560, word: 92, promise: 40, gap: 12, px: 520, pw: 520, gx: '38%', badge: 15, bx: '.04', by: '.80', band: [1546, 423] }],
+  'linkedin': [1128, 191],
+};
+const [w, h, o] = SIZES[k];
+document.documentElement.style.setProperty('--w', w + 'px');
+document.documentElement.style.setProperty('--h', h + 'px');
+const PROMISE = 'علامتك. حضورك الرقمي.<br><span>شريك واحد.</span>';
+const PROMISE_LINE = 'علامتك. حضورك الرقمي. <span>شريك واحد.</span>';
+const EN = 'Your brand. Your digital presence. One partner.';
+const CHIPS = ['الهوية والتصميم', 'المواقع', 'السوشال ميديا', 'الإعلانات'];
+const URL = 'zaokalyamamah<b>.online</b>';
+if (k.startsWith('profile')) {
+  document.body.className = 'profile' + (k === 'profile-yellow' ? ' yellow' : '');
+  document.body.innerHTML = `<svg class="guides" viewBox="0 0 1080 1080"><circle cx="540" cy="540" r="330"/><line x1="0" y1="540" x2="1080" y2="540"/><line x1="540" y1="0" x2="540" y2="1080"/></svg><span class="x">X</span>`;
+} else if (k === 'linkedin') {
+  document.body.className = 'cover strip';
+  const s = document.documentElement.style;
+  s.setProperty('--ts', '96px'); s.setProperty('--word', '58px'); s.setProperty('--promise', '30px'); s.setProperty('--gx', '75%');
+  document.body.innerHTML = `<div class="glow"></div><div class="grid"></div>
+    <div class="text"><div><div class="word">PI<b>X</b>ORA</div><div class="sub">DIGITAL AGENCY</div></div><i class="rule"></i>
+    <div><p class="promise">${PROMISE_LINE}</p><p class="en" style="margin-top:2px">${EN}</p></div></div>`;
+} else {
+  document.body.className = 'cover';
+  const s = document.documentElement.style;
+  // On YouTube the design lives in the safe band; the rest is background.
+  const H = o.band ? o.band[1] : h;
+  if (o.sv) s.setProperty('--sv', o.sv);
+  for (const [key, v] of Object.entries({ tw: o.tw + 'px', ts: o.ts + 'px', word: o.word + 'px', promise: o.promise + 'px', gap: o.gap + 'px', px: o.px + 'px', pw: o.pw + 'px', gx: o.gx, badge: o.badge + 'px' })) s.setProperty('--' + key, v);
+  const prints = PRINTS.map(([f, ar, x, y, pw, r, z, pos]) =>
+    `<figure class="print" style="--ar:${ar};--x:${x * o.pw}px;--y0:${(o.band ? (h - H) / 2 : 0) + y * H}px;--pw0:${pw * o.pw}px;--r:${r};--z:${z};${pos ? `--pos:${pos}` : ''}"><img src="${work(f)}"></figure>`).join('');
+  document.body.innerHTML = `<div class="glow"></div><div class="grid"></div>
+    <div class="prints">${prints}<span class="badge" style="--bx:${o.bx * o.pw}px;--by:${(o.band ? (h - H) / 2 : 0) + o.by * H}px">أعمال حقيقية من فريقنا</span></div>
+    <div class="text"><div><div class="word">PI<b>X</b>ORA</div><div class="sub">DIGITAL AGENCY</div></div>
+      <p class="promise">${PROMISE}</p><p class="en">${EN}</p>
+      <p class="services">${CHIPS.join('<i></i>')}</p>
+      <p class="url">${URL}</p></div>`;
+}
+</script>
+</body></html>
