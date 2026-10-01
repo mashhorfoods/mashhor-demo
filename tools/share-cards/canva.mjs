@@ -69,7 +69,11 @@ for (const [k, [width, height]] of Object.entries(KINDS)) {
   await page.screenshot({ path: path.join(out, `${k}-background.png`) });
 
   const esc = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-  const textEl = (t) => `    <p style="position:absolute;left:${t.x - 2}px;top:${t.y}px;width:${t.w + 4}px;margin:0;white-space:nowrap;font-family:'${t.font}';font-size:${t.size}px;font-weight:${t.weight};color:${t.color};letter-spacing:${t.spacing};line-height:${t.line};direction:${t.dir};text-align:${t.align === 'start' ? (t.dir === 'rtl' ? 'right' : 'left') : t.align}">${t.html.replace(/<b>|<span>/g, '<span style="color:#f4d13f">').replace(/<\/b>/g, '</span>')}</p>`;
+  // Canva keeps a line at least as tall as its type, so a tight line (the
+  // wordmark's .9) would drop. Single lines get a standard 1.2, placed so the
+  // line's centre stays where it was.
+  const norm = (t) => (t.html.includes('<br>') ? t : { ...t, y: Math.round((t.y + t.h / 2 - t.size * 0.6) * 10) / 10, line: `${Math.round(t.size * 1.2 * 10) / 10}px` });
+  const textEl = (t0) => { const t = norm(t0); return `    <p style="position:absolute;left:${t.x - 2}px;top:${t.y}px;width:${t.w + 4}px;margin:0;white-space:nowrap;font-family:'${t.font}';font-size:${t.size}px;font-weight:${t.weight};color:${t.color};letter-spacing:${t.spacing};line-height:${t.line};direction:${t.dir};text-align:${t.align === 'start' ? (t.dir === 'rtl' ? 'right' : 'left') : t.align}">${t.html.replace(/<b>|<span>/g, '<span style="color:#f4d13f">').replace(/<\/b>/g, '</span>')}</p>`; };
   const imgEl = (p) => `    <img src="${RAW}/${p.src.replace(/^\.\.\/\.\.\//, '')}" alt="" style="position:absolute;left:${p.x}px;top:${p.y}px;width:${p.w}px;height:${p.h}px;object-fit:cover;object-position:${p.pos};border-radius:${p.radius};transform:rotate(${p.rotate});z-index:${p.z === 'auto' ? 1 : p.z}">`;
   const html = `<!doctype html>
 <html lang="ar" dir="rtl">
