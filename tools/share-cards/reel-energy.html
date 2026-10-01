@@ -1,0 +1,206 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><style>
+/* PIXORA — the brand in 15 seconds (1080×1920), cut to a 120 BPM beat (a cut
+   every half second). The X is the motif: it slams in, we dive through it,
+   it ends the film. render(t) draws any instant from scratch, so reel.mjs can
+   step through frames (and sub-frames, for motion blur) and the film is the
+   same every time. CUES (below) is the timeline the soundtrack is composed
+   to (tools/share-cards/soundtrack.py), so every hit lands on its cut.
+   Text sits between y 280 and 1480, clear of the platforms' own interface. */
+@font-face{font-family:Cairo;src:url(fonts/Cairo-Bold.ttf);font-weight:700}
+@font-face{font-family:Cairo;src:url(fonts/Cairo-ExtraBold.ttf);font-weight:800}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-Medium.ttf);font-weight:500}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-SemiBold.ttf);font-weight:600}
+@font-face{font-family:Poppins;src:url(fonts/Poppins-Bold.ttf);font-weight:700}
+:root{--y:#f4d13f;--k:#141414}
+*{box-sizing:border-box;margin:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--k)}
+body{color:#fff;font-family:Cairo,Poppins,sans-serif}
+#cam{position:absolute;inset:0;will-change:transform}
+.layer{position:absolute;inset:0;display:none;overflow:hidden}
+.fill-y{background:var(--y)}.fill-k{background:var(--k)}
+.center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.06) 2px,transparent 2px),linear-gradient(90deg,rgba(255,255,255,.06) 2px,transparent 2px);background-size:120px 120px;background-position:center}
+.x{font-family:Poppins;font-weight:700;color:var(--y);line-height:1;display:block}
+.big{font-weight:800;line-height:1;white-space:nowrap;text-align:center}
+.label{font-family:Poppins;font-weight:600;letter-spacing:.42em;direction:ltr;white-space:nowrap}
+.card{position:absolute;left:50%;top:50%;width:940px;height:700px;border-radius:30px;overflow:hidden;box-shadow:0 70px 120px -40px rgba(0,0,0,.85)}
+.card img{width:100%;height:100%;object-fit:cover;display:block}
+.ghost{position:absolute;left:50%;font-family:Poppins;font-weight:700;font-size:250px;letter-spacing:.02em;line-height:1;white-space:nowrap;direction:ltr;color:transparent;-webkit-text-stroke:3px currentColor}
+.counter{position:absolute;top:300px;left:0;right:0;text-align:center;font-family:Poppins;font-weight:700;font-size:40px;letter-spacing:.3em;direction:ltr}
+.band{position:absolute;left:0;right:0;height:300px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:170px;line-height:1}
+.word{font-family:Poppins;font-weight:700;font-size:186px;letter-spacing:.02em;line-height:1;direction:ltr;display:flex;white-space:nowrap}
+.word span{display:inline-block}
+.pill{display:inline-flex;align-items:center;gap:24px;background:var(--k);color:var(--y);border-radius:999px;padding:34px 60px;font-size:50px;font-weight:700;white-space:nowrap}
+.pill::before{content:"";width:22px;height:22px;border-radius:50%;background:var(--y)}
+.flash{position:absolute;inset:0;background:#fff;pointer-events:none;opacity:0}
+</style></head><body>
+<div id="cam">
+  <!-- 1. the X slams in; the grid draws out; we dive through it -->
+  <section class="layer fill-k" id="s1"><div class="grid" id="s1grid"></div><span class="x center" id="s1x" style="font-size:520px">X</span></section>
+  <!-- 2. the services, one word per beat, on yellow -->
+  <section class="layer fill-y" id="s2"><p class="big center" id="s2w" style="color:var(--k);font-size:250px"></p><p class="label center" id="s2l" style="color:var(--k);font-size:40px;top:62%"></p></section>
+  <!-- 3. the promise -->
+  <section class="layer fill-k" id="s3"><p class="big center" id="s3a" style="font-size:300px;top:40%">شريك</p><p class="big center" id="s3b" style="font-size:330px;top:60%;color:var(--y)">واحد.</p></section>
+  <!-- 4. the work, one piece per beat -->
+  <section class="layer" id="s4"><p class="ghost" id="s4g"></p><p class="counter" id="s4c"></p><div id="s4cards"></div><p class="label center" id="s4l" style="font-size:34px;top:1420px"></p></section>
+  <!-- 5. what we do, band by band -->
+  <section class="layer fill-k" id="s5"></section>
+  <!-- 6. the wordmark; we dive into its X -->
+  <section class="layer fill-k" id="s6"><div class="word center" id="s6w"></div><p class="label center" id="s6s" style="font-size:34px;top:57%;color:rgba(255,255,255,.55)">DIGITAL AGENCY</p></section>
+  <!-- 7. the invitation -->
+  <section class="layer fill-y" id="s7"><p class="big center" id="s7a" style="color:var(--k);font-size:150px;top:38%">عندك مشروع؟</p><p class="big center" id="s7b" style="color:var(--k);font-size:96px;top:50%">نبدأ من محادثة.</p><div class="center" id="s7p" style="top:64%"><span class="pill">راسلنا — الرابط في البايو</span></div><p class="center" id="s7w" style="top:1440px;font-family:Poppins;font-weight:700;font-size:64px;direction:ltr;color:var(--k);letter-spacing:.02em">PIXORA</p></section>
+</div>
+<div class="flash" id="flash"></div>
+<script>
+const BEAT = 0.5;
+window.DURATION = 15;
+// The timeline the music follows: hits, beats and sweeps, in seconds.
+window.CUES = {
+  bpm: 120, duration: 15,
+  impacts: [0.25, 4.5, 5.0, 12.75, 13.5],
+  whooshes: [[1.1, 0.45], [5.75, 0.3], [9.85, 0.2], [13.05, 0.45]],
+  ticks: [6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5],
+  riser: [10, 2.0],
+  groove: [2, 12.5],
+  hits: [1.5, 1.75],                                     // the cut to yellow, and a pickup
+  snaps: [12, 12.09, 12.18, 12.27, 12.36, 12.45],        // PIXORA, letter by letter
+};
+
+// ---- easing and helpers ------------------------------------------------
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const p = (t, a, d) => clamp((t - a) / d);
+const expoOut = (x) => (x >= 1 ? 1 : 1 - Math.pow(2, -10 * x));
+const expoIn = (x) => (x <= 0 ? 0 : Math.pow(2, 10 * x - 10));
+const backOut = (x) => { const c = 1.9; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const lerp = (a, b, x) => a + (b - a) * x;
+const $ = (id) => document.getElementById(id);
+const show = (id, on) => { $(id).style.display = on ? 'block' : 'none'; };
+// Camera shake after each impact: a few decaying, deterministic wobbles.
+const shake = (t) => {
+  let x = 0, y = 0, r = 0;
+  for (const i of CUES.impacts) {
+    const d = t - i;
+    if (d < 0 || d > 0.45) continue;
+    const a = Math.exp(-d * 11);
+    x += a * 18 * Math.sin(d * 97); y += a * 15 * Math.sin(d * 131 + 1); r += a * 0.9 * Math.sin(d * 83 + 2);
+  }
+  return `translate(${x}px,${y}px) rotate(${r}deg)`;
+};
+const flash = (t) => Math.max(0, ...CUES.impacts.map((i) => (t >= i && t < i + 0.07 ? 0.28 * (1 - (t - i) / 0.07) : 0)));
+
+// ---- scene content ------------------------------------------------------
+const SERVICES = [['هوية.', 'IDENTITY'], ['مواقع.', 'WEBSITES'], ['محتوى.', 'CONTENT'], ['سوشال.', 'SOCIAL'], ['إعلانات.', 'ADS']];
+const work = (f) => `../../overlay/assets/${f}.webp`, site = (f) => `../../source/assets/${f}.webp`;
+const WORK = [
+  [work('case-brand-identity-systems-identity'), 'IDENTITY', 'الهوية'],
+  [work('case-brand-identity-systems-packaging'), 'PACKAGING', 'التغليف'],
+  [site('al-mada-website'), 'WEB', 'المواقع'],
+  [work('case-digital-campaigns-key-visual'), 'CAMPAIGN', 'الحملات'],
+  [work('case-editorial-publication-design-spread'), 'EDITORIAL', 'التقارير'],
+  [work('case-digital-campaigns-stories'), 'SOCIAL', 'السوشال'],
+  [work('case-information-design-infographic'), 'DATA', 'الإنفوجرافيك'],
+  [work('case-brand-identity-systems-stationery'), 'PRINT', 'المطبوعات'],
+];
+$('s4cards').innerHTML = WORK.map(([s], i) => `<figure class="card" id="card${i}" style="display:none"><img src="${s}"></figure>`).join('');
+const VERBS = [['نصمّم.', 'var(--k)', 'var(--y)'], ['نبني.', '#fff', '#262626'], ['نطلق.', 'var(--k)', '#fff'], ['ننمّي.', 'var(--k)', 'var(--y)']];
+$('s5').innerHTML = VERBS.map(([w, fg, bg], i) => `<div class="band" id="v${i}" style="top:${280 + i * 300}px;color:${fg};background:${bg}">${w}</div>`).join('');
+$('s6w').innerHTML = [...'PIXORA'].map((c, i) => `<span id="L${i}" style="${c === 'X' ? 'color:var(--y)' : ''}">${c}</span>`).join('');
+
+// ---- the film ------------------------------------------------------------
+window.render = (t) => {
+  $('cam').style.transform = shake(t);
+  $('flash').style.opacity = flash(t);
+
+  // 1 · 0–1.5s: X slams in, grid draws out, then we dive through the X.
+  show('s1', t < 1.5);
+  if (t < 1.5) {
+    const slam = expoOut(p(t, 0.05, 0.25));
+    const dive = expoIn(p(t, 1.05, 0.45));
+    $('s1x').style.transform = `translate(-50%,-50%) scale(${lerp(7, 1, slam) * lerp(1, 60, dive)}) rotate(${lerp(-30, 0, slam) + 90 * dive}deg)`;
+    $('s1x').style.opacity = slam;
+    const g = expoOut(p(t, 0.3, 0.7));
+    $('s1grid').style.clipPath = `circle(${g * 75}% at 50% 50%)`;
+    $('s1grid').style.opacity = 1 - dive;
+  }
+  // 2 · 1.5–4.5s: on yellow, one service per beat (from 2.0s).
+  show('s2', t >= 1.5 && t < 4.5);
+  if (t >= 1.5 && t < 4.5) {
+    const i = clamp(Math.floor((t - 2) / BEAT), -1, 4);
+    if (i < 0) { $('s2w').textContent = ''; $('s2l').textContent = ''; }
+    else {
+      const k = expoOut(p(t, 2 + i * BEAT, 0.22));
+      $('s2w').textContent = SERVICES[i][0];
+      $('s2l').textContent = SERVICES[i][1];
+      $('s2w').style.transform = `translate(-50%,-50%) scale(${lerp(1.45, 1, k)}) rotate(${(i % 2 ? 3 : -3) * (1 - k * 0.6)}deg)`;
+      $('s2l').style.transform = `translate(-50%,-50%) translateY(${lerp(40, 0, k)}px)`;
+      $('s2l').style.opacity = k;
+    }
+  }
+  // 3 · 4.5–6s: the promise.
+  show('s3', t >= 4.5 && t < 6);
+  if (t >= 4.5 && t < 6) {
+    const a = expoOut(p(t, 4.5, 0.3)), b = backOut(p(t, 5.0, 0.4));
+    const out = expoIn(p(t, 5.75, 0.25));
+    $('s3a').style.transform = `translate(-50%,-50%) scale(${lerp(2.2, 1, a)}) translateX(${out * 1200}px)`;
+    $('s3a').style.opacity = a;
+    $('s3b').style.transform = `translate(-50%,-50%) scale(${b}) translateX(${-out * 1200}px)`;
+  }
+  // 4 · 6–10s: the work, one piece per beat, black and yellow in turn.
+  show('s4', t >= 6 && t < 10);
+  if (t >= 6 && t < 10) {
+    const i = clamp(Math.floor((t - 6) / BEAT), 0, 7);
+    const k = p(t, 6 + i * BEAT, BEAT);
+    const inn = expoOut(clamp(k / 0.4));
+    const dir = i % 2 ? -1 : 1;
+    const yellow = i % 2 === 1;
+    $('s4').className = `layer ${yellow ? 'fill-y' : 'fill-k'}`;
+    WORK.forEach((_, j) => { $(`card${j}`).style.display = j === i ? 'block' : 'none'; });
+    $(`card${i}`).style.transform = `translate(-50%,-50%) translateX(${dir * lerp(900, 0, inn)}px) rotate(${dir * lerp(12, 2, inn)}deg) scale(${lerp(1.15, 1, expoOut(k))})`;
+    $('s4g').textContent = WORK[i][1];
+    $('s4g').style.color = yellow ? 'rgba(20,20,20,.22)' : 'rgba(244,209,63,.35)';
+    $('s4g').style.top = `${560 + (i % 2) * 520}px`;
+    $('s4g').style.transform = `translate(-50%,-50%) translateX(${dir * -lerp(140, 0, expoOut(k))}px)`;
+    $('s4c').textContent = `0${i + 1} / 08`;
+    $('s4c').style.color = yellow ? 'var(--k)' : 'var(--y)';
+    $('s4l').textContent = WORK[i][2];
+    $('s4l').style.cssText = `font-size:44px;top:1420px;font-family:Cairo;letter-spacing:0;font-weight:800;color:${yellow ? 'var(--k)' : '#fff'};transform:translate(-50%,-50%) translateY(${lerp(30, 0, inn)}px);opacity:${inn}`;
+  }
+  // 5 · 10–12s: what we do, a band per beat, from alternate sides.
+  show('s5', t >= 10 && t < 12);
+  if (t >= 10 && t < 12) {
+    VERBS.forEach((_, i) => {
+      const k = expoOut(p(t, 10 + i * BEAT, 0.3));
+      $(`v${i}`).style.transform = `translateX(${(i % 2 ? -1 : 1) * lerp(1100, 0, k)}px)`;
+    });
+  }
+  // 6 · 12–13.5s: PIXORA snaps together; on the beat we dive into its X.
+  show('s6', t >= 12 && t < 13.5);
+  if (t >= 12 && t < 13.5) {
+    const dive = expoIn(p(t, 13.05, 0.45));
+    [...'PIXORA'].forEach((c, i) => {
+      const k = expoOut(p(t, 12 + i * 0.09, 0.3));
+      $(`L${i}`).style.transform = `translateY(${lerp(i % 2 ? -260 : 260, 0, k)}px)`;
+      $(`L${i}`).style.opacity = k;
+    });
+    const sub = expoOut(p(t, 12.6, 0.3));
+    $('s6s').style.opacity = sub * (1 - dive);
+    // The X is the third letter: zoom on its centre.
+    const w = $('s6w'), x = $('L2');
+    const ox = x.offsetLeft + x.offsetWidth / 2, oy = x.offsetTop + x.offsetHeight * 0.55;
+    w.style.transformOrigin = `${ox}px ${oy}px`;
+    w.style.transform = `translate(-50%,-50%) scale(${lerp(1, 45, dive)})`;
+  }
+  // 7 · 13.5–15s: the invitation.
+  show('s7', t >= 13.5);
+  if (t >= 13.5) {
+    const a = expoOut(p(t, 13.5, 0.35)), b = expoOut(p(t, 13.75, 0.35)), c = backOut(p(t, 14.0, 0.45)), d = expoOut(p(t, 14.3, 0.4));
+    $('s7a').style.transform = `translate(-50%,-50%) scale(${lerp(1.6, 1, a)})`; $('s7a').style.opacity = a;
+    $('s7b').style.transform = `translate(-50%,-50%) translateY(${lerp(60, 0, b)}px)`; $('s7b').style.opacity = b;
+    $('s7p').style.transform = `translate(-50%,-50%) scale(${c})`;
+    $('s7w').style.transform = `translate(-50%,-50%) translateY(${lerp(40, 0, d)}px)`; $('s7w').style.opacity = d;
+  }
+};
+window.seek = (t) => window.render(t);
+window.seek(0);
+</script>
+</body></html>
