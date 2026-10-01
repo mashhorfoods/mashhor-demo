@@ -207,7 +207,7 @@ def closing(study=None):
           <div class="c-quote" data-reveal>
             <div>
               <h2 class="c-quote__title" id="cases-next">{bi("Your project could be the next one here.", "مشروعك قد يكون التالي هنا.")}</h2>
-              <p class="c-quote__body">{bi("Tell the Pixora team what you are building; we reply within two working hours.", "أخبر فريق بيكسورا بما تبنيه؛ نردّ خلال ساعتين في أوقات العمل.")}</p>
+              <p class="c-quote__body">{bi("Tell the Pixora team what you are building; we’ll get back to you as soon as possible.", "أخبر فريق بيكسورا بما تبنيه، وسنتواصل معك في أقرب فرصة ممكنة.")}</p>
             </div>
             <div class="c-svc__actions">
               {actions}

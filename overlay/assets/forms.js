@@ -70,8 +70,8 @@
   'use strict';
 
   const TEXT = {
-    en: { sending: 'Sending…', sent: 'Received — thank you. We reply within two working hours, on WhatsApp if you left a number, otherwise by email.', failed: 'It could not be sent from here, so your email app has the message ready. WhatsApp works too:', general: 'General enquiry' },
-    ar: { sending: 'جارٍ الإرسال…', sent: 'وصلتنا رسالتك، شكرًا لك. نردّ خلال ساعتين في أوقات العمل، على واتساب إن تركت رقمك، وإلا فبالبريد.', failed: 'تعذّر الإرسال من هنا، لذلك جهّزنا الرسالة في تطبيق البريد لديك. ويمكنك أيضًا عبر واتساب:', general: 'استفسار عام' },
+    en: { sending: 'Sending…', sent: 'Received — thank you. We’ll get back to you as soon as possible, on WhatsApp if you left a number, otherwise by email.', failed: 'It could not be sent from here, so your email app has the message ready. WhatsApp works too:', general: 'General enquiry' },
+    ar: { sending: 'جارٍ الإرسال…', sent: 'وصلتنا رسالتك، شكرًا لك. سنتواصل معك في أقرب فرصة ممكنة، على واتساب إن تركت رقمك، وإلا فبالبريد.', failed: 'تعذّر الإرسال من هنا، لذلك جهّزنا الرسالة في تطبيق البريد لديك. ويمكنك أيضًا عبر واتساب:', general: 'استفسار عام' },
   };
   const lang = () => (document.documentElement.lang?.startsWith('ar') ? 'ar' : 'en');
   const track = (event, props) => { try { window.plausible?.(event, { props }); } catch { /* analytics never blocks a message */ } };

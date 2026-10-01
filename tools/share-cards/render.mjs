@@ -27,7 +27,10 @@ const root = path.join(here, '..', '..');
 const out = path.join(root, 'overlay', 'assets');
 const site = (p) => `file://${path.join(root, 'site', p)}`;
 const SERVICES = { branding: 'center', websites: 'center', social: '40% 50%', marketing: 'center', integrated: 'center' };
-const CASES = [...readFileSync(path.join(here, '..', 'cases.py'), 'utf8').matchAll(/"slug": "([^"]+)"/g)].map((m) => m[1]);
+// The studies, in /work's order: tools/cases.py lists them as ("slug", "kinds").
+const CASES = [...readFileSync(path.join(here, '..', 'cases.py'), 'utf8').split('CASES = [')[1].split(']]')[0]
+  .matchAll(/\("([a-z-]+)", "[a-z ]+"\)/g)].map((m) => m[1]);
+if (CASES.length < 2) throw new Error('render: could not read the studies from tools/cases.py');
 const BILLING = { billingOnce: 'مرة واحدة', billingMonthly: 'شهريًا' };
 const browser = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
 const page = await browser.newPage({ viewport: { width: 1200, height: 630 } });

@@ -41,7 +41,7 @@ def chips(items):
 def section():
     studies = [(c["category"][0], c["category"][1]) for c in CASES]
     about = [("One team, one standard", "فريق واحد ومعيار واحد"), ("Arabic &amp; English", "عربي وإنجليزي"),
-             ("A reply within two working hours", "ردّ خلال ساعتين في أوقات العمل")]
+             ("A reply as soon as possible", "ردّ في أقرب فرصة ممكنة")]
     return f'''<section class="l-section c-doors" aria-labelledby="doors-title">
         <div class="l-container">
           <header class="c-doors__head" data-reveal-group>

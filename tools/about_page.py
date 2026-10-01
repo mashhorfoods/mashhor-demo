@@ -203,7 +203,7 @@ def main(cards):
           <div class="c-quote" data-reveal>
             <div>
               <h2 class="c-quote__title" id="about-next">{t("Tell the Pixora team what you are building.", "أخبر فريق بيكسورا بما تبنيه.")}</h2>
-              <p class="c-quote__body">{t("We reply within two working hours, Sunday to Thursday.", "نردّ خلال ساعتين في أوقات العمل، من الأحد إلى الخميس.")}</p>
+              <p class="c-quote__body">{t("We’ll get back to you as soon as possible, Sunday to Thursday.", "سنتواصل معك في أقرب فرصة ممكنة، من الأحد إلى الخميس.")}</p>
             </div>
             <div class="c-svc__actions">
               <a class="c-btn c-btn--primary" href="/#contact" data-cta-link><span data-cta-label>Start Your Project</span></a>

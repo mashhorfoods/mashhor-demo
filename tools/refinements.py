@@ -199,9 +199,9 @@ LANG_FIRST = ("<script>(function(){var d=document.documentElement,l;"
 
 FORM_NOTE = [
     ("formNote: 'Opens your email app with the message ready to send.',",
-     "formNote: 'Sent straight to the Pixora team. We reply within two working hours.',"),
+     "formNote: 'Sent straight to the Pixora team. We’ll get back to you as soon as possible.',"),
     ("formNote: 'يفتح تطبيق البريد لديك والرسالة جاهزة للإرسال.',",
-     "formNote: 'تصل مباشرة إلى فريق بيكسورا، ونردّ خلال ساعتين في أوقات العمل.',"),
+     "formNote: 'تصل مباشرة إلى فريق بيكسورا، وسنتواصل معك في أقرب فرصة ممكنة.',"),
 ]
 CONTACT_EMAIL_END = """<input class="c-field__control" id="contact-email" name="email" type="email"
                   autocomplete="email" required />

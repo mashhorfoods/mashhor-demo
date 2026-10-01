@@ -16,7 +16,8 @@ stays in tools/case_stories.py and tools/cases.py; the panel edits words, not
 the shape of a page.
 
 apply(site) runs first, on the supplied pages as copied: it writes the prices
-and the WhatsApp number wherever the supplied site states them, and the later
+and the WhatsApp number wherever the supplied site states them (and the reply
+line: "as soon as possible", not "within 2 working hours"), and the later
 steps build on those. Unchanged content leaves every page byte for byte as it
 was. Anything missing or malformed stops the build with a message saying
 which file and field, so a bad edit never reaches the site.
@@ -183,6 +184,25 @@ def apply_whatsapp(site):
             path.write_text(new, encoding="utf-8")
 
 
+# ---------------------------------------------------------------------------
+# How soon we reply: the supplied pages promise "within 2 working hours";
+# the site promises to get back as soon as possible instead.
+
+REPLY = [("We reply within 2 working hours", "We’ll get back to you as soon as possible"),
+         ("نردّ خلال ساعتين في أوقات العمل", "سنتواصل معك في أقرب فرصة ممكنة")]
+
+
+def apply_reply(site):
+    for path in sorted(site.rglob("*.html")):
+        text = path.read_text(encoding="utf-8")
+        new = text
+        for old, line in REPLY:
+            new = new.replace(old, line)
+        if new != text:
+            path.write_text(new, encoding="utf-8")
+
+
 def apply(site):
     apply_whatsapp(site)
     apply_prices(site)
+    apply_reply(site)
