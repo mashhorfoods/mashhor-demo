@@ -112,6 +112,20 @@ document.querySelector('.services').outerHTML = SERVICES.map(([name, l1, l2, img
 }).join('');
 // The clock: reel.mjs calls this for each frame.
 window.DURATION = 18;
+// The soundtrack's timeline (music.py, "intro"): the signature on the
+// wordmark (X at 0.75s) and again on the closing one; a hit per line of the
+// promise; a bar of 120 BPM per service from 5.4s, four bars, to the invitation.
+window.CUES = {
+  style: 'intro', bpm: 120, duration: 18,
+  logo: [0.15, 15.3],
+  promise: [[2.8, ['B3', 'D4', 'F#4']], [3.3, ['G3', 'B3', 'D4']], [3.9, ['A3', 'C#4', 'E4', 'A4']]],
+  drop: 5.4, groove: [5.4, 13.4],
+  hits: [5.4],
+  accents: [[1.2, 'chime'], [7.4, 'tick'], [9.4, 'tick'], [11.4, 'tick'], [13.5, 'note'], [14.0, 'note'], [14.7, 'pop']],
+  whooshes: [[2.25, 0.4], [4.9, 0.45], [6.95, 0.4], [8.95, 0.4], [10.95, 0.4], [12.95, 0.4]],
+  risers: [[4.4, 1.0]],
+  outro: 15.9,
+};
 window.seek = (t) => { for (const an of document.getAnimations()) { an.pause(); an.currentTime = t * 1000; } };
 window.seek(0);
 </script>

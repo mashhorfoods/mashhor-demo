@@ -22,6 +22,9 @@ and a style decides how the band plays:
                 shaker, soft kick; warm room reverb. Crafted, light, precise.
     websites    128 BPM, E minor: synthwave/electro; four-on-the-floor,
                 gated snare, octave bass, a sixteenth-note saw arpeggio.
+    intro       120 BPM, D major: the short intro. Pixora's five-note
+                signature on the wordmark; a bar per service on that
+                service film's instrument; all four together at the end.
     social      96 BPM, F major: bouncy pop; swung hats, finger snaps,
                 off-beat pluck chords, sub bass locked to the kick.
     ads         140 BPM half-time, F minor: trap; 808 with glides, rolling
@@ -440,10 +443,107 @@ def ads(c, n):
     return drums, bass, music, fx
 
 
-STYLES = {'branding': branding, 'websites': websites, 'social': social, 'ads': ads}
-CHORDS = {'branding': ['D3', 'F#3', 'A3', 'D4', 'E4'], 'websites': ['E3', 'G3', 'B3', 'D4', 'F#4'],
+MOTIF = ['D5', 'E5', 'F#5', 'A5', 'B5']                       # the sonic logo: P I O R A, rising
+
+
+def logo(at, fx, music, drums, bass, gain=1.0):
+    """Pixora's sonic signature: five quick rising notes (bell over pluck), a
+    breath, then the X — a sub boom under a bright D chord."""
+    for i, nm in enumerate(MOTIF):
+        t = at + i * 0.07
+        place(music, bell(note(nm), 1.0), t, 0.32 * gain)
+        place(music, pluck(note(nm), 0.6, 0.9), t, 0.25 * gain)
+    x = at + 0.6
+    place(fx, revcym(0.45), x - 0.45, 0.35 * gain)
+    place(drums, kick('808'), x, 0.9 * gain)
+    place(bass, sub(note('D2'), 1.4), x, 0.7 * gain)
+    for f in ('D4', 'F#4', 'A4', 'D5'):
+        place(music, synth(note(f), 1.6, 3200, 2.2), x, 0.22 * gain)
+        place(music, bell(note(f) * 2, 1.4), x, 0.08 * gain)
+
+
+def intro(c, n):
+    """One team, four disciplines. The signature; the promise in three hits;
+    then one bar per service, each played on that service film's instrument
+    (marimba, synth arp, plucks and snaps, 808 and bell) over one beat; at the
+    invitation all four together; the signature again to sign off."""
+    beat = 60 / c['bpm']
+    drums, bass, music, fx = (np.zeros(n) for _ in range(4))
+    logo(c['logo'][0], fx, music, drums, bass)
+    # The promise: a hit per line, the last one lifts.
+    for (at, ch), g in zip(c['promise'], (0.7, 0.8, 1.0)):
+        place(drums, kick('house'), at, 0.8 * g)
+        place(drums, clap(), at, 0.4 * g)
+        for f in ch:
+            place(music, synth(note(f), 0.5, 2400, 7), at, 0.2 * g)
+        place(bass, sub(note(ch[0][:-1] + '2'), 0.45), at, 0.6 * g)
+    # A snare roll into the drop.
+    r0 = c['drop'] - 1.0
+    for i in range(16):
+        place(drums, snare(), r0 + i / 16, 0.12 + 0.03 * i)
+    # The services: D – A – Bm – G, a bar each.
+    prog = [['D', 'F#', 'A'], ['A', 'C#', 'E'], ['B', 'D', 'F#'], ['G', 'B', 'D']]
+    roots = ['D2', 'A1', 'B1', 'G1']
+    g0, g1 = c['groove']
+    duck = np.ones(n)
+
+    def band(t, k, bar, layers, full=1.0):
+        kb = k % 4
+        place(drums, kick('house'), t, 0.85 * full)
+        i0 = int(t * SR); m = min(int(0.2 * SR), n - i0)
+        if m > 0:
+            duck[i0:i0 + m] = np.minimum(duck[i0:i0 + m], 0.35 + 0.65 * np.linspace(0, 1, m) ** 0.6)
+        if kb in (1, 3):
+            place(drums, clap(), t, 0.6 * full)
+        place(drums, hat(open_=kb == 3), t + beat / 2, 0.45)
+        place(drums, hat(), t + beat / 4, 0.25)
+        place(drums, hat(), t + 3 * beat / 4, 0.25)
+        root = note(roots[bar])
+        for s in range(2):
+            place(bass, synth(root * (2 if s else 1), beat / 2, 800, 8), t + s * beat / 2, 0.55)
+        tones = [note(x + '4') for x in prog[bar]] + [note(prog[bar][0] + '5')]
+        if 'marimba' in layers:
+            for s, idx in enumerate([0, 1, 2, 3] if kb % 2 == 0 else [3, 2, 1, 2]):
+                place(music, marimba(tones[idx], 0.5), t + s * beat / 4, 0.32)
+        if 'arp' in layers:
+            for s in range(4):
+                place(music, synth(tones[(kb * 4 + s) % 4] * 2, beat / 4 * 1.5, 2800, 14, kind='pulse' if s % 2 else 'saw'), t + s * beat / 4, 0.18)
+        if 'pluck' in layers:
+            for f in prog[bar]:
+                place(music, pluck(note(f + '4'), 0.4, 0.8), t + beat / 2, 0.2)
+            if kb in (1, 3):
+                place(drums, snap(), t, 0.5)
+        if 'trap' in layers:
+            if kb == 0:
+                place(bass, sub(root * 2, beat * 1.8, glide_from=root * 2.5), t, 0.5)
+                place(music, bell(tones[3] * 2, 1.0), t + beat * 1.5, 0.14)
+            if kb == 3:
+                for s in range(6):
+                    place(drums, hat(), t + s * beat / 6, 0.3)
+
+    LAYERS = [['marimba'], ['arp'], ['pluck'], ['trap']]
+    t, k = g0, 0
+    while t < g1 - 1e-6:
+        bar = int((t - g0) / (4 * beat))
+        band(t, k, bar % 4, LAYERS[bar % 4] + (['marimba'] if bar % 4 else []))
+        t += beat
+        k += 1
+    # The invitation: all four together, lighter drums, under the sign-off.
+    t, k = g1, 0
+    end = c['logo'][1] + 0.6
+    while t < end - 1e-6:
+        band(t, k, (k // 4) % 4, ['marimba', 'arp', 'pluck'], 0.7)
+        t += beat
+        k += 1
+    bass *= duck
+    logo(c['logo'][1], fx, music, drums, bass, 1.1)
+    return drums, bass, music, fx
+
+
+STYLES = {'branding': branding, 'websites': websites, 'social': social, 'ads': ads, 'intro': intro}
+CHORDS = {'intro': ['D3', 'A3', 'D4', 'F#4', 'A4'], 'branding': ['D3', 'F#3', 'A3', 'D4', 'E4'], 'websites': ['E3', 'G3', 'B3', 'D4', 'F#4'],
           'social': ['F3', 'A3', 'C4', 'E4', 'G4'], 'ads': ['F2', 'C3', 'Ab3', 'C4', 'Eb4']}
-NOTE = {'branding': lambda i: marimba(note(['D5', 'E5', 'F#5', 'A5', 'B5', 'D6'][i % 6]), 0.8),
+NOTE = {'intro': lambda i: bell(note(MOTIF[i % 5]), 0.8), 'branding': lambda i: marimba(note(['D5', 'E5', 'F#5', 'A5', 'B5', 'D6'][i % 6]), 0.8),
         'websites': lambda i: synth(note(['E5', 'G5', 'B5', 'D6'][i % 4]), 0.3, 3000, 10),
         'social': lambda i: bell(note(['C6', 'A5', 'F5', 'G5'][i % 4]), 0.8),
         'ads': lambda i: bell(note(['C5', 'Eb5', 'F5', 'Ab5'][i % 4]), 0.8)}
@@ -475,7 +575,7 @@ def main(cues_path, out_path):
     for i, x in enumerate(CHORDS[style][1:]):                 # a strum into the end chord
         place(music, pluck(note(x) * 2, 2.0, 0.6) if style != 'branding' else marimba(note(x) * 2, 1.5), outro + i * 0.04, 0.35)
 
-    rev = {'branding': (1.8, 0.3), 'websites': (1.2, 0.18), 'social': (0.9, 0.15), 'ads': (2.2, 0.22)}[style]
+    rev = {'intro': (1.6, 0.24), 'branding': (1.8, 0.3), 'websites': (1.2, 0.18), 'social': (0.9, 0.15), 'ads': (2.2, 0.22)}[style]
     music = room(music, *rev)
     fx = room(fx, 1.0, 0.15)
     mix = drums * 0.8 + bass * 0.9 + music * 0.75 + fx * 0.75
