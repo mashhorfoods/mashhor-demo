@@ -108,8 +108,10 @@ function readLayout() {
     const parent = f.offsetParent.getBoundingClientRect();
     const s = getComputedStyle(f);
     const img = f.querySelector('img');
-    const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
-    c.getContext('2d').drawImage(img, 0, 0);
+    // Embedded at twice the size it is shown: sharp, and a fraction of the file.
+    const scale = Math.min(1, (2 * f.offsetWidth) / img.naturalWidth);
+    const c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth * scale); c.height = Math.round(img.naturalHeight * scale);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
     return { x: px(parent.left + f.offsetLeft), y: px(parent.top + f.offsetTop), w: px(f.offsetWidth), h: px(f.offsetHeight),
       rotate: s.rotate === 'none' ? 0 : parseFloat(s.rotate), radius: parseFloat(s.borderRadius), z: s.zIndex === 'auto' ? 1 : +s.zIndex,
       src: img.getAttribute('src'), pos: getComputedStyle(img).objectPosition, jpeg: c.toDataURL('image/jpeg', 0.9) };
@@ -239,8 +241,17 @@ for (const [group, designs] of Object.entries(DESIGNS)) {
     };
     await load();
     await page.screenshot({ path: path.join(kit, `${name}.png`) });
-    await page.pdf({ path: path.join(kit, `${name}.pdf`), width: `${d.w}px`, height: `${d.h}px`, printBackground: true, margin: { top: 0, right: 0, bottom: 0, left: 0 }, pageRanges: '1' });
     const layout = await page.evaluate(readLayout);
+    // For the PDF, each photo as a JPEG at twice its shown size (Chromium would
+    // otherwise embed the full image, uncompressed). The PNG above is untouched.
+    await page.evaluate(() => Promise.all([...document.images].map((img) => {
+      const scale = Math.min(1, (2 * img.getBoundingClientRect().width) / img.naturalWidth);
+      const c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth * scale); c.height = Math.round(img.naturalHeight * scale);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      return new Promise((r) => { img.onload = r; img.src = c.toDataURL('image/jpeg', 0.88); });
+    })));
+    await page.pdf({ path: path.join(kit, `${name}.pdf`), width: `${d.w}px`, height: `${d.h}px`, printBackground: true, margin: { top: 0, right: 0, bottom: 0, left: 0 }, pageRanges: '1' });
+    await load();
 
     // The background: the glow, grid and guides, nothing else. A .t only
     // loses its letters, so lines it draws itself (the eyebrow's) stay.
