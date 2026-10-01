@@ -26,6 +26,13 @@ body{background:#141414;color:#fff;font-family:Cairo,Poppins,sans-serif;position
 .profile.yellow .guides *{stroke:rgba(20,20,20,.18)}
 .profile.yellow .x{color:var(--ink)}
 
+/* ---- Instagram highlight covers (1080×1920): Instagram shows only a circle
+   from the middle, so the icon sits there, inside the profile's ring. ------- */
+.highlight{background:radial-gradient(700px 700px at 50% 50%,#262626,#141414 72%)}
+.highlight .guides{position:absolute;left:0;top:420px;width:1080px;height:1080px}
+.highlight .guides *{fill:none;stroke:rgba(244,209,63,.2);stroke-width:2;stroke-dasharray:6 10}
+.icon{position:absolute;left:330px;top:750px;width:420px;height:420px;fill:none;stroke:var(--y);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+
 /* ---- Covers ------------------------------------------------------------- */
 .cover{background:#141414}
 .glow{position:absolute;inset:0;background:radial-gradient(calc(var(--h)*1.3) calc(var(--h)*1.05) at var(--gx,30%) 50%,rgba(244,209,63,.14),transparent 70%)}
@@ -77,6 +84,17 @@ const SIZES = {
   // YouTube: 2560×1440, but only the middle 1546×423 shows everywhere.
   'youtube': [2560, 1440, { ts: 540, tw: 560, word: 92, promise: 40, gap: 12, px: 520, pw: 520, gx: '38%', badge: 15, bx: '.04', by: '.80', band: [1546, 423] }],
   'linkedin': [1128, 191],
+  'highlight-work': [1080, 1920], 'highlight-branding': [1080, 1920], 'highlight-websites': [1080, 1920],
+  'highlight-social': [1080, 1920], 'highlight-ads': [1080, 1920], 'highlight-contact': [1080, 1920],
+};
+// Highlight icons (24×24, stroked), one per highlight.
+const ICONS = {
+  'highlight-work': 'M4 4h7v7H4z M13 4h7v7h-7z M4 13h7v7H4z M13 13h7v7h-7z',
+  'highlight-branding': 'M12 3l6.5 7.5L12 21l-6.5-10.5z M12 3v8.5 M10.5 12.5a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0',
+  'highlight-websites': 'M3 5h18v11H3z M3 8.5h18 M12 16v4 M8 20h8',
+  'highlight-social': 'M8 3h8v18H8z M11 18h2 M12 12.6l-2.1-2.1a1.3 1.3 0 0 1 2.1-1.6a1.3 1.3 0 0 1 2.1 1.6z',
+  'highlight-ads': 'M4 10v4h3l7 5V5l-7 5z M17.5 9a4 4 0 0 1 0 6 M7 14l1.5 6',
+  'highlight-contact': 'M4 5h16v11H10l-6 4z M8.5 10.5h.01 M12 10.5h.01 M15.5 10.5h.01',
 };
 const [w, h, o] = SIZES[k];
 document.documentElement.style.setProperty('--w', w + 'px');
@@ -85,7 +103,11 @@ const PROMISE = 'علامتك. حضورك الرقمي.<br><span>شريك واح
 const PROMISE_LINE = 'علامتك. حضورك الرقمي. <span>شريك واحد.</span>';
 const EN = 'Your brand. Your digital presence. One partner.';
 const CHIPS = ['الهوية والتصميم', 'المواقع', 'السوشال ميديا', 'الإعلانات'];
-if (k.startsWith('profile')) {
+if (k.startsWith('highlight')) {
+  document.body.className = 'highlight';
+  document.body.innerHTML = `<svg class="guides" viewBox="0 0 1080 1080"><circle cx="540" cy="540" r="330"/><line x1="0" y1="540" x2="1080" y2="540"/><line x1="540" y1="0" x2="540" y2="1080"/></svg>
+    <svg class="icon" viewBox="0 0 24 24"><path d="${ICONS[k]}"/></svg>`;
+} else if (k.startsWith('profile')) {
   document.body.className = 'profile' + (k === 'profile-yellow' ? ' yellow' : '');
   document.body.innerHTML = `<svg class="guides" viewBox="0 0 1080 1080"><circle cx="540" cy="540" r="330"/><line x1="0" y1="540" x2="1080" y2="540"/><line x1="540" y1="0" x2="540" y2="1080"/></svg><span class="x">X</span>`;
 } else if (k === 'linkedin') {

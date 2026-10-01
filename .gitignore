@@ -10,3 +10,6 @@ tools/service-covers/out/
 # Upload packages made by hand
 pixora-site-upload*.zip
 tools/share-cards/out/
+
+# The social media kit, made by tools/share-cards/export.mjs (delivered as a zip).
+brand/kit/
