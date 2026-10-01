@@ -4,7 +4,7 @@
     python3 tools/share-cards/soundtrack.py cues.json out.wav
 
 cues.json is the video's CUES (reel-energy.html): bpm, duration, impacts,
-whooshes, ticks, riser, groove, hits, snaps. The track is synthesised here, so it is ours
+whooshes, ticks, riser, groove, breaks, roll, outro, hits, snaps. The track is synthesised here, so it is ours
 outright: a four-on-the-floor groove in A minor (kick, clap, hats, a
 side-chained saw bass) between the groove's start and end, a sub-drop and
 burst on every impact, a filtered-noise sweep on every whoosh, a shutter tick
@@ -128,7 +128,7 @@ def main(cues_path, out_path):
     g0, g1 = c["groove"]
     impacts = c["impacts"]
     # Breaks: no groove from one beat before an impact pair to the next cut.
-    breaks = [(4.5, 6.0), (12.0, 13.5)]
+    breaks = [tuple(b) for b in c.get("breaks", [])]
     in_break = lambda t: any(a <= t < b for a, b in breaks)
 
     # Groove: kick on every beat, clap on 2 and 4, hats on the off-beats.
@@ -144,9 +144,10 @@ def main(cues_path, out_path):
             place(drums, hat(), t + 3 * beat / 4, 0.35)
         t += beat
         k += 1
-    # A roll into the logo (the verbs, 11–12s).
-    for i in range(16):
-        place(drums, clap(), 11 + i * 1 / 16, 0.15 + 0.03 * i)
+    # A roll into the logo.
+    if "roll" in c:
+        for i in range(16):
+            place(drums, clap(), c["roll"] + i / 16, 0.15 + 0.03 * i)
 
     # Bass: A F C G, two beats each, eighth notes, side-chained to the kick.
     roots = [55.0, 43.65, 65.41, 49.0]
@@ -174,7 +175,8 @@ def main(cues_path, out_path):
     # Intro pad under the X (0.25–1.5s), the break's held note, and the end chord.
     place(music, chord([110, 130.81, 164.81], 1.5), 0.25, 0.35)
     place(music, chord([55, 110, 164.81], 1.5), 4.5, 0.35)
-    place(music, chord([110, 130.81, 164.81, 220, 261.63], c["duration"] - 13.5 + 0.5), 13.5, 0.5)
+    outro = c.get("outro", c["duration"] - 1.5)
+    place(music, chord([110, 130.81, 164.81, 220, 261.63], c["duration"] - outro + 0.5), outro, 0.5)
     for ti in impacts:
         place(fx, impact(), ti, 0.95)
     for at, dur in c["whooshes"]:

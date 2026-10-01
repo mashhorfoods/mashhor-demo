@@ -1,5 +1,5 @@
 <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><style>
-/* PIXORA — the brand in 15 seconds (1080×1920), cut to a 120 BPM beat (a cut
+/* PIXORA — the brand in 19 seconds (1080×1920), cut to a 120 BPM beat (a cut
    every half second). The X is the motif: it slams in, we dive through it,
    it ends the film. render(t) draws any instant from scratch, so reel.mjs can
    step through frames (and sub-frames, for motion blur) and the film is the
@@ -40,7 +40,7 @@ body{color:#fff;font-family:Cairo,Poppins,sans-serif}
   <!-- 2. the services, one word per beat, on yellow -->
   <section class="layer fill-y" id="s2"><p class="big center" id="s2w" style="color:var(--k);font-size:250px"></p><p class="label center" id="s2l" style="color:var(--k);font-size:40px;top:62%"></p></section>
   <!-- 3. the promise -->
-  <section class="layer fill-k" id="s3"><p class="big center" id="s3a" style="font-size:300px;top:40%">شريك</p><p class="big center" id="s3b" style="font-size:330px;top:60%;color:var(--y)">واحد.</p></section>
+  <section class="layer fill-k" id="s3"><p class="big center" id="s3a" style="font-size:300px;top:38%">شريك</p><p class="big center" id="s3b" style="font-size:330px;top:56%;color:var(--y)">واحد.</p><p class="big center" id="s3c" style="font-size:52px;top:71%;font-weight:700;color:rgba(255,255,255,.85)">من الهوية حتى الإعلان — فريق واحد.</p></section>
   <!-- 4. the work, one piece per beat -->
   <section class="layer" id="s4"><p class="ghost" id="s4g"></p><p class="counter" id="s4c"></p><div id="s4cards"></div><p class="label center" id="s4l" style="font-size:34px;top:1420px"></p></section>
   <!-- 5. what we do, band by band -->
@@ -53,17 +53,20 @@ body{color:#fff;font-family:Cairo,Poppins,sans-serif}
 <div class="flash" id="flash"></div>
 <script>
 const BEAT = 0.5;
-window.DURATION = 15;
+window.DURATION = 19;
 // The timeline the music follows: hits, beats and sweeps, in seconds.
 window.CUES = {
-  bpm: 120, duration: 15,
-  impacts: [0.25, 4.5, 5.0, 12.75, 13.5],
-  whooshes: [[1.1, 0.45], [5.75, 0.3], [9.85, 0.2], [13.05, 0.45]],
+  bpm: 120, duration: 19,
+  impacts: [0.25, 4.5, 5.0, 14.75, 15.5],
+  whooshes: [[1.1, 0.45], [5.75, 0.3], [11.85, 0.2], [15.05, 0.45]],
   ticks: [6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5],
-  riser: [10, 2.0],
-  groove: [2, 12.5],
+  riser: [12, 2.0],
+  groove: [2, 14.5],
+  breaks: [[4.5, 6], [14, 15.5]],                        // no groove under the promise and the logo
+  roll: 13,                                              // a clap roll into the logo
+  outro: 15.5,                                           // the closing chord, held to the end
   hits: [1.5, 1.75],                                     // the cut to yellow, and a pickup
-  snaps: [12, 12.09, 12.18, 12.27, 12.36, 12.45],        // PIXORA, letter by letter
+  snaps: [14, 14.09, 14.18, 14.27, 14.36, 14.45],        // PIXORA, letter by letter
 };
 
 // ---- easing and helpers ------------------------------------------------
@@ -98,9 +101,8 @@ const WORK = [
   [work('case-digital-campaigns-key-visual'), 'CAMPAIGN', 'الحملات'],
   [work('case-editorial-publication-design-spread'), 'EDITORIAL', 'التقارير'],
   [work('case-digital-campaigns-stories'), 'SOCIAL', 'السوشال'],
-  [work('case-information-design-infographic'), 'DATA', 'الإنفوجرافيك'],
-  [work('case-brand-identity-systems-stationery'), 'PRINT', 'المطبوعات'],
 ];
+const PIECE = 1;  // seconds per piece of work
 $('s4cards').innerHTML = WORK.map(([s], i) => `<figure class="card" id="card${i}" style="display:none"><img src="${s}"></figure>`).join('');
 const VERBS = [['نصمّم.', 'var(--k)', 'var(--y)'], ['نبني.', '#fff', '#262626'], ['نطلق.', 'var(--k)', '#fff'], ['ننمّي.', 'var(--k)', 'var(--y)']];
 $('s5').innerHTML = VERBS.map(([w, fg, bg], i) => `<div class="band" id="v${i}" style="top:${280 + i * 300}px;color:${fg};background:${bg}">${w}</div>`).join('');
@@ -144,45 +146,50 @@ window.render = (t) => {
     $('s3a').style.transform = `translate(-50%,-50%) scale(${lerp(2.2, 1, a)}) translateX(${out * 1200}px)`;
     $('s3a').style.opacity = a;
     $('s3b').style.transform = `translate(-50%,-50%) scale(${b}) translateX(${-out * 1200}px)`;
+    const c = expoOut(p(t, 5.25, 0.35));
+    $('s3c').style.transform = `translate(-50%,-50%) translateY(${lerp(40, 0, c) + out * 300}px)`;
+    $('s3c').style.opacity = c * (1 - out);
   }
-  // 4 · 6–10s: the work, one piece per beat, black and yellow in turn.
-  show('s4', t >= 6 && t < 10);
-  if (t >= 6 && t < 10) {
-    const i = clamp(Math.floor((t - 6) / BEAT), 0, 7);
-    const k = p(t, 6 + i * BEAT, BEAT);
-    const inn = expoOut(clamp(k / 0.4));
+  // 4 · 6–12s: the work, a piece a second, black and yellow in turn; a
+  // punch on the off-beat keeps the pulse.
+  show('s4', t >= 6 && t < 12);
+  if (t >= 6 && t < 12) {
+    const i = clamp(Math.floor((t - 6) / PIECE), 0, WORK.length - 1);
+    const k = p(t, 6 + i * PIECE, PIECE);
+    const punch = Math.exp(-Math.max(0, t - (6 + i * PIECE + BEAT)) * 9) * (t >= 6 + i * PIECE + BEAT ? 1 : 0);
+    const inn = expoOut(clamp(k / 0.25));
     const dir = i % 2 ? -1 : 1;
     const yellow = i % 2 === 1;
     $('s4').className = `layer ${yellow ? 'fill-y' : 'fill-k'}`;
     WORK.forEach((_, j) => { $(`card${j}`).style.display = j === i ? 'block' : 'none'; });
-    $(`card${i}`).style.transform = `translate(-50%,-50%) translateX(${dir * lerp(900, 0, inn)}px) rotate(${dir * lerp(12, 2, inn)}deg) scale(${lerp(1.15, 1, expoOut(k))})`;
+    $(`card${i}`).style.transform = `translate(-50%,-50%) translateX(${dir * lerp(900, 0, inn)}px) rotate(${dir * lerp(12, 2, inn)}deg) scale(${lerp(1.15, 1, expoOut(k)) + punch * 0.06})`;
     $('s4g').textContent = WORK[i][1];
     $('s4g').style.color = yellow ? 'rgba(20,20,20,.22)' : 'rgba(244,209,63,.35)';
     $('s4g').style.top = `${560 + (i % 2) * 520}px`;
     $('s4g').style.transform = `translate(-50%,-50%) translateX(${dir * -lerp(140, 0, expoOut(k))}px)`;
-    $('s4c').textContent = `0${i + 1} / 08`;
+    $('s4c').textContent = `0${i + 1} / 0${WORK.length}`;
     $('s4c').style.color = yellow ? 'var(--k)' : 'var(--y)';
     $('s4l').textContent = WORK[i][2];
     $('s4l').style.cssText = `font-size:44px;top:1420px;font-family:Cairo;letter-spacing:0;font-weight:800;color:${yellow ? 'var(--k)' : '#fff'};transform:translate(-50%,-50%) translateY(${lerp(30, 0, inn)}px);opacity:${inn}`;
   }
-  // 5 · 10–12s: what we do, a band per beat, from alternate sides.
-  show('s5', t >= 10 && t < 12);
-  if (t >= 10 && t < 12) {
+  // 5 · 12–14s: what we do, a band per beat, from alternate sides.
+  show('s5', t >= 12 && t < 14);
+  if (t >= 12 && t < 14) {
     VERBS.forEach((_, i) => {
-      const k = expoOut(p(t, 10 + i * BEAT, 0.3));
+      const k = expoOut(p(t, 12 + i * BEAT, 0.3));
       $(`v${i}`).style.transform = `translateX(${(i % 2 ? -1 : 1) * lerp(1100, 0, k)}px)`;
     });
   }
-  // 6 · 12–13.5s: PIXORA snaps together; on the beat we dive into its X.
-  show('s6', t >= 12 && t < 13.5);
-  if (t >= 12 && t < 13.5) {
-    const dive = expoIn(p(t, 13.05, 0.45));
+  // 6 · 14–15.5s: PIXORA snaps together; on the beat we dive into its X.
+  show('s6', t >= 14 && t < 15.5);
+  if (t >= 14 && t < 15.5) {
+    const dive = expoIn(p(t, 15.05, 0.45));
     [...'PIXORA'].forEach((c, i) => {
-      const k = expoOut(p(t, 12 + i * 0.09, 0.3));
+      const k = expoOut(p(t, 14 + i * 0.09, 0.3));
       $(`L${i}`).style.transform = `translateY(${lerp(i % 2 ? -260 : 260, 0, k)}px)`;
       $(`L${i}`).style.opacity = k;
     });
-    const sub = expoOut(p(t, 12.6, 0.3));
+    const sub = expoOut(p(t, 14.6, 0.3));
     $('s6s').style.opacity = sub * (1 - dive);
     // The X is the third letter: zoom on its centre.
     const w = $('s6w'), x = $('L2');
@@ -190,10 +197,10 @@ window.render = (t) => {
     w.style.transformOrigin = `${ox}px ${oy}px`;
     w.style.transform = `translate(-50%,-50%) scale(${lerp(1, 45, dive)})`;
   }
-  // 7 · 13.5–15s: the invitation.
-  show('s7', t >= 13.5);
-  if (t >= 13.5) {
-    const a = expoOut(p(t, 13.5, 0.35)), b = expoOut(p(t, 13.75, 0.35)), c = backOut(p(t, 14.0, 0.45)), d = expoOut(p(t, 14.3, 0.4));
+  // 7 · 15.5–19s: the invitation, held long enough to act on.
+  show('s7', t >= 15.5);
+  if (t >= 15.5) {
+    const a = expoOut(p(t, 15.5, 0.35)), b = expoOut(p(t, 15.75, 0.35)), c = backOut(p(t, 16.0, 0.45)), d = expoOut(p(t, 16.3, 0.4));
     $('s7a').style.transform = `translate(-50%,-50%) scale(${lerp(1.6, 1, a)})`; $('s7a').style.opacity = a;
     $('s7b').style.transform = `translate(-50%,-50%) translateY(${lerp(60, 0, b)}px)`; $('s7b').style.opacity = b;
     $('s7p').style.transform = `translate(-50%,-50%) scale(${c})`;

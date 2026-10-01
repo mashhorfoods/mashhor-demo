@@ -43,7 +43,7 @@ if (cues) {
   const json = path.join(frames, 'cues.json'), wav = path.join(frames, 'soundtrack.wav');
   writeFileSync(json, JSON.stringify(cues));
   execFileSync('python3', [path.join(here, 'soundtrack.py'), json, wav]);
-  audio = ['-i', wav, '-af', 'loudnorm=I=-14:TP=-2:LRA=11'];
+  audio = ['-i', wav, '-af', 'loudnorm=I=-14:TP=-2:LRA=11,alimiter=limit=0.79:level=false'];
 }
 const blur = SUB > 1 ? ['-vf', `tmix=frames=${SUB},select='not(mod(n+1\\,${SUB}))',setpts=N/${FPS}/TB`] : [];
 execFileSync('ffmpeg', ['-v', 'error', '-y', '-framerate', String(FPS * SUB), '-i', path.join(frames, 'f%05d.jpg'), ...audio,
