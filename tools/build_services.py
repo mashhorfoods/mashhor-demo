@@ -53,7 +53,8 @@ SHOWCASE = {
                  ["al-mada-identity.webp", "work-1.webp", "work-2.webp", "work-3.webp",
                   "work-4.webp", "work-5.webp", "work-6.webp", "work-7.webp"]),
     "websites": (r'<div class="c-devices"', "div",
-                 ["al-mada-website.webp", "d01.webp", "t01.webp", "mo1.webp"]),
+                 ["site-travel.webp", "site-aun.webp", "site-travel-phones.webp", "site-aun-phones.webp",
+                  "al-mada-website.webp", "d01.webp", "t01.webp", "mo1.webp"]),
     "social": (r'<ul class="c-modules"', "ul",
                ["al-mada-campaign.webp", "c01.webp", "c02.webp", "c03.webp", "c04.webp", "c05.webp"]),
     "marketing": (None, None, ["al-mada-campaign.webp", "c02.webp", "c04.webp", "c05.webp"]),
@@ -77,11 +78,34 @@ CAPTIONS = {
 # Screens and posters are tall: their frame shows the top (the headline).
 TOP = {"d01.webp", "t01.webp", "mo1.webp", "c01.webp", "c02.webp", "c03.webp", "c04.webp", "c05.webp", "al-mada-campaign.webp"}
 REPLACED = set()  # images of the blocks a slideshow replaced
+# Work this project adds (overlay/assets, made by tools/share-cards/sites.mjs
+# from the websites' own screenshots): alt text and caption in both
+# languages; the ones marked gallery=True also join the homepage's work
+# gallery, newest first.
+NEW_WORK = {
+    "site-travel.webp": {
+        "alt": ("A travel and tourism website: its booking page on a desktop browser, the same page on a phone beside it.",
+                "موقع سفر وسياحة: صفحة الحجز على متصفح مكتبي، والصفحة نفسها على جوال بجانبه."),
+        "caption": ("Travel &amp; tourism platform — website", "منصة سفر وسياحة — موقع إلكتروني"), "gallery": True},
+    "site-aun.webp": {
+        "alt": ("The Aun Aldrb website, specialised transport in Riyadh, on a desktop browser and on a phone.",
+                "موقع عون الدرب للنقل المتخصص في الرياض، على متصفح مكتبي وعلى جوال."),
+        "caption": ("Aun Aldrb — website", "عون الدرب — موقع إلكتروني"), "gallery": True},
+    "site-travel-phones.webp": {
+        "alt": ("Three phone screens of the travel website: the home page, the offers and the destinations.",
+                "ثلاث شاشات جوال من موقع السفر: الصفحة الرئيسية، والعروض، والوجهات."),
+        "caption": ("Travel &amp; tourism platform — on the phone", "منصة سفر وسياحة — على الجوال"), "gallery": False},
+    "site-aun-phones.webp": {
+        "alt": ("Three phone screens of the Aun Aldrb website: the opening, a service and the company's vision.",
+                "ثلاث شاشات جوال من موقع عون الدرب: الواجهة، وخدمة، ورؤية الشركة."),
+        "caption": ("Aun Aldrb — on the phone", "عون الدرب — على الجوال"), "gallery": False},
+}
 # Images that have a smaller copy the slideshow can offer phones.
 SMALLER = {"al-mada-identity.webp": ("al-mada-identity-tile.webp", 900, 1400),
            "al-mada-website.webp": ("al-mada-website-tile.webp", 900, 1200),
            "al-mada-campaign.webp": ("al-mada-campaign-tile.webp", 560, 900),
-           "al-mada-profile.webp": ("al-mada-profile-tile.webp", 560, 1200)}
+           "al-mada-profile.webp": ("al-mada-profile-tile.webp", 560, 1200),
+           **{n: (n.replace(".webp", "-800.webp"), 800, 1200) for n in NEW_WORK}}
 WA = common.WA + "?text="
 
 
@@ -182,7 +206,34 @@ def read_work(home):
         en, ar = re.search(r'data-alt-en="([^"]*)"', m.group(0)), re.search(r'data-alt-ar="([^"]*)"', m.group(0))
         if name in CAPTIONS and name not in work and en and ar:
             work[name] = {"alt": (en.group(1), ar.group(1)), "caption": CAPTIONS[name]}
+    for name, w in NEW_WORK.items():
+        work.setdefault(name, {"alt": w["alt"], "caption": w["caption"]})
     return work
+
+
+def add_to_gallery(home):
+    """The project's new work at the front of the homepage's work gallery, in
+    the gallery's own markup."""
+    at = home.find('<li class="c-gallery__item">')
+    if at < 0:
+        raise SystemExit("build_services: the homepage's work gallery was not found")
+    items = []
+    for name, w in NEW_WORK.items():
+        if not w["gallery"]:
+            continue
+        width, height = webp_size(name)
+        items.append(f'''<li class="c-gallery__item">
+                <figure style="margin:0">
+                  <img class="c-gallery__image" src="./assets/{name}"
+                    alt="{w["alt"][0]}" data-alt-en="{w["alt"][0]}" data-alt-ar="{w["alt"][1]}"
+                    width="{width}" height="{height}" loading="lazy" decoding="async" />
+                  <figcaption class="c-gallery__caption">
+                    <span data-lang-copy="en">{w["caption"][0]}</span><span data-lang-copy="ar" lang="ar">{w["caption"][1]}</span>
+                  </figcaption>
+                </figure>
+              </li>
+              ''')
+    return home[:at] + "".join(items) + home[at:]
 
 
 def webp_size(name):
@@ -490,7 +541,7 @@ CSS = stylesheet("services")
 # The three changes.
 # ---------------------------------------------------------------------------
 def build(site: pathlib.Path):
-    home = (site / "index.html").read_text(encoding="utf-8")
+    home = add_to_gallery((site / "index.html").read_text(encoding="utf-8"))
     pricing = (site / "pricing.html").read_text(encoding="utf-8")
     data = read_services(home, pricing)
     addons_section, addon_groups = read_addons(home)
