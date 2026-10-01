@@ -27,7 +27,7 @@ body{background:#141414;color:#fff;font-family:Cairo,Poppins,sans-serif;position
 .foot-en{bottom:82px;left:96px;font-family:Poppins;font-weight:500;font-size:18px;letter-spacing:.32em;color:rgba(255,255,255,.4);direction:ltr}
 .eyebrow{right:96px;font-size:30px;font-weight:700;color:var(--y);display:flex;align-items:center;gap:18px}
 .eyebrow::after{content:"";width:56px;height:3px;background:var(--y)}
-.h{right:96px;font-weight:800;font-size:84px;line-height:1.22}
+.h{right:96px;font-weight:800;font-size:84px;line-height:1.42}
 .en{right:96px;font-family:Poppins;font-weight:600;font-size:28px;color:rgba(255,255,255,.58);direction:ltr}
 .lead{right:96px;font-size:31px;font-weight:500;line-height:1.6;color:rgba(255,255,255,.78)}
 .print{position:absolute;margin:0;border-radius:22px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 46px 80px -34px rgba(0,0,0,.95)}
@@ -59,9 +59,9 @@ const SERVICES = ['الهوية والتصميم', 'المواقع', 'السوش
 // in yellow), the English, its lead, and its work laid out like prints.
 const service = (n, name, l1, l2, en, lead, prints, size = 84, gy = '80%') => ({ gy, html:
   t('eyebrow', 'top:250px', name) +
-  t('h', `top:${316 + (84 - size)}px;font-size:${size}px`, `${l1}<br><span>${l2}</span>`) +
-  t('en', 'top:540px', en) +
-  t('lead', 'top:600px', lead) + prints + frame(n) });
+  t('h', `top:${304 + (84 - size)}px;font-size:${size}px`, `${l1}<br><span>${l2}</span>`) +
+  t('en', 'top:572px', en) +
+  t('lead', 'top:628px', lead) + prints + frame(n) });
 
 const POSTS = {
   1: { gy: '78%', html:
@@ -90,11 +90,11 @@ const POSTS = {
     fig(work('case-digital-campaigns-stories.webp'), 680, 790, 250, '4/5', -5, 3), 72),
   6: { gy: '70%', html:
     t('eyebrow', 'top:250px', 'دراسة حالة · المدى للسفر والسياحة') +
-    t('h', 'top:316px', 'هوية واحدة،<br><span>أربع واجهات.</span>') +
-    t('en', 'top:540px', 'One brand, four surfaces.') +
+    t('h', 'top:304px', 'هوية واحدة،<br><span>أربع واجهات.</span>') +
+    t('en', 'top:572px', 'One brand, four surfaces.') +
     [['al-mada-identity-tile.webp', 'الهوية'], ['al-mada-website-tile.webp', 'الموقع'],
      ['al-mada-campaign-tile.webp', 'الحملة'], ['al-mada-profile-tile.webp', 'الملف التعريفي']].map(([f, l], i) => {
-      const x = i % 2 ? 96 : 552, y = 620 + Math.floor(i / 2) * 296;
+      const x = i % 2 ? 96 : 552, y = 650 + Math.floor(i / 2) * 290;
       return fig(site(f), x, y, 432, '16/10', 0, 1) + `<span class="badge" style="left:${x + 18}px;top:${y + 190}px;font-size:22px">${l}</span>`;
     }).join('') + frame(6) },
   7: { gy: '60%', html:
@@ -103,7 +103,7 @@ const POSTS = {
     [['الاستكشاف', 'DISCOVER', 'فهم العمل وجمهوره قبل تصميم أي شيء.'], ['التخطيط', 'PLAN', 'النطاق والباقة والإضافات — متّفق عليها كتابةً.'],
      ['الإنشاء', 'CREATE', 'الهوية والتصميم، تراهما وهما يتشكّلان.'], ['التنفيذ', 'BUILD', 'الموقع والقوالب والحملة — على أرض الواقع.'],
      ['الإطلاق', 'LAUNCH', 'إطلاق واختبار، وتسليم كل ما تحتاجه.'], ['النمو', 'GROW', 'المحتوى والتواصل والإعلانات، إن أردت أن نستمر معك.']]
-      .map(([ar, en, d], i) => { const y = 548 + i * 108;
+      .map(([ar, en, d], i) => { const y = 572 + i * 104;
         return `<i class="rule" style="top:${y - 14}px"></i>` + t('row-n', `top:${y}px;font-size:36px`, `0${i + 1}`) + t('row-t', `top:${y - 8}px;font-size:36px`, ar) +
           t('row-d', `top:${y + 44}px;font-size:23px`, d) + t('row-en', `top:${y + 8}px;left:180px;right:auto;font-size:16px`, en); }).join('') +
     frame(7) },
@@ -113,17 +113,17 @@ const POSTS = {
     [['فريق واحد وخيط واحد', 'One team, one thread', 'الهوية والموقع والمحتوى والإعلانات تُصنع معًا،<br>فتبدو كل واجهة وتتحدث كأنها العمل نفسه.'],
      ['لغتان، كلتاهما أولًا', 'Two languages, both first', 'العربية والإنجليزية تُكتب كلٌّ منهما وتُصمَّم على أصولها —<br>لا تُضاف إحداهما ترجمةً في النهاية.'],
      ['لا نعد بما لا نثبته', 'Nothing we cannot show', 'لا ننشر نتائج لا نستطيع إثباتها.<br>نعرض ما صنعناه، كما صنعناه.']]
-      .map(([ar, en, d], i) => { const y = 580 + i * 196;
+      .map(([ar, en, d], i) => { const y = 600 + i * 190;
         return `<i class="rule" style="top:${y - 24}px"></i>` + t('row-n', `top:${y}px`, `0${i + 1}`) + t('row-t', `top:${y - 10}px`, ar) +
           t('row-en', `top:${y + 64}px`, en) + t('row-d', `top:${y + 100}px;line-height:1.5`, d); }).join('') +
     frame(8) },
   9: { gy: '50%', html:
     t('eyebrow', 'top:250px', 'لنبدأ') +
-    t('h', 'top:330px;font-size:104px;line-height:1.18', 'عندك مشروع؟<br><span>نبدأ من محادثة.</span>') +
-    t('en', 'top:610px;font-size:30px', 'Have a project? It starts with a conversation.') +
-    t('services', 'top:700px;right:96px;font-size:30px', SERVICES.join('<i></i>')) +
-    t('lead', 'top:790px', 'أخبرنا عن عملك وما تريد الوصول إليه،<br>ونقترح عليك الطريق — بلا التزام.') +
-    `<span class="badge" style="right:96px;top:1010px;font-size:34px;padding:.55em 1.3em">راسلنا — الرابط في البايو</span>` +
+    t('h', 'top:330px;font-size:104px;line-height:1.42', 'عندك مشروع؟<br><span>نبدأ من محادثة.</span>') +
+    t('en', 'top:650px;font-size:30px', 'Have a project? It starts with a conversation.') +
+    t('services', 'top:735px;right:96px;font-size:30px', SERVICES.join('<i></i>')) +
+    t('lead', 'top:820px', 'أخبرنا عن عملك وما تريد الوصول إليه،<br>ونقترح عليك الطريق — بلا التزام.') +
+    `<span class="badge" style="right:96px;top:1035px;font-size:34px;padding:.55em 1.3em">راسلنا — الرابط في البايو</span>` +
     frame(9) },
 };
 const post = POSTS[p];

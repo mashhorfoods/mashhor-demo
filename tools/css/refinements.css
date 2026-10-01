@@ -178,4 +178,14 @@ html{-webkit-tap-highlight-color:transparent}
 .c-notfound__more{display:grid;gap:var(--space-16);margin-block-start:var(--space-48);padding-block-start:var(--space-32);border-block-start:var(--border-hairline)}
 .c-notfound__list{display:grid;grid-template-columns:repeat(auto-fill,minmax(14rem,1fr));gap:var(--space-12) var(--space-32);margin:0;padding:0;list-style:none}
 .c-notfound__list .c-link{display:inline-flex;min-block-size:44px;align-items:center}
+/* Arabic headings: Cairo's ascenders and descenders are taller than Latin
+   ones, so the tight leading the English headings use makes two Arabic lines
+   touch (a descender of one line meets the ascender of the next). Arabic
+   headings get their own, roomier leading; English keeps its own. */
+:root{--leading-heading-ar:1.45}
+:lang(ar) :is(h1,h2,h3,h4,.t-display-xl,.t-display-l,.t-h1,.t-h2,.t-h3,.t-h4),
+[dir="rtl"] :is(h1,h2,h3,h4,.t-display-xl,.t-display-l,.t-h1,.t-h2,.t-h3,.t-h4),
+:lang(ar) :is(h1,h2,h3,h4) *,[dir="rtl"] :is(h1,h2,h3,h4) *,
+:is(h1,h2,h3,h4) :lang(ar){line-height:var(--leading-heading-ar)}
+
 /* REFINEMENTS:END */
